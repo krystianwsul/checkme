@@ -12,10 +12,10 @@ import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.ScheduleType
 import com.krystianwsul.common.utils.UserKey
 
-class SingleSchedule<T : ProjectType>(
-        rootTask: Task<T>,
+class SingleSchedule(
+        rootTask: Task<*>,
         val singleScheduleRecord: SingleScheduleRecord,
-) : Schedule<T>(rootTask) {
+) : Schedule(rootTask) {
 
     private val mockInstance get() = getInstance(rootTask).takeIf { it.exists() }
 
@@ -35,7 +35,7 @@ class SingleSchedule<T : ProjectType>(
     fun <T : ProjectType> getInstance(task: Task<T>) = task.getInstance(originalScheduleDateTime)
 
     override fun getDateTimesInRange(
-            scheduleInterval: ScheduleInterval<T>,
+            scheduleInterval: ScheduleInterval<*>,
             givenStartExactTimeStamp: ExactTimeStamp.Offset?,
             givenEndExactTimeStamp: ExactTimeStamp.Offset?,
             originalDateTime: Boolean,
@@ -62,7 +62,7 @@ class SingleSchedule<T : ProjectType>(
     override val oldestVisible = OldestVisible.Single
 
     override fun updateOldestVisible(
-            scheduleInterval: ScheduleInterval<T>,
+            scheduleInterval: ScheduleInterval<*>,
             now: ExactTimeStamp.Local,
     ) = Unit
 
@@ -79,7 +79,7 @@ class SingleSchedule<T : ProjectType>(
 
     override fun toString() = super.toString() + ", dateTime: $dateTime"
 
-    private inner class MockRecord(private val instance: Instance<T>) : SingleScheduleRecord(
+    private inner class MockRecord(private val instance: Instance<*>) : SingleScheduleRecord(
             singleScheduleRecord.taskRecord,
             singleScheduleRecord.createObject,
             singleScheduleRecord.id,

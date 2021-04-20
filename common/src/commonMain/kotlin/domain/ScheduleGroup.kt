@@ -5,22 +5,21 @@ import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.time.TimePair
-import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.ScheduleData
 import com.krystianwsul.common.utils.UserKey
 
-sealed class ScheduleGroup<T : ProjectType> {
+sealed class ScheduleGroup {
 
     companion object {
 
-        fun <T : ProjectType> getGroups(schedules: List<Schedule<out T>>): List<ScheduleGroup<T>> {
+        fun getGroups(schedules: List<Schedule>): List<ScheduleGroup> {
             fun Time.getTimeFloat(daysOfWeek: Collection<DayOfWeek> = DayOfWeek.set) = daysOfWeek.map { day ->
                 getHourMinute(day).let { it.hour * 60 + it.minute }
             }
                     .sum()
                     .toFloat() / daysOfWeek.count()
 
-            val singleSchedules = schedules.filterIsInstance<SingleSchedule<T>>()
+            val singleSchedules = schedules.filterIsInstance<SingleSchedule>()
                     .sortedWith(compareBy(
                             { it.date },
                             { it.time.getHourMinute(it.date.dayOfWeek) }
@@ -36,7 +35,7 @@ sealed class ScheduleGroup<T : ProjectType> {
             )
 
             val weeklySchedules = schedules.asSequence()
-                    .filterIsInstance<WeeklySchedule<T>>()
+                    .filterIsInstance<WeeklySchedule>()
                     .groupBy {
                         val interval = if (it.interval == 1) {
                             Weekly.Interval.One
@@ -57,7 +56,7 @@ sealed class ScheduleGroup<T : ProjectType> {
                                         it.key.from,
                                         it.key.until,
                                         it.key.interval,
-                                        it.key.assignedTo
+                                        it.key.assignedTo,
                                 )
                         )
                     }
@@ -65,14 +64,14 @@ sealed class ScheduleGroup<T : ProjectType> {
                     .map { it.second }
                     .toList()
 
-            val monthlyDaySchedules = schedules.filterIsInstance<MonthlyDaySchedule<T>>()
+            val monthlyDaySchedules = schedules.filterIsInstance<MonthlyDaySchedule>()
                     .sortedWith(compareBy(
                             { !it.beginningOfMonth },
                             { it.dayOfMonth },
                             { it.time.getTimeFloat() }))
                     .map { MonthlyDay(it) }
 
-            val monthlyWeekSchedules = schedules.filterIsInstance<MonthlyWeekSchedule<T>>()
+            val monthlyWeekSchedules = schedules.filterIsInstance<MonthlyWeekSchedule>()
                     .sortedWith(compareBy(
                             { !it.beginningOfMonth },
                             { it.weekOfMonth },
@@ -80,7 +79,7 @@ sealed class ScheduleGroup<T : ProjectType> {
                             { it.time.getTimeFloat() }))
                     .map { MonthlyWeek(it) }
 
-            val yearlySchedules = schedules.filterIsInstance<YearlySchedule<T>>()
+            val yearlySchedules = schedules.filterIsInstance<YearlySchedule>()
                     .sortedWith(compareBy(
                             { it.month },
                             { it.day },
@@ -94,13 +93,11 @@ sealed class ScheduleGroup<T : ProjectType> {
 
     abstract val scheduleData: ScheduleData
 
-    abstract val schedules: List<Schedule<T>>
+    abstract val schedules: List<Schedule>
 
     abstract val assignedTo: Set<UserKey>
 
-    class Single<T : ProjectType>(
-            private val singleSchedule: SingleSchedule<T>,
-    ) : ScheduleGroup<T>() {
+    class Single(private val singleSchedule: SingleSchedule) : ScheduleGroup() {
 
         override val scheduleData get() = ScheduleData.Single(singleSchedule.date, singleSchedule.timePair)
 
@@ -109,14 +106,14 @@ sealed class ScheduleGroup<T : ProjectType> {
         override val assignedTo get() = singleSchedule.assignedTo
     }
 
-    class Weekly<T : ProjectType>(
+    class Weekly(
             private val timePair: TimePair,
-            private val weeklySchedules: List<WeeklySchedule<T>>,
+            private val weeklySchedules: List<WeeklySchedule>,
             val from: Date?,
             val until: Date?,
             private val interval: Interval,
             override val assignedTo: Set<UserKey>,
-    ) : ScheduleGroup<T>() {
+    ) : ScheduleGroup() {
 
         val daysOfWeek get() = weeklySchedules.map { it.dayOfWeek }.toSet()
 
@@ -144,9 +141,7 @@ sealed class ScheduleGroup<T : ProjectType> {
         }
     }
 
-    class MonthlyDay<T : ProjectType>(
-            private val monthlyDaySchedule: MonthlyDaySchedule<T>
-    ) : ScheduleGroup<T>() {
+    class MonthlyDay(private val monthlyDaySchedule: MonthlyDaySchedule) : ScheduleGroup() {
 
         override val scheduleData
             get() = ScheduleData.MonthlyDay(
@@ -154,7 +149,7 @@ sealed class ScheduleGroup<T : ProjectType> {
                     monthlyDaySchedule.beginningOfMonth,
                     monthlyDaySchedule.timePair,
                     monthlyDaySchedule.from,
-                    monthlyDaySchedule.until
+                    monthlyDaySchedule.until,
             )
 
         override val schedules get() = listOf(monthlyDaySchedule)
@@ -162,9 +157,7 @@ sealed class ScheduleGroup<T : ProjectType> {
         override val assignedTo get() = monthlyDaySchedule.assignedTo
     }
 
-    class MonthlyWeek<T : ProjectType>(
-            private val monthlyWeekSchedule: MonthlyWeekSchedule<T>
-    ) : ScheduleGroup<T>() {
+    class MonthlyWeek(private val monthlyWeekSchedule: MonthlyWeekSchedule) : ScheduleGroup() {
 
         override val scheduleData
             get() = ScheduleData.MonthlyWeek(
@@ -173,7 +166,7 @@ sealed class ScheduleGroup<T : ProjectType> {
                     monthlyWeekSchedule.beginningOfMonth,
                     monthlyWeekSchedule.timePair,
                     monthlyWeekSchedule.from,
-                    monthlyWeekSchedule.until
+                    monthlyWeekSchedule.until,
             )
 
         override val schedules get() = listOf(monthlyWeekSchedule)
@@ -181,9 +174,7 @@ sealed class ScheduleGroup<T : ProjectType> {
         override val assignedTo get() = monthlyWeekSchedule.assignedTo
     }
 
-    class Yearly<T : ProjectType>(
-            private val yearlySchedule: YearlySchedule<T>
-    ) : ScheduleGroup<T>() {
+    class Yearly(private val yearlySchedule: YearlySchedule) : ScheduleGroup() {
 
         override val scheduleData
             get() = ScheduleData.Yearly(
@@ -191,7 +182,7 @@ sealed class ScheduleGroup<T : ProjectType> {
                     yearlySchedule.day,
                     yearlySchedule.timePair,
                     yearlySchedule.from,
-                    yearlySchedule.until
+                    yearlySchedule.until,
             )
 
         override val schedules get() = listOf(yearlySchedule)

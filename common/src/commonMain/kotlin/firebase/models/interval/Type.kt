@@ -36,13 +36,13 @@ sealed class Type<T : ProjectType> {
     }
 
     data class Schedule<T : ProjectType>(
-            private val schedules: List<com.krystianwsul.common.firebase.models.schedule.Schedule<T>>,
+            private val schedules: List<com.krystianwsul.common.firebase.models.schedule.Schedule>,
     ) : Type<T>() {
 
         override val taskParentEntries get() = schedules
 
         fun getScheduleIntervals(interval: Interval<T>) = schedules.map {
-            ScheduleInterval(interval.startExactTimeStampOffset, interval.endExactTimeStampOffset, it)
+            ScheduleInterval<T>(interval.startExactTimeStampOffset, interval.endExactTimeStampOffset, it)
         }
     }
 

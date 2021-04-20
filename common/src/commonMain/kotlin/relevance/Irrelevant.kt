@@ -90,7 +90,7 @@ object Irrelevant {
         val relevantExistingInstances = relevantInstances.filter { it.exists() }
         val irrelevantExistingInstances = existingInstances - relevantExistingInstances
 
-        val irrelevantSchedules = mutableListOf<Schedule<*>>()
+        val irrelevantSchedules = mutableListOf<Schedule>()
         val irrelevantNoScheduleOrParents = mutableListOf<NoScheduleOrParent<*>>()
 
         relevantTasks.forEach {
@@ -101,7 +101,7 @@ object Irrelevant {
             irrelevantSchedules += scheduleIntervals.filter { scheduleInterval ->
                 val schedule = scheduleInterval.schedule
 
-                val result = if (schedule is SingleSchedule<*>) {
+                val result = if (schedule is SingleSchedule) {
                     /**
                      * Can't assume the instance is root; it could be joined.  But (I think) the schedule is still
                      * relevant, since removing it would make the task unscheduled.
@@ -206,7 +206,7 @@ object Irrelevant {
     data class Result(
             val irrelevantExistingInstances: Collection<Instance<*>>,
             val irrelevantTaskHierarchies: Collection<TaskHierarchy<*>>,
-            val irrelevantSchedules: Collection<Schedule<*>>,
+            val irrelevantSchedules: Collection<Schedule>,
             val irrelevantNoScheduleOrParents: Collection<NoScheduleOrParent<*>>,
             val irrelevantTasks: Collection<Task<*>>,
             val irrelevantRemoteCustomTimes: Collection<Time.Custom.Project<*>>,

@@ -26,7 +26,7 @@ class IntervalBuilderTest {
             start: ExactTimeStamp.Local,
             end: ExactTimeStamp.Local? = null,
             taskHierarchies: Collection<ProjectTaskHierarchy<ProjectType.Private>> = setOf(),
-            scheduleList: List<Schedule<ProjectType.Private>> = listOf(),
+            scheduleList: List<Schedule> = listOf(),
             noScheduleOrParentList: List<NoScheduleOrParent<ProjectType.Private>> = listOf(),
     ): Task<ProjectType.Private> {
         return mockk(relaxed = true) {
@@ -55,10 +55,7 @@ class IntervalBuilderTest {
         }
     }
 
-    private fun scheduleMock(
-            start: ExactTimeStamp.Local,
-            end: ExactTimeStamp.Local? = null,
-    ): Schedule<ProjectType.Private> {
+    private fun scheduleMock(start: ExactTimeStamp.Local, end: ExactTimeStamp.Local? = null): Schedule {
         return mockk(relaxed = true) {
             every { startExactTimeStamp } returns start
             every { startExactTimeStampOffset } returns start.toOffset()

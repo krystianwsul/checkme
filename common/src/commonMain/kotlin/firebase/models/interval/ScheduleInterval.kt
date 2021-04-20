@@ -8,7 +8,7 @@ import com.krystianwsul.common.utils.ProjectType
 class ScheduleInterval<T : ProjectType>(
         override val startExactTimeStampOffset: ExactTimeStamp.Offset,
         override val endExactTimeStampOffset: ExactTimeStamp.Offset?,
-        val schedule: Schedule<T>,
+        val schedule: Schedule,
 ) : CurrentOffset {
 
     fun getDateTimesInRange(

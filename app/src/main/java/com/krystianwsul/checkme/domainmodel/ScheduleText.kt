@@ -20,10 +20,7 @@ sealed class ScheduleText {
 
     companion object : Task.ScheduleTextFactory {
 
-        override fun getScheduleText(
-                scheduleGroup: ScheduleGroup<*>,
-                project: Project<*>
-        ) = when (scheduleGroup) {
+        override fun getScheduleText(scheduleGroup: ScheduleGroup, project: Project<*>) = when (scheduleGroup) {
             is ScheduleGroup.Single -> Single(scheduleGroup)
             is ScheduleGroup.Weekly -> Weekly(scheduleGroup)
             is ScheduleGroup.MonthlyDay -> MonthlyDay(scheduleGroup)
@@ -61,13 +58,13 @@ sealed class ScheduleText {
         return time.toString()
     }
 
-    class Single(private val scheduleGroup: ScheduleGroup.Single<*>) : ScheduleText() {
+    class Single(private val scheduleGroup: ScheduleGroup.Single) : ScheduleText() {
 
         companion object {
 
             fun getScheduleText(
                     scheduleData: ScheduleData.Single,
-                    timePairCallback: (TimePair) -> String
+                    timePairCallback: (TimePair) -> String,
             ) = scheduleData.date.getDisplayText() + ", " + timePairCallback(scheduleData.timePair)
         }
 
@@ -76,13 +73,13 @@ sealed class ScheduleText {
         }
     }
 
-    class Weekly(private val scheduleGroup: ScheduleGroup.Weekly<*>) : ScheduleText() {
+    class Weekly(private val scheduleGroup: ScheduleGroup.Weekly) : ScheduleText() {
 
         companion object {
 
             fun getScheduleText(
                     scheduleData: ScheduleData.Weekly,
-                    timePairCallback: (TimePair) -> String
+                    timePairCallback: (TimePair) -> String,
             ): String {
                 val intervalText = scheduleData.interval
                         .takeIf { it > 1 }
@@ -101,13 +98,13 @@ sealed class ScheduleText {
         }
     }
 
-    class MonthlyDay(private val scheduleGroup: ScheduleGroup.MonthlyDay<*>) : ScheduleText() {
+    class MonthlyDay(private val scheduleGroup: ScheduleGroup.MonthlyDay) : ScheduleText() {
 
         companion object {
 
             fun getScheduleText(
                     scheduleData: ScheduleData.MonthlyDay,
-                    timePairCallback: (TimePair) -> String
+                    timePairCallback: (TimePair) -> String,
             ): String {
                 return MyApplication.instance.run {
                     Utils.ordinal(scheduleData.dayOfMonth) + " " + getString(R.string.monthDay) + " " + getString(R.string.monthDayStart) + " " + resources.getStringArray(R.array.month)[if (scheduleData.beginningOfMonth) 0 else 1] + " " + getString(R.string.monthDayEnd)
@@ -120,13 +117,13 @@ sealed class ScheduleText {
         }
     }
 
-    class MonthlyWeek(private val scheduleGroup: ScheduleGroup.MonthlyWeek<*>) : ScheduleText() {
+    class MonthlyWeek(private val scheduleGroup: ScheduleGroup.MonthlyWeek) : ScheduleText() {
 
         companion object {
 
             fun getScheduleText(
                     scheduleData: ScheduleData.MonthlyWeek,
-                    timePairCallback: (TimePair) -> String
+                    timePairCallback: (TimePair) -> String,
             ): String {
                 return MyApplication.instance.run {
                     Utils.ordinal(scheduleData.weekOfMonth) + " " + scheduleData.dayOfWeek + " " + getString(R.string.monthDayStart) + " " + resources.getStringArray(R.array.month)[if (scheduleData.beginningOfMonth) 0 else 1] + " " + getString(R.string.monthDayEnd)
@@ -139,7 +136,7 @@ sealed class ScheduleText {
         }
     }
 
-    class Yearly(private val scheduleGroup: ScheduleGroup.Yearly<*>) : ScheduleText() {
+    class Yearly(private val scheduleGroup: ScheduleGroup.Yearly) : ScheduleText() {
 
         companion object {
 
@@ -147,7 +144,7 @@ sealed class ScheduleText {
 
             fun getScheduleText(
                     scheduleData: ScheduleData.Yearly,
-                    timePairCallback: (TimePair) -> String
+                    timePairCallback: (TimePair) -> String,
             ) = getDateText(scheduleData.month, scheduleData.day) +
                     ": " +
                     timePairCallback(scheduleData.timePair) +

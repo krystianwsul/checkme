@@ -185,14 +185,14 @@ object IntervalBuilder {
         }
 
         class Schedule<T : ProjectType>(
-                val schedule: com.krystianwsul.common.firebase.models.schedule.Schedule<T>,
+                val schedule: com.krystianwsul.common.firebase.models.schedule.Schedule,
         ) : TypeBuilder<T>() {
 
             override val startExactTimeStampOffset = schedule.startExactTimeStampOffset
 
-            override fun toIntervalBuilder() = IntervalBuilder.Schedule(
+            override fun toIntervalBuilder() = IntervalBuilder.Schedule<T>(
                     startExactTimeStampOffset,
-                    mutableListOf(schedule)
+                    mutableListOf(schedule),
             )
         }
 
@@ -240,7 +240,7 @@ object IntervalBuilder {
 
         data class Schedule<T : ProjectType>(
                 override val startExactTimeStampOffset: ExactTimeStamp.Offset,
-                val schedules: MutableList<com.krystianwsul.common.firebase.models.schedule.Schedule<T>>,
+                val schedules: MutableList<com.krystianwsul.common.firebase.models.schedule.Schedule>,
         ) : IntervalBuilder<T>() {
 
             override val endExactTimeStampOffset
@@ -251,7 +251,7 @@ object IntervalBuilder {
                         it.requireNoNulls().maxOrNull()
                 }
 
-            override fun toType() = Type.Schedule(schedules)
+            override fun toType() = Type.Schedule<T>(schedules)
         }
 
         data class NoSchedule<T : ProjectType>(

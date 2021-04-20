@@ -5,14 +5,13 @@ import com.krystianwsul.common.firebase.models.Task
 import com.krystianwsul.common.firebase.records.schedule.MonthlyWeekScheduleRecord
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.DayOfWeek
-import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.ScheduleType
 import com.krystianwsul.common.utils.getDateInMonth
 
-class MonthlyWeekSchedule<T : ProjectType>(
-        rootTask: Task<T>,
+class MonthlyWeekSchedule(
+        rootTask: Task<*>,
         override val repeatingScheduleRecord: MonthlyWeekScheduleRecord,
-) : RepeatingSchedule<T>(rootTask) {
+) : RepeatingSchedule(rootTask) {
 
     override val scheduleRecord get() = repeatingScheduleRecord
 

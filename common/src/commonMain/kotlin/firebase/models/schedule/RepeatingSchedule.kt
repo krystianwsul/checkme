@@ -6,12 +6,11 @@ import com.krystianwsul.common.firebase.models.Task
 import com.krystianwsul.common.firebase.models.interval.ScheduleInterval
 import com.krystianwsul.common.firebase.records.schedule.RepeatingScheduleRecord
 import com.krystianwsul.common.time.*
-import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.invalidatableLazy
 import com.soywiz.klock.days
 import com.soywiz.klock.plus
 
-abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<T>(rootTask) {
+abstract class RepeatingSchedule(rootTask: Task<*>) : Schedule(rootTask) {
 
     protected abstract val repeatingScheduleRecord: RepeatingScheduleRecord
 
@@ -48,7 +47,7 @@ abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<
     }
 
     override fun getDateTimesInRange(
-            scheduleInterval: ScheduleInterval<T>,
+            scheduleInterval: ScheduleInterval<*>,
             givenStartExactTimeStamp: ExactTimeStamp.Offset?,
             givenEndExactTimeStamp: ExactTimeStamp.Offset?,
             originalDateTime: Boolean,
@@ -129,7 +128,7 @@ abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<
 
     protected abstract fun containsDate(date: Date): Boolean
 
-    override fun updateOldestVisible(scheduleInterval: ScheduleInterval<T>, now: ExactTimeStamp.Local) {
+    override fun updateOldestVisible(scheduleInterval: ScheduleInterval<*>, now: ExactTimeStamp.Local) {
         val dateTimes = getDateTimesInRange(
                 scheduleInterval,
                 null,

@@ -6,11 +6,10 @@ import com.krystianwsul.common.firebase.models.TaskParentEntry
 import com.krystianwsul.common.firebase.models.interval.ScheduleInterval
 import com.krystianwsul.common.firebase.records.schedule.ScheduleRecord
 import com.krystianwsul.common.time.*
-import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.ScheduleType
 import com.krystianwsul.common.utils.UserKey
 
-abstract class Schedule<T : ProjectType>(val rootTask: Task<T>) : TaskParentEntry {
+abstract class Schedule(val rootTask: Task<*>) : TaskParentEntry {
 
     protected abstract val scheduleRecord: ScheduleRecord
 
@@ -56,7 +55,7 @@ abstract class Schedule<T : ProjectType>(val rootTask: Task<T>) : TaskParentEntr
     }
 
     abstract fun getDateTimesInRange(
-            scheduleInterval: ScheduleInterval<T>,
+            scheduleInterval: ScheduleInterval<*>,
             givenStartExactTimeStamp: ExactTimeStamp.Offset?,
             givenEndExactTimeStamp: ExactTimeStamp.Offset?,
             originalDateTime: Boolean = false,
@@ -85,7 +84,7 @@ abstract class Schedule<T : ProjectType>(val rootTask: Task<T>) : TaskParentEntr
 
     abstract val oldestVisible: OldestVisible
 
-    abstract fun updateOldestVisible(scheduleInterval: ScheduleInterval<T>, now: ExactTimeStamp.Local)
+    abstract fun updateOldestVisible(scheduleInterval: ScheduleInterval<*>, now: ExactTimeStamp.Local)
 
     val assignedTo get() = scheduleRecord.assignedTo.map { UserKey(it) }.toSet()
 

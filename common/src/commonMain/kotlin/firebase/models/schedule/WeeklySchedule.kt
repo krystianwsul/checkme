@@ -5,13 +5,12 @@ import com.krystianwsul.common.firebase.models.Task
 import com.krystianwsul.common.firebase.records.schedule.WeeklyScheduleRecord
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.DayOfWeek
-import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.ScheduleType
 
-class WeeklySchedule<T : ProjectType>(
-        rootTask: Task<T>,
+class WeeklySchedule(
+        rootTask: Task<*>,
         override val repeatingScheduleRecord: WeeklyScheduleRecord,
-) : RepeatingSchedule<T>(rootTask) {
+) : RepeatingSchedule(rootTask) {
 
     val dayOfWeek = DayOfWeek.values()[repeatingScheduleRecord.dayOfWeek]
 

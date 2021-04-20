@@ -33,7 +33,7 @@ class Task<T : ProjectType>(val project: Project<T>, private val taskRecord: Tas
     }
     val endData by endDataProperty
 
-    private val _schedules = mutableListOf<Schedule<T>>()
+    private val _schedules = mutableListOf<Schedule>()
 
     private val noScheduleOrParentsMap = taskRecord.noScheduleOrParentRecords
             .mapValues { NoScheduleOrParent(this, it.value) }
@@ -43,7 +43,7 @@ class Task<T : ProjectType>(val project: Project<T>, private val taskRecord: Tas
 
     val name get() = taskRecord.name
 
-    val schedules: List<Schedule<T>> get() = _schedules
+    val schedules: List<Schedule> get() = _schedules
 
     override val startExactTimeStamp = ExactTimeStamp.Local(taskRecord.startTime)
 
@@ -389,7 +389,7 @@ class Task<T : ProjectType>(val project: Project<T>, private val taskRecord: Tas
             assignedTo: Set<UserKey>,
             customTimeMigrationHelper: Project.CustomTimeMigrationHelper,
     ) {
-        val removeSchedules = mutableListOf<Schedule<T>>()
+        val removeSchedules = mutableListOf<Schedule>()
         val addScheduleDatas = scheduleDatas.map { ScheduleDiffKey(it.first, assignedTo) to it }.toMutableList()
 
         val oldSchedules = getCurrentScheduleIntervals(now).map { it.schedule }
@@ -557,7 +557,7 @@ class Task<T : ProjectType>(val project: Project<T>, private val taskRecord: Tas
         return project.createTaskHierarchy(this, childTask as Task<T>, now)
     }
 
-    fun deleteSchedule(schedule: Schedule<T>) {
+    fun deleteSchedule(schedule: Schedule) {
         check(_schedules.contains(schedule))
 
         _schedules.remove(schedule)
@@ -758,7 +758,7 @@ class Task<T : ProjectType>(val project: Project<T>, private val taskRecord: Tas
     fun copySchedules(
             deviceDbInfo: DeviceDbInfo,
             now: ExactTimeStamp.Local,
-            schedules: List<Schedule<*>>,
+            schedules: List<Schedule>,
             customTimeMigrationHelper: Project.CustomTimeMigrationHelper,
     ) {
         for (schedule in schedules) {
@@ -788,7 +788,7 @@ class Task<T : ProjectType>(val project: Project<T>, private val taskRecord: Tas
                     .toSet()
 
             when (schedule) {
-                is SingleSchedule<*> -> {
+                is SingleSchedule -> {
                     val date = schedule.date
 
                     val singleScheduleRecord = taskRecord.newSingleScheduleRecord(
@@ -807,7 +807,7 @@ class Task<T : ProjectType>(val project: Project<T>, private val taskRecord: Tas
 
                     _schedules += SingleSchedule(this, singleScheduleRecord)
                 }
-                is WeeklySchedule<*> -> {
+                is WeeklySchedule -> {
                     val weeklyScheduleRecord = taskRecord.newWeeklyScheduleRecord(
                             project.copyScheduleHelper.newWeekly(
                                     now.long,
@@ -825,7 +825,7 @@ class Task<T : ProjectType>(val project: Project<T>, private val taskRecord: Tas
 
                     _schedules += WeeklySchedule(this, weeklyScheduleRecord)
                 }
-                is MonthlyDaySchedule<*> -> {
+                is MonthlyDaySchedule -> {
                     val monthlyDayScheduleRecord = taskRecord.newMonthlyDayScheduleRecord(
                             project.copyScheduleHelper.newMonthlyDay(
                                     now.long,
@@ -843,7 +843,7 @@ class Task<T : ProjectType>(val project: Project<T>, private val taskRecord: Tas
 
                     _schedules += MonthlyDaySchedule(this, monthlyDayScheduleRecord)
                 }
-                is MonthlyWeekSchedule<*> -> {
+                is MonthlyWeekSchedule -> {
                     val monthlyWeekScheduleRecord = taskRecord.newMonthlyWeekScheduleRecord(
                             project.copyScheduleHelper.newMonthlyWeek(
                                     now.long,
@@ -862,7 +862,7 @@ class Task<T : ProjectType>(val project: Project<T>, private val taskRecord: Tas
 
                     _schedules += MonthlyWeekSchedule(this, monthlyWeekScheduleRecord)
                 }
-                is YearlySchedule<*> -> {
+                is YearlySchedule -> {
                     val yearlyScheduleRecord = taskRecord.newYearlyScheduleRecord(
                             project.copyScheduleHelper.newYearly(
                                     now.long,
@@ -1079,7 +1079,7 @@ class Task<T : ProjectType>(val project: Project<T>, private val taskRecord: Tas
 
     interface ScheduleTextFactory {
 
-        fun getScheduleText(scheduleGroup: ScheduleGroup<*>, project: Project<*>): String
+        fun getScheduleText(scheduleGroup: ScheduleGroup, project: Project<*>): String
     }
 
     interface ProjectUpdater {

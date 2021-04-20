@@ -91,7 +91,7 @@ object Preferences {
 
     val versionCode get() = sharedPreferences.getInt(KEY_VERSION_CODE, -1).takeIf { it != -1 }
 
-    fun setVersionCode() = sharedPreferences.edit { putInt(KEY_VERSION_CODE, BuildConfig.VERSION_CODE) }
+    fun setVersionCode(versionCode: Int) = sharedPreferences.edit { putInt(KEY_VERSION_CODE, versionCode) }
 
     init {
         tokenRelay.distinctUntilChanged()

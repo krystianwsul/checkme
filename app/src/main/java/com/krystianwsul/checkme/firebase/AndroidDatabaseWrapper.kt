@@ -6,8 +6,6 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.GenericTypeIndicator
 import com.google.firebase.database.Query
 import com.google.firebase.database.core.Path
-import com.krystianwsul.checkme.MyApplication
-import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.observeOnDomain
 import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
@@ -45,6 +43,10 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
     }
 
     private val rxPaperBook = RxPaperBook.with("firebaseCache")
+
+    fun onUpgrade() {
+        rxPaperBook.destroy().subscribe()
+    }
 
     private fun getUserQuery(userKey: UserKey) = rootReference.child("$USERS_KEY/${userKey.key}")
     override fun getUserObservable(userKey: UserKey) = getUserQuery(userKey).typedSnapshotChanges<UserWrapper>()

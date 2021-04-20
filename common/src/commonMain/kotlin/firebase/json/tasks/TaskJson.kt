@@ -4,10 +4,9 @@ import com.krystianwsul.common.firebase.json.InstanceJson
 import com.krystianwsul.common.firebase.json.NestedTaskHierarchyJson
 import com.krystianwsul.common.firebase.json.NoScheduleOrParentJson
 import com.krystianwsul.common.firebase.json.schedule.ScheduleWrapper
-import com.krystianwsul.common.utils.ProjectType
 import kotlinx.serialization.Serializable
 
-interface TaskJson<T : ProjectType> {
+interface TaskJson {
 
     var name: String
     var note: String?

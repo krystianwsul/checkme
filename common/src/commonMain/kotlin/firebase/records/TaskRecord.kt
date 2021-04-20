@@ -13,7 +13,7 @@ abstract class TaskRecord<T : ProjectType> protected constructor(
         create: Boolean,
         val id: String,
         val projectRecord: ProjectRecord<T>,
-        private val taskJson: TaskJson<T>,
+        private val taskJson: TaskJson,
         val assignedToHelper: AssignedToHelper<T>,
 ) : RemoteRecord(create) {
 

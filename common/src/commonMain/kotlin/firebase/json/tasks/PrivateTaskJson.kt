@@ -4,7 +4,6 @@ import com.krystianwsul.common.firebase.json.InstanceJson
 import com.krystianwsul.common.firebase.json.NestedTaskHierarchyJson
 import com.krystianwsul.common.firebase.json.NoScheduleOrParentJson
 import com.krystianwsul.common.firebase.json.schedule.PrivateScheduleWrapper
-import com.krystianwsul.common.utils.ProjectType
 import kotlinx.serialization.Serializable
 import kotlin.jvm.JvmOverloads
 
@@ -22,4 +21,4 @@ data class PrivateTaskJson @JvmOverloads constructor(
         override var noScheduleOrParent: Map<String, NoScheduleOrParentJson> = mutableMapOf(),
         override var ordinal: Double? = null,
         override var taskHierarchies: Map<String, NestedTaskHierarchyJson> = mapOf(),
-) : TaskJson<ProjectType.Private>
+) : TaskJson

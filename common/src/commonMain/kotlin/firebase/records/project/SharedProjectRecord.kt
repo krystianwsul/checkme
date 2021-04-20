@@ -151,7 +151,7 @@ class SharedProjectRecord(
 
     override fun getProjectCustomTimeId(id: String) = CustomTimeId.Project.Shared(id)
 
-    override fun getProjectCustomTimeKey(projectCustomTimeId: CustomTimeId.Project<ProjectType.Shared>) =
+    override fun getProjectCustomTimeKey(projectCustomTimeId: CustomTimeId.Project) =
             CustomTimeKey.Project.Shared(projectKey, projectCustomTimeId as CustomTimeId.Project.Shared)
 
     override fun newNoScheduleOrParentRecordId(taskId: String) =

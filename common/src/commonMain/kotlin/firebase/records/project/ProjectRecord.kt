@@ -24,7 +24,7 @@ abstract class ProjectRecord<T : ProjectType>(
 
     abstract val projectKey: ProjectKey<T>
 
-    abstract val customTimeRecords: Map<out CustomTimeId.Project<T>, ProjectCustomTimeRecord<T>>
+    abstract val customTimeRecords: Map<out CustomTimeId.Project, ProjectCustomTimeRecord<T>>
 
     abstract val taskRecords: Map<String, TaskRecord>
 
@@ -77,7 +77,7 @@ abstract class ProjectRecord<T : ProjectType>(
 
     abstract fun newNoScheduleOrParentRecordId(taskId: String): String
 
-    abstract override fun getProjectCustomTimeKey(projectCustomTimeId: CustomTimeId.Project<T>): CustomTimeKey.Project<T>
+    abstract override fun getProjectCustomTimeKey(projectCustomTimeId: CustomTimeId.Project): CustomTimeKey.Project<T>
     fun getProjectCustomTimeKey(customTimeId: String) = getProjectCustomTimeKey(getProjectCustomTimeId(customTimeId))
 
     fun getTaskKey(taskId: String) = TaskKey(projectKey, taskId)

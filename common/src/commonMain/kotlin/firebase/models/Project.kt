@@ -26,7 +26,7 @@ abstract class Project<T : ProjectType>(
     @Suppress("PropertyName")
     protected abstract val _tasks: MutableMap<String, Task<T>>
     protected abstract val taskHierarchyContainer: TaskHierarchyContainer<T>
-    protected abstract val remoteCustomTimes: Map<out CustomTimeId.Project<T>, Time.Custom.Project<T>>
+    protected abstract val remoteCustomTimes: Map<out CustomTimeId.Project, Time.Custom.Project<T>>
 
     abstract val projectKey: ProjectKey<T>
 
@@ -377,9 +377,8 @@ abstract class Project<T : ProjectType>(
 
     abstract fun getProjectCustomTime(projectCustomTimeKey: CustomTimeKey.Project<T>): Time.Custom.Project<T>
 
-    @Suppress("UNCHECKED_CAST")
-    fun getUntypedProjectCustomTime(projectCustomTimeId: CustomTimeId.Project<*>) =
-            getProjectCustomTime(projectCustomTimeId as CustomTimeId.Project<T>)
+    fun getUntypedProjectCustomTime(projectCustomTimeId: CustomTimeId.Project) =
+            getProjectCustomTime(projectCustomTimeId)
 
     fun getUntypedProjectCustomTime(projectCustomTimeId: String) =
             getProjectCustomTime(projectRecord.getProjectCustomTimeId(projectCustomTimeId))
@@ -387,7 +386,7 @@ abstract class Project<T : ProjectType>(
     override fun getUserCustomTime(userCustomTimeKey: CustomTimeKey.User) =
             userCustomTimeProvider.getUserCustomTime(userCustomTimeKey)
 
-    override fun getProjectCustomTimeKey(projectCustomTimeId: CustomTimeId.Project<T>) = projectRecord.getProjectCustomTimeKey(projectCustomTimeId)
+    override fun getProjectCustomTimeKey(projectCustomTimeId: CustomTimeId.Project) = projectRecord.getProjectCustomTimeKey(projectCustomTimeId)
 
     private fun getTime(timePair: TimePair) = timePair.customTimeKey
             ?.let(::getCustomTime)

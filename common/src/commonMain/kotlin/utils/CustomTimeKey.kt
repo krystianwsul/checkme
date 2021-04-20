@@ -9,7 +9,7 @@ sealed class CustomTimeKey : Parcelable, Serializable {
     sealed class Project<T : ProjectType> : CustomTimeKey() {
 
         abstract val projectId: ProjectKey<T>
-        abstract override val customTimeId: CustomTimeId.Project<T>
+        abstract override val customTimeId: CustomTimeId.Project
 
         override fun toJson() = customTimeId.value
 
@@ -22,7 +22,7 @@ sealed class CustomTimeKey : Parcelable, Serializable {
         @Parcelize
         data class Shared(
                 override val projectId: ProjectKey<ProjectType.Shared>,
-                override val customTimeId: CustomTimeId.Project<ProjectType.Shared>,
+                override val customTimeId: CustomTimeId.Project,
         ) : CustomTimeKey.Project<ProjectType.Shared>()
     }
 

@@ -60,7 +60,7 @@ sealed class Time {
 
             abstract override val customTimeRecord: ProjectCustomTimeRecord<T>
 
-            abstract override val id: CustomTimeId.Project<T>
+            abstract override val id: CustomTimeId.Project
 
             abstract override val key: CustomTimeKey.Project<T>
 

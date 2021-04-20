@@ -17,7 +17,7 @@ sealed class JsonTime {
         fun <T : ProjectType> fromTime(time: Time): JsonTime {
             @Suppress("UNCHECKED_CAST")
             return when (time) {
-                is Time.Custom.Project<*> -> Custom.Project(time.key.customTimeId as CustomTimeId.Project<T>)
+                is Time.Custom.Project<*> -> Custom.Project<T>(time.key.customTimeId)
                 is Time.Custom.User -> Custom.User(time.key)
                 is Time.Normal -> Normal(time.hourMinute)
             }
@@ -53,12 +53,12 @@ sealed class JsonTime {
             fun <T : ProjectType> fromJson(projectCustomTimeIdProvider: ProjectCustomTimeIdProvider<T>, json: String): JsonTime {
                 CustomTimeKey.User.tryFromJson(json)?.let { return User(it) }
 
-                return Project(projectCustomTimeIdProvider.getProjectCustomTimeId(json))
+                return Project<T>(projectCustomTimeIdProvider.getProjectCustomTimeId(json))
             }
 
             fun <T : ProjectType> fromCustomTimeKey(customTimeKey: CustomTimeKey): Custom {
                 return when (customTimeKey) {
-                    is CustomTimeKey.Project<*> -> Project(customTimeKey.customTimeId)
+                    is CustomTimeKey.Project<*> -> Project<T>(customTimeKey.customTimeId)
                     is CustomTimeKey.User -> User(customTimeKey)
                 }
             }
@@ -72,7 +72,7 @@ sealed class JsonTime {
                 projectCustomTimeKeyProvider: ProjectCustomTimeKeyProvider<T>,
         ) = TimePair(getCustomTimeKey(projectCustomTimeKeyProvider), null)
 
-        data class Project<U : ProjectType>(val id: CustomTimeId.Project<U>) : JsonTime.Custom() {
+        data class Project<U : ProjectType>(val id: CustomTimeId.Project) : JsonTime.Custom() {
 
             override fun toJson() = id.toString()
 
@@ -80,12 +80,12 @@ sealed class JsonTime {
             override fun <T : ProjectType> toTime(
                     projectCustomTimeProvider: ProjectCustomTimeProvider<T>,
                     userCustomTimeProvider: UserCustomTimeProvider,
-            ) = projectCustomTimeProvider.getProjectCustomTime(id as CustomTimeId.Project<T>)
+            ) = projectCustomTimeProvider.getProjectCustomTime(id)
 
             @Suppress("UNCHECKED_CAST")
             override fun <T : ProjectType> getCustomTimeKey(
                     projectCustomTimeKeyProvider: ProjectCustomTimeKeyProvider<T>,
-            ) = projectCustomTimeKeyProvider.getProjectCustomTimeKey(id as CustomTimeId.Project<T>)
+            ) = projectCustomTimeKeyProvider.getProjectCustomTimeKey(id)
         }
 
         data class User(val key: CustomTimeKey.User) : JsonTime.Custom() {
@@ -123,17 +123,17 @@ sealed class JsonTime {
 
     interface ProjectCustomTimeIdProvider<T : ProjectType> {
 
-        fun getProjectCustomTimeId(id: String): CustomTimeId.Project<T>
+        fun getProjectCustomTimeId(id: String): CustomTimeId.Project
     }
 
     interface ProjectCustomTimeProvider<T : ProjectType> {
 
-        fun getProjectCustomTime(projectCustomTimeId: CustomTimeId.Project<T>): Time.Custom.Project<T>
+        fun getProjectCustomTime(projectCustomTimeId: CustomTimeId.Project): Time.Custom.Project<T>
     }
 
     interface ProjectCustomTimeKeyProvider<T : ProjectType> {
 
-        fun getProjectCustomTimeKey(projectCustomTimeId: CustomTimeId.Project<T>): CustomTimeKey.Project<T>
+        fun getProjectCustomTimeKey(projectCustomTimeId: CustomTimeId.Project): CustomTimeKey.Project<T>
     }
 
     interface ProjectCustomTimeIdAndKeyProvider<T : ProjectType> :

@@ -29,7 +29,7 @@ class PrivateProject(
     override val projectKey = projectRecord.projectKey
 
     override val remoteCustomTimes = HashMap<CustomTimeId.Project.Private, PrivateCustomTime>()
-    override val _tasks: MutableMap<String, Task<ProjectType.Private>>
+    override val _tasks: MutableMap<String, Task>
     override val taskHierarchyContainer = TaskHierarchyContainer<ProjectType.Private>()
 
     override val customTimes get() = remoteCustomTimes.values
@@ -123,13 +123,13 @@ class PrivateProject(
     }
 
     override fun createChildTask(
-            parentTask: Task<ProjectType.Private>,
+            parentTask: Task,
             now: ExactTimeStamp.Local,
             name: String,
             note: String?,
             image: TaskJson.Image?,
             ordinal: Double?,
-    ): Task<ProjectType.Private> {
+    ): Task {
         val taskJson = PrivateTaskJson(
                 name,
                 now.long,
@@ -148,7 +148,7 @@ class PrivateProject(
     }
 
     override fun copyTaskRecord(
-            oldTask: Task<*>,
+            oldTask: Task,
             now: ExactTimeStamp.Local,
             instanceJsons: MutableMap<String, InstanceJson>,
     ) = projectRecord.newTaskRecord(PrivateTaskJson(
@@ -161,7 +161,7 @@ class PrivateProject(
             ordinal = oldTask.ordinal
     ))
 
-    fun newTask(taskJson: PrivateTaskJson): Task<ProjectType.Private> {
+    fun newTask(taskJson: PrivateTaskJson): Task {
         val taskRecord = projectRecord.newTaskRecord(taskJson)
 
         val task = Task(this, taskRecord)

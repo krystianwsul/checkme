@@ -21,7 +21,7 @@ import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.*
 
-class Task<T : ProjectType>(val project: Project<T>, private val taskRecord: TaskRecord) :
+class Task(val project: Project<*>, private val taskRecord: TaskRecord) :
         Current, CurrentOffset, QueryMatchable, Assignable {
 
     private val endDataProperty = invalidatableLazyCallbacks {
@@ -138,7 +138,7 @@ class Task<T : ProjectType>(val project: Project<T>, private val taskRecord: Tas
         return getInstances(null, null, now).any { it.canAddSubtask(now, hack24) }
     }
 
-    private fun getRootTask(exactTimeStamp: ExactTimeStamp): Task<T> =
+    private fun getRootTask(exactTimeStamp: ExactTimeStamp): Task =
             getParentTask(exactTimeStamp)?.getRootTask(exactTimeStamp) ?: this
 
     fun getCurrentScheduleIntervals(exactTimeStamp: ExactTimeStamp): List<ScheduleInterval> {
@@ -223,14 +223,14 @@ class Task<T : ProjectType>(val project: Project<T>, private val taskRecord: Tas
         setMyEndExactTimeStamp(null)
     }
 
-    fun getParentTask(exactTimeStamp: ExactTimeStamp): Task<T>? {
+    fun getParentTask(exactTimeStamp: ExactTimeStamp): Task? {
         requireNotDeletedOffset(exactTimeStamp)
 
         return getParentTaskHierarchy(exactTimeStamp)?.run {
             requireNotDeletedOffset(exactTimeStamp)
             taskHierarchy.requireNotDeletedOffset(exactTimeStamp)
 
-            (taskHierarchy.parentTask as Task<T>).apply { requireNotDeletedOffset(exactTimeStamp) }
+            taskHierarchy.parentTask.apply { requireNotDeletedOffset(exactTimeStamp) }
         }
     }
 
@@ -270,8 +270,8 @@ class Task<T : ProjectType>(val project: Project<T>, private val taskRecord: Tas
             bySchedule: Boolean,
     ): Sequence<Instance> {
         val instanceSequences = parentHierarchyIntervals.map {
-            (it.taskHierarchy
-                    .parentTask as Task<T>)
+            it.taskHierarchy
+                    .parentTask
                     .getInstances(givenStartExactTimeStamp, givenEndExactTimeStamp, now, bySchedule)
                     .filter { it.isVisible(now, Instance.VisibilityOptions(hack24 = true)) }
                     .mapNotNull {
@@ -554,9 +554,8 @@ class Task<T : ProjectType>(val project: Project<T>, private val taskRecord: Tas
             customTimeMigrationHelper: Project.CustomTimeMigrationHelper,
     ) = createSchedules(ownerKey, now, scheduleDatas, assignedTo, customTimeMigrationHelper)
 
-    fun addChild(childTask: Task<*>, now: ExactTimeStamp.Local): TaskHierarchyKey {
-        @Suppress("UNCHECKED_CAST")
-        return project.createTaskHierarchy(this, childTask as Task<T>, now)
+    fun addChild(childTask: Task, now: ExactTimeStamp.Local): TaskHierarchyKey {
+        return project.createTaskHierarchy(this, childTask, now)
     }
 
     fun deleteSchedule(schedule: Schedule) {
@@ -901,7 +900,7 @@ class Task<T : ProjectType>(val project: Project<T>, private val taskRecord: Tas
             projectUpdater: ProjectUpdater,
             now: ExactTimeStamp.Local,
             projectId: ProjectKey<*>,
-    ): Task<*> {
+    ): Task {
         return if (projectId == project.projectKey)
             this
         else
@@ -1042,7 +1041,7 @@ class Task<T : ProjectType>(val project: Project<T>, private val taskRecord: Tas
         nestedTaskHierarchy.invalidateTasks()
     }
 
-    fun createParentNestedTaskHierarchy(parentTask: Task<T>, now: ExactTimeStamp.Local): TaskHierarchyKey.Nested {
+    fun createParentNestedTaskHierarchy(parentTask: Task, now: ExactTimeStamp.Local): TaskHierarchyKey.Nested {
         val taskHierarchyJson = NestedTaskHierarchyJson(parentTask.id, now.long, now.offset)
 
         return createParentNestedTaskHierarchy(taskHierarchyJson).taskHierarchyKey
@@ -1086,11 +1085,7 @@ class Task<T : ProjectType>(val project: Project<T>, private val taskRecord: Tas
 
     interface ProjectUpdater {
 
-        fun <T : ProjectType> convert(
-                now: ExactTimeStamp.Local,
-                startingTask: Task<T>,
-                projectId: ProjectKey<*>,
-        ): Task<*>
+        fun convert(now: ExactTimeStamp.Local, startingTask: Task, projectId: ProjectKey<*>): Task
     }
 
     data class EndData(

@@ -9,7 +9,7 @@ import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.ScheduleType
 import com.krystianwsul.common.utils.UserKey
 
-abstract class Schedule(val rootTask: Task<*>) : TaskParentEntry {
+abstract class Schedule(val rootTask: Task) : TaskParentEntry {
 
     protected abstract val scheduleRecord: ScheduleRecord
 

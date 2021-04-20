@@ -12,7 +12,7 @@ import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.*
 import com.soywiz.klock.days
 
-class Instance private constructor(val task: Task<*>, private var data: Data) : Assignable {
+class Instance private constructor(val task: Task, private var data: Data) : Assignable {
 
     companion object {
 
@@ -148,7 +148,7 @@ class Instance private constructor(val task: Task<*>, private var data: Data) : 
         return when (val type = interval.type) {
             is Type.Child -> {
                 val parentTaskHierarchy = type.getHierarchyInterval(interval).taskHierarchy
-                val parentTask = parentTaskHierarchy.parentTask as Task<*>
+                val parentTask = parentTaskHierarchy.parentTask
                 parentTask.getInstance(scheduleDateTime)
             }
             is Type.Schedule -> null
@@ -179,9 +179,9 @@ class Instance private constructor(val task: Task<*>, private var data: Data) : 
     private val parentInstanceData by parentInstanceProperty
     val parentInstance get() = parentInstanceData?.instance
 
-    constructor(task: Task<*>, instanceRecord: InstanceRecord) : this(task, Data.Real(task, instanceRecord))
+    constructor(task: Task, instanceRecord: InstanceRecord) : this(task, Data.Real(task, instanceRecord))
 
-    constructor(task: Task<*>, scheduleDateTime: DateTime) :
+    constructor(task: Task, scheduleDateTime: DateTime) :
             this(task, Data.Virtual(scheduleDateTime.date, JsonTime.fromTime(scheduleDateTime.time), task.project))
 
     init {
@@ -579,7 +579,7 @@ class Instance private constructor(val task: Task<*>, private var data: Data) : 
 
         abstract val parentState: ParentState
 
-        class Real(private val task: Task<*>, val instanceRecord: InstanceRecord) : Data() {
+        class Real(private val task: Task, val instanceRecord: InstanceRecord) : Data() {
 
             override val scheduleDate get() = instanceRecord.run { Date(scheduleYear, scheduleMonth, scheduleDay) }
 

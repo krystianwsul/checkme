@@ -12,7 +12,7 @@ object IntervalBuilder {
      Note: this will return NoSchedule for the time spans that were covered by irrelevant schedules
      and task hierarchies.  These periods, by definition, shouldn't be needed for anything.
      */
-    fun build(task: Task<*>): List<Interval> {
+    fun build(task: Task): List<Interval> {
         val allTypeBuilders = listOf(
                 task.schedules.map { TypeBuilder.Schedule(it) },
                 task.parentTaskHierarchies.map { TypeBuilder.Parent(it) },

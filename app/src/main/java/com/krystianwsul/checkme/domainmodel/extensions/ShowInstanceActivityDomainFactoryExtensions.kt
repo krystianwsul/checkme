@@ -99,7 +99,7 @@ fun DomainUpdater.setTaskEndTimeStamps(
 
 private fun DomainFactory.getGroupListData(
         instance: Instance,
-        task: Task<*>,
+        task: Task,
         now: ExactTimeStamp.Local,
 ): GroupListDataWrapper {
     val customTimeDatas = getCurrentRemoteCustomTimes(now).map {

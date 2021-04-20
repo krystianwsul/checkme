@@ -211,7 +211,7 @@ fun DomainUpdater.createScheduleRootTask(
     )
 }.perform(this)
 
-private fun <T : ProjectType> Task<T>.toCreateResult(now: ExactTimeStamp.Local) =
+private fun Task.toCreateResult(now: ExactTimeStamp.Local) =
         getInstances(null, null, now).singleOrNull()
                 ?.let { EditDelegate.CreateResult.Instance(it.instanceKey) }
                 ?: EditDelegate.CreateResult.Task(taskKey)
@@ -349,7 +349,7 @@ fun DomainUpdater.updateChildTask(
 
     task.setName(name, note)
 
-    tailrec fun Task<*>.hasAncestor(taskKey: TaskKey): Boolean {
+    tailrec fun Task.hasAncestor(taskKey: TaskKey): Boolean {
         val parentTask = getParentTask(now) ?: return false
 
         if (parentTask.taskKey == taskKey) return true
@@ -635,10 +635,7 @@ private fun DomainFactory.getProjectTaskTreeDatas(
             .toList()
 }
 
-private fun Task<*>.showAsParent(
-        now: ExactTimeStamp.Local,
-        excludedTaskKeys: Set<TaskKey>,
-): Boolean {
+private fun Task.showAsParent(now: ExactTimeStamp.Local, excludedTaskKeys: Set<TaskKey>): Boolean {
     if (!current(now)) return false
 
     if (excludedTaskKeys.contains(taskKey)) return false
@@ -649,7 +646,7 @@ private fun Task<*>.showAsParent(
 }
 
 private fun DomainFactory.joinJoinables(
-        newParentTask: Task<*>,
+        newParentTask: Task,
         joinables: List<EditParameters.Join.Joinable>,
         now: ExactTimeStamp.Local,
 ) {
@@ -686,8 +683,8 @@ private fun DomainFactory.joinJoinables(
 }
 
 private fun DomainFactory.joinTasks(
-        newParentTask: Task<*>,
-        joinTasks: List<Task<*>>,
+        newParentTask: Task,
+        joinTasks: List<Task>,
         now: ExactTimeStamp.Local,
         removeInstanceKeys: List<InstanceKey>,
 ) {
@@ -706,7 +703,7 @@ private fun DomainFactory.joinTasks(
 
 private fun DomainFactory.getTaskListChildTaskDatas(
         now: ExactTimeStamp.Local,
-        parentTask: Task<*>,
+        parentTask: Task,
         excludedTaskKeys: Set<TaskKey>,
 ): List<EditViewModel.ParentTreeData> =
         parentTask.getChildTaskHierarchies(now)
@@ -726,7 +723,7 @@ private fun DomainFactory.getTaskListChildTaskDatas(
                 }
                 .toList()
 
-private fun DomainFactory.copyTask(now: ExactTimeStamp.Local, task: Task<*>, copyTaskKey: TaskKey) {
+private fun DomainFactory.copyTask(now: ExactTimeStamp.Local, task: Task, copyTaskKey: TaskKey) {
     val copiedTask = getTaskForce(copyTaskKey)
 
     copiedTask.getChildTaskHierarchies(now).forEach {
@@ -744,14 +741,14 @@ private fun DomainFactory.copyTask(now: ExactTimeStamp.Local, task: Task<*>, cop
     }
 }
 
-private fun <T : ProjectType> DomainFactory.createChildTask(
+private fun DomainFactory.createChildTask(
         now: ExactTimeStamp.Local,
-        parentTask: Task<T>,
+        parentTask: Task,
         name: String,
         note: String?,
         imageJson: TaskJson.Image?,
         copyTaskKey: TaskKey? = null,
-): Task<T> {
+): Task {
     check(name.isNotEmpty())
     parentTask.requireCurrent(now)
 

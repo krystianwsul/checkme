@@ -8,14 +8,10 @@ import com.krystianwsul.common.firebase.models.interval.ScheduleInterval
 import com.krystianwsul.common.firebase.records.schedule.SingleScheduleRecord
 import com.krystianwsul.common.time.DateTime
 import com.krystianwsul.common.time.ExactTimeStamp
-import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.ScheduleType
 import com.krystianwsul.common.utils.UserKey
 
-class SingleSchedule(
-        rootTask: Task<*>,
-        val singleScheduleRecord: SingleScheduleRecord,
-) : Schedule(rootTask) {
+class SingleSchedule(rootTask: Task, val singleScheduleRecord: SingleScheduleRecord) : Schedule(rootTask) {
 
     private val mockInstance get() = getInstance(rootTask).takeIf { it.exists() }
 
@@ -32,7 +28,7 @@ class SingleSchedule(
             DateTime(originalDate, originalTimePair.toTime())
         }
 
-    fun <T : ProjectType> getInstance(task: Task<T>) = task.getInstance(originalScheduleDateTime)
+    fun getInstance(task: Task) = task.getInstance(originalScheduleDateTime)
 
     override fun getDateTimesInRange(
             scheduleInterval: ScheduleInterval,

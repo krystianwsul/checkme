@@ -38,7 +38,7 @@ abstract class TaskHierarchy(private val project: Project<*>) : TaskParentEntry 
     val id by lazy { taskHierarchyRecord.id }
 
     val parentTask by lazy { project.getTaskForce(parentTaskId) }
-    abstract val childTask: Task<*>
+    abstract val childTask: Task
 
     val parentTaskId by lazy { taskHierarchyRecord.parentTaskId }
     abstract val childTaskId: String

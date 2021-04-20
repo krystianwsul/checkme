@@ -182,7 +182,7 @@ fun DomainFactory.getUnscheduledTasks(now: ExactTimeStamp.Local) =
         getTasks().filter { it.current(now) && it.isUnscheduled(now) }
 
 fun DomainFactory.getGroupListChildTaskDatas(
-        parentTask: Task<*>,
+        parentTask: Task,
         now: ExactTimeStamp.Local,
         searchCriteria: SearchCriteria? = null,
 ): List<GroupListDataWrapper.TaskData> = parentTask.getChildTaskHierarchies(now)
@@ -277,8 +277,8 @@ private class AddChildToParentUndoData(
 }
 
 fun addChildToParent(
-        childTask: Task<*>,
-        parentTask: Task<*>,
+        childTask: Task,
+        parentTask: Task,
         now: ExactTimeStamp.Local,
         hideInstance: Instance? = null,
 ): UndoData {

@@ -3,7 +3,7 @@ package com.krystianwsul.common.utils
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.Task
 
-class InstanceHierarchyContainer<T : ProjectType>(private val task: Task<T>) {
+class InstanceHierarchyContainer(private val task: Task) {
 
     private val parentScheduleKeyToChildInstanceKeys = mutableMapOf<ScheduleKey, MutableSet<InstanceKey>>()
 

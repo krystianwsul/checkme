@@ -153,7 +153,7 @@ class ProjectsFactory(
             customTimeMigrationHelper: Project.CustomTimeMigrationHelper,
             ordinal: Double? = null,
             assignedTo: Set<UserKey> = setOf(),
-    ): Task<*> {
+    ): Task {
         return createTaskHelper(
                 now,
                 name,

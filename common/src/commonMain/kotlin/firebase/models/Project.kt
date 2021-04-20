@@ -24,7 +24,7 @@ abstract class Project<T : ProjectType>(
     abstract val projectRecord: ProjectRecord<T>
 
     @Suppress("PropertyName")
-    protected abstract val _tasks: MutableMap<String, Task<T>>
+    protected abstract val _tasks: MutableMap<String, Task>
     protected abstract val taskHierarchyContainer: TaskHierarchyContainer<T>
     protected abstract val remoteCustomTimes: Map<out CustomTimeId.Project, Time.Custom.Project<T>>
 
@@ -44,7 +44,7 @@ abstract class Project<T : ProjectType>(
 
     // don't want these to be mutable
     val taskIds: Set<String> get() = _tasks.keys
-    val tasks: Collection<Task<T>> get() = _tasks.values
+    val tasks: Collection<Task> get() = _tasks.values
 
     abstract val customTimes: Collection<Time.Custom.Project<T>>
 
@@ -63,19 +63,15 @@ abstract class Project<T : ProjectType>(
     }
 
     abstract fun createChildTask(
-            parentTask: Task<T>,
+            parentTask: Task,
             now: ExactTimeStamp.Local,
             name: String,
             note: String?,
             image: TaskJson.Image?,
             ordinal: Double?,
-    ): Task<T>
+    ): Task
 
-    fun createTaskHierarchy(
-            parentTask: Task<T>,
-            childTask: Task<T>,
-            now: ExactTimeStamp.Local,
-    ): TaskHierarchyKey {
+    fun createTaskHierarchy(parentTask: Task, childTask: Task, now: ExactTimeStamp.Local): TaskHierarchyKey {
         return if (TaskHierarchy.WRITE_NESTED_TASK_HIERARCHIES) {
             childTask.createParentNestedTaskHierarchy(parentTask, now)
         } else {
@@ -98,14 +94,14 @@ abstract class Project<T : ProjectType>(
     }
 
     protected abstract fun copyTaskRecord(
-            oldTask: Task<*>,
+            oldTask: Task,
             now: ExactTimeStamp.Local,
             instanceJsons: MutableMap<String, InstanceJson>,
     ): TaskRecord
 
     private fun convertScheduleKey(
             userInfo: UserInfo,
-            oldTask: Task<*>,
+            oldTask: Task,
             oldScheduleKey: ScheduleKey,
             customTimeMigrationHelper: CustomTimeMigrationHelper,
             now: ExactTimeStamp.Local,
@@ -141,12 +137,12 @@ abstract class Project<T : ProjectType>(
     @Suppress("ConstantConditionIf")
     fun copyTask(
             deviceDbInfo: DeviceDbInfo,
-            oldTask: Task<*>,
+            oldTask: Task,
             instances: Collection<Instance>,
             now: ExactTimeStamp.Local,
             newProjectKey: ProjectKey<*>,
             customTimeMigrationHelper: CustomTimeMigrationHelper,
-    ): Pair<Task<T>, List<(Map<String, String>) -> Any?>> {
+    ): Pair<Task, List<(Map<String, String>) -> Any?>> {
         val instanceDatas = instances.map { oldInstance ->
             val (newInstance, updater) = getInstanceJson(
                     deviceDbInfo.key,
@@ -280,11 +276,10 @@ abstract class Project<T : ProjectType>(
             now: ExactTimeStamp.Local,
             startTaskHierarchy: V,
             parentTaskId: String,
-            childTask: Task<*>,
+            childTask: Task,
     ) {
         if (TaskHierarchy.WRITE_NESTED_TASK_HIERARCHIES) {
-            @Suppress("UNCHECKED_CAST")
-            (childTask as Task<T>).copyParentNestedTaskHierarchy(now, startTaskHierarchy, parentTaskId)
+            childTask.copyParentNestedTaskHierarchy(now, startTaskHierarchy, parentTaskId)
         } else {
             check(parentTaskId.isNotEmpty())
 
@@ -305,7 +300,7 @@ abstract class Project<T : ProjectType>(
         }
     }
 
-    fun deleteTask(task: Task<T>) {
+    fun deleteTask(task: Task) {
         check(_tasks.containsKey(task.id))
 
         _tasks.remove(task.id)
@@ -386,7 +381,8 @@ abstract class Project<T : ProjectType>(
     override fun getUserCustomTime(userCustomTimeKey: CustomTimeKey.User) =
             userCustomTimeProvider.getUserCustomTime(userCustomTimeKey)
 
-    override fun getProjectCustomTimeKey(projectCustomTimeId: CustomTimeId.Project) = projectRecord.getProjectCustomTimeKey(projectCustomTimeId)
+    override fun getProjectCustomTimeKey(projectCustomTimeId: CustomTimeId.Project) =
+            projectRecord.getProjectCustomTimeKey(projectCustomTimeId)
 
     private fun getTime(timePair: TimePair) = timePair.customTimeKey
             ?.let(::getCustomTime)
@@ -397,8 +393,8 @@ abstract class Project<T : ProjectType>(
 
     fun convertRemoteToRemoteHelper(
             now: ExactTimeStamp.Local,
-            remoteToRemoteConversion: RemoteToRemoteConversion<T>,
-            startTask: Task<T>,
+            remoteToRemoteConversion: RemoteToRemoteConversion,
+            startTask: Task,
     ) {
         if (remoteToRemoteConversion.startTasks.containsKey(startTask.id)) return
 
@@ -418,7 +414,7 @@ abstract class Project<T : ProjectType>(
 
         remoteToRemoteConversion.startTaskHierarchies.addAll(childTaskHierarchies)
 
-        childTaskHierarchies.map { it.childTask as Task<T> }.forEach {
+        childTaskHierarchies.map { it.childTask }.forEach {
             it.requireCurrent(now)
 
             convertRemoteToRemoteHelper(now, remoteToRemoteConversion, it)
@@ -500,7 +496,7 @@ abstract class Project<T : ProjectType>(
             name: String,
             note: String?,
             ordinal: Double?,
-    ): Task<T>
+    ): Task
 
     abstract fun getAssignedTo(userKeys: Set<UserKey>): Map<UserKey, ProjectUser>
 

@@ -297,7 +297,7 @@ class DomainFactory(
     ): Pair<TaskUndoData, DomainUpdater.Params> {
         check(taskKeys.isNotEmpty())
 
-        fun Task<*>.getAllChildren(): List<Task<*>> = listOf(this) + getChildTaskHierarchies(now).map {
+        fun Task.getAllChildren(): List<Task> = listOf(this) + getChildTaskHierarchies(now).map {
             it.childTask.getAllChildren()
         }.flatten()
 
@@ -446,12 +446,8 @@ class DomainFactory(
 
     val ownerKey get() = myUserFactory.user.userKey
 
-    override fun <T : ProjectType> convert(
-            now: ExactTimeStamp.Local,
-            startingTask: Task<T>,
-            projectId: ProjectKey<*>,
-    ): Task<*> {
-        val remoteToRemoteConversion = RemoteToRemoteConversion<T>()
+    override fun convert(now: ExactTimeStamp.Local, startingTask: Task, projectId: ProjectKey<*>): Task {
+        val remoteToRemoteConversion = RemoteToRemoteConversion()
         val startProject = startingTask.project
         startProject.convertRemoteToRemoteHelper(now, remoteToRemoteConversion, startingTask)
 
@@ -520,7 +516,7 @@ class DomainFactory(
     fun getTaskIfPresent(taskKey: TaskKey) = projectsFactory.getTaskIfPresent(taskKey)
 
     fun getTaskListChildTaskDatas(
-            parentTask: Task<*>,
+            parentTask: Task,
             now: ExactTimeStamp.Local,
             parentHierarchyExactTimeStamp: ExactTimeStamp,
     ): List<TaskListFragment.ChildTaskData> {

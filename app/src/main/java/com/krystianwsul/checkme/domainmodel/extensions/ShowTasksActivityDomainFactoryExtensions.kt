@@ -21,7 +21,7 @@ fun DomainFactory.getShowTasksData(parameters: ShowTasksActivity.Parameters): Sh
 
     val now = ExactTimeStamp.Local.now
 
-    fun Task<*>.toChildTaskData(): TaskListFragment.ChildTaskData {
+    fun Task.toChildTaskData(): TaskListFragment.ChildTaskData {
         val hierarchyExactTimeStamp = getHierarchyExactTimeStamp(now)
 
         return TaskListFragment.ChildTaskData(

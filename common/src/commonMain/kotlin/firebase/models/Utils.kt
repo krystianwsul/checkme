@@ -3,12 +3,11 @@ package com.krystianwsul.common.firebase.models
 import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.interrupt.InterruptionChecker
 import com.krystianwsul.common.time.ExactTimeStamp
-import com.krystianwsul.common.utils.ProjectType
 
-fun <T : ProjectType> Sequence<Task<out T>>.filterQuery(query: String?) = if (query.isNullOrEmpty()) {
+fun Sequence<Task>.filterQuery(query: String?) = if (query.isNullOrEmpty()) {
     map { it to FilterResult.MATCHES }
 } else {
-    fun childHierarchyMatches(task: Task<out T>): FilterResult {
+    fun childHierarchyMatches(task: Task): FilterResult {
         InterruptionChecker.throwIfInterrupted()
 
         if (task.matchesQuery(query)) return FilterResult.MATCHES
@@ -17,7 +16,7 @@ fun <T : ProjectType> Sequence<Task<out T>>.filterQuery(query: String?) = if (qu
 
         if (
                 task.childHierarchyIntervals.any {
-                    childHierarchyMatches(it.taskHierarchy.childTask as Task<T>) != FilterResult.DOESNT_MATCH
+                    childHierarchyMatches(it.taskHierarchy.childTask) != FilterResult.DOESNT_MATCH
                 }
         ) {
             return FilterResult.CHILD_MATCHES

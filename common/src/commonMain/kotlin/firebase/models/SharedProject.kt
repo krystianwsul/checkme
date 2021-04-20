@@ -39,7 +39,7 @@ class SharedProject(
     val users get() = remoteUsers.values
 
     override val remoteCustomTimes = mutableMapOf<CustomTimeId.Project.Shared, SharedCustomTime>()
-    override val _tasks: MutableMap<String, Task<ProjectType.Shared>>
+    override val _tasks: MutableMap<String, Task>
     override val taskHierarchyContainer = TaskHierarchyContainer<ProjectType.Shared>()
 
     override val customTimes get() = remoteCustomTimes.values
@@ -180,13 +180,13 @@ class SharedProject(
     }
 
     override fun createChildTask(
-            parentTask: Task<ProjectType.Shared>,
+            parentTask: Task,
             now: ExactTimeStamp.Local,
             name: String,
             note: String?,
             image: TaskJson.Image?,
             ordinal: Double?,
-    ): Task<ProjectType.Shared> {
+    ): Task {
         val taskJson = SharedTaskJson(
                 name,
                 now.long,
@@ -205,7 +205,7 @@ class SharedProject(
     }
 
     override fun copyTaskRecord(
-            oldTask: Task<*>,
+            oldTask: Task,
             now: ExactTimeStamp.Local,
             instanceJsons: MutableMap<String, InstanceJson>,
     ) = projectRecord.newTaskRecord(SharedTaskJson(
@@ -218,7 +218,7 @@ class SharedProject(
             ordinal = oldTask.ordinal,
     ))
 
-    private fun newTask(taskJson: SharedTaskJson): Task<ProjectType.Shared> {
+    private fun newTask(taskJson: SharedTaskJson): Task {
         val taskRecord = projectRecord.newTaskRecord(taskJson)
 
         val task = Task(this, taskRecord)

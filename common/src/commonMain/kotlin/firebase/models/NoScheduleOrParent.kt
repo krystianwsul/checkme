@@ -4,7 +4,7 @@ import com.krystianwsul.common.firebase.records.NoScheduleOrParentRecord
 import com.krystianwsul.common.time.ExactTimeStamp
 
 class NoScheduleOrParent(
-        private val task: Task<*>,
+        private val task: Task,
         private val noScheduleOrParentRecord: NoScheduleOrParentRecord,
 ) : TaskParentEntry {
 

@@ -6,10 +6,8 @@ import com.krystianwsul.common.firebase.records.schedule.YearlyScheduleRecord
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.utils.ScheduleType
 
-class YearlySchedule(
-        rootTask: Task<*>,
-        override val repeatingScheduleRecord: YearlyScheduleRecord,
-) : RepeatingSchedule(rootTask) {
+class YearlySchedule(rootTask: Task, override val repeatingScheduleRecord: YearlyScheduleRecord) :
+        RepeatingSchedule(rootTask) {
 
     override val scheduleRecord get() = repeatingScheduleRecord
 

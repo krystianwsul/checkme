@@ -7,10 +7,8 @@ import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.utils.ScheduleType
 
-class WeeklySchedule(
-        rootTask: Task<*>,
-        override val repeatingScheduleRecord: WeeklyScheduleRecord,
-) : RepeatingSchedule(rootTask) {
+class WeeklySchedule(rootTask: Task, override val repeatingScheduleRecord: WeeklyScheduleRecord) :
+        RepeatingSchedule(rootTask) {
 
     val dayOfWeek = DayOfWeek.values()[repeatingScheduleRecord.dayOfWeek]
 

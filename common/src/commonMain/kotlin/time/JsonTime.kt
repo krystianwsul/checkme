@@ -42,8 +42,7 @@ sealed class JsonTime {
             userCustomTimeProvider: UserCustomTimeProvider,
     ): Time
 
-    fun <T : ProjectType> toTime(customTimeProvider: CustomTimeProvider<T>) =
-            toTime(customTimeProvider, customTimeProvider)
+    fun toTime(customTimeProvider: CustomTimeProvider<*>) = toTime(customTimeProvider, customTimeProvider)
 
     sealed class Custom : JsonTime() {
 

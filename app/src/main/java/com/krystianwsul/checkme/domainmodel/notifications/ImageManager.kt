@@ -60,7 +60,7 @@ object ImageManager {
     fun getBigPicture(uuid: String?) = bigPictureDownloader.getImage(uuid)
 
     @Synchronized
-    fun prefetch(deviceDbInfo: DeviceDbInfo, tasks: List<Task<*>>, callback: () -> Unit) {
+    fun prefetch(deviceDbInfo: DeviceDbInfo, tasks: List<Task>, callback: () -> Unit) {
         largeIconDownloader.prefetch(deviceDbInfo, tasks, callback)
         bigPictureDownloader.prefetch(deviceDbInfo, tasks, callback)
     }
@@ -90,7 +90,7 @@ object ImageManager {
                     .subscribe()
         }
 
-        fun prefetch(deviceDbInfo: DeviceDbInfo, tasks: List<Task<*>>, callback: () -> Unit) {
+        fun prefetch(deviceDbInfo: DeviceDbInfo, tasks: List<Task>, callback: () -> Unit) {
             val tasksWithImages = tasks.map { it to it.getImage(deviceDbInfo)?.uuid }
                     .filter { it.second != null }
                     .associate { it.second!! to it.first }

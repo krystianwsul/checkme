@@ -10,7 +10,7 @@ import com.krystianwsul.common.utils.invalidatableLazy
 import com.soywiz.klock.days
 import com.soywiz.klock.plus
 
-abstract class RepeatingSchedule(rootTask: Task<*>) : Schedule(rootTask) {
+abstract class RepeatingSchedule(rootTask: Task) : Schedule(rootTask) {
 
     protected abstract val repeatingScheduleRecord: RepeatingScheduleRecord
 

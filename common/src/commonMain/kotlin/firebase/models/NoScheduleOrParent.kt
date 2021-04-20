@@ -6,7 +6,7 @@ import com.krystianwsul.common.utils.ProjectType
 
 class NoScheduleOrParent<T : ProjectType>(
         private val task: Task<T>,
-        private val noScheduleOrParentRecord: NoScheduleOrParentRecord<T>
+        private val noScheduleOrParentRecord: NoScheduleOrParentRecord,
 ) : TaskParentEntry {
 
     override val startExactTimeStamp = ExactTimeStamp.Local(noScheduleOrParentRecord.startTime)

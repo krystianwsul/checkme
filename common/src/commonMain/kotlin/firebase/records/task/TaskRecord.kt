@@ -257,7 +257,7 @@ abstract class TaskRecord<T : ProjectType> protected constructor(
         return yearlyScheduleRecord
     }
 
-    fun newNoScheduleOrParentRecord(noScheduleOrParentJson: NoScheduleOrParentJson): NoScheduleOrParentRecord<T> {
+    fun newNoScheduleOrParentRecord(noScheduleOrParentJson: NoScheduleOrParentJson): NoScheduleOrParentRecord {
         val noScheduleOrParentRecord = NoScheduleOrParentRecord(this, noScheduleOrParentJson, null)
         check(!noScheduleOrParentRecords.containsKey(noScheduleOrParentRecord.id))
 

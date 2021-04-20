@@ -17,7 +17,7 @@ class WeeklyScheduleRecord<T : ProjectType>(
         scheduleWrapper,
         scheduleWrapperBridge.weeklyScheduleJson!!,
         "weeklyScheduleJson",
-        id
+        id,
 ) {
 
     private val weeklyScheduleJson by lazy { scheduleWrapperBridge.weeklyScheduleJson!! }

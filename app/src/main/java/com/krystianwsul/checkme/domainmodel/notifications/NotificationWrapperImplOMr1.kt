@@ -8,7 +8,7 @@ open class NotificationWrapperImplOMr1 : NotificationWrapperImplO() {
 
     override fun getInstanceData(
             deviceDbInfo: DeviceDbInfo,
-            instance: Instance<*>,
+            instance: Instance,
             silent: Boolean,
             now: ExactTimeStamp.Local,
             highPriority: Boolean,

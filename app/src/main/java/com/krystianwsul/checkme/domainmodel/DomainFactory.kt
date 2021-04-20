@@ -353,7 +353,7 @@ class DomainFactory(
             searchCriteria: SearchCriteria? = null,
             filterVisible: Boolean = true,
             projectKey: ProjectKey<*>? = null,
-    ): Sequence<Instance<*>> {
+    ): Sequence<Instance> {
         val searchData = searchCriteria?.let { Project.SearchData(it, myUserFactory.user) }
 
         val projects =
@@ -374,7 +374,7 @@ class DomainFactory(
     }
 
     fun instanceToGroupListData(
-            instance: Instance<*>,
+            instance: Instance,
             now: ExactTimeStamp.Local,
             children: MutableMap<InstanceKey, GroupListDataWrapper.InstanceData>,
     ): GroupListDataWrapper.InstanceData {
@@ -402,9 +402,9 @@ class DomainFactory(
     }
 
     fun <T> getChildInstanceDatas(
-            instance: Instance<*>,
+            instance: Instance,
             now: ExactTimeStamp.Local,
-            mapper: (Instance<*>, ExactTimeStamp.Local, MutableMap<InstanceKey, T>) -> T,
+            mapper: (Instance, ExactTimeStamp.Local, MutableMap<InstanceKey, T>) -> T,
             searchCriteria: SearchCriteria = SearchCriteria.empty,
             filterVisible: Boolean = true,
     ): MutableMap<InstanceKey, T> {
@@ -437,7 +437,7 @@ class DomainFactory(
     }
 
     fun getChildInstanceDatas(
-            instance: Instance<*>,
+            instance: Instance,
             now: ExactTimeStamp.Local,
             searchCriteria: SearchCriteria = SearchCriteria.empty,
             filterVisible: Boolean = true,

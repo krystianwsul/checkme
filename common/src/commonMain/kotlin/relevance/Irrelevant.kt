@@ -205,7 +205,7 @@ object Irrelevant {
     private class VisibleIrrelevantTasksException(message: String) : Exception(message)
 
     data class Result(
-            val irrelevantExistingInstances: Collection<Instance<*>>,
+            val irrelevantExistingInstances: Collection<Instance>,
             val irrelevantTaskHierarchies: Collection<TaskHierarchy>,
             val irrelevantSchedules: Collection<Schedule>,
             val irrelevantNoScheduleOrParents: Collection<NoScheduleOrParent>,

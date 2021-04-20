@@ -11,17 +11,17 @@ object LockerManager {
     var state: State = State.None
         private set
 
-    fun <T : ProjectType> getTaskLocker(taskKey: TaskKey): TaskLocker<T>? {
+    fun getTaskLocker(taskKey: TaskKey): TaskLocker<*>? {
         val state = state as? State.Locker ?: return null
 
         @Suppress("UNCHECKED_CAST")
         return when (taskKey.projectKey) {
             is ProjectKey.Private -> state.privateProjectLocker
             is ProjectKey.Shared -> state.getSharedProjectLocker(taskKey.projectKey)
-        }.getTaskLocker(taskKey) as TaskLocker<T>
+        }.getTaskLocker(taskKey)
     }
 
-    fun <T : ProjectType> getInstanceLocker(instanceKey: InstanceKey) = getTaskLocker<T>(instanceKey.taskKey)?.getInstanceLocker(instanceKey)
+    fun getInstanceLocker(instanceKey: InstanceKey) = getTaskLocker(instanceKey.taskKey)?.getInstanceLocker(instanceKey)
 
     sealed class State {
 

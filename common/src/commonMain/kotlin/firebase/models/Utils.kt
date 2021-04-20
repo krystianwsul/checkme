@@ -29,14 +29,14 @@ fun <T : ProjectType> Sequence<Task<out T>>.filterQuery(query: String?) = if (qu
     map { it to childHierarchyMatches(it) }.filter { it.second != FilterResult.DOESNT_MATCH }
 }
 
-fun <T : ProjectType> Sequence<Instance<out T>>.filterSearchCriteria(
+fun Sequence<Instance>.filterSearchCriteria(
         searchCriteria: SearchCriteria,
         now: ExactTimeStamp.Local,
         myUser: MyUser,
 ) = if (searchCriteria.isEmpty) {
     this
 } else {
-    fun childHierarchyMatches(instance: Instance<out T>): Boolean {
+    fun childHierarchyMatches(instance: Instance): Boolean {
         InterruptionChecker.throwIfInterrupted()
 
         if (!searchCriteria.showAssignedToOthers && !instance.isAssignedToMe(now, myUser)) return false

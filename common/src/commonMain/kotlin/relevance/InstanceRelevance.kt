@@ -9,7 +9,7 @@ import com.krystianwsul.common.utils.TaskHierarchyKey
 import com.krystianwsul.common.utils.TaskKey
 
 
-class InstanceRelevance(val instance: Instance<*>) {
+class InstanceRelevance(val instance: Instance) {
 
     var relevant = false
         private set

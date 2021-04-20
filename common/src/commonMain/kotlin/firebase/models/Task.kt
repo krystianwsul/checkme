@@ -62,7 +62,7 @@ class Task<T : ProjectType>(val project: Project<T>, private val taskRecord: Tas
 
     val id get() = taskRecord.id
 
-    val existingInstances: Map<ScheduleKey, Instance<T>> get() = _existingInstances
+    val existingInstances: Map<ScheduleKey, Instance> get() = _existingInstances
 
     val imageJson get() = taskRecord.image
 
@@ -239,7 +239,7 @@ class Task<T : ProjectType>(val project: Project<T>, private val taskRecord: Tas
             endExactTimeStamp: ExactTimeStamp.Offset?,
             bySchedule: Boolean,
             onlyRoot: Boolean,
-    ): Sequence<Instance<T>> {
+    ): Sequence<Instance> {
         return _existingInstances.values
                 .asSequence()
                 .run { if (onlyRoot) filter { it.isRootInstance() } else this }
@@ -268,7 +268,7 @@ class Task<T : ProjectType>(val project: Project<T>, private val taskRecord: Tas
             givenEndExactTimeStamp: ExactTimeStamp.Offset?,
             now: ExactTimeStamp.Local,
             bySchedule: Boolean,
-    ): Sequence<Instance<out T>> {
+    ): Sequence<Instance> {
         val instanceSequences = parentHierarchyIntervals.map {
             (it.taskHierarchy
                     .parentTask as Task<T>)
@@ -281,14 +281,14 @@ class Task<T : ProjectType>(val project: Project<T>, private val taskRecord: Tas
                     }
         }
 
-        return combineInstanceSequences<T>(instanceSequences, bySchedule)
+        return combineInstanceSequences(instanceSequences, bySchedule)
     }
 
     // contains only generated, root instances that aren't virtual parents
     private fun getScheduleInstances(
             startExactTimeStamp: ExactTimeStamp.Offset?,
             endExactTimeStamp: ExactTimeStamp.Offset?,
-    ): Sequence<Instance<out T>> {
+    ): Sequence<Instance> {
         val scheduleSequence = getScheduleDateTimes(startExactTimeStamp, endExactTimeStamp)
 
         return scheduleSequence.flatMap {
@@ -346,7 +346,7 @@ class Task<T : ProjectType>(val project: Project<T>, private val taskRecord: Tas
             bySchedule: Boolean = false,
             onlyRoot: Boolean = false,
             filterVisible: Boolean = true,
-    ): Sequence<Instance<out T>> {
+    ): Sequence<Instance> {
         InterruptionChecker.throwIfInterrupted()
 
         return if (filterVisible && !notDeleted(now) && endData!!.deleteInstances) {
@@ -357,7 +357,7 @@ class Task<T : ProjectType>(val project: Project<T>, private val taskRecord: Tas
                     onlyRoot
             ).filter { it.done != null }
         } else {
-            val instanceSequences = mutableListOf<Sequence<Instance<out T>>>()
+            val instanceSequences = mutableListOf<Sequence<Instance>>()
 
             instanceSequences += getExistingInstances(
                     startExactTimeStamp,
@@ -573,7 +573,7 @@ class Task<T : ProjectType>(val project: Project<T>, private val taskRecord: Tas
         invalidateIntervals()
     }
 
-    fun createRemoteInstanceRecord(instance: Instance<T>): InstanceRecord {
+    fun createRemoteInstanceRecord(instance: Instance): InstanceRecord {
         check(generatedInstances.containsKey(instance.instanceKey))
 
         generatedInstances.remove(instance.instanceKey)
@@ -585,7 +585,7 @@ class Task<T : ProjectType>(val project: Project<T>, private val taskRecord: Tas
         return instanceRecord
     }
 
-    fun deleteInstance(instance: Instance<T>) {
+    fun deleteInstance(instance: Instance) {
         val scheduleKey = instance.scheduleKey
 
         check(_existingInstances.containsKey(scheduleKey))
@@ -596,7 +596,7 @@ class Task<T : ProjectType>(val project: Project<T>, private val taskRecord: Tas
 
     private fun getExistingInstanceIfPresent(scheduleKey: ScheduleKey) = _existingInstances[scheduleKey]
 
-    fun getInstance(scheduleDateTime: DateTime): Instance<T> {
+    fun getInstance(scheduleDateTime: DateTime): Instance {
         val scheduleKey = ScheduleKey(scheduleDateTime.date, scheduleDateTime.time.timePair)
 
         val existingInstance = getExistingInstanceIfPresent(scheduleKey)
@@ -922,10 +922,10 @@ class Task<T : ProjectType>(val project: Project<T>, private val taskRecord: Tas
         }
     }
 
-    private val generatedInstances = mutableMapOf<InstanceKey, Instance<T>>()
+    private val generatedInstances = mutableMapOf<InstanceKey, Instance>()
     private val generatedInstancesLog = mutableListOf<String>().synchronized()
 
-    private fun generateInstance(scheduleDateTime: DateTime): Instance<T> {
+    private fun generateInstance(scheduleDateTime: DateTime): Instance {
         val instanceKey = InstanceKey(taskKey, scheduleDateTime.date, scheduleDateTime.time.timePair)
 
         if (!generatedInstances.containsKey(instanceKey)) {

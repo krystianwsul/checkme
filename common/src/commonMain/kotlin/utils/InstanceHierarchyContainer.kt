@@ -7,7 +7,7 @@ class InstanceHierarchyContainer<T : ProjectType>(private val task: Task<T>) {
 
     private val parentScheduleKeyToChildInstanceKeys = mutableMapOf<ScheduleKey, MutableSet<InstanceKey>>()
 
-    fun addChildInstance(childInstance: Instance<T>) {
+    fun addChildInstance(childInstance: Instance) {
         check(childInstance.exists())
 
         val childInstanceKey = childInstance.instanceKey
@@ -22,7 +22,7 @@ class InstanceHierarchyContainer<T : ProjectType>(private val task: Task<T>) {
         childInstanceKeys += childInstanceKey
     }
 
-    fun removeChildInstance(childInstance: Instance<T>) {
+    fun removeChildInstance(childInstance: Instance) {
         check(childInstance.exists())
 
         val childInstanceKey = childInstance.instanceKey
@@ -41,7 +41,7 @@ class InstanceHierarchyContainer<T : ProjectType>(private val task: Task<T>) {
         }
     }
 
-    fun getChildInstances(parentInstanceKey: InstanceKey): List<Instance<T>> {
+    fun getChildInstances(parentInstanceKey: InstanceKey): List<Instance> {
         check(parentInstanceKey.taskKey == task.taskKey)
 
         val childInstanceKeys = parentScheduleKeyToChildInstanceKeys[parentInstanceKey.scheduleKey] ?: setOf()

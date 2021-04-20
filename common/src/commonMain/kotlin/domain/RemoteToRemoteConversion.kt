@@ -8,7 +8,7 @@ import com.krystianwsul.common.utils.TaskKey
 
 class RemoteToRemoteConversion<T : ProjectType> {
 
-    val startTasks = mutableMapOf<String, Pair<Task<T>, List<Instance<T>>>>()
+    val startTasks = mutableMapOf<String, Pair<Task<T>, List<Instance>>>()
     val startTaskHierarchies = mutableListOf<TaskHierarchy>()
 
     val endTasks = HashMap<String, Task<*>>()

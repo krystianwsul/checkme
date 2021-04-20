@@ -42,7 +42,7 @@ fun DomainFactory.getEditInstancesData(instanceKeys: List<InstanceKey>): EditIns
         }
     }
 
-    fun Instance<*>.hierarchyContainsKeys(): Boolean {
+    fun Instance.hierarchyContainsKeys(): Boolean {
         if (instanceKey in instanceKeys) return true
 
         return parentInstance?.hierarchyContainsKeys() ?: false

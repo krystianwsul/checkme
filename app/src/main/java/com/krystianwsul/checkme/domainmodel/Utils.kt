@@ -58,7 +58,7 @@ fun Task<*>.getProjectInfo(now: ExactTimeStamp.Local): DetailsNode.ProjectInfo? 
     }
 }
 
-fun Instance<*>.getProjectInfo(now: ExactTimeStamp.Local): DetailsNode.ProjectInfo? {
+fun Instance.getProjectInfo(now: ExactTimeStamp.Local): DetailsNode.ProjectInfo? {
     return if (isRootInstance() && task.project is SharedProject) {
         DetailsNode.ProjectInfo(task.project.name, DetailsNode.User.fromProjectUsers(getAssignedTo(now)))
     } else {

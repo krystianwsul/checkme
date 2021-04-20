@@ -7,7 +7,7 @@ class InstanceLocker<T : ProjectType>(private val taskLocker: TaskLocker<T>) {
 
     val now get() = taskLocker.now
 
-    var childInstances: List<Instance<T>>? = null
+    var childInstances: List<Instance>? = null
 
     val isVisible: MutableMap<Instance.VisibilityOptions, Boolean> = mutableMapOf()
 }

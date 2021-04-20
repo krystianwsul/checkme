@@ -12,7 +12,7 @@ import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.*
 import com.soywiz.klock.days
 
-class Instance<T : ProjectType> private constructor(val task: Task<T>, private var data: Data<T>) : Assignable {
+class Instance private constructor(val task: Task<*>, private var data: Data) : Assignable {
 
     companion object {
 
@@ -102,9 +102,9 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
     }
     private val matchingScheduleIntervals by matchingScheduleIntervalsProperty
 
-    private class ParentInstanceData<T : ProjectType>(val instance: Instance<T>, val doneCallback: () -> Unit)
+    private class ParentInstanceData(val instance: Instance, val doneCallback: () -> Unit)
 
-    fun getTaskHierarchyParentInstance(): Instance<T>? {
+    fun getTaskHierarchyParentInstance(): Instance? {
         /**
          * The baseline here is getting the interval corresponding to the scheduleDateTime, as in
          * interval.start < scheduleDateTime, and interval.end > scheduleDateTime (if present).  But, since we
@@ -148,7 +148,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
         return when (val type = interval.type) {
             is Type.Child -> {
                 val parentTaskHierarchy = type.getHierarchyInterval(interval).taskHierarchy
-                val parentTask = parentTaskHierarchy.parentTask as Task<T>
+                val parentTask = parentTaskHierarchy.parentTask as Task<*>
                 parentTask.getInstance(scheduleDateTime)
             }
             is Type.Schedule -> null
@@ -179,9 +179,9 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
     private val parentInstanceData by parentInstanceProperty
     val parentInstance get() = parentInstanceData?.instance
 
-    constructor(task: Task<T>, instanceRecord: InstanceRecord) : this(task, Data.Real(task, instanceRecord))
+    constructor(task: Task<*>, instanceRecord: InstanceRecord) : this(task, Data.Real(task, instanceRecord))
 
-    constructor(task: Task<T>, scheduleDateTime: DateTime) :
+    constructor(task: Task<*>, scheduleDateTime: DateTime) :
             this(task, Data.Virtual(scheduleDateTime.date, JsonTime.fromTime(scheduleDateTime.time), task.project))
 
     init {
@@ -225,7 +225,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
 
     fun exists() = (data is Data.Real)
 
-    fun getChildInstances(): List<Instance<T>> {
+    fun getChildInstances(): List<Instance> {
         val instanceLocker = getInstanceLocker()
         instanceLocker?.childInstances?.let { return it }
 
@@ -243,7 +243,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
                 .map {
                     it.taskHierarchy
                             .childTask
-                            .getInstance(scheduleDateTime) as Instance<T>
+                            .getInstance(scheduleDateTime)
                 }
                 .filter { it.parentInstance?.instanceKey == instanceKey }
                 .toList()
@@ -279,7 +279,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
 
     fun getOldestVisibles() = getMatchingScheduleIntervals(false).map { it.schedule.oldestVisible }
 
-    private fun getInstanceLocker() = LockerManager.getInstanceLocker<T>(instanceKey)
+    private fun getInstanceLocker() = LockerManager.getInstanceLocker(instanceKey)
 
     fun isVisible(now: ExactTimeStamp.Local, visibilityOptions: VisibilityOptions): Boolean {
         val instanceLocker = getInstanceLocker()?.also { check(it.now == now) }
@@ -361,7 +361,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
     fun unhide() {
         check(data.hidden)
 
-        (data as Data.Real<T>).instanceRecord.hidden = false
+        (data as Data.Real).instanceRecord.hidden = false
     }
 
     fun getParentName() = parentInstance?.name ?: task.project.name
@@ -413,17 +413,17 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
         shownHolder.forceShown(shownFactory).notified = false
     }
 
-    private fun createInstanceRecord(): Data.Real<T> {
-        if (data !is Data.Real<T>) {
+    private fun createInstanceRecord(): Data.Real {
+        if (data !is Data.Real) {
             data = Data.Real(
                     task,
-                    task.createRemoteInstanceRecord(this)
+                    task.createRemoteInstanceRecord(this),
             )
 
             addToParentInstanceHierarchyContainer()
         }
 
-        return data as Data.Real<T>
+        return data as Data.Real
     }
 
     fun setDone(shownFactory: ShownFactory, done: Boolean, now: ExactTimeStamp.Local) {
@@ -435,7 +435,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
 
             getShown(shownFactory)?.notified = false
         } else {
-            (data as Data.Real<*>).instanceRecord.let {
+            (data as Data.Real).instanceRecord.let {
                 it.done = null
                 it.doneOffset = null
             }
@@ -446,13 +446,13 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
     }
 
     fun delete() {
-        check(data is Data.Real<*>)
+        check(data is Data.Real)
 
         removeLazyCallbacks()
 
         task.deleteInstance(this)
 
-        (data as Data.Real<*>).instanceRecord.delete()
+        (data as Data.Real).instanceRecord.delete()
     }
 
     // todo use for all CreateTaskActivity schedule hints.  Either filter by current, or add non-current to create task data
@@ -492,7 +492,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
 
     fun fixOffsets() {
         done?.let {
-            val instanceRecord = (data as Data.Real<*>).instanceRecord
+            val instanceRecord = (data as Data.Real).instanceRecord
 
             if (instanceRecord.doneOffset == null) {
                 instanceRecord.doneOffset = it.offset
@@ -560,7 +560,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
         return parentInstance?.canAddSubtask(now, hack24) ?: true
     }
 
-    private sealed class Data<T : ProjectType> {
+    private sealed class Data {
 
         abstract val scheduleDate: Date
         abstract val instanceDate: Date
@@ -579,10 +579,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
 
         abstract val parentState: ParentState
 
-        class Real<T : ProjectType>(
-                private val task: Task<T>,
-                val instanceRecord: InstanceRecord,
-        ) : Data<T>() {
+        class Real(private val task: Task<*>, val instanceRecord: InstanceRecord) : Data() {
 
             override val scheduleDate get() = instanceRecord.run { Date(scheduleYear, scheduleMonth, scheduleDay) }
 
@@ -647,11 +644,11 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
                 }
         }
 
-        class Virtual<T : ProjectType>(
+        class Virtual(
                 override val scheduleDate: Date,
                 private val scheduleJsonTime: JsonTime,
-                private val customTimeProvider: JsonTime.CustomTimeProvider<T>,
-        ) : Data<T>() {
+                private val customTimeProvider: JsonTime.CustomTimeProvider<*>,
+        ) : Data() {
 
             override val instanceDate = scheduleDate
 
@@ -678,13 +675,13 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
 
         fun getShown(shownFactory: ShownFactory): Shown? {
             if (first)
-                shown = shownFactory.getShown<T>(taskKey, scheduleDateTime)
+                shown = shownFactory.getShown(taskKey, scheduleDateTime)
             return shown
         }
 
         fun forceShown(shownFactory: ShownFactory): Shown {
             if (getShown(shownFactory) == null)
-                shown = shownFactory.createShown<T>(taskKey.taskId, scheduleDateTime, taskKey.projectKey)
+                shown = shownFactory.createShown(taskKey.taskId, scheduleDateTime, taskKey.projectKey)
             return shown!!
         }
     }
@@ -697,11 +694,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
 
     interface ShownFactory {
 
-        fun <T : ProjectType> createShown(
-                remoteTaskId: String,
-                scheduleDateTime: DateTime,
-                projectId: ProjectKey<*>,
-        ): Shown
+        fun createShown(remoteTaskId: String, scheduleDateTime: DateTime, projectId: ProjectKey<*>): Shown
 
         fun getShown(
                 projectId: ProjectKey<*>,
@@ -712,7 +705,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
                 scheduleJsonTime: JsonTime,
         ): Shown?
 
-        fun <T : ProjectType> getShown(taskKey: TaskKey, scheduleDateTime: DateTime): Shown? {
+        fun getShown(taskKey: TaskKey, scheduleDateTime: DateTime): Shown? {
             return getShown(
                     taskKey.projectKey,
                     taskKey.taskId,

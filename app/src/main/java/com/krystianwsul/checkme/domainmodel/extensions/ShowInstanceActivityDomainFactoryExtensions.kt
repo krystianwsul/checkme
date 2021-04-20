@@ -98,7 +98,7 @@ fun DomainUpdater.setTaskEndTimeStamps(
 }.perform(this)
 
 private fun DomainFactory.getGroupListData(
-        instance: Instance<*>,
+        instance: Instance,
         task: Task<*>,
         now: ExactTimeStamp.Local,
 ): GroupListDataWrapper {

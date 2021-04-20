@@ -85,7 +85,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
 
     final override fun notifyInstance(
             deviceDbInfo: DeviceDbInfo,
-            instance: Instance<*>,
+            instance: Instance,
             silent: Boolean,
             now: ExactTimeStamp.Local,
     ) {
@@ -97,7 +97,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
 
     protected open fun getInstanceData(
             deviceDbInfo: DeviceDbInfo,
-            instance: Instance<*>,
+            instance: Instance,
             silent: Boolean,
             now: ExactTimeStamp.Local,
             highPriority: Boolean,
@@ -236,7 +236,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         return (if (bits < 0) "--------------------" else "00000000000000000000").substring(s.length) + s
     }
 
-    private fun getInstanceText(instance: Instance<*>, now: ExactTimeStamp.Local): String {
+    private fun getInstanceText(instance: Instance, now: ExactTimeStamp.Local): String {
         val childNames = getChildNames(instance, now)
 
         return if (childNames.isNotEmpty()) {
@@ -248,7 +248,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         }
     }
 
-    private fun getChildNames(instance: Instance<*>, now: ExactTimeStamp.Local) = instance.getChildInstances()
+    private fun getChildNames(instance: Instance, now: ExactTimeStamp.Local) = instance.getChildInstances()
             .asSequence()
             .filter { it.done == null }
             .filter { it.isVisible(now, Instance.VisibilityOptions(assumeChildOfVisibleParent = true)) }
@@ -396,7 +396,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
     }
 
     override fun notifyGroup(
-            instances: Collection<Instance<*>>,
+            instances: Collection<Instance>,
             silent: Boolean, // not needed >= 24
             now: ExactTimeStamp.Local,
             summary: Boolean,
@@ -408,7 +408,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
     }
 
     private inner class GroupData(
-            instances: Collection<com.krystianwsul.common.firebase.models.Instance<*>>,
+            instances: Collection<com.krystianwsul.common.firebase.models.Instance>,
             private val now: ExactTimeStamp.Local,
             val silent: Boolean,
             val highPriority: Boolean,
@@ -416,7 +416,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
     ) {
         val instances = instances.map(::Instance)
 
-        inner class Instance(instance: com.krystianwsul.common.firebase.models.Instance<*>) {
+        inner class Instance(instance: com.krystianwsul.common.firebase.models.Instance) {
 
             val name = instance.name
             val instanceKey = instance.instanceKey
@@ -579,7 +579,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
 
     protected inner class InstanceData(
             deviceDbInfo: DeviceDbInfo,
-            instance: Instance<*>,
+            instance: Instance,
             now: ExactTimeStamp.Local,
             val silent: Boolean,
             val highPriority: Boolean,

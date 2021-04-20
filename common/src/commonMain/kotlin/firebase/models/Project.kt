@@ -142,7 +142,7 @@ abstract class Project<T : ProjectType>(
     fun copyTask(
             deviceDbInfo: DeviceDbInfo,
             oldTask: Task<*>,
-            instances: Collection<Instance<*>>,
+            instances: Collection<Instance>,
             now: ExactTimeStamp.Local,
             newProjectKey: ProjectKey<*>,
             customTimeMigrationHelper: CustomTimeMigrationHelper,
@@ -234,7 +234,7 @@ abstract class Project<T : ProjectType>(
 
     private fun getInstanceJson(
             ownerKey: UserKey,
-            instance: Instance<*>,
+            instance: Instance,
             newProjectKey: ProjectKey<*>,
             customTimeMigrationHelper: CustomTimeMigrationHelper,
             now: ExactTimeStamp.Local,
@@ -442,7 +442,7 @@ abstract class Project<T : ProjectType>(
             now: ExactTimeStamp.Local,
             searchData: SearchData? = null,
             filterVisible: Boolean = true,
-    ): Sequence<Instance<out T>> {
+    ): Sequence<Instance> {
         check(startExactTimeStamp == null || endExactTimeStamp == null || startExactTimeStamp < endExactTimeStamp)
 
         InterruptionChecker.throwIfInterrupted()

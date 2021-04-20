@@ -23,13 +23,13 @@ abstract class NotificationWrapper {
 
     abstract fun notifyInstance(
             deviceDbInfo: DeviceDbInfo,
-            instance: Instance<*>,
+            instance: Instance,
             silent: Boolean,
             now: ExactTimeStamp.Local,
     )
 
     abstract fun notifyGroup(
-            instances: Collection<Instance<*>>,
+            instances: Collection<Instance>,
             silent: Boolean,
             now: ExactTimeStamp.Local,
             summary: Boolean = true,

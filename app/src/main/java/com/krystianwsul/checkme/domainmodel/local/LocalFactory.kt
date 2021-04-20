@@ -9,7 +9,6 @@ import com.krystianwsul.common.time.DateTime
 import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.time.TimeDescriptor
 import com.krystianwsul.common.utils.ProjectKey
-import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.common.utils.singleOrEmpty
 
@@ -47,7 +46,7 @@ class LocalFactory(
                 .singleOrEmpty()
     }
 
-    override fun <T : ProjectType> createShown(
+    override fun createShown(
             remoteTaskId: String,
             scheduleDateTime: DateTime,
             projectId: ProjectKey<*>,

@@ -211,7 +211,7 @@ fun <T : Comparable<T>> DomainFactory.searchInstances(
         searchCriteria: SearchCriteria,
         page: Int,
         projectKey: ProjectKey<*>?,
-        mapper: (Instance<*>, ExactTimeStamp.Local, MutableMap<InstanceKey, T>) -> T,
+        mapper: (Instance, ExactTimeStamp.Local, MutableMap<InstanceKey, T>) -> T,
 ): Pair<List<T>, Boolean> {
     DomainThreadChecker.instance.requireDomainThread()
 
@@ -280,7 +280,7 @@ fun addChildToParent(
         childTask: Task<*>,
         parentTask: Task<*>,
         now: ExactTimeStamp.Local,
-        hideInstance: Instance<*>? = null,
+        hideInstance: Instance? = null,
 ): UndoData {
     childTask.requireCurrent(now)
 

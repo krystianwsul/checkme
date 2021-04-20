@@ -668,7 +668,7 @@ private fun DomainFactory.joinJoinables(
     joinables.forEach { joinable ->
         val task = getTaskForce(joinable.taskKey)
 
-        fun addChildToParent(instance: Instance<*>? = null) = addChildToParent(task, newParentTask, now, instance)
+        fun addChildToParent(instance: Instance? = null) = addChildToParent(task, newParentTask, now, instance)
 
         when (joinable) {
             is EditParameters.Join.Joinable.Task -> addChildToParent()

@@ -43,7 +43,7 @@ class TaskRelevance(val task: Task<*>) {
                     )
                 }
 
-        fun Instance<*>.filterOldestVisible(now: ExactTimeStamp.Local, ignoreHidden: Boolean = false): Boolean {
+        fun Instance.filterOldestVisible(now: ExactTimeStamp.Local, ignoreHidden: Boolean = false): Boolean {
             val oldestVisibles = getOldestVisibles()
 
             return if (oldestVisibles.isEmpty()) {

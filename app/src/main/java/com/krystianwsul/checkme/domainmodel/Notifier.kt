@@ -278,10 +278,10 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
         }
     }
 
-    private fun notifyInstance(instance: Instance<*>, silent: Boolean, now: ExactTimeStamp.Local) =
+    private fun notifyInstance(instance: Instance, silent: Boolean, now: ExactTimeStamp.Local) =
             notificationWrapper.notifyInstance(domainFactory.deviceDbInfo, instance, silent, now)
 
-    private fun updateInstance(instance: Instance<*>, now: ExactTimeStamp.Local) =
+    private fun updateInstance(instance: Instance, now: ExactTimeStamp.Local) =
             notificationWrapper.notifyInstance(domainFactory.deviceDbInfo, instance, true, now)
 
     private fun setIrrelevant(now: ExactTimeStamp.Local) {

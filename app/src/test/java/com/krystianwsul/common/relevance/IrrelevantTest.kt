@@ -3,7 +3,7 @@ package com.krystianwsul.common.relevance
 import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.DomainThreadChecker
-import com.krystianwsul.common.firebase.json.PrivateProjectJson
+import com.krystianwsul.common.firebase.json.projects.PrivateProjectJson
 import com.krystianwsul.common.firebase.json.schedule.PrivateScheduleWrapper
 import com.krystianwsul.common.firebase.json.schedule.PrivateSingleScheduleJson
 import com.krystianwsul.common.firebase.json.schedule.PrivateWeeklyScheduleJson

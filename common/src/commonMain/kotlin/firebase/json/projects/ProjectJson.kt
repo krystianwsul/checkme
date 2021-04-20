@@ -1,4 +1,4 @@
-package com.krystianwsul.common.firebase.json
+package com.krystianwsul.common.firebase.json.projects
 
 import com.krystianwsul.common.firebase.json.customtimes.CustomTimeJson
 import com.krystianwsul.common.firebase.json.taskhierarchies.ProjectTaskHierarchyJson

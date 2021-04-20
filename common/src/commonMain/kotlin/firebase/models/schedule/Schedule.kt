@@ -1,6 +1,8 @@
-package com.krystianwsul.common.firebase.models
+package com.krystianwsul.common.firebase.models.schedule
 
 
+import com.krystianwsul.common.firebase.models.Task
+import com.krystianwsul.common.firebase.models.TaskParentEntry
 import com.krystianwsul.common.firebase.models.interval.ScheduleInterval
 import com.krystianwsul.common.firebase.records.schedule.ScheduleRecord
 import com.krystianwsul.common.time.*
@@ -10,7 +12,7 @@ import com.krystianwsul.common.utils.UserKey
 
 abstract class Schedule<T : ProjectType>(val rootTask: Task<T>) : TaskParentEntry {
 
-    protected abstract val scheduleRecord: ScheduleRecord<T>
+    protected abstract val scheduleRecord: ScheduleRecord
 
     override val startExactTimeStamp by lazy { ExactTimeStamp.Local(scheduleRecord.startTime) }
 

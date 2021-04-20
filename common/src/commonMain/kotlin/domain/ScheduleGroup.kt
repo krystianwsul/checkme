@@ -1,6 +1,6 @@
 package com.krystianwsul.common.domain
 
-import com.krystianwsul.common.firebase.models.*
+import com.krystianwsul.common.firebase.models.schedule.*
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.Time

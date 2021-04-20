@@ -1,6 +1,8 @@
-package com.krystianwsul.common.firebase.models
+package com.krystianwsul.common.firebase.models.schedule
 
 
+import com.krystianwsul.common.firebase.models.Instance
+import com.krystianwsul.common.firebase.models.Task
 import com.krystianwsul.common.firebase.models.interval.ScheduleInterval
 import com.krystianwsul.common.firebase.records.schedule.RepeatingScheduleRecord
 import com.krystianwsul.common.time.*
@@ -11,7 +13,7 @@ import com.soywiz.klock.plus
 
 abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<T>(rootTask) {
 
-    protected abstract val repeatingScheduleRecord: RepeatingScheduleRecord<T>
+    protected abstract val repeatingScheduleRecord: RepeatingScheduleRecord
 
     val from get() = repeatingScheduleRecord.from
     val until get() = repeatingScheduleRecord.until

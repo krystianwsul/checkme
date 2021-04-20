@@ -185,7 +185,7 @@ object IntervalBuilder {
         }
 
         class Schedule<T : ProjectType>(
-                val schedule: com.krystianwsul.common.firebase.models.Schedule<T>,
+                val schedule: com.krystianwsul.common.firebase.models.schedule.Schedule<T>,
         ) : TypeBuilder<T>() {
 
             override val startExactTimeStampOffset = schedule.startExactTimeStampOffset
@@ -240,7 +240,7 @@ object IntervalBuilder {
 
         data class Schedule<T : ProjectType>(
                 override val startExactTimeStampOffset: ExactTimeStamp.Offset,
-                val schedules: MutableList<com.krystianwsul.common.firebase.models.Schedule<T>>,
+                val schedules: MutableList<com.krystianwsul.common.firebase.models.schedule.Schedule<T>>,
         ) : IntervalBuilder<T>() {
 
             override val endExactTimeStampOffset

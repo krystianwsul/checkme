@@ -1,6 +1,7 @@
-package com.krystianwsul.common.firebase.models
+package com.krystianwsul.common.firebase.models.schedule
 
 
+import com.krystianwsul.common.firebase.models.Task
 import com.krystianwsul.common.firebase.records.schedule.MonthlyDayScheduleRecord
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.utils.ProjectType
@@ -9,7 +10,7 @@ import com.krystianwsul.common.utils.getDateInMonth
 
 class MonthlyDaySchedule<T : ProjectType>(
         rootTask: Task<T>,
-        override val repeatingScheduleRecord: MonthlyDayScheduleRecord<T>,
+        override val repeatingScheduleRecord: MonthlyDayScheduleRecord,
 ) : RepeatingSchedule<T>(rootTask) {
 
     override val scheduleRecord get() = repeatingScheduleRecord

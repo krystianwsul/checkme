@@ -10,12 +10,11 @@ import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.time.TimePair
 import com.krystianwsul.common.utils.CustomTimeKey
-import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.ScheduleId
 import com.krystianwsul.common.utils.TaskKey
 
-abstract class ScheduleRecord<T : ProjectType>(
-        val taskRecord: TaskRecord<T>,
+abstract class ScheduleRecord(
+        val taskRecord: TaskRecord<*>,
         final override val createObject: ScheduleWrapper,
         private val scheduleJson: ScheduleJson,
         scheduleTypeSubkey: String,

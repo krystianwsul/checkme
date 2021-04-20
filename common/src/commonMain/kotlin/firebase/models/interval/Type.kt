@@ -36,7 +36,7 @@ sealed class Type<T : ProjectType> {
     }
 
     data class Schedule<T : ProjectType>(
-            private val schedules: List<com.krystianwsul.common.firebase.models.Schedule<T>>,
+            private val schedules: List<com.krystianwsul.common.firebase.models.schedule.Schedule<T>>,
     ) : Type<T>() {
 
         override val taskParentEntries get() = schedules

@@ -1,7 +1,9 @@
-package com.krystianwsul.common.firebase.models
+package com.krystianwsul.common.firebase.models.schedule
 
 
 import com.krystianwsul.common.firebase.json.schedule.WriteAssignedToJson
+import com.krystianwsul.common.firebase.models.Instance
+import com.krystianwsul.common.firebase.models.Task
 import com.krystianwsul.common.firebase.models.interval.ScheduleInterval
 import com.krystianwsul.common.firebase.records.schedule.SingleScheduleRecord
 import com.krystianwsul.common.time.DateTime
@@ -12,7 +14,7 @@ import com.krystianwsul.common.utils.UserKey
 
 class SingleSchedule<T : ProjectType>(
         rootTask: Task<T>,
-        val singleScheduleRecord: SingleScheduleRecord<T>,
+        val singleScheduleRecord: SingleScheduleRecord,
 ) : Schedule<T>(rootTask) {
 
     private val mockInstance get() = getInstance(rootTask).takeIf { it.exists() }
@@ -77,7 +79,7 @@ class SingleSchedule<T : ProjectType>(
 
     override fun toString() = super.toString() + ", dateTime: $dateTime"
 
-    private inner class MockRecord(private val instance: Instance<T>) : SingleScheduleRecord<T>(
+    private inner class MockRecord(private val instance: Instance<T>) : SingleScheduleRecord(
             singleScheduleRecord.taskRecord,
             singleScheduleRecord.createObject,
             singleScheduleRecord.id,

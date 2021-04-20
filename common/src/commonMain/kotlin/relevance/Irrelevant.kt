@@ -2,6 +2,8 @@ package com.krystianwsul.common.relevance
 
 
 import com.krystianwsul.common.firebase.models.*
+import com.krystianwsul.common.firebase.models.schedule.Schedule
+import com.krystianwsul.common.firebase.models.schedule.SingleSchedule
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.CustomTimeKey

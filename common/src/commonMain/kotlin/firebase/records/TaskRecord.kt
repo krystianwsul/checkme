@@ -24,15 +24,15 @@ abstract class TaskRecord<T : ProjectType> protected constructor(
 
     val instanceRecords = mutableMapOf<ScheduleKey, InstanceRecord<T>>()
 
-    val singleScheduleRecords: MutableMap<String, SingleScheduleRecord<T>> = mutableMapOf()
+    val singleScheduleRecords: MutableMap<String, SingleScheduleRecord> = mutableMapOf()
 
-    val weeklyScheduleRecords: MutableMap<String, WeeklyScheduleRecord<T>> = mutableMapOf()
+    val weeklyScheduleRecords: MutableMap<String, WeeklyScheduleRecord> = mutableMapOf()
 
-    val monthlyDayScheduleRecords: MutableMap<String, MonthlyDayScheduleRecord<T>> = mutableMapOf()
+    val monthlyDayScheduleRecords: MutableMap<String, MonthlyDayScheduleRecord> = mutableMapOf()
 
-    val monthlyWeekScheduleRecords: MutableMap<String, MonthlyWeekScheduleRecord<T>> = mutableMapOf()
+    val monthlyWeekScheduleRecords: MutableMap<String, MonthlyWeekScheduleRecord> = mutableMapOf()
 
-    val yearlyScheduleRecords: MutableMap<String, YearlyScheduleRecord<T>> = mutableMapOf()
+    val yearlyScheduleRecords: MutableMap<String, YearlyScheduleRecord> = mutableMapOf()
 
     val noScheduleOrParentRecords = taskJson.noScheduleOrParent
             .mapValues { NoScheduleOrParentRecord(this, it.value, it.key) }
@@ -191,7 +191,7 @@ abstract class TaskRecord<T : ProjectType> protected constructor(
             yearlyScheduleJson: YearlyScheduleJson? = null,
     ): ScheduleWrapper
 
-    fun newSingleScheduleRecord(singleScheduleJson: SingleScheduleJson): SingleScheduleRecord<T> {
+    fun newSingleScheduleRecord(singleScheduleJson: SingleScheduleJson): SingleScheduleRecord {
         val singleScheduleRecord = SingleScheduleRecord(
                 this,
                 newScheduleWrapper(singleScheduleJson = singleScheduleJson),
@@ -203,7 +203,7 @@ abstract class TaskRecord<T : ProjectType> protected constructor(
         return singleScheduleRecord
     }
 
-    fun newWeeklyScheduleRecord(weeklyScheduleJson: WeeklyScheduleJson): WeeklyScheduleRecord<T> {
+    fun newWeeklyScheduleRecord(weeklyScheduleJson: WeeklyScheduleJson): WeeklyScheduleRecord {
         val weeklyScheduleRecord = WeeklyScheduleRecord(
                 this,
                 newScheduleWrapper(weeklyScheduleJson = weeklyScheduleJson),
@@ -215,7 +215,7 @@ abstract class TaskRecord<T : ProjectType> protected constructor(
         return weeklyScheduleRecord
     }
 
-    fun newMonthlyDayScheduleRecord(monthlyDayScheduleJson: MonthlyDayScheduleJson): MonthlyDayScheduleRecord<T> {
+    fun newMonthlyDayScheduleRecord(monthlyDayScheduleJson: MonthlyDayScheduleJson): MonthlyDayScheduleRecord {
         val monthlyDayScheduleRecord = MonthlyDayScheduleRecord(
                 this,
                 newScheduleWrapper(monthlyDayScheduleJson = monthlyDayScheduleJson),
@@ -227,7 +227,7 @@ abstract class TaskRecord<T : ProjectType> protected constructor(
         return monthlyDayScheduleRecord
     }
 
-    fun newMonthlyWeekScheduleRecord(monthlyWeekScheduleJson: MonthlyWeekScheduleJson): MonthlyWeekScheduleRecord<T> {
+    fun newMonthlyWeekScheduleRecord(monthlyWeekScheduleJson: MonthlyWeekScheduleJson): MonthlyWeekScheduleRecord {
         val monthlyWeekScheduleRecord = MonthlyWeekScheduleRecord(
                 this,
                 newScheduleWrapper(monthlyWeekScheduleJson = monthlyWeekScheduleJson),
@@ -239,7 +239,7 @@ abstract class TaskRecord<T : ProjectType> protected constructor(
         return monthlyWeekScheduleRecord
     }
 
-    fun newYearlyScheduleRecord(yearlyScheduleJson: YearlyScheduleJson): YearlyScheduleRecord<T> {
+    fun newYearlyScheduleRecord(yearlyScheduleJson: YearlyScheduleJson): YearlyScheduleRecord {
         val yearlyScheduleRecord = YearlyScheduleRecord(
                 this,
                 newScheduleWrapper(yearlyScheduleJson = yearlyScheduleJson),

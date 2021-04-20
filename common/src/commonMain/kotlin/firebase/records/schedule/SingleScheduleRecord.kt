@@ -5,16 +5,15 @@ import com.krystianwsul.common.firebase.json.schedule.ScheduleWrapper
 import com.krystianwsul.common.firebase.json.schedule.ScheduleWrapperBridge
 import com.krystianwsul.common.firebase.records.TaskRecord
 import com.krystianwsul.common.time.Date
-import com.krystianwsul.common.utils.ProjectType
 
 
-open class SingleScheduleRecord<T : ProjectType>(
-        taskRecord: TaskRecord<T>,
+open class SingleScheduleRecord(
+        taskRecord: TaskRecord<*>,
         scheduleWrapper: ScheduleWrapper,
         id: String? = null,
         override val scheduleWrapperBridge: ScheduleWrapperBridge =
                 ScheduleWrapperBridge.fromScheduleWrapper(scheduleWrapper),
-) : ScheduleRecord<T>(
+) : ScheduleRecord(
         taskRecord,
         scheduleWrapper,
         scheduleWrapperBridge.singleScheduleJson!!,

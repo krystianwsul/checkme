@@ -12,7 +12,7 @@ sealed class AssignedToHelper<T : ProjectType> {
 
     abstract fun setAssignedTo(
             assignedToJson: WriteAssignedToJson,
-            singleScheduleRecord: SingleScheduleRecord<T>,
+            singleScheduleRecord: SingleScheduleRecord,
             assignedTo: Set<String>,
     )
 
@@ -22,7 +22,7 @@ sealed class AssignedToHelper<T : ProjectType> {
 
         override fun setAssignedTo(
                 assignedToJson: WriteAssignedToJson,
-                singleScheduleRecord: SingleScheduleRecord<ProjectType.Private>,
+                singleScheduleRecord: SingleScheduleRecord,
                 assignedTo: Set<String>,
         ) = throw UnsupportedOperationException()
     }
@@ -33,12 +33,12 @@ sealed class AssignedToHelper<T : ProjectType> {
 
         override fun setAssignedTo(
                 assignedToJson: WriteAssignedToJson,
-                singleScheduleRecord: SingleScheduleRecord<ProjectType.Shared>,
+                singleScheduleRecord: SingleScheduleRecord,
                 assignedTo: Set<String>,
         ) = singleScheduleRecord.setProperty(
                 assignedToJson::assignedTo,
                 assignedTo.associateWith { true },
-                singleScheduleRecord.keyPlusSubkey
+                singleScheduleRecord.keyPlusSubkey,
         )
     }
 }

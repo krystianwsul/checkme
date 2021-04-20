@@ -1,22 +1,22 @@
 package com.krystianwsul.common.firebase.models.interval
 
 import com.krystianwsul.common.firebase.models.NoScheduleOrParent
-import com.krystianwsul.common.firebase.models.ProjectTaskHierarchy
-import com.krystianwsul.common.firebase.models.TaskHierarchy
 import com.krystianwsul.common.firebase.models.TaskParentEntry
+import com.krystianwsul.common.firebase.models.taskhierarchy.ProjectTaskHierarchy
+import com.krystianwsul.common.firebase.models.taskhierarchy.TaskHierarchy
 import com.krystianwsul.common.utils.ProjectType
 
 sealed class Type<T : ProjectType> {
 
-    open fun matches(taskHierarchy: ProjectTaskHierarchy<T>) = false
+    open fun matches(taskHierarchy: ProjectTaskHierarchy) = false
 
     abstract val taskParentEntries: Collection<TaskParentEntry>
 
-    data class Child<T : ProjectType>(val parentTaskHierarchy: TaskHierarchy<T>) : Type<T>() {
+    data class Child<T : ProjectType>(val parentTaskHierarchy: TaskHierarchy) : Type<T>() {
 
         override val taskParentEntries get() = listOf(parentTaskHierarchy)
 
-        override fun matches(taskHierarchy: ProjectTaskHierarchy<T>) = parentTaskHierarchy == taskHierarchy
+        override fun matches(taskHierarchy: ProjectTaskHierarchy) = parentTaskHierarchy == taskHierarchy
 
         fun getHierarchyInterval(interval: Interval<T>): HierarchyInterval<T> {
             check(parentTaskHierarchy.startExactTimeStampOffset == interval.startExactTimeStampOffset)

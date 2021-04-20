@@ -1,13 +1,15 @@
-package com.krystianwsul.common.firebase.models
+package com.krystianwsul.common.firebase.models.taskhierarchy
 
+import com.krystianwsul.common.firebase.models.Project
+import com.krystianwsul.common.firebase.models.Task
+import com.krystianwsul.common.firebase.models.TaskParentEntry
 import com.krystianwsul.common.firebase.records.taskhierarchy.TaskHierarchyRecord
 import com.krystianwsul.common.time.ExactTimeStamp
-import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.TaskHierarchyKey
 import com.krystianwsul.common.utils.TaskKey
 
 
-abstract class TaskHierarchy<T : ProjectType>(private val project: Project<T>) : TaskParentEntry {
+abstract class TaskHierarchy(private val project: Project<*>) : TaskParentEntry {
 
     companion object {
 
@@ -36,7 +38,7 @@ abstract class TaskHierarchy<T : ProjectType>(private val project: Project<T>) :
     val id by lazy { taskHierarchyRecord.id }
 
     val parentTask by lazy { project.getTaskForce(parentTaskId) }
-    abstract val childTask: Task<T>
+    abstract val childTask: Task<*>
 
     val parentTaskId by lazy { taskHierarchyRecord.parentTaskId }
     abstract val childTaskId: String

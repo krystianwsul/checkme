@@ -15,6 +15,7 @@ import com.krystianwsul.common.firebase.json.projects.PrivateProjectJson
 import com.krystianwsul.common.firebase.json.projects.SharedProjectJson
 import com.krystianwsul.common.firebase.json.tasks.TaskJson
 import com.krystianwsul.common.firebase.models.*
+import com.krystianwsul.common.firebase.models.taskhierarchy.TaskHierarchy
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.*
@@ -259,7 +260,7 @@ class ProjectsFactory(
             .singleOrNull { it.key.key == projectId }
             ?.value
 
-    fun getTaskHierarchy(taskHierarchyKey: TaskHierarchyKey): TaskHierarchy<*> {
+    fun getTaskHierarchy(taskHierarchyKey: TaskHierarchyKey): TaskHierarchy {
         return when (taskHierarchyKey) {
             is TaskHierarchyKey.Project -> projects.getValue(taskHierarchyKey.projectId)
                     .getProjectTaskHierarchy(taskHierarchyKey.taskHierarchyId)

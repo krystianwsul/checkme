@@ -10,6 +10,8 @@ import com.krystianwsul.common.firebase.json.taskhierarchies.NestedTaskHierarchy
 import com.krystianwsul.common.firebase.json.tasks.TaskJson
 import com.krystianwsul.common.firebase.models.interval.*
 import com.krystianwsul.common.firebase.models.schedule.*
+import com.krystianwsul.common.firebase.models.taskhierarchy.NestedTaskHierarchy
+import com.krystianwsul.common.firebase.models.taskhierarchy.TaskHierarchy
 import com.krystianwsul.common.firebase.records.InstanceRecord
 import com.krystianwsul.common.firebase.records.task.TaskRecord
 import com.krystianwsul.common.interrupt.InterruptionChecker
@@ -228,7 +230,7 @@ class Task<T : ProjectType>(val project: Project<T>, private val taskRecord: Tas
             requireNotDeletedOffset(exactTimeStamp)
             taskHierarchy.requireNotDeletedOffset(exactTimeStamp)
 
-            taskHierarchy.parentTask.apply { requireNotDeletedOffset(exactTimeStamp) }
+            (taskHierarchy.parentTask as Task<T>).apply { requireNotDeletedOffset(exactTimeStamp) }
         }
     }
 
@@ -268,8 +270,8 @@ class Task<T : ProjectType>(val project: Project<T>, private val taskRecord: Tas
             bySchedule: Boolean,
     ): Sequence<Instance<out T>> {
         val instanceSequences = parentHierarchyIntervals.map {
-            it.taskHierarchy
-                    .parentTask
+            (it.taskHierarchy
+                    .parentTask as Task<T>)
                     .getInstances(givenStartExactTimeStamp, givenEndExactTimeStamp, now, bySchedule)
                     .filter { it.isVisible(now, Instance.VisibilityOptions(hack24 = true)) }
                     .mapNotNull {
@@ -279,7 +281,7 @@ class Task<T : ProjectType>(val project: Project<T>, private val taskRecord: Tas
                     }
         }
 
-        return combineInstanceSequences(instanceSequences, bySchedule)
+        return combineInstanceSequences<T>(instanceSequences, bySchedule)
     }
 
     // contains only generated, root instances that aren't virtual parents
@@ -444,7 +446,7 @@ class Task<T : ProjectType>(val project: Project<T>, private val taskRecord: Tas
     fun getChildTaskHierarchies(
             exactTimeStamp: ExactTimeStamp,
             currentByHierarchy: Boolean = false,
-    ): List<TaskHierarchy<T>> {
+    ): List<TaskHierarchy> {
         val taskHierarchies = childHierarchyIntervals.filter {
             val currentCheckExactTimeStamp = if (currentByHierarchy) {
                 it.taskHierarchy
@@ -1032,7 +1034,7 @@ class Task<T : ProjectType>(val project: Project<T>, private val taskRecord: Tas
         }
     }
 
-    fun deleteNestedTaskHierarchy(nestedTaskHierarchy: NestedTaskHierarchy<T>) {
+    fun deleteNestedTaskHierarchy(nestedTaskHierarchy: NestedTaskHierarchy) {
         check(nestedParentTaskHierarchies.containsKey(nestedTaskHierarchy.childTaskId))
 
         nestedParentTaskHierarchies.remove(nestedTaskHierarchy.childTaskId)
@@ -1048,7 +1050,7 @@ class Task<T : ProjectType>(val project: Project<T>, private val taskRecord: Tas
 
     private fun createParentNestedTaskHierarchy(
             nestedTaskHierarchyJson: NestedTaskHierarchyJson,
-    ): NestedTaskHierarchy<T> {
+    ): NestedTaskHierarchy {
         val taskHierarchyRecord = taskRecord.newTaskHierarchyRecord(nestedTaskHierarchyJson)
         val taskHierarchy = NestedTaskHierarchy(this, taskHierarchyRecord)
 
@@ -1059,7 +1061,7 @@ class Task<T : ProjectType>(val project: Project<T>, private val taskRecord: Tas
         return taskHierarchy
     }
 
-    fun <V : TaskHierarchy<*>> copyParentNestedTaskHierarchy(
+    fun <V : TaskHierarchy> copyParentNestedTaskHierarchy(
             now: ExactTimeStamp.Local,
             startTaskHierarchy: V,
             parentTaskId: String,

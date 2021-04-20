@@ -3,7 +3,7 @@ package com.krystianwsul.common.firebase.models.interval
 import com.krystianwsul.common.ErrorLogger
 import com.krystianwsul.common.firebase.models.NoScheduleOrParent
 import com.krystianwsul.common.firebase.models.Task
-import com.krystianwsul.common.firebase.models.TaskHierarchy
+import com.krystianwsul.common.firebase.models.taskhierarchy.TaskHierarchy
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.ProjectType
 
@@ -17,7 +17,7 @@ object IntervalBuilder {
         val allTypeBuilders = listOf(
                 task.schedules.map { TypeBuilder.Schedule<T>(it) },
                 task.parentTaskHierarchies.map { TypeBuilder.Parent(it) },
-                task.noScheduleOrParents.map { TypeBuilder.NoScheduleOrParent(it) },
+                task.noScheduleOrParents.map { TypeBuilder.NoScheduleOrParent<T>(it) },
         ).flatten()
                 .sortedBy { it.startExactTimeStampOffset }
                 .toMutableList()
@@ -177,11 +177,11 @@ object IntervalBuilder {
 
         abstract fun toIntervalBuilder(): IntervalBuilder<T>
 
-        class Parent<T : ProjectType>(val parentTaskHierarchy: TaskHierarchy<T>) : TypeBuilder<T>() {
+        class Parent<T : ProjectType>(val parentTaskHierarchy: TaskHierarchy) : TypeBuilder<T>() {
 
             override val startExactTimeStampOffset = parentTaskHierarchy.startExactTimeStampOffset
 
-            override fun toIntervalBuilder() = IntervalBuilder.Child(startExactTimeStampOffset, parentTaskHierarchy)
+            override fun toIntervalBuilder() = IntervalBuilder.Child<T>(startExactTimeStampOffset, parentTaskHierarchy)
         }
 
         class Schedule<T : ProjectType>(
@@ -231,12 +231,12 @@ object IntervalBuilder {
 
         data class Child<T : ProjectType>(
                 override val startExactTimeStampOffset: ExactTimeStamp.Offset,
-                val parentTaskHierarchy: TaskHierarchy<T>,
+                val parentTaskHierarchy: TaskHierarchy,
         ) : IntervalBuilder<T>() {
 
             override val endExactTimeStampOffset = parentTaskHierarchy.endExactTimeStampOffset
 
-            override fun toType() = Type.Child(parentTaskHierarchy)
+            override fun toType() = Type.Child<T>(parentTaskHierarchy)
         }
 
         data class Schedule<T : ProjectType>(

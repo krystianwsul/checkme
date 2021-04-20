@@ -1,14 +1,14 @@
-package com.krystianwsul.common.firebase.models
+package com.krystianwsul.common.firebase.models.taskhierarchy
 
+import com.krystianwsul.common.firebase.models.Task
 import com.krystianwsul.common.firebase.records.taskhierarchy.NestedTaskHierarchyRecord
-import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.TaskHierarchyKey
 
 
-class NestedTaskHierarchy<T : ProjectType>(
-        override val childTask: Task<T>,
+class NestedTaskHierarchy(
+        override val childTask: Task<*>,
         override val taskHierarchyRecord: NestedTaskHierarchyRecord,
-) : TaskHierarchy<T>(childTask.project) {
+) : TaskHierarchy(childTask.project) {
 
     override val childTaskKey get() = childTask.taskKey
     override val childTaskId get() = childTaskKey.taskId

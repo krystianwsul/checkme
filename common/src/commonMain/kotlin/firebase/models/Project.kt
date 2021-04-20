@@ -5,6 +5,8 @@ import com.krystianwsul.common.domain.*
 import com.krystianwsul.common.firebase.json.InstanceJson
 import com.krystianwsul.common.firebase.json.taskhierarchies.ProjectTaskHierarchyJson
 import com.krystianwsul.common.firebase.json.tasks.TaskJson
+import com.krystianwsul.common.firebase.models.taskhierarchy.ProjectTaskHierarchy
+import com.krystianwsul.common.firebase.models.taskhierarchy.TaskHierarchy
 import com.krystianwsul.common.firebase.records.AssignedToHelper
 import com.krystianwsul.common.firebase.records.InstanceRecord
 import com.krystianwsul.common.firebase.records.project.ProjectRecord
@@ -46,7 +48,7 @@ abstract class Project<T : ProjectType>(
 
     abstract val customTimes: Collection<Time.Custom.Project<T>>
 
-    val taskHierarchies: Collection<TaskHierarchy<T>>
+    val taskHierarchies: Collection<TaskHierarchy>
         get() =
             taskHierarchyContainer.all + tasks.flatMap { it.nestedParentTaskHierarchies.values }
 
@@ -274,7 +276,7 @@ abstract class Project<T : ProjectType>(
         return instanceJson to updater
     }
 
-    fun <V : TaskHierarchy<*>> copyTaskHierarchy(
+    fun <V : TaskHierarchy> copyTaskHierarchy(
             now: ExactTimeStamp.Local,
             startTaskHierarchy: V,
             parentTaskId: String,
@@ -309,7 +311,7 @@ abstract class Project<T : ProjectType>(
         _tasks.remove(task.id)
     }
 
-    fun deleteTaskHierarchy(taskHierarchy: ProjectTaskHierarchy<T>) {
+    fun deleteTaskHierarchy(taskHierarchy: ProjectTaskHierarchy) {
         taskHierarchyContainer.removeForce(taskHierarchy.id)
         taskHierarchy.invalidateTasks()
     }
@@ -319,13 +321,13 @@ abstract class Project<T : ProjectType>(
     fun getTaskForce(taskId: String) = _tasks[taskId]
             ?: throw MissingTaskException(projectKey, taskId)
 
-    fun getTaskHierarchiesByChildTaskKey(childTaskKey: TaskKey): Set<ProjectTaskHierarchy<T>> {
+    fun getTaskHierarchiesByChildTaskKey(childTaskKey: TaskKey): Set<ProjectTaskHierarchy> {
         check(childTaskKey.taskId.isNotEmpty())
 
         return taskHierarchyContainer.getByChildTaskKey(childTaskKey)
     }
 
-    fun getTaskHierarchiesByParentTaskKey(parentTaskKey: TaskKey): Set<TaskHierarchy<T>> {
+    fun getTaskHierarchiesByParentTaskKey(parentTaskKey: TaskKey): Set<TaskHierarchy> {
         check(parentTaskKey.taskId.isNotEmpty())
 
         val projectTaskHierarchies = taskHierarchyContainer.getByParentTaskKey(parentTaskKey)
@@ -417,7 +419,7 @@ abstract class Project<T : ProjectType>(
 
         remoteToRemoteConversion.startTaskHierarchies.addAll(childTaskHierarchies)
 
-        childTaskHierarchies.map { it.childTask }.forEach {
+        childTaskHierarchies.map { it.childTask as Task<T> }.forEach {
             it.requireCurrent(now)
 
             convertRemoteToRemoteHelper(now, remoteToRemoteConversion, it)

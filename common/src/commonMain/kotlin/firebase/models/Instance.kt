@@ -148,7 +148,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
         return when (val type = interval.type) {
             is Type.Child<T> -> {
                 val parentTaskHierarchy = type.getHierarchyInterval(interval).taskHierarchy
-                val parentTask = parentTaskHierarchy.parentTask
+                val parentTask = parentTaskHierarchy.parentTask as Task<T>
                 parentTask.getInstance(scheduleDateTime)
             }
             is Type.Schedule<T> -> null
@@ -243,7 +243,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
                 .map {
                     it.taskHierarchy
                             .childTask
-                            .getInstance(scheduleDateTime)
+                            .getInstance(scheduleDateTime) as Instance<T>
                 }
                 .filter { it.parentInstance?.instanceKey == instanceKey }
                 .toList()

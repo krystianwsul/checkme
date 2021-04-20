@@ -1,15 +1,15 @@
-package com.krystianwsul.common.firebase.models
+package com.krystianwsul.common.firebase.models.taskhierarchy
 
+import com.krystianwsul.common.firebase.models.Project
 import com.krystianwsul.common.firebase.records.taskhierarchy.ProjectTaskHierarchyRecord
-import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.TaskHierarchyKey
 import com.krystianwsul.common.utils.TaskKey
 
 
-class ProjectTaskHierarchy<T : ProjectType>(
-        private val project: Project<T>,
+class ProjectTaskHierarchy(
+        private val project: Project<*>,
         override val taskHierarchyRecord: ProjectTaskHierarchyRecord,
-) : TaskHierarchy<T>(project) {
+) : TaskHierarchy(project) {
 
     override val childTaskKey by lazy { TaskKey(project.projectKey, taskHierarchyRecord.childTaskId) }
     override val childTask by lazy { project.getTaskForce(childTaskId) }

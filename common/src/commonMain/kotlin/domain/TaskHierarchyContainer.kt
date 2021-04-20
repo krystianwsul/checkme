@@ -1,17 +1,17 @@
 package com.krystianwsul.common.domain
 
-import com.krystianwsul.common.firebase.models.ProjectTaskHierarchy
+import com.krystianwsul.common.firebase.models.taskhierarchy.ProjectTaskHierarchy
 import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.TaskKey
 
 class TaskHierarchyContainer<T : ProjectType> {
 
-    private val taskHierarchiesById = HashMap<String, ProjectTaskHierarchy<T>>()
+    private val taskHierarchiesById = HashMap<String, ProjectTaskHierarchy>()
 
     private val taskHierarchiesByParent = MultiMap<T>()
     private val taskHierarchiesByChild = MultiMap<T>()
 
-    fun add(id: String, taskHierarchy: ProjectTaskHierarchy<T>) {
+    fun add(id: String, taskHierarchy: ProjectTaskHierarchy) {
         check(!taskHierarchiesById.containsKey(id))
 
         taskHierarchiesById[id] = taskHierarchy
@@ -37,19 +37,19 @@ class TaskHierarchyContainer<T : ProjectType> {
         check(taskHierarchiesByParent.remove(parentTaskKey, taskHierarchy))
     }
 
-    fun getByChildTaskKey(childTaskKey: TaskKey): Set<ProjectTaskHierarchy<T>> = taskHierarchiesByChild.get(childTaskKey)
+    fun getByChildTaskKey(childTaskKey: TaskKey): Set<ProjectTaskHierarchy> = taskHierarchiesByChild.get(childTaskKey)
 
-    fun getByParentTaskKey(parentTaskKey: TaskKey): Set<ProjectTaskHierarchy<T>> = taskHierarchiesByParent.get(parentTaskKey)
+    fun getByParentTaskKey(parentTaskKey: TaskKey): Set<ProjectTaskHierarchy> = taskHierarchiesByParent.get(parentTaskKey)
 
     fun getById(id: String) = taskHierarchiesById[id]!!
 
-    val all: Collection<ProjectTaskHierarchy<T>> get() = taskHierarchiesById.values
+    val all: Collection<ProjectTaskHierarchy> get() = taskHierarchiesById.values
 
     private class MultiMap<T : ProjectType> {
 
-        private val values = mutableMapOf<TaskKey, MutableSet<ProjectTaskHierarchy<T>>>()
+        private val values = mutableMapOf<TaskKey, MutableSet<ProjectTaskHierarchy>>()
 
-        fun put(taskKey: TaskKey, taskHierarchy: ProjectTaskHierarchy<T>): Boolean {
+        fun put(taskKey: TaskKey, taskHierarchy: ProjectTaskHierarchy): Boolean {
             if (!values.containsKey(taskKey))
                 values[taskKey] = mutableSetOf()
             return values.getValue(taskKey).add(taskHierarchy)
@@ -57,12 +57,12 @@ class TaskHierarchyContainer<T : ProjectType> {
 
         fun containsEntry(
                 taskKey: TaskKey,
-                taskHierarchy: ProjectTaskHierarchy<T>,
+                taskHierarchy: ProjectTaskHierarchy,
         ) = values[taskKey]?.contains(taskHierarchy) ?: false
 
         fun remove(
                 taskKey: TaskKey,
-                taskHierarchy: ProjectTaskHierarchy<T>,
+                taskHierarchy: ProjectTaskHierarchy,
         ) = values[taskKey]?.remove(taskHierarchy) ?: false
 
         fun get(taskKey: TaskKey) = values[taskKey]?.toMutableSet() ?: mutableSetOf()

@@ -17,7 +17,7 @@ fun <T : ProjectType> Sequence<Task<out T>>.filterQuery(query: String?) = if (qu
 
         if (
                 task.childHierarchyIntervals.any {
-                    childHierarchyMatches(it.taskHierarchy.childTask) != FilterResult.DOESNT_MATCH
+                    childHierarchyMatches(it.taskHierarchy.childTask as Task<T>) != FilterResult.DOESNT_MATCH
                 }
         ) {
             return FilterResult.CHILD_MATCHES

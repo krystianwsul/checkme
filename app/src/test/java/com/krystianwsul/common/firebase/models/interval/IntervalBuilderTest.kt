@@ -2,9 +2,9 @@ package com.krystianwsul.common.firebase.models.interval
 
 import com.krystianwsul.common.ErrorLogger
 import com.krystianwsul.common.firebase.models.NoScheduleOrParent
-import com.krystianwsul.common.firebase.models.ProjectTaskHierarchy
 import com.krystianwsul.common.firebase.models.Task
 import com.krystianwsul.common.firebase.models.schedule.Schedule
+import com.krystianwsul.common.firebase.models.taskhierarchy.ProjectTaskHierarchy
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.HourMinute
@@ -25,7 +25,7 @@ class IntervalBuilderTest {
     private fun taskMock(
             start: ExactTimeStamp.Local,
             end: ExactTimeStamp.Local? = null,
-            taskHierarchies: Collection<ProjectTaskHierarchy<ProjectType.Private>> = setOf(),
+            taskHierarchies: Collection<ProjectTaskHierarchy> = setOf(),
             scheduleList: List<Schedule> = listOf(),
             noScheduleOrParentList: List<NoScheduleOrParent> = listOf(),
     ): Task<ProjectType.Private> {
@@ -45,7 +45,7 @@ class IntervalBuilderTest {
     private fun taskHierarchyMock(
             start: ExactTimeStamp.Local,
             end: ExactTimeStamp.Local? = null,
-    ): ProjectTaskHierarchy<ProjectType.Private> {
+    ): ProjectTaskHierarchy {
         return mockk(relaxed = true) {
             every { startExactTimeStamp } returns start
             every { startExactTimeStampOffset } returns start.toOffset()

@@ -15,7 +15,7 @@ import com.krystianwsul.common.utils.*
 
 abstract class Project<T : ProjectType>(
         val copyScheduleHelper: CopyScheduleHelper<T>,
-        val assignedToHelper: AssignedToHelper<T>,
+        val assignedToHelper: AssignedToHelper,
         val userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
 ) : Current, JsonTime.CustomTimeProvider<T>, JsonTime.ProjectCustomTimeKeyProvider<T> {
 

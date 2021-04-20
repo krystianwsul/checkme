@@ -4,9 +4,8 @@ import com.krystianwsul.common.firebase.json.schedule.AssignedToJson
 import com.krystianwsul.common.firebase.json.schedule.ScheduleJson
 import com.krystianwsul.common.firebase.json.schedule.WriteAssignedToJson
 import com.krystianwsul.common.firebase.records.schedule.SingleScheduleRecord
-import com.krystianwsul.common.utils.ProjectType
 
-sealed class AssignedToHelper<T : ProjectType> {
+sealed class AssignedToHelper {
 
     abstract fun getAssignedTo(scheduleJson: ScheduleJson): Set<String>
 
@@ -16,7 +15,7 @@ sealed class AssignedToHelper<T : ProjectType> {
             assignedTo: Set<String>,
     )
 
-    object Private : AssignedToHelper<ProjectType.Private>() {
+    object Private : AssignedToHelper() {
 
         override fun getAssignedTo(scheduleJson: ScheduleJson) = setOf<String>()
 
@@ -27,7 +26,7 @@ sealed class AssignedToHelper<T : ProjectType> {
         ) = throw UnsupportedOperationException()
     }
 
-    object Shared : AssignedToHelper<ProjectType.Shared>() {
+    object Shared : AssignedToHelper() {
 
         override fun getAssignedTo(scheduleJson: ScheduleJson) = (scheduleJson as AssignedToJson).assignedTo.keys
 

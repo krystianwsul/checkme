@@ -6,7 +6,7 @@ import com.krystianwsul.common.firebase.records.task.TaskRecord
 import com.krystianwsul.common.time.Date
 
 abstract class RepeatingScheduleRecord(
-        taskRecord: TaskRecord<*>,
+        taskRecord: TaskRecord,
         createObject: ScheduleWrapper,
         repeatingScheduleJson: RepeatingScheduleJson,
         endTimeKey: String,

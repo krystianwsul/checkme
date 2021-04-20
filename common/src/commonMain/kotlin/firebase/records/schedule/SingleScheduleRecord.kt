@@ -8,7 +8,7 @@ import com.krystianwsul.common.time.Date
 
 
 open class SingleScheduleRecord(
-        taskRecord: TaskRecord<*>,
+        taskRecord: TaskRecord,
         scheduleWrapper: ScheduleWrapper,
         id: String? = null,
         override val scheduleWrapperBridge: ScheduleWrapperBridge =

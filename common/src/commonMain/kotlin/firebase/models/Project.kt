@@ -99,7 +99,7 @@ abstract class Project<T : ProjectType>(
             oldTask: Task<*>,
             now: ExactTimeStamp.Local,
             instanceJsons: MutableMap<String, InstanceJson>,
-    ): TaskRecord<T>
+    ): TaskRecord
 
     private fun convertScheduleKey(
             userInfo: UserInfo,

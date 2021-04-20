@@ -19,7 +19,7 @@ import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.*
 
-class Task<T : ProjectType>(val project: Project<T>, private val taskRecord: TaskRecord<T>) :
+class Task<T : ProjectType>(val project: Project<T>, private val taskRecord: TaskRecord) :
         Current, CurrentOffset, QueryMatchable, Assignable {
 
     private val endDataProperty = invalidatableLazyCallbacks {

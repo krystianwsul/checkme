@@ -5,14 +5,13 @@ import com.krystianwsul.common.firebase.json.tasks.SharedTaskJson
 import com.krystianwsul.common.firebase.records.AssignedToHelper
 import com.krystianwsul.common.firebase.records.InstanceRecord
 import com.krystianwsul.common.firebase.records.project.SharedProjectRecord
-import com.krystianwsul.common.utils.ProjectType
 
 class SharedTaskRecord private constructor(
         create: Boolean,
         id: String,
         private val sharedProjectRecord: SharedProjectRecord,
         private val taskJson: SharedTaskJson,
-) : TaskRecord<ProjectType.Shared>(create, id, sharedProjectRecord, taskJson, AssignedToHelper.Shared) {
+) : TaskRecord(create, id, sharedProjectRecord, taskJson, AssignedToHelper.Shared) {
 
     override val createObject: SharedTaskJson // because of duplicate functionality when converting local task
         get() {

@@ -14,7 +14,7 @@ import com.krystianwsul.common.utils.ScheduleId
 import com.krystianwsul.common.utils.TaskKey
 
 abstract class ScheduleRecord(
-        val taskRecord: TaskRecord<*>,
+        val taskRecord: TaskRecord,
         final override val createObject: ScheduleWrapper,
         private val scheduleJson: ScheduleJson,
         scheduleTypeSubkey: String,

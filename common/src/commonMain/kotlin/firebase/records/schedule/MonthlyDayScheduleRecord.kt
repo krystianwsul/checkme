@@ -7,7 +7,7 @@ import com.krystianwsul.common.firebase.records.task.TaskRecord
 
 
 class MonthlyDayScheduleRecord(
-        taskRecord: TaskRecord<*>,
+        taskRecord: TaskRecord,
         scheduleWrapper: ScheduleWrapper,
         id: String? = null,
         override val scheduleWrapperBridge: ScheduleWrapperBridge =

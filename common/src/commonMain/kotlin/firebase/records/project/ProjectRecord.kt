@@ -26,7 +26,7 @@ abstract class ProjectRecord<T : ProjectType>(
 
     abstract val customTimeRecords: Map<out CustomTimeId.Project<T>, ProjectCustomTimeRecord<T>>
 
-    abstract val taskRecords: Map<String, TaskRecord<T>>
+    abstract val taskRecords: Map<String, TaskRecord>
 
     lateinit var taskHierarchyRecords: MutableMap<String, ProjectTaskHierarchyRecord>
         private set

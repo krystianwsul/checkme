@@ -5,14 +5,13 @@ import com.krystianwsul.common.firebase.json.tasks.PrivateTaskJson
 import com.krystianwsul.common.firebase.records.AssignedToHelper
 import com.krystianwsul.common.firebase.records.InstanceRecord
 import com.krystianwsul.common.firebase.records.project.PrivateProjectRecord
-import com.krystianwsul.common.utils.ProjectType
 
 class PrivateTaskRecord private constructor(
         create: Boolean,
         id: String,
         private val privateProjectRecord: PrivateProjectRecord,
         private val taskJson: PrivateTaskJson,
-) : TaskRecord<ProjectType.Private>(create, id, privateProjectRecord, taskJson, AssignedToHelper.Private) {
+) : TaskRecord(create, id, privateProjectRecord, taskJson, AssignedToHelper.Private) {
 
     override val createObject: PrivateTaskJson // because of duplicate functionality when converting local task
         get() {

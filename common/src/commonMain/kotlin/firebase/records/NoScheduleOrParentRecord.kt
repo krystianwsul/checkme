@@ -4,7 +4,7 @@ import com.krystianwsul.common.firebase.json.NoScheduleOrParentJson
 import com.krystianwsul.common.firebase.records.task.TaskRecord
 
 class NoScheduleOrParentRecord(
-        private val taskRecord: TaskRecord<*>,
+        private val taskRecord: TaskRecord,
         override val createObject: NoScheduleOrParentJson,
         _id: String?,
 ) : RemoteRecord(_id == null) {

@@ -15,7 +15,7 @@ import kotlin.properties.Delegates.observable
 
 class InstanceRecord(
         create: Boolean,
-        private val taskRecord: TaskRecord<*>,
+        private val taskRecord: TaskRecord,
         override val createObject: InstanceJson,
         val scheduleKey: ScheduleKey,
         firebaseKey: String,

@@ -12,13 +12,12 @@ import com.krystianwsul.common.firebase.records.RemoteRecord
 import com.krystianwsul.common.firebase.records.project.ProjectRecord
 import com.krystianwsul.common.firebase.records.schedule.*
 import com.krystianwsul.common.firebase.records.taskhierarchy.NestedTaskHierarchyRecord
-import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.ScheduleKey
 
-abstract class TaskRecord<T : ProjectType> protected constructor(
+abstract class TaskRecord protected constructor(
         create: Boolean,
         val id: String,
-        val projectRecord: ProjectRecord<T>,
+        val projectRecord: ProjectRecord<*>,
         private val taskJson: TaskJson,
         val assignedToHelper: AssignedToHelper,
 ) : RemoteRecord(create) {

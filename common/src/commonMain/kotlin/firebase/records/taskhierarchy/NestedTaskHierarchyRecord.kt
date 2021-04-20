@@ -7,7 +7,7 @@ import com.krystianwsul.common.firebase.records.task.TaskRecord
 class NestedTaskHierarchyRecord(
         create: Boolean,
         id: String,
-        private val taskRecord: TaskRecord<*>,
+        private val taskRecord: TaskRecord,
         createObject: NestedTaskHierarchyJson,
 ) : TaskHierarchyRecord<NestedTaskHierarchyJson>(create, id, createObject) {
 
@@ -19,12 +19,12 @@ class NestedTaskHierarchyRecord(
 
     constructor(
             id: String,
-            taskRecord: TaskRecord<*>,
+            taskRecord: TaskRecord,
             taskHierarchyJson: NestedTaskHierarchyJson,
     ) : this(false, id, taskRecord, taskHierarchyJson)
 
     constructor(
-            taskRecord: TaskRecord<*>,
+            taskRecord: TaskRecord,
             taskHierarchyJson: NestedTaskHierarchyJson,
     ) : this(
             true,

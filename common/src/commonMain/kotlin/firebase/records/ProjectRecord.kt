@@ -1,7 +1,7 @@
 package com.krystianwsul.common.firebase.records
 
 import com.krystianwsul.common.firebase.json.ProjectJson
-import com.krystianwsul.common.firebase.json.ProjectTaskHierarchyJson
+import com.krystianwsul.common.firebase.json.taskhierarchies.ProjectTaskHierarchyJson
 import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.utils.*
 

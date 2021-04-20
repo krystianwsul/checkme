@@ -1,6 +1,6 @@
 package com.krystianwsul.common.firebase.records
 
-import com.krystianwsul.common.firebase.json.TaskHierarchyJson
+import com.krystianwsul.common.firebase.json.taskhierarchies.TaskHierarchyJson
 
 
 abstract class TaskHierarchyRecord<T : TaskHierarchyJson>(

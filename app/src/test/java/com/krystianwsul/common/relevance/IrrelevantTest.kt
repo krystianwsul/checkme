@@ -3,12 +3,12 @@ package com.krystianwsul.common.relevance
 import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.DomainThreadChecker
-import com.krystianwsul.common.firebase.json.NestedTaskHierarchyJson
 import com.krystianwsul.common.firebase.json.PrivateProjectJson
-import com.krystianwsul.common.firebase.json.ProjectTaskHierarchyJson
 import com.krystianwsul.common.firebase.json.schedule.PrivateScheduleWrapper
 import com.krystianwsul.common.firebase.json.schedule.PrivateSingleScheduleJson
 import com.krystianwsul.common.firebase.json.schedule.PrivateWeeklyScheduleJson
+import com.krystianwsul.common.firebase.json.taskhierarchies.NestedTaskHierarchyJson
+import com.krystianwsul.common.firebase.json.taskhierarchies.ProjectTaskHierarchyJson
 import com.krystianwsul.common.firebase.json.tasks.PrivateTaskJson
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.PrivateProject

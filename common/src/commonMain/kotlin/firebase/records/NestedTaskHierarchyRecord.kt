@@ -1,6 +1,6 @@
 package com.krystianwsul.common.firebase.records
 
-import com.krystianwsul.common.firebase.json.NestedTaskHierarchyJson
+import com.krystianwsul.common.firebase.json.taskhierarchies.NestedTaskHierarchyJson
 
 
 class NestedTaskHierarchyRecord(

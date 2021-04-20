@@ -1,5 +1,6 @@
 package com.krystianwsul.common.firebase.json
 
+import com.krystianwsul.common.firebase.json.taskhierarchies.ProjectTaskHierarchyJson
 import com.krystianwsul.common.firebase.json.tasks.PrivateTaskJson
 import com.krystianwsul.common.utils.ProjectType
 import kotlinx.serialization.Serializable

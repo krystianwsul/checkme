@@ -87,7 +87,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             parametersRelay.accept(value)
         }
 
-    private val rootTaskData get() = parameters?.rootTaskData
+    private val topLevelTaskData get() = parameters?.topLevelTaskData
     private val data get() = parameters?.data
 
     private val dragHelper by lazy {
@@ -254,7 +254,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         override val progressView get() = binding.taskListProgress
         override val emptyTextBinding get() = binding.taskListEmptyTextInclude
 
-        override val emptyTextResId get() = rootTaskData?.let { R.string.empty_child } ?: R.string.tasks_empty_root
+        override val emptyTextResId get() = topLevelTaskData?.let { R.string.empty_child } ?: R.string.tasks_empty_root
 
         override val compositeDisposable = viewCreatedDisposable
 
@@ -270,7 +270,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         ): Boolean {
             fun FilterCriteria.showProjects() = (this as? FilterCriteria.Full)?.filterParams?.showProjects
 
-            return rootTaskData == null && oldFilterCriteria.showProjects() != newFilterCriteria.showProjects()
+            return topLevelTaskData == null && oldFilterCriteria.showProjects() != newFilterCriteria.showProjects()
         }
 
         override fun instantiateAdapters(filterCriteria: FilterCriteria) =
@@ -520,7 +520,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                 ).initialize(treeNodeCollection)
             }
 
-            taskListFragment.rootTaskData
+            taskListFragment.topLevelTaskData
                     ?.imageState
                     ?.let {
                         treeNodes += ImageNode( // todo create some sort of imageViewerHost, merge code with GroupListFragment
@@ -935,7 +935,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         fun startCopy(taskKey: TaskKey): Unit = throw UnsupportedOperationException()
     }
 
-    data class RootTaskData(val taskKey: TaskKey, val imageState: ImageState?)
+    data class TopLevelTaskData(val taskKey: TaskKey, val imageState: ImageState?)
 
     @Parcelize
     private data class AdapterState(
@@ -951,7 +951,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
     sealed class Parameters {
 
         abstract val data: Data
-        open val rootTaskData: RootTaskData? = null
+        open val topLevelTaskData: TopLevelTaskData? = null
 
         abstract val hint: EditActivity.Hint?
 
@@ -967,9 +967,9 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             override val hint get() = (projectKey as? ProjectKey.Shared)?.let(EditActivity.Hint::Project)
         }
 
-        data class Task(override val data: Data, override val rootTaskData: RootTaskData) : Parameters() {
+        data class Task(override val data: Data, override val topLevelTaskData: TopLevelTaskData) : Parameters() {
 
-            override val hint = EditActivity.Hint.Task(rootTaskData.taskKey)
+            override val hint = EditActivity.Hint.Task(topLevelTaskData.taskKey)
         }
     }
 }

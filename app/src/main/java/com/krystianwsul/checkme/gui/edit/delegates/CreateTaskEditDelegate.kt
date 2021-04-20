@@ -5,8 +5,8 @@ import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.ShortcutManager
 import com.krystianwsul.checkme.domainmodel.extensions.createChildTask
-import com.krystianwsul.checkme.domainmodel.extensions.createRootTask
-import com.krystianwsul.checkme.domainmodel.extensions.createScheduleRootTask
+import com.krystianwsul.checkme.domainmodel.extensions.createScheduleTopLevelTask
+import com.krystianwsul.checkme.domainmodel.extensions.createTopLevelTask
 import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
 import com.krystianwsul.checkme.gui.edit.*
 import com.krystianwsul.common.utils.ProjectKey
@@ -102,7 +102,7 @@ class CreateTaskEditDelegate(
     ): Single<CreateResult> {
         check(createParameters.allReminders)
 
-        return AndroidDomainUpdater.createScheduleRootTask(
+        return AndroidDomainUpdater.createScheduleTopLevelTask(
                 DomainListenerManager.NotificationType.All,
                 createParameters.name,
                 scheduleDatas,
@@ -143,7 +143,7 @@ class CreateTaskEditDelegate(
     ): Single<CreateResult> {
         check(createParameters.allReminders)
 
-        return AndroidDomainUpdater.createRootTask(
+        return AndroidDomainUpdater.createTopLevelTask(
                 DomainListenerManager.NotificationType.All,
                 createParameters.name,
                 createParameters.note,

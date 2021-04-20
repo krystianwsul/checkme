@@ -11,9 +11,9 @@ import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.ScheduleType
 import com.krystianwsul.common.utils.UserKey
 
-class SingleSchedule(rootTask: Task, val singleScheduleRecord: SingleScheduleRecord) : Schedule(rootTask) {
+class SingleSchedule(topLevelTask: Task, val singleScheduleRecord: SingleScheduleRecord) : Schedule(topLevelTask) {
 
-    private val mockInstance get() = getInstance(rootTask).takeIf { it.exists() }
+    private val mockInstance get() = getInstance(topLevelTask).takeIf { it.exists() }
 
     override val scheduleRecord get() = mockInstance?.let { MockRecord(it) } ?: singleScheduleRecord
 
@@ -63,7 +63,7 @@ class SingleSchedule(rootTask: Task, val singleScheduleRecord: SingleScheduleRec
         val writeAssignedToJson = singleScheduleRecord.singleScheduleJson as? WriteAssignedToJson
                 ?: throw UnsupportedOperationException()
 
-        rootTask.project.assignedToHelper.setAssignedTo(
+        topLevelTask.project.assignedToHelper.setAssignedTo(
                 writeAssignedToJson,
                 singleScheduleRecord,
                 assignedTo.map { it.key }.toSet(),

@@ -129,17 +129,17 @@ class Task(val project: Project<*>, private val taskRecord: TaskRecord) :
         // in general, we can add a subtask to any task that is either unscheduled, or has not done instances.  Checking
         // for that will be difficult, though.
 
-        val rootTask = getRootTask(now)
+        val topLevelTask = getTopLevelTask(now)
 
         // if it's in the unscheduled tasks list, we can add a subtask
-        if (rootTask.isUnscheduled(now)) return true
+        if (topLevelTask.isUnscheduled(now)) return true
 
         // ... and if not, we can just use getInstances() and check all of them.
         return getInstances(null, null, now).any { it.canAddSubtask(now, hack24) }
     }
 
-    private fun getRootTask(exactTimeStamp: ExactTimeStamp): Task =
-            getParentTask(exactTimeStamp)?.getRootTask(exactTimeStamp) ?: this
+    private fun getTopLevelTask(exactTimeStamp: ExactTimeStamp): Task =
+            getParentTask(exactTimeStamp)?.getTopLevelTask(exactTimeStamp) ?: this
 
     fun getCurrentScheduleIntervals(exactTimeStamp: ExactTimeStamp): List<ScheduleInterval> {
         requireCurrentOffset(exactTimeStamp)
@@ -159,7 +159,7 @@ class Task(val project: Project<*>, private val taskRecord: TaskRecord) :
                 check(it.noScheduleOrParent.currentOffset(now))
             }
 
-    fun isRootTask(exactTimeStamp: ExactTimeStamp): Boolean {
+    fun isTopLevelTask(exactTimeStamp: ExactTimeStamp): Boolean {
         requireCurrentOffset(exactTimeStamp)
 
         return getParentTask(exactTimeStamp) == null
@@ -782,7 +782,7 @@ class Task(val project: Project<*>, private val taskRecord: TaskRecord) :
                     now,
             )
 
-            val assignedTo = schedule.takeIf { it.rootTask.project == project }
+            val assignedTo = schedule.takeIf { it.topLevelTask.project == project }
                     ?.assignedTo
                     .orEmpty()
                     .map { it.key }

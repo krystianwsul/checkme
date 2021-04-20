@@ -54,7 +54,7 @@ object Irrelevant {
                     val exactTimeStamp = getIrrelevantNow(it.endExactTimeStamp)
 
                     it.current(exactTimeStamp)
-                            && it.isRootTask(exactTimeStamp)
+                            && it.isTopLevelTask(exactTimeStamp)
                             && it.isVisible(exactTimeStamp, true)
                 }
                 .map { taskRelevances.getValue(it.taskKey) }

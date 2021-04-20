@@ -142,7 +142,7 @@ class ProjectsFactory(
                 .map { it.tasks.size }
                 .sum()
 
-    fun createScheduleRootTask(
+    fun createScheduleTopLevelTask(
             now: ExactTimeStamp.Local,
             name: String,
             scheduleDatas: List<Pair<ScheduleData, Time>>,

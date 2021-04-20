@@ -149,7 +149,7 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.Listener {
                         data.taskData,
                         false,
                 ),
-                TaskListFragment.RootTaskData(taskKey, data.imageData),
+                TaskListFragment.TopLevelTaskData(taskKey, data.imageData),
         )
     }
 

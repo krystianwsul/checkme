@@ -42,7 +42,7 @@ abstract class ScheduleRecord(
 
     val taskId = taskRecord.id
 
-    val rootTaskKey by lazy { TaskKey(projectKey, taskId) }
+    val topLevelTaskKey by lazy { TaskKey(projectKey, taskId) }
 
     val scheduleId by lazy { ScheduleId(projectKey, taskId, id) }
 

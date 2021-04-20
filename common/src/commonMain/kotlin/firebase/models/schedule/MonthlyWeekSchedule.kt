@@ -8,8 +8,8 @@ import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.utils.ScheduleType
 import com.krystianwsul.common.utils.getDateInMonth
 
-class MonthlyWeekSchedule(rootTask: Task, override val repeatingScheduleRecord: MonthlyWeekScheduleRecord) :
-        RepeatingSchedule(rootTask) {
+class MonthlyWeekSchedule(topLevelTask: Task, override val repeatingScheduleRecord: MonthlyWeekScheduleRecord) :
+        RepeatingSchedule(topLevelTask) {
 
     override val scheduleRecord get() = repeatingScheduleRecord
 

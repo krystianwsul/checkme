@@ -3,8 +3,8 @@ package com.krystianwsul.checkme.gui.edit.delegates
 import android.os.Bundle
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.extensions.updateChildTask
-import com.krystianwsul.checkme.domainmodel.extensions.updateRootTask
 import com.krystianwsul.checkme.domainmodel.extensions.updateScheduleTask
+import com.krystianwsul.checkme.domainmodel.extensions.updateTopLevelTask
 import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
 import com.krystianwsul.checkme.gui.edit.EditParameters
 import com.krystianwsul.checkme.gui.edit.EditViewModel
@@ -89,7 +89,7 @@ class EditExistingTaskEditDelegate(
     ): Single<CreateResult> {
         check(createParameters.allReminders)
 
-        return AndroidDomainUpdater.updateRootTask(
+        return AndroidDomainUpdater.updateTopLevelTask(
                 DomainListenerManager.NotificationType.All,
                 parameters.taskKey,
                 createParameters.name,

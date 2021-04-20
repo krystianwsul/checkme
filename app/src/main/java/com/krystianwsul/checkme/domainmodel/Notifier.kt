@@ -321,7 +321,7 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
                         results.irrelevantSchedules
                                 .sortedBy { it.startExactTimeStamp }
                                 .forEach {
-                                    Log.e("asdf", "magic irrelevant schedule, schedule: $it, task: ${it.rootTask}")
+                                    Log.e("asdf", "magic irrelevant schedule, schedule: $it, task: ${it.topLevelTask}")
                                 }
                     }
 

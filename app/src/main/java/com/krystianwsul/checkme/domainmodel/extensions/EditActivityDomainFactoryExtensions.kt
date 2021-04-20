@@ -45,7 +45,7 @@ fun DomainFactory.getCreateTaskData(
         var scheduleDataWrappers: List<EditViewModel.ScheduleDataWrapper>? = null
         var assignedTo: Set<UserKey> = setOf()
 
-        if (task.isRootTask(now)) {
+        if (task.isTopLevelTask(now)) {
             val schedules = task.getCurrentScheduleIntervals(now)
 
             customTimes += schedules.mapNotNull { it.schedule.customTimeKey }.map {
@@ -114,7 +114,7 @@ fun DomainFactory.getCreateTaskData(
         is EditViewModel.CurrentParentSource.FromTask -> {
             val task = getTaskForce(currentParentSource.taskKey)
 
-            if (task.isRootTask(now)) {
+            if (task.isTopLevelTask(now)) {
                 when (val projectKey = task.project.projectKey) {
                     is ProjectKey.Private -> null
                     is ProjectKey.Shared -> EditViewModel.ParentKey.Project(projectKey)
@@ -171,7 +171,7 @@ fun DomainFactory.getCreateTaskParentPickerData(
 }
 
 @CheckResult
-fun DomainUpdater.createScheduleRootTask(
+fun DomainUpdater.createScheduleTopLevelTask(
         notificationType: DomainListenerManager.NotificationType,
         name: String,
         scheduleDatas: List<ScheduleData>,
@@ -179,7 +179,7 @@ fun DomainUpdater.createScheduleRootTask(
         sharedProjectParameters: EditDelegate.SharedProjectParameters?,
         imagePath: Pair<String, Uri>?,
         copyTaskKey: TaskKey? = null,
-): Single<EditDelegate.CreateResult> = SingleDomainUpdate.create("createScheduleRootTask") { now ->
+): Single<EditDelegate.CreateResult> = SingleDomainUpdate.create("createScheduleTopLevelTask") { now ->
     check(name.isNotEmpty())
     check(scheduleDatas.isNotEmpty())
 
@@ -187,7 +187,7 @@ fun DomainUpdater.createScheduleRootTask(
 
     val imageUuid = imagePath?.let { newUuid() }
 
-    val task = projectsFactory.createScheduleRootTask(
+    val task = projectsFactory.createScheduleTopLevelTask(
             now,
             name,
             scheduleDatas.map { it to getTime(it.timePair) },
@@ -252,14 +252,14 @@ fun DomainUpdater.createChildTask(
 }.perform(this)
 
 @CheckResult
-fun DomainUpdater.createRootTask(
+fun DomainUpdater.createTopLevelTask(
         notificationType: DomainListenerManager.NotificationType,
         name: String,
         note: String?,
         sharedProjectKey: ProjectKey.Shared?,
         imagePath: Pair<String, Uri>?,
         copyTaskKey: TaskKey? = null,
-): Single<EditDelegate.CreateResult> = SingleDomainUpdate.create("createRootTask") { now ->
+): Single<EditDelegate.CreateResult> = SingleDomainUpdate.create("createTopLevelTask") { now ->
     check(name.isNotEmpty())
 
     val finalProjectId = sharedProjectKey ?: defaultProjectId
@@ -389,14 +389,14 @@ fun DomainUpdater.updateChildTask(
 }.perform(this)
 
 @CheckResult
-fun DomainUpdater.updateRootTask(
+fun DomainUpdater.updateTopLevelTask(
         notificationType: DomainListenerManager.NotificationType,
         taskKey: TaskKey,
         name: String,
         note: String?,
         sharedProjectKey: ProjectKey.Shared?,
         imagePath: NullableWrapper<Pair<String, Uri>>?,
-): Single<TaskKey> = SingleDomainUpdate.create("updateRootTask") { now ->
+): Single<TaskKey> = SingleDomainUpdate.create("updateTopLevelTask") { now ->
     check(name.isNotEmpty())
 
     val task = getTaskForce(taskKey).also {
@@ -424,7 +424,7 @@ fun DomainUpdater.updateRootTask(
 }.perform(this)
 
 @CheckResult
-fun DomainUpdater.createScheduleJoinRootTask(
+fun DomainUpdater.createScheduleJoinTopLevelTask(
         notificationType: DomainListenerManager.NotificationType,
         name: String,
         scheduleDatas: List<ScheduleData>,
@@ -433,7 +433,7 @@ fun DomainUpdater.createScheduleJoinRootTask(
         sharedProjectParameters: EditDelegate.SharedProjectParameters?,
         imagePath: Pair<String, Uri>?,
         allReminders: Boolean,
-): Single<TaskKey> = SingleDomainUpdate.create("createScheduleJoinRootTask") { now ->
+): Single<TaskKey> = SingleDomainUpdate.create("createScheduleJoinTopLevelTask") { now ->
     check(name.isNotEmpty())
     check(scheduleDatas.isNotEmpty())
     check(joinables.size > 1)
@@ -458,7 +458,7 @@ fun DomainUpdater.createScheduleJoinRootTask(
 
     val imageUuid = imagePath?.let { newUuid() }
 
-    val newParentTask = projectsFactory.createScheduleRootTask(
+    val newParentTask = projectsFactory.createScheduleTopLevelTask(
             now,
             name,
             scheduleDatas.map { it to getTime(it.timePair) },
@@ -526,7 +526,7 @@ fun DomainUpdater.createJoinChildTask(
 }.perform(this)
 
 @CheckResult
-fun DomainUpdater.createJoinRootTask(
+fun DomainUpdater.createJoinTopLevelTask(
         notificationType: DomainListenerManager.NotificationType,
         name: String,
         joinTaskKeys: List<TaskKey>,
@@ -534,7 +534,7 @@ fun DomainUpdater.createJoinRootTask(
         sharedProjectKey: ProjectKey.Shared?,
         imagePath: Pair<String, Uri>?,
         removeInstanceKeys: List<InstanceKey>,
-): Single<TaskKey> = SingleDomainUpdate.create("createJoinRootTask") { now ->
+): Single<TaskKey> = SingleDomainUpdate.create("createJoinTopLevelTask") { now ->
     check(name.isNotEmpty())
     check(joinTaskKeys.size > 1)
 
@@ -580,7 +580,7 @@ private fun DomainFactory.getParentTreeDatas(
             .tasks
             .asSequence()
             .filter { it.showAsParent(now, excludedTaskKeys) }
-            .filter { it.isRootTask(now) }
+            .filter { it.isTopLevelTask(now) }
             .map {
                 EditViewModel.ParentTreeData(
                         it.name,
@@ -620,7 +620,7 @@ private fun DomainFactory.getProjectTaskTreeDatas(
     return project.tasks
             .asSequence()
             .filter { it.showAsParent(now, excludedTaskKeys) }
-            .filter { it.isRootTask(now) }
+            .filter { it.isTopLevelTask(now) }
             .map {
                 EditViewModel.ParentTreeData(
                         it.name,

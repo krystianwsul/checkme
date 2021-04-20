@@ -9,7 +9,7 @@ import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.ScheduleType
 import com.krystianwsul.common.utils.UserKey
 
-abstract class Schedule(val rootTask: Task) : TaskParentEntry {
+abstract class Schedule(val topLevelTask: Task) : TaskParentEntry {
 
     protected abstract val scheduleRecord: ScheduleRecord
 
@@ -34,7 +34,8 @@ abstract class Schedule(val rootTask: Task) : TaskParentEntry {
 
     val time get() = timePair.toTime()
 
-    protected fun TimePair.toTime() = customTimeKey?.let(rootTask.project::getCustomTime) ?: Time.Normal(hourMinute!!)
+    protected fun TimePair.toTime() = customTimeKey?.let(topLevelTask.project::getCustomTime)
+            ?: Time.Normal(hourMinute!!)
 
     override fun setEndExactTimeStamp(endExactTimeStamp: ExactTimeStamp) {
         requireCurrentOffset(endExactTimeStamp)
@@ -42,7 +43,7 @@ abstract class Schedule(val rootTask: Task) : TaskParentEntry {
         scheduleRecord.endTime = endExactTimeStamp.long
         scheduleRecord.endTimeOffset = endExactTimeStamp.offset
 
-        rootTask.invalidateIntervals()
+        topLevelTask.invalidateIntervals()
     }
 
     override fun clearEndExactTimeStamp(now: ExactTimeStamp.Local) {
@@ -51,7 +52,7 @@ abstract class Schedule(val rootTask: Task) : TaskParentEntry {
         scheduleRecord.endTime = null
         scheduleRecord.endTimeOffset = null
 
-        rootTask.invalidateIntervals()
+        topLevelTask.invalidateIntervals()
     }
 
     abstract fun getDateTimesInRange(
@@ -65,7 +66,7 @@ abstract class Schedule(val rootTask: Task) : TaskParentEntry {
     abstract fun isAfterOldestVisible(exactTimeStamp: ExactTimeStamp): Boolean
 
     fun delete() {
-        rootTask.deleteSchedule(this)
+        topLevelTask.deleteSchedule(this)
         scheduleRecord.delete()
     }
 

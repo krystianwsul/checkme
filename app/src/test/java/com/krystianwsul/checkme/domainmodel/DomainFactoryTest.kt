@@ -23,7 +23,7 @@ class DomainFactoryTest {
 
     @Test
     fun testCreatingTask() {
-        domainUpdater().createScheduleRootTask(
+        domainUpdater().createScheduleTopLevelTask(
                 DomainListenerManager.NotificationType.All,
                 "task",
                 listOf(ScheduleData.Single(Date(2020, 12, 20), TimePair(HourMinute(20, 0)))),
@@ -57,7 +57,7 @@ class DomainFactoryTest {
         val scheduleDatas = listOf(ScheduleData.Single(date, TimePair(HourMinute(10, 0))))
 
         val taskName1 = "task1"
-        val taskKey1 = domainUpdater(now).createScheduleRootTask(
+        val taskKey1 = domainUpdater(now).createScheduleTopLevelTask(
                 DomainListenerManager.NotificationType.All,
                 taskName1,
                 scheduleDatas,
@@ -123,7 +123,7 @@ class DomainFactoryTest {
         val date = Date(2020, 12, 23)
         var now = ExactTimeStamp.Local(date, HourMinute(1, 0))
 
-        val parentTask1Key = domainUpdater(now).createScheduleRootTask(
+        val parentTask1Key = domainUpdater(now).createScheduleTopLevelTask(
                 DomainListenerManager.NotificationType.All,
                 "parentTask1",
                 listOf(ScheduleData.Single(date, TimePair(HourMinute(2, 0)))),
@@ -180,7 +180,7 @@ class DomainFactoryTest {
 
         now += 1.hours
 
-        val parentTask2Key = domainUpdater(now).createScheduleRootTask(
+        val parentTask2Key = domainUpdater(now).createScheduleTopLevelTask(
                 DomainListenerManager.NotificationType.All,
                 "parentTask2",
                 listOf(ScheduleData.Single(date, TimePair(HourMinute(3, 0)))),
@@ -226,7 +226,7 @@ class DomainFactoryTest {
 
         var now = ExactTimeStamp.Local(date, HourMinute(1, 0))
 
-        val parentTaskKey = domainUpdater(now).createScheduleRootTask(
+        val parentTaskKey = domainUpdater(now).createScheduleTopLevelTask(
                 DomainListenerManager.NotificationType.All,
                 "parentTask",
                 listOf(
@@ -282,7 +282,7 @@ class DomainFactoryTest {
         val date = Date(2020, 12, 28)
         var now = ExactTimeStamp.Local(date, HourMinute(1, 0))
 
-        val task1Key = domainUpdater(now).createScheduleRootTask(
+        val task1Key = domainUpdater(now).createScheduleTopLevelTask(
                 DomainListenerManager.NotificationType.All,
                 "task1",
                 listOf(ScheduleData.Single(date, TimePair(HourMinute(5, 0)))),
@@ -360,7 +360,7 @@ class DomainFactoryTest {
         val date = Date(2021, 1, 10)
         var now = ExactTimeStamp.Local(date, HourMinute(1, 0))
 
-        domainUpdater(now).createScheduleRootTask(
+        domainUpdater(now).createScheduleTopLevelTask(
                 DomainListenerManager.NotificationType.All,
                 "childTask1",
                 listOf(ScheduleData.Single(date, TimePair(HourMinute(2, 0)))),
@@ -370,7 +370,7 @@ class DomainFactoryTest {
                 null,
         ).blockingGet()
 
-        domainUpdater(now).createScheduleRootTask(
+        domainUpdater(now).createScheduleTopLevelTask(
                 DomainListenerManager.NotificationType.All,
                 "childTask1",
                 listOf(ScheduleData.Single(date, TimePair(HourMinute(2, 0)))),
@@ -386,7 +386,7 @@ class DomainFactoryTest {
 
         now += 2.hours // 3AM
 
-        domainUpdater(now).createScheduleJoinRootTask(
+        domainUpdater(now).createScheduleJoinTopLevelTask(
                 DomainListenerManager.NotificationType.All,
                 "parentTask",
                 listOf(ScheduleData.Single(date, TimePair(HourMinute(4, 0)))),
@@ -412,7 +412,7 @@ class DomainFactoryTest {
                 DayOfWeek.values().associateWith { HourMinute(2, 0) },
         ).blockingGet()
 
-        val privateTaskKey = domainUpdater(now).createScheduleRootTask(
+        val privateTaskKey = domainUpdater(now).createScheduleTopLevelTask(
                 DomainListenerManager.NotificationType.All,
                 "task",
                 listOf(ScheduleData.Single(date, TimePair(customTimeKey))),

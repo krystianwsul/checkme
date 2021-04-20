@@ -4,8 +4,8 @@ import android.os.Bundle
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.extensions.createJoinChildTask
-import com.krystianwsul.checkme.domainmodel.extensions.createJoinRootTask
-import com.krystianwsul.checkme.domainmodel.extensions.createScheduleJoinRootTask
+import com.krystianwsul.checkme.domainmodel.extensions.createJoinTopLevelTask
+import com.krystianwsul.checkme.domainmodel.extensions.createScheduleJoinTopLevelTask
 import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
 import com.krystianwsul.checkme.gui.edit.*
 import com.krystianwsul.common.utils.ProjectKey
@@ -62,7 +62,7 @@ class JoinTasksEditDelegate(
             scheduleDatas: List<ScheduleData>,
             sharedProjectParameters: SharedProjectParameters?,
     ): Single<CreateResult> {
-        return AndroidDomainUpdater.createScheduleJoinRootTask(
+        return AndroidDomainUpdater.createScheduleJoinTopLevelTask(
                 DomainListenerManager.NotificationType.All,
                 createParameters.name,
                 scheduleDatas,
@@ -107,7 +107,7 @@ class JoinTasksEditDelegate(
     ): Single<CreateResult> {
         check(createParameters.allReminders)
 
-        return AndroidDomainUpdater.createJoinRootTask(
+        return AndroidDomainUpdater.createJoinTopLevelTask(
                 DomainListenerManager.NotificationType.All,
                 createParameters.name,
                 taskKeys,

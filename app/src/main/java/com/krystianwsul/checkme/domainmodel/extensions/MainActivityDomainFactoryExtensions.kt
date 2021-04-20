@@ -28,7 +28,7 @@ fun DomainFactory.getMainData(now: ExactTimeStamp.Local = ExactTimeStamp.Local.n
                 val childTaskDatas = it.tasks
                         .asSequence()
                         .map { Pair(it, it.getHierarchyExactTimeStamp(now)) }
-                        .filter { (task, hierarchyExactTimeStamp) -> task.isRootTask(hierarchyExactTimeStamp) }
+                        .filter { (task, hierarchyExactTimeStamp) -> task.isTopLevelTask(hierarchyExactTimeStamp) }
                         .map { (task, hierarchyExactTimeStamp) ->
                             TaskListFragment.ChildTaskData(
                                     task.name,

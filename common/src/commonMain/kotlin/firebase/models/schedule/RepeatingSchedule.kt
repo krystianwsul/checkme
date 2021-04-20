@@ -10,7 +10,7 @@ import com.krystianwsul.common.utils.invalidatableLazy
 import com.soywiz.klock.days
 import com.soywiz.klock.plus
 
-abstract class RepeatingSchedule(rootTask: Task) : Schedule(rootTask) {
+abstract class RepeatingSchedule(topLevelTask: Task) : Schedule(topLevelTask) {
 
     protected abstract val repeatingScheduleRecord: RepeatingScheduleRecord
 
@@ -135,7 +135,7 @@ abstract class RepeatingSchedule(rootTask: Task) : Schedule(rootTask) {
                 now.toOffset().plusOne(),
         ).toList()
 
-        val pastRootInstances = dateTimes.map(rootTask::getInstance).filter { it.isRootInstance() }
+        val pastRootInstances = dateTimes.map(topLevelTask::getInstance).filter { it.isRootInstance() }
 
         val oldestVisible = listOf(
                 pastRootInstances.filter {

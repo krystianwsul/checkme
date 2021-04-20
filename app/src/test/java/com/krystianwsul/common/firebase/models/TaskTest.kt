@@ -33,7 +33,7 @@ class TaskTest {
 
         val hierarchyTimeStamp = task.getHierarchyExactTimeStamp(now)
         assertEquals(start.toOffset(), hierarchyTimeStamp)
-        assertTrue(task.isRootTask(hierarchyTimeStamp))
+        assertTrue(task.isTopLevelTask(hierarchyTimeStamp))
     }
 
     @Test
@@ -54,6 +54,6 @@ class TaskTest {
 
         val hierarchyTimeStamp = task.getHierarchyExactTimeStamp(now)
         assertEquals(end.minusOne().toOffset(), hierarchyTimeStamp)
-        assertTrue(task.isRootTask(hierarchyTimeStamp))
+        assertTrue(task.isTopLevelTask(hierarchyTimeStamp))
     }
 }

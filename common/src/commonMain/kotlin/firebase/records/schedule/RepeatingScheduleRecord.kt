@@ -2,7 +2,7 @@ package com.krystianwsul.common.firebase.records.schedule
 
 import com.krystianwsul.common.firebase.json.schedule.RepeatingScheduleJson
 import com.krystianwsul.common.firebase.json.schedule.ScheduleWrapper
-import com.krystianwsul.common.firebase.records.TaskRecord
+import com.krystianwsul.common.firebase.records.task.TaskRecord
 import com.krystianwsul.common.time.Date
 
 abstract class RepeatingScheduleRecord(

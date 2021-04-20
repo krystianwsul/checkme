@@ -1,10 +1,12 @@
-package com.krystianwsul.common.firebase.records
+package com.krystianwsul.common.firebase.records.project
 
 import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.json.customtimes.PrivateCustomTimeJson
 import com.krystianwsul.common.firebase.json.projects.PrivateProjectJson
 import com.krystianwsul.common.firebase.json.tasks.PrivateTaskJson
+import com.krystianwsul.common.firebase.records.customtime.PrivateCustomTimeRecord
+import com.krystianwsul.common.firebase.records.task.PrivateTaskRecord
 import com.krystianwsul.common.utils.CustomTimeId
 import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.ProjectKey

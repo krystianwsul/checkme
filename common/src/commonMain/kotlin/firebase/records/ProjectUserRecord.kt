@@ -3,6 +3,7 @@ package com.krystianwsul.common.firebase.records
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.firebase.UserData
 import com.krystianwsul.common.firebase.json.UserJson
+import com.krystianwsul.common.firebase.records.project.SharedProjectRecord
 
 
 class ProjectUserRecord(

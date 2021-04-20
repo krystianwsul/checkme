@@ -1,6 +1,6 @@
 package com.krystianwsul.checkme.firebase
 
-import com.krystianwsul.common.firebase.records.ProjectRecord
+import com.krystianwsul.common.firebase.records.project.ProjectRecord
 import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.CustomTimeKey

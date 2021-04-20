@@ -1,10 +1,13 @@
-package com.krystianwsul.common.firebase.records
+package com.krystianwsul.common.firebase.records.project
 
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.json.JsonWrapper
 import com.krystianwsul.common.firebase.json.UserJson
 import com.krystianwsul.common.firebase.json.customtimes.SharedCustomTimeJson
 import com.krystianwsul.common.firebase.json.tasks.SharedTaskJson
+import com.krystianwsul.common.firebase.records.ProjectUserRecord
+import com.krystianwsul.common.firebase.records.customtime.SharedCustomTimeRecord
+import com.krystianwsul.common.firebase.records.task.SharedTaskRecord
 import com.krystianwsul.common.utils.*
 
 class SharedProjectRecord(

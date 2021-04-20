@@ -1,6 +1,7 @@
 package com.krystianwsul.common.firebase.records
 
 import com.krystianwsul.common.firebase.json.NoScheduleOrParentJson
+import com.krystianwsul.common.firebase.records.task.TaskRecord
 import com.krystianwsul.common.utils.ProjectType
 
 class NoScheduleOrParentRecord<T : ProjectType>(

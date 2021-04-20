@@ -5,7 +5,7 @@ import com.krystianwsul.common.firebase.json.schedule.ScheduleJson
 import com.krystianwsul.common.firebase.json.schedule.ScheduleWrapper
 import com.krystianwsul.common.firebase.json.schedule.ScheduleWrapperBridge
 import com.krystianwsul.common.firebase.records.RemoteRecord
-import com.krystianwsul.common.firebase.records.TaskRecord
+import com.krystianwsul.common.firebase.records.task.TaskRecord
 import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.time.TimePair

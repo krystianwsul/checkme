@@ -25,7 +25,7 @@ import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.json.projects.PrivateProjectJson
 import com.krystianwsul.common.firebase.models.MyUser
 import com.krystianwsul.common.firebase.records.MyUserRecord
-import com.krystianwsul.common.firebase.records.PrivateProjectRecord
+import com.krystianwsul.common.firebase.records.project.PrivateProjectRecord
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.HourMinute

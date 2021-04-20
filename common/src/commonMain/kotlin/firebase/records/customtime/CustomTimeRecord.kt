@@ -1,6 +1,7 @@
-package com.krystianwsul.common.firebase.records
+package com.krystianwsul.common.firebase.records.customtime
 
 import com.krystianwsul.common.firebase.json.customtimes.CustomTimeJson
+import com.krystianwsul.common.firebase.records.RemoteRecord
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.utils.CustomTimeId

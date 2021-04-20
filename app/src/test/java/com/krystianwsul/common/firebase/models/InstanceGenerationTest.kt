@@ -6,7 +6,7 @@ import com.krystianwsul.common.firebase.json.schedule.PrivateScheduleWrapper
 import com.krystianwsul.common.firebase.json.schedule.PrivateWeeklyScheduleJson
 import com.krystianwsul.common.firebase.json.tasks.PrivateTaskJson
 import com.krystianwsul.common.firebase.json.tasks.TaskJson
-import com.krystianwsul.common.firebase.records.PrivateTaskRecord
+import com.krystianwsul.common.firebase.records.task.PrivateTaskRecord
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.ProjectType
 import io.mockk.mockk

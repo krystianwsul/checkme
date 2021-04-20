@@ -1,7 +1,7 @@
 package com.krystianwsul.common.firebase.managers
 
 import com.krystianwsul.common.firebase.DatabaseWrapper
-import com.krystianwsul.common.firebase.records.PrivateProjectRecord
+import com.krystianwsul.common.firebase.records.project.PrivateProjectRecord
 
 abstract class PrivateProjectManager : ValueRecordManager<List<PrivateProjectRecord>>() {
 

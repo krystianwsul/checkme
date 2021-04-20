@@ -8,7 +8,7 @@ import com.krystianwsul.common.firebase.json.customtimes.SharedCustomTimeJson
 import com.krystianwsul.common.firebase.json.tasks.SharedTaskJson
 import com.krystianwsul.common.firebase.json.tasks.TaskJson
 import com.krystianwsul.common.firebase.records.AssignedToHelper
-import com.krystianwsul.common.firebase.records.SharedProjectRecord
+import com.krystianwsul.common.firebase.records.project.SharedProjectRecord
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.JsonTime

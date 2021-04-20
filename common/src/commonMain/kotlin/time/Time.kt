@@ -1,9 +1,9 @@
 package com.krystianwsul.common.time
 
 import com.krystianwsul.common.firebase.models.RootUser
-import com.krystianwsul.common.firebase.records.CustomTimeRecord
-import com.krystianwsul.common.firebase.records.ProjectCustomTimeRecord
-import com.krystianwsul.common.firebase.records.UserCustomTimeRecord
+import com.krystianwsul.common.firebase.records.customtime.CustomTimeRecord
+import com.krystianwsul.common.firebase.records.customtime.ProjectCustomTimeRecord
+import com.krystianwsul.common.firebase.records.customtime.UserCustomTimeRecord
 import com.krystianwsul.common.utils.CustomTimeId
 import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.Endable

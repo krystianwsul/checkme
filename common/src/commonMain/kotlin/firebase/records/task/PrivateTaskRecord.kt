@@ -1,7 +1,10 @@
-package com.krystianwsul.common.firebase.records
+package com.krystianwsul.common.firebase.records.task
 
 import com.krystianwsul.common.firebase.json.schedule.*
 import com.krystianwsul.common.firebase.json.tasks.PrivateTaskJson
+import com.krystianwsul.common.firebase.records.AssignedToHelper
+import com.krystianwsul.common.firebase.records.InstanceRecord
+import com.krystianwsul.common.firebase.records.project.PrivateProjectRecord
 import com.krystianwsul.common.utils.ProjectType
 
 class PrivateTaskRecord private constructor(

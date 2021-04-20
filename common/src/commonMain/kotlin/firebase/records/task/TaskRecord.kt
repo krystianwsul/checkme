@@ -1,11 +1,17 @@
-package com.krystianwsul.common.firebase.records
+package com.krystianwsul.common.firebase.records.task
 
 import com.krystianwsul.common.firebase.json.InstanceJson
 import com.krystianwsul.common.firebase.json.NoScheduleOrParentJson
 import com.krystianwsul.common.firebase.json.schedule.*
 import com.krystianwsul.common.firebase.json.taskhierarchies.NestedTaskHierarchyJson
 import com.krystianwsul.common.firebase.json.tasks.TaskJson
+import com.krystianwsul.common.firebase.records.AssignedToHelper
+import com.krystianwsul.common.firebase.records.InstanceRecord
+import com.krystianwsul.common.firebase.records.NoScheduleOrParentRecord
+import com.krystianwsul.common.firebase.records.RemoteRecord
+import com.krystianwsul.common.firebase.records.project.ProjectRecord
 import com.krystianwsul.common.firebase.records.schedule.*
+import com.krystianwsul.common.firebase.records.taskhierarchy.NestedTaskHierarchyRecord
 import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.ScheduleKey
 

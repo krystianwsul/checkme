@@ -7,8 +7,8 @@ import com.krystianwsul.common.firebase.json.taskhierarchies.ProjectTaskHierarch
 import com.krystianwsul.common.firebase.json.tasks.TaskJson
 import com.krystianwsul.common.firebase.records.AssignedToHelper
 import com.krystianwsul.common.firebase.records.InstanceRecord
-import com.krystianwsul.common.firebase.records.ProjectRecord
-import com.krystianwsul.common.firebase.records.TaskRecord
+import com.krystianwsul.common.firebase.records.project.ProjectRecord
+import com.krystianwsul.common.firebase.records.task.TaskRecord
 import com.krystianwsul.common.interrupt.InterruptionChecker
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.*

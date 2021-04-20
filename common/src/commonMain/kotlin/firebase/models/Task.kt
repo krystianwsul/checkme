@@ -11,7 +11,7 @@ import com.krystianwsul.common.firebase.json.tasks.TaskJson
 import com.krystianwsul.common.firebase.models.interval.*
 import com.krystianwsul.common.firebase.models.schedule.*
 import com.krystianwsul.common.firebase.records.InstanceRecord
-import com.krystianwsul.common.firebase.records.TaskRecord
+import com.krystianwsul.common.firebase.records.task.TaskRecord
 import com.krystianwsul.common.interrupt.InterruptionChecker
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.DateTime

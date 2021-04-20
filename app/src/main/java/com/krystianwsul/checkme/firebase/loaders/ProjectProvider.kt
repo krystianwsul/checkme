@@ -5,7 +5,7 @@ import com.krystianwsul.common.firebase.ChangeWrapper
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.json.Parsable
 import com.krystianwsul.common.firebase.managers.RecordManager
-import com.krystianwsul.common.firebase.records.ProjectRecord
+import com.krystianwsul.common.firebase.records.project.ProjectRecord
 import com.krystianwsul.common.utils.ProjectType
 
 interface ProjectProvider {

@@ -1,7 +1,7 @@
 package com.krystianwsul.common.firebase.models
 
 import com.krystianwsul.common.firebase.MyCustomTime
-import com.krystianwsul.common.firebase.records.UserCustomTimeRecord
+import com.krystianwsul.common.firebase.records.customtime.UserCustomTimeRecord
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.time.Time

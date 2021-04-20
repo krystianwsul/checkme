@@ -3,7 +3,7 @@ package com.krystianwsul.common.firebase.records.schedule
 
 import com.krystianwsul.common.firebase.json.schedule.ScheduleWrapper
 import com.krystianwsul.common.firebase.json.schedule.ScheduleWrapperBridge
-import com.krystianwsul.common.firebase.records.TaskRecord
+import com.krystianwsul.common.firebase.records.task.TaskRecord
 
 
 class WeeklyScheduleRecord(

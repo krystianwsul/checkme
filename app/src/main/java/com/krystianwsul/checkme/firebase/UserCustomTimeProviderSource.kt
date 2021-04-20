@@ -1,9 +1,9 @@
 package com.krystianwsul.checkme.firebase
 
 import com.krystianwsul.checkme.firebase.factories.MyUserFactory
-import com.krystianwsul.common.firebase.records.PrivateProjectRecord
-import com.krystianwsul.common.firebase.records.ProjectRecord
-import com.krystianwsul.common.firebase.records.SharedProjectRecord
+import com.krystianwsul.common.firebase.records.project.PrivateProjectRecord
+import com.krystianwsul.common.firebase.records.project.ProjectRecord
+import com.krystianwsul.common.firebase.records.project.SharedProjectRecord
 import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.CustomTimeKey

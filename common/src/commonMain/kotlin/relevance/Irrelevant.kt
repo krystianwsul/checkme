@@ -91,7 +91,7 @@ object Irrelevant {
         val irrelevantExistingInstances = existingInstances - relevantExistingInstances
 
         val irrelevantSchedules = mutableListOf<Schedule>()
-        val irrelevantNoScheduleOrParents = mutableListOf<NoScheduleOrParent<*>>()
+        val irrelevantNoScheduleOrParents = mutableListOf<NoScheduleOrParent>()
 
         relevantTasks.forEach {
             val scheduleIntervals = it.scheduleIntervals
@@ -207,7 +207,7 @@ object Irrelevant {
             val irrelevantExistingInstances: Collection<Instance<*>>,
             val irrelevantTaskHierarchies: Collection<TaskHierarchy<*>>,
             val irrelevantSchedules: Collection<Schedule>,
-            val irrelevantNoScheduleOrParents: Collection<NoScheduleOrParent<*>>,
+            val irrelevantNoScheduleOrParents: Collection<NoScheduleOrParent>,
             val irrelevantTasks: Collection<Task<*>>,
             val irrelevantRemoteCustomTimes: Collection<Time.Custom.Project<*>>,
             val removedSharedProjects: Collection<SharedProject>,

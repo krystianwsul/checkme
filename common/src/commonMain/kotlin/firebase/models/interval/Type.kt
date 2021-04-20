@@ -46,15 +46,15 @@ sealed class Type<T : ProjectType> {
         }
     }
 
-    data class NoSchedule<T : ProjectType>(val noScheduleOrParent: NoScheduleOrParent<T>? = null) : Type<T>() {
+    data class NoSchedule<T : ProjectType>(val noScheduleOrParent: NoScheduleOrParent? = null) : Type<T>() {
 
         override val taskParentEntries get() = listOfNotNull(noScheduleOrParent)
 
         fun getNoScheduleOrParentInterval(interval: Interval<T>) = noScheduleOrParent?.let {
-            NoScheduleOrParentInterval(
+            NoScheduleOrParentInterval<T>(
                     interval.startExactTimeStampOffset,
                     interval.endExactTimeStampOffset,
-                    it
+                    it,
             )
         }
     }

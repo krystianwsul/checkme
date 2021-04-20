@@ -15,7 +15,7 @@ object IntervalBuilder {
      */
     fun <T : ProjectType> build(task: Task<T>): List<Interval<T>> {
         val allTypeBuilders = listOf(
-                task.schedules.map { TypeBuilder.Schedule(it) },
+                task.schedules.map { TypeBuilder.Schedule<T>(it) },
                 task.parentTaskHierarchies.map { TypeBuilder.Parent(it) },
                 task.noScheduleOrParents.map { TypeBuilder.NoScheduleOrParent(it) },
         ).flatten()
@@ -97,8 +97,8 @@ object IntervalBuilder {
                     is IntervalBuilder.Schedule -> {
                         when (typeBuilder) {
                             is TypeBuilder.Parent -> addIntervalBuilder()
-                            is TypeBuilder.Schedule -> currentIntervalBuilder.schedules += typeBuilder.schedule
-                            is TypeBuilder.NoScheduleOrParent -> addIntervalBuilder()
+                            is TypeBuilder.Schedule<*> -> currentIntervalBuilder.schedules += typeBuilder.schedule
+                            is TypeBuilder.NoScheduleOrParent<*> -> addIntervalBuilder()
                         }
                     }
                     is IntervalBuilder.NoSchedule -> addIntervalBuilder()
@@ -197,12 +197,13 @@ object IntervalBuilder {
         }
 
         class NoScheduleOrParent<T : ProjectType>(
-                val noScheduleOrParent: com.krystianwsul.common.firebase.models.NoScheduleOrParent<T>,
+                val noScheduleOrParent: com.krystianwsul.common.firebase.models.NoScheduleOrParent,
         ) : TypeBuilder<T>() {
 
             override val startExactTimeStampOffset = noScheduleOrParent.startExactTimeStampOffset
 
-            override fun toIntervalBuilder() = IntervalBuilder.NoSchedule(startExactTimeStampOffset, noScheduleOrParent)
+            override fun toIntervalBuilder() =
+                    IntervalBuilder.NoSchedule<T>(startExactTimeStampOffset, noScheduleOrParent)
         }
     }
 
@@ -256,12 +257,12 @@ object IntervalBuilder {
 
         data class NoSchedule<T : ProjectType>(
                 override val startExactTimeStampOffset: ExactTimeStamp.Offset,
-                val noScheduleOrParent: NoScheduleOrParent<T>? = null,
+                val noScheduleOrParent: NoScheduleOrParent? = null,
         ) : IntervalBuilder<T>() {
 
             override val endExactTimeStampOffset = noScheduleOrParent?.endExactTimeStampOffset
 
-            override fun toType() = Type.NoSchedule(noScheduleOrParent)
+            override fun toType() = Type.NoSchedule<T>(noScheduleOrParent)
 
             // endExactTimeStamp is meaningful only when the record is present
             override fun badOverlap(nextEndExactTimeStampOffset: ExactTimeStamp.Offset): Boolean {

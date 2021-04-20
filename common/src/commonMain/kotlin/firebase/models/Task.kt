@@ -39,7 +39,7 @@ class Task<T : ProjectType>(val project: Project<T>, private val taskRecord: Tas
             .mapValues { NoScheduleOrParent(this, it.value) }
             .toMutableMap()
 
-    val noScheduleOrParents: Collection<NoScheduleOrParent<T>> get() = noScheduleOrParentsMap.values
+    val noScheduleOrParents: Collection<NoScheduleOrParent> get() = noScheduleOrParentsMap.values
 
     val name get() = taskRecord.name
 
@@ -564,7 +564,7 @@ class Task<T : ProjectType>(val project: Project<T>, private val taskRecord: Tas
         invalidateIntervals()
     }
 
-    fun deleteNoScheduleOrParent(noScheduleOrParent: NoScheduleOrParent<T>) {
+    fun deleteNoScheduleOrParent(noScheduleOrParent: NoScheduleOrParent) {
         check(noScheduleOrParentsMap.containsKey(noScheduleOrParent.id))
 
         noScheduleOrParentsMap.remove(noScheduleOrParent.id)

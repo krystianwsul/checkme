@@ -2,10 +2,9 @@ package com.krystianwsul.common.firebase.models
 
 import com.krystianwsul.common.firebase.records.NoScheduleOrParentRecord
 import com.krystianwsul.common.time.ExactTimeStamp
-import com.krystianwsul.common.utils.ProjectType
 
-class NoScheduleOrParent<T : ProjectType>(
-        private val task: Task<T>,
+class NoScheduleOrParent(
+        private val task: Task<*>,
         private val noScheduleOrParentRecord: NoScheduleOrParentRecord,
 ) : TaskParentEntry {
 

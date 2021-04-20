@@ -8,5 +8,5 @@ import com.krystianwsul.common.utils.ProjectType
 class NoScheduleOrParentInterval<T : ProjectType>(
         override val startExactTimeStampOffset: ExactTimeStamp.Offset,
         override val endExactTimeStampOffset: ExactTimeStamp.Offset?,
-        val noScheduleOrParent: NoScheduleOrParent<T>,
+        val noScheduleOrParent: NoScheduleOrParent,
 ) : CurrentOffset

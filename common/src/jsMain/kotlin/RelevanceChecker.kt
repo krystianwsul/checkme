@@ -3,10 +3,10 @@ import com.krystianwsul.common.firebase.JsDatabaseWrapper
 import com.krystianwsul.common.firebase.managers.JsPrivateProjectManager
 import com.krystianwsul.common.firebase.managers.JsRootUserManager
 import com.krystianwsul.common.firebase.managers.JsSharedProjectManager
-import com.krystianwsul.common.firebase.models.PrivateProject
-import com.krystianwsul.common.firebase.models.Project
 import com.krystianwsul.common.firebase.models.RootUser
-import com.krystianwsul.common.firebase.models.SharedProject
+import com.krystianwsul.common.firebase.models.project.PrivateProject
+import com.krystianwsul.common.firebase.models.project.Project
+import com.krystianwsul.common.firebase.models.project.SharedProject
 import com.krystianwsul.common.relevance.CustomTimeRelevance
 import com.krystianwsul.common.relevance.Irrelevant
 import com.krystianwsul.common.time.ExactTimeStamp

@@ -1,6 +1,6 @@
 package com.krystianwsul.common.firebase.models.taskhierarchy
 
-import com.krystianwsul.common.firebase.models.Project
+import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.records.taskhierarchy.ProjectTaskHierarchyRecord
 import com.krystianwsul.common.utils.TaskHierarchyKey
 import com.krystianwsul.common.utils.TaskKey

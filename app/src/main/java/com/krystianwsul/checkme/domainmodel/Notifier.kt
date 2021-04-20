@@ -7,7 +7,7 @@ import com.krystianwsul.checkme.domainmodel.notifications.NotificationWrapper
 import com.krystianwsul.checkme.domainmodel.notifications.NotificationWrapperImpl
 import com.krystianwsul.checkme.ticks.Ticker
 import com.krystianwsul.common.firebase.models.Instance
-import com.krystianwsul.common.firebase.models.Project
+import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.relevance.CustomTimeRelevance
 import com.krystianwsul.common.relevance.Irrelevant
 import com.krystianwsul.common.time.Date

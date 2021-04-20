@@ -6,7 +6,7 @@ import com.krystianwsul.checkme.utils.publishImmediate
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.json.Parsable
-import com.krystianwsul.common.firebase.models.Project
+import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.records.project.ProjectRecord
 import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.utils.ProjectType

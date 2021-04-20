@@ -1,10 +1,13 @@
-package com.krystianwsul.common.firebase.models
+package com.krystianwsul.common.firebase.models.project
 
 import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.domain.*
 import com.krystianwsul.common.firebase.json.InstanceJson
 import com.krystianwsul.common.firebase.json.taskhierarchies.ProjectTaskHierarchyJson
 import com.krystianwsul.common.firebase.json.tasks.TaskJson
+import com.krystianwsul.common.firebase.models.*
+import com.krystianwsul.common.firebase.models.customtime.PrivateCustomTime
+import com.krystianwsul.common.firebase.models.customtime.SharedCustomTime
 import com.krystianwsul.common.firebase.models.taskhierarchy.ProjectTaskHierarchy
 import com.krystianwsul.common.firebase.models.taskhierarchy.TaskHierarchy
 import com.krystianwsul.common.firebase.records.AssignedToHelper

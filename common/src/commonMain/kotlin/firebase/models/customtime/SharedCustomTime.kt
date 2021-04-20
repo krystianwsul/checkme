@@ -1,5 +1,6 @@
-package com.krystianwsul.common.firebase.models
+package com.krystianwsul.common.firebase.models.customtime
 
+import com.krystianwsul.common.firebase.models.project.SharedProject
 import com.krystianwsul.common.firebase.records.customtime.SharedCustomTimeRecord
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.CustomTimeId

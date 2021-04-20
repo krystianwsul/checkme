@@ -1,10 +1,15 @@
-package com.krystianwsul.common.firebase.models
+package com.krystianwsul.common.firebase.models.project
 
 import com.krystianwsul.common.domain.TaskHierarchyContainer
 import com.krystianwsul.common.firebase.json.InstanceJson
 import com.krystianwsul.common.firebase.json.customtimes.PrivateCustomTimeJson
 import com.krystianwsul.common.firebase.json.tasks.PrivateTaskJson
 import com.krystianwsul.common.firebase.json.tasks.TaskJson
+import com.krystianwsul.common.firebase.models.CopyScheduleHelper
+import com.krystianwsul.common.firebase.models.ProjectUser
+import com.krystianwsul.common.firebase.models.Task
+import com.krystianwsul.common.firebase.models.customtime.PrivateCustomTime
+import com.krystianwsul.common.firebase.models.customtime.SharedCustomTime
 import com.krystianwsul.common.firebase.models.taskhierarchy.ProjectTaskHierarchy
 import com.krystianwsul.common.firebase.records.AssignedToHelper
 import com.krystianwsul.common.firebase.records.project.PrivateProjectRecord

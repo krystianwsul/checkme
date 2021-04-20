@@ -6,7 +6,7 @@ import com.krystianwsul.checkme.R
 import com.krystianwsul.common.firebase.json.customtimes.PrivateCustomTimeJson
 import com.krystianwsul.common.firebase.json.customtimes.UserCustomTimeJson
 import com.krystianwsul.common.firebase.models.MyUser
-import com.krystianwsul.common.firebase.models.PrivateProject
+import com.krystianwsul.common.firebase.models.project.PrivateProject
 import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.time.Time
 

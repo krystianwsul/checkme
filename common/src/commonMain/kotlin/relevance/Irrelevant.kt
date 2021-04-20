@@ -1,7 +1,12 @@
 package com.krystianwsul.common.relevance
 
 
-import com.krystianwsul.common.firebase.models.*
+import com.krystianwsul.common.firebase.models.Instance
+import com.krystianwsul.common.firebase.models.NoScheduleOrParent
+import com.krystianwsul.common.firebase.models.Task
+import com.krystianwsul.common.firebase.models.project.PrivateProject
+import com.krystianwsul.common.firebase.models.project.Project
+import com.krystianwsul.common.firebase.models.project.SharedProject
 import com.krystianwsul.common.firebase.models.schedule.Schedule
 import com.krystianwsul.common.firebase.models.schedule.SingleSchedule
 import com.krystianwsul.common.firebase.models.taskhierarchy.TaskHierarchy

@@ -4,7 +4,7 @@ import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.checkme.firebase.loaders.ProjectLoader
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.firebase.json.JsonWrapper
-import com.krystianwsul.common.firebase.models.SharedProject
+import com.krystianwsul.common.firebase.models.project.SharedProject
 import com.krystianwsul.common.firebase.records.project.ProjectRecord
 import com.krystianwsul.common.firebase.records.project.SharedProjectRecord
 import com.krystianwsul.common.time.ExactTimeStamp

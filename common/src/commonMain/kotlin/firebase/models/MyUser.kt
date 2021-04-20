@@ -3,6 +3,7 @@ package com.krystianwsul.common.firebase.models
 import com.badoo.reaktive.subject.publish.PublishSubject
 import com.krystianwsul.common.firebase.MyUserProperties
 import com.krystianwsul.common.firebase.json.customtimes.UserCustomTimeJson
+import com.krystianwsul.common.firebase.models.customtime.MyUserCustomTime
 import com.krystianwsul.common.firebase.records.MyUserRecord
 import com.krystianwsul.common.utils.CustomTimeId
 import com.krystianwsul.common.utils.UserKey

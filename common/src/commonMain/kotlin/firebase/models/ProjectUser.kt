@@ -1,6 +1,7 @@
 package com.krystianwsul.common.firebase.models
 
 import com.krystianwsul.common.domain.DeviceDbInfo
+import com.krystianwsul.common.firebase.models.project.SharedProject
 import com.krystianwsul.common.firebase.records.ProjectUserRecord
 
 

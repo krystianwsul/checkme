@@ -1,6 +1,6 @@
 package com.krystianwsul.common.relevance
 
-import com.krystianwsul.common.firebase.models.Project
+import com.krystianwsul.common.firebase.models.project.Project
 
 class RemoteProjectRelevance(val project: Project<*>) {
 

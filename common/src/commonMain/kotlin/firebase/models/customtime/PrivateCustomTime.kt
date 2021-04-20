@@ -1,6 +1,7 @@
-package com.krystianwsul.common.firebase.models
+package com.krystianwsul.common.firebase.models.customtime
 
 import com.krystianwsul.common.firebase.MyCustomTime
+import com.krystianwsul.common.firebase.models.project.PrivateProject
 import com.krystianwsul.common.firebase.records.customtime.PrivateCustomTimeRecord
 import com.krystianwsul.common.firebase.records.customtime.ProjectCustomTimeRecord
 import com.krystianwsul.common.time.DayOfWeek

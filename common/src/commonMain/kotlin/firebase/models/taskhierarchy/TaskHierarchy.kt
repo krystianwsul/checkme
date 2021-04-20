@@ -1,8 +1,8 @@
 package com.krystianwsul.common.firebase.models.taskhierarchy
 
-import com.krystianwsul.common.firebase.models.Project
 import com.krystianwsul.common.firebase.models.Task
 import com.krystianwsul.common.firebase.models.TaskParentEntry
+import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.records.taskhierarchy.TaskHierarchyRecord
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.TaskHierarchyKey

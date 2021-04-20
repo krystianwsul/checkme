@@ -4,7 +4,7 @@ import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.checkme.firebase.loaders.ProjectLoader
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.firebase.json.projects.PrivateProjectJson
-import com.krystianwsul.common.firebase.models.PrivateProject
+import com.krystianwsul.common.firebase.models.project.PrivateProject
 import com.krystianwsul.common.firebase.records.project.PrivateProjectRecord
 import com.krystianwsul.common.firebase.records.project.ProjectRecord
 import com.krystianwsul.common.time.JsonTime

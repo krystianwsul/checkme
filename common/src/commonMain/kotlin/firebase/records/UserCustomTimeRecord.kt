@@ -1,6 +1,6 @@
 package com.krystianwsul.common.firebase.records
 
-import com.krystianwsul.common.firebase.json.UserCustomTimeJson
+import com.krystianwsul.common.firebase.json.customtimes.UserCustomTimeJson
 import com.krystianwsul.common.utils.CustomTimeId
 import com.krystianwsul.common.utils.CustomTimeKey
 

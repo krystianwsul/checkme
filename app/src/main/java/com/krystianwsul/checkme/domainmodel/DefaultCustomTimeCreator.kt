@@ -3,8 +3,8 @@ package com.krystianwsul.checkme.domainmodel
 import androidx.annotation.StringRes
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
-import com.krystianwsul.common.firebase.json.PrivateCustomTimeJson
-import com.krystianwsul.common.firebase.json.UserCustomTimeJson
+import com.krystianwsul.common.firebase.json.customtimes.PrivateCustomTimeJson
+import com.krystianwsul.common.firebase.json.customtimes.UserCustomTimeJson
 import com.krystianwsul.common.firebase.models.MyUser
 import com.krystianwsul.common.firebase.models.PrivateProject
 import com.krystianwsul.common.time.HourMinute

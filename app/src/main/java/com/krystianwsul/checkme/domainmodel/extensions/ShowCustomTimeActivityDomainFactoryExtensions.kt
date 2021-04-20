@@ -10,8 +10,8 @@ import com.krystianwsul.checkme.domainmodel.update.SingleDomainUpdate
 import com.krystianwsul.checkme.viewmodels.ShowCustomTimeViewModel
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.MyCustomTime
-import com.krystianwsul.common.firebase.json.PrivateCustomTimeJson
-import com.krystianwsul.common.firebase.json.UserCustomTimeJson
+import com.krystianwsul.common.firebase.json.customtimes.PrivateCustomTimeJson
+import com.krystianwsul.common.firebase.json.customtimes.UserCustomTimeJson
 import com.krystianwsul.common.firebase.models.PrivateCustomTime
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.ExactTimeStamp

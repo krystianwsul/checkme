@@ -1,4 +1,4 @@
-package com.krystianwsul.common.firebase.json
+package com.krystianwsul.common.firebase.json.customtimes
 
 interface CustomTimeJson {
     var name: String

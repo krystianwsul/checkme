@@ -1,10 +1,13 @@
-package com.krystianwsul.common.firebase.json
+package com.krystianwsul.common.firebase.json.customtimes
 
+import com.krystianwsul.common.utils.Parcelable
+import com.krystianwsul.common.utils.Parcelize
 import kotlinx.serialization.Serializable
 import kotlin.jvm.JvmOverloads
 
 @Serializable
-data class SharedCustomTimeJson @JvmOverloads constructor(
+@Parcelize
+data class PrivateCustomTimeJson @JvmOverloads constructor(
         override var name: String = "",
         override var sundayHour: Int = 0,
         override var sundayMinute: Int = 0,
@@ -20,6 +23,6 @@ data class SharedCustomTimeJson @JvmOverloads constructor(
         override var fridayMinute: Int = 0,
         override var saturdayHour: Int = 0,
         override var saturdayMinute: Int = 0,
-        val ownerKey: String? = null,
-        val privateKey: String? = null,
-) : CustomTimeJson
+        var current: Boolean = true,
+        var endTime: Long? = null,
+) : CustomTimeJson, Parcelable

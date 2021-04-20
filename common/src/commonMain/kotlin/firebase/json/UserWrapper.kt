@@ -1,5 +1,6 @@
 package com.krystianwsul.common.firebase.json
 
+import com.krystianwsul.common.firebase.json.customtimes.UserCustomTimeJson
 import com.krystianwsul.common.utils.Parcelable
 import com.krystianwsul.common.utils.Parcelize
 import kotlinx.serialization.Serializable

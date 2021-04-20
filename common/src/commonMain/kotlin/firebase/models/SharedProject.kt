@@ -4,7 +4,7 @@ import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.DeviceInfo
 import com.krystianwsul.common.domain.TaskHierarchyContainer
 import com.krystianwsul.common.firebase.json.InstanceJson
-import com.krystianwsul.common.firebase.json.SharedCustomTimeJson
+import com.krystianwsul.common.firebase.json.customtimes.SharedCustomTimeJson
 import com.krystianwsul.common.firebase.json.tasks.SharedTaskJson
 import com.krystianwsul.common.firebase.json.tasks.TaskJson
 import com.krystianwsul.common.firebase.records.AssignedToHelper

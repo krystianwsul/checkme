@@ -2,7 +2,7 @@ package com.krystianwsul.common.firebase.models
 
 import com.krystianwsul.common.domain.TaskHierarchyContainer
 import com.krystianwsul.common.firebase.json.InstanceJson
-import com.krystianwsul.common.firebase.json.PrivateCustomTimeJson
+import com.krystianwsul.common.firebase.json.customtimes.PrivateCustomTimeJson
 import com.krystianwsul.common.firebase.json.tasks.PrivateTaskJson
 import com.krystianwsul.common.firebase.json.tasks.TaskJson
 import com.krystianwsul.common.firebase.records.AssignedToHelper

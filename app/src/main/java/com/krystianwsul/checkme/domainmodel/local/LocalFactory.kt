@@ -55,8 +55,8 @@ class LocalFactory(
         return persistenceManager.createInstanceShownRecord(
                 remoteTaskId,
                 scheduleDateTime.date,
-                JsonTime.fromTime<T>(scheduleDateTime.time),
-                projectId
+                JsonTime.fromTime(scheduleDateTime.time),
+                projectId,
         )
     }
 

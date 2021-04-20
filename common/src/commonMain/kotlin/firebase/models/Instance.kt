@@ -84,7 +84,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
 
     val name get() = task.name
 
-    val notificationId get() = getNotificationId(scheduleDate, JsonTime.fromTimePair<T>(data.scheduleTimePair), taskKey)
+    val notificationId get() = getNotificationId(scheduleDate, JsonTime.fromTimePair(data.scheduleTimePair), taskKey)
 
     val hidden get() = data.hidden
 
@@ -182,7 +182,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
     constructor(task: Task<T>, instanceRecord: InstanceRecord) : this(task, Data.Real(task, instanceRecord))
 
     constructor(task: Task<T>, scheduleDateTime: DateTime) :
-            this(task, Data.Virtual(scheduleDateTime.date, JsonTime.fromTime<T>(scheduleDateTime.time), task.project))
+            this(task, Data.Virtual(scheduleDateTime.date, JsonTime.fromTime(scheduleDateTime.time), task.project))
 
     init {
         addLazyCallbacks()
@@ -406,7 +406,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
             it.instanceJsonTime = dateTime?.time?.let {
                 task.project
                         .getOrCopyTime(ownerKey, dateTime.date.dayOfWeek, it, customTimeMigrationHelper, now)
-                        .let { JsonTime.fromTime<T>(it) }
+                        .let { JsonTime.fromTime(it) }
             }
         }
 
@@ -588,7 +588,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
 
             override val instanceDate get() = instanceRecord.instanceDate ?: scheduleDate
 
-            val scheduleJsonTime get() = JsonTime.fromTimePair<T>(instanceRecord.scheduleKey.scheduleTimePair)
+            val scheduleJsonTime get() = JsonTime.fromTimePair(instanceRecord.scheduleKey.scheduleTimePair)
 
             override val scheduleTime get() = scheduleJsonTime.toTime(task.project)
 
@@ -719,7 +719,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
                     scheduleDateTime.date.year,
                     scheduleDateTime.date.month,
                     scheduleDateTime.date.day,
-                    JsonTime.fromTime<T>(scheduleDateTime.time),
+                    JsonTime.fromTime(scheduleDateTime.time),
             )
         }
     }

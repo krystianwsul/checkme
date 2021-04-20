@@ -12,8 +12,8 @@ sealed class CopyScheduleHelper<T : ProjectType> {
         private fun Set<String>.toMap() = associate { it to true }
 
         private fun <T : ProjectType> Time.destructure(): DestructuredTime {
-            val jsonTime = JsonTime.fromTime<T>(this)
-            val projectCustomTimeId = (jsonTime as? JsonTime.Custom.Project<*>)?.id?.value
+            val jsonTime = JsonTime.fromTime(this)
+            val projectCustomTimeId = (jsonTime as? JsonTime.Custom.Project)?.id?.value
             val hourMinute = (jsonTime as? JsonTime.Normal)?.hourMinute
 
             return DestructuredTime(

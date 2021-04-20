@@ -251,7 +251,7 @@ abstract class Project<T : ProjectType>(
                 now,
         )
 
-        val instanceTimeString = JsonTime.fromTime<T>(newInstanceTime).toJson()
+        val instanceTimeString = JsonTime.fromTime(newInstanceTime).toJson()
 
         val parentState = instance.parentState
 

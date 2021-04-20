@@ -18,7 +18,7 @@ data class DateTime(val date: Date, val time: Time) : Comparable<DateTime> {
             this,
             other,
             { it.date },
-            { it.hourMinute }
+            { it.hourMinute },
     )
 
     override fun toString() = "$date $time"

@@ -30,7 +30,6 @@ class TaskTest {
                     every { startTime } returns start.long
                     every { startTimeOffset } returns null
                 },
-                mockk(relaxed = true)
         )
 
         val hierarchyTimeStamp = task.getHierarchyExactTimeStamp(now)
@@ -52,7 +51,6 @@ class TaskTest {
                 mockk(relaxed = true) {
                     every { endData } returns TaskJson.EndData(end.long)
                 },
-                mockk(relaxed = true)
         )
 
         val hierarchyTimeStamp = task.getHierarchyExactTimeStamp(now)

@@ -5,29 +5,29 @@ import com.krystianwsul.common.firebase.json.InstanceJson
 import com.krystianwsul.common.firebase.json.PrivateCustomTimeJson
 import com.krystianwsul.common.firebase.json.PrivateTaskJson
 import com.krystianwsul.common.firebase.json.TaskJson
-import com.krystianwsul.common.firebase.managers.RootInstanceManager
 import com.krystianwsul.common.firebase.records.AssignedToHelper
 import com.krystianwsul.common.firebase.records.PrivateProjectRecord
-import com.krystianwsul.common.firebase.records.TaskRecord
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.ExactTimeStamp
+import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.time.Time
-import com.krystianwsul.common.utils.*
+import com.krystianwsul.common.utils.CustomTimeId
+import com.krystianwsul.common.utils.CustomTimeKey
+import com.krystianwsul.common.utils.ProjectType
+import com.krystianwsul.common.utils.UserKey
 
 class PrivateProject(
         override val projectRecord: PrivateProjectRecord,
-        rootInstanceManagers: Map<TaskKey, RootInstanceManager<ProjectType.Private>>,
-        newRootInstanceManager: (TaskRecord<ProjectType.Private>) -> RootInstanceManager<ProjectType.Private>,
+        userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
 ) : Project<ProjectType.Private>(
         CopyScheduleHelper.Private,
         AssignedToHelper.Private,
-        rootInstanceManagers,
-        newRootInstanceManager,
+        userCustomTimeProvider,
 ) {
 
     override val projectKey = projectRecord.projectKey
 
-    override val remoteCustomTimes = HashMap<CustomTimeId.Private, PrivateCustomTime>()
+    override val remoteCustomTimes = HashMap<CustomTimeId.Project.Private, PrivateCustomTime>()
     override val _tasks: MutableMap<String, Task<ProjectType.Private>>
     override val taskHierarchyContainer = TaskHierarchyContainer<ProjectType.Private>()
 
@@ -49,17 +49,13 @@ class PrivateProject(
 
         _tasks = projectRecord.taskRecords
                 .values
-                .map {
-                    val rootInstanceManager = rootInstanceManagers[it.taskKey] ?: newRootInstanceManager(it)
-
-                    Task(this, it, rootInstanceManager)
-                }
+                .map { Task(this, it) }
                 .associateBy { it.id }
                 .toMutableMap()
 
         projectRecord.taskHierarchyRecords
                 .values
-                .map { TaskHierarchy(this, it) }
+                .map { ProjectTaskHierarchy(this, it) }
                 .forEach { taskHierarchyContainer.add(it.id, it) }
 
         initializeInstanceHierarchyContainers()
@@ -77,33 +73,32 @@ class PrivateProject(
         return remoteCustomTime
     }
 
-    fun deleteCustomTime(remoteCustomTime: PrivateCustomTime) {
+    override fun deleteCustomTime(remoteCustomTime: Time.Custom.Project<ProjectType.Private>) {
         check(remoteCustomTimes.containsKey(remoteCustomTime.id))
 
         remoteCustomTimes.remove(remoteCustomTime.id)
     }
 
-    override fun getCustomTime(customTimeId: CustomTimeId<*>): PrivateCustomTime {
-        check(remoteCustomTimes.containsKey(customTimeId as CustomTimeId.Private))
+    override fun getProjectCustomTime(
+            projectCustomTimeId: CustomTimeId.Project<ProjectType.Private>,
+    ): PrivateCustomTime {
+        check(remoteCustomTimes.containsKey(projectCustomTimeId as CustomTimeId.Project.Private))
 
-        return remoteCustomTimes.getValue(customTimeId)
+        return remoteCustomTimes.getValue(projectCustomTimeId)
     }
 
-    override fun getCustomTime(customTimeKey: CustomTimeKey<ProjectType.Private>): PrivateCustomTime = getCustomTime(customTimeKey.customTimeId)
-    override fun getCustomTime(customTimeId: String) = getCustomTime(CustomTimeId.Private(customTimeId))
+    override fun getProjectCustomTime(projectCustomTimeKey: CustomTimeKey.Project<ProjectType.Private>): PrivateCustomTime =
+            getProjectCustomTime(projectCustomTimeKey.customTimeId)
 
-    override fun getOrCreateCustomTime(
+    override fun getOrCreateCustomTimeOld(
             ownerKey: UserKey,
-            customTime: Time.Custom<*>,
-            allowCopy: Boolean,
-    ) = when (customTime) {
+            customTime: Time.Custom.Project<*>,
+    ): PrivateCustomTime = when (customTime) {
         is PrivateCustomTime -> customTime
         is SharedCustomTime -> {
             if (customTime.ownerKey?.toPrivateProjectKey() == projectKey) {
                 customTimes.single { it.id == customTime.privateKey }
             } else {
-                if (!allowCopy) throw UnsupportedOperationException()
-
                 val customTimeJson = PrivateCustomTimeJson(
                         customTime.name,
                         customTime.getHourMinute(DayOfWeek.SUNDAY).hour,
@@ -170,12 +165,7 @@ class PrivateProject(
     fun newTask(taskJson: PrivateTaskJson): Task<ProjectType.Private> {
         val taskRecord = projectRecord.newTaskRecord(taskJson)
 
-        val task = Task(
-                this,
-                taskRecord,
-                rootInstanceManagers[taskRecord.taskKey] ?: newRootInstanceManager(taskRecord),
-        )
-
+        val task = Task(this, taskRecord)
         check(!_tasks.containsKey(task.id))
 
         _tasks[task.id] = task

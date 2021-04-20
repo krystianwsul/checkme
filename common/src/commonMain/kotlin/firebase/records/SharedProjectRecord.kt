@@ -1,6 +1,5 @@
 package com.krystianwsul.common.firebase.records
 
-import com.badoo.reaktive.subject.behavior.BehaviorSubject
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.json.JsonWrapper
 import com.krystianwsul.common.firebase.json.SharedCustomTimeJson
@@ -13,7 +12,7 @@ class SharedProjectRecord(
         private val parent: Parent,
         create: Boolean,
         override val projectKey: ProjectKey.Shared,
-        private val jsonWrapper: JsonWrapper
+        private val jsonWrapper: JsonWrapper,
 ) : ProjectRecord<ProjectType.Shared>(
         create,
         jsonWrapper.projectJson,
@@ -21,23 +20,15 @@ class SharedProjectRecord(
         "${projectKey.key}/$PROJECT_JSON"
 ) {
 
-    override val taskRecordsRelay = BehaviorSubject(
-            projectJson.tasks
-                    .mapValues { (id, taskJson) ->
-                        check(id.isNotEmpty())
+    override val taskRecords = projectJson.tasks
+            .mapValues { (id, taskJson) ->
+                check(id.isNotEmpty())
 
-                        SharedTaskRecord(id, this, taskJson)
-                    }
-    )
+                SharedTaskRecord(id, this, taskJson)
+            }
+            .toMutableMap()
 
-    override val taskRecords: Map<String, SharedTaskRecord> get() = taskRecordsRelay.value
-
-    fun mutateTaskRecords(action: (MutableMap<String, SharedTaskRecord>) -> Unit) {
-        taskRecordsRelay.onNext(taskRecords.toMutableMap().also(action))
-    }
-
-    override lateinit var customTimeRecords: MutableMap<CustomTimeId.Shared, SharedCustomTimeRecord>
-        private set
+    override val customTimeRecords: MutableMap<CustomTimeId.Project.Shared, SharedCustomTimeRecord>
 
     var userRecords: MutableMap<UserKey, ProjectUserRecord>
         private set
@@ -53,7 +44,7 @@ class SharedProjectRecord(
                 .associate { (id, customTimeJson) ->
                     check(id.isNotEmpty())
 
-                    val customTimeId = CustomTimeId.Shared(id)
+                    val customTimeId = CustomTimeId.Project.Shared(id)
 
                     customTimeId to SharedCustomTimeRecord(customTimeId, this, customTimeJson)
                 }
@@ -76,25 +67,25 @@ class SharedProjectRecord(
             databaseWrapper: DatabaseWrapper,
             parent: Parent,
             id: ProjectKey.Shared,
-            jsonWrapper: JsonWrapper
+            jsonWrapper: JsonWrapper,
     ) : this(
             databaseWrapper,
             parent,
             false,
             id,
-            jsonWrapper
+            jsonWrapper,
     )
 
     constructor(
             databaseWrapper: DatabaseWrapper,
             parent: Parent,
-            jsonWrapper: JsonWrapper
+            jsonWrapper: JsonWrapper,
     ) : this(
             databaseWrapper,
             parent,
             true,
             databaseWrapper.newSharedProjectRecordId(),
-            jsonWrapper
+            jsonWrapper,
     )
 
     fun newRemoteCustomTimeRecord(customTimeJson: SharedCustomTimeJson): SharedCustomTimeRecord {
@@ -139,23 +130,26 @@ class SharedProjectRecord(
     override fun deleteFromParent() = parent.remove(projectKey)
 
     fun getCustomTimeRecordId() =
-            CustomTimeId.Shared(databaseWrapper.newSharedCustomTimeRecordId(projectKey))
+            CustomTimeId.Project.Shared(databaseWrapper.newSharedCustomTimeRecordId(projectKey))
 
     override fun getTaskRecordId() = databaseWrapper.newSharedTaskRecordId(projectKey)
 
     override fun getScheduleRecordId(taskId: String) =
             databaseWrapper.newSharedScheduleRecordId(projectKey, taskId)
 
-    override fun getTaskHierarchyRecordId() =
-            databaseWrapper.newSharedTaskHierarchyRecordId(projectKey)
+    override fun getProjectTaskHierarchyRecordId() =
+            databaseWrapper.newSharedProjectTaskHierarchyRecordId(projectKey)
+
+    override fun newNestedTaskHierarchyRecordId(taskId: String) =
+            databaseWrapper.newSharedNestedTaskHierarchyRecordId(projectKey, taskId)
 
     override fun getCustomTimeRecord(id: String) =
-            customTimeRecords.getValue(CustomTimeId.Shared(id))
+            customTimeRecords.getValue(CustomTimeId.Project.Shared(id))
 
-    override fun getCustomTimeId(id: String) = CustomTimeId.Shared(id)
+    override fun getProjectCustomTimeId(id: String) = CustomTimeId.Project.Shared(id)
 
-    override fun getCustomTimeKey(customTimeId: CustomTimeId<ProjectType.Shared>) =
-            CustomTimeKey.Shared(projectKey, customTimeId)
+    override fun getProjectCustomTimeKey(projectCustomTimeId: CustomTimeId.Project<ProjectType.Shared>) =
+            CustomTimeKey.Project.Shared(projectKey, projectCustomTimeId as CustomTimeId.Project.Shared)
 
     override fun newNoScheduleOrParentRecordId(taskId: String) =
             databaseWrapper.newSharedNoScheduleOrParentRecordId(projectKey, taskId)
@@ -164,9 +158,7 @@ class SharedProjectRecord(
         val remoteTaskRecord = SharedTaskRecord(this, taskJson)
         check(!taskRecords.containsKey(remoteTaskRecord.id))
 
-        mutateTaskRecords {
-            it[remoteTaskRecord.id] = remoteTaskRecord
-        }
+        taskRecords[remoteTaskRecord.id] = remoteTaskRecord
 
         return remoteTaskRecord
     }

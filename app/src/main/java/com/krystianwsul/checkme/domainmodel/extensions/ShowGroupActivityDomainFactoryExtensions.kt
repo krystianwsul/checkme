@@ -26,9 +26,9 @@ fun DomainFactory.getShowGroupData(timeStamp: TimeStamp): ShowGroupViewModel.Dat
     val dayOfWeek = date.dayOfWeek
     val hourMinute = timeStamp.hourMinute
 
-    val time =
-            getCurrentRemoteCustomTimes(now).firstOrNull { it.getHourMinute(dayOfWeek) == hourMinute }
-                    ?: Time.Normal(hourMinute)
+    val time = getCurrentRemoteCustomTimes(now).map { it as Time.Custom }
+            .firstOrNull { it.getHourMinute(dayOfWeek) == hourMinute }
+            ?: Time.Normal(hourMinute)
 
     val displayText = DateTime(date, time).getDisplayText()
 

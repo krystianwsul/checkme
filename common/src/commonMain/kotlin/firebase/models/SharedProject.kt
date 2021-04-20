@@ -7,24 +7,24 @@ import com.krystianwsul.common.firebase.json.InstanceJson
 import com.krystianwsul.common.firebase.json.SharedCustomTimeJson
 import com.krystianwsul.common.firebase.json.SharedTaskJson
 import com.krystianwsul.common.firebase.json.TaskJson
-import com.krystianwsul.common.firebase.managers.RootInstanceManager
 import com.krystianwsul.common.firebase.records.AssignedToHelper
 import com.krystianwsul.common.firebase.records.SharedProjectRecord
-import com.krystianwsul.common.firebase.records.TaskRecord
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.ExactTimeStamp
+import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.time.Time
-import com.krystianwsul.common.utils.*
+import com.krystianwsul.common.utils.CustomTimeId
+import com.krystianwsul.common.utils.CustomTimeKey
+import com.krystianwsul.common.utils.ProjectType
+import com.krystianwsul.common.utils.UserKey
 
 class SharedProject(
         override val projectRecord: SharedProjectRecord,
-        rootInstanceManagers: Map<TaskKey, RootInstanceManager<ProjectType.Shared>>,
-        newRootInstanceManager: (TaskRecord<ProjectType.Shared>) -> RootInstanceManager<ProjectType.Shared>,
+        userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
 ) : Project<ProjectType.Shared>(
         CopyScheduleHelper.Shared,
         AssignedToHelper.Shared,
-        rootInstanceManagers,
-        newRootInstanceManager,
+        userCustomTimeProvider,
 ) {
 
     override val projectKey = projectRecord.projectKey
@@ -37,7 +37,7 @@ class SharedProject(
 
     val users get() = remoteUsers.values
 
-    override val remoteCustomTimes = mutableMapOf<CustomTimeId.Shared, SharedCustomTime>()
+    override val remoteCustomTimes = mutableMapOf<CustomTimeId.Project.Shared, SharedCustomTime>()
     override val _tasks: MutableMap<String, Task<ProjectType.Shared>>
     override val taskHierarchyContainer = TaskHierarchyContainer<ProjectType.Shared>()
 
@@ -53,17 +53,13 @@ class SharedProject(
 
         _tasks = projectRecord.taskRecords
                 .values
-                .map {
-                    val rootInstanceManager = rootInstanceManagers[it.taskKey] ?: newRootInstanceManager(it)
-
-                    Task(this, it, rootInstanceManager)
-                }
+                .map { Task(this, it) }
                 .associateBy { it.id }
                 .toMutableMap()
 
         projectRecord.taskHierarchyRecords
                 .values
-                .map { TaskHierarchy(this, it) }
+                .map { ProjectTaskHierarchy(this, it) }
                 .forEach { taskHierarchyContainer.add(it.id, it) }
 
         initializeInstanceHierarchyContainers()
@@ -116,25 +112,27 @@ class SharedProject(
         }
     }
 
-    fun deleteCustomTime(remoteCustomTime: SharedCustomTime) {
+    override fun deleteCustomTime(remoteCustomTime: Time.Custom.Project<ProjectType.Shared>) {
         check(remoteCustomTimes.containsKey(remoteCustomTime.id))
 
         remoteCustomTimes.remove(remoteCustomTime.id)
     }
 
     fun getSharedTimeIfPresent(
-            privateCustomTimeId: CustomTimeKey.Private,
-            ownerKey: UserKey
+            privateCustomTimeId: CustomTimeKey.Project.Private,
+            ownerKey: UserKey,
     ) = remoteCustomTimes.values.singleOrNull { it.ownerKey == ownerKey && it.privateKey == privateCustomTimeId.customTimeId }
 
-    override fun getCustomTime(customTimeId: CustomTimeId<*>): SharedCustomTime {
-        check(remoteCustomTimes.containsKey(customTimeId as CustomTimeId.Shared))
+    override fun getProjectCustomTime(
+            projectCustomTimeId: CustomTimeId.Project<ProjectType.Shared>,
+    ): SharedCustomTime {
+        check(remoteCustomTimes.containsKey(projectCustomTimeId as CustomTimeId.Project.Shared))
 
-        return remoteCustomTimes.getValue(customTimeId)
+        return remoteCustomTimes.getValue(projectCustomTimeId)
     }
 
-    override fun getCustomTime(customTimeKey: CustomTimeKey<ProjectType.Shared>): SharedCustomTime = getCustomTime(customTimeKey.customTimeId)
-    override fun getCustomTime(customTimeId: String) = getCustomTime(CustomTimeId.Shared(customTimeId))
+    override fun getProjectCustomTime(projectCustomTimeKey: CustomTimeKey.Project<ProjectType.Shared>): SharedCustomTime =
+            getProjectCustomTime(projectCustomTimeKey.customTimeId)
 
     private fun newRemoteCustomTime(customTimeJson: SharedCustomTimeJson): SharedCustomTime {
         val remoteCustomTimeRecord = projectRecord.newRemoteCustomTimeRecord(customTimeJson)
@@ -148,14 +146,8 @@ class SharedProject(
         return remoteCustomTime
     }
 
-    override fun getOrCreateCustomTime(
-            ownerKey: UserKey,
-            customTime: Time.Custom<*>,
-            allowCopy: Boolean,
-    ): SharedCustomTime {
+    override fun getOrCreateCustomTimeOld(ownerKey: UserKey, customTime: Time.Custom.Project<*>): SharedCustomTime {
         fun copy(): SharedCustomTime {
-            if (!allowCopy) throw UnsupportedOperationException()
-
             val private = customTime as? PrivateCustomTime
 
             val customTimeJson = SharedCustomTimeJson(
@@ -175,7 +167,7 @@ class SharedProject(
                     customTime.getHourMinute(DayOfWeek.SATURDAY).hour,
                     customTime.getHourMinute(DayOfWeek.SATURDAY).minute,
                     private?.projectId?.key,
-                    private?.id?.value
+                    private?.id?.value,
             )
 
             return newRemoteCustomTime(customTimeJson)
@@ -224,18 +216,13 @@ class SharedProject(
             oldTask.endExactTimeStamp?.long,
             oldTask.note,
             instanceJsons,
-            ordinal = oldTask.ordinal
+            ordinal = oldTask.ordinal,
     ))
 
     private fun newTask(taskJson: SharedTaskJson): Task<ProjectType.Shared> {
         val taskRecord = projectRecord.newTaskRecord(taskJson)
 
-        val task = Task(
-                this,
-                taskRecord,
-                rootInstanceManagers[taskRecord.taskKey] ?: newRootInstanceManager(taskRecord),
-        )
-
+        val task = Task(this, taskRecord)
         check(!_tasks.containsKey(task.id))
 
         _tasks[task.id] = task

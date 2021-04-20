@@ -1,6 +1,8 @@
 package com.krystianwsul.checkme.firebase.loaders
 
 import com.jakewharton.rxrelay3.ReplayRelay
+import com.krystianwsul.checkme.firebase.UserCustomTimeProviderSource
+import com.krystianwsul.checkme.firebase.UserKeyStore
 import com.krystianwsul.checkme.firebase.managers.AndroidSharedProjectManager
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.checkme.utils.zipSingle
@@ -35,6 +37,8 @@ interface SharedProjectsLoader {
             override val projectManager: AndroidSharedProjectManager,
             private val domainDisposable: CompositeDisposable,
             private val sharedProjectsProvider: SharedProjectsProvider,
+            private val userCustomTimeProviderSource: UserCustomTimeProviderSource,
+            private val userKeyStore: UserKeyStore,
     ) : SharedProjectsLoader {
 
         private data class AddedProjectData(val initialProjectRecord: SharedProjectRecord)
@@ -107,9 +111,9 @@ interface SharedProjectsLoader {
                     ProjectLoader.Impl(
                             projectEntry.databaseRx.observable,
                             domainDisposable,
-                            sharedProjectsProvider.projectProvider,
                             projectManager,
                             projectEntry.initialProjectRecord,
+                            userCustomTimeProviderSource,
                     )
                 }
         )
@@ -137,7 +141,7 @@ interface SharedProjectsLoader {
                 .map {
                     check(it.all { it.second.changeType == ChangeType.REMOTE })
 
-                    InitialProjectsEvent(it.map { it.first to it.second.data })
+                    InitialProjectsEvent(it.map { InitialProjectData(it.first, it.second.data) })
                 }
                 .cacheImmediate()
 
@@ -147,9 +151,7 @@ interface SharedProjectsLoader {
                             .values
                             .map { projectLoader ->
                                 projectLoader.initialProjectEvent
-                                        .map { (changeType, initialProjectEvent) ->
-                                            ChangeWrapper(changeType, AddProjectEvent(projectLoader, initialProjectEvent))
-                                        }
+                                        .map { it.newData(AddProjectEvent(projectLoader, it.data)) }
                                         .toObservable()
                             }
                             .merge()
@@ -160,7 +162,11 @@ interface SharedProjectsLoader {
             ChangeWrapper(it.userChangeType, RemoveProjectsEvent(it.removedProjectKeys))
         }
                 .filter { it.data.projectKeys.isNotEmpty() }
-                .doOnNext { check(it.changeType == ChangeType.REMOTE) }
+                .doOnNext {
+                    check(it.changeType == ChangeType.REMOTE)
+
+                    userKeyStore.onProjectsRemoved(it.data.projectKeys)
+                }
                 .replayImmediate()
 
         override fun addProject(jsonWrapper: JsonWrapper): SharedProjectRecord {
@@ -180,8 +186,11 @@ interface SharedProjectsLoader {
         }
     }
 
-    class InitialProjectsEvent(
-            val pairs: List<Pair<ProjectLoader<ProjectType.Shared, JsonWrapper>, ProjectLoader.InitialProjectEvent<ProjectType.Shared, JsonWrapper>>>,
+    class InitialProjectsEvent(val initialProjectDatas: List<InitialProjectData>)
+
+    data class InitialProjectData(
+            val projectLoader: ProjectLoader<ProjectType.Shared, JsonWrapper>,
+            val initialProjectEvent: ProjectLoader.InitialProjectEvent<ProjectType.Shared, JsonWrapper>,
     )
 
     class AddProjectEvent(

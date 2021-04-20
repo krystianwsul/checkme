@@ -3,6 +3,7 @@ package com.krystianwsul.common.firebase.models
 
 import com.krystianwsul.common.ErrorLogger
 import com.krystianwsul.common.criteria.Assignable
+import com.krystianwsul.common.firebase.MyCustomTime
 import com.krystianwsul.common.firebase.models.interval.ScheduleInterval
 import com.krystianwsul.common.firebase.models.interval.Type
 import com.krystianwsul.common.firebase.records.InstanceRecord
@@ -17,15 +18,15 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
 
         fun getNotificationId(
                 scheduleDate: Date,
-                scheduleCustomTimeKey: CustomTimeKey<*>?,
-                scheduleHourMinute: HourMinute?,
+                scheduleJsonTime: JsonTime,
                 taskKey: TaskKey,
-        ) = getNotificationId(
-                scheduleDate,
-                scheduleCustomTimeKey?.let { Pair(it.projectId.key, it.customTimeId.value) },
-                scheduleHourMinute,
-                taskKey.run { Pair(projectKey.key, taskId) }
-        )
+        ): Int {
+            return getNotificationId(
+                    scheduleDate,
+                    TimeDescriptor.fromJsonTime(scheduleJsonTime),
+                    taskKey.run { Pair(projectKey.key, taskId) },
+            )
+        }
 
         /*
         I'm going to make some assumptions here:
@@ -35,28 +36,22 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
             4. hash looping past Integer.MAX_VALUE isn't likely to cause collisions
          */
 
+        /**
+         * todo: The whole scheduleCustomTimeId isn't guaranteed to be unique, but I don't feel like migrating
+         * InstanceShownRecord right now.  Move it to Paper later, and make all this strongly typed
+         */
+
         // todo just hash a data object
         fun getNotificationId(
                 scheduleDate: Date,
-                scheduleCustomTimeData: Pair<String, String>?,
-                scheduleHourMinute: HourMinute?,
+                scheduleTimeDescriptor: TimeDescriptor,
                 taskKey: Pair<String, String>,
         ): Int {
-            check(scheduleCustomTimeData == null != (scheduleHourMinute == null))
-
             var hash = scheduleDate.month
             hash += 12 * scheduleDate.day
             hash += 12 * 31 * (scheduleDate.year - 2015)
-
-            if (scheduleCustomTimeData == null) {
-                hash += 12 * 31 * 73 * (scheduleHourMinute!!.hour + 1)
-                hash += 12 * 31 * 73 * 24 * (scheduleHourMinute.minute + 1)
-            } else {
-                hash += 12 * 31 * 73 * 24 * 60 * scheduleCustomTimeData.hashCode()
-            }
-
-            @Suppress("INTEGER_OVERFLOW")
-            hash += 12 * 31 * 73 * 24 * 60 * 10000 * taskKey.hashCode()
+            hash += 12 * 31 * 73 * scheduleTimeDescriptor.hashCode()
+            hash += 12 * 31 * 73 * 13 * taskKey.hashCode()
 
             return hash
         }
@@ -66,10 +61,9 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
 
     val instanceKey by lazy { InstanceKey(taskKey, scheduleKey) }
 
-    val scheduleKey by lazy { ScheduleKey(scheduleDate, TimePair(scheduleCustomTimeKey, data.scheduleHourMinute)) }
+    val scheduleKey by lazy { ScheduleKey(scheduleDate, data.scheduleTimePair) }
 
     val scheduleDate get() = data.scheduleDate
-    val scheduleTime get() = data.scheduleTime
     val scheduleDateTime get() = DateTime(scheduleDate, data.scheduleTime)
 
     val instanceDate get() = data.instanceDate
@@ -90,22 +84,9 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
 
     val name get() = task.name
 
-    val instanceTimePair get() = TimePair(instanceCustomTimeKey, instanceHourMinute)
-
-    @Suppress("UNCHECKED_CAST")
-    val instanceCustomTimeKey
-        get() = (instanceTime as? Time.Custom<T>)?.key
-
-    private val instanceHourMinute get() = (instanceTime as? Time.Normal)?.hourMinute
-
-    val notificationId get() = getNotificationId(scheduleDate, scheduleCustomTimeKey, data.scheduleHourMinute, taskKey)
+    val notificationId get() = getNotificationId(scheduleDate, JsonTime.fromTimePair<T>(data.scheduleTimePair), taskKey)
 
     val hidden get() = data.hidden
-
-    // scenario already covered by task/schedule relevance
-    val customTimeKey get() = data.customTimeKey
-
-    val scheduleCustomTimeKey get() = data.scheduleCustomTimeKey
 
     val parentState get() = data.parentState
 
@@ -199,7 +180,9 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
     val parentInstance get() = parentInstanceData?.instance
 
     constructor(task: Task<T>, instanceRecord: InstanceRecord<T>) : this(task, Data.Real(task, instanceRecord))
-    constructor(task: Task<T>, scheduleDateTime: DateTime) : this(task, Data.Virtual(scheduleDateTime))
+
+    constructor(task: Task<T>, scheduleDateTime: DateTime) :
+            this(task, Data.Virtual(scheduleDateTime.date, JsonTime.fromTime<T>(scheduleDateTime.time), task.project))
 
     init {
         addLazyCallbacks()
@@ -420,14 +403,8 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
 
             it.instanceJsonTime = dateTime?.time?.let {
                 task.project
-                        .getOrCopyTime(ownerKey, it)
-                        .let {
-                            @Suppress("UNCHECKED_CAST")
-                            when (it) {
-                                is Time.Custom<*> -> JsonTime.Custom(it.key.customTimeId as CustomTimeId<T>)
-                                is Time.Normal -> JsonTime.Normal(it.hourMinute)
-                            }
-                        }
+                        .getOrCopyTime(ownerKey, dateTime.date.dayOfWeek, it)
+                        .let { JsonTime.fromTime<T>(it) }
             }
         }
 
@@ -481,28 +458,27 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
         val instanceTimePair = instanceTime.timePair
 
         return if (instanceTimePair.customTimeKey != null) {
-            val customTime = task.project.getCustomTime(instanceTimePair.customTimeKey.customTimeId)
+            val customTime = task.project.getCustomTime(instanceTimePair.customTimeKey)
 
             val privateCustomTime = when (customTime) {
                 is SharedCustomTime -> {
                     val ownerKey = privateProject.projectKey.toUserKey()
 
                     if (customTime.ownerKey == ownerKey) {
-                        val privateCustomTimeKey = CustomTimeKey.Private(
+                        val privateCustomTimeKey = CustomTimeKey.Project.Private(
                                 ownerKey.toPrivateProjectKey(),
                                 customTime.privateKey!!,
                         )
 
-                        privateProject.getCustomTime(privateCustomTimeKey)
+                        privateProject.getProjectCustomTime(privateCustomTimeKey)
                     } else {
                         null
                     }
                 }
-                is PrivateCustomTime -> customTime
-                else -> throw UnsupportedOperationException()
-            }
+                else -> customTime
+            } as? MyCustomTime
 
-            privateCustomTime?.takeIf { it.current(now) }
+            privateCustomTime?.takeIf { it.notDeleted(now) }
                     ?.let { TimePair(it.key) }
                     ?: TimePair(customTime.getHourMinute(instanceDate.dayOfWeek))
         } else {
@@ -597,11 +573,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
 
         abstract val hidden: Boolean
 
-        abstract val scheduleHourMinute: HourMinute?
-
-        abstract val customTimeKey: Pair<ProjectKey<T>, CustomTimeId<T>>?
-
-        abstract val scheduleCustomTimeKey: CustomTimeKey<*>?
+        abstract val scheduleTimePair: TimePair
 
         abstract val parentState: ParentState
 
@@ -610,24 +582,15 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
                 val instanceRecord: InstanceRecord<T>,
         ) : Data<T>() {
 
-            fun getCustomTime(customTimeId: CustomTimeId<T>) = task.project.getCustomTime(customTimeId)
-
             override val scheduleDate get() = instanceRecord.run { Date(scheduleYear, scheduleMonth, scheduleDay) }
 
             override val instanceDate get() = instanceRecord.instanceDate ?: scheduleDate
 
-            override val scheduleTime
-                get() = instanceRecord.run {
-                    scheduleCustomTimeId?.let { getCustomTime(it) } ?: Time.Normal(scheduleHour!!, scheduleMinute!!)
-                }
+            val scheduleJsonTime get() = JsonTime.fromTimePair<T>(instanceRecord.scheduleKey.scheduleTimePair)
 
-            private val recordInstanceTime: Time?
-                get() = instanceRecord.instanceJsonTime?.let {
-                    when (it) {
-                        is JsonTime.Custom -> getCustomTime(it.id)
-                        is JsonTime.Normal -> Time.Normal(it.hourMinute)
-                    }
-                }
+            override val scheduleTime get() = scheduleJsonTime.toTime(task.project)
+
+            private val recordInstanceTime: Time? get() = instanceRecord.instanceJsonTime?.toTime(task.project)
 
             override val instanceTime get() = recordInstanceTime ?: scheduleTime
 
@@ -652,18 +615,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
 
             override val hidden get() = instanceRecord.hidden
 
-            override val scheduleHourMinute
-                get() = instanceRecord.scheduleHour?.let { HourMinute(it, instanceRecord.scheduleMinute!!) }
-
-            override val customTimeKey
-                get() = instanceRecord.instanceJsonTime?.let {
-                    (it as? JsonTime.Custom)?.let { Pair(task.project.projectKey, it.id) }
-                }
-
-            override val scheduleCustomTimeKey
-                get() = instanceRecord.scheduleKey
-                        .scheduleTimePair
-                        .customTimeKey
+            override val scheduleTimePair get() = instanceRecord.scheduleKey.scheduleTimePair
 
             override var parentState: ParentState
                 get() {
@@ -693,24 +645,23 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
                 }
         }
 
-        class Virtual<T : ProjectType>(scheduleDateTime: DateTime) : Data<T>() {
+        class Virtual<T : ProjectType>(
+                override val scheduleDate: Date,
+                private val scheduleJsonTime: JsonTime,
+                private val customTimeProvider: JsonTime.CustomTimeProvider<T>,
+        ) : Data<T>() {
 
-            override val scheduleDate = scheduleDateTime.date
             override val instanceDate = scheduleDate
 
-            override val scheduleTime = scheduleDateTime.time
-            override val instanceTime = scheduleTime
+            override val scheduleTime get() = scheduleJsonTime.toTime(customTimeProvider)
+            override val instanceTime get() = scheduleTime
 
             override val done: Long? = null
             override val doneOffset: Double? = null
 
             override val hidden = false
 
-            override val scheduleHourMinute = scheduleTime.timePair.hourMinute
-
-            override val customTimeKey: Pair<ProjectKey<T>, CustomTimeId<T>>? = null
-
-            override val scheduleCustomTimeKey = scheduleTime.timePair.customTimeKey
+            override val scheduleTimePair = scheduleTime.timePair
 
             override val parentState = ParentState.Unset
 
@@ -725,13 +676,13 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
 
         fun getShown(shownFactory: ShownFactory): Shown? {
             if (first)
-                shown = shownFactory.getShown(taskKey, scheduleDateTime)
+                shown = shownFactory.getShown<T>(taskKey, scheduleDateTime)
             return shown
         }
 
         fun forceShown(shownFactory: ShownFactory): Shown {
             if (getShown(shownFactory) == null)
-                shown = shownFactory.createShown(taskKey.taskId, scheduleDateTime, taskKey.projectKey)
+                shown = shownFactory.createShown<T>(taskKey.taskId, scheduleDateTime, taskKey.projectKey)
             return shown!!
         }
     }
@@ -744,7 +695,11 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
 
     interface ShownFactory {
 
-        fun createShown(remoteTaskId: String, scheduleDateTime: DateTime, projectId: ProjectKey<*>): Shown
+        fun <T : ProjectType> createShown(
+                remoteTaskId: String,
+                scheduleDateTime: DateTime,
+                projectId: ProjectKey<*>,
+        ): Shown
 
         fun getShown(
                 projectId: ProjectKey<*>,
@@ -752,25 +707,17 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
                 scheduleYear: Int,
                 scheduleMonth: Int,
                 scheduleDay: Int,
-                scheduleCustomTimeId: CustomTimeId<*>?,
-                scheduleHour: Int?,
-                scheduleMinute: Int?,
+                scheduleJsonTime: JsonTime,
         ): Shown?
 
-        fun getShown(taskKey: TaskKey, scheduleDateTime: DateTime): Shown? {
-            val (customTimeId, hour, minute) = scheduleDateTime.time
-                    .timePair
-                    .destructureRemote()
-
+        fun <T : ProjectType> getShown(taskKey: TaskKey, scheduleDateTime: DateTime): Shown? {
             return getShown(
                     taskKey.projectKey,
                     taskKey.taskId,
                     scheduleDateTime.date.year,
                     scheduleDateTime.date.month,
                     scheduleDateTime.date.day,
-                    customTimeId,
-                    hour,
-                    minute
+                    JsonTime.fromTime<T>(scheduleDateTime.time),
             )
         }
     }

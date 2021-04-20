@@ -14,4 +14,6 @@ interface ScheduleJson<T : ProjectType> {
     val customTimeId: String?
     val hour: Int?
     val minute: Int?
+
+    val time: String?
 }

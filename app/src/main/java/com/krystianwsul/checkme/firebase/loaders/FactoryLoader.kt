@@ -2,6 +2,9 @@ package com.krystianwsul.checkme.firebase.loaders
 
 import com.krystianwsul.checkme.domainmodel.extensions.updateDeviceDbInfo
 import com.krystianwsul.checkme.domainmodel.observeOnDomain
+import com.krystianwsul.checkme.firebase.CustomTimeCoordinator
+import com.krystianwsul.checkme.firebase.UserCustomTimeProviderSource
+import com.krystianwsul.checkme.firebase.UserKeyStore
 import com.krystianwsul.checkme.firebase.factories.FriendsFactory
 import com.krystianwsul.checkme.firebase.factories.MyUserFactory
 import com.krystianwsul.checkme.firebase.factories.ProjectsFactory
@@ -66,19 +69,43 @@ class FactoryLoader(
 
                     val privateProjectManager = AndroidPrivateProjectManager(userInfo, factoryProvider.database)
 
+                    val userFactorySingle = userDatabaseRx.first
+                            .map { MyUserFactory(it, getDeviceDbInfo(), factoryProvider.database) }
+                            .cacheImmediate()
+
+                    val userKeyStore = UserKeyStore(
+                            userFactorySingle.flatMapObservable { it.friendKeysObservable },
+                            domainDisposable,
+                    )
+
+                    val friendsLoader = FriendsLoader(userKeyStore, domainDisposable, factoryProvider.friendsProvider)
+
+                    val friendsFactorySingle = friendsLoader.initialFriendsEvent
+                            .map {
+                                FriendsFactory(
+                                        friendsLoader,
+                                        it,
+                                        domainDisposable,
+                                        factoryProvider.database,
+                                )
+                            }
+                            .cacheImmediate()
+
+                    val userCustomTimeProviderSource = UserCustomTimeProviderSource.Impl(
+                            userInfo.key,
+                            userFactorySingle,
+                            CustomTimeCoordinator(userInfo.key, friendsLoader, friendsFactorySingle),
+                    )
+
                     val privateProjectLoader = ProjectLoader.Impl(
                             privateProjectDatabaseRx.observable,
                             domainDisposable,
-                            factoryProvider.projectProvider,
                             privateProjectManager,
                             null,
+                            userCustomTimeProviderSource,
                     )
 
                     val startTime = ExactTimeStamp.Local.now
-
-                    val userFactorySingle = userDatabaseRx.first
-                            .map { MyUserFactory(it, getDeviceDbInfo()) }
-                            .cacheImmediate()
 
                     val sharedProjectManager = AndroidSharedProjectManager(factoryProvider.database)
 
@@ -86,7 +113,9 @@ class FactoryLoader(
                             userFactorySingle.flatMapObservable { it.sharedProjectKeysObservable },
                             sharedProjectManager,
                             domainDisposable,
-                            factoryProvider.sharedProjectsProvider
+                            factoryProvider.sharedProjectsProvider,
+                            userCustomTimeProviderSource,
+                            userKeyStore,
                     )
 
                     val projectsFactorySingle = Single.zip(
@@ -109,16 +138,6 @@ class FactoryLoader(
                                 ::getDeviceDbInfo
                         )
                     }.cacheImmediate()
-
-                    val friendsLoader = FriendsLoader(
-                            userFactorySingle.flatMapObservable { it.friendKeysObservable },
-                            domainDisposable,
-                            factoryProvider.friendsProvider
-                    )
-
-                    val friendsFactorySingle = friendsLoader.initialFriendsEvent
-                            .map { FriendsFactory(friendsLoader, it, domainDisposable) }
-                            .cacheImmediate()
 
                     val domainFactorySingle = Single.zip(
                             userFactorySingle,

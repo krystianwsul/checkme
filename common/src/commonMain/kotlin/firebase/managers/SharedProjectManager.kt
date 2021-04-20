@@ -13,6 +13,8 @@ abstract class SharedProjectManager :
 
     abstract val databaseWrapper: DatabaseWrapper
 
+    override fun valueToRecord(value: SharedProjectRecord) = value
+
     fun newProjectRecord(jsonWrapper: JsonWrapper) = SharedProjectRecord(
             databaseWrapper,
             this,

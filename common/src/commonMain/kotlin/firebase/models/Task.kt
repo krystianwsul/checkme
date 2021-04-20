@@ -5,29 +5,19 @@ import com.krystianwsul.common.criteria.QueryMatchable
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.ScheduleGroup
 import com.krystianwsul.common.domain.TaskUndoData
-import com.krystianwsul.common.firebase.json.InstanceJson
-import com.krystianwsul.common.firebase.json.NoScheduleOrParentJson
-import com.krystianwsul.common.firebase.json.TaskJson
-import com.krystianwsul.common.firebase.managers.RootInstanceManager
+import com.krystianwsul.common.firebase.json.*
 import com.krystianwsul.common.firebase.models.interval.*
 import com.krystianwsul.common.firebase.records.InstanceRecord
 import com.krystianwsul.common.firebase.records.TaskRecord
 import com.krystianwsul.common.interrupt.InterruptionChecker
+import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.DateTime
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.*
 
-class Task<T : ProjectType>(
-        val project: Project<T>,
-        private val taskRecord: TaskRecord<T>,
-        val rootInstanceManager: RootInstanceManager<T>,
-) : Current, CurrentOffset, QueryMatchable, Assignable {
-
-    companion object {
-
-        var USE_ROOT_INSTANCES = false
-    }
+class Task<T : ProjectType>(val project: Project<T>, private val taskRecord: TaskRecord<T>) :
+        Current, CurrentOffset, QueryMatchable, Assignable {
 
     private val endDataProperty = invalidatableLazyCallbacks {
         taskRecord.endData?.let {
@@ -71,8 +61,17 @@ class Task<T : ProjectType>(
 
     val imageJson get() = taskRecord.image
 
-    private val parentTaskHierarchiesProperty = invalidatableLazy { project.getTaskHierarchiesByChildTaskKey(taskKey) }
-    val parentTaskHierarchies by parentTaskHierarchiesProperty
+    private val parentProjectTaskHierarchiesProperty = invalidatableLazy {
+        project.getTaskHierarchiesByChildTaskKey(taskKey)
+    }
+
+    private val projectParentTaskHierarchies by parentProjectTaskHierarchiesProperty
+
+    val nestedParentTaskHierarchies = taskRecord.taskHierarchyRecords
+            .mapValues { NestedTaskHierarchy(this, it.value) }
+            .toMutableMap()
+
+    val parentTaskHierarchies get() = projectParentTaskHierarchies + nestedParentTaskHierarchies.values
 
     val intervalsProperty = invalidatableLazyCallbacks { IntervalBuilder.build(this) }
     val intervals by intervalsProperty
@@ -100,10 +99,7 @@ class Task<T : ProjectType>(
 
     private val _existingInstances = taskRecord.instanceRecords
             .values
-            .toMutableList<InstanceRecord<T>>()
-            .apply { addAll(rootInstanceManager.records) }
             .map { Instance(this, it) }
-            .toMutableList()
             .associateBy { it.scheduleKey }
             .toMutableMap()
 
@@ -293,7 +289,8 @@ class Task<T : ProjectType>(
         return scheduleSequence.flatMap {
             InterruptionChecker.throwIfInterrupted()
 
-            it.asSequence().map { it.first }
+            it.asSequence()
+                    .map { it.first }
                     .distinct()
                     .map(::getInstance)
                     .filter { !it.exists() && it.isRootInstance() } // I don't know if the root part is necessary, now that group tasks are removed
@@ -361,7 +358,7 @@ class Task<T : ProjectType>(
                     startExactTimeStamp,
                     endExactTimeStamp,
                     bySchedule,
-                    onlyRoot
+                    onlyRoot,
             )
 
             if (!onlyRoot) {
@@ -369,7 +366,7 @@ class Task<T : ProjectType>(
                         startExactTimeStamp,
                         endExactTimeStamp,
                         now,
-                        bySchedule
+                        bySchedule,
                 )
             }
 
@@ -569,21 +566,7 @@ class Task<T : ProjectType>(
 
         generatedInstances.remove(instance.instanceKey)
 
-        val newRecord = if (USE_ROOT_INSTANCES)
-            rootInstanceManager::newRootInstanceRecord
-        else
-            taskRecord::newInstanceRecord
-
-        @Suppress("UNCHECKED_CAST")
-        val instanceRecord = newRecord(
-                InstanceJson(),
-                instance.scheduleKey,
-                instance.scheduleDateTime
-                        .time
-                        .timePair
-                        .customTimeKey
-                        ?.let { it.customTimeId as CustomTimeId<T> }
-        )
+        val instanceRecord = taskRecord.newInstanceRecord(InstanceJson(), instance.scheduleKey)
 
         _existingInstances[instance.scheduleKey] = instance
 
@@ -599,7 +582,7 @@ class Task<T : ProjectType>(
         _existingInstances.remove(scheduleKey)
     }
 
-    fun getExistingInstanceIfPresent(scheduleKey: ScheduleKey) = _existingInstances[scheduleKey]
+    private fun getExistingInstanceIfPresent(scheduleKey: ScheduleKey) = _existingInstances[scheduleKey]
 
     fun getInstance(scheduleDateTime: DateTime): Instance<T> {
         val scheduleKey = ScheduleKey(scheduleDateTime.date, scheduleDateTime.time.timePair)
@@ -620,11 +603,10 @@ class Task<T : ProjectType>(
         val assignedToKeys = assignedTo.map { it.key }.toSet()
 
         for ((scheduleData, time) in scheduleDatas) {
-            val (customTimeId, hour, minute) = project.getOrCopyAndDestructureTime(ownerKey, time)
-
             when (scheduleData) {
                 is ScheduleData.Single -> {
                     val date = scheduleData.date
+                    val copiedTime = project.getOrCopyTime(ownerKey, date.dayOfWeek, time)
 
                     val singleScheduleRecord = taskRecord.newSingleScheduleRecord(
                             project.copyScheduleHelper.newSingle(
@@ -635,9 +617,7 @@ class Task<T : ProjectType>(
                                     date.year,
                                     date.month,
                                     date.day,
-                                    customTimeId?.value,
-                                    hour,
-                                    minute,
+                                    copiedTime,
                                     assignedToKeys,
                             )
                     )
@@ -646,6 +626,8 @@ class Task<T : ProjectType>(
                 }
                 is ScheduleData.Weekly -> {
                     for (dayOfWeek in scheduleData.daysOfWeek) {
+                        val copiedTime = project.getOrCopyTime(ownerKey, dayOfWeek, time)
+
                         val weeklyScheduleRecord = taskRecord.newWeeklyScheduleRecord(
                                 project.copyScheduleHelper.newWeekly(
                                         now.long,
@@ -653,9 +635,7 @@ class Task<T : ProjectType>(
                                         null,
                                         null,
                                         dayOfWeek.ordinal,
-                                        customTimeId?.value,
-                                        hour,
-                                        minute,
+                                        copiedTime,
                                         scheduleData.from?.toJson(),
                                         scheduleData.until?.toJson(),
                                         scheduleData.interval,
@@ -669,6 +649,17 @@ class Task<T : ProjectType>(
                 is ScheduleData.MonthlyDay -> {
                     val (dayOfMonth, beginningOfMonth, _) = scheduleData
 
+                    val today = Date.today()
+
+                    val dayOfWeek = getDateInMonth(
+                            today.year,
+                            today.month,
+                            scheduleData.dayOfMonth,
+                            scheduleData.beginningOfMonth,
+                    ).dayOfWeek
+
+                    val copiedTime = project.getOrCopyTime(ownerKey, dayOfWeek, time)
+
                     val monthlyDayScheduleRecord = taskRecord.newMonthlyDayScheduleRecord(
                             project.copyScheduleHelper.newMonthlyDay(
                                     now.long,
@@ -677,9 +668,7 @@ class Task<T : ProjectType>(
                                     null,
                                     dayOfMonth,
                                     beginningOfMonth,
-                                    customTimeId?.value,
-                                    hour,
-                                    minute,
+                                    copiedTime,
                                     scheduleData.from?.toJson(),
                                     scheduleData.until?.toJson(),
                                     assignedToKeys,
@@ -690,6 +679,7 @@ class Task<T : ProjectType>(
                 }
                 is ScheduleData.MonthlyWeek -> {
                     val (weekOfMonth, dayOfWeek, beginningOfMonth) = scheduleData
+                    val copiedTime = project.getOrCopyTime(ownerKey, dayOfWeek, time)
 
                     val monthlyWeekScheduleRecord = taskRecord.newMonthlyWeekScheduleRecord(
                             project.copyScheduleHelper.newMonthlyWeek(
@@ -700,9 +690,7 @@ class Task<T : ProjectType>(
                                     weekOfMonth,
                                     dayOfWeek.ordinal,
                                     beginningOfMonth,
-                                    customTimeId?.value,
-                                    hour,
-                                    minute,
+                                    copiedTime,
                                     scheduleData.from?.toJson(),
                                     scheduleData.until?.toJson(),
                                     assignedToKeys,
@@ -712,6 +700,12 @@ class Task<T : ProjectType>(
                     _schedules += MonthlyWeekSchedule(this, monthlyWeekScheduleRecord)
                 }
                 is ScheduleData.Yearly -> {
+                    val copiedTime = project.getOrCopyTime(
+                            ownerKey,
+                            Date(Date.today().year, scheduleData.month, scheduleData.day).dayOfWeek,
+                            time,
+                    )
+
                     val yearlyScheduleRecord = taskRecord.newYearlyScheduleRecord(
                             project.copyScheduleHelper.newYearly(
                                     now.long,
@@ -720,9 +714,7 @@ class Task<T : ProjectType>(
                                     null,
                                     scheduleData.month,
                                     scheduleData.day,
-                                    customTimeId?.value,
-                                    hour,
-                                    minute,
+                                    copiedTime,
                                     scheduleData.from?.toJson(),
                                     scheduleData.until?.toJson(),
                                     assignedToKeys,
@@ -737,13 +729,20 @@ class Task<T : ProjectType>(
         intervalsProperty.invalidate()
     }
 
-    fun copySchedules(
-            deviceDbInfo: DeviceDbInfo,
-            now: ExactTimeStamp.Local,
-            schedules: List<Schedule<*>>,
-    ) {
+    fun copySchedules(deviceDbInfo: DeviceDbInfo, now: ExactTimeStamp.Local, schedules: List<Schedule<*>>) {
         for (schedule in schedules) {
-            val (customTimeId, hour, minute) = project.getOrCopyAndDestructureTime(deviceDbInfo.key, schedule.time)
+            val today = Date.today()
+
+            val dayOfWeek = when (schedule) {
+                is SingleSchedule -> schedule.date.dayOfWeek
+                is WeeklySchedule -> schedule.dayOfWeek
+                is MonthlyDaySchedule -> schedule.getDateInMonth(today.year, today.month).dayOfWeek
+                is MonthlyWeekSchedule -> schedule.dayOfWeek
+                is YearlySchedule -> schedule.getDateInYear(today.year).dayOfWeek
+                else -> throw UnsupportedOperationException()
+            }
+
+            val copiedTime = project.getOrCopyTime(deviceDbInfo.key, dayOfWeek, schedule.time)
 
             val assignedTo = schedule.takeIf { it.rootTask.project == project }
                     ?.assignedTo
@@ -764,10 +763,8 @@ class Task<T : ProjectType>(
                                     date.year,
                                     date.month,
                                     date.day,
-                                    customTimeId?.value,
-                                    hour,
-                                    minute,
-                                    assignedTo
+                                    copiedTime,
+                                    assignedTo,
                             )
                     )
 
@@ -781,13 +778,11 @@ class Task<T : ProjectType>(
                                     schedule.endExactTimeStamp?.long,
                                     schedule.endExactTimeStamp?.offset,
                                     schedule.dayOfWeek.ordinal,
-                                    customTimeId?.value,
-                                    hour,
-                                    minute,
+                                    copiedTime,
                                     schedule.from?.toJson(),
                                     schedule.until?.toJson(),
                                     schedule.interval,
-                                    assignedTo
+                                    assignedTo,
                             )
                     )
 
@@ -802,12 +797,10 @@ class Task<T : ProjectType>(
                                     schedule.endExactTimeStamp?.offset,
                                     schedule.dayOfMonth,
                                     schedule.beginningOfMonth,
-                                    customTimeId?.value,
-                                    hour,
-                                    minute,
+                                    copiedTime,
                                     schedule.from?.toJson(),
                                     schedule.until?.toJson(),
-                                    assignedTo
+                                    assignedTo,
                             )
                     )
 
@@ -823,12 +816,10 @@ class Task<T : ProjectType>(
                                     schedule.weekOfMonth,
                                     schedule.dayOfWeek.ordinal,
                                     schedule.beginningOfMonth,
-                                    customTimeId?.value,
-                                    hour,
-                                    minute,
+                                    copiedTime,
                                     schedule.from?.toJson(),
                                     schedule.until?.toJson(),
-                                    assignedTo
+                                    assignedTo,
                             )
                     )
 
@@ -843,12 +834,10 @@ class Task<T : ProjectType>(
                                     schedule.endExactTimeStamp?.offset,
                                     schedule.month,
                                     schedule.day,
-                                    customTimeId?.value,
-                                    hour,
-                                    minute,
+                                    copiedTime,
                                     schedule.from?.toJson(),
                                     schedule.until?.toJson(),
-                                    assignedTo
+                                    assignedTo,
                             )
                     )
 
@@ -860,8 +849,8 @@ class Task<T : ProjectType>(
         intervalsProperty.invalidate()
     }
 
-    fun invalidateParentTaskHierarchies() {
-        parentTaskHierarchiesProperty.invalidate()
+    fun invalidateProjectParentTaskHierarchies() {
+        parentProjectTaskHierarchiesProperty.invalidate()
         invalidateIntervals()
     }
 
@@ -1004,6 +993,51 @@ class Task<T : ProjectType>(
                     .let(project::getAssignedTo)
                     .map { it.value }
         }
+    }
+
+    fun deleteNestedTaskHierarchy(nestedTaskHierarchy: NestedTaskHierarchy<T>) {
+        check(nestedParentTaskHierarchies.containsKey(nestedTaskHierarchy.childTaskId))
+
+        nestedParentTaskHierarchies.remove(nestedTaskHierarchy.childTaskId)
+
+        nestedTaskHierarchy.invalidateTasks()
+    }
+
+    fun createParentNestedTaskHierarchy(parentTask: Task<T>, now: ExactTimeStamp.Local): TaskHierarchyKey.Nested {
+        val taskHierarchyJson = NestedTaskHierarchyJson(parentTask.id, now.long, now.offset)
+
+        return createParentNestedTaskHierarchy(taskHierarchyJson).taskHierarchyKey
+    }
+
+    private fun createParentNestedTaskHierarchy(
+            nestedTaskHierarchyJson: NestedTaskHierarchyJson,
+    ): NestedTaskHierarchy<T> {
+        val taskHierarchyRecord = taskRecord.newTaskHierarchyRecord(nestedTaskHierarchyJson)
+        val taskHierarchy = NestedTaskHierarchy(this, taskHierarchyRecord)
+
+        nestedParentTaskHierarchies[taskHierarchy.id] = taskHierarchy
+
+        taskHierarchy.invalidateTasks()
+
+        return taskHierarchy
+    }
+
+    fun <V : TaskHierarchy<*>> copyParentNestedTaskHierarchy(
+            now: ExactTimeStamp.Local,
+            startTaskHierarchy: V,
+            parentTaskId: String,
+    ) {
+        check(parentTaskId.isNotEmpty())
+
+        val taskHierarchyJson = NestedTaskHierarchyJson(
+                parentTaskId,
+                now.long,
+                now.offset,
+                startTaskHierarchy.endExactTimeStampOffset?.long,
+                startTaskHierarchy.endExactTimeStampOffset?.offset,
+        )
+
+        createParentNestedTaskHierarchy(taskHierarchyJson)
     }
 
     interface ScheduleTextFactory {

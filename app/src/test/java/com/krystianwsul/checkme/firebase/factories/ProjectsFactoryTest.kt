@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.firebase.factories
 
 import com.jakewharton.rxrelay3.PublishRelay
 import com.krystianwsul.checkme.domainmodel.DomainFactoryRule
+import com.krystianwsul.checkme.firebase.TestUserCustomTimeProviderSource
 import com.krystianwsul.checkme.firebase.checkRemote
 import com.krystianwsul.checkme.firebase.loaders.*
 import com.krystianwsul.checkme.firebase.managers.AndroidPrivateProjectManager
@@ -13,36 +14,33 @@ import com.krystianwsul.common.domain.DeviceInfo
 import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.ChangeWrapper
-import com.krystianwsul.common.firebase.json.*
-import com.krystianwsul.common.firebase.models.Task
-import com.krystianwsul.common.firebase.records.InstanceRecord
+import com.krystianwsul.common.firebase.json.PrivateProjectJson
+import com.krystianwsul.common.firebase.json.PrivateTaskJson
+import com.krystianwsul.common.firebase.json.SharedProjectJson
+import com.krystianwsul.common.firebase.json.UserJson
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ProjectType
-import com.krystianwsul.common.utils.ScheduleKey
 import com.krystianwsul.common.utils.TaskKey
 import io.mockk.every
 import io.mockk.mockk
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.subscribeBy
-import org.junit.*
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
+import org.junit.Before
+import org.junit.Rule
+import org.junit.Test
 
 @ExperimentalStdlibApi
-class ProjectsFactoryNewTest {
+class ProjectsFactoryTest {
 
     companion object {
 
         private val userInfo = UserInfo("email", "name", "uid")
         private val deviceDbInfo = DeviceDbInfo(DeviceInfo(userInfo, "token"), "uuid")
-
-        @BeforeClass
-        @JvmStatic
-        fun beforeClassStatic() {
-            Task.USE_ROOT_INSTANCES = true
-        }
     }
 
     @get:Rule
@@ -53,7 +51,7 @@ class ProjectsFactoryNewTest {
     private lateinit var rxErrorChecker: RxErrorChecker
 
     private lateinit var privateProjectRelay: PublishRelay<Snapshot<PrivateProjectJson>>
-    private lateinit var factoryProvider: ProjectFactoryNewTest.TestFactoryProvider
+    private lateinit var factoryProvider: ProjectFactoryTest.TestFactoryProvider
     private lateinit var privateProjectManager: AndroidPrivateProjectManager
     private lateinit var privateProjectLoader: ProjectLoader.Impl<ProjectType.Private, PrivateProjectJson>
     private lateinit var projectKeysRelay: PublishRelay<ChangeWrapper<Set<ProjectKey.Shared>>>
@@ -81,15 +79,15 @@ class ProjectsFactoryNewTest {
         rxErrorChecker = RxErrorChecker()
 
         privateProjectRelay = PublishRelay.create()
-        factoryProvider = ProjectFactoryNewTest.TestFactoryProvider()
+        factoryProvider = ProjectFactoryTest.TestFactoryProvider()
         privateProjectManager = AndroidPrivateProjectManager(userInfo, factoryProvider.database)
 
         privateProjectLoader = ProjectLoader.Impl(
                 privateProjectRelay,
                 compositeDisposable,
-                factoryProvider.projectProvider,
                 privateProjectManager,
                 null,
+                TestUserCustomTimeProviderSource(),
         )
 
         initialProjectEvent = null
@@ -104,7 +102,9 @@ class ProjectsFactoryNewTest {
                 projectKeysRelay,
                 sharedProjectManager,
                 compositeDisposable,
-                factoryProvider.sharedProjectsProvider
+                factoryProvider.sharedProjectsProvider,
+                TestUserCustomTimeProviderSource(),
+                mockk(relaxed = true),
         )
 
         initialProjectsEvent = null
@@ -132,7 +132,7 @@ class ProjectsFactoryNewTest {
                 initialProjectsEvent!!,
                 ExactTimeStamp.Local.now,
                 factoryProvider,
-                compositeDisposable
+                compositeDisposable,
         ) { deviceDbInfo }
 
         _emissionChecker = EmissionChecker("changeTypes", compositeDisposable, projectsFactory.changeTypes)
@@ -200,13 +200,11 @@ class ProjectsFactoryNewTest {
 
         initProjectsFactory()
 
-        privateProjectRelay.accept(Snapshot(
-                privateProjectKey.key,
-                PrivateProjectJson(tasks = mutableMapOf(taskKey.taskId to PrivateTaskJson("task"))),
-        ))
-
         emissionChecker.checkRemote {
-            factoryProvider.projectProvider.acceptInstance(privateProjectKey.key, taskKey.taskId, mapOf())
+            privateProjectRelay.accept(Snapshot(
+                    privateProjectKey.key,
+                    PrivateProjectJson(tasks = mutableMapOf(taskKey.taskId to PrivateTaskJson("task"))),
+            ))
         }
         assertEquals(projectsFactory.privateProject.tasks.size, 1)
     }
@@ -222,29 +220,11 @@ class ProjectsFactoryNewTest {
 
         initProjectsFactory()
 
-        privateProjectRelay.accept(Snapshot(
-                privateProjectKey.key,
-                PrivateProjectJson(tasks = mutableMapOf(taskKey.taskId to PrivateTaskJson("task"))),
-        ))
-
-        val date = Date.today()
-        val hourMinute = HourMinute.now
-        val done = ExactTimeStamp.Local.now
-        val scheduleKey = ScheduleKey(date, TimePair(hourMinute))
-
         emissionChecker.checkRemote {
-            factoryProvider.projectProvider.acceptInstance(
+            privateProjectRelay.accept(Snapshot(
                     privateProjectKey.key,
-                    taskKey.taskId,
-                    mapOf(
-                            InstanceRecord.scheduleKeyToDateString(scheduleKey, true) to mapOf(
-                                    Pair(
-                                            InstanceRecord.scheduleKeyToTimeString(scheduleKey, true),
-                                            InstanceJson(done = done.long),
-                                    )
-                            )
-                    )
-            )
+                    PrivateProjectJson(tasks = mutableMapOf(taskKey.taskId to PrivateTaskJson("task"))),
+            ))
         }
         assertEquals(projectsFactory.privateProject.tasks.size, 1)
     }
@@ -272,9 +252,7 @@ class ProjectsFactoryNewTest {
                 PrivateProjectJson(tasks = mutableMapOf(taskKey.taskId to taskJson)),
         ))
 
-        emissionChecker.checkRemote {
-            factoryProvider.projectProvider.acceptInstance(privateProjectKey.key, taskKey.taskId, mapOf())
-        }
+        // doesn't emit ChangeType.LOCAL
     }
 
     @Test
@@ -285,10 +263,9 @@ class ProjectsFactoryNewTest {
         privateProjectRelay.accept(
                 Snapshot(
                         privateProjectKey.key,
-                        PrivateProjectJson(tasks = mutableMapOf(taskKey.taskId to PrivateTaskJson("task")))),
+                        PrivateProjectJson(tasks = mutableMapOf(taskKey.taskId to PrivateTaskJson("task"))),
+                )
         )
-
-        factoryProvider.projectProvider.acceptInstance(privateProjectKey.key, taskKey.taskId, mapOf())
 
         projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf()))
 
@@ -313,10 +290,9 @@ class ProjectsFactoryNewTest {
         privateProjectRelay.accept(
                 Snapshot(
                         privateProjectKey.key,
-                        PrivateProjectJson(tasks = mutableMapOf(taskKey.taskId to PrivateTaskJson("task")))),
+                        PrivateProjectJson(tasks = mutableMapOf(taskKey.taskId to PrivateTaskJson("task")))
+                )
         )
-
-        factoryProvider.projectProvider.acceptInstance(privateProjectKey.key, taskKey.taskId, mapOf())
 
         projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf()))
 
@@ -346,10 +322,9 @@ class ProjectsFactoryNewTest {
         privateProjectRelay.accept(
                 Snapshot(
                         privateProjectKey.key,
-                        PrivateProjectJson(tasks = mutableMapOf(taskKey.taskId to PrivateTaskJson("task")))),
+                        PrivateProjectJson(tasks = mutableMapOf(taskKey.taskId to PrivateTaskJson("task"))),
+                )
         )
-
-        factoryProvider.projectProvider.acceptInstance(privateProjectKey.key, taskKey.taskId, mapOf())
 
         projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf()))
 
@@ -372,8 +347,6 @@ class ProjectsFactoryNewTest {
                 PrivateProjectJson(tasks = mutableMapOf(taskKey.taskId to PrivateTaskJson("task"))),
         ))
 
-        factoryProvider.projectProvider.acceptInstance(privateProjectKey.key, taskKey.taskId, mapOf())
-
         projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf()))
 
         initProjectsFactory()
@@ -390,22 +363,6 @@ class ProjectsFactoryNewTest {
 
         instance.setDone(mockk(relaxed = true), true, done)
         projectsFactory.save()
-
-        val scheduleKey = ScheduleKey(date, TimePair(hourMinute))
-
-        // doesn't emit ChangeType.LOCAL
-        factoryProvider.projectProvider.acceptInstance(
-                privateProjectKey.key,
-                taskKey.taskId,
-                mapOf(
-                        InstanceRecord.scheduleKeyToDateString(scheduleKey, true) to mapOf(
-                                Pair(
-                                        InstanceRecord.scheduleKeyToTimeString(scheduleKey, true),
-                                        InstanceJson(done = done.long, doneOffset = done.offset),
-                                )
-                        )
-                ),
-        )
     }
 
     @Test
@@ -419,31 +376,9 @@ class ProjectsFactoryNewTest {
                 PrivateProjectJson(tasks = mutableMapOf(taskKey.taskId to PrivateTaskJson("task"))),
         ))
 
-        factoryProvider.projectProvider.acceptInstance(privateProjectKey.key, taskKey.taskId, mapOf())
-
         projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf()))
 
         initProjectsFactory()
-
-        val date = Date.today()
-        val hourMinute = HourMinute.now
-        val done = ExactTimeStamp.Local.now
-        val scheduleKey = ScheduleKey(date, TimePair(hourMinute))
-
-        emissionChecker.checkRemote {
-            factoryProvider.projectProvider.acceptInstance(
-                    privateProjectKey.key,
-                    taskKey.taskId,
-                    mapOf(
-                            InstanceRecord.scheduleKeyToDateString(scheduleKey, true) to mapOf(
-                                    Pair(
-                                            InstanceRecord.scheduleKeyToTimeString(scheduleKey, true),
-                                            InstanceJson(done = done.long),
-                                    )
-                            )
-                    )
-            )
-        }
     }
 
     @Test
@@ -503,7 +438,7 @@ class ProjectsFactoryNewTest {
                         now.long,
                         now.offset,
                         users = mutableMapOf(userInfo.key.key to newUserJson()),
-                )
+                ),
         )
     }
 
@@ -561,93 +496,7 @@ class ProjectsFactoryNewTest {
                         .values
                         .single()
                         .name,
-                name,
-        )
-    }
-
-    @Test
-    fun testChangeSharedProjectRemoteAddRemoteTaskWithInstances() {
-        val privateProjectKey = ProjectKey.Private("privateProjectKey")
-        privateProjectRelay.accept(Snapshot(privateProjectKey.key, PrivateProjectJson()))
-
-        val sharedProjectKey = ProjectKey.Shared("sharedProjectKey")
-        projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf(sharedProjectKey)))
-
-        factoryProvider.acceptSharedProject(sharedProjectKey, SharedProjectJson(users = mutableMapOf(
-                userInfo.key.key to mockk(relaxed = true) {
-                    every { tokens } returns mutableMapOf()
-                }
-        )))
-
-        initProjectsFactory()
-
-        val name = "name"
-
-        emissionChecker.checkRemote {
-            factoryProvider.acceptSharedProject(sharedProjectKey, SharedProjectJson(
-                    name = name,
-                    users = mutableMapOf(
-                            userInfo.key.key to mockk(relaxed = true) {
-                                every { tokens } returns mutableMapOf()
-                            }
-                    )
-            ))
-        }
-        assertEquals(
-                projectsFactory.sharedProjects
-                        .values
-                        .single()
-                        .name,
                 name
-        )
-
-        val taskKey = TaskKey(privateProjectKey, "taskKey")
-
-        factoryProvider.acceptSharedProject(sharedProjectKey, SharedProjectJson(
-                users = mutableMapOf(
-                        userInfo.key.key to mockk(relaxed = true) {
-                            every { tokens } returns mutableMapOf()
-                        }
-                ),
-                tasks = mutableMapOf(taskKey.taskId to SharedTaskJson("task"))
-        ))
-
-        val date = Date.today()
-        val hourMinute = HourMinute.now
-        val done = ExactTimeStamp.Local.now
-        val scheduleKey = ScheduleKey(date, TimePair(hourMinute))
-
-        emissionChecker.checkRemote {
-            factoryProvider.projectProvider.acceptInstance(
-                    sharedProjectKey.key,
-                    taskKey.taskId,
-                    mapOf(
-                            InstanceRecord.scheduleKeyToDateString(scheduleKey, true) to mapOf(
-                                    Pair(
-                                            InstanceRecord.scheduleKeyToTimeString(scheduleKey, true),
-                                            InstanceJson(done = done.long),
-                                    )
-                            )
-                    )
-            )
-        }
-        assertEquals(
-                1,
-                projectsFactory.sharedProjects
-                        .values
-                        .single()
-                        .tasks
-                        .size
-        )
-        assertEquals(
-                1,
-                projectsFactory.sharedProjects
-                        .values
-                        .single()
-                        .tasks
-                        .single()
-                        .existingInstances
-                        .size
         )
     }
 
@@ -683,7 +532,7 @@ class ProjectsFactoryNewTest {
                 sharedProjectKey,
                 SharedProjectJson(
                         name = name,
-                        users = mutableMapOf(userInfo.key.key to newUserJson())
+                        users = mutableMapOf(userInfo.key.key to newUserJson()),
                 ),
         )
         assertEquals(
@@ -691,7 +540,7 @@ class ProjectsFactoryNewTest {
                         .values
                         .single()
                         .name,
-                name,
+                name
         )
     }
 }

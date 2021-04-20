@@ -12,14 +12,15 @@ import com.krystianwsul.common.utils.UserKey
 class MyUserManager(
         deviceDbInfo: DeviceDbInfo,
         snapshot: Snapshot<UserWrapper>,
-) : ValueRecordManager<MyUserRecord>(), SnapshotRecordManager<MyUserRecord, Snapshot<UserWrapper>> {
+        private val databaseWrapper: DatabaseWrapper,
+) : ValueRecordManager<MyUserRecord>() {
 
     companion object {
 
         private fun Snapshot<*>.toKey() = UserKey(key)
-
-        private fun Snapshot<UserWrapper>.toRecord() = MyUserRecord(false, value!!, toKey())
     }
+
+    private fun Snapshot<UserWrapper>.toRecord() = MyUserRecord(databaseWrapper, false, value!!, toKey())
 
     override val databasePrefix = DatabaseWrapper.USERS_KEY
 
@@ -30,7 +31,7 @@ class MyUserManager(
                             deviceDbInfo.run { UserJson(email, name, mutableMapOf(uuid to token), userInfo.uid) }
                     )
 
-                    MyUserRecord(true, userWrapper, snapshot.toKey())
+                    MyUserRecord(databaseWrapper, true, userWrapper, snapshot.toKey())
                 } else {
                     snapshot.toRecord()
                 }
@@ -39,7 +40,7 @@ class MyUserManager(
 
     override val records get() = listOf(value)
 
-    override fun set(snapshot: Snapshot<UserWrapper>) = set(
+    fun set(snapshot: Snapshot<UserWrapper>) = set(
             { it.createObject != snapshot.value },
             { snapshot.toRecord() },
     )

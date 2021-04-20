@@ -3,9 +3,10 @@ package com.krystianwsul.common.relevance
 import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.DomainThreadChecker
+import com.krystianwsul.common.firebase.json.NestedTaskHierarchyJson
 import com.krystianwsul.common.firebase.json.PrivateProjectJson
 import com.krystianwsul.common.firebase.json.PrivateTaskJson
-import com.krystianwsul.common.firebase.json.TaskHierarchyJson
+import com.krystianwsul.common.firebase.json.ProjectTaskHierarchyJson
 import com.krystianwsul.common.firebase.json.schedule.PrivateScheduleWrapper
 import com.krystianwsul.common.firebase.json.schedule.PrivateSingleScheduleJson
 import com.krystianwsul.common.firebase.json.schedule.PrivateWeeklyScheduleJson
@@ -16,7 +17,7 @@ import com.krystianwsul.common.firebase.models.Task
 import com.krystianwsul.common.firebase.records.PrivateProjectRecord
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.ProjectKey
-import com.krystianwsul.common.utils.TaskKey
+import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.UserKey
 import io.mockk.every
 import io.mockk.mockk
@@ -41,7 +42,8 @@ class IrrelevantTest {
         }
 
         private val shownFactory = mockk<Instance.ShownFactory> {
-            every { getShown(any(), any()) } returns mockk(relaxed = true)
+            every { getShown<ProjectType.Private>(any(), any()) } returns mockk(relaxed = true)
+            every { getShown<ProjectType.Shared>(any(), any()) } returns mockk(relaxed = true)
         }
 
         private val projectParent = mockk<Project.Parent>()
@@ -68,12 +70,7 @@ class IrrelevantTest {
 
         val projectJson = PrivateProjectJson(startTime = now.long)
         val projectRecord = PrivateProjectRecord(databaseWrapper, userInfo, projectJson)
-
-        val project = PrivateProject(projectRecord, mapOf()) {
-            mockk {
-                every { records } returns mutableListOf()
-            }
-        }
+        val project = PrivateProject(projectRecord, mockk())
 
         now = ExactTimeStamp.Local(day1, hour2)
 
@@ -84,14 +81,14 @@ class IrrelevantTest {
                         month = day1.month,
                         day = day1.day,
                         hour = hour3.hour,
-                        minute = hour3.minute
+                        minute = hour3.minute,
                 )
         )
 
         val taskJson = PrivateTaskJson(
                 name = "task",
                 startTime = now.long,
-                schedules = mutableMapOf("scheduleKey" to scheduleWrapper)
+                schedules = mutableMapOf("scheduleKey" to scheduleWrapper),
         )
 
         val task = project.newTask(taskJson)
@@ -105,7 +102,7 @@ class IrrelevantTest {
                 now.toOffset().plusOne(),
                 now,
                 bySchedule = true,
-                onlyRoot = true
+                onlyRoot = true,
         ).single()
 
         instance.setInstanceDateTime(shownFactory, userKey, DateTime(day1, Time.Normal(hour4)))
@@ -135,7 +132,7 @@ class IrrelevantTest {
 
         now = ExactTimeStamp.Local(day2, hour1)
 
-        Irrelevant.setIrrelevant(projectParent, project, now)
+        Irrelevant.setIrrelevant(mapOf(), projectParent, project, now)
 
         assertTrue(task.isReminderless())
     }
@@ -159,7 +156,7 @@ class IrrelevantTest {
                         month = day1.month,
                         day = day1.day,
                         hour = hour2.hour,
-                        minute = hour2.minute
+                        minute = hour2.minute,
                 )
         )
 
@@ -168,7 +165,7 @@ class IrrelevantTest {
                         startTime = now.long,
                         dayOfWeek = 1, // monday
                         hour = hour1.hour,
-                        minute = hour1.minute
+                        minute = hour1.minute,
                 )
         )
 
@@ -177,34 +174,21 @@ class IrrelevantTest {
                 startTime = now.long,
                 schedules = mutableMapOf(
                         "singleScheduleKey" to singleScheduleWrapper,
-                        "weeklyScheduleKey" to weeklyScheduleWrapper
-                )
+                        "weeklyScheduleKey" to weeklyScheduleWrapper,
+                ),
         )
 
         val projectKey = ProjectKey.Private(userKey.key)
 
         val taskId = "taskKey"
-        val taskKey = TaskKey(ProjectKey.Private(userKey.key), taskId)
 
         val projectJson = PrivateProjectJson(
                 startTime = now.long,
-                tasks = mutableMapOf(taskId to taskJson)
+                tasks = mutableMapOf(taskId to taskJson),
         )
+
         val projectRecord = PrivateProjectRecord(databaseWrapper, projectKey, projectJson)
-
-        val project = PrivateProject(
-                projectRecord,
-                mapOf(
-                        taskKey to mockk {
-                            every { records } returns mutableListOf()
-                        }
-                )
-        ) {
-            mockk {
-                every { records } returns mutableListOf()
-            }
-        }
-
+        val project = PrivateProject(projectRecord, mockk())
         val task = project.tasks.single()
 
         // 2. Mark single instance done
@@ -218,7 +202,7 @@ class IrrelevantTest {
                 now.toOffset().plusOne(),
                 now,
                 bySchedule = true,
-                onlyRoot = true
+                onlyRoot = true,
         ).single()
 
         instance.setDone(shownFactory, true, now)
@@ -241,7 +225,7 @@ class IrrelevantTest {
         )
         assertTrue(task.getCurrentScheduleIntervals(now).size == 2)
 
-        Irrelevant.setIrrelevant(projectParent, project, now)
+        Irrelevant.setIrrelevant(mapOf(), projectParent, project, now)
 
         assertTrue(task.getCurrentScheduleIntervals(now).size == 1)
         assertTrue(
@@ -258,7 +242,7 @@ class IrrelevantTest {
     }
 
     @Test
-    fun testDeletedChildTaskIsntInInstance() {
+    fun testDeletedChildTaskIsntInInstanceProjectTaskHierarchy() {
         // 1: Create task with single schedule and single child
         // 2: Delete single child with remove instances option
         // 3: Add new child
@@ -284,14 +268,14 @@ class IrrelevantTest {
                         month = day1.month,
                         day = day1.day,
                         hour = hour2.hour,
-                        minute = hour2.minute
+                        minute = hour2.minute,
                 )
         )
 
         val parentTaskJson = PrivateTaskJson(
                 name = "parentTask",
                 startTime = now.long,
-                schedules = mutableMapOf("singleScheduleKey" to singleScheduleWrapper)
+                schedules = mutableMapOf("singleScheduleKey" to singleScheduleWrapper),
         )
         val parentTaskId = "parentTaskKey"
 
@@ -300,10 +284,10 @@ class IrrelevantTest {
                 startTime = now.long,
         )
         val child1TaskId = "child1TaskKey"
-        val taskHierarchy1Json = TaskHierarchyJson(
+        val taskHierarchy1Json = ProjectTaskHierarchyJson(
                 parentTaskId = parentTaskId,
                 childTaskId = child1TaskId,
-                startTime = now.long
+                startTime = now.long,
         )
         val taskHierarchy1Id = "taskHierarchy1"
 
@@ -312,10 +296,10 @@ class IrrelevantTest {
                 startTime = now.long,
         )
         val child2TaskId = "child2TaskKey"
-        val taskHierarchy2Json = TaskHierarchyJson(
+        val taskHierarchy2Json = ProjectTaskHierarchyJson(
                 parentTaskId = parentTaskId,
                 childTaskId = child2TaskId,
-                startTime = now.long
+                startTime = now.long,
         )
         val taskHierarchy2Id = "taskHierarchy2"
 
@@ -324,20 +308,16 @@ class IrrelevantTest {
                 tasks = mutableMapOf(
                         parentTaskId to parentTaskJson,
                         child1TaskId to child1TaskJson,
-                        child2TaskId to child2TaskJson
+                        child2TaskId to child2TaskJson,
                 ),
                 taskHierarchies = mutableMapOf(
                         taskHierarchy1Id to taskHierarchy1Json,
-                        taskHierarchy2Id to taskHierarchy2Json
-                )
+                        taskHierarchy2Id to taskHierarchy2Json,
+                ),
         )
-        val projectRecord = PrivateProjectRecord(databaseWrapper, projectKey, projectJson)
 
-        val project = PrivateProject(projectRecord, mapOf()) {
-            mockk {
-                every { records } returns mutableListOf()
-            }
-        }
+        val projectRecord = PrivateProjectRecord(databaseWrapper, projectKey, projectJson)
+        val project = PrivateProject(projectRecord, mockk())
 
         val parentTask = project.tasks.single { it.isRootTask(now) }
         assertEquals(2, parentTask.getChildTaskHierarchies(now).size)
@@ -385,6 +365,138 @@ class IrrelevantTest {
 
         now = ExactTimeStamp.Local(day2, hour5)
 
-        Irrelevant.setIrrelevant(projectParent, project, now, false)
+        Irrelevant.setIrrelevant(mapOf(), projectParent, project, now, false)
+    }
+
+    @Test
+    fun testDeletedChildTaskIsntInInstanceNestedTaskHierarchy() {
+        // 1: Create task with single schedule and single child
+        // 2: Delete single child with remove instances option
+        // 3: Add new child
+        // 4: Reschedule instance
+        // 5: check instance has only the second child
+
+        val day1 = Date(2020, 10, 6) // tuesday
+        val day2 = Date(2020, 10, 7) // wednesday
+        val hour1 = HourMinute(1, 0).toHourMilli()
+        val hour2 = HourMinute(2, 0).toHourMilli()
+        val hour3 = HourMinute(3, 0).toHourMilli()
+        val hour4 = HourMinute(4, 0).toHourMilli()
+        val hour5 = HourMinute(5, 0).toHourMilli()
+
+        var now = ExactTimeStamp.Local(day1, hour1)
+
+        val projectKey = ProjectKey.Private(userKey.key)
+
+        val singleScheduleWrapper = PrivateScheduleWrapper(
+                singleScheduleJson = PrivateSingleScheduleJson(
+                        startTime = now.long,
+                        startTimeOffset = now.offset,
+                        year = day1.year,
+                        month = day1.month,
+                        day = day1.day,
+                        hour = hour2.hour,
+                        minute = hour2.minute,
+                )
+        )
+
+        val parentTaskJson = PrivateTaskJson(
+                name = "parentTask",
+                startTime = now.long,
+                startTimeOffset = now.offset,
+                schedules = mutableMapOf("singleScheduleKey" to singleScheduleWrapper),
+        )
+        val parentTaskId = "parentTaskKey"
+
+        val taskHierarchy1Json = NestedTaskHierarchyJson(
+                parentTaskId = parentTaskId,
+                startTime = now.long,
+                startTimeOffset = now.offset,
+        )
+        val taskHierarchy1Id = "taskHierarchy1"
+
+        val child1TaskJson = PrivateTaskJson(
+                name = "child1Task",
+                startTime = now.long,
+                startTimeOffset = now.offset,
+                taskHierarchies = mapOf(taskHierarchy1Id to taskHierarchy1Json),
+        )
+        val child1TaskId = "child1TaskKey"
+
+        val taskHierarchy2Json = NestedTaskHierarchyJson(
+                parentTaskId = parentTaskId,
+                startTime = now.long,
+                startTimeOffset = now.offset,
+        )
+        val taskHierarchy2Id = "taskHierarchy2"
+
+        val child2TaskJson = PrivateTaskJson(
+                name = "child2Task",
+                startTime = now.long,
+                startTimeOffset = now.offset,
+                taskHierarchies = mapOf(taskHierarchy2Id to taskHierarchy2Json),
+        )
+        val child2TaskId = "child2TaskKey"
+
+        val projectJson = PrivateProjectJson(
+                startTime = now.long,
+                startTimeOffset = now.offset,
+                tasks = mutableMapOf(
+                        parentTaskId to parentTaskJson,
+                        child1TaskId to child1TaskJson,
+                        child2TaskId to child2TaskJson,
+                ),
+        )
+
+        val projectRecord = PrivateProjectRecord(databaseWrapper, projectKey, projectJson)
+        val project = PrivateProject(projectRecord, mockk())
+
+        val parentTask = project.tasks.single { it.isRootTask(now) }
+        assertEquals(2, parentTask.getChildTaskHierarchies(now).size)
+
+        val child1Task = parentTask.getChildTaskHierarchies(now)
+                .single { it.childTaskId == child1TaskId }
+                .childTask
+
+        val child2Task = parentTask.getChildTaskHierarchies(now)
+                .single { it.childTaskId == child2TaskId }
+                .childTask
+
+        now = ExactTimeStamp.Local(day1, hour2)
+
+        val parentInstance = parentTask.getInstances(
+                null,
+                now.toOffset().plusOne(),
+                now,
+                bySchedule = true,
+                onlyRoot = true,
+        ).single()
+        assertEquals(2, parentInstance.getChildInstances().size)
+
+        val child1Instance = parentInstance.getChildInstances().single {
+            it.instanceKey
+                    .taskKey
+                    .taskId == child1TaskId
+        }
+
+        child1Instance.setDone(shownFactory, true, now)
+
+        now = ExactTimeStamp.Local(day1, hour3)
+
+        child1Task.setEndData(Task.EndData(now, true))
+        child2Task.setEndData(Task.EndData(now, true))
+
+        now = ExactTimeStamp.Local(day1, hour4)
+
+        assertTrue(parentTask.getChildTaskHierarchies(now).isEmpty())
+        assertTrue(
+                parentInstance.getChildInstances().single {
+                    it.isVisible(now, Instance.VisibilityOptions(assumeChildOfVisibleParent = true))
+                } == child1Instance
+        )
+
+        now = ExactTimeStamp.Local(day2, hour5)
+
+        Irrelevant.setIrrelevant(mapOf(), projectParent, project, now, false)
     }
 }

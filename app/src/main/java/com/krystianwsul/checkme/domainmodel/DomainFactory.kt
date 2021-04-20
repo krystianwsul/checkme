@@ -30,6 +30,7 @@ import com.krystianwsul.common.domain.TaskUndoData
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.DomainThreadChecker
+import com.krystianwsul.common.firebase.MyCustomTime
 import com.krystianwsul.common.firebase.models.*
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.*
@@ -53,7 +54,11 @@ class DomainFactory(
         domainDisposable: CompositeDisposable,
         private val databaseWrapper: DatabaseWrapper,
         private val getDomainUpdater: (DomainFactory) -> DomainUpdater,
-) : PrivateCustomTime.AllRecordsSource, Task.ProjectUpdater, FactoryProvider.Domain {
+) :
+        PrivateCustomTime.AllRecordsSource,
+        Task.ProjectUpdater,
+        FactoryProvider.Domain,
+        JsonTime.UserCustomTimeProvider {
 
     companion object {
 
@@ -94,7 +99,7 @@ class DomainFactory(
 
         projectsFactory.privateProject.let {
             if (it.run { !defaultTimesCreated && customTimes.isEmpty() }) {
-                DefaultCustomTimeCreator.createDefaultCustomTimes(it)
+                DefaultCustomTimeCreator.createDefaultCustomTimes(it, myUserFactory.user)
 
                 it.defaultTimesCreated = true
             }
@@ -331,7 +336,7 @@ class DomainFactory(
 
     // internal
 
-    override fun getSharedCustomTimes(customTimeKey: CustomTimeKey.Private) =
+    override fun getSharedCustomTimes(customTimeKey: CustomTimeKey.Project.Private) =
             projectsFactory.sharedProjects
                     .values
                     .mapNotNull { it.getSharedTimeIfPresent(customTimeKey, ownerKey) }
@@ -359,9 +364,12 @@ class DomainFactory(
         return combineInstanceSequences(instanceSequences)
     }
 
-    fun getCurrentRemoteCustomTimes(now: ExactTimeStamp.Local) = projectsFactory.privateProject
-            .customTimes
-            .filter { it.current(now) }
+    fun getCurrentRemoteCustomTimes(now: ExactTimeStamp.Local): List<MyCustomTime> {
+        val projectCustomTimes = projectsFactory.privateProject.customTimes
+        val userCustomTimes = myUserFactory.user.customTimes.values
+
+        return (projectCustomTimes + userCustomTimes).filter { it.notDeleted(now) }
+    }
 
     fun instanceToGroupListData(
             instance: Instance<*>,
@@ -469,14 +477,7 @@ class DomainFactory(
             val childTask =
                     remoteToRemoteConversion.endTasks.getValue(startTaskHierarchy.childTaskId)
 
-            val taskHierarchy = newProject.copyTaskHierarchy(
-                    now,
-                    startTaskHierarchy,
-                    parentTask.id,
-                    childTask.id,
-            )
-
-            remoteToRemoteConversion.endTaskHierarchies.add(taskHierarchy)
+            newProject.copyTaskHierarchy(now, startTaskHierarchy, parentTask.id, childTask)
         }
 
         val endData = Task.EndData(now, true)
@@ -575,11 +576,26 @@ class DomainFactory(
     }
 
     fun getTime(timePair: TimePair) = timePair.customTimeKey
-            ?.let { projectsFactory.getCustomTime(it) }
+            ?.let(::getCustomTime)
             ?: Time.Normal(timePair.hourMinute!!)
 
     fun getDateTime(dateTimePair: DateTimePair) = dateTimePair.run { DateTime(date, getTime(timePair)) }
 
+    override fun getUserCustomTime(userCustomTimeKey: CustomTimeKey.User): Time.Custom.User {
+        val provider = if (userCustomTimeKey.userKey == deviceDbInfo.key) myUserFactory.user else friendsFactory
+
+        return provider.getUserCustomTime(userCustomTimeKey)
+    }
+
+    fun getCustomTime(customTimeKey: CustomTimeKey): Time.Custom {
+        return when (customTimeKey) {
+            is CustomTimeKey.Project<*> -> projectsFactory.getCustomTime(customTimeKey)
+            is CustomTimeKey.User -> getUserCustomTime(customTimeKey)
+            else -> throw UnsupportedOperationException() // compilation
+        }
+    }
+
+    // this shouldn't use DateTime, since that leaks Time.Custom which is a model object
     class HourUndoData(val instanceDateTimes: Map<InstanceKey, DateTime>)
 
     class ReadTimes(start: ExactTimeStamp.Local, read: ExactTimeStamp.Local, stop: ExactTimeStamp.Local) {

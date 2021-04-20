@@ -39,6 +39,8 @@ class SharedTaskRecord private constructor(
 
             taskJson.noScheduleOrParent = noScheduleOrParentRecords.mapValues { it.value.createObject }
 
+            taskJson.taskHierarchies = taskHierarchyRecords.mapValues { it.value.createObject }
+
             return taskJson
         }
 
@@ -71,8 +73,6 @@ class SharedTaskRecord private constructor(
     )
 
     override fun deleteFromParent() {
-        sharedProjectRecord.mutateTaskRecords {
-            check(it.remove(id) == this)
-        }
+        check(sharedProjectRecord.taskRecords.remove(id) == this)
     }
 }

@@ -3,15 +3,16 @@ import com.krystianwsul.common.firebase.JsDatabaseWrapper
 import com.krystianwsul.common.firebase.managers.JsPrivateProjectManager
 import com.krystianwsul.common.firebase.managers.JsRootUserManager
 import com.krystianwsul.common.firebase.managers.JsSharedProjectManager
-import com.krystianwsul.common.firebase.managers.RootInstanceManager
 import com.krystianwsul.common.firebase.models.PrivateProject
 import com.krystianwsul.common.firebase.models.Project
 import com.krystianwsul.common.firebase.models.RootUser
 import com.krystianwsul.common.firebase.models.SharedProject
-import com.krystianwsul.common.firebase.records.ProjectRecord
+import com.krystianwsul.common.relevance.CustomTimeRelevance
 import com.krystianwsul.common.relevance.Irrelevant
 import com.krystianwsul.common.time.ExactTimeStamp
-import com.krystianwsul.common.utils.ProjectType
+import com.krystianwsul.common.time.JsonTime
+import com.krystianwsul.common.time.Time
+import com.krystianwsul.common.utils.CustomTimeKey
 
 object RelevanceChecker {
 
@@ -19,7 +20,7 @@ object RelevanceChecker {
             admin: dynamic,
             response: MutableList<String>,
             updateDatabase: Boolean,
-            onComplete: () -> Unit
+            onComplete: () -> Unit,
     ) {
         val roots = listOf("development", "production")
 
@@ -42,47 +43,40 @@ object RelevanceChecker {
         roots.forEach { root ->
             val databaseWrapper = JsDatabaseWrapper(admin, root)
 
-            databaseWrapper.getInstances { instanceJsonMap ->
-                fun <T : ProjectType> getInstances(projectRecord: ProjectRecord<T>) = projectRecord.taskRecords
-                        .values
-                        .associate {
-                            val taskInstanceJsons = instanceJsonMap[it.rootInstanceKey] ?: mapOf()
+            databaseWrapper.getUsers { userWrapperMap ->
+                val rootUserManager = JsRootUserManager(databaseWrapper, userWrapperMap)
 
-                            val snapshotInfos = taskInstanceJsons.map { (date, timeMap) ->
-                                timeMap.map { (time, instanceJson) ->
-                                    RootInstanceManager.SnapshotInfo(date, time, instanceJson)
-                                }
-                            }.flatten()
+                val rootUsers = rootUserManager.records.mapValues { RootUser(it.value) }
 
-                            it.taskKey to RootInstanceManager(it, snapshotInfos, databaseWrapper)
-                        }
+                val userCustomTimes = rootUsers.flatMap { it.value.customTimes.values }
+                val userCustomTimeRelevances = userCustomTimes.associate { it.key to CustomTimeRelevance(it) }
 
-                var privateData: Pair<JsPrivateProjectManager, Collection<RootInstanceManager<ProjectType.Private>>>? =
-                        null
-                var sharedData: Triple<JsSharedProjectManager, List<SharedProject>, Collection<RootInstanceManager<ProjectType.Shared>>>? =
-                        null
+                userCustomTimeRelevances.values
+                        .filter { (it.customTime as Time.Custom.User).notDeleted(ExactTimeStamp.Local.now) }
+                        .forEach { it.setRelevant() }
+
+                var privateData: JsPrivateProjectManager? = null
+                var sharedData: Pair<JsSharedProjectManager, List<SharedProject>>? = null
 
                 fun projectCallback() {
-                    if (privateData == null)
-                        return
+                    if (privateData == null) return
 
-                    if (sharedData == null)
-                        return
+                    if (sharedData == null) return
 
-                    fun saveProjects(rootUserManager: JsRootUserManager?) {
+                    fun saveProjects() {
                         val values = mutableMapOf<String, Any?>()
 
-                        privateData!!.first.save(values)
-                        privateData!!.second.forEach { it.save(values) }
+                        privateData!!.save(values)
                         sharedData!!.first.save(values)
-                        sharedData!!.third.forEach { it.save(values) }
-                        rootUserManager?.save(values)
+                        rootUserManager.save(values)
 
                         ErrorLogger.instance.log("updateDatabase: $updateDatabase")
                         ErrorLogger.instance.log(
-                            "all database values: ${values.entries.joinToString(
-                                "<br>\n"
-                            )}"
+                                "all database values: ${
+                                    values.entries.joinToString(
+                                            "<br>\n"
+                                    )
+                                }"
                         )
                         if (updateDatabase) {
                             databaseWrapper.update(values) { message, _, exception ->
@@ -98,71 +92,54 @@ object RelevanceChecker {
                         }
                     }
 
+                    userCustomTimeRelevances.values
+                            .filter { !it.relevant }
+                            .forEach { (it.customTime as Time.Custom.User).delete() }
+
                     if (sharedData!!.second.isEmpty()) {
-                        saveProjects(null)
+                        saveProjects()
                     } else {
-                        databaseWrapper.getUsers {
-                            val rootUserManager = JsRootUserManager(it)
+                        val removedSharedProjectKeys = sharedData!!.second.map { it.projectKey }
 
-                            val rootUsers = rootUserManager.records
-                                    .values
-                                    .map { RootUser(it) }
-
-                            val removedSharedProjectKeys = sharedData!!.second.map { it.projectKey }
-
-                            rootUsers.forEach { remoteUser ->
-                                removedSharedProjectKeys.forEach {
-                                    remoteUser.removeProject(it)
-                                }
+                        rootUsers.values.forEach { remoteUser ->
+                            removedSharedProjectKeys.forEach {
+                                remoteUser.removeProject(it)
                             }
-
-                            saveProjects(rootUserManager)
                         }
+
+                        saveProjects()
+                    }
+                }
+
+                val userCustomTimeProvider = object : JsonTime.UserCustomTimeProvider {
+
+                    override fun getUserCustomTime(userCustomTimeKey: CustomTimeKey.User): Time.Custom.User {
+                        return rootUsers.getValue(userCustomTimeKey.userKey).getUserCustomTime(userCustomTimeKey)
                     }
                 }
 
                 databaseWrapper.getPrivateProjects {
                     val privateProjectManager = JsPrivateProjectManager(databaseWrapper, it)
 
-                    val privateRootInstanceManagers = privateProjectManager.value
-                            .associate { it.projectKey to null as Collection<RootInstanceManager<ProjectType.Private>>? }
-                            .toMutableMap()
-
                     privateProjectManager.value.forEach { privateProjectRecord ->
-                        val rootInstanceManagers = getInstances(privateProjectRecord)
-
-                        val privateProject = PrivateProject(privateProjectRecord, rootInstanceManagers) {
-                            throw UnsupportedOperationException()
-                        }
+                        val privateProject = PrivateProject(privateProjectRecord, userCustomTimeProvider)
 
                         response += "checking relevance for private project ${privateProject.projectKey}"
 
                         Irrelevant.setIrrelevant(
+                                userCustomTimeRelevances,
                                 object : Project.Parent {
 
                                     override fun deleteProject(project: Project<*>) = throw UnsupportedOperationException()
                                 },
                                 privateProject,
-                                ExactTimeStamp.Local.now
+                                ExactTimeStamp.Local.now,
                         )
 
-                        check(privateRootInstanceManagers.containsKey(privateProject.projectKey))
-                        check(privateRootInstanceManagers[privateProject.projectKey] == null)
+                        check(privateData == null)
 
-                        privateRootInstanceManagers[privateProject.projectKey] = rootInstanceManagers.values
-
-                        if (privateRootInstanceManagers.none { it.value == null }) {
-                            check(privateData == null)
-
-                            privateData = Pair(
-                                    privateProjectManager,
-                                    privateRootInstanceManagers.values
-                                            .map { it!! }
-                                            .flatten()
-                            )
-
-                            projectCallback()
-                        }
+                        privateData = privateProjectManager
+                        projectCallback()
                     }
                 }
 
@@ -172,32 +149,25 @@ object RelevanceChecker {
                     val sharedDataInner = sharedProjectManager.records
                             .values
                             .map { sharedProjectRecord ->
-                                val rootInstanceManagers = getInstances(sharedProjectRecord)
-
-                                val sharedProject = SharedProject(sharedProjectRecord, rootInstanceManagers) {
-                                    throw UnsupportedOperationException()
-                                }
+                                val sharedProject = SharedProject(sharedProjectRecord, userCustomTimeProvider)
 
                                 response += "checking relevance for shared project ${sharedProject.projectKey}: ${sharedProject.name}"
 
                                 val removedSharedProjects = Irrelevant.setIrrelevant(
+                                        userCustomTimeRelevances,
                                         object : Project.Parent {
 
                                             override fun deleteProject(project: Project<*>) = Unit
                                         },
                                         sharedProject,
-                                        ExactTimeStamp.Local.now
+                                        ExactTimeStamp.Local.now,
                                 ).removedSharedProjects
                                 check(removedSharedProjects.size < 2)
 
-                                Pair(removedSharedProjects.singleOrNull(), rootInstanceManagers.values)
+                                removedSharedProjects.singleOrNull()
                             }
 
-                    sharedData = Triple(
-                            sharedProjectManager,
-                            sharedDataInner.mapNotNull { it.first },
-                            sharedDataInner.map { it.second }.flatten()
-                    )
+                    sharedData = Pair(sharedProjectManager, sharedDataInner.filterNotNull())
 
                     projectCallback()
                 }

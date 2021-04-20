@@ -25,7 +25,7 @@ interface CurrentOffset {
         if (currentOffset(exactTimeStamp)) throwTime(exactTimeStamp)
     }
 
-    private fun throwTime(exactTimeStamp: ExactTimeStamp): Nothing = throw Current.TimeException(
+    private fun throwTime(exactTimeStamp: ExactTimeStamp): Nothing = throw Endable.TimeException(
             "$this offsets start: $startExactTimeStampOffset, end: $endExactTimeStampOffset, time: $exactTimeStamp"
     )
 }

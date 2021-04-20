@@ -7,7 +7,7 @@ import com.krystianwsul.common.firebase.json.PrivateProjectJson
 import com.krystianwsul.common.firebase.models.PrivateProject
 import com.krystianwsul.common.firebase.records.PrivateProjectRecord
 import com.krystianwsul.common.firebase.records.ProjectRecord
-import com.krystianwsul.common.time.ExactTimeStamp
+import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.utils.ProjectType
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 
@@ -25,10 +25,8 @@ class PrivateProjectFactory(
         deviceDbInfo,
 ) {
 
-    override fun newProject(projectRecord: ProjectRecord<ProjectType.Private>) = PrivateProject(
-            projectRecord as PrivateProjectRecord,
-            rootInstanceManagers
-    ) { newRootInstanceManager(it, null) }.apply {
-        fixNotificationShown(factoryProvider.shownFactory, ExactTimeStamp.Local.now)
-    }
+    override fun newProject(
+            projectRecord: ProjectRecord<ProjectType.Private>,
+            userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
+    ) = PrivateProject(projectRecord as PrivateProjectRecord, userCustomTimeProvider)
 }

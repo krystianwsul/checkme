@@ -24,5 +24,5 @@ class YearlySchedule<T : ProjectType>(
         return dateThisYear == date
     }
 
-    private fun getDateInYear(year: Int) = Date(year, month, day)
+    fun getDateInYear(year: Int) = Date(year, month, day)
 }

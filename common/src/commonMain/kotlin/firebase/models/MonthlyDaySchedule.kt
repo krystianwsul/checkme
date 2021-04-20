@@ -26,10 +26,10 @@ class MonthlyDaySchedule<T : ProjectType>(
         return dateThisMonth == date
     }
 
-    private fun getDateInMonth(year: Int, month: Int) = getDateInMonth(
+    fun getDateInMonth(year: Int, month: Int) = getDateInMonth(
             year,
             month,
             repeatingScheduleRecord.dayOfMonth,
-            repeatingScheduleRecord.beginningOfMonth
+            repeatingScheduleRecord.beginningOfMonth,
     )
 }

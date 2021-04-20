@@ -18,6 +18,7 @@ import com.krystianwsul.checkme.utils.newUuid
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.domain.ScheduleGroup
 import com.krystianwsul.common.firebase.DomainThreadChecker
+import com.krystianwsul.common.firebase.MyCustomTime
 import com.krystianwsul.common.firebase.json.TaskJson
 import com.krystianwsul.common.firebase.models.*
 import com.krystianwsul.common.time.ExactTimeStamp
@@ -35,9 +36,7 @@ fun DomainFactory.getCreateTaskData(
 
     val now = ExactTimeStamp.Local.now
 
-    val customTimes = getCurrentRemoteCustomTimes(now).associateBy {
-        it.key
-    }.toMutableMap<CustomTimeKey<*>, Time.Custom<*>>()
+    val customTimes = getCurrentRemoteCustomTimes(now).associate { it.key to it as Time.Custom }.toMutableMap()
 
     val taskData = (startParameters as? EditViewModel.StartParameters.Task)?.let {
         val task = getTaskForce(it.taskKey)
@@ -50,7 +49,7 @@ fun DomainFactory.getCreateTaskData(
             val schedules = task.getCurrentScheduleIntervals(now)
 
             customTimes += schedules.mapNotNull { it.schedule.customTimeKey }.map {
-                it to task.project.getCustomTime(it.customTimeId)
+                it to getCustomTime(it)
             }
 
             parentKey = task.project
@@ -82,12 +81,12 @@ fun DomainFactory.getCreateTaskData(
                 task.project
                         .getAssignedTo(assignedTo)
                         .map { it.key }
-                        .toSet()
+                        .toSet(),
         )
     }
 
     val customTimeDatas = customTimes.values.associate {
-        it.key to EditViewModel.CustomTimeData(it.key, it.name, it.hourMinutes.toSortedMap())
+        it.key to EditViewModel.CustomTimeData(it.key, it.name, it.hourMinutes.toSortedMap(), it is MyCustomTime)
     }
 
     val showAllInstancesDialog = when (startParameters) {
@@ -196,7 +195,7 @@ fun DomainUpdater.createScheduleRootTask(
             finalProjectId,
             imageUuid,
             deviceDbInfo,
-            assignedTo = sharedProjectParameters.nonNullAssignedTo
+            assignedTo = sharedProjectParameters.nonNullAssignedTo,
     )
 
     copyTaskKey?.let { copyTask(now, task, it) }

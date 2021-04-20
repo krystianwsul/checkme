@@ -6,13 +6,16 @@ import com.krystianwsul.checkme.persistencemodel.InstanceShownRecord
 import com.krystianwsul.checkme.persistencemodel.PersistenceManager
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.time.DateTime
-import com.krystianwsul.common.utils.CustomTimeId
+import com.krystianwsul.common.time.JsonTime
+import com.krystianwsul.common.time.TimeDescriptor
 import com.krystianwsul.common.utils.ProjectKey
+import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.TaskKey
+import com.krystianwsul.common.utils.singleOrEmpty
 
 @SuppressLint("UseSparseArrays")
 class LocalFactory(
-        private val persistenceManager: PersistenceManager = PersistenceManager.instance
+        private val persistenceManager: PersistenceManager = PersistenceManager.instance,
 ) : Instance.ShownFactory, FactoryProvider.Local {
 
     val instanceShownRecords: Collection<InstanceShownRecord>
@@ -28,58 +31,31 @@ class LocalFactory(
             scheduleYear: Int,
             scheduleMonth: Int,
             scheduleDay: Int,
-            scheduleCustomTimeId: CustomTimeId<*>?,
-            scheduleHour: Int?,
-            scheduleMinute: Int?
+            scheduleJsonTime: JsonTime,
     ): InstanceShownRecord? {
-        val matches: List<InstanceShownRecord>
-        if (scheduleCustomTimeId != null) {
-            check(scheduleHour == null)
-            check(scheduleMinute == null)
+        val scheduleTimeDescriptor = TimeDescriptor.fromJsonTime(scheduleJsonTime)
 
-            matches = persistenceManager.instanceShownRecords
-                    .asSequence()
-                    .filter { it.projectId == projectId.key }
-                    .filter { it.taskId == taskId }
-                    .filter { it.scheduleYear == scheduleYear }
-                    .filter { it.scheduleMonth == scheduleMonth }
-                    .filter { it.scheduleDay == scheduleDay }
-                    .filter { it.scheduleCustomTimeId == scheduleCustomTimeId.value }
-                    .toList()
-        } else {
-            checkNotNull(scheduleHour)
-            checkNotNull(scheduleMinute)
-
-            matches = persistenceManager.instanceShownRecords
-                    .asSequence()
-                    .filter { it.projectId == projectId.key }
-                    .filter { it.taskId == taskId }
-                    .filter { it.scheduleYear == scheduleYear }
-                    .filter { it.scheduleMonth == scheduleMonth }
-                    .filter { it.scheduleDay == scheduleDay }
-                    .filter { it.scheduleHour == scheduleHour }
-                    .filter { it.scheduleMinute == scheduleMinute }
-                    .toList()
-        }
-
-        return matches.singleOrNull()
+        return persistenceManager.instanceShownRecords
+                .asSequence()
+                .filter { it.projectId == projectId.key }
+                .filter { it.taskId == taskId }
+                .filter { it.scheduleYear == scheduleYear }
+                .filter { it.scheduleMonth == scheduleMonth }
+                .filter { it.scheduleDay == scheduleDay }
+                .filter { it.scheduleTimeDescriptor == scheduleTimeDescriptor }
+                .toList()
+                .singleOrEmpty()
     }
 
-    override fun createShown(
+    override fun <T : ProjectType> createShown(
             remoteTaskId: String,
             scheduleDateTime: DateTime,
-            projectId: ProjectKey<*>
+            projectId: ProjectKey<*>,
     ): InstanceShownRecord {
-        val (customTimeId, hour, minute) = scheduleDateTime.time
-                .timePair
-                .destructureRemote()
-
         return persistenceManager.createInstanceShownRecord(
                 remoteTaskId,
                 scheduleDateTime.date,
-                customTimeId,
-                hour,
-                minute,
+                JsonTime.fromTime<T>(scheduleDateTime.time),
                 projectId
         )
     }

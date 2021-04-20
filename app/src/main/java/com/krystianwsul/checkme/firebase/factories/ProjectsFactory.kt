@@ -39,18 +39,18 @@ class ProjectsFactory(
             privateInitialProjectEvent,
             factoryProvider,
             domainDisposable,
-            deviceDbInfo
+            deviceDbInfo,
     )
 
     private val sharedProjectFactoriesProperty = MapRelayProperty(
-            sharedInitialProjectsEvent.pairs
+            sharedInitialProjectsEvent.initialProjectDatas
                     .associate { (sharedProjectLoader, sharedInitialProjectEvent) ->
                         sharedInitialProjectEvent.projectRecord.projectKey to SharedProjectFactory(
                                 sharedProjectLoader,
                                 sharedInitialProjectEvent,
                                 factoryProvider,
                                 domainDisposable,
-                                deviceDbInfo
+                                deviceDbInfo,
                         )
                     }
                     .toMutableMap()
@@ -110,7 +110,7 @@ class ProjectsFactory(
                 privateProjectFactory.changeTypes,
                 sharedProjectFactoryChangeTypes,
                 addProjectChangeTypes,
-                removeProjectChangeTypes
+                removeProjectChangeTypes,
         ).merge().publishImmediate(domainDisposable)
     }
 
@@ -227,14 +227,11 @@ class ProjectsFactory(
 
     fun save(values: MutableMap<String, Any?>) {
         privateProjectLoader.projectManager.save(values)
-        privateProjectFactory.saveInstances(values)
-
         sharedProjectsLoader.projectManager.save(values)
-        sharedProjectFactories.forEach { it.value.saveInstances(values) }
     }
 
-    fun getCustomTime(customTimeKey: CustomTimeKey<*>) =
-            projects.getValue(customTimeKey.projectId).getCustomTime(customTimeKey.customTimeId)
+    fun getCustomTime(customTimeKey: CustomTimeKey.Project<*>) =
+            projects.getValue(customTimeKey.projectId).getUntypedProjectCustomTime(customTimeKey.customTimeId)
 
     private fun getProjectForce(taskKey: TaskKey) = getProjectIfPresent(taskKey)!!
 
@@ -261,9 +258,16 @@ class ProjectsFactory(
             .singleOrNull { it.key.key == projectId }
             ?.value
 
-    fun getTaskHierarchy(taskHierarchyKey: TaskHierarchyKey) =
-            projects.getValue(taskHierarchyKey.projectId)
-                    .getTaskHierarchy(taskHierarchyKey.taskHierarchyId)
+    fun getTaskHierarchy(taskHierarchyKey: TaskHierarchyKey): TaskHierarchy<*> {
+        return when (taskHierarchyKey) {
+            is TaskHierarchyKey.Project -> projects.getValue(taskHierarchyKey.projectId)
+                    .getProjectTaskHierarchy(taskHierarchyKey.taskHierarchyId)
+            is TaskHierarchyKey.Nested -> projects.getValue(taskHierarchyKey.childTaskKey.projectKey)
+                    .getTaskForce(taskHierarchyKey.childTaskKey.taskId)
+                    .nestedParentTaskHierarchies.getValue(taskHierarchyKey.taskHierarchyId)
+            else -> throw UnsupportedOperationException() // compilation
+        }
+    }
 
     fun getSchedule(scheduleId: ScheduleId) = projects.getValue(scheduleId.projectId)
             .getTaskForce(scheduleId.taskId)

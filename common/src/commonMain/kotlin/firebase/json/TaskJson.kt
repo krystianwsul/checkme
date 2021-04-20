@@ -20,6 +20,7 @@ interface TaskJson<T : ProjectType> {
     var instances: MutableMap<String, InstanceJson>
     val schedules: Map<String, ScheduleWrapper<T>>
     var noScheduleOrParent: Map<String, NoScheduleOrParentJson>
+    val taskHierarchies: Map<String, NestedTaskHierarchyJson>
 
     @Serializable
     data class Image(

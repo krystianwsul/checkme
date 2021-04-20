@@ -94,7 +94,7 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
 
     private val timeDialogListener = object : TimeDialogFragment.TimeDialogListener {
 
-        override fun onCustomTimeSelected(customTimeKey: CustomTimeKey<*>) {
+        override fun onCustomTimeSelected(customTimeKey: CustomTimeKey) {
             state.timePairPersist.customTimeKey = customTimeKey
             updateFields()
         }
@@ -108,7 +108,7 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
 
         override fun onAddSelected() = startActivityForResult(
                 ShowCustomTimeActivity.getCreateIntent(requireContext()),
-                ShowCustomTimeActivity.CREATE_CUSTOM_TIME_REQUEST_CODE
+                ShowCustomTimeActivity.CREATE_CUSTOM_TIME_REQUEST_CODE,
         )
     }
 
@@ -315,16 +315,17 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
         tryGetFragment<MaterialTimePicker>(TAG_TIME_FRAGMENT)?.setListener(timePickerDialogFragmentListener)
 
         binding.editInstanceTimeLayout.setDropdown {
-            val customTimeDatas = ArrayList(data.customTimeDatas
-                    .values
-                    .filter { it.customTimeKey is CustomTimeKey.Private }
-                    .sortedBy { it.hourMinutes[state.date.dayOfWeek] }
-                    .map {
-                        TimeDialogFragment.CustomTimeData(
-                                it.customTimeKey,
-                                it.name + " (" + it.hourMinutes[state.date.dayOfWeek] + ")"
-                        )
-                    }
+            val customTimeDatas = ArrayList(
+                    data.customTimeDatas
+                            .values
+                            .filter { it.isMine }
+                            .sortedBy { it.hourMinutes[state.date.dayOfWeek] }
+                            .map {
+                                TimeDialogFragment.CustomTimeData(
+                                        it.customTimeKey,
+                                        it.name + " (" + it.hourMinutes[state.date.dayOfWeek] + ")",
+                                )
+                            }
             )
 
             TimeDialogFragment.newInstance(customTimeDatas).also {
@@ -437,8 +438,7 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
         check(requestCode == ShowCustomTimeActivity.CREATE_CUSTOM_TIME_REQUEST_CODE)
 
         if (resultCode == Activity.RESULT_OK) {
-            state.timePairPersist.customTimeKey =
-                    data!!.getParcelableExtra<CustomTimeKey.Private>(ShowCustomTimeActivity.CUSTOM_TIME_KEY)!!
+            state.timePairPersist.customTimeKey = data!!.getParcelableExtra(ShowCustomTimeActivity.CUSTOM_TIME_KEY)!!
         }
     }
 

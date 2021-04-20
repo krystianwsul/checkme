@@ -6,17 +6,17 @@ import com.krystianwsul.common.utils.Parcelize
 
 @Parcelize
 class TimePairPersist private constructor(
-        var customTimeKey: CustomTimeKey<*>?,
-        private var _hourMinute: HourMinute
+        var customTimeKey: CustomTimeKey?,
+        private var _hourMinute: HourMinute,
 ) : Parcelable {
 
     val hourMinute get() = _hourMinute
 
-    val timePair get() = customTimeKey?.let { TimePair(it) } ?: TimePair(hourMinute)
+    val timePair get() = customTimeKey?.let(::TimePair) ?: TimePair(hourMinute)
 
     constructor(timePair: TimePair) : this(
             timePair.customTimeKey,
-            timePair.hourMinute ?: HourMinute.nextHour.second
+            timePair.hourMinute ?: HourMinute.nextHour.second,
     )
 
     fun setHourMinute(hourMinute: HourMinute) {

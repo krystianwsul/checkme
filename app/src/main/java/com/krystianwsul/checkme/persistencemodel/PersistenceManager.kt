@@ -2,7 +2,8 @@ package com.krystianwsul.checkme.persistencemodel
 
 
 import com.krystianwsul.common.time.Date
-import com.krystianwsul.common.utils.CustomTimeId
+import com.krystianwsul.common.time.JsonTime
+import com.krystianwsul.common.time.TimeDescriptor
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
 
@@ -39,10 +40,8 @@ class PersistenceManager(
     fun createInstanceShownRecord(
             remoteTaskId: String,
             scheduleDate: Date,
-            customTimeId: CustomTimeId<*>?,
-            hour: Int?,
-            minute: Int?,
-            projectId: ProjectKey<*>
+            scheduleJsonTime: JsonTime,
+            projectId: ProjectKey<*>,
     ): InstanceShownRecord {
         check(remoteTaskId.isNotEmpty())
 
@@ -55,12 +54,10 @@ class PersistenceManager(
                 scheduleDate.year,
                 scheduleDate.month,
                 scheduleDate.day,
-                customTimeId?.value,
-                hour,
-                minute,
+                TimeDescriptor.fromJsonTime(scheduleJsonTime),
                 mNotified = false,
                 mNotificationShown = false,
-                mProjectId = projectId.key
+                mProjectId = projectId.key,
         ).also { _instanceShownRecords.add(it) }
     }
 

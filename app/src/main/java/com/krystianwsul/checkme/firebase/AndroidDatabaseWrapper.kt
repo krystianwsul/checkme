@@ -8,11 +8,8 @@ import com.google.firebase.database.Query
 import com.google.firebase.database.core.Path
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
-import com.krystianwsul.checkme.RemoteConfig
 import com.krystianwsul.checkme.domainmodel.observeOnDomain
 import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
-import com.krystianwsul.checkme.firebase.loaders.ProjectProvider
-import com.krystianwsul.checkme.firebase.loaders.RootInstanceMap
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.checkme.utils.getMessage
 import com.krystianwsul.checkme.utils.toV3
@@ -145,24 +142,6 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
 
     override fun getPrivateProjectObservable(key: ProjectKey.Private) =
             privateProjectQuery(key).typedSnapshotChanges<PrivateProjectJson>()
-
-    private fun rootInstanceQuery(taskFirebaseKey: String) =
-            rootReference.child("$KEY_INSTANCES/$taskFirebaseKey")
-
-    override fun getRootInstanceObservable(taskFirebaseKey: String): Observable<ProjectProvider.RootInstanceData> {
-        return RemoteConfig.observable
-                .map { it.queryRemoteInstances }
-                .distinctUntilChanged()
-                .switchMap {
-                    if (it) {
-                        rootInstanceQuery(taskFirebaseKey).indicatorSnapshotChanges<RootInstanceMap>().map {
-                            ProjectProvider.RootInstanceData(true, it)
-                        }
-                    } else {
-                        Observable.just(ProjectProvider.RootInstanceData(false, Snapshot("", null)))
-                    }
-                }
-    }
 
     sealed class LoadState<T : Any> {
 

@@ -77,7 +77,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
     override val backgroundView get() = binding.scheduleDialogRoot
     override val contentView get() = binding.scheduleDialogContentWrapper
 
-    private var customTimeDatas: Map<CustomTimeKey<*>, EditViewModel.CustomTimeData>? = null
+    private var customTimeDatas: Map<CustomTimeKey, EditViewModel.CustomTimeData>? = null
 
     private lateinit var scheduleDialogData: ScheduleDialogData
 
@@ -91,8 +91,8 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
     private val timeDialogListener = object : TimeDialogFragment.TimeDialogListener {
 
-        override fun onCustomTimeSelected(customTimeKey: CustomTimeKey<*>) {
-            check(customTimeDatas != null)
+        override fun onCustomTimeSelected(customTimeKey: CustomTimeKey) {
+            checkNotNull(customTimeDatas)
 
             scheduleDialogData.timePairPersist.customTimeKey = customTimeKey
 
@@ -261,7 +261,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         binding.scheduleDialogTimeLayout.setDropdown {
             checkNotNull(customTimeDatas)
 
-            val list = customTimeDatas!!.values.filter { it.customTimeKey is CustomTimeKey.Private }
+            val list = customTimeDatas!!.values.filter { it.isMine }
 
             val customTimeDatas = delegate.getCustomTimeDatas(list)
 
@@ -429,7 +429,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         if (customTimeDatas != null) updateFields()
     }
 
-    fun initialize(customTimeDatas: Map<CustomTimeKey<*>, EditViewModel.CustomTimeData>) {
+    fun initialize(customTimeDatas: Map<CustomTimeKey, EditViewModel.CustomTimeData>) {
         this.customTimeDatas = customTimeDatas
 
         if (this::scheduleDialogData.isInitialized)
@@ -476,7 +476,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
         if (resultCode == Activity.RESULT_OK)
             scheduleDialogData.timePairPersist.customTimeKey =
-                    data!!.getParcelableExtra<CustomTimeKey.Private>(ShowCustomTimeActivity.CUSTOM_TIME_KEY)!!
+                    data!!.getParcelableExtra(ShowCustomTimeActivity.CUSTOM_TIME_KEY)!!
     }
 
     @SuppressLint("SetTextI18n")

@@ -131,7 +131,7 @@ abstract class RepeatingSchedule<T : ProjectType>(rootTask: Task<T>) : Schedule<
         val dateTimes = getDateTimesInRange(
                 scheduleInterval,
                 null,
-                now.toOffset().plusOne()
+                now.toOffset().plusOne(),
         ).toList()
 
         val pastRootInstances = dateTimes.map(rootTask::getInstance).filter { it.isRootInstance() }

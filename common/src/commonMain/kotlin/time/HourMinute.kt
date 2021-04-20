@@ -14,6 +14,8 @@ data class HourMinute(val hour: Int, val minute: Int) : Comparable<HourMinute>, 
         private val dateFormat = DateFormat(PATTERN)
         private val timeFormat = TimeFormat(PATTERN)
 
+        private val hourMinuteRegex = Regex("^\\d\\d:\\d\\d$")
+
         val now get() = TimeStamp.now.hourMinute
 
         val nextHour get() = getNextHour(Date.today())
@@ -25,7 +27,9 @@ data class HourMinute(val hour: Int, val minute: Int) : Comparable<HourMinute>, 
                 .plus(1.hours)
                 .let { Pair(Date(it), HourMinute(it)) }
 
-        fun fromJson(json: String) = dateFormat.parse(json).let { HourMinute(it.hours, it.minutes) }
+        private fun fromJson(json: String) = dateFormat.parse(json).let { HourMinute(it.hours, it.minutes) }
+
+        fun tryFromJson(json: String) = hourMinuteRegex.find(json)?.let { fromJson(json) }
     }
 
     constructor(dateTimeTz: DateTimeTz) : this(dateTimeTz.hours, dateTimeTz.minutes)

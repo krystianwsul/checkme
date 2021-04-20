@@ -1,11 +1,11 @@
 package com.krystianwsul.common.firebase.records
 
 import com.krystianwsul.common.firebase.json.InstanceJson
+import com.krystianwsul.common.firebase.json.NestedTaskHierarchyJson
 import com.krystianwsul.common.firebase.json.NoScheduleOrParentJson
 import com.krystianwsul.common.firebase.json.TaskJson
 import com.krystianwsul.common.firebase.json.schedule.*
 import com.krystianwsul.common.firebase.records.schedule.*
-import com.krystianwsul.common.utils.CustomTimeId
 import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.ScheduleKey
 
@@ -22,7 +22,7 @@ abstract class TaskRecord<T : ProjectType> protected constructor(
         const val TASKS = "tasks"
     }
 
-    val instanceRecords = mutableMapOf<ScheduleKey, ProjectInstanceRecord<T>>()
+    val instanceRecords = mutableMapOf<ScheduleKey, InstanceRecord<T>>()
 
     val singleScheduleRecords: MutableMap<String, SingleScheduleRecord<T>> = mutableMapOf()
 
@@ -36,6 +36,10 @@ abstract class TaskRecord<T : ProjectType> protected constructor(
 
     val noScheduleOrParentRecords = taskJson.noScheduleOrParent
             .mapValues { NoScheduleOrParentRecord(this, it.value, it.key) }
+            .toMutableMap()
+
+    val taskHierarchyRecords = taskJson.taskHierarchies
+            .mapValues { NestedTaskHierarchyRecord(it.key, this, it.value) }
             .toMutableMap()
 
     final override val key get() = projectRecord.childKey + "/" + TASKS + "/" + id
@@ -74,7 +78,8 @@ abstract class TaskRecord<T : ProjectType> protected constructor(
                 monthlyDayScheduleRecords.values +
                 monthlyWeekScheduleRecords.values +
                 yearlyScheduleRecords.values +
-                noScheduleOrParentRecords.values
+                noScheduleOrParentRecords.values +
+                taskHierarchyRecords.values
 
     init {
         if (name.isEmpty()) throw MalformedTaskException("taskKey: $key, taskJson: $taskJson")
@@ -82,15 +87,14 @@ abstract class TaskRecord<T : ProjectType> protected constructor(
         for ((key, instanceJson) in taskJson.instances) {
             check(key.isNotEmpty())
 
-            val (scheduleKey, customTimeId) = InstanceRecord.stringToScheduleKey(projectRecord, key)
+            val scheduleKey = InstanceRecord.stringToScheduleKey(projectRecord, key)
 
-            val remoteInstanceRecord = ProjectInstanceRecord(
+            val remoteInstanceRecord = InstanceRecord(
                     create,
                     this,
                     instanceJson,
                     scheduleKey,
                     key,
-                    customTimeId
             )
 
             instanceRecords[scheduleKey] = remoteInstanceRecord
@@ -162,20 +166,15 @@ abstract class TaskRecord<T : ProjectType> protected constructor(
         }
     }
 
-    fun newInstanceRecord(
-            instanceJson: InstanceJson,
-            scheduleKey: ScheduleKey,
-            customTimeId: CustomTimeId<T>?
-    ): InstanceRecord<T> {
+    fun newInstanceRecord(instanceJson: InstanceJson, scheduleKey: ScheduleKey): InstanceRecord<T> {
         val firebaseKey = InstanceRecord.scheduleKeyToString(scheduleKey)
 
-        val projectInstanceRecord = ProjectInstanceRecord(
+        val projectInstanceRecord = InstanceRecord(
                 true,
                 this,
                 instanceJson,
                 scheduleKey,
                 firebaseKey,
-                customTimeId
         )
 
         check(!instanceRecords.containsKey(projectInstanceRecord.scheduleKey))
@@ -260,8 +259,18 @@ abstract class TaskRecord<T : ProjectType> protected constructor(
         return noScheduleOrParentRecord
     }
 
+    fun newTaskHierarchyRecord(taskHierarchyJson: NestedTaskHierarchyJson): NestedTaskHierarchyRecord {
+        val taskHierarchyRecord = NestedTaskHierarchyRecord(this, taskHierarchyJson)
+        check(!taskHierarchyRecords.containsKey(taskHierarchyRecord.id))
+
+        taskHierarchyRecords[taskHierarchyRecord.id] = taskHierarchyRecord
+        return taskHierarchyRecord
+    }
+
     fun getScheduleRecordId() = projectRecord.getScheduleRecordId(id)
     fun newNoScheduleOrParentRecordId() = projectRecord.newNoScheduleOrParentRecordId(id)
+
+    fun newTaskHierarchyRecordId() = projectRecord.newNestedTaskHierarchyRecordId(id)
 
     private class MalformedTaskException(message: String) : Exception(message)
 }

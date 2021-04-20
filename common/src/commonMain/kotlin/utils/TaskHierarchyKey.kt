@@ -1,3 +1,10 @@
 package com.krystianwsul.common.utils
 
-data class TaskHierarchyKey(val projectId: ProjectKey<*>, val taskHierarchyId: String)
+sealed class TaskHierarchyKey {
+
+    abstract val taskHierarchyId: String
+
+    data class Project(val projectId: ProjectKey<*>, override val taskHierarchyId: String) : TaskHierarchyKey()
+
+    data class Nested(val childTaskKey: TaskKey, override val taskHierarchyId: String) : TaskHierarchyKey()
+}

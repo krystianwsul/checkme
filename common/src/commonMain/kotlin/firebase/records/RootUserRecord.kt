@@ -1,15 +1,19 @@
 package com.krystianwsul.common.firebase.records
 
+import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.RootUserProperties
+import com.krystianwsul.common.firebase.json.UserCustomTimeJson
 import com.krystianwsul.common.firebase.json.UserWrapper
+import com.krystianwsul.common.utils.CustomTimeId
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.UserKey
 
 
 open class RootUserRecord(
+        private val databaseWrapper: DatabaseWrapper,
         create: Boolean,
-        override val createObject: UserWrapper,
-        override val userKey: UserKey
+        final override val createObject: UserWrapper,
+        override val userKey: UserKey,
 ) : RemoteRecord(create), RootUserProperties {
 
     companion object {
@@ -21,9 +25,11 @@ open class RootUserRecord(
 
     final override val userJson by lazy { createObject.userData }
 
-    override val userWrapper by lazy { createObject }
+    final override val userWrapper = createObject
 
-    final override val key by lazy { this.userKey.key }
+    final override val key by lazy { userKey.key }
+
+    override val children get() = customTimeRecords.values.toList()
 
     override var name by Committer(userJson::name, "$key/$USER_DATA")
 
@@ -42,6 +48,16 @@ open class RootUserRecord(
                 .keys
                 .map(::UserKey)
                 .toSet()
+
+    val customTimeRecords = userWrapper.customTimes
+            .entries
+            .associate { (key, customTimeJson) ->
+                val customTimeId = CustomTimeId.User(key)
+                val customTimeRecord = UserCustomTimeRecord(customTimeId, this, customTimeJson)
+
+                customTimeId to customTimeRecord
+            }
+            .toMutableMap()
 
     override fun addFriend(userKey: UserKey) {
         val friendId = userKey.key
@@ -88,5 +104,17 @@ open class RootUserRecord(
         } else {
             false
         }
+    }
+
+    fun newCustomTimeId() = CustomTimeId.User(databaseWrapper.newRootUserCustomTimeId(userKey))
+
+    fun newCustomTimeRecord(customTimeJson: UserCustomTimeJson): UserCustomTimeRecord {
+        val remoteCustomTimeRecord = UserCustomTimeRecord(this, customTimeJson)
+        check(!customTimeRecords.containsKey(remoteCustomTimeRecord.id))
+
+        userWrapper.customTimes[remoteCustomTimeRecord.key] = customTimeJson
+        customTimeRecords[remoteCustomTimeRecord.id] = remoteCustomTimeRecord
+
+        return remoteCustomTimeRecord
     }
 }

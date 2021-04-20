@@ -2,18 +2,14 @@ package com.krystianwsul.checkme.gui.edit.dialogs
 
 import android.app.Dialog
 import android.os.Bundle
-import android.os.Parcelable
-import android.text.TextUtils
 import androidx.appcompat.app.AlertDialog
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.jakewharton.rxrelay3.BehaviorRelay
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.base.AbstractDialogFragment
 import com.krystianwsul.checkme.gui.edit.EditViewModel
-import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.UserKey
 import io.reactivex.rxjava3.kotlin.plusAssign
-import kotlinx.parcelize.Parcelize
 import java.util.*
 
 class AssignToDialogFragment : AbstractDialogFragment() {
@@ -63,14 +59,6 @@ class AssignToDialogFragment : AbstractDialogFragment() {
 
         startDisposable += buttonEnabledRelay.subscribe {
             (requireDialog() as AlertDialog).getButton(AlertDialog.BUTTON_POSITIVE).isEnabled = it
-        }
-    }
-
-    @Parcelize
-    class CustomTimeData(val customTimeKey: CustomTimeKey<*>, val name: String) : Parcelable {
-
-        init {
-            check(!TextUtils.isEmpty(name))
         }
     }
 }

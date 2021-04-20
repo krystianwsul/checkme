@@ -7,38 +7,43 @@ import com.krystianwsul.common.utils.TaskHierarchyKey
 import com.krystianwsul.common.utils.TaskKey
 
 
-class TaskHierarchy<T : ProjectType>(
-        private val project: Project<T>,
-        private val taskHierarchyRecord: TaskHierarchyRecord
-) : TaskParentEntry {
+abstract class TaskHierarchy<T : ProjectType>(private val project: Project<T>) : TaskParentEntry {
 
-    override val startExactTimeStamp by lazy { ExactTimeStamp.Local(taskHierarchyRecord.startTime) }
+    companion object {
 
-    override val startExactTimeStampOffset by lazy {
+        // todo after flipping this, remove all code for creating ProjectTaskHierarchies
+        const val WRITE_NESTED_TASK_HIERARCHIES = false
+    }
+
+    protected abstract val taskHierarchyRecord: TaskHierarchyRecord<*>
+
+    final override val startExactTimeStamp by lazy { ExactTimeStamp.Local(taskHierarchyRecord.startTime) }
+
+    final override val startExactTimeStampOffset by lazy {
         taskHierarchyRecord.run { ExactTimeStamp.Offset.fromOffset(startTime, startTimeOffset) }
     }
 
-    override val endExactTimeStamp get() = taskHierarchyRecord.endTime?.let { ExactTimeStamp.Local(it) }
+    final override val endExactTimeStamp get() = taskHierarchyRecord.endTime?.let { ExactTimeStamp.Local(it) }
 
-    override val endExactTimeStampOffset
+    final override val endExactTimeStampOffset
         get() = taskHierarchyRecord.endTime?.let {
             ExactTimeStamp.Offset.fromOffset(it, taskHierarchyRecord.endTimeOffset)
         }
 
     val parentTaskKey by lazy { TaskKey(project.projectKey, taskHierarchyRecord.parentTaskId) }
-    val childTaskKey by lazy { TaskKey(project.projectKey, taskHierarchyRecord.childTaskId) }
+    abstract val childTaskKey: TaskKey
 
     val id by lazy { taskHierarchyRecord.id }
 
     val parentTask by lazy { project.getTaskForce(parentTaskId) }
-    val childTask by lazy { project.getTaskForce(childTaskId) }
+    abstract val childTask: Task<T>
 
     val parentTaskId by lazy { taskHierarchyRecord.parentTaskId }
-    val childTaskId by lazy { taskHierarchyRecord.childTaskId }
+    abstract val childTaskId: String
 
-    val taskHierarchyKey by lazy { TaskHierarchyKey(project.projectKey, taskHierarchyRecord.id) }
+    abstract val taskHierarchyKey: TaskHierarchyKey
 
-    override fun setEndExactTimeStamp(endExactTimeStamp: ExactTimeStamp) {
+    final override fun setEndExactTimeStamp(endExactTimeStamp: ExactTimeStamp) {
         requireCurrentOffset(endExactTimeStamp)
 
         taskHierarchyRecord.endTime = endExactTimeStamp.long
@@ -47,7 +52,7 @@ class TaskHierarchy<T : ProjectType>(
         invalidateTasks()
     }
 
-    override fun clearEndExactTimeStamp(now: ExactTimeStamp.Local) {
+    final override fun clearEndExactTimeStamp(now: ExactTimeStamp.Local) {
         requireNotCurrent(now)
 
         taskHierarchyRecord.endTime = null
@@ -56,25 +61,17 @@ class TaskHierarchy<T : ProjectType>(
         invalidateTasks()
     }
 
-    fun invalidateTasks() {
-        parentTask.invalidateChildTaskHierarchies()
-        childTask.invalidateParentTaskHierarchies()
-    }
+    abstract fun invalidateTasks()
+
+    protected abstract fun deleteFromParent()
 
     fun delete() {
-        project.deleteTaskHierarchy(this)
+        deleteFromParent()
 
         taskHierarchyRecord.delete()
     }
 
     override fun toString() = super.toString() + ", taskHierarchyKey: $taskHierarchyKey, startExactTimeStamp: $startExactTimeStamp, endExactTimeStamp: $endExactTimeStamp, parentTaskKey: $parentTaskKey, childTaskKey: $childTaskKey"
 
-    fun fixOffsets() {
-        if (taskHierarchyRecord.startTimeOffset == null)
-            taskHierarchyRecord.startTimeOffset = startExactTimeStamp.offset
-
-        endExactTimeStamp?.let {
-            if (taskHierarchyRecord.endTimeOffset == null) taskHierarchyRecord.endTimeOffset = it.offset
-        }
-    }
+    abstract fun fixOffsets()
 }

@@ -2,27 +2,36 @@ package com.krystianwsul.checkme.firebase.loaders
 
 import com.jakewharton.rxrelay3.PublishRelay
 import com.krystianwsul.checkme.domainmodel.DomainFactoryRule
+import com.krystianwsul.checkme.firebase.TestUserCustomTimeProviderSource
 import com.krystianwsul.checkme.firebase.managers.AndroidSharedProjectManager
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.ChangeWrapper
+import com.krystianwsul.common.firebase.DatabaseCallback
+import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.json.JsonWrapper
 import com.krystianwsul.common.firebase.json.SharedProjectJson
-import com.krystianwsul.common.firebase.models.Task
 import com.krystianwsul.common.utils.ProjectKey
+import io.mockk.mockk
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
-import org.junit.*
+import org.junit.After
+import org.junit.Before
+import org.junit.Rule
+import org.junit.Test
 
 @ExperimentalStdlibApi
-class SharedProjectsLoaderOldTest {
+class SharedProjectsLoaderTest {
 
-    companion object {
+    class TestProjectProvider : ProjectProvider {
 
-        @BeforeClass
-        @JvmStatic
-        fun beforeClassStatic() {
-            Task.USE_ROOT_INSTANCES = false
+        override val database = object : DatabaseWrapper() {
+
+            override fun getNewId(path: String): String {
+                TODO("Not yet implemented")
+            }
+
+            override fun update(values: Map<String, Any?>, callback: DatabaseCallback) = Unit
         }
     }
 
@@ -30,7 +39,7 @@ class SharedProjectsLoaderOldTest {
 
         private val sharedProjectObservables = mutableMapOf<ProjectKey.Shared, PublishRelay<Snapshot<JsonWrapper>>>()
 
-        override val projectProvider = ProjectLoaderNewTest.TestProjectProvider()
+        override val projectProvider = TestProjectProvider()
 
         override fun getSharedProjectObservable(projectKey: ProjectKey.Shared): Observable<Snapshot<JsonWrapper>> {
             if (!sharedProjectObservables.containsKey(projectKey))
@@ -79,12 +88,19 @@ class SharedProjectsLoaderOldTest {
                 projectKeysRelay,
                 projectManager,
                 compositeDisposable,
-                sharedProjectsProvider
+                sharedProjectsProvider,
+                TestUserCustomTimeProviderSource(),
+                mockk(relaxed = true),
         )
 
-        initialProjectsEmissionChecker = EmissionChecker("initialProjects", compositeDisposable, sharedProjectsLoader.initialProjectsEvent)
-        addProjectEmissionChecker = EmissionChecker("addProject", compositeDisposable, sharedProjectsLoader.addProjectEvents)
-        removeProjectsEmissionChecker = EmissionChecker("removeProjects", compositeDisposable, sharedProjectsLoader.removeProjectEvents)
+        initialProjectsEmissionChecker =
+                EmissionChecker("initialProjects", compositeDisposable, sharedProjectsLoader.initialProjectsEvent)
+
+        addProjectEmissionChecker =
+                EmissionChecker("addProject", compositeDisposable, sharedProjectsLoader.addProjectEvents)
+
+        removeProjectsEmissionChecker =
+                EmissionChecker("removeProjects", compositeDisposable, sharedProjectsLoader.removeProjectEvents)
     }
 
     @After

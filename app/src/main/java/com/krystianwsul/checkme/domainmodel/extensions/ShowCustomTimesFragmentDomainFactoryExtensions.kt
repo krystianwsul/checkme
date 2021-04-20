@@ -9,9 +9,9 @@ import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
 import com.krystianwsul.checkme.utils.prettyPrint
 import com.krystianwsul.checkme.viewmodels.ShowCustomTimesViewModel
 import com.krystianwsul.common.firebase.DomainThreadChecker
+import com.krystianwsul.common.firebase.MyCustomTime
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.CustomTimeKey
-import com.krystianwsul.common.utils.ProjectType
 import io.reactivex.rxjava3.core.Completable
 
 fun DomainFactory.getShowCustomTimesData(): ShowCustomTimesViewModel.Data {
@@ -35,11 +35,7 @@ fun DomainFactory.getShowCustomTimesData(): ShowCustomTimesViewModel.Data {
                     .prettyPrint() + it.key
         }
 
-        ShowCustomTimesViewModel.CustomTimeData(
-                it.key,
-                it.name,
-                details
-        )
+        ShowCustomTimesViewModel.CustomTimeData(it.key, it.name, details)
     }.toMutableList()
 
     return ShowCustomTimesViewModel.Data(entries)
@@ -48,17 +44,15 @@ fun DomainFactory.getShowCustomTimesData(): ShowCustomTimesViewModel.Data {
 @CheckResult
 fun DomainUpdater.setCustomTimesCurrent(
         notificationType: DomainListenerManager.NotificationType,
-        customTimeIds: List<CustomTimeKey<ProjectType.Private>>,
+        customTimeKeys: List<CustomTimeKey>,
         current: Boolean,
 ): Completable = CompletableDomainUpdate.create("setCustomTimesCurrent") { now ->
-    check(customTimeIds.isNotEmpty())
+    check(customTimeKeys.isNotEmpty())
 
     val endExactTimeStamp = now.takeUnless { current }
 
-    for (customTimeId in customTimeIds) {
-        val remotePrivateCustomTime = projectsFactory.privateProject.getCustomTime(customTimeId)
-
-        remotePrivateCustomTime.endExactTimeStamp = endExactTimeStamp
+    customTimeKeys.map { getCustomTime(it) as MyCustomTime }.forEach {
+        it.endExactTimeStamp = endExactTimeStamp
     }
 
     DomainUpdater.Params(false, notificationType)

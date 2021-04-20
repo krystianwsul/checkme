@@ -12,7 +12,6 @@ class RemoteToRemoteConversion<T : ProjectType> {
     val startTaskHierarchies = mutableListOf<TaskHierarchy<T>>()
 
     val endTasks = HashMap<String, Task<*>>()
-    val endTaskHierarchies = ArrayList<TaskHierarchy<*>>()
 
     val copiedTaskKeys = mutableMapOf<TaskKey, TaskKey>()
 }

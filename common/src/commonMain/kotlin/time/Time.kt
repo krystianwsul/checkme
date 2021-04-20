@@ -1,9 +1,12 @@
 package com.krystianwsul.common.time
 
-import com.krystianwsul.common.firebase.models.Project
+import com.krystianwsul.common.firebase.models.RootUser
 import com.krystianwsul.common.firebase.records.CustomTimeRecord
+import com.krystianwsul.common.firebase.records.ProjectCustomTimeRecord
+import com.krystianwsul.common.firebase.records.UserCustomTimeRecord
 import com.krystianwsul.common.utils.CustomTimeId
 import com.krystianwsul.common.utils.CustomTimeKey
+import com.krystianwsul.common.utils.Endable
 import com.krystianwsul.common.utils.ProjectType
 
 sealed class Time {
@@ -25,23 +28,17 @@ sealed class Time {
         override fun toString() = hourMinute.toString()
     }
 
-    abstract class Custom<T : ProjectType> : Time() {
+    sealed class Custom : Time(), CustomTimeProperties {
 
-        protected abstract val project: Project<T>
+        abstract val customTimeRecord: CustomTimeRecord
 
-        abstract val customTimeRecord: CustomTimeRecord<T>
+        abstract val id: CustomTimeId
 
-        abstract val id: CustomTimeId<T>
+        override val name get() = customTimeRecord.name
 
-        abstract val key: CustomTimeKey<T>
-
-        val name get() = customTimeRecord.name
-
-        val hourMinutes get() = DayOfWeek.values().associate { it to getHourMinute(it) }
+        override val hourMinutes get() = DayOfWeek.values().associate { it to getHourMinute(it) }
 
         override val timePair by lazy { TimePair(key, null) }// possibly should get local key from DomainFactory (instead I have to do it in RemoteInstance)
-
-        val projectId by lazy { project.projectKey }
 
         override fun getHourMinute(dayOfWeek: DayOfWeek) = when (dayOfWeek) {
             DayOfWeek.SUNDAY -> HourMinute(customTimeRecord.sundayHour, customTimeRecord.sundayMinute)
@@ -56,5 +53,48 @@ sealed class Time {
         override fun toString() = name
 
         abstract fun delete()
+
+        abstract class Project<T : ProjectType> : Custom() {
+
+            protected abstract val project: com.krystianwsul.common.firebase.models.Project<T>
+
+            abstract override val customTimeRecord: ProjectCustomTimeRecord<T>
+
+            abstract override val id: CustomTimeId.Project<T>
+
+            abstract override val key: CustomTimeKey.Project<T>
+
+            val projectId by lazy { project.projectKey }
+
+            override fun delete() {
+                project.deleteCustomTime(this)
+
+                customTimeRecord.delete()
+            }
+        }
+
+        open class User(
+                private val user: RootUser,
+                final override val customTimeRecord: UserCustomTimeRecord,
+        ) : Custom(), Endable {
+
+            companion object {
+
+                // todo after flipping this, remove all code for creating old time types
+                const val WRITE_USER_CUSTOM_TIMES = false
+            }
+
+            override val id = customTimeRecord.id
+
+            override val key = customTimeRecord.customTimeKey
+
+            override val endExactTimeStamp get() = customTimeRecord.endTime?.let { ExactTimeStamp.Local(it) }
+
+            override fun delete() {
+                user.deleteCustomTime(this)
+
+                customTimeRecord.delete()
+            }
+        }
     }
 }

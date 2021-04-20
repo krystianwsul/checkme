@@ -14,10 +14,10 @@ import com.krystianwsul.checkme.viewmodels.EditInstancesSearchViewModel
 import com.krystianwsul.checkme.viewmodels.EditInstancesViewModel
 import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.firebase.DomainThreadChecker
+import com.krystianwsul.common.firebase.MyCustomTime
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.locker.LockerManager
 import com.krystianwsul.common.time.*
-import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.ProjectKey
 import io.reactivex.rxjava3.core.Single
@@ -31,15 +31,13 @@ fun DomainFactory.getEditInstancesData(instanceKeys: List<InstanceKey>): EditIns
 
     val now = ExactTimeStamp.Local.now
 
-    val customTimes = getCurrentRemoteCustomTimes(now).associateBy {
-        it.key
-    }.toMutableMap<CustomTimeKey<*>, Time.Custom<*>>()
+    val customTimes = getCurrentRemoteCustomTimes(now).associate { it.key to it as Time.Custom }.toMutableMap()
 
     val instances = instanceKeys.map(::getInstance)
     check(instances.all { it.done == null })
 
     instances.forEach { instance ->
-        (instance.instanceTime as? Time.Custom<*>)?.let {
+        (instance.instanceTime as? Time.Custom)?.let {
             customTimes[it.key] = it
         }
     }
@@ -65,7 +63,8 @@ fun DomainFactory.getEditInstancesData(instanceKeys: List<InstanceKey>): EditIns
             EditInstancesViewModel.CustomTimeData(
                     it.key,
                     it.name,
-                    it.hourMinutes.toSortedMap()
+                    it.hourMinutes.toSortedMap(),
+                    it is MyCustomTime,
             )
         }
     }

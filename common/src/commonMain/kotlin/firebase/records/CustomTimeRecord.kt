@@ -1,25 +1,22 @@
 package com.krystianwsul.common.firebase.records
 
-import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.json.CustomTimeJson
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.utils.CustomTimeId
 import com.krystianwsul.common.utils.CustomTimeKey
-import com.krystianwsul.common.utils.ProjectType
 
 
-abstract class CustomTimeRecord<T : ProjectType>(create: Boolean) : RemoteRecord(create) {
+abstract class CustomTimeRecord(create: Boolean) : RemoteRecord(create) {
 
     companion object {
 
         const val CUSTOM_TIMES = "customTimes"
     }
 
-    abstract val id: CustomTimeId<T>
-    abstract val customTimeKey: CustomTimeKey<T>
+    abstract val id: CustomTimeId
+    abstract val customTimeKey: CustomTimeKey
     protected abstract val customTimeJson: CustomTimeJson
-    protected abstract val projectRecord: ProjectRecord<T>
 
     var name by Committer({ customTimeJson::name })
 
@@ -43,12 +40,6 @@ abstract class CustomTimeRecord<T : ProjectType>(create: Boolean) : RemoteRecord
 
     var saturdayHour by Committer({ customTimeJson::saturdayHour })
     var saturdayMinute by Committer({ customTimeJson::saturdayMinute })
-
-    val projectId get() = projectRecord.projectKey
-
-    override val key get() = projectRecord.childKey + "/" + CUSTOM_TIMES + "/" + id
-
-    abstract fun mine(userInfo: UserInfo): Boolean
 
     fun setHourMinute(dayOfWeek: DayOfWeek, hourMinute: HourMinute) {
         when (dayOfWeek) {

@@ -51,7 +51,7 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
     lateinit var treeViewAdapter: TreeViewAdapter<AbstractHolder>
         private set
 
-    private var selectedCustomTimeKeys: List<CustomTimeKey.Private>? = null
+    private var selectedCustomTimeKeys: List<CustomTimeKey>? = null
 
     private val listener get() = activity as CustomTimesListListener
 
@@ -301,12 +301,15 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
                     0,
                     false,
                     false,
-                    false
+                    false,
             )
 
         override fun onClick(holder: AbstractHolder) = startActivity(ShowCustomTimeActivity.getEditIntent(customTimeData.id, requireActivity()))
 
-        override fun compareTo(other: ModelNode<AbstractHolder>) = customTimeData.id.customTimeId.compareTo((other as CustomTimeNode).customTimeData.id.customTimeId)
+        private val customTimeId get() = customTimeData.id.customTimeId.value
+
+        override fun compareTo(other: ModelNode<AbstractHolder>) =
+                customTimeId.compareTo((other as CustomTimeNode).customTimeId)
     }
 
     interface CustomTimesListListener : ActionModeListener, SnackbarListener {

@@ -13,6 +13,6 @@ interface ProjectJson<T : ProjectType> {
     var endTimeOffset: Double?
 
     val tasks: Map<String, TaskJson<T>>
-    var taskHierarchies: MutableMap<String, TaskHierarchyJson>
+    var taskHierarchies: MutableMap<String, ProjectTaskHierarchyJson>
     val customTimes: Map<String, CustomTimeJson>
 }

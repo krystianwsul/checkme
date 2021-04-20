@@ -166,7 +166,7 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
 
             private fun timePairCallback(
                     timePair: TimePair,
-                    customTimeDatas: Map<CustomTimeKey<*>, CustomTimeData>,
+                    customTimeDatas: Map<CustomTimeKey, CustomTimeData>,
                     dayOfWeek: DayOfWeek? = null,
             ): String {
                 return timePair.customTimeKey
@@ -195,7 +195,7 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
 
         val timePair get() = scheduleData.timePair
 
-        abstract fun getText(customTimeDatas: Map<CustomTimeKey<*>, CustomTimeData>, context: Context): String
+        abstract fun getText(customTimeDatas: Map<CustomTimeKey, CustomTimeData>, context: Context): String
 
         fun getScheduleDialogData(scheduleHint: EditActivity.Hint.Schedule?) =
                 getScheduleDialogDataHelper(scheduleHint?.date ?: Date.today())
@@ -204,7 +204,10 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
 
         data class Single(override val scheduleData: ScheduleData.Single) : ScheduleDataWrapper() {
 
-            override fun getText(customTimeDatas: Map<CustomTimeKey<*>, CustomTimeData>, context: Context): String {
+            override fun getText(
+                    customTimeDatas: Map<CustomTimeKey, CustomTimeData>,
+                    context: Context,
+            ): String {
                 return ScheduleText.Single.getScheduleText(scheduleData) {
                     timePairCallback(it, customTimeDatas, scheduleData.date.dayOfWeek)
                 }
@@ -226,14 +229,17 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
                         ScheduleType.SINGLE,
                         null,
                         null,
-                        1
+                        1,
                 )
             }
         }
 
         data class Weekly(override val scheduleData: ScheduleData.Weekly) : ScheduleDataWrapper() {
 
-            override fun getText(customTimeDatas: Map<CustomTimeKey<*>, CustomTimeData>, context: Context): String {
+            override fun getText(
+                    customTimeDatas: Map<CustomTimeKey, CustomTimeData>,
+                    context: Context,
+            ): String {
                 return ScheduleText.Weekly.getScheduleText(scheduleData) {
                     timePairCallback(it, customTimeDatas)
                 }
@@ -261,7 +267,10 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
 
         data class MonthlyDay(override val scheduleData: ScheduleData.MonthlyDay) : ScheduleDataWrapper() {
 
-            override fun getText(customTimeDatas: Map<CustomTimeKey<*>, CustomTimeData>, context: Context): String {
+            override fun getText(
+                    customTimeDatas: Map<CustomTimeKey, CustomTimeData>,
+                    context: Context,
+            ): String {
                 return ScheduleText.MonthlyDay.getScheduleText(scheduleData) {
                     timePairCallback(it, customTimeDatas)
                 }
@@ -288,14 +297,17 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
                         ScheduleType.MONTHLY_DAY,
                         scheduleData.from,
                         scheduleData.until,
-                        1
+                        1,
                 )
             }
         }
 
         data class MonthlyWeek(override val scheduleData: ScheduleData.MonthlyWeek) : ScheduleDataWrapper() {
 
-            override fun getText(customTimeDatas: Map<CustomTimeKey<*>, CustomTimeData>, context: Context): String {
+            override fun getText(
+                    customTimeDatas: Map<CustomTimeKey, CustomTimeData>,
+                    context: Context,
+            ): String {
                 return ScheduleText.MonthlyWeek.getScheduleText(scheduleData) {
                     timePairCallback(it, customTimeDatas)
                 }
@@ -335,7 +347,10 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
 
         data class Yearly(override val scheduleData: ScheduleData.Yearly) : ScheduleDataWrapper() {
 
-            override fun getText(customTimeDatas: Map<CustomTimeKey<*>, CustomTimeData>, context: Context): String {
+            override fun getText(
+                    customTimeDatas: Map<CustomTimeKey, CustomTimeData>,
+                    context: Context,
+            ): String {
                 return ScheduleText.Yearly.getScheduleText(scheduleData) {
                     timePairCallback(it, customTimeDatas)
                 }
@@ -346,7 +361,7 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
                         suggestedDate.year,
                         scheduleData.month,
                         scheduleData.day,
-                        true
+                        true,
                 )
 
                 val (monthDayNumber, beginningOfMonth) = dateToDayFromBeginningOrEnd(date)
@@ -364,7 +379,7 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
                         ScheduleType.YEARLY,
                         scheduleData.from,
                         scheduleData.until,
-                        1
+                        1,
                 )
             }
         }
@@ -372,7 +387,7 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
 
     data class MainData(
             val taskData: TaskData?,
-            val customTimeDatas: Map<CustomTimeKey<*>, CustomTimeData>,
+            val customTimeDatas: Map<CustomTimeKey, CustomTimeData>,
             val showAllInstancesDialog: Boolean?,
             val currentParent: ParentScheduleManager.Parent?,
     ) : DomainData()
@@ -380,9 +395,10 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
     data class ParentPickerData(val parentTreeDatas: List<ParentTreeData>) : DomainData()
 
     data class CustomTimeData(
-            val customTimeKey: CustomTimeKey<*>,
+            val customTimeKey: CustomTimeKey,
             val name: String,
             val hourMinutes: SortedMap<DayOfWeek, HourMinute>,
+            val isMine: Boolean,
     )
 
     data class TaskData(

@@ -2,7 +2,7 @@ package com.krystianwsul.common.relevance
 
 import com.krystianwsul.common.time.Time
 
-class RemoteCustomTimeRelevance(val customTime: Time.Custom<*>) {
+class CustomTimeRelevance(val customTime: Time.Custom) {
 
     var relevant = false
         private set

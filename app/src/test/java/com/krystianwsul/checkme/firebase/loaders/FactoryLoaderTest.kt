@@ -15,31 +15,21 @@ import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.DatabaseCallback
 import com.krystianwsul.common.firebase.json.*
 import com.krystianwsul.common.firebase.models.Instance
-import com.krystianwsul.common.firebase.models.Task
 import com.krystianwsul.common.time.DateTime
 import com.krystianwsul.common.time.ExactTimeStamp
-import com.krystianwsul.common.utils.CustomTimeId
+import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.utils.ProjectKey
+import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.UserKey
 import io.mockk.mockk
 import io.reactivex.plugins.RxJavaPlugins
 import io.reactivex.rxjava3.core.Completable
-import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
 import org.junit.*
 import org.junit.Assert.*
 
-class FactoryLoaderNewTest {
-
-    companion object {
-
-        @BeforeClass
-        @JvmStatic
-        fun beforeClassStatic() {
-            Task.USE_ROOT_INSTANCES = true
-        }
-    }
+class FactoryLoaderTest {
 
     @get:Rule
     val domainFactoryRule = DomainFactoryRule()
@@ -54,12 +44,10 @@ class FactoryLoaderNewTest {
                 scheduleYear: Int,
                 scheduleMonth: Int,
                 scheduleDay: Int,
-                scheduleCustomTimeId: CustomTimeId<*>?,
-                scheduleHour: Int?,
-                scheduleMinute: Int?,
+                scheduleJsonTime: JsonTime,
         ): Instance.Shown? = null
 
-        override fun createShown(
+        override fun <T : ProjectType> createShown(
                 remoteTaskId: String,
                 scheduleDateTime: DateTime,
                 projectId: ProjectKey<*>,
@@ -111,67 +99,29 @@ class FactoryLoaderNewTest {
         }
     }
 
-    private class TestDatabase(private val myUserKey: UserKey) : FactoryProvider.Database() {
+    private class TestDatabase : FactoryProvider.Database() {
 
         val privateProjectObservable = PublishRelay.create<PrivateProjectJson>()!!
         val sharedProjectObservable = PublishRelay.create<Snapshot<JsonWrapper>>()!!
-        val myUserObservable = PublishRelay.create<Snapshot<UserWrapper>>()!!
-
-        private val rootInstanceObservables = mutableMapOf<String, PublishRelay<Snapshot<Map<String, Map<String, InstanceJson>>>>>()
-        private val userObservables = mutableMapOf<UserKey, PublishRelay<Snapshot<UserWrapper>>>()
-
-        fun acceptInstance(
-                projectId: String,
-                taskId: String,
-                map: Map<String, Map<String, InstanceJson>>,
-        ) {
-            val key = "$projectId-$taskId"
-            rootInstanceObservables.getValue(key).accept(Snapshot(key, map))
-        }
-
-        fun acceptUser(
-                userKey: UserKey,
-                userWrapper: UserWrapper,
-        ) = userObservables.getValue(userKey).accept(Snapshot(userKey.key, userWrapper))
-
-        private fun getOrInitUserObservable(userKey: UserKey): PublishRelay<Snapshot<UserWrapper>> {
-            if (!userObservables.containsKey(userKey))
-                userObservables[userKey] = PublishRelay.create()
-            return userObservables.getValue(userKey)
-        }
+        val userObservable = PublishRelay.create<Snapshot<UserWrapper>>()!!
 
         override fun getPrivateProjectObservable(key: ProjectKey.Private) =
                 privateProjectObservable.map<Snapshot<PrivateProjectJson>> { Snapshot(key.key, it) }!!
 
         override fun getSharedProjectObservable(projectKey: ProjectKey.Shared) = sharedProjectObservable
 
-        override fun getUserObservable(userKey: UserKey): Observable<Snapshot<UserWrapper>> {
-            return if (userKey == myUserKey)
-                myUserObservable
-            else
-                getOrInitUserObservable(userKey)
-        }
-
-        override fun getRootInstanceObservable(taskFirebaseKey: String): Observable<ProjectProvider.RootInstanceData> {
-            if (!rootInstanceObservables.containsKey(taskFirebaseKey))
-                rootInstanceObservables[taskFirebaseKey] = PublishRelay.create()
-
-            return rootInstanceObservables.getValue(taskFirebaseKey).map {
-                ProjectProvider.RootInstanceData(true, it)
-            }
-        }
-
+        override fun getUserObservable(userKey: UserKey) = userObservable
 
         override fun getNewId(path: String) = "id"
 
         override fun update(values: Map<String, Any?>, callback: DatabaseCallback) = Unit
     }
 
-    private class TestFactoryProvider(myUserKey: UserKey) : FactoryProvider {
+    private class TestFactoryProvider : FactoryProvider {
 
         override val nullableInstance: FactoryProvider.Domain? = null
 
-        override val database = TestDatabase(myUserKey)
+        override val database = TestDatabase()
 
         override val projectProvider = object : ProjectProvider {
 
@@ -182,9 +132,7 @@ class FactoryLoaderNewTest {
 
         override val shownFactory = mockk<Instance.ShownFactory>()
 
-        lateinit var friendsFactory: FriendsFactory
-
-        override val domainUpdater get() = mockk<DomainUpdater>(relaxed = true)
+        override val domainUpdater = mockk<DomainUpdater>(relaxed = true)
 
         override fun newDomain(
                 localFactory: FactoryProvider.Local,
@@ -195,11 +143,7 @@ class FactoryLoaderNewTest {
                 startTime: ExactTimeStamp.Local,
                 readTime: ExactTimeStamp.Local,
                 domainDisposable: CompositeDisposable,
-        ): FactoryProvider.Domain {
-            this.friendsFactory = friendsFactory
-
-            return domain
-        }
+        ) = domain
     }
 
     private val userInfo by lazy { UserInfo("email", "name", "uid") }
@@ -210,7 +154,6 @@ class FactoryLoaderNewTest {
 
     private val compositeDisposable = CompositeDisposable()
 
-    private val privateProjectKey by lazy { userInfo.key.key }
     private val sharedProjectKey = "sharedProject"
     private val privateTaskKey = "privateTask"
     private val sharedTaskKey = "sharedTask"
@@ -235,7 +178,7 @@ class FactoryLoaderNewTest {
 
         userInfoObservable = PublishRelay.create()
         tokenObservable = BehaviorRelay.createDefault(tokenWrapper)
-        testFactoryProvider = TestFactoryProvider(userInfo.key)
+        testFactoryProvider = TestFactoryProvider()
         factoryLoader = FactoryLoader(local, userInfoObservable, testFactoryProvider, tokenObservable)
         domainFactoryRelay = BehaviorRelay.create()
 
@@ -255,7 +198,7 @@ class FactoryLoaderNewTest {
 
     private fun initializeEmpty() {
         testFactoryProvider.database
-                .myUserObservable
+                .userObservable
                 .accept(Snapshot(userInfo.key.key, UserWrapper()))
 
         assertNull(domainFactoryRelay.value)
@@ -277,7 +220,7 @@ class FactoryLoaderNewTest {
         val sharedProjectKey = "sharedProject"
 
         testFactoryProvider.database
-                .myUserObservable
+                .userObservable
                 .accept(
                         Snapshot(
                                 userInfo.key.key,
@@ -306,7 +249,7 @@ class FactoryLoaderNewTest {
         val sharedProjectKey = "sharedProject"
 
         testFactoryProvider.database
-                .myUserObservable
+                .userObservable
                 .accept(
                         Snapshot(
                                 userInfo.key.key,
@@ -334,22 +277,13 @@ class FactoryLoaderNewTest {
                         )),
                 ))
 
-        assertNull(domainFactoryRelay.value)
-
-        val privateProjectKey = userInfo.key.key
-
-        testFactoryProvider.database.apply {
-            acceptInstance(privateProjectKey, privateTaskKey, mapOf())
-            acceptInstance(sharedProjectKey, sharedTaskKey, mapOf())
-        }
-
         assertNotNull(domainFactoryRelay.value)
     }
 
     @Test
     fun testPrivateAndSharedInstances() {
         testFactoryProvider.database
-                .myUserObservable
+                .userObservable
                 .accept(
                         Snapshot(
                                 userInfo.key.key,
@@ -359,8 +293,10 @@ class FactoryLoaderNewTest {
 
         testFactoryProvider.database
                 .privateProjectObservable
-                .accept(PrivateProjectJson(
-                        tasks = mutableMapOf(privateTaskKey to PrivateTaskJson(name = privateTaskKey)))
+                .accept(
+                        PrivateProjectJson(
+                                tasks = mutableMapOf(privateTaskKey to PrivateTaskJson(name = privateTaskKey))
+                        )
                 )
 
         testFactoryProvider.database
@@ -373,15 +309,6 @@ class FactoryLoaderNewTest {
                         )),
                 ))
 
-        assertNull(domainFactoryRelay.value)
-
-        val map = mapOf("2020-03-25" to mapOf("14-47" to InstanceJson()))
-
-        testFactoryProvider.database.apply {
-            acceptInstance(privateProjectKey, privateTaskKey, map)
-            acceptInstance(sharedProjectKey, sharedTaskKey, map)
-        }
-
         assertNotNull(domainFactoryRelay.value)
     }
 
@@ -390,141 +317,12 @@ class FactoryLoaderNewTest {
         initializeEmpty()
 
         testFactoryProvider.apply {
-            database.privateProjectObservable.accept(PrivateProjectJson(tasks = mutableMapOf(privateTaskKey to PrivateTaskJson("task"))))
 
             domain.checkChange {
-                database.acceptInstance(privateProjectKey, privateTaskKey, mapOf("2019-03-25" to mapOf("16-44" to InstanceJson())))
+                database.privateProjectObservable.accept(
+                        PrivateProjectJson(tasks = mutableMapOf(privateTaskKey to PrivateTaskJson("task")))
+                )
             }
         }
-    }
-
-    private val friendKey1 = UserKey("friendKey1")
-    private val friendKey2 = UserKey("friendKey2")
-
-    @Test
-    fun testFriendsInitial() {
-        testFactoryProvider.database
-                .myUserObservable
-                .accept(Snapshot(
-                        userInfo.key.key,
-                        UserWrapper(friends = mutableMapOf(friendKey1.key to true, friendKey2.key to true)),
-                ))
-
-        testFactoryProvider.database.acceptUser(friendKey1, UserWrapper())
-        testFactoryProvider.database.acceptUser(friendKey2, UserWrapper())
-
-        assertNull(domainFactoryRelay.value)
-
-        testFactoryProvider.database
-                .privateProjectObservable
-                .accept(PrivateProjectJson())
-
-        assertNotNull(domainFactoryRelay.value)
-        assertEquals(
-                setOf(friendKey1, friendKey2),
-                testFactoryProvider.friendsFactory
-                        .friends
-                        .map { it.userKey }
-                        .toSet()
-        )
-    }
-
-    @Test
-    fun testFriendsChangeAfterDomainInit() {
-        testFactoryProvider.database
-                .myUserObservable
-                .accept(Snapshot(
-                        userInfo.key.key,
-                        UserWrapper(friends = mutableMapOf(friendKey1.key to true, friendKey2.key to true)),
-                ))
-
-        testFactoryProvider.database.acceptUser(friendKey1, UserWrapper())
-        testFactoryProvider.database.acceptUser(friendKey2, UserWrapper())
-
-        assertNull(domainFactoryRelay.value)
-
-        testFactoryProvider.database
-                .privateProjectObservable
-                .accept(PrivateProjectJson())
-
-        assertNotNull(domainFactoryRelay.value)
-
-        val changedEmail = "changed email"
-        testFactoryProvider.domain.checkChange {
-            testFactoryProvider.database.acceptUser(friendKey2, UserWrapper(UserJson(changedEmail)))
-        }
-
-        assertEquals(
-                changedEmail,
-                testFactoryProvider.friendsFactory
-                        .friends
-                        .single { it.userKey == friendKey2 }
-                        .email
-        )
-    }
-
-    @Test
-    fun testFriendsChangeAfterFriendsFactoryInit() {
-        testFactoryProvider.database
-                .myUserObservable
-                .accept(Snapshot(
-                        userInfo.key.key,
-                        UserWrapper(friends = mutableMapOf(friendKey1.key to true, friendKey2.key to true)),
-                ))
-
-        testFactoryProvider.database.acceptUser(friendKey1, UserWrapper())
-        testFactoryProvider.database.acceptUser(friendKey2, UserWrapper())
-
-        val changedEmail = "changed email"
-        testFactoryProvider.database.acceptUser(friendKey2, UserWrapper(UserJson(changedEmail)))
-
-        assertNull(domainFactoryRelay.value)
-
-        testFactoryProvider.database
-                .privateProjectObservable
-                .accept(PrivateProjectJson())
-
-        assertNotNull(domainFactoryRelay.value)
-
-        assertEquals(
-                changedEmail,
-                testFactoryProvider.friendsFactory
-                        .friends
-                        .single { it.userKey == friendKey2 }
-                        .email,
-        )
-    }
-
-    @Test
-    fun testFriendsChangeBeforeFriendsFactoryInit() {
-        testFactoryProvider.database
-                .myUserObservable
-                .accept(Snapshot(
-                        userInfo.key.key,
-                        UserWrapper(friends = mutableMapOf(friendKey1.key to true, friendKey2.key to true)),
-                ))
-
-        testFactoryProvider.database.acceptUser(friendKey2, UserWrapper())
-
-        val changedEmail = "changed email"
-        testFactoryProvider.database.acceptUser(friendKey2, UserWrapper(UserJson(changedEmail)))
-
-        testFactoryProvider.database.acceptUser(friendKey1, UserWrapper())
-
-        assertNull(domainFactoryRelay.value)
-
-        testFactoryProvider.database
-                .privateProjectObservable
-                .accept(PrivateProjectJson())
-
-        assertNotNull(domainFactoryRelay.value)
-
-        assertEquals(
-                changedEmail,
-                testFactoryProvider.friendsFactory
-                        .friends
-                        .single { it.userKey == friendKey2 }
-                        .email
-        )
     }
 }

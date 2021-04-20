@@ -6,7 +6,6 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.plusAssign
 import org.junit.Assert
 
-@ExperimentalStdlibApi
 class EmissionChecker<T : Any>(
         val name: String,
         compositeDisposable: CompositeDisposable,

@@ -11,15 +11,15 @@ import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.ChangeWrapper
 import com.krystianwsul.common.firebase.DatabaseCallback
-import com.krystianwsul.common.firebase.json.*
+import com.krystianwsul.common.firebase.json.JsonWrapper
+import com.krystianwsul.common.firebase.json.PrivateProjectJson
+import com.krystianwsul.common.firebase.json.SharedProjectJson
+import com.krystianwsul.common.firebase.json.UserWrapper
 import com.krystianwsul.common.firebase.models.Instance
-import com.krystianwsul.common.firebase.models.Task
 import com.krystianwsul.common.firebase.records.PrivateProjectRecord
-import com.krystianwsul.common.firebase.records.PrivateTaskRecord
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ProjectType
-import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.common.utils.UserKey
 import io.mockk.mockk
 import io.reactivex.rxjava3.core.Observable
@@ -27,34 +27,24 @@ import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.subscribeBy
-import org.junit.*
+import org.junit.After
+import org.junit.Before
+import org.junit.Rule
+import org.junit.Test
 import kotlin.random.Random
 
 @ExperimentalStdlibApi
-class ProjectFactoryOldTest {
-
-    companion object {
-
-        @BeforeClass
-        @JvmStatic
-        fun beforeClassStatic() {
-            Task.USE_ROOT_INSTANCES = false
-        }
-    }
+class ProjectFactoryTest {
 
     class TestFactoryProvider : FactoryProvider {
 
         private val sharedProjectObservables = mutableMapOf<ProjectKey.Shared, PublishRelay<Snapshot<JsonWrapper>>>()
 
-        override val projectProvider = ProjectLoaderOldTest.TestProjectProvider()
+        override val projectProvider = ProjectLoaderTest.TestProjectProvider()
 
         override val database = object : FactoryProvider.Database() {
 
             override fun getPrivateProjectObservable(key: ProjectKey.Private): Observable<Snapshot<PrivateProjectJson>> {
-                TODO("Not yet implemented")
-            }
-
-            override fun getRootInstanceObservable(taskFirebaseKey: String): Observable<ProjectProvider.RootInstanceData> {
                 TODO("Not yet implemented")
             }
 
@@ -111,17 +101,14 @@ class ProjectFactoryOldTest {
 
         override val projectManager = AndroidPrivateProjectManager(userInfo, mockk(relaxed = true))
 
-        val projectRecord = PrivateProjectRecord(mockk(), projectKey, PrivateProjectJson())
+        private val projectRecord = PrivateProjectRecord(mockk(), projectKey, PrivateProjectJson())
 
-        private val event = ProjectLoader.InitialProjectEvent(projectManager, projectRecord, mapOf())
+        private val event = ProjectLoader.InitialProjectEvent(projectManager, projectRecord, mockk())
 
         override val initialProjectEvent = Single.just(ChangeWrapper(ChangeType.REMOTE, event))!!
 
-        override val addTaskEvents = PublishRelay.create<ChangeWrapper<ProjectLoader.AddTaskEvent<ProjectType.Private>>>()!!
-
-        override val changeInstancesEvents = Observable.never<ProjectLoader.ChangeInstancesEvent<ProjectType.Private>>()!!
-
-        override val changeProjectEvents = PublishRelay.create<ChangeWrapper<ProjectLoader.ChangeProjectEvent<ProjectType.Private>>>()!!
+        override val changeProjectEvents =
+                PublishRelay.create<ChangeWrapper<ProjectLoader.ChangeProjectEvent<ProjectType.Private>>>()!!
     }
 
     @get:Rule
@@ -139,7 +126,6 @@ class ProjectFactoryOldTest {
     private lateinit var changeTypesEmissionChecker: EmissionChecker<ChangeType>
 
     private val projectKey = ProjectKey.Private("projectKey")
-    private val taskKey = TaskKey(projectKey, "taskKey")
 
     @Before
     fun before() {
@@ -156,10 +142,11 @@ class ProjectFactoryOldTest {
                             projectLoader,
                             it.data,
                             factoryProvider,
-                            compositeDisposable
+                            compositeDisposable,
                     ) { mockk() }
 
-                    changeTypesEmissionChecker = EmissionChecker("changeTypes", compositeDisposable, projectFactory.changeTypes)
+                    changeTypesEmissionChecker =
+                            EmissionChecker("changeTypes", compositeDisposable, projectFactory.changeTypes)
                 }
                 .addTo(compositeDisposable)
     }
@@ -176,23 +163,5 @@ class ProjectFactoryOldTest {
     @Test
     fun testInitial() {
 
-    }
-
-    @Test
-    fun testAddTask() {
-        changeTypesEmissionChecker.checkOne {
-            projectLoader.addTaskEvents.accept(ChangeWrapper(
-                    ChangeType.REMOTE,
-                    ProjectLoader.AddTaskEvent(
-                            projectLoader.projectRecord,
-                            PrivateTaskRecord(
-                                    taskKey.taskId,
-                                    projectLoader.projectRecord,
-                                    PrivateTaskJson("task")
-                            ),
-                            Snapshot("", null),
-                    )
-            ))
-        }
     }
 }

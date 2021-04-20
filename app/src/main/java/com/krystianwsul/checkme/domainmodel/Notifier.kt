@@ -8,9 +8,11 @@ import com.krystianwsul.checkme.domainmodel.notifications.NotificationWrapperImp
 import com.krystianwsul.checkme.ticks.Ticker
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.Project
+import com.krystianwsul.common.relevance.CustomTimeRelevance
 import com.krystianwsul.common.relevance.Irrelevant
-import com.krystianwsul.common.time.*
-import com.krystianwsul.common.utils.CustomTimeKey
+import com.krystianwsul.common.time.Date
+import com.krystianwsul.common.time.DateTimeSoy
+import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.common.utils.singleOrEmpty
@@ -60,32 +62,14 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
 
         instanceShownPairs.filter { it.second == null }.forEach { (instanceShownRecord, _) ->
             val scheduleDate = instanceShownRecord.run { Date(scheduleYear, scheduleMonth, scheduleDay) }
-            val customTimeId = instanceShownRecord.scheduleCustomTimeId
-
-            val customTimePair: Pair<String, String>?
-            val hourMinute: HourMinute?
-            if (!customTimeId.isNullOrEmpty()) {
-                check(instanceShownRecord.scheduleHour == null)
-                check(instanceShownRecord.scheduleMinute == null)
-
-                customTimePair = Pair(instanceShownRecord.projectId, customTimeId)
-                hourMinute = null
-            } else {
-                checkNotNull(instanceShownRecord.scheduleHour)
-                checkNotNull(instanceShownRecord.scheduleMinute)
-
-                customTimePair = null
-                hourMinute = instanceShownRecord.run { HourMinute(scheduleHour!!, scheduleMinute!!) }
-            }
 
             val taskKey = Pair(instanceShownRecord.projectId, instanceShownRecord.taskId)
 
             NotificationWrapper.instance.cancelNotification(
                     Instance.getNotificationId(
                             scheduleDate,
-                            customTimePair,
-                            hourMinute,
-                            taskKey
+                            instanceShownRecord.scheduleTimeDescriptor,
+                            taskKey,
                     )
             )
             instanceShownRecord.notificationShown = false
@@ -93,28 +77,13 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
 
         val shownInstanceKeys = instanceShownPairs.filter { it.second != null }
                 .map { (instanceShownRecord, task) ->
+                    val scheduleJsonTime =
+                            instanceShownRecord.scheduleTimeDescriptor.toJsonTime(task!!.project.projectRecord)
+
                     val scheduleDate = instanceShownRecord.run { Date(scheduleYear, scheduleMonth, scheduleDay) }
-                    val customTimeId = instanceShownRecord.scheduleCustomTimeId
-                    val project = task!!.project
 
-                    val customTimeKey: CustomTimeKey<*>?
-                    val hourMinute: HourMinute?
-                    if (!customTimeId.isNullOrEmpty()) {
-                        check(instanceShownRecord.scheduleHour == null)
-                        check(instanceShownRecord.scheduleMinute == null)
-
-                        customTimeKey = project.getCustomTime(customTimeId).key
-                        hourMinute = null
-                    } else {
-                        checkNotNull(instanceShownRecord.scheduleHour)
-                        checkNotNull(instanceShownRecord.scheduleMinute)
-
-                        customTimeKey = null
-                        hourMinute = instanceShownRecord.run { HourMinute(scheduleHour!!, scheduleMinute!!) }
-                    }
-
-                    val taskKey = TaskKey(project.projectKey, instanceShownRecord.taskId)
-                    InstanceKey(taskKey, scheduleDate, TimePair(customTimeKey, hourMinute))
+                    val taskKey = TaskKey(task.project.projectKey, instanceShownRecord.taskId)
+                    InstanceKey(taskKey, scheduleDate, scheduleJsonTime.toTimePair(task.project))
                 }
                 .toSet()
 
@@ -322,18 +291,27 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
             val dateTimeSoy = DateTime(tomorrow, Time(2.hours))
             val exactTimeStamp = ExactTimeStamp.Local(dateTimeSoy)
 
+            val userCustomTimeRelevances = domainFactory.run {
+                friendsFactory.userMap
+                        .map { it.value.value } +
+                        myUserFactory.user
+            }
+                    .flatMap { it.customTimes.values }
+                    .associate { it.key to CustomTimeRelevance(it) }
+
             domainFactory.projectsFactory
                     .projects
                     .values
                     .forEach {
                         val results = Irrelevant.setIrrelevant(
+                                userCustomTimeRelevances,
                                 object : Project.Parent {
 
                                     override fun deleteProject(project: Project<*>) = throw NotImplementedError()
                                 },
                                 it,
                                 exactTimeStamp,
-                                false
+                                false,
                         )
 
                         results.irrelevantExistingInstances

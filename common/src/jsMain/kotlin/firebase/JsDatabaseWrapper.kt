@@ -67,16 +67,6 @@ class JsDatabaseWrapper(admin: dynamic, root: String) : DatabaseWrapper() {
     @Serializable
     private class Users(val userWrappers: Map<String, UserWrapper>)
 
-    fun getInstances(callback: (Map<String, Map<String, Map<String, InstanceJson>>>) -> Unit) {
-        rootReference.child(KEY_INSTANCES).once("value") { snapshot ->
-            callback(parse(Instances.serializer(), object {
-
-                @Suppress("unused")
-                val snapshotInfos = snapshot
-            }).snapshotInfos ?: mapOf())
-        }
-    }
-
     @Serializable
     private class Instances(val snapshotInfos: Map<String, Map<String, Map<String, InstanceJson>>>? = null)
 

@@ -1,8 +1,8 @@
 package com.krystianwsul.common.firebase.records
 
-import com.badoo.reaktive.subject.behavior.BehaviorSubject
 import com.krystianwsul.common.firebase.json.ProjectJson
-import com.krystianwsul.common.firebase.json.TaskHierarchyJson
+import com.krystianwsul.common.firebase.json.ProjectTaskHierarchyJson
+import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.utils.*
 
 @Suppress("LeakingThis")
@@ -11,7 +11,7 @@ abstract class ProjectRecord<T : ProjectType>(
         private val projectJson: ProjectJson<T>,
         private val _id: ProjectKey<T>,
         committerKey: String,
-) : RemoteRecord(create) {
+) : RemoteRecord(create), JsonTime.ProjectCustomTimeIdAndKeyProvider<T> {
 
     companion object {
 
@@ -20,13 +20,11 @@ abstract class ProjectRecord<T : ProjectType>(
 
     abstract val projectKey: ProjectKey<T>
 
-    abstract val customTimeRecords: Map<out CustomTimeId<T>, CustomTimeRecord<T>>
-
-    abstract val taskRecordsRelay: BehaviorSubject<out Map<String, TaskRecord<T>>>
+    abstract val customTimeRecords: Map<out CustomTimeId.Project<T>, ProjectCustomTimeRecord<T>>
 
     abstract val taskRecords: Map<String, TaskRecord<T>>
 
-    lateinit var taskHierarchyRecords: MutableMap<String, TaskHierarchyRecord>
+    lateinit var taskHierarchyRecords: MutableMap<String, ProjectTaskHierarchyRecord>
         private set
 
     protected fun initTaskHierarchyRecords() {
@@ -34,7 +32,7 @@ abstract class ProjectRecord<T : ProjectType>(
                 .mapValues { (id, taskHierarchyJson) ->
                     check(id.isNotEmpty())
 
-                    TaskHierarchyRecord(id, this, taskHierarchyJson)
+                    ProjectTaskHierarchyRecord(id, this, taskHierarchyJson)
                 }
                 .toMutableMap()
     }
@@ -56,29 +54,27 @@ abstract class ProjectRecord<T : ProjectType>(
                 taskHierarchyRecords.values +
                 customTimeRecords.values
 
-    fun newTaskHierarchyRecord(taskHierarchyJson: TaskHierarchyJson): TaskHierarchyRecord {
-        val taskHierarchyRecord = TaskHierarchyRecord(this, taskHierarchyJson)
+    fun newTaskHierarchyRecord(taskHierarchyJson: ProjectTaskHierarchyJson): ProjectTaskHierarchyRecord {
+        val taskHierarchyRecord = ProjectTaskHierarchyRecord(this, taskHierarchyJson)
         check(!taskHierarchyRecords.containsKey(taskHierarchyRecord.id))
 
         taskHierarchyRecords[taskHierarchyRecord.id] = taskHierarchyRecord
         return taskHierarchyRecord
     }
 
-    abstract fun getTaskHierarchyRecordId(): String
+    abstract fun getProjectTaskHierarchyRecordId(): String
+    abstract fun newNestedTaskHierarchyRecordId(taskId: String): String
 
     abstract fun getTaskRecordId(): String
 
     abstract fun getScheduleRecordId(taskId: String): String
 
-    abstract fun getCustomTimeRecord(id: String): CustomTimeRecord<T>
-
-    abstract fun getCustomTimeId(id: String): CustomTimeId<T>
-
-    abstract fun getCustomTimeKey(customTimeId: CustomTimeId<T>): CustomTimeKey<T>
+    abstract fun getCustomTimeRecord(id: String): ProjectCustomTimeRecord<T>
 
     abstract fun newNoScheduleOrParentRecordId(taskId: String): String
 
-    fun getCustomTimeKey(customTimeId: String) = getCustomTimeKey(getCustomTimeId(customTimeId))
+    abstract override fun getProjectCustomTimeKey(projectCustomTimeId: CustomTimeId.Project<T>): CustomTimeKey.Project<T>
+    fun getProjectCustomTimeKey(customTimeId: String) = getProjectCustomTimeKey(getProjectCustomTimeId(customTimeId))
 
     fun getTaskKey(taskId: String) = TaskKey(projectKey, taskId)
 }

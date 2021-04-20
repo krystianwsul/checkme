@@ -8,6 +8,7 @@ import com.krystianwsul.common.firebase.models.SharedProject
 import com.krystianwsul.common.firebase.records.ProjectRecord
 import com.krystianwsul.common.firebase.records.SharedProjectRecord
 import com.krystianwsul.common.time.ExactTimeStamp
+import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.utils.ProjectType
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 
@@ -25,10 +26,10 @@ class SharedProjectFactory(
         deviceDbInfo,
 ) {
 
-    override fun newProject(projectRecord: ProjectRecord<ProjectType.Shared>) = SharedProject(
-            projectRecord as SharedProjectRecord,
-            rootInstanceManagers
-    ) { newRootInstanceManager(it, null) }.apply {
+    override fun newProject(
+            projectRecord: ProjectRecord<ProjectType.Shared>,
+            userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
+    ) = SharedProject(projectRecord as SharedProjectRecord, userCustomTimeProvider).apply {
         fixNotificationShown(factoryProvider.shownFactory, ExactTimeStamp.Local.now)
         updateDeviceDbInfo(deviceDbInfo())
     }

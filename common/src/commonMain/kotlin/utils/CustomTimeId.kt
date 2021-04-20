@@ -1,19 +1,26 @@
 package com.krystianwsul.common.utils
 
-sealed class CustomTimeId<T : ProjectType> : Parcelable, Serializable {
+sealed class CustomTimeId : Parcelable, Serializable {
 
     abstract val value: String
 
-    @Parcelize
-    data class Private(override val value: String) : CustomTimeId<ProjectType.Private>(), Comparable<Private> {
+    sealed class Project<T : ProjectType> : CustomTimeId() {
 
-        override fun toString() = value
+        @Parcelize
+        data class Private(override val value: String) : Project<ProjectType.Private>() {
 
-        override fun compareTo(other: Private) = value.compareTo(other.value)
+            override fun toString() = value
+        }
+
+        @Parcelize
+        data class Shared(override val value: String) : Project<ProjectType.Shared>() {
+
+            override fun toString() = value
+        }
     }
 
     @Parcelize
-    data class Shared(override val value: String) : CustomTimeId<ProjectType.Shared>() {
+    data class User(override val value: String) : CustomTimeId() {
 
         override fun toString() = value
     }

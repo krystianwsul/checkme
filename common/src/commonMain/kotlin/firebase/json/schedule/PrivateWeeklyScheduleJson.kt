@@ -18,4 +18,5 @@ data class PrivateWeeklyScheduleJson @JvmOverloads constructor(
         override val until: String? = null,
         override val interval: Int = 1,
         override var oldestVisible: String? = null,
+        override val time: String? = null,
 ) : WeeklyScheduleJson<ProjectType.Private>

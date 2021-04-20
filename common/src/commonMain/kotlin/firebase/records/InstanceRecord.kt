@@ -5,26 +5,24 @@ import com.krystianwsul.common.firebase.json.InstanceJson
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.time.JsonTime
-import com.krystianwsul.common.time.TimePair
-import com.krystianwsul.common.utils.*
+import com.krystianwsul.common.utils.InstanceKey
+import com.krystianwsul.common.utils.ProjectType
+import com.krystianwsul.common.utils.ScheduleKey
+import com.krystianwsul.common.utils.TaskKey
 import kotlin.jvm.JvmStatic
 import kotlin.properties.Delegates.observable
 
-abstract class InstanceRecord<T : ProjectType>(
+class InstanceRecord<T : ProjectType>(
         create: Boolean,
-        protected val taskRecord: TaskRecord<T>,
-        final override val createObject: InstanceJson,
+        private val taskRecord: TaskRecord<T>,
+        override val createObject: InstanceJson,
         val scheduleKey: ScheduleKey,
-        override val key: String,
-        val scheduleCustomTimeId: CustomTimeId<T>?
+        firebaseKey: String,
 ) : RemoteRecord(create) {
 
     companion object {
 
-        private val hourMinuteRegex = Regex("^\\d\\d:\\d\\d$")
-
-        private val hourMinuteKeyRegex = Regex("^(\\d\\d\\d\\d)-(\\d?\\d)-(\\d?\\d)-(\\d?\\d)-(\\d?\\d)$")
-        private val customTimeKeyRegex = Regex("^(\\d\\d\\d\\d)-(\\d?\\d)-(\\d?\\d)-(.+)$")
+        private val scheduleKeyRegex = Regex("^(\\d\\d\\d\\d-\\d?\\d-\\d?\\d)-(.+)$")
 
         private fun Int.pad(padding: Boolean) = toString().run { if (padding) padStart(2, '0') else this }
 
@@ -39,47 +37,58 @@ abstract class InstanceRecord<T : ProjectType>(
         fun scheduleKeyToTimeString(scheduleKey: ScheduleKey, padding: Boolean) = scheduleKey.scheduleTimePair.run {
             fun Int.pad() = pad(padding)
 
-            customTimeKey?.customTimeId?.value ?: hourMinute!!.run { "${hour.pad()}-${minute.pad()}" }
+            customTimeKey?.toJson() ?: hourMinute!!.run { "${hour.pad()}-${minute.pad()}" }
         }
 
         fun scheduleKeyToString(scheduleKey: ScheduleKey) = scheduleKey.let {
             scheduleKeyToDateString(it, false) + "-" + scheduleKeyToTimeString(it, false)
         }
 
-        @JvmStatic
-        protected fun MatchResult.getInt(position: Int) = groupValues[position].toInt()
-
         fun <T : ProjectType> stringToScheduleKey(
-                projectRecord: ProjectRecord<T>,
-                key: String
-        ): Pair<ScheduleKey, CustomTimeId<T>?> {
-            val hourMinuteMatchResult = hourMinuteKeyRegex.find(key)
+                projectCustomTimeIdAndKeyProvider: JsonTime.ProjectCustomTimeIdAndKeyProvider<T>,
+                key: String,
+        ): ScheduleKey {
+            val matchResult = scheduleKeyRegex.find(key)!!
 
-            if (hourMinuteMatchResult != null) {
-                val year = hourMinuteMatchResult.getInt(1)
-                val month = hourMinuteMatchResult.getInt(2)
-                val day = hourMinuteMatchResult.getInt(3)
-                val hour = hourMinuteMatchResult.getInt(4)
-                val minute = hourMinuteMatchResult.getInt(5)
+            val dateString = matchResult.groupValues[1]
+            val timeString = matchResult.groupValues[2]
 
-                return Pair(ScheduleKey(Date(year, month, day), TimePair(HourMinute(hour, minute))), null)
-            } else {
-                val customTimeMatchResult = customTimeKeyRegex.find(key)
-                checkNotNull(customTimeMatchResult)
+            return dateTimeStringsToScheduleKey(projectCustomTimeIdAndKeyProvider, dateString, timeString)
+        }
 
-                val year = customTimeMatchResult.getInt(1)
-                val month = customTimeMatchResult.getInt(2)
-                val day = customTimeMatchResult.getInt(3)
+        private val dateRegex = Regex("^(\\d\\d\\d\\d)-(\\d?\\d)-(\\d?\\d)$")
+        private val hourMinuteRegex = Regex("^(\\d?\\d)-(\\d?\\d)$")
 
-                val customTimeId = customTimeMatchResult.groupValues[4]
-                check(customTimeId.isNotEmpty())
+        private fun MatchResult.getInt(position: Int) = groupValues[position].toInt()
 
-                val customTimeKey = projectRecord.getCustomTimeKey(customTimeId)
+        private fun dateStringToDate(dateString: String): Date {
+            val matchResult = dateRegex.find(dateString)!!
 
-                return Pair(ScheduleKey(Date(year, month, day), TimePair(customTimeKey)), customTimeKey.customTimeId)
-            }
+            val year = matchResult.getInt(1)
+            val month = matchResult.getInt(2)
+            val day = matchResult.getInt(3)
+
+            return Date(year, month, day)
+        }
+
+        private fun <T : ProjectType> dateTimeStringsToScheduleKey(
+                projectCustomTimeIdAndKeyProvider: JsonTime.ProjectCustomTimeIdAndKeyProvider<T>,
+                dateString: String,
+                timeString: String,
+        ): ScheduleKey {
+            val date = dateStringToDate(dateString)
+
+            val jsonTime = hourMinuteRegex.find(timeString)?.let { matchResult ->
+                val (hour, minute) = (1..2).map { matchResult.groupValues[it].toInt() }
+
+                JsonTime.Normal(HourMinute(hour, minute))
+            } ?: JsonTime.fromJson(projectCustomTimeIdAndKeyProvider, timeString)
+
+            return ScheduleKey(date, jsonTime.toTimePair(projectCustomTimeIdAndKeyProvider))
         }
     }
+
+    override val key = taskRecord.key + "/instances/" + firebaseKey
 
     var done by Committer(createObject::done)
     var doneOffset by Committer(createObject::doneOffset)
@@ -88,20 +97,8 @@ abstract class InstanceRecord<T : ProjectType>(
     val scheduleMonth by lazy { scheduleKey.scheduleDate.month }
     val scheduleDay by lazy { scheduleKey.scheduleDate.day }
 
-    val scheduleHour by lazy {
-        scheduleKey.scheduleTimePair
-                .hourMinute
-                ?.hour
-    }
-
-    val scheduleMinute by lazy {
-        scheduleKey.scheduleTimePair
-                .hourMinute
-                ?.minute
-    }
-
     private fun getInitialInstanceDate() = createObject.instanceDate
-                .takeUnless { it.isNullOrEmpty() }
+            .takeUnless { it.isNullOrEmpty() }
             ?.let { Date.fromJson(it) }
 
     var instanceDate by observable(getInitialInstanceDate()) { _, _, value ->
@@ -110,12 +107,7 @@ abstract class InstanceRecord<T : ProjectType>(
 
     @Suppress("RemoveExplicitTypeArguments")
     private fun getInitialInstanceJsonTime() = createObject.instanceTime
-            ?.let {
-                if (hourMinuteRegex.find(it) != null)
-                    JsonTime.Normal<T>(HourMinute.fromJson(it))
-                else
-                    JsonTime.Custom(taskRecord.projectRecord.getCustomTimeId(it))
-            }
+            ?.let { JsonTime.fromJson(taskRecord.projectRecord, it) }
 
     var instanceJsonTime by observable(getInitialInstanceJsonTime()) { _, _, value ->
         setProperty(createObject::instanceTime, value?.toJson())
@@ -129,7 +121,7 @@ abstract class InstanceRecord<T : ProjectType>(
             createObject.parentJson?.let {
                 InstanceKey(
                         TaskKey(taskRecord.projectRecord.projectKey, it.taskId),
-                        stringToScheduleKey(taskRecord.projectRecord, it.scheduleKey).first
+                        stringToScheduleKey(taskRecord.projectRecord, it.scheduleKey),
                 )
             }
     ) { _, _, newValue ->
@@ -140,4 +132,6 @@ abstract class InstanceRecord<T : ProjectType>(
     }
 
     var noParent by Committer(createObject::noParent)
+
+    override fun deleteFromParent() = check(taskRecord.instanceRecords.remove(scheduleKey) == this)
 }

@@ -47,7 +47,7 @@ abstract class RepeatingSchedule(rootTask: Task<*>) : Schedule(rootTask) {
     }
 
     override fun getDateTimesInRange(
-            scheduleInterval: ScheduleInterval<*>,
+            scheduleInterval: ScheduleInterval,
             givenStartExactTimeStamp: ExactTimeStamp.Offset?,
             givenEndExactTimeStamp: ExactTimeStamp.Offset?,
             originalDateTime: Boolean,
@@ -128,7 +128,7 @@ abstract class RepeatingSchedule(rootTask: Task<*>) : Schedule(rootTask) {
 
     protected abstract fun containsDate(date: Date): Boolean
 
-    override fun updateOldestVisible(scheduleInterval: ScheduleInterval<*>, now: ExactTimeStamp.Local) {
+    override fun updateOldestVisible(scheduleInterval: ScheduleInterval, now: ExactTimeStamp.Local) {
         val dateTimes = getDateTimesInRange(
                 scheduleInterval,
                 null,

@@ -78,9 +78,9 @@ class IntervalBuilderTest {
         }
     }
 
-    private fun noScheduleMock() = Type.NoSchedule<ProjectType.Private>()
+    private fun noScheduleMock() = Type.NoSchedule()
 
-    private fun Task<ProjectType.Private>.check(vararg expected: Interval<ProjectType.Private>) {
+    private fun Task<ProjectType.Private>.check(vararg expected: Interval) {
         val actual = IntervalBuilder.build(this)
         assertEquals(expected.toList(), actual)
     }

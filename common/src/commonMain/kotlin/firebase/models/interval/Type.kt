@@ -4,21 +4,20 @@ import com.krystianwsul.common.firebase.models.NoScheduleOrParent
 import com.krystianwsul.common.firebase.models.TaskParentEntry
 import com.krystianwsul.common.firebase.models.taskhierarchy.ProjectTaskHierarchy
 import com.krystianwsul.common.firebase.models.taskhierarchy.TaskHierarchy
-import com.krystianwsul.common.utils.ProjectType
 
-sealed class Type<T : ProjectType> {
+sealed class Type {
 
     open fun matches(taskHierarchy: ProjectTaskHierarchy) = false
 
     abstract val taskParentEntries: Collection<TaskParentEntry>
 
-    data class Child<T : ProjectType>(val parentTaskHierarchy: TaskHierarchy) : Type<T>() {
+    data class Child(val parentTaskHierarchy: TaskHierarchy) : Type() {
 
         override val taskParentEntries get() = listOf(parentTaskHierarchy)
 
         override fun matches(taskHierarchy: ProjectTaskHierarchy) = parentTaskHierarchy == taskHierarchy
 
-        fun getHierarchyInterval(interval: Interval<T>): HierarchyInterval<T> {
+        fun getHierarchyInterval(interval: Interval): HierarchyInterval {
             check(parentTaskHierarchy.startExactTimeStampOffset == interval.startExactTimeStampOffset)
 
             parentTaskHierarchy.endExactTimeStampOffset?.let {
@@ -35,23 +34,23 @@ sealed class Type<T : ProjectType> {
         }
     }
 
-    data class Schedule<T : ProjectType>(
+    data class Schedule(
             private val schedules: List<com.krystianwsul.common.firebase.models.schedule.Schedule>,
-    ) : Type<T>() {
+    ) : Type() {
 
         override val taskParentEntries get() = schedules
 
-        fun getScheduleIntervals(interval: Interval<T>) = schedules.map {
-            ScheduleInterval<T>(interval.startExactTimeStampOffset, interval.endExactTimeStampOffset, it)
+        fun getScheduleIntervals(interval: Interval) = schedules.map {
+            ScheduleInterval(interval.startExactTimeStampOffset, interval.endExactTimeStampOffset, it)
         }
     }
 
-    data class NoSchedule<T : ProjectType>(val noScheduleOrParent: NoScheduleOrParent? = null) : Type<T>() {
+    data class NoSchedule(val noScheduleOrParent: NoScheduleOrParent? = null) : Type() {
 
         override val taskParentEntries get() = listOfNotNull(noScheduleOrParent)
 
-        fun getNoScheduleOrParentInterval(interval: Interval<T>) = noScheduleOrParent?.let {
-            NoScheduleOrParentInterval<T>(
+        fun getNoScheduleOrParentInterval(interval: Interval) = noScheduleOrParent?.let {
+            NoScheduleOrParentInterval(
                     interval.startExactTimeStampOffset,
                     interval.endExactTimeStampOffset,
                     it,

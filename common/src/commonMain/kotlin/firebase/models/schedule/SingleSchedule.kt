@@ -35,7 +35,7 @@ class SingleSchedule(
     fun <T : ProjectType> getInstance(task: Task<T>) = task.getInstance(originalScheduleDateTime)
 
     override fun getDateTimesInRange(
-            scheduleInterval: ScheduleInterval<*>,
+            scheduleInterval: ScheduleInterval,
             givenStartExactTimeStamp: ExactTimeStamp.Offset?,
             givenEndExactTimeStamp: ExactTimeStamp.Offset?,
             originalDateTime: Boolean,
@@ -61,10 +61,7 @@ class SingleSchedule(
 
     override val oldestVisible = OldestVisible.Single
 
-    override fun updateOldestVisible(
-            scheduleInterval: ScheduleInterval<*>,
-            now: ExactTimeStamp.Local,
-    ) = Unit
+    override fun updateOldestVisible(scheduleInterval: ScheduleInterval, now: ExactTimeStamp.Local) = Unit
 
     fun setAssignedTo(assignedTo: Set<UserKey>) {
         val writeAssignedToJson = singleScheduleRecord.singleScheduleJson as? WriteAssignedToJson

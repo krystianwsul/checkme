@@ -2,30 +2,29 @@ package com.krystianwsul.common.firebase.models.interval
 
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.CurrentOffset
-import com.krystianwsul.common.utils.ProjectType
 
-sealed class Interval<T : ProjectType> : CurrentOffset {
+sealed class Interval : CurrentOffset {
 
-    abstract val type: Type<T>
+    abstract val type: Type
 
     abstract override val startExactTimeStampOffset: ExactTimeStamp.Offset
     abstract override val endExactTimeStampOffset: ExactTimeStamp.Offset?
 
     open fun containsExactTimeStamp(exactTimeStamp: ExactTimeStamp) = startExactTimeStampOffset <= exactTimeStamp
 
-    data class Current<T : ProjectType>(
-            override val type: Type<T>,
+    data class Current(
+            override val type: Type,
             override val startExactTimeStampOffset: ExactTimeStamp.Offset,
-    ) : Interval<T>() {
+    ) : Interval() {
 
         override val endExactTimeStampOffset: ExactTimeStamp.Offset? = null
     }
 
-    data class Ended<T : ProjectType>(
-            override val type: Type<T>,
+    data class Ended(
+            override val type: Type,
             override val startExactTimeStampOffset: ExactTimeStamp.Offset,
             override val endExactTimeStampOffset: ExactTimeStamp.Offset,
-    ) : Interval<T>() {
+    ) : Interval() {
 
         override fun containsExactTimeStamp(exactTimeStamp: ExactTimeStamp): Boolean {
             if (!super.containsExactTimeStamp(exactTimeStamp)) return false

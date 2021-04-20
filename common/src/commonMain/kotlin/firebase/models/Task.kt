@@ -141,7 +141,7 @@ class Task<T : ProjectType>(val project: Project<T>, private val taskRecord: Tas
     private fun getRootTask(exactTimeStamp: ExactTimeStamp): Task<T> =
             getParentTask(exactTimeStamp)?.getRootTask(exactTimeStamp) ?: this
 
-    fun getCurrentScheduleIntervals(exactTimeStamp: ExactTimeStamp): List<ScheduleInterval<T>> {
+    fun getCurrentScheduleIntervals(exactTimeStamp: ExactTimeStamp): List<ScheduleInterval> {
         requireCurrentOffset(exactTimeStamp)
 
         return getInterval(exactTimeStamp).let {
@@ -211,7 +211,7 @@ class Task<T : ProjectType>(val project: Project<T>, private val taskRecord: Tas
             .onEach { it.setEndExactTimeStamp(now.toOffset()) }
             .map { it.id }
 
-    private fun getParentTaskHierarchy(exactTimeStamp: ExactTimeStamp): HierarchyInterval<T>? {
+    private fun getParentTaskHierarchy(exactTimeStamp: ExactTimeStamp): HierarchyInterval? {
         requireCurrentOffset(exactTimeStamp)
 
         return getInterval(exactTimeStamp).let { (it.type as? Type.Child)?.getHierarchyInterval(it) }
@@ -311,7 +311,7 @@ class Task<T : ProjectType>(val project: Project<T>, private val taskRecord: Tas
             endExactTimeStamp: ExactTimeStamp.Offset?,
             originalDateTime: Boolean = false,
             checkOldestVisible: Boolean = true,
-    ): Sequence<List<Pair<DateTime, ScheduleInterval<T>>>> {
+    ): Sequence<List<Pair<DateTime, ScheduleInterval>>> {
         if (endExactTimeStamp != null && startExactTimeStamp != null && endExactTimeStamp < startExactTimeStamp)
             return sequenceOf()
 
@@ -962,7 +962,7 @@ class Task<T : ProjectType>(val project: Project<T>, private val taskRecord: Tas
 
     fun isUnscheduled(now: ExactTimeStamp.Local) = getInterval(now).type is Type.NoSchedule
 
-    private fun getInterval(exactTimeStamp: ExactTimeStamp): Interval<T> {
+    private fun getInterval(exactTimeStamp: ExactTimeStamp): Interval {
         val intervals = intervals
 
         try {
@@ -994,7 +994,7 @@ class Task<T : ProjectType>(val project: Project<T>, private val taskRecord: Tas
     }
 
     fun correctIntervalEndExactTimeStamps() = intervals.asSequence()
-            .filterIsInstance<Interval.Ended<T>>()
+            .filterIsInstance<Interval.Ended>()
             .forEach { it.correctEndExactTimeStamps() }
 
     fun hasOtherVisibleInstances(now: ExactTimeStamp.Local, instanceKey: InstanceKey?) = getInstances(

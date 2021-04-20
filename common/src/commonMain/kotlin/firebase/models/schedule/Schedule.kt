@@ -55,7 +55,7 @@ abstract class Schedule(val rootTask: Task<*>) : TaskParentEntry {
     }
 
     abstract fun getDateTimesInRange(
-            scheduleInterval: ScheduleInterval<*>,
+            scheduleInterval: ScheduleInterval,
             givenStartExactTimeStamp: ExactTimeStamp.Offset?,
             givenEndExactTimeStamp: ExactTimeStamp.Offset?,
             originalDateTime: Boolean = false,
@@ -84,7 +84,7 @@ abstract class Schedule(val rootTask: Task<*>) : TaskParentEntry {
 
     abstract val oldestVisible: OldestVisible
 
-    abstract fun updateOldestVisible(scheduleInterval: ScheduleInterval<*>, now: ExactTimeStamp.Local)
+    abstract fun updateOldestVisible(scheduleInterval: ScheduleInterval, now: ExactTimeStamp.Local)
 
     val assignedTo get() = scheduleRecord.assignedTo.map { UserKey(it) }.toSet()
 

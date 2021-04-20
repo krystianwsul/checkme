@@ -8,7 +8,6 @@ import com.krystianwsul.common.firebase.json.tasks.PrivateTaskJson
 import com.krystianwsul.common.firebase.json.tasks.TaskJson
 import com.krystianwsul.common.firebase.records.task.PrivateTaskRecord
 import com.krystianwsul.common.time.*
-import com.krystianwsul.common.utils.ProjectType
 import io.mockk.mockk
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -35,7 +34,7 @@ class InstanceGenerationTest {
         private const val differentOffsetHours = 5
     }
 
-    private fun createMockTask(hours: Int): Task<ProjectType.Private> {
+    private fun createMockTask(hours: Int): Task {
         val offsetDouble = getOffset(hours)
 
         // let's say we have a schedule that was created at 12:00, and deleted at 13:00.  It has an instance at 12:30

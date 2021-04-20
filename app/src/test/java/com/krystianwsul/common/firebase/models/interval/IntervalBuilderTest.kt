@@ -8,7 +8,6 @@ import com.krystianwsul.common.firebase.models.taskhierarchy.ProjectTaskHierarch
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.HourMinute
-import com.krystianwsul.common.utils.ProjectType
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.Assert.assertEquals
@@ -28,7 +27,7 @@ class IntervalBuilderTest {
             taskHierarchies: Collection<ProjectTaskHierarchy> = setOf(),
             scheduleList: List<Schedule> = listOf(),
             noScheduleOrParentList: List<NoScheduleOrParent> = listOf(),
-    ): Task<ProjectType.Private> {
+    ): Task {
         return mockk(relaxed = true) {
             every { startExactTimeStamp } returns start
             every { startExactTimeStampOffset } returns start.toOffset()
@@ -80,7 +79,7 @@ class IntervalBuilderTest {
 
     private fun noScheduleMock() = Type.NoSchedule()
 
-    private fun Task<ProjectType.Private>.check(vararg expected: Interval) {
+    private fun Task.check(vararg expected: Interval) {
         val actual = IntervalBuilder.build(this)
         assertEquals(expected.toList(), actual)
     }

@@ -4,7 +4,6 @@ import com.krystianwsul.common.firebase.json.tasks.TaskJson
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.HourMinute
-import com.krystianwsul.common.utils.ProjectType
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.Assert.assertEquals
@@ -22,7 +21,7 @@ class TaskTest {
         val now = ExactTimeStamp.Local(date, hour1)
         val start = ExactTimeStamp.Local(date, hour2)
 
-        val task = Task<ProjectType.Private>(
+        val task = Task(
                 mockk(relaxed = true),
                 mockk(relaxed = true) {
                     every { endData } returns null
@@ -46,7 +45,7 @@ class TaskTest {
         val end = ExactTimeStamp.Local(date, hour1)
         val now = ExactTimeStamp.Local(date, hour2)
 
-        val task = Task<ProjectType.Private>(
+        val task = Task(
                 mockk(relaxed = true),
                 mockk(relaxed = true) {
                     every { endData } returns TaskJson.EndData(end.long)

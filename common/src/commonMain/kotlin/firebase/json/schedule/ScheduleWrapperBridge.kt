@@ -7,6 +7,7 @@ interface ScheduleWrapperBridge {
         fun fromScheduleWrapper(scheduleWrapper: ScheduleWrapper): ScheduleWrapperBridge = when (scheduleWrapper) {
             is PrivateScheduleWrapper -> PrivateScheduleWrapperBridge(scheduleWrapper)
             is SharedScheduleWrapper -> SharedScheduleWrapperBridge(scheduleWrapper)
+            is RootScheduleWrapper -> RootScheduleWrapperBridge(scheduleWrapper)
             else -> throw IllegalArgumentException()
         }
     }

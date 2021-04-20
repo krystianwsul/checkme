@@ -12,7 +12,7 @@ abstract class TaskHierarchy<T : ProjectType>(private val project: Project<T>) :
     companion object {
 
         // todo after flipping this, remove all code for creating ProjectTaskHierarchies
-        const val WRITE_NESTED_TASK_HIERARCHIES = false
+        const val WRITE_NESTED_TASK_HIERARCHIES = false // todo published on 2021.04.20
     }
 
     protected abstract val taskHierarchyRecord: TaskHierarchyRecord<*>

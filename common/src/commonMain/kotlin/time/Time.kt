@@ -81,7 +81,7 @@ sealed class Time {
             companion object {
 
                 // todo after flipping this, remove all code for creating old time types
-                const val WRITE_USER_CUSTOM_TIMES = false
+                const val WRITE_USER_CUSTOM_TIMES = false // todo published on 2021.04.20
             }
 
             override val id = customTimeRecord.id

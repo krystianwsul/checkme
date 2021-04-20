@@ -46,6 +46,10 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
 
     private val rxPaperBook = RxPaperBook.with("firebaseCache")
 
+    fun onUpgrade() {
+        rxPaperBook.destroy().subscribe()
+    }
+
     private fun getUserQuery(userKey: UserKey) = rootReference.child("$USERS_KEY/${userKey.key}")
     override fun getUserObservable(userKey: UserKey) = getUserQuery(userKey).typedSnapshotChanges<UserWrapper>()
 

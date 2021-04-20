@@ -8,6 +8,7 @@ import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager.NotificationType
 import com.krystianwsul.checkme.domainmodel.extensions.fixOffsets
+import com.krystianwsul.checkme.domainmodel.extensions.migratePrivateCustomTime
 import com.krystianwsul.checkme.domainmodel.extensions.updateNotifications
 import com.krystianwsul.checkme.domainmodel.local.LocalFactory
 import com.krystianwsul.checkme.domainmodel.notifications.ImageManager
@@ -58,7 +59,8 @@ class DomainFactory(
         PrivateCustomTime.AllRecordsSource,
         Task.ProjectUpdater,
         FactoryProvider.Domain,
-        JsonTime.UserCustomTimeProvider {
+        JsonTime.UserCustomTimeProvider,
+        Project.CustomTimeMigrationHelper {
 
     companion object {
 
@@ -464,6 +466,7 @@ class DomainFactory(
                     pair.second,
                     now,
                     newProject.projectKey,
+                    this,
             )
 
             remoteToRemoteConversion.endTasks[pair.first.id] = task
@@ -593,6 +596,37 @@ class DomainFactory(
             is CustomTimeKey.User -> getUserCustomTime(customTimeKey)
             else -> throw UnsupportedOperationException() // compilation
         }
+    }
+
+    override fun tryMigrateProjectCustomTime(
+            customTime: Time.Custom.Project<*>,
+            now: ExactTimeStamp.Local,
+    ): Time.Custom.User? {
+        val privateCustomTime = when (customTime) {
+            is PrivateCustomTime -> customTime
+            is SharedCustomTime -> {
+                if (customTime.ownerKey == ownerKey) {
+                    val privateCustomTimeKey = CustomTimeKey.Project.Private(
+                            ownerKey.toPrivateProjectKey(),
+                            customTime.privateKey!!,
+                    )
+
+                    getCustomTime(privateCustomTimeKey) as PrivateCustomTime
+                } else {
+                    null
+                }
+            }
+            else -> throw UnsupportedOperationException()
+        } ?: return null
+
+        myUserFactory.user
+                .customTimes
+                .values
+                .filter { it.customTimeRecord.privateCustomTimeId == privateCustomTime.id } // this could go south if two users migrate the same time simultaneously
+                .singleOrEmpty()
+                ?.let { return it }
+
+        return migratePrivateCustomTime(privateCustomTime, now)
     }
 
     // this shouldn't use DateTime, since that leaks Time.Custom which is a model object

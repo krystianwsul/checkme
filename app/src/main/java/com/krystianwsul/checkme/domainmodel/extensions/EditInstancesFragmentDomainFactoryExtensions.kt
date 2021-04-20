@@ -77,7 +77,9 @@ private class SetInstancesDateTimeUndoData(val data: List<Pair<InstanceKey, Date
     override fun undo(domainFactory: DomainFactory, now: ExactTimeStamp.Local) = domainFactory.run {
         val pairs = data.map { getInstance(it.first) to it.second?.let(::getDateTime) }
 
-        pairs.forEach { (instance, dateTime) -> instance.setInstanceDateTime(localFactory, ownerKey, dateTime) }
+        pairs.forEach { (instance, dateTime) ->
+            instance.setInstanceDateTime(localFactory, ownerKey, dateTime, this, now)
+        }
 
         pairs.map { it.first.task.project }.toSet()
     }
@@ -89,7 +91,7 @@ fun DomainUpdater.setInstancesDateTime(
         instanceKeys: Set<InstanceKey>,
         instanceDate: Date,
         instanceTimePair: TimePair,
-): Single<UndoData> = SingleDomainUpdate.create("setInstancesDateTime") {
+): Single<UndoData> = SingleDomainUpdate.create("setInstancesDateTime") { now ->
     check(instanceKeys.isNotEmpty())
 
     val instances = instanceKeys.map(this::getInstance)
@@ -103,6 +105,8 @@ fun DomainUpdater.setInstancesDateTime(
                 localFactory,
                 ownerKey,
                 DateTime(instanceDate, getTime(instanceTimePair)),
+                this,
+                now,
         )
 
         if (it.parentInstance != null) {

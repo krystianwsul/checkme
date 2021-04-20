@@ -21,6 +21,7 @@ import com.krystianwsul.checkme.domainmodel.extensions.updatePhotoUrl
 import com.krystianwsul.checkme.domainmodel.local.LocalFactory
 import com.krystianwsul.checkme.domainmodel.notifications.ImageManager
 import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
+import com.krystianwsul.checkme.firebase.AndroidDatabaseWrapper
 import com.krystianwsul.checkme.firebase.loaders.FactoryLoader
 import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.checkme.persistencemodel.PersistenceManager
@@ -104,7 +105,6 @@ class MyApplication : Application() {
         AndroidDomainUpdater.init()
 
         Preferences.language.applySettingStartup()
-        Preferences.setVersionCode()
         Preferences.tickLog.logLineDate("MyApplication.onCreate")
 
         FirebaseDatabase.getInstance().apply {
@@ -128,6 +128,7 @@ class MyApplication : Application() {
         val localFactory = LocalFactory(PersistenceManager.instance)
 
         RxPaperBook.init(this)
+        VersionCodeManager.check(AndroidDatabaseWrapper::onUpgrade)
 
         FactoryLoader(
                 localFactory,

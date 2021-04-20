@@ -101,7 +101,13 @@ abstract class Project<T : ProjectType>(
             instanceJsons: MutableMap<String, InstanceJson>,
     ): TaskRecord<T>
 
-    private fun convertScheduleKey(userInfo: UserInfo, oldTask: Task<*>, oldScheduleKey: ScheduleKey): ScheduleKey {
+    private fun convertScheduleKey(
+            userInfo: UserInfo,
+            oldTask: Task<*>,
+            oldScheduleKey: ScheduleKey,
+            customTimeMigrationHelper: CustomTimeMigrationHelper,
+            now: ExactTimeStamp.Local,
+    ): ScheduleKey {
         check(oldTask.project != this)
 
         val (oldScheduleDate, oldScheduleTimePair) = oldScheduleKey
@@ -116,7 +122,7 @@ abstract class Project<T : ProjectType>(
                     else -> throw IllegalStateException()
                 }
 
-                getOrCreateCustomTime(ownerKey, oldScheduleDate.dayOfWeek, customTime)
+                getOrCreateCustomTime(ownerKey, oldScheduleDate.dayOfWeek, customTime, customTimeMigrationHelper, now)
             }
             is Time.Custom.User -> customTime
         }
@@ -137,11 +143,24 @@ abstract class Project<T : ProjectType>(
             instances: Collection<Instance<*>>,
             now: ExactTimeStamp.Local,
             newProjectKey: ProjectKey<*>,
+            customTimeMigrationHelper: CustomTimeMigrationHelper,
     ): Pair<Task<T>, List<(Map<String, String>) -> Any?>> {
         val instanceDatas = instances.map { oldInstance ->
-            val (newInstance, updater) = getInstanceJson(deviceDbInfo.key, oldInstance, newProjectKey)
+            val (newInstance, updater) = getInstanceJson(
+                    deviceDbInfo.key,
+                    oldInstance,
+                    newProjectKey,
+                    customTimeMigrationHelper,
+                    now,
+            )
 
-            val newScheduleKey = convertScheduleKey(deviceDbInfo.userInfo, oldTask, oldInstance.scheduleKey)
+            val newScheduleKey = convertScheduleKey(
+                    deviceDbInfo.userInfo,
+                    oldTask,
+                    oldInstance.scheduleKey,
+                    customTimeMigrationHelper,
+                    now,
+            )
 
             InstanceConversionData(newInstance, newScheduleKey, updater)
         }
@@ -169,7 +188,7 @@ abstract class Project<T : ProjectType>(
         if (currentSchedules.isNotEmpty()) {
             check(currentNoScheduleOrParent == null)
 
-            newTask.copySchedules(deviceDbInfo, now, currentSchedules)
+            newTask.copySchedules(deviceDbInfo, now, currentSchedules, customTimeMigrationHelper)
         } else {
             currentNoScheduleOrParent?.let { newTask.setNoScheduleOrParent(now) }
         }
@@ -181,11 +200,15 @@ abstract class Project<T : ProjectType>(
             ownerKey: UserKey,
             dayOfWeek: DayOfWeek,
             customTime: Time.Custom.Project<*>,
+            customTimeMigrationHelper: CustomTimeMigrationHelper,
+            now: ExactTimeStamp.Local,
     ): Time {
-        return if (Time.Custom.User.WRITE_USER_CUSTOM_TIMES)
-            Time.Normal(customTime.getHourMinute(dayOfWeek))
-        else
+        return if (Time.Custom.User.WRITE_USER_CUSTOM_TIMES) {
+            customTimeMigrationHelper.tryMigrateProjectCustomTime(customTime, now)
+                    ?: Time.Normal(customTime.getHourMinute(dayOfWeek))
+        } else {
             getOrCreateCustomTimeOld(ownerKey, customTime)
+        }
     }
 
     protected abstract fun getOrCreateCustomTimeOld(
@@ -193,9 +216,15 @@ abstract class Project<T : ProjectType>(
             customTime: Time.Custom.Project<*>,
     ): Time.Custom.Project<T>
 
-    fun getOrCopyTime(ownerKey: UserKey, dayOfWeek: DayOfWeek, time: Time) = time.let {
+    fun getOrCopyTime(
+            ownerKey: UserKey,
+            dayOfWeek: DayOfWeek,
+            time: Time,
+            customTimeMigrationHelper: CustomTimeMigrationHelper,
+            now: ExactTimeStamp.Local,
+    ) = time.let {
         when (it) {
-            is Time.Custom.Project<*> -> getOrCreateCustomTime(ownerKey, dayOfWeek, it)
+            is Time.Custom.Project<*> -> getOrCreateCustomTime(ownerKey, dayOfWeek, it, customTimeMigrationHelper, now)
             is Time.Custom.User -> it
             is Time.Normal -> it
         }
@@ -205,12 +234,21 @@ abstract class Project<T : ProjectType>(
             ownerKey: UserKey,
             instance: Instance<*>,
             newProjectKey: ProjectKey<*>,
+            customTimeMigrationHelper: CustomTimeMigrationHelper,
+            now: ExactTimeStamp.Local,
     ): Pair<InstanceJson, (Map<String, String>) -> Any?> {
         val done = instance.doneOffset
 
         val instanceDate = instance.instanceDate
 
-        val newInstanceTime = getOrCopyTime(ownerKey, instanceDate.dayOfWeek, instance.instanceTime)
+        val newInstanceTime = getOrCopyTime(
+                ownerKey,
+                instanceDate.dayOfWeek,
+                instance.instanceTime,
+                customTimeMigrationHelper,
+                now,
+        )
+
         val instanceTimeString = JsonTime.fromTime<T>(newInstanceTime).toJson()
 
         val parentState = instance.parentState
@@ -478,5 +516,10 @@ abstract class Project<T : ProjectType>(
     interface Parent {
 
         fun deleteProject(project: Project<*>) // todo this is never implemented, just get rid of it
+    }
+
+    interface CustomTimeMigrationHelper {
+
+        fun tryMigrateProjectCustomTime(customTime: Time.Custom.Project<*>, now: ExactTimeStamp.Local): Time.Custom.User?
     }
 }

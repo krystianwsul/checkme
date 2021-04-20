@@ -195,6 +195,7 @@ fun DomainUpdater.createScheduleRootTask(
             finalProjectId,
             imageUuid,
             deviceDbInfo,
+            this,
             assignedTo = sharedProjectParameters.nonNullAssignedTo,
     )
 
@@ -315,7 +316,8 @@ fun DomainUpdater.updateScheduleTask(
                 localFactory,
                 scheduleDatas.map { it to getTime(it.timePair) },
                 now,
-                sharedProjectParameters.nonNullAssignedTo
+                sharedProjectParameters.nonNullAssignedTo,
+                this@create,
         )
 
         if (imagePath != null) setImage(deviceDbInfo, imageUuid?.let { ImageState.Local(imageUuid) })
@@ -464,8 +466,9 @@ fun DomainUpdater.createScheduleJoinRootTask(
             finalProjectId,
             imageUuid,
             deviceDbInfo,
+            this,
             ordinal,
-            assignedTo = sharedProjectParameters.nonNullAssignedTo
+            sharedProjectParameters.nonNullAssignedTo,
     )
 
     if (allReminders)

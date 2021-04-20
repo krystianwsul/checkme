@@ -12,7 +12,9 @@ import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.MyCustomTime
 import com.krystianwsul.common.firebase.json.PrivateCustomTimeJson
 import com.krystianwsul.common.firebase.json.UserCustomTimeJson
+import com.krystianwsul.common.firebase.models.PrivateCustomTime
 import com.krystianwsul.common.time.DayOfWeek
+import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.CustomTimeKey
@@ -41,6 +43,7 @@ fun DomainUpdater.updateCustomTime(
     check(name.isNotEmpty())
 
     val customTime = getCustomTime(customTimeId) as MyCustomTime
+
     customTime.setName(this, name)
 
     for (dayOfWeek in DayOfWeek.values()) {
@@ -49,12 +52,20 @@ fun DomainUpdater.updateCustomTime(
         customTime.setHourMinute(this, dayOfWeek, hourMinute)
     }
 
-    customTime.endExactTimeStamp = now
-
-    createUserCustomTime(name, hourMinutes)
+    if (Time.Custom.User.WRITE_USER_CUSTOM_TIMES && customTime is PrivateCustomTime)
+        migratePrivateCustomTime(customTime, now)
 
     DomainUpdater.Params(false, notificationType)
 }.perform(this)
+
+fun DomainFactory.migratePrivateCustomTime(
+        privateCustomTime: PrivateCustomTime,
+        now: ExactTimeStamp.Local,
+): Time.Custom.User {
+    privateCustomTime.endExactTimeStamp = now
+
+    return createUserCustomTime(privateCustomTime.name, privateCustomTime.hourMinutes, privateCustomTime)
+}
 
 @CheckResult
 fun DomainUpdater.createCustomTime(
@@ -67,7 +78,7 @@ fun DomainUpdater.createCustomTime(
     check(DayOfWeek.set == hourMinutes.keys)
 
     val customTime = if (Time.Custom.User.WRITE_USER_CUSTOM_TIMES) {
-        createUserCustomTime(name, hourMinutes)
+        createUserCustomTime(name, hourMinutes, null)
     } else {
         projectsFactory.privateProject.newRemoteCustomTime(PrivateCustomTimeJson(
                 name,
@@ -94,6 +105,7 @@ fun DomainUpdater.createCustomTime(
 private fun DomainFactory.createUserCustomTime(
         name: String,
         hourMinutes: Map<DayOfWeek, HourMinute>,
+        fromPrivateCustomTime: PrivateCustomTime?,
 ) = myUserFactory.user.newCustomTime(UserCustomTimeJson(
         name,
         hourMinutes.getValue(DayOfWeek.SUNDAY).hour,
@@ -110,4 +122,5 @@ private fun DomainFactory.createUserCustomTime(
         hourMinutes.getValue(DayOfWeek.FRIDAY).minute,
         hourMinutes.getValue(DayOfWeek.SATURDAY).hour,
         hourMinutes.getValue(DayOfWeek.SATURDAY).minute,
+        privateCustomTimeId = fromPrivateCustomTime?.id?.value,
 ))

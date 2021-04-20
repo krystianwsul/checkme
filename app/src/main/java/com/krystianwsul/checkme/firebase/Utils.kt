@@ -133,14 +133,15 @@ private sealed class PairState<T : Any, U : Any> {
             check(newPaperState is AndroidDatabaseWrapper.LoadState.Loaded)
             check(newFirebaseState is AndroidDatabaseWrapper.LoadState.Loaded)
 
-            return if (converter.snapshotToPaper(newFirebaseState.value) == paper) {
+            val firebase = converter.snapshotToPaper(newFirebaseState.value)
+            return if (firebase == paper) {
                 Terminal(null)
             } else {
                 /**
                  * This isn't necessarily an issue, but I'm expecting them always to be consistent.  It would be nice
                  * to know what happened.
                  */
-                MyCrashlytics.logException(PaperCacheException("firebase was different than paper, path: $path"))
+                MyCrashlytics.logException(PaperCacheException("firebase was different than paper, path: $path, paper: $paper, firebase: $firebase"))
 
                 Terminal(newFirebaseState.value)
             }

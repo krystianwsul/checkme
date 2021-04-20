@@ -31,5 +31,9 @@ class UserCustomTimeRecord(
 
     var endTime by Committer(customTimeJson::endTime)
 
+    val privateCustomTimeId by lazy {
+        customTimeJson.privateCustomTimeId?.let { CustomTimeId.Project.Private(it) }
+    }
+
     override fun deleteFromParent() = check(rootUserRecord.customTimeRecords.remove(id) == this)
 }

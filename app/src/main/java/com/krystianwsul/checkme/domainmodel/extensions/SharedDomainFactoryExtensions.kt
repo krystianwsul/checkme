@@ -107,6 +107,8 @@ fun DomainUpdater.setInstancesAddHourActivity(
                 localFactory,
                 ownerKey,
                 DateTime(date, Time.Normal(hourMinute)),
+                this,
+                now,
         )
     }
 
@@ -124,11 +126,13 @@ fun DomainUpdater.setInstancesAddHourActivity(
 fun DomainUpdater.undoInstancesAddHour(
         notificationType: DomainListenerManager.NotificationType,
         hourUndoData: DomainFactory.HourUndoData,
-): Completable = CompletableDomainUpdate.create("setInstanceAddHourActivity") {
+): Completable = CompletableDomainUpdate.create("setInstanceAddHourActivity") { now ->
     check(hourUndoData.instanceDateTimes.isNotEmpty())
 
     val instances = hourUndoData.instanceDateTimes.map { (instanceKey, instanceDateTime) ->
-        getInstance(instanceKey).apply { setInstanceDateTime(localFactory, ownerKey, instanceDateTime) }
+        getInstance(instanceKey).also {
+            it.setInstanceDateTime(localFactory, ownerKey, instanceDateTime, this, now)
+        }
     }
 
     val remoteProjects = instances.map { it.task.project }.toSet()

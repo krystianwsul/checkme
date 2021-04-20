@@ -571,7 +571,7 @@ class Task<T : ProjectType>(val project: Project<T>, private val taskRecord: Tas
         invalidateIntervals()
     }
 
-    fun createRemoteInstanceRecord(instance: Instance<T>): InstanceRecord<T> {
+    fun createRemoteInstanceRecord(instance: Instance<T>): InstanceRecord {
         check(generatedInstances.containsKey(instance.instanceKey))
 
         generatedInstances.remove(instance.instanceKey)

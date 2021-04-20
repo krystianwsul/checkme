@@ -12,9 +12,9 @@ import com.krystianwsul.common.utils.TaskKey
 import kotlin.jvm.JvmStatic
 import kotlin.properties.Delegates.observable
 
-class InstanceRecord<T : ProjectType>(
+class InstanceRecord(
         create: Boolean,
-        private val taskRecord: TaskRecord<T>,
+        private val taskRecord: TaskRecord<*>,
         override val createObject: InstanceJson,
         val scheduleKey: ScheduleKey,
         firebaseKey: String,

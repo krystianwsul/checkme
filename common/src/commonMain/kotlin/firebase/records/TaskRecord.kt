@@ -22,7 +22,7 @@ abstract class TaskRecord<T : ProjectType> protected constructor(
         const val TASKS = "tasks"
     }
 
-    val instanceRecords = mutableMapOf<ScheduleKey, InstanceRecord<T>>()
+    val instanceRecords = mutableMapOf<ScheduleKey, InstanceRecord>()
 
     val singleScheduleRecords: MutableMap<String, SingleScheduleRecord> = mutableMapOf()
 
@@ -166,7 +166,7 @@ abstract class TaskRecord<T : ProjectType> protected constructor(
         }
     }
 
-    fun newInstanceRecord(instanceJson: InstanceJson, scheduleKey: ScheduleKey): InstanceRecord<T> {
+    fun newInstanceRecord(instanceJson: InstanceJson, scheduleKey: ScheduleKey): InstanceRecord {
         val firebaseKey = InstanceRecord.scheduleKeyToString(scheduleKey)
 
         val projectInstanceRecord = InstanceRecord(

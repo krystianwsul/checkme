@@ -179,7 +179,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
     private val parentInstanceData by parentInstanceProperty
     val parentInstance get() = parentInstanceData?.instance
 
-    constructor(task: Task<T>, instanceRecord: InstanceRecord<T>) : this(task, Data.Real(task, instanceRecord))
+    constructor(task: Task<T>, instanceRecord: InstanceRecord) : this(task, Data.Real(task, instanceRecord))
 
     constructor(task: Task<T>, scheduleDateTime: DateTime) :
             this(task, Data.Virtual(scheduleDateTime.date, JsonTime.fromTime<T>(scheduleDateTime.time), task.project))
@@ -581,7 +581,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
 
         class Real<T : ProjectType>(
                 private val task: Task<T>,
-                val instanceRecord: InstanceRecord<T>,
+                val instanceRecord: InstanceRecord,
         ) : Data<T>() {
 
             override val scheduleDate get() = instanceRecord.run { Date(scheduleYear, scheduleMonth, scheduleDay) }

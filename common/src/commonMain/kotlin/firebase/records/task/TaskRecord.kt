@@ -49,8 +49,6 @@ abstract class TaskRecord protected constructor(
 
     final override val key get() = projectRecord.childKey + "/" + TASKS + "/" + id
 
-    val rootInstanceKey by lazy { "${projectRecord.projectKey.key}-$id" }
-
     val projectKey get() = projectRecord.projectKey
 
     var name by Committer(taskJson::name)

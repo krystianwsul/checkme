@@ -384,17 +384,20 @@ class Task<T : ProjectType>(val project: Project<T>, private val taskRecord: Tas
             scheduleDatas: List<Pair<ScheduleData, Time>>,
             now: ExactTimeStamp.Local,
             assignedTo: Set<UserKey>,
+            customTimeMigrationHelper: Project.CustomTimeMigrationHelper,
     ) {
         val removeSchedules = mutableListOf<Schedule<T>>()
         val addScheduleDatas = scheduleDatas.map { ScheduleDiffKey(it.first, assignedTo) to it }.toMutableList()
 
         val oldSchedules = getCurrentScheduleIntervals(now).map { it.schedule }
+
         val oldScheduleDatas = ScheduleGroup.getGroups(oldSchedules).map {
             ScheduleDiffKey(it.scheduleData, it.assignedTo) to it.schedules
         }
 
         for ((key, value) in oldScheduleDatas) {
             val existing = addScheduleDatas.singleOrNull { it.first == key }
+
             if (existing != null)
                 addScheduleDatas.remove(existing)
             else
@@ -422,10 +425,13 @@ class Task<T : ProjectType>(val project: Project<T>, private val taskRecord: Tas
                     shownFactory,
                     ownerKey,
                     singleAddSchedulePair.second.run { DateTime((first as ScheduleData.Single).date, second) },
+                    customTimeMigrationHelper,
+                    now,
             )
         } else {
             removeSchedules.forEach { it.setEndExactTimeStamp(now.toOffset()) }
-            addSchedules(ownerKey, addScheduleDatas.map { it.second }, now, assignedTo)
+
+            addSchedules(ownerKey, addScheduleDatas.map { it.second }, now, assignedTo, customTimeMigrationHelper)
         }
     }
 
@@ -540,7 +546,8 @@ class Task<T : ProjectType>(val project: Project<T>, private val taskRecord: Tas
             scheduleDatas: List<Pair<ScheduleData, Time>>,
             now: ExactTimeStamp.Local,
             assignedTo: Set<UserKey>,
-    ) = createSchedules(ownerKey, now, scheduleDatas, assignedTo)
+            customTimeMigrationHelper: Project.CustomTimeMigrationHelper,
+    ) = createSchedules(ownerKey, now, scheduleDatas, assignedTo, customTimeMigrationHelper)
 
     fun addChild(childTask: Task<*>, now: ExactTimeStamp.Local): TaskHierarchyKey {
         @Suppress("UNCHECKED_CAST")
@@ -599,6 +606,7 @@ class Task<T : ProjectType>(val project: Project<T>, private val taskRecord: Tas
             now: ExactTimeStamp.Local,
             scheduleDatas: List<Pair<ScheduleData, Time>>,
             assignedTo: Set<UserKey>,
+            customTimeMigrationHelper: Project.CustomTimeMigrationHelper,
     ) {
         val assignedToKeys = assignedTo.map { it.key }.toSet()
 
@@ -606,7 +614,14 @@ class Task<T : ProjectType>(val project: Project<T>, private val taskRecord: Tas
             when (scheduleData) {
                 is ScheduleData.Single -> {
                     val date = scheduleData.date
-                    val copiedTime = project.getOrCopyTime(ownerKey, date.dayOfWeek, time)
+
+                    val copiedTime = project.getOrCopyTime(
+                            ownerKey,
+                            date.dayOfWeek,
+                            time,
+                            customTimeMigrationHelper,
+                            now,
+                    )
 
                     val singleScheduleRecord = taskRecord.newSingleScheduleRecord(
                             project.copyScheduleHelper.newSingle(
@@ -626,7 +641,13 @@ class Task<T : ProjectType>(val project: Project<T>, private val taskRecord: Tas
                 }
                 is ScheduleData.Weekly -> {
                     for (dayOfWeek in scheduleData.daysOfWeek) {
-                        val copiedTime = project.getOrCopyTime(ownerKey, dayOfWeek, time)
+                        val copiedTime = project.getOrCopyTime(
+                                ownerKey,
+                                dayOfWeek,
+                                time,
+                                customTimeMigrationHelper,
+                                now,
+                        )
 
                         val weeklyScheduleRecord = taskRecord.newWeeklyScheduleRecord(
                                 project.copyScheduleHelper.newWeekly(
@@ -658,7 +679,7 @@ class Task<T : ProjectType>(val project: Project<T>, private val taskRecord: Tas
                             scheduleData.beginningOfMonth,
                     ).dayOfWeek
 
-                    val copiedTime = project.getOrCopyTime(ownerKey, dayOfWeek, time)
+                    val copiedTime = project.getOrCopyTime(ownerKey, dayOfWeek, time, customTimeMigrationHelper, now)
 
                     val monthlyDayScheduleRecord = taskRecord.newMonthlyDayScheduleRecord(
                             project.copyScheduleHelper.newMonthlyDay(
@@ -679,7 +700,7 @@ class Task<T : ProjectType>(val project: Project<T>, private val taskRecord: Tas
                 }
                 is ScheduleData.MonthlyWeek -> {
                     val (weekOfMonth, dayOfWeek, beginningOfMonth) = scheduleData
-                    val copiedTime = project.getOrCopyTime(ownerKey, dayOfWeek, time)
+                    val copiedTime = project.getOrCopyTime(ownerKey, dayOfWeek, time, customTimeMigrationHelper, now)
 
                     val monthlyWeekScheduleRecord = taskRecord.newMonthlyWeekScheduleRecord(
                             project.copyScheduleHelper.newMonthlyWeek(
@@ -704,6 +725,8 @@ class Task<T : ProjectType>(val project: Project<T>, private val taskRecord: Tas
                             ownerKey,
                             Date(Date.today().year, scheduleData.month, scheduleData.day).dayOfWeek,
                             time,
+                            customTimeMigrationHelper,
+                            now,
                     )
 
                     val yearlyScheduleRecord = taskRecord.newYearlyScheduleRecord(
@@ -729,7 +752,12 @@ class Task<T : ProjectType>(val project: Project<T>, private val taskRecord: Tas
         intervalsProperty.invalidate()
     }
 
-    fun copySchedules(deviceDbInfo: DeviceDbInfo, now: ExactTimeStamp.Local, schedules: List<Schedule<*>>) {
+    fun copySchedules(
+            deviceDbInfo: DeviceDbInfo,
+            now: ExactTimeStamp.Local,
+            schedules: List<Schedule<*>>,
+            customTimeMigrationHelper: Project.CustomTimeMigrationHelper,
+    ) {
         for (schedule in schedules) {
             val today = Date.today()
 
@@ -742,7 +770,13 @@ class Task<T : ProjectType>(val project: Project<T>, private val taskRecord: Tas
                 else -> throw UnsupportedOperationException()
             }
 
-            val copiedTime = project.getOrCopyTime(deviceDbInfo.key, dayOfWeek, schedule.time)
+            val copiedTime = project.getOrCopyTime(
+                    deviceDbInfo.key,
+                    dayOfWeek,
+                    schedule.time,
+                    customTimeMigrationHelper,
+                    now,
+            )
 
             val assignedTo = schedule.takeIf { it.rootTask.project == project }
                     ?.assignedTo

@@ -149,6 +149,7 @@ class ProjectsFactory(
             projectId: ProjectKey<*>,
             imageUuid: String?,
             deviceDbInfo: DeviceDbInfo,
+            customTimeMigrationHelper: Project.CustomTimeMigrationHelper,
             ordinal: Double? = null,
             assignedTo: Set<UserKey> = setOf(),
     ): Task<*> {
@@ -160,7 +161,7 @@ class ProjectsFactory(
                 imageUuid,
                 deviceDbInfo,
                 ordinal,
-        ).apply { createSchedules(deviceDbInfo.key, now, scheduleDatas, assignedTo) }
+        ).apply { createSchedules(deviceDbInfo.key, now, scheduleDatas, assignedTo, customTimeMigrationHelper) }
     }
 
     fun createNoScheduleOrParentTask(

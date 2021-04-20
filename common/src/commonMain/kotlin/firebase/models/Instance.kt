@@ -395,6 +395,8 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
             shownFactory: ShownFactory,
             ownerKey: UserKey,
             dateTime: DateTime?,
+            customTimeMigrationHelper: Project.CustomTimeMigrationHelper,
+            now: ExactTimeStamp.Local,
     ) {
         if (dateTime == recordInstanceDateTime) return
 
@@ -403,7 +405,7 @@ class Instance<T : ProjectType> private constructor(val task: Task<T>, private v
 
             it.instanceJsonTime = dateTime?.time?.let {
                 task.project
-                        .getOrCopyTime(ownerKey, dateTime.date.dayOfWeek, it)
+                        .getOrCopyTime(ownerKey, dateTime.date.dayOfWeek, it, customTimeMigrationHelper, now)
                         .let { JsonTime.fromTime<T>(it) }
             }
         }

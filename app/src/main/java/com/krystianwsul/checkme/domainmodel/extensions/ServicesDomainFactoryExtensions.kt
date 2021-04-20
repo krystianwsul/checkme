@@ -32,7 +32,10 @@ fun DomainUpdater.setInstanceAddHourService(instanceKey: InstanceKey): Completab
                     localFactory,
                     ownerKey,
                     DateTime(date, Time.Normal(hourMinute)),
+                    this,
+                    now,
             )
+
             instance.setNotificationShown(localFactory, false)
 
             DomainUpdater.Params(

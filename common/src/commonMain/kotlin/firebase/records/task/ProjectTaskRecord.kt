@@ -19,8 +19,6 @@ abstract class ProjectTaskRecord protected constructor(
         projectRecord.childKey + "/" + TASKS + "/" + id,
 ) {
 
-    override val projectKey get() = projectRecord.projectKey
-
     override val taskKey by lazy { projectRecord.getTaskKey(id) }
 
     override fun getScheduleRecordId() = projectRecord.getScheduleRecordId(id)

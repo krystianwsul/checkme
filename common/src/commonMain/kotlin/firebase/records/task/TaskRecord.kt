@@ -12,7 +12,6 @@ import com.krystianwsul.common.firebase.records.RemoteRecord
 import com.krystianwsul.common.firebase.records.schedule.*
 import com.krystianwsul.common.firebase.records.taskhierarchy.NestedTaskHierarchyRecord
 import com.krystianwsul.common.time.JsonTime
-import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ScheduleKey
 import com.krystianwsul.common.utils.TaskKey
 
@@ -21,7 +20,7 @@ abstract class TaskRecord protected constructor(
         val id: String,
         private val taskJson: TaskJson,
         val assignedToHelper: AssignedToHelper,
-        val projectCustomTimeIdAndKeyProvider: JsonTime.ProjectCustomTimeIdAndKeyProvider, // todo task model pass in throwing object
+        val projectCustomTimeIdAndKeyProvider: JsonTime.ProjectCustomTimeIdAndKeyProvider,
         override val key: String,
 ) : RemoteRecord(create) {
 
@@ -50,14 +49,12 @@ abstract class TaskRecord protected constructor(
             .mapValues { NestedTaskHierarchyRecord(it.key, this, it.value) }
             .toMutableMap()
 
-    abstract val projectKey: ProjectKey<*> // todo task model
-
     var name by Committer(taskJson::name)
 
     val startTime get() = taskJson.startTime
     var startTimeOffset by Committer(taskJson::startTimeOffset)
 
-    abstract val taskKey: TaskKey // todo task model
+    abstract val taskKey: TaskKey
 
     var endData
         get() = taskJson.endData ?: taskJson.endTime?.let { TaskJson.EndData(it, null, false) }

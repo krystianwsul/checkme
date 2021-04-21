@@ -7,7 +7,6 @@ import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.utils.InstanceKey
-import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.ScheduleKey
 import kotlin.jvm.JvmStatic
 import kotlin.properties.Delegates.observable
@@ -44,8 +43,8 @@ class InstanceRecord(
             scheduleKeyToDateString(it, false) + "-" + scheduleKeyToTimeString(it, false)
         }
 
-        fun <T : ProjectType> stringToScheduleKey(
-                projectCustomTimeIdAndKeyProvider: JsonTime.ProjectCustomTimeIdAndKeyProvider<T>,
+        fun stringToScheduleKey(
+                projectCustomTimeIdAndKeyProvider: JsonTime.ProjectCustomTimeIdAndKeyProvider,
                 key: String,
         ): ScheduleKey {
             val matchResult = scheduleKeyRegex.find(key)!!
@@ -71,8 +70,8 @@ class InstanceRecord(
             return Date(year, month, day)
         }
 
-        private fun <T : ProjectType> dateTimeStringsToScheduleKey(
-                projectCustomTimeIdAndKeyProvider: JsonTime.ProjectCustomTimeIdAndKeyProvider<T>,
+        private fun dateTimeStringsToScheduleKey(
+                projectCustomTimeIdAndKeyProvider: JsonTime.ProjectCustomTimeIdAndKeyProvider,
                 dateString: String,
                 timeString: String,
         ): ScheduleKey {

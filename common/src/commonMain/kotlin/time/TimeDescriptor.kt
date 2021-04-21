@@ -1,7 +1,5 @@
 package com.krystianwsul.common.time
 
-import com.krystianwsul.common.utils.ProjectType
-
 data class TimeDescriptor(val customTimeDescriptor: String?, val hour: Int?, val minute: Int?) {
 
     init {
@@ -28,7 +26,7 @@ data class TimeDescriptor(val customTimeDescriptor: String?, val hour: Int?, val
         }
     }
 
-    fun <T : ProjectType> toJsonTime(projectCustomTimeIdProvider: JsonTime.ProjectCustomTimeIdProvider<T>): JsonTime {
+    fun toJsonTime(projectCustomTimeIdProvider: JsonTime.ProjectCustomTimeIdProvider): JsonTime {
         return if (customTimeDescriptor != null) {
             JsonTime.Custom.fromJson(projectCustomTimeIdProvider, customTimeDescriptor)
         } else {

@@ -8,7 +8,7 @@ sealed class JsonTime {
 
     companion object {
 
-        fun fromJson(projectCustomTimeIdProvider: ProjectCustomTimeIdProvider<*>, json: String): JsonTime {
+        fun fromJson(projectCustomTimeIdProvider: ProjectCustomTimeIdProvider, json: String): JsonTime {
             HourMinute.tryFromJson(json)?.let { return Normal(it) }
 
             return Custom.fromJson(projectCustomTimeIdProvider, json)
@@ -31,11 +31,9 @@ sealed class JsonTime {
 
     abstract fun toJson(): String
 
-    abstract fun <T : ProjectType> getCustomTimeKey(
-            projectCustomTimeKeyProvider: ProjectCustomTimeKeyProvider<T>,
-    ): CustomTimeKey?
+    abstract fun getCustomTimeKey(projectCustomTimeKeyProvider: ProjectCustomTimeKeyProvider): CustomTimeKey?
 
-    abstract fun <T : ProjectType> toTimePair(projectCustomTimeKeyProvider: ProjectCustomTimeKeyProvider<T>): TimePair
+    abstract fun toTimePair(projectCustomTimeKeyProvider: ProjectCustomTimeKeyProvider): TimePair
 
     abstract fun <T : ProjectType> toTime(
             projectCustomTimeProvider: ProjectCustomTimeProvider<T>,
@@ -48,7 +46,7 @@ sealed class JsonTime {
 
         companion object {
 
-            fun <T : ProjectType> fromJson(projectCustomTimeIdProvider: ProjectCustomTimeIdProvider<T>, json: String): JsonTime {
+            fun fromJson(projectCustomTimeIdProvider: ProjectCustomTimeIdProvider, json: String): JsonTime {
                 CustomTimeKey.User.tryFromJson(json)?.let { return User(it) }
 
                 return Project(projectCustomTimeIdProvider.getProjectCustomTimeId(json))
@@ -62,12 +60,12 @@ sealed class JsonTime {
             }
         }
 
-        abstract override fun <T : ProjectType> getCustomTimeKey(
-                projectCustomTimeKeyProvider: ProjectCustomTimeKeyProvider<T>,
+        abstract override fun getCustomTimeKey(
+                projectCustomTimeKeyProvider: ProjectCustomTimeKeyProvider,
         ): CustomTimeKey
 
-        override fun <T : ProjectType> toTimePair(
-                projectCustomTimeKeyProvider: ProjectCustomTimeKeyProvider<T>,
+        override fun toTimePair(
+                projectCustomTimeKeyProvider: ProjectCustomTimeKeyProvider,
         ) = TimePair(getCustomTimeKey(projectCustomTimeKeyProvider), null)
 
         data class Project(val id: CustomTimeId.Project) : JsonTime.Custom() {
@@ -79,8 +77,8 @@ sealed class JsonTime {
                     userCustomTimeProvider: UserCustomTimeProvider,
             ) = projectCustomTimeProvider.getProjectCustomTime(id)
 
-            override fun <T : ProjectType> getCustomTimeKey(
-                    projectCustomTimeKeyProvider: ProjectCustomTimeKeyProvider<T>,
+            override fun getCustomTimeKey(
+                    projectCustomTimeKeyProvider: ProjectCustomTimeKeyProvider,
             ) = projectCustomTimeKeyProvider.getProjectCustomTimeKey(id)
         }
 
@@ -93,9 +91,7 @@ sealed class JsonTime {
                     userCustomTimeProvider: UserCustomTimeProvider,
             ) = userCustomTimeProvider.getUserCustomTime(key)
 
-            override fun <T : ProjectType> getCustomTimeKey(
-                    projectCustomTimeKeyProvider: ProjectCustomTimeKeyProvider<T>,
-            ) = key
+            override fun getCustomTimeKey(projectCustomTimeKeyProvider: ProjectCustomTimeKeyProvider) = key
         }
     }
 
@@ -108,16 +104,14 @@ sealed class JsonTime {
                 userCustomTimeProvider: UserCustomTimeProvider,
         ) = Time.Normal(hourMinute)
 
-        override fun <T : ProjectType> getCustomTimeKey(
-                projectCustomTimeKeyProvider: ProjectCustomTimeKeyProvider<T>,
-        ): CustomTimeKey? = null
+        override fun getCustomTimeKey(projectCustomTimeKeyProvider: ProjectCustomTimeKeyProvider): CustomTimeKey? = null
 
-        override fun <T : ProjectType> toTimePair(
-                projectCustomTimeKeyProvider: ProjectCustomTimeKeyProvider<T>,
+        override fun toTimePair(
+                projectCustomTimeKeyProvider: ProjectCustomTimeKeyProvider,
         ) = TimePair(null, hourMinute)
     }
 
-    interface ProjectCustomTimeIdProvider<T : ProjectType> {
+    interface ProjectCustomTimeIdProvider {
 
         fun getProjectCustomTimeId(id: String): CustomTimeId.Project
     }
@@ -127,13 +121,27 @@ sealed class JsonTime {
         fun getProjectCustomTime(projectCustomTimeId: CustomTimeId.Project): Time.Custom.Project<T>
     }
 
-    interface ProjectCustomTimeKeyProvider<T : ProjectType> {
+    interface ProjectCustomTimeKeyProvider {
 
-        fun getProjectCustomTimeKey(projectCustomTimeId: CustomTimeId.Project): CustomTimeKey.Project<T>
+        fun getProjectCustomTimeKey(projectCustomTimeId: CustomTimeId.Project): CustomTimeKey.Project<*>
     }
 
-    interface ProjectCustomTimeIdAndKeyProvider<T : ProjectType> :
-            ProjectCustomTimeIdProvider<T>, ProjectCustomTimeKeyProvider<T>
+    interface ProjectCustomTimeIdAndKeyProvider : ProjectCustomTimeIdProvider, ProjectCustomTimeKeyProvider {
+
+        companion object {
+
+            val rootTask = object : ProjectCustomTimeIdAndKeyProvider {
+
+                override fun getProjectCustomTimeId(id: String): CustomTimeId.Project = throw RootTaskException()
+
+                override fun getProjectCustomTimeKey(
+                        projectCustomTimeId: CustomTimeId.Project,
+                ): CustomTimeKey.Project<*> = throw RootTaskException()
+            }
+        }
+
+        class RootTaskException : Exception("This should never be called for root tasks")
+    }
 
     interface UserCustomTimeProvider {
 

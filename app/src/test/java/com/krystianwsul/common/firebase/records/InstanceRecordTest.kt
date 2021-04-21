@@ -4,7 +4,10 @@ import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.time.TimePair
-import com.krystianwsul.common.utils.*
+import com.krystianwsul.common.utils.CustomTimeId
+import com.krystianwsul.common.utils.CustomTimeKey
+import com.krystianwsul.common.utils.ProjectKey
+import com.krystianwsul.common.utils.ScheduleKey
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -12,7 +15,7 @@ class InstanceRecordTest {
 
     private val projectKey = ProjectKey.Private("projectKey")
 
-    private val provider = object : JsonTime.ProjectCustomTimeIdAndKeyProvider<ProjectType.Private> {
+    private val provider = object : JsonTime.ProjectCustomTimeIdAndKeyProvider {
 
         override fun getProjectCustomTimeId(id: String) = CustomTimeId.Project.Private(id)
 

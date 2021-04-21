@@ -267,7 +267,9 @@ class DomainFactory(
          */
 
         val notifyParams = when (runType) {
-            RunType.APP_START, RunType.LOCAL -> tickData?.let { tick(it, false) }
+            RunType.APP_START ->
+                tickData?.let { tick(it, false) } ?: Notifier.Params("$source, runType: $runType", true)
+            RunType.LOCAL -> tickData?.let { tick(it, false) }
             RunType.SIGN_IN -> tickData?.let { tick(it, false) } ?: notify()
             RunType.REMOTE -> tickData?.let { tick(it, true) } ?: notify()
         }

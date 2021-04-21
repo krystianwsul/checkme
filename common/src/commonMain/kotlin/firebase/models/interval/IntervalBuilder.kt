@@ -2,7 +2,7 @@ package com.krystianwsul.common.firebase.models.interval
 
 import com.krystianwsul.common.ErrorLogger
 import com.krystianwsul.common.firebase.models.NoScheduleOrParent
-import com.krystianwsul.common.firebase.models.Task
+import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.firebase.models.taskhierarchy.TaskHierarchy
 import com.krystianwsul.common.time.ExactTimeStamp
 

@@ -10,7 +10,7 @@ import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.notifications.ImageManager
 import com.krystianwsul.checkme.gui.edit.EditActivity
 import com.krystianwsul.common.domain.DeviceDbInfo
-import com.krystianwsul.common.firebase.models.Task
+import com.krystianwsul.common.firebase.models.task.Task
 import io.reactivex.rxjava3.core.BackpressureStrategy
 import io.reactivex.rxjava3.schedulers.Schedulers
 

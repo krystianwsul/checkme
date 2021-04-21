@@ -1,6 +1,7 @@
 package com.krystianwsul.common.firebase.models
 
 import com.krystianwsul.common.criteria.SearchCriteria
+import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.interrupt.InterruptionChecker
 import com.krystianwsul.common.time.ExactTimeStamp
 

@@ -1,7 +1,7 @@
 package com.krystianwsul.common.firebase.models.schedule
 
 
-import com.krystianwsul.common.firebase.models.Task
+import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.firebase.records.schedule.WeeklyScheduleRecord
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.DayOfWeek

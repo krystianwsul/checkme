@@ -15,7 +15,7 @@ import com.krystianwsul.checkme.domainmodel.toImageLoader
 import com.krystianwsul.checkme.utils.circle
 import com.krystianwsul.checkme.utils.dpToPx
 import com.krystianwsul.common.domain.DeviceDbInfo
-import com.krystianwsul.common.firebase.models.Task
+import com.krystianwsul.common.firebase.models.task.Task
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.kotlin.subscribeBy

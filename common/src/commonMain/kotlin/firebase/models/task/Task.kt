@@ -1,4 +1,4 @@
-package com.krystianwsul.common.firebase.models
+package com.krystianwsul.common.firebase.models.task
 
 import com.krystianwsul.common.criteria.Assignable
 import com.krystianwsul.common.criteria.QueryMatchable
@@ -8,6 +8,10 @@ import com.krystianwsul.common.domain.TaskUndoData
 import com.krystianwsul.common.firebase.json.*
 import com.krystianwsul.common.firebase.json.taskhierarchies.NestedTaskHierarchyJson
 import com.krystianwsul.common.firebase.json.tasks.TaskJson
+import com.krystianwsul.common.firebase.models.ImageState
+import com.krystianwsul.common.firebase.models.Instance
+import com.krystianwsul.common.firebase.models.NoScheduleOrParent
+import com.krystianwsul.common.firebase.models.ProjectUser
 import com.krystianwsul.common.firebase.models.interval.*
 import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.schedule.*

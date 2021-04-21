@@ -7,8 +7,8 @@ import com.krystianwsul.checkme.utils.Utils
 import com.krystianwsul.checkme.utils.prettyPrint
 import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.common.domain.ScheduleGroup
-import com.krystianwsul.common.firebase.models.Task
 import com.krystianwsul.common.firebase.models.project.Project
+import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.time.TimePair

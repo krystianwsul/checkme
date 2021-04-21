@@ -3,8 +3,8 @@ package com.krystianwsul.common.firebase.models.schedule
 
 import com.krystianwsul.common.firebase.json.schedule.WriteAssignedToJson
 import com.krystianwsul.common.firebase.models.Instance
-import com.krystianwsul.common.firebase.models.Task
 import com.krystianwsul.common.firebase.models.interval.ScheduleInterval
+import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.firebase.records.schedule.SingleScheduleRecord
 import com.krystianwsul.common.time.DateTime
 import com.krystianwsul.common.time.ExactTimeStamp

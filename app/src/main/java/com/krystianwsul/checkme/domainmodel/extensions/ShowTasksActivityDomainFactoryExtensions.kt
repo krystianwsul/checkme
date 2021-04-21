@@ -10,8 +10,8 @@ import com.krystianwsul.checkme.gui.tasks.ShowTasksActivity
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.viewmodels.ShowTasksViewModel
 import com.krystianwsul.common.firebase.DomainThreadChecker
-import com.krystianwsul.common.firebase.models.Task
 import com.krystianwsul.common.firebase.models.project.SharedProject
+import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.time.ExactTimeStamp
 
 fun DomainFactory.getShowTasksData(parameters: ShowTasksActivity.Parameters): ShowTasksViewModel.Data {

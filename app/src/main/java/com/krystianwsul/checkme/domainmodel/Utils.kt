@@ -8,8 +8,8 @@ import com.krystianwsul.checkme.viewmodels.DomainResult
 import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.models.ImageState
 import com.krystianwsul.common.firebase.models.Instance
-import com.krystianwsul.common.firebase.models.Task
 import com.krystianwsul.common.firebase.models.project.SharedProject
+import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.interrupt.DomainInterruptedException
 import com.krystianwsul.common.interrupt.InterruptionChecker
 import com.krystianwsul.common.time.ExactTimeStamp

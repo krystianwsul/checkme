@@ -1,9 +1,9 @@
 package com.krystianwsul.common.firebase.models.schedule
 
 
-import com.krystianwsul.common.firebase.models.Task
 import com.krystianwsul.common.firebase.models.TaskParentEntry
 import com.krystianwsul.common.firebase.models.interval.ScheduleInterval
+import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.firebase.records.schedule.ScheduleRecord
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.ScheduleType

@@ -1,6 +1,7 @@
 package com.krystianwsul.common.firebase.models
 
 import com.krystianwsul.common.firebase.json.tasks.TaskJson
+import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.HourMinute

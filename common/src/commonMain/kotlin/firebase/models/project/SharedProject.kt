@@ -10,9 +10,9 @@ import com.krystianwsul.common.firebase.json.tasks.TaskJson
 import com.krystianwsul.common.firebase.models.CopyScheduleHelper
 import com.krystianwsul.common.firebase.models.ProjectUser
 import com.krystianwsul.common.firebase.models.RootUser
-import com.krystianwsul.common.firebase.models.Task
 import com.krystianwsul.common.firebase.models.customtime.PrivateCustomTime
 import com.krystianwsul.common.firebase.models.customtime.SharedCustomTime
+import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.firebase.models.taskhierarchy.ProjectTaskHierarchy
 import com.krystianwsul.common.firebase.records.AssignedToHelper
 import com.krystianwsul.common.firebase.records.project.SharedProjectRecord

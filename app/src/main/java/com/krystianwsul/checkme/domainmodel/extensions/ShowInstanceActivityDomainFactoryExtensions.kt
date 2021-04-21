@@ -13,7 +13,7 @@ import com.krystianwsul.checkme.viewmodels.ShowInstanceViewModel
 import com.krystianwsul.common.domain.TaskUndoData
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.models.Instance
-import com.krystianwsul.common.firebase.models.Task
+import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.TaskKey

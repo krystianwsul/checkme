@@ -87,16 +87,28 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
         }
     }
 
-    private inline fun <reified T : Parsable> Query.typedSnapshotChanges(): Observable<Snapshot<T>> =
-            cache(
-                    { Snapshot.fromParsable(it, T::class) },
-                    Converter(
-                            { Snapshot(path.back.asString(), it.value) },
-                            { NullableWrapper(it.value) },
-                    ),
-                    { readNullable(it) },
-                    { path, value -> writeNullable(path, value) },
-            )
+    private class SnapshotConverter<T : Parsable>(
+            path: Path,
+            private val customPrintDiff: ((paper: T?, firebase: T?) -> String)? = null,
+    ) : Converter<NullableWrapper<T>, Snapshot<T>>(
+            { Snapshot(path.back.asString(), it.value) },
+            { NullableWrapper(it.value) },
+    ) {
+
+        override fun printDiff(paper: NullableWrapper<T>, firebase: NullableWrapper<T>) =
+                customPrintDiff?.invoke(paper.value, firebase.value) ?: super.printDiff(paper, firebase)
+    }
+
+    private inline fun <reified T : Parsable> Query.typedSnapshotChanges(
+            noinline customPrintDiff: ((paper: T?, firebase: T?) -> String)? = null,
+    ): Observable<Snapshot<T>> {
+        return cache(
+                { Snapshot.fromParsable(it, T::class) },
+                SnapshotConverter(path, customPrintDiff),
+                { readNullable(it) },
+                { path, value -> writeNullable(path, value) },
+        )
+    }
 
     private inline fun <reified T : Any> Query.indicatorSnapshotChanges(): Observable<Snapshot<T>> =
             cache(
@@ -145,7 +157,29 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
             rootReference.child("$PRIVATE_PROJECTS_KEY/${key.key}")
 
     override fun getPrivateProjectObservable(key: ProjectKey.Private) =
-            privateProjectQuery(key).typedSnapshotChanges<PrivateProjectJson>()
+            privateProjectQuery(key).typedSnapshotChanges<PrivateProjectJson> { paper, firebase ->
+                when {
+                    paper == null && firebase == null -> "both are null, WTF?"
+                    paper == null || firebase == null -> "one is null, paper: $paper, firebase: $firebase"
+                    else -> {
+                        PrivateProjectJson::class
+                                .java
+                                .fields
+                                .mapNotNull {
+                                    val paperField = it.get(paper)
+                                    val firebaseField = it.get(firebase)
+
+                                    if (paperField != firebaseField) {
+                                        "field: ${it.name}, paper: $paperField, firebase: $firebaseField"
+                                    } else {
+                                        null
+                                    }
+                                }
+                                .joinToString("; ")
+                    }
+                }
+
+            }
 
     sealed class LoadState<T : Any> {
 

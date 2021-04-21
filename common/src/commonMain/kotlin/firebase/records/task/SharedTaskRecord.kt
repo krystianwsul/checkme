@@ -11,7 +11,7 @@ class SharedTaskRecord private constructor(
         id: String,
         private val sharedProjectRecord: SharedProjectRecord,
         private val taskJson: SharedTaskJson,
-) : TaskRecord(create, id, sharedProjectRecord, taskJson, AssignedToHelper.Shared) {
+) : ProjectTaskRecord(create, id, sharedProjectRecord, taskJson, AssignedToHelper.Shared) {
 
     override val createObject: SharedTaskJson // because of duplicate functionality when converting local task
         get() {

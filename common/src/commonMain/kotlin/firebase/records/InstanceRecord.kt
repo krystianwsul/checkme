@@ -2,6 +2,7 @@ package com.krystianwsul.common.firebase.records
 
 
 import com.krystianwsul.common.firebase.json.InstanceJson
+import com.krystianwsul.common.firebase.records.task.ProjectTaskRecord
 import com.krystianwsul.common.firebase.records.task.TaskRecord
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.HourMinute
@@ -108,7 +109,7 @@ class InstanceRecord(
 
     @Suppress("RemoveExplicitTypeArguments")
     private fun getInitialInstanceJsonTime() = createObject.instanceTime
-            ?.let { JsonTime.fromJson(taskRecord.projectRecord, it) }
+            ?.let { JsonTime.fromJson((taskRecord as ProjectTaskRecord).projectRecord, it) } // todo task model
 
     var instanceJsonTime by observable(getInitialInstanceJsonTime()) { _, _, value ->
         setProperty(createObject::instanceTime, value?.toJson())
@@ -121,7 +122,7 @@ class InstanceRecord(
     var parentInstanceKey: InstanceKey? by observable(
             createObject.parentJson?.let {
                 InstanceKey(
-                        TaskKey.Project(taskRecord.projectRecord.projectKey, it.taskId), // todo task model
+                        TaskKey.Project((taskRecord as ProjectTaskRecord).projectRecord.projectKey, it.taskId), // todo task model
                         stringToScheduleKey(taskRecord.projectRecord, it.scheduleKey),
                 )
             }

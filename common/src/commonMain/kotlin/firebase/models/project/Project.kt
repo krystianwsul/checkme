@@ -13,7 +13,7 @@ import com.krystianwsul.common.firebase.models.taskhierarchy.TaskHierarchy
 import com.krystianwsul.common.firebase.records.AssignedToHelper
 import com.krystianwsul.common.firebase.records.InstanceRecord
 import com.krystianwsul.common.firebase.records.project.ProjectRecord
-import com.krystianwsul.common.firebase.records.task.TaskRecord
+import com.krystianwsul.common.firebase.records.task.ProjectTaskRecord
 import com.krystianwsul.common.interrupt.InterruptionChecker
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.*
@@ -100,7 +100,7 @@ abstract class Project<T : ProjectType>(
             oldTask: Task,
             now: ExactTimeStamp.Local,
             instanceJsons: MutableMap<String, InstanceJson>,
-    ): TaskRecord
+    ): ProjectTaskRecord
 
     private fun convertScheduleKey(
             userInfo: UserInfo,

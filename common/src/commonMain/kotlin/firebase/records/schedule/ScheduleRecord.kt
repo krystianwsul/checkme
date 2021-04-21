@@ -5,6 +5,7 @@ import com.krystianwsul.common.firebase.json.schedule.ScheduleJson
 import com.krystianwsul.common.firebase.json.schedule.ScheduleWrapper
 import com.krystianwsul.common.firebase.json.schedule.ScheduleWrapperBridge
 import com.krystianwsul.common.firebase.records.RemoteRecord
+import com.krystianwsul.common.firebase.records.task.ProjectTaskRecord
 import com.krystianwsul.common.firebase.records.task.TaskRecord
 import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.time.JsonTime
@@ -38,7 +39,7 @@ abstract class ScheduleRecord(
     open var endTime by Committer(scheduleJson::endTime, keyPlusSubkey)
     open var endTimeOffset by Committer(scheduleJson::endTimeOffset, keyPlusSubkey)
 
-    val projectKey = taskRecord.projectKey
+    val projectKey by lazy { taskRecord.projectKey } // todo task model
 
     val taskId = taskRecord.id
 
@@ -49,12 +50,12 @@ abstract class ScheduleRecord(
     open val timePair by lazy {
         scheduleJson.run {
             if (time != null) {
-                val jsonTime = JsonTime.fromJson(taskRecord.projectRecord, time!!)
+                val jsonTime = JsonTime.fromJson((taskRecord as ProjectTaskRecord).projectRecord, time!!) // todo task model
 
                 jsonTime.toTimePair(taskRecord.projectRecord)
             } else {
                 customTimeId?.let {
-                    TimePair(taskRecord.projectRecord.getProjectCustomTimeKey(it))
+                    TimePair((taskRecord as ProjectTaskRecord).projectRecord.getProjectCustomTimeKey(it)) // todo task model
                 } ?: TimePair(HourMinute(hour!!, minute!!))
             }
         }

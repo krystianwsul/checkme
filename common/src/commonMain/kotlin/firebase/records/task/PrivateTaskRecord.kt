@@ -11,7 +11,7 @@ class PrivateTaskRecord private constructor(
         id: String,
         private val privateProjectRecord: PrivateProjectRecord,
         private val taskJson: PrivateTaskJson,
-) : TaskRecord(create, id, privateProjectRecord, taskJson, AssignedToHelper.Private) {
+) : ProjectTaskRecord(create, id, privateProjectRecord, taskJson, AssignedToHelper.Private) {
 
     override val createObject: PrivateTaskJson // because of duplicate functionality when converting local task
         get() {

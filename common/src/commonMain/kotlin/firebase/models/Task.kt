@@ -14,7 +14,7 @@ import com.krystianwsul.common.firebase.models.schedule.*
 import com.krystianwsul.common.firebase.models.taskhierarchy.NestedTaskHierarchy
 import com.krystianwsul.common.firebase.models.taskhierarchy.TaskHierarchy
 import com.krystianwsul.common.firebase.records.InstanceRecord
-import com.krystianwsul.common.firebase.records.task.TaskRecord
+import com.krystianwsul.common.firebase.records.task.ProjectTaskRecord
 import com.krystianwsul.common.interrupt.InterruptionChecker
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.DateTime
@@ -22,7 +22,7 @@ import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.*
 
-class Task(val project: Project<*>, private val taskRecord: TaskRecord) :
+class Task(val project: Project<*>, private val taskRecord: ProjectTaskRecord) :
         Current, CurrentOffset, QueryMatchable, Assignable {
 
     private val endDataProperty = invalidatableLazyCallbacks {

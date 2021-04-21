@@ -4,7 +4,7 @@ import com.krystianwsul.common.firebase.json.projects.ProjectJson
 import com.krystianwsul.common.firebase.json.taskhierarchies.ProjectTaskHierarchyJson
 import com.krystianwsul.common.firebase.records.RemoteRecord
 import com.krystianwsul.common.firebase.records.customtime.ProjectCustomTimeRecord
-import com.krystianwsul.common.firebase.records.task.TaskRecord
+import com.krystianwsul.common.firebase.records.task.ProjectTaskRecord
 import com.krystianwsul.common.firebase.records.taskhierarchy.ProjectTaskHierarchyRecord
 import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.utils.*
@@ -26,7 +26,7 @@ abstract class ProjectRecord<T : ProjectType>(
 
     abstract val customTimeRecords: Map<out CustomTimeId.Project, ProjectCustomTimeRecord<T>>
 
-    abstract val taskRecords: Map<String, TaskRecord>
+    abstract val taskRecords: Map<String, ProjectTaskRecord>
 
     lateinit var taskHierarchyRecords: MutableMap<String, ProjectTaskHierarchyRecord>
         private set

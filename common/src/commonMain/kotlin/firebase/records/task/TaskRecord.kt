@@ -9,17 +9,20 @@ import com.krystianwsul.common.firebase.records.AssignedToHelper
 import com.krystianwsul.common.firebase.records.InstanceRecord
 import com.krystianwsul.common.firebase.records.NoScheduleOrParentRecord
 import com.krystianwsul.common.firebase.records.RemoteRecord
-import com.krystianwsul.common.firebase.records.project.ProjectRecord
 import com.krystianwsul.common.firebase.records.schedule.*
 import com.krystianwsul.common.firebase.records.taskhierarchy.NestedTaskHierarchyRecord
+import com.krystianwsul.common.time.JsonTime
+import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ScheduleKey
+import com.krystianwsul.common.utils.TaskKey
 
 abstract class TaskRecord protected constructor(
         create: Boolean,
         val id: String,
-        val projectRecord: ProjectRecord<*>,
         private val taskJson: TaskJson,
         val assignedToHelper: AssignedToHelper,
+        projectCustomTimeIdAndKeyProvider: JsonTime.ProjectCustomTimeIdAndKeyProvider<*>, // todo task model
+        override val key: String,
 ) : RemoteRecord(create) {
 
     companion object {
@@ -47,16 +50,14 @@ abstract class TaskRecord protected constructor(
             .mapValues { NestedTaskHierarchyRecord(it.key, this, it.value) }
             .toMutableMap()
 
-    final override val key get() = projectRecord.childKey + "/" + TASKS + "/" + id
-
-    val projectKey get() = projectRecord.projectKey
+    abstract val projectKey: ProjectKey<*> // todo task model
 
     var name by Committer(taskJson::name)
 
     val startTime get() = taskJson.startTime
     var startTimeOffset by Committer(taskJson::startTimeOffset)
 
-    val taskKey by lazy { projectRecord.getTaskKey(id) }
+    abstract val taskKey: TaskKey // todo task model
 
     var endData
         get() = taskJson.endData ?: taskJson.endTime?.let { TaskJson.EndData(it, null, false) }
@@ -85,12 +86,10 @@ abstract class TaskRecord protected constructor(
                 taskHierarchyRecords.values
 
     init {
-        if (name.isEmpty()) throw MalformedTaskException("taskKey: $key, taskJson: $taskJson")
-
         for ((key, instanceJson) in taskJson.instances) {
             check(key.isNotEmpty())
 
-            val scheduleKey = InstanceRecord.stringToScheduleKey(projectRecord, key)
+            val scheduleKey = InstanceRecord.stringToScheduleKey(projectCustomTimeIdAndKeyProvider, key)
 
             val remoteInstanceRecord = InstanceRecord(
                     create,
@@ -270,10 +269,7 @@ abstract class TaskRecord protected constructor(
         return taskHierarchyRecord
     }
 
-    fun getScheduleRecordId() = projectRecord.getScheduleRecordId(id)
-    fun newNoScheduleOrParentRecordId() = projectRecord.newNoScheduleOrParentRecordId(id)
-
-    fun newTaskHierarchyRecordId() = projectRecord.newNestedTaskHierarchyRecordId(id)
-
-    private class MalformedTaskException(message: String) : Exception(message)
+    abstract fun getScheduleRecordId(): String
+    abstract fun newNoScheduleOrParentRecordId(): String
+    abstract fun newTaskHierarchyRecordId(): String
 }

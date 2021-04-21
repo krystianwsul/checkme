@@ -11,7 +11,6 @@ import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.time.TimePair
 import com.krystianwsul.common.utils.CustomTimeKey
-import com.krystianwsul.common.utils.TaskKey
 
 abstract class ScheduleRecord(
         val taskRecord: TaskRecord,
@@ -38,21 +37,19 @@ abstract class ScheduleRecord(
     open var endTime by Committer(scheduleJson::endTime, keyPlusSubkey)
     open var endTimeOffset by Committer(scheduleJson::endTimeOffset, keyPlusSubkey)
 
-    val projectKey by lazy { taskRecord.projectKey } // todo task model
-
     val taskId = taskRecord.id
-
-    val topLevelTaskKey by lazy { TaskKey.Project(projectKey, taskId) } // todo task model
 
     open val timePair by lazy {
         scheduleJson.run {
             if (time != null) {
-                val jsonTime = JsonTime.fromJson((taskRecord as ProjectTaskRecord).projectRecord, time!!) // todo task model
+                val jsonTime = JsonTime.fromJson(taskRecord.projectCustomTimeIdAndKeyProvider, time!!)
 
-                jsonTime.toTimePair(taskRecord.projectRecord)
-            } else {
+                jsonTime.toTimePair(taskRecord.projectCustomTimeIdAndKeyProvider)
+            } else { // this part is only for old data
+                check(taskRecord is ProjectTaskRecord)
+
                 customTimeId?.let {
-                    TimePair((taskRecord as ProjectTaskRecord).projectRecord.getProjectCustomTimeKey(it)) // todo task model
+                    TimePair(taskRecord.projectRecord.getProjectCustomTimeKey(it))
                 } ?: TimePair(HourMinute(hour!!, minute!!))
             }
         }

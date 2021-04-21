@@ -19,16 +19,18 @@ sealed class TaskKey : Parcelable, Serializable {
         }
     }
 
+    abstract val taskId: String
+
     abstract fun toShortcut(): String
 
     @Parcelize
-    data class Project(val projectKey: ProjectKey<*>, val taskId: String) : TaskKey() {
+    data class Project(val projectKey: ProjectKey<*>, override val taskId: String) : TaskKey() {
 
         override fun toShortcut() = "${projectKey.type}:${projectKey.key}:$taskId"
     }
 
     @Parcelize
-    data class Root(val taskId: String) : TaskKey() {
+    data class Root(override val taskId: String) : TaskKey() {
 
         override fun toShortcut() = taskId
     }

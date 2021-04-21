@@ -1,20 +1,35 @@
 package com.krystianwsul.common.utils
 
-@Parcelize
-data class TaskKey(val projectKey: ProjectKey<*>, val taskId: String) : Parcelable, Serializable {
+sealed class TaskKey : Parcelable, Serializable {
 
     companion object {
 
         fun fromShortcut(shortcut: String): TaskKey {
-            val (type, projectId, taskId) = shortcut.split(':')
+            return if (shortcut.contains(':')) {
+                val (type, projectId, taskId) = shortcut.split(':')
 
-            val projectKey: ProjectKey<*> = ProjectKey.Type
-                    .valueOf(type)
-                    .newKey(projectId)
+                val projectKey: ProjectKey<*> = ProjectKey.Type
+                        .valueOf(type)
+                        .newKey(projectId)
 
-            return TaskKey(projectKey, taskId)
+                Project(projectKey, taskId)
+            } else {
+                Root(shortcut)
+            }
         }
     }
 
-    fun toShortcut() = "${projectKey.type}:${projectKey.key}:$taskId"
+    abstract fun toShortcut(): String
+
+    @Parcelize
+    data class Project(val projectKey: ProjectKey<*>, val taskId: String) : TaskKey() {
+
+        override fun toShortcut() = "${projectKey.type}:${projectKey.key}:$taskId"
+    }
+
+    @Parcelize
+    data class Root(val taskId: String) : TaskKey() {
+
+        override fun toShortcut() = taskId
+    }
 }

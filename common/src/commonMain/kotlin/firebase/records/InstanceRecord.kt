@@ -121,7 +121,7 @@ class InstanceRecord(
     var parentInstanceKey: InstanceKey? by observable(
             createObject.parentJson?.let {
                 InstanceKey(
-                        TaskKey(taskRecord.projectRecord.projectKey, it.taskId),
+                        TaskKey.Project(taskRecord.projectRecord.projectKey, it.taskId), // todo task model
                         stringToScheduleKey(taskRecord.projectRecord, it.scheduleKey),
                 )
             }

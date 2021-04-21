@@ -17,6 +17,7 @@ import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.records.project.PrivateProjectRecord
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.ProjectKey
+import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.common.utils.UserKey
 import io.mockk.every
 import io.mockk.mockk
@@ -340,8 +341,8 @@ class IrrelevantTest {
         assertEquals(2, parentInstance.getChildInstances().size)
 
         val child1Instance = parentInstance.getChildInstances().single {
-            it.instanceKey
-                    .taskKey
+            (it.instanceKey
+                    .taskKey as TaskKey.Project) // todo task tests
                     .taskId == child1TaskId
         }
 
@@ -472,8 +473,8 @@ class IrrelevantTest {
         assertEquals(2, parentInstance.getChildInstances().size)
 
         val child1Instance = parentInstance.getChildInstances().single {
-            it.instanceKey
-                    .taskKey
+            (it.instanceKey
+                    .taskKey as TaskKey.Project) // todo task tests
                     .taskId == child1TaskId
         }
 

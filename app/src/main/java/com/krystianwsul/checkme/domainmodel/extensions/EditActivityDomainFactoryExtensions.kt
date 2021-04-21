@@ -92,7 +92,7 @@ fun DomainFactory.getCreateTaskData(
 
     val showAllInstancesDialog = when (startParameters) {
         is EditViewModel.StartParameters.Join -> startParameters.joinables.run {
-            map { it.taskKey.projectKey }.distinct().size == 1 && any {
+            map { (it.taskKey as TaskKey.Project).projectKey }.distinct().size == 1 && any { // todo task after model
                 getTaskForce(it.taskKey).let { task ->
                     if (it.instanceKey != null) {
                         task.hasOtherVisibleInstances(now, it.instanceKey)
@@ -326,7 +326,7 @@ fun DomainUpdater.updateScheduleTask(
 
     imageUuid?.let { Uploader.addUpload(deviceDbInfo, task.taskKey, it, imagePath.value) }
 
-    DomainUpdater.Result(task.taskKey, true, notificationType, DomainFactory.CloudParams(task.project))
+    DomainUpdater.Result(task.taskKey as TaskKey, true, notificationType, DomainFactory.CloudParams(task.project)) // todo task after model
 }.perform(this)
 
 @CheckResult
@@ -386,7 +386,7 @@ fun DomainUpdater.updateChildTask(
 
     imageUuid?.let { Uploader.addUpload(deviceDbInfo, task.taskKey, it, imagePath.value) }
 
-    DomainUpdater.Result(task.taskKey, true, notificationType, DomainFactory.CloudParams(task.project))
+    DomainUpdater.Result(task.taskKey as TaskKey, true, notificationType, DomainFactory.CloudParams(task.project)) // todo task after model
 }.perform(this)
 
 @CheckResult
@@ -421,7 +421,7 @@ fun DomainUpdater.updateTopLevelTask(
         Uploader.addUpload(deviceDbInfo, task.taskKey, it, imagePath.value)
     }
 
-    DomainUpdater.Result(task.taskKey, true, notificationType, DomainFactory.CloudParams(task.project))
+    DomainUpdater.Result(task.taskKey as TaskKey, true, notificationType, DomainFactory.CloudParams(task.project)) // todo task after model
 }.perform(this)
 
 @CheckResult
@@ -447,7 +447,7 @@ fun DomainUpdater.createScheduleJoinTopLevelTask(
         joinableTaskKeys.map { getTaskForce(it).updateProject(this, now, finalProjectId) }
     } else {
         check(
-                joinableTaskKeys.map { it.projectKey }
+                joinableTaskKeys.map { (it as TaskKey.Project).projectKey } // todo task after model
                         .distinct()
                         .single() == finalProjectId
         )
@@ -480,7 +480,7 @@ fun DomainUpdater.createScheduleJoinTopLevelTask(
     imageUuid?.let { Uploader.addUpload(deviceDbInfo, newParentTask.taskKey, it, imagePath) }
 
     DomainUpdater.Result(
-            newParentTask.taskKey,
+            newParentTask.taskKey as TaskKey, // todo task after model
             true,
             notificationType,
             DomainFactory.CloudParams(newParentTask.project),
@@ -503,7 +503,7 @@ fun DomainUpdater.createJoinChildTask(
     val parentTask = getTaskForce(parentTaskKey)
     parentTask.requireCurrent(now)
 
-    check(joinTaskKeys.map { it.projectKey }.distinct().size == 1)
+    check(joinTaskKeys.map { (it as TaskKey.Project).projectKey }.distinct().size == 1) // todo task after model
 
     val joinTasks = joinTaskKeys.map { getTaskForce(it) }
 
@@ -523,7 +523,7 @@ fun DomainUpdater.createJoinChildTask(
 
     imageUuid?.let { Uploader.addUpload(deviceDbInfo, childTask.taskKey, it, imagePath) }
 
-    DomainUpdater.Result(childTask.taskKey, true, notificationType, DomainFactory.CloudParams(childTask.project))
+    DomainUpdater.Result(childTask.taskKey as TaskKey, true, notificationType, DomainFactory.CloudParams(childTask.project)) // todo task after model
 }.perform(this)
 
 @CheckResult
@@ -539,9 +539,10 @@ fun DomainUpdater.createJoinTopLevelTask(
     check(name.isNotEmpty())
     check(joinTaskKeys.size > 1)
 
-    val finalProjectId = sharedProjectKey ?: joinTaskKeys.map { it.projectKey }
-            .distinct()
-            .single()
+    val finalProjectId = sharedProjectKey
+            ?: joinTaskKeys.map { (it as TaskKey.Project).projectKey } // todo task after model
+                    .distinct()
+                    .single()
 
     val joinTasks = joinTaskKeys.map { getTaskForce(it).updateProject(this, now, finalProjectId) }
 
@@ -564,7 +565,7 @@ fun DomainUpdater.createJoinTopLevelTask(
     imageUuid?.let { Uploader.addUpload(deviceDbInfo, newParentTask.taskKey, it, imagePath) }
 
     DomainUpdater.Result(
-            newParentTask.taskKey,
+            newParentTask.taskKey as TaskKey, // todo task after model
             true,
             notificationType,
             DomainFactory.CloudParams(newParentTask.project),
@@ -651,7 +652,7 @@ private fun DomainFactory.joinJoinables(
         joinables: List<EditParameters.Join.Joinable>,
         now: ExactTimeStamp.Local,
 ) {
-    check(joinables.map { it.taskKey.projectKey }.distinct().size == 1)
+    check(joinables.map { (it.taskKey as TaskKey.Project).projectKey }.distinct().size == 1) // todo task after model
 
     val parentInstanceKey = newParentTask.getInstances(
             null,

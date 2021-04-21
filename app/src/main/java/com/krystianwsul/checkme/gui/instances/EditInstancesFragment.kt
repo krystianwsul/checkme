@@ -44,6 +44,7 @@ import com.krystianwsul.common.time.TimePairPersist
 import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.InstanceKey
+import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.treeadapter.FilterCriteria
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Observable
@@ -132,7 +133,7 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
 
     private val instanceKeys by lazy { requireArguments().getParcelableArrayList<InstanceKey>(INSTANCE_KEYS)!! }
 
-    private val projectKey by lazy { instanceKeys.map { it.taskKey.projectKey }.distinct().singleOrNull() }
+    private val projectKey by lazy { instanceKeys.map { (it.taskKey as TaskKey.Project).projectKey }.distinct().singleOrNull() } // todo task after model
 
     private val parentPickerDelegate by lazy {
         object : ParentPickerFragment.Delegate {

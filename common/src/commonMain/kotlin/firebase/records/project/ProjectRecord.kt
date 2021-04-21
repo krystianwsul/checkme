@@ -80,5 +80,5 @@ abstract class ProjectRecord<T : ProjectType>(
     abstract override fun getProjectCustomTimeKey(projectCustomTimeId: CustomTimeId.Project): CustomTimeKey.Project<T>
     fun getProjectCustomTimeKey(customTimeId: String) = getProjectCustomTimeKey(getProjectCustomTimeId(customTimeId))
 
-    fun getTaskKey(taskId: String) = TaskKey(projectKey, taskId)
+    fun getTaskKey(taskId: String) = TaskKey.Project(projectKey, taskId) // todo task after model
 }

@@ -192,7 +192,7 @@ class ProjectsFactoryTest {
     @Test
     fun testRemotePrivateAddTaskNoInstances() {
         val privateProjectKey = ProjectKey.Private("key")
-        val taskKey = TaskKey(privateProjectKey, "taskKey")
+        val taskKey = TaskKey.Project(privateProjectKey, "taskKey") // todo task tests
 
         privateProjectRelay.accept(Snapshot(privateProjectKey.key, PrivateProjectJson()))
 
@@ -212,7 +212,7 @@ class ProjectsFactoryTest {
     @Test
     fun testRemotePrivateAddTaskWithInstances() {
         val privateProjectKey = ProjectKey.Private("key")
-        val taskKey = TaskKey(privateProjectKey, "taskKey")
+        val taskKey = TaskKey.Project(privateProjectKey, "taskKey") // todo task tests
 
         privateProjectRelay.accept(Snapshot(privateProjectKey.key, PrivateProjectJson()))
 
@@ -258,7 +258,7 @@ class ProjectsFactoryTest {
     @Test
     fun testRemotePrivateChangeTask() {
         val privateProjectKey = ProjectKey.Private("key")
-        val taskKey = TaskKey(privateProjectKey, "taskKey")
+        val taskKey = TaskKey.Project(privateProjectKey, "taskKey") // todo task tests
 
         privateProjectRelay.accept(
                 Snapshot(
@@ -285,7 +285,7 @@ class ProjectsFactoryTest {
     @Test
     fun testLocalPrivateChangeTask() {
         val privateProjectKey = ProjectKey.Private("key")
-        val taskKey = TaskKey(privateProjectKey, "taskKey")
+        val taskKey = TaskKey.Project(privateProjectKey, "taskKey") // todo task tests
 
         privateProjectRelay.accept(
                 Snapshot(
@@ -317,7 +317,7 @@ class ProjectsFactoryTest {
     @Test
     fun testPrivateRemoveTask() {
         val privateProjectKey = ProjectKey.Private("key")
-        val taskKey = TaskKey(privateProjectKey, "taskKey")
+        val taskKey = TaskKey.Project(privateProjectKey, "taskKey") // todo task tests
 
         privateProjectRelay.accept(
                 Snapshot(
@@ -340,7 +340,7 @@ class ProjectsFactoryTest {
     fun testLocalPrivateInstanceChange() {
         val privateProjectKey = ProjectKey.Private("key")
 
-        val taskKey = TaskKey(privateProjectKey, "taskKey")
+        val taskKey = TaskKey.Project(privateProjectKey, "taskKey") // todo task tests
 
         privateProjectRelay.accept(Snapshot(
                 privateProjectKey.key,
@@ -369,7 +369,7 @@ class ProjectsFactoryTest {
     fun testRemotePrivateInstanceChange() {
         val privateProjectKey = ProjectKey.Private("key")
 
-        val taskKey = TaskKey(privateProjectKey, "taskKey")
+        val taskKey = TaskKey.Project(privateProjectKey, "taskKey") // todo task tests
 
         privateProjectRelay.accept(Snapshot(
                 privateProjectKey.key,

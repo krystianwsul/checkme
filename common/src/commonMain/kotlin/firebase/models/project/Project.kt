@@ -265,8 +265,8 @@ abstract class Project<T : ProjectType>(
 
         val updater = { taskKeyMap: Map<String, String> ->
             parentState.parentInstanceKey?.let { oldKey ->
-                val newTaskId = taskKeyMap.getValue(oldKey.taskKey.taskId)
-                val newTaskKey = TaskKey(newProjectKey, newTaskId)
+                val newTaskId = taskKeyMap.getValue((oldKey.taskKey as TaskKey.Project).taskId) // todo task convert
+                val newTaskKey = TaskKey.Project(newProjectKey, newTaskId)
 
                 instanceJson.parentJson = InstanceJson.ParentJson(InstanceKey(newTaskKey, oldKey.scheduleKey))
             }
@@ -319,15 +319,11 @@ abstract class Project<T : ProjectType>(
     fun getTaskForce(taskId: String) = _tasks[taskId]
             ?: throw MissingTaskException(projectKey, taskId)
 
-    fun getTaskHierarchiesByChildTaskKey(childTaskKey: TaskKey): Set<ProjectTaskHierarchy> {
-        check(childTaskKey.taskId.isNotEmpty())
-
+    fun getTaskHierarchiesByChildTaskKey(childTaskKey: TaskKey): Set<ProjectTaskHierarchy> { // todo task after model
         return taskHierarchyContainer.getByChildTaskKey(childTaskKey)
     }
 
-    fun getTaskHierarchiesByParentTaskKey(parentTaskKey: TaskKey): Set<TaskHierarchy> {
-        check(parentTaskKey.taskId.isNotEmpty())
-
+    fun getTaskHierarchiesByParentTaskKey(parentTaskKey: TaskKey): Set<TaskHierarchy> { // todo task after model
         val projectTaskHierarchies = taskHierarchyContainer.getByParentTaskKey(parentTaskKey)
 
         val nestedTaskHierarchies = tasks.flatMap {
@@ -503,10 +499,10 @@ abstract class Project<T : ProjectType>(
 
     abstract fun getAssignedTo(userKeys: Set<UserKey>): Map<UserKey, ProjectUser>
 
-    fun getInstance(instanceKey: InstanceKey) = getTaskForce(instanceKey.taskKey.taskId).getInstance(
+    fun getInstance(instanceKey: InstanceKey) = getTaskForce((instanceKey.taskKey as TaskKey.Project).taskId).getInstance( // todo task after model
             DateTime(
                     instanceKey.scheduleKey.scheduleDate,
-                    getTime(instanceKey.scheduleKey.scheduleTimePair)
+                    getTime(instanceKey.scheduleKey.scheduleTimePair),
             )
     )
 

@@ -27,7 +27,7 @@ class Instance private constructor(val task: Task, private var data: Data) : Ass
             return getNotificationId(
                     scheduleDate,
                     TimeDescriptor.fromJsonTime(scheduleJsonTime),
-                    taskKey.run { Pair(projectKey.key, taskId) },
+                    (taskKey as TaskKey.Project).run { Pair(projectKey.key, taskId) }, // todo task notification
             )
         }
 
@@ -519,8 +519,6 @@ class Instance private constructor(val task: Task, private var data: Data) : Ass
     fun setParentState(newParentState: ParentState) {
         if (parentState == newParentState) return
 
-        newParentState.parentInstanceKey?.let { check(it.taskKey.projectKey == task.project.projectKey) }
-
         createInstanceRecord().parentState = newParentState
 
         invalidateParentInstanceData()
@@ -685,6 +683,7 @@ class Instance private constructor(val task: Task, private var data: Data) : Ass
         fun forceShown(shownFactory: ShownFactory): Shown {
             if (getShown(shownFactory) == null)
                 shown = shownFactory.createShown(taskKey.taskId, scheduleDateTime, taskKey.projectKey)
+
             return shown!!
         }
     }
@@ -709,6 +708,8 @@ class Instance private constructor(val task: Task, private var data: Data) : Ass
         ): Shown?
 
         fun getShown(taskKey: TaskKey, scheduleDateTime: DateTime): Shown? {
+            check(taskKey is TaskKey.Project) // todo task notification , also, what's the point of this overload?
+
             return getShown(
                     taskKey.projectKey,
                     taskKey.taskId,

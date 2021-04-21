@@ -59,7 +59,7 @@ class Task(val project: Project<*>, private val taskRecord: TaskRecord) :
 
     val note get() = taskRecord.note
 
-    val taskKey get() = TaskKey(project.projectKey, taskRecord.id)
+    val taskKey get() = TaskKey.Project(project.projectKey, taskRecord.id) // todo task model
 
     val id get() = taskRecord.id
 

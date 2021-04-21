@@ -15,9 +15,9 @@ object LockerManager {
         val state = state as? State.Locker ?: return null
 
         @Suppress("UNCHECKED_CAST")
-        return when (taskKey.projectKey) {
+        return when (val projectKey = (taskKey as TaskKey.Project).projectKey) { // todo task after model
             is ProjectKey.Private -> state.privateProjectLocker
-            is ProjectKey.Shared -> state.getSharedProjectLocker(taskKey.projectKey)
+            is ProjectKey.Shared -> state.getSharedProjectLocker(projectKey)
         }.getTaskLocker(taskKey)
     }
 

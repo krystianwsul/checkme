@@ -90,7 +90,7 @@ class EditActivity : NavBarActivity() {
         fun getShortcutIntent(parentTaskKeyHint: TaskKey) = Intent(MyApplication.instance, EditActivity::class.java).apply {
             action = Intent.ACTION_DEFAULT
 
-            putExtra(KEY_PARENT_PROJECT_KEY, parentTaskKeyHint.projectKey.key)
+            putExtra(KEY_PARENT_PROJECT_KEY, (parentTaskKeyHint as TaskKey.Project).projectKey.key) // todo task after model
             putExtra(KEY_PARENT_PROJECT_TYPE, parentTaskKeyHint.projectKey.type.ordinal)
             putExtra(KEY_PARENT_TASK, parentTaskKeyHint.taskId)
         }

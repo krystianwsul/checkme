@@ -2,6 +2,7 @@ package com.krystianwsul.common.firebase.json
 
 import com.krystianwsul.common.firebase.records.InstanceRecord
 import com.krystianwsul.common.utils.InstanceKey
+import com.krystianwsul.common.utils.TaskKey
 import kotlinx.serialization.Serializable
 import kotlin.jvm.JvmOverloads
 
@@ -23,7 +24,7 @@ data class InstanceJson @JvmOverloads constructor(
     ) {
 
         constructor(instanceKey: InstanceKey) : this(
-                instanceKey.taskKey.taskId,
+                (instanceKey.taskKey as TaskKey.Project).taskId, // todo task model
                 InstanceRecord.scheduleKeyToString(instanceKey.scheduleKey),
         )
     }

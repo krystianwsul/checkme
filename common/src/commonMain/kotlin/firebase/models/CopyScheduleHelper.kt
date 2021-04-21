@@ -417,4 +417,162 @@ sealed class CopyScheduleHelper {
             )
         }
     }
+
+    object Root : CopyScheduleHelper() {
+
+        override fun newSingle(
+                startTime: Long,
+                startTimeOffset: Double?,
+                endTime: Long?,
+                endTimeOffset: Double?,
+                year: Int,
+                month: Int,
+                day: Int,
+                copiedTime: Time,
+                assignedTo: Set<String>,
+        ): RootSingleScheduleJson {
+            val destructuredTime = copiedTime.destructure()
+
+            return RootSingleScheduleJson(
+                    startTime,
+                    startTimeOffset,
+                    endTime,
+                    endTimeOffset,
+                    year,
+                    month,
+                    day,
+                    destructuredTime.projectCustomTimeId,
+                    destructuredTime.hour,
+                    destructuredTime.minute,
+                    assignedTo.toMap(),
+                    destructuredTime.jsonTime,
+            )
+        }
+
+        override fun newWeekly(
+                startTime: Long,
+                startTimeOffset: Double?,
+                endTime: Long?,
+                endTimeOffset: Double?,
+                dayOfWeek: Int,
+                copiedTime: Time,
+                from: String?,
+                until: String?,
+                interval: Int,
+                assignedTo: Set<String>,
+        ): WeeklyScheduleJson {
+            val destructuredTime = copiedTime.destructure()
+
+            return RootWeeklyScheduleJson(
+                    startTime,
+                    startTimeOffset,
+                    endTime,
+                    endTimeOffset,
+                    dayOfWeek,
+                    destructuredTime.projectCustomTimeId,
+                    destructuredTime.hour,
+                    destructuredTime.minute,
+                    from,
+                    until,
+                    interval,
+                    assignedTo = assignedTo.toMap(),
+                    time = destructuredTime.jsonTime,
+            )
+        }
+
+        override fun newMonthlyDay(
+                startTime: Long,
+                startTimeOffset: Double?,
+                endTime: Long?,
+                endTimeOffset: Double?,
+                dayOfMonth: Int,
+                beginningOfMonth: Boolean,
+                copiedTime: Time,
+                from: String?,
+                until: String?,
+                assignedTo: Set<String>,
+        ): MonthlyDayScheduleJson {
+            val destructuredTime = copiedTime.destructure()
+
+            return RootMonthlyDayScheduleJson(
+                    startTime,
+                    startTimeOffset,
+                    endTime,
+                    endTimeOffset,
+                    dayOfMonth,
+                    beginningOfMonth,
+                    destructuredTime.projectCustomTimeId,
+                    destructuredTime.hour,
+                    destructuredTime.minute,
+                    from,
+                    until,
+                    assignedTo = assignedTo.toMap(),
+                    time = destructuredTime.jsonTime,
+            )
+        }
+
+        override fun newMonthlyWeek(
+                startTime: Long,
+                startTimeOffset: Double?,
+                endTime: Long?,
+                endTimeOffset: Double?,
+                dayOfMonth: Int,
+                dayOfWeek: Int,
+                beginningOfMonth: Boolean,
+                copiedTime: Time,
+                from: String?,
+                until: String?,
+                assignedTo: Set<String>,
+        ): MonthlyWeekScheduleJson {
+            val destructuredTime = copiedTime.destructure()
+
+            return RootMonthlyWeekScheduleJson(
+                    startTime,
+                    startTimeOffset,
+                    endTime,
+                    endTimeOffset,
+                    dayOfMonth,
+                    dayOfWeek,
+                    beginningOfMonth,
+                    destructuredTime.projectCustomTimeId,
+                    destructuredTime.hour,
+                    destructuredTime.minute,
+                    from,
+                    until,
+                    assignedTo = assignedTo.toMap(),
+                    time = destructuredTime.jsonTime,
+            )
+        }
+
+        override fun newYearly(
+                startTime: Long,
+                startTimeOffset: Double?,
+                endTime: Long?,
+                endTimeOffset: Double?,
+                month: Int,
+                day: Int,
+                copiedTime: Time,
+                from: String?,
+                until: String?,
+                assignedTo: Set<String>,
+        ): YearlyScheduleJson {
+            val destructuredTime = copiedTime.destructure()
+
+            return RootYearlyScheduleJson(
+                    startTime,
+                    startTimeOffset,
+                    endTime,
+                    endTimeOffset,
+                    month,
+                    day,
+                    destructuredTime.projectCustomTimeId,
+                    destructuredTime.hour,
+                    destructuredTime.minute,
+                    from,
+                    until,
+                    assignedTo = assignedTo.toMap(),
+                    time = destructuredTime.jsonTime,
+            )
+        }
+    }
 }

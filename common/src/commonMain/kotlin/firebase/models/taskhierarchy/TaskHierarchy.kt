@@ -32,7 +32,7 @@ abstract class TaskHierarchy(private val project: Project<*>) : TaskParentEntry 
             ExactTimeStamp.Offset.fromOffset(it, taskHierarchyRecord.endTimeOffset)
         }
 
-    val parentTaskKey by lazy { TaskKey.Project(project.projectKey, taskHierarchyRecord.parentTaskId) } // todo task model
+    val parentTaskKey: TaskKey by lazy { TaskKey.Project(project.projectKey, taskHierarchyRecord.parentTaskId) } // todo task model
     abstract val childTaskKey: TaskKey
 
     val id by lazy { taskHierarchyRecord.id }

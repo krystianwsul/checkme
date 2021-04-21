@@ -7,7 +7,6 @@ import com.krystianwsul.checkme.utils.Utils
 import com.krystianwsul.checkme.utils.prettyPrint
 import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.common.domain.ScheduleGroup
-import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.JsonTime
@@ -31,7 +30,7 @@ sealed class ScheduleText {
             is ScheduleGroup.MonthlyWeek -> MonthlyWeek(scheduleGroup)
             is ScheduleGroup.Yearly -> Yearly(scheduleGroup)
             else -> throw UnsupportedOperationException() // compilation
-        }.getScheduleText(customTimeProvider as Project<*>) // todo task model
+        }.getScheduleText(customTimeProvider)
 
         fun fromUntil(from: Date?, until: Date?, intervalText: String? = null): String {
             fun getString(@StringRes id: Int) = MyApplication.instance
@@ -54,10 +53,12 @@ sealed class ScheduleText {
         }
     }
 
-    abstract fun getScheduleText(project: Project<*>): String
+    abstract fun getScheduleText(customTimeProvider: JsonTime.CustomTimeProvider<*>): String
 
-    protected fun timePairCallback(timePair: TimePair, project: Project<*>): String {
-        val time = timePair.customTimeKey?.let { project.getCustomTime(it) } ?: Time.Normal(timePair.hourMinute!!)
+    protected fun timePairCallback(timePair: TimePair, customTimeProvider: JsonTime.CustomTimeProvider<*>): String {
+        val time = timePair.customTimeKey
+                ?.let { customTimeProvider.getCustomTime(it) }
+                ?: Time.Normal(timePair.hourMinute!!)
 
         return time.toString()
     }
@@ -72,9 +73,8 @@ sealed class ScheduleText {
             ) = scheduleData.date.getDisplayText() + ", " + timePairCallback(scheduleData.timePair)
         }
 
-        override fun getScheduleText(project: Project<*>) = Companion.getScheduleText(scheduleGroup.scheduleData) {
-            timePairCallback(it, project)
-        }
+        override fun getScheduleText(customTimeProvider: JsonTime.CustomTimeProvider<*>) =
+                Companion.getScheduleText(scheduleGroup.scheduleData) { timePairCallback(it, customTimeProvider) }
     }
 
     class Weekly(private val scheduleGroup: ScheduleGroup.Weekly) : ScheduleText() {
@@ -95,9 +95,9 @@ sealed class ScheduleText {
             }
         }
 
-        override fun getScheduleText(project: Project<*>): String {
+        override fun getScheduleText(customTimeProvider: JsonTime.CustomTimeProvider<*>): String {
             return Companion.getScheduleText(scheduleGroup.scheduleData) {
-                timePairCallback(it, project)
+                timePairCallback(it, customTimeProvider)
             }
         }
     }
@@ -116,9 +116,8 @@ sealed class ScheduleText {
             }
         }
 
-        override fun getScheduleText(project: Project<*>) = Companion.getScheduleText(scheduleGroup.scheduleData) {
-            timePairCallback(it, project)
-        }
+        override fun getScheduleText(customTimeProvider: JsonTime.CustomTimeProvider<*>) =
+                Companion.getScheduleText(scheduleGroup.scheduleData) { timePairCallback(it, customTimeProvider) }
     }
 
     class MonthlyWeek(private val scheduleGroup: ScheduleGroup.MonthlyWeek) : ScheduleText() {
@@ -135,9 +134,8 @@ sealed class ScheduleText {
             }
         }
 
-        override fun getScheduleText(project: Project<*>) = Companion.getScheduleText(scheduleGroup.scheduleData) {
-            timePairCallback(it, project)
-        }
+        override fun getScheduleText(customTimeProvider: JsonTime.CustomTimeProvider<*>) =
+                Companion.getScheduleText(scheduleGroup.scheduleData) { timePairCallback(it, customTimeProvider) }
     }
 
     class Yearly(private val scheduleGroup: ScheduleGroup.Yearly) : ScheduleText() {
@@ -155,8 +153,7 @@ sealed class ScheduleText {
                     fromUntil(scheduleData.from, scheduleData.until)
         }
 
-        override fun getScheduleText(project: Project<*>) = Companion.getScheduleText(scheduleGroup.scheduleData) {
-            timePairCallback(it, project)
-        }
+        override fun getScheduleText(customTimeProvider: JsonTime.CustomTimeProvider<*>) =
+                Companion.getScheduleText(scheduleGroup.scheduleData) { timePairCallback(it, customTimeProvider) }
     }
 }

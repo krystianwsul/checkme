@@ -55,7 +55,7 @@ fun DomainUpdater.clearTaskEndTimeStamps(
     processTaskUndoData(taskUndoData, now)
 
     val remoteProjects = taskUndoData.taskKeys
-            .map { getTaskForce(it).project }
+            .map { getTaskForce(it.key).project }
             .toSet()
 
     DomainUpdater.Params(true, notificationType, DomainFactory.CloudParams(remoteProjects))

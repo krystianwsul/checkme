@@ -324,21 +324,20 @@ class DomainFactory(
 
     fun processTaskUndoData(taskUndoData: TaskUndoData, now: ExactTimeStamp.Local) {
         taskUndoData.taskKeys
-                .map { getTaskForce(it) }
-                .forEach {
-                    it.requireNotCurrent(now)
+                .forEach { (taskKey, scheduleIds) ->
+                    val task = getTaskForce(taskKey)
 
-                    it.clearEndExactTimeStamp(now)
+                    task.requireNotCurrent(now)
+                    task.clearEndExactTimeStamp(now)
+
+                    scheduleIds.forEach { scheduleId ->
+                        task.schedules.single { it.id == scheduleId }.clearEndExactTimeStamp(now)
+                    }
                 }
 
         taskUndoData.taskHierarchyKeys
                 .asSequence()
                 .map { projectsFactory.getTaskHierarchy(it) }
-                .forEach { it.clearEndExactTimeStamp(now) }
-
-        taskUndoData.scheduleIds
-                .asSequence()
-                .map { projectsFactory.getSchedule(it) }
                 .forEach { it.clearEndExactTimeStamp(now) }
     }
 

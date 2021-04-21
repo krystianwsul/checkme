@@ -72,8 +72,6 @@ abstract class Schedule(val topLevelTask: Task) : TaskParentEntry {
         scheduleRecord.delete()
     }
 
-    val scheduleId get() = scheduleRecord.scheduleId
-
     sealed class OldestVisible {
 
         open val date: Date? = null

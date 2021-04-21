@@ -11,7 +11,6 @@ import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.time.TimePair
 import com.krystianwsul.common.utils.CustomTimeKey
-import com.krystianwsul.common.utils.ScheduleId
 import com.krystianwsul.common.utils.TaskKey
 
 abstract class ScheduleRecord(
@@ -44,8 +43,6 @@ abstract class ScheduleRecord(
     val taskId = taskRecord.id
 
     val topLevelTaskKey by lazy { TaskKey.Project(projectKey, taskId) } // todo task model
-
-    val scheduleId by lazy { ScheduleId(projectKey, taskId, id) }
 
     open val timePair by lazy {
         scheduleJson.run {

@@ -176,15 +176,15 @@ class Task(val project: Project<*>, private val taskRecord: ProjectTaskRecord) :
 
         requireCurrent(now)
 
-        taskUndoData?.taskKeys?.add(taskKey)
-
-        getCurrentScheduleIntervals(now).forEach {
+        val scheduleIds = getCurrentScheduleIntervals(now).map {
             it.requireCurrentOffset(now)
 
-            taskUndoData?.scheduleIds?.add(it.schedule.scheduleId)
-
             it.schedule.setEndExactTimeStamp(now.toOffset())
-        }
+
+            it.schedule.id
+        }.toSet()
+
+        taskUndoData?.taskKeys?.put(taskKey, scheduleIds)
 
         if (!recursive) {
             getParentTaskHierarchy(now)?.let {
@@ -423,8 +423,6 @@ class Task(val project: Project<*>, private val taskRecord: ProjectTaskRecord) :
         }
 
         if (singleRemoveSchedule != null && singleAddSchedulePair != null) {
-            check(singleRemoveSchedule.scheduleId == singleRemoveSchedule.scheduleId)
-
             if (assignedTo.isNotEmpty()) singleRemoveSchedule.setAssignedTo(assignedTo)
 
             singleRemoveSchedule.getInstance(this).setInstanceDateTime(

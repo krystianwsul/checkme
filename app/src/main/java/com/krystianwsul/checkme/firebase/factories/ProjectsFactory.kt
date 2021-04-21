@@ -274,9 +274,4 @@ class ProjectsFactory(
             else -> throw UnsupportedOperationException() // compilation
         }
     }
-
-    fun getSchedule(scheduleId: ScheduleId) = projects.getValue(scheduleId.projectId)
-            .getTaskForce(scheduleId.taskId)
-            .schedules
-            .single { it.scheduleId == scheduleId }
 }

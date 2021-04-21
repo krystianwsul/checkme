@@ -57,7 +57,16 @@ class RootTask(
             time: Time,
             customTimeMigrationHelper: Project.CustomTimeMigrationHelper,
             now: ExactTimeStamp.Local,
-    ) = project.getOrCopyTime(ownerKey, dayOfWeek, time, customTimeMigrationHelper, now) // todo task model WTF
+    ) = when (time) {
+        is Time.Custom.Project<*> -> {
+            check(Time.Custom.User.WRITE_USER_CUSTOM_TIMES)
+
+            customTimeMigrationHelper.tryMigrateProjectCustomTime(time, now)
+                    ?: Time.Normal(time.getHourMinute(dayOfWeek))
+        }
+        is Time.Custom.User -> time
+        is Time.Normal -> time
+    }
 
     override fun addChild(childTask: Task, now: ExactTimeStamp.Local) =
             createParentNestedTaskHierarchy(childTask, now)

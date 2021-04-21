@@ -23,7 +23,7 @@ import com.krystianwsul.common.utils.*
 
 abstract class Task(
         val project: Project<*>,
-        private val copyScheduleHelper: CopyScheduleHelper<*>, // todo task model
+        private val copyScheduleHelper: CopyScheduleHelper,
         private val customTimeProvider: JsonTime.CustomTimeProvider<*>, // todo task model
         private val taskRecord: TaskRecord,
 ) : Current, CurrentOffset, QueryMatchable, Assignable {

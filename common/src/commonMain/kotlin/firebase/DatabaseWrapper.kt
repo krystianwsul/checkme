@@ -17,7 +17,7 @@ abstract class DatabaseWrapper {
         const val USERS_KEY = "users"
         const val RECORDS_KEY = "records"
         const val PRIVATE_PROJECTS_KEY = "privateProjects"
-        const val KEY_INSTANCES = "instances"
+        const val TASKS_KEY = "tasks"
     }
 
     protected abstract fun getNewId(path: String): String
@@ -53,4 +53,14 @@ abstract class DatabaseWrapper {
             getNewId("$RECORDS_KEY/$projectId/${ProjectRecord.PROJECT_JSON}/${TaskRecord.TASKS}/$taskId/${TaskHierarchyRecord.TASK_HIERARCHIES}")
 
     fun newSharedCustomTimeRecordId(projectId: ProjectKey<ProjectType.Shared>) = getNewId("$RECORDS_KEY/$projectId/${ProjectRecord.PROJECT_JSON}/${CustomTimeRecord.CUSTOM_TIMES}")
+
+    // root tasks
+
+    fun newRootTaskScheduleRecordId(taskId: String) = getNewId("$TASKS_KEY/$taskId/${ScheduleRecord.SCHEDULES}")
+
+    fun newRootTaskNoScheduleOrParentRecordId(taskId: String) =
+            getNewId("$TASKS_KEY/$taskId/${NoScheduleOrParentRecord.NO_SCHEDULE_OR_PARENT}")
+
+    fun newRootTaskNestedTaskHierarchyRecordId(taskId: String) =
+            getNewId("$TASKS_KEY/$taskId/${TaskHierarchyRecord.TASK_HIERARCHIES}")
 }

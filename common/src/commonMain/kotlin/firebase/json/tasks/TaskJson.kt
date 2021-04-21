@@ -14,7 +14,7 @@ interface TaskJson {
     var ordinal: Double?
 
     val startTime: Long
-    var startTimeOffset: Double?
+    var startTimeOffset: Double? // todo task after model, make non-null and read-only for Root.  Same for other JSONS
 
     var endTime: Long?
     var endData: EndData?

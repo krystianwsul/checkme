@@ -206,7 +206,7 @@ class Task(val project: Project<*>, private val taskRecord: ProjectTaskRecord) :
 
     fun endAllCurrentSchedules(now: ExactTimeStamp.Local) = schedules.filter { it.currentOffset(now) }
             .onEach { it.setEndExactTimeStamp(now.toOffset()) }
-            .map { it.scheduleId }
+            .map { it.id }
 
     fun endAllCurrentNoScheduleOrParents(now: ExactTimeStamp.Local) = noScheduleOrParents.filter { it.currentOffset(now) }
             .onEach { it.setEndExactTimeStamp(now.toOffset()) }

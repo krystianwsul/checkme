@@ -13,6 +13,8 @@ abstract class Schedule(val topLevelTask: Task) : TaskParentEntry {
 
     protected abstract val scheduleRecord: ScheduleRecord
 
+    val id get() = scheduleRecord.id
+
     override val startExactTimeStamp by lazy { ExactTimeStamp.Local(scheduleRecord.startTime) }
 
     override val startExactTimeStampOffset by lazy {
@@ -89,7 +91,7 @@ abstract class Schedule(val topLevelTask: Task) : TaskParentEntry {
 
     val assignedTo get() = scheduleRecord.assignedTo.map { UserKey(it) }.toSet()
 
-    override fun toString() = super.toString() + ", scheduleId: $scheduleId, type: ${this::class.simpleName}, startExactTimeStamp: $startExactTimeStamp, endExactTimeStamp: $endExactTimeStamp"
+    override fun toString() = super.toString() + ", taskKey: ${topLevelTask.taskKey}, id: $id, type: ${this::class.simpleName}, startExactTimeStamp: $startExactTimeStamp, endExactTimeStamp: $endExactTimeStamp"
 
     fun fixOffsets() {
         if (scheduleRecord.startTimeOffset == null) scheduleRecord.startTimeOffset = startExactTimeStamp.offset

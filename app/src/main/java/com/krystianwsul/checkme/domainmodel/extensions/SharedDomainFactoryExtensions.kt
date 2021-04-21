@@ -23,7 +23,10 @@ import com.krystianwsul.common.firebase.models.filterQuery
 import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.time.Date
-import com.krystianwsul.common.utils.*
+import com.krystianwsul.common.utils.InstanceKey
+import com.krystianwsul.common.utils.ProjectKey
+import com.krystianwsul.common.utils.TaskHierarchyKey
+import com.krystianwsul.common.utils.TaskKey
 import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Single
 import java.util.*
@@ -251,7 +254,7 @@ fun <T : Comparable<T>> DomainFactory.searchInstances(
 private class AddChildToParentUndoData(
         val taskKey: TaskKey,
         val taskHierarchyKeys: List<TaskHierarchyKey>,
-        val scheduleIds: List<ScheduleId>,
+        val scheduleIds: List<String>,
         val noScheduleOrParentsIds: List<String>,
         val deleteTaskHierarchyKey: TaskHierarchyKey,
         val unhideInstanceKey: InstanceKey?,
@@ -269,7 +272,7 @@ private class AddChildToParentUndoData(
         }.forEach { it.clearEndExactTimeStamp(now) }
 
         scheduleIds.map { scheduleId ->
-            task.schedules.single { it.scheduleId == scheduleId }
+            task.schedules.single { it.id == scheduleId }
         }.forEach { it.clearEndExactTimeStamp(now) }
 
         taskHierarchyKeys.map { taskHierarchyKey ->

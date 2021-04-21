@@ -56,6 +56,8 @@ abstract class DatabaseWrapper {
 
     // root tasks
 
+    fun newRootTaskRecordId() = getNewId(TASKS_KEY)
+
     fun newRootTaskScheduleRecordId(taskId: String) = getNewId("$TASKS_KEY/$taskId/${ScheduleRecord.SCHEDULES}")
 
     fun newRootTaskNoScheduleOrParentRecordId(taskId: String) =

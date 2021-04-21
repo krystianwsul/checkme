@@ -24,7 +24,7 @@ import com.krystianwsul.common.utils.*
 abstract class Task(
         val project: Project<*>,
         private val copyScheduleHelper: CopyScheduleHelper,
-        private val customTimeProvider: JsonTime.CustomTimeProvider<*>, // todo task model
+        private val customTimeProvider: JsonTime.CustomTimeProvider,
         private val taskRecord: TaskRecord,
 ) : Current, CurrentOffset, QueryMatchable, Assignable {
 
@@ -1060,7 +1060,7 @@ abstract class Task(
 
     interface ScheduleTextFactory {
 
-        fun getScheduleText(scheduleGroup: ScheduleGroup, customTimeProvider: JsonTime.CustomTimeProvider<*>): String
+        fun getScheduleText(scheduleGroup: ScheduleGroup, customTimeProvider: JsonTime.CustomTimeProvider): String
     }
 
     interface ProjectUpdater {

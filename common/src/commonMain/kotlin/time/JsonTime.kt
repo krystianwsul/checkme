@@ -2,7 +2,6 @@ package com.krystianwsul.common.time
 
 import com.krystianwsul.common.utils.CustomTimeId
 import com.krystianwsul.common.utils.CustomTimeKey
-import com.krystianwsul.common.utils.ProjectType
 
 sealed class JsonTime {
 
@@ -35,12 +34,12 @@ sealed class JsonTime {
 
     abstract fun toTimePair(projectCustomTimeKeyProvider: ProjectCustomTimeKeyProvider): TimePair
 
-    abstract fun <T : ProjectType> toTime(
-            projectCustomTimeProvider: ProjectCustomTimeProvider<T>,
+    abstract fun toTime(
+            projectCustomTimeProvider: ProjectCustomTimeProvider,
             userCustomTimeProvider: UserCustomTimeProvider,
     ): Time
 
-    fun toTime(customTimeProvider: CustomTimeProvider<*>) = toTime(customTimeProvider, customTimeProvider)
+    fun toTime(customTimeProvider: CustomTimeProvider) = toTime(customTimeProvider, customTimeProvider)
 
     sealed class Custom : JsonTime() {
 
@@ -72,8 +71,8 @@ sealed class JsonTime {
 
             override fun toJson() = id.toString()
 
-            override fun <T : ProjectType> toTime(
-                    projectCustomTimeProvider: ProjectCustomTimeProvider<T>,
+            override fun toTime(
+                    projectCustomTimeProvider: ProjectCustomTimeProvider,
                     userCustomTimeProvider: UserCustomTimeProvider,
             ) = projectCustomTimeProvider.getProjectCustomTime(id)
 
@@ -86,8 +85,8 @@ sealed class JsonTime {
 
             override fun toJson() = key.toJson()
 
-            override fun <T : ProjectType> toTime(
-                    projectCustomTimeProvider: ProjectCustomTimeProvider<T>,
+            override fun toTime(
+                    projectCustomTimeProvider: ProjectCustomTimeProvider,
                     userCustomTimeProvider: UserCustomTimeProvider,
             ) = userCustomTimeProvider.getUserCustomTime(key)
 
@@ -99,8 +98,8 @@ sealed class JsonTime {
 
         override fun toJson() = hourMinute.toJson()
 
-        override fun <T : ProjectType> toTime(
-                projectCustomTimeProvider: ProjectCustomTimeProvider<T>,
+        override fun toTime(
+                projectCustomTimeProvider: ProjectCustomTimeProvider,
                 userCustomTimeProvider: UserCustomTimeProvider,
         ) = Time.Normal(hourMinute)
 
@@ -116,9 +115,9 @@ sealed class JsonTime {
         fun getProjectCustomTimeId(id: String): CustomTimeId.Project
     }
 
-    interface ProjectCustomTimeProvider<T : ProjectType> {
+    interface ProjectCustomTimeProvider {
 
-        fun getProjectCustomTime(projectCustomTimeId: CustomTimeId.Project): Time.Custom.Project<T>
+        fun getProjectCustomTime(projectCustomTimeId: CustomTimeId.Project): Time.Custom.Project<*>
     }
 
     interface ProjectCustomTimeKeyProvider {
@@ -148,13 +147,24 @@ sealed class JsonTime {
         fun getUserCustomTime(userCustomTimeKey: CustomTimeKey.User): Time.Custom.User
     }
 
-    interface CustomTimeProvider<T : ProjectType> : ProjectCustomTimeProvider<T>, UserCustomTimeProvider {
+    interface CustomTimeProvider : ProjectCustomTimeProvider, UserCustomTimeProvider {
+
+        companion object {
+
+            fun getForRootTask(userCustomTimeProvider: UserCustomTimeProvider): CustomTimeProvider =
+                    object : CustomTimeProvider, UserCustomTimeProvider by userCustomTimeProvider {
+
+                        override fun getProjectCustomTime(
+                                projectCustomTimeId: CustomTimeId.Project,
+                        ): Time.Custom.Project<*> = throw ProjectCustomTimeIdAndKeyProvider.RootTaskException()
+                    }
+        }
 
         fun getCustomTime(customTimeKey: CustomTimeKey): Time.Custom {
             @Suppress("UNCHECKED_CAST")
             return when (customTimeKey) {
                 is CustomTimeKey.Project<*> ->
-                    getProjectCustomTime((customTimeKey as CustomTimeKey.Project<T>).customTimeId)
+                    getProjectCustomTime(customTimeKey.customTimeId)
                 is CustomTimeKey.User -> getUserCustomTime(customTimeKey)
             }
         }

@@ -649,7 +649,7 @@ class Instance private constructor(val task: Task, private var data: Data) : Ass
         class Virtual(
                 override val scheduleDate: Date,
                 private val scheduleJsonTime: JsonTime,
-                private val customTimeProvider: JsonTime.CustomTimeProvider<*>,
+                private val customTimeProvider: JsonTime.CustomTimeProvider,
         ) : Data() {
 
             override val instanceDate = scheduleDate

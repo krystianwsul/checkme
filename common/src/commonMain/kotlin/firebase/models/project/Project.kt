@@ -24,7 +24,7 @@ abstract class Project<T : ProjectType>(
         val copyScheduleHelper: CopyScheduleHelper,
         val assignedToHelper: AssignedToHelper,
         val userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
-) : Current, JsonTime.CustomTimeProvider<T>, JsonTime.ProjectCustomTimeKeyProvider {
+) : Current, JsonTime.CustomTimeProvider, JsonTime.ProjectCustomTimeKeyProvider {
 
     abstract val projectRecord: ProjectRecord<T>
 

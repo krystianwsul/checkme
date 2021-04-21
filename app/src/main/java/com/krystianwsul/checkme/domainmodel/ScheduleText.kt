@@ -22,7 +22,7 @@ sealed class ScheduleText {
 
         override fun getScheduleText(
                 scheduleGroup: ScheduleGroup,
-                customTimeProvider: JsonTime.CustomTimeProvider<*>,
+                customTimeProvider: JsonTime.CustomTimeProvider,
         ) = when (scheduleGroup) {
             is ScheduleGroup.Single -> Single(scheduleGroup)
             is ScheduleGroup.Weekly -> Weekly(scheduleGroup)
@@ -53,9 +53,9 @@ sealed class ScheduleText {
         }
     }
 
-    abstract fun getScheduleText(customTimeProvider: JsonTime.CustomTimeProvider<*>): String
+    abstract fun getScheduleText(customTimeProvider: JsonTime.CustomTimeProvider): String
 
-    protected fun timePairCallback(timePair: TimePair, customTimeProvider: JsonTime.CustomTimeProvider<*>): String {
+    protected fun timePairCallback(timePair: TimePair, customTimeProvider: JsonTime.CustomTimeProvider): String {
         val time = timePair.customTimeKey
                 ?.let { customTimeProvider.getCustomTime(it) }
                 ?: Time.Normal(timePair.hourMinute!!)
@@ -73,7 +73,7 @@ sealed class ScheduleText {
             ) = scheduleData.date.getDisplayText() + ", " + timePairCallback(scheduleData.timePair)
         }
 
-        override fun getScheduleText(customTimeProvider: JsonTime.CustomTimeProvider<*>) =
+        override fun getScheduleText(customTimeProvider: JsonTime.CustomTimeProvider) =
                 Companion.getScheduleText(scheduleGroup.scheduleData) { timePairCallback(it, customTimeProvider) }
     }
 
@@ -95,7 +95,7 @@ sealed class ScheduleText {
             }
         }
 
-        override fun getScheduleText(customTimeProvider: JsonTime.CustomTimeProvider<*>): String {
+        override fun getScheduleText(customTimeProvider: JsonTime.CustomTimeProvider): String {
             return Companion.getScheduleText(scheduleGroup.scheduleData) {
                 timePairCallback(it, customTimeProvider)
             }
@@ -116,7 +116,7 @@ sealed class ScheduleText {
             }
         }
 
-        override fun getScheduleText(customTimeProvider: JsonTime.CustomTimeProvider<*>) =
+        override fun getScheduleText(customTimeProvider: JsonTime.CustomTimeProvider) =
                 Companion.getScheduleText(scheduleGroup.scheduleData) { timePairCallback(it, customTimeProvider) }
     }
 
@@ -134,7 +134,7 @@ sealed class ScheduleText {
             }
         }
 
-        override fun getScheduleText(customTimeProvider: JsonTime.CustomTimeProvider<*>) =
+        override fun getScheduleText(customTimeProvider: JsonTime.CustomTimeProvider) =
                 Companion.getScheduleText(scheduleGroup.scheduleData) { timePairCallback(it, customTimeProvider) }
     }
 
@@ -153,7 +153,7 @@ sealed class ScheduleText {
                     fromUntil(scheduleData.from, scheduleData.until)
         }
 
-        override fun getScheduleText(customTimeProvider: JsonTime.CustomTimeProvider<*>) =
+        override fun getScheduleText(customTimeProvider: JsonTime.CustomTimeProvider) =
                 Companion.getScheduleText(scheduleGroup.scheduleData) { timePairCallback(it, customTimeProvider) }
     }
 }

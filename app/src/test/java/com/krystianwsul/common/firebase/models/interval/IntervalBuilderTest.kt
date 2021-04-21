@@ -3,7 +3,7 @@ package com.krystianwsul.common.firebase.models.interval
 import com.krystianwsul.common.ErrorLogger
 import com.krystianwsul.common.firebase.models.NoScheduleOrParent
 import com.krystianwsul.common.firebase.models.schedule.Schedule
-import com.krystianwsul.common.firebase.models.task.Task
+import com.krystianwsul.common.firebase.models.task.ProjectTask
 import com.krystianwsul.common.firebase.models.taskhierarchy.ProjectTaskHierarchy
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.ExactTimeStamp
@@ -27,7 +27,7 @@ class IntervalBuilderTest {
             taskHierarchies: Collection<ProjectTaskHierarchy> = setOf(),
             scheduleList: List<Schedule> = listOf(),
             noScheduleOrParentList: List<NoScheduleOrParent> = listOf(),
-    ): Task {
+    ): ProjectTask {
         return mockk(relaxed = true) {
             every { startExactTimeStamp } returns start
             every { startExactTimeStampOffset } returns start.toOffset()
@@ -79,7 +79,7 @@ class IntervalBuilderTest {
 
     private fun noScheduleMock() = Type.NoSchedule()
 
-    private fun Task.check(vararg expected: Interval) {
+    private fun ProjectTask.check(vararg expected: Interval) {
         val actual = IntervalBuilder.build(this)
         assertEquals(expected.toList(), actual)
     }

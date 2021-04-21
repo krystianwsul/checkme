@@ -683,7 +683,7 @@ class Instance private constructor(val task: Task, private var data: Data) : Ass
 
         fun forceShown(shownFactory: ShownFactory): Shown {
             if (getShown(shownFactory) == null)
-                shown = shownFactory.createShown(taskKey.taskId, scheduleDateTime, taskKey.projectKey)
+                shown = shownFactory.createShown(taskKey.taskId, scheduleDateTime, (taskKey as TaskKey.Project).projectKey) // todo task notification
 
             return shown!!
         }

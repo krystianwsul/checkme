@@ -12,7 +12,7 @@ import com.krystianwsul.common.firebase.models.ProjectUser
 import com.krystianwsul.common.firebase.models.RootUser
 import com.krystianwsul.common.firebase.models.customtime.PrivateCustomTime
 import com.krystianwsul.common.firebase.models.customtime.SharedCustomTime
-import com.krystianwsul.common.firebase.models.task.Task
+import com.krystianwsul.common.firebase.models.task.ProjectTask
 import com.krystianwsul.common.firebase.models.taskhierarchy.ProjectTaskHierarchy
 import com.krystianwsul.common.firebase.records.AssignedToHelper
 import com.krystianwsul.common.firebase.records.project.SharedProjectRecord
@@ -45,7 +45,7 @@ class SharedProject(
     val users get() = remoteUsers.values
 
     override val remoteCustomTimes = mutableMapOf<CustomTimeId.Project.Shared, SharedCustomTime>()
-    override val _tasks: MutableMap<String, Task>
+    override val _tasks: MutableMap<String, ProjectTask>
     override val taskHierarchyContainer = TaskHierarchyContainer<ProjectType.Shared>()
 
     override val customTimes get() = remoteCustomTimes.values
@@ -60,7 +60,7 @@ class SharedProject(
 
         _tasks = projectRecord.taskRecords
                 .values
-                .map { Task(this, it) }
+                .map { ProjectTask(this, it) }
                 .associateBy { it.id }
                 .toMutableMap()
 
@@ -186,13 +186,13 @@ class SharedProject(
     }
 
     override fun createChildTask(
-            parentTask: Task,
+            parentTask: ProjectTask,
             now: ExactTimeStamp.Local,
             name: String,
             note: String?,
             image: TaskJson.Image?,
             ordinal: Double?,
-    ): Task {
+    ): ProjectTask {
         val taskJson = SharedTaskJson(
                 name,
                 now.long,
@@ -211,7 +211,7 @@ class SharedProject(
     }
 
     override fun copyTaskRecord(
-            oldTask: Task,
+            oldTask: ProjectTask,
             now: ExactTimeStamp.Local,
             instanceJsons: MutableMap<String, InstanceJson>,
     ) = projectRecord.newTaskRecord(SharedTaskJson(
@@ -224,10 +224,10 @@ class SharedProject(
             ordinal = oldTask.ordinal,
     ))
 
-    private fun newTask(taskJson: SharedTaskJson): Task {
+    private fun newTask(taskJson: SharedTaskJson): ProjectTask {
         val taskRecord = projectRecord.newTaskRecord(taskJson)
 
-        val task = Task(this, taskRecord)
+        val task = ProjectTask(this, taskRecord)
         check(!_tasks.containsKey(task.id))
 
         _tasks[task.id] = task

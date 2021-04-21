@@ -8,7 +8,7 @@ import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.project.SharedProject
 import com.krystianwsul.common.firebase.models.schedule.Schedule
 import com.krystianwsul.common.firebase.models.schedule.SingleSchedule
-import com.krystianwsul.common.firebase.models.task.Task
+import com.krystianwsul.common.firebase.models.task.ProjectTask
 import com.krystianwsul.common.firebase.models.taskhierarchy.TaskHierarchy
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.Time
@@ -215,7 +215,7 @@ object Irrelevant {
             val irrelevantTaskHierarchies: Collection<TaskHierarchy>,
             val irrelevantSchedules: Collection<Schedule>,
             val irrelevantNoScheduleOrParents: Collection<NoScheduleOrParent>,
-            val irrelevantTasks: Collection<Task>,
+            val irrelevantTasks: Collection<ProjectTask>,
             val irrelevantRemoteCustomTimes: Collection<Time.Custom.Project<*>>,
             val removedSharedProjects: Collection<SharedProject>,
     )

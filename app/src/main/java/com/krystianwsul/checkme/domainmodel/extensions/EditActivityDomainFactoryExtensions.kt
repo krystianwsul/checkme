@@ -22,6 +22,7 @@ import com.krystianwsul.common.firebase.MyCustomTime
 import com.krystianwsul.common.firebase.json.tasks.TaskJson
 import com.krystianwsul.common.firebase.models.*
 import com.krystianwsul.common.firebase.models.project.Project
+import com.krystianwsul.common.firebase.models.task.ProjectTask
 import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.Time
@@ -213,7 +214,7 @@ fun DomainUpdater.createScheduleTopLevelTask(
     )
 }.perform(this)
 
-private fun Task.toCreateResult(now: ExactTimeStamp.Local) =
+private fun ProjectTask.toCreateResult(now: ExactTimeStamp.Local) =
         getInstances(null, null, now).singleOrNull()
                 ?.let { EditDelegate.CreateResult.Instance(it.instanceKey) }
                 ?: EditDelegate.CreateResult.Task(taskKey)
@@ -327,7 +328,7 @@ fun DomainUpdater.updateScheduleTask(
 
     imageUuid?.let { Uploader.addUpload(deviceDbInfo, task.taskKey, it, imagePath.value) }
 
-    DomainUpdater.Result(task.taskKey as TaskKey, true, notificationType, DomainFactory.CloudParams(task.project)) // todo task after model
+    DomainUpdater.Result(task.taskKey, true, notificationType, DomainFactory.CloudParams(task.project))
 }.perform(this)
 
 @CheckResult
@@ -649,7 +650,7 @@ private fun Task.showAsParent(now: ExactTimeStamp.Local, excludedTaskKeys: Set<T
 }
 
 private fun DomainFactory.joinJoinables(
-        newParentTask: Task,
+        newParentTask: ProjectTask,
         joinables: List<EditParameters.Join.Joinable>,
         now: ExactTimeStamp.Local,
 ) {
@@ -686,7 +687,7 @@ private fun DomainFactory.joinJoinables(
 }
 
 private fun DomainFactory.joinTasks(
-        newParentTask: Task,
+        newParentTask: ProjectTask,
         joinTasks: List<Task>,
         now: ExactTimeStamp.Local,
         removeInstanceKeys: List<InstanceKey>,
@@ -726,7 +727,7 @@ private fun DomainFactory.getTaskListChildTaskDatas(
                 }
                 .toList()
 
-private fun DomainFactory.copyTask(now: ExactTimeStamp.Local, task: Task, copyTaskKey: TaskKey) {
+private fun DomainFactory.copyTask(now: ExactTimeStamp.Local, task: ProjectTask, copyTaskKey: TaskKey) {
     val copiedTask = getTaskForce(copyTaskKey)
 
     copiedTask.getChildTaskHierarchies(now).forEach {
@@ -746,12 +747,12 @@ private fun DomainFactory.copyTask(now: ExactTimeStamp.Local, task: Task, copyTa
 
 private fun DomainFactory.createChildTask(
         now: ExactTimeStamp.Local,
-        parentTask: Task,
+        parentTask: ProjectTask,
         name: String,
         note: String?,
         imageJson: TaskJson.Image?,
         copyTaskKey: TaskKey? = null,
-): Task {
+): ProjectTask {
     check(name.isNotEmpty())
     parentTask.requireCurrent(now)
 

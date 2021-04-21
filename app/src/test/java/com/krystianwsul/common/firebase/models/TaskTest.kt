@@ -1,7 +1,7 @@
 package com.krystianwsul.common.firebase.models
 
 import com.krystianwsul.common.firebase.json.tasks.TaskJson
-import com.krystianwsul.common.firebase.models.task.Task
+import com.krystianwsul.common.firebase.models.task.ProjectTask
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.HourMinute
@@ -22,7 +22,7 @@ class TaskTest {
         val now = ExactTimeStamp.Local(date, hour1)
         val start = ExactTimeStamp.Local(date, hour2)
 
-        val task = Task(
+        val task = ProjectTask(
                 mockk(relaxed = true),
                 mockk(relaxed = true) {
                     every { endData } returns null
@@ -46,7 +46,7 @@ class TaskTest {
         val end = ExactTimeStamp.Local(date, hour1)
         val now = ExactTimeStamp.Local(date, hour2)
 
-        val task = Task(
+        val task = ProjectTask(
                 mockk(relaxed = true),
                 mockk(relaxed = true) {
                     every { endData } returns TaskJson.EndData(end.long)

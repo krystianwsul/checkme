@@ -8,6 +8,7 @@ import com.krystianwsul.common.firebase.json.tasks.TaskJson
 import com.krystianwsul.common.firebase.models.*
 import com.krystianwsul.common.firebase.models.customtime.PrivateCustomTime
 import com.krystianwsul.common.firebase.models.customtime.SharedCustomTime
+import com.krystianwsul.common.firebase.models.task.ProjectTask
 import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.firebase.models.taskhierarchy.ProjectTaskHierarchy
 import com.krystianwsul.common.firebase.models.taskhierarchy.TaskHierarchy
@@ -28,7 +29,7 @@ abstract class Project<T : ProjectType>(
     abstract val projectRecord: ProjectRecord<T>
 
     @Suppress("PropertyName")
-    protected abstract val _tasks: MutableMap<String, Task>
+    protected abstract val _tasks: MutableMap<String, ProjectTask>
     protected abstract val taskHierarchyContainer: TaskHierarchyContainer<T>
     protected abstract val remoteCustomTimes: Map<out CustomTimeId.Project, Time.Custom.Project<T>>
 
@@ -48,7 +49,7 @@ abstract class Project<T : ProjectType>(
 
     // don't want these to be mutable
     val taskIds: Set<String> get() = _tasks.keys
-    val tasks: Collection<Task> get() = _tasks.values
+    val tasks: Collection<ProjectTask> get() = _tasks.values
 
     abstract val customTimes: Collection<Time.Custom.Project<T>>
 
@@ -67,15 +68,15 @@ abstract class Project<T : ProjectType>(
     }
 
     abstract fun createChildTask(
-            parentTask: Task,
+            parentTask: ProjectTask,
             now: ExactTimeStamp.Local,
             name: String,
             note: String?,
             image: TaskJson.Image?,
             ordinal: Double?,
-    ): Task
+    ): ProjectTask
 
-    fun createTaskHierarchy(parentTask: Task, childTask: Task, now: ExactTimeStamp.Local): TaskHierarchyKey {
+    fun createTaskHierarchy(parentTask: ProjectTask, childTask: ProjectTask, now: ExactTimeStamp.Local): TaskHierarchyKey {
         return if (TaskHierarchy.WRITE_NESTED_TASK_HIERARCHIES) {
             childTask.createParentNestedTaskHierarchy(parentTask, now)
         } else {
@@ -98,14 +99,14 @@ abstract class Project<T : ProjectType>(
     }
 
     protected abstract fun copyTaskRecord(
-            oldTask: Task,
+            oldTask: ProjectTask,
             now: ExactTimeStamp.Local,
             instanceJsons: MutableMap<String, InstanceJson>,
     ): ProjectTaskRecord
 
     private fun convertScheduleKey(
             userInfo: UserInfo,
-            oldTask: Task,
+            oldTask: ProjectTask,
             oldScheduleKey: ScheduleKey,
             customTimeMigrationHelper: CustomTimeMigrationHelper,
             now: ExactTimeStamp.Local,
@@ -141,12 +142,12 @@ abstract class Project<T : ProjectType>(
     @Suppress("ConstantConditionIf")
     fun copyTask(
             deviceDbInfo: DeviceDbInfo,
-            oldTask: Task,
+            oldTask: ProjectTask,
             instances: Collection<Instance>,
             now: ExactTimeStamp.Local,
             newProjectKey: ProjectKey<*>,
             customTimeMigrationHelper: CustomTimeMigrationHelper,
-    ): Pair<Task, List<(Map<String, String>) -> Any?>> {
+    ): Pair<ProjectTask, List<(Map<String, String>) -> Any?>> {
         val instanceDatas = instances.map { oldInstance ->
             val (newInstance, updater) = getInstanceJson(
                     deviceDbInfo.key,
@@ -179,7 +180,7 @@ abstract class Project<T : ProjectType>(
 
         val taskRecord = copyTaskRecord(oldTask, now, instanceJsons)
 
-        val newTask = Task(this, taskRecord)
+        val newTask = ProjectTask(this, taskRecord)
         check(!_tasks.containsKey(newTask.id))
 
         _tasks[newTask.id] = newTask
@@ -280,7 +281,7 @@ abstract class Project<T : ProjectType>(
             now: ExactTimeStamp.Local,
             startTaskHierarchy: V,
             parentTaskId: String,
-            childTask: Task,
+            childTask: ProjectTask,
     ) {
         if (TaskHierarchy.WRITE_NESTED_TASK_HIERARCHIES) {
             childTask.copyParentNestedTaskHierarchy(now, startTaskHierarchy, parentTaskId)
@@ -304,7 +305,7 @@ abstract class Project<T : ProjectType>(
         }
     }
 
-    fun deleteTask(task: Task) {
+    fun deleteTask(task: ProjectTask) {
         check(_tasks.containsKey(task.id))
 
         _tasks.remove(task.id)
@@ -394,7 +395,7 @@ abstract class Project<T : ProjectType>(
     fun convertRemoteToRemoteHelper(
             now: ExactTimeStamp.Local,
             remoteToRemoteConversion: RemoteToRemoteConversion,
-            startTask: Task,
+            startTask: ProjectTask,
     ) {
         if (remoteToRemoteConversion.startTasks.containsKey(startTask.id)) return
 
@@ -417,7 +418,7 @@ abstract class Project<T : ProjectType>(
         childTaskHierarchies.map { it.childTask }.forEach {
             it.requireCurrent(now)
 
-            convertRemoteToRemoteHelper(now, remoteToRemoteConversion, it)
+            convertRemoteToRemoteHelper(now, remoteToRemoteConversion, it as ProjectTask) // todo task convert
         }
     }
 
@@ -496,7 +497,7 @@ abstract class Project<T : ProjectType>(
             name: String,
             note: String?,
             ordinal: Double?,
-    ): Task
+    ): ProjectTask
 
     abstract fun getAssignedTo(userKeys: Set<UserKey>): Map<UserKey, ProjectUser>
 

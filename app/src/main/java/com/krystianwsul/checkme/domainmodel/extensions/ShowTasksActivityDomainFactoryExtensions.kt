@@ -11,7 +11,7 @@ import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.viewmodels.ShowTasksViewModel
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.models.project.SharedProject
-import com.krystianwsul.common.firebase.models.task.Task
+import com.krystianwsul.common.firebase.models.task.ProjectTask
 import com.krystianwsul.common.time.ExactTimeStamp
 
 fun DomainFactory.getShowTasksData(parameters: ShowTasksActivity.Parameters): ShowTasksViewModel.Data {
@@ -21,7 +21,7 @@ fun DomainFactory.getShowTasksData(parameters: ShowTasksActivity.Parameters): Sh
 
     val now = ExactTimeStamp.Local.now
 
-    fun Task.toChildTaskData(): TaskListFragment.ChildTaskData {
+    fun ProjectTask.toChildTaskData(): TaskListFragment.ChildTaskData {
         val hierarchyExactTimeStamp = getHierarchyExactTimeStamp(now)
 
         return TaskListFragment.ChildTaskData(

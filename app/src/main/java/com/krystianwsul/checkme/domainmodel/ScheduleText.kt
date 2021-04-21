@@ -10,6 +10,7 @@ import com.krystianwsul.common.domain.ScheduleGroup
 import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.time.Date
+import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.time.TimePair
 import com.krystianwsul.common.utils.ScheduleData
@@ -20,14 +21,17 @@ sealed class ScheduleText {
 
     companion object : Task.ScheduleTextFactory {
 
-        override fun getScheduleText(scheduleGroup: ScheduleGroup, project: Project<*>) = when (scheduleGroup) {
+        override fun getScheduleText(
+                scheduleGroup: ScheduleGroup,
+                customTimeProvider: JsonTime.CustomTimeProvider<*>,
+        ) = when (scheduleGroup) {
             is ScheduleGroup.Single -> Single(scheduleGroup)
             is ScheduleGroup.Weekly -> Weekly(scheduleGroup)
             is ScheduleGroup.MonthlyDay -> MonthlyDay(scheduleGroup)
             is ScheduleGroup.MonthlyWeek -> MonthlyWeek(scheduleGroup)
             is ScheduleGroup.Yearly -> Yearly(scheduleGroup)
             else -> throw UnsupportedOperationException() // compilation
-        }.getScheduleText(project)
+        }.getScheduleText(customTimeProvider as Project<*>) // todo task model
 
         fun fromUntil(from: Date?, until: Date?, intervalText: String? = null): String {
             fun getString(@StringRes id: Int) = MyApplication.instance

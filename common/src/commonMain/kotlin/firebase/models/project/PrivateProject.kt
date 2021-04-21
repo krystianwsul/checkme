@@ -9,7 +9,7 @@ import com.krystianwsul.common.firebase.models.CopyScheduleHelper
 import com.krystianwsul.common.firebase.models.ProjectUser
 import com.krystianwsul.common.firebase.models.customtime.PrivateCustomTime
 import com.krystianwsul.common.firebase.models.customtime.SharedCustomTime
-import com.krystianwsul.common.firebase.models.task.Task
+import com.krystianwsul.common.firebase.models.task.ProjectTask
 import com.krystianwsul.common.firebase.models.taskhierarchy.ProjectTaskHierarchy
 import com.krystianwsul.common.firebase.records.AssignedToHelper
 import com.krystianwsul.common.firebase.records.project.PrivateProjectRecord
@@ -34,7 +34,7 @@ class PrivateProject(
     override val projectKey = projectRecord.projectKey
 
     override val remoteCustomTimes = HashMap<CustomTimeId.Project.Private, PrivateCustomTime>()
-    override val _tasks: MutableMap<String, Task>
+    override val _tasks: MutableMap<String, ProjectTask>
     override val taskHierarchyContainer = TaskHierarchyContainer<ProjectType.Private>()
 
     override val customTimes get() = remoteCustomTimes.values
@@ -55,7 +55,7 @@ class PrivateProject(
 
         _tasks = projectRecord.taskRecords
                 .values
-                .map { Task(this, it) }
+                .map { ProjectTask(this, it) }
                 .associateBy { it.id }
                 .toMutableMap()
 
@@ -128,13 +128,13 @@ class PrivateProject(
     }
 
     override fun createChildTask(
-            parentTask: Task,
+            parentTask: ProjectTask,
             now: ExactTimeStamp.Local,
             name: String,
             note: String?,
             image: TaskJson.Image?,
             ordinal: Double?,
-    ): Task {
+    ): ProjectTask {
         val taskJson = PrivateTaskJson(
                 name,
                 now.long,
@@ -153,7 +153,7 @@ class PrivateProject(
     }
 
     override fun copyTaskRecord(
-            oldTask: Task,
+            oldTask: ProjectTask,
             now: ExactTimeStamp.Local,
             instanceJsons: MutableMap<String, InstanceJson>,
     ) = projectRecord.newTaskRecord(PrivateTaskJson(
@@ -166,10 +166,10 @@ class PrivateProject(
             ordinal = oldTask.ordinal
     ))
 
-    fun newTask(taskJson: PrivateTaskJson): Task {
+    fun newTask(taskJson: PrivateTaskJson): ProjectTask {
         val taskRecord = projectRecord.newTaskRecord(taskJson)
 
-        val task = Task(this, taskRecord)
+        val task = ProjectTask(this, taskRecord)
         check(!_tasks.containsKey(task.id))
 
         _tasks[task.id] = task

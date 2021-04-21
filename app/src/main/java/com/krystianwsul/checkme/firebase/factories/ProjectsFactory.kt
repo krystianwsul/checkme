@@ -18,7 +18,7 @@ import com.krystianwsul.common.firebase.models.RootUser
 import com.krystianwsul.common.firebase.models.project.PrivateProject
 import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.project.SharedProject
-import com.krystianwsul.common.firebase.models.task.Task
+import com.krystianwsul.common.firebase.models.task.ProjectTask
 import com.krystianwsul.common.firebase.models.taskhierarchy.TaskHierarchy
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.Time
@@ -157,7 +157,7 @@ class ProjectsFactory(
             customTimeMigrationHelper: Project.CustomTimeMigrationHelper,
             ordinal: Double? = null,
             assignedTo: Set<UserKey> = setOf(),
-    ): Task {
+    ): ProjectTask {
         return createTaskHelper(
                 now,
                 name,

@@ -38,6 +38,7 @@ import com.krystianwsul.common.firebase.models.customtime.SharedCustomTime
 import com.krystianwsul.common.firebase.models.filterSearchCriteria
 import com.krystianwsul.common.firebase.models.project.PrivateProject
 import com.krystianwsul.common.firebase.models.project.Project
+import com.krystianwsul.common.firebase.models.task.ProjectTask
 import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.*
@@ -451,10 +452,10 @@ class DomainFactory(
 
     val ownerKey get() = myUserFactory.user.userKey
 
-    override fun convert(now: ExactTimeStamp.Local, startingTask: Task, projectId: ProjectKey<*>): Task {
+    override fun convert(now: ExactTimeStamp.Local, startingTask: Task, projectId: ProjectKey<*>): ProjectTask {
         val remoteToRemoteConversion = RemoteToRemoteConversion()
         val startProject = startingTask.project
-        startProject.convertRemoteToRemoteHelper(now, remoteToRemoteConversion, startingTask)
+        startProject.convertRemoteToRemoteHelper(now, remoteToRemoteConversion, startingTask as ProjectTask) // todo task convert
 
         val newProject = projectsFactory.getProjectForce(projectId)
 
@@ -476,10 +477,8 @@ class DomainFactory(
         }
 
         for (startTaskHierarchy in remoteToRemoteConversion.startTaskHierarchies) {
-            val parentTask =
-                    remoteToRemoteConversion.endTasks.getValue(startTaskHierarchy.parentTaskId)
-            val childTask =
-                    remoteToRemoteConversion.endTasks.getValue(startTaskHierarchy.childTaskId)
+            val parentTask = remoteToRemoteConversion.endTasks.getValue(startTaskHierarchy.parentTaskId)
+            val childTask = remoteToRemoteConversion.endTasks.getValue(startTaskHierarchy.childTaskId)
 
             newProject.copyTaskHierarchy(now, startTaskHierarchy, parentTask.id, childTask)
         }

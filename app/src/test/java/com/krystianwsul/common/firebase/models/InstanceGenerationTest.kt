@@ -6,7 +6,7 @@ import com.krystianwsul.common.firebase.json.schedule.PrivateScheduleWrapper
 import com.krystianwsul.common.firebase.json.schedule.PrivateWeeklyScheduleJson
 import com.krystianwsul.common.firebase.json.tasks.PrivateTaskJson
 import com.krystianwsul.common.firebase.json.tasks.TaskJson
-import com.krystianwsul.common.firebase.models.task.Task
+import com.krystianwsul.common.firebase.models.task.ProjectTask
 import com.krystianwsul.common.firebase.records.task.PrivateTaskRecord
 import com.krystianwsul.common.time.*
 import io.mockk.mockk
@@ -35,7 +35,7 @@ class InstanceGenerationTest {
         private const val differentOffsetHours = 5
     }
 
-    private fun createMockTask(hours: Int): Task {
+    private fun createMockTask(hours: Int): ProjectTask {
         val offsetDouble = getOffset(hours)
 
         // let's say we have a schedule that was created at 12:00, and deleted at 13:00.  It has an instance at 12:30
@@ -65,7 +65,7 @@ class InstanceGenerationTest {
                 schedules = mutableMapOf("scheduleKey" to PrivateScheduleWrapper(weeklyScheduleJson = weeklyScheduleJson)),
         )
 
-        return Task(
+        return ProjectTask(
                 mockk(relaxed = true),
                 PrivateTaskRecord(
                         "taskKey",

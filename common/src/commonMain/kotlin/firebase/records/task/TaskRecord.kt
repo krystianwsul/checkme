@@ -21,7 +21,7 @@ abstract class TaskRecord protected constructor(
         val id: String,
         private val taskJson: TaskJson,
         val assignedToHelper: AssignedToHelper,
-        projectCustomTimeIdAndKeyProvider: JsonTime.ProjectCustomTimeIdAndKeyProvider<*>, // todo task model
+        val projectCustomTimeIdAndKeyProvider: JsonTime.ProjectCustomTimeIdAndKeyProvider<*>, // todo task model pass in throwing object
         override val key: String,
 ) : RemoteRecord(create) {
 

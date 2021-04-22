@@ -39,10 +39,10 @@ abstract class ProjectFactory<T : ProjectType, U : Parsable>(
     init {
         project = newProject(initialProjectEvent.projectRecord, initialProjectEvent.userCustomTimeProvider)
 
-        val changeProjectChangeTypes = projectLoader.changeProjectEvents.map { (projectChangeType, changeProjectEvent) ->
-            project = newProject(changeProjectEvent.projectRecord, changeProjectEvent.userCustomTimeProvider)
+        val changeProjectChangeTypes = projectLoader.changeProjectEvents.map {
+            project = newProject(it.projectRecord, it.userCustomTimeProvider)
 
-            projectChangeType
+            ChangeType.REMOTE
         }
 
         changeTypes = listOf(changeProjectChangeTypes).merge().publishImmediate(domainDisposable)

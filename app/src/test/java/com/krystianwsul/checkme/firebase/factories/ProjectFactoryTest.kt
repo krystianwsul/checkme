@@ -108,7 +108,7 @@ class ProjectFactoryTest {
         override val initialProjectEvent = Single.just(ChangeWrapper(ChangeType.REMOTE, event))!!
 
         override val changeProjectEvents =
-                PublishRelay.create<ChangeWrapper<ProjectLoader.ChangeProjectEvent<ProjectType.Private>>>()!!
+                PublishRelay.create<ProjectLoader.ChangeProjectEvent<ProjectType.Private>>()!!
     }
 
     @get:Rule

@@ -25,7 +25,7 @@ interface ProjectLoader<T : ProjectType, U : Parsable> { // U: Project JSON type
     val initialProjectEvent: Single<ChangeWrapper<InitialProjectEvent<T, U>>>
 
     // Here we observe remaining changes to the project or tasks, which don't affect the instance observables
-    val changeProjectEvents: Observable<ChangeWrapper<ChangeProjectEvent<T>>>
+    val changeProjectEvents: Observable<ChangeProjectEvent<T>>
 
     class InitialProjectEvent<T : ProjectType, U : Parsable>(
             // U: Project JSON type
@@ -96,10 +96,7 @@ interface ProjectLoader<T : ProjectType, U : Parsable> { // U: Project JSON type
                 .map {
                     check(it.changeType == ChangeType.REMOTE)
 
-                    ChangeWrapper(
-                            it.changeType,
-                            ChangeProjectEvent(it.projectRecord, it.userCustomTimeProvider),
-                    )
+                    ChangeProjectEvent(it.projectRecord, it.userCustomTimeProvider)
                 }
                 .replayImmediate()
     }

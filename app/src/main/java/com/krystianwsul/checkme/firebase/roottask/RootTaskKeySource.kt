@@ -4,35 +4,37 @@ import com.jakewharton.rxrelay3.PublishRelay
 import com.krystianwsul.common.firebase.records.task.RootTaskRecord
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
+import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 
 class RootTaskKeySource(private val domainDisposable: CompositeDisposable) {
 
     private val projectEvents = PublishRelay.create<ProjectEvent>()
 
-    val rootTaskKeysObservable = projectEvents.scan(ProjectAggregate()) { aggregate, projectEvent ->
-        when (projectEvent) {
-            is ProjectEvent.ProjectAddedOrUpdated -> aggregate.copy(
-                    aggregate.projectMap
-                            .toMutableMap()
-                            .apply { put(projectEvent.projectKey, projectEvent.rootTaskKeys) }
-            )
-            is ProjectEvent.ProjectsRemoved -> {
-                val newMap = aggregate.projectMap.toMutableMap()
+    val rootTaskKeysObservable: Observable<Set<TaskKey.Root>> =
+            projectEvents.scan(ProjectAggregate()) { aggregate, projectEvent ->
+                when (projectEvent) {
+                    is ProjectEvent.ProjectAddedOrUpdated -> aggregate.copy(
+                            aggregate.projectMap
+                                    .toMutableMap()
+                                    .apply { put(projectEvent.projectKey, projectEvent.rootTaskKeys) }
+                    )
+                    is ProjectEvent.ProjectsRemoved -> {
+                        val newMap = aggregate.projectMap.toMutableMap()
 
-                projectEvent.projectKeys.forEach {
-                    check(newMap.containsKey(it))
+                        projectEvent.projectKeys.forEach {
+                            check(newMap.containsKey(it))
 
-                    newMap.remove(it)
+                            newMap.remove(it)
+                        }
+
+                        aggregate.copy(newMap)
+                    }
                 }
-
-                aggregate.copy(newMap)
             }
-        }
-    }
-            .skip(1)
-            .map { it.output }
-            .distinctUntilChanged()
+                    .skip(1)
+                    .map { it.output }
+                    .distinctUntilChanged()
 
     fun onProjectAddedOrUpdated(projectKey: ProjectKey<*>, rootTaskKeys: Set<TaskKey.Root>) {
         // this covers:

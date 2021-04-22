@@ -14,6 +14,7 @@ import com.krystianwsul.checkme.firebase.loaders.ProjectLoader
 import com.krystianwsul.checkme.firebase.loaders.SharedProjectsLoader
 import com.krystianwsul.checkme.firebase.loaders.mockBase64
 import com.krystianwsul.checkme.firebase.managers.AndroidSharedProjectManager
+import com.krystianwsul.checkme.firebase.roottask.RootTaskCoordinator
 import com.krystianwsul.common.ErrorLogger
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.DeviceInfo
@@ -26,6 +27,7 @@ import com.krystianwsul.common.firebase.json.projects.PrivateProjectJson
 import com.krystianwsul.common.firebase.models.MyUser
 import com.krystianwsul.common.firebase.records.MyUserRecord
 import com.krystianwsul.common.firebase.records.project.PrivateProjectRecord
+import com.krystianwsul.common.firebase.records.project.ProjectRecord
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.HourMinute
@@ -33,6 +35,7 @@ import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.UserKey
 import io.mockk.*
 import io.reactivex.rxjava3.android.plugins.RxAndroidPlugins
+import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.plugins.RxJavaPlugins
@@ -194,6 +197,10 @@ class DomainFactoryRule : TestRule {
                 },
                 TestUserCustomTimeProviderSource(),
                 mockk(relaxed = true),
+                object : RootTaskCoordinator {
+
+                    override fun getRootTasks(projectRecord: ProjectRecord<*>) = Completable.complete() // todo task tests
+                },
         )
 
         val projectsFactory = ProjectsFactory(

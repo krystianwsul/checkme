@@ -6,4 +6,11 @@ import io.reactivex.rxjava3.core.Completable
 interface RootTaskCoordinator {
 
     fun getRootTasks(projectRecord: ProjectRecord<*>): Completable
+
+    class Impl : RootTaskCoordinator {
+
+        override fun getRootTasks(projectRecord: ProjectRecord<*>): Completable {
+            TODO("todo task fetch")
+        }
+    }
 }

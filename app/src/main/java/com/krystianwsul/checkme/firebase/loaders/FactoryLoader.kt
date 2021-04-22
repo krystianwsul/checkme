@@ -10,6 +10,7 @@ import com.krystianwsul.checkme.firebase.factories.MyUserFactory
 import com.krystianwsul.checkme.firebase.factories.ProjectsFactory
 import com.krystianwsul.checkme.firebase.managers.AndroidPrivateProjectManager
 import com.krystianwsul.checkme.firebase.managers.AndroidSharedProjectManager
+import com.krystianwsul.checkme.firebase.roottask.RootTaskCoordinator
 import com.krystianwsul.checkme.utils.cacheImmediate
 import com.krystianwsul.checkme.utils.mapNotNull
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
@@ -97,12 +98,15 @@ class FactoryLoader(
                             CustomTimeCoordinator(userInfo.key, friendsLoader, friendsFactorySingle),
                     )
 
+                    val rootTaskCoordinator = RootTaskCoordinator.Impl()
+
                     val privateProjectLoader = ProjectLoader.Impl(
                             privateProjectDatabaseRx.observable,
                             domainDisposable,
                             privateProjectManager,
                             null,
                             userCustomTimeProviderSource,
+                            rootTaskCoordinator,
                     )
 
                     val startTime = ExactTimeStamp.Local.now
@@ -116,6 +120,7 @@ class FactoryLoader(
                             factoryProvider.sharedProjectsProvider,
                             userCustomTimeProviderSource,
                             userKeyStore,
+                            rootTaskCoordinator,
                     )
 
                     val projectsFactorySingle = Single.zip(

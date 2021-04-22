@@ -4,6 +4,7 @@ import com.jakewharton.rxrelay3.ReplayRelay
 import com.krystianwsul.checkme.firebase.UserCustomTimeProviderSource
 import com.krystianwsul.checkme.firebase.UserKeyStore
 import com.krystianwsul.checkme.firebase.managers.AndroidSharedProjectManager
+import com.krystianwsul.checkme.firebase.roottask.RootTaskCoordinator
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.checkme.utils.zipSingle
 import com.krystianwsul.common.firebase.ChangeType
@@ -39,6 +40,7 @@ interface SharedProjectsLoader {
             private val sharedProjectsProvider: SharedProjectsProvider,
             private val userCustomTimeProviderSource: UserCustomTimeProviderSource,
             private val userKeyStore: UserKeyStore,
+            private val rootTaskCoordinator: RootTaskCoordinator,
     ) : SharedProjectsLoader {
 
         private data class AddedProjectData(val initialProjectRecord: SharedProjectRecord)
@@ -114,6 +116,7 @@ interface SharedProjectsLoader {
                             projectManager,
                             projectEntry.initialProjectRecord,
                             userCustomTimeProviderSource,
+                            rootTaskCoordinator,
                     )
                 }
         )

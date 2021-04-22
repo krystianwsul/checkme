@@ -4,6 +4,7 @@ import com.jakewharton.rxrelay3.PublishRelay
 import com.krystianwsul.checkme.domainmodel.DomainFactoryRule
 import com.krystianwsul.checkme.firebase.TestUserCustomTimeProviderSource
 import com.krystianwsul.checkme.firebase.managers.AndroidSharedProjectManager
+import com.krystianwsul.checkme.firebase.roottask.RootTaskCoordinator
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.ChangeWrapper
@@ -11,8 +12,10 @@ import com.krystianwsul.common.firebase.DatabaseCallback
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.json.JsonWrapper
 import com.krystianwsul.common.firebase.json.projects.SharedProjectJson
+import com.krystianwsul.common.firebase.records.project.ProjectRecord
 import com.krystianwsul.common.utils.ProjectKey
 import io.mockk.mockk
+import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import org.junit.After
@@ -91,6 +94,10 @@ class SharedProjectsLoaderTest {
                 sharedProjectsProvider,
                 TestUserCustomTimeProviderSource(),
                 mockk(relaxed = true),
+                object : RootTaskCoordinator {
+
+                    override fun getRootTasks(projectRecord: ProjectRecord<*>) = Completable.complete() // todo task tests
+                },
         )
 
         initialProjectsEmissionChecker =

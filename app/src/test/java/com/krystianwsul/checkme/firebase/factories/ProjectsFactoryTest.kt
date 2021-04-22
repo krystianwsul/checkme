@@ -7,6 +7,7 @@ import com.krystianwsul.checkme.firebase.checkRemote
 import com.krystianwsul.checkme.firebase.loaders.*
 import com.krystianwsul.checkme.firebase.managers.AndroidPrivateProjectManager
 import com.krystianwsul.checkme.firebase.managers.AndroidSharedProjectManager
+import com.krystianwsul.checkme.firebase.roottask.RootTaskCoordinator
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.common.ErrorLogger
 import com.krystianwsul.common.domain.DeviceDbInfo
@@ -18,12 +19,14 @@ import com.krystianwsul.common.firebase.json.UserJson
 import com.krystianwsul.common.firebase.json.projects.PrivateProjectJson
 import com.krystianwsul.common.firebase.json.projects.SharedProjectJson
 import com.krystianwsul.common.firebase.json.tasks.PrivateTaskJson
+import com.krystianwsul.common.firebase.records.project.ProjectRecord
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.TaskKey
 import io.mockk.every
 import io.mockk.mockk
+import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.subscribeBy
@@ -88,6 +91,10 @@ class ProjectsFactoryTest {
                 privateProjectManager,
                 null,
                 TestUserCustomTimeProviderSource(),
+                object : RootTaskCoordinator {
+
+                    override fun getRootTasks(projectRecord: ProjectRecord<*>) = Completable.complete() // todo task tests
+                },
         )
 
         initialProjectEvent = null
@@ -105,6 +112,10 @@ class ProjectsFactoryTest {
                 factoryProvider.sharedProjectsProvider,
                 TestUserCustomTimeProviderSource(),
                 mockk(relaxed = true),
+                object : RootTaskCoordinator {
+
+                    override fun getRootTasks(projectRecord: ProjectRecord<*>) = Completable.complete() // todo task tests
+                },
         )
 
         initialProjectsEvent = null

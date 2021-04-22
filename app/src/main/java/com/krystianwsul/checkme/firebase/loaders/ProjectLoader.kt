@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.firebase.loaders
 
+import com.krystianwsul.checkme.firebase.RootTaskCoordinator
 import com.krystianwsul.checkme.firebase.UserCustomTimeProviderSource
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.checkme.utils.cacheImmediate
@@ -13,6 +14,7 @@ import com.krystianwsul.common.utils.ProjectType
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.CompositeDisposable
+import io.reactivex.rxjava3.kotlin.Singles
 import io.reactivex.rxjava3.kotlin.plusAssign
 
 interface ProjectLoader<T : ProjectType, U : Parsable> { // U: Project JSON type
@@ -44,6 +46,7 @@ interface ProjectLoader<T : ProjectType, U : Parsable> { // U: Project JSON type
             override val projectManager: ProjectProvider.ProjectManager<T, U>,
             initialProjectRecord: ProjectRecord<T>?,
             private val userCustomTimeProviderSource: UserCustomTimeProviderSource,
+            private val rootTaskCoordinator: RootTaskCoordinator,
     ) : ProjectLoader<T, U> {
 
         private fun <T> Observable<T>.replayImmediate() = replay().apply { domainDisposable += connect() }!!
@@ -68,8 +71,12 @@ interface ProjectLoader<T : ProjectType, U : Parsable> { // U: Project JSON type
                              * I'm assuming here that 1. a new project doesn't have any custom times, and 2. all other
                              * project events are remote.
                              */
-                            userCustomTimeProviderSource.getUserCustomTimeProvider(projectRecord).map {
-                                ProjectRecordData(projectChangeType, projectRecord, it)
+
+                            Singles.zip(
+                                    rootTaskCoordinator.getRootTasks(projectRecord).toSingleDefault(Unit),
+                                    userCustomTimeProviderSource.getUserCustomTimeProvider(projectRecord),
+                            ).map { (_, userCustomTimeProvider) ->
+                                ProjectRecordData(projectChangeType, projectRecord, userCustomTimeProvider)
                             }
                         }
                 .replayImmediate()
@@ -91,7 +98,7 @@ interface ProjectLoader<T : ProjectType, U : Parsable> { // U: Project JSON type
 
                     ChangeWrapper(
                             it.changeType,
-                            ChangeProjectEvent(it.projectRecord, it.userCustomTimeProvider)
+                            ChangeProjectEvent(it.projectRecord, it.userCustomTimeProvider),
                     )
                 }
                 .replayImmediate()

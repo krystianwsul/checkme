@@ -30,7 +30,7 @@ interface SharedProjectsLoader {
     // this is the event for adding new projects
     val addProjectEvents: Observable<ChangeWrapper<AddProjectEvent>>
 
-    val removeProjectEvents: Observable<ChangeWrapper<RemoveProjectsEvent>>
+    val removeProjectEvents: Observable<RemoveProjectsEvent>
 
     fun addProject(jsonWrapper: JsonWrapper): SharedProjectRecord
 
@@ -160,15 +160,15 @@ interface SharedProjectsLoader {
                 }
                 .replayImmediate()
 
-        override val removeProjectEvents = projectLoadersObservable.map {
-            ChangeWrapper(it.userChangeType, RemoveProjectsEvent(it.removedProjectKeys))
-        }
-                .filter { it.data.projectKeys.isNotEmpty() }
-                .doOnNext {
-                    check(it.changeType == ChangeType.REMOTE)
+        override val removeProjectEvents = projectLoadersObservable.filter { it.removedProjectKeys.isNotEmpty() }
+                .map {
+                    check(it.userChangeType == ChangeType.REMOTE)
 
-                    rootTaskKeySource.onProjectsRemoved(it.data.projectKeys)
-                    userKeyStore.onProjectsRemoved(it.data.projectKeys)
+                    RemoveProjectsEvent(it.removedProjectKeys)
+                }
+                .doOnNext {
+                    rootTaskKeySource.onProjectsRemoved(it.projectKeys)
+                    userKeyStore.onProjectsRemoved(it.projectKeys)
                 }
                 .replayImmediate()
 

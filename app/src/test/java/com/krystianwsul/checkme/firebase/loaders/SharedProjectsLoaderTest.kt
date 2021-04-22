@@ -75,7 +75,7 @@ class SharedProjectsLoaderTest {
 
     private lateinit var initialProjectsEmissionChecker: EmissionChecker<SharedProjectsLoader.InitialProjectsEvent>
     private lateinit var addProjectEmissionChecker: EmissionChecker<ChangeWrapper<SharedProjectsLoader.AddProjectEvent>>
-    private lateinit var removeProjectsEmissionChecker: EmissionChecker<ChangeWrapper<SharedProjectsLoader.RemoveProjectsEvent>>
+    private lateinit var removeProjectsEmissionChecker: EmissionChecker<SharedProjectsLoader.RemoveProjectsEvent>
 
     @Before
     fun before() {
@@ -172,7 +172,7 @@ class SharedProjectsLoaderTest {
             sharedProjectsProvider.acceptProject(projectKey1, SharedProjectJson())
         }
 
-        removeProjectsEmissionChecker.checkRemote { projectKeysRelay.accept(setOf()) }
+        removeProjectsEmissionChecker.checkOne { projectKeysRelay.accept(setOf()) }
     }
 
     @Test
@@ -183,7 +183,7 @@ class SharedProjectsLoaderTest {
             sharedProjectsProvider.acceptProject(projectKey1, SharedProjectJson())
         }
 
-        removeProjectsEmissionChecker.checkRemote { projectKeysRelay.accept(setOf(projectKey2)) }
+        removeProjectsEmissionChecker.checkOne { projectKeysRelay.accept(setOf(projectKey2)) }
 
         addProjectEmissionChecker.checkRemote {
             sharedProjectsProvider.acceptProject(projectKey2, SharedProjectJson())
@@ -198,7 +198,7 @@ class SharedProjectsLoaderTest {
             sharedProjectsProvider.acceptProject(projectKey1, SharedProjectJson())
         }
 
-        removeProjectsEmissionChecker.checkRemote { projectKeysRelay.accept(setOf(projectKey2)) }
+        removeProjectsEmissionChecker.checkOne { projectKeysRelay.accept(setOf(projectKey2)) }
 
         addProjectEmissionChecker.checkRemote {
             sharedProjectsProvider.acceptProject(projectKey2, SharedProjectJson())

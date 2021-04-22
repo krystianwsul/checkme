@@ -93,16 +93,14 @@ class ProjectsFactory(
         }
 
         val removeProjectChangeTypes =
-                sharedProjectsLoader.removeProjectEvents.map { (changeType, removeProjectEvent) ->
-                    check(changeType == ChangeType.REMOTE)
-
-                    removeProjectEvent.projectKeys.forEach {
+                sharedProjectsLoader.removeProjectEvents.map {
+                    it.projectKeys.forEach {
                         check(sharedProjectFactories.containsKey(it))
 
                         sharedProjectFactoriesProperty.remove(it)
                     }
 
-                    changeType
+                    ChangeType.REMOTE
                 }
 
         val sharedProjectFactoryChangeTypes = sharedProjectFactoriesProperty.observable.switchMap {

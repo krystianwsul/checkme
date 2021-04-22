@@ -20,6 +20,7 @@ abstract class ProjectRecord<T : ProjectType>(
     companion object {
 
         const val PROJECT_JSON = "projectJson"
+        const val ROOT_TASK_IDS_KEY = "rootTaskIds"
     }
 
     abstract val projectKey: ProjectKey<T>
@@ -53,6 +54,13 @@ abstract class ProjectRecord<T : ProjectType>(
     var endTime by Committer(projectJson::endTime, committerKey)
     var endTimeOffset by Committer(projectJson::endTimeOffset, committerKey)
 
+    private val rootTaskKeysProperty = invalidatableLazy {
+        projectJson.rootTaskIds
+                .keys
+                .map(TaskKey::Root)
+    }
+    val rootTaskKeys by rootTaskKeysProperty
+
     override val children
         get() = taskRecords.values +
                 taskHierarchyRecords.values +
@@ -81,4 +89,28 @@ abstract class ProjectRecord<T : ProjectType>(
     fun getProjectCustomTimeKey(customTimeId: String) = getProjectCustomTimeKey(getProjectCustomTimeId(customTimeId))
 
     fun getTaskKey(taskId: String) = TaskKey.Project(projectKey, taskId) // todo task after model
+
+    fun addRootTask(rootTaskKey: TaskKey.Root) {
+        val rootTaskId = rootTaskKey.taskId
+
+        if (!projectJson.rootTaskIds.containsKey(rootTaskId)) {
+            projectJson.rootTaskIds[rootTaskId] = true
+
+            addValue("$key/$ROOT_TASK_IDS_KEY/$rootTaskId", true)
+
+            rootTaskKeysProperty.invalidate()
+        }
+    }
+
+    fun removeRootTask(rootTaskKey: TaskKey.Root) {
+        val rootTaskId = rootTaskKey.taskId
+
+        if (projectJson.rootTaskIds.containsKey(rootTaskId)) {
+            projectJson.rootTaskIds.remove(rootTaskId)
+
+            addValue("$key/$ROOT_TASK_IDS_KEY/$rootTaskId", null)
+
+            rootTaskKeysProperty.invalidate()
+        }
+    }
 }

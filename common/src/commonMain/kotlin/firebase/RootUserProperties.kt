@@ -20,5 +20,5 @@ interface RootUserProperties {
     fun removeFriend(userKey: UserKey)
 
     fun addProject(projectKey: ProjectKey.Shared)
-    fun removeProject(projectKey: ProjectKey.Shared): Boolean
+    fun removeProject(projectKey: ProjectKey.Shared): Boolean // todo return value unused?
 }

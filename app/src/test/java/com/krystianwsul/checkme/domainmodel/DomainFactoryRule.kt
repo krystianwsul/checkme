@@ -201,6 +201,7 @@ class DomainFactoryRule : TestRule {
 
                     override fun getRootTasks(projectRecord: ProjectRecord<*>) = Completable.complete() // todo task tests
                 },
+                mockk(relaxed = true), // todo task tests
         )
 
         val projectsFactory = ProjectsFactory(

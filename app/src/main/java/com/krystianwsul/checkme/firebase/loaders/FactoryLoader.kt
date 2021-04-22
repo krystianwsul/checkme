@@ -124,6 +124,7 @@ class FactoryLoader(
                             userCustomTimeProviderSource,
                             userKeyStore,
                             rootTaskCoordinator,
+                            rootTaskKeySource,
                     )
 
                     val projectsFactorySingle = Single.zip(
@@ -143,7 +144,7 @@ class FactoryLoader(
                                 ExactTimeStamp.Local.now,
                                 factoryProvider,
                                 domainDisposable,
-                                ::getDeviceDbInfo
+                                ::getDeviceDbInfo,
                         )
                     }.cacheImmediate()
 

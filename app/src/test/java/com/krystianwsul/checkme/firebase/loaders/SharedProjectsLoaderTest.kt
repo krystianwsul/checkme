@@ -98,6 +98,7 @@ class SharedProjectsLoaderTest {
 
                     override fun getRootTasks(projectRecord: ProjectRecord<*>) = Completable.complete() // todo task tests
                 },
+                mockk(relaxed = true), // todo task tests
         )
 
         initialProjectsEmissionChecker =

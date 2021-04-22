@@ -23,7 +23,7 @@ import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.*
 
 abstract class Task(
-        val project: Project<*>, // todo task model check usages outside here
+        val project: Project<*>, // todo task after model check usages outside here
         private val copyScheduleHelper: CopyScheduleHelper,
         private val customTimeProvider: JsonTime.CustomTimeProvider,
         private val taskRecord: TaskRecord,

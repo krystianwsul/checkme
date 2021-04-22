@@ -1,12 +1,28 @@
 package com.krystianwsul.common.firebase.models.taskhierarchy
 
-import com.krystianwsul.common.firebase.models.project.Project
+import com.krystianwsul.common.firebase.models.task.RootTask
 import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.utils.TaskKey
 
-class ParentTaskDelegate(private val project: Project<*>) {
+sealed class ParentTaskDelegate {
 
-    fun getTaskKey(parentTaskId: String): TaskKey = TaskKey.Project(project.projectKey, parentTaskId)
+    abstract fun getTaskKey(parentTaskId: String): TaskKey
 
-    fun getTask(parentTaskId: String): Task = project.getTaskForce(parentTaskId)
+    abstract fun getTask(parentTaskId: String): Task
+
+    class Project(
+            private val project: com.krystianwsul.common.firebase.models.project.Project<*>,
+    ) : ParentTaskDelegate() {
+
+        override fun getTaskKey(parentTaskId: String): TaskKey = TaskKey.Project(project.projectKey, parentTaskId)
+
+        override fun getTask(parentTaskId: String): Task = project.getTaskForce(parentTaskId)
+    }
+
+    class Root(private val rootTaskParent: RootTask.Parent) : ParentTaskDelegate() {
+
+        override fun getTaskKey(parentTaskId: String) = TaskKey.Root(parentTaskId)
+
+        override fun getTask(parentTaskId: String) = rootTaskParent.getTask(getTaskKey(parentTaskId))
+    }
 }

@@ -2,6 +2,7 @@ package com.krystianwsul.common.firebase.models.task
 
 import com.krystianwsul.common.firebase.json.tasks.TaskJson
 import com.krystianwsul.common.firebase.models.project.Project
+import com.krystianwsul.common.firebase.models.taskhierarchy.ParentTaskDelegate
 import com.krystianwsul.common.firebase.records.task.ProjectTaskRecord
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.ExactTimeStamp
@@ -9,7 +10,7 @@ import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.*
 
 class ProjectTask(project: Project<*>, private val taskRecord: ProjectTaskRecord) :
-        Task(project, project.copyScheduleHelper, project, taskRecord) {
+        Task(project, project.copyScheduleHelper, project, taskRecord, ParentTaskDelegate.Project(project)) {
 
     override val taskKey get() = TaskKey.Project(project.projectKey, taskRecord.id)
 

@@ -4,6 +4,7 @@ import com.krystianwsul.common.firebase.json.tasks.TaskJson
 import com.krystianwsul.common.firebase.models.CopyScheduleHelper
 import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.taskhierarchy.NestedTaskHierarchy
+import com.krystianwsul.common.firebase.models.taskhierarchy.ParentTaskDelegate
 import com.krystianwsul.common.firebase.models.taskhierarchy.ProjectTaskHierarchy
 import com.krystianwsul.common.firebase.records.task.ProjectTaskRecord
 import com.krystianwsul.common.time.*
@@ -19,6 +20,7 @@ class RootTask(
         CopyScheduleHelper.Root,
         JsonTime.CustomTimeProvider.getForRootTask(userCustomTimeProvider),
         taskRecord,
+        ParentTaskDelegate.Root(parent),
 ) {
 
     override val taskKey get() = TaskKey.Root(taskRecord.id)
@@ -104,5 +106,7 @@ class RootTask(
         fun getTaskHierarchiesByParentTaskKey(childTaskKey: TaskKey.Root): Set<NestedTaskHierarchy>
 
         fun deleteTask(task: RootTask)
+
+        fun getTask(taskKey: TaskKey.Root): RootTask
     }
 }

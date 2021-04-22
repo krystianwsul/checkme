@@ -13,6 +13,7 @@ import com.krystianwsul.common.firebase.models.interval.*
 import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.schedule.*
 import com.krystianwsul.common.firebase.models.taskhierarchy.NestedTaskHierarchy
+import com.krystianwsul.common.firebase.models.taskhierarchy.ParentTaskDelegate
 import com.krystianwsul.common.firebase.models.taskhierarchy.ProjectTaskHierarchy
 import com.krystianwsul.common.firebase.models.taskhierarchy.TaskHierarchy
 import com.krystianwsul.common.firebase.records.InstanceRecord
@@ -26,6 +27,7 @@ abstract class Task(
         private val copyScheduleHelper: CopyScheduleHelper,
         private val customTimeProvider: JsonTime.CustomTimeProvider,
         private val taskRecord: TaskRecord,
+        private val parentTaskDelegate: ParentTaskDelegate,
 ) : Current, CurrentOffset, QueryMatchable, Assignable {
 
     private val endDataProperty = invalidatableLazyCallbacks {
@@ -73,7 +75,7 @@ abstract class Task(
     protected abstract val projectParentTaskHierarchies: Set<ProjectTaskHierarchy>
 
     val nestedParentTaskHierarchies = taskRecord.taskHierarchyRecords
-            .mapValues { NestedTaskHierarchy(this, it.value) }
+            .mapValues { NestedTaskHierarchy(this, it.value, parentTaskDelegate) }
             .toMutableMap()
 
     val parentTaskHierarchies get() = projectParentTaskHierarchies + nestedParentTaskHierarchies.values
@@ -1031,7 +1033,7 @@ abstract class Task(
             nestedTaskHierarchyJson: NestedTaskHierarchyJson,
     ): NestedTaskHierarchy {
         val taskHierarchyRecord = taskRecord.newTaskHierarchyRecord(nestedTaskHierarchyJson)
-        val taskHierarchy = NestedTaskHierarchy(this, taskHierarchyRecord)
+        val taskHierarchy = NestedTaskHierarchy(this, taskHierarchyRecord, parentTaskDelegate)
 
         nestedParentTaskHierarchies[taskHierarchy.id] = taskHierarchy
 

@@ -8,7 +8,8 @@ import com.krystianwsul.common.utils.TaskHierarchyKey
 class NestedTaskHierarchy(
         override val childTask: Task,
         override val taskHierarchyRecord: NestedTaskHierarchyRecord,
-) : TaskHierarchy(ParentTaskDelegate(childTask.project)) {
+        parentTaskDelegate: ParentTaskDelegate,
+) : TaskHierarchy(parentTaskDelegate) {
 
     override val childTaskKey get() = childTask.taskKey
     override val childTaskId get() = childTaskKey.taskId

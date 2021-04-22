@@ -35,7 +35,7 @@ interface SharedProjectsLoader {
     fun addProject(jsonWrapper: JsonWrapper): SharedProjectRecord
 
     class Impl(
-            projectKeysObservable: Observable<ChangeWrapper<Set<ProjectKey.Shared>>>,
+            projectKeysObservable: Observable<Set<ProjectKey.Shared>>,
             override val projectManager: AndroidSharedProjectManager,
             private val domainDisposable: CompositeDisposable,
             private val sharedProjectsProvider: SharedProjectsProvider,
@@ -52,10 +52,7 @@ interface SharedProjectsLoader {
 
         init {
             projectKeysObservable.map {
-                ChangeWrapper<Map<ProjectKey.Shared, AddedProjectData?>>(
-                        it.changeType,
-                        it.data.associateWith { null },
-                )
+                ChangeWrapper<Map<ProjectKey.Shared, AddedProjectData?>>(ChangeType.REMOTE, it.associateWith { null })
             }
                     .subscribe(addedProjectDatasRelay)
                     .addTo(domainDisposable)

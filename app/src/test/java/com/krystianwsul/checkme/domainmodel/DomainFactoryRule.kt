@@ -19,8 +19,6 @@ import com.krystianwsul.common.ErrorLogger
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.DeviceInfo
 import com.krystianwsul.common.domain.UserInfo
-import com.krystianwsul.common.firebase.ChangeType
-import com.krystianwsul.common.firebase.ChangeWrapper
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.json.projects.PrivateProjectJson
@@ -187,7 +185,7 @@ class DomainFactoryRule : TestRule {
         }
 
         val sharedProjectsLoader = SharedProjectsLoader.Impl(
-                Observable.just(ChangeWrapper(ChangeType.LOCAL, setOf())),
+                Observable.just(setOf()),
                 spyk(AndroidSharedProjectManager(databaseWrapper)) {
                     every { save(any()) } returns Unit
                 },

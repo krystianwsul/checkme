@@ -21,8 +21,7 @@ class MyUserFactory(userSnapshot: Snapshot<UserWrapper>, deviceDbInfo: DeviceDbI
         get() = userRelay.value!!
         private set(value) = userRelay.accept(value)
 
-    val sharedProjectKeysObservable =
-            userRelay.map { ChangeWrapper(ChangeType.REMOTE, it.projectIds) }.distinctUntilChanged()!!
+    val sharedProjectKeysObservable = userRelay.map { it.projectIds }.distinctUntilChanged()!!
 
     val friendKeysObservable = userRelay.switchMap { myUser ->
         myUser.friendChanges

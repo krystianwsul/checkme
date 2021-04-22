@@ -14,7 +14,6 @@ import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.DeviceInfo
 import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.ChangeType
-import com.krystianwsul.common.firebase.ChangeWrapper
 import com.krystianwsul.common.firebase.json.UserJson
 import com.krystianwsul.common.firebase.json.projects.PrivateProjectJson
 import com.krystianwsul.common.firebase.json.projects.SharedProjectJson
@@ -57,7 +56,7 @@ class ProjectsFactoryTest {
     private lateinit var factoryProvider: ProjectFactoryTest.TestFactoryProvider
     private lateinit var privateProjectManager: AndroidPrivateProjectManager
     private lateinit var privateProjectLoader: ProjectLoader.Impl<ProjectType.Private, PrivateProjectJson>
-    private lateinit var projectKeysRelay: PublishRelay<ChangeWrapper<Set<ProjectKey.Shared>>>
+    private lateinit var projectKeysRelay: PublishRelay<Set<ProjectKey.Shared>>
     private lateinit var sharedProjectManager: AndroidSharedProjectManager
     private lateinit var sharedProjectsLoader: SharedProjectsLoader.Impl
 
@@ -155,14 +154,14 @@ class ProjectsFactoryTest {
         val privateProjectKey = ProjectKey.Private("key")
         privateProjectRelay.accept(Snapshot(privateProjectKey.key, PrivateProjectJson()))
 
-        projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf()))
+        projectKeysRelay.accept(setOf())
 
         val name = "privateProject"
         privateProjectRelay.accept(Snapshot(privateProjectKey.key, PrivateProjectJson(name)))
 
         val sharedProjectKey = ProjectKey.Shared("sharedProjectKey")
 
-        projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf(sharedProjectKey)))
+        projectKeysRelay.accept(setOf(sharedProjectKey))
         factoryProvider.acceptSharedProject(sharedProjectKey, SharedProjectJson(users = mutableMapOf(
                 userInfo.key.key to mockk(relaxed = true) {
                     every { tokens } returns mutableMapOf()
@@ -180,7 +179,7 @@ class ProjectsFactoryTest {
         val privateProjectKey = ProjectKey.Private("privateProjectKey")
         privateProjectRelay.accept(Snapshot(privateProjectKey.key, PrivateProjectJson()))
 
-        projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf()))
+        projectKeysRelay.accept(setOf())
 
         initProjectsFactory()
 
@@ -208,7 +207,7 @@ class ProjectsFactoryTest {
 
         privateProjectRelay.accept(Snapshot(privateProjectKey.key, PrivateProjectJson()))
 
-        projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf()))
+        projectKeysRelay.accept(setOf())
 
         initProjectsFactory()
 
@@ -228,7 +227,7 @@ class ProjectsFactoryTest {
 
         privateProjectRelay.accept(Snapshot(privateProjectKey.key, PrivateProjectJson()))
 
-        projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf()))
+        projectKeysRelay.accept(setOf())
 
         initProjectsFactory()
 
@@ -247,7 +246,7 @@ class ProjectsFactoryTest {
 
         privateProjectRelay.accept(Snapshot(privateProjectKey.key, PrivateProjectJson()))
 
-        projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf()))
+        projectKeysRelay.accept(setOf())
 
         initProjectsFactory()
 
@@ -279,7 +278,7 @@ class ProjectsFactoryTest {
                 )
         )
 
-        projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf()))
+        projectKeysRelay.accept(setOf())
 
         initProjectsFactory()
 
@@ -306,7 +305,7 @@ class ProjectsFactoryTest {
                 )
         )
 
-        projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf()))
+        projectKeysRelay.accept(setOf())
 
         initProjectsFactory()
 
@@ -338,7 +337,7 @@ class ProjectsFactoryTest {
                 )
         )
 
-        projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf()))
+        projectKeysRelay.accept(setOf())
 
         initProjectsFactory()
 
@@ -359,7 +358,7 @@ class ProjectsFactoryTest {
                 PrivateProjectJson(tasks = mutableMapOf(taskKey.taskId to PrivateTaskJson("task"))),
         ))
 
-        projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf()))
+        projectKeysRelay.accept(setOf())
 
         initProjectsFactory()
 
@@ -388,7 +387,7 @@ class ProjectsFactoryTest {
                 PrivateProjectJson(tasks = mutableMapOf(taskKey.taskId to PrivateTaskJson("task"))),
         ))
 
-        projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf()))
+        projectKeysRelay.accept(setOf())
 
         initProjectsFactory()
     }
@@ -398,13 +397,13 @@ class ProjectsFactoryTest {
         val privateProjectKey = ProjectKey.Private("privateProjectKey")
         privateProjectRelay.accept(Snapshot(privateProjectKey.key, PrivateProjectJson()))
 
-        projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf()))
+        projectKeysRelay.accept(setOf())
 
         initProjectsFactory()
 
         val sharedProjectKey = ProjectKey.Shared("sharedProjectKey")
 
-        projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf(sharedProjectKey)))
+        projectKeysRelay.accept(setOf(sharedProjectKey))
 
         emissionChecker.checkRemote {
             factoryProvider.acceptSharedProject(sharedProjectKey, SharedProjectJson(users = mutableMapOf(
@@ -420,7 +419,7 @@ class ProjectsFactoryTest {
         val privateProjectKey = ProjectKey.Private("privateProjectKey")
         privateProjectRelay.accept(Snapshot(privateProjectKey.key, PrivateProjectJson()))
 
-        projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf()))
+        projectKeysRelay.accept(setOf())
 
         initProjectsFactory()
 
@@ -436,11 +435,9 @@ class ProjectsFactoryTest {
                     every { userJson } returns UserJson()
                 },
                 userInfo,
-                mockk(relaxed = true)
+                mockk(relaxed = true),
         )
         projectsFactory.save()
-
-        projectKeysRelay.accept(ChangeWrapper(ChangeType.LOCAL, setOf(sharedProject.projectKey)))
 
         // doesn't emit ChangeType.LOCAL
         factoryProvider.acceptSharedProject(
@@ -460,7 +457,7 @@ class ProjectsFactoryTest {
         privateProjectRelay.accept(Snapshot(privateProjectKey.key, PrivateProjectJson()))
 
         val sharedProjectKey = ProjectKey.Shared("sharedProjectKey")
-        projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf(sharedProjectKey)))
+        projectKeysRelay.accept(setOf(sharedProjectKey))
 
         factoryProvider.acceptSharedProject(sharedProjectKey, SharedProjectJson(users = mutableMapOf(
                 userInfo.key.key to mockk(relaxed = true) {
@@ -470,9 +467,7 @@ class ProjectsFactoryTest {
 
         initProjectsFactory()
 
-        emissionChecker.checkRemote {
-            projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf()))
-        }
+        emissionChecker.checkRemote { projectKeysRelay.accept(setOf()) }
     }
 
     @Test
@@ -481,7 +476,7 @@ class ProjectsFactoryTest {
         privateProjectRelay.accept(Snapshot(privateProjectKey.key, PrivateProjectJson()))
 
         val sharedProjectKey = ProjectKey.Shared("sharedProjectKey")
-        projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf(sharedProjectKey)))
+        projectKeysRelay.accept(setOf(sharedProjectKey))
 
         factoryProvider.acceptSharedProject(sharedProjectKey, SharedProjectJson(users = mutableMapOf(
                 userInfo.key.key to mockk(relaxed = true) {
@@ -508,7 +503,7 @@ class ProjectsFactoryTest {
                         .values
                         .single()
                         .name,
-                name
+                name,
         )
     }
 
@@ -521,7 +516,7 @@ class ProjectsFactoryTest {
         privateProjectRelay.accept(Snapshot(privateProjectKey.key, PrivateProjectJson()))
 
         val sharedProjectKey = ProjectKey.Shared("sharedProjectKey")
-        projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf(sharedProjectKey)))
+        projectKeysRelay.accept(setOf(sharedProjectKey))
 
         factoryProvider.acceptSharedProject(
                 sharedProjectKey,
@@ -552,7 +547,7 @@ class ProjectsFactoryTest {
                         .values
                         .single()
                         .name,
-                name
+                name,
         )
     }
 }

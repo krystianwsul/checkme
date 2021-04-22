@@ -6,7 +6,6 @@ import com.krystianwsul.checkme.firebase.TestUserCustomTimeProviderSource
 import com.krystianwsul.checkme.firebase.managers.AndroidSharedProjectManager
 import com.krystianwsul.checkme.firebase.roottask.RootTaskCoordinator
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
-import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.ChangeWrapper
 import com.krystianwsul.common.firebase.DatabaseCallback
 import com.krystianwsul.common.firebase.DatabaseWrapper
@@ -68,7 +67,7 @@ class SharedProjectsLoaderTest {
 
     private lateinit var rxErrorChecker: RxErrorChecker
 
-    private lateinit var projectKeysRelay: PublishRelay<ChangeWrapper<Set<ProjectKey.Shared>>>
+    private lateinit var projectKeysRelay: PublishRelay<Set<ProjectKey.Shared>>
     private lateinit var sharedProjectsProvider: TestSharedProjectsProvider
     private lateinit var projectManager: AndroidSharedProjectManager
 
@@ -127,14 +126,12 @@ class SharedProjectsLoaderTest {
 
     @Test
     fun testInitialEmpty() {
-        initialProjectsEmissionChecker.checkOne {
-            projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf()))
-        }
+        initialProjectsEmissionChecker.checkOne { projectKeysRelay.accept(setOf()) }
     }
 
     @Test
     fun testInitialProject() {
-        projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf(projectKey1)))
+        projectKeysRelay.accept(setOf(projectKey1))
 
         initialProjectsEmissionChecker.checkOne {
             sharedProjectsProvider.acceptProject(projectKey1, SharedProjectJson())
@@ -143,11 +140,9 @@ class SharedProjectsLoaderTest {
 
     @Test
     fun testInitialEmptyAdd() {
-        initialProjectsEmissionChecker.checkOne {
-            projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf()))
-        }
+        initialProjectsEmissionChecker.checkOne { projectKeysRelay.accept(setOf()) }
 
-        projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf(projectKey1)))
+        projectKeysRelay.accept(setOf(projectKey1))
 
         addProjectEmissionChecker.checkRemote {
             sharedProjectsProvider.acceptProject(projectKey1, SharedProjectJson())
@@ -156,13 +151,13 @@ class SharedProjectsLoaderTest {
 
     @Test
     fun testInitialProjectAdd() {
-        projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf(projectKey1)))
+        projectKeysRelay.accept(setOf(projectKey1))
 
         initialProjectsEmissionChecker.checkOne {
             sharedProjectsProvider.acceptProject(projectKey1, SharedProjectJson())
         }
 
-        projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf(projectKey1, projectKey2)))
+        projectKeysRelay.accept(setOf(projectKey1, projectKey2))
 
         addProjectEmissionChecker.checkRemote {
             sharedProjectsProvider.acceptProject(projectKey2, SharedProjectJson())
@@ -171,28 +166,24 @@ class SharedProjectsLoaderTest {
 
     @Test
     fun testInitialProjectRemove() {
-        projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf(projectKey1)))
+        projectKeysRelay.accept(setOf(projectKey1))
 
         initialProjectsEmissionChecker.checkOne {
             sharedProjectsProvider.acceptProject(projectKey1, SharedProjectJson())
         }
 
-        removeProjectsEmissionChecker.checkRemote {
-            projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf()))
-        }
+        removeProjectsEmissionChecker.checkRemote { projectKeysRelay.accept(setOf()) }
     }
 
     @Test
     fun testInitialProjectSwap1() {
-        projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf(projectKey1)))
+        projectKeysRelay.accept(setOf(projectKey1))
 
         initialProjectsEmissionChecker.checkOne {
             sharedProjectsProvider.acceptProject(projectKey1, SharedProjectJson())
         }
 
-        removeProjectsEmissionChecker.checkRemote {
-            projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf(projectKey2)))
-        }
+        removeProjectsEmissionChecker.checkRemote { projectKeysRelay.accept(setOf(projectKey2)) }
 
         addProjectEmissionChecker.checkRemote {
             sharedProjectsProvider.acceptProject(projectKey2, SharedProjectJson())
@@ -201,15 +192,13 @@ class SharedProjectsLoaderTest {
 
     @Test
     fun testInitialProjectSwap2() {
-        projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf(projectKey1)))
+        projectKeysRelay.accept(setOf(projectKey1))
 
         initialProjectsEmissionChecker.checkOne {
             sharedProjectsProvider.acceptProject(projectKey1, SharedProjectJson())
         }
 
-        removeProjectsEmissionChecker.checkRemote {
-            projectKeysRelay.accept(ChangeWrapper(ChangeType.REMOTE, setOf(projectKey2)))
-        }
+        removeProjectsEmissionChecker.checkRemote { projectKeysRelay.accept(setOf(projectKey2)) }
 
         addProjectEmissionChecker.checkRemote {
             sharedProjectsProvider.acceptProject(projectKey2, SharedProjectJson())

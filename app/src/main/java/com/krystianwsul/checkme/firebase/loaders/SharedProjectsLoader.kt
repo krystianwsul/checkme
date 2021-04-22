@@ -5,6 +5,7 @@ import com.krystianwsul.checkme.firebase.UserCustomTimeProviderSource
 import com.krystianwsul.checkme.firebase.UserKeyStore
 import com.krystianwsul.checkme.firebase.managers.AndroidSharedProjectManager
 import com.krystianwsul.checkme.firebase.roottask.RootTaskCoordinator
+import com.krystianwsul.checkme.firebase.roottask.RootTaskKeySource
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.checkme.utils.zipSingle
 import com.krystianwsul.common.firebase.ChangeType
@@ -41,6 +42,7 @@ interface SharedProjectsLoader {
             private val userCustomTimeProviderSource: UserCustomTimeProviderSource,
             private val userKeyStore: UserKeyStore,
             private val rootTaskCoordinator: RootTaskCoordinator,
+            private val rootTaskKeySource: RootTaskKeySource,
     ) : SharedProjectsLoader {
 
         private data class AddedProjectData(val initialProjectRecord: SharedProjectRecord)
@@ -168,6 +170,7 @@ interface SharedProjectsLoader {
                 .doOnNext {
                     check(it.changeType == ChangeType.REMOTE)
 
+                    rootTaskKeySource.onProjectsRemoved(it.data.projectKeys)
                     userKeyStore.onProjectsRemoved(it.data.projectKeys)
                 }
                 .replayImmediate()

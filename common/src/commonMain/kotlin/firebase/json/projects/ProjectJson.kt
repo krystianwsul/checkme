@@ -18,4 +18,6 @@ interface ProjectJson<T : ProjectType> {
     val tasks: Map<String, TaskJson>
     var taskHierarchies: MutableMap<String, ProjectTaskHierarchyJson>
     val customTimes: Map<String, CustomTimeJson>
+
+    val rootTaskIds: MutableMap<String, Boolean>
 }

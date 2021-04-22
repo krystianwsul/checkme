@@ -19,4 +19,5 @@ data class SharedProjectJson @JvmOverloads constructor(
         override var taskHierarchies: MutableMap<String, ProjectTaskHierarchyJson> = mutableMapOf(),
         override var customTimes: MutableMap<String, SharedCustomTimeJson> = mutableMapOf(),
         var users: MutableMap<String, UserJson> = mutableMapOf(),
+        override val rootTaskIds: MutableMap<String, Boolean> = mutableMapOf(),
 ) : ProjectJson<ProjectType.Shared>

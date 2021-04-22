@@ -7,10 +7,12 @@ interface RootTaskCoordinator {
 
     fun getRootTasks(projectRecord: ProjectRecord<*>): Completable
 
-    class Impl : RootTaskCoordinator {
+    class Impl(private val rootTaskKeySource: RootTaskKeySource) : RootTaskCoordinator {
 
         override fun getRootTasks(projectRecord: ProjectRecord<*>): Completable {
-            return Completable.complete() // todo task fetch
+            rootTaskKeySource.onProjectAddedOrUpdated(projectRecord.projectKey, projectRecord.rootTaskKeys)
+
+            return Completable.complete() // todo task fetch return after tasks are loaded
         }
     }
 }

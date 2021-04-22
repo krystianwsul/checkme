@@ -58,6 +58,7 @@ abstract class ProjectRecord<T : ProjectType>(
         projectJson.rootTaskIds
                 .keys
                 .map(TaskKey::Root)
+                .toSet()
     }
     val rootTaskKeys by rootTaskKeysProperty
 

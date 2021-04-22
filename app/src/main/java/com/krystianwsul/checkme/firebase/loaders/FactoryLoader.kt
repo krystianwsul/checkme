@@ -11,6 +11,7 @@ import com.krystianwsul.checkme.firebase.factories.ProjectsFactory
 import com.krystianwsul.checkme.firebase.managers.AndroidPrivateProjectManager
 import com.krystianwsul.checkme.firebase.managers.AndroidSharedProjectManager
 import com.krystianwsul.checkme.firebase.roottask.RootTaskCoordinator
+import com.krystianwsul.checkme.firebase.roottask.RootTaskKeySource
 import com.krystianwsul.checkme.utils.cacheImmediate
 import com.krystianwsul.checkme.utils.mapNotNull
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
@@ -98,7 +99,9 @@ class FactoryLoader(
                             CustomTimeCoordinator(userInfo.key, friendsLoader, friendsFactorySingle),
                     )
 
-                    val rootTaskCoordinator = RootTaskCoordinator.Impl()
+                    val rootTaskKeySource = RootTaskKeySource(domainDisposable)
+
+                    val rootTaskCoordinator = RootTaskCoordinator.Impl(rootTaskKeySource)
 
                     val privateProjectLoader = ProjectLoader.Impl(
                             privateProjectDatabaseRx.observable,

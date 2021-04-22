@@ -10,7 +10,7 @@ interface RootTaskCoordinator {
     class Impl : RootTaskCoordinator {
 
         override fun getRootTasks(projectRecord: ProjectRecord<*>): Completable {
-            TODO("todo task fetch")
+            return Completable.complete() // todo task fetch
         }
     }
 }

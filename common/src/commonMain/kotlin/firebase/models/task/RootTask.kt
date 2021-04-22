@@ -44,7 +44,7 @@ class RootTask(
             note: String?,
             image: TaskJson.Image?,
             ordinal: Double?,
-    ) = TODO("todo task fetch")
+    ) = TODO("todo task after fetch")
 
     override fun deleteFromParent() = parent.deleteTask(this)
 

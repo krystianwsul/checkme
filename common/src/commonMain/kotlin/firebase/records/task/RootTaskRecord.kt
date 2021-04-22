@@ -68,7 +68,7 @@ class RootTaskRecord private constructor(
     override fun newTaskHierarchyRecordId() = databaseWrapper.newRootTaskNestedTaskHierarchyRecordId(id)
 
     override fun deleteFromParent() {
-        // todo task fetch
+        // todo task after fetch
     }
 
     override fun newScheduleWrapper(

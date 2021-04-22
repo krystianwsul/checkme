@@ -11,17 +11,19 @@ import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.*
 
 class RootTask(
-        project: Project<*>,
+        private val projectKey: ProjectKey<*>, // todo task edit this will be dynamic
         private val taskRecord: ProjectTaskRecord,
         private val parent: Parent,
         private val userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
 ) : Task(
-        project,
         CopyScheduleHelper.Root,
         JsonTime.CustomTimeProvider.getForRootTask(userCustomTimeProvider),
         taskRecord,
         ParentTaskDelegate.Root(parent),
 ) {
+
+    private val projectProperty = invalidatableLazy { parent.getProject(projectKey) }
+    override val project by projectProperty
 
     override val taskKey get() = TaskKey.Root(taskRecord.id)
 
@@ -108,5 +110,7 @@ class RootTask(
         fun deleteTask(task: RootTask)
 
         fun getTask(taskKey: TaskKey.Root): RootTask
+
+        fun getProject(projectKey: ProjectKey<*>): Project<*>
     }
 }

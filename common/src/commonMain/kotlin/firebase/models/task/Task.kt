@@ -23,12 +23,13 @@ import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.*
 
 abstract class Task(
-        val project: Project<*>, // todo task after model check usages outside here
         private val copyScheduleHelper: CopyScheduleHelper,
         private val customTimeProvider: JsonTime.CustomTimeProvider,
         private val taskRecord: TaskRecord,
         private val parentTaskDelegate: ParentTaskDelegate,
 ) : Current, CurrentOffset, QueryMatchable, Assignable {
+
+    abstract val project: Project<*> // todo task after model check usages outside here
 
     private val endDataProperty = invalidatableLazyCallbacks {
         taskRecord.endData?.let {

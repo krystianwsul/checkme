@@ -22,6 +22,16 @@ interface RootTaskToRootTaskCoordinator {
              * is complete.  Yeah, figuring that out is gonna be fun.
              */
 
+            /**
+             * Ho hum.  We need a way to determine which task records have been loaded.  Ultimately, this delay is so
+             * that by the time a project is initialized, all the tasks, and all the custom times they use, are all
+             * initialized.  That part's something we can check at the TaskFactory level, like how we check for custom
+             * times.  (Since the task model objects should be ready before the project model is constructed.)
+             *
+             * But it's trickier for individual tasks.  Here, we need to wait for all child task records to be ready,
+             * and all of their custom times to be ready.
+             */
+
             return Completable.complete()
         }
     }

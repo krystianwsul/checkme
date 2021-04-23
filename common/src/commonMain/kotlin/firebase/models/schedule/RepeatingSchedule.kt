@@ -7,6 +7,7 @@ import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.firebase.records.schedule.RepeatingScheduleRecord
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.invalidatableLazy
+import com.krystianwsul.common.utils.invalidatableLazyCallbacks
 import com.soywiz.klock.days
 import com.soywiz.klock.plus
 
@@ -26,16 +27,17 @@ abstract class RepeatingSchedule(topLevelTask: Task) : Schedule(topLevelTask) {
     override val oldestVisible
         get() = oldestVisibleDate?.let { OldestVisible.RepeatingNonNull(it) } ?: OldestVisible.RepeatingNull
 
-    private val intrinsicStartExactTimeStamp by lazy {
+    private val intrinsicStartExactTimeStampProperty = invalidatableLazy {
         listOfNotNull(
                 startExactTimeStampOffset,
                 repeatingScheduleRecord.from?.let {
                     ExactTimeStamp.Local(it, HourMilli(0, 0, 0, 0))
                 },
         ).maxOrNull()!!
-    }
+    }.apply { addTo(startExactTimeStampOffsetProperty) }
+    private val intrinsicStartExactTimeStamp by intrinsicStartExactTimeStampProperty
 
-    private val intrinsicEndExactTimeStamp by lazy {
+    private val intrinsicEndExactTimeStamp by invalidatableLazyCallbacks {
         listOfNotNull(
                 endExactTimeStampOffset,
                 repeatingScheduleRecord.until
@@ -44,6 +46,8 @@ abstract class RepeatingSchedule(topLevelTask: Task) : Schedule(topLevelTask) {
                         ?.plus(1.days)
                         ?.let(ExactTimeStamp::Local),
         ).minOrNull()
+    }.apply {
+        addTo(endExactTimeStampOffsetProperty)
     }
 
     override fun getDateTimesInRange(

@@ -8,6 +8,7 @@ import com.krystianwsul.common.firebase.records.schedule.ScheduleRecord
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.ScheduleType
 import com.krystianwsul.common.utils.UserKey
+import com.krystianwsul.common.utils.invalidatableLazyCallbacks
 
 abstract class Schedule(val topLevelTask: Task) : TaskParentEntry {
 
@@ -17,16 +18,22 @@ abstract class Schedule(val topLevelTask: Task) : TaskParentEntry {
 
     override val startExactTimeStamp by lazy { ExactTimeStamp.Local(scheduleRecord.startTime) }
 
-    override val startExactTimeStampOffset by lazy {
+    protected val startExactTimeStampOffsetProperty = invalidatableLazyCallbacks {
         scheduleRecord.run { ExactTimeStamp.Offset.fromOffset(startTime, startTimeOffset) }
     }
+    override val startExactTimeStampOffset by startExactTimeStampOffsetProperty
 
-    override val endExactTimeStamp get() = scheduleRecord.endTime?.let { ExactTimeStamp.Local(it) }
+    private val endExactTimeStampProperty = invalidatableLazy {
+        scheduleRecord.endTime?.let { ExactTimeStamp.Local(it) }
+    }
+    override val endExactTimeStamp by endExactTimeStampProperty
 
-    override val endExactTimeStampOffset
-        get() = scheduleRecord.endTime?.let {
+    protected val endExactTimeStampOffsetProperty = invalidatableLazyCallbacks {
+        scheduleRecord.endTime?.let {
             ExactTimeStamp.Offset.fromOffset(it, scheduleRecord.endTimeOffset)
         }
+    }
+    override val endExactTimeStampOffset by endExactTimeStampOffsetProperty
 
     val customTimeKey get() = scheduleRecord.customTimeKey
 
@@ -39,12 +46,18 @@ abstract class Schedule(val topLevelTask: Task) : TaskParentEntry {
     protected fun TimePair.toTime() = customTimeKey?.let(topLevelTask.project::getCustomTime)
             ?: Time.Normal(hourMinute!!)
 
+    private fun invalidateEnd() {
+        endExactTimeStampProperty.invalidate()
+        endExactTimeStampOffsetProperty.invalidate()
+    }
+
     override fun setEndExactTimeStamp(endExactTimeStamp: ExactTimeStamp) {
         requireCurrentOffset(endExactTimeStamp)
 
         scheduleRecord.endTime = endExactTimeStamp.long
         scheduleRecord.endTimeOffset = endExactTimeStamp.offset
 
+        invalidateEnd()
         topLevelTask.invalidateIntervals()
     }
 
@@ -54,6 +67,7 @@ abstract class Schedule(val topLevelTask: Task) : TaskParentEntry {
         scheduleRecord.endTime = null
         scheduleRecord.endTimeOffset = null
 
+        invalidateEnd()
         topLevelTask.invalidateIntervals()
     }
 
@@ -92,10 +106,18 @@ abstract class Schedule(val topLevelTask: Task) : TaskParentEntry {
     override fun toString() = super.toString() + ", taskKey: ${topLevelTask.taskKey}, id: $id, type: ${this::class.simpleName}, startExactTimeStamp: $startExactTimeStamp, endExactTimeStamp: $endExactTimeStamp"
 
     fun fixOffsets() {
-        if (scheduleRecord.startTimeOffset == null) scheduleRecord.startTimeOffset = startExactTimeStamp.offset
+        if (scheduleRecord.startTimeOffset == null) {
+            scheduleRecord.startTimeOffset = startExactTimeStamp.offset
+
+            startExactTimeStampOffsetProperty.invalidate()
+        }
 
         endExactTimeStamp?.let {
-            if (scheduleRecord.endTimeOffset == null) scheduleRecord.endTimeOffset = it.offset
+            if (scheduleRecord.endTimeOffset == null) {
+                scheduleRecord.endTimeOffset = it.offset
+
+                endExactTimeStampOffsetProperty.invalidate()
+            }
         }
     }
 }

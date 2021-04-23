@@ -22,7 +22,7 @@ abstract class RootTaskParentDelegate(private val rootTaskParentJson: RootTaskPa
 
     protected abstract fun addValue(subKey: String, value: Boolean?)
 
-    fun addRootTask(rootTaskKey: TaskKey.Root) {
+    fun addRootTask(rootTaskKey: TaskKey.Root) { // todo task fetch call into RootTaskKeySource
         val rootTaskId = rootTaskKey.taskId
 
         if (!rootTaskIds.containsKey(rootTaskId)) {
@@ -34,7 +34,7 @@ abstract class RootTaskParentDelegate(private val rootTaskParentJson: RootTaskPa
         }
     }
 
-    fun removeRootTask(rootTaskKey: TaskKey.Root) {
+    fun removeRootTask(rootTaskKey: TaskKey.Root) { // todo task fetch call into RootTaskKeySource
         val rootTaskId = rootTaskKey.taskId
 
         if (rootTaskIds.containsKey(rootTaskId)) {

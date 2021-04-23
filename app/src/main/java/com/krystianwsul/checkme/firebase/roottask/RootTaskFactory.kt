@@ -14,10 +14,15 @@ class RootTaskFactory(
 
     init {
         rootTaskLoader.addChangeEvents
-                .doOnNext { (taskKey, taskRecord) ->
-                    check(!rootTasks.containsKey(taskKey))
+                .doOnNext { (taskRecord, projectKey) ->
+                    check(!rootTasks.containsKey(taskRecord.taskKey))
 
-                    val task = RootTask()
+                    val task = RootTask(
+                            projectKey,
+                            taskRecord,
+                            this,
+
+                    )
                 }
 
 

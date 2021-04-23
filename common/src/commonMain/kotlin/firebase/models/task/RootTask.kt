@@ -6,13 +6,13 @@ import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.taskhierarchy.NestedTaskHierarchy
 import com.krystianwsul.common.firebase.models.taskhierarchy.ParentTaskDelegate
 import com.krystianwsul.common.firebase.models.taskhierarchy.ProjectTaskHierarchy
-import com.krystianwsul.common.firebase.records.task.ProjectTaskRecord
+import com.krystianwsul.common.firebase.records.task.RootTaskRecord
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.*
 
 class RootTask(
         private val projectKey: ProjectKey<*>, // todo task edit this will be dynamic
-        private val taskRecord: ProjectTaskRecord,
+        private val taskRecord: RootTaskRecord,
         private val parent: Parent,
         private val userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
 ) : Task(

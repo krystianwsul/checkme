@@ -12,6 +12,7 @@ import com.krystianwsul.common.utils.UserKey
 import com.krystianwsul.treeadapter.tryGetCurrentValue
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
+import io.reactivex.rxjava3.kotlin.combineLatest
 import io.reactivex.rxjava3.kotlin.merge
 import io.reactivex.rxjava3.kotlin.plusAssign
 
@@ -21,6 +22,7 @@ class UserKeyStore(
 ) {
 
     private val projectUserRequestMerger = UserRequestMerger<ProjectKey.Shared>()
+    private val rootTaskUserRequestMerger = UserRequestMerger<TaskKey.Root>()
 
     private val addFriendEvents = PublishRelay.create<FriendEvent.AddFriend>()
 
@@ -55,10 +57,14 @@ class UserKeyStore(
                 .skip(1)
                 .map { FriendOrCustomTimeEvent.Friend(it) }
 
-        loadUserDataObservable = listOf(
-                friendEvents,
-                projectUserRequestMerger.requestedUserKeysObservable.map { FriendOrCustomTimeEvent.CustomTimes(it) },
-        ).merge()
+        val mergedRequests = listOf(
+                projectUserRequestMerger,
+                rootTaskUserRequestMerger,
+        ).map { it.requestedUserKeysObservable }
+                .combineLatest { FriendOrCustomTimeEvent.CustomTimes(it.flatten().toSet()) }
+                .skip(1) // first event is just the initial empty sets from both
+
+        loadUserDataObservable = listOf(friendEvents, mergedRequests).merge()
                 .scan(OutputAggregate()) { aggregate, friendOrCustomTimeEvent ->
                     // when summing maps, add friends to customTimes, since the former takes priority
 
@@ -101,16 +107,22 @@ class UserKeyStore(
         projectUserRequestMerger.requestCustomTimeUsers(projectKey, userKeys)
     }
 
-    fun requestCustomTimeUsers(rootTaskKey: TaskKey.Root, userKeys: Set<UserKey>) {
-        checkNotNull(loadUserDataObservable.tryGetCurrentValue())
-
-// todo task fetch        customTimeEvents.accept(CustomTimeEvent.ProjectAdded(projectKey, userKeys))
-    }
-
     fun onProjectsRemoved(projectKeys: Set<ProjectKey.Shared>) {
         checkNotNull(loadUserDataObservable.tryGetCurrentValue())
 
         projectUserRequestMerger.onRequestsRemoved(projectKeys)
+    }
+
+    fun requestCustomTimeUsers(rootTaskKey: TaskKey.Root, userKeys: Set<UserKey>) {
+        checkNotNull(loadUserDataObservable.tryGetCurrentValue())
+
+        rootTaskUserRequestMerger.requestCustomTimeUsers(rootTaskKey, userKeys)
+    }
+
+    fun onTasksRemoved(rootTaskKeys: Set<TaskKey.Root>) { // todo task fetch
+        checkNotNull(loadUserDataObservable.tryGetCurrentValue())
+
+        rootTaskUserRequestMerger.onRequestsRemoved(rootTaskKeys)
     }
 
     sealed class LoadUserData {

@@ -27,9 +27,7 @@ class UserRequestMerger<REQUEST_KEY : Any> {
                 CustomTimeAggregate(newProjectMap)
             }
         }
-    }
-            .skip(1)
-            .map { it.output }
+    }.map { it.output }
 
     fun requestCustomTimeUsers(requestKey: REQUEST_KEY, userKeys: Set<UserKey>) =
             customTimeEvents.accept(CustomTimeEvent.ProjectAdded(requestKey, userKeys))

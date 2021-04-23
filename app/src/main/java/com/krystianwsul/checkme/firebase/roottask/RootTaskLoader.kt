@@ -8,7 +8,6 @@ import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.checkme.utils.mapNotNull
 import com.krystianwsul.common.firebase.json.tasks.RootTaskJson
 import com.krystianwsul.common.firebase.records.task.RootTaskRecord
-import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
@@ -16,7 +15,7 @@ import io.reactivex.rxjava3.kotlin.merge
 import io.reactivex.rxjava3.kotlin.plusAssign
 
 class RootTaskLoader(
-        taskKeysObservable: Observable<Map<TaskKey.Root, ProjectKey<*>>>,
+        taskKeysObservable: Observable<Set<TaskKey.Root>>,
         private val provider: Provider,
         private val domainDisposable: CompositeDisposable,
         private val rootTaskManager: RootTaskManager,
@@ -25,8 +24,8 @@ class RootTaskLoader(
 
     private fun <T> Observable<T>.replayImmediate() = replay().apply { domainDisposable += connect() }!!
 
-    private val databaseRxObservable: Observable<MapChanges<Map<TaskKey.Root, ProjectKey<*>>, TaskKey.Root, DatabaseRx<Snapshot<RootTaskJson>>>> = taskKeysObservable.processChanges(
-            { it.keys },
+    private val databaseRxObservable: Observable<MapChanges<Set<TaskKey.Root>, TaskKey.Root, DatabaseRx<Snapshot<RootTaskJson>>>> = taskKeysObservable.processChanges(
+            { it },
             { _, taskKey ->
                 DatabaseRx(
                         CompositeDisposable(),
@@ -38,13 +37,11 @@ class RootTaskLoader(
 
     val addChangeEvents: Observable<AddChangeEvent> = databaseRxObservable.switchMap { mapChanges ->
         mapChanges.newMap
-                .map { (taskKey, databaseRx) ->
+                .map { (_, databaseRx) ->
                     databaseRx.observable
                             .mapNotNull { rootTaskManager.set(it) }
                             .map { rootTaskRecord ->
-                                val projectKey = mapChanges.original.getValue(taskKey)
-
-                                AddChangeEvent(rootTaskRecord, projectKey)
+                                AddChangeEvent(rootTaskRecord)
                             }
                 }.merge()
     }.replayImmediate()
@@ -61,7 +58,7 @@ class RootTaskLoader(
             .map { RemoveEvent(it.keys) }
             .replayImmediate()
 
-    data class AddChangeEvent(val rootTaskRecord: RootTaskRecord, val projectKey: ProjectKey<*>)
+    data class AddChangeEvent(val rootTaskRecord: RootTaskRecord)
 
     data class RemoveEvent(val taskKeys: Set<TaskKey.Root>)
 

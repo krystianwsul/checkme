@@ -28,14 +28,14 @@ class RootTaskFactory(
 
     init {
         val addChangeEventChangeTypes = rootTaskLoader.addChangeEvents
-                .switchMapSingle { (taskRecord, projectKey) ->
+                .switchMapSingle { (taskRecord) ->
                     check(!rootTasks.containsKey(taskRecord.taskKey))
 
                     Singles.zip(
                             rootTaskToRootTaskCoordinator.getRootTasks(taskRecord).toSingleDefault(Unit),
                             rootTaskUserCustomTimeProviderSource.getUserCustomTimeProvider(taskRecord),
                     ).map { (_, userCustomTimeProvider) ->
-                        RootTask(projectKey, taskRecord, this, userCustomTimeProvider)
+                        RootTask(taskRecord, this, userCustomTimeProvider)
                     }
                 }
                 .doOnNext {

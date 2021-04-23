@@ -25,7 +25,7 @@ class RootTaskKeySourceTest {
     private val domainDisposable = CompositeDisposable()
 
     private lateinit var rootTaskKeySource: RootTaskKeySource
-    private lateinit var testObserver: TestObserver<Map<TaskKey.Root, ProjectKey<*>>>
+    private lateinit var testObserver: TestObserver<Set<TaskKey.Root>>
 
     @Before
     fun before() {
@@ -46,24 +46,16 @@ class RootTaskKeySourceTest {
     @Test
     fun testAddProject() {
         rootTaskKeySource.onProjectAddedOrUpdated(projectKey1, setOf(rootTaskKey1, rootTaskKey2))
-        testObserver.assertValue(mapOf(rootTaskKey1 to projectKey1, rootTaskKey2 to projectKey1))
+        testObserver.assertValue(setOf(rootTaskKey1, rootTaskKey2))
     }
 
     @Test
     fun testAddSecondProject() {
         rootTaskKeySource.onProjectAddedOrUpdated(projectKey1, setOf(rootTaskKey1, rootTaskKey2))
-        testObserver.assertValue(mapOf(rootTaskKey1 to projectKey1, rootTaskKey2 to projectKey1))
+        testObserver.assertValue(setOf(rootTaskKey1, rootTaskKey2))
 
         rootTaskKeySource.onProjectAddedOrUpdated(projectKey2, setOf(rootTaskKey3, rootTaskKey4))
-        testObserver.assertValueAt(
-                1,
-                mapOf(
-                        rootTaskKey1 to projectKey1,
-                        rootTaskKey2 to projectKey1,
-                        rootTaskKey3 to projectKey2,
-                        rootTaskKey4 to projectKey2,
-                ),
-        )
+        testObserver.assertValueAt(1, setOf(rootTaskKey1, rootTaskKey2, rootTaskKey3, rootTaskKey4))
     }
 
     @Test
@@ -71,7 +63,7 @@ class RootTaskKeySourceTest {
         testAddSecondProject()
 
         rootTaskKeySource.onProjectsRemoved(setOf(projectKey2))
-        testObserver.assertValueAt(2, mapOf(rootTaskKey1 to projectKey1, rootTaskKey2 to projectKey1))
+        testObserver.assertValueAt(2, setOf(rootTaskKey1, rootTaskKey2))
     }
 
     @Test
@@ -79,14 +71,6 @@ class RootTaskKeySourceTest {
         testAddSecondProject()
 
         rootTaskKeySource.onProjectAddedOrUpdated(projectKey2, setOf(rootTaskKey4, rootTaskKey5))
-        testObserver.assertValueAt(
-                2,
-                mapOf(
-                        rootTaskKey1 to projectKey1,
-                        rootTaskKey2 to projectKey1,
-                        rootTaskKey4 to projectKey2,
-                        rootTaskKey5 to projectKey2,
-                ),
-        )
+        testObserver.assertValueAt(2, setOf(rootTaskKey1, rootTaskKey2, rootTaskKey4, rootTaskKey5))
     }
 }

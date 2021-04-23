@@ -1,6 +1,6 @@
 package com.krystianwsul.checkme.firebase.roottask
 
-import com.jakewharton.rxrelay3.PublishRelay
+import com.krystianwsul.checkme.firebase.RequestKeyStore
 import com.krystianwsul.common.firebase.records.task.RootTaskRecord
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
@@ -9,42 +9,10 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable
 
 class RootTaskKeySource(private val domainDisposable: CompositeDisposable) {
 
-    private val projectEvents = PublishRelay.create<ProjectEvent>()
+    private val projectStore = RequestKeyStore<ProjectKey<*>, TaskKey.Root>()
+    private val taskStore = RequestKeyStore<TaskKey.Root, TaskKey.Root>()
 
-    val rootTaskKeysObservable: Observable<Map<TaskKey.Root, ProjectKey<*>>> =
-            projectEvents.scan(ProjectAggregate()) { aggregate, projectEvent ->
-                when (projectEvent) {
-                    is ProjectEvent.ProjectAddedOrUpdated -> {
-                        val oldTaskKeys = aggregate.projectMap
-                                .filterKeys { it != projectEvent.projectKey }
-                                .values
-                                .flatten()
-                                .toSet()
-
-                        projectEvent.rootTaskKeys.forEach { check(it !in oldTaskKeys) }
-
-                        aggregate.copy(
-                                aggregate.projectMap
-                                        .toMutableMap()
-                                        .apply { put(projectEvent.projectKey, projectEvent.rootTaskKeys) }
-                        )
-                    }
-                    is ProjectEvent.ProjectsRemoved -> {
-                        val newMap = aggregate.projectMap.toMutableMap()
-
-                        projectEvent.projectKeys.forEach {
-                            check(newMap.containsKey(it))
-
-                            newMap.remove(it)
-                        }
-
-                        aggregate.copy(newMap)
-                    }
-                }
-            }
-                    .skip(1)
-                    .map { it.output }
-                    .distinctUntilChanged()
+    val rootTaskKeysObservable: Observable<Set<TaskKey.Root>> = RequestKeyStore.merge(projectStore, taskStore)
 
     fun onProjectAddedOrUpdated(projectKey: ProjectKey<*>, rootTaskKeys: Set<TaskKey.Root>) {
         // this covers:
@@ -53,7 +21,7 @@ class RootTaskKeySource(private val domainDisposable: CompositeDisposable) {
 
         // this contributes to final observable by adding keys, or updating keys for given project
 
-        projectEvents.accept(ProjectEvent.ProjectAddedOrUpdated(projectKey, rootTaskKeys))
+        projectStore.requestCustomTimeUsers(projectKey, rootTaskKeys)
     }
 
     fun onTaskAddedLocally(parentKey: ParentKey, taskKey: TaskKey, taskRecord: RootTaskRecord) {
@@ -68,9 +36,7 @@ class RootTaskKeySource(private val domainDisposable: CompositeDisposable) {
         // todo task fetch
     }
 
-    fun onProjectsRemoved(projectKeys: Set<ProjectKey<*>>) {
-        projectEvents.accept(ProjectEvent.ProjectsRemoved(projectKeys))
-    }
+    fun onProjectsRemoved(projectKeys: Set<ProjectKey<*>>) = projectStore.onRequestsRemoved(projectKeys)
 
     fun onRootTaskAddedOrUpdated(parentRootTaskKey: TaskKey.Root, childRootTaskKeys: Set<TaskKey.Root>) {
         // this covers:
@@ -102,23 +68,4 @@ class RootTaskKeySource(private val domainDisposable: CompositeDisposable) {
         data class Project(val projectKey: ProjectKey<*>) : ParentKey()
         data class Task(val taskKey: TaskKey.Root) : ParentKey()
     }
-
-    private sealed class ProjectEvent {
-
-        data class ProjectAddedOrUpdated(
-                val projectKey: ProjectKey<*>,
-                val rootTaskKeys: Set<TaskKey.Root>,
-        ) : ProjectEvent()
-
-        data class ProjectsRemoved(val projectKeys: Set<ProjectKey<*>>) : ProjectEvent()
-    }
-
-    private data class ProjectAggregate(val projectMap: Map<ProjectKey<*>, Set<TaskKey.Root>> = mapOf()) {
-
-        val output = projectMap.flatMap { (projectKey, taskKeys) ->
-            taskKeys.map { taskKey -> taskKey to projectKey }
-        }.toMap()
-    }
-
-    data class TaskData(val projectKey: ProjectKey<*>, val taskKey: TaskKey.Root)
 }

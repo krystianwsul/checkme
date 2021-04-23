@@ -11,7 +11,6 @@ import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.*
 
 class RootTask(
-        private val projectKey: ProjectKey<*>, // todo task edit this will be dynamic
         private val taskRecord: RootTaskRecord,
         private val parent: Parent,
         private val userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
@@ -21,6 +20,18 @@ class RootTask(
         taskRecord,
         ParentTaskDelegate.Root(parent),
 ) {
+
+    /**
+     * todo task fetch this is kinda insane, but I'm going to cross my fingers that the projectKey won't be immediately
+     * necessary when creating the object.  I'm going to initialize it AFTER the project is initialized.  Probably
+     * build this out to a delegate that does book-keeping on whether or not the projectKey is valid (init vs. editing)
+     *
+     * It feels iffy, but less iffy than passing in the initial projectKey and keeping track of it beforehand.  Ideally,
+     * I'd pass the project into every call that involves the current project, but that would require wrapping the task
+     * into some sort of object that holds the current project and delegates calls to the task, and that would require
+     * a shit-ton of work.
+     */
+    lateinit var projectKey: ProjectKey<*> // todo task after fetch this is kinda insane, but
 
     private val projectProperty = invalidatableLazy { parent.getProject(projectKey) }
     override val project by projectProperty

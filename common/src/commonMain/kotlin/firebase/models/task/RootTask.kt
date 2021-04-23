@@ -22,7 +22,7 @@ class RootTask(
 ) {
 
     /**
-     * todo task fetch this is kinda insane, but I'm going to cross my fingers that the projectKey won't be immediately
+     * todo task after fetch this is kinda insane, but I'm going to cross my fingers that the projectKey won't be immediately
      * necessary when creating the object.  I'm going to initialize it AFTER the project is initialized.  Probably
      * build this out to a delegate that does book-keeping on whether or not the projectKey is valid (init vs. editing)
      *
@@ -31,7 +31,7 @@ class RootTask(
      * into some sort of object that holds the current project and delegates calls to the task, and that would require
      * a shit-ton of work.
      */
-    lateinit var projectKey: ProjectKey<*> // todo task after fetch this is kinda insane, but
+    lateinit var projectKey: ProjectKey<*>
 
     private val projectProperty = invalidatableLazy { parent.getProject(projectKey) }
     override val project by projectProperty

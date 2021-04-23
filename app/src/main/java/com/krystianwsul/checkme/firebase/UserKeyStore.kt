@@ -20,7 +20,7 @@ class UserKeyStore(
         domainDisposable: CompositeDisposable,
 ) {
 
-    private val projectUserRequestMerger = UserRequestMerger()
+    private val projectUserRequestMerger = UserRequestMerger<ProjectKey.Shared>()
 
     private val addFriendEvents = PublishRelay.create<FriendEvent.AddFriend>()
 
@@ -110,7 +110,7 @@ class UserKeyStore(
     fun onProjectsRemoved(projectKeys: Set<ProjectKey.Shared>) {
         checkNotNull(loadUserDataObservable.tryGetCurrentValue())
 
-        projectUserRequestMerger.onProjectsRemoved(projectKeys)
+        projectUserRequestMerger.onRequestsRemoved(projectKeys)
     }
 
     sealed class LoadUserData {

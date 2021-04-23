@@ -1,28 +1,27 @@
 package com.krystianwsul.checkme.firebase
 
 import com.jakewharton.rxrelay3.PublishRelay
-import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.UserKey
 import io.reactivex.rxjava3.core.Observable
 
-class UserRequestMerger() {
+class UserRequestMerger<REQUEST_KEY : Any> {
 
-    private val customTimeEvents = PublishRelay.create<CustomTimeEvent>()
+    private val customTimeEvents = PublishRelay.create<CustomTimeEvent<REQUEST_KEY>>()
 
-    val requestedUserKeysObservable: Observable<Set<UserKey>> = customTimeEvents.scan(CustomTimeAggregate()) { aggregate, customTimeEvent ->
+    val requestedUserKeysObservable: Observable<Set<UserKey>> = customTimeEvents.scan(CustomTimeAggregate<REQUEST_KEY>()) { aggregate, customTimeEvent ->
         when (customTimeEvent) {
-            is CustomTimeEvent.ProjectAdded -> {
-                val newProjectMap = aggregate.projectMap
+            is CustomTimeEvent.ProjectAdded<REQUEST_KEY> -> {
+                val newProjectMap = aggregate.requestMap
                         .toMutableMap()
-                        .also { it[customTimeEvent.projectKey] = customTimeEvent.userKeys }
+                        .also { it[customTimeEvent.requestKey] = customTimeEvent.userKeys }
 
                 CustomTimeAggregate(newProjectMap)
             }
-            is CustomTimeEvent.ProjectsRemoved -> {
-                val newProjectMap = aggregate.projectMap
+            is CustomTimeEvent.ProjectsRemoved<REQUEST_KEY> -> {
+                val newProjectMap = aggregate.requestMap
                         .toMutableMap()
                         .also { map ->
-                            customTimeEvent.projectKeys.forEach { map.remove(it) }
+                            customTimeEvent.requestKeys.forEach { map.remove(it) }
                         }
 
                 CustomTimeAggregate(newProjectMap)
@@ -32,22 +31,29 @@ class UserRequestMerger() {
             .skip(1)
             .map { it.output }
 
-    fun requestCustomTimeUsers(projectKey: ProjectKey.Shared, userKeys: Set<UserKey>) =
-            customTimeEvents.accept(CustomTimeEvent.ProjectAdded(projectKey, userKeys))
+    fun requestCustomTimeUsers(requestKey: REQUEST_KEY, userKeys: Set<UserKey>) =
+            customTimeEvents.accept(CustomTimeEvent.ProjectAdded(requestKey, userKeys))
 
-    fun onProjectsRemoved(projectKeys: Set<ProjectKey.Shared>) =
-            customTimeEvents.accept(CustomTimeEvent.ProjectsRemoved(projectKeys))
+    fun onRequestsRemoved(requestKey: Set<REQUEST_KEY>) =
+            customTimeEvents.accept(CustomTimeEvent.ProjectsRemoved(requestKey))
 
-    private sealed class CustomTimeEvent {
+    private sealed class CustomTimeEvent<REQUEST_KEY : Any> {
 
-        data class ProjectAdded(val projectKey: ProjectKey.Shared, val userKeys: Set<UserKey>) : CustomTimeEvent()
+        data class ProjectAdded<REQUEST_KEY : Any>(
+                val requestKey: REQUEST_KEY,
+                val userKeys: Set<UserKey>,
+        ) : CustomTimeEvent<REQUEST_KEY>()
 
-        data class ProjectsRemoved(val projectKeys: Set<ProjectKey.Shared>) : CustomTimeEvent()
+        data class ProjectsRemoved<REQUEST_KEY : Any>(
+                val requestKeys: Set<REQUEST_KEY>,
+        ) : CustomTimeEvent<REQUEST_KEY>()
     }
 
-    private data class CustomTimeAggregate(val projectMap: Map<ProjectKey.Shared, Set<UserKey>> = mapOf()) {
+    private data class CustomTimeAggregate<REQUEST_KEY : Any>(
+            val requestMap: Map<REQUEST_KEY, Set<UserKey>> = mapOf(),
+    ) {
 
-        val output = projectMap.values
+        val output = requestMap.values
                 .flatten()
                 .toSet()
     }

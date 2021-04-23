@@ -1,7 +1,7 @@
 package com.krystianwsul.checkme.firebase.loaders
 
 import com.krystianwsul.checkme.firebase.ProjectUserCustomTimeProviderSource
-import com.krystianwsul.checkme.firebase.roottask.RootTaskCoordinator
+import com.krystianwsul.checkme.firebase.roottask.ProjectToRootTaskCoordinator
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.checkme.utils.cacheImmediate
 import com.krystianwsul.checkme.utils.mapNotNull
@@ -46,7 +46,7 @@ interface ProjectLoader<T : ProjectType, U : Parsable> { // U: Project JSON type
             override val projectManager: ProjectProvider.ProjectManager<T, U>,
             initialProjectRecord: ProjectRecord<T>?,
             private val userCustomTimeProviderSource: ProjectUserCustomTimeProviderSource,
-            private val rootTaskCoordinator: RootTaskCoordinator,
+            private val projectToRootTaskCoordinator: ProjectToRootTaskCoordinator,
     ) : ProjectLoader<T, U> {
 
         private fun <T> Observable<T>.replayImmediate() = replay().apply { domainDisposable += connect() }!!
@@ -73,7 +73,7 @@ interface ProjectLoader<T : ProjectType, U : Parsable> { // U: Project JSON type
                              */
 
                             Singles.zip(
-                                    rootTaskCoordinator.getRootTasks(projectRecord).toSingleDefault(Unit),
+                                    projectToRootTaskCoordinator.getRootTasks(projectRecord).toSingleDefault(Unit),
                                     userCustomTimeProviderSource.getUserCustomTimeProvider(projectRecord),
                             ).map { (_, userCustomTimeProvider) ->
                                 ProjectRecordData(projectChangeType, projectRecord, userCustomTimeProvider)

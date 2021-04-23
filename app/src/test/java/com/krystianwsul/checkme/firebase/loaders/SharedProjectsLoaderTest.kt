@@ -4,7 +4,7 @@ import com.jakewharton.rxrelay3.PublishRelay
 import com.krystianwsul.checkme.domainmodel.DomainFactoryRule
 import com.krystianwsul.checkme.firebase.TestProjectUserCustomTimeProviderSource
 import com.krystianwsul.checkme.firebase.managers.AndroidSharedProjectManager
-import com.krystianwsul.checkme.firebase.roottask.RootTaskCoordinator
+import com.krystianwsul.checkme.firebase.roottask.ProjectToRootTaskCoordinator
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.common.firebase.ChangeWrapper
 import com.krystianwsul.common.firebase.DatabaseCallback
@@ -93,7 +93,7 @@ class SharedProjectsLoaderTest {
                 sharedProjectsProvider,
                 TestProjectUserCustomTimeProviderSource(),
                 mockk(relaxed = true),
-                object : RootTaskCoordinator {
+                object : ProjectToRootTaskCoordinator {
 
                     override fun getRootTasks(projectRecord: ProjectRecord<*>) = Completable.complete() // todo task tests
                 },

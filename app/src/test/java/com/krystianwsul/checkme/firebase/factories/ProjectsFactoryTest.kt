@@ -7,7 +7,7 @@ import com.krystianwsul.checkme.firebase.checkRemote
 import com.krystianwsul.checkme.firebase.loaders.*
 import com.krystianwsul.checkme.firebase.managers.AndroidPrivateProjectManager
 import com.krystianwsul.checkme.firebase.managers.AndroidSharedProjectManager
-import com.krystianwsul.checkme.firebase.roottask.RootTaskCoordinator
+import com.krystianwsul.checkme.firebase.roottask.ProjectToRootTaskCoordinator
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.common.ErrorLogger
 import com.krystianwsul.common.domain.DeviceDbInfo
@@ -90,7 +90,7 @@ class ProjectsFactoryTest {
                 privateProjectManager,
                 null,
                 TestProjectUserCustomTimeProviderSource(),
-                object : RootTaskCoordinator {
+                object : ProjectToRootTaskCoordinator {
 
                     override fun getRootTasks(projectRecord: ProjectRecord<*>) = Completable.complete() // todo task tests
                 },
@@ -111,7 +111,7 @@ class ProjectsFactoryTest {
                 factoryProvider.sharedProjectsProvider,
                 TestProjectUserCustomTimeProviderSource(),
                 mockk(relaxed = true),
-                object : RootTaskCoordinator {
+                object : ProjectToRootTaskCoordinator {
 
                     override fun getRootTasks(projectRecord: ProjectRecord<*>) = Completable.complete() // todo task tests
                 },

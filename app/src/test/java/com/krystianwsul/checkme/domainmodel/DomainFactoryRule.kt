@@ -14,7 +14,7 @@ import com.krystianwsul.checkme.firebase.loaders.ProjectLoader
 import com.krystianwsul.checkme.firebase.loaders.SharedProjectsLoader
 import com.krystianwsul.checkme.firebase.loaders.mockBase64
 import com.krystianwsul.checkme.firebase.managers.AndroidSharedProjectManager
-import com.krystianwsul.checkme.firebase.roottask.RootTaskCoordinator
+import com.krystianwsul.checkme.firebase.roottask.ProjectToRootTaskCoordinator
 import com.krystianwsul.common.ErrorLogger
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.DeviceInfo
@@ -195,7 +195,7 @@ class DomainFactoryRule : TestRule {
                 },
                 TestProjectUserCustomTimeProviderSource(),
                 mockk(relaxed = true),
-                object : RootTaskCoordinator {
+                object : ProjectToRootTaskCoordinator {
 
                     override fun getRootTasks(projectRecord: ProjectRecord<*>) = Completable.complete() // todo task tests
                 },

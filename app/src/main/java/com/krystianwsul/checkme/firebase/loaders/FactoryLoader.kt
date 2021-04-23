@@ -119,7 +119,7 @@ class FactoryLoader(
                             rootTaskUserCustomTimeProviderSource,
                     )
 
-                    val rootTaskCoordinator = RootTaskCoordinator.Impl(rootTaskKeySource)
+                    val rootTaskCoordinator = ProjectToRootTaskCoordinator.Impl(rootTaskKeySource)
 
                     val rootTaskFactory = RootTaskFactory(
                             rootTaskLoader,

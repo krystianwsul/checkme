@@ -16,7 +16,7 @@ class RootTaskFactory(
         private val rootTaskLoader: RootTaskLoader,
         private val rootTaskUserCustomTimeProviderSource: RootTaskUserCustomTimeProviderSource,
         private val userKeyStore: UserKeyStore,
-        private val rootTaskCoordinator: RootTaskCoordinator,
+        private val projectToRootTaskCoordinator: ProjectToRootTaskCoordinator,
         private val domainDisposable: CompositeDisposable,
         private val rootTaskKeySource: RootTaskKeySource,
 ) : RootTask.Parent {

@@ -72,6 +72,16 @@ class RootTaskKeySource(private val domainDisposable: CompositeDisposable) {
         projectEvents.accept(ProjectEvent.ProjectsRemoved(projectKeys))
     }
 
+    fun onRootTaskAddedOrUpdated(parentRootTaskKey: TaskKey.Root, childRootTaskKeys: Set<TaskKey.Root>) {
+        // this covers:
+        // private project: remote initial load, remote changes to tasks
+        // shared project: both remote and local initial load, remote changes to tasks
+
+        // this contributes to final observable by adding keys, or updating keys for given project
+
+        // todo task fetch projectEvents.accept(ProjectEvent.ProjectAddedOrUpdated(projectKey, rootTaskKeys))
+    }
+
     /**
      * todo task fetch add callbacks for recursive tasks, similar to projects.
      */

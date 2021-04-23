@@ -11,10 +11,7 @@ import com.krystianwsul.checkme.firebase.factories.ProjectsFactory
 import com.krystianwsul.checkme.firebase.managers.AndroidPrivateProjectManager
 import com.krystianwsul.checkme.firebase.managers.AndroidSharedProjectManager
 import com.krystianwsul.checkme.firebase.managers.RootTaskManager
-import com.krystianwsul.checkme.firebase.roottask.RootTaskCoordinator
-import com.krystianwsul.checkme.firebase.roottask.RootTaskKeySource
-import com.krystianwsul.checkme.firebase.roottask.RootTaskLoader
-import com.krystianwsul.checkme.firebase.roottask.RootTaskUserCustomTimeProviderSource
+import com.krystianwsul.checkme.firebase.roottask.*
 import com.krystianwsul.checkme.utils.cacheImmediate
 import com.krystianwsul.checkme.utils.mapNotNull
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
@@ -124,6 +121,15 @@ class FactoryLoader(
 
                     val rootTaskCoordinator = RootTaskCoordinator.Impl(rootTaskKeySource)
 
+                    val rootTaskFactory = RootTaskFactory(
+                            rootTaskLoader,
+                            rootTaskUserCustomTimeProviderSource,
+                            userKeyStore,
+                            rootTaskCoordinator,
+                            domainDisposable,
+                            rootTaskKeySource,
+                    )
+
                     val privateProjectLoader = ProjectLoader.Impl(
                             privateProjectDatabaseRx.observable,
                             domainDisposable,
@@ -194,6 +200,7 @@ class FactoryLoader(
                             projectsFactorySingle.flatMapObservable { it.changeTypes },
                             friendsFactorySingle.flatMapObservable { it.changeTypes },
                             userFactoryChangeTypes,
+                            rootTaskFactory.changeTypes,
                     ).merge()
 
                     // ignore all change events that come in before the DomainFactory is initialized

@@ -8,7 +8,6 @@ import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.checkme.utils.mapNotNull
 import com.krystianwsul.common.firebase.json.tasks.RootTaskJson
 import com.krystianwsul.common.firebase.records.task.RootTaskRecord
-import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
 import io.reactivex.rxjava3.core.Observable
@@ -42,10 +41,10 @@ class RootTaskLoader(
                 .map { (taskKey, databaseRx) ->
                     databaseRx.observable
                             .mapNotNull { rootTaskManager.set(it) }
-                            .switchMapSingle { rootTaskRecord ->
+                            .map { rootTaskRecord ->
                                 val projectKey = mapChanges.original.getValue(taskKey)
 
-                                getAddChangeEventSingle(rootTaskRecord, projectKey)
+                                AddChangeEvent(rootTaskRecord, projectKey)
                             }
                 }.merge()
     }.replayImmediate()
@@ -57,21 +56,12 @@ class RootTaskLoader(
      * simultaneously.  Move it into the RootTaskFactory if need be, I'm not attached to this part.
      */
 
-    private fun getAddChangeEventSingle(rootTaskRecord: RootTaskRecord, projectKey: ProjectKey<*>) =
-            rootTaskUserCustomTimeProviderSource.getUserCustomTimeProvider(rootTaskRecord).map {
-                AddChangeEvent(rootTaskRecord, projectKey, it)
-            }
-
     val removeEvents: Observable<RemoveEvent> = databaseRxObservable.map { it.removedEntries }
             .filter { it.isNotEmpty() }
             .map { RemoveEvent(it.keys) }
             .replayImmediate()
 
-    data class AddChangeEvent(
-            val rootTaskRecord: RootTaskRecord,
-            val projectKey: ProjectKey<*>,
-            val userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
-    )
+    data class AddChangeEvent(val rootTaskRecord: RootTaskRecord, val projectKey: ProjectKey<*>)
 
     data class RemoveEvent(val taskKeys: Set<TaskKey.Root>)
 

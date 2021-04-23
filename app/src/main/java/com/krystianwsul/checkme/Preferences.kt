@@ -33,7 +33,6 @@ object Preferences {
     private const val KEY_TEMPORARY_NOTIFICATION_LOG = "temporaryNotificationLog"
     private const val KEY_MAIN_TABS_LOG = "mainTabsLog"
     private const val TOKEN_KEY = "token"
-    private const val KEY_SAVE_LOG = "saveLog"
     private const val KEY_SHOW_NOTIFICATIONS = "showNotifications"
     private const val KEY_NOTIFICATION_LEVEL = "notificationLevel"
     private const val KEY_ADD_DEFAULT_REMINDER = "addDefaultReminder"
@@ -86,8 +85,6 @@ object Preferences {
             BehaviorRelay.createDefault(NullableWrapper(sharedPreferences.getString(TOKEN_KEY, null)))!!
 
     val mainTabsLog = Logger(KEY_MAIN_TABS_LOG, 10)
-
-    val saveLog = Logger(KEY_SAVE_LOG)
 
     val versionCode get() = sharedPreferences.getInt(KEY_VERSION_CODE, -1).takeIf { it != -1 }
 

@@ -114,9 +114,6 @@ class DebugFragment : AbstractFragment() {
                         append("\n\n")
                         append(Preferences.mainTabsLog.log)
 
-                        append("\n\n")
-                        append(Preferences.saveLog.log)
-
                         append("\n\ntoday: ")
                         append(loadTime)
                         append(" ms")

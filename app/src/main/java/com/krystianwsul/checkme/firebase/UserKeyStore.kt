@@ -21,8 +21,8 @@ class UserKeyStore(
         domainDisposable: CompositeDisposable,
 ) {
 
-    private val projectUserRequestMerger = UserRequestMerger<ProjectKey.Shared>()
-    private val rootTaskUserRequestMerger = UserRequestMerger<TaskKey.Root>()
+    private val projectRequestKeyStore = RequestKeyStore<ProjectKey.Shared, UserKey>()
+    private val rootTaskRequestKeyStore = RequestKeyStore<TaskKey.Root, UserKey>()
 
     private val addFriendEvents = PublishRelay.create<FriendEvent.AddFriend>()
 
@@ -58,8 +58,8 @@ class UserKeyStore(
                 .map { FriendOrCustomTimeEvent.Friend(it) }
 
         val mergedRequests = listOf(
-                projectUserRequestMerger,
-                rootTaskUserRequestMerger,
+                projectRequestKeyStore,
+                rootTaskRequestKeyStore,
         ).map { it.requestedUserKeysObservable }
                 .combineLatest { FriendOrCustomTimeEvent.CustomTimes(it.flatten().toSet()) }
                 .skip(1) // first event is just the initial empty sets from both
@@ -104,25 +104,25 @@ class UserKeyStore(
     fun requestCustomTimeUsers(projectKey: ProjectKey.Shared, userKeys: Set<UserKey>) {
         checkNotNull(loadUserDataObservable.tryGetCurrentValue())
 
-        projectUserRequestMerger.requestCustomTimeUsers(projectKey, userKeys)
+        projectRequestKeyStore.requestCustomTimeUsers(projectKey, userKeys)
     }
 
     fun onProjectsRemoved(projectKeys: Set<ProjectKey.Shared>) {
         checkNotNull(loadUserDataObservable.tryGetCurrentValue())
 
-        projectUserRequestMerger.onRequestsRemoved(projectKeys)
+        projectRequestKeyStore.onRequestsRemoved(projectKeys)
     }
 
     fun requestCustomTimeUsers(rootTaskKey: TaskKey.Root, userKeys: Set<UserKey>) {
         checkNotNull(loadUserDataObservable.tryGetCurrentValue())
 
-        rootTaskUserRequestMerger.requestCustomTimeUsers(rootTaskKey, userKeys)
+        rootTaskRequestKeyStore.requestCustomTimeUsers(rootTaskKey, userKeys)
     }
 
     fun onTasksRemoved(rootTaskKeys: Set<TaskKey.Root>) { // todo task fetch
         checkNotNull(loadUserDataObservable.tryGetCurrentValue())
 
-        rootTaskUserRequestMerger.onRequestsRemoved(rootTaskKeys)
+        rootTaskRequestKeyStore.onRequestsRemoved(rootTaskKeys)
     }
 
     sealed class LoadUserData {

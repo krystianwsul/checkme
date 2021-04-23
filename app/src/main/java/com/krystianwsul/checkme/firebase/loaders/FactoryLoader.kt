@@ -130,7 +130,8 @@ class FactoryLoader(
                             rootTaskKeySource,
                     )
 
-                    val projectToRootTaskCoordinator = ProjectToRootTaskCoordinator.Impl(rootTaskKeySource)
+                    val projectToRootTaskCoordinator =
+                            ProjectToRootTaskCoordinator.Impl(rootTaskKeySource, rootTaskFactory)
 
                     val privateProjectLoader = ProjectLoader.Impl(
                             privateProjectDatabaseRx.observable,

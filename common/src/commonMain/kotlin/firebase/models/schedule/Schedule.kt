@@ -8,6 +8,7 @@ import com.krystianwsul.common.firebase.records.schedule.ScheduleRecord
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.ScheduleType
 import com.krystianwsul.common.utils.UserKey
+import com.krystianwsul.common.utils.invalidatableLazy
 import com.krystianwsul.common.utils.invalidatableLazyCallbacks
 
 abstract class Schedule(val topLevelTask: Task) : TaskParentEntry {

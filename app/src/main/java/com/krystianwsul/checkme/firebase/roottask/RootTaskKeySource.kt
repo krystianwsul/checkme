@@ -11,7 +11,7 @@ class RootTaskKeySource(private val domainDisposable: CompositeDisposable) {
 
     private val projectEvents = PublishRelay.create<ProjectEvent>()
 
-    val rootTaskKeysObservable: Observable<Set<TaskKey.Root>> =
+    val rootTaskKeysObservable: Observable<Map<TaskKey.Root, ProjectKey<*>>> =
             projectEvents.scan(ProjectAggregate()) { aggregate, projectEvent ->
                 when (projectEvent) {
                     is ProjectEvent.ProjectAddedOrUpdated -> {
@@ -99,9 +99,9 @@ class RootTaskKeySource(private val domainDisposable: CompositeDisposable) {
 
     private data class ProjectAggregate(val projectMap: Map<ProjectKey<*>, Set<TaskKey.Root>> = mapOf()) {
 
-        val output = projectMap.values
-                .flatten()
-                .toSet()
+        val output = projectMap.flatMap { (projectKey, taskKeys) ->
+            taskKeys.map { taskKey -> taskKey to projectKey }
+        }.toMap()
     }
 
     data class TaskData(val projectKey: ProjectKey<*>, val taskKey: TaskKey.Root)

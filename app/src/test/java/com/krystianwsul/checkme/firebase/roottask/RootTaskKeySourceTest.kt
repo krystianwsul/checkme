@@ -14,7 +14,6 @@ class RootTaskKeySourceTest {
 
         private val projectKey1 = ProjectKey.Private("projectKey1")
         private val projectKey2 = ProjectKey.Private("projectKey2")
-        private val projectKey3 = ProjectKey.Private("projectKey3")
 
         private val rootTaskKey1 = TaskKey.Root("rootTaskKey1")
         private val rootTaskKey2 = TaskKey.Root("rootTaskKey2")
@@ -26,7 +25,7 @@ class RootTaskKeySourceTest {
     private val domainDisposable = CompositeDisposable()
 
     private lateinit var rootTaskKeySource: RootTaskKeySource
-    private lateinit var testObserver: TestObserver<Set<TaskKey.Root>>
+    private lateinit var testObserver: TestObserver<Map<TaskKey.Root, ProjectKey<*>>>
 
     @Before
     fun before() {
@@ -47,31 +46,47 @@ class RootTaskKeySourceTest {
     @Test
     fun testAddProject() {
         rootTaskKeySource.onProjectAddedOrUpdated(projectKey1, setOf(rootTaskKey1, rootTaskKey2))
-        testObserver.assertValue(setOf(rootTaskKey1, rootTaskKey2))
+        testObserver.assertValue(mapOf(rootTaskKey1 to projectKey1, rootTaskKey2 to projectKey1))
     }
 
     @Test
-    fun testAddOverlappingProjects() {
+    fun testAddSecondProject() {
         rootTaskKeySource.onProjectAddedOrUpdated(projectKey1, setOf(rootTaskKey1, rootTaskKey2))
-        testObserver.assertValue(setOf(rootTaskKey1, rootTaskKey2))
+        testObserver.assertValue(mapOf(rootTaskKey1 to projectKey1, rootTaskKey2 to projectKey1))
 
-        rootTaskKeySource.onProjectAddedOrUpdated(projectKey2, setOf(rootTaskKey2, rootTaskKey3))
-        testObserver.assertValueAt(1, setOf(rootTaskKey1, rootTaskKey2, rootTaskKey3))
+        rootTaskKeySource.onProjectAddedOrUpdated(projectKey2, setOf(rootTaskKey3, rootTaskKey4))
+        testObserver.assertValueAt(
+                1,
+                mapOf(
+                        rootTaskKey1 to projectKey1,
+                        rootTaskKey2 to projectKey1,
+                        rootTaskKey3 to projectKey2,
+                        rootTaskKey4 to projectKey2,
+                ),
+        )
     }
 
     @Test
     fun testRemoveProject() {
-        testAddOverlappingProjects()
+        testAddSecondProject()
 
         rootTaskKeySource.onProjectsRemoved(setOf(projectKey2))
-        testObserver.assertValueAt(2, setOf(rootTaskKey1, rootTaskKey2))
+        testObserver.assertValueAt(2, mapOf(rootTaskKey1 to projectKey1, rootTaskKey2 to projectKey1))
     }
 
     @Test
     fun tesUpdateProject() {
-        testAddOverlappingProjects()
+        testAddSecondProject()
 
-        rootTaskKeySource.onProjectAddedOrUpdated(projectKey2, setOf(rootTaskKey3, rootTaskKey4))
-        testObserver.assertValueAt(2, setOf(rootTaskKey1, rootTaskKey2, rootTaskKey3, rootTaskKey4))
+        rootTaskKeySource.onProjectAddedOrUpdated(projectKey2, setOf(rootTaskKey4, rootTaskKey5))
+        testObserver.assertValueAt(
+                2,
+                mapOf(
+                        rootTaskKey1 to projectKey1,
+                        rootTaskKey2 to projectKey1,
+                        rootTaskKey4 to projectKey2,
+                        rootTaskKey5 to projectKey2,
+                ),
+        )
     }
 }

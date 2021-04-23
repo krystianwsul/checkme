@@ -1,7 +1,9 @@
 package com.krystianwsul.checkme.firebase.roottask
 
 import com.krystianwsul.common.firebase.records.task.RootTaskRecord
+import com.krystianwsul.common.utils.TaskKey
 import io.reactivex.rxjava3.core.Completable
+import io.reactivex.rxjava3.core.Single
 
 interface RootTaskToRootTaskCoordinator {
 
@@ -10,10 +12,10 @@ interface RootTaskToRootTaskCoordinator {
     class Impl(private val rootTaskKeySource: RootTaskKeySource) : RootTaskToRootTaskCoordinator {
 
         override fun getRootTasks(rootTaskRecord: RootTaskRecord): Completable {
-            rootTaskKeySource.onRootTaskAddedOrUpdated(
-                    rootTaskRecord.taskKey,
-                    rootTaskRecord.rootTaskParentDelegate.rootTaskKeys,
-            )
+            val allRelatedTasks: Set<TaskKey.Root> = rootTaskRecord.rootTaskParentDelegate.rootTaskKeys +
+                    rootTaskRecord.taskHierarchyRecords.map { TaskKey.Root(it.value.parentTaskId) }
+
+            rootTaskKeySource.onRootTaskAddedOrUpdated(rootTaskRecord.taskKey, allRelatedTasks)
 
             /**
              * todo task fetch return after tasks are loaded.
@@ -34,5 +36,22 @@ interface RootTaskToRootTaskCoordinator {
 
             return Completable.complete()
         }
+
+        /** todo task fetch just for shits and giggles, let's try to construct an algorithm that can determine if all
+         * records have been loaded, based on a single function that gets an observable for a single record.
+         *
+         */
+
+        lateinit var getTaskRecord: (taskKey: TaskKey.Root) -> Single<RootTaskRecord>
+        lateinit var rootTaskUserCustomTimeCoordinator: RootTaskUserCustomTimeProviderSource
+
+        /**
+         * Here's a rough idea of what I need.
+         *
+         * 1. We start with a single task key.
+         * 2. Fetch its task record.
+         * 3. From that, construct a list of singles for task records, plus a list of custom times we're waiting on.
+         * 4. Subscribe to everything.  Every time a single returns, expand the list in #3 with the new data.
+         */
     }
 }

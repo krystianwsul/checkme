@@ -2,6 +2,7 @@ package com.krystianwsul.common.firebase.json.tasks
 
 import com.krystianwsul.common.firebase.json.InstanceJson
 import com.krystianwsul.common.firebase.json.NoScheduleOrParentJson
+import com.krystianwsul.common.firebase.json.Parsable
 import com.krystianwsul.common.firebase.json.schedule.RootScheduleWrapper
 import com.krystianwsul.common.firebase.json.taskhierarchies.NestedTaskHierarchyJson
 import kotlinx.serialization.Serializable
@@ -21,4 +22,4 @@ data class RootTaskJson @JvmOverloads constructor(
         override var noScheduleOrParent: Map<String, NoScheduleOrParentJson> = mutableMapOf(),
         override var ordinal: Double? = null,
         override var taskHierarchies: Map<String, NestedTaskHierarchyJson> = mapOf(),
-) : TaskJson
+) : TaskJson, Parsable

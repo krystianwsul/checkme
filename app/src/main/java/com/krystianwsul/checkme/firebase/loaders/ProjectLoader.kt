@@ -1,6 +1,6 @@
 package com.krystianwsul.checkme.firebase.loaders
 
-import com.krystianwsul.checkme.firebase.UserCustomTimeProviderSource
+import com.krystianwsul.checkme.firebase.ProjectUserCustomTimeProviderSource
 import com.krystianwsul.checkme.firebase.roottask.RootTaskCoordinator
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.checkme.utils.cacheImmediate
@@ -45,7 +45,7 @@ interface ProjectLoader<T : ProjectType, U : Parsable> { // U: Project JSON type
             private val domainDisposable: CompositeDisposable,
             override val projectManager: ProjectProvider.ProjectManager<T, U>,
             initialProjectRecord: ProjectRecord<T>?,
-            private val userCustomTimeProviderSource: UserCustomTimeProviderSource,
+            private val userCustomTimeProviderSource: ProjectUserCustomTimeProviderSource,
             private val rootTaskCoordinator: RootTaskCoordinator,
     ) : ProjectLoader<T, U> {
 

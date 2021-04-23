@@ -6,7 +6,7 @@ import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.CustomTimeKey
 import io.reactivex.rxjava3.core.Single
 
-class TestUserCustomTimeProviderSource : UserCustomTimeProviderSource {
+class TestProjectUserCustomTimeProviderSource : ProjectUserCustomTimeProviderSource {
 
     override fun getUserCustomTimeProvider(projectRecord: ProjectRecord<*>): Single<JsonTime.UserCustomTimeProvider> {
         return Single.just(

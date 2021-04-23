@@ -4,6 +4,7 @@ import com.krystianwsul.checkme.firebase.factories.MyUserFactory
 import com.krystianwsul.common.firebase.records.project.PrivateProjectRecord
 import com.krystianwsul.common.firebase.records.project.ProjectRecord
 import com.krystianwsul.common.firebase.records.project.SharedProjectRecord
+import com.krystianwsul.common.firebase.records.task.TaskRecord
 import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.CustomTimeKey
@@ -11,7 +12,36 @@ import com.krystianwsul.common.utils.UserKey
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.kotlin.Singles
 
-interface UserCustomTimeProviderSource {
+interface ProjectUserCustomTimeProviderSource {
+
+    companion object {
+
+        fun getUserCustomTimeKeys(taskRecord: TaskRecord, expectProjectKeys: Boolean): List<CustomTimeKey.User> {
+            val scheduleCustomTimeKeys = listOf(
+                    taskRecord.singleScheduleRecords,
+                    taskRecord.weeklyScheduleRecords,
+                    taskRecord.monthlyDayScheduleRecords,
+                    taskRecord.monthlyWeekScheduleRecords,
+                    taskRecord.yearlyScheduleRecords,
+            ).flatMap { it.values }.map { it.customTimeKey }
+
+            val instanceCustomTimeKeys: List<CustomTimeKey?> = taskRecord.instanceRecords
+                    .values
+                    .flatMap {
+                        listOf(
+                                it.scheduleKey.scheduleTimePair.customTimeKey,
+                                it.instanceJsonTime?.getCustomTimeKey(taskRecord.projectCustomTimeIdAndKeyProvider)
+                        )
+                    }
+
+            val customTimeKeys = listOf(scheduleCustomTimeKeys, instanceCustomTimeKeys).flatten()
+
+            return if (expectProjectKeys)
+                customTimeKeys.filterIsInstance<CustomTimeKey.User>()
+            else
+                customTimeKeys.map { it as CustomTimeKey.User }
+        }
+    }
 
     // emit only remote changes
     fun getUserCustomTimeProvider(projectRecord: ProjectRecord<*>): Single<JsonTime.UserCustomTimeProvider>
@@ -20,7 +50,7 @@ interface UserCustomTimeProviderSource {
             private val myUserKey: UserKey,
             private val myUserFactorySingle: Single<MyUserFactory>,
             private val customTimeCoordinator: CustomTimeCoordinator,
-    ) : UserCustomTimeProviderSource {
+    ) : ProjectUserCustomTimeProviderSource {
 
         override fun getUserCustomTimeProvider(
                 projectRecord: ProjectRecord<*>,
@@ -69,29 +99,7 @@ interface UserCustomTimeProviderSource {
         private fun getUserCustomTimeKeys(projectRecord: ProjectRecord<*>): Set<CustomTimeKey.User> {
             return projectRecord.taskRecords
                     .values
-                    .flatMap {
-                        val scheduleCustomTimeKeys = listOf(
-                                it.singleScheduleRecords,
-                                it.weeklyScheduleRecords,
-                                it.monthlyDayScheduleRecords,
-                                it.monthlyWeekScheduleRecords,
-                                it.yearlyScheduleRecords,
-                        ).flatMap { it.values }.map { it.customTimeKey }
-
-                        val instanceCustomTimeKeys: List<CustomTimeKey?> = it.instanceRecords
-                                .values
-                                .flatMap {
-                                    listOf(
-                                            it.scheduleKey.scheduleTimePair.customTimeKey,
-                                            it.instanceJsonTime?.getCustomTimeKey(projectRecord)
-                                    )
-                                }
-
-                        listOf(
-                                scheduleCustomTimeKeys,
-                                instanceCustomTimeKeys,
-                        ).flatten().filterIsInstance<CustomTimeKey.User>()
-                    }
+                    .flatMap { getUserCustomTimeKeys(it, true) }
                     .toSet()
         }
     }

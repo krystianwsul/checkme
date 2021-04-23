@@ -7,6 +7,7 @@ import com.krystianwsul.common.firebase.UserLoadReason
 import com.krystianwsul.common.firebase.json.UserWrapper
 import com.krystianwsul.common.firebase.records.RootUserRecord
 import com.krystianwsul.common.utils.ProjectKey
+import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.common.utils.UserKey
 import com.krystianwsul.treeadapter.tryGetCurrentValue
 import io.reactivex.rxjava3.core.Observable
@@ -118,6 +119,12 @@ class UserKeyStore(
         checkNotNull(loadUserDataObservable.tryGetCurrentValue())
 
         customTimeEvents.accept(CustomTimeEvent.ProjectAdded(projectKey, userKeys))
+    }
+
+    fun requestCustomTimeUsers(rootTaskKey: TaskKey.Root, userKeys: Set<UserKey>) {
+        checkNotNull(loadUserDataObservable.tryGetCurrentValue())
+
+// todo task fetch        customTimeEvents.accept(CustomTimeEvent.ProjectAdded(projectKey, userKeys))
     }
 
     fun onProjectsRemoved(projectKeys: Set<ProjectKey.Shared>) {

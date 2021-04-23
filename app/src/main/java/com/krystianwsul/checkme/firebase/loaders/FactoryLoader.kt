@@ -3,7 +3,7 @@ package com.krystianwsul.checkme.firebase.loaders
 import com.krystianwsul.checkme.domainmodel.extensions.updateDeviceDbInfo
 import com.krystianwsul.checkme.domainmodel.observeOnDomain
 import com.krystianwsul.checkme.firebase.CustomTimeCoordinator
-import com.krystianwsul.checkme.firebase.UserCustomTimeProviderSource
+import com.krystianwsul.checkme.firebase.ProjectUserCustomTimeProviderSource
 import com.krystianwsul.checkme.firebase.UserKeyStore
 import com.krystianwsul.checkme.firebase.factories.FriendsFactory
 import com.krystianwsul.checkme.firebase.factories.MyUserFactory
@@ -14,6 +14,7 @@ import com.krystianwsul.checkme.firebase.managers.RootTaskManager
 import com.krystianwsul.checkme.firebase.roottask.RootTaskCoordinator
 import com.krystianwsul.checkme.firebase.roottask.RootTaskKeySource
 import com.krystianwsul.checkme.firebase.roottask.RootTaskLoader
+import com.krystianwsul.checkme.firebase.roottask.RootTaskUserCustomTimeProviderSource
 import com.krystianwsul.checkme.utils.cacheImmediate
 import com.krystianwsul.checkme.utils.mapNotNull
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
@@ -95,21 +96,30 @@ class FactoryLoader(
                             }
                             .cacheImmediate()
 
-                    val userCustomTimeProviderSource = UserCustomTimeProviderSource.Impl(
+                    val customTimeCoordinator = CustomTimeCoordinator(userInfo.key, friendsLoader, friendsFactorySingle)
+
+                    val projectUserCustomTimeProviderSource = ProjectUserCustomTimeProviderSource.Impl(
                             userInfo.key,
                             userFactorySingle,
-                            CustomTimeCoordinator(userInfo.key, friendsLoader, friendsFactorySingle),
+                            customTimeCoordinator,
                     )
 
                     val rootTaskKeySource = RootTaskKeySource(domainDisposable)
 
                     val rootTaskManager = RootTaskManager(factoryProvider.database)
 
+                    val rootTaskUserCustomTimeProviderSource = RootTaskUserCustomTimeProviderSource.Impl(
+                            userInfo.key,
+                            userFactorySingle,
+                            customTimeCoordinator,
+                    )
+
                     val rootTaskLoader = RootTaskLoader(
                             rootTaskKeySource.rootTaskKeysObservable,
                             factoryProvider.database,
                             domainDisposable,
                             rootTaskManager,
+                            rootTaskUserCustomTimeProviderSource,
                     )
 
                     val rootTaskCoordinator = RootTaskCoordinator.Impl(rootTaskKeySource)
@@ -119,7 +129,7 @@ class FactoryLoader(
                             domainDisposable,
                             privateProjectManager,
                             null,
-                            userCustomTimeProviderSource,
+                            projectUserCustomTimeProviderSource,
                             rootTaskCoordinator,
                     )
 
@@ -132,7 +142,7 @@ class FactoryLoader(
                             sharedProjectManager,
                             domainDisposable,
                             factoryProvider.sharedProjectsProvider,
-                            userCustomTimeProviderSource,
+                            projectUserCustomTimeProviderSource,
                             userKeyStore,
                             rootTaskCoordinator,
                             rootTaskKeySource,

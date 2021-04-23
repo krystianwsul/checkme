@@ -8,6 +8,7 @@ import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.checkme.utils.mapNotNull
 import com.krystianwsul.common.firebase.json.tasks.RootTaskJson
 import com.krystianwsul.common.firebase.records.task.RootTaskRecord
+import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
 import io.reactivex.rxjava3.core.Observable
@@ -20,6 +21,7 @@ class RootTaskLoader(
         private val provider: Provider,
         private val domainDisposable: CompositeDisposable,
         private val rootTaskManager: RootTaskManager,
+        private val rootTaskUserCustomTimeProviderSource: RootTaskUserCustomTimeProviderSource,
 ) {
 
     private fun <T> Observable<T>.replayImmediate() = replay().apply { domainDisposable += connect() }!!
@@ -40,16 +42,29 @@ class RootTaskLoader(
                 .map { (taskKey, databaseRx) ->
                     databaseRx.observable
                             .mapNotNull { rootTaskManager.set(it) }
-                            .map { AddChangeEvent(it, mapChanges.original.getValue(taskKey)) }
+                            .switchMapSingle { rootTaskRecord ->
+                                val projectKey = mapChanges.original.getValue(taskKey)
+
+                                getAddChangeEventSingle(rootTaskRecord, projectKey)
+                            }
                 }.merge()
     }.replayImmediate()
+
+    private fun getAddChangeEventSingle(rootTaskRecord: RootTaskRecord, projectKey: ProjectKey<*>) =
+            rootTaskUserCustomTimeProviderSource.getUserCustomTimeProvider(rootTaskRecord).map {
+                AddChangeEvent(rootTaskRecord, projectKey, it)
+            }
 
     val removeEvents: Observable<RemoveEvent> = databaseRxObservable.map { it.removedEntries }
             .filter { it.isNotEmpty() }
             .map { RemoveEvent(it.keys) }
             .replayImmediate()
 
-    data class AddChangeEvent(val rootTaskRecord: RootTaskRecord, val projectKey: ProjectKey<*>)
+    data class AddChangeEvent(
+            val rootTaskRecord: RootTaskRecord,
+            val projectKey: ProjectKey<*>,
+            val userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
+    )
 
     data class RemoveEvent(val taskKeys: Set<TaskKey.Root>)
 

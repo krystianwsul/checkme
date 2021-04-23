@@ -3,7 +3,7 @@ package com.krystianwsul.checkme.firebase.loaders
 import android.util.Base64
 import com.jakewharton.rxrelay3.BehaviorRelay
 import com.krystianwsul.checkme.domainmodel.DomainFactoryRule
-import com.krystianwsul.checkme.firebase.TestUserCustomTimeProviderSource
+import com.krystianwsul.checkme.firebase.TestProjectUserCustomTimeProviderSource
 import com.krystianwsul.checkme.firebase.managers.AndroidPrivateProjectManager
 import com.krystianwsul.checkme.firebase.roottask.RootTaskCoordinator
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
@@ -80,7 +80,7 @@ class ProjectLoaderTest {
                 compositeDisposable,
                 projectManager,
                 null,
-                TestUserCustomTimeProviderSource(),
+                TestProjectUserCustomTimeProviderSource(),
                 object : RootTaskCoordinator {
 
                     override fun getRootTasks(projectRecord: ProjectRecord<*>) = Completable.complete() // todo task tests

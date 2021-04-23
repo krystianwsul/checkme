@@ -2,7 +2,7 @@ package com.krystianwsul.checkme.firebase.loaders
 
 import com.jakewharton.rxrelay3.PublishRelay
 import com.krystianwsul.checkme.domainmodel.DomainFactoryRule
-import com.krystianwsul.checkme.firebase.TestUserCustomTimeProviderSource
+import com.krystianwsul.checkme.firebase.TestProjectUserCustomTimeProviderSource
 import com.krystianwsul.checkme.firebase.managers.AndroidSharedProjectManager
 import com.krystianwsul.checkme.firebase.roottask.RootTaskCoordinator
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
@@ -91,7 +91,7 @@ class SharedProjectsLoaderTest {
                 projectManager,
                 compositeDisposable,
                 sharedProjectsProvider,
-                TestUserCustomTimeProviderSource(),
+                TestProjectUserCustomTimeProviderSource(),
                 mockk(relaxed = true),
                 object : RootTaskCoordinator {
 

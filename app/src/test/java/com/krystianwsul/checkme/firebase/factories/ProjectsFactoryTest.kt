@@ -2,7 +2,7 @@ package com.krystianwsul.checkme.firebase.factories
 
 import com.jakewharton.rxrelay3.PublishRelay
 import com.krystianwsul.checkme.domainmodel.DomainFactoryRule
-import com.krystianwsul.checkme.firebase.TestUserCustomTimeProviderSource
+import com.krystianwsul.checkme.firebase.TestProjectUserCustomTimeProviderSource
 import com.krystianwsul.checkme.firebase.checkRemote
 import com.krystianwsul.checkme.firebase.loaders.*
 import com.krystianwsul.checkme.firebase.managers.AndroidPrivateProjectManager
@@ -89,7 +89,7 @@ class ProjectsFactoryTest {
                 compositeDisposable,
                 privateProjectManager,
                 null,
-                TestUserCustomTimeProviderSource(),
+                TestProjectUserCustomTimeProviderSource(),
                 object : RootTaskCoordinator {
 
                     override fun getRootTasks(projectRecord: ProjectRecord<*>) = Completable.complete() // todo task tests
@@ -109,7 +109,7 @@ class ProjectsFactoryTest {
                 sharedProjectManager,
                 compositeDisposable,
                 factoryProvider.sharedProjectsProvider,
-                TestUserCustomTimeProviderSource(),
+                TestProjectUserCustomTimeProviderSource(),
                 mockk(relaxed = true),
                 object : RootTaskCoordinator {
 

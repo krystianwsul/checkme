@@ -115,7 +115,7 @@ class UserKeyStore(
         rootTaskRequestKeyStore.requestCustomTimeUsers(rootTaskKey, userKeys)
     }
 
-    fun onTasksRemoved(rootTaskKeys: Set<TaskKey.Root>) { // todo task fetch
+    fun onTasksRemoved(rootTaskKeys: Set<TaskKey.Root>) {
         checkNotNull(loadUserDataObservable.tryGetCurrentValue())
 
         rootTaskRequestKeyStore.onRequestsRemoved(rootTaskKeys)

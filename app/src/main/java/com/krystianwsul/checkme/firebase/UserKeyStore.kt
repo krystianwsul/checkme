@@ -12,7 +12,6 @@ import com.krystianwsul.common.utils.UserKey
 import com.krystianwsul.treeadapter.tryGetCurrentValue
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
-import io.reactivex.rxjava3.kotlin.combineLatest
 import io.reactivex.rxjava3.kotlin.merge
 import io.reactivex.rxjava3.kotlin.plusAssign
 
@@ -57,12 +56,9 @@ class UserKeyStore(
                 .skip(1)
                 .map { FriendOrCustomTimeEvent.Friend(it) }
 
-        val mergedRequests = listOf(
-                projectRequestKeyStore,
-                rootTaskRequestKeyStore,
-        ).map { it.requestedUserKeysObservable }
-                .combineLatest { FriendOrCustomTimeEvent.CustomTimes(it.flatten().toSet()) }
-                .skip(1) // first event is just the initial empty sets from both
+        val mergedRequests = RequestKeyStore.merge(projectRequestKeyStore, rootTaskRequestKeyStore).map {
+            FriendOrCustomTimeEvent.CustomTimes(it)
+        }
 
         loadUserDataObservable = listOf(friendEvents, mergedRequests).merge()
                 .scan(OutputAggregate()) { aggregate, friendOrCustomTimeEvent ->

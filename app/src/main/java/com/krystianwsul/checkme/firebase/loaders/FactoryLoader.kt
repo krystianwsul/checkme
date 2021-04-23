@@ -10,8 +10,10 @@ import com.krystianwsul.checkme.firebase.factories.MyUserFactory
 import com.krystianwsul.checkme.firebase.factories.ProjectsFactory
 import com.krystianwsul.checkme.firebase.managers.AndroidPrivateProjectManager
 import com.krystianwsul.checkme.firebase.managers.AndroidSharedProjectManager
+import com.krystianwsul.checkme.firebase.managers.RootTaskManager
 import com.krystianwsul.checkme.firebase.roottask.RootTaskCoordinator
 import com.krystianwsul.checkme.firebase.roottask.RootTaskKeySource
+import com.krystianwsul.checkme.firebase.roottask.RootTaskLoader
 import com.krystianwsul.checkme.utils.cacheImmediate
 import com.krystianwsul.checkme.utils.mapNotNull
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
@@ -100,6 +102,15 @@ class FactoryLoader(
                     )
 
                     val rootTaskKeySource = RootTaskKeySource(domainDisposable)
+
+                    val rootTaskManager = RootTaskManager(factoryProvider.database)
+
+                    val rootTaskLoader = RootTaskLoader(
+                            rootTaskKeySource.rootTaskKeysObservable,
+                            factoryProvider.database,
+                            domainDisposable,
+                            rootTaskManager,
+                    )
 
                     val rootTaskCoordinator = RootTaskCoordinator.Impl(rootTaskKeySource)
 

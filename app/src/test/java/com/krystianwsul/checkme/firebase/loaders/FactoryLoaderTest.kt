@@ -17,16 +17,19 @@ import com.krystianwsul.common.firebase.json.*
 import com.krystianwsul.common.firebase.json.projects.PrivateProjectJson
 import com.krystianwsul.common.firebase.json.projects.SharedProjectJson
 import com.krystianwsul.common.firebase.json.tasks.PrivateTaskJson
+import com.krystianwsul.common.firebase.json.tasks.RootTaskJson
 import com.krystianwsul.common.firebase.json.tasks.SharedTaskJson
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.time.DateTime
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.utils.ProjectKey
+import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.common.utils.UserKey
 import io.mockk.mockk
 import io.reactivex.plugins.RxJavaPlugins
 import io.reactivex.rxjava3.core.Completable
+import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
 import org.junit.*
@@ -109,11 +112,15 @@ class FactoryLoaderTest {
         val userObservable = PublishRelay.create<Snapshot<UserWrapper>>()!!
 
         override fun getPrivateProjectObservable(key: ProjectKey.Private) =
-                privateProjectObservable.map<Snapshot<PrivateProjectJson>> { Snapshot(key.key, it) }!!
+                privateProjectObservable.map { Snapshot(key.key, it) }!!
 
         override fun getSharedProjectObservable(projectKey: ProjectKey.Shared) = sharedProjectObservable
 
         override fun getUserObservable(userKey: UserKey) = userObservable
+
+        override fun getRootTaskObservable(rootTaskKey: TaskKey.Root): Observable<Snapshot<RootTaskJson>> {
+            TODO("Not yet implemented")
+        }
 
         override fun getNewId(path: String) = "id"
 

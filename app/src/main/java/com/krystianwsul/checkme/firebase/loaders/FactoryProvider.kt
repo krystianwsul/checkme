@@ -9,6 +9,7 @@ import com.krystianwsul.checkme.firebase.AndroidDatabaseWrapper
 import com.krystianwsul.checkme.firebase.factories.FriendsFactory
 import com.krystianwsul.checkme.firebase.factories.MyUserFactory
 import com.krystianwsul.checkme.firebase.factories.ProjectsFactory
+import com.krystianwsul.checkme.firebase.roottask.RootTaskLoader
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.firebase.ChangeType
@@ -72,7 +73,7 @@ interface FactoryProvider {
         val uuid: String
     }
 
-    abstract class Database : FriendsProvider.Database() {
+    abstract class Database : FriendsProvider.Database(), RootTaskLoader.Provider {
 
         abstract fun getPrivateProjectObservable(key: ProjectKey.Private): Observable<Snapshot<PrivateProjectJson>>
 

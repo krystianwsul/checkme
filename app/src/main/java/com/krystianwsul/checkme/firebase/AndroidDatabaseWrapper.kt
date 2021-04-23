@@ -186,7 +186,7 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
     private fun rootTaskQuery(rootTaskKey: TaskKey.Root) =
             rootReference.child("$TASKS_KEY/${rootTaskKey.taskId}")
 
-    fun getRootTaskObservable(rootTaskKey: TaskKey.Root): Observable<Snapshot<RootTaskJson>> =
+    override fun getRootTaskObservable(rootTaskKey: TaskKey.Root) =
             rootTaskQuery(rootTaskKey).typedSnapshotChanges<RootTaskJson>()
 
     sealed class LoadState<T : Any> {

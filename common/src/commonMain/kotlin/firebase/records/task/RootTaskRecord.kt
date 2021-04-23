@@ -5,6 +5,7 @@ import com.krystianwsul.common.firebase.json.schedule.*
 import com.krystianwsul.common.firebase.json.tasks.RootTaskJson
 import com.krystianwsul.common.firebase.records.AssignedToHelper
 import com.krystianwsul.common.firebase.records.InstanceRecord
+import com.krystianwsul.common.firebase.records.RootTaskParentDelegate
 import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.utils.TaskKey
 
@@ -62,6 +63,13 @@ class RootTaskRecord private constructor(
 
     constructor(taskJson: RootTaskJson, databaseWrapper: DatabaseWrapper) :
             this(true, databaseWrapper.newRootTaskRecordId(), taskJson, databaseWrapper)
+
+    val rootTaskParentDelegate = object : RootTaskParentDelegate(taskJson) {
+
+        override fun addValue(subKey: String, value: Boolean?) {
+            this@RootTaskRecord.addValue("$key/$subKey", value)
+        }
+    }
 
     override fun getScheduleRecordId() = databaseWrapper.newRootTaskScheduleRecordId(id)
     override fun newNoScheduleOrParentRecordId() = databaseWrapper.newRootTaskNoScheduleOrParentRecordId(id)

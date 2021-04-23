@@ -3,6 +3,7 @@ package com.krystianwsul.common.firebase.json.tasks
 import com.krystianwsul.common.firebase.json.InstanceJson
 import com.krystianwsul.common.firebase.json.NoScheduleOrParentJson
 import com.krystianwsul.common.firebase.json.Parsable
+import com.krystianwsul.common.firebase.json.RootTaskParentJson
 import com.krystianwsul.common.firebase.json.schedule.RootScheduleWrapper
 import com.krystianwsul.common.firebase.json.taskhierarchies.NestedTaskHierarchyJson
 import kotlinx.serialization.Serializable
@@ -21,5 +22,6 @@ data class RootTaskJson @JvmOverloads constructor(
         override var endData: TaskJson.EndData? = null,
         override var noScheduleOrParent: Map<String, NoScheduleOrParentJson> = mutableMapOf(),
         override var ordinal: Double? = null,
-        override var taskHierarchies: Map<String, NestedTaskHierarchyJson> = mapOf(), // todo task fetch add child keys here, use a delegate extracted from projects for managing them, and add a todo to add callbacks to RootTaskKeySource when edited
-) : TaskJson, Parsable
+        override var taskHierarchies: Map<String, NestedTaskHierarchyJson> = mapOf(),
+        override val rootTaskIds: MutableMap<String, Boolean>,
+) : TaskJson, Parsable, RootTaskParentJson

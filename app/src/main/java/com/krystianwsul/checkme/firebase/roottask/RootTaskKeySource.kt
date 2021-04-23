@@ -14,35 +14,26 @@ class RootTaskKeySource(private val domainDisposable: CompositeDisposable) {
 
     val rootTaskKeysObservable: Observable<Set<TaskKey.Root>> = RequestKeyStore.merge(projectStore, taskStore)
 
-    fun onProjectAddedOrUpdated(projectKey: ProjectKey<*>, rootTaskKeys: Set<TaskKey.Root>) {
-        // this covers:
-        // private project: remote initial load, remote changes to tasks
-        // shared project: both remote and local initial load, remote changes to tasks
+    fun onProjectAddedOrUpdated(projectKey: ProjectKey<*>, rootTaskKeys: Set<TaskKey.Root>) =
+            projectStore.requestCustomTimeUsers(projectKey, rootTaskKeys)
 
-        // this contributes to final observable by adding keys, or updating keys for given project
-
-        projectStore.requestCustomTimeUsers(projectKey, rootTaskKeys)
-    }
+    fun onProjectsRemoved(projectKeys: Set<ProjectKey<*>>) = projectStore.onRequestsRemoved(projectKeys)
 
     fun onTaskAddedLocally(parentKey: ParentKey, taskKey: TaskKey, taskRecord: RootTaskRecord) {
-        // todo double-check that local changes to the keys that a project task aren't propagated through that other place
+        // todo task edit not sure if this will require rootTaskRecord; depends on RootTaskManager impl
 
-        // todo task fetch not sure if this will require rootTaskRecord; depends on RootTaskManager impl
-
-        // this covers task being added locally.  Not sure if it will need to return anything
+        // see notes for onRootTaskAddedOrUpdated
     }
 
     fun onTaskParentChanged(oldParentKey: ParentKey, newParentKey: ParentKey, taskKey: TaskKey.Root) {
-        // todo task fetch
+        // todo task edit
     }
-
-    fun onProjectsRemoved(projectKeys: Set<ProjectKey<*>>) = projectStore.onRequestsRemoved(projectKeys)
 
     fun onRootTaskAddedOrUpdated(parentRootTaskKey: TaskKey.Root, childRootTaskKeys: Set<TaskKey.Root>) {
         // this happens for initial loads, and when a task is changed remotely.
 
         /**
-         * todo task fetch this is going to be tricky.  When we add a task locally, we want to set up the listeners
+         * todo task edit this is going to be tricky.  When we add a task locally, we want to set up the listeners
          * for it.  But I haven't decided if we want the change to propagate through the RX chain down to the factory,
          * or if we'll do manual book-keeping there.  I think that decision should come after we figure out what's
          * easiest for edits.
@@ -54,13 +45,13 @@ class RootTaskKeySource(private val domainDisposable: CompositeDisposable) {
     fun onRootTasksRemoved(rootTaskKeys: Set<TaskKey.Root>) = taskStore.onRequestsRemoved(rootTaskKeys)
 
     /**
-     * todo task fetch custom times, similar to projects. We will need to load custom times in response to remote
+     * OLD: custom times, similar to projects. We will need to load custom times in response to remote
      * changes, including initial remote loads.  But not local edits, since those can only assign our own custom times.
      * But local edits may affect bookkeeping, in that changing a time on a task may make a certain custom time no
      * longer needed.
      *
-     * If we do fine-grained updates for local edits to tasks (for child task keys), consider doing that as well for
-     * custom times.  The two cases are very similar, so let's be thorough.
+     * todo task edit If we end up do fine-grained updates for local edits to tasks (for child task keys), consider
+     * doing that as well for custom times.  The two cases are very similar, so let's be thorough.
      */
 
     sealed class ParentKey {

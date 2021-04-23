@@ -28,7 +28,7 @@ class RequestKeyStore<REQUEST_KEY : Any, OUTPUT_KEY : Any> {
             is CustomTimeEvent.ProjectAdded<REQUEST_KEY, OUTPUT_KEY> -> {
                 val newProjectMap = aggregate.requestMap
                         .toMutableMap()
-                        .also { it[customTimeEvent.requestKey] = customTimeEvent.userKeys }
+                        .also { it[customTimeEvent.requestKey] = customTimeEvent.outputKeys }
 
                 CustomTimeAggregate(newProjectMap)
             }
@@ -36,7 +36,11 @@ class RequestKeyStore<REQUEST_KEY : Any, OUTPUT_KEY : Any> {
                 val newProjectMap = aggregate.requestMap
                         .toMutableMap()
                         .also { map ->
-                            customTimeEvent.requestKeys.forEach { map.remove(it) }
+                            customTimeEvent.requestKeys.forEach {
+                                check(map.containsKey(it))
+
+                                map.remove(it)
+                            }
                         }
 
                 CustomTimeAggregate(newProjectMap)
@@ -44,7 +48,7 @@ class RequestKeyStore<REQUEST_KEY : Any, OUTPUT_KEY : Any> {
         }
     }
             .map { it.output }
-            .distinctUntilChanged()
+            .distinctUntilChanged() // this initially emits an empty set.  It's necessary-ish for merging
 
     fun requestCustomTimeUsers(requestKey: REQUEST_KEY, userKeys: Set<OUTPUT_KEY>) =
             customTimeEvents.accept(CustomTimeEvent.ProjectAdded(requestKey, userKeys))
@@ -56,7 +60,7 @@ class RequestKeyStore<REQUEST_KEY : Any, OUTPUT_KEY : Any> {
 
         data class ProjectAdded<REQUEST_KEY : Any, OUTPUT_KEY : Any>(
                 val requestKey: REQUEST_KEY,
-                val userKeys: Set<OUTPUT_KEY>,
+                val outputKeys: Set<OUTPUT_KEY>,
         ) : CustomTimeEvent<REQUEST_KEY, OUTPUT_KEY>()
 
         data class ProjectsRemoved<REQUEST_KEY : Any, OUTPUT_KEY : Any>(

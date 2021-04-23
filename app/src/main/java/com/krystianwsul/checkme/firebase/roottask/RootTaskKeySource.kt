@@ -57,6 +57,8 @@ class RootTaskKeySource(private val domainDisposable: CompositeDisposable) {
     }
 
     fun onTaskAddedLocally(parentKey: ParentKey, taskKey: TaskKey, taskRecord: RootTaskRecord) {
+        // todo double-check that local changes to the keys that a project task aren't propagated through that other place
+
         // todo task fetch not sure if this will require rootTaskRecord; depends on RootTaskManager impl
 
         // this covers task being added locally.  Not sure if it will need to return anything

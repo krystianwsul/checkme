@@ -21,5 +21,5 @@ data class RootTaskJson @JvmOverloads constructor(
         override var endData: TaskJson.EndData? = null,
         override var noScheduleOrParent: Map<String, NoScheduleOrParentJson> = mutableMapOf(),
         override var ordinal: Double? = null,
-        override var taskHierarchies: Map<String, NestedTaskHierarchyJson> = mapOf(),
+        override var taskHierarchies: Map<String, NestedTaskHierarchyJson> = mapOf(), // todo task fetch add child keys here, use a delegate extracted from projects for managing them, and add a todo to add callbacks to RootTaskKeySource when edited
 ) : TaskJson, Parsable

@@ -53,5 +53,24 @@ interface RootTaskToRootTaskCoordinator {
          * 3. From that, construct a list of singles for task records, plus a list of custom times we're waiting on.
          * 4. Subscribe to everything.  Every time a single returns, expand the list in #3 with the new data.
          */
+
+        class TreeLoadState(initialTaskKey: TaskKey.Root) {
+
+            val taskLoadStates = mutableMapOf<TaskKey.Root, TaskLoadState>()
+
+            fun requestLoad(taskKey: TaskKey.Root) {
+
+            }
+
+            init {
+                requestLoad(initialTaskKey)
+            }
+        }
+
+        sealed class TaskLoadState {
+
+            object Loading : TaskLoadState()
+            class Loaded(val taskRecord: RootTaskRecord) : TaskLoadState()
+        }
     }
 }

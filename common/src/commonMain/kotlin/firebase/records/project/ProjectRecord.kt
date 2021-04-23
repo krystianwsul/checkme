@@ -46,7 +46,7 @@ abstract class ProjectRecord<T : ProjectType>(
 
     abstract val childKey: String
 
-    var name by Committer(projectJson::name, "$key/$PROJECT_JSON")
+    var name by Committer(projectJson::name, committerKey)
 
     val startTime get() = projectJson.startTime
     var startTimeOffset by Committer(projectJson::startTimeOffset, committerKey)

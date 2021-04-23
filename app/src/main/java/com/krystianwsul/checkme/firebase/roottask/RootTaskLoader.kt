@@ -34,7 +34,7 @@ class RootTaskLoader(
             { it.disposable.dispose() },
     ).replayImmediate()
 
-    private val addChangeEvents: Observable<AddChangeEvent> = databaseRxObservable.switchMap { mapChanges ->
+    val addChangeEvents: Observable<AddChangeEvent> = databaseRxObservable.switchMap { mapChanges ->
         mapChanges.newMap
                 .map { (taskKey, databaseRx) ->
                     databaseRx.observable
@@ -43,14 +43,14 @@ class RootTaskLoader(
                 }.merge()
     }.replayImmediate()
 
-    private val removeEvents: Observable<RemoveEvent> = databaseRxObservable.map { it.removedEntries }
+    val removeEvents: Observable<RemoveEvent> = databaseRxObservable.map { it.removedEntries }
             .filter { it.isNotEmpty() }
             .map { RemoveEvent(it.keys) }
             .replayImmediate()
 
-    private data class AddChangeEvent(val taskKey: TaskKey.Root, val rootTaskRecord: RootTaskRecord)
+    data class AddChangeEvent(val taskKey: TaskKey.Root, val rootTaskRecord: RootTaskRecord)
 
-    private data class RemoveEvent(val taskKeys: Set<TaskKey.Root>)
+    data class RemoveEvent(val taskKeys: Set<TaskKey.Root>)
 
     interface Provider {
 

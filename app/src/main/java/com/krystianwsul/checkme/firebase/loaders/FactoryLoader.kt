@@ -119,16 +119,18 @@ class FactoryLoader(
                             rootTaskUserCustomTimeProviderSource,
                     )
 
-                    val rootTaskCoordinator = ProjectToRootTaskCoordinator.Impl(rootTaskKeySource)
+                    val rootTaskToRootTaskCoordinator = RootTaskToRootTaskCoordinator.Impl(rootTaskKeySource)
 
                     val rootTaskFactory = RootTaskFactory(
                             rootTaskLoader,
                             rootTaskUserCustomTimeProviderSource,
                             userKeyStore,
-                            rootTaskCoordinator,
+                            rootTaskToRootTaskCoordinator,
                             domainDisposable,
                             rootTaskKeySource,
                     )
+
+                    val projectToRootTaskCoordinator = ProjectToRootTaskCoordinator.Impl(rootTaskKeySource)
 
                     val privateProjectLoader = ProjectLoader.Impl(
                             privateProjectDatabaseRx.observable,
@@ -136,7 +138,7 @@ class FactoryLoader(
                             privateProjectManager,
                             null,
                             projectUserCustomTimeProviderSource,
-                            rootTaskCoordinator,
+                            projectToRootTaskCoordinator,
                     )
 
                     val startTime = ExactTimeStamp.Local.now
@@ -150,7 +152,7 @@ class FactoryLoader(
                             factoryProvider.sharedProjectsProvider,
                             projectUserCustomTimeProviderSource,
                             userKeyStore,
-                            rootTaskCoordinator,
+                            projectToRootTaskCoordinator,
                             rootTaskKeySource,
                     )
 

@@ -16,6 +16,8 @@ interface ProjectToRootTaskCoordinator {
             )
 
             return Completable.complete() // todo task fetch return after tasks are loaded
+
+            // todo task fetch see note in RootTaskToRootTaskCoordinator
         }
     }
 }

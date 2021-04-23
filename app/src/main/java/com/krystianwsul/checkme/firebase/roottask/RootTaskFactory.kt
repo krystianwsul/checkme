@@ -10,13 +10,14 @@ import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
+import io.reactivex.rxjava3.kotlin.Singles
 import io.reactivex.rxjava3.kotlin.merge
 
 class RootTaskFactory(
         private val rootTaskLoader: RootTaskLoader,
         private val rootTaskUserCustomTimeProviderSource: RootTaskUserCustomTimeProviderSource,
         private val userKeyStore: UserKeyStore,
-        private val projectToRootTaskCoordinator: ProjectToRootTaskCoordinator,
+        private val rootTaskToRootTaskCoordinator: RootTaskToRootTaskCoordinator,
         private val domainDisposable: CompositeDisposable,
         private val rootTaskKeySource: RootTaskKeySource,
 ) : RootTask.Parent {
@@ -30,10 +31,12 @@ class RootTaskFactory(
                 .switchMapSingle { (taskRecord, projectKey) ->
                     check(!rootTasks.containsKey(taskRecord.taskKey))
 
-                    rootTaskUserCustomTimeProviderSource.getUserCustomTimeProvider(taskRecord).map {
-                        RootTask(projectKey, taskRecord, this, it)
+                    Singles.zip(
+                            rootTaskToRootTaskCoordinator.getRootTasks(taskRecord).toSingleDefault(Unit),
+                            rootTaskUserCustomTimeProviderSource.getUserCustomTimeProvider(taskRecord),
+                    ).map { (_, userCustomTimeProvider) ->
+                        RootTask(projectKey, taskRecord, this, userCustomTimeProvider)
                     }
-                    // todo task fetch block for child tasks
                 }
                 .doOnNext {
                     check(!rootTasks.containsKey(it.taskKey))
@@ -42,12 +45,14 @@ class RootTaskFactory(
                 }
 
         val removeEventChangeTypes = rootTaskLoader.removeEvents.doOnNext {
-            it.taskKeys.forEach { check(rootTasks.containsKey(it)) }
+            it.taskKeys.forEach {
+                check(rootTasks.containsKey(it))
+
+                rootTasks.remove(it)
+            }
 
             userKeyStore.onTasksRemoved(it.taskKeys)
-            // todo task fetch update root task key source
-
-            it.taskKeys.forEach { rootTasks.remove(it) }
+            rootTaskKeySource.onRootTasksRemoved(it.taskKeys)
         }
 
         changeTypes = listOf(addChangeEventChangeTypes, removeEventChangeTypes).merge()

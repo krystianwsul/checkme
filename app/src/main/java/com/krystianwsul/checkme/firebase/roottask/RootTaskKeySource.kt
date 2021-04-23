@@ -82,6 +82,10 @@ class RootTaskKeySource(private val domainDisposable: CompositeDisposable) {
         // todo task fetch projectEvents.accept(ProjectEvent.ProjectAddedOrUpdated(projectKey, rootTaskKeys))
     }
 
+    fun onRootTasksRemoved(rootTaskKeys: Set<TaskKey.Root>) {
+        // todo task fetch projectEvents.accept(ProjectEvent.ProjectsRemoved(rootTaskKeys))
+    }
+
     /**
      * todo task fetch add callbacks for recursive tasks, similar to projects.
      */

@@ -15,7 +15,14 @@ interface RootTaskToRootTaskCoordinator {
                     rootTaskRecord.rootTaskParentDelegate.rootTaskKeys,
             )
 
-            return Completable.complete() // todo task fetch return after tasks are loaded
+            /**
+             * todo task fetch return after tasks are loaded.
+             *
+             * Note: this needs to block not only until the immediate children are loaded, but until the entire graph
+             * is complete.  Yeah, figuring that out is gonna be fun.
+             */
+
+            return Completable.complete()
         }
     }
 }

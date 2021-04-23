@@ -14,11 +14,21 @@ class RootTaskKeySource(private val domainDisposable: CompositeDisposable) {
     val rootTaskKeysObservable: Observable<Set<TaskKey.Root>> =
             projectEvents.scan(ProjectAggregate()) { aggregate, projectEvent ->
                 when (projectEvent) {
-                    is ProjectEvent.ProjectAddedOrUpdated -> aggregate.copy(
-                            aggregate.projectMap
-                                    .toMutableMap()
-                                    .apply { put(projectEvent.projectKey, projectEvent.rootTaskKeys) }
-                    )
+                    is ProjectEvent.ProjectAddedOrUpdated -> {
+                        val oldTaskKeys = aggregate.projectMap
+                                .filterKeys { it != projectEvent.projectKey }
+                                .values
+                                .flatten()
+                                .toSet()
+
+                        projectEvent.rootTaskKeys.forEach { check(it !in oldTaskKeys) }
+
+                        aggregate.copy(
+                                aggregate.projectMap
+                                        .toMutableMap()
+                                        .apply { put(projectEvent.projectKey, projectEvent.rootTaskKeys) }
+                        )
+                    }
                     is ProjectEvent.ProjectsRemoved -> {
                         val newMap = aggregate.projectMap.toMutableMap()
 
@@ -93,4 +103,6 @@ class RootTaskKeySource(private val domainDisposable: CompositeDisposable) {
                 .flatten()
                 .toSet()
     }
+
+    data class TaskData(val projectKey: ProjectKey<*>, val taskKey: TaskKey.Root)
 }

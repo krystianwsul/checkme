@@ -5,7 +5,7 @@ import com.krystianwsul.common.firebase.json.taskhierarchies.ProjectTaskHierarch
 import com.krystianwsul.common.firebase.json.tasks.TaskJson
 import com.krystianwsul.common.utils.ProjectType
 
-interface ProjectJson<T : ProjectType> {
+interface ProjectJson<T : ProjectType> : RootTaskParentJson {
 
     var name: String
 
@@ -18,6 +18,4 @@ interface ProjectJson<T : ProjectType> {
     val tasks: Map<String, TaskJson>
     var taskHierarchies: MutableMap<String, ProjectTaskHierarchyJson>
     val customTimes: Map<String, CustomTimeJson>
-
-    val rootTaskIds: MutableMap<String, Boolean>
 }

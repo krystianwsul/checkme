@@ -46,13 +46,6 @@ class RootTaskLoader(
                 }.merge()
     }.replayImmediate()
 
-    /**
-     * todo task fetch add waiting for child tasks to load.  But, this may not be the best place to do it.  Think about
-     * how we'll determine/signal that a child task is loaded, and if this can cause a deadlock if the child depends on
-     * the parent too.  But also, merge these events in a way that allows the children and custom times to be requested
-     * simultaneously.  Move it into the RootTaskFactory if need be, I'm not attached to this part.
-     */
-
     val removeEvents: Observable<RemoveEvent> = databaseRxObservable.map { it.removedEntries }
             .filter { it.isNotEmpty() }
             .map { RemoveEvent(it.keys) }

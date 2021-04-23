@@ -3,6 +3,7 @@ package com.krystianwsul.common.firebase.records.project
 import com.krystianwsul.common.firebase.json.projects.ProjectJson
 import com.krystianwsul.common.firebase.json.taskhierarchies.ProjectTaskHierarchyJson
 import com.krystianwsul.common.firebase.records.RemoteRecord
+import com.krystianwsul.common.firebase.records.RootTaskParentDelegate
 import com.krystianwsul.common.firebase.records.customtime.ProjectCustomTimeRecord
 import com.krystianwsul.common.firebase.records.task.ProjectTaskRecord
 import com.krystianwsul.common.firebase.records.taskhierarchy.ProjectTaskHierarchyRecord
@@ -20,7 +21,6 @@ abstract class ProjectRecord<T : ProjectType>(
     companion object {
 
         const val PROJECT_JSON = "projectJson"
-        const val ROOT_TASK_IDS_KEY = "rootTaskIds"
     }
 
     abstract val projectKey: ProjectKey<T>
@@ -54,18 +54,17 @@ abstract class ProjectRecord<T : ProjectType>(
     var endTime by Committer(projectJson::endTime, committerKey)
     var endTimeOffset by Committer(projectJson::endTimeOffset, committerKey)
 
-    private val rootTaskKeysProperty = invalidatableLazy {
-        projectJson.rootTaskIds
-                .keys
-                .map(TaskKey::Root)
-                .toSet()
-    }
-    val rootTaskKeys by rootTaskKeysProperty
-
     override val children
         get() = taskRecords.values +
                 taskHierarchyRecords.values +
                 customTimeRecords.values
+
+    val rootTaskParentDelegate = object : RootTaskParentDelegate(projectJson) {
+
+        override fun addValue(subKey: String, value: Boolean?) {
+            this@ProjectRecord.addValue("$committerKey/$subKey", value)
+        }
+    }
 
     fun newTaskHierarchyRecord(taskHierarchyJson: ProjectTaskHierarchyJson): ProjectTaskHierarchyRecord {
         val taskHierarchyRecord = ProjectTaskHierarchyRecord(this, taskHierarchyJson)
@@ -90,28 +89,4 @@ abstract class ProjectRecord<T : ProjectType>(
     fun getProjectCustomTimeKey(customTimeId: String) = getProjectCustomTimeKey(getProjectCustomTimeId(customTimeId))
 
     fun getTaskKey(taskId: String) = TaskKey.Project(projectKey, taskId) // todo task after model
-
-    fun addRootTask(rootTaskKey: TaskKey.Root) {
-        val rootTaskId = rootTaskKey.taskId
-
-        if (!projectJson.rootTaskIds.containsKey(rootTaskId)) {
-            projectJson.rootTaskIds[rootTaskId] = true
-
-            addValue("$key/$ROOT_TASK_IDS_KEY/$rootTaskId", true)
-
-            rootTaskKeysProperty.invalidate()
-        }
-    }
-
-    fun removeRootTask(rootTaskKey: TaskKey.Root) {
-        val rootTaskId = rootTaskKey.taskId
-
-        if (projectJson.rootTaskIds.containsKey(rootTaskId)) {
-            projectJson.rootTaskIds.remove(rootTaskId)
-
-            addValue("$key/$ROOT_TASK_IDS_KEY/$rootTaskId", null)
-
-            rootTaskKeysProperty.invalidate()
-        }
-    }
 }

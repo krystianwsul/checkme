@@ -1,4 +1,4 @@
-package com.krystianwsul.common.firebase.json.projects
+package com.krystianwsul.common.firebase.json
 
 interface RootTaskParentJson {
 

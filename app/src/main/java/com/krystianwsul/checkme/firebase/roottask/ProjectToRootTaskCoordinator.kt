@@ -1,7 +1,12 @@
 package com.krystianwsul.checkme.firebase.roottask
 
+import com.krystianwsul.checkme.utils.mapNotNull
+import com.krystianwsul.common.firebase.models.task.RootTask
 import com.krystianwsul.common.firebase.records.project.ProjectRecord
+import com.krystianwsul.common.utils.TaskKey
 import io.reactivex.rxjava3.core.Completable
+import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.core.Single
 
 interface ProjectToRootTaskCoordinator {
 
@@ -18,21 +23,33 @@ interface ProjectToRootTaskCoordinator {
                     projectRecord.rootTaskParentDelegate.rootTaskKeys,
             )
 
-            return Completable.complete() // todo task fetch return after tasks are loaded
+            val loadedKeys = mutableSetOf<TaskKey.Root>()
 
-            /**
-             * This has to complete when the whole tree of task models has finished loading.  The ChangeType.Remote
-             * that will emit after the project model is initialized will be the point at which root tasks are
-             * first accessed (even if the objects are present earlier, they won't be queried), so all tasks have to
-             * be initialized and ready to go (recursively) before this completes.
-             */
+            return Completable.merge(
+                    projectRecord.rootTaskParentDelegate
+                            .rootTaskKeys
+                            .map { getTaskDependenciesLoadedCompletable(it, loadedKeys) }
+            )
+        }
 
-            /**
-             * Ho hum.  We need a way to determine which task records have been loaded.  Ultimately, this delay is so
-             * that by the time a project is initialized, all the tasks, and all the custom times they use, are all
-             * initialized.  That part's something we can check at the TaskFactory level, like how we check for custom
-             * times.  (Since the task model objects should be ready before the project model is constructed.)
-             */
+        private fun getTaskLoadedSingle(taskKey: TaskKey.Root): Single<RootTask> {
+            return Observable.just(Unit)
+                    .concatWith(rootTaskFactory.changeTypes.map { })
+                    .mapNotNull { rootTaskFactory.rootTasks[taskKey] }
+                    .firstOrError()
+        }
+
+        private fun getTaskDependenciesLoadedCompletable(
+                taskKey: TaskKey.Root,
+                loadedTaskKeys: MutableSet<TaskKey.Root>,
+        ): Completable {
+            return getTaskLoadedSingle(taskKey).flatMapCompletable {
+                loadedTaskKeys += it.taskKey
+
+                val newTaskKeys = it.taskRecord.getDependentTaskKeys() - loadedTaskKeys
+
+                Completable.merge(newTaskKeys.map { getTaskDependenciesLoadedCompletable(it, loadedTaskKeys) })
+            }
         }
     }
 }

@@ -92,4 +92,7 @@ class RootTaskRecord private constructor(
             monthlyWeekScheduleJson as? RootMonthlyWeekScheduleJson,
             yearlyScheduleJson as? RootYearlyScheduleJson,
     )
+
+    fun getDependentTaskKeys(): Set<TaskKey.Root> =
+            rootTaskParentDelegate.rootTaskKeys + taskHierarchyRecords.map { TaskKey.Root(it.value.parentTaskId) }
 }

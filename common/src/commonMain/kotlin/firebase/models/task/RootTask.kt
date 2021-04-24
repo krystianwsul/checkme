@@ -11,7 +11,7 @@ import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.*
 
 class RootTask(
-        private val taskRecord: RootTaskRecord,
+        val taskRecord: RootTaskRecord,
         private val parent: Parent,
         private val userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
 ) : Task(

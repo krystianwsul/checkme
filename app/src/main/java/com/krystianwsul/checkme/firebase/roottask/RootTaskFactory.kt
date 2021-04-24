@@ -14,22 +14,24 @@ import io.reactivex.rxjava3.kotlin.Singles
 import io.reactivex.rxjava3.kotlin.merge
 
 class RootTaskFactory(
-        private val rootTaskLoader: RootTaskLoader,
+        rootTaskLoader: RootTaskLoader,
         private val rootTaskUserCustomTimeProviderSource: RootTaskUserCustomTimeProviderSource,
         private val userKeyStore: UserKeyStore,
         private val rootTaskToRootTaskCoordinator: RootTaskToRootTaskCoordinator,
-        private val domainDisposable: CompositeDisposable,
+        domainDisposable: CompositeDisposable,
         private val rootTaskKeySource: RootTaskKeySource,
 ) : RootTask.Parent {
 
-    private val rootTasks = mutableMapOf<TaskKey.Root, RootTask>()
+    private val rootTaskMap = mutableMapOf<TaskKey.Root, RootTask>()
+
+    val rootTasks: Map<TaskKey.Root, RootTask> get() = rootTaskMap
 
     val changeTypes: Observable<ChangeType>
 
     init {
         val addChangeEventChangeTypes = rootTaskLoader.addChangeEvents
                 .switchMapSingle { (taskRecord) ->
-                    check(!rootTasks.containsKey(taskRecord.taskKey))
+                    check(!rootTaskMap.containsKey(taskRecord.taskKey))
 
                     Singles.zip(
                             rootTaskToRootTaskCoordinator.getRootTasks(taskRecord).toSingleDefault(Unit),
@@ -39,16 +41,16 @@ class RootTaskFactory(
                     }
                 }
                 .doOnNext {
-                    check(!rootTasks.containsKey(it.taskKey))
+                    check(!rootTaskMap.containsKey(it.taskKey))
 
-                    rootTasks[it.taskKey] = it
+                    rootTaskMap[it.taskKey] = it
                 }
 
         val removeEventChangeTypes = rootTaskLoader.removeEvents.doOnNext {
             it.taskKeys.forEach {
-                check(rootTasks.containsKey(it))
+                check(rootTaskMap.containsKey(it))
 
-                rootTasks.remove(it)
+                rootTaskMap.remove(it)
             }
 
             userKeyStore.onTasksRemoved(it.taskKeys)

@@ -1,11 +1,13 @@
 package com.krystianwsul.checkme.firebase.roottask
 
+import com.jakewharton.rxrelay3.BehaviorRelay
 import com.krystianwsul.common.firebase.records.task.RootTaskRecord
 import com.krystianwsul.common.utils.TaskKey
 import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Maybe
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.kotlin.merge
+import io.reactivex.rxjava3.kotlin.ofType
 
 interface RootTaskToRootTaskCoordinator {
 
@@ -37,6 +39,51 @@ interface RootTaskToRootTaskCoordinator {
              */
 
             return Completable.complete()
+        }
+
+        fun getAllRecordsLoadedCompletable(
+                // todo task fetch test this
+                taskRecord: RootTaskRecord,
+                taskRecordLoader: TaskRecordLoader,
+                rootTaskUserCustomTimeProviderSource: RootTaskUserCustomTimeProviderSource,
+        ): Completable {
+            val taskKey = taskRecord.taskKey
+            val fakeInitialMap = mapOf(taskKey to TaskLoadState.LoadingRecord(taskKey, taskRecordLoader, rootTaskUserCustomTimeProviderSource))
+
+            val initialMap = RecordLoadedMutator(
+                    taskRecord,
+                    taskRecordLoader,
+                    rootTaskUserCustomTimeProviderSource,
+            ).mutateMap(fakeInitialMap)
+
+            val initialState = TreeLoadState(initialMap)
+
+            val stateRelay = BehaviorRelay.createDefault(initialState)
+
+            val getRecordsState = stateRelay.switchMapSingle {
+                it.getNextState()
+                        .map<GetRecordsState> { GetRecordsState.Loading(it) }
+                        .defaultIfEmpty(GetRecordsState.Loaded)
+            }.share()
+
+            val stateProcessor =
+                    getRecordsState.ofType<GetRecordsState.Loading>().doOnNext { stateRelay.accept(it.treeLoadState) }
+
+            val loadedObservable = getRecordsState.ofType<GetRecordsState.Loaded>()
+
+            return listOf(
+                    stateProcessor.ignoreElements().toObservable<GetRecordsState.Loaded>(), // never completes, just hiding subscription
+                    loadedObservable,
+            ).merge()
+                    .firstOrError()
+                    .ignoreElement()
+        }
+
+        sealed class GetRecordsState {
+
+            class Loading(val treeLoadState: TreeLoadState) : GetRecordsState()
+
+            object Loaded : GetRecordsState()
         }
 
         class TreeLoadState(val taskLoadStates: Map<TaskKey.Root, TaskLoadState>) {

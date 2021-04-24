@@ -3,7 +3,9 @@ package com.krystianwsul.checkme.firebase.roottask
 import com.krystianwsul.common.firebase.records.task.RootTaskRecord
 import com.krystianwsul.common.utils.TaskKey
 import io.reactivex.rxjava3.core.Completable
+import io.reactivex.rxjava3.core.Maybe
 import io.reactivex.rxjava3.core.Single
+import io.reactivex.rxjava3.kotlin.merge
 
 interface RootTaskToRootTaskCoordinator {
 
@@ -37,40 +39,102 @@ interface RootTaskToRootTaskCoordinator {
             return Completable.complete()
         }
 
-        /** todo task fetch just for shits and giggles, let's try to construct an algorithm that can determine if all
-         * records have been loaded, based on a single function that gets an observable for a single record.
-         *
-         */
+        class TreeLoadState(val taskLoadStates: Map<TaskKey.Root, TaskLoadState>) {
 
-        lateinit var getTaskRecord: (taskKey: TaskKey.Root) -> Single<RootTaskRecord>
-        lateinit var rootTaskUserCustomTimeCoordinator: RootTaskUserCustomTimeProviderSource
+            fun getNextState(): Maybe<TreeLoadState> {
+                val mutatorSingles = taskLoadStates.mapNotNull { it.value.mutator }
 
-        /**
-         * Here's a rough idea of what I need.
-         *
-         * 1. We start with a single task key.
-         * 2. Fetch its task record.
-         * 3. From that, construct a list of singles for task records, plus a list of custom times we're waiting on.
-         * 4. Subscribe to everything.  Every time a single returns, expand the list in #3 with the new data.
-         */
+                return if (mutatorSingles.isEmpty()) {
+                    Maybe.empty()
+                } else {
+                    val nextMutatorSingle = mutatorSingles.map { it.toObservable() }
+                            .merge()
+                            .firstOrError()
 
-        class TreeLoadState(initialTaskKey: TaskKey.Root) {
-
-            val taskLoadStates = mutableMapOf<TaskKey.Root, TaskLoadState>()
-
-            fun requestLoad(taskKey: TaskKey.Root) {
-
-            }
-
-            init {
-                requestLoad(initialTaskKey)
+                    nextMutatorSingle.map { TreeLoadState(it.mutateMap(taskLoadStates)) }.toMaybe()
+                }
             }
         }
 
         sealed class TaskLoadState {
 
-            object Loading : TaskLoadState()
-            class Loaded(val taskRecord: RootTaskRecord) : TaskLoadState()
+            abstract val mutator: Single<TaskLoadStateMapMutator>?
+
+            class LoadingRecord(
+                    val taskKey: TaskKey.Root,
+                    val taskRecordLoader: TaskRecordLoader,
+                    val rootTaskUserCustomTimeProviderSource: RootTaskUserCustomTimeProviderSource,
+            ) : TaskLoadState() {
+
+                override val mutator = taskRecordLoader.getTaskRecordSingle(taskKey)
+                        .map<TaskLoadStateMapMutator> {
+                            RecordLoadedMutator(it, taskRecordLoader, rootTaskUserCustomTimeProviderSource)
+                        }
+                        .cache()!!
+            }
+
+            class LoadingTimes(
+                    val taskRecord: RootTaskRecord,
+                    val rootTaskUserCustomTimeProviderSource: RootTaskUserCustomTimeProviderSource,
+            ) : TaskLoadState() {
+
+                override val mutator = rootTaskUserCustomTimeProviderSource.getUserCustomTimeProvider(taskRecord)
+                        .map<TaskLoadStateMapMutator> { TimesLoadedMutator(taskRecord) }
+                        .cache()!!
+            }
+
+            class Loaded(val taskRecord: RootTaskRecord) : TaskLoadState() {
+
+                override val mutator: Single<TaskLoadStateMapMutator>? = null
+            }
+        }
+
+        interface TaskLoadStateMapMutator {
+
+            fun mutateMap(oldMap: Map<TaskKey.Root, TaskLoadState>): Map<TaskKey.Root, TaskLoadState>
+        }
+
+        class RecordLoadedMutator(
+                val taskRecord: RootTaskRecord,
+                val taskRecordLoader: TaskRecordLoader,
+                val rootTaskUserCustomTimeProviderSource: RootTaskUserCustomTimeProviderSource,
+        ) : TaskLoadStateMapMutator {
+
+            override fun mutateMap(oldMap: Map<TaskKey.Root, TaskLoadState>): Map<TaskKey.Root, TaskLoadState> {
+                val parentKeys = taskRecord.taskHierarchyRecords.map { TaskKey.Root(it.value.parentTaskId) }
+                val childKeys = taskRecord.rootTaskParentDelegate.rootTaskKeys
+                val allKeys = (parentKeys + childKeys).toSet()
+
+                val newKeys = allKeys - oldMap.keys
+
+                val newEntries = newKeys.map {
+                    it to TaskLoadState.LoadingRecord(it, taskRecordLoader, rootTaskUserCustomTimeProviderSource)
+                }
+
+                val newMap = (oldMap + newEntries).toMutableMap()
+                check(newMap.getValue(taskRecord.taskKey) is TaskLoadState.LoadingRecord)
+
+                newMap[taskRecord.taskKey] =
+                        TaskLoadState.LoadingTimes(taskRecord, rootTaskUserCustomTimeProviderSource)
+
+                return oldMap + newEntries
+            }
+        }
+
+        class TimesLoadedMutator(val taskRecord: RootTaskRecord) : TaskLoadStateMapMutator {
+
+            override fun mutateMap(oldMap: Map<TaskKey.Root, TaskLoadState>): Map<TaskKey.Root, TaskLoadState> {
+                check(oldMap.containsKey(taskRecord.taskKey))
+
+                return oldMap.toMutableMap().also {
+                    it[taskRecord.taskKey] = TaskLoadState.Loaded(taskRecord)
+                }
+            }
+        }
+
+        interface TaskRecordLoader {
+
+            fun getTaskRecordSingle(taskKey: TaskKey.Root): Single<RootTaskRecord>
         }
     }
 }

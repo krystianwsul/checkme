@@ -211,4 +211,80 @@ class RecursiveTaskRecordLoaderTest {
         acceptTime(taskRecord3)
         testObserver.assertComplete()
     }
+
+    @Test
+    fun testOneChildOneSubchild() {
+        val initialTaskRecord = mockTaskRecord(taskKey1, children = setOf(taskKey2))
+
+        initLoader(initialTaskRecord)
+        testObserver.assertNotComplete()
+
+        acceptTime(initialTaskRecord)
+        testObserver.assertNotComplete()
+
+        val taskRecord2 = mockTaskRecord(taskKey2, children = setOf(taskKey3))
+
+        acceptTask(taskKey2, taskRecord2)
+        testObserver.assertNotComplete()
+
+        acceptTime(taskRecord2)
+        testObserver.assertNotComplete()
+
+        val taskRecord3 = mockTaskRecord(taskKey3)
+
+        acceptTask(taskKey3, taskRecord3)
+        testObserver.assertNotComplete()
+
+        acceptTime(taskRecord3)
+        testObserver.assertComplete()
+    }
+
+    @Test
+    fun testTwoChildrenOneSubchild() {
+        val initialTaskRecord = mockTaskRecord(taskKey1, children = setOf(taskKey2, taskKey3))
+
+        initLoader(initialTaskRecord)
+        testObserver.assertNotComplete()
+
+        acceptTime(initialTaskRecord)
+        testObserver.assertNotComplete()
+
+        // feed first child
+        val taskRecord2 = mockTaskRecord(taskKey2, children = setOf(taskKey4))
+
+        acceptTask(taskKey2, taskRecord2)
+        testObserver.assertNotComplete()
+
+        acceptTime(taskRecord2)
+        testObserver.assertNotComplete()
+
+        // feed second child
+        val taskRecord3 = mockTaskRecord(taskKey3, children = setOf(taskKey5))
+
+        acceptTask(taskKey3, taskRecord3)
+        testObserver.assertNotComplete()
+
+        acceptTime(taskRecord3)
+        testObserver.assertNotComplete()
+
+        // feed first subchild
+        val taskRecord4 = mockTaskRecord(taskKey4)
+
+        acceptTask(taskKey4, taskRecord4)
+        testObserver.assertNotComplete()
+
+        acceptTime(taskRecord4)
+        testObserver.assertNotComplete()
+
+        // feed second subchild
+        val taskRecord5 = mockTaskRecord(taskKey5)
+
+        acceptTask(taskKey5, taskRecord5)
+        testObserver.assertNotComplete()
+
+        acceptTime(taskRecord5)
+        testObserver.assertComplete()
+    }
+
+    // todo task fetch remember to test loop!
 }

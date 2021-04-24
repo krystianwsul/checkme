@@ -187,7 +187,7 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
             rootReference.child("$TASKS_KEY/${rootTaskKey.taskId}")
 
     override fun getRootTaskObservable(rootTaskKey: TaskKey.Root) =
-            rootTaskQuery(rootTaskKey).typedSnapshotChanges<RootTaskJson>() // todo task after fetch rxpaper
+            rootTaskQuery(rootTaskKey).typedSnapshotChanges<RootTaskJson>() // todo task rxpaper
 
     sealed class LoadState<T : Any> {
 

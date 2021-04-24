@@ -22,7 +22,7 @@ class RootTask(
 ) {
 
     /**
-     * todo task after fetch this is kinda insane, but I'm going to cross my fingers that the projectKey won't be immediately
+     * todo task project this is kinda insane, but I'm going to cross my fingers that the projectKey won't be immediately
      * necessary when creating the object.  I'm going to initialize it AFTER the project is initialized.  Probably
      * build this out to a delegate that does book-keeping on whether or not the projectKey is valid (init vs. editing)
      *
@@ -55,7 +55,7 @@ class RootTask(
             note: String?,
             image: TaskJson.Image?,
             ordinal: Double?,
-    ) = TODO("todo task after fetch")
+    ) = TODO("todo task edit")
 
     override fun deleteFromParent() = parent.deleteTask(this)
 

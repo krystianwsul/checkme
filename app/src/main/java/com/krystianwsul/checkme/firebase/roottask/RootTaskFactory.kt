@@ -67,7 +67,7 @@ class RootTaskFactory(
     }
 
     override fun deleteTask(task: RootTask) {
-        TODO("todo task after fetch")
+        TODO("todo task edit")
     }
 
     override fun getTask(taskKey: TaskKey.Root): RootTask {

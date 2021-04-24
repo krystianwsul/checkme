@@ -44,7 +44,7 @@ class RecursiveTaskRecordLoader(
         val loadedObservable = getRecordsState.ofType<GetRecordsState.Loaded>()
 
         completable = listOf(
-                stateProcessor.ignoreElements().toObservable<GetRecordsState.Loaded>(), // never completes, just hiding subscription
+                stateProcessor.ignoreElements().toObservable(), // never completes, just hiding subscription
                 loadedObservable,
         ).merge()
                 .firstOrError()
@@ -136,7 +136,7 @@ class RecursiveTaskRecordLoader(
             newMap[taskRecord.taskKey] =
                     TaskLoadState.LoadingTimes(taskRecord, rootTaskUserCustomTimeProviderSource)
 
-            return oldMap + newEntries
+            return newMap
         }
     }
 

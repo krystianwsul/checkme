@@ -135,12 +135,12 @@ object RelevanceChecker {
                                 privateProject,
                                 ExactTimeStamp.Local.now,
                         )
-
-                        check(privateData == null)
-
-                        privateData = privateProjectManager
-                        projectCallback()
                     }
+
+                    check(privateData == null)
+
+                    privateData = privateProjectManager
+                    projectCallback()
                 }
 
                 databaseWrapper.getSharedProjects {

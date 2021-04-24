@@ -23,8 +23,9 @@ class RootTaskLoader(
 ) {
 
     private fun <T> Observable<T>.replayImmediate() = replay().apply { domainDisposable += connect() }!!
+    private fun <T> Observable<T>.publishImmediate() = publish().apply { domainDisposable += connect() }!!
 
-    private val databaseRxObservable: Observable<MapChanges<Set<TaskKey.Root>, TaskKey.Root, DatabaseRx<Snapshot<RootTaskJson>>>> = taskKeysObservable.processChanges(
+    val databaseRxObservable: Observable<MapChanges<Set<TaskKey.Root>, TaskKey.Root, DatabaseRx<Snapshot<RootTaskJson>>>> = taskKeysObservable.processChanges(
             { it },
             { _, taskKey ->
                 DatabaseRx(

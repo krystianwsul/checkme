@@ -26,6 +26,13 @@ interface ProjectToRootTaskCoordinator {
              * first accessed (even if the objects are present earlier, they won't be queried), so all tasks have to
              * be initialized and ready to go (recursively) before this completes.
              */
+
+            /**
+             * Ho hum.  We need a way to determine which task records have been loaded.  Ultimately, this delay is so
+             * that by the time a project is initialized, all the tasks, and all the custom times they use, are all
+             * initialized.  That part's something we can check at the TaskFactory level, like how we check for custom
+             * times.  (Since the task model objects should be ready before the project model is constructed.)
+             */
         }
     }
 }

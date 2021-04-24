@@ -51,8 +51,7 @@ fun DomainFactory.getShowTaskData(requestTaskKey: TaskKey): ShowTaskViewModel.Da
     ).joinToString("\n\n")
 
     if (debugMode) {
-        collapseText += "\n\nproject key: " + (taskKey as TaskKey.Project).projectKey // todo task after model
-        collapseText += "\ntask id: " + taskKey.taskId
+        collapseText += "\n\ntaskKey: $taskKey"
         collapseText += "\nstartTime: " + task.startExactTimeStampOffset
     }
 

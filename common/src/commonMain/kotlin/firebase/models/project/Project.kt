@@ -321,11 +321,11 @@ abstract class Project<T : ProjectType>(
     fun getTaskForce(taskId: String) = _tasks[taskId]
             ?: throw MissingTaskException(projectKey, taskId)
 
-    fun getTaskHierarchiesByChildTaskKey(childTaskKey: TaskKey): Set<ProjectTaskHierarchy> { // todo task after model
+    fun getTaskHierarchiesByChildTaskKey(childTaskKey: TaskKey): Set<ProjectTaskHierarchy> { // todo task after project
         return taskHierarchyContainer.getByChildTaskKey(childTaskKey)
     }
 
-    fun getTaskHierarchiesByParentTaskKey(parentTaskKey: TaskKey): Set<TaskHierarchy> { // todo task after model
+    fun getTaskHierarchiesByParentTaskKey(parentTaskKey: TaskKey): Set<TaskHierarchy> { // todo task after project
         val projectTaskHierarchies = taskHierarchyContainer.getByParentTaskKey(parentTaskKey)
 
         val nestedTaskHierarchies = tasks.flatMap {
@@ -501,7 +501,7 @@ abstract class Project<T : ProjectType>(
 
     abstract fun getAssignedTo(userKeys: Set<UserKey>): Map<UserKey, ProjectUser>
 
-    fun getInstance(instanceKey: InstanceKey) = getTaskForce((instanceKey.taskKey as TaskKey.Project).taskId).getInstance( // todo task after model
+    fun getInstance(instanceKey: InstanceKey) = getTaskForce((instanceKey.taskKey as TaskKey.Project).taskId).getInstance( // todo task after project
             DateTime(
                     instanceKey.scheduleKey.scheduleDate,
                     getTime(instanceKey.scheduleKey.scheduleTimePair),

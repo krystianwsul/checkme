@@ -239,12 +239,12 @@ class ProjectsFactory(
 
     private fun getProjectForce(taskKey: TaskKey) = getProjectIfPresent(taskKey)!!
 
-    private fun getProjectIfPresent(taskKey: TaskKey) = projects[(taskKey as TaskKey.Project).projectKey] // todo task after model
+    private fun getProjectIfPresent(taskKey: TaskKey) = projects[(taskKey as TaskKey.Project).projectKey] // todo task after project
 
-    fun getTaskForce(taskKey: TaskKey) = getProjectForce(taskKey).getTaskForce((taskKey as TaskKey.Project).taskId) // todo task after model
+    fun getTaskForce(taskKey: TaskKey) = getProjectForce(taskKey).getTaskForce((taskKey as TaskKey.Project).taskId) // todo task after project
 
     fun getTaskIfPresent(taskKey: TaskKey) =
-            getProjectIfPresent(taskKey)?.getTaskIfPresent((taskKey as TaskKey.Project).taskId) // todo task after model
+            getProjectIfPresent(taskKey)?.getTaskIfPresent((taskKey as TaskKey.Project).taskId) // todo task after project
 
     fun updateDeviceInfo(deviceDbInfo: DeviceDbInfo) = sharedProjects.values.forEach {
         it.updateDeviceDbInfo(deviceDbInfo)
@@ -266,8 +266,8 @@ class ProjectsFactory(
         return when (taskHierarchyKey) {
             is TaskHierarchyKey.Project -> projects.getValue(taskHierarchyKey.projectId)
                     .getProjectTaskHierarchy(taskHierarchyKey.taskHierarchyId)
-            is TaskHierarchyKey.Nested -> projects.getValue((taskHierarchyKey.childTaskKey as TaskKey.Project).projectKey) // todo task after model
-                    .getTaskForce((taskHierarchyKey.childTaskKey as TaskKey.Project).taskId) // todo task after model
+            is TaskHierarchyKey.Nested -> projects.getValue((taskHierarchyKey.childTaskKey as TaskKey.Project).projectKey) // todo task after project
+                    .getTaskForce((taskHierarchyKey.childTaskKey as TaskKey.Project).taskId) // todo task after project
                     .nestedParentTaskHierarchies.getValue(taskHierarchyKey.taskHierarchyId)
             else -> throw UnsupportedOperationException() // compilation
         }

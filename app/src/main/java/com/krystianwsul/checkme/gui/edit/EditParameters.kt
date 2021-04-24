@@ -65,7 +65,7 @@ sealed class EditParameters : Parcelable {
                             .values()[intent.getIntExtra(EditActivity.KEY_PARENT_PROJECT_TYPE, -1)]
                             .newKey(intent.getStringExtra(EditActivity.KEY_PARENT_PROJECT_KEY)!!)
 
-                    Shortcut(TaskKey.Project(projectKey, intent.getStringExtra(EditActivity.KEY_PARENT_TASK)!!)) // todo task after model
+                    Shortcut(TaskKey.Project(projectKey, intent.getStringExtra(EditActivity.KEY_PARENT_TASK)!!)) // todo task shortcut
                 }
                 else -> None
             }

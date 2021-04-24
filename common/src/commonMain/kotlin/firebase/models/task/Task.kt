@@ -29,7 +29,7 @@ abstract class Task(
         private val parentTaskDelegate: ParentTaskDelegate,
 ) : Current, CurrentOffset, QueryMatchable, Assignable {
 
-    abstract val project: Project<*> // todo task after model check usages outside here
+    abstract val project: Project<*> // todo task project
 
     private val endDataProperty = invalidatableLazyCallbacks {
         taskRecord.endData?.let {

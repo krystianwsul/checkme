@@ -133,7 +133,7 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
 
     private val instanceKeys by lazy { requireArguments().getParcelableArrayList<InstanceKey>(INSTANCE_KEYS)!! }
 
-    private val projectKey by lazy { instanceKeys.map { (it.taskKey as TaskKey.Project).projectKey }.distinct().singleOrNull() } // todo task after model
+    private val projectKey by lazy { instanceKeys.map { (it.taskKey as TaskKey.Project).projectKey }.distinct().singleOrNull() } // todo task after project
 
     private val parentPickerDelegate by lazy {
         object : ParentPickerFragment.Delegate {

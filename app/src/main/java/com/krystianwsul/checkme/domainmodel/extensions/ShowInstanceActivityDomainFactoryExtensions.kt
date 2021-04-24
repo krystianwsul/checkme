@@ -56,8 +56,7 @@ fun DomainFactory.getShowInstanceData(requestInstanceKey: InstanceKey): ShowInst
     ).joinToString("\n\n")
 
     if (debugMode) {
-        displayText += "\n\nproject key: " + (instanceKey.taskKey as TaskKey.Project).projectKey // todo task after model
-        displayText += "\ntask id: " + (instanceKey.taskKey as TaskKey.Project).taskId // todo task after model
+        displayText += "\n\ntask key: " + instanceKey.taskKey
         displayText += "\ndate: " + instanceKey.scheduleKey.scheduleDate
         displayText += "\ncustom time: " + instanceKey.scheduleKey.scheduleTimePair.customTimeKey
         displayText += "\nnormal time: " + instanceKey.scheduleKey.scheduleTimePair.hourMinute

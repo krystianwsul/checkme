@@ -286,5 +286,41 @@ class RecursiveTaskRecordLoaderTest {
         testObserver.assertComplete()
     }
 
-    // todo task fetch remember to test loop!
+    @Test
+    fun testOneChildLoop() {
+        val initialTaskRecord = mockTaskRecord(taskKey1, children = setOf(taskKey2))
+
+        initLoader(initialTaskRecord)
+        testObserver.assertNotComplete()
+
+        acceptTime(initialTaskRecord)
+        testObserver.assertNotComplete()
+
+        val taskRecord2 = mockTaskRecord(taskKey2, children = setOf(taskKey1))
+
+        acceptTask(taskKey2, taskRecord2)
+        testObserver.assertNotComplete()
+
+        acceptTime(taskRecord2)
+        testObserver.assertComplete()
+    }
+
+    @Test
+    fun testOneChildLoopParent() {
+        val initialTaskRecord = mockTaskRecord(taskKey1, children = setOf(taskKey2))
+
+        initLoader(initialTaskRecord)
+        testObserver.assertNotComplete()
+
+        acceptTime(initialTaskRecord)
+        testObserver.assertNotComplete()
+
+        val taskRecord2 = mockTaskRecord(taskKey2, parents = setOf(taskKey1))
+
+        acceptTask(taskKey2, taskRecord2)
+        testObserver.assertNotComplete()
+
+        acceptTime(taskRecord2)
+        testObserver.assertComplete()
+    }
 }

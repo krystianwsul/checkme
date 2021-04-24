@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.firebase.roottask
 
 import com.krystianwsul.checkme.utils.SingleParamSingleSource
 import com.krystianwsul.common.firebase.records.task.RootTaskRecord
+import com.krystianwsul.common.firebase.records.taskhierarchy.NestedTaskHierarchyRecord
 import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.utils.TaskKey
 import io.mockk.every
@@ -14,6 +15,11 @@ class RecursiveTaskRecordLoaderTest {
     companion object {
 
         val taskKey1 = TaskKey.Root("taskKey1")
+        val taskKey2 = TaskKey.Root("taskKey2")
+        val taskKey3 = TaskKey.Root("taskKey3")
+        val taskKey4 = TaskKey.Root("taskKey4")
+        val taskKey5 = TaskKey.Root("taskKey5")
+        val taskKey6 = TaskKey.Root("taskKey6")
     }
 
     private class TestTaskRecordLoader : RecursiveTaskRecordLoader.TaskRecordLoader {
@@ -50,25 +56,159 @@ class RecursiveTaskRecordLoaderTest {
         testObserver = recursiveTaskRecordLoader.completable.test()
     }
 
-    private fun mockTaskRecord(taskKey: TaskKey.Root) = mockk<RootTaskRecord> {
+    private fun mockTaskRecord(
+            taskKey: TaskKey.Root,
+            children: Set<TaskKey.Root> = emptySet(),
+            parents: Set<TaskKey.Root> = emptySet(),
+    ) = mockk<RootTaskRecord> {
         every { this@mockk.taskKey } returns taskKey
-        every { taskHierarchyRecords } returns mutableMapOf()
+
+        every { taskHierarchyRecords } returns parents.mapIndexed { index, parentTaskKey ->
+            index.toString() to mockk<NestedTaskHierarchyRecord> {
+                every { parentTaskId } returns parentTaskKey.taskId
+            }
+        }
+                .toMap()
+                .toMutableMap()
 
         every { rootTaskParentDelegate } returns mockk {
-            every { rootTaskKeys } returns setOf()
+            every { rootTaskKeys } returns children
         }
     }
 
+    private fun acceptTime(taskRecord: RootTaskRecord) =
+            rootTaskUserCustomTimeProviderSource.singleParamSingleSource.accept(taskRecord, mockk())
+
+    private fun acceptTask(taskKey: TaskKey.Root, taskRecord: RootTaskRecord) =
+            taskRecordLoader.singleParamSingleSource.accept(taskKey, taskRecord)
+
     @Test
-    fun testNoChildrenOrTimesCompletesImmediately() {
+    fun testNoChildrenCompletesImmediately() {
         val initialTaskRecord = mockTaskRecord(taskKey1)
 
         initLoader(initialTaskRecord)
-
         testObserver.assertNotComplete()
 
-        rootTaskUserCustomTimeProviderSource.singleParamSingleSource.accept(initialTaskRecord, mockk())
+        acceptTime(initialTaskRecord)
+        testObserver.assertComplete()
+    }
 
+    @Test
+    fun testOneImmediateChild() {
+        val initialTaskRecord = mockTaskRecord(taskKey1, children = setOf(taskKey2))
+
+        initLoader(initialTaskRecord)
+        testObserver.assertNotComplete()
+
+        acceptTime(initialTaskRecord)
+        testObserver.assertNotComplete()
+
+        val taskRecord2 = mockTaskRecord(taskKey2)
+
+        acceptTask(taskKey2, taskRecord2)
+        testObserver.assertNotComplete()
+
+        acceptTime(taskRecord2)
+        testObserver.assertComplete()
+    }
+
+    @Test
+    fun testOneImmediateChildTimesLast() {
+        val initialTaskRecord = mockTaskRecord(taskKey1, children = setOf(taskKey2))
+
+        initLoader(initialTaskRecord)
+        testObserver.assertNotComplete()
+
+        val taskRecord2 = mockTaskRecord(taskKey2)
+
+        acceptTask(taskKey2, taskRecord2)
+        testObserver.assertNotComplete()
+
+        acceptTime(initialTaskRecord)
+        testObserver.assertNotComplete()
+
+        acceptTime(taskRecord2)
+        testObserver.assertComplete()
+    }
+
+    @Test
+    fun testTwoImmediateChildren() {
+        val initialTaskRecord = mockTaskRecord(taskKey1, children = setOf(taskKey2, taskKey3))
+
+        initLoader(initialTaskRecord)
+        testObserver.assertNotComplete()
+
+        acceptTime(initialTaskRecord)
+        testObserver.assertNotComplete()
+
+        val taskRecord2 = mockTaskRecord(taskKey2)
+
+        acceptTask(taskKey2, taskRecord2)
+        testObserver.assertNotComplete()
+
+        acceptTime(taskRecord2)
+        testObserver.assertNotComplete()
+
+        val taskRecord3 = mockTaskRecord(taskKey3)
+
+        acceptTask(taskKey3, taskRecord3)
+        testObserver.assertNotComplete()
+
+        acceptTime(taskRecord3)
+        testObserver.assertComplete()
+    }
+
+    @Test
+    fun testTwoImmediateChildrenTimesLast() {
+        val initialTaskRecord = mockTaskRecord(taskKey1, children = setOf(taskKey2, taskKey3))
+
+        initLoader(initialTaskRecord)
+        testObserver.assertNotComplete()
+
+        val taskRecord2 = mockTaskRecord(taskKey2)
+
+        acceptTask(taskKey2, taskRecord2)
+        testObserver.assertNotComplete()
+
+        val taskRecord3 = mockTaskRecord(taskKey3)
+
+        acceptTask(taskKey3, taskRecord3)
+        testObserver.assertNotComplete()
+
+        acceptTime(initialTaskRecord)
+        testObserver.assertNotComplete()
+
+        acceptTime(taskRecord2)
+        testObserver.assertNotComplete()
+
+        acceptTime(taskRecord3)
+        testObserver.assertComplete()
+    }
+
+    @Test
+    fun testChildAndParent() {
+        val initialTaskRecord = mockTaskRecord(taskKey1, children = setOf(taskKey2), parents = setOf(taskKey3))
+
+        initLoader(initialTaskRecord)
+        testObserver.assertNotComplete()
+
+        acceptTime(initialTaskRecord)
+        testObserver.assertNotComplete()
+
+        val taskRecord2 = mockTaskRecord(taskKey2)
+
+        acceptTask(taskKey2, taskRecord2)
+        testObserver.assertNotComplete()
+
+        acceptTime(taskRecord2)
+        testObserver.assertNotComplete()
+
+        val taskRecord3 = mockTaskRecord(taskKey3)
+
+        acceptTask(taskKey3, taskRecord3)
+        testObserver.assertNotComplete()
+
+        acceptTime(taskRecord3)
         testObserver.assertComplete()
     }
 }

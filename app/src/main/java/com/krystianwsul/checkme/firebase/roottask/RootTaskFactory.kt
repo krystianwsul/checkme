@@ -72,11 +72,9 @@ class RootTaskFactory(
         TODO("todo task edit")
     }
 
-    override fun getTask(taskKey: TaskKey.Root): RootTask {
-        TODO("todo task after fetch")
-    }
+    override fun getTask(taskKey: TaskKey.Root) = rootTasks.getValue(taskKey)
 
     override fun getProject(projectKey: ProjectKey<*>): Project<*> {
-        TODO("todo task after fetch")
+        TODO("todo task project")
     }
 }

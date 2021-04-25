@@ -41,6 +41,7 @@ import com.krystianwsul.common.firebase.models.project.PrivateProject
 import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.task.ProjectTask
 import com.krystianwsul.common.firebase.models.task.Task
+import com.krystianwsul.common.firebase.models.taskhierarchy.TaskHierarchy
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.*
 import io.reactivex.rxjava3.core.Observable
@@ -344,8 +345,18 @@ class DomainFactory(
 
         taskUndoData.taskHierarchyKeys
                 .asSequence()
-                .map { projectsFactory.getTaskHierarchy(it) }
+                .map(::getTaskHierarchy)
                 .forEach { it.clearEndExactTimeStamp(now) }
+    }
+
+    private fun getTaskHierarchy(taskHierarchyKey: TaskHierarchyKey): TaskHierarchy {
+        return when (taskHierarchyKey) {
+            is TaskHierarchyKey.Project -> projectsFactory.getProjectForce(taskHierarchyKey.projectId)
+                    .getProjectTaskHierarchy(taskHierarchyKey.taskHierarchyId)
+            is TaskHierarchyKey.Nested -> getTaskForce(taskHierarchyKey.childTaskKey)
+                    .getNestedTaskHierarchy(taskHierarchyKey.taskHierarchyId)
+            else -> throw UnsupportedOperationException()
+        }
     }
 
     // internal

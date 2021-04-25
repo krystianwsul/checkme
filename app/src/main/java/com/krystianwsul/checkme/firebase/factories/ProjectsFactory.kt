@@ -19,7 +19,6 @@ import com.krystianwsul.common.firebase.models.project.PrivateProject
 import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.project.SharedProject
 import com.krystianwsul.common.firebase.models.task.ProjectTask
-import com.krystianwsul.common.firebase.models.taskhierarchy.TaskHierarchy
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.*
@@ -237,15 +236,4 @@ class ProjectsFactory(
             ?.value
 
     fun getProjectForce(projectId: String) = getProjectIfPresent(projectId)!!
-
-    fun getTaskHierarchy(taskHierarchyKey: TaskHierarchyKey): TaskHierarchy {
-        return when (taskHierarchyKey) {
-            is TaskHierarchyKey.Project -> projects.getValue(taskHierarchyKey.projectId)
-                    .getProjectTaskHierarchy(taskHierarchyKey.taskHierarchyId)
-            is TaskHierarchyKey.Nested -> projects.getValue((taskHierarchyKey.childTaskKey as TaskKey.Project).projectKey) // todo task fetch
-                    .getTaskForce((taskHierarchyKey.childTaskKey as TaskKey.Project).taskId) // todo task fetch
-                    .nestedParentTaskHierarchies.getValue(taskHierarchyKey.taskHierarchyId)
-            else -> throw UnsupportedOperationException() // compilation
-        }
-    }
 }

@@ -215,6 +215,8 @@ abstract class Task(
             .onEach { it.setEndExactTimeStamp(now.toOffset()) }
             .map { it.id }
 
+    fun getNestedTaskHierarchy(taskHierarchyId: String) = nestedParentTaskHierarchies.getValue(taskHierarchyId)
+
     private fun getParentTaskHierarchy(exactTimeStamp: ExactTimeStamp): HierarchyInterval? {
         requireCurrentOffset(exactTimeStamp)
 

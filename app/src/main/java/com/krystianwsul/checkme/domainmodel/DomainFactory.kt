@@ -517,7 +517,7 @@ class DomainFactory(
 
     private val customTimes get() = projectsFactory.remoteCustomTimes
 
-    fun getTaskForce(taskKey: TaskKey) = projectsFactory.getTaskForce(taskKey) // todo task after project
+    fun getTaskForce(taskKey: TaskKey) = projectsFactory.getTaskForce(taskKey) // todo task fetch
 
     fun getTaskIfPresent(taskKey: TaskKey) = projectsFactory.getTaskIfPresent(taskKey)
 

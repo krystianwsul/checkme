@@ -237,14 +237,14 @@ class ProjectsFactory(
     fun getCustomTime(customTimeKey: CustomTimeKey.Project<*>) =
             projects.getValue(customTimeKey.projectId).getUntypedProjectCustomTime(customTimeKey.customTimeId)
 
-    private fun getProjectForce(taskKey: TaskKey) = getProjectIfPresent(taskKey)!!
+    private fun getProjectForce(taskKey: TaskKey) = getProjectIfPresent(taskKey)!! // todo task fetch
 
-    private fun getProjectIfPresent(taskKey: TaskKey) = projects[(taskKey as TaskKey.Project).projectKey] // todo task after project
+    private fun getProjectIfPresent(taskKey: TaskKey) = projects[(taskKey as TaskKey.Project).projectKey] // todo task fetch
 
-    fun getTaskForce(taskKey: TaskKey) = getProjectForce(taskKey).getTaskForce((taskKey as TaskKey.Project).taskId) // todo task after project
+    fun getTaskForce(taskKey: TaskKey) = getProjectForce(taskKey).getTaskForce((taskKey as TaskKey.Project).taskId) // todo task fetch
 
     fun getTaskIfPresent(taskKey: TaskKey) =
-            getProjectIfPresent(taskKey)?.getTaskIfPresent((taskKey as TaskKey.Project).taskId) // todo task after project
+            getProjectIfPresent(taskKey)?.getTaskIfPresent((taskKey as TaskKey.Project).taskId) // todo task fetch
 
     fun updateDeviceInfo(deviceDbInfo: DeviceDbInfo) = sharedProjects.values.forEach {
         it.updateDeviceDbInfo(deviceDbInfo)
@@ -268,8 +268,8 @@ class ProjectsFactory(
         return when (taskHierarchyKey) {
             is TaskHierarchyKey.Project -> projects.getValue(taskHierarchyKey.projectId)
                     .getProjectTaskHierarchy(taskHierarchyKey.taskHierarchyId)
-            is TaskHierarchyKey.Nested -> projects.getValue((taskHierarchyKey.childTaskKey as TaskKey.Project).projectKey) // todo task after project
-                    .getTaskForce((taskHierarchyKey.childTaskKey as TaskKey.Project).taskId) // todo task after project
+            is TaskHierarchyKey.Nested -> projects.getValue((taskHierarchyKey.childTaskKey as TaskKey.Project).projectKey) // todo task fetch
+                    .getTaskForce((taskHierarchyKey.childTaskKey as TaskKey.Project).taskId) // todo task fetch
                     .nestedParentTaskHierarchies.getValue(taskHierarchyKey.taskHierarchyId)
             else -> throw UnsupportedOperationException() // compilation
         }

@@ -123,7 +123,7 @@ class ProjectsFactory(
 
     val projects get() = sharedProjects + mapOf(privateProject.projectKey to privateProject)
 
-    val tasks get() = projects.values.flatMap { it.projectTasks } // todo task fetch
+    val tasks get() = projects.values.flatMap { it.projectTasks }
 
     val taskKeys
         get() = projects.values

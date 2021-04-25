@@ -55,7 +55,7 @@ abstract class Project<T : ProjectType>(
 
     abstract val customTimes: Collection<Time.Custom.Project<T>>
 
-    val taskHierarchies: Collection<TaskHierarchy> // todo task fetch
+    val taskHierarchies
         get() =
             taskHierarchyContainer.all + projectTasks.flatMap { it.nestedParentTaskHierarchies.values }
 

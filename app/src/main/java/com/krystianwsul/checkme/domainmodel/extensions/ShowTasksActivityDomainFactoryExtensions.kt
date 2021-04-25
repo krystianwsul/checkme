@@ -76,7 +76,7 @@ fun DomainFactory.getShowTasksData(parameters: ShowTasksActivity.Parameters): Sh
         is ShowTasksActivity.Parameters.Project -> {
             val project = projectsFactory.getProjectForce(parameters.projectKey)
 
-            entryDatas = project.projectTasks.map { it.toChildTaskData() } // todo task fetch
+            entryDatas = project.getAllTasks().map { it.toChildTaskData() }
 
             title = project.getDisplayName()
 

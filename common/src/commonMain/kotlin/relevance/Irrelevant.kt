@@ -24,7 +24,7 @@ object Irrelevant {
             now: ExactTimeStamp.Local,
             delete: Boolean = true,
     ): Result {
-        val tasks = project.projectTasks // todo task fetch
+        val tasks = project.projectTasks // todo task relevance
 
         tasks.forEach {
             it.correctIntervalEndExactTimeStamps()
@@ -35,7 +35,7 @@ object Irrelevant {
         // relevant hack
         val taskRelevances = tasks.associate { it.taskKey as TaskKey to TaskRelevance(it) } // todo task relevance
 
-        val taskHierarchies = project.taskHierarchies
+        val taskHierarchies = project.taskHierarchies // todo task relevance
         val taskHierarchyRelevances = taskHierarchies.associate { it.taskHierarchyKey to TaskHierarchyRelevance(it) }
 
         val existingInstances = project.existingInstances

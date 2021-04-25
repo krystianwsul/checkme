@@ -218,7 +218,7 @@ class ProjectsFactoryTest {
                     PrivateProjectJson(tasks = mutableMapOf(taskKey.taskId to PrivateTaskJson("task"))),
             ))
         }
-        assertEquals(projectsFactory.privateProject.tasks.size, 1)
+        assertEquals(projectsFactory.privateProject.projectTasks.size, 1)
     }
 
     @Test
@@ -238,7 +238,7 @@ class ProjectsFactoryTest {
                     PrivateProjectJson(tasks = mutableMapOf(taskKey.taskId to PrivateTaskJson("task"))),
             ))
         }
-        assertEquals(projectsFactory.privateProject.tasks.size, 1)
+        assertEquals(projectsFactory.privateProject.projectTasks.size, 1)
     }
 
     @Test
@@ -291,7 +291,7 @@ class ProjectsFactoryTest {
                     PrivateProjectJson(tasks = mutableMapOf(taskKey.taskId to PrivateTaskJson(name))),
             ))
         }
-        assertEquals(projectsFactory.privateProject.tasks.single().name, name)
+        assertEquals(projectsFactory.privateProject.projectTasks.single().name, name)
     }
 
     @Test
@@ -313,7 +313,7 @@ class ProjectsFactoryTest {
         val name = "task1"
 
         projectsFactory.privateProject
-                .tasks
+                .projectTasks
                 .single()
                 .setName(name, null)
         projectsFactory.save()
@@ -323,7 +323,7 @@ class ProjectsFactoryTest {
                 privateProjectKey.key,
                 PrivateProjectJson(tasks = mutableMapOf(taskKey.taskId to PrivateTaskJson(name))),
         ))
-        assertEquals(projectsFactory.privateProject.tasks.single().name, name)
+        assertEquals(projectsFactory.privateProject.projectTasks.single().name, name)
     }
 
     @Test
@@ -345,7 +345,7 @@ class ProjectsFactoryTest {
         emissionChecker.checkRemote {
             privateProjectRelay.accept(Snapshot(privateProjectKey.key, PrivateProjectJson()))
         }
-        assertTrue(projectsFactory.privateProject.tasks.isEmpty())
+        assertTrue(projectsFactory.privateProject.projectTasks.isEmpty())
     }
 
     @Test
@@ -367,7 +367,7 @@ class ProjectsFactoryTest {
         val hourMinute = HourMinute.now
 
         val instance = projectsFactory.privateProject
-                .tasks
+                .projectTasks
                 .single()
                 .getInstance(DateTime(date, Time.Normal(hourMinute)))
 

@@ -11,7 +11,7 @@ import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.viewmodels.ShowTasksViewModel
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.models.project.SharedProject
-import com.krystianwsul.common.firebase.models.task.ProjectTask
+import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.time.ExactTimeStamp
 
 fun DomainFactory.getShowTasksData(parameters: ShowTasksActivity.Parameters): ShowTasksViewModel.Data {
@@ -21,7 +21,7 @@ fun DomainFactory.getShowTasksData(parameters: ShowTasksActivity.Parameters): Sh
 
     val now = ExactTimeStamp.Local.now
 
-    fun ProjectTask.toChildTaskData(): TaskListFragment.ChildTaskData {
+    fun Task.toChildTaskData(): TaskListFragment.ChildTaskData {
         val hierarchyExactTimeStamp = getHierarchyExactTimeStamp(now)
 
         return TaskListFragment.ChildTaskData(
@@ -52,7 +52,7 @@ fun DomainFactory.getShowTasksData(parameters: ShowTasksActivity.Parameters): Sh
             entryDatas = projectsFactory.projects
                     .values
                     .map {
-                        val childTaskDatas = it.tasks
+                        val childTaskDatas = it.getAllTasks()
                                 .filter { it.current(now) && it.isUnscheduled(now) }
                                 .map { it.toChildTaskData() }
 
@@ -76,7 +76,7 @@ fun DomainFactory.getShowTasksData(parameters: ShowTasksActivity.Parameters): Sh
         is ShowTasksActivity.Parameters.Project -> {
             val project = projectsFactory.getProjectForce(parameters.projectKey)
 
-            entryDatas = project.tasks.map { it.toChildTaskData() }
+            entryDatas = project.projectTasks.map { it.toChildTaskData() } // todo task fetch
 
             title = project.getDisplayName()
 

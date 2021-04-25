@@ -24,7 +24,7 @@ object Irrelevant {
             now: ExactTimeStamp.Local,
             delete: Boolean = true,
     ): Result {
-        val tasks = project.tasks
+        val tasks = project.projectTasks // todo task fetch
 
         tasks.forEach {
             it.correctIntervalEndExactTimeStamps()

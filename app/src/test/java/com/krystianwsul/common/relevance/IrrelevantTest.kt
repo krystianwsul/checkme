@@ -185,7 +185,7 @@ class IrrelevantTest {
 
         val projectRecord = PrivateProjectRecord(databaseWrapper, projectKey, projectJson)
         val project = PrivateProject(projectRecord, mockk(), mockk())
-        val task = project.tasks.single()
+        val task = project.projectTasks.single()
 
         // 2. Mark single instance done
 
@@ -315,7 +315,7 @@ class IrrelevantTest {
         val projectRecord = PrivateProjectRecord(databaseWrapper, projectKey, projectJson)
         val project = PrivateProject(projectRecord, mockk(), mockk())
 
-        val parentTask = project.tasks.single { it.isTopLevelTask(now) }
+        val parentTask = project.projectTasks.single { it.isTopLevelTask(now) }
         assertEquals(2, parentTask.getChildTaskHierarchies(now).size)
 
         val child1Task = parentTask.getChildTaskHierarchies(now)
@@ -447,7 +447,7 @@ class IrrelevantTest {
         val projectRecord = PrivateProjectRecord(databaseWrapper, projectKey, projectJson)
         val project = PrivateProject(projectRecord, mockk(), mockk())
 
-        val parentTask = project.tasks.single { it.isTopLevelTask(now) }
+        val parentTask = project.projectTasks.single { it.isTopLevelTask(now) }
         assertEquals(2, parentTask.getChildTaskHierarchies(now).size)
 
         val child1Task = parentTask.getChildTaskHierarchies(now)

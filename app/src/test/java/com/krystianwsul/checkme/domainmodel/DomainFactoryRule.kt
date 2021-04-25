@@ -15,6 +15,7 @@ import com.krystianwsul.checkme.firebase.loaders.SharedProjectsLoader
 import com.krystianwsul.checkme.firebase.loaders.mockBase64
 import com.krystianwsul.checkme.firebase.managers.AndroidSharedProjectManager
 import com.krystianwsul.checkme.firebase.roottask.ProjectToRootTaskCoordinator
+import com.krystianwsul.checkme.firebase.roottask.RootTaskFactory
 import com.krystianwsul.common.ErrorLogger
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.DeviceInfo
@@ -184,6 +185,10 @@ class DomainFactoryRule : TestRule {
             )
         }
 
+        val rootTaskFactory = mockk<RootTaskFactory>() {
+            every { getRootTasksForProject(any()) } returns emptyList()
+        }
+
         val sharedProjectsLoader = SharedProjectsLoader.Impl(
                 Observable.just(setOf()),
                 spyk(AndroidSharedProjectManager(databaseWrapper)) {
@@ -222,7 +227,7 @@ class DomainFactoryRule : TestRule {
                 domainFactoryStartTime,
                 mockk(relaxed = true),
                 compositeDisposable,
-                mockk(),
+                rootTaskFactory,
         ) { deviceDbInfo }
 
         val friendsFactory = mockk<FriendsFactory> {
@@ -241,7 +246,7 @@ class DomainFactoryRule : TestRule {
                 domainFactoryStartTime,
                 compositeDisposable,
                 databaseWrapper,
-                mockk(),
+                rootTaskFactory,
         ) { TestDomainUpdater(it, ExactTimeStamp.Local.now) }
     }
 

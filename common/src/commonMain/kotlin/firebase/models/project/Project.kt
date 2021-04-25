@@ -51,18 +51,18 @@ abstract class Project<T : ProjectType>(
 
     // don't want these to be mutable
     val projectTaskIds: Set<String> get() = _tasks.keys
-    val tasks: Collection<ProjectTask> get() = _tasks.values // todo task fetch
+    val projectTasks: Collection<ProjectTask> get() = _tasks.values
 
     abstract val customTimes: Collection<Time.Custom.Project<T>>
 
     val taskHierarchies: Collection<TaskHierarchy> // todo task fetch
         get() =
-            taskHierarchyContainer.all + tasks.flatMap { it.nestedParentTaskHierarchies.values }
+            taskHierarchyContainer.all + projectTasks.flatMap { it.nestedParentTaskHierarchies.values }
 
-    val existingInstances get() = tasks.flatMap { it.existingInstances.values }
+    val existingInstances get() = projectTasks.flatMap { it.existingInstances.values } // todo task fetch
 
     protected fun initializeInstanceHierarchyContainers() {
-        tasks.forEach {
+        projectTasks.forEach { // todo task fetch
             it.existingInstances
                     .values
                     .forEach { it.addToParentInstanceHierarchyContainer() }
@@ -329,7 +329,7 @@ abstract class Project<T : ProjectType>(
     override fun getTaskHierarchiesByParentTaskKey(parentTaskKey: TaskKey): Set<TaskHierarchy> {
         val projectTaskHierarchies = taskHierarchyContainer.getByParentTaskKey(parentTaskKey as TaskKey.Project)
 
-        val nestedTaskHierarchies = tasks.flatMap {
+        val nestedTaskHierarchies = projectTasks.flatMap {
             it.nestedParentTaskHierarchies.values
         }.filter { it.parentTaskKey == parentTaskKey }
 
@@ -422,7 +422,7 @@ abstract class Project<T : ProjectType>(
     fun fixNotificationShown(
             shownFactory: Instance.ShownFactory,
             now: ExactTimeStamp.Local,
-    ) = tasks.forEach {
+    ) = projectTasks.forEach { // todo task fetch
         it.existingInstances
                 .values
                 .forEach { it.fixNotificationShown(shownFactory, now) }
@@ -441,7 +441,7 @@ abstract class Project<T : ProjectType>(
 
         InterruptionChecker.throwIfInterrupted()
 
-        val filteredTasks = tasks.asSequence()
+        val filteredTasks = projectTasks.asSequence() // todo task fetch
                 .filter { it.mayHaveRootInstances() }
                 .filterQuery(searchData?.searchCriteria?.query).map { it.first }
                 .toList()

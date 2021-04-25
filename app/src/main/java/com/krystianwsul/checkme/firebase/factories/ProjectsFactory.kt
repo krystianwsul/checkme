@@ -123,7 +123,7 @@ class ProjectsFactory(
 
     val projects get() = sharedProjects + mapOf(privateProject.projectKey to privateProject)
 
-    val tasks get() = projects.values.flatMap { it.tasks }
+    val tasks get() = projects.values.flatMap { it.projectTasks } // todo task fetch
 
     val taskKeys
         get() = projects.values
@@ -136,7 +136,7 @@ class ProjectsFactory(
 
     val taskCount: Int // todo task fetch
         get() = projects.values
-                .map { it.tasks.size }
+                .map { it.projectTasks.size } // todo task fetch
                 .sum()
 
     fun createScheduleTopLevelTask(

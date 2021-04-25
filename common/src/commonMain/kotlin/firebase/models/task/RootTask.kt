@@ -2,6 +2,7 @@ package com.krystianwsul.common.firebase.models.task
 
 import com.krystianwsul.common.firebase.json.tasks.TaskJson
 import com.krystianwsul.common.firebase.models.CopyScheduleHelper
+import com.krystianwsul.common.firebase.models.interval.Type
 import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.taskhierarchy.ParentTaskDelegate
 import com.krystianwsul.common.firebase.models.taskhierarchy.ProjectTaskHierarchy
@@ -21,19 +22,19 @@ class RootTask(
         parent,
 ) {
 
-    /**
-     * todo task project this is kinda insane, but I'm going to cross my fingers that the projectKey won't be immediately
-     * necessary when creating the object.  I'm going to initialize it AFTER the project is initialized.  Probably
-     * build this out to a delegate that does book-keeping on whether or not the projectKey is valid (init vs. editing)
-     *
-     * It feels iffy, but less iffy than passing in the initial projectKey and keeping track of it beforehand.  Ideally,
-     * I'd pass the project into every call that involves the current project, but that would require wrapping the task
-     * into some sort of object that holds the current project and delegates calls to the task, and that would require
-     * a shit-ton of work.
-     */
-    lateinit var projectKey: ProjectKey<*>
+    private val projectProperty = invalidatableLazy {
+        val interval = intervals.last()
 
-    private val projectProperty = invalidatableLazy { parent.getProject(projectKey) }
+        when (val type = interval.type) {
+            is Type.Schedule ->
+                parent.getProject(type.taskParentEntries.maxByOrNull { it.startExactTimeStamp }!!.projectId)
+            is Type.NoSchedule -> parent.getProject(type.noScheduleOrParent!!.projectId)
+            is Type.Child -> type.parentTaskHierarchy
+                    .parentTask
+                    .project
+        }
+    }.apply { addTo(intervalsProperty) }
+
     override val project by projectProperty
 
     override val taskKey get() = TaskKey.Root(taskRecord.id)
@@ -96,6 +97,6 @@ class RootTask(
 
         fun getTask(taskKey: TaskKey.Root): RootTask
 
-        fun getProject(projectKey: ProjectKey<*>): Project<*>
+        fun getProject(projectId: String): Project<*>
     }
 }

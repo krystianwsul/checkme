@@ -44,6 +44,8 @@ abstract class Schedule(val topLevelTask: Task) : TaskParentEntry {
 
     val time get() = timePair.toTime()
 
+    val projectId get() = scheduleRecord.projectId
+
     protected fun TimePair.toTime() = customTimeKey?.let(topLevelTask.project::getCustomTime)
             ?: Time.Normal(hourMinute!!)
 

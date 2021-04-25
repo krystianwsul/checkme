@@ -6,7 +6,6 @@ import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.task.RootTask
 import com.krystianwsul.common.firebase.models.taskhierarchy.TaskHierarchy
-import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
@@ -74,7 +73,7 @@ class RootTaskFactory(
 
     override fun getTask(taskKey: TaskKey.Root) = rootTasks.getValue(taskKey)
 
-    override fun getProject(projectKey: ProjectKey<*>): Project<*> {
+    override fun getProject(projectId: String): Project<*> {
         TODO("todo task project")
     }
 }

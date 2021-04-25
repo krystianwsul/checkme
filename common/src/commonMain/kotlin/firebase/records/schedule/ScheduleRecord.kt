@@ -62,4 +62,6 @@ abstract class ScheduleRecord(
     abstract val scheduleWrapperBridge: ScheduleWrapperBridge
 
     abstract val projectHelper: ProjectHelper
+
+    val projectId get() = projectHelper.getProjectId(scheduleJson)
 }

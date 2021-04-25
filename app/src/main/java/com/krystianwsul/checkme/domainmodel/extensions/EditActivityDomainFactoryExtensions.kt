@@ -118,7 +118,7 @@ fun DomainFactory.getCreateTaskData(
             val task = getTaskForce(currentParentSource.taskKey)
 
             if (task.isTopLevelTask(now)) {
-                when (val projectKey = task.project.projectKey) { // todo task project
+                when (val projectKey = task.project.projectKey) { // todo task edit
                     is ProjectKey.Private -> null
                     is ProjectKey.Shared -> EditViewModel.ParentKey.Project(projectKey)
                     else -> throw UnsupportedOperationException()
@@ -210,7 +210,7 @@ fun DomainUpdater.createScheduleTopLevelTask(
             task.toCreateResult(now),
             true,
             notificationType,
-            DomainFactory.CloudParams(task.project), // todo task project
+            DomainFactory.CloudParams(task.project), // todo task edit
     )
 }.perform(this)
 

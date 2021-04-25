@@ -49,8 +49,8 @@ fun <T> Sequence<T>.takeAndHasMore(n: Int): Pair<List<T>, Boolean> {
 }
 
 fun Task.getProjectInfo(now: ExactTimeStamp.Local): DetailsNode.ProjectInfo? {
-    return if (isTopLevelTask(getHierarchyExactTimeStamp(now)) && project is SharedProject) { // todo task project
-        DetailsNode.ProjectInfo(project.name, DetailsNode.User.fromProjectUsers(getAssignedTo(now))) // todo task project
+    return if (isTopLevelTask(getHierarchyExactTimeStamp(now)) && project is SharedProject) {
+        DetailsNode.ProjectInfo(project.name, DetailsNode.User.fromProjectUsers(getAssignedTo(now)))
     } else {
         check(getAssignedTo(now).isEmpty())
 

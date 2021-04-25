@@ -15,7 +15,7 @@ import com.krystianwsul.checkme.domainmodel.toImageLoader
 import com.krystianwsul.checkme.utils.circle
 import com.krystianwsul.checkme.utils.dpToPx
 import com.krystianwsul.common.domain.DeviceDbInfo
-import com.krystianwsul.common.firebase.models.task.ProjectTask
+import com.krystianwsul.common.firebase.models.task.Task
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.kotlin.subscribeBy
@@ -60,7 +60,7 @@ object ImageManager {
     fun getBigPicture(uuid: String?) = bigPictureDownloader.getImage(uuid)
 
     @Synchronized
-    fun prefetch(deviceDbInfo: DeviceDbInfo, tasks: List<ProjectTask>, callback: () -> Unit) {
+    fun prefetch(deviceDbInfo: DeviceDbInfo, tasks: List<Task>, callback: () -> Unit) {
         largeIconDownloader.prefetch(deviceDbInfo, tasks, callback)
         bigPictureDownloader.prefetch(deviceDbInfo, tasks, callback)
     }
@@ -90,7 +90,7 @@ object ImageManager {
                     .subscribe()
         }
 
-        fun prefetch(deviceDbInfo: DeviceDbInfo, tasks: List<ProjectTask>, callback: () -> Unit) {
+        fun prefetch(deviceDbInfo: DeviceDbInfo, tasks: List<Task>, callback: () -> Unit) {
             val tasksWithImages = tasks.map { it to it.getImage(deviceDbInfo)?.uuid }
                     .filter { it.second != null }
                     .associate { it.second!! to it.first }

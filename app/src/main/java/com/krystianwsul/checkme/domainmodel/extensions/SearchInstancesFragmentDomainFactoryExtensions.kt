@@ -36,6 +36,7 @@ fun DomainFactory.getSearchInstancesData(
             )
 
             val taskDatas = getUnscheduledTasks(now)
+                    .asSequence()
                     .filterQuery(searchCriteria.query)
                     .map { (task, filterResult) ->
                         val childQuery = if (filterResult == FilterResult.MATCHES) null else searchCriteria

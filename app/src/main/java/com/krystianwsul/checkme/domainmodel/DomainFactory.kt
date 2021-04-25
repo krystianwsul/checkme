@@ -145,7 +145,7 @@ class DomainFactory(
 
     // misc
 
-    private fun getAllTasks() = projectsFactory.tasks + rootTaskFactory.rootTasks.values
+    fun getAllTasks() = projectsFactory.tasks + rootTaskFactory.rootTasks.values
 
     val taskCount get() = getAllTasks().size
     val instanceCount get() = getAllTasks().map { it.existingInstances.size }.sum()
@@ -202,7 +202,7 @@ class DomainFactory(
     }
 
     private fun updateShortcuts(now: ExactTimeStamp.Local) {
-        ImageManager.prefetch(deviceDbInfo, getTasks().toList()) {
+        ImageManager.prefetch(deviceDbInfo, getAllTasks()) {
             getDomainUpdater(this).updateNotifications(Notifier.Params()).subscribe()
         }
 
@@ -516,8 +516,6 @@ class DomainFactory(
 
         return remoteToRemoteConversion.endTasks.getValue(startingTask.id)
     }
-
-    fun getTasks() = projectsFactory.tasks.asSequence()
 
     fun getTaskForce(taskKey: TaskKey) = projectsFactory.getTaskForce(taskKey) // todo task fetch
 

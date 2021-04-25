@@ -1,22 +1,21 @@
 package com.krystianwsul.common.domain
 
 import com.krystianwsul.common.firebase.models.taskhierarchy.ProjectTaskHierarchy
-import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.TaskKey
 
-class TaskHierarchyContainer<T : ProjectType> {
+class TaskHierarchyContainer {
 
     private val taskHierarchiesById = HashMap<String, ProjectTaskHierarchy>()
 
-    private val taskHierarchiesByParent = MultiMap<T>()
-    private val taskHierarchiesByChild = MultiMap<T>()
+    private val taskHierarchiesByParent = MultiMap()
+    private val taskHierarchiesByChild = MultiMap()
 
     fun add(id: String, taskHierarchy: ProjectTaskHierarchy) {
         check(!taskHierarchiesById.containsKey(id))
 
         taskHierarchiesById[id] = taskHierarchy
         check(taskHierarchiesByChild.put(taskHierarchy.childTaskKey, taskHierarchy))
-        check(taskHierarchiesByParent.put(taskHierarchy.parentTaskKey, taskHierarchy))
+        check(taskHierarchiesByParent.put(taskHierarchy.parentTaskKey as TaskKey.Project, taskHierarchy))
     }
 
     fun removeForce(id: String) {
@@ -32,39 +31,39 @@ class TaskHierarchyContainer<T : ProjectType> {
         check(taskHierarchiesByChild.remove(childTaskKey, taskHierarchy))
 
         val parentTaskKey = taskHierarchy.parentTaskKey
-        check(taskHierarchiesByParent.containsEntry(parentTaskKey, taskHierarchy))
+        check(taskHierarchiesByParent.containsEntry(parentTaskKey as TaskKey.Project, taskHierarchy))
 
         check(taskHierarchiesByParent.remove(parentTaskKey, taskHierarchy))
     }
 
-    fun getByChildTaskKey(childTaskKey: TaskKey): Set<ProjectTaskHierarchy> = taskHierarchiesByChild.get(childTaskKey) // todo task typing
+    fun getByChildTaskKey(childTaskKey: TaskKey.Project): Set<ProjectTaskHierarchy> = taskHierarchiesByChild.get(childTaskKey) // todo task typing
 
-    fun getByParentTaskKey(parentTaskKey: TaskKey): Set<ProjectTaskHierarchy> = taskHierarchiesByParent.get(parentTaskKey) // todo task typing
+    fun getByParentTaskKey(parentTaskKey: TaskKey.Project): Set<ProjectTaskHierarchy> = taskHierarchiesByParent.get(parentTaskKey) // todo task typing
 
     fun getById(id: String) = taskHierarchiesById[id]!!
 
     val all: Collection<ProjectTaskHierarchy> get() = taskHierarchiesById.values
 
-    private class MultiMap<T : ProjectType> {
+    private class MultiMap {
 
-        private val values = mutableMapOf<TaskKey, MutableSet<ProjectTaskHierarchy>>()
+        private val values = mutableMapOf<TaskKey.Project, MutableSet<ProjectTaskHierarchy>>()
 
-        fun put(taskKey: TaskKey, taskHierarchy: ProjectTaskHierarchy): Boolean {
+        fun put(taskKey: TaskKey.Project, taskHierarchy: ProjectTaskHierarchy): Boolean {
             if (!values.containsKey(taskKey))
                 values[taskKey] = mutableSetOf()
             return values.getValue(taskKey).add(taskHierarchy)
         }
 
         fun containsEntry(
-                taskKey: TaskKey,
+                taskKey: TaskKey.Project,
                 taskHierarchy: ProjectTaskHierarchy,
         ) = values[taskKey]?.contains(taskHierarchy) ?: false
 
         fun remove(
-                taskKey: TaskKey,
+                taskKey: TaskKey.Project,
                 taskHierarchy: ProjectTaskHierarchy,
         ) = values[taskKey]?.remove(taskHierarchy) ?: false
 
-        fun get(taskKey: TaskKey) = values[taskKey]?.toMutableSet() ?: mutableSetOf()
+        fun get(taskKey: TaskKey.Project) = values[taskKey]?.toMutableSet() ?: mutableSetOf()
     }
 }

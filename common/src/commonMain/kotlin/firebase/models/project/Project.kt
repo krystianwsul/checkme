@@ -30,7 +30,7 @@ abstract class Project<T : ProjectType>(
 
     @Suppress("PropertyName")
     protected abstract val _tasks: MutableMap<String, ProjectTask>
-    protected abstract val taskHierarchyContainer: TaskHierarchyContainer<T>
+    protected abstract val taskHierarchyContainer: TaskHierarchyContainer
     protected abstract val remoteCustomTimes: Map<out CustomTimeId.Project, Time.Custom.Project<T>>
 
     abstract val projectKey: ProjectKey<T>
@@ -321,12 +321,11 @@ abstract class Project<T : ProjectType>(
     fun getTaskForce(taskId: String) = _tasks[taskId]
             ?: throw MissingTaskException(projectKey, taskId)
 
-    fun getTaskHierarchiesByChildTaskKey(childTaskKey: TaskKey): Set<ProjectTaskHierarchy> {
-        return taskHierarchyContainer.getByChildTaskKey(childTaskKey)
-    }
+    fun getTaskHierarchiesByChildTaskKey(childTaskKey: TaskKey.Project) =
+            taskHierarchyContainer.getByChildTaskKey(childTaskKey)
 
     override fun getTaskHierarchiesByParentTaskKey(parentTaskKey: TaskKey): Set<TaskHierarchy> {
-        val projectTaskHierarchies = taskHierarchyContainer.getByParentTaskKey(parentTaskKey)
+        val projectTaskHierarchies = taskHierarchyContainer.getByParentTaskKey(parentTaskKey as TaskKey.Project)
 
         val nestedTaskHierarchies = tasks.flatMap {
             it.nestedParentTaskHierarchies.values

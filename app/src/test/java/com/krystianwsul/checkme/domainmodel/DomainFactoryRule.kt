@@ -241,6 +241,7 @@ class DomainFactoryRule : TestRule {
                 domainFactoryStartTime,
                 compositeDisposable,
                 databaseWrapper,
+                mockk(),
         ) { TestDomainUpdater(it, ExactTimeStamp.Local.now) }
     }
 

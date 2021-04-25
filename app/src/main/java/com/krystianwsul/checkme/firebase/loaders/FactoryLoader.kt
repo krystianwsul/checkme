@@ -201,6 +201,7 @@ class FactoryLoader(
                                 startTime,
                                 ExactTimeStamp.Local.now,
                                 domainDisposable,
+                                rootTaskFactory,
                         )
                     }.cacheImmediate()
 

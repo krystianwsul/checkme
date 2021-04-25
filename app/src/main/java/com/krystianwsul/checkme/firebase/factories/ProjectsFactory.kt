@@ -125,8 +125,6 @@ class ProjectsFactory(
 
     val tasks get() = projects.values.flatMap { it.tasks }
 
-    val remoteCustomTimes get() = projects.values.flatMap { it.customTimes } // todo task fetch
-
     val instanceCount // todo task fetch
         get() = projects.values
                 .flatMap { it.tasks }

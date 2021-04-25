@@ -5,6 +5,7 @@ import com.krystianwsul.checkme.domainmodel.DomainFactoryRule
 import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
 import com.krystianwsul.checkme.firebase.loaders.*
 import com.krystianwsul.checkme.firebase.managers.AndroidPrivateProjectManager
+import com.krystianwsul.checkme.firebase.roottask.RootTaskFactory
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.UserInfo
@@ -86,6 +87,7 @@ class ProjectFactoryTest {
                 startTime: ExactTimeStamp.Local,
                 readTime: ExactTimeStamp.Local,
                 domainDisposable: CompositeDisposable,
+                rootTaskFactory: RootTaskFactory,
         ): FactoryProvider.Domain {
             TODO("Not yet implemented")
         }

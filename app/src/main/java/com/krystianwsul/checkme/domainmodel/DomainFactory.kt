@@ -150,7 +150,7 @@ class DomainFactory(
 
     lateinit var instanceInfo: Pair<Int, Int>
 
-    val customTimeCount get() = customTimes.size
+    val customTimeCount get() = projectsFactory.privateProject.customTimes.size + myUserFactory.user.customTimes.size
 
     val instanceShownCount get() = localFactory.instanceShownRecords.size
 
@@ -516,8 +516,6 @@ class DomainFactory(
     }
 
     fun getTasks() = projectsFactory.tasks.asSequence()
-
-    private val customTimes get() = projectsFactory.remoteCustomTimes
 
     fun getTaskForce(taskKey: TaskKey) = projectsFactory.getTaskForce(taskKey) // todo task fetch
 

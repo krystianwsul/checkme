@@ -46,6 +46,8 @@ class SharedTaskRecord private constructor(
             return taskJson
         }
 
+    override var startTimeOffset by Committer(taskJson::startTimeOffset)
+
     constructor(id: String, projectRecord: SharedProjectRecord, taskJson: SharedTaskJson) : this(
             false,
             id,

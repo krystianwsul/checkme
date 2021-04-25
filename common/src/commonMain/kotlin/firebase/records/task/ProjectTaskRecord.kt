@@ -20,6 +20,8 @@ abstract class ProjectTaskRecord protected constructor(
         projectRecord,
 ) {
 
+    abstract override var startTimeOffset: Double?
+
     override val taskKey by lazy { projectRecord.getTaskKey(id) }
 
     override fun getScheduleRecordId() = projectRecord.getScheduleRecordId(id)

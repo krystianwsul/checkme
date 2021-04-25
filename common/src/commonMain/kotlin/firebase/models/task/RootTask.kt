@@ -90,19 +90,6 @@ class RootTask(
             projectUpdater.convert(now, this, projectId)
     }
 
-    fun fixOffsets() {
-        if (taskRecord.startTimeOffset == null) taskRecord.startTimeOffset = startExactTimeStamp.offset
-
-        endData?.let {
-            if (taskRecord.endData!!.offset == null) setMyEndExactTimeStamp(it)
-        }
-
-        scheduleIntervals.forEach { it.schedule.fixOffsets() }
-        parentHierarchyIntervals.forEach { it.taskHierarchy.fixOffsets() }
-        noScheduleOrParentIntervals.forEach { it.noScheduleOrParent.fixOffsets() }
-        existingInstances.values.forEach { it.fixOffsets() }
-    }
-
     interface Parent : Task.Parent {
 
         fun deleteTask(task: RootTask)

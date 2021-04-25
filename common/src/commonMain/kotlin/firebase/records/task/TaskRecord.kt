@@ -53,7 +53,7 @@ abstract class TaskRecord protected constructor(
     var name by Committer(taskJson::name)
 
     val startTime get() = taskJson.startTime
-    var startTimeOffset by Committer(taskJson::startTimeOffset)
+    abstract val startTimeOffset: Double?
 
     abstract val taskKey: TaskKey
 

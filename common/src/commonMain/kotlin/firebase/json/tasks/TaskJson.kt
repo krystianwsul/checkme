@@ -14,7 +14,7 @@ interface TaskJson {
     var ordinal: Double?
 
     val startTime: Long
-    var startTimeOffset: Double? // this is nullable only for project tasks
+    val startTimeOffset: Double? // this is nullable only for project tasks
 
     var endTime: Long?
     var endData: EndData?

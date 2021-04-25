@@ -46,6 +46,8 @@ class PrivateTaskRecord private constructor(
             return taskJson
         }
 
+    override var startTimeOffset by Committer(taskJson::startTimeOffset)
+
     constructor(id: String, projectRecord: PrivateProjectRecord, taskJson: PrivateTaskJson) : this(
             false,
             id,

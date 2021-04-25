@@ -3,6 +3,7 @@ package com.krystianwsul.common.firebase.records.task
 import com.krystianwsul.common.firebase.json.tasks.TaskJson
 import com.krystianwsul.common.firebase.records.AssignedToHelper
 import com.krystianwsul.common.firebase.records.project.ProjectRecord
+import com.krystianwsul.common.firebase.records.schedule.ProjectHelper
 
 abstract class ProjectTaskRecord protected constructor(
         create: Boolean,
@@ -18,6 +19,7 @@ abstract class ProjectTaskRecord protected constructor(
         projectRecord,
         projectRecord.childKey + "/" + TASKS + "/" + id,
         projectRecord,
+        ProjectHelper.Project,
 ) {
 
     abstract override var startTimeOffset: Double?

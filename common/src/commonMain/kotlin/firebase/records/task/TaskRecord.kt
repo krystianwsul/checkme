@@ -23,6 +23,7 @@ abstract class TaskRecord protected constructor(
         val projectCustomTimeIdAndKeyProvider: JsonTime.ProjectCustomTimeIdAndKeyProvider,
         override val key: String,
         private val parent: Parent,
+        private val projectHelper: ProjectHelper,
 ) : RemoteRecord(create) {
 
     companion object {
@@ -43,7 +44,7 @@ abstract class TaskRecord protected constructor(
     val yearlyScheduleRecords: MutableMap<String, YearlyScheduleRecord> = mutableMapOf()
 
     val noScheduleOrParentRecords = taskJson.noScheduleOrParent
-            .mapValues { NoScheduleOrParentRecord(this, it.value, it.key) }
+            .mapValues { NoScheduleOrParentRecord(this, it.value, it.key, projectHelper) }
             .toMutableMap()
 
     val taskHierarchyRecords = taskJson.taskHierarchies
@@ -115,6 +116,7 @@ abstract class TaskRecord protected constructor(
                     singleScheduleRecords[id] = SingleScheduleRecord(
                             this,
                             scheduleWrapper,
+                            projectHelper,
                             id,
                             scheduleWrapperBridge,
                     )
@@ -127,6 +129,7 @@ abstract class TaskRecord protected constructor(
                     weeklyScheduleRecords[id] = WeeklyScheduleRecord(
                             this,
                             scheduleWrapper,
+                            projectHelper,
                             id,
                             scheduleWrapperBridge,
                     )
@@ -138,6 +141,7 @@ abstract class TaskRecord protected constructor(
                     monthlyDayScheduleRecords[id] = MonthlyDayScheduleRecord(
                             this,
                             scheduleWrapper,
+                            projectHelper,
                             id,
                             scheduleWrapperBridge,
                     )
@@ -148,6 +152,7 @@ abstract class TaskRecord protected constructor(
                     monthlyWeekScheduleRecords[id] = MonthlyWeekScheduleRecord(
                             this,
                             scheduleWrapper,
+                            projectHelper,
                             id,
                             scheduleWrapperBridge,
                     )
@@ -158,6 +163,7 @@ abstract class TaskRecord protected constructor(
                     yearlyScheduleRecords[id] = YearlyScheduleRecord(
                             this,
                             scheduleWrapper,
+                            projectHelper,
                             id,
                             scheduleWrapperBridge,
                     )
@@ -195,6 +201,7 @@ abstract class TaskRecord protected constructor(
         val singleScheduleRecord = SingleScheduleRecord(
                 this,
                 newScheduleWrapper(singleScheduleJson = singleScheduleJson),
+                projectHelper,
         )
 
         check(!singleScheduleRecords.containsKey(singleScheduleRecord.id))
@@ -207,6 +214,7 @@ abstract class TaskRecord protected constructor(
         val weeklyScheduleRecord = WeeklyScheduleRecord(
                 this,
                 newScheduleWrapper(weeklyScheduleJson = weeklyScheduleJson),
+                projectHelper,
         )
 
         check(!weeklyScheduleRecords.containsKey(weeklyScheduleRecord.id))
@@ -219,6 +227,7 @@ abstract class TaskRecord protected constructor(
         val monthlyDayScheduleRecord = MonthlyDayScheduleRecord(
                 this,
                 newScheduleWrapper(monthlyDayScheduleJson = monthlyDayScheduleJson),
+                projectHelper,
         )
 
         check(!monthlyDayScheduleRecords.containsKey(monthlyDayScheduleRecord.id))
@@ -231,6 +240,7 @@ abstract class TaskRecord protected constructor(
         val monthlyWeekScheduleRecord = MonthlyWeekScheduleRecord(
                 this,
                 newScheduleWrapper(monthlyWeekScheduleJson = monthlyWeekScheduleJson),
+                projectHelper,
         )
 
         check(!monthlyWeekScheduleRecords.containsKey(monthlyWeekScheduleRecord.id))
@@ -243,6 +253,7 @@ abstract class TaskRecord protected constructor(
         val yearlyScheduleRecord = YearlyScheduleRecord(
                 this,
                 newScheduleWrapper(yearlyScheduleJson = yearlyScheduleJson),
+                projectHelper,
         )
 
         check(!yearlyScheduleRecords.containsKey(yearlyScheduleRecord.id))
@@ -252,7 +263,13 @@ abstract class TaskRecord protected constructor(
     }
 
     fun newNoScheduleOrParentRecord(noScheduleOrParentJson: NoScheduleOrParentJson): NoScheduleOrParentRecord {
-        val noScheduleOrParentRecord = NoScheduleOrParentRecord(this, noScheduleOrParentJson, null)
+        val noScheduleOrParentRecord = NoScheduleOrParentRecord(
+                this,
+                noScheduleOrParentJson,
+                null,
+                projectHelper,
+        )
+
         check(!noScheduleOrParentRecords.containsKey(noScheduleOrParentRecord.id))
 
         noScheduleOrParentRecords[noScheduleOrParentRecord.id] = noScheduleOrParentRecord

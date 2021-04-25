@@ -60,4 +60,6 @@ abstract class ScheduleRecord(
     val assignedTo get() = taskRecord.assignedToHelper.getAssignedTo(scheduleJson)
 
     abstract val scheduleWrapperBridge: ScheduleWrapperBridge
+
+    abstract val projectHelper: ProjectHelper
 }

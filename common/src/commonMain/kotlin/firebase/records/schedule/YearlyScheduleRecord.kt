@@ -9,6 +9,7 @@ import com.krystianwsul.common.firebase.records.task.TaskRecord
 class YearlyScheduleRecord(
         taskRecord: TaskRecord,
         scheduleWrapper: ScheduleWrapper,
+        override val projectHelper: ProjectHelper,
         id: String? = null,
         override val scheduleWrapperBridge: ScheduleWrapperBridge =
                 ScheduleWrapperBridge.fromScheduleWrapper(scheduleWrapper),

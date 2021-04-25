@@ -5,6 +5,7 @@ import com.krystianwsul.common.firebase.json.schedule.WriteAssignedToJson
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.interval.ScheduleInterval
 import com.krystianwsul.common.firebase.models.task.Task
+import com.krystianwsul.common.firebase.records.schedule.ProjectHelper
 import com.krystianwsul.common.firebase.records.schedule.SingleScheduleRecord
 import com.krystianwsul.common.time.DateTime
 import com.krystianwsul.common.time.ExactTimeStamp
@@ -15,7 +16,9 @@ class SingleSchedule(topLevelTask: Task, val singleScheduleRecord: SingleSchedul
 
     private val mockInstance get() = getInstance(topLevelTask).takeIf { it.exists() }
 
-    override val scheduleRecord get() = mockInstance?.let { MockRecord(it) } ?: singleScheduleRecord
+    override val scheduleRecord
+        get() =
+            mockInstance?.let { MockRecord(it, singleScheduleRecord.projectHelper) } ?: singleScheduleRecord
 
     val date get() = scheduleRecord.date
 
@@ -72,9 +75,10 @@ class SingleSchedule(topLevelTask: Task, val singleScheduleRecord: SingleSchedul
 
     override fun toString() = super.toString() + ", dateTime: $dateTime"
 
-    private inner class MockRecord(private val instance: Instance) : SingleScheduleRecord(
+    private inner class MockRecord(private val instance: Instance, projectHelper: ProjectHelper) : SingleScheduleRecord(
             singleScheduleRecord.taskRecord,
             singleScheduleRecord.createObject,
+            projectHelper,
             singleScheduleRecord.id,
     ) {
 

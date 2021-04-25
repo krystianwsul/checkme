@@ -1,12 +1,14 @@
 package com.krystianwsul.common.firebase.records
 
 import com.krystianwsul.common.firebase.json.NoScheduleOrParentJson
+import com.krystianwsul.common.firebase.records.schedule.ProjectHelper
 import com.krystianwsul.common.firebase.records.task.TaskRecord
 
 class NoScheduleOrParentRecord(
         private val taskRecord: TaskRecord,
         override val createObject: NoScheduleOrParentJson,
         _id: String?,
+        val projectHelper: ProjectHelper,
 ) : RemoteRecord(_id == null) {
 
     companion object {
@@ -23,6 +25,8 @@ class NoScheduleOrParentRecord(
 
     var endTime by Committer(createObject::endTime)
     var endTimeOffset by Committer(createObject::endTimeOffset)
+
+    val projectId get() = createObject.projectId
 
     override fun deleteFromParent() = check(taskRecord.noScheduleOrParentRecords.remove(id) == this)
 }

@@ -6,6 +6,7 @@ import com.krystianwsul.common.firebase.json.tasks.RootTaskJson
 import com.krystianwsul.common.firebase.records.AssignedToHelper
 import com.krystianwsul.common.firebase.records.InstanceRecord
 import com.krystianwsul.common.firebase.records.RootTaskParentDelegate
+import com.krystianwsul.common.firebase.records.schedule.ProjectHelper
 import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.utils.TaskKey
 
@@ -23,6 +24,7 @@ class RootTaskRecord private constructor(
         JsonTime.ProjectCustomTimeIdAndKeyProvider.rootTask,
         id,
         parent,
+        ProjectHelper.Root,
 ) {
 
     override val createObject: RootTaskJson // because of duplicate functionality when converting local task

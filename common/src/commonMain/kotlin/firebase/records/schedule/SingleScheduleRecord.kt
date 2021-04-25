@@ -10,6 +10,7 @@ import com.krystianwsul.common.time.Date
 open class SingleScheduleRecord(
         taskRecord: TaskRecord,
         scheduleWrapper: ScheduleWrapper,
+        override val projectHelper: ProjectHelper,
         id: String? = null,
         override val scheduleWrapperBridge: ScheduleWrapperBridge =
                 ScheduleWrapperBridge.fromScheduleWrapper(scheduleWrapper),

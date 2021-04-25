@@ -59,10 +59,10 @@ abstract class Project<T : ProjectType>(
         get() =
             taskHierarchyContainer.all + projectTasks.flatMap { it.nestedParentTaskHierarchies.values }
 
-    val existingInstances get() = projectTasks.flatMap { it.existingInstances.values } // todo task fetch
+    val existingInstances get() = projectTasks.flatMap { it.existingInstances.values }
 
     protected fun initializeInstanceHierarchyContainers() {
-        projectTasks.forEach { // todo task fetch
+        getAllTasks().forEach {
             it.existingInstances
                     .values
                     .forEach { it.addToParentInstanceHierarchyContainer() }

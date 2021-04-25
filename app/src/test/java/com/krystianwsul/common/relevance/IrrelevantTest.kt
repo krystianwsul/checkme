@@ -66,7 +66,7 @@ class IrrelevantTest {
 
         val projectJson = PrivateProjectJson(startTime = now.long)
         val projectRecord = PrivateProjectRecord(databaseWrapper, userInfo, projectJson)
-        val project = PrivateProject(projectRecord, mockk(), mockk())
+        val project = PrivateProject(projectRecord, mockk(), mockk(relaxed = true)) // todo task tests
 
         now = ExactTimeStamp.Local(day1, hour2)
 
@@ -184,7 +184,7 @@ class IrrelevantTest {
         )
 
         val projectRecord = PrivateProjectRecord(databaseWrapper, projectKey, projectJson)
-        val project = PrivateProject(projectRecord, mockk(), mockk())
+        val project = PrivateProject(projectRecord, mockk(), mockk(relaxed = true)) // todo task tests
         val task = project.projectTasks.single()
 
         // 2. Mark single instance done
@@ -313,7 +313,7 @@ class IrrelevantTest {
         )
 
         val projectRecord = PrivateProjectRecord(databaseWrapper, projectKey, projectJson)
-        val project = PrivateProject(projectRecord, mockk(), mockk())
+        val project = PrivateProject(projectRecord, mockk(), mockk(relaxed = true)) // todo task tests
 
         val parentTask = project.projectTasks.single { it.isTopLevelTask(now) }
         assertEquals(2, parentTask.getChildTaskHierarchies(now).size)
@@ -445,7 +445,7 @@ class IrrelevantTest {
         )
 
         val projectRecord = PrivateProjectRecord(databaseWrapper, projectKey, projectJson)
-        val project = PrivateProject(projectRecord, mockk(), mockk())
+        val project = PrivateProject(projectRecord, mockk(), mockk(relaxed = true)) // todo task tests
 
         val parentTask = project.projectTasks.single { it.isTopLevelTask(now) }
         assertEquals(2, parentTask.getChildTaskHierarchies(now).size)

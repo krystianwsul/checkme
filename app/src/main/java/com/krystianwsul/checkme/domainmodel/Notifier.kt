@@ -273,7 +273,7 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
         if (params.tick) {
             setIrrelevant(now)
 
-            domainFactory.run { localFactory.deleteInstanceShownRecords(projectsFactory.taskKeys) }
+            domainFactory.run { localFactory.deleteInstanceShownRecords(getAllTasks().map { it.taskKey }.toSet()) }
         }
     }
 

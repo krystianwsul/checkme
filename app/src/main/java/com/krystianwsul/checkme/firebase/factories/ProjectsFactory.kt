@@ -123,21 +123,7 @@ class ProjectsFactory(
 
     val projects get() = sharedProjects + mapOf(privateProject.projectKey to privateProject)
 
-    val tasks get() = projects.values.flatMap { it.projectTasks }
-
-    val taskKeys
-        get() = projects.values
-                .flatMap {
-                    val projectId = it.projectKey
-
-                    it.projectTaskIds.map { TaskKey.Project(projectId, it) } // todo task fetch
-                }
-                .toSet()
-
-    val taskCount: Int // todo task fetch
-        get() = projects.values
-                .map { it.projectTasks.size } // todo task fetch
-                .sum()
+    val projectTasks get() = projects.values.flatMap { it.projectTasks }
 
     fun createScheduleTopLevelTask(
             now: ExactTimeStamp.Local,

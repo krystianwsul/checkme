@@ -185,7 +185,8 @@ class DomainFactoryRule : TestRule {
             )
         }
 
-        val rootTaskFactory = mockk<RootTaskFactory>() {
+        val rootTaskFactory = mockk<RootTaskFactory> { // todo task tests
+            every { rootTasks } returns emptyMap()
             every { getRootTasksForProject(any()) } returns emptyList()
         }
 

@@ -151,7 +151,7 @@ class ProjectFactoryTest {
                             it.data,
                             factoryProvider,
                             compositeDisposable,
-                            mockk(),
+                            mockk(relaxed = true), // todo task tests
                     ) { mockk() }
 
                     changeTypesEmissionChecker =

@@ -126,6 +126,9 @@ class FactoryLoader(
                             rootTaskUserCustomTimeProviderSource,
                     )
 
+                    // this is hacky as fuck, but I'll take my chances
+                    lateinit var projectsFactorySingle: Single<ProjectsFactory>
+
                     val rootTaskFactory = RootTaskFactory(
                             rootTaskLoader,
                             rootTaskUserCustomTimeProviderSource,
@@ -133,7 +136,7 @@ class FactoryLoader(
                             rootTaskToRootTaskCoordinator,
                             domainDisposable,
                             rootTaskKeySource,
-                    )
+                    ) { projectsFactorySingle.getCurrentValue() }
 
                     val projectToRootTaskCoordinator =
                             ProjectToRootTaskCoordinator.Impl(rootTaskKeySource, rootTaskFactory)
@@ -162,7 +165,7 @@ class FactoryLoader(
                             rootTaskKeySource,
                     )
 
-                    val projectsFactorySingle = Single.zip(
+                    projectsFactorySingle = Single.zip(
                             privateProjectLoader.initialProjectEvent.doOnSuccess {
                                 check(it.changeType == ChangeType.REMOTE)
                             },

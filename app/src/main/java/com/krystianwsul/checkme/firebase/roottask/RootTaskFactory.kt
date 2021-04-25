@@ -1,9 +1,9 @@
 package com.krystianwsul.checkme.firebase.roottask
 
 import com.krystianwsul.checkme.firebase.UserKeyStore
+import com.krystianwsul.checkme.firebase.factories.ProjectsFactory
 import com.krystianwsul.checkme.utils.publishImmediate
 import com.krystianwsul.common.firebase.ChangeType
-import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.task.RootTask
 import com.krystianwsul.common.firebase.models.taskhierarchy.TaskHierarchy
 import com.krystianwsul.common.utils.TaskKey
@@ -19,6 +19,7 @@ class RootTaskFactory(
         private val rootTaskToRootTaskCoordinator: RootTaskToRootTaskCoordinator,
         domainDisposable: CompositeDisposable,
         private val rootTaskKeySource: RootTaskKeySource,
+        private val getProjectsFactory: () -> ProjectsFactory,
 ) : RootTask.Parent {
 
     private val rootTaskMap = mutableMapOf<TaskKey.Root, RootTask>()
@@ -73,7 +74,5 @@ class RootTaskFactory(
 
     override fun getTask(taskKey: TaskKey.Root) = rootTasks.getValue(taskKey)
 
-    override fun getProject(projectId: String): Project<*> {
-        TODO("todo task project")
-    }
+    override fun getProject(projectId: String) = getProjectsFactory().getProjectForce(projectId)
 }

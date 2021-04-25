@@ -262,6 +262,8 @@ class ProjectsFactory(
             .singleOrNull { it.key.key == projectId }
             ?.value
 
+    fun getProjectForce(projectId: String) = getProjectIfPresent(projectId)!!
+
     fun getTaskHierarchy(taskHierarchyKey: TaskHierarchyKey): TaskHierarchy {
         return when (taskHierarchyKey) {
             is TaskHierarchyKey.Project -> projects.getValue(taskHierarchyKey.projectId)

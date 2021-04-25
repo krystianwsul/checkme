@@ -5,7 +5,6 @@ import com.krystianwsul.common.firebase.managers.JsRootUserManager
 import com.krystianwsul.common.firebase.managers.JsSharedProjectManager
 import com.krystianwsul.common.firebase.models.RootUser
 import com.krystianwsul.common.firebase.models.project.PrivateProject
-import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.project.SharedProject
 import com.krystianwsul.common.relevance.CustomTimeRelevance
 import com.krystianwsul.common.relevance.Irrelevant
@@ -128,10 +127,6 @@ object RelevanceChecker {
 
                         Irrelevant.setIrrelevant(
                                 userCustomTimeRelevances,
-                                object : Project.Parent {
-
-                                    override fun deleteProject(project: Project<*>) = throw UnsupportedOperationException()
-                                },
                                 privateProject,
                                 ExactTimeStamp.Local.now,
                         )
@@ -155,10 +150,6 @@ object RelevanceChecker {
 
                                 val removedSharedProjects = Irrelevant.setIrrelevant(
                                         userCustomTimeRelevances,
-                                        object : Project.Parent {
-
-                                            override fun deleteProject(project: Project<*>) = Unit
-                                        },
                                         sharedProject,
                                         ExactTimeStamp.Local.now,
                                 ).removedSharedProjects

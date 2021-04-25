@@ -334,11 +334,7 @@ abstract class Project<T : ProjectType>(
         return projectTaskHierarchies + nestedTaskHierarchies
     }
 
-    fun delete(parent: Parent) {
-        parent.deleteProject(this)
-
-        projectRecord.delete()
-    }
+    fun delete() = projectRecord.delete()
 
     fun setEndExactTimeStamp(
             now: ExactTimeStamp.Local,
@@ -509,11 +505,6 @@ abstract class Project<T : ProjectType>(
 
     private class MissingTaskException(projectId: ProjectKey<*>, taskId: String) :
             Exception("projectId: $projectId, taskId: $taskId")
-
-    interface Parent {
-
-        fun deleteProject(project: Project<*>) // todo this is never implemented, just get rid of it
-    }
 
     interface CustomTimeMigrationHelper {
 

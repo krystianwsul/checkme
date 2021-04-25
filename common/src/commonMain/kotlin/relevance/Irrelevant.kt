@@ -20,7 +20,6 @@ object Irrelevant {
 
     fun setIrrelevant(
             userCustomTimeRelevances: Map<CustomTimeKey.User, CustomTimeRelevance>,
-            parent: Project.Parent,
             project: Project<*>,
             now: ExactTimeStamp.Local,
             delete: Boolean = true,
@@ -195,7 +194,7 @@ object Irrelevant {
 
         val irrelevantRemoteProjects = remoteProjects - relevantRemoteProjects
 
-        if (delete) irrelevantRemoteProjects.forEach { it.delete(parent) }
+        if (delete) irrelevantRemoteProjects.forEach { it.delete() }
 
         return Result(
                 irrelevantExistingInstances,

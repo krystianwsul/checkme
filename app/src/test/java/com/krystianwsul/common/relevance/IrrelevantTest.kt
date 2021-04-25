@@ -12,7 +12,6 @@ import com.krystianwsul.common.firebase.json.taskhierarchies.ProjectTaskHierarch
 import com.krystianwsul.common.firebase.json.tasks.PrivateTaskJson
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.project.PrivateProject
-import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.firebase.records.project.PrivateProjectRecord
 import com.krystianwsul.common.time.*
@@ -44,8 +43,6 @@ class IrrelevantTest {
         private val shownFactory = mockk<Instance.ShownFactory> {
             every { getShown(any(), any()) } returns mockk(relaxed = true)
         }
-
-        private val projectParent = mockk<Project.Parent>()
 
         @JvmStatic
         @BeforeClass
@@ -131,7 +128,7 @@ class IrrelevantTest {
 
         now = ExactTimeStamp.Local(day2, hour1)
 
-        Irrelevant.setIrrelevant(mapOf(), projectParent, project, now)
+        Irrelevant.setIrrelevant(mapOf(), project, now)
 
         assertTrue(task.isReminderless())
     }
@@ -224,7 +221,7 @@ class IrrelevantTest {
         )
         assertTrue(task.getCurrentScheduleIntervals(now).size == 2)
 
-        Irrelevant.setIrrelevant(mapOf(), projectParent, project, now)
+        Irrelevant.setIrrelevant(mapOf(), project, now)
 
         assertTrue(task.getCurrentScheduleIntervals(now).size == 1)
         assertTrue(
@@ -364,7 +361,7 @@ class IrrelevantTest {
 
         now = ExactTimeStamp.Local(day2, hour5)
 
-        Irrelevant.setIrrelevant(mapOf(), projectParent, project, now, false)
+        Irrelevant.setIrrelevant(mapOf(), project, now, false)
     }
 
     @Test
@@ -496,6 +493,6 @@ class IrrelevantTest {
 
         now = ExactTimeStamp.Local(day2, hour5)
 
-        Irrelevant.setIrrelevant(mapOf(), projectParent, project, now, false)
+        Irrelevant.setIrrelevant(mapOf(), project, now, false)
     }
 }

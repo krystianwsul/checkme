@@ -125,13 +125,6 @@ class ProjectsFactory(
 
     val tasks get() = projects.values.flatMap { it.tasks }
 
-    val instanceCount // todo task fetch
-        get() = projects.values
-                .flatMap { it.tasks }
-                .asSequence()
-                .map { it.existingInstances.size }
-                .sum()
-
     val taskKeys
         get() = projects.values
                 .flatMap {

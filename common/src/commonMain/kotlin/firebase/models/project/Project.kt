@@ -31,7 +31,7 @@ abstract class Project<T : ProjectType>(
     abstract val projectRecord: ProjectRecord<T>
 
     @Suppress("PropertyName")
-    protected abstract val _tasks: MutableMap<String, ProjectTask> // todo task fetch
+    protected abstract val _tasks: MutableMap<String, ProjectTask>
     protected abstract val taskHierarchyContainer: TaskHierarchyContainer
     protected abstract val remoteCustomTimes: Map<out CustomTimeId.Project, Time.Custom.Project<T>>
 
@@ -318,9 +318,9 @@ abstract class Project<T : ProjectType>(
         taskHierarchy.invalidateTasks()
     }
 
-    fun getTaskIfPresent(taskId: String) = _tasks[taskId]
+    fun getTaskIfPresent(taskId: String) = _tasks[taskId] // todo task fetch
 
-    fun getTaskForce(taskId: String) = _tasks[taskId]
+    fun getTaskForce(taskId: String) = _tasks[taskId] // todo task fetch
             ?: throw MissingTaskException(projectKey, taskId)
 
     fun getTaskHierarchiesByChildTaskKey(childTaskKey: TaskKey.Project) =
@@ -338,6 +338,8 @@ abstract class Project<T : ProjectType>(
 
     fun delete() = projectRecord.delete()
 
+    fun getAllTasks(): Collection<Task> = _tasks.values + rootTaskProvider.getRootTasksForProject(projectKey)
+
     fun setEndExactTimeStamp(
             now: ExactTimeStamp.Local,
             projectUndoData: ProjectUndoData,
@@ -345,11 +347,9 @@ abstract class Project<T : ProjectType>(
     ) {
         requireCurrent(now)
 
-        _tasks.values
-                .filter { it.current(now) }
-                .forEach {
-                    it.setEndData(Task.EndData(now, removeInstances), projectUndoData.taskUndoData)
-                }
+        getAllTasks().filter { it.current(now) }.forEach {
+            it.setEndData(Task.EndData(now, removeInstances), projectUndoData.taskUndoData)
+        }
 
         projectUndoData.projectIds.add(projectKey)
 
@@ -514,5 +514,7 @@ abstract class Project<T : ProjectType>(
     interface RootTaskProvider {
 
         fun getRootTask(rootTaskKey: TaskKey.Root): RootTask
+
+        fun getRootTasksForProject(projectKey: ProjectKey<*>): Collection<RootTask>
     }
 }

@@ -7,6 +7,7 @@ import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.models.task.RootTask
 import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.firebase.models.taskhierarchy.TaskHierarchy
+import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
@@ -84,4 +85,7 @@ class RootTaskFactory(
             else -> throw UnsupportedOperationException()
         }
     }
+
+    override fun getRootTasksForProject(projectKey: ProjectKey<*>) =
+            rootTasks.values.filter { it.project.projectKey == projectKey }
 }

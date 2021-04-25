@@ -320,8 +320,12 @@ abstract class Project<T : ProjectType>(
 
     fun getTaskIfPresent(taskId: String) = _tasks[taskId] // todo task fetch
 
+    fun getTaskIfPresent(taskKey: TaskKey.Project) = getTaskIfPresent(taskKey.taskId)
+
     fun getTaskForce(taskId: String) = _tasks[taskId] // todo task fetch
             ?: throw MissingTaskException(projectKey, taskId)
+
+    fun getTaskForce(taskKey: TaskKey.Project) = getTaskForce(taskKey.taskId)
 
     fun getTaskHierarchiesByChildTaskKey(childTaskKey: TaskKey.Project) =
             taskHierarchyContainer.getByChildTaskKey(childTaskKey)

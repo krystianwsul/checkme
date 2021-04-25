@@ -218,22 +218,15 @@ class ProjectsFactory(
     fun getCustomTime(customTimeKey: CustomTimeKey.Project<*>) =
             projects.getValue(customTimeKey.projectId).getUntypedProjectCustomTime(customTimeKey.customTimeId)
 
-    private fun getProjectForce(taskKey: TaskKey) = getProjectIfPresent(taskKey)!! // todo task fetch
+    fun getTaskForce(taskKey: TaskKey.Project) = projects.getValue(taskKey.projectKey).getTaskForce(taskKey)
 
-    private fun getProjectIfPresent(taskKey: TaskKey) = projects[(taskKey as TaskKey.Project).projectKey] // todo task fetch
+    fun getTaskIfPresent(taskKey: TaskKey.Project) = projects[taskKey.projectKey]?.getTaskIfPresent(taskKey)
 
-    fun getTaskForce(taskKey: TaskKey) = getProjectForce(taskKey).getTaskForce((taskKey as TaskKey.Project).taskId) // todo task fetch
+    fun updateDeviceInfo(deviceDbInfo: DeviceDbInfo) =
+            sharedProjects.values.forEach { it.updateDeviceDbInfo(deviceDbInfo) }
 
-    fun getTaskIfPresent(taskKey: TaskKey) =
-            getProjectIfPresent(taskKey)?.getTaskIfPresent((taskKey as TaskKey.Project).taskId) // todo task fetch
-
-    fun updateDeviceInfo(deviceDbInfo: DeviceDbInfo) = sharedProjects.values.forEach {
-        it.updateDeviceDbInfo(deviceDbInfo)
-    }
-
-    fun updatePhotoUrl(deviceInfo: DeviceInfo, photoUrl: String) = sharedProjects.values.forEach {
-        it.updatePhotoUrl(deviceInfo, photoUrl)
-    }
+    fun updatePhotoUrl(deviceInfo: DeviceInfo, photoUrl: String) =
+            sharedProjects.values.forEach { it.updatePhotoUrl(deviceInfo, photoUrl) }
 
     @Suppress("UNCHECKED_CAST")
     fun <T : ProjectType> getProjectForce(projectId: ProjectKey<T>) =

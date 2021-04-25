@@ -56,7 +56,7 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
         val instanceShownPairs = domainFactory.localFactory.instanceShownRecords
                 .filter { it.notificationShown }
                 .map {
-                    it to domainFactory.projectsFactory.getProjectIfPresent(it.projectId)?.getTaskIfPresent(it.taskId)
+                    it to domainFactory.projectsFactory.getProjectIfPresent(it.projectId)?.getTaskIfPresent(it.taskId) // todo task notification
                 }
 
         instanceShownPairs.filter { it.second == null }.forEach { (instanceShownRecord, _) ->

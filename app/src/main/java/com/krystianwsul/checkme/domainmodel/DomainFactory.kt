@@ -220,7 +220,7 @@ class DomainFactory(
 
         val shortcutDatas = shortcutTasks.sortedBy { it.first }
                 .takeLast(maxShortcuts)
-                .map { ShortcutQueue.ShortcutData(deviceDbInfo, it.second) }
+                .map { ShortcutQueue.ShortcutData(deviceDbInfo, it.second as ProjectTask) } // todo task shortcut
 
         ShortcutQueue.updateShortcuts(shortcutDatas)
     }
@@ -355,8 +355,7 @@ class DomainFactory(
                     .values
                     .mapNotNull { it.getSharedTimeIfPresent(customTimeKey, ownerKey) }
 
-    fun getInstance(instanceKey: InstanceKey) =
-            projectsFactory.getTaskForce(instanceKey.taskKey).getInstance(instanceKey.scheduleKey)
+    fun getInstance(instanceKey: InstanceKey) = getTaskForce(instanceKey.taskKey).getInstance(instanceKey.scheduleKey)
 
     fun getRootInstances(
             startExactTimeStamp: ExactTimeStamp.Offset?,
@@ -517,9 +516,15 @@ class DomainFactory(
         return remoteToRemoteConversion.endTasks.getValue(startingTask.id)
     }
 
-    fun getTaskForce(taskKey: TaskKey) = projectsFactory.getTaskForce(taskKey) // todo task fetch
+    fun getTaskIfPresent(taskKey: TaskKey): Task? {
+        return when (taskKey) {
+            is TaskKey.Project -> projectsFactory.getTaskIfPresent(taskKey)
+            is TaskKey.Root -> rootTaskFactory.getRootTaskIfPresent(taskKey)
+            else -> throw UnsupportedOperationException()
+        }
+    }
 
-    fun getTaskIfPresent(taskKey: TaskKey) = projectsFactory.getTaskIfPresent(taskKey)
+    fun getTaskForce(taskKey: TaskKey) = getTaskIfPresent(taskKey)!!
 
     fun getTaskListChildTaskDatas(
             parentTask: Task,

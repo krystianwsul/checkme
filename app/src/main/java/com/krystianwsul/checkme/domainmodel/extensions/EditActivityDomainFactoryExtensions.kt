@@ -237,7 +237,7 @@ fun DomainUpdater.createChildTask(
 
     val childTask = createChildTask(
             now,
-            parentTask,
+            parentTask as ProjectTask, // todo task edit
             name,
             note,
             imageUuid?.let { TaskJson.Image(it, uuid) },
@@ -388,7 +388,7 @@ fun DomainUpdater.updateChildTask(
 
     imageUuid?.let { Uploader.addUpload(deviceDbInfo, task.taskKey, it, imagePath.value) }
 
-    DomainUpdater.Result(task.taskKey as TaskKey, true, notificationType, DomainFactory.CloudParams(task.project)) // todo task edit
+    DomainUpdater.Result(task.taskKey, true, notificationType, DomainFactory.CloudParams(task.project))
 }.perform(this)
 
 @CheckResult
@@ -423,7 +423,7 @@ fun DomainUpdater.updateTopLevelTask(
         Uploader.addUpload(deviceDbInfo, task.taskKey, it, imagePath.value)
     }
 
-    DomainUpdater.Result(task.taskKey as TaskKey, true, notificationType, DomainFactory.CloudParams(task.project)) // todo task edit
+    DomainUpdater.Result(task.taskKey, true, notificationType, DomainFactory.CloudParams(task.project))
 }.perform(this)
 
 @CheckResult
@@ -521,7 +521,7 @@ fun DomainUpdater.createJoinChildTask(
             ordinal
     )
 
-    joinTasks(childTask, joinTasks, now, removeInstanceKeys)
+    joinTasks(childTask as ProjectTask, joinTasks, now, removeInstanceKeys) // todo task edit
 
     imageUuid?.let { Uploader.addUpload(deviceDbInfo, childTask.taskKey, it, imagePath) }
 

@@ -74,6 +74,8 @@ class RootTaskFactory(
         TODO("todo task edit")
     }
 
+    fun getRootTaskIfPresent(taskKey: TaskKey.Root) = rootTasks[taskKey]
+
     override fun getRootTask(rootTaskKey: TaskKey.Root) = rootTasks.getValue(rootTaskKey)
 
     override fun getProject(projectId: String) = getProjectsFactory().getProjectForce(projectId)

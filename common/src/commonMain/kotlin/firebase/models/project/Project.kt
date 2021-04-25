@@ -31,7 +31,7 @@ abstract class Project<T : ProjectType>(
     abstract val projectRecord: ProjectRecord<T>
 
     @Suppress("PropertyName")
-    protected abstract val _tasks: MutableMap<String, ProjectTask>
+    protected abstract val _tasks: MutableMap<String, ProjectTask> // todo task fetch
     protected abstract val taskHierarchyContainer: TaskHierarchyContainer
     protected abstract val remoteCustomTimes: Map<out CustomTimeId.Project, Time.Custom.Project<T>>
 
@@ -50,7 +50,7 @@ abstract class Project<T : ProjectType>(
     override val endExactTimeStamp get() = projectRecord.endTime?.let { ExactTimeStamp.Local(it) }
 
     // don't want these to be mutable
-    val taskIds: Set<String> get() = _tasks.keys // todo task fetch
+    val projectTaskIds: Set<String> get() = _tasks.keys
     val tasks: Collection<ProjectTask> get() = _tasks.values // todo task fetch
 
     abstract val customTimes: Collection<Time.Custom.Project<T>>

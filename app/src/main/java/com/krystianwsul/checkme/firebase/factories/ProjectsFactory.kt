@@ -139,7 +139,7 @@ class ProjectsFactory(
                 .flatMap {
                     val projectId = it.projectKey
 
-                    it.taskIds.map { TaskKey.Project(projectId, it) } // todo task fetch
+                    it.projectTaskIds.map { TaskKey.Project(projectId, it) } // todo task fetch
                 }
                 .toSet()
 

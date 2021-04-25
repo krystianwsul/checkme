@@ -121,9 +121,9 @@ class ProjectsFactory(
 
     val tasks get() = projects.values.flatMap { it.tasks }
 
-    val remoteCustomTimes get() = projects.values.flatMap { it.customTimes }
+    val remoteCustomTimes get() = projects.values.flatMap { it.customTimes } // todo task fetch
 
-    val instanceCount
+    val instanceCount // todo task fetch
         get() = projects.values
                 .flatMap { it.tasks }
                 .asSequence()
@@ -135,11 +135,11 @@ class ProjectsFactory(
                 .flatMap {
                     val projectId = it.projectKey
 
-                    it.taskIds.map { TaskKey.Project(projectId, it) } // todo task after project
+                    it.taskIds.map { TaskKey.Project(projectId, it) } // todo task fetch
                 }
                 .toSet()
 
-    val taskCount: Int
+    val taskCount: Int // todo task fetch
         get() = projects.values
                 .map { it.tasks.size }
                 .sum()

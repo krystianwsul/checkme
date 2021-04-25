@@ -36,9 +36,11 @@ class TaskHierarchyContainer {
         check(taskHierarchiesByParent.remove(parentTaskKey, taskHierarchy))
     }
 
-    fun getByChildTaskKey(childTaskKey: TaskKey.Project): Set<ProjectTaskHierarchy> = taskHierarchiesByChild.get(childTaskKey) // todo task typing
+    fun getByChildTaskKey(childTaskKey: TaskKey.Project): Set<ProjectTaskHierarchy> =
+            taskHierarchiesByChild.get(childTaskKey)
 
-    fun getByParentTaskKey(parentTaskKey: TaskKey.Project): Set<ProjectTaskHierarchy> = taskHierarchiesByParent.get(parentTaskKey) // todo task typing
+    fun getByParentTaskKey(parentTaskKey: TaskKey.Project): Set<ProjectTaskHierarchy> =
+            taskHierarchiesByParent.get(parentTaskKey)
 
     fun getById(id: String) = taskHierarchiesById[id]!!
 

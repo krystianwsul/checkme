@@ -21,6 +21,7 @@ abstract class ProjectFactory<T : ProjectType, U : Parsable>(
         initialProjectEvent: ProjectLoader.InitialProjectEvent<T, U>,
         protected val factoryProvider: FactoryProvider,
         domainDisposable: CompositeDisposable,
+        private val rootTaskProvider: Project.RootTaskProvider,
         protected val deviceDbInfo: () -> DeviceDbInfo,
 ) {
 
@@ -32,15 +33,20 @@ abstract class ProjectFactory<T : ProjectType, U : Parsable>(
     protected abstract fun newProject(
             projectRecord: ProjectRecord<T>,
             userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
+            rootTaskProvider: Project.RootTaskProvider,
     ): Project<T>
 
     val changeTypes: Observable<ChangeType>
 
     init {
-        project = newProject(initialProjectEvent.projectRecord, initialProjectEvent.userCustomTimeProvider)
+        project = newProject(
+                initialProjectEvent.projectRecord,
+                initialProjectEvent.userCustomTimeProvider,
+                rootTaskProvider,
+        )
 
         val changeProjectChangeTypes = projectLoader.changeProjectEvents.map {
-            project = newProject(it.projectRecord, it.userCustomTimeProvider)
+            project = newProject(it.projectRecord, it.userCustomTimeProvider, rootTaskProvider)
 
             ChangeType.REMOTE
         }

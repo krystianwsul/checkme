@@ -182,6 +182,7 @@ class FactoryLoader(
                                 ExactTimeStamp.Local.now,
                                 factoryProvider,
                                 domainDisposable,
+                                rootTaskFactory,
                                 ::getDeviceDbInfo,
                         )
                     }.cacheImmediate()

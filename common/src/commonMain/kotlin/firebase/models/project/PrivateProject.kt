@@ -25,10 +25,12 @@ import com.krystianwsul.common.utils.UserKey
 class PrivateProject(
         override val projectRecord: PrivateProjectRecord,
         userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
+        rootTaskProvider: RootTaskProvider,
 ) : Project<ProjectType.Private>(
         CopyScheduleHelper.Private,
         AssignedToHelper.Private,
         userCustomTimeProvider,
+        rootTaskProvider,
 ) {
 
     override val projectKey = projectRecord.projectKey

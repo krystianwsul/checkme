@@ -23,6 +23,6 @@ sealed class ParentTaskDelegate {
 
         override fun getTaskKey(parentTaskId: String) = TaskKey.Root(parentTaskId)
 
-        override fun getTask(parentTaskId: String) = rootTaskParent.getTask(getTaskKey(parentTaskId))
+        override fun getTask(parentTaskId: String) = rootTaskParent.getRootTask(getTaskKey(parentTaskId))
     }
 }

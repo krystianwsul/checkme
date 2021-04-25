@@ -10,7 +10,9 @@ import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.*
 
 class ProjectTask(override val project: Project<*>, private val taskRecord: ProjectTaskRecord) :
-        Task(project.copyScheduleHelper, project, taskRecord, ParentTaskDelegate.Project(project), project) {
+        Task(project.copyScheduleHelper, project, taskRecord, ParentTaskDelegate.Project(project)) {
+
+    override val parent = project
 
     override val taskKey get() = TaskKey.Project(project.projectKey, taskRecord.id)
 

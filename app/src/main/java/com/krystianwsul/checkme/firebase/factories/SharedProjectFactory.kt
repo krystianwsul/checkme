@@ -4,6 +4,7 @@ import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.checkme.firebase.loaders.ProjectLoader
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.firebase.json.JsonWrapper
+import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.project.SharedProject
 import com.krystianwsul.common.firebase.records.project.ProjectRecord
 import com.krystianwsul.common.firebase.records.project.SharedProjectRecord
@@ -17,19 +18,22 @@ class SharedProjectFactory(
         initialProjectEvent: ProjectLoader.InitialProjectEvent<ProjectType.Shared, JsonWrapper>,
         factoryProvider: FactoryProvider,
         domainDisposable: CompositeDisposable,
+        rootTaskProvider: Project.RootTaskProvider,
         deviceDbInfo: () -> DeviceDbInfo,
 ) : ProjectFactory<ProjectType.Shared, JsonWrapper>(
         projectLoader,
         initialProjectEvent,
         factoryProvider,
         domainDisposable,
+        rootTaskProvider,
         deviceDbInfo,
 ) {
 
     override fun newProject(
             projectRecord: ProjectRecord<ProjectType.Shared>,
             userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
-    ) = SharedProject(projectRecord as SharedProjectRecord, userCustomTimeProvider).apply {
+            rootTaskProvider: Project.RootTaskProvider,
+    ) = SharedProject(projectRecord as SharedProjectRecord, userCustomTimeProvider, rootTaskProvider).apply {
         fixNotificationShown(factoryProvider.shownFactory, ExactTimeStamp.Local.now)
         updateDeviceDbInfo(deviceDbInfo())
     }

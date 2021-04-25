@@ -12,14 +12,13 @@ import com.krystianwsul.common.utils.*
 
 class RootTask(
         val taskRecord: RootTaskRecord,
-        private val parent: Parent,
+        override val parent: Parent,
         private val userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
 ) : Task(
         CopyScheduleHelper.Root,
         JsonTime.CustomTimeProvider.getForRootTask(userCustomTimeProvider),
         taskRecord,
         ParentTaskDelegate.Root(parent),
-        parent,
 ) {
 
     private val projectProperty = invalidatableLazy {
@@ -49,7 +48,7 @@ class RootTask(
             ordinal: Double?,
     ) = TODO("todo task edit")
 
-    override fun deleteFromParent() = parent.deleteTask(this)
+    override fun deleteFromParent() = parent.deleteRootTask(this)
 
     override fun getDateTime(scheduleKey: ScheduleKey) =
             DateTime(scheduleKey.scheduleDate, getTime(scheduleKey.scheduleTimePair))
@@ -91,11 +90,9 @@ class RootTask(
             projectUpdater.convert(now, this, projectId)
     }
 
-    interface Parent : Task.Parent {
+    interface Parent : Task.Parent, Project.RootTaskProvider {
 
-        fun deleteTask(task: RootTask)
-
-        fun getTask(taskKey: TaskKey.Root): RootTask
+        fun deleteRootTask(task: RootTask)
 
         fun getProject(projectId: String): Project<*>
     }

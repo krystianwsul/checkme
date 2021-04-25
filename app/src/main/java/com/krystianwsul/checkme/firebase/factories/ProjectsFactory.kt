@@ -36,6 +36,7 @@ class ProjectsFactory(
         now: ExactTimeStamp.Local,
         private val factoryProvider: FactoryProvider,
         private val domainDisposable: CompositeDisposable,
+        rootTaskProvider: Project.RootTaskProvider,
         deviceDbInfo: () -> DeviceDbInfo,
 ) {
 
@@ -44,6 +45,7 @@ class ProjectsFactory(
             privateInitialProjectEvent,
             factoryProvider,
             domainDisposable,
+            rootTaskProvider,
             deviceDbInfo,
     )
 
@@ -55,6 +57,7 @@ class ProjectsFactory(
                                 sharedInitialProjectEvent,
                                 factoryProvider,
                                 domainDisposable,
+                                rootTaskProvider,
                                 deviceDbInfo,
                         )
                     }
@@ -84,6 +87,7 @@ class ProjectsFactory(
                     addProjectEvent.initialProjectEvent,
                     factoryProvider,
                     domainDisposable,
+                    rootTaskProvider,
                     deviceDbInfo,
             )
 

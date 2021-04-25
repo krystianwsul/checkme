@@ -144,6 +144,7 @@ class ProjectsFactoryTest {
                 ExactTimeStamp.Local.now,
                 factoryProvider,
                 compositeDisposable,
+                mockk(),
         ) { deviceDbInfo }
 
         _emissionChecker = EmissionChecker("changeTypes", compositeDisposable, projectsFactory.changeTypes)

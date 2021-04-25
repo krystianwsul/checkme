@@ -5,6 +5,7 @@ import com.krystianwsul.checkme.firebase.factories.ProjectsFactory
 import com.krystianwsul.checkme.utils.publishImmediate
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.models.task.RootTask
+import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.firebase.models.taskhierarchy.TaskHierarchy
 import com.krystianwsul.common.utils.TaskKey
 import io.reactivex.rxjava3.core.Observable
@@ -68,11 +69,19 @@ class RootTaskFactory(
                 .toSet()
     }
 
-    override fun deleteTask(task: RootTask) {
+    override fun deleteRootTask(task: RootTask) {
         TODO("todo task edit")
     }
 
-    override fun getTask(taskKey: TaskKey.Root) = rootTasks.getValue(taskKey)
+    override fun getRootTask(rootTaskKey: TaskKey.Root) = rootTasks.getValue(rootTaskKey)
 
     override fun getProject(projectId: String) = getProjectsFactory().getProjectForce(projectId)
+
+    override fun getTask(taskKey: TaskKey): Task {
+        return when (taskKey) {
+            is TaskKey.Root -> getRootTask(taskKey)
+            is TaskKey.Project -> getProjectsFactory().getTaskForce(taskKey)
+            else -> throw UnsupportedOperationException()
+        }
+    }
 }

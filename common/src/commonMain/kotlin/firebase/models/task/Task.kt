@@ -27,9 +27,9 @@ abstract class Task(
         val customTimeProvider: JsonTime.CustomTimeProvider,
         private val taskRecord: TaskRecord,
         private val parentTaskDelegate: ParentTaskDelegate,
-        private val parent: Parent,
 ) : Current, CurrentOffset, QueryMatchable, Assignable {
 
+    abstract val parent: Parent
     abstract val project: Project<*>
 
     private val endDataProperty = invalidatableLazyCallbacks {
@@ -1090,5 +1090,10 @@ abstract class Task(
     interface Parent {
 
         fun getTaskHierarchiesByParentTaskKey(parentTaskKey: TaskKey): Set<TaskHierarchy>
+
+        fun getTask(taskKey: TaskKey): Task // todo task fetch check usages
+
+        // todo task fetch check usages
+        fun getInstance(instanceKey: InstanceKey) = getTask(instanceKey.taskKey).getInstance(instanceKey.scheduleKey)
     }
 }

@@ -222,6 +222,7 @@ class DomainFactoryRule : TestRule {
                 domainFactoryStartTime,
                 mockk(relaxed = true),
                 compositeDisposable,
+                mockk(),
         ) { deviceDbInfo }
 
         val friendsFactory = mockk<FriendsFactory> {

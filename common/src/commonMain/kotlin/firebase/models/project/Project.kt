@@ -9,6 +9,7 @@ import com.krystianwsul.common.firebase.models.*
 import com.krystianwsul.common.firebase.models.customtime.PrivateCustomTime
 import com.krystianwsul.common.firebase.models.customtime.SharedCustomTime
 import com.krystianwsul.common.firebase.models.task.ProjectTask
+import com.krystianwsul.common.firebase.models.task.RootTask
 import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.firebase.models.taskhierarchy.ProjectTaskHierarchy
 import com.krystianwsul.common.firebase.models.taskhierarchy.TaskHierarchy
@@ -24,6 +25,7 @@ abstract class Project<T : ProjectType>(
         val copyScheduleHelper: CopyScheduleHelper,
         val assignedToHelper: AssignedToHelper,
         val userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
+        val rootTaskProvider: RootTaskProvider,
 ) : Current, JsonTime.CustomTimeProvider, JsonTime.ProjectCustomTimeKeyProvider, Task.Parent {
 
     abstract val projectRecord: ProjectRecord<T>
@@ -496,12 +498,10 @@ abstract class Project<T : ProjectType>(
 
     abstract fun getAssignedTo(userKeys: Set<UserKey>): Map<UserKey, ProjectUser>
 
-    fun getInstance(instanceKey: InstanceKey) = getTaskForce((instanceKey.taskKey as TaskKey.Project).taskId).getInstance( // todo task fetch
-            DateTime(
-                    instanceKey.scheduleKey.scheduleDate,
-                    getTime(instanceKey.scheduleKey.scheduleTimePair),
-            )
-    )
+    override fun getTask(taskKey: TaskKey) = when (taskKey) { // todo task fetch
+        is TaskKey.Project -> getTaskForce(taskKey.taskId)
+        is TaskKey.Root -> rootTaskProvider.getRootTask(taskKey)
+    }
 
     private class MissingTaskException(projectId: ProjectKey<*>, taskId: String) :
             Exception("projectId: $projectId, taskId: $taskId")
@@ -509,5 +509,10 @@ abstract class Project<T : ProjectType>(
     interface CustomTimeMigrationHelper {
 
         fun tryMigrateProjectCustomTime(customTime: Time.Custom.Project<*>, now: ExactTimeStamp.Local): Time.Custom.User?
+    }
+
+    interface RootTaskProvider {
+
+        fun getRootTask(rootTaskKey: TaskKey.Root): RootTask
     }
 }

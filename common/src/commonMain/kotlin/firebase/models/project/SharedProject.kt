@@ -28,10 +28,12 @@ import com.krystianwsul.common.utils.UserKey
 class SharedProject(
         override val projectRecord: SharedProjectRecord,
         userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
+        rootTaskProvider: RootTaskProvider,
 ) : Project<ProjectType.Shared>(
         CopyScheduleHelper.Shared,
         AssignedToHelper.Shared,
         userCustomTimeProvider,
+        rootTaskProvider,
 ) {
 
     override val projectKey = projectRecord.projectKey

@@ -83,7 +83,7 @@ class RootTaskFactory(
     override fun getTask(taskKey: TaskKey): Task {
         return when (taskKey) {
             is TaskKey.Root -> getRootTask(taskKey)
-            is TaskKey.Project -> getProjectsFactory().getTaskForce(taskKey)
+            is TaskKey.Project -> getProjectsFactory().getProjectTaskForce(taskKey)
             else -> throw UnsupportedOperationException()
         }
     }

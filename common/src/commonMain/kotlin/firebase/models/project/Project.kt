@@ -322,10 +322,9 @@ abstract class Project<T : ProjectType>(
 
     fun getTaskIfPresent(taskKey: TaskKey.Project) = getTaskIfPresent(taskKey.taskId)
 
-    fun getTaskForce(taskId: String) = _tasks[taskId] // todo task fetch
-            ?: throw MissingTaskException(projectKey, taskId)
+    fun getProjectTaskForce(taskId: String) = _tasks[taskId] ?: throw MissingTaskException(projectKey, taskId)
 
-    fun getTaskForce(taskKey: TaskKey.Project) = getTaskForce(taskKey.taskId)
+    fun getProjectTaskForce(taskKey: TaskKey.Project) = getProjectTaskForce(taskKey.taskId)
 
     fun getTaskHierarchiesByChildTaskKey(childTaskKey: TaskKey.Project) =
             taskHierarchyContainer.getByChildTaskKey(childTaskKey)
@@ -503,7 +502,7 @@ abstract class Project<T : ProjectType>(
     abstract fun getAssignedTo(userKeys: Set<UserKey>): Map<UserKey, ProjectUser>
 
     override fun getTask(taskKey: TaskKey) = when (taskKey) { // todo task fetch
-        is TaskKey.Project -> getTaskForce(taskKey.taskId)
+        is TaskKey.Project -> getProjectTaskForce(taskKey.taskId)
         is TaskKey.Root -> rootTaskProvider.getRootTask(taskKey)
     }
 

@@ -217,7 +217,7 @@ class ProjectsFactory(
     fun getCustomTime(customTimeKey: CustomTimeKey.Project<*>) =
             projects.getValue(customTimeKey.projectId).getUntypedProjectCustomTime(customTimeKey.customTimeId)
 
-    fun getTaskForce(taskKey: TaskKey.Project) = projects.getValue(taskKey.projectKey).getTaskForce(taskKey)
+    fun getProjectTaskForce(taskKey: TaskKey.Project) = projects.getValue(taskKey.projectKey).getProjectTaskForce(taskKey)
 
     fun getTaskIfPresent(taskKey: TaskKey.Project) = projects[taskKey.projectKey]?.getTaskIfPresent(taskKey)
 

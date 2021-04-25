@@ -12,7 +12,7 @@ class ProjectTaskHierarchy(
 ) : TaskHierarchy(ParentTaskDelegate.Project(project)) {
 
     override val childTaskKey by lazy { TaskKey.Project(project.projectKey, taskHierarchyRecord.childTaskId) }
-    override val childTask by lazy { project.getTaskForce(childTaskId) }
+    override val childTask by lazy { project.getProjectTaskForce(childTaskId) }
     override val childTaskId by lazy { taskHierarchyRecord.childTaskId }
 
     override val taskHierarchyKey by lazy { TaskHierarchyKey.Project(project.projectKey, taskHierarchyRecord.id) }

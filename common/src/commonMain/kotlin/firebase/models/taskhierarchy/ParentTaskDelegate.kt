@@ -16,7 +16,7 @@ sealed class ParentTaskDelegate {
 
         override fun getTaskKey(parentTaskId: String): TaskKey = TaskKey.Project(project.projectKey, parentTaskId)
 
-        override fun getTask(parentTaskId: String): Task = project.getTaskForce(parentTaskId)
+        override fun getTask(parentTaskId: String): Task = project.getProjectTaskForce(parentTaskId)
     }
 
     class Root(private val rootTaskParent: RootTask.Parent) : ParentTaskDelegate() {

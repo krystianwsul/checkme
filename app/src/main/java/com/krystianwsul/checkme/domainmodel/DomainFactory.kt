@@ -320,7 +320,7 @@ class DomainFactory(
 
         tasks.forEach { it.setEndData(Task.EndData(now, deleteInstances), taskUndoData) }
 
-        val remoteProjects = tasks.map { it.project }.toSet() // todo task project
+        val remoteProjects = tasks.map { it.project }.toSet()
 
         return taskUndoData to DomainUpdater.Params(true, notificationType, CloudParams(remoteProjects))
     }
@@ -456,7 +456,7 @@ class DomainFactory(
 
     override fun convert(now: ExactTimeStamp.Local, startingTask: Task, projectId: ProjectKey<*>): ProjectTask {
         val remoteToRemoteConversion = RemoteToRemoteConversion()
-        val startProject = startingTask.project // todo task project
+        val startProject = startingTask.project // todo task convert
         startProject.convertRemoteToRemoteHelper(now, remoteToRemoteConversion, startingTask as ProjectTask) // todo task convert
 
         val newProject = projectsFactory.getProjectForce(projectId)
@@ -517,7 +517,7 @@ class DomainFactory(
 
     private val customTimes get() = projectsFactory.remoteCustomTimes
 
-    fun getTaskForce(taskKey: TaskKey) = projectsFactory.getTaskForce(taskKey)
+    fun getTaskForce(taskKey: TaskKey) = projectsFactory.getTaskForce(taskKey) // todo task after project
 
     fun getTaskIfPresent(taskKey: TaskKey) = projectsFactory.getTaskIfPresent(taskKey)
 

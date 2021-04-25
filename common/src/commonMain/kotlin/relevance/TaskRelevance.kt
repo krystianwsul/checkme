@@ -84,6 +84,6 @@ class TaskRelevance(val task: ProjectTask) {
                 .map { customTimeRelevanceCollection.getRelevance(it) }
                 .forEach { it.setRelevant() }
 
-        remoteProjectRelevances.getValue(task.project.projectKey).setRelevant() // todo task project
+        remoteProjectRelevances.getValue(task.project.projectKey).setRelevant() // todo task relevance
     }
 }

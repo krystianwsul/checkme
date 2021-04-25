@@ -74,7 +74,7 @@ class InstanceRelevance(val instance: Instance) {
                 .customTimeKey
                 ?.let { customTimeRelevanceCollection.getRelevance(it).setRelevant() }
 
-        remoteProjectRelevances.getValue(instance.task.project.projectKey).setRelevant() // todo task project
+        remoteProjectRelevances.getValue(instance.task.project.projectKey).setRelevant() // todo task relevance
 
         instance.scheduleKey
                 .scheduleTimePair

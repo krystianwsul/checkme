@@ -123,8 +123,7 @@ abstract class Task(
 
     val instanceHierarchyContainer by lazy { InstanceHierarchyContainer(this) }
 
-    fun getParentName(exactTimeStamp: ExactTimeStamp) = getParentTask(exactTimeStamp)?.name
-            ?: project.name // todo task project
+    fun getParentName(exactTimeStamp: ExactTimeStamp) = getParentTask(exactTimeStamp)?.name ?: project.name
 
     // hack24 = false -> basically, is it possible to add a subtask
     fun isVisible(now: ExactTimeStamp.Local, hack24: Boolean = false): Boolean {

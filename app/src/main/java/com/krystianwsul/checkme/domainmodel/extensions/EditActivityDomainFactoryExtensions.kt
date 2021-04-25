@@ -250,7 +250,7 @@ fun DomainUpdater.createChildTask(
             childTask.toCreateResult(now),
             true,
             notificationType,
-            DomainFactory.CloudParams(childTask.project), // todo task project
+            DomainFactory.CloudParams(childTask.project),
     )
 }.perform(this)
 
@@ -286,7 +286,7 @@ fun DomainUpdater.createTopLevelTask(
             task.toCreateResult(now),
             true,
             notificationType,
-            DomainFactory.CloudParams(task.project), // todo task project
+            DomainFactory.CloudParams(task.project),
     )
 }.perform(this)
 

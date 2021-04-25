@@ -169,7 +169,7 @@ class Instance private constructor(val task: Task, private var data: Data) : Ass
     private val parentInstanceProperty = invalidatableLazy {
         val parentInstance = when (val parentState = data.parentState) {
             ParentState.NoParent -> null
-            is ParentState.Parent -> task.project.getInstance(parentState.parentInstanceKey) // todo task project
+            is ParentState.Parent -> task.project.getInstance(parentState.parentInstanceKey) // todo task instance parent
             ParentState.Unset -> getTaskHierarchyParentInstance()
         }
 

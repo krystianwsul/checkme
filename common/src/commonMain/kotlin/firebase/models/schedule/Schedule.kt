@@ -46,8 +46,8 @@ abstract class Schedule(val topLevelTask: Task) : TaskParentEntry {
 
     val projectId get() = scheduleRecord.projectId
 
-    protected fun TimePair.toTime() = customTimeKey?.let(topLevelTask.project::getCustomTime) // todo task project
-            ?: Time.Normal(hourMinute!!)
+    protected fun TimePair.toTime() =
+            customTimeKey?.let(topLevelTask.customTimeProvider::getCustomTime) ?: Time.Normal(hourMinute!!)
 
     private fun invalidateEnd() {
         endExactTimeStampProperty.invalidate()

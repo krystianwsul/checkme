@@ -46,7 +46,7 @@ class InstanceHierarchyContainer(private val task: Task) {
 
         val childInstanceKeys = parentScheduleKeyToChildInstanceKeys[parentInstanceKey.scheduleKey] ?: setOf()
 
-        return childInstanceKeys.map(task.project::getInstance).onEach { // todo task project
+        return childInstanceKeys.map(task.project::getInstance).onEach { // todo task after project
             check(it.exists())
             check(it.parentInstance!!.instanceKey == parentInstanceKey)
         }

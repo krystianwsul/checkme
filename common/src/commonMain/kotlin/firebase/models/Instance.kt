@@ -185,8 +185,10 @@ class Instance private constructor(val task: Task, private var data: Data) : Ass
 
     constructor(task: Task, instanceRecord: InstanceRecord) : this(task, Data.Real(task, instanceRecord))
 
-    constructor(task: Task, scheduleDateTime: DateTime) :
-            this(task, Data.Virtual(scheduleDateTime.date, JsonTime.fromTime(scheduleDateTime.time), task.project)) // todo task project
+    constructor(task: Task, scheduleDateTime: DateTime) : this(
+            task,
+            Data.Virtual(scheduleDateTime.date, JsonTime.fromTime(scheduleDateTime.time), task.customTimeProvider),
+    )
 
     init {
         addLazyCallbacks()
@@ -368,7 +370,7 @@ class Instance private constructor(val task: Task, private var data: Data) : Ass
         (data as Data.Real).instanceRecord.hidden = false
     }
 
-    fun getParentName() = parentInstance?.name ?: task.project.name // todo task project
+    fun getParentName() = parentInstance?.name ?: task.project.name
 
     fun getShown(shownFactory: ShownFactory) = shownHolder.getShown(shownFactory)
 
@@ -408,7 +410,7 @@ class Instance private constructor(val task: Task, private var data: Data) : Ass
             it.instanceDate = dateTime?.date
 
             it.instanceJsonTime = dateTime?.time?.let {
-                task.project // todo task project
+                task.project // todo task edit
                         .getOrCopyTime(ownerKey, dateTime.date.dayOfWeek, it, customTimeMigrationHelper, now)
                         .let { JsonTime.fromTime(it) }
             }
@@ -464,7 +466,7 @@ class Instance private constructor(val task: Task, private var data: Data) : Ass
         val instanceTimePair = instanceTime.timePair
 
         return if (instanceTimePair.customTimeKey != null) {
-            val customTime = task.project.getCustomTime(instanceTimePair.customTimeKey) // todo task project
+            val customTime = task.customTimeProvider.getCustomTime(instanceTimePair.customTimeKey)
 
             val privateCustomTime = when (customTime) {
                 is SharedCustomTime -> {
@@ -513,7 +515,7 @@ class Instance private constructor(val task: Task, private var data: Data) : Ass
                 .distinct()
                 .singleOrEmpty()
                 .orEmpty()
-                .let(task.project::getAssignedTo) // todo task project
+                .let(task.project::getAssignedTo) // todo task edit
                 .map { it.value }
     }
 
@@ -589,9 +591,9 @@ class Instance private constructor(val task: Task, private var data: Data) : Ass
 
             val scheduleJsonTime get() = JsonTime.fromTimePair(instanceRecord.scheduleKey.scheduleTimePair)
 
-            override val scheduleTime get() = scheduleJsonTime.toTime(task.project) // todo task project
+            override val scheduleTime get() = scheduleJsonTime.toTime(task.customTimeProvider)
 
-            private val recordInstanceTime: Time? get() = instanceRecord.instanceJsonTime?.toTime(task.project) // todo task project
+            private val recordInstanceTime get() = instanceRecord.instanceJsonTime?.toTime(task.customTimeProvider)
 
             override val instanceTime get() = recordInstanceTime ?: scheduleTime
 

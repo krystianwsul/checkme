@@ -24,7 +24,7 @@ import com.krystianwsul.common.utils.*
 
 abstract class Task(
         private val copyScheduleHelper: CopyScheduleHelper,
-        private val customTimeProvider: JsonTime.CustomTimeProvider,
+        val customTimeProvider: JsonTime.CustomTimeProvider,
         private val taskRecord: TaskRecord,
         private val parentTaskDelegate: ParentTaskDelegate,
         private val parent: Parent,
@@ -1019,7 +1019,7 @@ abstract class Task(
             currentScheduleIntervals.map { it.schedule.assignedTo }
                     .distinct()
                     .single()
-                    .let(project::getAssignedTo) // todo task project
+                    .let(project::getAssignedTo) // todo task edit
                     .map { it.value }
         }
     }

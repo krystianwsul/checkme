@@ -66,12 +66,9 @@ class SingleSchedule(topLevelTask: Task, val singleScheduleRecord: SingleSchedul
         val writeAssignedToJson = singleScheduleRecord.singleScheduleJson as? WriteAssignedToJson
                 ?: throw UnsupportedOperationException()
 
-        topLevelTask.project.assignedToHelper.setAssignedTo(
-                // todo task project
-                writeAssignedToJson,
-                singleScheduleRecord,
-                assignedTo.map { it.key }.toSet(),
-        )
+        topLevelTask.project
+                .assignedToHelper
+                .setAssignedTo(writeAssignedToJson, singleScheduleRecord, assignedTo.map { it.key }.toSet()) // todo task edit
     }
 
     override fun toString() = super.toString() + ", dateTime: $dateTime"

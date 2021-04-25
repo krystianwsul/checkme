@@ -425,7 +425,7 @@ abstract class Project<T : ProjectType>(
     fun fixNotificationShown(
             shownFactory: Instance.ShownFactory,
             now: ExactTimeStamp.Local,
-    ) = projectTasks.forEach { // todo task fetch
+    ) = getAllTasks().forEach {
         it.existingInstances
                 .values
                 .forEach { it.fixNotificationShown(shownFactory, now) }

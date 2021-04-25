@@ -31,7 +31,7 @@ class RootTask(
             is Type.NoSchedule -> parent.getProject(type.noScheduleOrParent!!.projectId)
             is Type.Child -> type.parentTaskHierarchy
                     .parentTask
-                    .project
+                    .project // todo task project
         }
     }.apply { addTo(intervalsProperty) }
 
@@ -85,7 +85,7 @@ class RootTask(
             now: ExactTimeStamp.Local,
             projectId: ProjectKey<*>,
     ): Task {
-        return if (projectId == project.projectKey)
+        return if (projectId == project.projectKey) // todo task project
             this
         else
             projectUpdater.convert(now, this, projectId)

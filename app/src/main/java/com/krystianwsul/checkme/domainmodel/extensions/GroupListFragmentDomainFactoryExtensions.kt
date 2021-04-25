@@ -19,7 +19,7 @@ fun DomainUpdater.setInstancesDone(
 
     instances.forEach { it.setDone(localFactory, done, now) }
 
-    val remoteProjects = instances.map { it.task.project }.toSet()
+    val remoteProjects = instances.map { it.task.project }.toSet() // todo task project
 
     DomainUpdater.Params(true, notificationType, DomainFactory.CloudParams(remoteProjects))
 }.perform(this)

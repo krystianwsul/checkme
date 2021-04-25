@@ -67,6 +67,7 @@ class SingleSchedule(topLevelTask: Task, val singleScheduleRecord: SingleSchedul
                 ?: throw UnsupportedOperationException()
 
         topLevelTask.project.assignedToHelper.setAssignedTo(
+                // todo task project
                 writeAssignedToJson,
                 singleScheduleRecord,
                 assignedTo.map { it.key }.toSet(),

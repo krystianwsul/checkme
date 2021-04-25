@@ -118,7 +118,7 @@ fun DomainFactory.getCreateTaskData(
             val task = getTaskForce(currentParentSource.taskKey)
 
             if (task.isTopLevelTask(now)) {
-                when (val projectKey = task.project.projectKey) {
+                when (val projectKey = task.project.projectKey) { // todo task project
                     is ProjectKey.Private -> null
                     is ProjectKey.Shared -> EditViewModel.ParentKey.Project(projectKey)
                     else -> throw UnsupportedOperationException()
@@ -210,7 +210,7 @@ fun DomainUpdater.createScheduleTopLevelTask(
             task.toCreateResult(now),
             true,
             notificationType,
-            DomainFactory.CloudParams(task.project),
+            DomainFactory.CloudParams(task.project), // todo task project
     )
 }.perform(this)
 
@@ -250,7 +250,7 @@ fun DomainUpdater.createChildTask(
             childTask.toCreateResult(now),
             true,
             notificationType,
-            DomainFactory.CloudParams(childTask.project),
+            DomainFactory.CloudParams(childTask.project), // todo task project
     )
 }.perform(this)
 
@@ -286,7 +286,7 @@ fun DomainUpdater.createTopLevelTask(
             task.toCreateResult(now),
             true,
             notificationType,
-            DomainFactory.CloudParams(task.project),
+            DomainFactory.CloudParams(task.project), // todo task project
     )
 }.perform(this)
 
@@ -328,7 +328,7 @@ fun DomainUpdater.updateScheduleTask(
 
     imageUuid?.let { Uploader.addUpload(deviceDbInfo, task.taskKey, it, imagePath.value) }
 
-    DomainUpdater.Result(task.taskKey, true, notificationType, DomainFactory.CloudParams(task.project))
+    DomainUpdater.Result(task.taskKey, true, notificationType, DomainFactory.CloudParams(task.project)) // todo task project
 }.perform(this)
 
 @CheckResult
@@ -485,7 +485,7 @@ fun DomainUpdater.createScheduleJoinTopLevelTask(
             newParentTask.taskKey as TaskKey, // todo task edit
             true,
             notificationType,
-            DomainFactory.CloudParams(newParentTask.project),
+            DomainFactory.CloudParams(newParentTask.project), // todo task project
     )
 }.perform(this)
 
@@ -570,7 +570,7 @@ fun DomainUpdater.createJoinTopLevelTask(
             newParentTask.taskKey as TaskKey, // todo task after edit
             true,
             notificationType,
-            DomainFactory.CloudParams(newParentTask.project),
+            DomainFactory.CloudParams(newParentTask.project), // todo task project
     )
 }.perform(this)
 

@@ -30,7 +30,7 @@ abstract class Task(
         private val parent: Parent,
 ) : Current, CurrentOffset, QueryMatchable, Assignable {
 
-    abstract val project: Project<*> // todo task project
+    abstract val project: Project<*>
 
     private val endDataProperty = invalidatableLazyCallbacks {
         taskRecord.endData?.let {
@@ -123,7 +123,8 @@ abstract class Task(
 
     val instanceHierarchyContainer by lazy { InstanceHierarchyContainer(this) }
 
-    fun getParentName(exactTimeStamp: ExactTimeStamp) = getParentTask(exactTimeStamp)?.name ?: project.name
+    fun getParentName(exactTimeStamp: ExactTimeStamp) = getParentTask(exactTimeStamp)?.name
+            ?: project.name // todo task project
 
     // hack24 = false -> basically, is it possible to add a subtask
     fun isVisible(now: ExactTimeStamp.Local, hack24: Boolean = false): Boolean {
@@ -794,7 +795,7 @@ abstract class Task(
                     now,
             )
 
-            val assignedTo = schedule.takeIf { it.topLevelTask.project == project }
+            val assignedTo = schedule.takeIf { it.topLevelTask.project == project } // todo task project
                     ?.assignedTo
                     .orEmpty()
                     .map { it.key }
@@ -1019,7 +1020,7 @@ abstract class Task(
             currentScheduleIntervals.map { it.schedule.assignedTo }
                     .distinct()
                     .single()
-                    .let(project::getAssignedTo)
+                    .let(project::getAssignedTo) // todo task project
                     .map { it.value }
         }
     }

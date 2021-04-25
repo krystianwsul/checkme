@@ -78,12 +78,12 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
         val shownInstanceKeys = instanceShownPairs.filter { it.second != null }
                 .map { (instanceShownRecord, task) ->
                     val scheduleJsonTime =
-                            instanceShownRecord.scheduleTimeDescriptor.toJsonTime(task!!.project.projectRecord)
+                            instanceShownRecord.scheduleTimeDescriptor.toJsonTime(task!!.project.projectRecord) // todo task project
 
                     val scheduleDate = instanceShownRecord.run { Date(scheduleYear, scheduleMonth, scheduleDay) }
 
                     val taskKey = TaskKey.Project(task.project.projectKey, instanceShownRecord.taskId) // todo task notification
-                    InstanceKey(taskKey, scheduleDate, scheduleJsonTime.toTimePair(task.project))
+                    InstanceKey(taskKey, scheduleDate, scheduleJsonTime.toTimePair(task.project)) // todo task project
                 }
                 .toSet()
 

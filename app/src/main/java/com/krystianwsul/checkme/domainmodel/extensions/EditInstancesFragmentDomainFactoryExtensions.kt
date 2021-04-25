@@ -81,7 +81,7 @@ private class SetInstancesDateTimeUndoData(val data: List<Pair<InstanceKey, Date
             instance.setInstanceDateTime(localFactory, ownerKey, dateTime, this, now)
         }
 
-        pairs.map { it.first.task.project }.toSet()
+        pairs.map { it.first.task.project }.toSet() // todo task project
     }
 }
 
@@ -127,7 +127,7 @@ fun DomainUpdater.setInstancesDateTime(
         }
     }
 
-    val projects = instances.map { it.task.project }.toSet()
+    val projects = instances.map { it.task.project }.toSet() // todo task project
 
     DomainUpdater.Result(
             editInstancesUndoData as UndoData,
@@ -154,7 +154,7 @@ private class SetInstanceParentUndoData(
     ) = domainFactory.getInstance(instanceKey).let {
         it.setParentState(parentState)
 
-        setOf(it.task.project)
+        setOf(it.task.project) // todo task project
     }
 }
 
@@ -184,7 +184,7 @@ fun DomainUpdater.setInstancesParent(
         }
     }
 
-    val projects = instances.map { it.task.project }.toSet()
+    val projects = instances.map { it.task.project }.toSet() // todo task project
 
     DomainUpdater.Result(
             ListUndoData(undoDatas) as UndoData,

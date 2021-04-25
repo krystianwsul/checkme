@@ -55,7 +55,7 @@ fun DomainUpdater.clearTaskEndTimeStamps(
     processTaskUndoData(taskUndoData, now)
 
     val remoteProjects = taskUndoData.taskKeys
-            .map { getTaskForce(it.key).project }
+            .map { getTaskForce(it.key).project } // todo task project
             .toSet()
 
     DomainUpdater.Params(true, notificationType, DomainFactory.CloudParams(remoteProjects))
@@ -71,7 +71,7 @@ fun DomainUpdater.setOrdinal(
 
     task.ordinal = ordinal
 
-    DomainUpdater.Params(true, notificationType, DomainFactory.CloudParams(task.project))
+    DomainUpdater.Params(true, notificationType, DomainFactory.CloudParams(task.project)) // todo task project
 }.perform(this)
 
 @CheckResult
@@ -119,7 +119,7 @@ fun DomainUpdater.setInstancesAddHourActivity(
         )
     }
 
-    val remoteProjects = instances.map { it.task.project }.toSet()
+    val remoteProjects = instances.map { it.task.project }.toSet() // todo task project
 
     DomainUpdater.Result(
             DomainFactory.HourUndoData(instanceDateTimes),
@@ -142,7 +142,7 @@ fun DomainUpdater.undoInstancesAddHour(
         }
     }
 
-    val remoteProjects = instances.map { it.task.project }.toSet()
+    val remoteProjects = instances.map { it.task.project }.toSet() // todo task project
 
     DomainUpdater.Params(true, notificationType, DomainFactory.CloudParams(remoteProjects))
 }.perform(this)
@@ -157,7 +157,7 @@ fun DomainUpdater.setInstanceDone(
 
     instance.setDone(localFactory, done, now)
 
-    DomainUpdater.Params(true, notificationType, DomainFactory.CloudParams(instance.task.project))
+    DomainUpdater.Params(true, notificationType, DomainFactory.CloudParams(instance.task.project)) // todo task project
 }.perform(this)
 
 @CheckResult
@@ -279,7 +279,7 @@ private class AddChildToParentUndoData(
             task.parentTaskHierarchies.single { it.taskHierarchyKey == taskHierarchyKey }
         }.forEach { it.clearEndExactTimeStamp(now) }
 
-        setOf(task.project)
+        setOf(task.project) // todo task project
     }
 }
 

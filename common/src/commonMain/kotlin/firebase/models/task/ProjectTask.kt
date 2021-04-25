@@ -10,12 +10,12 @@ import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.*
 
 class ProjectTask(override val project: Project<*>, private val taskRecord: ProjectTaskRecord) :
-        Task(project.copyScheduleHelper, project, taskRecord, ParentTaskDelegate.Project(project), project) {
+        Task(project.copyScheduleHelper, project, taskRecord, ParentTaskDelegate.Project(project), project) { // todo task project
 
-    override val taskKey get() = TaskKey.Project(project.projectKey, taskRecord.id)
+    override val taskKey get() = TaskKey.Project(project.projectKey, taskRecord.id) // todo task project
 
     private val parentProjectTaskHierarchiesProperty = invalidatableLazy {
-        project.getTaskHierarchiesByChildTaskKey(taskKey)
+        project.getTaskHierarchiesByChildTaskKey(taskKey) // todo task project
     }
 
     override val projectParentTaskHierarchies by parentProjectTaskHierarchiesProperty
@@ -26,11 +26,11 @@ class ProjectTask(override val project: Project<*>, private val taskRecord: Proj
             note: String?,
             image: TaskJson.Image?,
             ordinal: Double?,
-    ) = project.createChildTask(this, now, name, note, image, ordinal)
+    ) = project.createChildTask(this, now, name, note, image, ordinal) // todo task project
 
-    override fun deleteFromParent() = project.deleteTask(this)
+    override fun deleteFromParent() = project.deleteTask(this) // todo task project
 
-    override fun getDateTime(scheduleKey: ScheduleKey) = project.getDateTime(scheduleKey)
+    override fun getDateTime(scheduleKey: ScheduleKey) = project.getDateTime(scheduleKey) // todo task project
 
     override fun getOrCopyTime(
             ownerKey: UserKey,
@@ -38,10 +38,10 @@ class ProjectTask(override val project: Project<*>, private val taskRecord: Proj
             time: Time,
             customTimeMigrationHelper: Project.CustomTimeMigrationHelper,
             now: ExactTimeStamp.Local,
-    ) = project.getOrCopyTime(ownerKey, dayOfWeek, time, customTimeMigrationHelper, now)
+    ) = project.getOrCopyTime(ownerKey, dayOfWeek, time, customTimeMigrationHelper, now) // todo task project
 
     override fun addChild(childTask: Task, now: ExactTimeStamp.Local): TaskHierarchyKey {
-        return project.createTaskHierarchy(this, childTask as ProjectTask, now)
+        return project.createTaskHierarchy(this, childTask as ProjectTask, now) // todo task project
     }
 
     override fun invalidateProjectParentTaskHierarchies() {

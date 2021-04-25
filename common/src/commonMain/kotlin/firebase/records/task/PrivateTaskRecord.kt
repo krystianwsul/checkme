@@ -9,7 +9,7 @@ import com.krystianwsul.common.firebase.records.project.PrivateProjectRecord
 class PrivateTaskRecord private constructor(
         create: Boolean,
         id: String,
-        private val privateProjectRecord: PrivateProjectRecord,
+        privateProjectRecord: PrivateProjectRecord,
         private val taskJson: PrivateTaskJson,
 ) : ProjectTaskRecord(create, id, privateProjectRecord, taskJson, AssignedToHelper.Private) {
 
@@ -73,8 +73,4 @@ class PrivateTaskRecord private constructor(
             monthlyWeekScheduleJson as? PrivateMonthlyWeekScheduleJson,
             yearlyScheduleJson as? PrivateYearlyScheduleJson,
     )
-
-    override fun deleteFromParent() {
-        check(privateProjectRecord.taskRecords.remove(id) == this)
-    }
 }

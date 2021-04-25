@@ -14,6 +14,7 @@ class RootTaskRecord private constructor(
         id: String,
         private val taskJson: RootTaskJson,
         private val databaseWrapper: DatabaseWrapper,
+        parent: Parent,
 ) : TaskRecord(
         create,
         id,
@@ -21,6 +22,7 @@ class RootTaskRecord private constructor(
         AssignedToHelper.root,
         JsonTime.ProjectCustomTimeIdAndKeyProvider.rootTask,
         id,
+        parent,
 ) {
 
     override val createObject: RootTaskJson // because of duplicate functionality when converting local task
@@ -58,11 +60,11 @@ class RootTaskRecord private constructor(
 
     override val taskKey = TaskKey.Root(id)
 
-    constructor(id: String, taskJson: RootTaskJson, databaseWrapper: DatabaseWrapper) :
-            this(false, id, taskJson, databaseWrapper)
+    constructor(id: String, taskJson: RootTaskJson, databaseWrapper: DatabaseWrapper, parent: Parent) :
+            this(false, id, taskJson, databaseWrapper, parent)
 
-    constructor(taskJson: RootTaskJson, databaseWrapper: DatabaseWrapper) :
-            this(true, databaseWrapper.newRootTaskRecordId(), taskJson, databaseWrapper)
+    constructor(taskJson: RootTaskJson, databaseWrapper: DatabaseWrapper, parent: Parent) :
+            this(true, databaseWrapper.newRootTaskRecordId(), taskJson, databaseWrapper, parent)
 
     val rootTaskParentDelegate = object : RootTaskParentDelegate(taskJson) {
 
@@ -74,10 +76,6 @@ class RootTaskRecord private constructor(
     override fun getScheduleRecordId() = databaseWrapper.newRootTaskScheduleRecordId(id)
     override fun newNoScheduleOrParentRecordId() = databaseWrapper.newRootTaskNoScheduleOrParentRecordId(id)
     override fun newTaskHierarchyRecordId() = databaseWrapper.newRootTaskNestedTaskHierarchyRecordId(id)
-
-    override fun deleteFromParent() {
-        // todo task after fetch
-    }
 
     override fun newScheduleWrapper(
             singleScheduleJson: SingleScheduleJson?,

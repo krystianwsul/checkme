@@ -8,6 +8,7 @@ import com.krystianwsul.common.firebase.json.tasks.SharedTaskJson
 import com.krystianwsul.common.firebase.records.ProjectUserRecord
 import com.krystianwsul.common.firebase.records.customtime.SharedCustomTimeRecord
 import com.krystianwsul.common.firebase.records.task.SharedTaskRecord
+import com.krystianwsul.common.firebase.records.task.TaskRecord
 import com.krystianwsul.common.utils.*
 
 class SharedProjectRecord(
@@ -164,6 +165,10 @@ class SharedProjectRecord(
         taskRecords[remoteTaskRecord.id] = remoteTaskRecord
 
         return remoteTaskRecord
+    }
+
+    override fun deleteTaskRecord(taskRecord: TaskRecord) {
+        check(taskRecords.remove(taskRecord.id) == taskRecord)
     }
 
     interface Parent {

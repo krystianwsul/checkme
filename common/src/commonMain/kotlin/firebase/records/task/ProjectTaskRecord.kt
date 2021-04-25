@@ -17,6 +17,7 @@ abstract class ProjectTaskRecord protected constructor(
         assignedToHelper,
         projectRecord,
         projectRecord.childKey + "/" + TASKS + "/" + id,
+        projectRecord,
 ) {
 
     override val taskKey by lazy { projectRecord.getTaskKey(id) }

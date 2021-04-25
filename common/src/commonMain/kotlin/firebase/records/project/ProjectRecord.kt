@@ -6,6 +6,7 @@ import com.krystianwsul.common.firebase.records.RemoteRecord
 import com.krystianwsul.common.firebase.records.RootTaskParentDelegate
 import com.krystianwsul.common.firebase.records.customtime.ProjectCustomTimeRecord
 import com.krystianwsul.common.firebase.records.task.ProjectTaskRecord
+import com.krystianwsul.common.firebase.records.task.TaskRecord
 import com.krystianwsul.common.firebase.records.taskhierarchy.ProjectTaskHierarchyRecord
 import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.utils.*
@@ -16,7 +17,7 @@ abstract class ProjectRecord<T : ProjectType>(
         private val projectJson: ProjectJson<T>,
         private val _id: ProjectKey<T>,
         committerKey: String,
-) : RemoteRecord(create), JsonTime.ProjectCustomTimeIdAndKeyProvider {
+) : RemoteRecord(create), JsonTime.ProjectCustomTimeIdAndKeyProvider, TaskRecord.Parent {
 
     companion object {
 

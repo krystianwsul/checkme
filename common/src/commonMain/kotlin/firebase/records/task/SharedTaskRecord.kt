@@ -9,7 +9,7 @@ import com.krystianwsul.common.firebase.records.project.SharedProjectRecord
 class SharedTaskRecord private constructor(
         create: Boolean,
         id: String,
-        private val sharedProjectRecord: SharedProjectRecord,
+        sharedProjectRecord: SharedProjectRecord,
         private val taskJson: SharedTaskJson,
 ) : ProjectTaskRecord(create, id, sharedProjectRecord, taskJson, AssignedToHelper.Shared) {
 
@@ -73,8 +73,4 @@ class SharedTaskRecord private constructor(
             monthlyWeekScheduleJson as? SharedMonthlyWeekScheduleJson,
             yearlyScheduleJson as? SharedYearlyScheduleJson,
     )
-
-    override fun deleteFromParent() {
-        check(sharedProjectRecord.taskRecords.remove(id) == this)
-    }
 }

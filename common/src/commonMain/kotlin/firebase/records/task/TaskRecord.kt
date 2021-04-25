@@ -22,6 +22,7 @@ abstract class TaskRecord protected constructor(
         val assignedToHelper: AssignedToHelper,
         val projectCustomTimeIdAndKeyProvider: JsonTime.ProjectCustomTimeIdAndKeyProvider,
         override val key: String,
+        private val parent: Parent,
 ) : RemoteRecord(create) {
 
     companion object {
@@ -269,4 +270,11 @@ abstract class TaskRecord protected constructor(
     abstract fun getScheduleRecordId(): String
     abstract fun newNoScheduleOrParentRecordId(): String
     abstract fun newTaskHierarchyRecordId(): String
+
+    final override fun deleteFromParent() = parent.deleteTaskRecord(this)
+
+    interface Parent {
+
+        fun deleteTaskRecord(taskRecord: TaskRecord)
+    }
 }

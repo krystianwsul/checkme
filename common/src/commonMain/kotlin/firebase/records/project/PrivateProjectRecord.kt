@@ -7,6 +7,7 @@ import com.krystianwsul.common.firebase.json.projects.PrivateProjectJson
 import com.krystianwsul.common.firebase.json.tasks.PrivateTaskJson
 import com.krystianwsul.common.firebase.records.customtime.PrivateCustomTimeRecord
 import com.krystianwsul.common.firebase.records.task.PrivateTaskRecord
+import com.krystianwsul.common.firebase.records.task.TaskRecord
 import com.krystianwsul.common.utils.CustomTimeId
 import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.ProjectKey
@@ -124,5 +125,9 @@ class PrivateProjectRecord(
         taskRecords[remoteTaskRecord.id] = remoteTaskRecord
 
         return remoteTaskRecord
+    }
+
+    override fun deleteTaskRecord(taskRecord: TaskRecord) {
+        check(taskRecords.remove(taskRecord.id) == taskRecord)
     }
 }

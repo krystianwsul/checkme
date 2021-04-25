@@ -111,13 +111,13 @@ abstract class Project<T : ProjectType>(
             customTimeMigrationHelper: CustomTimeMigrationHelper,
             now: ExactTimeStamp.Local,
     ): ScheduleKey {
-        check(oldTask.project != this) // todo task project
+        check(oldTask.project != this)
 
         val (oldScheduleDate, oldScheduleTimePair) = oldScheduleKey
 
         if (oldScheduleTimePair.customTimeKey == null) return oldScheduleKey
 
-        val convertedTime = when (val customTime = oldTask.project.getCustomTime(oldScheduleTimePair.customTimeKey)) { // todo task project
+        val convertedTime = when (val customTime = oldTask.project.getCustomTime(oldScheduleTimePair.customTimeKey)) { // todo task convert
             is Time.Custom.Project<*> -> {
                 val ownerKey = when (customTime) {
                     is PrivateCustomTime -> userInfo.key

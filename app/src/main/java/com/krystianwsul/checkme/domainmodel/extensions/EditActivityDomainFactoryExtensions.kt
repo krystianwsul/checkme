@@ -328,7 +328,7 @@ fun DomainUpdater.updateScheduleTask(
 
     imageUuid?.let { Uploader.addUpload(deviceDbInfo, task.taskKey, it, imagePath.value) }
 
-    DomainUpdater.Result(task.taskKey, true, notificationType, DomainFactory.CloudParams(task.project)) // todo task project
+    DomainUpdater.Result(task.taskKey, true, notificationType, DomainFactory.CloudParams(task.project))
 }.perform(this)
 
 @CheckResult
@@ -485,7 +485,7 @@ fun DomainUpdater.createScheduleJoinTopLevelTask(
             newParentTask.taskKey as TaskKey, // todo task edit
             true,
             notificationType,
-            DomainFactory.CloudParams(newParentTask.project), // todo task project
+            DomainFactory.CloudParams(newParentTask.project),
     )
 }.perform(this)
 
@@ -570,7 +570,7 @@ fun DomainUpdater.createJoinTopLevelTask(
             newParentTask.taskKey as TaskKey, // todo task after edit
             true,
             notificationType,
-            DomainFactory.CloudParams(newParentTask.project), // todo task project
+            DomainFactory.CloudParams(newParentTask.project),
     )
 }.perform(this)
 

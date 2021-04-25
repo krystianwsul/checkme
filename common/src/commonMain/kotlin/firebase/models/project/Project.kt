@@ -24,7 +24,7 @@ abstract class Project<T : ProjectType>(
         val copyScheduleHelper: CopyScheduleHelper,
         val assignedToHelper: AssignedToHelper,
         val userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
-) : Current, JsonTime.CustomTimeProvider, JsonTime.ProjectCustomTimeKeyProvider {
+) : Current, JsonTime.CustomTimeProvider, JsonTime.ProjectCustomTimeKeyProvider, Task.Parent {
 
     abstract val projectRecord: ProjectRecord<T>
 
@@ -325,7 +325,7 @@ abstract class Project<T : ProjectType>(
         return taskHierarchyContainer.getByChildTaskKey(childTaskKey)
     }
 
-    fun getTaskHierarchiesByParentTaskKey(parentTaskKey: TaskKey): Set<TaskHierarchy> { // todo task after project
+    override fun getTaskHierarchiesByParentTaskKey(parentTaskKey: TaskKey): Set<TaskHierarchy> {
         val projectTaskHierarchies = taskHierarchyContainer.getByParentTaskKey(parentTaskKey)
 
         val nestedTaskHierarchies = tasks.flatMap {

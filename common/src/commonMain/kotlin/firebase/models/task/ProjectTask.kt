@@ -10,7 +10,7 @@ import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.*
 
 class ProjectTask(override val project: Project<*>, private val taskRecord: ProjectTaskRecord) :
-        Task(project.copyScheduleHelper, project, taskRecord, ParentTaskDelegate.Project(project)) {
+        Task(project.copyScheduleHelper, project, taskRecord, ParentTaskDelegate.Project(project), project) {
 
     override val taskKey get() = TaskKey.Project(project.projectKey, taskRecord.id)
 
@@ -19,15 +19,6 @@ class ProjectTask(override val project: Project<*>, private val taskRecord: Proj
     }
 
     override val projectParentTaskHierarchies by parentProjectTaskHierarchiesProperty
-
-    private val childHierarchyIntervalsProperty = invalidatableLazy {
-        project.getTaskHierarchiesByParentTaskKey(taskKey)
-                .map { it.childTask }
-                .distinct()
-                .flatMap { it.parentHierarchyIntervals }
-                .filter { it.taskHierarchy.parentTaskKey == taskKey }
-    }
-    override val childHierarchyIntervals by childHierarchyIntervalsProperty
 
     override fun createChildTask(
             now: ExactTimeStamp.Local,
@@ -57,8 +48,6 @@ class ProjectTask(override val project: Project<*>, private val taskRecord: Proj
         parentProjectTaskHierarchiesProperty.invalidate()
         invalidateIntervals()
     }
-
-    override fun invalidateChildTaskHierarchies() = childHierarchyIntervalsProperty.invalidate()
 
     override fun updateProject(
             projectUpdater: ProjectUpdater,

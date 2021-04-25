@@ -5,7 +5,7 @@ import com.krystianwsul.checkme.utils.publishImmediate
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.task.RootTask
-import com.krystianwsul.common.firebase.models.taskhierarchy.NestedTaskHierarchy
+import com.krystianwsul.common.firebase.models.taskhierarchy.TaskHierarchy
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
 import io.reactivex.rxjava3.core.Observable
@@ -62,8 +62,10 @@ class RootTaskFactory(
                 .publishImmediate(domainDisposable)
     }
 
-    override fun getTaskHierarchiesByParentTaskKey(childTaskKey: TaskKey.Root): Set<NestedTaskHierarchy> {
-        TODO("todo task after fetch")
+    override fun getTaskHierarchiesByParentTaskKey(parentTaskKey: TaskKey): Set<TaskHierarchy> {
+        return rootTasks.flatMap { it.value.nestedParentTaskHierarchies.values }
+                .filter { it.parentTaskKey == parentTaskKey }
+                .toSet()
     }
 
     override fun deleteTask(task: RootTask) {

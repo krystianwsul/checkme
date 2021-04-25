@@ -3,7 +3,6 @@ package com.krystianwsul.common.firebase.models.task
 import com.krystianwsul.common.firebase.json.tasks.TaskJson
 import com.krystianwsul.common.firebase.models.CopyScheduleHelper
 import com.krystianwsul.common.firebase.models.project.Project
-import com.krystianwsul.common.firebase.models.taskhierarchy.NestedTaskHierarchy
 import com.krystianwsul.common.firebase.models.taskhierarchy.ParentTaskDelegate
 import com.krystianwsul.common.firebase.models.taskhierarchy.ProjectTaskHierarchy
 import com.krystianwsul.common.firebase.records.task.RootTaskRecord
@@ -19,6 +18,7 @@ class RootTask(
         JsonTime.CustomTimeProvider.getForRootTask(userCustomTimeProvider),
         taskRecord,
         ParentTaskDelegate.Root(parent),
+        parent,
 ) {
 
     /**
@@ -39,15 +39,6 @@ class RootTask(
     override val taskKey get() = TaskKey.Root(taskRecord.id)
 
     override val projectParentTaskHierarchies = setOf<ProjectTaskHierarchy>()
-
-    private val childHierarchyIntervalsProperty = invalidatableLazy {
-        parent.getTaskHierarchiesByParentTaskKey(taskKey)
-                .map { it.childTask }
-                .distinct()
-                .flatMap { it.parentHierarchyIntervals }
-                .filter { it.taskHierarchy.parentTaskKey == taskKey }
-    }
-    override val childHierarchyIntervals by childHierarchyIntervalsProperty
 
     override fun createChildTask(
             now: ExactTimeStamp.Local,
@@ -88,8 +79,6 @@ class RootTask(
 
     override fun invalidateProjectParentTaskHierarchies() = invalidateIntervals()
 
-    override fun invalidateChildTaskHierarchies() = childHierarchyIntervalsProperty.invalidate()
-
     override fun updateProject(
             projectUpdater: ProjectUpdater,
             now: ExactTimeStamp.Local,
@@ -114,9 +103,7 @@ class RootTask(
         existingInstances.values.forEach { it.fixOffsets() }
     }
 
-    interface Parent {
-
-        fun getTaskHierarchiesByParentTaskKey(childTaskKey: TaskKey.Root): Set<NestedTaskHierarchy>
+    interface Parent : Task.Parent {
 
         fun deleteTask(task: RootTask)
 

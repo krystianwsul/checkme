@@ -27,6 +27,7 @@ abstract class Task(
         private val customTimeProvider: JsonTime.CustomTimeProvider,
         private val taskRecord: TaskRecord,
         private val parentTaskDelegate: ParentTaskDelegate,
+        private val parent: Parent,
 ) : Current, CurrentOffset, QueryMatchable, Assignable {
 
     abstract val project: Project<*> // todo task project
@@ -96,7 +97,14 @@ abstract class Task(
             (it.type as? Type.NoSchedule)?.getNoScheduleOrParentInterval(it)
         }
 
-    abstract val childHierarchyIntervals: List<HierarchyInterval>
+    private val childHierarchyIntervalsProperty = invalidatableLazy {
+        parent.getTaskHierarchiesByParentTaskKey(taskKey)
+                .map { it.childTask }
+                .distinct()
+                .flatMap { it.parentHierarchyIntervals }
+                .filter { it.taskHierarchy.parentTaskKey == taskKey }
+    }
+    val childHierarchyIntervals by childHierarchyIntervalsProperty
 
     private val _existingInstances = taskRecord.instanceRecords
             .values
@@ -893,7 +901,7 @@ abstract class Task(
 
     abstract fun invalidateProjectParentTaskHierarchies()
 
-    abstract fun invalidateChildTaskHierarchies()
+    fun invalidateChildTaskHierarchies() = childHierarchyIntervalsProperty.invalidate()
 
     fun invalidateIntervals() = intervalsProperty.invalidate()
 
@@ -1078,4 +1086,9 @@ abstract class Task(
     )
 
     private class InstanceKeyNotFoundException(message: String) : Exception(message)
+
+    interface Parent {
+
+        fun getTaskHierarchiesByParentTaskKey(parentTaskKey: TaskKey): Set<TaskHierarchy>
+    }
 }

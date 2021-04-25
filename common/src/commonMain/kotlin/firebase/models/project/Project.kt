@@ -318,7 +318,7 @@ abstract class Project<T : ProjectType>(
         taskHierarchy.invalidateTasks()
     }
 
-    fun getTaskIfPresent(taskId: String) = _tasks[taskId] // todo task fetch
+    fun getTaskIfPresent(taskId: String) = _tasks[taskId]
 
     fun getTaskIfPresent(taskKey: TaskKey.Project) = getTaskIfPresent(taskKey.taskId)
 

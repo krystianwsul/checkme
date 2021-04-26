@@ -35,8 +35,6 @@ class RootTasksFactory(
     init {
         val unfilteredAddChangeEventChangeTypes = rootTasksLoader.addChangeEvents
                 .switchMapSingle { (taskRecord) ->
-                    check(!rootTaskMap.containsKey(taskRecord.taskKey))
-
                     Singles.zip(
                             rootTaskToRootTaskCoordinator.getRootTasks(taskRecord).toSingleDefault(Unit),
                             rootTaskUserCustomTimeProviderSource.getUserCustomTimeProvider(taskRecord),
@@ -45,8 +43,6 @@ class RootTasksFactory(
                     }
                 }
                 .doOnNext {
-                    check(!rootTaskMap.containsKey(it.taskKey))
-
                     rootTaskMap[it.taskKey] = it
                 }
                 .share()
@@ -68,13 +64,19 @@ class RootTasksFactory(
                 }
                 .share()
 
+        /**
+         * order is important: the bottom one executes later, and we first need to check filtering before emitting the
+         * unfiltered event
+         */
+        changeTypes = listOf(addChangeEventChangeTypes, removeEventChangeTypes).merge()
+                .map { ChangeType.REMOTE }
+                .publishImmediate(domainDisposable)
+
         unfilteredChanges = listOf(
                 unfilteredAddChangeEventChangeTypes,
                 removeEventChangeTypes,
-        ).merge().map { }
-
-        changeTypes = listOf(addChangeEventChangeTypes, removeEventChangeTypes).merge()
-                .map { ChangeType.REMOTE }
+        ).merge()
+                .map { }
                 .publishImmediate(domainDisposable)
     }
 

@@ -17,26 +17,34 @@ class EmissionChecker<T : Any>(
     constructor(name: String, compositeDisposable: CompositeDisposable, source: Single<T>) :
             this(name, compositeDisposable, source.toObservable())
 
+    private var hasErrors = false
+
     init {
         compositeDisposable += source.subscribe {
             try {
                 handlers.first().invoke(it)
                 handlers.removeFirst()
             } catch (exception: Exception) {
+                hasErrors = true
                 throw EmissionException(name, it, exception)
             }
         }
     }
 
     fun addHandler(handler: (T) -> Unit) {
+        check(!hasErrors)
+
         handlers += handler
     }
 
-    fun checkEmpty() = Assert.assertTrue("$name is not empty", handlers.isEmpty())
+    fun checkEmpty() = Assert.assertTrue(
+            "$name is not empty (as in, event not emitted as expected)",
+            handlers.isEmpty(),
+    )
 
     private class EmissionException(
             name: String,
             value: Any,
-            exception: Exception
+            exception: Exception,
     ) : Exception("name: $name, value: $value", exception)
 }

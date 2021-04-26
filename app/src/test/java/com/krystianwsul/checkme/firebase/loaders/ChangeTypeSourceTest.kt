@@ -216,7 +216,7 @@ class ChangeTypeSourceTest {
 
         acceptPrivateProject(PrivateProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true)))
 
-        emissionChecker.checkRemote {
+        emissionChecker.checkRemote { // todo getting two events here
             rootTasksLoaderProvider.accept(
                     taskKey1,
                     RootTaskJson(
@@ -251,6 +251,34 @@ class ChangeTypeSourceTest {
                     RootTaskJson(
                             taskHierarchies = mapOf(
                                     "taskHierarchyId" to NestedTaskHierarchyJson(parentTaskId = taskKey1.taskId)
+                            ),
+                    ),
+            )
+        }
+    }
+
+    @Test
+    fun testSingleProjectTaskChange() {
+        testInitial()
+        acceptPrivateProject(PrivateProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true)))
+
+        // initial event ignored for project
+        rootTasksLoaderProvider.accept(
+                taskKey1,
+                RootTaskJson(
+                        noScheduleOrParent = mapOf(
+                                "noScheduleOrParentId" to NoScheduleOrParentJson(projectId = privateProjectId),
+                        ),
+                ),
+        )
+
+        emissionChecker.checkRemote {
+            rootTasksLoaderProvider.accept(
+                    taskKey1,
+                    RootTaskJson(
+                            name = "changedName",
+                            noScheduleOrParent = mapOf(
+                                    "noScheduleOrParentId" to NoScheduleOrParentJson(projectId = privateProjectId),
                             ),
                     ),
             )

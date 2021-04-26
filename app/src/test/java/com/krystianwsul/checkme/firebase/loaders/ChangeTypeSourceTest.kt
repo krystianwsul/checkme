@@ -18,6 +18,7 @@ import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.json.NoScheduleOrParentJson
 import com.krystianwsul.common.firebase.json.projects.PrivateProjectJson
+import com.krystianwsul.common.firebase.json.taskhierarchies.NestedTaskHierarchyJson
 import com.krystianwsul.common.firebase.json.tasks.RootTaskJson
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.TaskKey
@@ -38,6 +39,7 @@ class ChangeTypeSourceTest {
         private const val privateProjectId = "privateProjectId"
 
         private val taskKey1 = TaskKey.Root("taskId1")
+        private val taskKey2 = TaskKey.Root("taskId2")
 
         @BeforeClass
         @JvmStatic
@@ -215,7 +217,43 @@ class ChangeTypeSourceTest {
         acceptPrivateProject(PrivateProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true)))
 
         emissionChecker.checkRemote {
-            rootTasksLoaderProvider.accept(taskKey1, RootTaskJson(noScheduleOrParent = mapOf("noScheduleOrParentId" to NoScheduleOrParentJson(projectId = privateProjectId))))
+            rootTasksLoaderProvider.accept(
+                    taskKey1,
+                    RootTaskJson(
+                            noScheduleOrParent = mapOf(
+                                    "noScheduleOrParentId" to NoScheduleOrParentJson(projectId = privateProjectId),
+                            ),
+                    ),
+            )
+        }
+    }
+
+    @Test
+    fun testSingleProjectRecursiveTask() {
+        testInitial()
+        acceptPrivateProject(PrivateProjectJson())
+
+        acceptPrivateProject(PrivateProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true)))
+
+        rootTasksLoaderProvider.accept(
+                taskKey1,
+                RootTaskJson(
+                        noScheduleOrParent = mapOf(
+                                "noScheduleOrParentId" to NoScheduleOrParentJson(projectId = privateProjectId),
+                        ),
+                        rootTaskIds = mutableMapOf(taskKey2.taskId to true)
+                ),
+        )
+
+        emissionChecker.checkRemote {
+            rootTasksLoaderProvider.accept(
+                    taskKey2,
+                    RootTaskJson(
+                            taskHierarchies = mapOf(
+                                    "taskHierarchyId" to NestedTaskHierarchyJson(parentTaskId = taskKey1.taskId)
+                            ),
+                    ),
+            )
         }
     }
 }

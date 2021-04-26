@@ -33,7 +33,7 @@ class RootTasksFactory(
     val changeTypes: Observable<ChangeType>
 
     init {
-        val unfilteredAddChangeEventChangeTypes = rootTasksLoader.addChangeEvents
+        val unfilteredAddChangeEventChanges = rootTasksLoader.addChangeEvents
                 .switchMapSingle { (taskRecord) ->
                     Singles.zip(
                             rootTaskToRootTaskCoordinator.getRootTasks(taskRecord).toSingleDefault(Unit),
@@ -47,11 +47,11 @@ class RootTasksFactory(
                 }
                 .share()
 
-        val addChangeEventChangeTypes = unfilteredAddChangeEventChangeTypes.filter {
+        val addChangeEventChanges = unfilteredAddChangeEventChanges.filter {
             !projectDependencyLoadTrackerManager.isTaskKeyTracked(it.taskKey)
         }
 
-        val removeEventChangeTypes = rootTasksLoader.removeEvents
+        val removeEventChanges = rootTasksLoader.removeEvents
                 .doOnNext {
                     it.taskKeys.forEach {
                         check(rootTaskMap.containsKey(it))
@@ -67,14 +67,15 @@ class RootTasksFactory(
         /**
          * order is important: the bottom one executes later, and we first need to check filtering before emitting the
          * unfiltered event
+         *
+         * We don't include removeEventChangeTypes here, since those will be emitted in the process of updating whatever
+         * initially requested the task.
          */
-        changeTypes = listOf(addChangeEventChangeTypes, removeEventChangeTypes).merge()
-                .map { ChangeType.REMOTE }
-                .publishImmediate(domainDisposable)
+        changeTypes = addChangeEventChanges.map { ChangeType.REMOTE }.publishImmediate(domainDisposable)
 
         unfilteredChanges = listOf(
-                unfilteredAddChangeEventChangeTypes,
-                removeEventChangeTypes,
+                unfilteredAddChangeEventChanges,
+                removeEventChanges,
         ).merge()
                 .map { }
                 .publishImmediate(domainDisposable)

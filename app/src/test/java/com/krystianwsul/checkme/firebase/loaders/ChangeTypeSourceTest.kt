@@ -102,7 +102,9 @@ class ChangeTypeSourceTest {
             every { getUserCustomTimeProvider(any()) } returns Single.just(mockk())
         }
 
-        val userKeyStore = mockk<UserKeyStore>()
+        val userKeyStore = mockk<UserKeyStore> {
+            every { onTasksRemoved(any()) } returns Unit
+        }
 
         val rootTaskToRootTaskCoordinator = RootTaskToRootTaskCoordinator.Impl(
                 rootTaskKeySource,
@@ -216,7 +218,7 @@ class ChangeTypeSourceTest {
 
         acceptPrivateProject(PrivateProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true)))
 
-        emissionChecker.checkRemote { // todo getting two events here
+        emissionChecker.checkRemote {
             rootTasksLoaderProvider.accept(
                     taskKey1,
                     RootTaskJson(
@@ -282,6 +284,26 @@ class ChangeTypeSourceTest {
                             ),
                     ),
             )
+        }
+    }
+
+    @Test
+    fun testSingleProjectRemoveTaskFromProject() {
+        testInitial()
+        acceptPrivateProject(PrivateProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true)))
+
+        // initial event ignored for project
+        rootTasksLoaderProvider.accept(
+                taskKey1,
+                RootTaskJson(
+                        noScheduleOrParent = mapOf(
+                                "noScheduleOrParentId" to NoScheduleOrParentJson(projectId = privateProjectId),
+                        ),
+                ),
+        )
+
+        emissionChecker.checkRemote {
+            acceptPrivateProject(PrivateProjectJson())
         }
     }
 }

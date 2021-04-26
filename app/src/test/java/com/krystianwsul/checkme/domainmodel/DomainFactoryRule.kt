@@ -55,7 +55,7 @@ class DomainFactoryRule : TestRule {
 
         private val userKey = UserKey("key")
 
-        private val deviceDbInfo = DeviceDbInfo(
+        val deviceDbInfo = DeviceDbInfo(
                 DeviceInfo(
                         spyk(UserInfo("email", "name", "uid")) {
                             every { key } returns userKey

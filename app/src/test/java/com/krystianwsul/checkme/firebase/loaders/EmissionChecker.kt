@@ -14,15 +14,8 @@ class EmissionChecker<T : Any>(
 
     private val handlers = mutableListOf<(T) -> Unit>()
 
-    constructor(
-            name: String,
-            compositeDisposable: CompositeDisposable,
-            source: Single<T>
-    ) : this(
-            name,
-            compositeDisposable,
-            source.toObservable()
-    )
+    constructor(name: String, compositeDisposable: CompositeDisposable, source: Single<T>) :
+            this(name, compositeDisposable, source.toObservable())
 
     init {
         compositeDisposable += source.subscribe {

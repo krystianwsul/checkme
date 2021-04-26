@@ -5,7 +5,6 @@ import com.krystianwsul.common.firebase.ChangeType
 import org.junit.Assert
 
 
-@ExperimentalStdlibApi
 fun <T : Any?> EmissionChecker<ChangeType>.checkChangeType(changeType: ChangeType, action: () -> T): T {
     addHandler {
         Assert.assertTrue(
@@ -18,7 +17,6 @@ fun <T : Any?> EmissionChecker<ChangeType>.checkChangeType(changeType: ChangeTyp
     return ret
 }
 
-@ExperimentalStdlibApi
 fun <T : Any?> EmissionChecker<ChangeType>.checkRemote(action: () -> T) = checkChangeType(ChangeType.REMOTE, action)
 
 @ExperimentalStdlibApi

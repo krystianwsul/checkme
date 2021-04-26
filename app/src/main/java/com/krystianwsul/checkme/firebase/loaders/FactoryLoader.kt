@@ -208,6 +208,7 @@ class FactoryLoader(
                             userDatabaseRx,
                             userFactorySingle,
                             rootTasksFactory,
+                            domainDisposable,
                     )
 
                     // ignore all change events that come in before the DomainFactory is initialized

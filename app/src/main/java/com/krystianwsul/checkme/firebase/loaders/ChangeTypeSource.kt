@@ -6,10 +6,12 @@ import com.krystianwsul.checkme.firebase.factories.ProjectsFactory
 import com.krystianwsul.checkme.firebase.roottask.RootTasksFactory
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.checkme.utils.mapNotNull
+import com.krystianwsul.checkme.utils.publishImmediate
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.json.UserWrapper
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Single
+import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.merge
 
 class ChangeTypeSource(
@@ -18,6 +20,7 @@ class ChangeTypeSource(
         userDatabaseRx: DatabaseRx<Snapshot<UserWrapper>>,
         userFactorySingle: Single<MyUserFactory>,
         rootTasksFactory: RootTasksFactory,
+        domainDisposable: CompositeDisposable,
 ) {
 
     val changeTypes: Observable<ChangeType>
@@ -32,6 +35,6 @@ class ChangeTypeSource(
                 friendsFactorySingle.flatMapObservable { it.changeTypes },
                 userFactoryChangeTypes,
                 rootTasksFactory.changeTypes,
-        ).merge()
+        ).merge().publishImmediate(domainDisposable)
     }
 }

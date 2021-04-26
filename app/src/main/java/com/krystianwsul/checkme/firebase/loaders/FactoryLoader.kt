@@ -163,13 +163,13 @@ class FactoryLoader(
                     )
 
                     projectsFactorySingle = Single.zip(
-                            privateProjectLoader.initialProjectEvent.doOnSuccess {
+                            privateProjectLoader.initialProjectEvent.map {
                                 check(it.changeType == ChangeType.REMOTE)
+
+                                it.data
                             },
                             sharedProjectsLoader.initialProjectsEvent,
-                    ) { (changeType, initialPrivateProjectEvent), initialSharedProjectsEvent ->
-                        check(changeType == ChangeType.REMOTE)
-
+                    ) { initialPrivateProjectEvent, initialSharedProjectsEvent ->
                         ProjectsFactory(
                                 localFactory,
                                 privateProjectLoader,

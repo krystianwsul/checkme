@@ -89,5 +89,5 @@ class RootTasksFactory(
     }
 
     override fun getRootTasksForProject(projectKey: ProjectKey<*>) =
-            rootTasks.values.filter { it.project.projectKey == projectKey }
+            rootTasks.values.filter { it.projectId == projectKey.key }
 }

@@ -21,20 +21,23 @@ class RootTask(
         ParentTaskDelegate.Root(parent),
 ) {
 
-    private val projectProperty = invalidatableLazy {
+    private val projectIdProperty = invalidatableLazy {
         val interval = intervals.last()
 
         when (val type = interval.type) {
-            is Type.Schedule ->
-                parent.getProject(type.taskParentEntries.maxByOrNull { it.startExactTimeStamp }!!.projectId)
-            is Type.NoSchedule -> parent.getProject(type.noScheduleOrParent!!.projectId)
-            is Type.Child -> type.parentTaskHierarchy
-                    .parentTask
-                    .project
+            is Type.Schedule -> type.taskParentEntries.maxByOrNull { it.startExactTimeStamp }!!.projectId
+            is Type.NoSchedule -> type.noScheduleOrParent!!.projectId
+            is Type.Child -> {
+                val parentTask = type.parentTaskHierarchy.parentTask as RootTask
+
+                parentTask.projectId
+            }
         }
     }.apply { addTo(intervalsProperty) }
 
-    override val project by projectProperty
+    val projectId: String by projectIdProperty
+
+    override val project get() = parent.getProject(projectId)
 
     override val taskKey get() = TaskKey.Root(taskRecord.id)
 

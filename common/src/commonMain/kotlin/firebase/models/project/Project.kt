@@ -444,7 +444,7 @@ abstract class Project<T : ProjectType>(
 
         InterruptionChecker.throwIfInterrupted()
 
-        val filteredTasks = projectTasks.asSequence() // todo task fetch
+        val filteredTasks = getAllTasks().asSequence()
                 .filter { it.mayHaveRootInstances() }
                 .filterQuery(searchData?.searchCriteria?.query).map { it.first }
                 .toList()
@@ -501,8 +501,8 @@ abstract class Project<T : ProjectType>(
 
     abstract fun getAssignedTo(userKeys: Set<UserKey>): Map<UserKey, ProjectUser>
 
-    override fun getTask(taskKey: TaskKey) = when (taskKey) { // todo task fetch
-        is TaskKey.Project -> getProjectTaskForce(taskKey.taskId)
+    override fun getTask(taskKey: TaskKey) = when (taskKey) {
+        is TaskKey.Project -> getProjectTaskForce(taskKey)
         is TaskKey.Root -> rootTaskProvider.getRootTask(taskKey)
     }
 

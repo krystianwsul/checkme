@@ -126,6 +126,8 @@ class FactoryLoader(
                     // this is hacky as fuck, but I'll take my chances
                     lateinit var projectsFactorySingle: Single<ProjectsFactory>
 
+                    val projectDependencyLoadTrackerManager = ProjectDependencyLoadTrackerManager()
+
                     val rootTasksFactory = RootTasksFactory(
                             rootTaskLoader,
                             rootTaskUserCustomTimeProviderSource,
@@ -133,10 +135,14 @@ class FactoryLoader(
                             rootTaskToRootTaskCoordinator,
                             domainDisposable,
                             rootTaskKeySource,
+                            projectDependencyLoadTrackerManager,
                     ) { projectsFactorySingle.getCurrentValue() }
 
-                    val projectToRootTaskCoordinator =
-                            ProjectToRootTaskCoordinator.Impl(rootTaskKeySource, rootTasksFactory)
+                    val projectToRootTaskCoordinator = ProjectToRootTaskCoordinator.Impl(
+                            rootTaskKeySource,
+                            rootTasksFactory,
+                            projectDependencyLoadTrackerManager,
+                    )
 
                     val privateProjectLoader = ProjectLoader.Impl(
                             privateProjectDatabaseRx.observable,

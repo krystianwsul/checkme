@@ -21,6 +21,7 @@ class RootTasksFactory(
         private val rootTaskToRootTaskCoordinator: RootTaskToRootTaskCoordinator,
         domainDisposable: CompositeDisposable,
         private val rootTaskKeySource: RootTaskKeySource,
+        projectDependencyLoadTrackerManager: ProjectDependencyLoadTrackerManager,
         private val getProjectsFactory: () -> ProjectsFactory,
 ) : RootTask.Parent {
 
@@ -28,10 +29,11 @@ class RootTasksFactory(
 
     val rootTasks: Map<TaskKey.Root, RootTask> get() = rootTaskMap
 
+    val unfilteredChanges: Observable<Unit>
     val changeTypes: Observable<ChangeType>
 
     init {
-        val addChangeEventChangeTypes = rootTasksLoader.addChangeEvents
+        val unfilteredAddChangeEventChangeTypes = rootTasksLoader.addChangeEvents
                 .switchMapSingle { (taskRecord) ->
                     check(!rootTaskMap.containsKey(taskRecord.taskKey))
 
@@ -47,17 +49,29 @@ class RootTasksFactory(
 
                     rootTaskMap[it.taskKey] = it
                 }
+                .share()
 
-        val removeEventChangeTypes = rootTasksLoader.removeEvents.doOnNext {
-            it.taskKeys.forEach {
-                check(rootTaskMap.containsKey(it))
-
-                rootTaskMap.remove(it)
-            }
-
-            userKeyStore.onTasksRemoved(it.taskKeys)
-            rootTaskKeySource.onRootTasksRemoved(it.taskKeys)
+        val addChangeEventChangeTypes = unfilteredAddChangeEventChangeTypes.filter {
+            !projectDependencyLoadTrackerManager.isTaskKeyTracked(it.taskKey)
         }
+
+        val removeEventChangeTypes = rootTasksLoader.removeEvents
+                .doOnNext {
+                    it.taskKeys.forEach {
+                        check(rootTaskMap.containsKey(it))
+
+                        rootTaskMap.remove(it)
+                    }
+
+                    userKeyStore.onTasksRemoved(it.taskKeys)
+                    rootTaskKeySource.onRootTasksRemoved(it.taskKeys)
+                }
+                .share()
+
+        unfilteredChanges = listOf(
+                unfilteredAddChangeEventChangeTypes,
+                removeEventChangeTypes,
+        ).merge().map { }
 
         changeTypes = listOf(addChangeEventChangeTypes, removeEventChangeTypes).merge()
                 .map { ChangeType.REMOTE }

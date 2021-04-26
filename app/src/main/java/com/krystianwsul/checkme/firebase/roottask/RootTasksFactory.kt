@@ -14,8 +14,8 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.Singles
 import io.reactivex.rxjava3.kotlin.merge
 
-class RootTaskFactory(
-        rootTaskLoader: RootTaskLoader,
+class RootTasksFactory(
+        rootTasksLoader: RootTasksLoader,
         private val rootTaskUserCustomTimeProviderSource: RootTaskUserCustomTimeProviderSource,
         private val userKeyStore: UserKeyStore,
         private val rootTaskToRootTaskCoordinator: RootTaskToRootTaskCoordinator,
@@ -31,7 +31,7 @@ class RootTaskFactory(
     val changeTypes: Observable<ChangeType>
 
     init {
-        val addChangeEventChangeTypes = rootTaskLoader.addChangeEvents
+        val addChangeEventChangeTypes = rootTasksLoader.addChangeEvents
                 .switchMapSingle { (taskRecord) ->
                     check(!rootTaskMap.containsKey(taskRecord.taskKey))
 
@@ -48,7 +48,7 @@ class RootTaskFactory(
                     rootTaskMap[it.taskKey] = it
                 }
 
-        val removeEventChangeTypes = rootTaskLoader.removeEvents.doOnNext {
+        val removeEventChangeTypes = rootTasksLoader.removeEvents.doOnNext {
             it.taskKeys.forEach {
                 check(rootTaskMap.containsKey(it))
 

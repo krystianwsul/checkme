@@ -14,18 +14,16 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.merge
 import io.reactivex.rxjava3.kotlin.plusAssign
 
-class RootTaskLoader(
+class RootTasksLoader(
         taskKeysObservable: Observable<Set<TaskKey.Root>>,
         private val provider: Provider,
         private val domainDisposable: CompositeDisposable,
         private val rootTaskManager: RootTaskManager,
-        private val rootTaskUserCustomTimeProviderSource: RootTaskUserCustomTimeProviderSource,
 ) {
 
     private fun <T> Observable<T>.replayImmediate() = replay().apply { domainDisposable += connect() }!!
-    private fun <T> Observable<T>.publishImmediate() = publish().apply { domainDisposable += connect() }!!
 
-    val databaseRxObservable: Observable<MapChanges<Set<TaskKey.Root>, TaskKey.Root, DatabaseRx<Snapshot<RootTaskJson>>>> = taskKeysObservable.processChanges(
+    private val databaseRxObservable: Observable<MapChanges<Set<TaskKey.Root>, TaskKey.Root, DatabaseRx<Snapshot<RootTaskJson>>>> = taskKeysObservable.processChanges(
             { it },
             { _, taskKey ->
                 DatabaseRx(

@@ -164,7 +164,7 @@ private typealias TaskKeys = Pair<ExactTimeStamp, Set<String>>
 
 private fun DomainFactory.getTaskKeys(): TaskKeys = Pair(
         ExactTimeStamp.Local.now,
-        projectsFactory.privateProject.projectTaskIds + rootTaskFactory.rootTasks.keys.map { it.taskId }
+        projectsFactory.privateProject.projectTaskIds + rootTasksFactory.rootTasks.keys.map { it.taskId }
 )
 
 private fun onComplete(

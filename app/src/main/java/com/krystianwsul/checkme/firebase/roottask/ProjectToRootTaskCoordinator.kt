@@ -14,7 +14,7 @@ interface ProjectToRootTaskCoordinator {
 
     class Impl(
             private val rootTaskKeySource: RootTaskKeySource,
-            private val rootTaskFactory: RootTaskFactory,
+            private val rootTasksFactory: RootTasksFactory,
     ) : ProjectToRootTaskCoordinator {
 
         override fun getRootTasks(projectRecord: ProjectRecord<*>): Completable {
@@ -34,8 +34,8 @@ interface ProjectToRootTaskCoordinator {
 
         private fun getTaskLoadedSingle(taskKey: TaskKey.Root): Single<RootTask> {
             return Observable.just(Unit)
-                    .concatWith(rootTaskFactory.changeTypes.map { })
-                    .mapNotNull { rootTaskFactory.rootTasks[taskKey] }
+                    .concatWith(rootTasksFactory.changeTypes.map { })
+                    .mapNotNull { rootTasksFactory.rootTasks[taskKey] }
                     .firstOrError()
         }
 

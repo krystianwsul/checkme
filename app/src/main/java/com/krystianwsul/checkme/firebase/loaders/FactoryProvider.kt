@@ -9,8 +9,8 @@ import com.krystianwsul.checkme.firebase.AndroidDatabaseWrapper
 import com.krystianwsul.checkme.firebase.factories.FriendsFactory
 import com.krystianwsul.checkme.firebase.factories.MyUserFactory
 import com.krystianwsul.checkme.firebase.factories.ProjectsFactory
-import com.krystianwsul.checkme.firebase.roottask.RootTaskFactory
-import com.krystianwsul.checkme.firebase.roottask.RootTaskLoader
+import com.krystianwsul.checkme.firebase.roottask.RootTasksFactory
+import com.krystianwsul.checkme.firebase.roottask.RootTasksLoader
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.firebase.ChangeType
@@ -59,7 +59,7 @@ interface FactoryProvider {
             startTime: ExactTimeStamp.Local,
             readTime: ExactTimeStamp.Local,
             domainDisposable: CompositeDisposable,
-            rootTaskFactory: RootTaskFactory,
+            rootTasksFactory: RootTasksFactory,
     ): Domain
 
     interface Domain {
@@ -75,7 +75,7 @@ interface FactoryProvider {
         val uuid: String
     }
 
-    abstract class Database : FriendsProvider.Database(), RootTaskLoader.Provider {
+    abstract class Database : FriendsProvider.Database(), RootTasksLoader.Provider {
 
         abstract fun getPrivateProjectObservable(key: ProjectKey.Private): Observable<Snapshot<PrivateProjectJson>>
 
@@ -104,7 +104,7 @@ interface FactoryProvider {
                 startTime: ExactTimeStamp.Local,
                 readTime: ExactTimeStamp.Local,
                 domainDisposable: CompositeDisposable,
-                rootTaskFactory: RootTaskFactory,
+                rootTasksFactory: RootTasksFactory,
         ) = DomainFactory(
                 localFactory as LocalFactory,
                 myUserFactory,
@@ -115,7 +115,7 @@ interface FactoryProvider {
                 readTime,
                 domainDisposable,
                 database,
-                rootTaskFactory,
+                rootTasksFactory,
         ) { AndroidDomainUpdater }
     }
 }

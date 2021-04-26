@@ -155,17 +155,17 @@ class RecursiveTaskRecordLoader(
 
         fun getTaskRecordSingle(taskKey: TaskKey.Root): Single<RootTaskRecord>
 
-        class Impl(private val rootTaskLoader: RootTaskLoader, domainDisposable: CompositeDisposable) :
+        class Impl(private val rootTasksLoader: RootTasksLoader, domainDisposable: CompositeDisposable) :
                 TaskRecordLoader {
 
             private val currentlyLoadedKeys = mutableMapOf<TaskKey.Root, RootTaskRecord>()
 
             init {
-                rootTaskLoader.addChangeEvents
+                rootTasksLoader.addChangeEvents
                         .subscribe { currentlyLoadedKeys[it.rootTaskRecord.taskKey] = it.rootTaskRecord }
                         .addTo(domainDisposable)
 
-                rootTaskLoader.removeEvents
+                rootTasksLoader.removeEvents
                         .subscribe { currentlyLoadedKeys -= it.taskKeys }
                         .addTo(domainDisposable)
             }
@@ -173,7 +173,7 @@ class RecursiveTaskRecordLoader(
             override fun getTaskRecordSingle(taskKey: TaskKey.Root): Single<RootTaskRecord> {
                 currentlyLoadedKeys[taskKey]?.let { return Single.just(it) }
 
-                return rootTaskLoader.addChangeEvents
+                return rootTasksLoader.addChangeEvents
                         .filter { it.rootTaskRecord.taskKey == taskKey }
                         .firstOrError()
                         .map { it.rootTaskRecord }

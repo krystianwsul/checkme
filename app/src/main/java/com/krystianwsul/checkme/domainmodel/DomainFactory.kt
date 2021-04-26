@@ -19,7 +19,7 @@ import com.krystianwsul.checkme.firebase.factories.FriendsFactory
 import com.krystianwsul.checkme.firebase.factories.MyUserFactory
 import com.krystianwsul.checkme.firebase.factories.ProjectsFactory
 import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
-import com.krystianwsul.checkme.firebase.roottask.RootTaskFactory
+import com.krystianwsul.checkme.firebase.roottask.RootTasksFactory
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.utils.checkError
@@ -63,7 +63,7 @@ class DomainFactory(
         readTime: ExactTimeStamp.Local,
         domainDisposable: CompositeDisposable,
         private val databaseWrapper: DatabaseWrapper,
-        val rootTaskFactory: RootTaskFactory,
+        val rootTasksFactory: RootTasksFactory,
         private val getDomainUpdater: (DomainFactory) -> DomainUpdater,
 ) :
         PrivateCustomTime.AllRecordsSource,
@@ -146,7 +146,7 @@ class DomainFactory(
 
     // misc
 
-    fun getAllTasks() = projectsFactory.projectTasks + rootTaskFactory.rootTasks.values
+    fun getAllTasks() = projectsFactory.projectTasks + rootTasksFactory.rootTasks.values
 
     val taskCount get() = getAllTasks().size
     val instanceCount get() = getAllTasks().map { it.existingInstances.size }.sum()
@@ -530,7 +530,7 @@ class DomainFactory(
     fun getTaskIfPresent(taskKey: TaskKey): Task? {
         return when (taskKey) {
             is TaskKey.Project -> projectsFactory.getTaskIfPresent(taskKey)
-            is TaskKey.Root -> rootTaskFactory.getRootTaskIfPresent(taskKey)
+            is TaskKey.Root -> rootTasksFactory.getRootTaskIfPresent(taskKey)
             else -> throw UnsupportedOperationException()
         }
     }

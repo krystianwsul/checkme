@@ -7,7 +7,7 @@ import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
 import com.krystianwsul.checkme.firebase.factories.FriendsFactory
 import com.krystianwsul.checkme.firebase.factories.MyUserFactory
 import com.krystianwsul.checkme.firebase.factories.ProjectsFactory
-import com.krystianwsul.checkme.firebase.roottask.RootTaskFactory
+import com.krystianwsul.checkme.firebase.roottask.RootTasksFactory
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.domain.DeviceDbInfo
@@ -154,7 +154,7 @@ class FactoryLoaderTest {
                 startTime: ExactTimeStamp.Local,
                 readTime: ExactTimeStamp.Local,
                 domainDisposable: CompositeDisposable,
-                rootTaskFactory: RootTaskFactory,
+                rootTasksFactory: RootTasksFactory,
         ) = domain
     }
 

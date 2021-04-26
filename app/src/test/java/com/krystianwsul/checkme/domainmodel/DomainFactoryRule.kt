@@ -15,7 +15,7 @@ import com.krystianwsul.checkme.firebase.loaders.SharedProjectsLoader
 import com.krystianwsul.checkme.firebase.loaders.mockBase64
 import com.krystianwsul.checkme.firebase.managers.AndroidSharedProjectManager
 import com.krystianwsul.checkme.firebase.roottask.ProjectToRootTaskCoordinator
-import com.krystianwsul.checkme.firebase.roottask.RootTaskFactory
+import com.krystianwsul.checkme.firebase.roottask.RootTasksFactory
 import com.krystianwsul.common.ErrorLogger
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.DeviceInfo
@@ -185,7 +185,7 @@ class DomainFactoryRule : TestRule {
             )
         }
 
-        val rootTaskFactory = mockk<RootTaskFactory> { // todo task tests
+        val rootTaskFactory = mockk<RootTasksFactory> { // todo task tests
             every { rootTasks } returns emptyMap()
             every { getRootTasksForProject(any()) } returns emptyList()
         }

@@ -11,12 +11,16 @@ import com.krystianwsul.checkme.firebase.managers.AndroidPrivateProjectManager
 import com.krystianwsul.checkme.firebase.managers.RootTasksManager
 import com.krystianwsul.checkme.firebase.roottask.*
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
+import com.krystianwsul.checkme.utils.SingleParamObservableSource
 import com.krystianwsul.checkme.utils.getCurrentValue
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.DomainThreadChecker
+import com.krystianwsul.common.firebase.json.NoScheduleOrParentJson
 import com.krystianwsul.common.firebase.json.projects.PrivateProjectJson
+import com.krystianwsul.common.firebase.json.tasks.RootTaskJson
 import com.krystianwsul.common.time.ExactTimeStamp
+import com.krystianwsul.common.utils.TaskKey
 import io.mockk.every
 import io.mockk.mockk
 import io.reactivex.rxjava3.core.Observable
@@ -33,6 +37,8 @@ class ChangeTypeSourceTest {
 
         private const val privateProjectId = "privateProjectId"
 
+        private val taskKey1 = TaskKey.Root("taskId1")
+
         @BeforeClass
         @JvmStatic
         fun beforeClass() {
@@ -40,9 +46,24 @@ class ChangeTypeSourceTest {
         }
     }
 
+    private class TestRootTasksLoaderProvider : RootTasksLoader.Provider {
+
+        private val singleParamObservableSource = SingleParamObservableSource<TaskKey.Root, Snapshot<RootTaskJson>>()
+
+        override fun getRootTaskObservable(rootTaskKey: TaskKey.Root) =
+                singleParamObservableSource.getObservable(rootTaskKey)
+
+        fun accept(taskKey: TaskKey.Root, json: RootTaskJson) =
+                singleParamObservableSource.accept(taskKey, Snapshot(taskKey.taskId, json))
+    }
+
     private val domainDisposable = CompositeDisposable()
 
     private lateinit var privateProjectSnapshotObservable: PublishRelay<Snapshot<PrivateProjectJson>>
+    private lateinit var rootTasksLoaderProvider: TestRootTasksLoaderProvider
+
+    private lateinit var rootTasksLoader: RootTasksLoader
+    private lateinit var rootTasksFactory: RootTasksFactory
 
     private lateinit var changeTypeSource: ChangeTypeSource
 
@@ -62,10 +83,13 @@ class ChangeTypeSourceTest {
     fun testInitial() {
         val rootTaskKeySource = RootTaskKeySource(domainDisposable)
 
-        val rootTasksLoaderProvider = mockk<RootTasksLoader.Provider>()
-        val rootTasksManager = mockk<RootTasksManager>()
+        rootTasksLoaderProvider = TestRootTasksLoaderProvider()
 
-        val rootTasksLoader = RootTasksLoader(
+        val databaseWrapper = mockk<DatabaseWrapper>()
+
+        val rootTasksManager = RootTasksManager(databaseWrapper)
+
+        rootTasksLoader = RootTasksLoader(
                 rootTaskKeySource.rootTaskKeysObservable,
                 rootTasksLoaderProvider,
                 domainDisposable,
@@ -73,7 +97,7 @@ class ChangeTypeSourceTest {
         )
 
         val rootTaskUserCustomTimeProviderSource = mockk<RootTaskUserCustomTimeProviderSource> {
-            every { getUserCustomTimeProvider(any()) } returns mockk()
+            every { getUserCustomTimeProvider(any()) } returns Single.just(mockk())
         }
 
         val userKeyStore = mockk<UserKeyStore>()
@@ -87,7 +111,7 @@ class ChangeTypeSourceTest {
 
         lateinit var projectsFactorySingle: Single<ProjectsFactory>
 
-        val rootTasksFactory = RootTasksFactory(
+        rootTasksFactory = RootTasksFactory(
                 rootTasksLoader,
                 rootTaskUserCustomTimeProviderSource,
                 userKeyStore,
@@ -95,8 +119,6 @@ class ChangeTypeSourceTest {
                 domainDisposable,
                 rootTaskKeySource,
         ) { projectsFactorySingle.getCurrentValue() }
-
-        val databaseWrapper = mockk<DatabaseWrapper>()
 
         val privateProjectManager = AndroidPrivateProjectManager(
                 DomainFactoryRule.deviceDbInfo.userInfo,
@@ -170,12 +192,23 @@ class ChangeTypeSourceTest {
     @Test
     fun testSingleProjectEmission() {
         testInitial()
-
         // first load event for projectsFactory doesn't emit a change... apparently.
         acceptPrivateProject(PrivateProjectJson())
 
         emissionChecker.checkRemote {
             acceptPrivateProject(PrivateProjectJson("name"))
+        }
+    }
+
+    @Test
+    fun testSingleProjectSingleTask() {
+        testInitial()
+        acceptPrivateProject(PrivateProjectJson())
+
+        acceptPrivateProject(PrivateProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true)))
+
+        emissionChecker.checkRemote {
+            rootTasksLoaderProvider.accept(taskKey1, RootTaskJson(noScheduleOrParent = mapOf("noScheduleOrParentId" to NoScheduleOrParentJson(projectId = privateProjectId))))
         }
     }
 }

@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.firebase.roottask
 
 import com.jakewharton.rxrelay3.BehaviorRelay
+import com.krystianwsul.checkme.utils.replayImmediate
 import com.krystianwsul.common.firebase.records.task.RootTaskRecord
 import com.krystianwsul.common.utils.TaskKey
 import io.reactivex.rxjava3.core.Completable
@@ -15,6 +16,7 @@ class RecursiveTaskRecordLoader(
         taskRecord: RootTaskRecord,
         taskRecordLoader: TaskRecordLoader,
         rootTaskUserCustomTimeProviderSource: RootTaskUserCustomTimeProviderSource,
+        domainDisposable: CompositeDisposable,
 ) {
 
     val completable: Completable
@@ -38,7 +40,7 @@ class RecursiveTaskRecordLoader(
             it.getNextState()
                     .map<GetRecordsState> { GetRecordsState.Loading(it) }
                     .defaultIfEmpty(GetRecordsState.Loaded)
-        }.share()
+        }.replayImmediate(domainDisposable) // just for tests
 
         val stateProcessor =
                 getRecordsState.ofType<GetRecordsState.Loading>().doOnNext { stateRelay.accept(it.treeLoadState) }

@@ -367,6 +367,9 @@ fun <T : Any, U : Any> Single<T>.mapNotNull(mapper: (T) -> U?) =
 fun <T> Observable<T>.publishImmediate(compositeDisposable: CompositeDisposable) =
         publish().apply { compositeDisposable += connect() }!!
 
+fun <T> Observable<T>.replayImmediate(compositeDisposable: CompositeDisposable) =
+        replay().apply { compositeDisposable += connect() }!!
+
 fun <T> Single<T>.cacheImmediate(compositeDisposable: CompositeDisposable) =
         cache().apply { compositeDisposable += subscribe() }!!
 

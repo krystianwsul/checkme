@@ -11,11 +11,12 @@ interface RootTaskToRootTaskCoordinator {
     class Impl(
             private val rootTaskKeySource: RootTaskKeySource,
             rootTasksLoader: RootTasksLoader,
-            domainDisposable: CompositeDisposable,
+            private val domainDisposable: CompositeDisposable,
             private val rootTaskUserCustomTimeProviderSource: RootTaskUserCustomTimeProviderSource,
     ) : RootTaskToRootTaskCoordinator {
 
-        private val taskRecordLoader = RecursiveTaskRecordLoader.TaskRecordLoader.Impl(rootTasksLoader, domainDisposable)
+        private val taskRecordLoader =
+                RecursiveTaskRecordLoader.TaskRecordLoader.Impl(rootTasksLoader, domainDisposable)
 
         override fun getRootTasks(rootTaskRecord: RootTaskRecord): Completable {
             rootTaskKeySource.onRootTaskAddedOrUpdated(rootTaskRecord.taskKey, rootTaskRecord.getDependentTaskKeys())
@@ -24,6 +25,7 @@ interface RootTaskToRootTaskCoordinator {
                     rootTaskRecord,
                     taskRecordLoader,
                     rootTaskUserCustomTimeProviderSource,
+                    domainDisposable,
             ).completable
         }
     }

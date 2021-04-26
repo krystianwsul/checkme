@@ -121,7 +121,7 @@ object RelevanceChecker {
                     val privateProjectManager = JsPrivateProjectManager(databaseWrapper, it)
 
                     privateProjectManager.value.forEach { privateProjectRecord ->
-                        val privateProject = PrivateProject(privateProjectRecord, userCustomTimeProvider)
+                        val privateProject = PrivateProject(privateProjectRecord, userCustomTimeProvider) // todo task relevance initialize instance hierarchies
 
                         response += "checking relevance for private project ${privateProject.projectKey}"
 
@@ -144,7 +144,7 @@ object RelevanceChecker {
                     val sharedDataInner = sharedProjectManager.records
                             .values
                             .map { sharedProjectRecord ->
-                                val sharedProject = SharedProject(sharedProjectRecord, userCustomTimeProvider)
+                                val sharedProject = SharedProject(sharedProjectRecord, userCustomTimeProvider) // todo task relevance initialize instance hierarchies
 
                                 response += "checking relevance for shared project ${sharedProject.projectKey}: ${sharedProject.name}"
 

@@ -7,7 +7,9 @@ import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.utils.TaskKey
 import io.mockk.every
 import io.mockk.mockk
+import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.observers.TestObserver
+import org.junit.After
 import org.junit.Test
 
 class RecursiveTaskRecordLoaderTest {
@@ -19,7 +21,6 @@ class RecursiveTaskRecordLoaderTest {
         val taskKey3 = TaskKey.Root("taskKey3")
         val taskKey4 = TaskKey.Root("taskKey4")
         val taskKey5 = TaskKey.Root("taskKey5")
-        val taskKey6 = TaskKey.Root("taskKey6")
     }
 
     private class TestTaskRecordLoader : RecursiveTaskRecordLoader.TaskRecordLoader {
@@ -37,6 +38,8 @@ class RecursiveTaskRecordLoaderTest {
                 singleParamSingleSource.getSingle(rootTaskRecord)
     }
 
+    private val domainDisposable = CompositeDisposable()
+
     private lateinit var taskRecordLoader: TestTaskRecordLoader
     private lateinit var rootTaskUserCustomTimeProviderSource: TestRootTaskUserCustomTimeProviderSource
     private lateinit var recursiveTaskRecordLoader: RecursiveTaskRecordLoader
@@ -51,6 +54,7 @@ class RecursiveTaskRecordLoaderTest {
                 initialTaskRecord,
                 taskRecordLoader,
                 rootTaskUserCustomTimeProviderSource,
+                domainDisposable,
         )
 
         testObserver = recursiveTaskRecordLoader.completable.test()
@@ -81,6 +85,11 @@ class RecursiveTaskRecordLoaderTest {
 
     private fun acceptTask(taskKey: TaskKey.Root, taskRecord: RootTaskRecord) =
             taskRecordLoader.singleParamSingleSource.accept(taskKey, taskRecord)
+
+    @After
+    fun after() {
+        domainDisposable.dispose()
+    }
 
     @Test
     fun testNoChildrenCompletesImmediately() {

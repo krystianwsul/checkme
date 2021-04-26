@@ -23,5 +23,5 @@ data class RootTaskJson @JvmOverloads constructor(
         override var noScheduleOrParent: Map<String, NoScheduleOrParentJson> = mutableMapOf(),
         override var ordinal: Double? = null,
         override var taskHierarchies: Map<String, NestedTaskHierarchyJson> = mapOf(),
-        override val rootTaskIds: MutableMap<String, Boolean>,
+        override val rootTaskIds: MutableMap<String, Boolean> = mutableMapOf(),
 ) : TaskJson, Parsable, RootTaskParentJson

@@ -3,7 +3,7 @@ package com.krystianwsul.checkme.firebase.roottask
 import com.krystianwsul.checkme.firebase.loaders.DatabaseRx
 import com.krystianwsul.checkme.firebase.loaders.MapChanges
 import com.krystianwsul.checkme.firebase.loaders.processChanges
-import com.krystianwsul.checkme.firebase.managers.RootTaskManager
+import com.krystianwsul.checkme.firebase.managers.RootTasksManager
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.checkme.utils.mapNotNull
 import com.krystianwsul.common.firebase.json.tasks.RootTaskJson
@@ -18,7 +18,7 @@ class RootTasksLoader(
         taskKeysObservable: Observable<Set<TaskKey.Root>>,
         private val provider: Provider,
         private val domainDisposable: CompositeDisposable,
-        private val rootTaskManager: RootTaskManager,
+        private val rootTasksManager: RootTasksManager,
 ) {
 
     private fun <T> Observable<T>.replayImmediate() = replay().apply { domainDisposable += connect() }!!
@@ -38,7 +38,7 @@ class RootTasksLoader(
         mapChanges.newMap
                 .map { (_, databaseRx) ->
                     databaseRx.observable
-                            .mapNotNull { rootTaskManager.set(it) }
+                            .mapNotNull { rootTasksManager.set(it) }
                             .map { rootTaskRecord ->
                                 AddChangeEvent(rootTaskRecord)
                             }

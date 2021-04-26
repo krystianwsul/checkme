@@ -8,7 +8,7 @@ import com.krystianwsul.common.firebase.records.task.RootTaskRecord
 import com.krystianwsul.common.firebase.records.task.TaskRecord
 import com.krystianwsul.common.utils.TaskKey
 
-class RootTaskManager(private val databaseWrapper: DatabaseWrapper) :
+class RootTasksManager(private val databaseWrapper: DatabaseWrapper) :
         MapRecordManager<TaskKey.Root, RootTaskRecord>(), TaskRecord.Parent {
 
     companion object {

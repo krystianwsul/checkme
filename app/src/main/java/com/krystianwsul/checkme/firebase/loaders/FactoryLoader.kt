@@ -13,7 +13,6 @@ import com.krystianwsul.checkme.firebase.managers.AndroidSharedProjectManager
 import com.krystianwsul.checkme.firebase.managers.RootTaskManager
 import com.krystianwsul.checkme.firebase.roottask.*
 import com.krystianwsul.checkme.utils.cacheImmediate
-import com.krystianwsul.checkme.utils.mapNotNull
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.DeviceInfo
@@ -25,7 +24,6 @@ import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
-import io.reactivex.rxjava3.kotlin.merge
 import io.reactivex.rxjava3.kotlin.plusAssign
 
 class FactoryLoader(
@@ -128,7 +126,7 @@ class FactoryLoader(
                     // this is hacky as fuck, but I'll take my chances
                     lateinit var projectsFactorySingle: Single<ProjectsFactory>
 
-                    val rootTaskFactory = RootTasksFactory(
+                    val rootTasksFactory = RootTasksFactory(
                             rootTaskLoader,
                             rootTaskUserCustomTimeProviderSource,
                             userKeyStore,
@@ -138,7 +136,7 @@ class FactoryLoader(
                     ) { projectsFactorySingle.getCurrentValue() }
 
                     val projectToRootTaskCoordinator =
-                            ProjectToRootTaskCoordinator.Impl(rootTaskKeySource, rootTaskFactory)
+                            ProjectToRootTaskCoordinator.Impl(rootTaskKeySource, rootTasksFactory)
 
                     val privateProjectLoader = ProjectLoader.Impl(
                             privateProjectDatabaseRx.observable,
@@ -181,7 +179,7 @@ class FactoryLoader(
                                 ExactTimeStamp.Local.now,
                                 factoryProvider,
                                 domainDisposable,
-                                rootTaskFactory,
+                                rootTasksFactory,
                                 ::getDeviceDbInfo,
                         )
                     }.cacheImmediate()
@@ -200,23 +198,22 @@ class FactoryLoader(
                                 startTime,
                                 ExactTimeStamp.Local.now,
                                 domainDisposable,
-                                rootTaskFactory,
+                                rootTasksFactory,
                         )
                     }.cacheImmediate()
 
-                    val userFactoryChangeTypes = userDatabaseRx.changes.flatMapMaybe { snapshot ->
-                        userFactorySingle.mapNotNull { it.onNewSnapshot(snapshot) }
-                    }
-
-                    val changeTypes = listOf(
-                            projectsFactorySingle.flatMapObservable { it.changeTypes },
-                            friendsFactorySingle.flatMapObservable { it.changeTypes },
-                            userFactoryChangeTypes,
-                            rootTaskFactory.changeTypes,
-                    ).merge()
+                    val changeTypeSource = ChangeTypeSource(
+                            projectsFactorySingle,
+                            friendsFactorySingle,
+                            userDatabaseRx,
+                            userFactorySingle,
+                            rootTasksFactory,
+                    )
 
                     // ignore all change events that come in before the DomainFactory is initialized
-                    domainFactorySingle.flatMapObservable { domainFactory -> changeTypes.map { domainFactory to it } }
+                    domainFactorySingle.flatMapObservable { domainFactory ->
+                        changeTypeSource.changeTypes.map { domainFactory to it }
+                    }
                             .subscribe { (domainFactory, changeType) ->
                                 domainFactory.onChangeTypeEvent(changeType, ExactTimeStamp.Local.now)
                             }

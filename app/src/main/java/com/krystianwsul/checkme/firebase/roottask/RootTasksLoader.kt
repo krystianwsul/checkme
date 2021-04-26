@@ -38,10 +38,8 @@ class RootTasksLoader(
         mapChanges.newMap
                 .map { (_, databaseRx) ->
                     databaseRx.observable
-                            .mapNotNull { rootTasksManager.set(it) }
-                            .map { rootTaskRecord ->
-                                AddChangeEvent(rootTaskRecord)
-                            }
+                            .mapNotNull(rootTasksManager::set)
+                            .map(::AddChangeEvent)
                 }.merge()
     }.replayImmediate()
 

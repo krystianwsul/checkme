@@ -88,11 +88,16 @@ class ChangeTypeSourceTest {
         every { getUserCustomTimeProvider(any()) } returns Single.just(mockk())
     }
 
+    private fun immediateRootTaskUserCustomTimeProviderSource() = mockk<RootTaskUserCustomTimeProviderSource> {
+        every { getUserCustomTimeProvider(any()) } returns Single.just(mockk())
+    }
+
     private fun setup(
             projectUserCustomTimeProviderSource: ProjectUserCustomTimeProviderSource =
                     immediateProjectUserCustomTimeProviderSource(),
+            rootTaskUserCustomTimeProviderSource: RootTaskUserCustomTimeProviderSource =
+                    immediateRootTaskUserCustomTimeProviderSource(),
     ) {
-
         val rootTaskKeySource = RootTaskKeySource(domainDisposable)
 
         rootTasksLoaderProvider = TestRootTasksLoaderProvider()
@@ -110,10 +115,6 @@ class ChangeTypeSourceTest {
                 rootTasksManager,
                 loadDependencyTrackerManager,
         )
-
-        val rootTaskUserCustomTimeProviderSource = mockk<RootTaskUserCustomTimeProviderSource> {
-            every { getUserCustomTimeProvider(any()) } returns Single.just(mockk())
-        }
 
         val userKeyStore = mockk<UserKeyStore> {
             every { onTasksRemoved(any()) } returns Unit

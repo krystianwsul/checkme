@@ -47,7 +47,7 @@ class RootTaskFactory(
             }
         }
                 .doOnNext { task = it.task }
-                .share()
+                .publish()
 
         val addChangeEventChanges = unfilteredAddChangeEventChanges.filter { !it.isTracked }
 
@@ -68,6 +68,9 @@ class RootTaskFactory(
         // todo task track I'm almost sure this isn't correct, since the map in RootTasksFactory won't pick up the initial event
         changeTypes = addChangeEventChanges.map { ChangeType.REMOTE }.publishImmediate(domainDisposable)
 
-        unfilteredChanges = unfilteredAddChangeEventChanges.map { }.publishImmediate(domainDisposable)
+        unfilteredChanges = unfilteredAddChangeEventChanges.map { }.replay(1)
+                .apply { domainDisposable += connect() }
+
+        unfilteredAddChangeEventChanges.connect()
     }
 }

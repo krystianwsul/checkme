@@ -321,7 +321,7 @@ class ChangeTypeSourceTest {
     }
 
     @Test
-    fun testSingleProjectRemoveChildTask() { // todo task change this test is incomplete
+    fun testSingleProjectRemoveChildTask() {
         testInitial()
         acceptPrivateProject(PrivateProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true)))
 
@@ -336,7 +336,6 @@ class ChangeTypeSourceTest {
         )
 
         rootTasksLoaderProvider.accept(
-                // todo task change I need to add recurrent changes to tracking
                 taskKey2,
                 RootTaskJson(
                         startTimeOffset = 0.0,
@@ -346,5 +345,16 @@ class ChangeTypeSourceTest {
                 ),
         )
         checkEmpty()
+
+        taskEmissionChecker.checkRemote {
+            rootTasksLoaderProvider.accept(
+                    taskKey1,
+                    RootTaskJson(
+                            noScheduleOrParent = mapOf(
+                                    "noScheduleOrParentId" to NoScheduleOrParentJson(projectId = privateProjectId),
+                            ),
+                    ),
+            )
+        }
     }
 }

@@ -9,10 +9,11 @@ import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.firebase.models.taskhierarchy.TaskHierarchy
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
+import com.krystianwsul.treeadapter.getCurrentValue
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
-import io.reactivex.rxjava3.kotlin.Singles
 import io.reactivex.rxjava3.kotlin.merge
+import io.reactivex.rxjava3.kotlin.plusAssign
 
 class RootTasksFactory(
         rootTasksLoader: RootTasksLoader,
@@ -25,62 +26,58 @@ class RootTasksFactory(
         private val getProjectsFactory: () -> ProjectsFactory,
 ) : RootTask.Parent {
 
-    private val rootTaskMap = mutableMapOf<TaskKey.Root, RootTask>()
+    private val rootTaskFactoriesObservable: Observable<Map<TaskKey.Root, RootTaskFactory>>
 
-    val rootTasks: Map<TaskKey.Root, RootTask> get() = rootTaskMap
+    val rootTasks: Map<TaskKey.Root, RootTask>
+        get() = rootTaskFactoriesObservable.getCurrentValue()
+                .mapValues { it.value.task }
+                .filterValues { it != null }
+                .mapValues { it.value!! }
 
     val unfilteredChanges: Observable<Unit>
     val changeTypes: Observable<ChangeType>
 
-    private data class AddChangeData(val task: RootTask, val isTracked: Boolean)
-
     init {
-        val unfilteredAddChangeEventChanges = rootTasksLoader.addChangeEvents
-                .flatMapSingle { (taskRecord, isTracked) ->
-                    val taskTracker = loadDependencyTrackerManager.startTrackingTaskLoad(taskRecord)
+        rootTaskFactoriesObservable = rootTasksLoader.addChangeEvents
+                .groupBy { it.rootTaskRecord.taskKey }
+                .scan(mapOf<TaskKey.Root, RootTaskFactory>()) { oldMap, group ->
+                    check(!oldMap.containsKey(group.key))
 
-                    Singles.zip(
-                            rootTaskToRootTaskCoordinator.getRootTasks(taskRecord).toSingleDefault(Unit),
-                            rootTaskUserCustomTimeProviderSource.getUserCustomTimeProvider(taskRecord),
-                    ).map { (_, userCustomTimeProvider) ->
-                        taskTracker.stopTracking()
-
-                        AddChangeData(RootTask(taskRecord, this, userCustomTimeProvider), isTracked)
+                    oldMap.toMutableMap().also {
+                        it[group.key] = RootTaskFactory(
+                                loadDependencyTrackerManager,
+                                rootTaskToRootTaskCoordinator,
+                                rootTaskUserCustomTimeProviderSource,
+                                this,
+                                domainDisposable,
+                                group,
+                        )
                     }
                 }
-                .doOnNext { rootTaskMap[it.task.taskKey] = it.task }
-                .share()
+                .replay(1)
 
-        val addChangeEventChanges = unfilteredAddChangeEventChanges.filter { !it.isTracked }
+        domainDisposable += rootTaskFactoriesObservable.connect()
 
-        val removeEventChanges = rootTasksLoader.removeEvents
+        fun getFactory(taskKey: TaskKey.Root) = rootTaskFactoriesObservable.getCurrentValue().getValue(taskKey)
+
+        val removeEvents = rootTasksLoader.removeEvents
                 .doOnNext {
-                    it.taskKeys.forEach {
-                        check(rootTaskMap.containsKey(it))
-
-                        rootTaskMap.remove(it)
-                    }
+                    it.taskKeys.forEach { getFactory(it).onRemove() }
 
                     userKeyStore.onTasksRemoved(it.taskKeys)
                     rootTaskKeySource.onRootTasksRemoved(it.taskKeys)
                 }
-                .share()
 
-        /**
-         * order is important: the bottom one executes later, and we first need to check filtering before emitting the
-         * unfiltered event
-         *
-         * We don't include removeEventChangeTypes here, since those will be emitted in the process of updating whatever
-         * initially requested the task.
-         */
-        changeTypes = addChangeEventChanges.map { ChangeType.REMOTE }.publishImmediate(domainDisposable)
+        changeTypes = rootTaskFactoriesObservable.switchMap {
+            it.map { it.value.changeTypes }.merge()
+        }.publishImmediate(domainDisposable)
 
-        unfilteredChanges = listOf(
-                unfilteredAddChangeEventChanges,
-                removeEventChanges,
-        ).merge()
-                .map { }
-                .publishImmediate(domainDisposable)
+        val factoryUnfilteredChanges = rootTaskFactoriesObservable.switchMap {
+            it.map { it.value.unfilteredChanges }.merge()
+        }
+
+        unfilteredChanges =
+                listOf(factoryUnfilteredChanges, removeEvents.map { }).merge().publishImmediate(domainDisposable)
     }
 
     override fun getTaskHierarchiesByParentTaskKey(parentTaskKey: TaskKey): Set<TaskHierarchy> {

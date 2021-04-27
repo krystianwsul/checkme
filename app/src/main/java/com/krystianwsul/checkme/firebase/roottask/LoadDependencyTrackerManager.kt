@@ -13,6 +13,10 @@ class LoadDependencyTrackerManager {
         return trackerMap.getOrPut(projectKey) { ProjectTracker(this, projectKey) }
     }
 
+    fun startTrackingTaskLoad(taskKey: TaskKey.Root): TaskTracker {
+        TODO("")
+    }
+
     private fun stopTrackingProjectLoad(projectTracker: ProjectTracker) {
         check(trackerMap.remove(projectTracker.projectKey) == projectTracker)
     }
@@ -31,5 +35,15 @@ class LoadDependencyTrackerManager {
         }
 
         fun stopTracking() = loadDependencyTrackerManager.stopTrackingProjectLoad(this)
+    }
+
+    class TaskTracker(private val parent: Parent, val taskKey: TaskKey.Root) {
+
+        fun stopTracking() = parent.stopTrackingTaskLoad(this)
+
+        interface Parent {
+
+            fun stopTrackingTaskLoad(taskTracker: TaskTracker)
+        }
     }
 }

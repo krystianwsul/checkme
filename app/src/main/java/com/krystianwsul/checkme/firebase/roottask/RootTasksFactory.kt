@@ -35,10 +35,14 @@ class RootTasksFactory(
     init {
         val unfilteredAddChangeEventChanges = rootTasksLoader.addChangeEvents
                 .switchMapSingle { (taskRecord) ->
+                    val taskTracker = loadDependencyTrackerManager.startTrackingTaskLoad(taskRecord.taskKey)
+
                     Singles.zip(
                             rootTaskToRootTaskCoordinator.getRootTasks(taskRecord).toSingleDefault(Unit),
                             rootTaskUserCustomTimeProviderSource.getUserCustomTimeProvider(taskRecord),
                     ).map { (_, userCustomTimeProvider) ->
+                        taskTracker.stopTracking()
+
                         RootTask(taskRecord, this, userCustomTimeProvider)
                     }
                 }

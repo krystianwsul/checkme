@@ -261,6 +261,7 @@ class ChangeTypeSourceTest {
             rootTasksLoaderProvider.accept(
                     taskKey2,
                     RootTaskJson(
+                            startTimeOffset = 0.0,
                             taskHierarchies = mapOf(
                                     "taskHierarchyId" to NestedTaskHierarchyJson(parentTaskId = taskKey1.taskId),
                             ),
@@ -338,6 +339,7 @@ class ChangeTypeSourceTest {
                 // todo task change I need to add recurrent changes to tracking
                 taskKey2,
                 RootTaskJson(
+                        startTimeOffset = 0.0,
                         taskHierarchies = mapOf(
                                 "taskHierarchyId" to NestedTaskHierarchyJson(parentTaskId = taskKey1.taskId)
                         ),

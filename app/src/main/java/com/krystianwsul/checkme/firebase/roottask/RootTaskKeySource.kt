@@ -15,7 +15,7 @@ class RootTaskKeySource(private val domainDisposable: CompositeDisposable) {
     val rootTaskKeysObservable: Observable<Set<TaskKey.Root>> = RequestKeyStore.merge(projectStore, taskStore)
 
     fun onProjectAddedOrUpdated(projectKey: ProjectKey<*>, rootTaskKeys: Set<TaskKey.Root>) =
-            projectStore.requestCustomTimeUsers(projectKey, rootTaskKeys)
+            projectStore.addRequest(projectKey, rootTaskKeys)
 
     fun onProjectsRemoved(projectKeys: Set<ProjectKey<*>>) = projectStore.onRequestsRemoved(projectKeys)
 
@@ -39,7 +39,7 @@ class RootTaskKeySource(private val domainDisposable: CompositeDisposable) {
          * easiest for edits.
          */
 
-        taskStore.requestCustomTimeUsers(parentRootTaskKey, childRootTaskKeys)
+        taskStore.addRequest(parentRootTaskKey, childRootTaskKeys)
     }
 
     fun onRootTasksRemoved(rootTaskKeys: Set<TaskKey.Root>) = taskStore.onRequestsRemoved(rootTaskKeys)

@@ -16,7 +16,6 @@ import com.krystianwsul.common.firebase.DatabaseCallback
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.json.projects.PrivateProjectJson
 import com.krystianwsul.common.firebase.json.tasks.PrivateTaskJson
-import com.krystianwsul.common.firebase.records.project.ProjectRecord
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ProjectType
 import io.mockk.every
@@ -84,7 +83,7 @@ class ProjectLoaderTest {
                 TestProjectUserCustomTimeProviderSource(),
                 object : ProjectToRootTaskCoordinator {
 
-                    override fun getRootTasks(projectTracker: LoadDependencyTrackerManager.ProjectTracker, projectRecord: ProjectRecord<*>) = Completable.complete() // todo task tests
+                    override fun getRootTasks(projectTracker: LoadDependencyTrackerManager.ProjectTracker) = Completable.complete() // todo task tests
                 },
                 mockk(relaxed = true), // todo task tests
         )

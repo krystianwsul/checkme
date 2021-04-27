@@ -47,8 +47,8 @@ class RequestKeyStore<REQUEST_KEY : Any, OUTPUT_KEY : Any> {
             .map { it.output }
             .distinctUntilChanged() // this initially emits an empty set.  It's necessary-ish for merging
 
-    fun requestCustomTimeUsers(requestKey: REQUEST_KEY, userKeys: Set<OUTPUT_KEY>) =
-            customTimeEvents.accept(CustomTimeEvent.ProjectAdded(requestKey, userKeys))
+    fun addRequest(requestKey: REQUEST_KEY, outputKeys: Set<OUTPUT_KEY>) =
+            customTimeEvents.accept(CustomTimeEvent.ProjectAdded(requestKey, outputKeys))
 
     fun onRequestsRemoved(requestKey: Set<REQUEST_KEY>) =
             customTimeEvents.accept(CustomTimeEvent.ProjectsRemoved(requestKey))

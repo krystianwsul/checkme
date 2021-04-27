@@ -27,7 +27,6 @@ import com.krystianwsul.common.firebase.json.projects.PrivateProjectJson
 import com.krystianwsul.common.firebase.models.MyUser
 import com.krystianwsul.common.firebase.records.MyUserRecord
 import com.krystianwsul.common.firebase.records.project.PrivateProjectRecord
-import com.krystianwsul.common.firebase.records.project.ProjectRecord
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.HourMinute
@@ -204,7 +203,7 @@ class DomainFactoryRule : TestRule {
                 mockk(relaxed = true),
                 object : ProjectToRootTaskCoordinator {
 
-                    override fun getRootTasks(projectTracker: LoadDependencyTrackerManager.ProjectTracker, projectRecord: ProjectRecord<*>) = Completable.complete() // todo task tests
+                    override fun getRootTasks(projectTracker: LoadDependencyTrackerManager.ProjectTracker) = Completable.complete() // todo task tests
                 },
                 mockk(relaxed = true), // todo task tests
                 mockk(relaxed = true), // todo task tests

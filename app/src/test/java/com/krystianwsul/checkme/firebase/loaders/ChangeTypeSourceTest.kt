@@ -321,7 +321,7 @@ class ChangeTypeSourceTest {
     }
 
     @Test
-    fun testSingleProjectRemoveRecursiveTask() { // todo task change this test is incomplete
+    fun testSingleProjectRemoveChildTask() { // todo task change this test is incomplete
         testInitial()
         acceptPrivateProject(PrivateProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true)))
 

@@ -1,49 +1,69 @@
 package com.krystianwsul.checkme.firebase.roottask
 
+import com.krystianwsul.common.firebase.records.project.ProjectRecord
+import com.krystianwsul.common.firebase.records.task.RootTaskRecord
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
 
 class LoadDependencyTrackerManager {
 
-    private val trackerMap = mutableMapOf<ProjectKey<*>, ProjectTracker>()
+    private val projectTrackers = mutableMapOf<ProjectKey<*>, ProjectTracker>()
+    private val taskTrackers = mutableMapOf<TaskKey.Root, TaskTracker>()
 
-    fun startTrackingProjectLoad(projectKey: ProjectKey<*>): ProjectTracker {
-        check(!trackerMap.containsKey(projectKey))
+    private val allTrackers get() = projectTrackers.values + taskTrackers.values
 
-        return trackerMap.getOrPut(projectKey) { ProjectTracker(this, projectKey) }
+    fun startTrackingProjectLoad(projectRecord: ProjectRecord<*>): ProjectTracker {
+        val projectKey = projectRecord.projectKey
+        check(!projectTrackers.containsKey(projectKey))
+
+        return ProjectTracker(
+                this,
+                projectKey,
+                projectRecord.rootTaskParentDelegate.rootTaskKeys,
+        ).also {
+            projectTrackers[projectKey] = it
+        }
     }
 
-    fun startTrackingTaskLoad(taskKey: TaskKey.Root): TaskTracker {
-        TODO("")
+    fun startTrackingTaskLoad(taskRecord: RootTaskRecord): TaskTracker {
+        val taskKey = taskRecord.taskKey
+        check(!taskTrackers.containsKey(taskKey))
+
+        return TaskTracker(this, taskKey, taskRecord.getDependentTaskKeys()).also {
+            taskTrackers[taskKey] = it
+        }
     }
 
     private fun stopTrackingProjectLoad(projectTracker: ProjectTracker) {
-        check(trackerMap.remove(projectTracker.projectKey) == projectTracker)
+        check(projectTrackers.remove(projectTracker.projectKey) == projectTracker)
     }
 
-    fun isTaskKeyTracked(taskKey: TaskKey.Root) = trackerMap.values.any { it.taskKeys.contains(taskKey) }
+    private fun stopTrackingTaskLoad(taskTracker: TaskTracker) {
+        check(taskTrackers.remove(taskTracker.taskKey) == taskTracker)
+    }
+
+    fun isTaskKeyTracked(taskKey: TaskKey.Root) = allTrackers.any { taskKey in it.dependentTaskKeys }
+
+    interface Tracker {
+
+        val dependentTaskKeys: Set<TaskKey.Root>
+    }
 
     class ProjectTracker(
             private val loadDependencyTrackerManager: LoadDependencyTrackerManager,
             val projectKey: ProjectKey<*>,
-    ) {
-
-        val taskKeys = mutableSetOf<TaskKey.Root>()
-
-        fun addTaskKey(taskKey: TaskKey.Root) {
-            taskKeys += taskKey
-        }
+            override val dependentTaskKeys: Set<TaskKey.Root>,
+    ) : Tracker {
 
         fun stopTracking() = loadDependencyTrackerManager.stopTrackingProjectLoad(this)
     }
 
-    class TaskTracker(private val parent: Parent, val taskKey: TaskKey.Root) {
+    class TaskTracker(
+            private val loadDependencyTrackerManager: LoadDependencyTrackerManager,
+            val taskKey: TaskKey.Root,
+            override val dependentTaskKeys: Set<TaskKey.Root>,
+    ) : Tracker {
 
-        fun stopTracking() = parent.stopTrackingTaskLoad(this)
-
-        interface Parent {
-
-            fun stopTrackingTaskLoad(taskTracker: TaskTracker)
-        }
+        fun stopTracking() = loadDependencyTrackerManager.stopTrackingTaskLoad(this)
     }
 }

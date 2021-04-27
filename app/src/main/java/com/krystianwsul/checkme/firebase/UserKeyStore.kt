@@ -100,7 +100,7 @@ class UserKeyStore(
     fun requestCustomTimeUsers(projectKey: ProjectKey.Shared, userKeys: Set<UserKey>) {
         checkNotNull(loadUserDataObservable.tryGetCurrentValue())
 
-        projectRequestKeyStore.requestCustomTimeUsers(projectKey, userKeys)
+        projectRequestKeyStore.addRequest(projectKey, userKeys)
     }
 
     fun onProjectsRemoved(projectKeys: Set<ProjectKey.Shared>) {
@@ -112,7 +112,7 @@ class UserKeyStore(
     fun requestCustomTimeUsers(rootTaskKey: TaskKey.Root, userKeys: Set<UserKey>) {
         checkNotNull(loadUserDataObservable.tryGetCurrentValue())
 
-        rootTaskRequestKeyStore.requestCustomTimeUsers(rootTaskKey, userKeys)
+        rootTaskRequestKeyStore.addRequest(rootTaskKey, userKeys)
     }
 
     fun onTasksRemoved(rootTaskKeys: Set<TaskKey.Root>) {

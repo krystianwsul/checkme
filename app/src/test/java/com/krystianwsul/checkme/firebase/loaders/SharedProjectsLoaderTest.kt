@@ -12,7 +12,6 @@ import com.krystianwsul.common.firebase.DatabaseCallback
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.json.JsonWrapper
 import com.krystianwsul.common.firebase.json.projects.SharedProjectJson
-import com.krystianwsul.common.firebase.records.project.ProjectRecord
 import com.krystianwsul.common.utils.ProjectKey
 import io.mockk.mockk
 import io.reactivex.rxjava3.core.Completable
@@ -96,7 +95,7 @@ class SharedProjectsLoaderTest {
                 mockk(relaxed = true),
                 object : ProjectToRootTaskCoordinator {
 
-                    override fun getRootTasks(projectTracker: LoadDependencyTrackerManager.ProjectTracker, projectRecord: ProjectRecord<*>) = Completable.complete() // todo task tests
+                    override fun getRootTasks(projectTracker: LoadDependencyTrackerManager.ProjectTracker) = Completable.complete() // todo task tests
                 },
                 mockk(relaxed = true), // todo task tests
                 mockk(relaxed = true), // todo task tests

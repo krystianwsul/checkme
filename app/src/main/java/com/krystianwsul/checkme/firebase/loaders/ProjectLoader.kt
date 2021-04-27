@@ -74,14 +74,10 @@ interface ProjectLoader<T : ProjectType, U : Parsable> { // U: Project JSON type
                              * project events are remote.
                              */
 
-                            val tracker =
-                                    loadDependencyTrackerManager.startTrackingProjectLoad(projectRecord.projectKey)
+                            val tracker = loadDependencyTrackerManager.startTrackingProjectLoad(projectRecord)
 
                             Singles.zip(
-                                    projectToRootTaskCoordinator.getRootTasks(
-                                            tracker,
-                                            projectRecord,
-                                    ).toSingleDefault(Unit),
+                                    projectToRootTaskCoordinator.getRootTasks(tracker).toSingleDefault(Unit),
                                     userCustomTimeProviderSource.getUserCustomTimeProvider(projectRecord),
                             ).map { (_, userCustomTimeProvider) ->
                                 tracker.stopTracking()

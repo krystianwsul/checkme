@@ -124,11 +124,7 @@ class RecursiveTaskRecordLoader(
     ) : TaskLoadStateMapMutator {
 
         override fun mutateMap(oldMap: Map<TaskKey.Root, TaskLoadState>): Map<TaskKey.Root, TaskLoadState> {
-            val parentKeys = taskRecord.taskHierarchyRecords.map { TaskKey.Root(it.value.parentTaskId) }
-            val childKeys = taskRecord.rootTaskParentDelegate.rootTaskKeys
-            val allKeys = (parentKeys + childKeys).toSet()
-
-            val newKeys = allKeys - oldMap.keys
+            val newKeys = taskRecord.getDependentTaskKeys() - oldMap.keys
 
             val newEntries = newKeys.map {
                 it to TaskLoadState.LoadingRecord(it, taskRecordLoader, rootTaskUserCustomTimeProviderSource)

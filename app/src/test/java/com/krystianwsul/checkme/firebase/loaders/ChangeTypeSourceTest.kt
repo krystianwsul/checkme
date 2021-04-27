@@ -19,7 +19,9 @@ import com.krystianwsul.common.firebase.json.NoScheduleOrParentJson
 import com.krystianwsul.common.firebase.json.projects.PrivateProjectJson
 import com.krystianwsul.common.firebase.json.taskhierarchies.NestedTaskHierarchyJson
 import com.krystianwsul.common.firebase.json.tasks.RootTaskJson
+import com.krystianwsul.common.firebase.records.project.ProjectRecord
 import com.krystianwsul.common.time.ExactTimeStamp
+import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.utils.TaskKey
 import io.mockk.every
 import io.mockk.mockk
@@ -82,8 +84,15 @@ class ChangeTypeSourceTest {
         domainDisposable.clear()
     }
 
-    @Test
-    fun testInitial() {
+    private fun immediateProjectUserCustomTimeProviderSource() = mockk<ProjectUserCustomTimeProviderSource> {
+        every { getUserCustomTimeProvider(any()) } returns Single.just(mockk())
+    }
+
+    private fun setup(
+            projectUserCustomTimeProviderSource: ProjectUserCustomTimeProviderSource =
+                    immediateProjectUserCustomTimeProviderSource(),
+    ) {
+
         val rootTaskKeySource = RootTaskKeySource(domainDisposable)
 
         rootTasksLoaderProvider = TestRootTasksLoaderProvider()
@@ -131,10 +140,6 @@ class ChangeTypeSourceTest {
                 DomainFactoryRule.deviceDbInfo.userInfo,
                 databaseWrapper,
         )
-
-        val projectUserCustomTimeProviderSource = mockk<ProjectUserCustomTimeProviderSource> {
-            every { getUserCustomTimeProvider(any()) } returns Single.just(mockk())
-        }
 
         val projectToRootTaskCoordinator = ProjectToRootTaskCoordinator.Impl(
                 rootTaskKeySource,
@@ -194,7 +199,11 @@ class ChangeTypeSourceTest {
 
         projectEmissionChecker = EmissionChecker("projectsFactory", domainDisposable, projectsFactorySingle.flatMapObservable { it.changeTypes })
         taskEmissionChecker = EmissionChecker("rootTasksFactory", domainDisposable, rootTasksFactory.changeTypes)
+    }
 
+    @Test
+    fun testInitial() {
+        setup()
         checkEmpty()
     }
 
@@ -395,6 +404,47 @@ class ChangeTypeSourceTest {
                             ),
                     ),
             )
+        }
+    }
+
+    @Test
+    fun testSingleProjectSingleTaskWithTaskChangeBeforeTimes() {
+        val timeRelay = PublishRelay.create<JsonTime.UserCustomTimeProvider>()
+
+        setup(
+                object : ProjectUserCustomTimeProviderSource {
+
+                    override fun getUserCustomTimeProvider(projectRecord: ProjectRecord<*>) = timeRelay.firstOrError()
+                }
+        )
+
+        acceptPrivateProject(PrivateProjectJson())
+        timeRelay.accept(mockk())
+        checkEmpty()
+
+        acceptPrivateProject(PrivateProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true)))
+
+        rootTasksLoaderProvider.accept(
+                taskKey1,
+                RootTaskJson(
+                        noScheduleOrParent = mapOf(
+                                "noScheduleOrParentId" to NoScheduleOrParentJson(projectId = privateProjectId),
+                        ),
+                ),
+        )
+
+        rootTasksLoaderProvider.accept(
+                taskKey1,
+                RootTaskJson(
+                        name = "changedName",
+                        noScheduleOrParent = mapOf(
+                                "noScheduleOrParentId" to NoScheduleOrParentJson(projectId = privateProjectId),
+                        ),
+                ),
+        )
+
+        projectEmissionChecker.checkRemote {
+            timeRelay.accept(mockk())
         }
     }
 }

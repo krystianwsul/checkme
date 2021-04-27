@@ -109,11 +109,14 @@ class FactoryLoader(
                             customTimeCoordinator,
                     )
 
+                    val loadDependencyTrackerManager = LoadDependencyTrackerManager()
+
                     val rootTaskLoader = RootTasksLoader(
                             rootTaskKeySource.rootTaskKeysObservable,
                             factoryProvider.database,
                             domainDisposable,
                             rootTaskManager,
+                            loadDependencyTrackerManager,
                     )
 
                     val rootTaskToRootTaskCoordinator = RootTaskToRootTaskCoordinator.Impl(
@@ -125,8 +128,6 @@ class FactoryLoader(
 
                     // this is hacky as fuck, but I'll take my chances
                     lateinit var projectsFactorySingle: Single<ProjectsFactory>
-
-                    val loadDependencyTrackerManager = LoadDependencyTrackerManager()
 
                     val rootTasksFactory = RootTasksFactory(
                             rootTaskLoader,

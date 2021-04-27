@@ -19,6 +19,7 @@ class RootTasksLoader(
         private val provider: Provider,
         private val domainDisposable: CompositeDisposable,
         private val rootTasksManager: RootTasksManager,
+        private val loadDependencyTrackerManager: LoadDependencyTrackerManager,
 ) {
 
     private fun <T> Observable<T>.replayImmediate() = replay().apply { domainDisposable += connect() }!!
@@ -39,7 +40,7 @@ class RootTasksLoader(
                 .map { (_, databaseRx) ->
                     databaseRx.observable
                             .mapNotNull(rootTasksManager::set)
-                            .map(::AddChangeEvent)
+                            .map { AddChangeEvent(it, loadDependencyTrackerManager.isTaskKeyTracked(it.taskKey)) }
                 }.merge()
     }.replayImmediate()
 
@@ -48,7 +49,7 @@ class RootTasksLoader(
             .map { RemoveEvent(it.keys) }
             .replayImmediate()
 
-    data class AddChangeEvent(val rootTaskRecord: RootTaskRecord)
+    data class AddChangeEvent(val rootTaskRecord: RootTaskRecord, val isTracked: Boolean)
 
     data class RemoveEvent(val taskKeys: Set<TaskKey.Root>)
 

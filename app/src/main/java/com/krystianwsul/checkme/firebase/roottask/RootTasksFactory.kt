@@ -32,9 +32,11 @@ class RootTasksFactory(
     val unfilteredChanges: Observable<Unit>
     val changeTypes: Observable<ChangeType>
 
+    private data class AddChangeData(val task: RootTask, val isTracked: Boolean)
+
     init {
         val unfilteredAddChangeEventChanges = rootTasksLoader.addChangeEvents
-                .switchMapSingle { (taskRecord) ->
+                .switchMapSingle { (taskRecord, isTracked) ->
                     val taskTracker = loadDependencyTrackerManager.startTrackingTaskLoad(taskRecord)
 
                     Singles.zip(
@@ -43,16 +45,13 @@ class RootTasksFactory(
                     ).map { (_, userCustomTimeProvider) ->
                         taskTracker.stopTracking()
 
-                        RootTask(taskRecord, this, userCustomTimeProvider)
+                        AddChangeData(RootTask(taskRecord, this, userCustomTimeProvider), isTracked)
                     }
                 }
-                .doOnNext { rootTaskMap[it.taskKey] = it }
+                .doOnNext { rootTaskMap[it.task.taskKey] = it.task }
                 .share()
 
-        val addChangeEventChanges = unfilteredAddChangeEventChanges.filter {
-            // todo task track this check needs to be performed before the event that cancels the parent tracker.
-            !loadDependencyTrackerManager.isTaskKeyTracked(it.taskKey)
-        }
+        val addChangeEventChanges = unfilteredAddChangeEventChanges.filter { !it.isTracked }
 
         val removeEventChanges = rootTasksLoader.removeEvents
                 .doOnNext {

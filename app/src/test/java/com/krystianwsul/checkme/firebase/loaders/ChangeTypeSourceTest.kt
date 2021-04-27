@@ -92,11 +92,14 @@ class ChangeTypeSourceTest {
 
         val rootTasksManager = RootTasksManager(databaseWrapper)
 
+        val loadDependencyTrackerManager = LoadDependencyTrackerManager()
+
         rootTasksLoader = RootTasksLoader(
                 rootTaskKeySource.rootTaskKeysObservable,
                 rootTasksLoaderProvider,
                 domainDisposable,
                 rootTasksManager,
+                loadDependencyTrackerManager,
         )
 
         val rootTaskUserCustomTimeProviderSource = mockk<RootTaskUserCustomTimeProviderSource> {
@@ -115,8 +118,6 @@ class ChangeTypeSourceTest {
         )
 
         lateinit var projectsFactorySingle: Single<ProjectsFactory>
-
-        val loadDependencyTrackerManager = LoadDependencyTrackerManager()
 
         rootTasksFactory = RootTasksFactory(
                 rootTasksLoader,

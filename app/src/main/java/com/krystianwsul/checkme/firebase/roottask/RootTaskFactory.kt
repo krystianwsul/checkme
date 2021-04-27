@@ -1,14 +1,13 @@
 package com.krystianwsul.checkme.firebase.roottask
 
 import com.jakewharton.rxrelay3.PublishRelay
-import com.krystianwsul.checkme.utils.publishImmediate
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.models.task.RootTask
 import com.krystianwsul.common.utils.TaskKey
-import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.Singles
 import io.reactivex.rxjava3.kotlin.plusAssign
+import io.reactivex.rxjava3.observables.ConnectableObservable
 import io.reactivex.rxjava3.observables.GroupedObservable
 
 class RootTaskFactory(
@@ -25,8 +24,10 @@ class RootTaskFactory(
     private val removeRelay = PublishRelay.create<Unit>()
     fun onRemove() = removeRelay.accept(Unit)
 
-    val changeTypes: Observable<ChangeType>
-    val unfilteredChanges: Observable<Unit>
+    private val unfilteredAddChangeEventChanges: ConnectableObservable<AddChangeData>
+
+    val changeTypes: ConnectableObservable<ChangeType>
+    val unfilteredChanges: ConnectableObservable<Unit>
 
     var task: RootTask? = null
         private set
@@ -34,7 +35,7 @@ class RootTaskFactory(
     private data class AddChangeData(val task: RootTask, val isTracked: Boolean)
 
     init {
-        val unfilteredAddChangeEventChanges = addChangeEvents.flatMapSingle { (taskRecord, isTracked) ->
+        unfilteredAddChangeEventChanges = addChangeEvents.flatMapSingle { (taskRecord, isTracked) ->
             val taskTracker = loadDependencyTrackerManager.startTrackingTaskLoad(taskRecord)
 
             Singles.zip(
@@ -53,6 +54,7 @@ class RootTaskFactory(
 
         domainDisposable += removeRelay.subscribe {
             checkNotNull(task)
+            check(connected)
 
             task = null
         }
@@ -65,11 +67,18 @@ class RootTaskFactory(
          * initially requested the task.
          */
 
-        // todo task track I'm almost sure this isn't correct, since the map in RootTasksFactory won't pick up the initial event
-        changeTypes = addChangeEventChanges.map { ChangeType.REMOTE }.publishImmediate(domainDisposable)
+        changeTypes = addChangeEventChanges.map { ChangeType.REMOTE }.publish()
+        unfilteredChanges = unfilteredAddChangeEventChanges.map { }.publish()
+    }
 
-        unfilteredChanges = unfilteredAddChangeEventChanges.map { }.replay(1)
-                .apply { domainDisposable += connect() }
+    private var connected = false
+
+    fun connect() {
+        if (connected) return
+        connected = true
+
+        changeTypes.connect()
+        unfilteredChanges.connect()
 
         unfilteredAddChangeEventChanges.connect()
     }

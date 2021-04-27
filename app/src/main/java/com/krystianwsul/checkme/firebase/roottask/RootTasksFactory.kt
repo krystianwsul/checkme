@@ -78,6 +78,10 @@ class RootTasksFactory(
 
         unfilteredChanges =
                 listOf(factoryUnfilteredChanges, removeEvents.map { }).merge().publishImmediate(domainDisposable)
+
+        domainDisposable += rootTaskFactoriesObservable.subscribe {
+            it.forEach { it.value.connect() }
+        }
     }
 
     override fun getTaskHierarchiesByParentTaskKey(parentTaskKey: TaskKey): Set<TaskHierarchy> {

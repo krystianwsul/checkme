@@ -5,6 +5,7 @@ import com.jakewharton.rxrelay3.BehaviorRelay
 import com.krystianwsul.checkme.domainmodel.DomainFactoryRule
 import com.krystianwsul.checkme.firebase.TestProjectUserCustomTimeProviderSource
 import com.krystianwsul.checkme.firebase.managers.AndroidPrivateProjectManager
+import com.krystianwsul.checkme.firebase.roottask.LoadDependencyTrackerManager
 import com.krystianwsul.checkme.firebase.roottask.ProjectToRootTaskCoordinator
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.checkme.utils.tryGetCurrentValue
@@ -83,8 +84,9 @@ class ProjectLoaderTest {
                 TestProjectUserCustomTimeProviderSource(),
                 object : ProjectToRootTaskCoordinator {
 
-                    override fun getRootTasks(projectRecord: ProjectRecord<*>) = Completable.complete() // todo task tests
+                    override fun getRootTasks(projectTracker: LoadDependencyTrackerManager.ProjectTracker, projectRecord: ProjectRecord<*>) = Completable.complete() // todo task tests
                 },
+                mockk(relaxed = true), // todo task tests
         )
 
         initialProjectEmissionChecker =

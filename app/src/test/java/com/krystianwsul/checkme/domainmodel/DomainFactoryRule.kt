@@ -14,6 +14,7 @@ import com.krystianwsul.checkme.firebase.loaders.ProjectLoader
 import com.krystianwsul.checkme.firebase.loaders.SharedProjectsLoader
 import com.krystianwsul.checkme.firebase.loaders.mockBase64
 import com.krystianwsul.checkme.firebase.managers.AndroidSharedProjectManager
+import com.krystianwsul.checkme.firebase.roottask.LoadDependencyTrackerManager
 import com.krystianwsul.checkme.firebase.roottask.ProjectToRootTaskCoordinator
 import com.krystianwsul.checkme.firebase.roottask.RootTasksFactory
 import com.krystianwsul.common.ErrorLogger
@@ -203,8 +204,9 @@ class DomainFactoryRule : TestRule {
                 mockk(relaxed = true),
                 object : ProjectToRootTaskCoordinator {
 
-                    override fun getRootTasks(projectRecord: ProjectRecord<*>) = Completable.complete() // todo task tests
+                    override fun getRootTasks(projectTracker: LoadDependencyTrackerManager.ProjectTracker, projectRecord: ProjectRecord<*>) = Completable.complete() // todo task tests
                 },
+                mockk(relaxed = true), // todo task tests
                 mockk(relaxed = true), // todo task tests
         )
 

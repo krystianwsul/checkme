@@ -115,7 +115,7 @@ class ChangeTypeSourceTest {
 
         lateinit var projectsFactorySingle: Single<ProjectsFactory>
 
-        val projectDependencyLoadTrackerManager = ProjectDependencyLoadTrackerManager()
+        val loadDependencyTrackerManager = LoadDependencyTrackerManager()
 
         rootTasksFactory = RootTasksFactory(
                 rootTasksLoader,
@@ -124,7 +124,7 @@ class ChangeTypeSourceTest {
                 rootTaskToRootTaskCoordinator,
                 domainDisposable,
                 rootTaskKeySource,
-                projectDependencyLoadTrackerManager,
+                loadDependencyTrackerManager,
         ) { projectsFactorySingle.getCurrentValue() }
 
         val privateProjectManager = AndroidPrivateProjectManager(
@@ -139,7 +139,6 @@ class ChangeTypeSourceTest {
         val projectToRootTaskCoordinator = ProjectToRootTaskCoordinator.Impl(
                 rootTaskKeySource,
                 rootTasksFactory,
-                projectDependencyLoadTrackerManager,
         )
 
         val privateProjectLoader = ProjectLoader.Impl(
@@ -149,6 +148,7 @@ class ChangeTypeSourceTest {
                 null,
                 projectUserCustomTimeProviderSource,
                 projectToRootTaskCoordinator,
+                loadDependencyTrackerManager,
         )
 
         val sharedProjectsLoader = mockk<SharedProjectsLoader> {

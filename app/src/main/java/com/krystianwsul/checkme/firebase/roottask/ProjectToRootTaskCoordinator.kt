@@ -10,15 +10,20 @@ import io.reactivex.rxjava3.core.Single
 
 interface ProjectToRootTaskCoordinator {
 
-    fun getRootTasks(projectRecord: ProjectRecord<*>): Completable
+    fun getRootTasks(
+            projectTracker: LoadDependencyTrackerManager.ProjectTracker,
+            projectRecord: ProjectRecord<*>,
+    ): Completable
 
     class Impl(
             private val rootTaskKeySource: RootTaskKeySource,
             private val rootTasksFactory: RootTasksFactory,
-            private val projectDependencyLoadTrackerManager: ProjectDependencyLoadTrackerManager,
     ) : ProjectToRootTaskCoordinator {
 
-        override fun getRootTasks(projectRecord: ProjectRecord<*>): Completable {
+        override fun getRootTasks(
+                projectTracker: LoadDependencyTrackerManager.ProjectTracker,
+                projectRecord: ProjectRecord<*>,
+        ): Completable {
             rootTaskKeySource.onProjectAddedOrUpdated(
                     projectRecord.projectKey,
                     projectRecord.rootTaskParentDelegate.rootTaskKeys,
@@ -26,20 +31,18 @@ interface ProjectToRootTaskCoordinator {
 
             val loadedKeys = mutableSetOf<TaskKey.Root>()
 
-            val tracker = projectDependencyLoadTrackerManager.startTrackingProjectLoad(projectRecord.projectKey)
-
             return Completable.merge(
                     projectRecord.rootTaskParentDelegate
                             .rootTaskKeys
-                            .map { getTaskDependenciesLoadedCompletable(tracker, it, loadedKeys) }
-            ).doOnComplete { projectDependencyLoadTrackerManager.stopTrackingProjectLoad(tracker) }
+                            .map { getTaskDependenciesLoadedCompletable(projectTracker, it, loadedKeys) }
+            )
         }
 
         private fun getTaskLoadedSingle(
-                tracker: ProjectDependencyLoadTrackerManager.Tracker,
+                projectTracker: LoadDependencyTrackerManager.ProjectTracker,
                 taskKey: TaskKey.Root,
         ): Single<RootTask> {
-            tracker.addTaskKey(taskKey)
+            projectTracker.addTaskKey(taskKey)
 
             return Observable.just(Unit)
                     .concatWith(rootTasksFactory.unfilteredChanges)
@@ -48,16 +51,16 @@ interface ProjectToRootTaskCoordinator {
         }
 
         private fun getTaskDependenciesLoadedCompletable(
-                tracker: ProjectDependencyLoadTrackerManager.Tracker,
+                projectTracker: LoadDependencyTrackerManager.ProjectTracker,
                 taskKey: TaskKey.Root,
                 loadedTaskKeys: MutableSet<TaskKey.Root>,
         ): Completable {
-            return getTaskLoadedSingle(tracker, taskKey).flatMapCompletable {
+            return getTaskLoadedSingle(projectTracker, taskKey).flatMapCompletable {
                 loadedTaskKeys += it.taskKey
 
                 val newTaskKeys = it.taskRecord.getDependentTaskKeys() - loadedTaskKeys
 
-                Completable.merge(newTaskKeys.map { getTaskDependenciesLoadedCompletable(tracker, it, loadedTaskKeys) })
+                Completable.merge(newTaskKeys.map { getTaskDependenciesLoadedCompletable(projectTracker, it, loadedTaskKeys) })
             }
         }
     }

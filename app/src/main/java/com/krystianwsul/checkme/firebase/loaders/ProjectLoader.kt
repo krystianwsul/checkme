@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.firebase.loaders
 
 import com.krystianwsul.checkme.firebase.ProjectUserCustomTimeProviderSource
+import com.krystianwsul.checkme.firebase.roottask.LoadDependencyTrackerManager
 import com.krystianwsul.checkme.firebase.roottask.ProjectToRootTaskCoordinator
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.checkme.utils.cacheImmediate
@@ -47,6 +48,7 @@ interface ProjectLoader<T : ProjectType, U : Parsable> { // U: Project JSON type
             initialProjectRecord: ProjectRecord<T>?,
             private val userCustomTimeProviderSource: ProjectUserCustomTimeProviderSource,
             private val projectToRootTaskCoordinator: ProjectToRootTaskCoordinator,
+            private val loadDependencyTrackerManager: LoadDependencyTrackerManager,
     ) : ProjectLoader<T, U> {
 
         private fun <T> Observable<T>.replayImmediate() = replay().apply { domainDisposable += connect() }!!
@@ -72,10 +74,18 @@ interface ProjectLoader<T : ProjectType, U : Parsable> { // U: Project JSON type
                              * project events are remote.
                              */
 
+                            val tracker =
+                                    loadDependencyTrackerManager.startTrackingProjectLoad(projectRecord.projectKey)
+
                             Singles.zip(
-                                    projectToRootTaskCoordinator.getRootTasks(projectRecord).toSingleDefault(Unit),
+                                    projectToRootTaskCoordinator.getRootTasks(
+                                            tracker,
+                                            projectRecord,
+                                    ).toSingleDefault(Unit),
                                     userCustomTimeProviderSource.getUserCustomTimeProvider(projectRecord),
                             ).map { (_, userCustomTimeProvider) ->
+                                tracker.stopTracking()
+
                                 ProjectRecordData(projectChangeType, projectRecord, userCustomTimeProvider)
                             }
                         }

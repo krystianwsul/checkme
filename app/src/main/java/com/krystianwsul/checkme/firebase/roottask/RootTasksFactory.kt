@@ -21,7 +21,7 @@ class RootTasksFactory(
         private val rootTaskToRootTaskCoordinator: RootTaskToRootTaskCoordinator,
         domainDisposable: CompositeDisposable,
         private val rootTaskKeySource: RootTaskKeySource,
-        projectDependencyLoadTrackerManager: ProjectDependencyLoadTrackerManager,
+        loadDependencyTrackerManager: LoadDependencyTrackerManager,
         private val getProjectsFactory: () -> ProjectsFactory,
 ) : RootTask.Parent {
 
@@ -48,7 +48,7 @@ class RootTasksFactory(
                 .share()
 
         val addChangeEventChanges = unfilteredAddChangeEventChanges.filter {
-            !projectDependencyLoadTrackerManager.isTaskKeyTracked(it.taskKey)
+            !loadDependencyTrackerManager.isTaskKeyTracked(it.taskKey)
         }
 
         val removeEventChanges = rootTasksLoader.removeEvents

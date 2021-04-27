@@ -62,7 +62,7 @@ class RecursiveTaskRecordLoader(
         object Loaded : GetRecordsState()
     }
 
-    class TreeLoadState(private val taskLoadStates: Map<TaskKey.Root, TaskLoadState>) {
+    class TreeLoadState(val taskLoadStates: Map<TaskKey.Root, TaskLoadState>) {
 
         fun getNextState(): Maybe<TreeLoadState> {
             val mutatorSingles = taskLoadStates.mapNotNull { it.value.mutator }
@@ -94,6 +94,8 @@ class RecursiveTaskRecordLoader(
                         RecordLoadedMutator(it, taskRecordLoader, rootTaskUserCustomTimeProviderSource)
                     }
                     .cache()!!
+
+            override fun toString() = "LoadingRecord $taskKey"
         }
 
         class LoadingTimes(
@@ -104,11 +106,15 @@ class RecursiveTaskRecordLoader(
             override val mutator = rootTaskUserCustomTimeProviderSource.getUserCustomTimeProvider(taskRecord)
                     .map<TaskLoadStateMapMutator> { TimesLoadedMutator(taskRecord) }
                     .cache()!!
+
+            override fun toString() = "LoadingTimes ${taskRecord.taskKey}"
         }
 
-        object Loaded : TaskLoadState() {
+        class Loaded(private val taskKey: TaskKey.Root) : TaskLoadState() {
 
             override val mutator: Single<TaskLoadStateMapMutator>? = null
+
+            override fun toString() = "Loaded $taskKey"
         }
     }
 
@@ -145,7 +151,7 @@ class RecursiveTaskRecordLoader(
         override fun mutateMap(oldMap: Map<TaskKey.Root, TaskLoadState>): Map<TaskKey.Root, TaskLoadState> {
             check(oldMap.containsKey(taskRecord.taskKey))
 
-            return oldMap.toMutableMap().also { it[taskRecord.taskKey] = TaskLoadState.Loaded }
+            return oldMap.toMutableMap().also { it[taskRecord.taskKey] = TaskLoadState.Loaded(taskRecord.taskKey) }
         }
     }
 

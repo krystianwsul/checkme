@@ -452,8 +452,8 @@ class ChangeTypeSourceTest {
     }
 
     @Test
-    fun testSingleProjectChildTaskWithTaskChangeBeforeTimes() { // todo task track this is incomplete so far
-        val timeSource = SingleParamSingleSource<TaskKey.Root, JsonTime.UserCustomTimeProvider>()
+    fun testTaskTimesSingleProjectChildTaskImmediate() {
+        val timeSource = SingleParamSingleSource<TaskKey.Root, JsonTime.UserCustomTimeProvider>(true)
 
         setup(
                 rootTaskUserCustomTimeProviderSource = object : RootTaskUserCustomTimeProviderSource {
@@ -462,6 +462,9 @@ class ChangeTypeSourceTest {
                             timeSource.getSingle(rootTaskRecord.taskKey)
                 }
         )
+
+        // to get the initial event out of the way
+        acceptPrivateProject(PrivateProjectJson())
 
         acceptPrivateProject(PrivateProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true)))
 
@@ -486,6 +489,6 @@ class ChangeTypeSourceTest {
                 ),
         )
 
-        taskEmissionChecker.checkRemote { timeSource.accept(taskKey2, mockk()) }
+        projectEmissionChecker.checkRemote { timeSource.accept(taskKey2, mockk()) }
     }
 }

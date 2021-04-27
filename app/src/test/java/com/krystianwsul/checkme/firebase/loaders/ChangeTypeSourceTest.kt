@@ -12,7 +12,6 @@ import com.krystianwsul.checkme.firebase.managers.RootTasksManager
 import com.krystianwsul.checkme.firebase.roottask.*
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.checkme.utils.SingleParamObservableSource
-import com.krystianwsul.checkme.utils.getCurrentValue
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.DomainThreadChecker
@@ -65,6 +64,7 @@ class ChangeTypeSourceTest {
     private lateinit var rootTasksLoaderProvider: TestRootTasksLoaderProvider
 
     private lateinit var rootTasksLoader: RootTasksLoader
+    private lateinit var projectsFactory: ProjectsFactory
     private lateinit var rootTasksFactory: RootTasksFactory
 
     private lateinit var changeTypeSource: ChangeTypeSource
@@ -117,8 +117,6 @@ class ChangeTypeSourceTest {
                 rootTaskUserCustomTimeProviderSource,
         )
 
-        lateinit var projectsFactorySingle: Single<ProjectsFactory>
-
         rootTasksFactory = RootTasksFactory(
                 rootTasksLoader,
                 rootTaskUserCustomTimeProviderSource,
@@ -127,7 +125,7 @@ class ChangeTypeSourceTest {
                 domainDisposable,
                 rootTaskKeySource,
                 loadDependencyTrackerManager,
-        ) { projectsFactorySingle.getCurrentValue() }
+        ) { projectsFactory }
 
         val privateProjectManager = AndroidPrivateProjectManager(
                 DomainFactoryRule.deviceDbInfo.userInfo,
@@ -164,7 +162,7 @@ class ChangeTypeSourceTest {
         val localFactory = mockk<LocalFactory>()
         val factoryProvider = mockk<FactoryProvider>()
 
-        projectsFactorySingle = Single.zip(
+        val projectsFactorySingle = Single.zip(
                 privateProjectLoader.initialProjectEvent.map {
                     check(it.changeType == ChangeType.REMOTE)
 
@@ -182,7 +180,7 @@ class ChangeTypeSourceTest {
                     factoryProvider,
                     domainDisposable,
                     rootTasksFactory,
-            ) { DomainFactoryRule.deviceDbInfo }
+            ) { DomainFactoryRule.deviceDbInfo }.also { projectsFactory = it }
         }.cache()
 
         changeTypeSource = ChangeTypeSource(

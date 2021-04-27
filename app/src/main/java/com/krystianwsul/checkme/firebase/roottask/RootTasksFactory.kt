@@ -36,7 +36,7 @@ class RootTasksFactory(
 
     init {
         val unfilteredAddChangeEventChanges = rootTasksLoader.addChangeEvents
-                .switchMapSingle { (taskRecord, isTracked) ->
+                .flatMapSingle { (taskRecord, isTracked) ->
                     val taskTracker = loadDependencyTrackerManager.startTrackingTaskLoad(taskRecord)
 
                     Singles.zip(

@@ -2,7 +2,6 @@ package com.krystianwsul.checkme.firebase.roottask
 
 import com.krystianwsul.checkme.utils.SingleParamSingleSource
 import com.krystianwsul.common.firebase.records.task.RootTaskRecord
-import com.krystianwsul.common.firebase.records.taskhierarchy.NestedTaskHierarchyRecord
 import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.utils.TaskKey
 import io.mockk.every
@@ -62,22 +61,11 @@ class RecursiveTaskRecordLoaderTest {
 
     private fun mockTaskRecord(
             taskKey: TaskKey.Root,
-            children: Set<TaskKey.Root> = emptySet(),
-            parents: Set<TaskKey.Root> = emptySet(),
+            dependentTaskKeys: Set<TaskKey.Root> = emptySet(),
     ) = mockk<RootTaskRecord> {
         every { this@mockk.taskKey } returns taskKey
 
-        every { taskHierarchyRecords } returns parents.mapIndexed { index, parentTaskKey ->
-            index.toString() to mockk<NestedTaskHierarchyRecord> {
-                every { parentTaskId } returns parentTaskKey.taskId
-            }
-        }
-                .toMap()
-                .toMutableMap()
-
-        every { rootTaskParentDelegate } returns mockk {
-            every { rootTaskKeys } returns children
-        }
+        every { getDependentTaskKeys() } returns dependentTaskKeys
     }
 
     private fun acceptTime(taskRecord: RootTaskRecord) =
@@ -104,7 +92,7 @@ class RecursiveTaskRecordLoaderTest {
 
     @Test
     fun testOneImmediateChild() {
-        val initialTaskRecord = mockTaskRecord(taskKey1, children = setOf(taskKey2))
+        val initialTaskRecord = mockTaskRecord(taskKey1, dependentTaskKeys = setOf(taskKey2))
 
         initLoader(initialTaskRecord)
         testObserver.assertNotComplete()
@@ -123,7 +111,7 @@ class RecursiveTaskRecordLoaderTest {
 
     @Test
     fun testOneImmediateChildTimesLast() {
-        val initialTaskRecord = mockTaskRecord(taskKey1, children = setOf(taskKey2))
+        val initialTaskRecord = mockTaskRecord(taskKey1, dependentTaskKeys = setOf(taskKey2))
 
         initLoader(initialTaskRecord)
         testObserver.assertNotComplete()
@@ -142,7 +130,7 @@ class RecursiveTaskRecordLoaderTest {
 
     @Test
     fun testTwoImmediateChildren() {
-        val initialTaskRecord = mockTaskRecord(taskKey1, children = setOf(taskKey2, taskKey3))
+        val initialTaskRecord = mockTaskRecord(taskKey1, dependentTaskKeys = setOf(taskKey2, taskKey3))
 
         initLoader(initialTaskRecord)
         testObserver.assertNotComplete()
@@ -169,7 +157,7 @@ class RecursiveTaskRecordLoaderTest {
 
     @Test
     fun testTwoImmediateChildrenTimesLast() {
-        val initialTaskRecord = mockTaskRecord(taskKey1, children = setOf(taskKey2, taskKey3))
+        val initialTaskRecord = mockTaskRecord(taskKey1, dependentTaskKeys = setOf(taskKey2, taskKey3))
 
         initLoader(initialTaskRecord)
         testObserver.assertNotComplete()
@@ -196,7 +184,7 @@ class RecursiveTaskRecordLoaderTest {
 
     @Test
     fun testChildAndParent() {
-        val initialTaskRecord = mockTaskRecord(taskKey1, children = setOf(taskKey2), parents = setOf(taskKey3))
+        val initialTaskRecord = mockTaskRecord(taskKey1, dependentTaskKeys = setOf(taskKey2, taskKey3))
 
         initLoader(initialTaskRecord)
         testObserver.assertNotComplete()
@@ -223,7 +211,7 @@ class RecursiveTaskRecordLoaderTest {
 
     @Test
     fun testOneChildOneSubchild() {
-        val initialTaskRecord = mockTaskRecord(taskKey1, children = setOf(taskKey2))
+        val initialTaskRecord = mockTaskRecord(taskKey1, dependentTaskKeys = setOf(taskKey2))
 
         initLoader(initialTaskRecord)
         testObserver.assertNotComplete()
@@ -231,7 +219,7 @@ class RecursiveTaskRecordLoaderTest {
         acceptTime(initialTaskRecord)
         testObserver.assertNotComplete()
 
-        val taskRecord2 = mockTaskRecord(taskKey2, children = setOf(taskKey3))
+        val taskRecord2 = mockTaskRecord(taskKey2, dependentTaskKeys = setOf(taskKey3))
 
         acceptTask(taskKey2, taskRecord2)
         testObserver.assertNotComplete()
@@ -250,7 +238,7 @@ class RecursiveTaskRecordLoaderTest {
 
     @Test
     fun testTwoChildrenOneSubchild() {
-        val initialTaskRecord = mockTaskRecord(taskKey1, children = setOf(taskKey2, taskKey3))
+        val initialTaskRecord = mockTaskRecord(taskKey1, dependentTaskKeys = setOf(taskKey2, taskKey3))
 
         initLoader(initialTaskRecord)
         testObserver.assertNotComplete()
@@ -259,7 +247,7 @@ class RecursiveTaskRecordLoaderTest {
         testObserver.assertNotComplete()
 
         // feed first child
-        val taskRecord2 = mockTaskRecord(taskKey2, children = setOf(taskKey4))
+        val taskRecord2 = mockTaskRecord(taskKey2, dependentTaskKeys = setOf(taskKey4))
 
         acceptTask(taskKey2, taskRecord2)
         testObserver.assertNotComplete()
@@ -268,7 +256,7 @@ class RecursiveTaskRecordLoaderTest {
         testObserver.assertNotComplete()
 
         // feed second child
-        val taskRecord3 = mockTaskRecord(taskKey3, children = setOf(taskKey5))
+        val taskRecord3 = mockTaskRecord(taskKey3, dependentTaskKeys = setOf(taskKey5))
 
         acceptTask(taskKey3, taskRecord3)
         testObserver.assertNotComplete()
@@ -297,7 +285,7 @@ class RecursiveTaskRecordLoaderTest {
 
     @Test
     fun testOneChildLoop() {
-        val initialTaskRecord = mockTaskRecord(taskKey1, children = setOf(taskKey2))
+        val initialTaskRecord = mockTaskRecord(taskKey1, dependentTaskKeys = setOf(taskKey2))
 
         initLoader(initialTaskRecord)
         testObserver.assertNotComplete()
@@ -305,7 +293,7 @@ class RecursiveTaskRecordLoaderTest {
         acceptTime(initialTaskRecord)
         testObserver.assertNotComplete()
 
-        val taskRecord2 = mockTaskRecord(taskKey2, children = setOf(taskKey1))
+        val taskRecord2 = mockTaskRecord(taskKey2, dependentTaskKeys = setOf(taskKey1))
 
         acceptTask(taskKey2, taskRecord2)
         testObserver.assertNotComplete()
@@ -316,7 +304,7 @@ class RecursiveTaskRecordLoaderTest {
 
     @Test
     fun testOneChildLoopParent() {
-        val initialTaskRecord = mockTaskRecord(taskKey1, children = setOf(taskKey2))
+        val initialTaskRecord = mockTaskRecord(taskKey1, dependentTaskKeys = setOf(taskKey2))
 
         initLoader(initialTaskRecord)
         testObserver.assertNotComplete()
@@ -324,7 +312,7 @@ class RecursiveTaskRecordLoaderTest {
         acceptTime(initialTaskRecord)
         testObserver.assertNotComplete()
 
-        val taskRecord2 = mockTaskRecord(taskKey2, parents = setOf(taskKey1))
+        val taskRecord2 = mockTaskRecord(taskKey2, dependentTaskKeys = setOf(taskKey1))
 
         acceptTask(taskKey2, taskRecord2)
         testObserver.assertNotComplete()

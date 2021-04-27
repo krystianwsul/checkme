@@ -69,7 +69,8 @@ class ChangeTypeSourceTest {
 
     private lateinit var changeTypeSource: ChangeTypeSource
 
-    private lateinit var emissionChecker: EmissionChecker<ChangeType>
+    private lateinit var projectEmissionChecker: EmissionChecker<ChangeType>
+    private lateinit var taskEmissionChecker: EmissionChecker<ChangeType>
 
     @Before
     fun before() {
@@ -192,33 +193,41 @@ class ChangeTypeSourceTest {
                 domainDisposable,
         )
 
-        emissionChecker = EmissionChecker("changeTypes", domainDisposable, changeTypeSource.changeTypes)
+        projectEmissionChecker = EmissionChecker("projectsFactory", domainDisposable, projectsFactorySingle.flatMapObservable { it.changeTypes })
+        taskEmissionChecker = EmissionChecker("rootTasksFactory", domainDisposable, rootTasksFactory.changeTypes)
 
-        emissionChecker.checkEmpty()
+        checkEmpty()
     }
 
     private fun acceptPrivateProject(privateProjectJson: PrivateProjectJson) =
             privateProjectSnapshotObservable.accept(Snapshot(privateProjectId, privateProjectJson))
 
+    private fun checkEmpty() {
+        projectEmissionChecker.checkEmpty()
+        taskEmissionChecker.checkEmpty()
+    }
+
     @Test
     fun testSingleProjectEmission() {
         testInitial()
+
         // first load event for projectsFactory doesn't emit a change... apparently.
         acceptPrivateProject(PrivateProjectJson())
+        checkEmpty()
 
-        emissionChecker.checkRemote {
-            acceptPrivateProject(PrivateProjectJson("name"))
-        }
+        projectEmissionChecker.checkRemote { acceptPrivateProject(PrivateProjectJson("name")) }
     }
 
     @Test
     fun testSingleProjectSingleTask() {
         testInitial()
+
         acceptPrivateProject(PrivateProjectJson())
+        checkEmpty()
 
         acceptPrivateProject(PrivateProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true)))
 
-        emissionChecker.checkRemote {
+        projectEmissionChecker.checkRemote {
             rootTasksLoaderProvider.accept(
                     taskKey1,
                     RootTaskJson(
@@ -233,7 +242,9 @@ class ChangeTypeSourceTest {
     @Test
     fun testSingleProjectRecursiveTask() {
         testInitial()
+
         acceptPrivateProject(PrivateProjectJson())
+        checkEmpty()
 
         acceptPrivateProject(PrivateProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true)))
 
@@ -247,7 +258,7 @@ class ChangeTypeSourceTest {
                 ),
         )
 
-        emissionChecker.checkRemote {
+        projectEmissionChecker.checkRemote {
             rootTasksLoaderProvider.accept(
                     taskKey2,
                     RootTaskJson(
@@ -262,6 +273,7 @@ class ChangeTypeSourceTest {
     @Test
     fun testSingleProjectTaskChange() {
         testInitial()
+
         acceptPrivateProject(PrivateProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true)))
 
         // initial event ignored for project
@@ -274,7 +286,9 @@ class ChangeTypeSourceTest {
                 ),
         )
 
-        emissionChecker.checkRemote {
+        checkEmpty()
+
+        taskEmissionChecker.checkRemote {
             rootTasksLoaderProvider.accept(
                     taskKey1,
                     RootTaskJson(
@@ -301,10 +315,9 @@ class ChangeTypeSourceTest {
                         ),
                 ),
         )
+        checkEmpty()
 
-        emissionChecker.checkRemote {
-            acceptPrivateProject(PrivateProjectJson())
-        }
+        projectEmissionChecker.checkRemote { acceptPrivateProject(PrivateProjectJson()) }
     }
 
     @Test
@@ -331,5 +344,6 @@ class ChangeTypeSourceTest {
                         ),
                 ),
         )
+        checkEmpty()
     }
 }

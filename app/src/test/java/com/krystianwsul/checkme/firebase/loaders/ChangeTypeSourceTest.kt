@@ -12,6 +12,7 @@ import com.krystianwsul.checkme.firebase.managers.RootTasksManager
 import com.krystianwsul.checkme.firebase.roottask.*
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.checkme.utils.SingleParamObservableSource
+import com.krystianwsul.checkme.utils.SingleParamSingleSource
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.DomainThreadChecker
@@ -20,6 +21,7 @@ import com.krystianwsul.common.firebase.json.projects.PrivateProjectJson
 import com.krystianwsul.common.firebase.json.taskhierarchies.NestedTaskHierarchyJson
 import com.krystianwsul.common.firebase.json.tasks.RootTaskJson
 import com.krystianwsul.common.firebase.records.project.ProjectRecord
+import com.krystianwsul.common.firebase.records.task.RootTaskRecord
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.utils.TaskKey
@@ -447,5 +449,43 @@ class ChangeTypeSourceTest {
         projectEmissionChecker.checkRemote {
             timeRelay.accept(mockk())
         }
+    }
+
+    @Test
+    fun testSingleProjectChildTaskWithTaskChangeBeforeTimes() { // todo task track this is incomplete so far
+        val timeSource = SingleParamSingleSource<TaskKey.Root, JsonTime.UserCustomTimeProvider>()
+
+        setup(
+                rootTaskUserCustomTimeProviderSource = object : RootTaskUserCustomTimeProviderSource {
+
+                    override fun getUserCustomTimeProvider(rootTaskRecord: RootTaskRecord) =
+                            timeSource.getSingle(rootTaskRecord.taskKey)
+                }
+        )
+
+        acceptPrivateProject(PrivateProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true)))
+
+        rootTasksLoaderProvider.accept(
+                taskKey1,
+                RootTaskJson(
+                        noScheduleOrParent = mapOf(
+                                "noScheduleOrParentId" to NoScheduleOrParentJson(projectId = privateProjectId),
+                        ),
+                        rootTaskIds = mutableMapOf(taskKey2.taskId to true)
+                ),
+        )
+        timeSource.accept(taskKey1, mockk())
+
+        rootTasksLoaderProvider.accept(
+                taskKey2,
+                RootTaskJson(
+                        startTimeOffset = 0.0,
+                        taskHierarchies = mapOf(
+                                "taskHierarchyId" to NestedTaskHierarchyJson(parentTaskId = taskKey1.taskId)
+                        ),
+                ),
+        )
+
+        taskEmissionChecker.checkRemote { timeSource.accept(taskKey2, mockk()) }
     }
 }

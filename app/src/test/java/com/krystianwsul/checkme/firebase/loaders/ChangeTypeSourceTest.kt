@@ -306,4 +306,30 @@ class ChangeTypeSourceTest {
             acceptPrivateProject(PrivateProjectJson())
         }
     }
+
+    @Test
+    fun testSingleProjectRemoveRecursiveTask() { // todo task change this test is incomplete
+        testInitial()
+        acceptPrivateProject(PrivateProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true)))
+
+        rootTasksLoaderProvider.accept(
+                taskKey1,
+                RootTaskJson(
+                        noScheduleOrParent = mapOf(
+                                "noScheduleOrParentId" to NoScheduleOrParentJson(projectId = privateProjectId),
+                        ),
+                        rootTaskIds = mutableMapOf(taskKey2.taskId to true)
+                ),
+        )
+
+        rootTasksLoaderProvider.accept(
+                // todo task change I need to add recurrent changes to tracking
+                taskKey2,
+                RootTaskJson(
+                        taskHierarchies = mapOf(
+                                "taskHierarchyId" to NestedTaskHierarchyJson(parentTaskId = taskKey1.taskId)
+                        ),
+                ),
+        )
+    }
 }

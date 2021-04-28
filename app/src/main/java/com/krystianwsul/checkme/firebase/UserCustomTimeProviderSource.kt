@@ -91,22 +91,7 @@ interface UserCustomTimeProviderSource {
                     if (foreignUserKeys.isNotEmpty())
                         friendsLoader.userKeyStore.requestCustomTimeUsers(projectRecord.projectKey, foreignUserKeys)
 
-                    Singles.zip(
-                            myUserFactorySingle,
-                            customTimeCoordinator.getCustomTimes(foreignUserKeys),
-                    ).map { (myUserFactory, friendsFactory) ->
-                        object : JsonTime.UserCustomTimeProvider {
-
-                            override fun getUserCustomTime(userCustomTimeKey: CustomTimeKey.User): Time.Custom.User {
-                                val provider = if (userCustomTimeKey.userKey == myUserFactory.user.userKey)
-                                    myUserFactory.user
-                                else
-                                    friendsFactory
-
-                                return provider.getUserCustomTime(userCustomTimeKey)
-                            }
-                        }
-                    }
+                    return getUserCustomTimeProvider(foreignUserKeys)
                 }
                 else -> throw IllegalArgumentException()
             }
@@ -128,6 +113,13 @@ interface UserCustomTimeProviderSource {
             if (foreignUserKeys.isNotEmpty())
                 friendsLoader.userKeyStore.requestCustomTimeUsers(rootTaskRecord.taskKey, foreignUserKeys)
 
+            return getUserCustomTimeProvider(foreignUserKeys)
+        }
+
+        private fun getUserCustomTimeKeys(taskRecord: RootTaskRecord) =
+                getUserCustomTimeKeys(taskRecord, false).toSet()
+
+        private fun getUserCustomTimeProvider(foreignUserKeys: Set<UserKey>): Single<JsonTime.UserCustomTimeProvider> {
             return Singles.zip(
                     myUserFactorySingle,
                     customTimeCoordinator.getCustomTimes(foreignUserKeys),
@@ -145,8 +137,5 @@ interface UserCustomTimeProviderSource {
                 }
             }
         }
-
-        private fun getUserCustomTimeKeys(taskRecord: RootTaskRecord) =
-                getUserCustomTimeKeys(taskRecord, false).toSet()
     }
 }

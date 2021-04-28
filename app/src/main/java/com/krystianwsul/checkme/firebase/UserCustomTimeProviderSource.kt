@@ -61,19 +61,16 @@ interface UserCustomTimeProviderSource {
             private val friendsFactorySingle: Single<FriendsFactory>,
     ) : UserCustomTimeProviderSource {
 
-        companion object {
-
-            fun getForeignUserKeys(myUserKey: UserKey, customTimeKeys: Set<CustomTimeKey.User>): Set<UserKey> {
-                val userKeys = customTimeKeys.map { it.userKey }.toSet()
-                return userKeys - myUserKey
-            }
+        private fun getForeignUserKeys(customTimeKeys: Set<CustomTimeKey.User>): Set<UserKey> {
+            val userKeys = customTimeKeys.map { it.userKey }.toSet()
+            return userKeys - myUserKey
         }
 
         override fun getUserCustomTimeProvider(
                 projectRecord: ProjectRecord<*>,
         ): Single<JsonTime.UserCustomTimeProvider> {
             val customTimeKeys = getUserCustomTimeKeys(projectRecord)
-            val foreignUserKeys = getForeignUserKeys(myUserKey, customTimeKeys)
+            val foreignUserKeys = getForeignUserKeys(customTimeKeys)
 
             return when (projectRecord) {
                 is PrivateProjectRecord -> {
@@ -90,11 +87,8 @@ interface UserCustomTimeProviderSource {
                         }
                     }
                 }
-                is SharedProjectRecord -> {
-                    if (foreignUserKeys.isNotEmpty())
-                        friendsLoader.userKeyStore.requestCustomTimeUsers(projectRecord.projectKey, foreignUserKeys)
-
-                    return getUserCustomTimeProvider(foreignUserKeys)
+                is SharedProjectRecord -> getUserCustomTimeProvider(foreignUserKeys) {
+                    friendsLoader.userKeyStore.requestCustomTimeUsers(projectRecord.projectKey, foreignUserKeys)
                 }
                 else -> throw IllegalArgumentException()
             }
@@ -111,18 +105,22 @@ interface UserCustomTimeProviderSource {
                 rootTaskRecord: RootTaskRecord,
         ): Single<JsonTime.UserCustomTimeProvider> {
             val customTimeKeys = getUserCustomTimeKeys(rootTaskRecord)
-            val foreignUserKeys = getForeignUserKeys(myUserKey, customTimeKeys)
+            val foreignUserKeys = getForeignUserKeys(customTimeKeys)
 
-            if (foreignUserKeys.isNotEmpty())
+            return getUserCustomTimeProvider(foreignUserKeys) {
                 friendsLoader.userKeyStore.requestCustomTimeUsers(rootTaskRecord.taskKey, foreignUserKeys)
-
-            return getUserCustomTimeProvider(foreignUserKeys)
+            }
         }
 
         private fun getUserCustomTimeKeys(taskRecord: RootTaskRecord) =
                 getUserCustomTimeKeys(taskRecord, false).toSet()
 
-        private fun getUserCustomTimeProvider(foreignUserKeys: Set<UserKey>): Single<JsonTime.UserCustomTimeProvider> {
+        private fun getUserCustomTimeProvider(
+                foreignUserKeys: Set<UserKey>,
+                notEmptyCallback: () -> Unit,
+        ): Single<JsonTime.UserCustomTimeProvider> {
+            if (foreignUserKeys.isNotEmpty()) notEmptyCallback()
+
             return Singles.zip(
                     myUserFactorySingle,
                     getCustomTimes(foreignUserKeys),

@@ -58,11 +58,11 @@ class RootTasksFactory(
 
         domainDisposable += rootTaskFactoriesObservable.connect()
 
-        fun getFactory(taskKey: TaskKey.Root) = rootTaskFactoriesObservable.getCurrentValue().getValue(taskKey)
+        fun getFactory(taskKey: TaskKey.Root) = rootTaskFactoriesObservable.getCurrentValue()[taskKey]
 
         val removeEvents = rootTasksLoader.removeEvents
                 .doOnNext {
-                    it.taskKeys.forEach { getFactory(it).onRemove() }
+                    it.taskKeys.forEach { getFactory(it)?.onRemove() }
 
                     userKeyStore.onTasksRemoved(it.taskKeys)
                     rootTaskKeySource.onRootTasksRemoved(it.taskKeys)

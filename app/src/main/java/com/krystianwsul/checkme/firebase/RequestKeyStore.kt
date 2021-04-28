@@ -33,11 +33,7 @@ class RequestKeyStore<REQUEST_KEY : Any, OUTPUT_KEY : Any> {
                 val newProjectMap = aggregate.requestMap
                         .toMutableMap()
                         .also { map ->
-                            customTimeEvent.requestKeys.forEach {
-                                check(map.containsKey(it))
-
-                                map.remove(it)
-                            }
+                            customTimeEvent.requestKeys.forEach { map.remove(it) }
                         }
 
                 CustomTimeAggregate(newProjectMap)

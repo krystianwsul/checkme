@@ -265,11 +265,36 @@ class ChangeTypeSourceTest {
         acceptPrivateProject(PrivateProjectJson())
         checkEmpty()
 
-        acceptPrivateProject(PrivateProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true))) // todo task track: next try with stripping out second task key
+        acceptPrivateProject(PrivateProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true)))
 
         acceptPrivateProject(
                 PrivateProjectJson(name = "nameChanged", rootTaskIds = mutableMapOf(taskKey1.taskId to true))
         )
+
+        projectEmissionChecker.checkRemote {
+            rootTasksLoaderProvider.accept(
+                    taskKey1,
+                    RootTaskJson(
+                            noScheduleOrParent = mapOf(
+                                    "noScheduleOrParentId" to NoScheduleOrParentJson(projectId = privateProjectId),
+                            ),
+                    ),
+            )
+        }
+    }
+
+    @Test
+    fun testSingleProjectSingleTaskChangeProjectBeforeTaskByStrippingOutSecondTask() {
+        testInitial()
+
+        acceptPrivateProject(PrivateProjectJson())
+        checkEmpty()
+
+        acceptPrivateProject(
+                PrivateProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true, taskKey2.taskId to true))
+        )
+
+        acceptPrivateProject(PrivateProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true)))
 
         projectEmissionChecker.checkRemote {
             rootTasksLoaderProvider.accept(

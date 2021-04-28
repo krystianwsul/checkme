@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.firebase.roottask
 
+import com.krystianwsul.checkme.firebase.UserCustomTimeProviderSource
 import com.krystianwsul.common.firebase.records.task.RootTaskRecord
 import com.krystianwsul.common.time.JsonTime
 import io.reactivex.rxjava3.core.Single
@@ -13,7 +14,7 @@ interface RootTaskDependencyCoordinator {
             private val rootTaskKeySource: RootTaskKeySource,
             rootTasksLoader: RootTasksLoader,
             private val domainDisposable: CompositeDisposable,
-            private val rootTaskUserCustomTimeProviderSource: RootTaskUserCustomTimeProviderSource,
+            private val userCustomTimeProviderSource: UserCustomTimeProviderSource,
     ) : RootTaskDependencyCoordinator {
 
         private val taskRecordLoader =
@@ -26,10 +27,10 @@ interface RootTaskDependencyCoordinator {
                     RecursiveTaskRecordLoader(
                             rootTaskRecord,
                             taskRecordLoader,
-                            rootTaskUserCustomTimeProviderSource,
+                            userCustomTimeProviderSource,
                             domainDisposable,
                     ).completable.toSingleDefault(Unit),
-                    rootTaskUserCustomTimeProviderSource.getUserCustomTimeProvider(rootTaskRecord),
+                    userCustomTimeProviderSource.getUserCustomTimeProvider(rootTaskRecord),
             ) { _, userCustomTimeProvider -> userCustomTimeProvider }
         }
     }

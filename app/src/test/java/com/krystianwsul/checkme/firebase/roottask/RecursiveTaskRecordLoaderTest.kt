@@ -1,11 +1,14 @@
 package com.krystianwsul.checkme.firebase.roottask
 
+import com.krystianwsul.checkme.firebase.UserCustomTimeProviderSource
 import com.krystianwsul.checkme.utils.SingleParamSingleSource
+import com.krystianwsul.common.firebase.records.project.ProjectRecord
 import com.krystianwsul.common.firebase.records.task.RootTaskRecord
 import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.utils.TaskKey
 import io.mockk.every
 import io.mockk.mockk
+import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.observers.TestObserver
 import org.junit.After
@@ -29,9 +32,13 @@ class RecursiveTaskRecordLoaderTest {
         override fun getTaskRecordSingle(taskKey: TaskKey.Root) = singleParamSingleSource.getSingle(taskKey)
     }
 
-    private class TestRootTaskUserCustomTimeProviderSource : RootTaskUserCustomTimeProviderSource {
+    private class TestUserCustomTimeProviderSource : UserCustomTimeProviderSource {
 
         val singleParamSingleSource = SingleParamSingleSource<RootTaskRecord, JsonTime.UserCustomTimeProvider>()
+
+        override fun getUserCustomTimeProvider(projectRecord: ProjectRecord<*>): Single<JsonTime.UserCustomTimeProvider> {
+            TODO("Not yet implemented")
+        }
 
         override fun getUserCustomTimeProvider(rootTaskRecord: RootTaskRecord) =
                 singleParamSingleSource.getSingle(rootTaskRecord)
@@ -40,14 +47,14 @@ class RecursiveTaskRecordLoaderTest {
     private val domainDisposable = CompositeDisposable()
 
     private lateinit var taskRecordLoader: TestTaskRecordLoader
-    private lateinit var rootTaskUserCustomTimeProviderSource: TestRootTaskUserCustomTimeProviderSource
+    private lateinit var rootTaskUserCustomTimeProviderSource: TestUserCustomTimeProviderSource
     private lateinit var recursiveTaskRecordLoader: RecursiveTaskRecordLoader
 
     private lateinit var testObserver: TestObserver<Void>
 
     private fun initLoader(initialTaskRecord: RootTaskRecord) {
         taskRecordLoader = TestTaskRecordLoader()
-        rootTaskUserCustomTimeProviderSource = TestRootTaskUserCustomTimeProviderSource()
+        rootTaskUserCustomTimeProviderSource = TestUserCustomTimeProviderSource()
 
         recursiveTaskRecordLoader = RecursiveTaskRecordLoader(
                 initialTaskRecord,

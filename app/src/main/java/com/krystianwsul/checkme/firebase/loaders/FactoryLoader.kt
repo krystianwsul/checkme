@@ -3,7 +3,7 @@ package com.krystianwsul.checkme.firebase.loaders
 import com.krystianwsul.checkme.domainmodel.extensions.updateDeviceDbInfo
 import com.krystianwsul.checkme.domainmodel.observeOnDomain
 import com.krystianwsul.checkme.firebase.CustomTimeCoordinator
-import com.krystianwsul.checkme.firebase.ProjectUserCustomTimeProviderSource
+import com.krystianwsul.checkme.firebase.UserCustomTimeProviderSource
 import com.krystianwsul.checkme.firebase.UserKeyStore
 import com.krystianwsul.checkme.firebase.factories.FriendsFactory
 import com.krystianwsul.checkme.firebase.factories.MyUserFactory
@@ -93,7 +93,7 @@ class FactoryLoader(
 
                     val customTimeCoordinator = CustomTimeCoordinator(userInfo.key, friendsFactorySingle)
 
-                    val projectUserCustomTimeProviderSource = ProjectUserCustomTimeProviderSource.Impl(
+                    val userCustomTimeProviderSource = UserCustomTimeProviderSource.Impl(
                             userInfo.key,
                             userFactorySingle,
                             customTimeCoordinator,
@@ -103,13 +103,6 @@ class FactoryLoader(
                     val rootTaskKeySource = RootTaskKeySource(domainDisposable)
 
                     val rootTaskManager = RootTasksManager(factoryProvider.database)
-
-                    val rootTaskUserCustomTimeProviderSource = RootTaskUserCustomTimeProviderSource.Impl(
-                            userInfo.key,
-                            userFactorySingle,
-                            customTimeCoordinator,
-                            friendsLoader,
-                    )
 
                     val loadDependencyTrackerManager = LoadDependencyTrackerManager()
 
@@ -125,7 +118,7 @@ class FactoryLoader(
                             rootTaskKeySource,
                             rootTaskLoader,
                             domainDisposable,
-                            rootTaskUserCustomTimeProviderSource,
+                            userCustomTimeProviderSource,
                     )
 
                     // this is hacky as fuck, but I'll take my chances
@@ -133,7 +126,6 @@ class FactoryLoader(
 
                     val rootTasksFactory = RootTasksFactory(
                             rootTaskLoader,
-                            rootTaskUserCustomTimeProviderSource,
                             userKeyStore,
                             rootTaskToRootTaskCoordinator,
                             domainDisposable,
@@ -151,7 +143,7 @@ class FactoryLoader(
                             domainDisposable,
                             privateProjectManager,
                             null,
-                            projectUserCustomTimeProviderSource,
+                            userCustomTimeProviderSource,
                             projectToRootTaskCoordinator,
                             loadDependencyTrackerManager,
                     )
@@ -165,7 +157,7 @@ class FactoryLoader(
                             sharedProjectManager,
                             domainDisposable,
                             factoryProvider.sharedProjectsProvider,
-                            projectUserCustomTimeProviderSource,
+                            userCustomTimeProviderSource,
                             userKeyStore,
                             projectToRootTaskCoordinator,
                             rootTaskKeySource,

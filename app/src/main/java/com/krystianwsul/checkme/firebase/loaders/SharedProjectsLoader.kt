@@ -1,7 +1,7 @@
 package com.krystianwsul.checkme.firebase.loaders
 
 import com.jakewharton.rxrelay3.ReplayRelay
-import com.krystianwsul.checkme.firebase.ProjectUserCustomTimeProviderSource
+import com.krystianwsul.checkme.firebase.UserCustomTimeProviderSource
 import com.krystianwsul.checkme.firebase.UserKeyStore
 import com.krystianwsul.checkme.firebase.managers.AndroidSharedProjectManager
 import com.krystianwsul.checkme.firebase.roottask.LoadDependencyTrackerManager
@@ -40,7 +40,7 @@ interface SharedProjectsLoader {
             override val projectManager: AndroidSharedProjectManager,
             private val domainDisposable: CompositeDisposable,
             private val sharedProjectsProvider: SharedProjectsProvider,
-            private val userCustomTimeProviderSource: ProjectUserCustomTimeProviderSource,
+            private val userCustomTimeProviderSource: UserCustomTimeProviderSource,
             private val userKeyStore: UserKeyStore,
             private val projectToRootTaskCoordinator: ProjectToRootTaskCoordinator,
             private val rootTaskKeySource: RootTaskKeySource,

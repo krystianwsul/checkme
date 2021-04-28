@@ -1,12 +1,13 @@
 package com.krystianwsul.checkme.firebase
 
 import com.krystianwsul.common.firebase.records.project.ProjectRecord
+import com.krystianwsul.common.firebase.records.task.RootTaskRecord
 import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.CustomTimeKey
 import io.reactivex.rxjava3.core.Single
 
-class TestProjectUserCustomTimeProviderSource : ProjectUserCustomTimeProviderSource {
+class TestUserCustomTimeProviderSource : UserCustomTimeProviderSource {
 
     override fun getUserCustomTimeProvider(projectRecord: ProjectRecord<*>): Single<JsonTime.UserCustomTimeProvider> {
         return Single.just(
@@ -17,5 +18,9 @@ class TestProjectUserCustomTimeProviderSource : ProjectUserCustomTimeProviderSou
                     }
                 }
         )
+    }
+
+    override fun getUserCustomTimeProvider(rootTaskRecord: RootTaskRecord): Single<JsonTime.UserCustomTimeProvider> {
+        TODO("Not yet implemented")
     }
 }

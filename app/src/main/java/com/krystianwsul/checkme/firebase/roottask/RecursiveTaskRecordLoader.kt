@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.firebase.roottask
 
 import com.jakewharton.rxrelay3.BehaviorRelay
+import com.krystianwsul.checkme.firebase.UserCustomTimeProviderSource
 import com.krystianwsul.checkme.utils.replayImmediate
 import com.krystianwsul.common.firebase.records.task.RootTaskRecord
 import com.krystianwsul.common.utils.TaskKey
@@ -15,7 +16,7 @@ import io.reactivex.rxjava3.kotlin.ofType
 class RecursiveTaskRecordLoader(
         taskRecord: RootTaskRecord,
         taskRecordLoader: TaskRecordLoader,
-        rootTaskUserCustomTimeProviderSource: RootTaskUserCustomTimeProviderSource,
+        userCustomTimeProviderSource: UserCustomTimeProviderSource,
         domainDisposable: CompositeDisposable,
 ) {
 
@@ -23,13 +24,13 @@ class RecursiveTaskRecordLoader(
 
     init {
         val taskKey = taskRecord.taskKey
-        val loadingRecord = TaskLoadState.LoadingRecord(taskKey, taskRecordLoader, rootTaskUserCustomTimeProviderSource)
+        val loadingRecord = TaskLoadState.LoadingRecord(taskKey, taskRecordLoader, userCustomTimeProviderSource)
         val fakeInitialMap = mapOf(taskKey to loadingRecord)
 
         val initialMap = RecordLoadedMutator(
                 taskRecord,
                 taskRecordLoader,
-                rootTaskUserCustomTimeProviderSource,
+                userCustomTimeProviderSource,
         ).mutateMap(fakeInitialMap)
 
         val initialState = TreeLoadState(initialMap)
@@ -86,12 +87,12 @@ class RecursiveTaskRecordLoader(
         class LoadingRecord(
                 val taskKey: TaskKey.Root,
                 private val taskRecordLoader: TaskRecordLoader,
-                private val rootTaskUserCustomTimeProviderSource: RootTaskUserCustomTimeProviderSource,
+                private val userCustomTimeProviderSource: UserCustomTimeProviderSource,
         ) : TaskLoadState() {
 
             override val mutator = taskRecordLoader.getTaskRecordSingle(taskKey)
                     .map<TaskLoadStateMapMutator> {
-                        RecordLoadedMutator(it, taskRecordLoader, rootTaskUserCustomTimeProviderSource)
+                        RecordLoadedMutator(it, taskRecordLoader, userCustomTimeProviderSource)
                     }
                     .cache()!!
 
@@ -100,10 +101,10 @@ class RecursiveTaskRecordLoader(
 
         class LoadingTimes(
                 private val taskRecord: RootTaskRecord,
-                rootTaskUserCustomTimeProviderSource: RootTaskUserCustomTimeProviderSource,
+                userCustomTimeProviderSource: UserCustomTimeProviderSource,
         ) : TaskLoadState() {
 
-            override val mutator = rootTaskUserCustomTimeProviderSource.getUserCustomTimeProvider(taskRecord)
+            override val mutator = userCustomTimeProviderSource.getUserCustomTimeProvider(taskRecord)
                     .map<TaskLoadStateMapMutator> { TimesLoadedMutator(taskRecord) }
                     .cache()!!
 
@@ -126,21 +127,21 @@ class RecursiveTaskRecordLoader(
     class RecordLoadedMutator(
             private val taskRecord: RootTaskRecord,
             private val taskRecordLoader: TaskRecordLoader,
-            private val rootTaskUserCustomTimeProviderSource: RootTaskUserCustomTimeProviderSource,
+            private val userCustomTimeProviderSource: UserCustomTimeProviderSource,
     ) : TaskLoadStateMapMutator {
 
         override fun mutateMap(oldMap: Map<TaskKey.Root, TaskLoadState>): Map<TaskKey.Root, TaskLoadState> {
             val newKeys = taskRecord.getDependentTaskKeys() - oldMap.keys
 
             val newEntries = newKeys.map {
-                it to TaskLoadState.LoadingRecord(it, taskRecordLoader, rootTaskUserCustomTimeProviderSource)
+                it to TaskLoadState.LoadingRecord(it, taskRecordLoader, userCustomTimeProviderSource)
             }
 
             val newMap = (oldMap + newEntries).toMutableMap()
             check(newMap.getValue(taskRecord.taskKey) is TaskLoadState.LoadingRecord)
 
             newMap[taskRecord.taskKey] =
-                    TaskLoadState.LoadingTimes(taskRecord, rootTaskUserCustomTimeProviderSource)
+                    TaskLoadState.LoadingTimes(taskRecord, userCustomTimeProviderSource)
 
             return newMap
         }

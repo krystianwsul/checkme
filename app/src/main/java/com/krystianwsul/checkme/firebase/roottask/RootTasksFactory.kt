@@ -18,7 +18,6 @@ import io.reactivex.rxjava3.kotlin.plusAssign
 
 class RootTasksFactory(
         rootTasksLoader: RootTasksLoader,
-        private val rootTaskUserCustomTimeProviderSource: RootTaskUserCustomTimeProviderSource,
         private val userKeyStore: UserKeyStore,
         private val rootTaskDependencyCoordinator: RootTaskDependencyCoordinator,
         domainDisposable: CompositeDisposable,

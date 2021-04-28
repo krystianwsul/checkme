@@ -37,9 +37,6 @@ class RootTasksFactoryTest {
                     every { addChangeEvents } returns addChangeEventsRelay
                     every { removeEvents } returns removeEventsRelay
                 },
-                mockk {
-                    every { getUserCustomTimeProvider(any()) } returns Single.just(mockk())
-                },
                 mockk(),
                 mockk {
                     every { getDependencies(any()) } returns Single.just(mockk())

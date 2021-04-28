@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.firebase
 
 import com.krystianwsul.checkme.firebase.factories.MyUserFactory
+import com.krystianwsul.checkme.firebase.loaders.FriendsLoader
 import com.krystianwsul.common.firebase.records.project.PrivateProjectRecord
 import com.krystianwsul.common.firebase.records.project.ProjectRecord
 import com.krystianwsul.common.firebase.records.project.SharedProjectRecord
@@ -50,6 +51,7 @@ interface ProjectUserCustomTimeProviderSource {
             private val myUserKey: UserKey,
             private val myUserFactorySingle: Single<MyUserFactory>,
             private val customTimeCoordinator: CustomTimeCoordinator,
+            private val friendsLoader: FriendsLoader,
     ) : ProjectUserCustomTimeProviderSource {
 
         override fun getUserCustomTimeProvider(
@@ -75,9 +77,12 @@ interface ProjectUserCustomTimeProviderSource {
                     }
                 }
                 is SharedProjectRecord -> {
+                    if (foreignUserKeys.isNotEmpty())
+                        friendsLoader.userKeyStore.requestCustomTimeUsers(projectRecord.projectKey, foreignUserKeys)
+
                     Singles.zip(
                             myUserFactorySingle,
-                            customTimeCoordinator.getCustomTimes(projectRecord.projectKey, foreignUserKeys),
+                            customTimeCoordinator.getCustomTimes(foreignUserKeys),
                     ).map { (myUserFactory, friendsFactory) ->
                         object : JsonTime.UserCustomTimeProvider {
 

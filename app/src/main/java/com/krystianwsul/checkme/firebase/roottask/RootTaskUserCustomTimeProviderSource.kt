@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.firebase.roottask
 import com.krystianwsul.checkme.firebase.CustomTimeCoordinator
 import com.krystianwsul.checkme.firebase.ProjectUserCustomTimeProviderSource
 import com.krystianwsul.checkme.firebase.factories.MyUserFactory
+import com.krystianwsul.checkme.firebase.loaders.FriendsLoader
 import com.krystianwsul.common.firebase.records.task.RootTaskRecord
 import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.time.Time
@@ -20,6 +21,7 @@ interface RootTaskUserCustomTimeProviderSource {
             private val myUserKey: UserKey,
             private val myUserFactorySingle: Single<MyUserFactory>,
             private val customTimeCoordinator: CustomTimeCoordinator,
+            private val friendsLoader: FriendsLoader,
     ) : RootTaskUserCustomTimeProviderSource {
 
         override fun getUserCustomTimeProvider(
@@ -29,9 +31,12 @@ interface RootTaskUserCustomTimeProviderSource {
             val userKeys = customTimeKeys.map { it.userKey }.toSet()
             val foreignUserKeys = userKeys - myUserKey
 
+            if (foreignUserKeys.isNotEmpty())
+                friendsLoader.userKeyStore.requestCustomTimeUsers(rootTaskRecord.taskKey, foreignUserKeys)
+
             return Singles.zip(
                     myUserFactorySingle,
-                    customTimeCoordinator.getCustomTimes(rootTaskRecord.taskKey, foreignUserKeys),
+                    customTimeCoordinator.getCustomTimes(foreignUserKeys),
             ).map { (myUserFactory, friendsFactory) ->
                 object : JsonTime.UserCustomTimeProvider {
 

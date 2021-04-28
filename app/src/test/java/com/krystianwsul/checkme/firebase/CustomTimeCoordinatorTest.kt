@@ -65,7 +65,7 @@ class CustomTimeCoordinatorTest {
                 .cache()
                 .apply { domainDisposable += subscribe() }
 
-        customTimeCoordinator = CustomTimeCoordinator(myUserKey, friendsLoader, friendsFactorySingle)
+        customTimeCoordinator = CustomTimeCoordinator(myUserKey, friendsFactorySingle)
     }
 
     @After
@@ -77,7 +77,8 @@ class CustomTimeCoordinatorTest {
     fun testEmptyEmitsImmediately() {
         friendKeysRelay.accept(setOf())
 
-        val testObserver = customTimeCoordinator.getCustomTimes(projectKey1, setOf()).test()
+        friendsLoader.userKeyStore.requestCustomTimeUsers(projectKey1, setOf())
+        val testObserver = customTimeCoordinator.getCustomTimes(setOf()).test()
         testObserver.assertValueCount(1)
     }
 
@@ -86,7 +87,8 @@ class CustomTimeCoordinatorTest {
         friendKeysRelay.accept(setOf(userKey1))
         friendsProvider.database.acceptUser(userKey1, UserWrapper())
 
-        val testObserver = customTimeCoordinator.getCustomTimes(projectKey1, setOf(userKey1)).test()
+        friendsLoader.userKeyStore.requestCustomTimeUsers(projectKey1, setOf())
+        val testObserver = customTimeCoordinator.getCustomTimes(setOf(userKey1)).test()
         testObserver.assertValueCount(1)
     }
 
@@ -94,7 +96,8 @@ class CustomTimeCoordinatorTest {
     fun testAbsentFriendEmitsAfterLoad() {
         friendKeysRelay.accept(setOf(userKey1))
 
-        val testObserver = customTimeCoordinator.getCustomTimes(projectKey1, setOf(userKey1)).test()
+        friendsLoader.userKeyStore.requestCustomTimeUsers(projectKey1, setOf())
+        val testObserver = customTimeCoordinator.getCustomTimes(setOf(userKey1)).test()
         testObserver.assertEmpty()
 
         friendsProvider.database.acceptUser(userKey1, UserWrapper())
@@ -106,7 +109,8 @@ class CustomTimeCoordinatorTest {
         friendKeysRelay.accept(setOf(userKey1))
         friendsProvider.database.acceptUser(userKey1, UserWrapper())
 
-        val testObserver = customTimeCoordinator.getCustomTimes(projectKey1, setOf(userKey2)).test()
+        friendsLoader.userKeyStore.requestCustomTimeUsers(projectKey1, setOf(userKey2))
+        val testObserver = customTimeCoordinator.getCustomTimes(setOf(userKey2)).test()
         testObserver.assertEmpty()
 
         friendsProvider.database.acceptUser(userKey2, UserWrapper())

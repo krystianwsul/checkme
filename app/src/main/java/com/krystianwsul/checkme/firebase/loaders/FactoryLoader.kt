@@ -91,12 +91,13 @@ class FactoryLoader(
                             }
                             .cacheImmediate()
 
-                    val customTimeCoordinator = CustomTimeCoordinator(userInfo.key, friendsLoader, friendsFactorySingle)
+                    val customTimeCoordinator = CustomTimeCoordinator(userInfo.key, friendsFactorySingle)
 
                     val projectUserCustomTimeProviderSource = ProjectUserCustomTimeProviderSource.Impl(
                             userInfo.key,
                             userFactorySingle,
                             customTimeCoordinator,
+                            friendsLoader,
                     )
 
                     val rootTaskKeySource = RootTaskKeySource(domainDisposable)
@@ -107,6 +108,7 @@ class FactoryLoader(
                             userInfo.key,
                             userFactorySingle,
                             customTimeCoordinator,
+                            friendsLoader,
                     )
 
                     val loadDependencyTrackerManager = LoadDependencyTrackerManager()

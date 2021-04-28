@@ -3,9 +3,13 @@ package com.krystianwsul.checkme.firebase.roottask
 import com.jakewharton.rxrelay3.PublishRelay
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.models.task.RootTask
+import com.krystianwsul.common.firebase.records.task.RootTaskRecord
 import com.krystianwsul.common.utils.TaskKey
+import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.Singles
+import io.reactivex.rxjava3.kotlin.merge
+import io.reactivex.rxjava3.kotlin.ofType
 import io.reactivex.rxjava3.kotlin.plusAssign
 import io.reactivex.rxjava3.observables.ConnectableObservable
 import io.reactivex.rxjava3.observables.GroupedObservable
@@ -15,7 +19,7 @@ class RootTaskFactory(
         private val rootTaskToRootTaskCoordinator: RootTaskToRootTaskCoordinator,
         private val rootTaskUserCustomTimeProviderSource: RootTaskUserCustomTimeProviderSource,
         private val rootTasksFactory: RootTasksFactory,
-        domainDisposable: CompositeDisposable,
+        private val domainDisposable: CompositeDisposable,
         addChangeEvents: GroupedObservable<TaskKey.Root, RootTasksLoader.AddChangeEvent>,
 ) {
 
@@ -24,7 +28,7 @@ class RootTaskFactory(
     private val removeRelay = PublishRelay.create<Unit>()
     fun onRemove() = removeRelay.accept(Unit)
 
-    private val unfilteredAddChangeEventChanges: ConnectableObservable<AddChangeData>
+    private val eventResults: ConnectableObservable<EventResult>
 
     val changeTypes: ConnectableObservable<ChangeType>
     val unfilteredChanges: ConnectableObservable<Unit>
@@ -35,29 +39,38 @@ class RootTaskFactory(
     private data class AddChangeData(val task: RootTask, val isTracked: Boolean)
 
     init {
-        unfilteredAddChangeEventChanges = addChangeEvents.flatMapSingle { (taskRecord, isTracked) ->
-            val taskTracker = loadDependencyTrackerManager.startTrackingTaskLoad(taskRecord)
+        eventResults = listOf(
+                addChangeEvents.map { Event.AddChange(it.rootTaskRecord, it.isTracked) },
+                removeRelay.map { Event.Remove },
+        ).merge()
+                .switchMapSingle { event ->
+                    when (event) {
+                        is Event.AddChange -> {
+                            val (taskRecord, isTracked) = event
 
-            Singles.zip(
-                    rootTaskToRootTaskCoordinator.getRootTasks(taskRecord).toSingleDefault(Unit),
-                    rootTaskUserCustomTimeProviderSource.getUserCustomTimeProvider(taskRecord),
-            ).map { (_, userCustomTimeProvider) ->
-                taskTracker.stopTracking()
+                            val taskTracker = loadDependencyTrackerManager.startTrackingTaskLoad(taskRecord)
 
-                AddChangeData(RootTask(taskRecord, rootTasksFactory, userCustomTimeProvider), isTracked)
-            }
-        }
+                            Singles.zip(
+                                    rootTaskToRootTaskCoordinator.getRootTasks(taskRecord).toSingleDefault(Unit),
+                                    rootTaskUserCustomTimeProviderSource.getUserCustomTimeProvider(taskRecord),
+                            ).map { (_, userCustomTimeProvider) ->
+                                taskTracker.stopTracking()
+
+                                EventResult.SetTask(
+                                        RootTask(taskRecord, rootTasksFactory, userCustomTimeProvider),
+                                        isTracked,
+                                )
+                            }
+                        }
+                        is Event.Remove -> Single.just(EventResult.RemoveTask)
+                    }
+                }
                 .doOnNext { task = it.task }
                 .publish()
 
-        val addChangeEventChanges = unfilteredAddChangeEventChanges.filter { !it.isTracked }
+        val unfilteredSetTaskEventResults = eventResults.ofType<EventResult.SetTask>()
 
-        domainDisposable += removeRelay.subscribe {
-            checkNotNull(task)
-            check(connected)
-
-            task = null
-        }
+        val addChangeEventChanges = unfilteredSetTaskEventResults.filter { !it.isTracked }
 
         /**
          * order is important: the bottom one executes later, and we first need to check filtering before emitting the
@@ -68,7 +81,7 @@ class RootTaskFactory(
          */
 
         changeTypes = addChangeEventChanges.map { ChangeType.REMOTE }.publish()
-        unfilteredChanges = unfilteredAddChangeEventChanges.map { }.publish()
+        unfilteredChanges = unfilteredSetTaskEventResults.map { }.publish()
     }
 
     private var connected = false
@@ -77,9 +90,28 @@ class RootTaskFactory(
         if (connected) return
         connected = true
 
-        changeTypes.connect()
-        unfilteredChanges.connect()
+        domainDisposable += changeTypes.connect()
+        domainDisposable += unfilteredChanges.connect()
 
-        unfilteredAddChangeEventChanges.connect()
+        domainDisposable += eventResults.connect()
+    }
+
+    private sealed class Event {
+
+        data class AddChange(val rootTaskRecord: RootTaskRecord, val isTracked: Boolean) : Event()
+
+        object Remove : Event()
+    }
+
+    private sealed class EventResult {
+
+        abstract val task: RootTask?
+
+        class SetTask(override val task: RootTask, val isTracked: Boolean) : EventResult()
+
+        object RemoveTask : EventResult() {
+
+            override val task: RootTask? = null
+        }
     }
 }

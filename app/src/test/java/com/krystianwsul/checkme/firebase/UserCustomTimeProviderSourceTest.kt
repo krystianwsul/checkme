@@ -18,7 +18,7 @@ import org.junit.Before
 import org.junit.BeforeClass
 import org.junit.Test
 
-class CustomTimeCoordinatorTest {
+class UserCustomTimeProviderSourceTest {
 
     companion object {
 
@@ -43,7 +43,7 @@ class CustomTimeCoordinatorTest {
     private lateinit var userKeyStore: UserKeyStore
     private lateinit var friendsProvider: FriendsLoaderTest.TestFriendsProvider
     private lateinit var friendsLoader: FriendsLoader
-    private lateinit var customTimeCoordinator: CustomTimeCoordinator
+    private lateinit var userCustomTimeProviderSource: UserCustomTimeProviderSource.Impl
 
     @Before
     fun before() {
@@ -65,7 +65,12 @@ class CustomTimeCoordinatorTest {
                 .cache()
                 .apply { domainDisposable += subscribe() }
 
-        customTimeCoordinator = CustomTimeCoordinator(myUserKey, friendsFactorySingle)
+        userCustomTimeProviderSource = UserCustomTimeProviderSource.Impl(
+                myUserKey,
+                mockk(),
+                mockk(),
+                friendsFactorySingle,
+        )
     }
 
     @After
@@ -78,7 +83,7 @@ class CustomTimeCoordinatorTest {
         friendKeysRelay.accept(setOf())
 
         friendsLoader.userKeyStore.requestCustomTimeUsers(projectKey1, setOf())
-        val testObserver = customTimeCoordinator.getCustomTimes(setOf()).test()
+        val testObserver = userCustomTimeProviderSource.getCustomTimes(setOf()).test()
         testObserver.assertValueCount(1)
     }
 
@@ -88,7 +93,7 @@ class CustomTimeCoordinatorTest {
         friendsProvider.database.acceptUser(userKey1, UserWrapper())
 
         friendsLoader.userKeyStore.requestCustomTimeUsers(projectKey1, setOf())
-        val testObserver = customTimeCoordinator.getCustomTimes(setOf(userKey1)).test()
+        val testObserver = userCustomTimeProviderSource.getCustomTimes(setOf(userKey1)).test()
         testObserver.assertValueCount(1)
     }
 
@@ -97,7 +102,7 @@ class CustomTimeCoordinatorTest {
         friendKeysRelay.accept(setOf(userKey1))
 
         friendsLoader.userKeyStore.requestCustomTimeUsers(projectKey1, setOf())
-        val testObserver = customTimeCoordinator.getCustomTimes(setOf(userKey1)).test()
+        val testObserver = userCustomTimeProviderSource.getCustomTimes(setOf(userKey1)).test()
         testObserver.assertEmpty()
 
         friendsProvider.database.acceptUser(userKey1, UserWrapper())
@@ -110,7 +115,7 @@ class CustomTimeCoordinatorTest {
         friendsProvider.database.acceptUser(userKey1, UserWrapper())
 
         friendsLoader.userKeyStore.requestCustomTimeUsers(projectKey1, setOf(userKey2))
-        val testObserver = customTimeCoordinator.getCustomTimes(setOf(userKey2)).test()
+        val testObserver = userCustomTimeProviderSource.getCustomTimes(setOf(userKey2)).test()
         testObserver.assertEmpty()
 
         friendsProvider.database.acceptUser(userKey2, UserWrapper())

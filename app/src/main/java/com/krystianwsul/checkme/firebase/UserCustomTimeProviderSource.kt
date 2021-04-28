@@ -1,5 +1,7 @@
 package com.krystianwsul.checkme.firebase
 
+import androidx.annotation.VisibleForTesting
+import com.krystianwsul.checkme.firebase.factories.FriendsFactory
 import com.krystianwsul.checkme.firebase.factories.MyUserFactory
 import com.krystianwsul.checkme.firebase.loaders.FriendsLoader
 import com.krystianwsul.common.firebase.records.project.PrivateProjectRecord
@@ -11,6 +13,7 @@ import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.UserKey
+import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.kotlin.Singles
 
@@ -54,8 +57,8 @@ interface UserCustomTimeProviderSource {
     class Impl(
             private val myUserKey: UserKey,
             private val myUserFactorySingle: Single<MyUserFactory>,
-            private val customTimeCoordinator: CustomTimeCoordinator,
             private val friendsLoader: FriendsLoader,
+            private val friendsFactorySingle: Single<FriendsFactory>,
     ) : UserCustomTimeProviderSource {
 
         companion object {
@@ -122,7 +125,7 @@ interface UserCustomTimeProviderSource {
         private fun getUserCustomTimeProvider(foreignUserKeys: Set<UserKey>): Single<JsonTime.UserCustomTimeProvider> {
             return Singles.zip(
                     myUserFactorySingle,
-                    customTimeCoordinator.getCustomTimes(foreignUserKeys),
+                    getCustomTimes(foreignUserKeys),
             ).map { (myUserFactory, friendsFactory) ->
                 object : JsonTime.UserCustomTimeProvider {
 
@@ -135,6 +138,19 @@ interface UserCustomTimeProviderSource {
                         return provider.getUserCustomTime(userCustomTimeKey)
                     }
                 }
+            }
+        }
+
+        @VisibleForTesting
+        fun getCustomTimes(foreignUserKeys: Set<UserKey>): Single<FriendsFactory> {
+            check(myUserKey !in foreignUserKeys)
+
+            return friendsFactorySingle.flatMap { friendsFactory ->
+                Observable.just(Unit)
+                        .concatWith(friendsFactory.changeTypes.map { })
+                        .filter { friendsFactory.hasUserKeys(foreignUserKeys) }
+                        .firstOrError()
+                        .map { friendsFactory }
             }
         }
     }

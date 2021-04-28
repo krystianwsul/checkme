@@ -2,7 +2,6 @@ package com.krystianwsul.checkme.firebase.loaders
 
 import com.krystianwsul.checkme.domainmodel.extensions.updateDeviceDbInfo
 import com.krystianwsul.checkme.domainmodel.observeOnDomain
-import com.krystianwsul.checkme.firebase.CustomTimeCoordinator
 import com.krystianwsul.checkme.firebase.UserCustomTimeProviderSource
 import com.krystianwsul.checkme.firebase.UserKeyStore
 import com.krystianwsul.checkme.firebase.factories.FriendsFactory
@@ -91,13 +90,11 @@ class FactoryLoader(
                             }
                             .cacheImmediate()
 
-                    val customTimeCoordinator = CustomTimeCoordinator(userInfo.key, friendsFactorySingle)
-
                     val userCustomTimeProviderSource = UserCustomTimeProviderSource.Impl(
                             userInfo.key,
                             userFactorySingle,
-                            customTimeCoordinator,
                             friendsLoader,
+                            friendsFactorySingle,
                     )
 
                     val rootTaskKeySource = RootTaskKeySource(domainDisposable)

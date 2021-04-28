@@ -7,7 +7,6 @@ import com.krystianwsul.common.firebase.records.task.RootTaskRecord
 import com.krystianwsul.common.utils.TaskKey
 import io.mockk.every
 import io.mockk.mockk
-import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import org.junit.After
@@ -43,7 +42,7 @@ class RootTasksFactoryTest {
                 },
                 mockk(),
                 mockk {
-                    every { getRootTasks(any()) } returns Completable.complete()
+                    every { getDependencies(any()) } returns Single.just(mockk())
                 },
                 domainDisposable,
                 mockk(),

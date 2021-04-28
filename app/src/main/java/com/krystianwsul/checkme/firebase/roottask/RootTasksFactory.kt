@@ -20,7 +20,7 @@ class RootTasksFactory(
         rootTasksLoader: RootTasksLoader,
         private val rootTaskUserCustomTimeProviderSource: RootTaskUserCustomTimeProviderSource,
         private val userKeyStore: UserKeyStore,
-        private val rootTaskToRootTaskCoordinator: RootTaskToRootTaskCoordinator,
+        private val rootTaskDependencyCoordinator: RootTaskDependencyCoordinator,
         domainDisposable: CompositeDisposable,
         private val rootTaskKeySource: RootTaskKeySource,
         loadDependencyTrackerManager: LoadDependencyTrackerManager,
@@ -44,8 +44,7 @@ class RootTasksFactory(
                     oldMap.toMutableMap().also {
                         it[group.key] = RootTaskFactory(
                                 loadDependencyTrackerManager,
-                                rootTaskToRootTaskCoordinator,
-                                rootTaskUserCustomTimeProviderSource,
+                                rootTaskDependencyCoordinator,
                                 this,
                                 domainDisposable,
                                 group,

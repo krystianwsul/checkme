@@ -119,7 +119,7 @@ class FactoryLoader(
                             loadDependencyTrackerManager,
                     )
 
-                    val rootTaskToRootTaskCoordinator = RootTaskToRootTaskCoordinator.Impl(
+                    val rootTaskToRootTaskCoordinator = RootTaskDependencyCoordinator.Impl(
                             rootTaskKeySource,
                             rootTaskLoader,
                             domainDisposable,

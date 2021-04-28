@@ -131,7 +131,7 @@ class ChangeTypeSourceTest {
             every { onTasksRemoved(any()) } returns Unit
         }
 
-        val rootTaskToRootTaskCoordinator = RootTaskToRootTaskCoordinator.Impl(
+        val rootTaskToRootTaskCoordinator = RootTaskDependencyCoordinator.Impl(
                 rootTaskKeySource,
                 rootTasksLoader,
                 domainDisposable,

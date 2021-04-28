@@ -87,7 +87,24 @@ class RootTasksFactoryTest {
     }
 
     @Test
-    fun testInitialTwoAddsChange() {
+    fun testInitialTwoAddsChangeFirst() {
+        val record1 = newRecord(taskKey1)
+        emissionChecker.checkOne {
+            addChangeEventsRelay.accept(RootTasksLoader.AddChangeEvent(record1, false))
+        }
+
+        val record2 = newRecord(taskKey2)
+        emissionChecker.checkOne {
+            addChangeEventsRelay.accept(RootTasksLoader.AddChangeEvent(record2, false))
+        }
+
+        emissionChecker.checkOne {
+            addChangeEventsRelay.accept(RootTasksLoader.AddChangeEvent(record1, false))
+        }
+    }
+
+    @Test
+    fun testInitialTwoAddsChangeSecond() {
         val record1 = newRecord(taskKey1)
         emissionChecker.checkOne {
             addChangeEventsRelay.accept(RootTasksLoader.AddChangeEvent(record1, false))

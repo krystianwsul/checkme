@@ -60,7 +60,7 @@ class RootTaskFactory(
                                         RootTask(taskRecord, rootTasksFactory, userCustomTimeProvider),
                                         isTracked,
                                 )
-                            }
+                            }.doOnDispose { taskTracker.stopTracking() } // in case a new event comes in before this completes
                         }
                         is Event.Remove -> Single.just(EventResult.RemoveTask)
                     }

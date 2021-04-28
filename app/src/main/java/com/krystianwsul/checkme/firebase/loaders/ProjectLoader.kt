@@ -5,6 +5,7 @@ import com.krystianwsul.checkme.firebase.roottask.LoadDependencyTrackerManager
 import com.krystianwsul.checkme.firebase.roottask.ProjectToRootTaskCoordinator
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.checkme.utils.cacheImmediate
+import com.krystianwsul.checkme.utils.doOnSuccessOrDispose
 import com.krystianwsul.checkme.utils.mapNotNull
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.ChangeWrapper
@@ -79,9 +80,7 @@ interface ProjectLoader<T : ProjectType, U : Parsable> { // U: Project JSON type
                             Singles.zip(
                                     projectToRootTaskCoordinator.getRootTasks(tracker).toSingleDefault(Unit),
                                     userCustomTimeProviderSource.getUserCustomTimeProvider(projectRecord),
-                            ).map { (_, userCustomTimeProvider) ->
-                                tracker.stopTracking()
-
+                            ).doOnSuccessOrDispose { tracker.stopTracking() }.map { (_, userCustomTimeProvider) ->
                                 ProjectRecordData(projectChangeType, projectRecord, userCustomTimeProvider)
                             }
                         }

@@ -259,6 +259,31 @@ class ChangeTypeSourceTest {
     }
 
     @Test
+    fun testSingleProjectSingleTaskChangeProjectBeforeTask() {
+        testInitial()
+
+        acceptPrivateProject(PrivateProjectJson())
+        checkEmpty()
+
+        acceptPrivateProject(PrivateProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true))) // todo task track: next try with stripping out second task key
+
+        acceptPrivateProject(
+                PrivateProjectJson(name = "nameChanged", rootTaskIds = mutableMapOf(taskKey1.taskId to true))
+        )
+
+        projectEmissionChecker.checkRemote {
+            rootTasksLoaderProvider.accept(
+                    taskKey1,
+                    RootTaskJson(
+                            noScheduleOrParent = mapOf(
+                                    "noScheduleOrParentId" to NoScheduleOrParentJson(projectId = privateProjectId),
+                            ),
+                    ),
+            )
+        }
+    }
+
+    @Test
     fun testSingleProjectRecursiveTask() {
         testInitial()
 
@@ -454,9 +479,7 @@ class ChangeTypeSourceTest {
                 ),
         )
 
-        projectEmissionChecker.checkRemote {
-            timeRelay.accept(mockk())
-        }
+        projectEmissionChecker.checkRemote { timeRelay.accept(mockk()) }
     }
 
     @Test

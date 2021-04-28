@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.firebase.roottask
 
 import com.jakewharton.rxrelay3.PublishRelay
+import com.krystianwsul.checkme.utils.doOnSuccessOrDispose
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.models.task.RootTask
 import com.krystianwsul.common.firebase.records.task.RootTaskRecord
@@ -53,14 +54,14 @@ class RootTaskFactory(
                             Singles.zip(
                                     rootTaskToRootTaskCoordinator.getRootTasks(taskRecord).toSingleDefault(Unit),
                                     rootTaskUserCustomTimeProviderSource.getUserCustomTimeProvider(taskRecord),
-                            ).map { (_, userCustomTimeProvider) ->
-                                taskTracker.stopTracking()
-
+                            ).doOnSuccessOrDispose {
+                                taskTracker.stopTracking() // in case a new event comes in before this completes
+                            }.map { (_, userCustomTimeProvider) ->
                                 EventResult.SetTask(
                                         RootTask(taskRecord, rootTasksFactory, userCustomTimeProvider),
                                         isTracked,
                                 )
-                            }.doOnDispose { taskTracker.stopTracking() } // in case a new event comes in before this completes
+                            }
                         }
                         is Event.Remove -> Single.just(EventResult.RemoveTask)
                     }

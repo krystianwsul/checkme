@@ -23,4 +23,8 @@ class TestUserCustomTimeProviderSource : UserCustomTimeProviderSource {
     override fun getUserCustomTimeProvider(rootTaskRecord: RootTaskRecord): Single<JsonTime.UserCustomTimeProvider> {
         TODO("Not yet implemented")
     }
+
+    override fun hasCustomTimes(rootTaskRecord: RootTaskRecord): Boolean {
+        TODO("Not yet implemented")
+    }
 }

@@ -4,6 +4,7 @@ import androidx.annotation.VisibleForTesting
 import com.krystianwsul.checkme.firebase.factories.FriendsFactory
 import com.krystianwsul.checkme.firebase.factories.MyUserFactory
 import com.krystianwsul.checkme.firebase.loaders.FriendsLoader
+import com.krystianwsul.checkme.utils.tryGetCurrentValue
 import com.krystianwsul.common.firebase.records.project.PrivateProjectRecord
 import com.krystianwsul.common.firebase.records.project.ProjectRecord
 import com.krystianwsul.common.firebase.records.project.SharedProjectRecord
@@ -54,6 +55,8 @@ interface UserCustomTimeProviderSource {
     // emit only remote changes
     fun getUserCustomTimeProvider(rootTaskRecord: RootTaskRecord): Single<JsonTime.UserCustomTimeProvider>
 
+    fun hasCustomTimes(rootTaskRecord: RootTaskRecord): Boolean
+
     class Impl(
             private val myUserKey: UserKey,
             private val myUserFactorySingle: Single<MyUserFactory>,
@@ -101,11 +104,13 @@ interface UserCustomTimeProviderSource {
                     .toSet()
         }
 
+        private fun getForeignUserKeys(rootTaskRecord: RootTaskRecord) =
+                getForeignUserKeys(getUserCustomTimeKeys(rootTaskRecord))
+
         override fun getUserCustomTimeProvider(
                 rootTaskRecord: RootTaskRecord,
         ): Single<JsonTime.UserCustomTimeProvider> {
-            val customTimeKeys = getUserCustomTimeKeys(rootTaskRecord)
-            val foreignUserKeys = getForeignUserKeys(customTimeKeys)
+            val foreignUserKeys = getForeignUserKeys(rootTaskRecord)
 
             return getUserCustomTimeProvider(foreignUserKeys) {
                 friendsLoader.userKeyStore.requestCustomTimeUsers(rootTaskRecord.taskKey, foreignUserKeys)
@@ -150,6 +155,14 @@ interface UserCustomTimeProviderSource {
                         .firstOrError()
                         .map { friendsFactory }
             }
+        }
+
+        override fun hasCustomTimes(rootTaskRecord: RootTaskRecord): Boolean {
+            val foreignUserKeys = getForeignUserKeys(rootTaskRecord)
+            if (foreignUserKeys.isEmpty()) return true
+
+            val friendsFactory = friendsFactorySingle.tryGetCurrentValue() ?: return false
+            return friendsFactory.hasUserKeys(foreignUserKeys)
         }
     }
 }

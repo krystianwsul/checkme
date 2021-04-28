@@ -86,6 +86,8 @@ class ChangeTypeSourceTest {
 
         override fun getUserCustomTimeProvider(rootTaskRecord: RootTaskRecord) =
                 source.getSingle(rootTaskRecord.taskKey)
+
+        override fun hasCustomTimes(rootTaskRecord: RootTaskRecord) = source.map.containsKey(rootTaskRecord.taskKey)
     }
 
     @Before
@@ -546,6 +548,8 @@ class ChangeTypeSourceTest {
 
                     override fun getUserCustomTimeProvider(rootTaskRecord: RootTaskRecord) =
                             Single.just<JsonTime.UserCustomTimeProvider>(mockk())
+
+                    override fun hasCustomTimes(rootTaskRecord: RootTaskRecord) = true
                 }
         )
 
@@ -613,18 +617,8 @@ class ChangeTypeSourceTest {
 
     @Test
     fun testTaskTimesSingleProjectChildTaskUpdateParentBeforeTime() {
-        val timeSource = SingleParamSingleSource<TaskKey.Root, JsonTime.UserCustomTimeProvider>(true)
-
-        setup(
-                userCustomTimeProviderSource = object : UserCustomTimeProviderSource {
-
-                    override fun getUserCustomTimeProvider(projectRecord: ProjectRecord<*>) =
-                            Single.just<JsonTime.UserCustomTimeProvider>(mockk())
-
-                    override fun getUserCustomTimeProvider(rootTaskRecord: RootTaskRecord) =
-                            timeSource.getSingle(rootTaskRecord.taskKey)
-                }
-        )
+        val timeSource = TestUserCustomTimeProviderSource()
+        setup(userCustomTimeProviderSource = timeSource)
 
         // to get the initial event out of the way
         acceptPrivateProject(PrivateProjectJson())
@@ -652,7 +646,7 @@ class ChangeTypeSourceTest {
                 ),
         )
 
-        timeSource.accept(taskKey1, mockk())
+        timeSource.source.accept(taskKey1, mockk())
 
         rootTasksLoaderProvider.accept(
                 taskKey2,
@@ -664,7 +658,7 @@ class ChangeTypeSourceTest {
                 ),
         )
 
-        projectEmissionChecker.checkRemote { timeSource.accept(taskKey2, mockk()) }
+        projectEmissionChecker.checkRemote { timeSource.source.accept(taskKey2, mockk()) }
     }
 
     @Test

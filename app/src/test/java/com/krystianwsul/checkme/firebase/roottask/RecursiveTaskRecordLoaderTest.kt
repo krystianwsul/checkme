@@ -42,6 +42,10 @@ class RecursiveTaskRecordLoaderTest {
 
         override fun getUserCustomTimeProvider(rootTaskRecord: RootTaskRecord) =
                 singleParamSingleSource.getSingle(rootTaskRecord)
+
+        override fun hasCustomTimes(rootTaskRecord: RootTaskRecord): Boolean {
+            TODO("Not yet implemented")
+        }
     }
 
     private val domainDisposable = CompositeDisposable()

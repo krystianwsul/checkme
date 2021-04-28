@@ -4,7 +4,8 @@ import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.plusAssign
-import org.junit.Assert
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 
 class EmissionChecker<T : Any>(
         val name: String,
@@ -31,13 +32,23 @@ class EmissionChecker<T : Any>(
         }
     }
 
+    fun checkNoErrors() = assertFalse(hasErrors)
+
+    fun checkNoErrors(action: () -> Unit) {
+        checkNoErrors()
+
+        action()
+
+        checkNoErrors()
+    }
+
     fun addHandler(handler: (T) -> Unit) {
         check(!hasErrors)
 
         handlers += handler
     }
 
-    fun checkEmpty() = Assert.assertTrue(
+    fun checkEmpty() = assertTrue(
             "$name is not empty (as in, event not emitted as expected)",
             handlers.isEmpty(),
     )

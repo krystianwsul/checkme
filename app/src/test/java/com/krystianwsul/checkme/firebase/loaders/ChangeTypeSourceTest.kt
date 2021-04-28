@@ -546,6 +546,58 @@ class ChangeTypeSourceTest {
     }
 
     @Test
+    fun testTaskTimesSingleProjectChildTaskUpdateChildBeforeTime() {
+        val timeSource = SingleParamSingleSource<TaskKey.Root, JsonTime.UserCustomTimeProvider>(true)
+
+        setup(
+                rootTaskUserCustomTimeProviderSource = object : RootTaskUserCustomTimeProviderSource {
+
+                    override fun getUserCustomTimeProvider(rootTaskRecord: RootTaskRecord) =
+                            timeSource.getSingle(rootTaskRecord.taskKey)
+                }
+        )
+
+        // to get the initial event out of the way
+        acceptPrivateProject(PrivateProjectJson())
+
+        acceptPrivateProject(PrivateProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true)))
+
+        rootTasksLoaderProvider.accept(
+                taskKey1,
+                RootTaskJson(
+                        noScheduleOrParent = mapOf(
+                                "noScheduleOrParentId" to NoScheduleOrParentJson(projectId = privateProjectId),
+                        ),
+                        rootTaskIds = mutableMapOf(taskKey2.taskId to true)
+                ),
+        )
+        timeSource.accept(taskKey1, mockk())
+
+        rootTasksLoaderProvider.accept(
+                taskKey2,
+                RootTaskJson(
+                        startTimeOffset = 0.0,
+                        taskHierarchies = mapOf(
+                                "taskHierarchyId" to NestedTaskHierarchyJson(parentTaskId = taskKey1.taskId)
+                        ),
+                ),
+        )
+
+        rootTasksLoaderProvider.accept(
+                taskKey2,
+                RootTaskJson(
+                        name = "changedName",
+                        startTimeOffset = 0.0,
+                        taskHierarchies = mapOf(
+                                "taskHierarchyId" to NestedTaskHierarchyJson(parentTaskId = taskKey1.taskId)
+                        ),
+                ),
+        )
+
+        projectEmissionChecker.checkRemote { timeSource.accept(taskKey2, mockk()) }
+    }
+
+    @Test
     fun testTaskTimesSingleProjectChildTaskTimesDelayed() {
         val timeSource = SingleParamSingleSource<TaskKey.Root, JsonTime.UserCustomTimeProvider>(true)
 

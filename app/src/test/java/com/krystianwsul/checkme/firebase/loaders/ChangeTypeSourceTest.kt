@@ -76,6 +76,14 @@ class ChangeTypeSourceTest {
     private lateinit var projectEmissionChecker: EmissionChecker<ChangeType>
     private lateinit var taskEmissionChecker: EmissionChecker<ChangeType>
 
+    private class TestRootTaskUserCustomTimeProviderSource : RootTaskUserCustomTimeProviderSource {
+
+        val source = SingleParamSingleSource<TaskKey.Root, JsonTime.UserCustomTimeProvider>(true)
+
+        override fun getUserCustomTimeProvider(rootTaskRecord: RootTaskRecord) =
+                source.getSingle(rootTaskRecord.taskKey)
+    }
+
     @Before
     fun before() {
         privateProjectSnapshotObservable = PublishRelay.create()
@@ -453,15 +461,8 @@ class ChangeTypeSourceTest {
 
     @Test
     fun testTaskTimesSingleProjectChildTaskImmediate() {
-        val timeSource = SingleParamSingleSource<TaskKey.Root, JsonTime.UserCustomTimeProvider>(true)
-
-        setup(
-                rootTaskUserCustomTimeProviderSource = object : RootTaskUserCustomTimeProviderSource {
-
-                    override fun getUserCustomTimeProvider(rootTaskRecord: RootTaskRecord) =
-                            timeSource.getSingle(rootTaskRecord.taskKey)
-                }
-        )
+        val timeSource = TestRootTaskUserCustomTimeProviderSource()
+        setup(rootTaskUserCustomTimeProviderSource = timeSource)
 
         // to get the initial event out of the way
         acceptPrivateProject(PrivateProjectJson())
@@ -477,7 +478,7 @@ class ChangeTypeSourceTest {
                         rootTaskIds = mutableMapOf(taskKey2.taskId to true)
                 ),
         )
-        timeSource.accept(taskKey1, mockk())
+        timeSource.source.accept(taskKey1, mockk())
 
         rootTasksLoaderProvider.accept(
                 taskKey2,
@@ -489,7 +490,7 @@ class ChangeTypeSourceTest {
                 ),
         )
 
-        projectEmissionChecker.checkRemote { timeSource.accept(taskKey2, mockk()) }
+        projectEmissionChecker.checkRemote { timeSource.source.accept(taskKey2, mockk()) }
     }
 
     @Test
@@ -547,15 +548,8 @@ class ChangeTypeSourceTest {
 
     @Test
     fun testTaskTimesSingleProjectChildTaskUpdateChildBeforeTime() {
-        val timeSource = SingleParamSingleSource<TaskKey.Root, JsonTime.UserCustomTimeProvider>(true)
-
-        setup(
-                rootTaskUserCustomTimeProviderSource = object : RootTaskUserCustomTimeProviderSource {
-
-                    override fun getUserCustomTimeProvider(rootTaskRecord: RootTaskRecord) =
-                            timeSource.getSingle(rootTaskRecord.taskKey)
-                }
-        )
+        val timeSource = TestRootTaskUserCustomTimeProviderSource()
+        setup(rootTaskUserCustomTimeProviderSource = timeSource)
 
         // to get the initial event out of the way
         acceptPrivateProject(PrivateProjectJson())
@@ -571,7 +565,7 @@ class ChangeTypeSourceTest {
                         rootTaskIds = mutableMapOf(taskKey2.taskId to true)
                 ),
         )
-        timeSource.accept(taskKey1, mockk())
+        timeSource.source.accept(taskKey1, mockk())
 
         rootTasksLoaderProvider.accept(
                 taskKey2,
@@ -594,20 +588,13 @@ class ChangeTypeSourceTest {
                 ),
         )
 
-        projectEmissionChecker.checkRemote { timeSource.accept(taskKey2, mockk()) }
+        projectEmissionChecker.checkRemote { timeSource.source.accept(taskKey2, mockk()) }
     }
 
     @Test
     fun testTaskTimesSingleProjectChildTaskTimesDelayed() {
-        val timeSource = SingleParamSingleSource<TaskKey.Root, JsonTime.UserCustomTimeProvider>(true)
-
-        setup(
-                rootTaskUserCustomTimeProviderSource = object : RootTaskUserCustomTimeProviderSource {
-
-                    override fun getUserCustomTimeProvider(rootTaskRecord: RootTaskRecord) =
-                            timeSource.getSingle(rootTaskRecord.taskKey)
-                }
-        )
+        val timeSource = TestRootTaskUserCustomTimeProviderSource()
+        setup(rootTaskUserCustomTimeProviderSource = timeSource)
 
         // to get the initial event out of the way
         acceptPrivateProject(PrivateProjectJson())
@@ -634,21 +621,14 @@ class ChangeTypeSourceTest {
                 ),
         )
 
-        timeSource.accept(taskKey1, mockk())
-        projectEmissionChecker.checkRemote { timeSource.accept(taskKey2, mockk()) }
+        timeSource.source.accept(taskKey1, mockk())
+        projectEmissionChecker.checkRemote { timeSource.source.accept(taskKey2, mockk()) }
     }
 
     @Test
     fun testTaskTimesSingleProjectChildTaskTimesDelayedSwapped() {
-        val timeSource = SingleParamSingleSource<TaskKey.Root, JsonTime.UserCustomTimeProvider>(true)
-
-        setup(
-                rootTaskUserCustomTimeProviderSource = object : RootTaskUserCustomTimeProviderSource {
-
-                    override fun getUserCustomTimeProvider(rootTaskRecord: RootTaskRecord) =
-                            timeSource.getSingle(rootTaskRecord.taskKey)
-                }
-        )
+        val timeSource = TestRootTaskUserCustomTimeProviderSource()
+        setup(rootTaskUserCustomTimeProviderSource = timeSource)
 
         // to get the initial event out of the way
         acceptPrivateProject(PrivateProjectJson())
@@ -675,7 +655,7 @@ class ChangeTypeSourceTest {
                 ),
         )
 
-        timeSource.accept(taskKey2, mockk())
-        projectEmissionChecker.checkRemote { timeSource.accept(taskKey1, mockk()) }
+        timeSource.source.accept(taskKey2, mockk())
+        projectEmissionChecker.checkRemote { timeSource.source.accept(taskKey1, mockk()) }
     }
 }

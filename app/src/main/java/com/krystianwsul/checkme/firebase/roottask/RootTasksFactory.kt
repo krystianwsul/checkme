@@ -9,6 +9,7 @@ import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.firebase.models.taskhierarchy.TaskHierarchy
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
+import com.krystianwsul.common.utils.mapValuesNotNull
 import com.krystianwsul.treeadapter.getCurrentValue
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
@@ -29,10 +30,7 @@ class RootTasksFactory(
     private val rootTaskFactoriesObservable: Observable<Map<TaskKey.Root, RootTaskFactory>>
 
     val rootTasks: Map<TaskKey.Root, RootTask>
-        get() = rootTaskFactoriesObservable.getCurrentValue()
-                .mapValues { it.value.task }
-                .filterValues { it != null }
-                .mapValues { it.value!! }
+        get() = rootTaskFactoriesObservable.getCurrentValue().mapValuesNotNull { it.value.task }
 
     val unfilteredChanges: Observable<Unit>
     val changeTypes: Observable<ChangeType>

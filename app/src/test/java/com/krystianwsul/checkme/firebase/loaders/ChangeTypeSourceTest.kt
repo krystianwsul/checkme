@@ -365,6 +365,52 @@ class ChangeTypeSourceTest {
         }
     }
 
+    /*
+    @Test
+    fun testSingleProjectTwoChildTasksButOneRemovedSwitchOrder() {
+        testInitial()
+
+        acceptPrivateProject(PrivateProjectJson())
+        checkEmpty()
+
+        acceptPrivateProject(PrivateProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true)))
+
+        rootTasksLoaderProvider.accept(
+                taskKey1,
+                RootTaskJson(
+                        noScheduleOrParent = mapOf(
+                                "noScheduleOrParentId" to NoScheduleOrParentJson(projectId = privateProjectId),
+                        ),
+                        rootTaskIds = mutableMapOf(taskKey2.taskId to true, taskKey3.taskId to true),
+                ),
+        )
+
+        rootTasksLoaderProvider.accept(
+                taskKey2,
+                RootTaskJson(
+                        startTimeOffset = 0.0,
+                        taskHierarchies = mapOf(
+                                "taskHierarchyId" to NestedTaskHierarchyJson(parentTaskId = taskKey1.taskId),
+                        ),
+                ),
+        )
+
+        projectEmissionChecker.checkRemote {
+            rootTasksLoaderProvider.accept(
+                    taskKey1,
+                    RootTaskJson(
+                            noScheduleOrParent = mapOf(
+                                    "noScheduleOrParentId" to NoScheduleOrParentJson(projectId = privateProjectId),
+                            ),
+                            rootTaskIds = mutableMapOf(taskKey2.taskId to true),
+                    ),
+            )
+
+            val x = 1/2
+        }
+    }
+    */
+
     @Test
     fun testSingleProjectTaskChange() {
         testInitial()

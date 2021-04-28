@@ -66,7 +66,9 @@ class RootTaskFactory(
                         is Event.Remove -> Single.just(EventResult.RemoveTask)
                     }
                 }
-                .doOnNext { task = it.task }
+                .doOnNext {
+                    task = it.task
+                }
                 .publish()
 
         val unfilteredSetTaskEventResults = eventResults.ofType<EventResult.SetTask>()

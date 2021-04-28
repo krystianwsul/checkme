@@ -1,11 +1,9 @@
 package com.krystianwsul.checkme.firebase.roottask
 
-import com.krystianwsul.checkme.utils.mapNotNull
-import com.krystianwsul.common.firebase.models.task.RootTask
 import com.krystianwsul.common.utils.TaskKey
+import com.krystianwsul.common.utils.filterValuesNotNull
 import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Observable
-import io.reactivex.rxjava3.core.Single
 
 interface ProjectToRootTaskCoordinator {
 
@@ -19,31 +17,30 @@ interface ProjectToRootTaskCoordinator {
         override fun getRootTasks(projectTracker: LoadDependencyTrackerManager.ProjectTracker): Completable {
             rootTaskKeySource.onProjectAddedOrUpdated(projectTracker.projectKey, projectTracker.dependentTaskKeys)
 
-            val loadedKeys = mutableSetOf<TaskKey.Root>()
-
-            return Completable.merge(
-                    projectTracker.dependentTaskKeys.map { getTaskDependenciesLoadedCompletable(it, loadedKeys) }
-            )
-        }
-
-        private fun getTaskLoadedSingle(taskKey: TaskKey.Root): Single<RootTask> {
             return Observable.just(Unit)
                     .concatWith(rootTasksFactory.unfilteredChanges)
-                    .mapNotNull { rootTasksFactory.rootTasks[taskKey] }
+                    .filter { hasAllDependentTasks(projectTracker.dependentTaskKeys) }
                     .firstOrError()
+                    .ignoreElement()
         }
 
-        private fun getTaskDependenciesLoadedCompletable(
-                taskKey: TaskKey.Root,
-                loadedTaskKeys: MutableSet<TaskKey.Root>,
-        ): Completable {
-            return getTaskLoadedSingle(taskKey).flatMapCompletable {
-                loadedTaskKeys += it.taskKey
+        private fun hasAllDependentTasks(
+                checkTaskKeys: Set<TaskKey.Root>,
+                checkedTaskKeys: MutableSet<TaskKey.Root> = mutableSetOf(),
+        ): Boolean {
+            val uncheckedTaskKeys = checkTaskKeys - checkedTaskKeys
 
-                val newTaskKeys = it.taskRecord.getDependentTaskKeys() - loadedTaskKeys
+            val uncheckedTasks = uncheckedTaskKeys.associateWith {
+                rootTasksFactory.rootTasks[it]
+            }.filterValuesNotNull()
 
-                Completable.merge(newTaskKeys.map { getTaskDependenciesLoadedCompletable(it, loadedTaskKeys) })
-            }
+            if (!uncheckedTasks.keys.containsAll(uncheckedTaskKeys)) return false
+
+            checkedTaskKeys += uncheckedTaskKeys
+
+            return uncheckedTasks.asSequence()
+                    .map { hasAllDependentTasks(it.value.taskRecord.getDependentTaskKeys(), checkedTaskKeys) }
+                    .all { it }
         }
     }
 }

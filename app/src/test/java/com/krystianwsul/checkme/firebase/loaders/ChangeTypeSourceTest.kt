@@ -43,6 +43,7 @@ class ChangeTypeSourceTest {
 
         private val taskKey1 = TaskKey.Root("taskId1")
         private val taskKey2 = TaskKey.Root("taskId2")
+        private val taskKey3 = TaskKey.Root("taskId3")
 
         @BeforeClass
         @JvmStatic
@@ -309,7 +310,31 @@ class ChangeTypeSourceTest {
     }
 
     @Test
-    fun testSingleProjectRecursiveTask() {
+    fun testSingleProjectSingleTaskChangeProjectBeforeTaskByStrippingOutSecondTaskDifferentOrder() {
+        testInitial()
+
+        acceptPrivateProject(PrivateProjectJson())
+        checkEmpty()
+
+        acceptPrivateProject(
+                PrivateProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true, taskKey2.taskId to true))
+        )
+        rootTasksLoaderProvider.accept(
+                taskKey1,
+                RootTaskJson(
+                        noScheduleOrParent = mapOf(
+                                "noScheduleOrParentId" to NoScheduleOrParentJson(projectId = privateProjectId),
+                        ),
+                ),
+        )
+
+        projectEmissionChecker.checkRemote {
+            acceptPrivateProject(PrivateProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true)))
+        }
+    }
+
+    @Test
+    fun testSingleProjectChildTask() {
         testInitial()
 
         acceptPrivateProject(PrivateProjectJson())

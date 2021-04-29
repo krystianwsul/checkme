@@ -289,7 +289,7 @@ class ChangeTypeSourceTest {
 
     @Test
     fun testSingleProjectEmission() {
-        testInitial()
+        setup()
 
         // first load event for projectsFactory doesn't emit a change... apparently.
         acceptPrivateProject(PrivateProjectJson())
@@ -300,7 +300,7 @@ class ChangeTypeSourceTest {
 
     @Test
     fun testSingleProjectSingleTask() {
-        testInitial()
+        setup()
 
         acceptPrivateProject(PrivateProjectJson())
         checkEmpty()
@@ -321,7 +321,7 @@ class ChangeTypeSourceTest {
 
     @Test
     fun testSingleProjectSingleTaskChangeProjectBeforeTask() {
-        testInitial()
+        setup()
 
         acceptPrivateProject(PrivateProjectJson())
         checkEmpty()
@@ -346,7 +346,7 @@ class ChangeTypeSourceTest {
 
     @Test
     fun testSingleProjectSingleTaskChangeProjectBeforeTaskByStrippingOutSecondTask() {
-        testInitial()
+        setup()
 
         acceptPrivateProject(PrivateProjectJson())
         checkEmpty()
@@ -371,7 +371,7 @@ class ChangeTypeSourceTest {
 
     @Test
     fun testSingleProjectSingleTaskChangeProjectBeforeTaskByStrippingOutSecondTaskDifferentOrder() {
-        testInitial()
+        setup()
 
         acceptPrivateProject(PrivateProjectJson())
         checkEmpty()
@@ -395,7 +395,7 @@ class ChangeTypeSourceTest {
 
     @Test
     fun testSingleProjectChildTask() {
-        testInitial()
+        setup()
 
         acceptPrivateProject(PrivateProjectJson())
         checkEmpty()
@@ -427,7 +427,7 @@ class ChangeTypeSourceTest {
 
     @Test
     fun testSingleProjectTwoChildTasksButOneRemovedSwitchOrder() {
-        testInitial()
+        setup()
 
         acceptPrivateProject(PrivateProjectJson())
         checkEmpty()
@@ -469,7 +469,7 @@ class ChangeTypeSourceTest {
 
     @Test
     fun testSingleProjectTaskChange() {
-        testInitial()
+        setup()
 
         acceptPrivateProject(PrivateProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true)))
 
@@ -500,7 +500,7 @@ class ChangeTypeSourceTest {
 
     @Test
     fun testSingleProjectRemoveTaskFromProject() {
-        testInitial()
+        setup()
         acceptPrivateProject(PrivateProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true)))
 
         // initial event ignored for project
@@ -519,7 +519,7 @@ class ChangeTypeSourceTest {
 
     @Test
     fun testSingleProjectRemoveChildTask() {
-        testInitial()
+        setup()
         acceptPrivateProject(PrivateProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true)))
 
         rootTasksLoaderProvider.accept(
@@ -557,7 +557,7 @@ class ChangeTypeSourceTest {
 
     @Test
     fun testSingleProjectUpdateChildTask() {
-        testInitial()
+        setup()
         acceptPrivateProject(PrivateProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true)))
 
         rootTasksLoaderProvider.accept(
@@ -836,7 +836,7 @@ class ChangeTypeSourceTest {
 
     @Test
     fun testSingleSharedProjectEmission() {
-        testInitial()
+        setup()
 
         // first load event for projectsFactory doesn't emit a change... apparently.
         acceptPrivateProject(PrivateProjectJson())
@@ -856,7 +856,7 @@ class ChangeTypeSourceTest {
 
     @Test
     fun testSingleSharedProjectSingleTask() {
-        testInitial()
+        setup()
 
         // first load event for projectsFactory doesn't emit a change... apparently.
         acceptPrivateProject(PrivateProjectJson())

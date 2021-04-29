@@ -7,7 +7,6 @@ import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.common.utils.filterValuesNotNull
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Single
-import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.merge
 
 interface RootTaskDependencyCoordinator {
@@ -17,12 +16,9 @@ interface RootTaskDependencyCoordinator {
     class Impl(
             private val rootTaskKeySource: RootTaskKeySource,
             private val rootTasksLoader: RootTasksLoader,
-            domainDisposable: CompositeDisposable,
             private val userCustomTimeProviderSource: UserCustomTimeProviderSource,
+            private val taskRecordLoader: RecursiveTaskRecordLoader.TaskRecordLoader,
     ) : RootTaskDependencyCoordinator {
-
-        private val taskRecordLoader =
-                RecursiveTaskRecordLoader.TaskRecordLoader.Impl(rootTasksLoader, domainDisposable) // todo task track consider injecting
 
         override fun getDependencies(rootTaskRecord: RootTaskRecord): Single<JsonTime.UserCustomTimeProvider> {
             rootTaskKeySource.onRootTaskAddedOrUpdated(rootTaskRecord.taskKey, rootTaskRecord.getDependentTaskKeys())

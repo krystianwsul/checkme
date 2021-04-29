@@ -155,11 +155,13 @@ class ChangeTypeSourceTest {
             every { onTasksRemoved(any()) } returns Unit
         }
 
+        val taskRecordLoader = RecursiveTaskRecordLoader.TaskRecordLoader.Impl(rootTasksLoader, domainDisposable)
+
         val rootTaskToRootTaskCoordinator = RootTaskDependencyCoordinator.Impl(
                 rootTaskKeySource,
                 rootTasksLoader,
-                domainDisposable,
                 userCustomTimeProviderSource,
+                taskRecordLoader,
         )
 
         rootTasksFactory = RootTasksFactory(

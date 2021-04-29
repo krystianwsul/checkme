@@ -103,7 +103,7 @@ class FactoryLoader(
 
                     val loadDependencyTrackerManager = LoadDependencyTrackerManager()
 
-                    val rootTaskLoader = RootTasksLoader(
+                    val rootTasksLoader = RootTasksLoader(
                             rootTaskKeySource.rootTaskKeysObservable,
                             factoryProvider.database,
                             domainDisposable,
@@ -111,18 +111,21 @@ class FactoryLoader(
                             loadDependencyTrackerManager,
                     )
 
+                    val taskRecordLoader =
+                            RecursiveTaskRecordLoader.TaskRecordLoader.Impl(rootTasksLoader, domainDisposable)
+
                     val rootTaskToRootTaskCoordinator = RootTaskDependencyCoordinator.Impl(
                             rootTaskKeySource,
-                            rootTaskLoader,
-                            domainDisposable,
+                            rootTasksLoader,
                             userCustomTimeProviderSource,
+                            taskRecordLoader,
                     )
 
                     // this is hacky as fuck, but I'll take my chances
                     lateinit var projectsFactorySingle: Single<ProjectsFactory>
 
                     val rootTasksFactory = RootTasksFactory(
-                            rootTaskLoader,
+                            rootTasksLoader,
                             userKeyStore,
                             rootTaskToRootTaskCoordinator,
                             domainDisposable,

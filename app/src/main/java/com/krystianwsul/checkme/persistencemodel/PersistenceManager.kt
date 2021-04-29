@@ -6,6 +6,7 @@ import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.time.TimeDescriptor
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
+import com.krystianwsul.common.utils.TaskKeyData
 
 
 class PersistenceManager(
@@ -69,17 +70,5 @@ class PersistenceManager(
         }
 
         remove.forEach { it.delete() }
-    }
-
-    data class TaskKeyData(val projectId: String, val taskId: String) {
-
-        constructor(taskKey: TaskKey) : this(
-                (taskKey as? TaskKey.Project)?.projectKey
-                        ?.key
-                        ?: "",
-                taskKey.taskId,
-        )
-
-        val root = projectId.isEmpty()
     }
 }

@@ -5,6 +5,7 @@ import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.time.TimeDescriptor
+import com.krystianwsul.common.utils.TaskKeyData
 import kotlin.properties.Delegates.observable
 import kotlin.reflect.KProperty
 
@@ -123,7 +124,7 @@ class InstanceShownRecord(
     override var notificationShown by observable(mNotificationShown, ::setChanged)
     var projectId by observable(mProjectId, ::setChanged)
 
-    val taskKeyData get() = PersistenceManager.TaskKeyData(projectId, taskId)
+    val taskKeyData get() = TaskKeyData(projectId, taskId)
 
     init {
         check(mProjectId.isNotEmpty())

@@ -9,14 +9,13 @@ import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Maybe
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.CompositeDisposable
-import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.merge
 import io.reactivex.rxjava3.kotlin.ofType
 
 class RecursiveTaskRecordLoader(
         // todo task track remove
         taskRecord: RootTaskRecord,
-        taskRecordLoader: TaskRecordLoader,
+        taskRecordLoader: TaskRecordsLoadedTracker,
         userCustomTimeProviderSource: UserCustomTimeProviderSource,
         domainDisposable: CompositeDisposable,
 ) {
@@ -87,7 +86,7 @@ class RecursiveTaskRecordLoader(
 
         class LoadingRecord(
                 val taskKey: TaskKey.Root,
-                private val taskRecordLoader: TaskRecordLoader,
+                private val taskRecordLoader: TaskRecordsLoadedTracker,
                 private val userCustomTimeProviderSource: UserCustomTimeProviderSource,
         ) : TaskLoadState() {
 
@@ -127,7 +126,7 @@ class RecursiveTaskRecordLoader(
 
     class RecordLoadedMutator(
             private val taskRecord: RootTaskRecord,
-            private val taskRecordLoader: TaskRecordLoader,
+            private val taskRecordLoader: TaskRecordsLoadedTracker,
             private val userCustomTimeProviderSource: UserCustomTimeProviderSource,
     ) : TaskLoadStateMapMutator {
 
@@ -157,37 +156,4 @@ class RecursiveTaskRecordLoader(
         }
     }
 
-    interface TaskRecordLoader {
-
-        fun getTaskRecordSingle(taskKey: TaskKey.Root): Single<RootTaskRecord>
-
-        fun tryGetTaskRecord(taskKey: TaskKey.Root): RootTaskRecord?
-
-        class Impl(private val rootTasksLoader: RootTasksLoader, domainDisposable: CompositeDisposable) :
-                TaskRecordLoader {
-
-            private val currentlyLoadedRecords = mutableMapOf<TaskKey.Root, RootTaskRecord>()
-
-            init {
-                rootTasksLoader.addChangeEvents
-                        .subscribe { currentlyLoadedRecords[it.rootTaskRecord.taskKey] = it.rootTaskRecord }
-                        .addTo(domainDisposable)
-
-                rootTasksLoader.removeEvents
-                        .subscribe { currentlyLoadedRecords -= it.taskKeys }
-                        .addTo(domainDisposable)
-            }
-
-            override fun getTaskRecordSingle(taskKey: TaskKey.Root): Single<RootTaskRecord> {
-                currentlyLoadedRecords[taskKey]?.let { return Single.just(it) }
-
-                return rootTasksLoader.addChangeEvents
-                        .filter { it.rootTaskRecord.taskKey == taskKey }
-                        .firstOrError()
-                        .map { it.rootTaskRecord }
-            }
-
-            override fun tryGetTaskRecord(taskKey: TaskKey.Root) = currentlyLoadedRecords[taskKey]
-        }
-    }
 }

@@ -26,7 +26,7 @@ class RecursiveTaskRecordLoaderTest {
         val taskKey5 = TaskKey.Root("taskKey5")
     }
 
-    private class TestTaskRecordLoader : RecursiveTaskRecordLoader.TaskRecordLoader {
+    private class TestTaskRecordLoader : TaskRecordsLoadedTracker {
 
         val singleParamSingleSource = SingleParamSingleSource<TaskKey.Root, RootTaskRecord>()
 

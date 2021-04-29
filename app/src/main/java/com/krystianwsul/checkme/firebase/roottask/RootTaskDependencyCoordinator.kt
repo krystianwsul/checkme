@@ -17,7 +17,7 @@ interface RootTaskDependencyCoordinator {
             private val rootTaskKeySource: RootTaskKeySource,
             private val rootTasksLoader: RootTasksLoader,
             private val userCustomTimeProviderSource: UserCustomTimeProviderSource,
-            private val taskRecordLoader: RecursiveTaskRecordLoader.TaskRecordLoader,
+            private val taskRecordLoader: TaskRecordsLoadedTracker,
     ) : RootTaskDependencyCoordinator {
 
         override fun getDependencies(rootTaskRecord: RootTaskRecord): Single<JsonTime.UserCustomTimeProvider> {

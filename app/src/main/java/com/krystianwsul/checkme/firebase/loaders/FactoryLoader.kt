@@ -112,7 +112,7 @@ class FactoryLoader(
                     )
 
                     val taskRecordLoader =
-                            RecursiveTaskRecordLoader.TaskRecordLoader.Impl(rootTasksLoader, domainDisposable)
+                            TaskRecordsLoadedTracker.Impl(rootTasksLoader, domainDisposable)
 
                     val rootTaskToRootTaskCoordinator = RootTaskDependencyCoordinator.Impl(
                             rootTaskKeySource,

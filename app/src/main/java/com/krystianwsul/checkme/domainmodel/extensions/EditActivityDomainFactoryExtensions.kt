@@ -270,6 +270,7 @@ fun DomainUpdater.createTopLevelTask(
     val imageUuid = imagePath?.let { newUuid() }
 
     val task = projectsFactory.createNoScheduleOrParentTask(
+            // todo task create
             now,
             name,
             note,

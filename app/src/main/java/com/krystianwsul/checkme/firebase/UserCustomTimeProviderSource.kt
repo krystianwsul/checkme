@@ -57,6 +57,8 @@ interface UserCustomTimeProviderSource {
 
     fun hasCustomTimes(rootTaskRecord: RootTaskRecord): Boolean
 
+    fun getTimeChangeObservable(): Observable<Unit>
+
     class Impl(
             private val myUserKey: UserKey,
             private val myUserFactorySingle: Single<MyUserFactory>,
@@ -144,6 +146,7 @@ interface UserCustomTimeProviderSource {
             }
         }
 
+
         @VisibleForTesting
         fun getCustomTimes(foreignUserKeys: Set<UserKey>): Single<FriendsFactory> {
             check(myUserKey !in foreignUserKeys)
@@ -163,6 +166,10 @@ interface UserCustomTimeProviderSource {
 
             val friendsFactory = friendsFactorySingle.tryGetCurrentValue() ?: return false
             return friendsFactory.hasUserKeys(foreignUserKeys)
+        }
+
+        override fun getTimeChangeObservable(): Observable<Unit> {
+            return friendsFactorySingle.flatMapObservable { it.changeTypes }.map { }
         }
     }
 }

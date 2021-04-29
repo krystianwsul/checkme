@@ -1,6 +1,8 @@
 package com.krystianwsul.checkme.firebase.loaders
 
+import com.jakewharton.rxrelay3.BehaviorRelay
 import com.jakewharton.rxrelay3.PublishRelay
+import com.jakewharton.rxrelay3.Relay
 import com.krystianwsul.checkme.domainmodel.DomainFactoryRule
 import com.krystianwsul.checkme.domainmodel.local.LocalFactory
 import com.krystianwsul.checkme.firebase.UserCustomTimeProviderSource
@@ -12,7 +14,6 @@ import com.krystianwsul.checkme.firebase.managers.RootTasksManager
 import com.krystianwsul.checkme.firebase.roottask.*
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.checkme.utils.SingleParamObservableSource
-import com.krystianwsul.checkme.utils.SingleParamSingleSource
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.DomainThreadChecker
@@ -79,15 +80,29 @@ class ChangeTypeSourceTest {
 
     private class TestUserCustomTimeProviderSource : UserCustomTimeProviderSource {
 
-        val source = SingleParamSingleSource<TaskKey.Root, JsonTime.UserCustomTimeProvider>(true)
+        private val relayMap = mutableMapOf<TaskKey.Root, Relay<JsonTime.UserCustomTimeProvider>>()
+        private val providerMap = mutableMapOf<TaskKey.Root, JsonTime.UserCustomTimeProvider>()
+
+        private val trigger = PublishRelay.create<Unit>()!!
 
         override fun getUserCustomTimeProvider(projectRecord: ProjectRecord<*>) =
                 Single.just<JsonTime.UserCustomTimeProvider>(mockk())!!
 
         override fun getUserCustomTimeProvider(rootTaskRecord: RootTaskRecord) =
-                source.getSingle(rootTaskRecord.taskKey)
+                relayMap.getOrPut(rootTaskRecord.taskKey) { BehaviorRelay.create() }.firstOrError()!!
 
-        override fun hasCustomTimes(rootTaskRecord: RootTaskRecord) = source.map.containsKey(rootTaskRecord.taskKey)
+        override fun hasCustomTimes(rootTaskRecord: RootTaskRecord) = providerMap.containsKey(rootTaskRecord.taskKey)
+
+        override fun getTimeChangeObservable() = trigger
+
+        fun accept(taskKey: TaskKey.Root, provider: JsonTime.UserCustomTimeProvider) {
+            check((relayMap[taskKey] as? BehaviorRelay<*>)?.hasValue() != true)
+
+            relayMap[taskKey]?.accept(provider)
+
+            providerMap[taskKey] = provider
+            trigger.accept(Unit)
+        }
     }
 
     @Before
@@ -100,9 +115,17 @@ class ChangeTypeSourceTest {
         domainDisposable.clear()
     }
 
-    private fun immediateUserCustomTimeProviderSource() = mockk<UserCustomTimeProviderSource> {
-        every { getUserCustomTimeProvider(any<ProjectRecord<*>>()) } returns Single.just(mockk())
-        every { getUserCustomTimeProvider(any<RootTaskRecord>()) } returns Single.just(mockk())
+    private fun immediateUserCustomTimeProviderSource() = object : UserCustomTimeProviderSource {
+
+        override fun getTimeChangeObservable() = Observable.just(Unit)
+
+        override fun getUserCustomTimeProvider(projectRecord: ProjectRecord<*>) =
+                Single.just(mockk<JsonTime.UserCustomTimeProvider>())
+
+        override fun getUserCustomTimeProvider(rootTaskRecord: RootTaskRecord) =
+                Single.just(mockk<JsonTime.UserCustomTimeProvider>())
+
+        override fun hasCustomTimes(rootTaskRecord: RootTaskRecord) = true
     }
 
     private fun setup(
@@ -363,7 +386,7 @@ class ChangeTypeSourceTest {
         }
     }
 
-    /*
+    /* todo task track
     @Test
     fun testSingleProjectTwoChildTasksButOneRemovedSwitchOrder() {
         testInitial()
@@ -550,6 +573,8 @@ class ChangeTypeSourceTest {
                             Single.just<JsonTime.UserCustomTimeProvider>(mockk())
 
                     override fun hasCustomTimes(rootTaskRecord: RootTaskRecord) = true
+
+                    override fun getTimeChangeObservable() = Observable.just(Unit)
                 }
         )
 
@@ -600,7 +625,7 @@ class ChangeTypeSourceTest {
                         rootTaskIds = mutableMapOf(taskKey2.taskId to true)
                 ),
         )
-        timeSource.source.accept(taskKey1, mockk())
+        timeSource.accept(taskKey1, mockk())
 
         rootTasksLoaderProvider.accept(
                 taskKey2,
@@ -612,7 +637,7 @@ class ChangeTypeSourceTest {
                 ),
         )
 
-        projectEmissionChecker.checkRemote { timeSource.source.accept(taskKey2, mockk()) }
+        projectEmissionChecker.checkRemote { timeSource.accept(taskKey2, mockk()) }
     }
 
     @Test
@@ -646,7 +671,7 @@ class ChangeTypeSourceTest {
                 ),
         )
 
-        timeSource.source.accept(taskKey1, mockk())
+        timeSource.accept(taskKey1, mockk())
 
         rootTasksLoaderProvider.accept(
                 taskKey2,
@@ -658,7 +683,7 @@ class ChangeTypeSourceTest {
                 ),
         )
 
-        projectEmissionChecker.checkRemote { timeSource.source.accept(taskKey2, mockk()) }
+        projectEmissionChecker.checkRemote { timeSource.accept(taskKey2, mockk()) }
     }
 
     @Test
@@ -680,7 +705,7 @@ class ChangeTypeSourceTest {
                         rootTaskIds = mutableMapOf(taskKey2.taskId to true)
                 ),
         )
-        timeSource.source.accept(taskKey1, mockk())
+        timeSource.accept(taskKey1, mockk())
 
         rootTasksLoaderProvider.accept(
                 taskKey2,
@@ -703,7 +728,7 @@ class ChangeTypeSourceTest {
                 ),
         )
 
-        projectEmissionChecker.checkRemote { timeSource.source.accept(taskKey2, mockk()) }
+        projectEmissionChecker.checkRemote { timeSource.accept(taskKey2, mockk()) }
     }
 
     @Test
@@ -736,8 +761,8 @@ class ChangeTypeSourceTest {
                 ),
         )
 
-        timeSource.source.accept(taskKey1, mockk())
-        projectEmissionChecker.checkRemote { timeSource.source.accept(taskKey2, mockk()) }
+        timeSource.accept(taskKey1, mockk())
+        projectEmissionChecker.checkRemote { timeSource.accept(taskKey2, mockk()) }
     }
 
     @Test
@@ -770,7 +795,7 @@ class ChangeTypeSourceTest {
                 ),
         )
 
-        timeSource.source.accept(taskKey2, mockk())
-        projectEmissionChecker.checkRemote { timeSource.source.accept(taskKey1, mockk()) }
+        timeSource.accept(taskKey2, mockk())
+        projectEmissionChecker.checkRemote { timeSource.accept(taskKey1, mockk()) }
     }
 }

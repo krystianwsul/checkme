@@ -14,6 +14,7 @@ import io.reactivex.rxjava3.kotlin.merge
 import io.reactivex.rxjava3.kotlin.ofType
 
 class RecursiveTaskRecordLoader(
+        // todo task track remove
         taskRecord: RootTaskRecord,
         taskRecordLoader: TaskRecordLoader,
         userCustomTimeProviderSource: UserCustomTimeProviderSource,
@@ -160,29 +161,33 @@ class RecursiveTaskRecordLoader(
 
         fun getTaskRecordSingle(taskKey: TaskKey.Root): Single<RootTaskRecord>
 
+        fun tryGetTaskRecord(taskKey: TaskKey.Root): RootTaskRecord?
+
         class Impl(private val rootTasksLoader: RootTasksLoader, domainDisposable: CompositeDisposable) :
                 TaskRecordLoader {
 
-            private val currentlyLoadedKeys = mutableMapOf<TaskKey.Root, RootTaskRecord>()
+            private val currentlyLoadedRecords = mutableMapOf<TaskKey.Root, RootTaskRecord>()
 
             init {
                 rootTasksLoader.addChangeEvents
-                        .subscribe { currentlyLoadedKeys[it.rootTaskRecord.taskKey] = it.rootTaskRecord }
+                        .subscribe { currentlyLoadedRecords[it.rootTaskRecord.taskKey] = it.rootTaskRecord }
                         .addTo(domainDisposable)
 
                 rootTasksLoader.removeEvents
-                        .subscribe { currentlyLoadedKeys -= it.taskKeys }
+                        .subscribe { currentlyLoadedRecords -= it.taskKeys }
                         .addTo(domainDisposable)
             }
 
             override fun getTaskRecordSingle(taskKey: TaskKey.Root): Single<RootTaskRecord> {
-                currentlyLoadedKeys[taskKey]?.let { return Single.just(it) }
+                currentlyLoadedRecords[taskKey]?.let { return Single.just(it) }
 
                 return rootTasksLoader.addChangeEvents
                         .filter { it.rootTaskRecord.taskKey == taskKey }
                         .firstOrError()
                         .map { it.rootTaskRecord }
             }
+
+            override fun tryGetTaskRecord(taskKey: TaskKey.Root) = currentlyLoadedRecords[taskKey]
         }
     }
 }

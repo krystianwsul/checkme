@@ -8,6 +8,7 @@ import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.utils.TaskKey
 import io.mockk.every
 import io.mockk.mockk
+import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.observers.TestObserver
@@ -30,6 +31,10 @@ class RecursiveTaskRecordLoaderTest {
         val singleParamSingleSource = SingleParamSingleSource<TaskKey.Root, RootTaskRecord>()
 
         override fun getTaskRecordSingle(taskKey: TaskKey.Root) = singleParamSingleSource.getSingle(taskKey)
+
+        override fun tryGetTaskRecord(taskKey: TaskKey.Root): RootTaskRecord? {
+            TODO("Not yet implemented")
+        }
     }
 
     private class TestUserCustomTimeProviderSource : UserCustomTimeProviderSource {
@@ -44,6 +49,10 @@ class RecursiveTaskRecordLoaderTest {
                 singleParamSingleSource.getSingle(rootTaskRecord)
 
         override fun hasCustomTimes(rootTaskRecord: RootTaskRecord): Boolean {
+            TODO("Not yet implemented")
+        }
+
+        override fun getTimeChangeObservable(): Observable<Unit> {
             TODO("Not yet implemented")
         }
     }

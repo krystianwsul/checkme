@@ -853,4 +853,34 @@ class ChangeTypeSourceTest {
             )
         }
     }
+
+    @Test
+    fun testSingleSharedProjectSingleTask() {
+        testInitial()
+
+        // first load event for projectsFactory doesn't emit a change... apparently.
+        acceptPrivateProject(PrivateProjectJson())
+        checkEmpty()
+
+        sharedProjectKeysRelay.accept(setOf(sharedProjectKey))
+
+        sharedProjectSnapshotRelay.accept(Snapshot(
+                sharedProjectKey.key,
+                JsonWrapper(SharedProjectJson(
+                        users = mutableMapOf("key" to UserJson()),
+                        rootTaskIds = mutableMapOf(taskKey1.taskId to true),
+                )),
+        ))
+
+        projectEmissionChecker.checkRemote {
+            rootTasksLoaderProvider.accept(
+                    taskKey1,
+                    RootTaskJson(
+                            noScheduleOrParent = mapOf(
+                                    "noScheduleOrParentId" to NoScheduleOrParentJson(projectId = sharedProjectKey.key),
+                            ),
+                    ),
+            )
+        }
+    }
 }

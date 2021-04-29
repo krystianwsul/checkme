@@ -13,7 +13,6 @@ import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.DateTimeSoy
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.InstanceKey
-import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.common.utils.singleOrEmpty
 import com.soywiz.klock.DateTime
 import com.soywiz.klock.Time
@@ -79,8 +78,7 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
 
                     val scheduleDate = instanceShownRecord.run { Date(scheduleYear, scheduleMonth, scheduleDay) }
 
-                    val taskKey = TaskKey.Project(task.project.projectKey, instanceShownRecord.taskId) // todo task notification
-                    InstanceKey(taskKey, scheduleDate, scheduleJsonTime.toTimePair(task.project)) // todo task notification
+                    InstanceKey(task.taskKey, scheduleDate, scheduleJsonTime.toTimePair(task.project))
                 }
                 .toSet()
 

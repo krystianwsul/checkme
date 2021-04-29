@@ -112,6 +112,14 @@ sealed class JsonTime {
 
     interface ProjectCustomTimeIdProvider {
 
+        companion object {
+
+            val rootTask = object : ProjectCustomTimeIdProvider {
+
+                override fun getProjectCustomTimeId(id: String): CustomTimeId.Project = throw RootTaskException()
+            }
+        }
+
         fun getProjectCustomTimeId(id: String): CustomTimeId.Project
     }
 
@@ -138,8 +146,6 @@ sealed class JsonTime {
                 ): CustomTimeKey.Project<*> = throw RootTaskException()
             }
         }
-
-        class RootTaskException : Exception("This should never be called for root tasks")
     }
 
     interface UserCustomTimeProvider {
@@ -156,7 +162,7 @@ sealed class JsonTime {
 
                         override fun getProjectCustomTime(
                                 projectCustomTimeId: CustomTimeId.Project,
-                        ): Time.Custom.Project<*> = throw ProjectCustomTimeIdAndKeyProvider.RootTaskException()
+                        ): Time.Custom.Project<*> = throw RootTaskException()
                     }
         }
 
@@ -169,4 +175,6 @@ sealed class JsonTime {
             }
         }
     }
+
+    class RootTaskException : Exception("This should never be called for root tasks")
 }

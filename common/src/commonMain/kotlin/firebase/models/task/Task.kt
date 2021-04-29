@@ -123,6 +123,8 @@ abstract class Task(
 
     val instanceHierarchyContainer by lazy { InstanceHierarchyContainer(this) }
 
+    abstract val projectCustomTimeIdProvider: JsonTime.ProjectCustomTimeIdProvider
+
     fun getParentName(exactTimeStamp: ExactTimeStamp) = getParentTask(exactTimeStamp)?.name ?: project.name
 
     // hack24 = false -> basically, is it possible to add a subtask

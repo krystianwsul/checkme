@@ -221,7 +221,7 @@ class DomainFactory(
 
         val shortcutDatas = shortcutTasks.sortedBy { it.first }
                 .takeLast(maxShortcuts)
-                .map { ShortcutQueue.ShortcutData(deviceDbInfo, it.second as ProjectTask) } // todo task shortcut
+                .map { ShortcutQueue.ShortcutData(deviceDbInfo, it.second) }
 
         ShortcutQueue.updateShortcuts(shortcutDatas)
     }

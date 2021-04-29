@@ -57,15 +57,22 @@ sealed class EditParameters : Parcelable {
 
                     Shortcut(TaskKey.fromShortcut(intent.getStringExtra(KEY_SHORTCUT_ID)!!))
                 }
-                intent.hasExtra(EditActivity.KEY_PARENT_PROJECT_KEY) -> {
-                    check(intent.hasExtra(EditActivity.KEY_PARENT_TASK))
-                    check(intent.hasExtra(EditActivity.KEY_PARENT_PROJECT_TYPE))
+                intent.hasExtra(EditActivity.KEY_PARENT_TASK) -> {
+                    val taskId = intent.getStringExtra(EditActivity.KEY_PARENT_TASK)!!
 
-                    val projectKey = ProjectKey.Type
-                            .values()[intent.getIntExtra(EditActivity.KEY_PARENT_PROJECT_TYPE, -1)]
-                            .newKey(intent.getStringExtra(EditActivity.KEY_PARENT_PROJECT_KEY)!!)
+                    val taskKey = if (intent.hasExtra(EditActivity.KEY_PARENT_PROJECT_KEY)) {
+                        check(intent.hasExtra(EditActivity.KEY_PARENT_PROJECT_TYPE))
 
-                    Shortcut(TaskKey.Project(projectKey, intent.getStringExtra(EditActivity.KEY_PARENT_TASK)!!)) // todo task shortcut
+                        val projectKey = ProjectKey.Type
+                                .values()[intent.getIntExtra(EditActivity.KEY_PARENT_PROJECT_TYPE, -1)]
+                                .newKey(intent.getStringExtra(EditActivity.KEY_PARENT_PROJECT_KEY)!!)
+
+                        TaskKey.Project(projectKey, taskId)
+                    } else {
+                        TaskKey.Root(taskId)
+                    }
+
+                    Shortcut(taskKey)
                 }
                 else -> None
             }

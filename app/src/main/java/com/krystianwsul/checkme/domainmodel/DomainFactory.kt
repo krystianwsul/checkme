@@ -22,6 +22,7 @@ import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.checkme.firebase.roottask.RootTasksFactory
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
+import com.krystianwsul.checkme.persistencemodel.PersistenceManager
 import com.krystianwsul.checkme.utils.checkError
 import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
@@ -613,6 +614,14 @@ class DomainFactory(
             is CustomTimeKey.Project<*> -> projectsFactory.getCustomTime(customTimeKey)
             is CustomTimeKey.User -> getUserCustomTime(customTimeKey)
             else -> throw UnsupportedOperationException() // compilation
+        }
+    }
+
+    fun tryGetTask(taskKeyData: PersistenceManager.TaskKeyData): Task? {
+        return if (taskKeyData.root) {
+            rootTasksFactory.getRootTaskIfPresent(TaskKey.Root(taskKeyData.taskId))
+        } else {
+            projectsFactory.getProjectIfPresent(taskKeyData.projectId)?.getTaskIfPresent(taskKeyData.taskId)
         }
     }
 

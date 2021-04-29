@@ -55,9 +55,7 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
 
         val instanceShownPairs = domainFactory.localFactory.instanceShownRecords
                 .filter { it.notificationShown }
-                .map {
-                    it to domainFactory.projectsFactory.getProjectIfPresent(it.projectId)?.getTaskIfPresent(it.taskId) // todo task notification
-                }
+                .map { it to domainFactory.tryGetTask(it.taskKeyData) }
 
         instanceShownPairs.filter { it.second == null }.forEach { (instanceShownRecord, _) ->
             val scheduleDate = instanceShownRecord.run { Date(scheduleYear, scheduleMonth, scheduleDay) }

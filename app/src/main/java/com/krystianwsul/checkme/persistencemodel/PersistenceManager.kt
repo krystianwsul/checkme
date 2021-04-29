@@ -79,5 +79,7 @@ class PersistenceManager(
                         ?: "",
                 taskKey.taskId,
         )
+
+        val root = projectId.isEmpty()
     }
 }

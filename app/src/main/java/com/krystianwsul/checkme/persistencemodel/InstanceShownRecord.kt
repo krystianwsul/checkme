@@ -123,6 +123,8 @@ class InstanceShownRecord(
     override var notificationShown by observable(mNotificationShown, ::setChanged)
     var projectId by observable(mProjectId, ::setChanged)
 
+    val taskKeyData get() = PersistenceManager.TaskKeyData(projectId, taskId)
+
     init {
         check(mProjectId.isNotEmpty())
     }

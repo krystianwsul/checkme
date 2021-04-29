@@ -94,7 +94,7 @@ fun DomainFactory.getCreateTaskData(
 
     val showAllInstancesDialog = when (startParameters) {
         is EditViewModel.StartParameters.Join -> startParameters.joinables.run {
-            map { (it.taskKey as TaskKey.Project).projectKey }.distinct().size == 1 && any { // todo task create
+            map { (it.taskKey as TaskKey.Project).projectKey }.distinct().size == 1 && any { // todo task edit
                 getTaskForce(it.taskKey).let { task ->
                     if (it.instanceKey != null) {
                         task.hasOtherVisibleInstances(now, it.instanceKey)
@@ -118,7 +118,7 @@ fun DomainFactory.getCreateTaskData(
             val task = getTaskForce(currentParentSource.taskKey)
 
             if (task.isTopLevelTask(now)) {
-                when (val projectKey = task.project.projectKey) { // todo task create
+                when (val projectKey = task.project.projectKey) {
                     is ProjectKey.Private -> null
                     is ProjectKey.Shared -> EditViewModel.ParentKey.Project(projectKey)
                     else -> throw UnsupportedOperationException()
@@ -241,7 +241,7 @@ fun DomainUpdater.createChildTask(
             name,
             note,
             imageUuid?.let { TaskJson.Image(it, uuid) },
-            copyTaskKey
+            copyTaskKey,
     )
 
     imageUuid?.let { Uploader.addUpload(deviceDbInfo, childTask.taskKey, it, imagePath) }

@@ -390,7 +390,6 @@ class ChangeTypeSourceTest {
         }
     }
 
-    /* todo task track
     @Test
     fun testSingleProjectTwoChildTasksButOneRemovedSwitchOrder() {
         testInitial()
@@ -430,11 +429,8 @@ class ChangeTypeSourceTest {
                             rootTaskIds = mutableMapOf(taskKey2.taskId to true),
                     ),
             )
-
-            val x = 1/2
         }
     }
-    */
 
     @Test
     fun testSingleProjectTaskChange() {

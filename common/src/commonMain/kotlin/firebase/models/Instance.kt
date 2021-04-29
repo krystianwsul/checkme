@@ -515,7 +515,7 @@ class Instance private constructor(val task: Task, private var data: Data) : Ass
                 .distinct()
                 .singleOrEmpty()
                 .orEmpty()
-                .let(task.project::getAssignedTo) // todo task before create
+                .let(task.project::getAssignedTo)
                 .map { it.value }
     }
 

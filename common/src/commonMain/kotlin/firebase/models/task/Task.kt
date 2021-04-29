@@ -1023,7 +1023,7 @@ abstract class Task(
             currentScheduleIntervals.map { it.schedule.assignedTo }
                     .distinct()
                     .single()
-                    .let(project::getAssignedTo) // todo task before create
+                    .let(project::getAssignedTo)
                     .map { it.value }
         }
     }

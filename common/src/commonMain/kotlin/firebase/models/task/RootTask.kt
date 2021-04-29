@@ -51,7 +51,7 @@ class RootTask(
             note: String?,
             image: TaskJson.Image?,
             ordinal: Double?,
-    ) = TODO("todo task edit2")
+    ) = TODO("todo task create")
 
     override fun deleteFromParent() = parent.deleteRootTask(this)
 
@@ -89,7 +89,7 @@ class RootTask(
             now: ExactTimeStamp.Local,
             projectId: ProjectKey<*>,
     ): Task {
-        return if (projectId == project.projectKey) // todo task edit2
+        return if (projectId == project.projectKey) // todo task edit
             this
         else
             projectUpdater.convert(now, this, projectId)

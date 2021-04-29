@@ -87,7 +87,7 @@ class RootTasksFactory(
     }
 
     override fun deleteRootTask(task: RootTask) {
-        TODO("todo task edit2")
+        TODO("todo task after edit")
     }
 
     fun getRootTaskIfPresent(taskKey: TaskKey.Root) = rootTasks[taskKey]

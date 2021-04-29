@@ -685,7 +685,7 @@ class Instance private constructor(val task: Task, private var data: Data) : Ass
 
         fun forceShown(shownFactory: ShownFactory): Shown {
             if (getShown(shownFactory) == null)
-                shown = shownFactory.createShown(taskKey.taskId, scheduleDateTime, (taskKey as TaskKey.Project).projectKey) // todo task notification
+                shown = shownFactory.createShown(TaskKeyData(taskKey), scheduleDateTime)
 
             return shown!!
         }
@@ -699,11 +699,10 @@ class Instance private constructor(val task: Task, private var data: Data) : Ass
 
     interface ShownFactory {
 
-        fun createShown(remoteTaskId: String, scheduleDateTime: DateTime, projectId: ProjectKey<*>): Shown
+        fun createShown(taskKeyData: TaskKeyData, scheduleDateTime: DateTime): Shown
 
         fun getShown(
-                projectId: ProjectKey<*>,
-                taskId: String,
+                taskKeyData: TaskKeyData,
                 scheduleYear: Int,
                 scheduleMonth: Int,
                 scheduleDay: Int,
@@ -714,8 +713,7 @@ class Instance private constructor(val task: Task, private var data: Data) : Ass
             check(taskKey is TaskKey.Project) // todo task notification , also, what's the point of this overload?
 
             return getShown(
-                    taskKey.projectKey,
-                    taskKey.taskId,
+                    TaskKeyData(taskKey),
                     scheduleDateTime.date.year,
                     scheduleDateTime.date.month,
                     scheduleDateTime.date.day,

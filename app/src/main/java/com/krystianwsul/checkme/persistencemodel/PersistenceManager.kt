@@ -4,7 +4,6 @@ package com.krystianwsul.checkme.persistencemodel
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.time.TimeDescriptor
-import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.common.utils.TaskKeyData
 
@@ -39,26 +38,23 @@ class PersistenceManager(
             .startService(this)
 
     fun createInstanceShownRecord(
-            remoteTaskId: String,
+            taskKeyData: TaskKeyData,
             scheduleDate: Date,
             scheduleJsonTime: JsonTime,
-            projectId: ProjectKey<*>,
     ): InstanceShownRecord {
-        check(remoteTaskId.isNotEmpty())
-
         val id = ++instanceShownMaxId
 
         return InstanceShownRecord(
                 false,
                 id,
-                remoteTaskId,
+                taskKeyData.taskId,
                 scheduleDate.year,
                 scheduleDate.month,
                 scheduleDate.day,
                 TimeDescriptor.fromJsonTime(scheduleJsonTime),
                 mNotified = false,
                 mNotificationShown = false,
-                mProjectId = projectId.key,
+                mProjectId = taskKeyData.projectId,
         ).also { _instanceShownRecords.add(it) }
     }
 

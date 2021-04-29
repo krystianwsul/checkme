@@ -59,13 +59,11 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
         instanceShownPairs.filter { it.second == null }.forEach { (instanceShownRecord, _) ->
             val scheduleDate = instanceShownRecord.run { Date(scheduleYear, scheduleMonth, scheduleDay) }
 
-            val taskKey = Pair(instanceShownRecord.projectId, instanceShownRecord.taskId)
-
             NotificationWrapper.instance.cancelNotification(
                     Instance.getNotificationId(
                             scheduleDate,
                             instanceShownRecord.scheduleTimeDescriptor,
-                            taskKey,
+                            instanceShownRecord.taskKeyData,
                     )
             )
             instanceShownRecord.notificationShown = false

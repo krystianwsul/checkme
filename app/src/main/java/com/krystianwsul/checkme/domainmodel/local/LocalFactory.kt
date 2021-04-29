@@ -8,8 +8,8 @@ import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.time.DateTime
 import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.time.TimeDescriptor
-import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
+import com.krystianwsul.common.utils.TaskKeyData
 import com.krystianwsul.common.utils.singleOrEmpty
 
 @SuppressLint("UseSparseArrays")
@@ -25,8 +25,7 @@ class LocalFactory(
     fun save(): Boolean = persistenceManager.save()
 
     override fun getShown(
-            projectId: ProjectKey<*>,
-            taskId: String,
+            taskKeyData: TaskKeyData,
             scheduleYear: Int,
             scheduleMonth: Int,
             scheduleDay: Int,
@@ -36,8 +35,7 @@ class LocalFactory(
 
         return persistenceManager.instanceShownRecords
                 .asSequence()
-                .filter { it.projectId == projectId.key }
-                .filter { it.taskId == taskId }
+                .filter { it.taskKeyData == taskKeyData }
                 .filter { it.scheduleYear == scheduleYear }
                 .filter { it.scheduleMonth == scheduleMonth }
                 .filter { it.scheduleDay == scheduleDay }
@@ -46,16 +44,11 @@ class LocalFactory(
                 .singleOrEmpty()
     }
 
-    override fun createShown(
-            remoteTaskId: String,
-            scheduleDateTime: DateTime,
-            projectId: ProjectKey<*>,
-    ): InstanceShownRecord {
+    override fun createShown(taskKeyData: TaskKeyData, scheduleDateTime: DateTime): InstanceShownRecord {
         return persistenceManager.createInstanceShownRecord(
-                remoteTaskId,
+                taskKeyData,
                 scheduleDateTime.date,
                 JsonTime.fromTime(scheduleDateTime.time),
-                projectId,
         )
     }
 

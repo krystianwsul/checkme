@@ -10,6 +10,7 @@ import com.krystianwsul.checkme.firebase.UserKeyStore
 import com.krystianwsul.checkme.firebase.checkRemote
 import com.krystianwsul.checkme.firebase.factories.ProjectsFactory
 import com.krystianwsul.checkme.firebase.managers.AndroidPrivateProjectManager
+import com.krystianwsul.checkme.firebase.managers.AndroidSharedProjectManager
 import com.krystianwsul.checkme.firebase.managers.RootTasksManager
 import com.krystianwsul.checkme.firebase.roottask.*
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
@@ -25,6 +26,7 @@ import com.krystianwsul.common.firebase.records.project.ProjectRecord
 import com.krystianwsul.common.firebase.records.task.RootTaskRecord
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.JsonTime
+import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
 import io.mockk.every
 import io.mockk.mockk
@@ -71,6 +73,9 @@ class ChangeTypeSourceTest {
 
     private lateinit var rootTasksLoader: RootTasksLoader
     private lateinit var projectsFactory: ProjectsFactory
+
+    private lateinit var sharedProjectKeysRelay: PublishRelay<Set<ProjectKey.Shared>>
+
     private lateinit var rootTasksFactory: RootTasksFactory
 
     private lateinit var changeTypeSource: ChangeTypeSource
@@ -193,13 +198,23 @@ class ChangeTypeSourceTest {
                 loadDependencyTrackerManager,
         )
 
-        val sharedProjectsLoader = mockk<SharedProjectsLoader> {
-            every { initialProjectsEvent } returns Single.just(SharedProjectsLoader.InitialProjectsEvent(emptyList()))
+        val sharedProjectManager = AndroidSharedProjectManager(databaseWrapper)
 
-            every { addProjectEvents } returns Observable.never()
+        val sharedProjectsProvider = mockk<SharedProjectsProvider>()
 
-            every { removeProjectEvents } returns Observable.never()
-        }
+        sharedProjectKeysRelay = PublishRelay.create()
+
+        val sharedProjectsLoader = SharedProjectsLoader.Impl(
+                sharedProjectKeysRelay,
+                sharedProjectManager,
+                domainDisposable,
+                sharedProjectsProvider,
+                userCustomTimeProviderSource,
+                userKeyStore,
+                projectToRootTaskCoordinator,
+                rootTaskKeySource,
+                loadDependencyTrackerManager,
+        )
 
         val localFactory = mockk<LocalFactory>()
         val factoryProvider = mockk<FactoryProvider>()
@@ -236,7 +251,12 @@ class ChangeTypeSourceTest {
 
         projectEmissionChecker = EmissionChecker("projectsFactory", domainDisposable, projectsFactorySingle.flatMapObservable { it.changeTypes })
         taskEmissionChecker = EmissionChecker("rootTasksFactory", domainDisposable, rootTasksFactory.changeTypes)
+
+        acceptSharedProjectKeys(setOf())
     }
+
+    private fun acceptSharedProjectKeys(sharedProjectKeys: Set<ProjectKey.Shared>) =
+            sharedProjectKeysRelay.accept(sharedProjectKeys)
 
     @Test
     fun testInitial() {

@@ -28,7 +28,7 @@ class Instance private constructor(val task: Task, private var data: Data) : Ass
             return getNotificationId(
                     scheduleDate,
                     TimeDescriptor.fromJsonTime(scheduleJsonTime),
-                    (taskKey as TaskKey.Project).run { Pair(projectKey.key, taskId) }, // todo task notification
+                    TaskKeyData(taskKey as TaskKey.Project),
             )
         }
 
@@ -49,13 +49,13 @@ class Instance private constructor(val task: Task, private var data: Data) : Ass
         fun getNotificationId(
                 scheduleDate: Date,
                 scheduleTimeDescriptor: TimeDescriptor,
-                taskKey: Pair<String, String>,
+                taskKeyData: TaskKeyData,
         ): Int {
             var hash = scheduleDate.month
             hash += 12 * scheduleDate.day
             hash += 12 * 31 * (scheduleDate.year - 2015)
             hash += 12 * 31 * 73 * scheduleTimeDescriptor.hashCode()
-            hash += 12 * 31 * 73 * 13 * taskKey.hashCode()
+            hash += 12 * 31 * 73 * 13 * taskKeyData.hashCode()
 
             return hash
         }

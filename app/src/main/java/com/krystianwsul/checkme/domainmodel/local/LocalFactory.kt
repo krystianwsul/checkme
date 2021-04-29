@@ -24,21 +24,17 @@ class LocalFactory(
 
     fun save(): Boolean = persistenceManager.save()
 
-    override fun getShown(
-            taskKeyData: TaskKeyData,
-            scheduleYear: Int,
-            scheduleMonth: Int,
-            scheduleDay: Int,
-            scheduleJsonTime: JsonTime,
-    ): InstanceShownRecord? {
-        val scheduleTimeDescriptor = TimeDescriptor.fromJsonTime(scheduleJsonTime)
+    override fun getShown(taskKey: TaskKey, scheduleDateTime: DateTime): InstanceShownRecord? {
+        val taskKeyData = TaskKeyData(taskKey)
+        val scheduleDate = scheduleDateTime.date
+        val scheduleTimeDescriptor = TimeDescriptor.fromJsonTime(JsonTime.fromTime(scheduleDateTime.time))
 
         return persistenceManager.instanceShownRecords
                 .asSequence()
                 .filter { it.taskKeyData == taskKeyData }
-                .filter { it.scheduleYear == scheduleYear }
-                .filter { it.scheduleMonth == scheduleMonth }
-                .filter { it.scheduleDay == scheduleDay }
+                .filter { it.scheduleYear == scheduleDate.year }
+                .filter { it.scheduleMonth == scheduleDate.month }
+                .filter { it.scheduleDay == scheduleDate.day }
                 .filter { it.scheduleTimeDescriptor == scheduleTimeDescriptor }
                 .toList()
                 .singleOrEmpty()

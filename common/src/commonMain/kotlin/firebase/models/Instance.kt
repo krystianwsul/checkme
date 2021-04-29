@@ -701,25 +701,7 @@ class Instance private constructor(val task: Task, private var data: Data) : Ass
 
         fun createShown(taskKeyData: TaskKeyData, scheduleDateTime: DateTime): Shown
 
-        fun getShown(
-                taskKeyData: TaskKeyData,
-                scheduleYear: Int,
-                scheduleMonth: Int,
-                scheduleDay: Int,
-                scheduleJsonTime: JsonTime,
-        ): Shown?
-
-        fun getShown(taskKey: TaskKey, scheduleDateTime: DateTime): Shown? {
-            check(taskKey is TaskKey.Project) // todo task notification , also, what's the point of this overload?
-
-            return getShown(
-                    TaskKeyData(taskKey),
-                    scheduleDateTime.date.year,
-                    scheduleDateTime.date.month,
-                    scheduleDateTime.date.day,
-                    JsonTime.fromTime(scheduleDateTime.time),
-            )
-        }
+        fun getShown(taskKey: TaskKey, scheduleDateTime: DateTime): Shown?
     }
 
     sealed class ParentState {

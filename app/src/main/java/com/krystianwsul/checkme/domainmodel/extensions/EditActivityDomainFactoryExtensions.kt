@@ -16,6 +16,7 @@ import com.krystianwsul.checkme.gui.edit.delegates.EditDelegate
 import com.krystianwsul.checkme.upload.Uploader
 import com.krystianwsul.checkme.utils.newUuid
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
+import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.ScheduleGroup
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.MyCustomTime
@@ -175,6 +176,7 @@ fun DomainFactory.getCreateTaskParentPickerData(
 
 @CheckResult
 fun DomainUpdater.createScheduleTopLevelTask(
+        // todo task create start
         notificationType: DomainListenerManager.NotificationType,
         name: String,
         scheduleDatas: List<ScheduleData>,
@@ -190,7 +192,7 @@ fun DomainUpdater.createScheduleTopLevelTask(
 
     val imageUuid = imagePath?.let { newUuid() }
 
-    val task = projectsFactory.createScheduleTopLevelTask(
+    val task = createScheduleTopLevelTask(
             now,
             name,
             scheduleDatas.map { it to getTime(it.timePair) },
@@ -269,8 +271,7 @@ fun DomainUpdater.createTopLevelTask(
 
     val imageUuid = imagePath?.let { newUuid() }
 
-    val task = projectsFactory.createNoScheduleOrParentTask(
-            // todo task create
+    val task = createNoScheduleOrParentTask(
             now,
             name,
             note,
@@ -462,7 +463,7 @@ fun DomainUpdater.createScheduleJoinTopLevelTask(
 
     val imageUuid = imagePath?.let { newUuid() }
 
-    val newParentTask = projectsFactory.createScheduleTopLevelTask(
+    val newParentTask = createScheduleTopLevelTask(
             now,
             name,
             scheduleDatas.map { it to getTime(it.timePair) },
@@ -553,7 +554,7 @@ fun DomainUpdater.createJoinTopLevelTask(
 
     val imageUuid = imagePath?.let { newUuid() }
 
-    val newParentTask = projectsFactory.createNoScheduleOrParentTask(
+    val newParentTask = createNoScheduleOrParentTask(
             now,
             name,
             note,
@@ -769,3 +770,47 @@ private fun Collection<ProjectUser>.toUserDatas() = associate {
 }
 
 private val EditDelegate.SharedProjectParameters?.nonNullAssignedTo get() = this?.assignedTo.orEmpty()
+
+private fun DomainFactory.createScheduleTopLevelTask(
+        now: ExactTimeStamp.Local,
+        name: String,
+        scheduleDatas: List<Pair<ScheduleData, Time>>,
+        note: String?,
+        projectId: ProjectKey<*>,
+        imageUuid: String?,
+        deviceDbInfo: DeviceDbInfo,
+        customTimeMigrationHelper: Project.CustomTimeMigrationHelper,
+        ordinal: Double? = null,
+        assignedTo: Set<UserKey> = setOf(),
+): ProjectTask = projectsFactory.createScheduleTopLevelTask(
+        // todo task create start
+        now,
+        name,
+        scheduleDatas,
+        note,
+        projectId,
+        imageUuid,
+        deviceDbInfo,
+        customTimeMigrationHelper,
+        ordinal,
+        assignedTo,
+)
+
+private fun DomainFactory.createNoScheduleOrParentTask(
+        // todo task create
+        now: ExactTimeStamp.Local,
+        name: String,
+        note: String?,
+        projectKey: ProjectKey<*>,
+        imageUuid: String?,
+        deviceDbInfo: DeviceDbInfo,
+        ordinal: Double? = null,
+) = projectsFactory.createNoScheduleOrParentTask(
+        now,
+        name,
+        note,
+        projectKey,
+        imageUuid,
+        deviceDbInfo,
+        ordinal,
+)

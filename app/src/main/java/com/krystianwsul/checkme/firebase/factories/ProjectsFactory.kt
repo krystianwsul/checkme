@@ -125,7 +125,6 @@ class ProjectsFactory(
     val projectTasks get() = projects.values.flatMap { it.projectTasks }
 
     fun createScheduleTopLevelTask(
-            // todo task create usages
             now: ExactTimeStamp.Local,
             name: String,
             scheduleDatas: List<Pair<ScheduleData, Time>>,
@@ -134,8 +133,8 @@ class ProjectsFactory(
             imageUuid: String?,
             deviceDbInfo: DeviceDbInfo,
             customTimeMigrationHelper: Project.CustomTimeMigrationHelper,
-            ordinal: Double? = null,
-            assignedTo: Set<UserKey> = setOf(),
+            ordinal: Double?,
+            assignedTo: Set<UserKey>,
     ): ProjectTask {
         return createTaskHelper(
                 now,
@@ -149,14 +148,13 @@ class ProjectsFactory(
     }
 
     fun createNoScheduleOrParentTask(
-            // todo task create usages
             now: ExactTimeStamp.Local,
             name: String,
             note: String?,
             projectKey: ProjectKey<*>,
             imageUuid: String?,
             deviceDbInfo: DeviceDbInfo,
-            ordinal: Double? = null,
+            ordinal: Double?,
     ) = createTaskHelper(
             now,
             name,

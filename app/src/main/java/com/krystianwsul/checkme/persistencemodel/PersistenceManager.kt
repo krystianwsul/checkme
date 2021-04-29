@@ -62,10 +62,22 @@ class PersistenceManager(
     }
 
     fun deleteInstanceShownRecords(taskKeys: Set<TaskKey>) {
+        val taskKeyDatas = taskKeys.map(::TaskKeyData)
+
         val remove = _instanceShownRecords.filterNot {
-            taskKeys.any { taskKey -> it.projectId == (taskKey as TaskKey.Project).projectKey.key && it.taskId == taskKey.taskId } // todo task notification
+            taskKeyDatas.any { taskKeyData -> it.projectId == taskKeyData.projectId && it.taskId == taskKeyData.taskId }
         }
 
         remove.forEach { it.delete() }
+    }
+
+    data class TaskKeyData(val projectId: String, val taskId: String) {
+
+        constructor(taskKey: TaskKey) : this(
+                (taskKey as? TaskKey.Project)?.projectKey
+                        ?.key
+                        ?: "",
+                taskKey.taskId,
+        )
     }
 }

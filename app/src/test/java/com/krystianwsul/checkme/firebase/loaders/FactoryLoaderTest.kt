@@ -23,9 +23,9 @@ import com.krystianwsul.common.firebase.json.tasks.SharedTaskJson
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.time.DateTime
 import com.krystianwsul.common.time.ExactTimeStamp
-import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
+import com.krystianwsul.common.utils.TaskKeyData
 import com.krystianwsul.common.utils.UserKey
 import io.mockk.mockk
 import io.reactivex.plugins.RxJavaPlugins
@@ -45,20 +45,9 @@ class FactoryLoaderTest {
 
         override val uuid = "uuid"
 
-        override fun getShown(
-                projectId: ProjectKey<*>,
-                taskId: String,
-                scheduleYear: Int,
-                scheduleMonth: Int,
-                scheduleDay: Int,
-                scheduleJsonTime: JsonTime,
-        ): Instance.Shown? = null
+        override fun getShown(taskKey: TaskKey, scheduleDateTime: DateTime): Instance.Shown? = null
 
-        override fun createShown(
-                remoteTaskId: String,
-                scheduleDateTime: DateTime,
-                projectId: ProjectKey<*>,
-        ) = object : Instance.Shown {
+        override fun createShown(taskKeyData: TaskKeyData, scheduleDateTime: DateTime) = object : Instance.Shown {
 
             override var notified = false
 

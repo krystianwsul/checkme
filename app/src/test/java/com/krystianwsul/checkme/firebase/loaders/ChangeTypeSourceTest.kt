@@ -18,8 +18,11 @@ import com.krystianwsul.checkme.utils.SingleParamObservableSource
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.DomainThreadChecker
+import com.krystianwsul.common.firebase.json.JsonWrapper
 import com.krystianwsul.common.firebase.json.NoScheduleOrParentJson
+import com.krystianwsul.common.firebase.json.UserJson
 import com.krystianwsul.common.firebase.json.projects.PrivateProjectJson
+import com.krystianwsul.common.firebase.json.projects.SharedProjectJson
 import com.krystianwsul.common.firebase.json.taskhierarchies.NestedTaskHierarchyJson
 import com.krystianwsul.common.firebase.json.tasks.RootTaskJson
 import com.krystianwsul.common.firebase.records.project.ProjectRecord
@@ -48,10 +51,14 @@ class ChangeTypeSourceTest {
         private val taskKey2 = TaskKey.Root("taskId2")
         private val taskKey3 = TaskKey.Root("taskId3")
 
+        private val sharedProjectKey = ProjectKey.Shared("sharedProjectId")
+
         @BeforeClass
         @JvmStatic
         fun beforeClass() {
             DomainThreadChecker.instance = mockk(relaxed = true)
+
+            mockBase64()
         }
     }
 
@@ -75,6 +82,7 @@ class ChangeTypeSourceTest {
     private lateinit var projectsFactory: ProjectsFactory
 
     private lateinit var sharedProjectKeysRelay: PublishRelay<Set<ProjectKey.Shared>>
+    private lateinit var sharedProjectSnapshotRelay: PublishRelay<Snapshot<JsonWrapper>>
 
     private lateinit var rootTasksFactory: RootTasksFactory
 
@@ -200,7 +208,11 @@ class ChangeTypeSourceTest {
 
         val sharedProjectManager = AndroidSharedProjectManager(databaseWrapper)
 
-        val sharedProjectsProvider = mockk<SharedProjectsProvider>()
+        sharedProjectSnapshotRelay = PublishRelay.create()
+
+        val sharedProjectsProvider = mockk<SharedProjectsProvider> {
+            every { getSharedProjectObservable(any()) } returns sharedProjectSnapshotRelay
+        }
 
         sharedProjectKeysRelay = PublishRelay.create()
 
@@ -217,7 +229,10 @@ class ChangeTypeSourceTest {
         )
 
         val localFactory = mockk<LocalFactory>()
-        val factoryProvider = mockk<FactoryProvider>()
+
+        val factoryProvider = mockk<FactoryProvider> {
+            every { shownFactory } returns mockk()
+        }
 
         val projectsFactorySingle = Single.zip(
                 privateProjectLoader.initialProjectEvent.map {
@@ -817,5 +832,25 @@ class ChangeTypeSourceTest {
 
         timeSource.accept(taskKey2, mockk())
         projectEmissionChecker.checkRemote { timeSource.accept(taskKey1, mockk()) }
+    }
+
+    @Test
+    fun testSingleSharedProjectEmission() {
+        testInitial()
+
+        // first load event for projectsFactory doesn't emit a change... apparently.
+        acceptPrivateProject(PrivateProjectJson())
+        checkEmpty()
+
+        sharedProjectKeysRelay.accept(setOf(sharedProjectKey))
+
+        projectEmissionChecker.checkRemote {
+            sharedProjectSnapshotRelay.accept(
+                    Snapshot(
+                            sharedProjectKey.key,
+                            JsonWrapper(SharedProjectJson(users = mutableMapOf("key" to UserJson()))),
+                    ),
+            )
+        }
     }
 }

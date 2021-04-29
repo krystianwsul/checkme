@@ -1,9 +1,8 @@
 package com.krystianwsul.common.locker
 
 import com.krystianwsul.common.firebase.models.Instance
-import com.krystianwsul.common.utils.ProjectType
 
-class InstanceLocker<T : ProjectType>(private val taskLocker: TaskLocker<T>) {
+class InstanceLocker(private val taskLocker: TaskLocker<*>) {
 
     val now get() = taskLocker.now
 

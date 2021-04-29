@@ -5,13 +5,10 @@ import com.krystianwsul.common.utils.ProjectType
 
 class TaskLocker<T : ProjectType>(private val projectLocker: ProjectLocker<T>) {
 
-    private val instanceLockers = mutableMapOf<InstanceKey, InstanceLocker<T>>()
+    private val instanceLockers = mutableMapOf<InstanceKey, InstanceLocker>()
 
     val now get() = projectLocker.now
 
-    fun getInstanceLocker(instanceKey: InstanceKey): InstanceLocker<T> {
-        if (!instanceLockers.containsKey(instanceKey)) instanceLockers[instanceKey] = InstanceLocker(this)
-
-        return instanceLockers.getValue(instanceKey)
-    }
+    fun getInstanceLocker(instanceKey: InstanceKey) =
+            instanceLockers.getOrPut(instanceKey) { InstanceLocker(this) }
 }

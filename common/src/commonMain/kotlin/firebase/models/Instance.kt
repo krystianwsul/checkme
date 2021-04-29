@@ -410,7 +410,7 @@ class Instance private constructor(val task: Task, private var data: Data) : Ass
             it.instanceDate = dateTime?.date
 
             it.instanceJsonTime = dateTime?.time?.let {
-                task.project // todo task edit
+                task.project // todo task edit2
                         .getOrCopyTime(ownerKey, dateTime.date.dayOfWeek, it, customTimeMigrationHelper, now)
                         .let { JsonTime.fromTime(it) }
             }
@@ -515,7 +515,7 @@ class Instance private constructor(val task: Task, private var data: Data) : Ass
                 .distinct()
                 .singleOrEmpty()
                 .orEmpty()
-                .let(task.project::getAssignedTo) // todo task edit
+                .let(task.project::getAssignedTo) // todo task edit2
                 .map { it.value }
     }
 

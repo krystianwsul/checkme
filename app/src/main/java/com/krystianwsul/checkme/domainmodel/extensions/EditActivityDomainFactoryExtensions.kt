@@ -94,7 +94,7 @@ fun DomainFactory.getCreateTaskData(
 
     val showAllInstancesDialog = when (startParameters) {
         is EditViewModel.StartParameters.Join -> startParameters.joinables.run {
-            map { (it.taskKey as TaskKey.Project).projectKey }.distinct().size == 1 && any { // todo task edit
+            map { (it.taskKey as TaskKey.Project).projectKey }.distinct().size == 1 && any { // todo task edit2
                 getTaskForce(it.taskKey).let { task ->
                     if (it.instanceKey != null) {
                         task.hasOtherVisibleInstances(now, it.instanceKey)
@@ -118,7 +118,7 @@ fun DomainFactory.getCreateTaskData(
             val task = getTaskForce(currentParentSource.taskKey)
 
             if (task.isTopLevelTask(now)) {
-                when (val projectKey = task.project.projectKey) { // todo task edit
+                when (val projectKey = task.project.projectKey) { // todo task edit2
                     is ProjectKey.Private -> null
                     is ProjectKey.Shared -> EditViewModel.ParentKey.Project(projectKey)
                     else -> throw UnsupportedOperationException()
@@ -210,7 +210,7 @@ fun DomainUpdater.createScheduleTopLevelTask(
             task.toCreateResult(now),
             true,
             notificationType,
-            DomainFactory.CloudParams(task.project), // todo task edit
+            DomainFactory.CloudParams(task.project), // todo task edit2
     )
 }.perform(this)
 
@@ -237,7 +237,7 @@ fun DomainUpdater.createChildTask(
 
     val childTask = createChildTask(
             now,
-            parentTask as ProjectTask, // todo task edit
+            parentTask as ProjectTask, // todo task edit2
             name,
             note,
             imageUuid?.let { TaskJson.Image(it, uuid) },
@@ -449,7 +449,7 @@ fun DomainUpdater.createScheduleJoinTopLevelTask(
         joinableTaskKeys.map { getTaskForce(it).updateProject(this, now, finalProjectId) }
     } else {
         check(
-                joinableTaskKeys.map { (it as TaskKey.Project).projectKey } // todo task edit
+                joinableTaskKeys.map { (it as TaskKey.Project).projectKey } // todo task edit2
                         .distinct()
                         .single() == finalProjectId
         )
@@ -482,7 +482,7 @@ fun DomainUpdater.createScheduleJoinTopLevelTask(
     imageUuid?.let { Uploader.addUpload(deviceDbInfo, newParentTask.taskKey, it, imagePath) }
 
     DomainUpdater.Result(
-            newParentTask.taskKey as TaskKey, // todo task edit
+            newParentTask.taskKey as TaskKey, // todo task edit2
             true,
             notificationType,
             DomainFactory.CloudParams(newParentTask.project),
@@ -505,7 +505,7 @@ fun DomainUpdater.createJoinChildTask(
     val parentTask = getTaskForce(parentTaskKey)
     parentTask.requireCurrent(now)
 
-    check(joinTaskKeys.map { (it as TaskKey.Project).projectKey }.distinct().size == 1) // todo task edit
+    check(joinTaskKeys.map { (it as TaskKey.Project).projectKey }.distinct().size == 1) // todo task edit2
 
     val joinTasks = joinTaskKeys.map { getTaskForce(it) }
 
@@ -521,11 +521,11 @@ fun DomainUpdater.createJoinChildTask(
             ordinal
     )
 
-    joinTasks(childTask as ProjectTask, joinTasks, now, removeInstanceKeys) // todo task edit
+    joinTasks(childTask as ProjectTask, joinTasks, now, removeInstanceKeys) // todo task edit2
 
     imageUuid?.let { Uploader.addUpload(deviceDbInfo, childTask.taskKey, it, imagePath) }
 
-    DomainUpdater.Result(childTask.taskKey as TaskKey, true, notificationType, DomainFactory.CloudParams(childTask.project)) // todo task edit
+    DomainUpdater.Result(childTask.taskKey as TaskKey, true, notificationType, DomainFactory.CloudParams(childTask.project)) // todo task edit2
 }.perform(this)
 
 @CheckResult
@@ -542,7 +542,7 @@ fun DomainUpdater.createJoinTopLevelTask(
     check(joinTaskKeys.size > 1)
 
     val finalProjectId = sharedProjectKey
-            ?: joinTaskKeys.map { (it as TaskKey.Project).projectKey } // todo task edit
+            ?: joinTaskKeys.map { (it as TaskKey.Project).projectKey } // todo task edit2
                     .distinct()
                     .single()
 
@@ -581,7 +581,7 @@ private fun DomainFactory.getParentTreeDatas(
     val parentTreeDatas = mutableListOf<EditViewModel.ParentTreeData>()
 
     parentTreeDatas += projectsFactory.privateProject
-            .projectTasks // todo task edit
+            .projectTasks // todo task edit2
             .asSequence()
             .filter { it.showAsParent(now, excludedTaskKeys) }
             .filter { it.isTopLevelTask(now) }
@@ -621,7 +621,7 @@ private fun DomainFactory.getProjectTaskTreeDatas(
         project: Project<*>,
         excludedTaskKeys: Set<TaskKey>,
 ): List<EditViewModel.ParentTreeData> {
-    return project.projectTasks // todo task edit
+    return project.projectTasks // todo task edit2
             .asSequence()
             .filter { it.showAsParent(now, excludedTaskKeys) }
             .filter { it.isTopLevelTask(now) }

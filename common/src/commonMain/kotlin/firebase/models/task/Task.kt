@@ -29,6 +29,11 @@ abstract class Task(
         private val parentTaskDelegate: ParentTaskDelegate,
 ) : Current, CurrentOffset, QueryMatchable, Assignable {
 
+    companion object {
+
+        const val WRITE_ROOT_TASKS = true // todo task disable
+    }
+
     abstract val parent: Parent
     abstract val project: Project<*>
 

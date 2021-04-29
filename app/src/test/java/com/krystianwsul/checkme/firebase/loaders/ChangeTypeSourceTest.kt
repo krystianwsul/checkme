@@ -88,8 +88,10 @@ class ChangeTypeSourceTest {
         override fun getUserCustomTimeProvider(projectRecord: ProjectRecord<*>) =
                 Single.just<JsonTime.UserCustomTimeProvider>(mockk())!!
 
+        private fun getRelay(taskKey: TaskKey.Root) = relayMap.getOrPut(taskKey) { BehaviorRelay.create() }
+
         override fun getUserCustomTimeProvider(rootTaskRecord: RootTaskRecord) =
-                relayMap.getOrPut(rootTaskRecord.taskKey) { BehaviorRelay.create() }.firstOrError()!!
+                getRelay(rootTaskRecord.taskKey).firstOrError()!!
 
         override fun hasCustomTimes(rootTaskRecord: RootTaskRecord) = providerMap.containsKey(rootTaskRecord.taskKey)
 
@@ -98,7 +100,7 @@ class ChangeTypeSourceTest {
         fun accept(taskKey: TaskKey.Root, provider: JsonTime.UserCustomTimeProvider) {
             check((relayMap[taskKey] as? BehaviorRelay<*>)?.hasValue() != true)
 
-            relayMap[taskKey]?.accept(provider)
+            getRelay(taskKey).accept(provider)
 
             providerMap[taskKey] = provider
             trigger.accept(Unit)

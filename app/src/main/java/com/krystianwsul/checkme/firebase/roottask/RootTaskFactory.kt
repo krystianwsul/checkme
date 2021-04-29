@@ -35,8 +35,6 @@ class RootTaskFactory(
     var task: RootTask? = null
         private set
 
-    private data class AddChangeData(val task: RootTask, val isTracked: Boolean)
-
     init {
         eventResults = listOf(
                 addChangeEvents.map { Event.AddChange(it.rootTaskRecord, it.isTracked) },

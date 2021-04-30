@@ -24,6 +24,7 @@ import com.krystianwsul.common.firebase.json.tasks.TaskJson
 import com.krystianwsul.common.firebase.models.*
 import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.task.ProjectTask
+import com.krystianwsul.common.firebase.models.task.RootTask
 import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.Time
@@ -176,7 +177,6 @@ fun DomainFactory.getCreateTaskParentPickerData(
 
 @CheckResult
 fun DomainUpdater.createScheduleTopLevelTask(
-        // todo task create start
         notificationType: DomainListenerManager.NotificationType,
         name: String,
         scheduleDatas: List<ScheduleData>,
@@ -827,3 +827,24 @@ private fun DomainFactory.createNoScheduleOrParentTask(
         deviceDbInfo,
         ordinal,
 )
+
+private fun DomainFactory.createRootTask(
+        now: ExactTimeStamp.Local,
+        imageUuid: String?,
+        name: String,
+        note: String?,
+        ordinal: Double?,
+        projectKey: ProjectKey<*>,
+): RootTask {
+    val task = rootTasksFactory.createTask(
+            now,
+            imageUuid?.let(::getTaskJsonImage),
+            name,
+            note,
+            ordinal,
+    )
+
+    projectsFactory.getProjectForce(projectKey).addRootTask(task.taskKey)
+
+    return task
+}

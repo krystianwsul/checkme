@@ -195,17 +195,7 @@ class SharedProject(
             image: TaskJson.Image?,
             ordinal: Double?,
     ): ProjectTask {
-        val taskJson = SharedTaskJson(
-                name,
-                now.long,
-                now.offset,
-                null,
-                note,
-                image = image,
-                ordinal = ordinal
-        )
-
-        val childTask = newTask(taskJson)
+        val childTask = createTask(now, image, name, note, ordinal)
 
         createTaskHierarchy(parentTask, childTask, now)
 

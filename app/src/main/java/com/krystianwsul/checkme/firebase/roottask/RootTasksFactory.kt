@@ -111,11 +111,9 @@ class RootTasksFactory(
             rootTasks.values.filter { it.projectId == projectKey.key }
 
     private fun newTask(taskJson: RootTaskJson): RootTask {
-        // todo task create handle ChangeType
+        val taskKey = rootTasksLoader.addTask(taskJson)
 
-        val taskRecord = rootTasksLoader.addTask(taskJson)
-
-        TODO("toto task create figure out RootTaskFactory init")
+        return getRootTask(taskKey)
     }
 
     fun createTask(

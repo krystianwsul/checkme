@@ -37,19 +37,24 @@ class RootTaskFactory(
 
     init {
         eventResults = listOf(
-                addChangeEvents.map { Event.AddChange(it.rootTaskRecord, it.isTracked) },
+                addChangeEvents.map { Event.AddChange(it.rootTaskRecord, it.skipChangeTypeEmission) },
                 removeRelay.map { Event.Remove },
         ).merge()
                 .switchMapSingle { event ->
                     when (event) {
                         is Event.AddChange -> {
-                            val (taskRecord, isTracked) = event
+                            val (taskRecord, skipChangeTypeEmission) = event
 
                             val taskTracker = loadDependencyTrackerManager.startTrackingTaskLoad(taskRecord)
 
                             rootTaskDependencyCoordinator.getDependencies(taskRecord)
                                     .doOnSuccessOrDispose { taskTracker.stopTracking() } // in case a new event comes in before this completes
-                                    .map { EventResult.SetTask(RootTask(taskRecord, rootTasksFactory, it), isTracked) }
+                                    .map {
+                                        EventResult.SetTask(
+                                                RootTask(taskRecord, rootTasksFactory, it),
+                                                skipChangeTypeEmission,
+                                        )
+                                    }
                         }
                         is Event.Remove -> Single.just(EventResult.RemoveTask)
                     }
@@ -59,7 +64,7 @@ class RootTaskFactory(
 
         val unfilteredSetTaskEventResults = eventResults.ofType<EventResult.SetTask>()
 
-        val addChangeEventChanges = unfilteredSetTaskEventResults.filter { !it.isTracked }
+        val addChangeEventChangeTypes = unfilteredSetTaskEventResults.filter { !it.skipChangeTypeEmission }
 
         /**
          * order is important: the bottom one executes later, and we first need to check filtering before emitting the
@@ -69,7 +74,7 @@ class RootTaskFactory(
          * initially requested the task.
          */
 
-        changeTypes = addChangeEventChanges.map { ChangeType.REMOTE }.publish()
+        changeTypes = addChangeEventChangeTypes.map { ChangeType.REMOTE }.publish()
         unfilteredChanges = unfilteredSetTaskEventResults.map { }.publish()
     }
 
@@ -87,7 +92,7 @@ class RootTaskFactory(
 
     private sealed class Event {
 
-        data class AddChange(val rootTaskRecord: RootTaskRecord, val isTracked: Boolean) : Event()
+        data class AddChange(val rootTaskRecord: RootTaskRecord, val skipChangeTypeEmission: Boolean) : Event()
 
         object Remove : Event()
     }
@@ -96,7 +101,7 @@ class RootTaskFactory(
 
         abstract val task: RootTask?
 
-        class SetTask(override val task: RootTask, val isTracked: Boolean) : EventResult()
+        class SetTask(override val task: RootTask, val skipChangeTypeEmission: Boolean) : EventResult()
 
         object RemoveTask : EventResult() {
 

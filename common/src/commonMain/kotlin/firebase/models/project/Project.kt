@@ -506,6 +506,8 @@ abstract class Project<T : ProjectType>(
         is TaskKey.Root -> rootTaskProvider.getRootTask(taskKey)
     }
 
+    fun addRootTask(taskKey: TaskKey.Root) = projectRecord.rootTaskParentDelegate.addRootTask(taskKey)
+
     private class MissingTaskException(projectId: ProjectKey<*>, taskId: String) :
             Exception("projectId: $projectId, taskId: $taskId")
 

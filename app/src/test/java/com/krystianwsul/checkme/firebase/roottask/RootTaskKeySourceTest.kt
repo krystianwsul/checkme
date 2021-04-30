@@ -40,22 +40,22 @@ class RootTaskKeySourceTest {
 
     @Test
     fun testInitial() {
-        testObserver.assertEmpty()
+        testObserver.assertValue(emptySet())
     }
 
     @Test
     fun testAddProject() {
         rootTaskKeySource.onProjectAddedOrUpdated(projectKey1, setOf(rootTaskKey1, rootTaskKey2))
-        testObserver.assertValue(setOf(rootTaskKey1, rootTaskKey2))
+        testObserver.assertValueAt(1, setOf(rootTaskKey1, rootTaskKey2))
     }
 
     @Test
     fun testAddSecondProject() {
         rootTaskKeySource.onProjectAddedOrUpdated(projectKey1, setOf(rootTaskKey1, rootTaskKey2))
-        testObserver.assertValue(setOf(rootTaskKey1, rootTaskKey2))
+        testObserver.assertValueAt(1, setOf(rootTaskKey1, rootTaskKey2))
 
         rootTaskKeySource.onProjectAddedOrUpdated(projectKey2, setOf(rootTaskKey3, rootTaskKey4))
-        testObserver.assertValueAt(1, setOf(rootTaskKey1, rootTaskKey2, rootTaskKey3, rootTaskKey4))
+        testObserver.assertValueAt(2, setOf(rootTaskKey1, rootTaskKey2, rootTaskKey3, rootTaskKey4))
     }
 
     @Test
@@ -63,7 +63,7 @@ class RootTaskKeySourceTest {
         testAddSecondProject()
 
         rootTaskKeySource.onProjectsRemoved(setOf(projectKey2))
-        testObserver.assertValueAt(2, setOf(rootTaskKey1, rootTaskKey2))
+        testObserver.assertValueAt(3, setOf(rootTaskKey1, rootTaskKey2))
     }
 
     @Test
@@ -71,6 +71,6 @@ class RootTaskKeySourceTest {
         testAddSecondProject()
 
         rootTaskKeySource.onProjectAddedOrUpdated(projectKey2, setOf(rootTaskKey4, rootTaskKey5))
-        testObserver.assertValueAt(2, setOf(rootTaskKey1, rootTaskKey2, rootTaskKey4, rootTaskKey5))
+        testObserver.assertValueAt(3, setOf(rootTaskKey1, rootTaskKey2, rootTaskKey4, rootTaskKey5))
     }
 }

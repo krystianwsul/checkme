@@ -11,11 +11,8 @@ class RequestKeyStore<REQUEST_KEY : Any, OUTPUT_KEY : Any> {
         fun <REQUEST1 : Any, REQUEST2 : Any, OUTPUT : Any> merge(
                 store1: RequestKeyStore<REQUEST1, OUTPUT>,
                 store2: RequestKeyStore<REQUEST2, OUTPUT>,
-        ): Observable<Set<OUTPUT>> {
-            return listOf(store1, store2).map { it.requestedOutputKeysObservable }
-                    .combineLatest { it.flatten().toSet() }
-                    .skip(1) // first event is just the initial empty sets from both
-        }
+        ): Observable<Set<OUTPUT>> =
+                listOf(store1, store2).map { it.requestedOutputKeysObservable }.combineLatest { it.flatten().toSet() }
     }
 
     private val customTimeEvents = PublishRelay.create<CustomTimeEvent<REQUEST_KEY, OUTPUT_KEY>>()

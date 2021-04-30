@@ -56,9 +56,9 @@ class UserKeyStore(
                 .skip(1)
                 .map { FriendOrCustomTimeEvent.Friend(it) }
 
-        val mergedRequests = RequestKeyStore.merge(projectRequestKeyStore, rootTaskRequestKeyStore).map {
-            FriendOrCustomTimeEvent.CustomTimes(it)
-        }
+        val mergedRequests = RequestKeyStore.merge(projectRequestKeyStore, rootTaskRequestKeyStore)
+                .skip(1)
+                .map { FriendOrCustomTimeEvent.CustomTimes(it) }
 
         loadUserDataObservable = listOf(friendEvents, mergedRequests).merge()
                 .scan(OutputAggregate()) { aggregate, friendOrCustomTimeEvent ->

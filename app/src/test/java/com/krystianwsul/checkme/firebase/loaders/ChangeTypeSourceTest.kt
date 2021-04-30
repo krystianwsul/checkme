@@ -150,7 +150,10 @@ class ChangeTypeSourceTest {
 
         rootTasksLoaderProvider = TestRootTasksLoaderProvider()
 
-        val databaseWrapper = mockk<DatabaseWrapper>()
+        val databaseWrapper = mockk<DatabaseWrapper> {
+            var taskRecordId = 0
+            every { newRootTaskRecordId() } answers { "rootTaskRecordId" + taskRecordId++ }
+        }
 
         val rootTasksManager = RootTasksManager(databaseWrapper)
 
@@ -878,6 +881,42 @@ class ChangeTypeSourceTest {
                     RootTaskJson(
                             noScheduleOrParent = mapOf(
                                     "noScheduleOrParentId" to NoScheduleOrParentJson(projectId = sharedProjectKey.key),
+                            ),
+                    ),
+            )
+        }
+    }
+
+    @Test
+    fun testTaskCreate() {
+        setup()
+
+        // first load event for projectsFactory doesn't emit a change... apparently.
+        acceptPrivateProject(PrivateProjectJson())
+
+        val task = rootTasksFactory.createTask(
+                ExactTimeStamp.Local.now,
+                null,
+                "task",
+                null,
+                null,
+        )
+
+        rootTasksFactory.getRootTask(task.taskRecord.taskKey)
+    }
+
+    @Test
+    fun testTaskCreateThenRemoteUpdate() {
+        testTaskCreate()
+
+        acceptPrivateProject(PrivateProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true)))
+
+        projectEmissionChecker.checkRemote {
+            rootTasksLoaderProvider.accept(
+                    taskKey1,
+                    RootTaskJson(
+                            noScheduleOrParent = mapOf(
+                                    "noScheduleOrParentId" to NoScheduleOrParentJson(projectId = privateProjectId),
                             ),
                     ),
             )

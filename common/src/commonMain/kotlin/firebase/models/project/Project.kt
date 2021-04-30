@@ -509,6 +509,16 @@ abstract class Project<T : ProjectType>(
     fun addRootTask(taskKey: TaskKey.Root) {
         projectRecord.rootTaskParentDelegate.addRootTask(taskKey)
 
+        updateRootTaskKeys()
+    }
+
+    fun removeRootTask(taskKey: TaskKey.Root) {
+        projectRecord.rootTaskParentDelegate.removeRootTask(taskKey)
+
+        updateRootTaskKeys()
+    }
+
+    private fun updateRootTaskKeys() {
         rootTaskProvider.updateProjectRecord(projectKey, projectRecord.rootTaskParentDelegate.rootTaskKeys)
     }
 

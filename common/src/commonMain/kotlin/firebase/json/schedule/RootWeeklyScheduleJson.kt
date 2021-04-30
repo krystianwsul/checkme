@@ -19,5 +19,5 @@ data class RootWeeklyScheduleJson @JvmOverloads constructor(
         override var oldestVisible: String? = null,
         override val assignedTo: Map<String, Boolean> = mapOf(),
         override val time: String? = null,
-        override val projectId: String = "",
+        override var projectId: String = "",
 ) : RootScheduleJson, WeeklyScheduleJson, AssignedToJson

@@ -17,5 +17,5 @@ data class RootSingleScheduleJson @JvmOverloads constructor(
         override val minute: Int? = null,
         override var assignedTo: Map<String, Boolean> = mapOf(),
         override val time: String? = null,
-        override val projectId: String = "",
+        override var projectId: String = "",
 ) : RootScheduleJson, SingleScheduleJson, WriteAssignedToJson

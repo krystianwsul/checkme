@@ -6,6 +6,7 @@ import com.krystianwsul.checkme.utils.publishImmediate
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.json.tasks.RootTaskJson
 import com.krystianwsul.common.firebase.json.tasks.TaskJson
+import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.task.RootTask
 import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.firebase.models.taskhierarchy.TaskHierarchy
@@ -127,6 +128,15 @@ class RootTasksFactory(
     override fun updateProjectRecord(projectKey: ProjectKey<*>, dependentRootTaskKeys: Set<TaskKey.Root>) {
         rootTasksLoader.ignoreKeyUpdates {
             rootTaskKeySource.onProjectAddedOrUpdated(projectKey, dependentRootTaskKeys)
+        }
+    }
+
+    override fun updateProject(taskKey: TaskKey.Root, oldProject: Project<*>, newProjectKey: ProjectKey<*>) {
+        val newProject = getProjectsFactory().getProjectForce(newProjectKey)
+
+        rootTasksLoader.ignoreKeyUpdates {
+            oldProject.removeRootTask(taskKey)
+            newProject.addRootTask(taskKey)
         }
     }
 }

@@ -4,6 +4,7 @@ package com.krystianwsul.common.firebase.records.schedule
 import com.krystianwsul.common.firebase.json.schedule.ScheduleJson
 import com.krystianwsul.common.firebase.json.schedule.ScheduleWrapper
 import com.krystianwsul.common.firebase.json.schedule.ScheduleWrapperBridge
+import com.krystianwsul.common.firebase.models.ProjectIdOwner
 import com.krystianwsul.common.firebase.records.RemoteRecord
 import com.krystianwsul.common.firebase.records.task.ProjectTaskRecord
 import com.krystianwsul.common.firebase.records.task.TaskRecord
@@ -11,6 +12,7 @@ import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.time.TimePair
 import com.krystianwsul.common.utils.CustomTimeKey
+import com.krystianwsul.common.utils.ProjectKey
 
 abstract class ScheduleRecord(
         val taskRecord: TaskRecord,
@@ -18,7 +20,7 @@ abstract class ScheduleRecord(
         private val scheduleJson: ScheduleJson,
         scheduleTypeSubkey: String,
         _id: String?,
-) : RemoteRecord(_id == null) {
+) : RemoteRecord(_id == null), ProjectIdOwner {
 
     companion object {
 
@@ -64,4 +66,9 @@ abstract class ScheduleRecord(
     abstract val projectHelper: ProjectHelper
 
     val projectId get() = projectHelper.getProjectId(scheduleJson)
+
+    override fun updateProject(projectKey: ProjectKey<*>) =
+            projectHelper.setProjectId(scheduleJson, projectKey.key) { subKey, value ->
+                addValue("$keyPlusSubkey/$subKey", value)
+            }
 }

@@ -21,11 +21,13 @@ class RootTask(
         ParentTaskDelegate.Root(parent),
 ) {
 
+    private fun Type.Schedule.getParentProjectSchedule() = taskParentEntries.maxByOrNull { it.startExactTimeStamp }!!
+
     private val projectIdProperty = invalidatableLazy {
         val interval = intervals.last()
 
         when (val type = interval.type) {
-            is Type.Schedule -> type.taskParentEntries.maxByOrNull { it.startExactTimeStamp }!!.projectId
+            is Type.Schedule -> type.getParentProjectSchedule().projectId
             is Type.NoSchedule -> type.noScheduleOrParent!!.projectId
             is Type.Child -> {
                 val parentTask = type.parentTaskHierarchy.parentTask as RootTask
@@ -93,12 +95,24 @@ class RootTask(
     override fun updateProject(
             projectUpdater: ProjectUpdater,
             now: ExactTimeStamp.Local,
-            projectId: ProjectKey<*>,
+            projectKey: ProjectKey<*>,
     ): Task {
-        return if (projectId == project.projectKey) // todo task edit
-            this
-        else
-            projectUpdater.convert(now, this, projectId)
+        val oldProject = project
+        if (projectKey == oldProject.projectKey) return this
+
+        val interval = intervals.last()
+
+        val taskParentEntry = when (val type = interval.type) {
+            is Type.Schedule -> type.getParentProjectSchedule()
+            is Type.NoSchedule -> type.noScheduleOrParent!!
+            is Type.Child -> throw UnsupportedOperationException()
+        }
+
+        taskParentEntry.updateProject(projectKey)
+
+        parent.updateProject(taskKey, oldProject, projectKey)
+
+        return this
     }
 
     interface Parent : Task.Parent, Project.RootTaskProvider {
@@ -114,5 +128,7 @@ class RootTask(
                 note: String?,
                 ordinal: Double?,
         ): RootTask
+
+        fun updateProject(taskKey: TaskKey.Root, oldProject: Project<*>, newProjectKey: ProjectKey<*>)
     }
 }

@@ -34,7 +34,7 @@ abstract class RootTaskParentDelegate(private val rootTaskParentJson: RootTaskPa
         }
     }
 
-    fun removeRootTask(rootTaskKey: TaskKey.Root) { // todo task after edit call into RootTaskKeySource
+    fun removeRootTask(rootTaskKey: TaskKey.Root) {
         val rootTaskId = rootTaskKey.taskId
 
         if (rootTaskIds.containsKey(rootTaskId)) {

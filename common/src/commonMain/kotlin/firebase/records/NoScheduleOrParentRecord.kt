@@ -1,15 +1,17 @@
 package com.krystianwsul.common.firebase.records
 
 import com.krystianwsul.common.firebase.json.NoScheduleOrParentJson
+import com.krystianwsul.common.firebase.models.ProjectIdOwner
 import com.krystianwsul.common.firebase.records.schedule.ProjectHelper
 import com.krystianwsul.common.firebase.records.task.TaskRecord
+import com.krystianwsul.common.utils.ProjectKey
 
 class NoScheduleOrParentRecord(
         private val taskRecord: TaskRecord,
         override val createObject: NoScheduleOrParentJson,
         _id: String?,
         val projectHelper: ProjectHelper,
-) : RemoteRecord(_id == null) {
+) : RemoteRecord(_id == null), ProjectIdOwner {
 
     companion object {
 
@@ -29,4 +31,7 @@ class NoScheduleOrParentRecord(
     val projectId get() = projectHelper.getProjectId(createObject)
 
     override fun deleteFromParent() = check(taskRecord.noScheduleOrParentRecords.remove(id) == this)
+
+    override fun updateProject(projectKey: ProjectKey<*>) =
+            projectHelper.setProjectId(createObject, projectKey.key, ::addValue)
 }

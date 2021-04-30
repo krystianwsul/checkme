@@ -309,7 +309,7 @@ fun DomainUpdater.updateScheduleTask(
 
     val task = getTaskForce(taskKey).let {
         it.requireCurrent(now)
-        it.updateProject(this, now, sharedProjectParameters?.key ?: defaultProjectId)
+        updateProject(it, now, sharedProjectParameters?.key ?: defaultProjectId)
     }.apply {
         setName(name, note)
 
@@ -407,7 +407,7 @@ fun DomainUpdater.updateTopLevelTask(
 
     val task = getTaskForce(taskKey).also {
         it.requireCurrent(now)
-        it.updateProject(this, now, sharedProjectKey ?: defaultProjectId)
+        updateProject(it, now, sharedProjectKey ?: defaultProjectId)
     }.apply {
         setName(name, note)
 
@@ -449,7 +449,7 @@ fun DomainUpdater.createScheduleJoinTopLevelTask(
     val joinableTaskKeys = joinables.map { it.taskKey }
 
     val joinTasks = if (allReminders) {
-        joinableTaskKeys.map { getTaskForce(it).updateProject(this, now, finalProjectId) }
+        joinableTaskKeys.map { updateProject(getTaskForce(it), now, finalProjectId) }
     } else {
         check(
                 joinableTaskKeys.map { (it as TaskKey.Project).projectKey } // todo task join
@@ -555,7 +555,7 @@ fun DomainUpdater.createJoinTopLevelTask(
                     .distinct()
                     .single()
 
-    val joinTasks = joinTaskKeys.map { getTaskForce(it).updateProject(this, now, finalProjectId) }
+    val joinTasks = joinTaskKeys.map { updateProject(getTaskForce(it), now, finalProjectId) }
 
     val ordinal = joinTasks.map { it.ordinal }.minOrNull()
 
@@ -859,4 +859,12 @@ private fun DomainFactory.createRootTask(
     projectsFactory.getProjectForce(projectKey).addRootTask(task.taskKey)
 
     return task
+}
+
+private fun DomainFactory.updateProject(task: Task, now: ExactTimeStamp.Local, projectKey: ProjectKey<*>): Task {
+    return if (Task.WRITE_ROOT_TASKS) {
+        TODO("todo task convert")
+    } else {
+        task.updateProject(this, now, projectKey)
+    }
 }

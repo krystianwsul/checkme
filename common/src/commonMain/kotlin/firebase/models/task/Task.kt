@@ -436,7 +436,6 @@ abstract class Task(
             it.first.scheduleData is ScheduleData.Single
         }
 
-        // todo task instance parent: update instance parent
         if (singleRemoveSchedule != null && singleAddSchedulePair != null) {
             if (assignedTo.isNotEmpty()) singleRemoveSchedule.setAssignedTo(assignedTo)
 
@@ -940,7 +939,7 @@ abstract class Task(
     abstract fun updateProject(
             projectUpdater: ProjectUpdater,
             now: ExactTimeStamp.Local,
-            projectId: ProjectKey<*>,
+            projectKey: ProjectKey<*>,
     ): Task
 
     fun getScheduleTextMultiline(

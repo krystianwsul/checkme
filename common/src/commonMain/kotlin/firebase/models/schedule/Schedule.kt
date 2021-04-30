@@ -1,17 +1,15 @@
 package com.krystianwsul.common.firebase.models.schedule
 
 
+import com.krystianwsul.common.firebase.models.ProjectIdOwner
 import com.krystianwsul.common.firebase.models.TaskParentEntry
 import com.krystianwsul.common.firebase.models.interval.ScheduleInterval
 import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.firebase.records.schedule.ScheduleRecord
 import com.krystianwsul.common.time.*
-import com.krystianwsul.common.utils.ScheduleType
-import com.krystianwsul.common.utils.UserKey
-import com.krystianwsul.common.utils.invalidatableLazy
-import com.krystianwsul.common.utils.invalidatableLazyCallbacks
+import com.krystianwsul.common.utils.*
 
-abstract class Schedule(val topLevelTask: Task) : TaskParentEntry {
+abstract class Schedule(val topLevelTask: Task) : TaskParentEntry, ProjectIdOwner {
 
     protected abstract val scheduleRecord: ScheduleRecord
 
@@ -123,4 +121,6 @@ abstract class Schedule(val topLevelTask: Task) : TaskParentEntry {
             }
         }
     }
+
+    override fun updateProject(projectKey: ProjectKey<*>) = scheduleRecord.updateProject(projectKey)
 }

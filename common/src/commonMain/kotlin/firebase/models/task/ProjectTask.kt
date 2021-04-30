@@ -56,12 +56,12 @@ class ProjectTask(override val project: Project<*>, private val taskRecord: Proj
     override fun updateProject(
             projectUpdater: ProjectUpdater,
             now: ExactTimeStamp.Local,
-            projectId: ProjectKey<*>,
+            projectKey: ProjectKey<*>,
     ): Task {
-        return if (projectId == project.projectKey)
+        return if (projectKey == project.projectKey)
             this
         else
-            projectUpdater.convert(now, this, projectId)
+            projectUpdater.convert(now, this, projectKey)
     }
 
     fun fixOffsets() {

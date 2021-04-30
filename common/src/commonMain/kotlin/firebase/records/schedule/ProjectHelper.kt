@@ -10,6 +10,18 @@ sealed class ProjectHelper {
 
     abstract fun getProjectId(noScheduleOrParentJson: NoScheduleOrParentJson): String
 
+    abstract fun setProjectId(
+            scheduleJson: ScheduleJson,
+            projectId: String,
+            addValue: (subKey: String, value: String) -> Unit,
+    )
+
+    abstract fun setProjectId(
+            noScheduleOrParentJson: NoScheduleOrParentJson,
+            projectId: String,
+            addValue: (subKey: String, value: String) -> Unit,
+    )
+
     object Project : ProjectHelper() {
 
         override fun getProjectId(scheduleJson: ScheduleJson): String {
@@ -23,6 +35,26 @@ sealed class ProjectHelper {
 
             throw UnsupportedOperationException()
         }
+
+        override fun setProjectId(
+                scheduleJson: ScheduleJson,
+                projectId: String,
+                addValue: (subKey: String, value: String) -> Unit,
+        ) {
+            check(scheduleJson !is RootScheduleJson)
+
+            throw UnsupportedOperationException()
+        }
+
+        override fun setProjectId(
+                noScheduleOrParentJson: NoScheduleOrParentJson,
+                projectId: String,
+                addValue: (subKey: String, value: String) -> Unit,
+        ) {
+            check(noScheduleOrParentJson.projectId == null)
+
+            throw UnsupportedOperationException()
+        }
     }
 
     object Root : ProjectHelper() {
@@ -30,5 +62,29 @@ sealed class ProjectHelper {
         override fun getProjectId(scheduleJson: ScheduleJson) = (scheduleJson as RootScheduleJson).projectId
 
         override fun getProjectId(noScheduleOrParentJson: NoScheduleOrParentJson) = noScheduleOrParentJson.projectId!!
+
+        override fun setProjectId(
+                scheduleJson: ScheduleJson,
+                projectId: String,
+                addValue: (subKey: String, String) -> Unit,
+        ) {
+            if ((scheduleJson as RootScheduleJson).projectId == projectId) return
+
+            scheduleJson.projectId = projectId
+
+            addValue("projectId", projectId)
+        }
+
+        override fun setProjectId(
+                noScheduleOrParentJson: NoScheduleOrParentJson,
+                projectId: String,
+                addValue: (subKey: String, String) -> Unit,
+        ) {
+            if (noScheduleOrParentJson.projectId == projectId) return
+
+            noScheduleOrParentJson.projectId = projectId
+
+            addValue("projectId", projectId)
+        }
     }
 }

@@ -239,7 +239,7 @@ fun DomainUpdater.createChildTask(
 
     val childTask = createChildTask(
             now,
-            parentTask as ProjectTask, // todo task create
+            parentTask,
             name,
             note,
             imageUuid?.let { TaskJson.Image(it, uuid) },
@@ -516,12 +516,13 @@ fun DomainUpdater.createJoinChildTask(
 
     val imageUuid = imagePath?.let { newUuid() }
 
-    val childTask = parentTask.createChildTask(
+    val childTask = createChildTask(
             now,
+            parentTask,
             name,
             note,
             imageUuid?.let { TaskJson.Image(it, uuid) },
-            ordinal
+            ordinal = ordinal,
     )
 
     joinTasks(childTask as ProjectTask, joinTasks, now, removeInstanceKeys) // todo task create
@@ -750,18 +751,19 @@ private fun DomainFactory.copyTask(now: ExactTimeStamp.Local, task: ProjectTask,
 
 private fun DomainFactory.createChildTask(
         now: ExactTimeStamp.Local,
-        parentTask: ProjectTask,
+        parentTask: Task,
         name: String,
         note: String?,
         imageJson: TaskJson.Image?,
         copyTaskKey: TaskKey? = null,
-): ProjectTask {
+        ordinal: Double? = null,
+): Task {
     check(name.isNotEmpty())
     parentTask.requireCurrent(now)
 
-    val childTask = parentTask.createChildTask(now, name, note, imageJson)
+    val childTask = parentTask.createChildTask(now, name, note, imageJson, ordinal)
 
-    copyTaskKey?.let { copyTask(now, childTask, it) }
+    copyTaskKey?.let { copyTask(now, childTask as ProjectTask, it) } // todo task copy
 
     return childTask
 }

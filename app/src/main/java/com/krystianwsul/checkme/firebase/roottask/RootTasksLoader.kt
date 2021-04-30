@@ -17,7 +17,7 @@ import io.reactivex.rxjava3.kotlin.merge
 import io.reactivex.rxjava3.kotlin.plusAssign
 
 class RootTasksLoader(
-        taskKeysObservable: Observable<Set<TaskKey.Root>>,
+        private val rootTaskKeySource: RootTaskKeySource,
         private val provider: Provider,
         private val domainDisposable: CompositeDisposable,
         private val rootTasksManager: RootTasksManager,
@@ -27,9 +27,8 @@ class RootTasksLoader(
     private val taskKeyRelay = ReplayRelay.create<Map<TaskKey.Root, RootTaskRecord?>>()
 
     init {
-        taskKeysObservable.map {
-            it.associateWith<TaskKey.Root, RootTaskRecord?> { null }
-        }
+        rootTaskKeySource.rootTaskKeysObservable
+                .map { it.associateWith<TaskKey.Root, RootTaskRecord?> { null } }
                 .subscribe(taskKeyRelay)
                 .addTo(domainDisposable)
     }

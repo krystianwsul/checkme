@@ -160,7 +160,7 @@ class ChangeTypeSourceTest {
         val loadDependencyTrackerManager = LoadDependencyTrackerManager()
 
         rootTasksLoader = RootTasksLoader(
-                rootTaskKeySource.rootTaskKeysObservable,
+                rootTaskKeySource,
                 rootTasksLoaderProvider,
                 domainDisposable,
                 rootTasksManager,
@@ -887,8 +887,7 @@ class ChangeTypeSourceTest {
         }
     }
 
-    @Test
-    fun testTaskCreate() {
+    private fun createTask(): TaskKey.Root {
         setup()
 
         // first load event for projectsFactory doesn't emit a change... apparently.
@@ -901,13 +900,21 @@ class ChangeTypeSourceTest {
                 null,
                 null,
         )
+        val taskKey = task.taskKey
 
-        rootTasksFactory.getRootTask(task.taskRecord.taskKey)
+        rootTasksFactory.getRootTask(taskKey)
+
+        return taskKey
+    }
+
+    @Test
+    fun testTaskCreate() {
+        createTask()
     }
 
     @Test
     fun testTaskCreateThenRemoteUpdate() {
-        testTaskCreate()
+        val taskKey = createTask()
 
         acceptPrivateProject(PrivateProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true)))
 
@@ -921,5 +928,7 @@ class ChangeTypeSourceTest {
                     ),
             )
         }
+
+        rootTasksFactory.getRootTask(taskKey)
     }
 }

@@ -104,7 +104,7 @@ class FactoryLoader(
                     val loadDependencyTrackerManager = LoadDependencyTrackerManager()
 
                     val rootTasksLoader = RootTasksLoader(
-                            rootTaskKeySource.rootTaskKeysObservable,
+                            rootTaskKeySource,
                             factoryProvider.database,
                             domainDisposable,
                             rootTaskManager,

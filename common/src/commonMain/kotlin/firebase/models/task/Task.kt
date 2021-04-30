@@ -436,7 +436,7 @@ abstract class Task(
             it.first.scheduleData is ScheduleData.Single
         }
 
-        // todo task create figure out how to handle this for editing single instances with root tasks
+        // todo task instance parent: update instance parent
         if (singleRemoveSchedule != null && singleAddSchedulePair != null) {
             if (assignedTo.isNotEmpty()) singleRemoveSchedule.setAssignedTo(assignedTo)
 

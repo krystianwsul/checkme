@@ -204,7 +204,7 @@ fun DomainUpdater.createScheduleTopLevelTask(
             assignedTo = sharedProjectParameters.nonNullAssignedTo,
     )
 
-    copyTaskKey?.let { copyTask(now, task, it) }
+    copyTaskKey?.let { copyTask(now, task as ProjectTask, it) } // todo task copy
 
     imageUuid?.let { Uploader.addUpload(deviceDbInfo, task.taskKey, it, imagePath) }
 
@@ -216,7 +216,7 @@ fun DomainUpdater.createScheduleTopLevelTask(
     )
 }.perform(this)
 
-private fun ProjectTask.toCreateResult(now: ExactTimeStamp.Local) =
+private fun Task.toCreateResult(now: ExactTimeStamp.Local) =
         getInstances(null, null, now).singleOrNull()
                 ?.let { EditDelegate.CreateResult.Instance(it.instanceKey) }
                 ?: EditDelegate.CreateResult.Task(taskKey)
@@ -477,9 +477,9 @@ fun DomainUpdater.createScheduleJoinTopLevelTask(
     )
 
     if (allReminders)
-        joinTasks(newParentTask, joinTasks, now, joinables.mapNotNull { it.instanceKey })
+        joinTasks(newParentTask as ProjectTask, joinTasks, now, joinables.mapNotNull { it.instanceKey }) // todo task join
     else
-        joinJoinables(newParentTask, joinables, now)
+        joinJoinables(newParentTask as ProjectTask, joinables, now) // todo task join
 
     imageUuid?.let { Uploader.addUpload(deviceDbInfo, newParentTask.taskKey, it, imagePath) }
 
@@ -782,8 +782,7 @@ private fun DomainFactory.createScheduleTopLevelTask(
         customTimeMigrationHelper: Project.CustomTimeMigrationHelper,
         ordinal: Double? = null,
         assignedTo: Set<UserKey> = setOf(),
-): ProjectTask = projectsFactory.createScheduleTopLevelTask(
-        // todo task create start
+): Task = projectsFactory.createScheduleTopLevelTask(
         now,
         name,
         scheduleDatas,

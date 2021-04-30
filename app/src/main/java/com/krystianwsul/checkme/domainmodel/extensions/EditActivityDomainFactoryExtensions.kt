@@ -784,7 +784,6 @@ private fun DomainFactory.createScheduleTopLevelTask(
         assignedTo: Set<UserKey> = setOf(),
 ): Task {
     return if (Task.WRITE_ROOT_TASKS) {
-        // todo task create start what about customTimeMigrationHelper?
         createRootTask(now, imageUuid, name, note, ordinal, projectId).apply {
             createSchedules(deviceDbInfo.key, now, scheduleDatas, assignedTo, customTimeMigrationHelper)
         }

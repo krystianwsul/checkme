@@ -61,7 +61,7 @@ class ProjectTask(override val project: Project<*>, private val taskRecord: Proj
         return if (projectKey == project.projectKey)
             this
         else
-            projectUpdater.convert(now, this, projectKey)
+            projectUpdater.convertProject(now, this, projectKey)
     }
 
     fun fixOffsets() {

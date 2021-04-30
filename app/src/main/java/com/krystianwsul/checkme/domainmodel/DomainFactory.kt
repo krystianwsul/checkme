@@ -468,10 +468,14 @@ class DomainFactory(
 
     val ownerKey get() = myUserFactory.user.userKey
 
-    override fun convert(now: ExactTimeStamp.Local, startingTask: Task, projectId: ProjectKey<*>): ProjectTask {
+    override fun convertProject(
+            now: ExactTimeStamp.Local,
+            startingTask: ProjectTask,
+            projectId: ProjectKey<*>,
+    ): ProjectTask {
         val remoteToRemoteConversion = RemoteToRemoteConversion()
         val startProject = startingTask.project // todo task convert
-        startProject.convertRemoteToRemoteHelper(now, remoteToRemoteConversion, startingTask as ProjectTask) // todo task convert
+        startProject.convertRemoteToRemoteHelper(now, remoteToRemoteConversion, startingTask) // todo task convert
 
         val newProject = projectsFactory.getProjectForce(projectId)
 

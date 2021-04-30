@@ -1111,7 +1111,7 @@ abstract class Task(
 
     interface ProjectUpdater {
 
-        fun convert(now: ExactTimeStamp.Local, startingTask: Task, projectId: ProjectKey<*>): Task
+        fun convertProject(now: ExactTimeStamp.Local, startingTask: ProjectTask, projectId: ProjectKey<*>): ProjectTask
     }
 
     data class EndData(

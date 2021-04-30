@@ -280,7 +280,7 @@ fun DomainUpdater.createTopLevelTask(
             deviceDbInfo,
     )
 
-    copyTaskKey?.let { copyTask(now, task, it) }
+    copyTaskKey?.let { copyTask(now, task as ProjectTask, it) } // todo task copy
 
     imageUuid?.let { Uploader.addUpload(deviceDbInfo, task.taskKey, it, imagePath) }
 
@@ -415,7 +415,7 @@ fun DomainUpdater.updateTopLevelTask(
         endAllCurrentSchedules(now)
         endAllCurrentNoScheduleOrParents(now)
 
-        setNoScheduleOrParent(now)
+        setNoScheduleOrParent(now, null) // todo task edit
     }
 
     val imageUuid = imagePath?.value?.let { newUuid() }
@@ -565,7 +565,7 @@ fun DomainUpdater.createJoinTopLevelTask(
             ordinal,
     )
 
-    joinTasks(newParentTask, joinTasks, now, removeInstanceKeys)
+    joinTasks(newParentTask as ProjectTask, joinTasks, now, removeInstanceKeys) // todo task join
 
     imageUuid?.let { Uploader.addUpload(deviceDbInfo, newParentTask.taskKey, it, imagePath) }
 
@@ -809,7 +809,6 @@ private fun DomainFactory.createScheduleTopLevelTask(
 private fun DomainFactory.getTaskJsonImage(imageUuid: String) = TaskJson.Image(imageUuid, deviceDbInfo.uuid)
 
 private fun DomainFactory.createNoScheduleOrParentTask(
-        // todo task create
         now: ExactTimeStamp.Local,
         name: String,
         note: String?,
@@ -817,15 +816,25 @@ private fun DomainFactory.createNoScheduleOrParentTask(
         imageUuid: String?,
         deviceDbInfo: DeviceDbInfo,
         ordinal: Double? = null,
-) = projectsFactory.createNoScheduleOrParentTask(
-        now,
-        name,
-        note,
-        projectKey,
-        imageUuid,
-        deviceDbInfo,
-        ordinal,
-)
+): Task {
+    return if (Task.WRITE_ROOT_TASKS) {
+        createRootTask(now, imageUuid, name, note, ordinal, projectKey).apply {
+            setNoScheduleOrParent(now, projectKey)
+
+            projectsFactory.getProjectForce(projectKey).addRootTask(taskKey)
+        }
+    } else {
+        projectsFactory.createNoScheduleOrParentTask(
+                now,
+                name,
+                note,
+                projectKey,
+                imageUuid,
+                deviceDbInfo,
+                ordinal,
+        )
+    }
+}
 
 private fun DomainFactory.createRootTask(
         now: ExactTimeStamp.Local,

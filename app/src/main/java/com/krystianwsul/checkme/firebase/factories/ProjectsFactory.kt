@@ -165,7 +165,7 @@ class ProjectsFactory(
             imageUuid,
             deviceDbInfo,
             ordinal,
-    ).apply { setNoScheduleOrParent(now) }
+    ).apply { setNoScheduleOrParent(now, null) }
 
     private fun createTaskHelper(
             now: ExactTimeStamp.Local,

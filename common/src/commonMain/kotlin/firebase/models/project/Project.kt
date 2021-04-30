@@ -195,7 +195,7 @@ abstract class Project<T : ProjectType>(
 
             newTask.copySchedules(deviceDbInfo, now, currentSchedules, customTimeMigrationHelper, null) // todo task copy
         } else {
-            currentNoScheduleOrParent?.let { newTask.setNoScheduleOrParent(now) }
+            currentNoScheduleOrParent?.let { newTask.setNoScheduleOrParent(now, null) } // todo task copy
         }
 
         return newTask to instanceDatas.map { it.updater }

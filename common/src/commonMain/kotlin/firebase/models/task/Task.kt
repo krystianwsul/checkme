@@ -1017,9 +1017,13 @@ abstract class Task(
 
     private class IntervalException(message: String, cause: Throwable) : Exception(message, cause)
 
-    fun setNoScheduleOrParent(now: ExactTimeStamp.Local) {
-        val noScheduleOrParentRecord =
-                taskRecord.newNoScheduleOrParentRecord(NoScheduleOrParentJson(now.long, now.offset))
+    fun setNoScheduleOrParent(now: ExactTimeStamp.Local, projectKey: ProjectKey<*>?) {
+        val noScheduleOrParentRecord = taskRecord.newNoScheduleOrParentRecord(NoScheduleOrParentJson(
+                now.long,
+                now.offset,
+                projectId = projectKey?.key
+        ))
+
         check(!noScheduleOrParentsMap.containsKey(noScheduleOrParentRecord.id))
 
         noScheduleOrParentsMap[noScheduleOrParentRecord.id] =

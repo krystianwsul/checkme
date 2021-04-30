@@ -22,7 +22,7 @@ abstract class RootTaskParentDelegate(private val rootTaskParentJson: RootTaskPa
 
     protected abstract fun addValue(subKey: String, value: Boolean?)
 
-    fun addRootTask(rootTaskKey: TaskKey.Root) { // todo task create call into RootTaskKeySource
+    fun addRootTask(rootTaskKey: TaskKey.Root) {
         val rootTaskId = rootTaskKey.taskId
 
         if (!rootTaskIds.containsKey(rootTaskId)) {

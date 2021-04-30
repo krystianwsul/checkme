@@ -193,7 +193,7 @@ abstract class Project<T : ProjectType>(
         if (currentSchedules.isNotEmpty()) {
             check(currentNoScheduleOrParent == null)
 
-            newTask.copySchedules(deviceDbInfo, now, currentSchedules, customTimeMigrationHelper)
+            newTask.copySchedules(deviceDbInfo, now, currentSchedules, customTimeMigrationHelper, null) // todo task copy
         } else {
             currentNoScheduleOrParent?.let { newTask.setNoScheduleOrParent(now) }
         }
@@ -506,7 +506,11 @@ abstract class Project<T : ProjectType>(
         is TaskKey.Root -> rootTaskProvider.getRootTask(taskKey)
     }
 
-    fun addRootTask(taskKey: TaskKey.Root) = projectRecord.rootTaskParentDelegate.addRootTask(taskKey)
+    fun addRootTask(taskKey: TaskKey.Root) {
+        projectRecord.rootTaskParentDelegate.addRootTask(taskKey)
+
+        rootTaskProvider.updateProjectRecord(projectKey, projectRecord.rootTaskParentDelegate.rootTaskKeys)
+    }
 
     private class MissingTaskException(projectId: ProjectKey<*>, taskId: String) :
             Exception("projectId: $projectId, taskId: $taskId")
@@ -521,5 +525,7 @@ abstract class Project<T : ProjectType>(
         fun getRootTask(rootTaskKey: TaskKey.Root): RootTask
 
         fun getRootTasksForProject(projectKey: ProjectKey<*>): Collection<RootTask>
+
+        fun updateProjectRecord(projectKey: ProjectKey<*>, dependentRootTaskKeys: Set<TaskKey.Root>)
     }
 }

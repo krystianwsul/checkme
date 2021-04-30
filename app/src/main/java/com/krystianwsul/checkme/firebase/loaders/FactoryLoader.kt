@@ -97,7 +97,7 @@ class FactoryLoader(
                             friendsFactorySingle,
                     )
 
-                    val rootTaskKeySource = RootTaskKeySource(domainDisposable)
+                    val rootTaskKeySource = RootTaskKeySource()
 
                     val rootTaskManager = RootTasksManager(factoryProvider.database)
 

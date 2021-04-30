@@ -2,9 +2,7 @@ package com.krystianwsul.checkme.firebase.roottask
 
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
-import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.observers.TestObserver
-import org.junit.After
 import org.junit.Before
 import org.junit.Test
 
@@ -22,20 +20,13 @@ class RootTaskKeySourceTest {
         private val rootTaskKey5 = TaskKey.Root("rootTaskKey5")
     }
 
-    private val domainDisposable = CompositeDisposable()
-
     private lateinit var rootTaskKeySource: RootTaskKeySource
     private lateinit var testObserver: TestObserver<Set<TaskKey.Root>>
 
     @Before
     fun before() {
-        rootTaskKeySource = RootTaskKeySource(domainDisposable)
+        rootTaskKeySource = RootTaskKeySource()
         testObserver = rootTaskKeySource.rootTaskKeysObservable.test()
-    }
-
-    @After
-    fun after() {
-        domainDisposable.clear()
     }
 
     @Test

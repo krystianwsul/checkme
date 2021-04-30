@@ -3,6 +3,7 @@ package com.krystianwsul.common.firebase.models
 import com.krystianwsul.common.firebase.json.schedule.*
 import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.time.Time
+import com.krystianwsul.common.utils.ProjectKey
 
 // todo I can't think of a good reason why this couldn't be implemented on the task record itself, but whatever
 sealed class CopyScheduleHelper {
@@ -42,6 +43,7 @@ sealed class CopyScheduleHelper {
             day: Int,
             copiedTime: Time,
             assignedTo: Set<String>,
+            projectKey: ProjectKey<*>?,
     ): SingleScheduleJson
 
     abstract fun newWeekly(
@@ -55,6 +57,7 @@ sealed class CopyScheduleHelper {
             until: String?,
             interval: Int,
             assignedTo: Set<String>,
+            projectKey: ProjectKey<*>?,
     ): WeeklyScheduleJson
 
     abstract fun newMonthlyDay(
@@ -68,6 +71,7 @@ sealed class CopyScheduleHelper {
             from: String?,
             until: String?,
             assignedTo: Set<String>,
+            projectKey: ProjectKey<*>?,
     ): MonthlyDayScheduleJson
 
     abstract fun newMonthlyWeek(
@@ -82,6 +86,7 @@ sealed class CopyScheduleHelper {
             from: String?,
             until: String?,
             assignedTo: Set<String>,
+            projectKey: ProjectKey<*>?,
     ): MonthlyWeekScheduleJson
 
     abstract fun newYearly(
@@ -95,6 +100,7 @@ sealed class CopyScheduleHelper {
             from: String?,
             until: String?,
             assignedTo: Set<String>,
+            projectKey: ProjectKey<*>?,
     ): YearlyScheduleJson
 
     object Private : CopyScheduleHelper() {
@@ -109,8 +115,10 @@ sealed class CopyScheduleHelper {
                 day: Int,
                 copiedTime: Time,
                 assignedTo: Set<String>,
+                projectKey: ProjectKey<*>?,
         ): SingleScheduleJson {
             check(assignedTo.isEmpty())
+            check(projectKey == null)
 
             val destructuredTime = copiedTime.destructure()
 
@@ -140,8 +148,10 @@ sealed class CopyScheduleHelper {
                 until: String?,
                 interval: Int,
                 assignedTo: Set<String>,
+                projectKey: ProjectKey<*>?,
         ): WeeklyScheduleJson {
             check(assignedTo.isEmpty())
+            check(projectKey == null)
 
             val destructuredTime = copiedTime.destructure()
 
@@ -172,8 +182,10 @@ sealed class CopyScheduleHelper {
                 from: String?,
                 until: String?,
                 assignedTo: Set<String>,
+                projectKey: ProjectKey<*>?,
         ): MonthlyDayScheduleJson {
             check(assignedTo.isEmpty())
+            check(projectKey == null)
 
             val destructuredTime = copiedTime.destructure()
 
@@ -205,8 +217,10 @@ sealed class CopyScheduleHelper {
                 from: String?,
                 until: String?,
                 assignedTo: Set<String>,
+                projectKey: ProjectKey<*>?,
         ): MonthlyWeekScheduleJson {
             check(assignedTo.isEmpty())
+            check(projectKey == null)
 
             val destructuredTime = copiedTime.destructure()
 
@@ -238,8 +252,10 @@ sealed class CopyScheduleHelper {
                 from: String?,
                 until: String?,
                 assignedTo: Set<String>,
+                projectKey: ProjectKey<*>?,
         ): YearlyScheduleJson {
             check(assignedTo.isEmpty())
+            check(projectKey == null)
 
             val destructuredTime = copiedTime.destructure()
 
@@ -272,7 +288,10 @@ sealed class CopyScheduleHelper {
                 day: Int,
                 copiedTime: Time,
                 assignedTo: Set<String>,
+                projectKey: ProjectKey<*>?,
         ): SharedSingleScheduleJson {
+            check(projectKey == null)
+
             val destructuredTime = copiedTime.destructure()
 
             return SharedSingleScheduleJson(
@@ -302,7 +321,10 @@ sealed class CopyScheduleHelper {
                 until: String?,
                 interval: Int,
                 assignedTo: Set<String>,
+                projectKey: ProjectKey<*>?,
         ): WeeklyScheduleJson {
+            check(projectKey == null)
+
             val destructuredTime = copiedTime.destructure()
 
             return SharedWeeklyScheduleJson(
@@ -333,7 +355,10 @@ sealed class CopyScheduleHelper {
                 from: String?,
                 until: String?,
                 assignedTo: Set<String>,
+                projectKey: ProjectKey<*>?,
         ): MonthlyDayScheduleJson {
+            check(projectKey == null)
+
             val destructuredTime = copiedTime.destructure()
 
             return SharedMonthlyDayScheduleJson(
@@ -365,7 +390,10 @@ sealed class CopyScheduleHelper {
                 from: String?,
                 until: String?,
                 assignedTo: Set<String>,
+                projectKey: ProjectKey<*>?,
         ): MonthlyWeekScheduleJson {
+            check(projectKey == null)
+
             val destructuredTime = copiedTime.destructure()
 
             return SharedMonthlyWeekScheduleJson(
@@ -397,7 +425,10 @@ sealed class CopyScheduleHelper {
                 from: String?,
                 until: String?,
                 assignedTo: Set<String>,
+                projectKey: ProjectKey<*>?,
         ): YearlyScheduleJson {
+            check(projectKey == null)
+
             val destructuredTime = copiedTime.destructure()
 
             return SharedYearlyScheduleJson(
@@ -430,7 +461,10 @@ sealed class CopyScheduleHelper {
                 day: Int,
                 copiedTime: Time,
                 assignedTo: Set<String>,
+                projectKey: ProjectKey<*>?,
         ): RootSingleScheduleJson {
+            checkNotNull(projectKey)
+
             val destructuredTime = copiedTime.destructure()
 
             return RootSingleScheduleJson(
@@ -446,6 +480,7 @@ sealed class CopyScheduleHelper {
                     destructuredTime.minute,
                     assignedTo.toMap(),
                     destructuredTime.jsonTime,
+                    projectKey.key,
             )
         }
 
@@ -460,7 +495,10 @@ sealed class CopyScheduleHelper {
                 until: String?,
                 interval: Int,
                 assignedTo: Set<String>,
+                projectKey: ProjectKey<*>?,
         ): WeeklyScheduleJson {
+            checkNotNull(projectKey)
+
             val destructuredTime = copiedTime.destructure()
 
             return RootWeeklyScheduleJson(
@@ -477,6 +515,7 @@ sealed class CopyScheduleHelper {
                     interval,
                     assignedTo = assignedTo.toMap(),
                     time = destructuredTime.jsonTime,
+                    projectId = projectKey.key,
             )
         }
 
@@ -491,7 +530,10 @@ sealed class CopyScheduleHelper {
                 from: String?,
                 until: String?,
                 assignedTo: Set<String>,
+                projectKey: ProjectKey<*>?,
         ): MonthlyDayScheduleJson {
+            checkNotNull(projectKey)
+
             val destructuredTime = copiedTime.destructure()
 
             return RootMonthlyDayScheduleJson(
@@ -508,6 +550,7 @@ sealed class CopyScheduleHelper {
                     until,
                     assignedTo = assignedTo.toMap(),
                     time = destructuredTime.jsonTime,
+                    projectId = projectKey.key,
             )
         }
 
@@ -523,7 +566,10 @@ sealed class CopyScheduleHelper {
                 from: String?,
                 until: String?,
                 assignedTo: Set<String>,
+                projectKey: ProjectKey<*>?,
         ): MonthlyWeekScheduleJson {
+            checkNotNull(projectKey)
+
             val destructuredTime = copiedTime.destructure()
 
             return RootMonthlyWeekScheduleJson(
@@ -541,6 +587,7 @@ sealed class CopyScheduleHelper {
                     until,
                     assignedTo = assignedTo.toMap(),
                     time = destructuredTime.jsonTime,
+                    projectId = projectKey.key,
             )
         }
 
@@ -555,7 +602,10 @@ sealed class CopyScheduleHelper {
                 from: String?,
                 until: String?,
                 assignedTo: Set<String>,
+                projectKey: ProjectKey<*>?,
         ): YearlyScheduleJson {
+            checkNotNull(projectKey)
+
             val destructuredTime = copiedTime.destructure()
 
             return RootYearlyScheduleJson(
@@ -572,6 +622,7 @@ sealed class CopyScheduleHelper {
                     until,
                     assignedTo = assignedTo.toMap(),
                     time = destructuredTime.jsonTime,
+                    projectId = projectKey.key,
             )
         }
     }

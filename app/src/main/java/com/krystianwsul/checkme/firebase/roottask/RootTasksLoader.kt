@@ -17,7 +17,7 @@ import io.reactivex.rxjava3.kotlin.merge
 import io.reactivex.rxjava3.kotlin.plusAssign
 
 class RootTasksLoader(
-        private val rootTaskKeySource: RootTaskKeySource,
+        rootTaskKeySource: RootTaskKeySource,
         private val provider: Provider,
         private val domainDisposable: CompositeDisposable,
         private val rootTasksManager: RootTasksManager,
@@ -26,8 +26,11 @@ class RootTasksLoader(
 
     private val taskKeyRelay = ReplayRelay.create<Map<TaskKey.Root, RootTaskRecord?>>()
 
+    private var ignoreKeyUpdates = false
+
     init {
         rootTaskKeySource.rootTaskKeysObservable
+                .filter { !ignoreKeyUpdates }
                 .map { it.associateWith<TaskKey.Root, RootTaskRecord?> { null } }
                 .subscribe(taskKeyRelay)
                 .addTo(domainDisposable)
@@ -35,7 +38,7 @@ class RootTasksLoader(
 
     private fun <T> Observable<T>.replayImmediate() = replay().apply { domainDisposable += connect() }!!
 
-    private data class TaskData(val databaseRx: DatabaseRx<Snapshot<RootTaskJson>>, val initialRecord: RootTaskRecord?)
+    private data class TaskData(val databaseRx: DatabaseRx<Snapshot<RootTaskJson>>, var initialRecord: RootTaskRecord?)
 
     private val databaseRxObservable: Observable<MapChanges<Map<TaskKey.Root, RootTaskRecord?>, TaskKey.Root, TaskData>> = taskKeyRelay.processChanges(
             { it.keys },
@@ -63,8 +66,11 @@ class RootTasksLoader(
                             .mapNotNull(rootTasksManager::set)
                             .map { RecordData(it, false) }
                             .let {
-                                if (taskData.initialRecord != null) {
-                                    it.startWithItem(RecordData(taskData.initialRecord, true))
+                                val initialRecord = taskData.initialRecord
+                                if (initialRecord != null) {
+                                    taskData.initialRecord = null
+
+                                    it.startWithItem(RecordData(initialRecord, true))
                                 } else {
                                     it
                                 }
@@ -98,6 +104,16 @@ class RootTasksLoader(
         )
 
         return taskKey
+    }
+
+    fun ignoreKeyUpdates(action: () -> Unit) {
+        check(!ignoreKeyUpdates)
+
+        ignoreKeyUpdates = true
+        action()
+        check(ignoreKeyUpdates)
+
+        ignoreKeyUpdates = false
     }
 
     data class AddChangeEvent(val rootTaskRecord: RootTaskRecord, val skipChangeTypeEmission: Boolean)

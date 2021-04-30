@@ -323,6 +323,7 @@ fun DomainUpdater.updateScheduleTask(
                 now,
                 sharedProjectParameters.nonNullAssignedTo,
                 this@create,
+                null, // todo task edit
         )
 
         if (imagePath != null) setImage(deviceDbInfo, imageUuid?.let { ImageState.Local(imageUuid) })
@@ -776,7 +777,7 @@ private fun DomainFactory.createScheduleTopLevelTask(
         name: String,
         scheduleDatas: List<Pair<ScheduleData, Time>>,
         note: String?,
-        projectId: ProjectKey<*>,
+        projectKey: ProjectKey<*>,
         imageUuid: String?,
         deviceDbInfo: DeviceDbInfo,
         customTimeMigrationHelper: Project.CustomTimeMigrationHelper,
@@ -784,8 +785,10 @@ private fun DomainFactory.createScheduleTopLevelTask(
         assignedTo: Set<UserKey> = setOf(),
 ): Task {
     return if (Task.WRITE_ROOT_TASKS) {
-        createRootTask(now, imageUuid, name, note, ordinal, projectId).apply {
-            createSchedules(deviceDbInfo.key, now, scheduleDatas, assignedTo, customTimeMigrationHelper)
+        createRootTask(now, imageUuid, name, note, ordinal, projectKey).apply {
+            createSchedules(deviceDbInfo.key, now, scheduleDatas, assignedTo, customTimeMigrationHelper, projectKey)
+
+            projectsFactory.getProjectForce(projectKey).addRootTask(taskKey)
         }
     } else {
         projectsFactory.createScheduleTopLevelTask(
@@ -793,7 +796,7 @@ private fun DomainFactory.createScheduleTopLevelTask(
                 name,
                 scheduleDatas,
                 note,
-                projectId,
+                projectKey,
                 imageUuid,
                 deviceDbInfo,
                 customTimeMigrationHelper,

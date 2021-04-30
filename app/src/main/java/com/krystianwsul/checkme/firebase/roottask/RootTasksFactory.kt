@@ -123,4 +123,10 @@ class RootTasksFactory(
             note: String?,
             ordinal: Double?,
     ) = newTask(RootTaskJson(name, now.long, now.offset, note = note, image = image, ordinal = ordinal))
+
+    override fun updateProjectRecord(projectKey: ProjectKey<*>, dependentRootTaskKeys: Set<TaskKey.Root>) {
+        rootTasksLoader.ignoreKeyUpdates {
+            rootTaskKeySource.onProjectAddedOrUpdated(projectKey, dependentRootTaskKeys)
+        }
+    }
 }

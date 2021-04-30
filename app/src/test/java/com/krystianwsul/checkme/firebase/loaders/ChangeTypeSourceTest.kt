@@ -27,9 +27,9 @@ import com.krystianwsul.common.firebase.json.taskhierarchies.NestedTaskHierarchy
 import com.krystianwsul.common.firebase.json.tasks.RootTaskJson
 import com.krystianwsul.common.firebase.records.project.ProjectRecord
 import com.krystianwsul.common.firebase.records.task.RootTaskRecord
-import com.krystianwsul.common.time.ExactTimeStamp
-import com.krystianwsul.common.time.JsonTime
+import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.ProjectKey
+import com.krystianwsul.common.utils.ScheduleData
 import com.krystianwsul.common.utils.TaskKey
 import io.mockk.every
 import io.mockk.mockk
@@ -46,6 +46,7 @@ class ChangeTypeSourceTest {
     companion object {
 
         private const val privateProjectId = "privateProjectId"
+        private val privateProjectKey = ProjectKey.Private(privateProjectId)
 
         private val taskKey1 = TaskKey.Root("taskId1")
         private val taskKey2 = TaskKey.Root("taskId2")
@@ -146,13 +147,16 @@ class ChangeTypeSourceTest {
     private fun setup(
             userCustomTimeProviderSource: UserCustomTimeProviderSource = immediateUserCustomTimeProviderSource(),
     ) {
-        val rootTaskKeySource = RootTaskKeySource(domainDisposable)
+        val rootTaskKeySource = RootTaskKeySource()
 
         rootTasksLoaderProvider = TestRootTasksLoaderProvider()
 
         val databaseWrapper = mockk<DatabaseWrapper> {
             var taskRecordId = 0
             every { newRootTaskRecordId() } answers { "rootTaskRecordId" + taskRecordId++ }
+
+            var scheduleRecordId = 0
+            every { newRootTaskScheduleRecordId(any()) } answers { "scheduleRecordId" + scheduleRecordId++ }
         }
 
         val rootTasksManager = RootTasksManager(databaseWrapper)
@@ -899,8 +903,21 @@ class ChangeTypeSourceTest {
                 "task",
                 null,
                 null,
-        )
+        ).apply {
+            createSchedules(
+                    privateProjectKey.toUserKey(),
+                    ExactTimeStamp.Local.now,
+                    listOf(Pair(ScheduleData.Single(Date.today(), TimePair(HourMinute.now)), Time.Normal(HourMinute.now))),
+                    setOf(),
+                    mockk(),
+                    privateProjectKey,
+            )
+        }
         val taskKey = task.taskKey
+
+        rootTasksFactory.getRootTask(taskKey)
+
+        rootTasksFactory.updateProjectRecord(privateProjectKey, setOf(taskKey))
 
         rootTasksFactory.getRootTask(taskKey)
 
@@ -916,7 +933,9 @@ class ChangeTypeSourceTest {
     fun testTaskCreateThenRemoteUpdate() {
         val taskKey = createTask()
 
-        acceptPrivateProject(PrivateProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true)))
+        acceptPrivateProject(PrivateProjectJson(
+                rootTaskIds = mutableMapOf(taskKey1.taskId to true, taskKey.taskId to true)
+        ))
 
         projectEmissionChecker.checkRemote {
             rootTasksLoaderProvider.accept(

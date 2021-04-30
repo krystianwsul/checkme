@@ -404,6 +404,7 @@ abstract class Task(
             now: ExactTimeStamp.Local,
             assignedTo: Set<UserKey>,
             customTimeMigrationHelper: Project.CustomTimeMigrationHelper,
+            projectKey: ProjectKey<*>?, // non-null for root tasks
     ) {
         val removeSchedules = mutableListOf<Schedule>()
         val addScheduleDatas = scheduleDatas.map { ScheduleDiffKey(it.first, assignedTo) to it }.toMutableList()
@@ -435,6 +436,7 @@ abstract class Task(
             it.first.scheduleData is ScheduleData.Single
         }
 
+        // todo task create figure out how to handle this for editing single instances with root tasks
         if (singleRemoveSchedule != null && singleAddSchedulePair != null) {
             if (assignedTo.isNotEmpty()) singleRemoveSchedule.setAssignedTo(assignedTo)
 
@@ -448,7 +450,14 @@ abstract class Task(
         } else {
             removeSchedules.forEach { it.setEndExactTimeStamp(now.toOffset()) }
 
-            addSchedules(ownerKey, addScheduleDatas.map { it.second }, now, assignedTo, customTimeMigrationHelper)
+            addSchedules(
+                    ownerKey,
+                    addScheduleDatas.map { it.second },
+                    now,
+                    assignedTo,
+                    customTimeMigrationHelper,
+                    projectKey,
+            )
         }
     }
 
@@ -566,7 +575,8 @@ abstract class Task(
             now: ExactTimeStamp.Local,
             assignedTo: Set<UserKey>,
             customTimeMigrationHelper: Project.CustomTimeMigrationHelper,
-    ) = createSchedules(ownerKey, now, scheduleDatas, assignedTo, customTimeMigrationHelper)
+            projectKey: ProjectKey<*>?,
+    ) = createSchedules(ownerKey, now, scheduleDatas, assignedTo, customTimeMigrationHelper, projectKey)
 
     abstract fun addChild(childTask: Task, now: ExactTimeStamp.Local): TaskHierarchyKey
 
@@ -630,9 +640,10 @@ abstract class Task(
     fun createSchedules(
             ownerKey: UserKey,
             now: ExactTimeStamp.Local,
-            scheduleDatas: List<Pair<ScheduleData, Time>>,
+            scheduleDatas: List<Pair<ScheduleData, Time>>, // todo task are these pairs needed anymore?
             assignedTo: Set<UserKey>,
             customTimeMigrationHelper: Project.CustomTimeMigrationHelper,
+            projectKey: ProjectKey<*>?, // non-null for root tasks
     ) {
         val assignedToKeys = assignedTo.map { it.key }.toSet()
 
@@ -660,6 +671,7 @@ abstract class Task(
                                     date.day,
                                     copiedTime,
                                     assignedToKeys,
+                                    projectKey,
                             )
                     )
 
@@ -687,6 +699,7 @@ abstract class Task(
                                         scheduleData.until?.toJson(),
                                         scheduleData.interval,
                                         assignedToKeys,
+                                        projectKey,
                                 )
                         )
 
@@ -719,6 +732,7 @@ abstract class Task(
                                     scheduleData.from?.toJson(),
                                     scheduleData.until?.toJson(),
                                     assignedToKeys,
+                                    projectKey,
                             )
                     )
 
@@ -741,6 +755,7 @@ abstract class Task(
                                     scheduleData.from?.toJson(),
                                     scheduleData.until?.toJson(),
                                     assignedToKeys,
+                                    projectKey,
                             )
                     )
 
@@ -767,6 +782,7 @@ abstract class Task(
                                     scheduleData.from?.toJson(),
                                     scheduleData.until?.toJson(),
                                     assignedToKeys,
+                                    projectKey,
                             )
                     )
 
@@ -783,6 +799,7 @@ abstract class Task(
             now: ExactTimeStamp.Local,
             schedules: List<Schedule>,
             customTimeMigrationHelper: Project.CustomTimeMigrationHelper,
+            projectKey: ProjectKey<*>?, // non-null for root tasks
     ) {
         for (schedule in schedules) {
             val today = Date.today()
@@ -825,6 +842,7 @@ abstract class Task(
                                     date.day,
                                     copiedTime,
                                     assignedTo,
+                                    projectKey,
                             )
                     )
 
@@ -843,6 +861,7 @@ abstract class Task(
                                     schedule.until?.toJson(),
                                     schedule.interval,
                                     assignedTo,
+                                    projectKey,
                             )
                     )
 
@@ -861,6 +880,7 @@ abstract class Task(
                                     schedule.from?.toJson(),
                                     schedule.until?.toJson(),
                                     assignedTo,
+                                    projectKey,
                             )
                     )
 
@@ -880,6 +900,7 @@ abstract class Task(
                                     schedule.from?.toJson(),
                                     schedule.until?.toJson(),
                                     assignedTo,
+                                    projectKey,
                             )
                     )
 
@@ -898,6 +919,7 @@ abstract class Task(
                                     schedule.from?.toJson(),
                                     schedule.until?.toJson(),
                                     assignedTo,
+                                    projectKey,
                             )
                     )
 

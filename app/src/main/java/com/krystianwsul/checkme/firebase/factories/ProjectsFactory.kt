@@ -144,7 +144,9 @@ class ProjectsFactory(
                 imageUuid,
                 deviceDbInfo,
                 ordinal,
-        ).apply { createSchedules(deviceDbInfo.key, now, scheduleDatas, assignedTo, customTimeMigrationHelper) }
+        ).apply {
+            createSchedules(deviceDbInfo.key, now, scheduleDatas, assignedTo, customTimeMigrationHelper, null)
+        }
     }
 
     fun createNoScheduleOrParentTask(

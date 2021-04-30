@@ -36,4 +36,7 @@ class RootTasksManager(private val databaseWrapper: DatabaseWrapper) :
     )?.data
 
     override fun deleteTaskRecord(taskRecord: TaskRecord) = remove((taskRecord as RootTaskRecord).taskKey)
+
+    fun newTaskRecord(taskJson: RootTaskJson) =
+            RootTaskRecord(taskJson, databaseWrapper, this).also { add(it.taskKey, it) }
 }

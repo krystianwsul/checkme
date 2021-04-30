@@ -49,6 +49,14 @@ class RootTasksLoader(
             .map { RemoveEvent(it.keys) }
             .replayImmediate()
 
+    fun addTask(taskJson: RootTaskJson): RootTaskRecord {
+        val taskRecord = rootTasksManager.newTaskRecord(taskJson)
+
+        // todo task create start add to RX
+
+        return taskRecord
+    }
+
     data class AddChangeEvent(val rootTaskRecord: RootTaskRecord, val isTracked: Boolean)
 
     data class RemoveEvent(val taskKeys: Set<TaskKey.Root>)

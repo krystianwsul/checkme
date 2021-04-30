@@ -782,18 +782,32 @@ private fun DomainFactory.createScheduleTopLevelTask(
         customTimeMigrationHelper: Project.CustomTimeMigrationHelper,
         ordinal: Double? = null,
         assignedTo: Set<UserKey> = setOf(),
-): Task = projectsFactory.createScheduleTopLevelTask(
-        now,
-        name,
-        scheduleDatas,
-        note,
-        projectId,
-        imageUuid,
-        deviceDbInfo,
-        customTimeMigrationHelper,
-        ordinal,
-        assignedTo,
-)
+): Task {
+    return if (Task.WRITE_ROOT_TASKS) {
+        rootTasksFactory.createTask(
+                now,
+                imageUuid?.let(::getTaskJsonImage),
+                name,
+                note,
+                ordinal,
+        ).apply { createSchedules(deviceDbInfo.key, now, scheduleDatas, assignedTo, customTimeMigrationHelper) }
+    } else {
+        projectsFactory.createScheduleTopLevelTask(
+                now,
+                name,
+                scheduleDatas,
+                note,
+                projectId,
+                imageUuid,
+                deviceDbInfo,
+                customTimeMigrationHelper,
+                ordinal,
+                assignedTo,
+        )
+    }
+}
+
+private fun DomainFactory.getTaskJsonImage(imageUuid: String) = TaskJson.Image(imageUuid, deviceDbInfo.uuid)
 
 private fun DomainFactory.createNoScheduleOrParentTask(
         // todo task create

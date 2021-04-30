@@ -4,9 +4,12 @@ import com.krystianwsul.checkme.firebase.UserKeyStore
 import com.krystianwsul.checkme.firebase.factories.ProjectsFactory
 import com.krystianwsul.checkme.utils.publishImmediate
 import com.krystianwsul.common.firebase.ChangeType
+import com.krystianwsul.common.firebase.json.tasks.RootTaskJson
+import com.krystianwsul.common.firebase.json.tasks.TaskJson
 import com.krystianwsul.common.firebase.models.task.RootTask
 import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.firebase.models.taskhierarchy.TaskHierarchy
+import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.common.utils.mapValuesNotNull
@@ -17,7 +20,7 @@ import io.reactivex.rxjava3.kotlin.merge
 import io.reactivex.rxjava3.kotlin.plusAssign
 
 class RootTasksFactory(
-        rootTasksLoader: RootTasksLoader,
+        private val rootTasksLoader: RootTasksLoader,
         private val userKeyStore: UserKeyStore,
         private val rootTaskDependencyCoordinator: RootTaskDependencyCoordinator,
         domainDisposable: CompositeDisposable,
@@ -106,4 +109,20 @@ class RootTasksFactory(
 
     override fun getRootTasksForProject(projectKey: ProjectKey<*>) =
             rootTasks.values.filter { it.projectId == projectKey.key }
+
+    private fun newTask(taskJson: RootTaskJson): RootTask {
+        // todo task create handle ChangeType
+
+        val taskRecord = rootTasksLoader.addTask(taskJson)
+
+        TODO("toto task create figure out RootTaskFactory init")
+    }
+
+    fun createTask(
+            now: ExactTimeStamp.Local,
+            image: TaskJson.Image?,
+            name: String,
+            note: String?,
+            ordinal: Double?,
+    ) = newTask(RootTaskJson(name, now.long, now.offset, note = note, image = image, ordinal = ordinal))
 }

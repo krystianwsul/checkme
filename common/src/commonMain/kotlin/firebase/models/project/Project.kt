@@ -527,5 +527,13 @@ abstract class Project<T : ProjectType>(
         fun getRootTasksForProject(projectKey: ProjectKey<*>): Collection<RootTask>
 
         fun updateProjectRecord(projectKey: ProjectKey<*>, dependentRootTaskKeys: Set<TaskKey.Root>)
+
+        fun createTask(
+                now: ExactTimeStamp.Local,
+                image: TaskJson.Image?,
+                name: String,
+                note: String?,
+                ordinal: Double?,
+        ): Task
     }
 }

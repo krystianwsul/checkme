@@ -51,7 +51,13 @@ class RootTask(
             note: String?,
             image: TaskJson.Image?,
             ordinal: Double?,
-    ) = TODO("todo task create")
+    ): RootTask {
+        val childTask = parent.createTask(now, image, name, note, ordinal)
+
+        childTask.createParentNestedTaskHierarchy(this, now)
+
+        return childTask
+    }
 
     override fun deleteFromParent() = parent.deleteRootTask(this)
 
@@ -100,5 +106,13 @@ class RootTask(
         fun deleteRootTask(task: RootTask)
 
         fun getProject(projectId: String): Project<*>
+
+        override fun createTask(
+                now: ExactTimeStamp.Local,
+                image: TaskJson.Image?,
+                name: String,
+                note: String?,
+                ordinal: Double?,
+        ): RootTask
     }
 }

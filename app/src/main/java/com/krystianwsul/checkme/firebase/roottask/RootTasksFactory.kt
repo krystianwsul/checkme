@@ -116,7 +116,7 @@ class RootTasksFactory(
         return getRootTask(taskKey)
     }
 
-    fun createTask(
+    override fun createTask(
             now: ExactTimeStamp.Local,
             image: TaskJson.Image?,
             name: String,

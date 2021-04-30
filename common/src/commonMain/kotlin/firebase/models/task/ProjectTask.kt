@@ -30,7 +30,7 @@ class ProjectTask(override val project: Project<*>, private val taskRecord: Proj
             note: String?,
             image: TaskJson.Image?,
             ordinal: Double?,
-    ) = project.createChildTask(this, now, name, note, image, ordinal) // todo task create
+    ) = project.createChildTask(this, now, name, note, image, ordinal)
 
     override fun deleteFromParent() = project.deleteTask(this)
 
@@ -45,7 +45,7 @@ class ProjectTask(override val project: Project<*>, private val taskRecord: Proj
     ) = project.getOrCopyTime(ownerKey, dayOfWeek, time, customTimeMigrationHelper, now) // todo task create
 
     override fun addChild(childTask: Task, now: ExactTimeStamp.Local): TaskHierarchyKey {
-        return project.createTaskHierarchy(this, childTask as ProjectTask, now) // todo task create
+        return project.createTaskHierarchy(this, childTask as ProjectTask, now) // todo task convert
     }
 
     override fun invalidateProjectParentTaskHierarchies() {

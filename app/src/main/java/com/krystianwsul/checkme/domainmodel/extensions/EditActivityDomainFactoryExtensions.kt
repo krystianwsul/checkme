@@ -589,9 +589,7 @@ private fun DomainFactory.getParentTreeDatas(
 ): List<EditViewModel.ParentTreeData> {
     val parentTreeDatas = mutableListOf<EditViewModel.ParentTreeData>()
 
-    parentTreeDatas += projectsFactory.privateProject
-            .projectTasks // todo task create
-            .asSequence()
+    parentTreeDatas += getAllTasks().asSequence()
             .filter { it.showAsParent(now, excludedTaskKeys) }
             .filter { it.isTopLevelTask(now) }
             .map {
@@ -630,8 +628,7 @@ private fun DomainFactory.getProjectTaskTreeDatas(
         project: Project<*>,
         excludedTaskKeys: Set<TaskKey>,
 ): List<EditViewModel.ParentTreeData> {
-    return project.projectTasks // todo task create
-            .asSequence()
+    return project.getAllTasks()
             .filter { it.showAsParent(now, excludedTaskKeys) }
             .filter { it.isTopLevelTask(now) }
             .map {

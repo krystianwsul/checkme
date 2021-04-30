@@ -42,7 +42,7 @@ class ProjectTask(override val project: Project<*>, private val taskRecord: Proj
             time: Time,
             customTimeMigrationHelper: Project.CustomTimeMigrationHelper,
             now: ExactTimeStamp.Local,
-    ) = project.getOrCopyTime(ownerKey, dayOfWeek, time, customTimeMigrationHelper, now) // todo task create
+    ) = project.getOrCopyTime(ownerKey, dayOfWeek, time, customTimeMigrationHelper, now)
 
     override fun addChild(childTask: Task, now: ExactTimeStamp.Local): TaskHierarchyKey {
         return project.createTaskHierarchy(this, childTask as ProjectTask, now) // todo task convert

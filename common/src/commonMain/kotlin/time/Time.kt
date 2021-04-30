@@ -80,7 +80,7 @@ sealed class Time {
 
             companion object {
 
-                // todo after flipping this, remove all code for creating old time types
+                // todo after flipping this, remove all code for creating old time types.  make json properties val
                 const val WRITE_USER_CUSTOM_TIMES = false // todo published on 2021.04.20
             }
 

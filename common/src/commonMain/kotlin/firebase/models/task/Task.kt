@@ -31,6 +31,7 @@ abstract class Task(
 
     companion object {
 
+        // todo after flipping switch, make json properties val
         const val WRITE_ROOT_TASKS = true // todo task disable
     }
 

@@ -764,7 +764,6 @@ class DomainFactory(
                 customTimeMigrationHelper: Project.CustomTimeMigrationHelper,
         ): RootTask {
             val newTask = rootTasksFactory.newTask(RootTaskJson(
-                    // todo task convert think about RX
                     oldTask.name,
                     now.long,
                     now.offset,
@@ -786,8 +785,14 @@ class DomainFactory(
                         customTimeMigrationHelper,
                         newProject.projectKey,
                 )
+
+                newProject.addRootTask(newTask.taskKey)
             } else {
-                currentNoScheduleOrParent?.let { newTask.setNoScheduleOrParent(now, newProject.projectKey) }
+                currentNoScheduleOrParent?.let {
+                    newTask.setNoScheduleOrParent(now, newProject.projectKey)
+
+                    newProject.addRootTask(newTask.taskKey)
+                }
             }
 
             return newTask

@@ -22,7 +22,7 @@ abstract class RootTaskParentDelegate(private val rootTaskParentJson: RootTaskPa
 
     protected abstract fun addValue(subKey: String, value: Boolean?)
 
-    fun addRootTask(rootTaskKey: TaskKey.Root) {
+    fun addRootTask(rootTaskKey: TaskKey.Root) { // todo task convert actually call this for root tasks, todo wrap calls in ingore thingy
         val rootTaskId = rootTaskKey.taskId
 
         if (!rootTaskIds.containsKey(rootTaskId)) {

@@ -682,7 +682,7 @@ class DomainFactory(
 
             val newProject = projectsFactory.getProjectForce(newProjectKey)
 
-            for (pair in projectToRootConversion.startTasks.values) { // todo task convert don't need second pair item
+            for (pair in projectToRootConversion.startTasks.values) {
                 val task = copyTask(
                         deviceDbInfo,
                         pair.first,

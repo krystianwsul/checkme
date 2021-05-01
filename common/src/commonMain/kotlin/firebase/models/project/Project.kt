@@ -509,13 +509,13 @@ abstract class Project<T : ProjectType>(
     fun addRootTask(taskKey: TaskKey.Root) {
         projectRecord.rootTaskParentDelegate.addRootTask(taskKey)
 
-        updateRootTaskKeys()
+        updateRootTaskKeys() // todo task convert check that all these are wrapped
     }
 
     fun removeRootTask(taskKey: TaskKey.Root) {
         projectRecord.rootTaskParentDelegate.removeRootTask(taskKey)
 
-        updateRootTaskKeys()
+        updateRootTaskKeys() // todo task convert check that all these are wrapped
     }
 
     private fun updateRootTaskKeys() {

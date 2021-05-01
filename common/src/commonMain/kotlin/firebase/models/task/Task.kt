@@ -820,7 +820,7 @@ abstract class Task(
                     now,
             )
 
-            val assignedTo = schedule.takeIf { it.topLevelTask.project == project } // todo task convert
+            val assignedTo = schedule.takeIf { it.topLevelTask.project == project }
                     ?.assignedTo
                     .orEmpty()
                     .map { it.key }

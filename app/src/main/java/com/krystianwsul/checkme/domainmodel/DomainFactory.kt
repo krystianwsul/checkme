@@ -784,7 +784,6 @@ class DomainFactory(
                 )
 
                 val newScheduleKey = convertScheduleKey(
-                        deviceDbInfo.userInfo,
                         oldTask,
                         oldInstance.scheduleKey,
                         customTimeMigrationHelper,
@@ -794,9 +793,6 @@ class DomainFactory(
                 InstanceConversionData(newInstance, newScheduleKey, updater)
             }
 
-            @Suppress("SimplifyBooleanWithConstants")
-            val instanceJsons = mutableMapOf<String, InstanceJson>() // todo task convert cleanup
-
             val newTask = rootTasksFactory.newTask(RootTaskJson(
                     // todo task convert think about RX
                     oldTask.name,
@@ -804,7 +800,6 @@ class DomainFactory(
                     now.offset,
                     oldTask.endExactTimeStamp?.long,
                     oldTask.note,
-                    instanceJsons,
                     ordinal = oldTask.ordinal,
             ))
 
@@ -867,7 +862,6 @@ class DomainFactory(
         }
 
         private fun convertScheduleKey(
-                userInfo: UserInfo,
                 oldTask: ProjectTask,
                 oldScheduleKey: ScheduleKey,
                 customTimeMigrationHelper: Project.CustomTimeMigrationHelper,
@@ -878,15 +872,8 @@ class DomainFactory(
             if (oldScheduleTimePair.customTimeKey == null) return oldScheduleKey
 
             val convertedTime = when (val customTime = oldTask.project.getCustomTime(oldScheduleTimePair.customTimeKey!!)) {
-                is Time.Custom.Project<*> -> {
-                    val ownerKey = when (customTime) {
-                        is PrivateCustomTime -> userInfo.key
-                        is SharedCustomTime -> customTime.ownerKey!!
-                        else -> throw IllegalStateException()
-                    }
-
-                    getOrCreateCustomTime(ownerKey, oldScheduleDate.dayOfWeek, customTime, customTimeMigrationHelper, now)
-                }
+                is Time.Custom.Project<*> ->
+                    getOrCreateCustomTime(oldScheduleDate.dayOfWeek, customTime, customTimeMigrationHelper, now)
                 is Time.Custom.User -> customTime
                 else -> throw UnsupportedOperationException()
             }
@@ -895,7 +882,6 @@ class DomainFactory(
         }
 
         private fun getOrCreateCustomTime(
-                ownerKey: UserKey,
                 dayOfWeek: DayOfWeek,
                 customTime: Time.Custom.Project<*>,
                 customTimeMigrationHelper: Project.CustomTimeMigrationHelper,

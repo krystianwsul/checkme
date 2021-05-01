@@ -119,7 +119,7 @@ abstract class Project<T : ProjectType>(
 
         if (oldScheduleTimePair.customTimeKey == null) return oldScheduleKey
 
-        val convertedTime = when (val customTime = oldTask.project.getCustomTime(oldScheduleTimePair.customTimeKey)) { // todo task convert
+        val convertedTime = when (val customTime = oldTask.project.getCustomTime(oldScheduleTimePair.customTimeKey)) {
             is Time.Custom.Project<*> -> {
                 val ownerKey = when (customTime) {
                     is PrivateCustomTime -> userInfo.key
@@ -269,7 +269,7 @@ abstract class Project<T : ProjectType>(
 
         val updater = { taskKeyMap: Map<String, String> ->
             parentState.parentInstanceKey?.let { oldKey ->
-                val newTaskId = taskKeyMap.getValue((oldKey.taskKey as TaskKey.Project).taskId) // todo task convert
+                val newTaskId = taskKeyMap.getValue((oldKey.taskKey as TaskKey.Project).taskId)
                 val newTaskKey = TaskKey.Project(newProjectKey, newTaskId)
 
                 instanceJson.parentJson = InstanceJson.ParentJson(InstanceKey(newTaskKey, oldKey.scheduleKey))
@@ -418,7 +418,7 @@ abstract class Project<T : ProjectType>(
         childTaskHierarchies.map { it.childTask }.forEach {
             it.requireCurrent(now)
 
-            convertRemoteToRemoteHelper(now, projectToProjectConversion, it as ProjectTask) // todo task convert
+            convertRemoteToRemoteHelper(now, projectToProjectConversion, it as ProjectTask)
         }
     }
 

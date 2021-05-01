@@ -309,7 +309,7 @@ fun DomainUpdater.updateScheduleTask(
 
     val task = getTaskForce(taskKey).let {
         it.requireCurrent(now)
-        updateProject(it, now, sharedProjectParameters?.key ?: defaultProjectId)
+        convertAndUpdateProject(it, now, sharedProjectParameters?.key ?: defaultProjectId)
     }.apply {
         setName(name, note)
 
@@ -407,7 +407,7 @@ fun DomainUpdater.updateTopLevelTask(
 
     val task = getTaskForce(taskKey).also {
         it.requireCurrent(now)
-        updateProject(it, now, sharedProjectKey ?: defaultProjectId)
+        convertAndUpdateProject(it, now, sharedProjectKey ?: defaultProjectId)
     }.apply {
         setName(name, note)
 
@@ -449,7 +449,7 @@ fun DomainUpdater.createScheduleJoinTopLevelTask(
     val joinableTaskKeys = joinables.map { it.taskKey }
 
     val joinTasks = if (allReminders) {
-        joinableTaskKeys.map { updateProject(getTaskForce(it), now, finalProjectId) }
+        joinableTaskKeys.map { convertAndUpdateProject(getTaskForce(it), now, finalProjectId) }
     } else {
         check(
                 joinableTaskKeys.map { (it as TaskKey.Project).projectKey } // todo task join
@@ -555,7 +555,7 @@ fun DomainUpdater.createJoinTopLevelTask(
                     .distinct()
                     .single()
 
-    val joinTasks = joinTaskKeys.map { updateProject(getTaskForce(it), now, finalProjectId) }
+    val joinTasks = joinTaskKeys.map { convertAndUpdateProject(getTaskForce(it), now, finalProjectId) }
 
     val ordinal = joinTasks.map { it.ordinal }.minOrNull()
 
@@ -861,9 +861,11 @@ private fun DomainFactory.createRootTask(
     return task
 }
 
-private fun DomainFactory.updateProject(task: Task, now: ExactTimeStamp.Local, projectKey: ProjectKey<*>): Task {
-    if (task.project.projectKey == projectKey) return task
-
+private fun DomainFactory.convertAndUpdateProject(
+        task: Task,
+        now: ExactTimeStamp.Local,
+        projectKey: ProjectKey<*>,
+): Task {
     return if (Task.WRITE_ROOT_TASKS) {
         when (task) {
             is RootTask -> task.updateProject(this, now, projectKey)
@@ -871,6 +873,8 @@ private fun DomainFactory.updateProject(task: Task, now: ExactTimeStamp.Local, p
             else -> throw UnsupportedOperationException()
         }
     } else {
+        if (task.project.projectKey == projectKey) return task
+
         task.updateProject(this, now, projectKey)
     }
 }

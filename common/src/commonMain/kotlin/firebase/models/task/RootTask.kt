@@ -97,6 +97,8 @@ class RootTask(
             now: ExactTimeStamp.Local,
             projectKey: ProjectKey<*>,
     ): Task {
+        if (project.projectKey == projectKey) return this
+
         val interval = intervals.last()
 
         val taskParentEntry = when (val type = interval.type) {

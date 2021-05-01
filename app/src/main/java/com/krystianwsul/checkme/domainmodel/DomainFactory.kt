@@ -31,7 +31,6 @@ import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.MyCustomTime
-import com.krystianwsul.common.firebase.json.InstanceJson
 import com.krystianwsul.common.firebase.json.tasks.RootTaskJson
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.customtime.PrivateCustomTime
@@ -683,13 +682,10 @@ class DomainFactory(
 
             val newProject = projectsFactory.getProjectForce(newProjectKey)
 
-            val allUpdaters = mutableListOf<(Map<String, String>) -> Any?>()
-
-            for (pair in projectToRootConversion.startTasks.values) {
-                val (task, updaters) = copyTask(
+            for (pair in projectToRootConversion.startTasks.values) { // todo task convert don't need second pair item
+                val task = copyTask(
                         deviceDbInfo,
                         pair.first,
-                        pair.second,
                         now,
                         newProject,
                         this@DomainFactory,
@@ -697,7 +693,6 @@ class DomainFactory(
 
                 projectToRootConversion.endTasks[pair.first.id] = task
                 projectToRootConversion.copiedTaskKeys[pair.first.taskKey] = task.taskKey
-                allUpdaters += updaters
             }
 
             for (startTaskHierarchy in projectToRootConversion.startTaskHierarchies) {
@@ -718,10 +713,6 @@ class DomainFactory(
                 else
                     pair.first.setEndData(endData)
             }
-
-            val taskKeyMap = projectToRootConversion.endTasks.mapValues { it.value.taskKey.taskId }
-
-            allUpdaters.forEach { it(taskKeyMap) }
 
             projectToRootConversion.endTasks.forEach {
                 it.value
@@ -765,34 +756,13 @@ class DomainFactory(
             }
         }
 
-        @Suppress("ConstantConditionIf")
-        fun copyTask(
+        private fun copyTask(
                 deviceDbInfo: DeviceDbInfo,
                 oldTask: ProjectTask,
-                instances: Collection<Instance>,
                 now: ExactTimeStamp.Local,
                 newProject: Project<*>,
                 customTimeMigrationHelper: Project.CustomTimeMigrationHelper,
-        ): Pair<RootTask, List<(Map<String, String>) -> Any?>> {
-            val instanceDatas = instances.map { oldInstance ->
-                val (newInstance, updater) = getInstanceJson(
-                        deviceDbInfo.key,
-                        oldInstance,
-                        customTimeMigrationHelper,
-                        now,
-                        newProject,
-                )
-
-                val newScheduleKey = convertScheduleKey(
-                        oldTask,
-                        oldInstance.scheduleKey,
-                        customTimeMigrationHelper,
-                        now,
-                )
-
-                InstanceConversionData(newInstance, newScheduleKey, updater)
-            }
-
+        ): RootTask {
             val newTask = rootTasksFactory.newTask(RootTaskJson(
                     // todo task convert think about RX
                     oldTask.name,
@@ -809,92 +779,18 @@ class DomainFactory(
             if (currentSchedules.isNotEmpty()) {
                 check(currentNoScheduleOrParent == null)
 
-                newTask.copySchedules(deviceDbInfo, now, currentSchedules, customTimeMigrationHelper, newProject.projectKey)
+                newTask.copySchedules(
+                        deviceDbInfo,
+                        now,
+                        currentSchedules,
+                        customTimeMigrationHelper,
+                        newProject.projectKey,
+                )
             } else {
                 currentNoScheduleOrParent?.let { newTask.setNoScheduleOrParent(now, newProject.projectKey) }
             }
 
-            return newTask to instanceDatas.map { it.updater }
-        }
-
-        private fun getInstanceJson(
-                ownerKey: UserKey,
-                instance: Instance,
-                customTimeMigrationHelper: Project.CustomTimeMigrationHelper,
-                now: ExactTimeStamp.Local,
-                newProject: Project<*>,
-        ): Pair<InstanceJson, (Map<String, String>) -> Any?> {
-            val done = instance.doneOffset
-
-            val instanceDate = instance.instanceDate
-
-            val newInstanceTime = newProject.getOrCopyTime(
-                    ownerKey,
-                    instanceDate.dayOfWeek,
-                    instance.instanceTime,
-                    customTimeMigrationHelper,
-                    now,
-            )
-
-            val instanceTimeString = JsonTime.fromTime(newInstanceTime).toJson()
-
-            val parentState = instance.parentState
-
-            val instanceJson = InstanceJson(
-                    done?.long,
-                    done?.offset,
-                    instanceDate.toJson(),
-                    instanceTimeString,
-                    parentJson = parentState.parentInstanceKey?.let(InstanceJson::ParentJson),
-                    noParent = parentState.noParent,
-            )
-
-            val updater = { taskKeyMap: Map<String, String> -> // todo task after convert consider improving typing
-                parentState.parentInstanceKey?.let { oldKey ->
-                    val newTaskId = taskKeyMap.getValue((oldKey.taskKey as TaskKey.Project).taskId)
-                    val newTaskKey = TaskKey.Root(newTaskId)
-
-                    instanceJson.parentJson = InstanceJson.ParentJson(InstanceKey(newTaskKey, oldKey.scheduleKey))
-                }
-            }
-
-            return instanceJson to updater
-        }
-
-        private fun convertScheduleKey(
-                oldTask: ProjectTask,
-                oldScheduleKey: ScheduleKey,
-                customTimeMigrationHelper: Project.CustomTimeMigrationHelper,
-                now: ExactTimeStamp.Local,
-        ): ScheduleKey {
-            val (oldScheduleDate, oldScheduleTimePair) = oldScheduleKey
-
-            if (oldScheduleTimePair.customTimeKey == null) return oldScheduleKey
-
-            val convertedTime = when (val customTime = oldTask.project.getCustomTime(oldScheduleTimePair.customTimeKey!!)) {
-                is Time.Custom.Project<*> ->
-                    getOrCreateCustomTime(oldScheduleDate.dayOfWeek, customTime, customTimeMigrationHelper, now)
-                is Time.Custom.User -> customTime
-                else -> throw UnsupportedOperationException()
-            }
-
-            return ScheduleKey(oldScheduleDate, convertedTime.timePair)
-        }
-
-        private fun getOrCreateCustomTime(
-                dayOfWeek: DayOfWeek,
-                customTime: Time.Custom.Project<*>,
-                customTimeMigrationHelper: Project.CustomTimeMigrationHelper,
-                now: ExactTimeStamp.Local,
-        ): Time {
-            return customTimeMigrationHelper.tryMigrateProjectCustomTime(customTime, now)
-                    ?: Time.Normal(customTime.getHourMinute(dayOfWeek))
+            return newTask
         }
     }
-
-    private class InstanceConversionData(
-            val newInstanceJson: InstanceJson,
-            val newScheduleKey: ScheduleKey,
-            val updater: (Map<String, String>) -> Any?,
-    )
 }

@@ -58,6 +58,8 @@ class RootTask(
 
         childTask.createParentNestedTaskHierarchy(this, now)
 
+        addRootTask(childTask)
+
         return childTask
     }
 
@@ -87,8 +89,19 @@ class RootTask(
         is Time.Normal -> time
     }
 
-    override fun addChild(childTask: Task, now: ExactTimeStamp.Local) =
-            createParentNestedTaskHierarchy(childTask, now)
+    override fun addChild(childTask: Task, now: ExactTimeStamp.Local): TaskHierarchyKey {
+        val taskHierarchyKey = childTask.createParentNestedTaskHierarchy(this, now)
+
+        addRootTask(childTask as RootTask)
+
+        return taskHierarchyKey
+    }
+
+    private fun addRootTask(childTask: RootTask) {
+        taskRecord.rootTaskParentDelegate.addRootTask(childTask.taskKey)
+
+        parent.updateTaskRecord(taskKey, taskRecord.rootTaskParentDelegate.rootTaskKeys)
+    }
 
     override fun invalidateProjectParentTaskHierarchies() = invalidateIntervals()
 

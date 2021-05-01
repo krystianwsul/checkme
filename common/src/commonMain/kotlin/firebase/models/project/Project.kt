@@ -538,6 +538,8 @@ abstract class Project<T : ProjectType>(
 
         fun updateProjectRecord(projectKey: ProjectKey<*>, dependentRootTaskKeys: Set<TaskKey.Root>)
 
+        fun updateTaskRecord(taskKey: TaskKey.Root, dependentRootTaskKeys: Set<TaskKey.Root>)
+
         fun createTask(
                 now: ExactTimeStamp.Local,
                 image: TaskJson.Image?,

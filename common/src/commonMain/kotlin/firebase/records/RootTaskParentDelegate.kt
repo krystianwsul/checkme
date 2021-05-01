@@ -22,7 +22,7 @@ abstract class RootTaskParentDelegate(private val rootTaskParentJson: RootTaskPa
 
     protected abstract fun addValue(subKey: String, value: Boolean?)
 
-    fun addRootTask(rootTaskKey: TaskKey.Root) { // todo task convert actually call this for root tasks, todo wrap calls in ingore thingy
+    fun addRootTask(rootTaskKey: TaskKey.Root) {
         val rootTaskId = rootTaskKey.taskId
 
         if (!rootTaskIds.containsKey(rootTaskId)) {
@@ -34,7 +34,7 @@ abstract class RootTaskParentDelegate(private val rootTaskParentJson: RootTaskPa
         }
     }
 
-    fun removeRootTask(rootTaskKey: TaskKey.Root) {
+    fun removeRootTask(rootTaskKey: TaskKey.Root) { // todo task relevance remember to call this after removing hierarchies, or do bulk update
         val rootTaskId = rootTaskKey.taskId
 
         if (rootTaskIds.containsKey(rootTaskId)) {

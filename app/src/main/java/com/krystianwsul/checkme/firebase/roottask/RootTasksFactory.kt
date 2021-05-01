@@ -21,7 +21,7 @@ import io.reactivex.rxjava3.kotlin.merge
 import io.reactivex.rxjava3.kotlin.plusAssign
 
 class RootTasksFactory(
-        val rootTasksLoader: RootTasksLoader,
+        private val rootTasksLoader: RootTasksLoader,
         private val userKeyStore: UserKeyStore,
         private val rootTaskDependencyCoordinator: RootTaskDependencyCoordinator,
         domainDisposable: CompositeDisposable,
@@ -128,6 +128,12 @@ class RootTasksFactory(
     override fun updateProjectRecord(projectKey: ProjectKey<*>, dependentRootTaskKeys: Set<TaskKey.Root>) {
         rootTasksLoader.ignoreKeyUpdates {
             rootTaskKeySource.onProjectAddedOrUpdated(projectKey, dependentRootTaskKeys)
+        }
+    }
+
+    override fun updateTaskRecord(taskKey: TaskKey.Root, dependentRootTaskKeys: Set<TaskKey.Root>) {
+        rootTasksLoader.ignoreKeyUpdates {
+            rootTaskKeySource.onRootTaskAddedOrUpdated(taskKey, dependentRootTaskKeys)
         }
     }
 

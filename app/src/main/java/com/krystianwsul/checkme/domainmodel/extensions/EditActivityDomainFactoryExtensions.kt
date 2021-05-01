@@ -862,8 +862,14 @@ private fun DomainFactory.createRootTask(
 }
 
 private fun DomainFactory.updateProject(task: Task, now: ExactTimeStamp.Local, projectKey: ProjectKey<*>): Task {
+    if (task.project.projectKey == projectKey) return task
+
     return if (Task.WRITE_ROOT_TASKS) {
-        TODO("todo task convert")
+        when (task) {
+            is RootTask -> task.updateProject(this, now, projectKey)
+            is ProjectTask -> converter.convertToRoot(now, task, projectKey)
+            else -> throw UnsupportedOperationException()
+        }
     } else {
         task.updateProject(this, now, projectKey)
     }

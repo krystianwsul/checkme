@@ -57,12 +57,7 @@ class ProjectTask(override val project: Project<*>, private val taskRecord: Proj
             projectUpdater: ProjectUpdater,
             now: ExactTimeStamp.Local,
             projectKey: ProjectKey<*>,
-    ): Task {
-        return if (projectKey == project.projectKey)
-            this
-        else
-            projectUpdater.convertProject(now, this, projectKey)
-    }
+    ) = projectUpdater.convertProject(now, this, projectKey)
 
     fun fixOffsets() {
         if (taskRecord.startTimeOffset == null) taskRecord.startTimeOffset = startExactTimeStamp.offset

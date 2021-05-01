@@ -5,7 +5,7 @@ import com.krystianwsul.common.firebase.models.task.ProjectTask
 import com.krystianwsul.common.firebase.models.taskhierarchy.TaskHierarchy
 import com.krystianwsul.common.utils.TaskKey
 
-class RemoteToRemoteConversion {
+class ProjectToProjectConversion {
 
     val startTasks = mutableMapOf<String, Pair<ProjectTask, List<Instance>>>()
     val startTaskHierarchies = mutableListOf<TaskHierarchy>()

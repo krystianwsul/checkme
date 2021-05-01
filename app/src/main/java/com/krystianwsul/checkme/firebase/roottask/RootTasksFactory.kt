@@ -21,7 +21,7 @@ import io.reactivex.rxjava3.kotlin.merge
 import io.reactivex.rxjava3.kotlin.plusAssign
 
 class RootTasksFactory(
-        private val rootTasksLoader: RootTasksLoader,
+        val rootTasksLoader: RootTasksLoader,
         private val userKeyStore: UserKeyStore,
         private val rootTaskDependencyCoordinator: RootTaskDependencyCoordinator,
         domainDisposable: CompositeDisposable,
@@ -111,7 +111,7 @@ class RootTasksFactory(
     override fun getRootTasksForProject(projectKey: ProjectKey<*>) =
             rootTasks.values.filter { it.projectId == projectKey.key }
 
-    private fun newTask(taskJson: RootTaskJson): RootTask {
+    fun newTask(taskJson: RootTaskJson): RootTask {
         val taskKey = rootTasksLoader.addTask(taskJson)
 
         return getRootTask(taskKey)

@@ -394,12 +394,12 @@ abstract class Project<T : ProjectType>(
 
     fun convertRemoteToRemoteHelper(
             now: ExactTimeStamp.Local,
-            remoteToRemoteConversion: RemoteToRemoteConversion,
+            projectToProjectConversion: ProjectToProjectConversion,
             startTask: ProjectTask,
     ) {
-        if (remoteToRemoteConversion.startTasks.containsKey(startTask.id)) return
+        if (projectToProjectConversion.startTasks.containsKey(startTask.id)) return
 
-        remoteToRemoteConversion.startTasks[startTask.id] = Pair(
+        projectToProjectConversion.startTasks[startTask.id] = Pair(
                 startTask,
                 startTask.existingInstances
                         .values
@@ -413,12 +413,12 @@ abstract class Project<T : ProjectType>(
 
         val childTaskHierarchies = startTask.getChildTaskHierarchies(now)
 
-        remoteToRemoteConversion.startTaskHierarchies.addAll(childTaskHierarchies)
+        projectToProjectConversion.startTaskHierarchies.addAll(childTaskHierarchies)
 
         childTaskHierarchies.map { it.childTask }.forEach {
             it.requireCurrent(now)
 
-            convertRemoteToRemoteHelper(now, remoteToRemoteConversion, it as ProjectTask) // todo task convert
+            convertRemoteToRemoteHelper(now, projectToProjectConversion, it as ProjectTask) // todo task convert
         }
     }
 

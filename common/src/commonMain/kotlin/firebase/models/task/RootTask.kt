@@ -97,9 +97,6 @@ class RootTask(
             now: ExactTimeStamp.Local,
             projectKey: ProjectKey<*>,
     ): Task {
-        val oldProject = project
-        if (projectKey == oldProject.projectKey) return this
-
         val interval = intervals.last()
 
         val taskParentEntry = when (val type = interval.type) {
@@ -107,6 +104,8 @@ class RootTask(
             is Type.NoSchedule -> type.noScheduleOrParent!!
             is Type.Child -> throw UnsupportedOperationException()
         }
+
+        val oldProject = project
 
         taskParentEntry.updateProject(projectKey)
 

@@ -223,7 +223,6 @@ private fun Task.toCreateResult(now: ExactTimeStamp.Local) =
 
 @CheckResult
 fun DomainUpdater.createChildTask(
-        // todo task convert
         notificationType: DomainListenerManager.NotificationType,
         parentTaskKey: TaskKey,
         name: String,
@@ -233,7 +232,7 @@ fun DomainUpdater.createChildTask(
 ): Single<EditDelegate.CreateResult> = SingleDomainUpdate.create("createChildTask") { now ->
     check(name.isNotEmpty())
 
-    val parentTask = getTaskForce(parentTaskKey)
+    val parentTask = convertToRoot(getTaskForce(parentTaskKey), now)
     parentTask.requireCurrent(now)
 
     val imageUuid = imagePath?.let { newUuid() }
@@ -259,7 +258,6 @@ fun DomainUpdater.createChildTask(
 
 @CheckResult
 fun DomainUpdater.createTopLevelTask(
-        // todo task convert
         notificationType: DomainListenerManager.NotificationType,
         name: String,
         note: String?,
@@ -296,7 +294,6 @@ fun DomainUpdater.createTopLevelTask(
 
 @CheckResult
 fun DomainUpdater.updateScheduleTask(
-        // todo task convert
         notificationType: DomainListenerManager.NotificationType,
         taskKey: TaskKey,
         name: String,
@@ -339,7 +336,6 @@ fun DomainUpdater.updateScheduleTask(
 
 @CheckResult
 fun DomainUpdater.updateChildTask(
-        // todo task convert
         notificationType: DomainListenerManager.NotificationType,
         taskKey: TaskKey,
         name: String,
@@ -351,10 +347,10 @@ fun DomainUpdater.updateChildTask(
 ): Single<TaskKey> = SingleDomainUpdate.create("updateChildTask") { now ->
     check(name.isNotEmpty())
 
-    val task = getTaskForce(taskKey)
+    val task = convertToRoot(getTaskForce(taskKey), now)
     task.requireCurrent(now)
 
-    val newParentTask = getTaskForce(parentTaskKey)
+    val newParentTask = convertToRoot(getTaskForce(parentTaskKey), now)
     newParentTask.requireCurrent(now)
 
     task.setName(name, note)
@@ -400,7 +396,6 @@ fun DomainUpdater.updateChildTask(
 
 @CheckResult
 fun DomainUpdater.updateTopLevelTask(
-        // todo task convert
         notificationType: DomainListenerManager.NotificationType,
         taskKey: TaskKey,
         name: String,
@@ -424,19 +419,16 @@ fun DomainUpdater.updateTopLevelTask(
     }
 
     val imageUuid = imagePath?.value?.let { newUuid() }
-    if (imagePath != null)
-        task.setImage(deviceDbInfo, imageUuid?.let { ImageState.Local(imageUuid) })
 
-    imageUuid?.let {
-        Uploader.addUpload(deviceDbInfo, task.taskKey, it, imagePath.value)
-    }
+    if (imagePath != null) task.setImage(deviceDbInfo, imageUuid?.let { ImageState.Local(imageUuid) })
+
+    imageUuid?.let { Uploader.addUpload(deviceDbInfo, task.taskKey, it, imagePath.value) }
 
     DomainUpdater.Result(task.taskKey, true, notificationType, DomainFactory.CloudParams(task.project))
 }.perform(this)
 
 @CheckResult
 fun DomainUpdater.createScheduleJoinTopLevelTask(
-        // todo task convert
         notificationType: DomainListenerManager.NotificationType,
         name: String,
         scheduleDatas: List<ScheduleData>,
@@ -500,7 +492,6 @@ fun DomainUpdater.createScheduleJoinTopLevelTask(
 
 @CheckResult
 fun DomainUpdater.createJoinChildTask(
-        // todo task convert
         notificationType: DomainListenerManager.NotificationType,
         parentTaskKey: TaskKey,
         name: String,
@@ -515,9 +506,9 @@ fun DomainUpdater.createJoinChildTask(
     val parentTask = getTaskForce(parentTaskKey)
     parentTask.requireCurrent(now)
 
-    check(joinTaskKeys.map { (it as TaskKey.Project).projectKey }.distinct().size == 1) // todo task join
+    check(joinTaskKeys.map { (it as TaskKey.Project).projectKey }.distinct().size == 1)
 
-    val joinTasks = joinTaskKeys.map { getTaskForce(it) }
+    val joinTasks = joinTaskKeys.map { convertToRoot(getTaskForce(it), now) }
 
     val ordinal = joinTasks.map { it.ordinal }.minOrNull()
 
@@ -546,7 +537,6 @@ fun DomainUpdater.createJoinChildTask(
 
 @CheckResult
 fun DomainUpdater.createJoinTopLevelTask(
-        // todo task convert
         notificationType: DomainListenerManager.NotificationType,
         name: String,
         joinTaskKeys: List<TaskKey>,
@@ -874,4 +864,11 @@ private fun DomainFactory.convertAndUpdateProject(
 
         task.updateProject(this, now, projectKey)
     }
+}
+
+private fun DomainFactory.convertToRoot(task: Task, now: ExactTimeStamp.Local): Task {
+    if (!Task.WRITE_ROOT_TASKS) return task
+    if (task is RootTask) return task
+
+    return converter.convertToRoot(now, task as ProjectTask, task.project.projectKey)
 }

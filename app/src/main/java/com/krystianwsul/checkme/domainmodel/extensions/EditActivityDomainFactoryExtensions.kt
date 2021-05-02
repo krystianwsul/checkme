@@ -87,6 +87,7 @@ fun DomainFactory.getCreateTaskData(
                         .getAssignedTo(assignedTo)
                         .map { it.key }
                         .toSet(),
+                task.project.projectKey,
         )
     }
 
@@ -139,6 +140,7 @@ fun DomainFactory.getCreateTaskData(
                     task.name,
                     EditViewModel.ParentKey.Task(task.taskKey),
                     mapOf(),
+                    task.project.projectKey,
             )
         }
         is EditViewModel.ParentKey.Project -> {
@@ -148,6 +150,7 @@ fun DomainFactory.getCreateTaskData(
                     project.name,
                     EditViewModel.ParentKey.Project(project.projectKey),
                     project.users.toUserDatas(),
+                    project.projectKey,
             )
         }
         null -> null
@@ -599,6 +602,7 @@ private fun DomainFactory.getParentTreeDatas(
                         it.note,
                         EditViewModel.SortKey.TaskSortKey(it.startExactTimeStamp),
                         mapOf(),
+                        it.project.projectKey,
                 )
             }
 
@@ -615,6 +619,7 @@ private fun DomainFactory.getParentTreeDatas(
                         null,
                         EditViewModel.SortKey.ProjectSortKey(it.projectKey),
                         it.users.toUserDatas(),
+                        it.projectKey,
                 )
             }
 
@@ -638,6 +643,7 @@ private fun DomainFactory.getProjectTaskTreeDatas(
                         it.note,
                         EditViewModel.SortKey.TaskSortKey(it.startExactTimeStamp),
                         mapOf(),
+                        it.project.projectKey,
                 )
             }
             .toList()
@@ -727,6 +733,7 @@ private fun DomainFactory.getTaskListChildTaskDatas(
                             childTask.note,
                             EditViewModel.SortKey.TaskSortKey(childTask.startExactTimeStamp),
                             mapOf(),
+                            childTask.project.projectKey,
                     )
                 }
                 .toList()

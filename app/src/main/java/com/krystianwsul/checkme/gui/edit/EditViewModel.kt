@@ -408,6 +408,7 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
             val note: String?,
             val imageState: ImageState?,
             val assignedTo: Set<UserKey>,
+            val projectKey: ProjectKey<*>,
     )
 
     data class ParentTreeData(
@@ -418,6 +419,7 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
             override val note: String?,
             override val sortKey: SortKey,
             val projectUsers: Map<UserKey, UserData>,
+            private val projectKey: ProjectKey<*>,
     ) : ParentPickerFragment.EntryData {
 
         override val normalizedFields by lazy { listOfNotNull(name, note).map { it.normalized() } }
@@ -426,7 +428,7 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
             normalizedFields
         }
 
-        fun toParent() = ParentScheduleManager.Parent(name, entryKey, projectUsers)
+        fun toParent() = ParentScheduleManager.Parent(name, entryKey, projectUsers, projectKey)
     }
 
     sealed class ParentKey : Parcelable {

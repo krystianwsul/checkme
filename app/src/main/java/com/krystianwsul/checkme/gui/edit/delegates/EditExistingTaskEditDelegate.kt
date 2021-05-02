@@ -25,22 +25,14 @@ class EditExistingTaskEditDelegate(
 ) : ExistingTaskEditDelegate(data, savedInstanceState, compositeDisposable, storeParentKey) {
 
     override fun skipScheduleCheck(scheduleEntry: ScheduleEntry): Boolean {
-        if (taskData.scheduleDataWrappers?.contains(scheduleEntry.scheduleDataWrapper) != true)
-            return false
+        if (taskData.scheduleDataWrappers?.contains(scheduleEntry.scheduleDataWrapper) != true) return false
 
         val parentKey = parentScheduleManager.parent?.parentKey
 
-        if (taskData.parentKey == parentKey)
-            return true
+        if (taskData.parentKey == parentKey) return true
 
-        fun EditViewModel.ParentKey.getProjectId(): ProjectKey<*> = when (this) {
-            is EditViewModel.ParentKey.Project -> projectId
-            is EditViewModel.ParentKey.Task -> (taskKey as TaskKey.Project).projectKey // todo task edit
-        }
-
-        val initialProject = taskData.parentKey?.getProjectId()
-
-        val finalProject = parentKey?.getProjectId()
+        val initialProject = taskData.projectKey
+        val finalProject = parentScheduleManager.parent?.projectKey
 
         return initialProject == finalProject
     }

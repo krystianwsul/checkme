@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.gui.edit
 
 import android.os.Bundle
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
+import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.UserKey
 import io.reactivex.rxjava3.core.Observable
 
@@ -41,5 +42,6 @@ interface ParentScheduleManager {
             val name: String,
             val parentKey: EditViewModel.ParentKey,
             val projectUsers: Map<UserKey, EditViewModel.UserData>,
+            val projectKey: ProjectKey<*>,
     )
 }

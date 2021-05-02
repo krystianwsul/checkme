@@ -797,10 +797,8 @@ private fun DomainFactory.createScheduleTopLevelTask(
         assignedTo: Set<UserKey> = setOf(),
 ): Task {
     return if (Task.WRITE_ROOT_TASKS) {
-        createRootTask(now, imageUuid, name, note, ordinal, projectKey).apply {
+        createRootTask(now, imageUuid, name, note, ordinal).apply {
             createSchedules(deviceDbInfo.key, now, scheduleDatas, assignedTo, customTimeMigrationHelper, projectKey)
-
-            projectsFactory.getProjectForce(projectKey).addRootTask(taskKey)
         }
     } else {
         projectsFactory.createScheduleTopLevelTask(
@@ -830,11 +828,7 @@ private fun DomainFactory.createNoScheduleOrParentTask(
         ordinal: Double? = null,
 ): Task {
     return if (Task.WRITE_ROOT_TASKS) {
-        createRootTask(now, imageUuid, name, note, ordinal, projectKey).apply {
-            setNoScheduleOrParent(now, projectKey)
-
-            projectsFactory.getProjectForce(projectKey).addRootTask(taskKey)
-        }
+        createRootTask(now, imageUuid, name, note, ordinal).apply { setNoScheduleOrParent(now, projectKey) }
     } else {
         projectsFactory.createNoScheduleOrParentTask(
                 now,
@@ -854,19 +848,14 @@ private fun DomainFactory.createRootTask(
         name: String,
         note: String?,
         ordinal: Double?,
-        projectKey: ProjectKey<*>,
 ): RootTask {
-    val task = rootTasksFactory.createTask(
+    return rootTasksFactory.createTask(
             now,
             imageUuid?.let(::getTaskJsonImage),
             name,
             note,
             ordinal,
     )
-
-    projectsFactory.getProjectForce(projectKey).addRootTask(task.taskKey)
-
-    return task
 }
 
 private fun DomainFactory.convertAndUpdateProject(

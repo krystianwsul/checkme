@@ -786,14 +786,8 @@ class DomainFactory(
                         customTimeMigrationHelper,
                         newProject.projectKey,
                 )
-
-                newProject.addRootTask(newTask.taskKey)
             } else {
-                currentNoScheduleOrParent?.let {
-                    newTask.setNoScheduleOrParent(now, newProject.projectKey)
-
-                    newProject.addRootTask(newTask.taskKey)
-                }
+                currentNoScheduleOrParent?.let { newTask.setNoScheduleOrParent(now, newProject.projectKey) }
             }
 
             return newTask

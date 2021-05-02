@@ -506,11 +506,11 @@ abstract class Project<T : ProjectType>(
         is TaskKey.Root -> rootTaskProvider.getRootTask(taskKey)
     }
 
-    fun addRootTask(taskKey: TaskKey.Root) { // todo task ids remove old refs
+    fun addRootTask(taskKey: TaskKey.Root) {
         projectRecord.rootTaskParentDelegate.addRootTask(taskKey) { updateRootTaskKeys(it) }
     }
 
-    fun removeRootTask(taskKey: TaskKey.Root) { // todo task ids remove old refs
+    fun removeRootTask(taskKey: TaskKey.Root) {
         projectRecord.rootTaskParentDelegate.removeRootTask(taskKey) { updateRootTaskKeys(it) }
     }
 

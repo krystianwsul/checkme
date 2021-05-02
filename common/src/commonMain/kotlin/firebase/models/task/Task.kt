@@ -791,7 +791,6 @@ abstract class Task(
         }
 
         intervalsProperty.invalidate()
-
         addRootTaskIdToProject()
     }
 
@@ -932,7 +931,6 @@ abstract class Task(
         }
 
         intervalsProperty.invalidate()
-
         addRootTaskIdToProject()
     }
 
@@ -1035,6 +1033,7 @@ abstract class Task(
                 NoScheduleOrParent(this, noScheduleOrParentRecord)
 
         invalidateIntervals()
+        addRootTaskIdToProject()
     }
 
     fun correctIntervalEndExactTimeStamps() = intervals.asSequence()

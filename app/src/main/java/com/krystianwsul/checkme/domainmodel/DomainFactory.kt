@@ -700,6 +700,7 @@ class DomainFactory(
                 val childTask = projectToRootConversion.endTasks.getValue(startTaskHierarchy.childTaskId)
 
                 childTask.copyParentNestedTaskHierarchy(now, startTaskHierarchy, parentTask.id)
+                parentTask.addRootTask(childTask)
             }
 
             val endData = Task.EndData(now, true)

@@ -57,7 +57,6 @@ class RootTask(
         val childTask = parent.createTask(now, image, name, note, ordinal)
 
         childTask.createParentNestedTaskHierarchy(this, now)
-
         addRootTask(childTask)
 
         return childTask
@@ -91,13 +90,12 @@ class RootTask(
 
     override fun addChild(childTask: Task, now: ExactTimeStamp.Local): TaskHierarchyKey {
         val taskHierarchyKey = childTask.createParentNestedTaskHierarchy(this, now)
-
         addRootTask(childTask as RootTask)
 
         return taskHierarchyKey
     }
 
-    private fun addRootTask(childTask: RootTask) { // todo task ids remove old refs
+    fun addRootTask(childTask: RootTask) {
         taskRecord.rootTaskParentDelegate.addRootTask(childTask.taskKey) { parent.updateTaskRecord(taskKey, it) }
     }
 

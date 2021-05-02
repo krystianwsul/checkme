@@ -323,7 +323,7 @@ fun DomainUpdater.updateScheduleTask(
                 now,
                 sharedProjectParameters.nonNullAssignedTo,
                 this@create,
-                null, // todo task edit
+                project.projectKey,
         )
 
         if (imagePath != null) setImage(deviceDbInfo, imageUuid?.let { ImageState.Local(imageUuid) })
@@ -415,7 +415,7 @@ fun DomainUpdater.updateTopLevelTask(
         endAllCurrentSchedules(now)
         endAllCurrentNoScheduleOrParents(now)
 
-        setNoScheduleOrParent(now, null) // todo task edit
+        setNoScheduleOrParent(now, project.projectKey)
     }
 
     val imageUuid = imagePath?.value?.let { newUuid() }

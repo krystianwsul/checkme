@@ -127,6 +127,8 @@ class RootTask(
         return this
     }
 
+    override fun addRootTaskIdToProject() = project.addRootTask(taskKey)
+
     interface Parent : Task.Parent, Project.RootTaskProvider {
 
         fun deleteRootTask(task: RootTask)

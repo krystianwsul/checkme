@@ -8,7 +8,6 @@ import com.krystianwsul.common.time.Date
 
 
 open class SingleScheduleRecord(
-        // todo task ids update stuff on creation
         taskRecord: TaskRecord,
         scheduleWrapper: ScheduleWrapper,
         override val projectHelper: ProjectHelper,

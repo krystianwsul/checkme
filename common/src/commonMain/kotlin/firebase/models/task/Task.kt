@@ -791,7 +791,11 @@ abstract class Task(
         }
 
         intervalsProperty.invalidate()
+
+        addRootTaskIdToProject()
     }
+
+    protected abstract fun addRootTaskIdToProject()
 
     fun copySchedules(
             deviceDbInfo: DeviceDbInfo,
@@ -928,6 +932,8 @@ abstract class Task(
         }
 
         intervalsProperty.invalidate()
+
+        addRootTaskIdToProject()
     }
 
     abstract fun invalidateProjectParentTaskHierarchies()

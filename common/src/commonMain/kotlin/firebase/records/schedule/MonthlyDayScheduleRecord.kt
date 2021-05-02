@@ -7,6 +7,7 @@ import com.krystianwsul.common.firebase.records.task.TaskRecord
 
 
 class MonthlyDayScheduleRecord(
+        // todo task ids update stuff on creation
         taskRecord: TaskRecord,
         scheduleWrapper: ScheduleWrapper,
         override val projectHelper: ProjectHelper,

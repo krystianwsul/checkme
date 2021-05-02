@@ -24,6 +24,7 @@ class NestedTaskHierarchyRecord(
     ) : this(false, id, taskRecord, taskHierarchyJson)
 
     constructor(
+            // todo task ids update stuff on creation
             taskRecord: TaskRecord,
             taskHierarchyJson: NestedTaskHierarchyJson,
     ) : this(

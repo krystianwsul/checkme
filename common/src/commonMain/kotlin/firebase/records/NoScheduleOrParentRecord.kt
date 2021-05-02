@@ -7,6 +7,7 @@ import com.krystianwsul.common.firebase.records.task.TaskRecord
 import com.krystianwsul.common.utils.ProjectKey
 
 class NoScheduleOrParentRecord(
+        // todo task ids update stuff on creation
         private val taskRecord: TaskRecord,
         override val createObject: NoScheduleOrParentJson,
         _id: String?,

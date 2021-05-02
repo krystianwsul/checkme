@@ -95,20 +95,20 @@ fun DomainFactory.getCreateTaskData(
     }
 
     val showAllInstancesDialog = when (startParameters) {
-        is EditViewModel.StartParameters.Join -> startParameters.joinables.run {
-            map { (it.taskKey as TaskKey.Project).projectKey }.distinct().size == 1 && any { // todo task edit
-                getTaskForce(it.taskKey).let { task ->
-                    if (it.instanceKey != null) {
-                        task.hasOtherVisibleInstances(now, it.instanceKey)
-                    } else {
-                        task.getInstances(null, null, now)
-                                .filter { it.isVisible(now, Instance.VisibilityOptions()) }
-                                .takeAndHasMore(1)
-                                .second
+        is EditViewModel.StartParameters.Join -> startParameters.joinables
+                .map { it to getTaskForce(it.taskKey) }
+                .run {
+                    map { it.second.project }.distinct().size == 1 && any { (joinable, task) ->
+                        if (joinable.instanceKey != null) {
+                            task.hasOtherVisibleInstances(now, joinable.instanceKey)
+                        } else {
+                            task.getInstances(null, null, now)
+                                    .filter { it.isVisible(now, Instance.VisibilityOptions()) }
+                                    .takeAndHasMore(1)
+                                    .second
+                        }
                     }
                 }
-            }
-        }
         is EditViewModel.StartParameters.Task -> null
         is EditViewModel.StartParameters.Create -> null
     }

@@ -452,14 +452,14 @@ fun DomainUpdater.createScheduleJoinTopLevelTask(
     val joinTasks = if (allReminders) {
         joinableTaskKeys.map { convertAndUpdateProject(getTaskForce(it), now, finalProjectId) }
     } else {
-        check(
-                joinableTaskKeys.map { (it as TaskKey.Project).projectKey } // todo task join
-                        .distinct()
-                        .single() == finalProjectId
-        )
-
-        joinableTaskKeys.map { getTaskForce(it) }
+        joinableTaskKeys.map { convertToRoot(getTaskForce(it), now) }
     }
+
+    check(
+            joinTasks.map { it.project }
+                    .distinct()
+                    .single() == finalProjectId
+    )
 
     val ordinal = joinTasks.map { it.ordinal }.minOrNull()
 

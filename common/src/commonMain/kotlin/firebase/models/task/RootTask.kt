@@ -47,6 +47,8 @@ class RootTask(
 
     override val projectCustomTimeIdProvider = JsonTime.ProjectCustomTimeIdProvider.rootTask
 
+    override val addProjectIdToNoScheduleOrParent = true
+
     override fun createChildTask(
             now: ExactTimeStamp.Local,
             name: String,

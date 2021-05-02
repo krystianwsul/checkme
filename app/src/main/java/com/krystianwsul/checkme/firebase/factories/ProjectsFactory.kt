@@ -129,7 +129,7 @@ class ProjectsFactory(
             name: String,
             scheduleDatas: List<Pair<ScheduleData, Time>>,
             note: String?,
-            projectId: ProjectKey<*>,
+            projectKey: ProjectKey<*>,
             imageUuid: String?,
             deviceDbInfo: DeviceDbInfo,
             customTimeMigrationHelper: Project.CustomTimeMigrationHelper,
@@ -140,12 +140,12 @@ class ProjectsFactory(
                 now,
                 name,
                 note,
-                projectId,
+                projectKey,
                 imageUuid,
                 deviceDbInfo,
                 ordinal,
         ).apply {
-            createSchedules(deviceDbInfo.key, now, scheduleDatas, assignedTo, customTimeMigrationHelper, null)
+            createSchedules(deviceDbInfo.key, now, scheduleDatas, assignedTo, customTimeMigrationHelper, projectKey)
         }
     }
 
@@ -165,17 +165,17 @@ class ProjectsFactory(
             imageUuid,
             deviceDbInfo,
             ordinal,
-    ).apply { setNoScheduleOrParent(now, null) }
+    ).apply { setNoScheduleOrParent(now, projectKey) }
 
     private fun createTaskHelper(
             now: ExactTimeStamp.Local,
             name: String,
             note: String?,
-            projectId: ProjectKey<*>,
+            projectKey: ProjectKey<*>,
             imageUuid: String?,
             deviceDbInfo: DeviceDbInfo,
             ordinal: Double? = null,
-    ) = getProjectForce(projectId).createTask(
+    ) = getProjectForce(projectKey).createTask(
             now,
             imageUuid?.let { TaskJson.Image(imageUuid, deviceDbInfo.uuid) },
             name,

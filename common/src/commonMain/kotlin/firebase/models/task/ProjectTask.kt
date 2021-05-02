@@ -24,6 +24,8 @@ class ProjectTask(override val project: Project<*>, private val taskRecord: Proj
 
     override val projectCustomTimeIdProvider = project.projectRecord
 
+    override val addProjectIdToNoScheduleOrParent = false
+
     override fun createChildTask(
             now: ExactTimeStamp.Local,
             name: String,

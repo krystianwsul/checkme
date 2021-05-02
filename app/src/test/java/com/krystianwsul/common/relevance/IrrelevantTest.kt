@@ -112,7 +112,7 @@ class IrrelevantTest {
             endAllCurrentSchedules(now)
             endAllCurrentNoScheduleOrParents(now)
 
-            setNoScheduleOrParent(now, null)
+            setNoScheduleOrParent(now, project.projectKey)
         }
 
         instance.setDone(shownFactory, true, now)

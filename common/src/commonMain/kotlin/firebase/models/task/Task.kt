@@ -404,7 +404,7 @@ abstract class Task(
             now: ExactTimeStamp.Local,
             assignedTo: Set<UserKey>,
             customTimeMigrationHelper: Project.CustomTimeMigrationHelper,
-            projectKey: ProjectKey<*>?, // non-null for root tasks
+            projectKey: ProjectKey<*>,
     ) {
         val removeSchedules = mutableListOf<Schedule>()
         val addScheduleDatas = scheduleDatas.map { ScheduleDiffKey(it.first, assignedTo) to it }.toMutableList()
@@ -574,7 +574,7 @@ abstract class Task(
             now: ExactTimeStamp.Local,
             assignedTo: Set<UserKey>,
             customTimeMigrationHelper: Project.CustomTimeMigrationHelper,
-            projectKey: ProjectKey<*>?,
+            projectKey: ProjectKey<*>,
     ) = createSchedules(ownerKey, now, scheduleDatas, assignedTo, customTimeMigrationHelper, projectKey)
 
     abstract fun addChild(childTask: Task, now: ExactTimeStamp.Local): TaskHierarchyKey
@@ -642,7 +642,7 @@ abstract class Task(
             scheduleDatas: List<Pair<ScheduleData, Time>>, // todo task are these pairs needed anymore?
             assignedTo: Set<UserKey>,
             customTimeMigrationHelper: Project.CustomTimeMigrationHelper,
-            projectKey: ProjectKey<*>?, // non-null for root tasks
+            projectKey: ProjectKey<*>,
     ) {
         val assignedToKeys = assignedTo.map { it.key }.toSet()
 
@@ -801,7 +801,7 @@ abstract class Task(
             now: ExactTimeStamp.Local,
             schedules: List<Schedule>,
             customTimeMigrationHelper: Project.CustomTimeMigrationHelper,
-            projectKey: ProjectKey<*>?, // non-null for root tasks
+            projectKey: ProjectKey<*>,
     ) {
         for (schedule in schedules) {
             val today = Date.today()
@@ -1020,11 +1020,13 @@ abstract class Task(
 
     private class IntervalException(message: String, cause: Throwable) : Exception(message, cause)
 
-    fun setNoScheduleOrParent(now: ExactTimeStamp.Local, projectKey: ProjectKey<*>?) {
+    protected abstract val addProjectIdToNoScheduleOrParent: Boolean
+
+    fun setNoScheduleOrParent(now: ExactTimeStamp.Local, projectKey: ProjectKey<*>) {
         val noScheduleOrParentRecord = taskRecord.newNoScheduleOrParentRecord(NoScheduleOrParentJson(
                 now.long,
                 now.offset,
-                projectId = projectKey?.key
+                projectId = projectKey.takeIf { addProjectIdToNoScheduleOrParent }?.key,
         ))
 
         check(!noScheduleOrParentsMap.containsKey(noScheduleOrParentRecord.id))

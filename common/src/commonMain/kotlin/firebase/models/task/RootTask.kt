@@ -97,10 +97,8 @@ class RootTask(
         return taskHierarchyKey
     }
 
-    private fun addRootTask(childTask: RootTask) {
-        taskRecord.rootTaskParentDelegate.addRootTask(childTask.taskKey)
-
-        parent.updateTaskRecord(taskKey, taskRecord.rootTaskParentDelegate.rootTaskKeys)
+    private fun addRootTask(childTask: RootTask) { // todo task ids remove old refs
+        taskRecord.rootTaskParentDelegate.addRootTask(childTask.taskKey) { parent.updateTaskRecord(taskKey, it) }
     }
 
     override fun invalidateProjectParentTaskHierarchies() = invalidateIntervals()

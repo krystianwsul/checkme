@@ -49,7 +49,7 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
 
     private var selectAllVisible = false
 
-    private lateinit var showGroupViewModel: ShowGroupViewModel
+    private val showGroupViewModel by lazy { getViewModel<ShowGroupViewModel>() }
 
     override val snackbarParent get() = binding.showGroupCoordinator
 
@@ -118,7 +118,7 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
         updateTopMenu()
         initBottomBar()
 
-        showGroupViewModel = getViewModel<ShowGroupViewModel>().apply {
+        showGroupViewModel.apply {
             start(timeStamp)
 
             createDisposable += data.subscribe { onLoadFinished(it) }

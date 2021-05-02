@@ -207,7 +207,7 @@ fun DomainUpdater.createScheduleTopLevelTask(
             assignedTo = sharedProjectParameters.nonNullAssignedTo,
     )
 
-    copyTaskKey?.let { copyTask(now, task as ProjectTask, it) } // todo task copy
+    copyTaskKey?.let { copyTask(now, task, it) }
 
     imageUuid?.let { Uploader.addUpload(deviceDbInfo, task.taskKey, it, imagePath) }
 
@@ -283,7 +283,7 @@ fun DomainUpdater.createTopLevelTask(
             deviceDbInfo,
     )
 
-    copyTaskKey?.let { copyTask(now, task as ProjectTask, it) } // todo task copy
+    copyTaskKey?.let { copyTask(now, task, it) }
 
     imageUuid?.let { Uploader.addUpload(deviceDbInfo, task.taskKey, it, imagePath) }
 
@@ -736,7 +736,7 @@ private fun DomainFactory.getTaskListChildTaskDatas(
                 }
                 .toList()
 
-private fun DomainFactory.copyTask(now: ExactTimeStamp.Local, task: ProjectTask, copyTaskKey: TaskKey) {
+private fun DomainFactory.copyTask(now: ExactTimeStamp.Local, task: Task, copyTaskKey: TaskKey) {
     val copiedTask = getTaskForce(copyTaskKey)
 
     copiedTask.getChildTaskHierarchies(now).forEach {
@@ -768,7 +768,7 @@ private fun DomainFactory.createChildTask(
 
     val childTask = parentTask.createChildTask(now, name, note, imageJson, ordinal)
 
-    copyTaskKey?.let { copyTask(now, childTask as ProjectTask, it) } // todo task copy
+    copyTaskKey?.let { copyTask(now, childTask, it) }
 
     return childTask
 }

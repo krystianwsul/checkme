@@ -445,20 +445,20 @@ fun DomainUpdater.createScheduleJoinTopLevelTask(
     check(scheduleDatas.isNotEmpty())
     check(joinables.size > 1)
 
-    val finalProjectId = sharedProjectParameters?.key ?: defaultProjectId
+    val finalProjectKey = sharedProjectParameters?.key ?: defaultProjectId
 
     val joinableTaskKeys = joinables.map { it.taskKey }
 
     val joinTasks = if (allReminders) {
-        joinableTaskKeys.map { convertAndUpdateProject(getTaskForce(it), now, finalProjectId) }
+        joinableTaskKeys.map { convertAndUpdateProject(getTaskForce(it), now, finalProjectKey) }
     } else {
         joinableTaskKeys.map { convertToRoot(getTaskForce(it), now) }
     }
 
     check(
-            joinTasks.map { it.project }
+            joinTasks.map { it.project.projectKey }
                     .distinct()
-                    .single() == finalProjectId
+                    .single() == finalProjectKey
     )
 
     val ordinal = joinTasks.map { it.ordinal }.minOrNull()
@@ -470,7 +470,7 @@ fun DomainUpdater.createScheduleJoinTopLevelTask(
             name,
             scheduleDatas.map { it to getTime(it.timePair) },
             note,
-            finalProjectId,
+            finalProjectKey,
             imageUuid,
             deviceDbInfo,
             this,

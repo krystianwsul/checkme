@@ -14,9 +14,8 @@ import com.krystianwsul.checkme.firebase.loaders.ProjectLoader
 import com.krystianwsul.checkme.firebase.loaders.SharedProjectsLoader
 import com.krystianwsul.checkme.firebase.loaders.mockBase64
 import com.krystianwsul.checkme.firebase.managers.AndroidSharedProjectManager
-import com.krystianwsul.checkme.firebase.roottask.LoadDependencyTrackerManager
-import com.krystianwsul.checkme.firebase.roottask.ProjectToRootTaskCoordinator
-import com.krystianwsul.checkme.firebase.roottask.RootTasksFactory
+import com.krystianwsul.checkme.firebase.managers.RootTasksManager
+import com.krystianwsul.checkme.firebase.roottask.*
 import com.krystianwsul.common.ErrorLogger
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.DeviceInfo
@@ -36,6 +35,7 @@ import io.mockk.*
 import io.reactivex.rxjava3.android.plugins.RxAndroidPlugins
 import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.plugins.RxJavaPlugins
 import io.reactivex.rxjava3.schedulers.Schedulers
@@ -170,6 +170,12 @@ class DomainFactoryRule : TestRule {
             every { newRootUserCustomTimeId(any()) } answers { "userCustomTimeId" + ++userCustomTimeId }
 
             every { update(any(), any()) } returns Unit
+
+            var rootTaskRecordId = 0
+            every { newRootTaskRecordId() } answers { "rootTaskRecordId" + ++rootTaskRecordId }
+
+            var rootTaskScheduleRecordId = 0
+            every { newRootTaskScheduleRecordId(any()) } answers { "rootTaskScheduleRecordId" + ++rootTaskScheduleRecordId }
         }
 
         val myUserFactory = mockk<MyUserFactory> {
@@ -185,10 +191,38 @@ class DomainFactoryRule : TestRule {
             )
         }
 
-        val rootTaskFactory = mockk<RootTasksFactory> { // todo task tests
-            every { rootTasks } returns emptyMap()
-            every { getRootTasksForProject(any()) } returns emptyList()
+        lateinit var projectsFactory: ProjectsFactory
+
+        val rootTaskKeySource = mockk<RootTaskKeySource>(relaxed = true) {
+            every { rootTaskKeysObservable } returns Observable.just(emptySet())
         }
+
+        val rootTasksManager = RootTasksManager(databaseWrapper)
+
+        val rootTasksLoaderProvider = mockk<RootTasksLoader.Provider> {
+            every { getRootTaskObservable(any()) } returns Observable.never()
+        }
+
+        val rootTasksLoader = RootTasksLoader(
+                rootTaskKeySource,
+                rootTasksLoaderProvider,
+                compositeDisposable,
+                rootTasksManager,
+                mockk(relaxed = true), // todo task tests
+        )
+
+        val rootTaskDependencyCoordinator = mockk<RootTaskDependencyCoordinator> {
+            every { getDependencies(any()) } returns Single.just(mockk())
+        }
+
+        val rootTaskFactory = RootTasksFactory(
+                rootTasksLoader,
+                mockk(relaxed = true), // todo task tests
+                rootTaskDependencyCoordinator,
+                compositeDisposable,
+                rootTaskKeySource,
+                mockk(relaxed = true), // todo task tests
+        ) { projectsFactory }
 
         val sharedProjectsLoader = SharedProjectsLoader.Impl(
                 Observable.just(setOf()),
@@ -205,11 +239,11 @@ class DomainFactoryRule : TestRule {
 
                     override fun getRootTasks(projectTracker: LoadDependencyTrackerManager.ProjectTracker) = Completable.complete() // todo task tests
                 },
-                mockk(relaxed = true), // todo task tests
+                rootTaskKeySource,
                 mockk(relaxed = true), // todo task tests
         )
 
-        val projectsFactory = ProjectsFactory(
+        projectsFactory = ProjectsFactory(
                 mockk(),
                 mockk(relaxed = true),
                 ProjectLoader.InitialProjectEvent(

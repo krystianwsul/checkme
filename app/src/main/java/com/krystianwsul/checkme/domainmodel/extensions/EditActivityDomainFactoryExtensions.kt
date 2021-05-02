@@ -479,14 +479,14 @@ fun DomainUpdater.createScheduleJoinTopLevelTask(
     )
 
     if (allReminders)
-        joinTasks(newParentTask as ProjectTask, joinTasks, now, joinables.mapNotNull { it.instanceKey }) // todo task join
+        joinTasks(newParentTask, joinTasks, now, joinables.mapNotNull { it.instanceKey })
     else
         joinJoinables(newParentTask as ProjectTask, joinables, now) // todo task join
 
     imageUuid?.let { Uploader.addUpload(deviceDbInfo, newParentTask.taskKey, it, imagePath) }
 
     DomainUpdater.Result(
-            newParentTask.taskKey as TaskKey, // todo task join
+            newParentTask.taskKey,
             true,
             notificationType,
             DomainFactory.CloudParams(newParentTask.project),
@@ -526,12 +526,12 @@ fun DomainUpdater.createJoinChildTask(
             ordinal = ordinal,
     )
 
-    joinTasks(childTask as ProjectTask, joinTasks, now, removeInstanceKeys) // todo task join
+    joinTasks(childTask, joinTasks, now, removeInstanceKeys)
 
     imageUuid?.let { Uploader.addUpload(deviceDbInfo, childTask.taskKey, it, imagePath) }
 
     DomainUpdater.Result(
-            childTask.taskKey as TaskKey, // todo task join
+            childTask.taskKey,
             true,
             notificationType,
             DomainFactory.CloudParams(childTask.project),
@@ -572,12 +572,12 @@ fun DomainUpdater.createJoinTopLevelTask(
             ordinal,
     )
 
-    joinTasks(newParentTask as ProjectTask, joinTasks, now, removeInstanceKeys) // todo task join
+    joinTasks(newParentTask, joinTasks, now, removeInstanceKeys)
 
     imageUuid?.let { Uploader.addUpload(deviceDbInfo, newParentTask.taskKey, it, imagePath) }
 
     DomainUpdater.Result(
-            newParentTask.taskKey as TaskKey, // todo task join
+            newParentTask.taskKey,
             true,
             notificationType,
             DomainFactory.CloudParams(newParentTask.project),
@@ -697,7 +697,7 @@ private fun DomainFactory.joinJoinables(
 }
 
 private fun DomainFactory.joinTasks(
-        newParentTask: ProjectTask,
+        newParentTask: Task,
         joinTasks: List<Task>,
         now: ExactTimeStamp.Local,
         removeInstanceKeys: List<InstanceKey>,

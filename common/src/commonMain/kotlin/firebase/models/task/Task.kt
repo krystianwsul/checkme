@@ -628,7 +628,7 @@ abstract class Task(
 
     fun getInstance(scheduleKey: ScheduleKey) = getInstance(getDateTime(scheduleKey))
 
-    protected abstract fun getOrCopyTime(
+    abstract fun getOrCopyTime(
             ownerKey: UserKey,
             dayOfWeek: DayOfWeek,
             time: Time,

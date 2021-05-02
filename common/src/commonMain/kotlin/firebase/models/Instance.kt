@@ -409,11 +409,9 @@ class Instance private constructor(val task: Task, private var data: Data) : Ass
         createInstanceRecord().instanceRecord.let {
             it.instanceDate = dateTime?.date
 
-            it.instanceJsonTime = dateTime?.time?.let {
-                task.project // todo task edit
-                        .getOrCopyTime(ownerKey, dateTime.date.dayOfWeek, it, customTimeMigrationHelper, now)
-                        .let { JsonTime.fromTime(it) }
-            }
+            it.instanceJsonTime = dateTime?.time
+                    ?.let { task.getOrCopyTime(ownerKey, dateTime.date.dayOfWeek, it, customTimeMigrationHelper, now) }
+                    ?.let(JsonTime::fromTime)
         }
 
         shownHolder.forceShown(shownFactory).notified = false

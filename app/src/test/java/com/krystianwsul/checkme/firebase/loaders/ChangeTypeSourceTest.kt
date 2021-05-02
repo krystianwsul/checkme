@@ -45,7 +45,7 @@ class ChangeTypeSourceTest {
 
     companion object {
 
-        private const val privateProjectId = "privateProjectId"
+        private const val privateProjectId = "key"
         private val privateProjectKey = ProjectKey.Private(privateProjectId)
 
         private val taskKey1 = TaskKey.Root("taskId1")

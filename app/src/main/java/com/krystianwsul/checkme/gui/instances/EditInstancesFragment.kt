@@ -219,9 +219,12 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
         }
 
         binding.editInstanceSave.setOnClickListener {
-            check(isValidDate)
-            check(isValidDateTime)
-            check(data.singleProjectKey != null || state.parentInstanceData == null)
+            if (state.parentInstanceData != null) {
+                checkNotNull(data.singleProjectKey)
+            } else {
+                check(isValidDate)
+                check(isValidDateTime)
+            }
 
             editInstancesViewModel.stop()
 

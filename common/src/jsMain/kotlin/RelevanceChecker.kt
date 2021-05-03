@@ -196,7 +196,7 @@ object RelevanceChecker {
                 privateProjectManager.save(values)
                 sharedProjectManager.save(values)
                 rootUserManager.save(values)
-                // todo task relevance save tasks
+                rootTaskManager.save(values)
 
                 ErrorLogger.instance.log("updateDatabase: $updateDatabase")
                 ErrorLogger.instance.log(

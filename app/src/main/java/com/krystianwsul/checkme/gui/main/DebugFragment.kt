@@ -111,7 +111,10 @@ class DebugFragment : AbstractFragment() {
                         append("\ninstance shown: ")
                         append(domainFactory.instanceShownCount)
 
-                        append("\n\n")
+                        append("\n\nsaved state log:\n")
+                        append(Preferences.savedStateLog.log)
+
+                        append("\n\ntab log:\n")
                         append(Preferences.mainTabsLog.log)
 
                         append("\n\ntoday: ")

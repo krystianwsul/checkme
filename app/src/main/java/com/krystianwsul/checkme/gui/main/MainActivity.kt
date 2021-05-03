@@ -312,6 +312,8 @@ class MainActivity :
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        Preferences.savedStateLog.logLineHour("savedState non-null? " + (savedInstanceState != null))
+
         binding = ActivityMainBinding.inflate(layoutInflater)
         bottomBinding = BottomBinding.bind(binding.root)
         setContentView(binding.root)

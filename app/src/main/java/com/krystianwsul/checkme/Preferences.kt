@@ -43,6 +43,7 @@ object Preferences {
     private const val KEY_SHOW_PROJECTS = "showProjects"
     private const val KEY_LANGUAGE = "language"
     private const val KEY_VERSION_CODE = "versionCode"
+    private const val KEY_SAVED_STATE_LOG = "savedStateLog"
 
     private val sharedPreferences by lazy { MyApplication.sharedPreferences }
 
@@ -85,6 +86,8 @@ object Preferences {
             BehaviorRelay.createDefault(NullableWrapper(sharedPreferences.getString(TOKEN_KEY, null)))!!
 
     val mainTabsLog = Logger(KEY_MAIN_TABS_LOG, 10)
+
+    val savedStateLog = Logger(KEY_SAVED_STATE_LOG, 10)
 
     val versionCode get() = sharedPreferences.getInt(KEY_VERSION_CODE, -1).takeIf { it != -1 }
 

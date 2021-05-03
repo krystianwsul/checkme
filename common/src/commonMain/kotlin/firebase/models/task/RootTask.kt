@@ -39,7 +39,7 @@ class RootTask(
 
     val projectId: String by projectIdProperty
 
-    override val project get() = parent.getProject(projectId) // todo task fuck it, make it nullable
+    override val project get() = parent.getProject(projectId)
 
     override val taskKey get() = TaskKey.Root(taskRecord.id)
 

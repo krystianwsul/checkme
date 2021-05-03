@@ -196,6 +196,7 @@ fun DomainUpdater.createScheduleTopLevelTask(
     val imageUuid = imagePath?.let { newUuid() }
 
     val task = createScheduleTopLevelTask(
+            // todo task project update
             now,
             name,
             scheduleDatas.map { it to getTime(it.timePair) },
@@ -241,6 +242,7 @@ fun DomainUpdater.createChildTask(
     val imageUuid = imagePath?.let { newUuid() }
 
     val childTask = createChildTask(
+            // todo task project update
             now,
             parentTask,
             name,
@@ -275,6 +277,7 @@ fun DomainUpdater.createTopLevelTask(
     val imageUuid = imagePath?.let { newUuid() }
 
     val task = createNoScheduleOrParentTask(
+            // todo task project update
             now,
             name,
             note,
@@ -329,7 +332,7 @@ fun DomainUpdater.updateScheduleTask(
                 sharedProjectParameters.nonNullAssignedTo,
                 this@create,
                 projectKey,
-        )
+        ) // todo task project update
 
         if (imagePath != null) setImage(deviceDbInfo, imageUuid?.let { ImageState.Local(imageUuid) })
     }
@@ -379,7 +382,7 @@ fun DomainUpdater.updateChildTask(
     if (allReminders) {
         task.endAllCurrentSchedules(now)
         task.endAllCurrentNoScheduleOrParents(now)
-    }
+    } // todo task project update
 
     val imageUuid = imagePath?.value?.let { newUuid() }
     if (imagePath != null) task.setImage(deviceDbInfo, imageUuid?.let { ImageState.Local(imageUuid) })
@@ -423,7 +426,7 @@ fun DomainUpdater.updateTopLevelTask(
         endAllCurrentNoScheduleOrParents(now)
 
         setNoScheduleOrParent(now, projectKey)
-    }
+    } // todo task project update
 
     val imageUuid = imagePath?.value?.let { newUuid() }
 
@@ -480,7 +483,7 @@ fun DomainUpdater.createScheduleJoinTopLevelTask(
             this,
             ordinal,
             sharedProjectParameters.nonNullAssignedTo,
-    )
+    ) // todo task project update
 
     if (allReminders)
         joinTasks(newParentTask, joinTasks, now, joinables.mapNotNull { it.instanceKey })
@@ -530,7 +533,7 @@ fun DomainUpdater.createJoinChildTask(
             ordinal = ordinal,
     )
 
-    joinTasks(childTask, joinTasks, now, removeInstanceKeys)
+    joinTasks(childTask, joinTasks, now, removeInstanceKeys) // todo task project update
 
     imageUuid?.let { Uploader.addUpload(deviceDbInfo, childTask.taskKey, it, imagePath) }
 
@@ -578,7 +581,7 @@ fun DomainUpdater.createJoinTopLevelTask(
             ordinal,
     )
 
-    joinTasks(newParentTask, joinTasks, now, removeInstanceKeys)
+    joinTasks(newParentTask, joinTasks, now, removeInstanceKeys) // todo task project update
 
     imageUuid?.let { Uploader.addUpload(deviceDbInfo, newParentTask.taskKey, it, imagePath) }
 

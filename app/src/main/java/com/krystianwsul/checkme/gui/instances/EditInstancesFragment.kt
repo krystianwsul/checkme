@@ -44,7 +44,6 @@ import com.krystianwsul.common.time.TimePairPersist
 import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.InstanceKey
-import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.treeadapter.FilterCriteria
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Observable
@@ -131,9 +130,7 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
     private val bindingProperty = ResettableProperty<FragmentEditInstancesBinding>()
     private var binding by bindingProperty
 
-    private val instanceKeys by lazy { requireArguments().getParcelableArrayList<InstanceKey>(INSTANCE_KEYS)!! }
-
-    private val projectKey by lazy { instanceKeys.map { (it.taskKey as TaskKey.Project).projectKey }.distinct().singleOrNull() } // todo task instance parent
+    private val instanceKeys by lazy { requireArguments().getParcelableArrayList<InstanceKey>(INSTANCE_KEYS)!!.toSet() }
 
     private val parentPickerDelegate by lazy {
         object : ParentPickerFragment.Delegate {
@@ -163,7 +160,7 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
                             ))
                         },
                         { searchCriteria, page ->
-                            editInstancesSearchViewModel.start(projectKey!!, searchCriteria, page)
+                            editInstancesSearchViewModel.start(data.singleProjectKey!!, searchCriteria, page)
                         },
                         instanceKeys.toSet(),
                 )
@@ -224,16 +221,16 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
         binding.editInstanceSave.setOnClickListener {
             check(isValidDate)
             check(isValidDateTime)
-            check(projectKey != null || state.parentInstanceData == null)
+            check(data.singleProjectKey != null || state.parentInstanceData == null)
 
             editInstancesViewModel.stop()
 
             AndroidDomainUpdater.run {
                 state.parentInstanceData
-                        ?.let { setInstancesParent(dataId.toFirst(), data.instanceKeys, it.instanceKey) }
+                        ?.let { setInstancesParent(dataId.toFirst(), instanceKeys, it.instanceKey) }
                         ?: setInstancesDateTime(
                                 dataId.toFirst(),
-                                data.instanceKeys,
+                                instanceKeys,
                                 state.date,
                                 state.timePairPersist.timePair,
                         )
@@ -242,7 +239,7 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
                     .subscribeBy {
                         dismiss()
 
-                        listener?.invoke(it, data.instanceKeys.size)
+                        listener?.invoke(it, instanceKeys.size)
                     }
                     .addTo(viewCreatedDisposable)
         }
@@ -260,8 +257,6 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
                     updateFields()
                 }
                 .addTo(viewCreatedDisposable)
-
-        binding.editInstanceParentLayout.isVisible = projectKey != null
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -310,6 +305,8 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
         updateFields()
 
         binding.editInstanceParentLayout.apply {
+            isVisible = data.singleProjectKey != null
+
             addOneShotGlobalLayoutListener { isHintAnimationEnabled = true }
         }
 

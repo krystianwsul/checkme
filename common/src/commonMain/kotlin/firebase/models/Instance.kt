@@ -562,6 +562,8 @@ class Instance private constructor(val task: Task, private var data: Data) : Ass
         return parentInstance?.canAddSubtask(now, hack24) ?: true
     }
 
+    fun getProject(): Project<*> = parentInstance?.getProject() ?: task.project
+
     private sealed class Data {
 
         abstract val scheduleDate: Date

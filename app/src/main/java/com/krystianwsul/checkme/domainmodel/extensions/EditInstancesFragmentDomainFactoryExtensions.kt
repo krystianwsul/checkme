@@ -22,7 +22,7 @@ import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.ProjectKey
 import io.reactivex.rxjava3.core.Single
 
-fun DomainFactory.getEditInstancesData(instanceKeys: List<InstanceKey>): EditInstancesViewModel.Data {
+fun DomainFactory.getEditInstancesData(instanceKeys: Set<InstanceKey>): EditInstancesViewModel.Data {
     MyCrashlytics.log("DomainFactory.getEditInstancesData")
 
     DomainThreadChecker.instance.requireDomainThread()
@@ -69,7 +69,12 @@ fun DomainFactory.getEditInstancesData(instanceKeys: List<InstanceKey>): EditIns
         }
     }
 
-    return EditInstancesViewModel.Data(instanceKeys.toSet(), parentInstanceData, dateTime, customTimeDatas)
+    val singleProjectKey = instances.map { it.getProject() }
+            .distinct()
+            .singleOrNull()
+            ?.projectKey
+
+    return EditInstancesViewModel.Data(parentInstanceData, dateTime, customTimeDatas, singleProjectKey)
 }
 
 private class SetInstancesDateTimeUndoData(val data: List<Pair<InstanceKey, DateTimePair?>>) : UndoData {

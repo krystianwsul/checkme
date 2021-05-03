@@ -39,7 +39,7 @@ class RootTask(
 
     val projectId: String by projectIdProperty
 
-    override val project get() = parent.getProject(projectId)
+    override val project get() = parent.getProject(projectId) // todo task fuck it, make it nullable
 
     override val taskKey get() = TaskKey.Root(taskRecord.id)
 
@@ -112,17 +112,18 @@ class RootTask(
 
         val interval = intervals.last()
 
-        val taskParentEntry = when (val type = interval.type) {
+        when (val type = interval.type) {
             is Type.Schedule -> type.getParentProjectSchedule()
             is Type.NoSchedule -> type.noScheduleOrParent!!
-            is Type.Child -> throw UnsupportedOperationException()
+            is Type.Child -> null // called redundantly
+        }?.let { taskParentEntry ->
+            val oldProject = project
+
+            taskParentEntry.updateProject(projectKey)
+
+            parent.updateProject(taskKey, oldProject, projectKey)
         }
 
-        val oldProject = project
-
-        taskParentEntry.updateProject(projectKey)
-
-        parent.updateProject(taskKey, oldProject, projectKey)
 
         return this
     }

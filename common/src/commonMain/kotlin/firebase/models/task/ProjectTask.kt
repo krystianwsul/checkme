@@ -77,6 +77,4 @@ class ProjectTask(override val project: Project<*>, private val taskRecord: Proj
         noScheduleOrParentIntervals.forEach { it.noScheduleOrParent.fixOffsets() }
         existingInstances.values.forEach { it.fixOffsets() }
     }
-
-    override fun addRootTaskIdToProject() {}
 }

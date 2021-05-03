@@ -117,22 +117,14 @@ class RootTask(
 
         val interval = intervals.last()
 
-        val taskParentEntry = when (val type = interval.type) {
+        when (val type = interval.type) {
             is Type.Schedule -> type.getParentProjectSchedule()
             is Type.NoSchedule -> type.noScheduleOrParent!!
-            is Type.Child -> throw UnsupportedOperationException()
-        }
-
-        val oldProject = project
-
-        taskParentEntry.updateProject(projectKey)
-
-        parent.updateProject(taskKey, oldProject, projectKey)
+            is Type.Child -> null // called redundantly
+        }?.updateProject(projectKey)
 
         return this
     }
-
-    override fun addRootTaskIdToProject() = project.addRootTask(taskKey)
 
     interface Parent : Task.Parent, Project.RootTaskProvider {
 
@@ -147,7 +139,5 @@ class RootTask(
                 note: String?,
                 ordinal: Double?,
         ): RootTask
-
-        fun updateProject(taskKey: TaskKey.Root, oldProject: Project<*>, newProjectKey: ProjectKey<*>)
     }
 }

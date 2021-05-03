@@ -20,7 +20,7 @@ class RootTaskRecord private constructor(
         create,
         id,
         taskJson,
-        AssignedToHelper.root,
+        AssignedToHelper.Shared,
         JsonTime.ProjectCustomTimeIdAndKeyProvider.rootTask,
         id,
         parent,

@@ -31,7 +31,26 @@ abstract class TaskRecord protected constructor(
         const val TASKS = "tasks"
     }
 
-    val instanceRecords = mutableMapOf<ScheduleKey, InstanceRecord>()
+    val instanceRecords by lazy {
+        taskJson.instances
+                .entries
+                .associate { (key, instanceJson) ->
+                    check(key.isNotEmpty())
+
+                    val scheduleKey = InstanceRecord.stringToScheduleKey(projectCustomTimeIdAndKeyProvider, key)
+
+                    val remoteInstanceRecord = InstanceRecord(
+                            create,
+                            this,
+                            instanceJson,
+                            scheduleKey,
+                            key,
+                    )
+
+                    scheduleKey to remoteInstanceRecord
+                }
+                .toMutableMap()
+    }
 
     val singleScheduleRecords: MutableMap<String, SingleScheduleRecord> = mutableMapOf()
 
@@ -85,22 +104,6 @@ abstract class TaskRecord protected constructor(
                 taskHierarchyRecords.values
 
     init {
-        for ((key, instanceJson) in taskJson.instances) {
-            check(key.isNotEmpty())
-
-            val scheduleKey = InstanceRecord.stringToScheduleKey(projectCustomTimeIdAndKeyProvider, key)
-
-            val remoteInstanceRecord = InstanceRecord(
-                    create,
-                    this,
-                    instanceJson,
-                    scheduleKey,
-                    key,
-            )
-
-            instanceRecords[scheduleKey] = remoteInstanceRecord
-        }
-
         for ((id, scheduleWrapper) in taskJson.schedules) {
             check(id.isNotEmpty())
 

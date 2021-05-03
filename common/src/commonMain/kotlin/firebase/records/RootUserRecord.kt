@@ -13,7 +13,7 @@ import com.krystianwsul.common.utils.UserKey
 open class RootUserRecord(
         private val databaseWrapper: DatabaseWrapper,
         create: Boolean,
-        final override val createObject: UserWrapper,
+        final override val userWrapper: UserWrapper,
         override val userKey: UserKey,
 ) : RemoteRecord(create), RootUserProperties {
 
@@ -24,9 +24,7 @@ open class RootUserRecord(
         const val PROJECTS = "projects"
     }
 
-    final override val userJson by lazy { createObject.userData }
-
-    final override val userWrapper = createObject
+    final override val userJson by lazy { userWrapper.userData }
 
     final override val key by lazy { userKey.key }
 
@@ -39,13 +37,13 @@ open class RootUserRecord(
     override val photoUrl get() = userJson.photoUrl
 
     override val projectIds
-        get() = createObject.projects
+        get() = userWrapper.projects
                 .keys
                 .map { ProjectKey.Shared(it) }
                 .toSet()
 
     override val friends
-        get() = createObject.friends
+        get() = userWrapper.friends
                 .keys
                 .map(::UserKey)
                 .toSet()
@@ -60,11 +58,18 @@ open class RootUserRecord(
             }
             .toMutableMap()
 
+    override val createObject
+        get() = userWrapper.apply {
+            customTimes = customTimeRecords.values
+                    .associate { it.id.toString() to it.createObject }
+                    .toMutableMap()
+        }
+
     override fun addFriend(userKey: UserKey) {
         val friendId = userKey.key
-        check(!createObject.friends.containsKey(friendId))
+        check(!userWrapper.friends.containsKey(friendId))
 
-        createObject.friends[friendId] = true
+        userWrapper.friends[friendId] = true
 
         addValue("$key/$FRIENDS/$friendId", true)
     }
@@ -72,7 +77,7 @@ open class RootUserRecord(
     override fun removeFriend(userKey: UserKey) {
         val friendId = userKey.key
 
-        val friends = createObject.friends
+        val friends = userWrapper.friends
         check(friends.containsKey(friendId))
         checkNotNull(friends[friendId])
 
@@ -86,8 +91,8 @@ open class RootUserRecord(
     override fun addProject(projectKey: ProjectKey.Shared) {
         val projectId = projectKey.key
 
-        if (!createObject.projects.containsKey(projectId)) {
-            createObject.projects[projectId] = true
+        if (!userWrapper.projects.containsKey(projectId)) {
+            userWrapper.projects[projectId] = true
 
             addValue("$key/$PROJECTS/$projectId", true)
         }
@@ -96,8 +101,8 @@ open class RootUserRecord(
     override fun removeProject(projectKey: ProjectKey.Shared): Boolean {
         val projectId = projectKey.key
 
-        return if (createObject.projects.containsKey(projectId)) {
-            createObject.projects.remove(projectId)
+        return if (userWrapper.projects.containsKey(projectId)) {
+            userWrapper.projects.remove(projectId)
 
             addValue("$key/$PROJECTS/$projectId", null)
 

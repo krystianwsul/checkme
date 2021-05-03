@@ -782,10 +782,7 @@ abstract class Task(
         }
 
         intervalsProperty.invalidate()
-        addRootTaskIdToProject()
     }
-
-    protected abstract fun addRootTaskIdToProject()
 
     fun copySchedules(
             deviceDbInfo: DeviceDbInfo,
@@ -923,7 +920,6 @@ abstract class Task(
         }
 
         intervalsProperty.invalidate()
-        addRootTaskIdToProject()
     }
 
     abstract fun invalidateProjectParentTaskHierarchies()
@@ -1027,7 +1023,6 @@ abstract class Task(
                 NoScheduleOrParent(this, noScheduleOrParentRecord)
 
         invalidateIntervals()
-        addRootTaskIdToProject()
     }
 
     fun correctIntervalEndExactTimeStamps() = intervals.asSequence()

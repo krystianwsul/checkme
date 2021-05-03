@@ -116,19 +116,10 @@ class RootTask(
             is Type.Schedule -> type.getParentProjectSchedule()
             is Type.NoSchedule -> type.noScheduleOrParent!!
             is Type.Child -> null // called redundantly
-        }?.let { taskParentEntry ->
-            val oldProject = project
-
-            taskParentEntry.updateProject(projectKey)
-
-            parent.updateProject(taskKey, oldProject, projectKey)
-        }
-
+        }?.updateProject(projectKey)
 
         return this
     }
-
-    override fun addRootTaskIdToProject() = project.addRootTask(taskKey)
 
     interface Parent : Task.Parent, Project.RootTaskProvider {
 
@@ -143,7 +134,5 @@ class RootTask(
                 note: String?,
                 ordinal: Double?,
         ): RootTask
-
-        fun updateProject(taskKey: TaskKey.Root, oldProject: Project<*>, newProjectKey: ProjectKey<*>)
     }
 }

@@ -912,7 +912,7 @@ private fun DomainFactory.updateProjectRootIds(editedTasks: Collection<Task>) {
                 .values
                 .forEach { project ->
                     if (project == currentProject)
-                        project.addRootTask(task.taskKey) // todo task project update remove other refs
+                        project.addRootTask(task.taskKey)
                     else
                         project.removeRootTask(task.taskKey) // todo task project update remove other refs
                 }

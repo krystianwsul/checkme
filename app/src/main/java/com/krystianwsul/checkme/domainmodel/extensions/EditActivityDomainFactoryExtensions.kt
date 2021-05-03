@@ -914,7 +914,7 @@ private fun DomainFactory.updateProjectRootIds(editedTasks: Collection<Task>) {
                     if (project == currentProject)
                         project.addRootTask(task.taskKey)
                     else
-                        project.removeRootTask(task.taskKey) // todo task project update remove other refs
+                        project.removeRootTask(task.taskKey)
                 }
     }
 }

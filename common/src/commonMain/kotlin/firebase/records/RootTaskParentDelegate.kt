@@ -35,7 +35,7 @@ abstract class RootTaskParentDelegate(private val rootTaskParentJson: RootTaskPa
         }
     }
 
-    fun removeRootTask(rootTaskKey: TaskKey.Root, onKeysChangedCallback: (Set<TaskKey.Root>) -> Unit) { // todo task relevance remember to call this after removing hierarchies, or do bulk update
+    fun removeRootTask(rootTaskKey: TaskKey.Root, onKeysChangedCallback: (Set<TaskKey.Root>) -> Unit) {
         val rootTaskId = rootTaskKey.taskId
 
         if (rootTaskIds.containsKey(rootTaskId)) {

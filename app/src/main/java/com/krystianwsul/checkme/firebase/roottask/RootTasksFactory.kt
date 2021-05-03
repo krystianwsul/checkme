@@ -143,4 +143,6 @@ class RootTasksFactory(
         oldProject.removeRootTask(taskKey)
         newProject.addRootTask(taskKey)
     }
+
+    fun save(values: MutableMap<String, Any?>) = rootTasksLoader.rootTasksManager.save(values)
 }

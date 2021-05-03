@@ -20,7 +20,7 @@ class RootTasksLoader(
         rootTaskKeySource: RootTaskKeySource,
         private val provider: Provider,
         private val domainDisposable: CompositeDisposable,
-        private val rootTasksManager: RootTasksManager,
+        val rootTasksManager: RootTasksManager,
         private val loadDependencyTrackerManager: LoadDependencyTrackerManager,
 ) {
 

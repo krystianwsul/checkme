@@ -31,7 +31,7 @@ abstract class Task(
 
     companion object {
 
-        // todo after flipping switch, make json properties val
+        // todo after flipping switch, make json properties val, make all updates in EditActivityExtensions return RootTask
         const val WRITE_ROOT_TASKS = false // todo task after instance parent check tests, enable other write flags
     }
 

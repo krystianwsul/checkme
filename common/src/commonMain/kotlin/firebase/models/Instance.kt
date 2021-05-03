@@ -28,7 +28,7 @@ class Instance private constructor(val task: Task, private var data: Data) : Ass
             return getNotificationId(
                     scheduleDate,
                     TimeDescriptor.fromJsonTime(scheduleJsonTime),
-                    TaskKeyData(taskKey as TaskKey.Project),
+                    TaskKeyData(taskKey),
             )
         }
 

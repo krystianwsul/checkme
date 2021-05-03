@@ -126,10 +126,6 @@ class InstanceShownRecord(
 
     val taskKeyData get() = TaskKeyData(projectId, taskId)
 
-    init {
-        check(mProjectId.isNotEmpty())
-    }
-
     override val contentValues
         get() = ContentValues().apply {
             put(COLUMN_TASK_ID, taskId)

@@ -40,7 +40,7 @@ interface UserCustomTimeProviderSource {
                         )
                     }
 
-            val customTimeKeys = listOf(scheduleCustomTimeKeys, instanceCustomTimeKeys).flatten()
+            val customTimeKeys = listOf(scheduleCustomTimeKeys, instanceCustomTimeKeys).flatten().filterNotNull()
 
             return if (expectProjectKeys)
                 customTimeKeys.filterIsInstance<CustomTimeKey.User>()

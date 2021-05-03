@@ -449,10 +449,10 @@ abstract class Task(
         } else {
             removeSchedules.forEach { it.setEndExactTimeStamp(now.toOffset()) }
 
-            addSchedules(
+            createSchedules(
                     ownerKey,
-                    addScheduleDatas.map { it.second },
                     now,
+                    addScheduleDatas.map { it.second },
                     assignedTo,
                     customTimeMigrationHelper,
                     projectKey,
@@ -567,15 +567,6 @@ abstract class Task(
 
         normalizedFieldsDelegate.invalidate()
     }
-
-    private fun addSchedules(
-            ownerKey: UserKey,
-            scheduleDatas: List<Pair<ScheduleData, Time>>,
-            now: ExactTimeStamp.Local,
-            assignedTo: Set<UserKey>,
-            customTimeMigrationHelper: Project.CustomTimeMigrationHelper,
-            projectKey: ProjectKey<*>,
-    ) = createSchedules(ownerKey, now, scheduleDatas, assignedTo, customTimeMigrationHelper, projectKey)
 
     abstract fun addChild(childTask: Task, now: ExactTimeStamp.Local): TaskHierarchyKey
 

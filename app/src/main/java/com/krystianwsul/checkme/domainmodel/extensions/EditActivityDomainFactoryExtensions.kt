@@ -310,9 +310,11 @@ fun DomainUpdater.updateScheduleTask(
 
     val imageUuid = imagePath?.value?.let { newUuid() }
 
+    val projectKey = sharedProjectParameters?.key ?: defaultProjectId
+
     val task = getTaskForce(taskKey).let {
         it.requireCurrent(now)
-        convertAndUpdateProject(it, now, sharedProjectParameters?.key ?: defaultProjectId)
+        convertAndUpdateProject(it, now, projectKey)
     }.apply {
         setName(name, note)
 
@@ -326,7 +328,7 @@ fun DomainUpdater.updateScheduleTask(
                 now,
                 sharedProjectParameters.nonNullAssignedTo,
                 this@create,
-                project.projectKey,
+                projectKey,
         )
 
         if (imagePath != null) setImage(deviceDbInfo, imageUuid?.let { ImageState.Local(imageUuid) })
@@ -408,9 +410,11 @@ fun DomainUpdater.updateTopLevelTask(
 ): Single<TaskKey> = SingleDomainUpdate.create("updateTopLevelTask") { now ->
     check(name.isNotEmpty())
 
+    val projectKey = sharedProjectKey ?: defaultProjectId
+
     val task = getTaskForce(taskKey).also {
         it.requireCurrent(now)
-        convertAndUpdateProject(it, now, sharedProjectKey ?: defaultProjectId)
+        convertAndUpdateProject(it, now, projectKey)
     }.apply {
         setName(name, note)
 
@@ -418,7 +422,7 @@ fun DomainUpdater.updateTopLevelTask(
         endAllCurrentSchedules(now)
         endAllCurrentNoScheduleOrParents(now)
 
-        setNoScheduleOrParent(now, project.projectKey)
+        setNoScheduleOrParent(now, projectKey)
     }
 
     val imageUuid = imagePath?.value?.let { newUuid() }

@@ -518,6 +518,8 @@ class Instance private constructor(val task: Task, private var data: Data) : Ass
     }
 
     fun setParentState(newParentState: ParentState) {
+        check(newParentState.parentInstanceKey != instanceKey)
+
         if (parentState == newParentState) return
 
         createInstanceRecord().parentState = newParentState

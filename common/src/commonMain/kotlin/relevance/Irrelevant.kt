@@ -8,12 +8,11 @@ import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.project.SharedProject
 import com.krystianwsul.common.firebase.models.schedule.Schedule
 import com.krystianwsul.common.firebase.models.schedule.SingleSchedule
-import com.krystianwsul.common.firebase.models.task.ProjectTask
+import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.firebase.models.taskhierarchy.TaskHierarchy
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.CustomTimeKey
-import com.krystianwsul.common.utils.TaskKey
 import com.soywiz.klock.days
 
 object Irrelevant {
@@ -24,7 +23,7 @@ object Irrelevant {
             now: ExactTimeStamp.Local,
             delete: Boolean = true,
     ): Result {
-        val tasks = project.projectTasks // todo task relevance
+        val tasks = project.getAllTasks()
 
         tasks.forEach {
             it.correctIntervalEndExactTimeStamps()
@@ -33,12 +32,12 @@ object Irrelevant {
         }
 
         // relevant hack
-        val taskRelevances = tasks.associate { it.taskKey as TaskKey to TaskRelevance(it) } // todo task relevance
+        val taskRelevances = tasks.associate { it.taskKey to TaskRelevance(it) }
 
-        val taskHierarchies = project.taskHierarchies // todo task relevance
+        val taskHierarchies = project.taskHierarchies
         val taskHierarchyRelevances = taskHierarchies.associate { it.taskHierarchyKey to TaskHierarchyRelevance(it) }
 
-        val existingInstances = project.existingInstances // todo task relevance
+        val existingInstances = project.existingInstances
         val rootInstances = project.getRootInstances(null, now.toOffset().plusOne(), now).toList()
 
         val instanceRelevances = (existingInstances + rootInstances)
@@ -214,7 +213,7 @@ object Irrelevant {
             val irrelevantTaskHierarchies: Collection<TaskHierarchy>,
             val irrelevantSchedules: Collection<Schedule>,
             val irrelevantNoScheduleOrParents: Collection<NoScheduleOrParent>,
-            val irrelevantTasks: Collection<ProjectTask>,
+            val irrelevantTasks: Collection<Task>,
             val irrelevantRemoteCustomTimes: Collection<Time.Custom.Project<*>>,
             val removedSharedProjects: Collection<SharedProject>,
     )

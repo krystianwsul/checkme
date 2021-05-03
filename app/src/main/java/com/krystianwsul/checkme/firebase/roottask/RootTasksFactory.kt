@@ -90,9 +90,7 @@ class RootTasksFactory(
                 .toSet()
     }
 
-    override fun deleteRootTask(task: RootTask) {
-        TODO("todo task relevance")
-    }
+    override fun deleteRootTask(task: RootTask) = throw UnsupportedOperationException()
 
     fun getRootTaskIfPresent(taskKey: TaskKey.Root) = rootTasks[taskKey]
 

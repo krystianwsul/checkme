@@ -56,10 +56,9 @@ abstract class Project<T : ProjectType>(
     abstract val customTimes: Collection<Time.Custom.Project<T>>
 
     val taskHierarchies
-        get() =
-            taskHierarchyContainer.all + projectTasks.flatMap { it.nestedParentTaskHierarchies.values }
+        get() = taskHierarchyContainer.all + getAllTasks().flatMap { it.nestedParentTaskHierarchies.values }
 
-    val existingInstances get() = projectTasks.flatMap { it.existingInstances.values }
+    val existingInstances get() = getAllTasks().flatMap { it.existingInstances.values }
 
     protected fun initializeInstanceHierarchyContainers() {
         getAllTasks().forEach {

@@ -792,7 +792,8 @@ abstract class Task(
             now: ExactTimeStamp.Local,
             schedules: List<Schedule>,
             customTimeMigrationHelper: Project.CustomTimeMigrationHelper,
-            projectKey: ProjectKey<*>,
+            oldProjectKey: ProjectKey<*>,
+            newProjectKey: ProjectKey<*>,
     ) {
         for (schedule in schedules) {
             val today = Date.today()
@@ -814,7 +815,7 @@ abstract class Task(
                     now,
             )
 
-            val assignedTo = schedule.takeIf { it.topLevelTask.project == project }
+            val assignedTo = schedule.takeIf { oldProjectKey == newProjectKey }
                     ?.assignedTo
                     .orEmpty()
                     .map { it.key }
@@ -835,7 +836,7 @@ abstract class Task(
                                     date.day,
                                     copiedTime,
                                     assignedTo,
-                                    projectKey,
+                                    newProjectKey,
                             )
                     )
 
@@ -854,7 +855,7 @@ abstract class Task(
                                     schedule.until?.toJson(),
                                     schedule.interval,
                                     assignedTo,
-                                    projectKey,
+                                    newProjectKey,
                             )
                     )
 
@@ -873,7 +874,7 @@ abstract class Task(
                                     schedule.from?.toJson(),
                                     schedule.until?.toJson(),
                                     assignedTo,
-                                    projectKey,
+                                    newProjectKey,
                             )
                     )
 
@@ -893,7 +894,7 @@ abstract class Task(
                                     schedule.from?.toJson(),
                                     schedule.until?.toJson(),
                                     assignedTo,
-                                    projectKey,
+                                    newProjectKey,
                             )
                     )
 
@@ -912,7 +913,7 @@ abstract class Task(
                                     schedule.from?.toJson(),
                                     schedule.until?.toJson(),
                                     assignedTo,
-                                    projectKey,
+                                    newProjectKey,
                             )
                     )
 

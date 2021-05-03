@@ -490,8 +490,8 @@ class DomainFactory(
                     pair.first,
                     pair.second,
                     now,
-                    newProject.projectKey,
                     this,
+                    startProject.projectKey,
             )
 
             remoteToRemoteConversion.endTasks[pair.first.id] = task
@@ -785,6 +785,7 @@ class DomainFactory(
                         now,
                         currentSchedules,
                         customTimeMigrationHelper,
+                        oldTask.project.projectKey,
                         newProject.projectKey,
                 )
             } else {

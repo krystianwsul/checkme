@@ -147,14 +147,14 @@ abstract class Project<T : ProjectType>(
             oldTask: ProjectTask,
             instances: Collection<Instance>,
             now: ExactTimeStamp.Local,
-            newProjectKey: ProjectKey<*>,
             customTimeMigrationHelper: CustomTimeMigrationHelper,
+            oldProjectKey: ProjectKey<*>,
     ): Pair<ProjectTask, List<(Map<String, String>) -> Any?>> {
         val instanceDatas = instances.map { oldInstance ->
             val (newInstance, updater) = getInstanceJson(
                     deviceDbInfo.key,
                     oldInstance,
-                    newProjectKey,
+                    projectKey,
                     customTimeMigrationHelper,
                     now,
             )
@@ -193,7 +193,14 @@ abstract class Project<T : ProjectType>(
         if (currentSchedules.isNotEmpty()) {
             check(currentNoScheduleOrParent == null)
 
-            newTask.copySchedules(deviceDbInfo, now, currentSchedules, customTimeMigrationHelper, projectKey)
+            newTask.copySchedules(
+                    deviceDbInfo,
+                    now,
+                    currentSchedules,
+                    customTimeMigrationHelper,
+                    oldProjectKey,
+                    projectKey,
+            )
         } else {
             currentNoScheduleOrParent?.let { newTask.setNoScheduleOrParent(now, projectKey) }
         }

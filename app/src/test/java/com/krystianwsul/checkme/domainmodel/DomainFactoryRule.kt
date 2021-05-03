@@ -175,7 +175,14 @@ class DomainFactoryRule : TestRule {
             every { newRootTaskRecordId() } answers { "rootTaskRecordId" + ++rootTaskRecordId }
 
             var rootTaskScheduleRecordId = 0
-            every { newRootTaskScheduleRecordId(any()) } answers { "rootTaskScheduleRecordId" + ++rootTaskScheduleRecordId }
+            every { newRootTaskScheduleRecordId(any()) } answers {
+                "rootTaskScheduleRecordId" + ++rootTaskScheduleRecordId
+            }
+
+            var rootTaskNestedTaskHierarchyRecordId = 0
+            every { newRootTaskNestedTaskHierarchyRecordId(any()) } answers {
+                "rootTaskNestedTaskHierarchyRecordId" + ++rootTaskNestedTaskHierarchyRecordId
+            }
         }
 
         val myUserFactory = mockk<MyUserFactory> {

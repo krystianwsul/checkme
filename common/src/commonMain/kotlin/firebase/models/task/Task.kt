@@ -31,8 +31,15 @@ abstract class Task(
 
     companion object {
 
-        // todo after flipping switch, make json properties val, make all updates in EditActivityExtensions return RootTask
-        const val WRITE_ROOT_TASKS = false // todo task after instance parent check tests, enable other write flags
+        /**
+         * todo after flipping switch:
+         *
+         * make json properties val, make all updates in EditActivityExtensions return RootTask
+         * add todo to add paper for rootTasks a week later
+         */
+
+        //
+        const val WRITE_ROOT_TASKS = false // todo task add publish date
     }
 
     abstract val parent: Parent
@@ -633,7 +640,7 @@ abstract class Task(
     fun createSchedules(
             ownerKey: UserKey,
             now: ExactTimeStamp.Local,
-            scheduleDatas: List<Pair<ScheduleData, Time>>, // todo task are these pairs needed anymore?
+            scheduleDatas: List<Pair<ScheduleData, Time>>,
             assignedTo: Set<UserKey>,
             customTimeMigrationHelper: Project.CustomTimeMigrationHelper,
             projectKey: ProjectKey<*>,

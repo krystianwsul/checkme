@@ -46,10 +46,7 @@ class RootTasksLoader(
                 val initialRecord = map.getValue(taskKey)
 
                 TaskData(
-                        DatabaseRx(
-                                CompositeDisposable(),
-                                provider.getRootTaskObservable(taskKey),
-                        ),
+                        DatabaseRx(domainDisposable, provider.getRootTaskObservable(taskKey)),
                         initialRecord,
                 )
             },

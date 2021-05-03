@@ -7,11 +7,6 @@ import com.krystianwsul.common.firebase.records.schedule.SingleScheduleRecord
 
 sealed class AssignedToHelper {
 
-    companion object {
-
-        val root = Shared
-    }
-
     abstract fun getAssignedTo(scheduleJson: ScheduleJson): Set<String>
 
     abstract fun setAssignedTo(

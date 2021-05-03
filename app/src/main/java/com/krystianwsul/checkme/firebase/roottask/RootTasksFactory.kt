@@ -140,9 +140,7 @@ class RootTasksFactory(
     override fun updateProject(taskKey: TaskKey.Root, oldProject: Project<*>, newProjectKey: ProjectKey<*>) {
         val newProject = getProjectsFactory().getProjectForce(newProjectKey)
 
-        rootTasksLoader.ignoreKeyUpdates {
-            oldProject.removeRootTask(taskKey)
-            newProject.addRootTask(taskKey)
-        }
+        oldProject.removeRootTask(taskKey)
+        newProject.addRootTask(taskKey)
     }
 }

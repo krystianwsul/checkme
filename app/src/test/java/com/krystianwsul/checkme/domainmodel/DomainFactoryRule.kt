@@ -219,7 +219,7 @@ class DomainFactoryRule : TestRule {
         )
 
         val rootTaskDependencyCoordinator = mockk<RootTaskDependencyCoordinator> {
-            every { getDependencies(any()) } returns Single.just(mockk())
+            every { getDependencies(any()) } returns Single.just(myUserFactory.user)
         }
 
         val rootTaskFactory = RootTasksFactory(

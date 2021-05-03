@@ -32,7 +32,7 @@ abstract class Task(
     companion object {
 
         // todo after flipping switch, make json properties val
-        const val WRITE_ROOT_TASKS = false // todo task after edit enable for tests
+        const val WRITE_ROOT_TASKS = false // todo task after instance parent check tests, enable other write flags
     }
 
     abstract val parent: Parent

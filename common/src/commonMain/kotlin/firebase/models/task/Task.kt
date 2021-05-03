@@ -38,7 +38,6 @@ abstract class Task(
          * add todo to add paper for rootTasks a week later
          */
 
-        //
         const val WRITE_ROOT_TASKS = false // todo task add publish date
     }
 

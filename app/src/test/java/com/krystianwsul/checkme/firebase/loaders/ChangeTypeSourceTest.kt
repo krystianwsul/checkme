@@ -10,8 +10,8 @@ import com.krystianwsul.checkme.firebase.UserKeyStore
 import com.krystianwsul.checkme.firebase.checkRemote
 import com.krystianwsul.checkme.firebase.factories.ProjectsFactory
 import com.krystianwsul.checkme.firebase.managers.AndroidPrivateProjectManager
+import com.krystianwsul.checkme.firebase.managers.AndroidRootTasksManager
 import com.krystianwsul.checkme.firebase.managers.AndroidSharedProjectManager
-import com.krystianwsul.checkme.firebase.managers.RootTasksManager
 import com.krystianwsul.checkme.firebase.roottask.*
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.checkme.utils.SingleParamObservableSource
@@ -159,7 +159,7 @@ class ChangeTypeSourceTest {
             every { newRootTaskScheduleRecordId(any()) } answers { "scheduleRecordId" + scheduleRecordId++ }
         }
 
-        val rootTasksManager = RootTasksManager(databaseWrapper)
+        val rootTasksManager = AndroidRootTasksManager(databaseWrapper)
 
         val loadDependencyTrackerManager = LoadDependencyTrackerManager()
 

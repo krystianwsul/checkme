@@ -8,8 +8,8 @@ import com.krystianwsul.checkme.firebase.factories.FriendsFactory
 import com.krystianwsul.checkme.firebase.factories.MyUserFactory
 import com.krystianwsul.checkme.firebase.factories.ProjectsFactory
 import com.krystianwsul.checkme.firebase.managers.AndroidPrivateProjectManager
+import com.krystianwsul.checkme.firebase.managers.AndroidRootTasksManager
 import com.krystianwsul.checkme.firebase.managers.AndroidSharedProjectManager
-import com.krystianwsul.checkme.firebase.managers.RootTasksManager
 import com.krystianwsul.checkme.firebase.roottask.*
 import com.krystianwsul.checkme.utils.cacheImmediate
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
@@ -99,7 +99,7 @@ class FactoryLoader(
 
                     val rootTaskKeySource = RootTaskKeySource()
 
-                    val rootTaskManager = RootTasksManager(factoryProvider.database)
+                    val rootTaskManager = AndroidRootTasksManager(factoryProvider.database)
 
                     val loadDependencyTrackerManager = LoadDependencyTrackerManager()
 

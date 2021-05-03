@@ -5,10 +5,8 @@ import com.krystianwsul.common.firebase.json.UserWrapper
 import com.krystianwsul.common.firebase.records.RootUserRecord
 import com.krystianwsul.common.utils.UserKey
 
-class JsRootUserManager(
-        databaseWrapper: DatabaseWrapper,
-        userWrappers: Map<String, UserWrapper>,
-) : RootUserManager<RootUserRecord>() {
+class JsRootUserManager(databaseWrapper: DatabaseWrapper, userWrappers: Map<String, UserWrapper>) :
+        RootUserManager<RootUserRecord>() {
 
     init {
         setInitialRecords(

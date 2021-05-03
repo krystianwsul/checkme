@@ -3,22 +3,16 @@ package com.krystianwsul.checkme.firebase.managers
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.json.tasks.RootTaskJson
-import com.krystianwsul.common.firebase.managers.MapRecordManager
+import com.krystianwsul.common.firebase.managers.RootTasksManager
 import com.krystianwsul.common.firebase.records.task.RootTaskRecord
-import com.krystianwsul.common.firebase.records.task.TaskRecord
 import com.krystianwsul.common.utils.TaskKey
 
-class RootTasksManager(private val databaseWrapper: DatabaseWrapper) :
-        MapRecordManager<TaskKey.Root, RootTaskRecord>(), TaskRecord.Parent {
+class AndroidRootTasksManager(databaseWrapper: DatabaseWrapper) : RootTasksManager(databaseWrapper) {
 
     companion object {
 
         private fun Snapshot<RootTaskJson>.toKey() = TaskKey.Root(key)
     }
-
-    override val databasePrefix = DatabaseWrapper.TASKS_KEY
-
-    override fun valueToRecord(value: RootTaskRecord) = value
 
     fun set(snapshot: Snapshot<RootTaskJson>) = set(
             snapshot.toKey(),
@@ -34,9 +28,4 @@ class RootTasksManager(private val databaseWrapper: DatabaseWrapper) :
                 }
             },
     )?.data
-
-    override fun deleteTaskRecord(taskRecord: TaskRecord) = remove((taskRecord as RootTaskRecord).taskKey)
-
-    fun newTaskRecord(taskJson: RootTaskJson) =
-            RootTaskRecord(taskJson, databaseWrapper, this).also { add(it.taskKey, it) }
 }

@@ -49,6 +49,7 @@ object RelevanceChecker {
 
             fun proceed() {
                 val userWrapperMap = userWrapperMapTmp ?: return
+                val rootTaskMap = rootTaskMapTmp ?: return
 
                 val rootUserManager = JsRootUserManager(databaseWrapper, userWrapperMap)
 

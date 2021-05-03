@@ -13,8 +13,8 @@ import com.krystianwsul.checkme.firebase.factories.ProjectsFactory
 import com.krystianwsul.checkme.firebase.loaders.ProjectLoader
 import com.krystianwsul.checkme.firebase.loaders.SharedProjectsLoader
 import com.krystianwsul.checkme.firebase.loaders.mockBase64
+import com.krystianwsul.checkme.firebase.managers.AndroidRootTasksManager
 import com.krystianwsul.checkme.firebase.managers.AndroidSharedProjectManager
-import com.krystianwsul.checkme.firebase.managers.RootTasksManager
 import com.krystianwsul.checkme.firebase.roottask.*
 import com.krystianwsul.common.ErrorLogger
 import com.krystianwsul.common.domain.DeviceDbInfo
@@ -204,7 +204,7 @@ class DomainFactoryRule : TestRule {
             every { rootTaskKeysObservable } returns Observable.just(emptySet())
         }
 
-        val rootTasksManager = RootTasksManager(databaseWrapper)
+        val rootTasksManager = AndroidRootTasksManager(databaseWrapper)
 
         val rootTasksLoaderProvider = mockk<RootTasksLoader.Provider> {
             every { getRootTaskObservable(any()) } returns Observable.never()

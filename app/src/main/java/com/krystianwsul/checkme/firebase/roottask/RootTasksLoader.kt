@@ -4,7 +4,7 @@ import com.jakewharton.rxrelay3.ReplayRelay
 import com.krystianwsul.checkme.firebase.loaders.DatabaseRx
 import com.krystianwsul.checkme.firebase.loaders.MapChanges
 import com.krystianwsul.checkme.firebase.loaders.processChanges
-import com.krystianwsul.checkme.firebase.managers.RootTasksManager
+import com.krystianwsul.checkme.firebase.managers.AndroidRootTasksManager
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.checkme.utils.mapNotNull
 import com.krystianwsul.common.firebase.json.tasks.RootTaskJson
@@ -20,7 +20,7 @@ class RootTasksLoader(
         rootTaskKeySource: RootTaskKeySource,
         private val provider: Provider,
         private val domainDisposable: CompositeDisposable,
-        val rootTasksManager: RootTasksManager,
+        val rootTasksManager: AndroidRootTasksManager,
         private val loadDependencyTrackerManager: LoadDependencyTrackerManager,
 ) {
 

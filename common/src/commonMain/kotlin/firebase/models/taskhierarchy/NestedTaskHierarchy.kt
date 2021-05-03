@@ -8,7 +8,7 @@ import com.krystianwsul.common.utils.TaskHierarchyKey
 class NestedTaskHierarchy(
         override val childTask: Task,
         override val taskHierarchyRecord: NestedTaskHierarchyRecord,
-        parentTaskDelegate: ParentTaskDelegate,
+        private val parentTaskDelegate: ParentTaskDelegate,
 ) : TaskHierarchy(parentTaskDelegate) {
 
     override val childTaskKey get() = childTask.taskKey
@@ -21,7 +21,11 @@ class NestedTaskHierarchy(
         childTask.invalidateIntervals()
     }
 
-    override fun deleteFromParent() = childTask.deleteNestedTaskHierarchy(this)
+    override fun deleteFromParent() {
+        parentTaskDelegate.removeRootChildTaskFromParent(parentTask, childTask)
+
+        childTask.deleteNestedTaskHierarchy(this)
+    }
 
     override fun fixOffsets() {}
 }

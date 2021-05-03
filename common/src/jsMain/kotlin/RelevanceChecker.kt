@@ -1,5 +1,7 @@
 import com.krystianwsul.common.ErrorLogger
 import com.krystianwsul.common.firebase.JsDatabaseWrapper
+import com.krystianwsul.common.firebase.json.UserWrapper
+import com.krystianwsul.common.firebase.json.tasks.RootTaskJson
 import com.krystianwsul.common.firebase.managers.JsPrivateProjectManager
 import com.krystianwsul.common.firebase.managers.JsRootUserManager
 import com.krystianwsul.common.firebase.managers.JsSharedProjectManager
@@ -42,7 +44,12 @@ object RelevanceChecker {
         roots.forEach { root ->
             val databaseWrapper = JsDatabaseWrapper(admin, root)
 
-            databaseWrapper.getUsers { userWrapperMap ->
+            var userWrapperMapTmp: Map<String, UserWrapper>? = null
+            var rootTaskMapTmp: Map<String, RootTaskJson>? = null
+
+            fun proceed() {
+                val userWrapperMap = userWrapperMapTmp ?: return
+
                 val rootUserManager = JsRootUserManager(databaseWrapper, userWrapperMap)
 
                 val rootUsers = rootUserManager.records.mapValues { RootUser(it.value) }
@@ -162,6 +169,18 @@ object RelevanceChecker {
 
                     projectCallback()
                 }
+            }
+
+            databaseWrapper.getUsers {
+                userWrapperMapTmp = it
+
+                proceed()
+            }
+
+            databaseWrapper.getRootTasks {
+                rootTaskMapTmp = it
+
+                proceed()
             }
         }
     }

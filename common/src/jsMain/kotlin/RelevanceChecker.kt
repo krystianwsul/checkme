@@ -4,18 +4,26 @@ import com.krystianwsul.common.firebase.json.JsonWrapper
 import com.krystianwsul.common.firebase.json.UserWrapper
 import com.krystianwsul.common.firebase.json.projects.PrivateProjectJson
 import com.krystianwsul.common.firebase.json.tasks.RootTaskJson
+import com.krystianwsul.common.firebase.json.tasks.TaskJson
 import com.krystianwsul.common.firebase.managers.JsPrivateProjectManager
+import com.krystianwsul.common.firebase.managers.JsRootTasksManager
 import com.krystianwsul.common.firebase.managers.JsRootUserManager
 import com.krystianwsul.common.firebase.managers.JsSharedProjectManager
 import com.krystianwsul.common.firebase.models.RootUser
 import com.krystianwsul.common.firebase.models.project.PrivateProject
+import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.project.SharedProject
+import com.krystianwsul.common.firebase.models.task.RootTask
+import com.krystianwsul.common.firebase.models.task.Task
+import com.krystianwsul.common.firebase.models.taskhierarchy.TaskHierarchy
 import com.krystianwsul.common.relevance.CustomTimeRelevance
 import com.krystianwsul.common.relevance.Irrelevant
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.CustomTimeKey
+import com.krystianwsul.common.utils.ProjectKey
+import com.krystianwsul.common.utils.TaskKey
 
 object RelevanceChecker {
 
@@ -75,18 +83,77 @@ object RelevanceChecker {
                     }
                 }
 
+                val rootTaskManager = JsRootTasksManager(databaseWrapper, rootTaskMap)
+
+                lateinit var projectMap: Map<ProjectKey<*>, Project<*>>
+                lateinit var rootTasks: Map<TaskKey.Root, RootTask>
+
+                val rootTaskParent = object : RootTask.Parent {
+
+                    override fun createTask(now: ExactTimeStamp.Local, image: TaskJson.Image?, name: String, note: String?, ordinal: Double?): RootTask {
+                        throw UnsupportedOperationException()
+                    }
+
+                    override fun updateProject(taskKey: TaskKey.Root, oldProject: Project<*>, newProjectKey: ProjectKey<*>) {
+                        throw UnsupportedOperationException()
+                    }
+
+                    override fun updateProjectRecord(projectKey: ProjectKey<*>, dependentRootTaskKeys: Set<TaskKey.Root>) {
+                        // this is just for loading
+                    }
+
+                    override fun updateTaskRecord(taskKey: TaskKey.Root, dependentRootTaskKeys: Set<TaskKey.Root>) {
+                        // this is just for loading
+                    }
+
+                    override fun getProject(projectId: String): Project<*> {
+                        return projectMap.entries
+                                .single { it.key.key == projectId }
+                                .value
+                    }
+
+                    override fun getRootTask(rootTaskKey: TaskKey.Root) = rootTasks.getValue(rootTaskKey)
+
+                    override fun getTask(taskKey: TaskKey): Task {
+                        return when (taskKey) {
+                            is TaskKey.Root -> getRootTask(taskKey)
+                            is TaskKey.Project -> projectMap.getValue(taskKey.projectKey).getProjectTaskForce(taskKey.taskId)
+                        }
+                    }
+
+                    override fun getRootTasksForProject(projectKey: ProjectKey<*>): Collection<RootTask> {
+                        return rootTasks.values.filter { it.projectId == projectKey.key }
+                    }
+
+                    override fun getTaskHierarchiesByParentTaskKey(parentTaskKey: TaskKey): Set<TaskHierarchy> {
+                        return rootTasks.flatMap { it.value.nestedParentTaskHierarchies.values }
+                                .filter { it.parentTaskKey == parentTaskKey }
+                                .toSet()
+                    }
+
+                    override fun deleteRootTask(task: RootTask) {
+                        // not really needed
+                    }
+                }
+
+                rootTasks = rootTaskManager.records
+                        .map { RootTask(it.value, rootTaskParent, userCustomTimeProvider) }
+                        .associateBy { it.taskKey }
+
                 val privateProjectManager = JsPrivateProjectManager(databaseWrapper, privateProjectMap)
 
                 val sharedProjectManager = JsSharedProjectManager(databaseWrapper, sharedProjectMap)
 
                 val privateProjects = privateProjectManager.value
-                        .map { PrivateProject(it, userCustomTimeProvider) }
+                        .map { PrivateProject(it, userCustomTimeProvider, rootTaskParent) }
                         .associateBy { it.projectKey }
 
                 val sharedProjects = sharedProjectManager.records
                         .values
-                        .map { SharedProject(it, userCustomTimeProvider) }
+                        .map { SharedProject(it, userCustomTimeProvider, rootTaskParent) }
                         .associateBy { it.projectKey }
+
+                projectMap = privateProjects + sharedProjects
 
                 privateProjects.values.forEach { privateProject ->
                     response += "checking relevance for private project ${privateProject.projectKey}"

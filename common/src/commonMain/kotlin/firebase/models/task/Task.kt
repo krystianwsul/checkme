@@ -546,9 +546,12 @@ abstract class Task(
             ordinal: Double? = null,
     ): Task
 
+    protected abstract fun deleteProjectRootTaskId()
     protected abstract fun deleteFromParent()
 
     fun delete() {
+        deleteProjectRootTaskId()
+
         existingInstances.values
                 .toMutableList()
                 .forEach { it.delete() }

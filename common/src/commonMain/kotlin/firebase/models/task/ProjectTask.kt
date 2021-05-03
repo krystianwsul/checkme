@@ -34,6 +34,10 @@ class ProjectTask(override val project: Project<*>, private val taskRecord: Proj
             ordinal: Double?,
     ) = project.createChildTask(this, now, name, note, image, ordinal)
 
+    override fun deleteProjectRootTaskId() {
+        // only for root projects
+    }
+
     override fun deleteFromParent() = project.deleteTask(this)
 
     override fun getDateTime(scheduleKey: ScheduleKey) = project.getDateTime(scheduleKey)

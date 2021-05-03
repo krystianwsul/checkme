@@ -64,6 +64,7 @@ class RootTask(
         return childTask
     }
 
+    override fun deleteProjectRootTaskId() = project.removeRootTask(taskKey)
     override fun deleteFromParent() = parent.deleteRootTask(this)
 
     override fun getDateTime(scheduleKey: ScheduleKey) =

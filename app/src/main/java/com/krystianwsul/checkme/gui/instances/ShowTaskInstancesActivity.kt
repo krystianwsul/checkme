@@ -23,6 +23,7 @@ import com.krystianwsul.checkme.utils.tryGetFragment
 import com.krystianwsul.checkme.viewmodels.DataId
 import com.krystianwsul.checkme.viewmodels.ShowTaskInstancesViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
+import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.treeadapter.FilterCriteria
 import com.krystianwsul.treeadapter.TreeViewAdapter
@@ -186,4 +187,10 @@ class ShowTaskInstancesActivity : AbstractActivity(), GroupListListener {
     override fun setToolbarExpanded(expanded: Boolean) = binding.showNotificationGroupToolbarCollapseInclude
             .collapseAppBarLayout
             .setExpanded(expanded)
+
+    sealed class Parameters {
+
+        data class Task(val taskKey: TaskKey) : Parameters()
+        data class Project(val projectKey: ProjectKey<*>) : Parameters()
+    }
 }

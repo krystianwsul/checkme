@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.gui.tree.delegates.multiline
 
-import android.graphics.Rect
+import android.text.Layout
+import android.text.StaticLayout
 import android.text.TextUtils
 import android.view.View
 import android.widget.TextView
@@ -9,7 +10,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.jakewharton.rxrelay3.BehaviorRelay
 import com.krystianwsul.checkme.gui.tree.NodeDelegate
 import io.reactivex.rxjava3.kotlin.addTo
-import kotlin.math.ceil
 
 class MultiLineDelegate(private val modelNode: MultiLineModelNode) : NodeDelegate {
 
@@ -29,7 +29,7 @@ class MultiLineDelegate(private val modelNode: MultiLineModelNode) : NodeDelegat
                             .resources
                             .configuration
                             .orientation,
-                    modelNode.widthKey
+                    modelNode.widthKey,
             )
 
             val textWidthRelay = textWidths[widthKey]
@@ -40,11 +40,15 @@ class MultiLineDelegate(private val modelNode: MultiLineModelNode) : NodeDelegat
                 var remainingLines = TOTAL_LINES - minLines
 
                 textViews.forEach { textView ->
-                    fun getWantLines(text: String) = Rect().run {
-                        if (textWidthRelay.value != null) {
-                            textView.paint.getTextBounds(text, 0, text.length, this)
-
-                            ceil((width() + 1).toDouble() / textWidthRelay.value!!).toInt()
+                    fun getWantLines(text: String): Int {
+                        return if (textWidthRelay.value != null) {
+                            StaticLayout.Builder
+                                    .obtain(text, 0, text.length, textView.paint, textWidthRelay.value!!)
+                                    .setAlignment(Layout.Alignment.ALIGN_NORMAL)
+                                    .setLineSpacing(textView.lineSpacingExtra, textView.lineSpacingMultiplier)
+                                    .setIncludePad(textView.includeFontPadding)
+                                    .build()
+                                    .lineCount
                         } else {
                             1
                         }

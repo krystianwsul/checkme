@@ -54,7 +54,6 @@ sealed class GroupListParameters(val draggable: Boolean = true) {
             override val dataId: DataId,
             override val immediate: Boolean,
             override val groupListDataWrapper: GroupListDataWrapper,
-            val taskKey: com.krystianwsul.common.utils.TaskKey,
             override val showProgress: Boolean,
     ) : GroupListParameters(false) {
 

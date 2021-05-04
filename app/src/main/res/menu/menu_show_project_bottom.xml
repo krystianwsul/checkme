@@ -3,6 +3,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
+        android:id="@+id/projectMenuShowInstances"
+        android:title="@string/showInstances"
+        android:orderInCategory="100"
+        android:icon="@drawable/ic_notifications_white_24dp"
+        app:showAsAction="ifRoom" />
+
+    <item
         android:id="@+id/projectMenuEdit"
         android:title="@string/editProject"
         android:orderInCategory="150"

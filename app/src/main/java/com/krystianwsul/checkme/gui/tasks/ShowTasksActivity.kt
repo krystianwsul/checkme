@@ -15,6 +15,7 @@ import com.krystianwsul.checkme.gui.base.AbstractActivity
 import com.krystianwsul.checkme.gui.dialogs.ConfirmDialogFragment
 import com.krystianwsul.checkme.gui.edit.EditActivity
 import com.krystianwsul.checkme.gui.edit.EditParameters
+import com.krystianwsul.checkme.gui.instances.ShowTaskInstancesActivity
 import com.krystianwsul.checkme.gui.projects.ShowProjectActivity
 import com.krystianwsul.checkme.utils.exhaustive
 import com.krystianwsul.checkme.utils.getOrInitializeFragment
@@ -150,8 +151,10 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
                 .run {
                     if (findItem(R.id.projectMenuEdit) == null) return
 
-                    findItem(R.id.projectMenuEdit).isVisible =
-                            (parameters as? Parameters.Project)?.projectKey is ProjectKey.Shared
+                    val showProjectOptions = (parameters as? Parameters.Project)?.projectKey is ProjectKey.Shared
+
+                    findItem(R.id.projectMenuShowInstances).isVisible = showProjectOptions
+                    findItem(R.id.projectMenuEdit).isVisible = showProjectOptions
                     findItem(R.id.projectMenuSelectAll).isVisible = selectAllVisible
                 }
     }
@@ -163,12 +166,14 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
             animateReplaceMenu(R.menu.menu_show_project_bottom, onEnd = ::updateBottomMenu)
 
             setOnMenuItemClickListener { item ->
-                when (item.itemId) {
-                    R.id.projectMenuEdit -> {
-                        val projectKey = (parameters as Parameters.Project).projectKey as ProjectKey.Shared
+                val projectKey by lazy { (parameters as Parameters.Project).projectKey as ProjectKey.Shared }
 
+                when (item.itemId) {
+                    R.id.projectMenuShowInstances -> startActivity(ShowTaskInstancesActivity.getIntent(
+                            ShowTaskInstancesActivity.Parameters.Project(projectKey)
+                    ))
+                    R.id.projectMenuEdit ->
                         startActivity(ShowProjectActivity.newIntent(this@ShowTasksActivity, projectKey))
-                    }
                     R.id.projectMenuSelectAll -> taskListFragment.treeViewAdapter.selectAll()
                     else -> throw UnsupportedOperationException()
                 }

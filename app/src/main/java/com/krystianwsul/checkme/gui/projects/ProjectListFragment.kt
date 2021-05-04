@@ -19,6 +19,7 @@ import com.krystianwsul.checkme.gui.base.AbstractFragment
 import com.krystianwsul.checkme.gui.base.ActionModeListener
 import com.krystianwsul.checkme.gui.base.SnackbarListener
 import com.krystianwsul.checkme.gui.dialogs.RemoveInstancesDialogFragment
+import com.krystianwsul.checkme.gui.instances.ShowTaskInstancesActivity
 import com.krystianwsul.checkme.gui.main.FabUser
 import com.krystianwsul.checkme.gui.main.MainActivity
 import com.krystianwsul.checkme.gui.tasks.ShowTasksActivity
@@ -89,6 +90,9 @@ class ProjectListFragment : AbstractFragment(), FabUser {
             val projectKey by lazy { projectIds.single() }
 
             when (itemId) {
+                R.id.projectsMenuShowInstances -> startActivity(ShowTaskInstancesActivity.getIntent(
+                        ShowTaskInstancesActivity.Parameters.Project(projectKey),
+                ))
                 R.id.projectsMenuShowTasks ->
                     startActivity(ShowTasksActivity.newIntent(ShowTasksActivity.Parameters.Project(projectKey)))
                 R.id.projectsMenuEdit ->
@@ -124,7 +128,11 @@ class ProjectListFragment : AbstractFragment(), FabUser {
 
             val single = selectedNodes.size == 1
 
-            return listOf(R.id.projectsMenuShowTasks, R.id.projectsMenuEdit).map { it to single }
+            return listOf(
+                    R.id.projectsMenuShowInstances,
+                    R.id.projectsMenuShowTasks,
+                    R.id.projectsMenuEdit,
+            ).map { it to single }
         }
     }
 

@@ -132,18 +132,27 @@ class EditActivity : NavBarActivity() {
         }
 
         override fun onNewEntry(nameHint: String?) = startActivityForResult(
-                getParametersIntent(EditParameters.Create(
-                        null,
+                getParametersIntent(
                         editViewModel.delegate
                                 .parentScheduleManager
                                 .run {
-                                    ParentScheduleState(
-                                            schedules.map { ScheduleEntry(it.scheduleDataWrapper) }.toMutableList(),
-                                            assignedTo,
+                                    EditParameters.Create(
+                                            parent?.parentKey?.let {
+                                                when (it) { // there's probably a helper for this somewhere
+                                                    is EditViewModel.ParentKey.Project -> Hint.Project(it.projectId)
+                                                    is EditViewModel.ParentKey.Task -> Hint.Task(it.taskKey)
+                                                }
+                                            },
+                                            ParentScheduleState(
+                                                    schedules.map {
+                                                        ScheduleEntry(it.scheduleDataWrapper)
+                                                    }.toMutableList(),
+                                                    assignedTo,
+                                            ),
+                                            nameHint,
                                     )
                                 },
-                        nameHint,
-                )),
+                ),
                 REQUEST_CREATE_PARENT,
         )
 
@@ -558,7 +567,8 @@ class EditActivity : NavBarActivity() {
         @Parcelize
         class Task(val taskKey: TaskKey) : Hint() {
 
-            override fun toCurrentParent() = EditViewModel.CurrentParentSource.Set(EditViewModel.ParentKey.Task(taskKey))
+            override fun toCurrentParent() =
+                    EditViewModel.CurrentParentSource.Set(EditViewModel.ParentKey.Task(taskKey))
         }
 
         @Parcelize

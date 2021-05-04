@@ -914,6 +914,7 @@ class MainActivity :
         binding.mainActivityToolbar.title = getString(tabSearchState.title)
 
         fun hideFab() {
+            binding.mainSearchGroupListFragment.clearFab()
             taskListFragment.clearFab()
             projectListFragment.clearFab()
             showCustomTimesFragment.clearFab()
@@ -929,9 +930,14 @@ class MainActivity :
                 showCustomTimesFragment.clearFab()
                 friendListFragment.clearFab()
 
-                if (tabSearchState.isSearching) binding.mainSearchGroupListFragment.setFab(bottomBinding.bottomFab)
+                if (tabSearchState.isSearching) {
+                    binding.mainSearchGroupListFragment.setFab(bottomBinding.bottomFab)
+                } else {
+                    binding.mainSearchGroupListFragment.clearFab()
+                }
             }
             is TabSearchState.Tasks -> {
+                binding.mainSearchGroupListFragment.clearFab()
                 projectListFragment.clearFab()
                 showCustomTimesFragment.clearFab()
                 friendListFragment.clearFab()
@@ -939,6 +945,7 @@ class MainActivity :
                 taskListFragment.setFab(bottomBinding.bottomFab)
             }
             TabSearchState.Projects -> {
+                binding.mainSearchGroupListFragment.clearFab()
                 taskListFragment.clearFab()
                 showCustomTimesFragment.clearFab()
                 friendListFragment.clearFab()
@@ -946,6 +953,7 @@ class MainActivity :
                 projectListFragment.setFab(bottomBinding.bottomFab)
             }
             TabSearchState.CustomTimes -> {
+                binding.mainSearchGroupListFragment.clearFab()
                 taskListFragment.clearFab()
                 projectListFragment.clearFab()
                 friendListFragment.clearFab()
@@ -953,6 +961,7 @@ class MainActivity :
                 showCustomTimesFragment.setFab(bottomBinding.bottomFab)
             }
             TabSearchState.Friends -> {
+                binding.mainSearchGroupListFragment.clearFab()
                 taskListFragment.clearFab()
                 projectListFragment.clearFab()
                 showCustomTimesFragment.clearFab()

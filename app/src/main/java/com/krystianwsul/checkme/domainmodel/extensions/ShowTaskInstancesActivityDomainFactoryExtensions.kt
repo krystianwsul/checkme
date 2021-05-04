@@ -4,20 +4,23 @@ import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.getProjectInfo
 import com.krystianwsul.checkme.domainmodel.takeAndHasMore
+import com.krystianwsul.checkme.gui.instances.ShowTaskInstancesActivity
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.checkme.viewmodels.ShowTaskInstancesViewModel
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.time.ExactTimeStamp
-import com.krystianwsul.common.utils.TaskKey
+import com.krystianwsul.common.utils.Current
 
-fun DomainFactory.getShowTaskInstancesData(taskKey: TaskKey, page: Int): ShowTaskInstancesViewModel.Data {
+fun DomainFactory.getShowTaskInstancesData(
+        parameters: ShowTaskInstancesActivity.Parameters,
+        page: Int,
+): ShowTaskInstancesViewModel.Data {
     MyCrashlytics.log("DomainFactory.getShowTaskInstancesData")
 
     DomainThreadChecker.instance.requireDomainThread()
 
-    val task = getTaskForce(taskKey)
     val now = ExactTimeStamp.Local.now
 
     val customTimeDatas = getCurrentRemoteCustomTimes(now).map {
@@ -26,13 +29,26 @@ fun DomainFactory.getShowTaskInstancesData(taskKey: TaskKey, page: Int): ShowTas
 
     val desiredCount = (page + 1) * SEARCH_PAGE_SIZE
 
-    val (instances, hasMore) = task.getInstances(
-            null,
-            null,
-            now
-    )
-            .filter { it.isVisible(now, Instance.VisibilityOptions(hack24 = true)) }
-            .takeAndHasMore(desiredCount)
+    val parent: Current
+    val instanceSequence: Sequence<Instance>
+    when (parameters) {
+        is ShowTaskInstancesActivity.Parameters.Task -> {
+            val task = getTaskForce(parameters.taskKey)
+
+            parent = task
+            instanceSequence = task.getInstances(null, null, now)
+        }
+        is ShowTaskInstancesActivity.Parameters.Project -> {
+            val project = projectsFactory.getProjectForce(parameters.projectKey)
+
+            parent = project
+            instanceSequence = project.getRootInstances(null, null, now)
+        }
+    }
+
+    val (instances, hasMore) = instanceSequence.filter {
+        it.isVisible(now, Instance.VisibilityOptions(hack24 = true))
+    }.takeAndHasMore(desiredCount)
 
     val instanceDatas = instances.map {
         val children = getChildInstanceDatas(it, now)
@@ -44,15 +60,15 @@ fun DomainFactory.getShowTaskInstancesData(taskKey: TaskKey, page: Int): ShowTas
                 it.name,
                 it.instanceDateTime.timeStamp,
                 it.instanceDateTime,
-                task.current(now),
+                it.task.current(now),
                 it.canAddSubtask(now),
                 it.isRootInstance(),
                 it.getCreateTaskTimePair(now, projectsFactory.privateProject),
-                task.note,
+                it.task.note,
                 children,
                 it.task.ordinal,
                 it.getNotificationShown(localFactory),
-                task.getImage(deviceDbInfo),
+                it.task.getImage(deviceDbInfo),
                 it.isAssignedToMe(now, myUserFactory.user),
                 it.getProjectInfo(now),
         )
@@ -60,7 +76,7 @@ fun DomainFactory.getShowTaskInstancesData(taskKey: TaskKey, page: Int): ShowTas
 
     val dataWrapper = GroupListDataWrapper(
             customTimeDatas,
-            task.current(now),
+            parent.current(now),
             listOf(),
             null,
             instanceDatas,

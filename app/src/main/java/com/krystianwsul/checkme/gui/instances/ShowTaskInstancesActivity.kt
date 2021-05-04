@@ -110,7 +110,7 @@ class ShowTaskInstancesActivity : AbstractActivity(), GroupListListener {
                     .switchMap { binding.groupListFragment.progressShown }
                     .doOnNext { page += 1 }
                     .startWithItem(Unit)
-                    .subscribe { start(taskKey, page) }
+                    .subscribe { start(Parameters.Task(taskKey), page) }
                     .addTo(createDisposable)
         }
 

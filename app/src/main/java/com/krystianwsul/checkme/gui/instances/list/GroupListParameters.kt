@@ -50,7 +50,7 @@ sealed class GroupListParameters(val draggable: Boolean = true) {
             override val groupListDataWrapper: GroupListDataWrapper,
     ) : GroupListParameters(false)
 
-    data class TaskKey(
+    data class Parent(
             override val dataId: DataId,
             override val immediate: Boolean,
             override val groupListDataWrapper: GroupListDataWrapper,

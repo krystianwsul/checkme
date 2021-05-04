@@ -99,7 +99,7 @@ class ShowTaskInstancesActivity : AbstractActivity(), GroupListListener {
 
         showTaskInstancesViewModel = getViewModel<ShowTaskInstancesViewModel>().apply {
             data.doOnNext {
-                binding.groupListFragment.setParameters(GroupListParameters.TaskKey(
+                binding.groupListFragment.setParameters(GroupListParameters.Parent(
                         showTaskInstancesViewModel.dataId,
                         it.immediate,
                         it.groupListDataWrapper,

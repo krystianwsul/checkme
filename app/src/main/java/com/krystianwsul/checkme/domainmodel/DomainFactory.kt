@@ -83,12 +83,6 @@ class DomainFactory(
         var firstRun = false
 
         val isSaved = Observable.just(false)!! // todo find a new use for toolbar progress bar
-
-        private val ChangeType.runType
-            get() = when (this) {
-                ChangeType.LOCAL -> RunType.LOCAL
-                ChangeType.REMOTE -> RunType.REMOTE
-            }
     }
 
     var remoteReadTimes: ReadTimes
@@ -242,7 +236,7 @@ class DomainFactory(
 
         updateShortcuts(now)
 
-        tryNotifyListeners("DomainFactory.onChangeTypeEvent", changeType.runType)
+        tryNotifyListeners("DomainFactory.onChangeTypeEvent", RunType.REMOTE)
 
         changeTypeRelay.accept(changeType)
     }
@@ -284,7 +278,6 @@ class DomainFactory(
         val notifyParams = when (runType) {
             RunType.APP_START ->
                 tickData?.let { tick(it, false) } ?: Notifier.Params("$source, runType: $runType", true)
-            RunType.LOCAL -> tickData?.let { tick(it, false) }
             RunType.SIGN_IN -> tickData?.let { tick(it, false) } ?: notify()
             RunType.REMOTE -> tickData?.let { tick(it, true) } ?: notify()
         }
@@ -301,7 +294,7 @@ class DomainFactory(
 
     private enum class RunType {
 
-        APP_START, SIGN_IN, LOCAL, REMOTE
+        APP_START, SIGN_IN, REMOTE
     }
 
     // sets

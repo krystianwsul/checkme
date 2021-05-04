@@ -157,7 +157,9 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                             .also { it.listener = deleteInstancesListener }
                             .show(childFragmentManager, TAG_REMOVE_INSTANCES)
                 }
-                R.id.action_task_show_instances -> startActivity(ShowTaskInstancesActivity.getIntent(taskKeys.single()))
+                R.id.action_task_show_instances -> startActivity(ShowTaskInstancesActivity.getIntent(
+                        ShowTaskInstancesActivity.Parameters.Task(taskKeys.single())
+                ))
                 R.id.actionTaskCopy -> startActivity(getCopyTasksIntent(taskKeys))
                 R.id.actionTaskWebSearch -> startActivity(webSearchIntent(selectedNodes.single().entryData.name))
                 else -> throw UnsupportedOperationException()

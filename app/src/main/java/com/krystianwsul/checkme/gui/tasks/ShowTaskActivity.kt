@@ -225,8 +225,11 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.Listener {
                                 .show(supportFragmentManager, TAG_REMOVE_INSTANCES)
                     }
                     R.id.task_menu_select_all -> taskListFragment.treeViewAdapter.selectAll()
-                    R.id.task_menu_show_instances -> startActivity(ShowTaskInstancesActivity.getIntent(taskKey))
-                    R.id.taskMenuCopyTask -> startActivity(EditActivity.getParametersIntent(EditParameters.Copy(taskKey)))
+                    R.id.task_menu_show_instances -> startActivity(ShowTaskInstancesActivity.getIntent(
+                            ShowTaskInstancesActivity.Parameters.Task(taskKey),
+                    ))
+                    R.id.taskMenuCopyTask ->
+                        startActivity(EditActivity.getParametersIntent(EditParameters.Copy(taskKey)))
                     R.id.taskMenuWebSearch -> startActivity(webSearchIntent(data!!.name))
                     else -> throw UnsupportedOperationException()
                 }

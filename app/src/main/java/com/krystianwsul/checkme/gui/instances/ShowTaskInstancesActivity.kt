@@ -30,24 +30,25 @@ import com.krystianwsul.treeadapter.TreeViewAdapter
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.kotlin.addTo
+import kotlinx.parcelize.Parcelize
 import java.io.Serializable
 
 class ShowTaskInstancesActivity : AbstractActivity(), GroupListListener {
 
     companion object {
 
-        private const val TASK_KEY = "taskKey"
+        private const val KEY_PARAMETERS = "parameters"
 
         private const val TAG_DELETE_INSTANCES = "deleteInstances"
 
         private const val KEY_PAGE = "page"
 
-        fun getIntent(taskKey: TaskKey) = Intent(MyApplication.instance, ShowTaskInstancesActivity::class.java).apply {
-            putExtra(TASK_KEY, taskKey as Parcelable)
+        fun getIntent(parameters: Parameters) = Intent(MyApplication.instance, ShowTaskInstancesActivity::class.java).apply {
+            putExtra(KEY_PARAMETERS, parameters)
         }
     }
 
-    private lateinit var taskKey: TaskKey
+    private lateinit var parameters: Parameters
 
     private var selectAllVisible = false
 
@@ -92,9 +93,7 @@ class ShowTaskInstancesActivity : AbstractActivity(), GroupListListener {
 
         binding.groupListFragment.listener = this
 
-        check(intent.hasExtra(TASK_KEY))
-
-        taskKey = intent.getParcelableExtra(TASK_KEY)!!
+        parameters = intent.getParcelableExtra(KEY_PARAMETERS)!!
 
         savedInstanceState?.apply { page = getInt(KEY_PAGE) }
 
@@ -110,7 +109,7 @@ class ShowTaskInstancesActivity : AbstractActivity(), GroupListListener {
                     .switchMap { binding.groupListFragment.progressShown }
                     .doOnNext { page += 1 }
                     .startWithItem(Unit)
-                    .subscribe { start(Parameters.Task(taskKey), page) }
+                    .subscribe { start(parameters, page) }
                     .addTo(createDisposable)
         }
 
@@ -188,9 +187,12 @@ class ShowTaskInstancesActivity : AbstractActivity(), GroupListListener {
             .collapseAppBarLayout
             .setExpanded(expanded)
 
-    sealed class Parameters {
+    sealed class Parameters : Parcelable {
 
+        @Parcelize
         data class Task(val taskKey: TaskKey) : Parameters()
+
+        @Parcelize
         data class Project(val projectKey: ProjectKey<*>) : Parameters()
     }
 }

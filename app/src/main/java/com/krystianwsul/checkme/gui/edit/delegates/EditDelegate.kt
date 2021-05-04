@@ -100,7 +100,7 @@ abstract class EditDelegate(
                     listOfNotNull(
                             parent.value
                                     ?.projectUsers
-                                    ?.takeIf { it.isNotEmpty() && schedules.isNotEmpty() }
+                                    ?.takeIf { it.size > 1 && schedules.isNotEmpty() }
                                     ?.let { EditActivity.Item.AssignTo }
                     ) +
                     schedules.map { EditActivity.Item.Schedule(it) } +

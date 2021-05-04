@@ -13,7 +13,7 @@ class SearchInstancesViewModel : DomainViewModel<SearchInstancesViewModel.Data>(
 
         override fun getDataResult(domainFactory: DomainFactory) = domainFactory.getSearchInstancesData(
                 parameters.searchCriteria,
-                parameters.page
+                parameters.page,
         )
     }
 

@@ -62,7 +62,7 @@ fun DomainFactory.getSearchInstancesData(
                     null,
                     cappedInstanceDatas,
                     null,
-                    null
+                    null,
             )
 
             SearchInstancesViewModel.Data(dataWrapper, hasMore, searchCriteria)

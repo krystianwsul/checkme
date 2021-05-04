@@ -9,12 +9,10 @@ object LockerManager {
     var state: State = State.None
         private set
 
-    private val taskLockers = mutableMapOf<TaskKey, TaskLocker>()
-
     private fun getTaskLocker(taskKey: TaskKey): TaskLocker? {
         val state = state as? State.Locker ?: return null
 
-        return taskLockers.getOrPut(taskKey) { TaskLocker(state) }
+        return state.taskLockers.getOrPut(taskKey) { TaskLocker(state) }
     }
 
     fun getInstanceLocker(instanceKey: InstanceKey) = getTaskLocker(instanceKey.taskKey)?.getInstanceLocker(instanceKey)
@@ -25,7 +23,10 @@ object LockerManager {
 
         class Now(val now: ExactTimeStamp.Local) : State()
 
-        class Locker(val now: ExactTimeStamp.Local) : State()
+        class Locker(val now: ExactTimeStamp.Local) : State() {
+
+            val taskLockers = mutableMapOf<TaskKey, TaskLocker>()
+        }
     }
 
     fun <T : Any> setLocker(action: (ExactTimeStamp.Local) -> T): T {

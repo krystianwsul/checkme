@@ -21,9 +21,7 @@ fun DomainFactory.getShowTasksData(parameters: ShowTasksActivity.Parameters): Sh
 
     val now = ExactTimeStamp.Local.now
 
-    fun Task.toChildTaskData(): TaskListFragment.ChildTaskData {
-        val hierarchyExactTimeStamp = getHierarchyExactTimeStamp(now)
-
+    fun Task.toChildTaskData(hierarchyExactTimeStamp: ExactTimeStamp): TaskListFragment.ChildTaskData {
         return TaskListFragment.ChildTaskData(
                 name,
                 getScheduleText(ScheduleText, hierarchyExactTimeStamp),
@@ -54,7 +52,7 @@ fun DomainFactory.getShowTasksData(parameters: ShowTasksActivity.Parameters): Sh
                     .map {
                         val childTaskDatas = it.getAllTasks()
                                 .filter { it.current(now) && it.isUnscheduled(now) }
-                                .map { it.toChildTaskData() }
+                                .map { it.toChildTaskData(it.getHierarchyExactTimeStamp(now)) }
 
                         it.toProjectData(childTaskDatas)
                     }
@@ -66,7 +64,8 @@ fun DomainFactory.getShowTasksData(parameters: ShowTasksActivity.Parameters): Sh
         }
         is ShowTasksActivity.Parameters.Copy -> {
             entryDatas = parameters.taskKeys
-                    .map { getTaskForce(it).toChildTaskData() }
+                    .map(::getTaskForce)
+                    .map { it.toChildTaskData(it.getHierarchyExactTimeStamp(now)) }
                     .sorted()
 
             title = MyApplication.context.getString(R.string.copyingTasksTitle)
@@ -76,7 +75,12 @@ fun DomainFactory.getShowTasksData(parameters: ShowTasksActivity.Parameters): Sh
         is ShowTasksActivity.Parameters.Project -> {
             val project = projectsFactory.getProjectForce(parameters.projectKey)
 
-            entryDatas = project.getAllTasks().map { it.toChildTaskData() }
+            entryDatas = project.getAllTasks()
+                    .asSequence()
+                    .map { Pair(it, it.getHierarchyExactTimeStamp(now)) }
+                    .filter { (task, hierarchyExactTimeStamp) -> task.isTopLevelTask(hierarchyExactTimeStamp) }
+                    .map { (task, hierarchyExactTimeStamp) -> task.toChildTaskData(hierarchyExactTimeStamp) }
+                    .toList()
 
             title = project.getDisplayName()
 

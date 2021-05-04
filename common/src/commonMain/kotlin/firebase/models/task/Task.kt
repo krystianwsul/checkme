@@ -130,7 +130,9 @@ abstract class Task(
             taskRecord.ordinal = value
         }
 
-    private val normalizedFieldsDelegate = invalidatableLazy { listOfNotNull(name, note).map { it.normalized() } }
+    protected val normalizedFieldsDelegate = invalidatableLazy {
+        listOfNotNull(name, note, project.name).map { it.normalized() }
+    }
     final override val normalizedFields by normalizedFieldsDelegate
 
     val instanceHierarchyContainer by lazy { InstanceHierarchyContainer(this) }

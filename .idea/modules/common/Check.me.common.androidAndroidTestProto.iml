@@ -2,7 +2,7 @@
 <module external.linked.project.id=":common:androidAndroidTestProto" external.linked.project.path="$MODULE_DIR$/../../../common" external.root.project.path="$MODULE_DIR$/../../.." external.system.id="GRADLE" external.system.module.group="Check.me" external.system.module.type="sourceSet" external.system.module.version="unspecified" type="JAVA_MODULE" version="4">
   <component name="FacetManager">
     <facet type="kotlin-language" name="Kotlin">
-      <configuration version="3" platform="Common (experimental) " allPlatforms="JS []/JVM [1.6]/Native []/Native [general]" useProjectSettings="false" isTestModule="false" externalProjectId=":common" pureKotlinSourceFolders="C:\Users\kryst\StudioProjects\Check.me\common\src\androidDebug\kotlin;C:\Users\kryst\StudioProjects\Check.me\common\src\debug\kotlin;C:\Users\kryst\StudioProjects\Check.me\common\src\debug\java;C:\Users\kryst\StudioProjects\Check.me\common\src\androidDebugAndroidTest\kotlin;C:\Users\kryst\StudioProjects\Check.me\common\src\androidDebugUnitTest\kotlin;C:\Users\kryst\StudioProjects\Check.me\common\src\androidProto\kotlin;C:\Users\kryst\StudioProjects\Check.me\common\src\proto\kotlin;C:\Users\kryst\StudioProjects\Check.me\common\src\proto\java;C:\Users\kryst\StudioProjects\Check.me\common\src\androidProtoUnitTest\kotlin;C:\Users\kryst\StudioProjects\Check.me\common\src\androidRelease\kotlin;C:\Users\kryst\StudioProjects\Check.me\common\src\release\kotlin;C:\Users\kryst\StudioProjects\Check.me\common\src\release\java;C:\Users\kryst\StudioProjects\Check.me\common\src\androidReleaseUnitTest\kotlin;C:\Users\kryst\StudioProjects\Check.me\common\src\jsMain\kotlin;C:\Users\kryst\StudioProjects\Check.me\common\src\jsTest\kotlin;C:\Users\kryst\StudioProjects\Check.me\common\src\commonMain\kotlin">
+      <configuration version="3" platform="Common (experimental) " allPlatforms="JS []/JVM [1.8]" useProjectSettings="false" isTestModule="false" externalProjectId=":common" pureKotlinSourceFolders="C:\Users\kryst\StudioProjects\Check.me\common\src\androidDebug\kotlin;C:\Users\kryst\StudioProjects\Check.me\common\src\debug\kotlin;C:\Users\kryst\StudioProjects\Check.me\common\src\debug\java;C:\Users\kryst\StudioProjects\Check.me\common\src\androidDebugAndroidTest\kotlin;C:\Users\kryst\StudioProjects\Check.me\common\src\androidDebugUnitTest\kotlin;C:\Users\kryst\StudioProjects\Check.me\common\src\androidProto\kotlin;C:\Users\kryst\StudioProjects\Check.me\common\src\proto\kotlin;C:\Users\kryst\StudioProjects\Check.me\common\src\proto\java;C:\Users\kryst\StudioProjects\Check.me\common\src\androidProtoUnitTest\kotlin;C:\Users\kryst\StudioProjects\Check.me\common\src\androidRelease\kotlin;C:\Users\kryst\StudioProjects\Check.me\common\src\release\kotlin;C:\Users\kryst\StudioProjects\Check.me\common\src\release\java;C:\Users\kryst\StudioProjects\Check.me\common\src\androidReleaseUnitTest\kotlin;C:\Users\kryst\StudioProjects\Check.me\common\src\jsMain\kotlin;C:\Users\kryst\StudioProjects\Check.me\common\src\jsTest\kotlin">
         <newMppModelJpsModuleKind>SOURCE_SET_HOLDER</newMppModelJpsModuleKind>
         <compilerSettings />
         <compilerArguments>
@@ -26,7 +26,7 @@
               <option value="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-script-runtime/1.4.32/bac50b0748be017dbc13fc1cb7231b1c9da0e106/kotlin-script-runtime-1.4.32.jar" />
               <option value="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-daemon-embeddable/1.4.32/b40c5de5adea26ebb4e5fc36945c482ac20acee2/kotlin-daemon-embeddable-1.4.32.jar" />
               <option value="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.intellij.deps/trove4j/1.0.20181211/216c2e14b070f334479d800987affe4054cd563f/trove4j-1.0.20181211.jar" />
-              <option value="$APPLICATION_PLUGINS_DIR$/Kotlin/kotlinc/lib/kotlinx-serialization-compiler-plugin.jar" />
+              <option value="$KOTLIN_BUNDLED$/lib/kotlinx-serialization-compiler-plugin.jar" />
             </array>
           </option>
           <option name="multiPlatform" value="true" />
@@ -42,5 +42,20 @@
     <content url="file://$MODULE_DIR$/../../../common/src/androidTestProto/resources" />
     <orderEntry type="jdk" jdkName="Kotlin SDK" jdkType="KotlinSDK" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="module" module-name="Check.me.common.commonMain" />
+    <orderEntry type="library" name="Gradle: org.jetbrains.kotlinx:kotlinx-serialization-core:1.1.0" level="project" />
+    <orderEntry type="module-library">
+      <library name="Gradle: org.jetbrains.kotlin:kotlin-stdlib-common:1.4.32">
+        <CLASSES>
+          <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib-common/1.4.32/ef50bfa2c0491a11dcc35d9822edbfd6170e1ea2/kotlin-stdlib-common-1.4.32.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib-common/1.4.32/f3e47c26a177728549b3dd2a624fec333aa17b36/kotlin-stdlib-common-1.4.32-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="library" name="Gradle: com.soywiz.korlibs.klock:klock-metadata:1.12.0" level="project" />
+    <orderEntry type="library" name="Gradle: com.badoo.reaktive:reaktive-metadata:1.1.17" level="project" />
   </component>
 </module>

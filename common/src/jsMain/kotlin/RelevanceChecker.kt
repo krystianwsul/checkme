@@ -94,10 +94,6 @@ object RelevanceChecker {
                         throw UnsupportedOperationException()
                     }
 
-                    override fun updateProject(taskKey: TaskKey.Root, oldProject: Project<*>, newProjectKey: ProjectKey<*>) {
-                        throw UnsupportedOperationException()
-                    }
-
                     override fun updateProjectRecord(projectKey: ProjectKey<*>, dependentRootTaskKeys: Set<TaskKey.Root>) {
                         // this is just for loading
                     }

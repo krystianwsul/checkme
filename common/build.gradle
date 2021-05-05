@@ -53,6 +53,7 @@ kotlin {
             dependencies {
                 implementation 'org.jetbrains.kotlin:kotlin-stdlib-common'
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-core:$serializationVersion"
+                implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$serializationVersion"
                 implementation "com.soywiz.korlibs.klock:klock:$klockVersion"
 
                 implementation "com.badoo.reaktive:reaktive:$reaktiveVersion"

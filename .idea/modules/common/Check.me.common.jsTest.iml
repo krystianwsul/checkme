@@ -52,27 +52,6 @@
     <content url="file://$MODULE_DIR$/../../../common/src/jsTest/resources" />
     <orderEntry type="jdk" jdkName="Kotlin SDK" jdkType="KotlinSDK" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" scope="TEST" name="Gradle: com.badoo.reaktive:reaktive-js:1.1.17" level="project" />
-    <orderEntry type="library" scope="TEST" name="Gradle: com.badoo.reaktive:reaktive-js:1.1.17" level="project" />
-    <orderEntry type="library" scope="TEST" name="Gradle: com.badoo.reaktive:reaktive-js:1.1.17" level="project" />
-    <orderEntry type="library" scope="TEST" name="Gradle: com.badoo.reaktive:reaktive-metadata:1.1.17" level="project" />
-    <orderEntry type="library" scope="TEST" name="Gradle: com.badoo.reaktive:reaktive-metadata:1.1.17" level="project" />
-    <orderEntry type="library" scope="TEST" name="Gradle: com.badoo.reaktive:reaktive-metadata:1.1.17" level="project" />
-    <orderEntry type="library" scope="TEST" name="Gradle: com.badoo.reaktive:utils-js:1.1.17" level="project" />
-    <orderEntry type="library" scope="TEST" name="Gradle: com.badoo.reaktive:utils-js:1.1.17" level="project" />
-    <orderEntry type="library" scope="TEST" name="Gradle: com.badoo.reaktive:utils-js:1.1.17" level="project" />
-    <orderEntry type="library" scope="TEST" name="Gradle: com.badoo.reaktive:utils-metadata:1.1.17" level="project" />
-    <orderEntry type="library" scope="TEST" name="Gradle: com.badoo.reaktive:utils-metadata:1.1.17" level="project" />
-    <orderEntry type="library" scope="TEST" name="Gradle: com.badoo.reaktive:utils-metadata:1.1.17" level="project" />
-    <orderEntry type="library" scope="TEST" name="Gradle: com.soywiz.korlibs.klock:klock:1.12.0" level="project" />
-    <orderEntry type="library" scope="TEST" name="Gradle: com.soywiz.korlibs.klock:klock:1.12.0" level="project" />
-    <orderEntry type="library" scope="TEST" name="Gradle: org.jetbrains.kotlin:kotlin-stdlib-js:1.5.0" level="project" />
-    <orderEntry type="library" scope="TEST" name="Gradle: org.jetbrains.kotlinx:kotlinx-serialization-core-js:1.1.0" level="project" />
-    <orderEntry type="library" scope="TEST" name="Gradle: org.jetbrains.kotlinx:kotlinx-serialization-core-js:1.1.0" level="project" />
-    <orderEntry type="library" scope="TEST" name="Gradle: org.jetbrains.kotlinx:kotlinx-serialization-core-js:1.1.0" level="project" />
-    <orderEntry type="library" scope="TEST" name="Gradle: org.jetbrains.kotlinx:kotlinx-serialization-core:1.1.0" level="project" />
-    <orderEntry type="library" scope="TEST" name="Gradle: org.jetbrains.kotlinx:kotlinx-serialization-core:1.1.0" level="project" />
-    <orderEntry type="library" scope="TEST" name="Gradle: org.jetbrains.kotlinx:kotlinx-serialization-core:1.1.0" level="project" />
     <orderEntry type="module" module-name="Check.me.common.commonMain" scope="TEST" />
     <orderEntry type="module" module-name="Check.me.common.commonTest" scope="TEST" production-on-test="" />
     <orderEntry type="module" module-name="Check.me.common.jsMain" scope="TEST" />
@@ -108,11 +87,12 @@
       </library>
     </orderEntry>
     <orderEntry type="library" scope="TEST" name="Gradle: com.badoo.reaktive:reaktive-js:1.1.17" level="project" />
+    <orderEntry type="library" scope="TEST" name="Gradle: com.soywiz.korlibs.klock:klock-metadata:1.12.0" level="project" />
     <orderEntry type="library" scope="TEST" name="Gradle: com.badoo.reaktive:reaktive-metadata:1.1.17" level="project" />
     <orderEntry type="library" scope="TEST" name="Gradle: com.badoo.reaktive:utils-js:1.1.17" level="project" />
     <orderEntry type="library" scope="TEST" name="Gradle: com.badoo.reaktive:utils-metadata:1.1.17" level="project" />
     <orderEntry type="library" scope="TEST" name="Gradle: org.jetbrains.kotlinx:kotlinx-serialization-core-js:1.1.0" level="project" />
-    <orderEntry type="library" scope="TEST" name="Gradle: com.soywiz.korlibs.klock:klock:1.12.0" level="project" />
+    <orderEntry type="library" scope="TEST" name="Gradle: com.soywiz.korlibs.klock:klock-js:1.12.0" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Gradle: com.badoo.reaktive:reaktive-annotations-js:1.1.17" level="project" />
   </component>
   <component name="TestModuleProperties" production-module="Check.me.common.jsMain" />

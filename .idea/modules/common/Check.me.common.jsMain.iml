@@ -70,6 +70,7 @@
     <orderEntry type="library" name="Gradle: com.badoo.reaktive:reaktive-metadata:1.1.17" level="project" />
     <orderEntry type="library" name="Gradle: com.badoo.reaktive:utils-js:1.1.17" level="project" />
     <orderEntry type="library" name="Gradle: com.badoo.reaktive:utils-metadata:1.1.17" level="project" />
+    <orderEntry type="library" name="Gradle: org.jetbrains.kotlinx:kotlinx-serialization-json-js:1.1.0" level="project" />
     <orderEntry type="library" name="Gradle: org.jetbrains.kotlinx:kotlinx-serialization-core-js:1.1.0" level="project" />
     <orderEntry type="library" name="Gradle: com.soywiz.korlibs.klock:klock-js:1.12.0" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Gradle: com.badoo.reaktive:reaktive-annotations-js:1.1.17" level="project" />

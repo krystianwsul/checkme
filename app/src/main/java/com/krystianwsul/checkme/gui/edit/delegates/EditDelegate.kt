@@ -3,7 +3,7 @@ package com.krystianwsul.checkme.gui.edit.delegates
 import android.content.Intent
 import android.os.Bundle
 import androidx.annotation.StringRes
-import arrow.syntax.function.invoke
+import arrow.core.curried
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.edit.*
@@ -36,12 +36,12 @@ abstract class EditDelegate(
                 storeParentKey: (EditViewModel.ParentKey?, Boolean) -> Unit,
         ): EditDelegate {
             return when (parameters) {
-                is EditParameters.Copy -> (::CopyExistingTaskEditDelegate)(parameters)
-                is EditParameters.Edit -> (::EditExistingTaskEditDelegate)(parameters)
-                is EditParameters.Join -> (::JoinTasksEditDelegate)(parameters)
+                is EditParameters.Copy -> ::CopyExistingTaskEditDelegate.curried()(parameters)
+                is EditParameters.Edit -> ::EditExistingTaskEditDelegate.curried()(parameters)
+                is EditParameters.Join -> ::JoinTasksEditDelegate.curried()(parameters)
                 is EditParameters.Create, is EditParameters.Share, is EditParameters.Shortcut, EditParameters.None ->
-                    (::CreateTaskEditDelegate)(parameters)
-            }(data, savedInstanceState, compositeDisposable, storeParentKey)
+                    ::CreateTaskEditDelegate.curried()(parameters)
+            }(data)(savedInstanceState)(compositeDisposable)(storeParentKey)
         }
 
         fun Single<TaskKey>.toCreateResult() = map<CreateResult>(CreateResult::Task)!!

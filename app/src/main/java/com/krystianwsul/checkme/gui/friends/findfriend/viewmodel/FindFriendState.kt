@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.gui.friends.findfriend.viewmodel
 
-import arrow.core.extensions.list.functorFilter.filter
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.common.utils.normalized
 import io.reactivex.rxjava3.kotlin.merge

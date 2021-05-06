@@ -9,22 +9,10 @@ import com.krystianwsul.common.utils.UserKey
 
 
 class SharedCustomTimeRecord(
-        create: Boolean,
-        override val id: CustomTimeId.Project.Shared,
-        override val customTimeJson: SharedCustomTimeJson,
-        override val projectRecord: SharedProjectRecord,
-) : ProjectCustomTimeRecord<ProjectType.Shared>(create) {
-
-    constructor(
-            id: CustomTimeId.Project.Shared,
-            remoteProjectRecord: SharedProjectRecord,
-            customTimeJson: SharedCustomTimeJson,
-    ) : this(false, id, customTimeJson, remoteProjectRecord)
-
-    constructor(
-            remoteProjectRecord: SharedProjectRecord,
-            customTimeJson: SharedCustomTimeJson,
-    ) : this(true, remoteProjectRecord.getCustomTimeRecordId(), customTimeJson, remoteProjectRecord)
+    override val id: CustomTimeId.Project.Shared,
+    override val projectRecord: SharedProjectRecord,
+    override val customTimeJson: SharedCustomTimeJson,
+) : ProjectCustomTimeRecord<ProjectType.Shared>(false) {
 
     override val customTimeKey = CustomTimeKey.Project.Shared(projectRecord.projectKey, id)
 

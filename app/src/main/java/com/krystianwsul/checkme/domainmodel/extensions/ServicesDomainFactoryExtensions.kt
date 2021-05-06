@@ -30,7 +30,6 @@ fun DomainUpdater.setInstanceAddHourService(instanceKey: InstanceKey): Completab
 
             instance.setInstanceDateTime(
                     localFactory,
-                    ownerKey,
                     DateTime(date, Time.Normal(hourMinute)),
                     this,
                     now,

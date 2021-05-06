@@ -4,19 +4,16 @@ import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.DeviceInfo
 import com.krystianwsul.common.domain.TaskHierarchyContainer
 import com.krystianwsul.common.firebase.json.InstanceJson
-import com.krystianwsul.common.firebase.json.customtimes.SharedCustomTimeJson
 import com.krystianwsul.common.firebase.json.tasks.SharedTaskJson
 import com.krystianwsul.common.firebase.json.tasks.TaskJson
 import com.krystianwsul.common.firebase.models.CopyScheduleHelper
 import com.krystianwsul.common.firebase.models.ProjectUser
 import com.krystianwsul.common.firebase.models.RootUser
-import com.krystianwsul.common.firebase.models.customtime.PrivateCustomTime
 import com.krystianwsul.common.firebase.models.customtime.SharedCustomTime
 import com.krystianwsul.common.firebase.models.task.ProjectTask
 import com.krystianwsul.common.firebase.models.taskhierarchy.ProjectTaskHierarchy
 import com.krystianwsul.common.firebase.records.AssignedToHelper
 import com.krystianwsul.common.firebase.records.project.SharedProjectRecord
-import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.time.Time
@@ -140,52 +137,6 @@ class SharedProject(
 
     override fun getProjectCustomTime(projectCustomTimeKey: CustomTimeKey.Project<ProjectType.Shared>): SharedCustomTime =
             getProjectCustomTime(projectCustomTimeKey.customTimeId)
-
-    private fun newRemoteCustomTime(customTimeJson: SharedCustomTimeJson): SharedCustomTime {
-        val remoteCustomTimeRecord = projectRecord.newRemoteCustomTimeRecord(customTimeJson)
-
-        val remoteCustomTime = SharedCustomTime(this, remoteCustomTimeRecord)
-
-        check(!remoteCustomTimes.containsKey(remoteCustomTime.id))
-
-        remoteCustomTimes[remoteCustomTime.id] = remoteCustomTime
-
-        return remoteCustomTime
-    }
-
-    override fun getOrCreateCustomTimeOld(ownerKey: UserKey, customTime: Time.Custom.Project<*>): SharedCustomTime {
-        fun copy(): SharedCustomTime {
-            val private = customTime as? PrivateCustomTime
-
-            val customTimeJson = SharedCustomTimeJson(
-                    customTime.name,
-                    customTime.getHourMinute(DayOfWeek.SUNDAY).hour,
-                    customTime.getHourMinute(DayOfWeek.SUNDAY).minute,
-                    customTime.getHourMinute(DayOfWeek.MONDAY).hour,
-                    customTime.getHourMinute(DayOfWeek.MONDAY).minute,
-                    customTime.getHourMinute(DayOfWeek.TUESDAY).hour,
-                    customTime.getHourMinute(DayOfWeek.TUESDAY).minute,
-                    customTime.getHourMinute(DayOfWeek.WEDNESDAY).hour,
-                    customTime.getHourMinute(DayOfWeek.WEDNESDAY).minute,
-                    customTime.getHourMinute(DayOfWeek.THURSDAY).hour,
-                    customTime.getHourMinute(DayOfWeek.THURSDAY).minute,
-                    customTime.getHourMinute(DayOfWeek.FRIDAY).hour,
-                    customTime.getHourMinute(DayOfWeek.FRIDAY).minute,
-                    customTime.getHourMinute(DayOfWeek.SATURDAY).hour,
-                    customTime.getHourMinute(DayOfWeek.SATURDAY).minute,
-                    private?.projectId?.key,
-                    private?.id?.value,
-            )
-
-            return newRemoteCustomTime(customTimeJson)
-        }
-
-        return when (customTime) {
-            is PrivateCustomTime -> getSharedTimeIfPresent(customTime.key, ownerKey)
-            is SharedCustomTime -> customTime.takeIf { it.projectId == projectKey }
-            else -> throw IllegalArgumentException()
-        } ?: copy()
-    }
 
     override fun createChildTask(
             parentTask: ProjectTask,

@@ -328,7 +328,6 @@ fun DomainUpdater.updateScheduleTask(
         endAllCurrentNoScheduleOrParents(now)
 
         updateSchedules(
-                ownerKey,
                 localFactory,
                 scheduleDatas.map { it to getTime(it.timePair) },
                 now,
@@ -815,7 +814,7 @@ private fun DomainFactory.createScheduleTopLevelTask(
 ): Task {
     return if (Task.WRITE_ROOT_TASKS) {
         createRootTask(now, imageUuid, name, note, ordinal).apply {
-            createSchedules(deviceDbInfo.key, now, scheduleDatas, assignedTo, customTimeMigrationHelper, projectKey)
+            createSchedules(now, scheduleDatas, assignedTo, customTimeMigrationHelper, projectKey)
         }
     } else {
         projectsFactory.createScheduleTopLevelTask(

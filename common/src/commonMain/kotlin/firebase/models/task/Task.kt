@@ -406,7 +406,6 @@ abstract class Task(
     private data class ScheduleDiffKey(val scheduleData: ScheduleData, val assignedTo: Set<UserKey>)
 
     fun updateSchedules(
-            ownerKey: UserKey,
             shownFactory: Instance.ShownFactory,
             scheduleDatas: List<Pair<ScheduleData, Time>>,
             now: ExactTimeStamp.Local,
@@ -449,7 +448,6 @@ abstract class Task(
 
             singleRemoveSchedule.getInstance(this).setInstanceDateTime(
                     shownFactory,
-                    ownerKey,
                     singleAddSchedulePair.second.run { DateTime((first as ScheduleData.Single).date, second) },
                     customTimeMigrationHelper,
                     now,
@@ -458,7 +456,6 @@ abstract class Task(
             removeSchedules.forEach { it.setEndExactTimeStamp(now.toOffset()) }
 
             createSchedules(
-                    ownerKey,
                     now,
                     addScheduleDatas.map { it.second },
                     assignedTo,
@@ -631,7 +628,6 @@ abstract class Task(
     fun getInstance(scheduleKey: ScheduleKey) = getInstance(getDateTime(scheduleKey))
 
     abstract fun getOrCopyTime(
-            ownerKey: UserKey,
             dayOfWeek: DayOfWeek,
             time: Time,
             customTimeMigrationHelper: Project.CustomTimeMigrationHelper,
@@ -639,7 +635,6 @@ abstract class Task(
     ): Time
 
     fun createSchedules(
-            ownerKey: UserKey,
             now: ExactTimeStamp.Local,
             scheduleDatas: List<Pair<ScheduleData, Time>>,
             assignedTo: Set<UserKey>,
@@ -654,7 +649,6 @@ abstract class Task(
                     val date = scheduleData.date
 
                     val copiedTime = getOrCopyTime(
-                            ownerKey,
                             date.dayOfWeek,
                             time,
                             customTimeMigrationHelper,
@@ -681,7 +675,6 @@ abstract class Task(
                 is ScheduleData.Weekly -> {
                     for (dayOfWeek in scheduleData.daysOfWeek) {
                         val copiedTime = getOrCopyTime(
-                                ownerKey,
                                 dayOfWeek,
                                 time,
                                 customTimeMigrationHelper,
@@ -719,7 +712,7 @@ abstract class Task(
                             scheduleData.beginningOfMonth,
                     ).dayOfWeek
 
-                    val copiedTime = getOrCopyTime(ownerKey, dayOfWeek, time, customTimeMigrationHelper, now)
+                    val copiedTime = getOrCopyTime(dayOfWeek, time, customTimeMigrationHelper, now)
 
                     val monthlyDayScheduleRecord = taskRecord.newMonthlyDayScheduleRecord(
                             copyScheduleHelper.newMonthlyDay(
@@ -741,7 +734,7 @@ abstract class Task(
                 }
                 is ScheduleData.MonthlyWeek -> {
                     val (weekOfMonth, dayOfWeek, beginningOfMonth) = scheduleData
-                    val copiedTime = getOrCopyTime(ownerKey, dayOfWeek, time, customTimeMigrationHelper, now)
+                    val copiedTime = getOrCopyTime(dayOfWeek, time, customTimeMigrationHelper, now)
 
                     val monthlyWeekScheduleRecord = taskRecord.newMonthlyWeekScheduleRecord(
                             copyScheduleHelper.newMonthlyWeek(
@@ -764,7 +757,6 @@ abstract class Task(
                 }
                 is ScheduleData.Yearly -> {
                     val copiedTime = getOrCopyTime(
-                            ownerKey,
                             Date(Date.today().year, scheduleData.month, scheduleData.day).dayOfWeek,
                             time,
                             customTimeMigrationHelper,
@@ -796,7 +788,6 @@ abstract class Task(
     }
 
     fun copySchedules(
-            deviceDbInfo: DeviceDbInfo,
             now: ExactTimeStamp.Local,
             schedules: List<Schedule>,
             customTimeMigrationHelper: Project.CustomTimeMigrationHelper,
@@ -816,7 +807,6 @@ abstract class Task(
             }
 
             val copiedTime = getOrCopyTime(
-                    deviceDbInfo.key,
                     dayOfWeek,
                     schedule.time,
                     customTimeMigrationHelper,

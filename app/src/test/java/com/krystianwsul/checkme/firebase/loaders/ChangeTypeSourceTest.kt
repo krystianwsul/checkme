@@ -905,7 +905,6 @@ class ChangeTypeSourceTest {
                 null,
         ).apply {
             createSchedules(
-                    privateProjectKey.toUserKey(),
                     ExactTimeStamp.Local.now,
                     listOf(Pair(ScheduleData.Single(Date.today(), TimePair(HourMinute.now)), Time.Normal(HourMinute.now))),
                     setOf(),

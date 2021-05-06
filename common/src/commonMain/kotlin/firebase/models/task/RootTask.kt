@@ -78,7 +78,6 @@ class RootTask(
             ?: Time.Normal(timePair.hourMinute!!)
 
     override fun getOrCopyTime(
-            ownerKey: UserKey,
             dayOfWeek: DayOfWeek,
             time: Time,
             customTimeMigrationHelper: Project.CustomTimeMigrationHelper,

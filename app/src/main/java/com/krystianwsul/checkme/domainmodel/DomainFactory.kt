@@ -107,7 +107,7 @@ class DomainFactory(
 
         projectsFactory.privateProject.let {
             if (it.run { !defaultTimesCreated && customTimes.isEmpty() }) {
-                DefaultCustomTimeCreator.createDefaultCustomTimes(it, myUserFactory.user)
+                DefaultCustomTimeCreator.createDefaultCustomTimes(myUserFactory.user)
 
                 it.defaultTimesCreated = true
             }
@@ -479,7 +479,6 @@ class DomainFactory(
 
         for (pair in remoteToRemoteConversion.startTasks.values) {
             val (task, updaters) = newProject.copyTask(
-                    deviceDbInfo,
                     pair.first,
                     pair.second,
                     now,
@@ -774,7 +773,6 @@ class DomainFactory(
                 check(currentNoScheduleOrParent == null)
 
                 newTask.copySchedules(
-                        deviceDbInfo,
                         now,
                         currentSchedules,
                         customTimeMigrationHelper,

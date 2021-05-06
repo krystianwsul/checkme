@@ -399,7 +399,6 @@ class Instance private constructor(val task: Task, private var data: Data) : Ass
 
     fun setInstanceDateTime(
             shownFactory: ShownFactory,
-            ownerKey: UserKey,
             dateTime: DateTime?,
             customTimeMigrationHelper: Project.CustomTimeMigrationHelper,
             now: ExactTimeStamp.Local,
@@ -410,7 +409,7 @@ class Instance private constructor(val task: Task, private var data: Data) : Ass
             it.instanceDate = dateTime?.date
 
             it.instanceJsonTime = dateTime?.time
-                    ?.let { task.getOrCopyTime(ownerKey, dateTime.date.dayOfWeek, it, customTimeMigrationHelper, now) }
+                ?.let { task.getOrCopyTime(dateTime.date.dayOfWeek, it, customTimeMigrationHelper, now) }
                     ?.let(JsonTime::fromTime)
         }
 

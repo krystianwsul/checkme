@@ -109,7 +109,7 @@ class DomainFactoryRule : TestRule {
         every { ImageManager.prefetch(any(), any(), any()) } returns Unit
 
         mockkObject(DefaultCustomTimeCreator)
-        every { DefaultCustomTimeCreator.createDefaultCustomTimes(any(), any()) } returns Unit
+        every { DefaultCustomTimeCreator.createDefaultCustomTimes(any()) } returns Unit
 
         DomainThreadChecker.instance = mockk(relaxed = true)
 
@@ -159,12 +159,6 @@ class DomainFactoryRule : TestRule {
             every { newPrivateNestedTaskHierarchyRecordId(any(), any()) } answers {
                 "nestedTaskHierarchyId" + ++nestedTaskHierarchyId
             }
-
-            var privateCustomTimeId = 0
-            every { newPrivateCustomTimeRecordId(any()) } answers { "privateCustomTimeId" + ++privateCustomTimeId }
-
-            var sharedCustomTimeId = 0
-            every { newSharedCustomTimeRecordId(any()) } answers { "sharedCustomTimeId" + ++sharedCustomTimeId }
 
             var userCustomTimeId = 0
             every { newRootUserCustomTimeId(any()) } answers { "userCustomTimeId" + ++userCustomTimeId }

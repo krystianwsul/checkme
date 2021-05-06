@@ -1,13 +1,13 @@
 package com.krystianwsul.common.firebase.models.project
 
 import com.krystianwsul.common.criteria.SearchCriteria
-import com.krystianwsul.common.domain.*
+import com.krystianwsul.common.domain.ProjectToProjectConversion
+import com.krystianwsul.common.domain.ProjectUndoData
+import com.krystianwsul.common.domain.TaskHierarchyContainer
 import com.krystianwsul.common.firebase.json.InstanceJson
 import com.krystianwsul.common.firebase.json.taskhierarchies.ProjectTaskHierarchyJson
 import com.krystianwsul.common.firebase.json.tasks.TaskJson
 import com.krystianwsul.common.firebase.models.*
-import com.krystianwsul.common.firebase.models.customtime.PrivateCustomTime
-import com.krystianwsul.common.firebase.models.customtime.SharedCustomTime
 import com.krystianwsul.common.firebase.models.task.ProjectTask
 import com.krystianwsul.common.firebase.models.task.RootTask
 import com.krystianwsul.common.firebase.models.task.Task
@@ -22,10 +22,10 @@ import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.*
 
 abstract class Project<T : ProjectType>(
-        val copyScheduleHelper: CopyScheduleHelper,
-        val assignedToHelper: AssignedToHelper,
-        val userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
-        val rootTaskProvider: RootTaskProvider,
+    val copyScheduleHelper: CopyScheduleHelper,
+    val assignedToHelper: AssignedToHelper,
+    val userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
+    val rootTaskProvider: RootTaskProvider,
 ) : Current, JsonTime.CustomTimeProvider, JsonTime.ProjectCustomTimeKeyProvider, Task.Parent {
 
     abstract val projectRecord: ProjectRecord<T>
@@ -63,18 +63,18 @@ abstract class Project<T : ProjectType>(
     protected fun initializeInstanceHierarchyContainers() {
         getAllTasks().forEach {
             it.existingInstances
-                    .values
-                    .forEach { it.addToParentInstanceHierarchyContainer() }
+                .values
+                .forEach { it.addToParentInstanceHierarchyContainer() }
         }
     }
 
     abstract fun createChildTask(
-            parentTask: ProjectTask,
-            now: ExactTimeStamp.Local,
-            name: String,
-            note: String?,
-            image: TaskJson.Image?,
-            ordinal: Double?,
+        parentTask: ProjectTask,
+        now: ExactTimeStamp.Local,
+        name: String,
+        note: String?,
+        image: TaskJson.Image?,
+        ordinal: Double?,
     ): ProjectTask
 
     fun createTaskHierarchy(parentTask: ProjectTask, childTask: ProjectTask, now: ExactTimeStamp.Local): TaskHierarchyKey {
@@ -82,10 +82,10 @@ abstract class Project<T : ProjectType>(
             childTask.createParentNestedTaskHierarchy(parentTask, now)
         } else {
             val taskHierarchyJson = ProjectTaskHierarchyJson(
-                    parentTask.id,
-                    childTask.id,
-                    now.long,
-                    now.offset,
+                parentTask.id,
+                childTask.id,
+                now.long,
+                now.offset,
             )
 
             val taskHierarchyRecord = projectRecord.newTaskHierarchyRecord(taskHierarchyJson)
@@ -100,17 +100,16 @@ abstract class Project<T : ProjectType>(
     }
 
     protected abstract fun copyTaskRecord(
-            oldTask: ProjectTask,
-            now: ExactTimeStamp.Local,
-            instanceJsons: MutableMap<String, InstanceJson>,
+        oldTask: ProjectTask,
+        now: ExactTimeStamp.Local,
+        instanceJsons: MutableMap<String, InstanceJson>,
     ): ProjectTaskRecord
 
     private fun convertScheduleKey(
-            userInfo: UserInfo,
-            oldTask: ProjectTask,
-            oldScheduleKey: ScheduleKey,
-            customTimeMigrationHelper: CustomTimeMigrationHelper,
-            now: ExactTimeStamp.Local,
+        oldTask: ProjectTask,
+        oldScheduleKey: ScheduleKey,
+        customTimeMigrationHelper: CustomTimeMigrationHelper,
+        now: ExactTimeStamp.Local,
     ): ScheduleKey {
         check(oldTask.project != this)
 
@@ -119,15 +118,8 @@ abstract class Project<T : ProjectType>(
         if (oldScheduleTimePair.customTimeKey == null) return oldScheduleKey
 
         val convertedTime = when (val customTime = oldTask.project.getCustomTime(oldScheduleTimePair.customTimeKey)) {
-            is Time.Custom.Project<*> -> {
-                val ownerKey = when (customTime) {
-                    is PrivateCustomTime -> userInfo.key
-                    is SharedCustomTime -> customTime.ownerKey!!
-                    else -> throw IllegalStateException()
-                }
-
-                getOrCreateCustomTime(ownerKey, oldScheduleDate.dayOfWeek, customTime, customTimeMigrationHelper, now)
-            }
+            is Time.Custom.Project<*> ->
+                getOrCreateCustomTime(oldScheduleDate.dayOfWeek, customTime, customTimeMigrationHelper, now)
             is Time.Custom.User -> customTime
         }
 
@@ -135,35 +127,32 @@ abstract class Project<T : ProjectType>(
     }
 
     private class InstanceConversionData(
-            val newInstanceJson: InstanceJson,
-            val newScheduleKey: ScheduleKey,
-            val updater: (Map<String, String>) -> Any?,
+        val newInstanceJson: InstanceJson,
+        val newScheduleKey: ScheduleKey,
+        val updater: (Map<String, String>) -> Any?,
     )
 
     @Suppress("ConstantConditionIf")
     fun copyTask(
-            deviceDbInfo: DeviceDbInfo,
-            oldTask: ProjectTask,
-            instances: Collection<Instance>,
-            now: ExactTimeStamp.Local,
-            customTimeMigrationHelper: CustomTimeMigrationHelper,
-            oldProjectKey: ProjectKey<*>,
+        oldTask: ProjectTask,
+        instances: Collection<Instance>,
+        now: ExactTimeStamp.Local,
+        customTimeMigrationHelper: CustomTimeMigrationHelper,
+        oldProjectKey: ProjectKey<*>,
     ): Pair<ProjectTask, List<(Map<String, String>) -> Any?>> {
         val instanceDatas = instances.map { oldInstance ->
             val (newInstance, updater) = getInstanceJson(
-                    deviceDbInfo.key,
-                    oldInstance,
-                    projectKey,
-                    customTimeMigrationHelper,
-                    now,
+                oldInstance,
+                projectKey,
+                customTimeMigrationHelper,
+                now,
             )
 
             val newScheduleKey = convertScheduleKey(
-                    deviceDbInfo.userInfo,
-                    oldTask,
-                    oldInstance.scheduleKey,
-                    customTimeMigrationHelper,
-                    now,
+                oldTask,
+                oldInstance.scheduleKey,
+                customTimeMigrationHelper,
+                now,
             )
 
             InstanceConversionData(newInstance, newScheduleKey, updater)
@@ -193,12 +182,11 @@ abstract class Project<T : ProjectType>(
             check(currentNoScheduleOrParent == null)
 
             newTask.copySchedules(
-                    deviceDbInfo,
-                    now,
-                    currentSchedules,
-                    customTimeMigrationHelper,
-                    oldProjectKey,
-                    projectKey,
+                now,
+                currentSchedules,
+                customTimeMigrationHelper,
+                oldProjectKey,
+                projectKey,
             )
         } else {
             currentNoScheduleOrParent?.let { newTask.setNoScheduleOrParent(now, projectKey) }
@@ -208,56 +196,43 @@ abstract class Project<T : ProjectType>(
     }
 
     private fun getOrCreateCustomTime(
-            ownerKey: UserKey,
-            dayOfWeek: DayOfWeek,
-            customTime: Time.Custom.Project<*>,
-            customTimeMigrationHelper: CustomTimeMigrationHelper,
-            now: ExactTimeStamp.Local,
+        dayOfWeek: DayOfWeek,
+        customTime: Time.Custom.Project<*>,
+        customTimeMigrationHelper: CustomTimeMigrationHelper,
+        now: ExactTimeStamp.Local,
     ): Time {
-        return if (Time.Custom.User.WRITE_USER_CUSTOM_TIMES) {
-            customTimeMigrationHelper.tryMigrateProjectCustomTime(customTime, now)
-                    ?: Time.Normal(customTime.getHourMinute(dayOfWeek))
-        } else {
-            getOrCreateCustomTimeOld(ownerKey, customTime)
-        }
+        return customTimeMigrationHelper.tryMigrateProjectCustomTime(customTime, now)
+            ?: Time.Normal(customTime.getHourMinute(dayOfWeek))
     }
 
-    protected abstract fun getOrCreateCustomTimeOld(
-            ownerKey: UserKey,
-            customTime: Time.Custom.Project<*>,
-    ): Time.Custom.Project<T>
-
     fun getOrCopyTime(
-            ownerKey: UserKey,
-            dayOfWeek: DayOfWeek,
-            time: Time,
-            customTimeMigrationHelper: CustomTimeMigrationHelper,
-            now: ExactTimeStamp.Local,
+        dayOfWeek: DayOfWeek,
+        time: Time,
+        customTimeMigrationHelper: CustomTimeMigrationHelper,
+        now: ExactTimeStamp.Local,
     ) = time.let {
         when (it) {
-            is Time.Custom.Project<*> -> getOrCreateCustomTime(ownerKey, dayOfWeek, it, customTimeMigrationHelper, now)
+            is Time.Custom.Project<*> -> getOrCreateCustomTime(dayOfWeek, it, customTimeMigrationHelper, now)
             is Time.Custom.User -> it
             is Time.Normal -> it
         }
     }
 
     private fun getInstanceJson(
-            ownerKey: UserKey,
-            instance: Instance,
-            newProjectKey: ProjectKey<*>,
-            customTimeMigrationHelper: CustomTimeMigrationHelper,
-            now: ExactTimeStamp.Local,
+        instance: Instance,
+        newProjectKey: ProjectKey<*>,
+        customTimeMigrationHelper: CustomTimeMigrationHelper,
+        now: ExactTimeStamp.Local,
     ): Pair<InstanceJson, (Map<String, String>) -> Any?> {
         val done = instance.doneOffset
 
         val instanceDate = instance.instanceDate
 
         val newInstanceTime = getOrCopyTime(
-                ownerKey,
-                instanceDate.dayOfWeek,
-                instance.instanceTime,
-                customTimeMigrationHelper,
-                now,
+            instanceDate.dayOfWeek,
+            instance.instanceTime,
+            customTimeMigrationHelper,
+            now,
         )
 
         val instanceTimeString = JsonTime.fromTime(newInstanceTime).toJson()
@@ -265,12 +240,12 @@ abstract class Project<T : ProjectType>(
         val parentState = instance.parentState
 
         val instanceJson = InstanceJson(
-                done?.long,
-                done?.offset,
-                instanceDate.toJson(),
-                instanceTimeString,
-                parentJson = parentState.parentInstanceKey?.let(InstanceJson::ParentJson),
-                noParent = parentState.noParent,
+            done?.long,
+            done?.offset,
+            instanceDate.toJson(),
+            instanceTimeString,
+            parentJson = parentState.parentInstanceKey?.let(InstanceJson::ParentJson),
+            noParent = parentState.noParent,
         )
 
         val updater = { taskKeyMap: Map<String, String> ->
@@ -286,10 +261,10 @@ abstract class Project<T : ProjectType>(
     }
 
     fun <V : TaskHierarchy> copyTaskHierarchy(
-            now: ExactTimeStamp.Local,
-            startTaskHierarchy: V,
-            parentTaskId: String,
-            childTask: ProjectTask,
+        now: ExactTimeStamp.Local,
+        startTaskHierarchy: V,
+        parentTaskId: String,
+        childTask: ProjectTask,
     ) {
         if (TaskHierarchy.WRITE_NESTED_TASK_HIERARCHIES) {
             childTask.copyParentNestedTaskHierarchy(now, startTaskHierarchy, parentTaskId)
@@ -297,12 +272,12 @@ abstract class Project<T : ProjectType>(
             check(parentTaskId.isNotEmpty())
 
             val taskHierarchyJson = ProjectTaskHierarchyJson(
-                    parentTaskId,
-                    childTask.id,
-                    now.long,
-                    now.offset,
-                    startTaskHierarchy.endExactTimeStampOffset?.long,
-                    startTaskHierarchy.endExactTimeStampOffset?.offset,
+                parentTaskId,
+                childTask.id,
+                now.long,
+                now.offset,
+                startTaskHierarchy.endExactTimeStampOffset?.long,
+                startTaskHierarchy.endExactTimeStampOffset?.offset,
             )
 
             val taskHierarchyRecord = projectRecord.newTaskHierarchyRecord(taskHierarchyJson)
@@ -333,7 +308,7 @@ abstract class Project<T : ProjectType>(
     fun getProjectTaskForce(taskKey: TaskKey.Project) = getProjectTaskForce(taskKey.taskId)
 
     fun getTaskHierarchiesByChildTaskKey(childTaskKey: TaskKey.Project) =
-            taskHierarchyContainer.getByChildTaskKey(childTaskKey)
+        taskHierarchyContainer.getByChildTaskKey(childTaskKey)
 
     override fun getTaskHierarchiesByParentTaskKey(parentTaskKey: TaskKey): Set<TaskHierarchy> {
         val projectTaskHierarchies = taskHierarchyContainer.getByParentTaskKey(parentTaskKey as TaskKey.Project)
@@ -350,9 +325,9 @@ abstract class Project<T : ProjectType>(
     fun getAllTasks(): Collection<Task> = _tasks.values + rootTaskProvider.getRootTasksForProject(projectKey)
 
     fun setEndExactTimeStamp(
-            now: ExactTimeStamp.Local,
-            projectUndoData: ProjectUndoData,
-            removeInstances: Boolean,
+        now: ExactTimeStamp.Local,
+        projectUndoData: ProjectUndoData,
+        removeInstances: Boolean,
     ) {
         requireCurrent(now)
 
@@ -380,41 +355,41 @@ abstract class Project<T : ProjectType>(
     abstract fun getProjectCustomTime(projectCustomTimeKey: CustomTimeKey.Project<T>): Time.Custom.Project<T>
 
     fun getUntypedProjectCustomTime(projectCustomTimeId: CustomTimeId.Project) =
-            getProjectCustomTime(projectCustomTimeId)
+        getProjectCustomTime(projectCustomTimeId)
 
     fun getUntypedProjectCustomTime(projectCustomTimeId: String) =
-            getProjectCustomTime(projectRecord.getProjectCustomTimeId(projectCustomTimeId))
+        getProjectCustomTime(projectRecord.getProjectCustomTimeId(projectCustomTimeId))
 
     override fun getUserCustomTime(userCustomTimeKey: CustomTimeKey.User) =
-            userCustomTimeProvider.getUserCustomTime(userCustomTimeKey)
+        userCustomTimeProvider.getUserCustomTime(userCustomTimeKey)
 
     override fun getProjectCustomTimeKey(projectCustomTimeId: CustomTimeId.Project) =
-            projectRecord.getProjectCustomTimeKey(projectCustomTimeId)
+        projectRecord.getProjectCustomTimeKey(projectCustomTimeId)
 
     private fun getTime(timePair: TimePair) = timePair.customTimeKey
-            ?.let(::getCustomTime)
-            ?: Time.Normal(timePair.hourMinute!!)
+        ?.let(::getCustomTime)
+        ?: Time.Normal(timePair.hourMinute!!)
 
     fun getDateTime(scheduleKey: ScheduleKey) =
-            DateTime(scheduleKey.scheduleDate, getTime(scheduleKey.scheduleTimePair))
+        DateTime(scheduleKey.scheduleDate, getTime(scheduleKey.scheduleTimePair))
 
     fun convertRemoteToRemoteHelper(
-            now: ExactTimeStamp.Local,
-            projectToProjectConversion: ProjectToProjectConversion,
-            startTask: ProjectTask,
+        now: ExactTimeStamp.Local,
+        projectToProjectConversion: ProjectToProjectConversion,
+        startTask: ProjectTask,
     ) {
         if (projectToProjectConversion.startTasks.containsKey(startTask.id)) return
 
         projectToProjectConversion.startTasks[startTask.id] = Pair(
-                startTask,
-                startTask.existingInstances
-                        .values
-                        .filter {
-                            listOf(
-                                    it.scheduleDateTime,
-                                    it.instanceDateTime,
-                            ).maxOrNull()!!.toLocalExactTimeStamp() >= now
-                        }
+            startTask,
+            startTask.existingInstances
+                .values
+                .filter {
+                    listOf(
+                        it.scheduleDateTime,
+                        it.instanceDateTime,
+                    ).maxOrNull()!!.toLocalExactTimeStamp() >= now
+                }
         )
 
         val childTaskHierarchies = startTask.getChildTaskHierarchies(now)
@@ -429,39 +404,39 @@ abstract class Project<T : ProjectType>(
     }
 
     fun fixNotificationShown(
-            shownFactory: Instance.ShownFactory,
-            now: ExactTimeStamp.Local,
+        shownFactory: Instance.ShownFactory,
+        now: ExactTimeStamp.Local,
     ) = getAllTasks().forEach {
         it.existingInstances
-                .values
-                .forEach { it.fixNotificationShown(shownFactory, now) }
+            .values
+            .forEach { it.fixNotificationShown(shownFactory, now) }
     }
 
     data class SearchData(val searchCriteria: SearchCriteria, val myUser: MyUser)
 
     fun getRootInstances(
-            startExactTimeStamp: ExactTimeStamp.Offset?,
-            endExactTimeStamp: ExactTimeStamp.Offset?,
-            now: ExactTimeStamp.Local,
-            searchData: SearchData? = null,
-            filterVisible: Boolean = true,
+        startExactTimeStamp: ExactTimeStamp.Offset?,
+        endExactTimeStamp: ExactTimeStamp.Offset?,
+        now: ExactTimeStamp.Local,
+        searchData: SearchData? = null,
+        filterVisible: Boolean = true,
     ): Sequence<Instance> {
         check(startExactTimeStamp == null || endExactTimeStamp == null || startExactTimeStamp < endExactTimeStamp)
 
         InterruptionChecker.throwIfInterrupted()
 
         val filteredTasks = getAllTasks().asSequence()
-                .filter { it.mayHaveRootInstances() }
-                .filterQuery(searchData?.searchCriteria?.query).map { it.first }
-                .toList()
+            .filter { it.mayHaveRootInstances() }
+            .filterQuery(searchData?.searchCriteria?.query).map { it.first }
+            .toList()
 
         val instanceSequences = filteredTasks.map {
             it.getInstances(
-                    startExactTimeStamp,
-                    endExactTimeStamp,
-                    now,
-                    onlyRoot = true,
-                    filterVisible = filterVisible,
+                startExactTimeStamp,
+                endExactTimeStamp,
+                now,
+                onlyRoot = true,
+                filterVisible = filterVisible,
             )
         }
 
@@ -477,8 +452,8 @@ abstract class Project<T : ProjectType>(
                     InterruptionChecker.throwIfInterrupted()
 
                     instance.isVisible(
-                            now,
-                            Instance.VisibilityOptions(hack24 = true, assumeRoot = true)
+                        now,
+                        Instance.VisibilityOptions(hack24 = true, assumeRoot = true)
                     )
                 }
             } else {
@@ -498,11 +473,11 @@ abstract class Project<T : ProjectType>(
     }
 
     abstract fun createTask(
-            now: ExactTimeStamp.Local,
-            image: TaskJson.Image?,
-            name: String,
-            note: String?,
-            ordinal: Double?,
+        now: ExactTimeStamp.Local,
+        image: TaskJson.Image?,
+        name: String,
+        note: String?,
+        ordinal: Double?,
     ): ProjectTask
 
     abstract fun getAssignedTo(userKeys: Set<UserKey>): Map<UserKey, ProjectUser>
@@ -525,7 +500,7 @@ abstract class Project<T : ProjectType>(
     }
 
     private class MissingTaskException(projectId: ProjectKey<*>, taskId: String) :
-            Exception("projectId: $projectId, taskId: $taskId")
+        Exception("projectId: $projectId, taskId: $taskId")
 
     interface CustomTimeMigrationHelper {
 
@@ -543,11 +518,11 @@ abstract class Project<T : ProjectType>(
         fun updateTaskRecord(taskKey: TaskKey.Root, dependentRootTaskKeys: Set<TaskKey.Root>)
 
         fun createTask(
-                now: ExactTimeStamp.Local,
-                image: TaskJson.Image?,
-                name: String,
-                note: String?,
-                ordinal: Double?,
+            now: ExactTimeStamp.Local,
+            image: TaskJson.Image?,
+            name: String,
+            note: String?,
+            ordinal: Double?,
         ): Task
     }
 }

@@ -43,12 +43,11 @@ class ProjectTask(override val project: Project<*>, private val taskRecord: Proj
     override fun getDateTime(scheduleKey: ScheduleKey) = project.getDateTime(scheduleKey)
 
     override fun getOrCopyTime(
-            ownerKey: UserKey,
-            dayOfWeek: DayOfWeek,
-            time: Time,
-            customTimeMigrationHelper: Project.CustomTimeMigrationHelper,
-            now: ExactTimeStamp.Local,
-    ) = project.getOrCopyTime(ownerKey, dayOfWeek, time, customTimeMigrationHelper, now)
+        dayOfWeek: DayOfWeek,
+        time: Time,
+        customTimeMigrationHelper: Project.CustomTimeMigrationHelper,
+        now: ExactTimeStamp.Local,
+    ) = project.getOrCopyTime(dayOfWeek, time, customTimeMigrationHelper, now)
 
     override fun addChild(childTask: Task, now: ExactTimeStamp.Local): TaskHierarchyKey {
         return project.createTaskHierarchy(this, childTask as ProjectTask, now)

@@ -112,7 +112,6 @@ fun DomainUpdater.setInstancesAddHourActivity(
     instances.forEach {
         it.setInstanceDateTime(
                 localFactory,
-                ownerKey,
                 DateTime(date, Time.Normal(hourMinute)),
                 this,
                 now,
@@ -138,7 +137,7 @@ fun DomainUpdater.undoInstancesAddHour(
 
     val instances = hourUndoData.instanceDateTimes.map { (instanceKey, instanceDateTime) ->
         getInstance(instanceKey).also {
-            it.setInstanceDateTime(localFactory, ownerKey, instanceDateTime, this, now)
+            it.setInstanceDateTime(localFactory, instanceDateTime, this, now)
         }
     }
 

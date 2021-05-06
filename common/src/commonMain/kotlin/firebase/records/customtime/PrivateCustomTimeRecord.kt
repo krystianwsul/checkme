@@ -8,22 +8,10 @@ import com.krystianwsul.common.utils.ProjectType
 
 
 class PrivateCustomTimeRecord(
-        create: Boolean,
-        override val id: CustomTimeId.Project.Private,
-        override val customTimeJson: PrivateCustomTimeJson,
-        override val projectRecord: PrivateProjectRecord,
-) : ProjectCustomTimeRecord<ProjectType.Private>(create) {
-
-    constructor(
-            id: CustomTimeId.Project.Private,
-            remoteProjectRecord: PrivateProjectRecord,
-            customTimeJson: PrivateCustomTimeJson,
-    ) : this(false, id, customTimeJson, remoteProjectRecord)
-
-    constructor(
-            remoteProjectRecord: PrivateProjectRecord,
-            customTimeJson: PrivateCustomTimeJson,
-    ) : this(true, remoteProjectRecord.getCustomTimeRecordId(), customTimeJson, remoteProjectRecord)
+    override val id: CustomTimeId.Project.Private,
+    override val projectRecord: PrivateProjectRecord,
+    override val customTimeJson: PrivateCustomTimeJson,
+) : ProjectCustomTimeRecord<ProjectType.Private>(false) {
 
     override val customTimeKey = CustomTimeKey.Project.Private(projectRecord.projectKey, id)
 

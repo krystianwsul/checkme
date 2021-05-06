@@ -3,7 +3,6 @@ package com.krystianwsul.common.firebase.records.project
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.json.JsonWrapper
 import com.krystianwsul.common.firebase.json.UserJson
-import com.krystianwsul.common.firebase.json.customtimes.SharedCustomTimeJson
 import com.krystianwsul.common.firebase.json.tasks.SharedTaskJson
 import com.krystianwsul.common.firebase.records.ProjectUserRecord
 import com.krystianwsul.common.firebase.records.customtime.SharedCustomTimeRecord
@@ -92,14 +91,6 @@ class SharedProjectRecord(
             jsonWrapper,
     )
 
-    fun newRemoteCustomTimeRecord(customTimeJson: SharedCustomTimeJson): SharedCustomTimeRecord {
-        val remoteCustomTimeRecord = SharedCustomTimeRecord(this, customTimeJson)
-        check(!customTimeRecords.containsKey(remoteCustomTimeRecord.id))
-
-        customTimeRecords[remoteCustomTimeRecord.id] = remoteCustomTimeRecord
-        return remoteCustomTimeRecord
-    }
-
     fun newRemoteUserRecord(userJson: UserJson): ProjectUserRecord {
         val remoteProjectUserRecord = ProjectUserRecord(true, this, userJson)
         check(!userRecords.containsKey(remoteProjectUserRecord.id))
@@ -132,9 +123,6 @@ class SharedProjectRecord(
     override val childKey get() = "$key/$PROJECT_JSON"
 
     override fun deleteFromParent() = parent.remove(projectKey)
-
-    fun getCustomTimeRecordId() =
-            CustomTimeId.Project.Shared(databaseWrapper.newSharedCustomTimeRecordId(projectKey))
 
     override fun getTaskRecordId() = databaseWrapper.newSharedTaskRecordId(projectKey)
 

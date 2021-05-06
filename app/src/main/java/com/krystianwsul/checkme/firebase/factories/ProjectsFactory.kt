@@ -145,7 +145,7 @@ class ProjectsFactory(
                 deviceDbInfo,
                 ordinal,
         ).apply {
-            createSchedules(deviceDbInfo.key, now, scheduleDatas, assignedTo, customTimeMigrationHelper, projectKey)
+            createSchedules(now, scheduleDatas, assignedTo, customTimeMigrationHelper, projectKey)
         }
     }
 

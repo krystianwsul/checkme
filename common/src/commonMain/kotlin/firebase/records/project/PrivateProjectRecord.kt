@@ -2,7 +2,6 @@ package com.krystianwsul.common.firebase.records.project
 
 import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.DatabaseWrapper
-import com.krystianwsul.common.firebase.json.customtimes.PrivateCustomTimeJson
 import com.krystianwsul.common.firebase.json.projects.PrivateProjectJson
 import com.krystianwsul.common.firebase.json.tasks.PrivateTaskJson
 import com.krystianwsul.common.firebase.records.customtime.PrivateCustomTimeRecord
@@ -62,14 +61,6 @@ class PrivateProjectRecord(
             projectJson: PrivateProjectJson
     ) : this(databaseWrapper, true, userInfo.key.toPrivateProjectKey(), projectJson)
 
-    fun newRemoteCustomTimeRecord(customTimeJson: PrivateCustomTimeJson): PrivateCustomTimeRecord {
-        val remoteCustomTimeRecord = PrivateCustomTimeRecord(this, customTimeJson)
-        check(!customTimeRecords.containsKey(remoteCustomTimeRecord.id))
-
-        customTimeRecords[remoteCustomTimeRecord.id] = remoteCustomTimeRecord
-        return remoteCustomTimeRecord
-    }
-
     private val createProjectJson
         get() = projectJson.apply {
             tasks = taskRecords.values
@@ -92,9 +83,6 @@ class PrivateProjectRecord(
     var defaultTimesCreated by Committer(projectJson::defaultTimesCreated, "$key/$PROJECT_JSON")
 
     override fun deleteFromParent() = throw UnsupportedOperationException()
-
-    fun getCustomTimeRecordId() =
-            CustomTimeId.Project.Private(databaseWrapper.newPrivateCustomTimeRecordId(projectKey))
 
     override fun getTaskRecordId() = databaseWrapper.newPrivateTaskRecordId(projectKey)
 

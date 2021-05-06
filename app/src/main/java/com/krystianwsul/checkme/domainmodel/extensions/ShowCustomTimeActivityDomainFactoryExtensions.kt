@@ -51,8 +51,7 @@ fun DomainUpdater.updateCustomTime(
         customTime.setHourMinute(this, dayOfWeek, hourMinute)
     }
 
-    if (Time.Custom.User.WRITE_USER_CUSTOM_TIMES && customTime is PrivateCustomTime)
-        migratePrivateCustomTime(customTime, now)
+    if (customTime is PrivateCustomTime) migratePrivateCustomTime(customTime, now)
 
     DomainUpdater.Params(false, notificationType)
 }.perform(this)

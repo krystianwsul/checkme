@@ -78,12 +78,6 @@ sealed class Time {
                 final override val customTimeRecord: UserCustomTimeRecord,
         ) : Custom(), Endable {
 
-            companion object {
-
-                // todo after flipping this, remove all code for creating old time types.  make json properties val
-                const val WRITE_USER_CUSTOM_TIMES = false // todo published on 2021.04.20
-            }
-
             override val id = customTimeRecord.id
 
             override val key = customTimeRecord.customTimeKey

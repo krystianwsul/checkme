@@ -11,14 +11,14 @@ import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.*
 
 class RootTask(
-        val taskRecord: RootTaskRecord,
-        override val parent: Parent,
-        private val userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
+    val taskRecord: RootTaskRecord,
+    override val parent: Parent,
+    private val userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
 ) : Task(
-        CopyScheduleHelper.Root,
-        JsonTime.CustomTimeProvider.getForRootTask(userCustomTimeProvider),
-        taskRecord,
-        ParentTaskDelegate.Root(parent),
+    CopyScheduleHelper.Root,
+    JsonTime.CustomTimeProvider.getForRootTask(userCustomTimeProvider),
+    taskRecord,
+    ParentTaskDelegate.Root(parent),
 ) {
 
     private fun Type.Schedule.getParentProjectSchedule() = taskParentEntries.maxByOrNull { it.startExactTimeStamp }!!
@@ -53,11 +53,11 @@ class RootTask(
     override val addProjectIdToNoScheduleOrParent = true
 
     override fun createChildTask(
-            now: ExactTimeStamp.Local,
-            name: String,
-            note: String?,
-            image: TaskJson.Image?,
-            ordinal: Double?,
+        now: ExactTimeStamp.Local,
+        name: String,
+        note: String?,
+        image: TaskJson.Image?,
+        ordinal: Double?,
     ): RootTask {
         val childTask = parent.createTask(now, image, name, note, ordinal)
 
@@ -71,24 +71,20 @@ class RootTask(
     override fun deleteFromParent() = parent.deleteRootTask(this)
 
     override fun getDateTime(scheduleKey: ScheduleKey) =
-            DateTime(scheduleKey.scheduleDate, getTime(scheduleKey.scheduleTimePair))
+        DateTime(scheduleKey.scheduleDate, getTime(scheduleKey.scheduleTimePair))
 
     private fun getTime(timePair: TimePair) = timePair.customTimeKey
-            ?.let { userCustomTimeProvider.getUserCustomTime(it as CustomTimeKey.User) }
-            ?: Time.Normal(timePair.hourMinute!!)
+        ?.let { userCustomTimeProvider.getUserCustomTime(it as CustomTimeKey.User) }
+        ?: Time.Normal(timePair.hourMinute!!)
 
     override fun getOrCopyTime(
-            dayOfWeek: DayOfWeek,
-            time: Time,
-            customTimeMigrationHelper: Project.CustomTimeMigrationHelper,
-            now: ExactTimeStamp.Local,
+        dayOfWeek: DayOfWeek,
+        time: Time,
+        customTimeMigrationHelper: Project.CustomTimeMigrationHelper,
+        now: ExactTimeStamp.Local,
     ) = when (time) {
-        is Time.Custom.Project<*> -> {
-            check(Time.Custom.User.WRITE_USER_CUSTOM_TIMES)
-
-            customTimeMigrationHelper.tryMigrateProjectCustomTime(time, now)
-                    ?: Time.Normal(time.getHourMinute(dayOfWeek))
-        }
+        is Time.Custom.Project<*> -> customTimeMigrationHelper.tryMigrateProjectCustomTime(time, now)
+            ?: Time.Normal(time.getHourMinute(dayOfWeek))
         is Time.Custom.User -> time
         is Time.Normal -> time
     }
@@ -111,9 +107,9 @@ class RootTask(
     override fun invalidateProjectParentTaskHierarchies() = invalidateIntervals()
 
     override fun updateProject(
-            projectUpdater: ProjectUpdater,
-            now: ExactTimeStamp.Local,
-            projectKey: ProjectKey<*>,
+        projectUpdater: ProjectUpdater,
+        now: ExactTimeStamp.Local,
+        projectKey: ProjectKey<*>,
     ): Task {
         if (project.projectKey == projectKey) return this
 
@@ -135,11 +131,11 @@ class RootTask(
         fun getProject(projectId: String): Project<*>
 
         override fun createTask(
-                now: ExactTimeStamp.Local,
-                image: TaskJson.Image?,
-                name: String,
-                note: String?,
-                ordinal: Double?,
+            now: ExactTimeStamp.Local,
+            image: TaskJson.Image?,
+            name: String,
+            note: String?,
+            ordinal: Double?,
         ): RootTask
     }
 }

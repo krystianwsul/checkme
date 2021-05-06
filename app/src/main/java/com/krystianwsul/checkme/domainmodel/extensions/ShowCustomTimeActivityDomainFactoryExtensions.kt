@@ -9,7 +9,6 @@ import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
 import com.krystianwsul.checkme.domainmodel.update.SingleDomainUpdate
 import com.krystianwsul.checkme.viewmodels.ShowCustomTimeViewModel
 import com.krystianwsul.common.firebase.DomainThreadChecker
-import com.krystianwsul.common.firebase.MyCustomTime
 import com.krystianwsul.common.firebase.json.customtimes.UserCustomTimeJson
 import com.krystianwsul.common.firebase.models.customtime.MyUserCustomTime
 import com.krystianwsul.common.firebase.models.customtime.PrivateCustomTime
@@ -41,7 +40,7 @@ fun DomainUpdater.updateCustomTime(
 ): Completable = CompletableDomainUpdate.create("updateCustomTime") { now ->
     check(name.isNotEmpty())
 
-    val initialCustomTime = getCustomTime(customTimeId) as MyCustomTime
+    val initialCustomTime = getCustomTime(customTimeId)
 
     val customTime = if (initialCustomTime is PrivateCustomTime) {
         migratePrivateCustomTime(initialCustomTime, now)
@@ -49,12 +48,12 @@ fun DomainUpdater.updateCustomTime(
         initialCustomTime as MyUserCustomTime
     }
 
-    customTime.setName(this, name)
+    customTime.setName(name)
 
     for (dayOfWeek in DayOfWeek.values()) {
         val hourMinute = hourMinutes.getValue(dayOfWeek)
 
-        customTime.setHourMinute(this, dayOfWeek, hourMinute)
+        customTime.setHourMinute(dayOfWeek, hourMinute)
     }
 
     DomainUpdater.Params(false, notificationType)

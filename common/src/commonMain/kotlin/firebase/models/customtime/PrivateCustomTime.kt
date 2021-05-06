@@ -3,12 +3,8 @@ package com.krystianwsul.common.firebase.models.customtime
 import com.krystianwsul.common.firebase.MyCustomTime
 import com.krystianwsul.common.firebase.models.project.PrivateProject
 import com.krystianwsul.common.firebase.records.customtime.PrivateCustomTimeRecord
-import com.krystianwsul.common.firebase.records.customtime.ProjectCustomTimeRecord
-import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.ExactTimeStamp
-import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.time.Time
-import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.ProjectType
 
 class PrivateCustomTime(
@@ -18,11 +14,6 @@ class PrivateCustomTime(
 
     override val key = customTimeRecord.customTimeKey
     override val id = key.customTimeId
-
-    private fun getAllRecords(allRecordsSource: AllRecordsSource) = allRecordsSource.getSharedCustomTimes(key)
-            .map { (it as Project<*>).customTimeRecord }
-            .toMutableList<ProjectCustomTimeRecord<*>>()
-            .apply { add(customTimeRecord) }
 
     override fun notDeleted(exactTimeStamp: ExactTimeStamp.Local): Boolean {
         val current = customTimeRecord.current
@@ -41,18 +32,4 @@ class PrivateCustomTime(
             customTimeRecord.current = value == null
             customTimeRecord.endTime = value?.long
         }
-
-    override fun setHourMinute(
-            allRecordsSource: AllRecordsSource,
-            dayOfWeek: DayOfWeek,
-            hourMinute: HourMinute,
-    ) = getAllRecords(allRecordsSource).forEach { it.setHourMinute(dayOfWeek, hourMinute) }
-
-    override fun setName(allRecordsSource: AllRecordsSource, name: String) =
-            getAllRecords(allRecordsSource).forEach { it.name = name }
-
-    interface AllRecordsSource {
-
-        fun getSharedCustomTimes(customTimeKey: CustomTimeKey.Project.Private): List<SharedCustomTime>
-    }
 }

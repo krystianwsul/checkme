@@ -66,7 +66,6 @@ class DomainFactory(
         val rootTasksFactory: RootTasksFactory,
         private val getDomainUpdater: (DomainFactory) -> DomainUpdater,
 ) :
-        PrivateCustomTime.AllRecordsSource,
         Task.ProjectUpdater,
         FactoryProvider.Domain,
         JsonTime.UserCustomTimeProvider,
@@ -356,11 +355,6 @@ class DomainFactory(
     }
 
     // internal
-
-    override fun getSharedCustomTimes(customTimeKey: CustomTimeKey.Project.Private) =
-            projectsFactory.sharedProjects
-                    .values
-                    .mapNotNull { it.getSharedTimeIfPresent(customTimeKey, ownerKey) }
 
     fun getInstance(instanceKey: InstanceKey) = getTaskForce(instanceKey.taskKey).getInstance(instanceKey.scheduleKey)
 

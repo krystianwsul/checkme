@@ -18,13 +18,9 @@ class MyUserCustomTime(myUser: MyUser, userCustomTimeRecord: UserCustomTimeRecor
             customTimeRecord.endTime = value?.long
         }
 
-    override fun setHourMinute(
-            allRecordsSource: PrivateCustomTime.AllRecordsSource,
-            dayOfWeek: DayOfWeek,
-            hourMinute: HourMinute,
-    ) = customTimeRecord.setHourMinute(dayOfWeek, hourMinute)
+    fun setHourMinute(dayOfWeek: DayOfWeek, hourMinute: HourMinute) = customTimeRecord.setHourMinute(dayOfWeek, hourMinute)
 
-    override fun setName(allRecordsSource: PrivateCustomTime.AllRecordsSource, name: String) {
+    fun setName(name: String) {
         customTimeRecord.name = name
     }
 }

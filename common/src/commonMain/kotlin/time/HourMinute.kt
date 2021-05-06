@@ -3,7 +3,9 @@ package com.krystianwsul.common.time
 import com.krystianwsul.common.utils.Parcelable
 import com.krystianwsul.common.utils.Parcelize
 import com.krystianwsul.common.utils.Serializable
-import com.soywiz.klock.*
+import com.soywiz.klock.DateTimeTz
+import com.soywiz.klock.TimeFormat
+import com.soywiz.klock.hours
 
 @Parcelize
 data class HourMinute(val hour: Int, val minute: Int) : Comparable<HourMinute>, Parcelable, Serializable {
@@ -11,25 +13,25 @@ data class HourMinute(val hour: Int, val minute: Int) : Comparable<HourMinute>, 
     companion object {
 
         private const val PATTERN = "HH:mm"
-        private val dateFormat = DateFormat(PATTERN)
         private val timeFormat = TimeFormat(PATTERN)
 
-        private val hourMinuteRegex = Regex("^\\d\\d:\\d\\d$")
+        private val hourMinuteRegex = Regex("^(\\d\\d):(\\d\\d)$")
 
         val now get() = TimeStamp.now.hourMinute
 
         val nextHour get() = getNextHour(Date.today())
 
         fun getNextHour(date: Date, now: ExactTimeStamp.Local = ExactTimeStamp.Local.now) = now.toTimeStamp()
-                .hourMinute
-                .let { TimeStamp(date, HourMinute(it.hour, 0)) }
-                .toDateTimeTz()
-                .plus(1.hours)
-                .let { Pair(Date(it), HourMinute(it)) }
+            .hourMinute
+            .let { TimeStamp(date, HourMinute(it.hour, 0)) }
+            .toDateTimeTz()
+            .plus(1.hours)
+            .let { Pair(Date(it), HourMinute(it)) }
 
-        private fun fromJson(json: String) = dateFormat.parse(json).let { HourMinute(it.hours, it.minutes) }
-
-        fun tryFromJson(json: String) = hourMinuteRegex.find(json)?.let { fromJson(json) }
+        fun tryFromJson(json: String) = hourMinuteRegex.find(json)?.let { matchResult ->
+            val (hour, minute) = (1..2).map { matchResult.groupValues[it].toInt() }
+            HourMinute(hour, minute)
+        }
     }
 
     constructor(dateTimeTz: DateTimeTz) : this(dateTimeTz.hours, dateTimeTz.minutes)

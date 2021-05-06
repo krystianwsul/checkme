@@ -11,11 +11,11 @@ import com.krystianwsul.checkme.viewmodels.ShowCustomTimeViewModel
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.MyCustomTime
 import com.krystianwsul.common.firebase.json.customtimes.UserCustomTimeJson
+import com.krystianwsul.common.firebase.models.customtime.MyUserCustomTime
 import com.krystianwsul.common.firebase.models.customtime.PrivateCustomTime
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.HourMinute
-import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.CustomTimeKey
 import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Single
@@ -41,7 +41,13 @@ fun DomainUpdater.updateCustomTime(
 ): Completable = CompletableDomainUpdate.create("updateCustomTime") { now ->
     check(name.isNotEmpty())
 
-    val customTime = getCustomTime(customTimeId) as MyCustomTime
+    val initialCustomTime = getCustomTime(customTimeId) as MyCustomTime
+
+    val customTime = if (initialCustomTime is PrivateCustomTime) {
+        migratePrivateCustomTime(initialCustomTime, now)
+    } else {
+        initialCustomTime as MyUserCustomTime
+    }
 
     customTime.setName(this, name)
 
@@ -51,15 +57,13 @@ fun DomainUpdater.updateCustomTime(
         customTime.setHourMinute(this, dayOfWeek, hourMinute)
     }
 
-    if (customTime is PrivateCustomTime) migratePrivateCustomTime(customTime, now)
-
     DomainUpdater.Params(false, notificationType)
 }.perform(this)
 
 fun DomainFactory.migratePrivateCustomTime(
-        privateCustomTime: PrivateCustomTime,
-        now: ExactTimeStamp.Local,
-): Time.Custom.User {
+    privateCustomTime: PrivateCustomTime,
+    now: ExactTimeStamp.Local,
+): MyUserCustomTime {
     privateCustomTime.endExactTimeStamp = now
 
     return createUserCustomTime(privateCustomTime.name, privateCustomTime.hourMinutes, privateCustomTime)

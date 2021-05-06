@@ -5,7 +5,6 @@ buildscript {
     repositories {
         mavenCentral()
         google()
-        jcenter()
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:4.2.0'
@@ -30,7 +29,6 @@ allprojects {
         google()
         maven { url "https://dl.bintray.com/badoo/maven" }
         maven { url "https://dl.bintray.com/arrow-kt/arrow-kt/" }
-        jcenter()
     }
 }
 
@@ -50,5 +48,5 @@ ext {
     klockVersion = '2.1.0'
     reaktiveVersion = '1.1.22'
     rxBindingVersion = '4.0.0'
-    arrowVersion = "0.11.0"
+    arrowVersion = "0.13.2"
 }

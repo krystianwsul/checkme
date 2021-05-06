@@ -17,7 +17,6 @@ class InstanceHierarchyContainer(private val task: Task) {
 
         val childInstanceKeys =
                 parentScheduleKeyToChildInstanceKeys.getOrPut(parentInstanceKey.scheduleKey) { mutableSetOf() }
-        check(!childInstanceKeys.contains(childInstanceKey))
 
         childInstanceKeys += childInstanceKey
     }
@@ -30,9 +29,7 @@ class InstanceHierarchyContainer(private val task: Task) {
         val parentInstanceKey = childInstance.parentInstance!!.instanceKey
         check(parentInstanceKey.taskKey == task.taskKey)
 
-        val childInstanceKeys = parentScheduleKeyToChildInstanceKeys[parentInstanceKey.scheduleKey]
-                ?: throw ScheduleKeyNotFoundException("instanceKey: $parentInstanceKey")
-        check(childInstanceKeys.contains(childInstanceKey))
+        val childInstanceKeys = parentScheduleKeyToChildInstanceKeys[parentInstanceKey.scheduleKey] ?: return
 
         if (childInstanceKeys.size == 1) {
             parentScheduleKeyToChildInstanceKeys.remove(parentInstanceKey.scheduleKey)
@@ -51,6 +48,4 @@ class InstanceHierarchyContainer(private val task: Task) {
             check(it.parentInstance!!.instanceKey == parentInstanceKey)
         }
     }
-
-    private class ScheduleKeyNotFoundException(message: String) : Exception(message)
 }

@@ -527,30 +527,20 @@ class Instance private constructor(val task: Task, private var data: Data) : Ass
         invalidateParentInstanceData()
     }
 
-    private var addedToParentInstanceHierarchyContainer = false
-
     fun addToParentInstanceHierarchyContainer() {
-        if (!addedToParentInstanceHierarchyContainer && exists()) {
-            parentInstance?.let { parentInstance ->
-                val parentTask = parentInstance.task
-
-                parentTask.instanceHierarchyContainer.addChildInstance(this)
-            }
+        if (exists()) {
+            parentInstance?.task
+                ?.instanceHierarchyContainer
+                ?.addChildInstance(this)
         }
-
-        addedToParentInstanceHierarchyContainer = true
     }
 
     private fun removeFromParentInstanceHierarchyContainer() {
-        if (addedToParentInstanceHierarchyContainer && parentInstanceProperty.isInitialized() && exists()) {
-            parentInstance?.let { parentInstance ->
-                val parentTask = parentInstance.task
-
-                parentTask.instanceHierarchyContainer.removeChildInstance(this)
-            }
+        if (parentInstanceProperty.isInitialized() && exists()) {
+            parentInstance?.task
+                ?.instanceHierarchyContainer
+                ?.removeChildInstance(this)
         }
-
-        addedToParentInstanceHierarchyContainer = false
     }
 
     fun canAddSubtask(now: ExactTimeStamp.Local, hack24: Boolean = false): Boolean {

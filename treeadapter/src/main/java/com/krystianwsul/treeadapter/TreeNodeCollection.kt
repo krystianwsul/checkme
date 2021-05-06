@@ -35,20 +35,7 @@ class TreeNodeCollection<T : TreeHolder>(val treeViewAdapter: TreeViewAdapter<T>
     }
 
     override fun getNode(position: Int, positionMode: PositionMode): TreeNode<T> {
-        check(position in positionMode.getRecursiveNodes(this).indices)
-
-        val treeNodes = positionMode.getDirectChildNodes(this)
-        var currPosition = position
-
-        for (treeNode in treeNodes) {
-            val nodeDisplayedSize = positionMode.getRecursiveNodes(treeNode).size
-
-            if (currPosition < nodeDisplayedSize) return treeNode.getNode(currPosition, positionMode)
-
-            currPosition -= nodeDisplayedSize
-        }
-
-        throw IndexOutOfBoundsException()
+        return positionMode.getRecursiveNodes(this)[position]
     }
 
     override fun getPosition(treeNode: TreeNode<T>, positionMode: PositionMode): Int {
@@ -71,10 +58,7 @@ class TreeNodeCollection<T : TreeHolder>(val treeViewAdapter: TreeViewAdapter<T>
         return treeNode.itemViewType
     }
 
-    override val displayedNodes
-        get() = treeNodesRelay.value
-                ?.flatMap { it.displayedNodes }
-                ?: throw SetTreeNodesNotCalledException()
+    override val displayedNodes get() = nodes.flatMap { it.displayedNodes }
 
     override val displayedChildNodes get() = displayedNodes
 

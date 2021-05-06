@@ -86,11 +86,18 @@ object RelevanceChecker {
                 val rootTaskManager = JsRootTasksManager(databaseWrapper, rootTaskMap)
 
                 lateinit var projectMap: Map<ProjectKey<*>, Project<*>>
-                lateinit var rootTasks: Map<TaskKey.Root, RootTask>
+                lateinit var rootTasksByTaskKey: Map<TaskKey.Root, RootTask>
+                lateinit var rootTasksByProjectId: Map<String, List<RootTask>>
 
                 val rootTaskParent = object : RootTask.Parent {
 
-                    override fun createTask(now: ExactTimeStamp.Local, image: TaskJson.Image?, name: String, note: String?, ordinal: Double?): RootTask {
+                    override fun createTask(
+                        now: ExactTimeStamp.Local,
+                        image: TaskJson.Image?,
+                        name: String,
+                        note: String?,
+                        ordinal: Double?
+                    ): RootTask {
                         throw UnsupportedOperationException()
                     }
 
@@ -108,7 +115,7 @@ object RelevanceChecker {
                                 .value
                     }
 
-                    override fun getRootTask(rootTaskKey: TaskKey.Root) = rootTasks.getValue(rootTaskKey)
+                    override fun getRootTask(rootTaskKey: TaskKey.Root) = rootTasksByTaskKey.getValue(rootTaskKey)
 
                     override fun getTask(taskKey: TaskKey): Task {
                         return when (taskKey) {
@@ -118,13 +125,13 @@ object RelevanceChecker {
                     }
 
                     override fun getRootTasksForProject(projectKey: ProjectKey<*>): Collection<RootTask> {
-                        return rootTasks.values.filter { it.projectId == projectKey.key }
+                        return rootTasksByProjectId[projectKey.key].orEmpty()
                     }
 
                     override fun getTaskHierarchiesByParentTaskKey(parentTaskKey: TaskKey): Set<TaskHierarchy> {
-                        return rootTasks.flatMap { it.value.nestedParentTaskHierarchies.values }
-                                .filter { it.parentTaskKey == parentTaskKey }
-                                .toSet()
+                        return rootTasksByTaskKey.flatMap { it.value.nestedParentTaskHierarchies.values }
+                            .filter { it.parentTaskKey == parentTaskKey }
+                            .toSet()
                     }
 
                     override fun deleteRootTask(task: RootTask) {
@@ -132,9 +139,10 @@ object RelevanceChecker {
                     }
                 }
 
-                rootTasks = rootTaskManager.records
-                        .map { RootTask(it.value, rootTaskParent, userCustomTimeProvider) }
-                        .associateBy { it.taskKey }
+                rootTasksByTaskKey = rootTaskManager.records
+                    .map { RootTask(it.value, rootTaskParent, userCustomTimeProvider) }
+                    .associateBy { it.taskKey }
+                rootTasksByProjectId = rootTasksByTaskKey.values.groupBy { it.projectId }
 
                 val privateProjectManager = JsPrivateProjectManager(databaseWrapper, privateProjectMap)
 

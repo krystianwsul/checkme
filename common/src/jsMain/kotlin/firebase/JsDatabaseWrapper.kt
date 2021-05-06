@@ -1,6 +1,5 @@
 package com.krystianwsul.common.firebase
 
-import com.krystianwsul.common.firebase.json.InstanceJson
 import com.krystianwsul.common.firebase.json.JsonWrapper
 import com.krystianwsul.common.firebase.json.UserWrapper
 import com.krystianwsul.common.firebase.json.projects.PrivateProjectJson
@@ -35,12 +34,12 @@ class JsDatabaseWrapper(admin: dynamic, root: String) : DatabaseWrapper() {
 
                 @Suppress("unused")
                 val privateProjectJsons = snapshot
-            }).privateProjectJsons)
+            }).privateProjectJsons ?: mapOf())
         }
     }
 
     @Serializable
-    private class PrivateProjects(val privateProjectJsons: Map<String, PrivateProjectJson>)
+    private class PrivateProjects(val privateProjectJsons: Map<String, PrivateProjectJson>? = null)
 
     fun getSharedProjects(callback: (Map<String, JsonWrapper>) -> Unit) {
         rootReference.child(RECORDS_KEY).once("value") { snapshot ->
@@ -53,7 +52,7 @@ class JsDatabaseWrapper(admin: dynamic, root: String) : DatabaseWrapper() {
     }
 
     @Serializable
-    private class SharedProjects(val jsonWrappers: Map<String, JsonWrapper>?)
+    private class SharedProjects(val jsonWrappers: Map<String, JsonWrapper>? = null)
 
     fun getUsers(callback: (Map<String, UserWrapper>) -> Unit) {
         rootReference.child(USERS_KEY).once("value") { snapshot ->
@@ -61,15 +60,12 @@ class JsDatabaseWrapper(admin: dynamic, root: String) : DatabaseWrapper() {
 
                 @Suppress("unused")
                 val userWrappers = snapshot
-            }).userWrappers)
+            }).userWrappers ?: mapOf())
         }
     }
 
     @Serializable
-    private class Users(val userWrappers: Map<String, UserWrapper>)
-
-    @Serializable
-    private class Instances(val snapshotInfos: Map<String, Map<String, Map<String, InstanceJson>>>? = null)
+    private class Users(val userWrappers: Map<String, UserWrapper>? = null)
 
     fun getRootTasks(callback: (Map<String, RootTaskJson>) -> Unit) {
         rootReference.child(TASKS_KEY).once("value") { snapshot ->
@@ -77,12 +73,12 @@ class JsDatabaseWrapper(admin: dynamic, root: String) : DatabaseWrapper() {
 
                 @Suppress("unused")
                 val rootTaskJsons = snapshot
-            }).rootTaskJsons)
+            }).rootTaskJsons ?: mapOf())
         }
     }
 
     @Serializable
-    private class RootTasks(val rootTaskJsons: Map<String, RootTaskJson>)
+    private class RootTasks(val rootTaskJsons: Map<String, RootTaskJson>? = null)
 
     @Suppress("EXPERIMENTAL_API_USAGE", "DEPRECATION", "UnsafeCastFromDynamic")
     private fun <T> parse(

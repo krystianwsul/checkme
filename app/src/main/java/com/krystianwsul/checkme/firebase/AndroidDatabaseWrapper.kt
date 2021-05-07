@@ -164,17 +164,17 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
                     paper == null && firebase == null -> "both are null, WTF?"
                     paper == null || firebase == null -> "one is null, paper: $paper, firebase: $firebase"
                     else -> {
-                        PrivateProjectJson::class
-                                .java
-                                .fields
-                                .mapNotNull {
-                                    val paperField = it.get(paper)
-                                    val firebaseField = it.get(firebase)
+                        "fields are different:\n" + PrivateProjectJson::class
+                            .java
+                            .fields
+                            .mapNotNull {
+                                val paperField = it.get(paper)
+                                val firebaseField = it.get(firebase)
 
-                                    if (paperField != firebaseField) {
-                                        "field: ${it.name}, paper: $paperField, firebase: $firebaseField"
-                                    } else {
-                                        null
+                                if (paperField != firebaseField) {
+                                    "field: ${it.name}, paper: $paperField, firebase: $firebaseField"
+                                } else {
+                                    null
                                     }
                                 }
                                 .joinToString("; ")

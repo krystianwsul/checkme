@@ -417,7 +417,7 @@ class DomainFactory(
     fun <T> getChildInstanceDatas(
         instance: Instance,
         now: ExactTimeStamp.Local,
-        mapper: (Instance, ExactTimeStamp.Local, MutableMap<InstanceKey, T>) -> T,
+        mapper: (Instance, MutableMap<InstanceKey, T>) -> T,
         searchCriteria: SearchCriteria = SearchCriteria.empty,
         filterVisible: Boolean = true,
     ): MutableMap<InstanceKey, T> {
@@ -441,7 +441,7 @@ class DomainFactory(
                 val children = getChildInstanceDatas(childInstance, now, mapper, childrenQuery, filterVisible)
 
                 if (childTaskMatches || children.isNotEmpty())
-                    childInstance.instanceKey to mapper(childInstance, now, children)
+                    childInstance.instanceKey to mapper(childInstance, children)
                 else
                     null
             }
@@ -459,7 +459,7 @@ class DomainFactory(
         getChildInstanceDatas(
             instance,
             now,
-            { instance, now, children -> instanceToGroupListData(instance, now, children, includeProjectInfo) },
+            { childInstance, children -> instanceToGroupListData(childInstance, now, children, includeProjectInfo) },
             searchCriteria,
             filterVisible,
         )

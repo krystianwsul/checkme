@@ -14,8 +14,8 @@ import com.krystianwsul.common.firebase.models.filterQuery
 import com.krystianwsul.common.locker.LockerManager
 
 fun DomainFactory.getSearchInstancesData(
-        searchCriteria: SearchCriteria,
-        page: Int,
+    searchCriteria: SearchCriteria,
+    page: Int,
 ): DomainResult<SearchInstancesViewModel.Data> {
     MyCrashlytics.log("DomainFactory.getSearchInstancesData")
 
@@ -27,42 +27,41 @@ fun DomainFactory.getSearchInstancesData(
                 GroupListDataWrapper.CustomTimeData(it.name, it.hourMinutes.toSortedMap())
             }
 
-            val (cappedInstanceDatas, hasMore) = searchInstances(
-                    now,
-                    searchCriteria,
-                    page,
-                    null,
-                    ::instanceToGroupListData,
-            )
+            val (cappedInstanceDatas, hasMore) = searchInstances<GroupListDataWrapper.InstanceData>(
+                now,
+                searchCriteria,
+                page,
+                null,
+            ) { instance, children -> instanceToGroupListData(instance, now, children) }
 
             val taskDatas = getUnscheduledTasks(now)
-                    .asSequence()
-                    .filterQuery(searchCriteria.query)
-                    .map { (task, filterResult) ->
-                        val childQuery = if (filterResult == FilterResult.MATCHES) null else searchCriteria
+                .asSequence()
+                .filterQuery(searchCriteria.query)
+                .map { (task, filterResult) ->
+                    val childQuery = if (filterResult == FilterResult.MATCHES) null else searchCriteria
 
-                        GroupListDataWrapper.TaskData(
-                                task.taskKey,
-                                task.name,
-                                getGroupListChildTaskDatas(task, now, childQuery),
-                                task.startExactTimeStamp,
-                                task.note,
-                                task.getImage(deviceDbInfo),
-                                task.isAssignedToMe(now, myUserFactory.user),
-                                task.getProjectInfo(now),
-                                task.ordinal,
-                        )
-                    }
-                    .toList()
+                    GroupListDataWrapper.TaskData(
+                        task.taskKey,
+                        task.name,
+                        getGroupListChildTaskDatas(task, now, childQuery),
+                        task.startExactTimeStamp,
+                        task.note,
+                        task.getImage(deviceDbInfo),
+                        task.isAssignedToMe(now, myUserFactory.user),
+                        task.getProjectInfo(now),
+                        task.ordinal,
+                    )
+                }
+                .toList()
 
             val dataWrapper = GroupListDataWrapper(
-                    customTimeDatas,
-                    null,
-                    taskDatas,
-                    null,
-                    cappedInstanceDatas,
-                    null,
-                    null,
+                customTimeDatas,
+                null,
+                taskDatas,
+                null,
+                cappedInstanceDatas,
+                null,
+                null,
             )
 
             SearchInstancesViewModel.Data(dataWrapper, hasMore, searchCriteria)

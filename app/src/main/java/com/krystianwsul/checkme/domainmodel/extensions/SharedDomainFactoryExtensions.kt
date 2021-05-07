@@ -213,11 +213,11 @@ fun DomainFactory.getGroupListChildTaskDatas(
         .toList()
 
 fun <T : Comparable<T>> DomainFactory.searchInstances(
-        now: ExactTimeStamp.Local,
-        searchCriteria: SearchCriteria,
-        page: Int,
-        projectKey: ProjectKey<*>?,
-        mapper: (Instance, ExactTimeStamp.Local, MutableMap<InstanceKey, T>) -> T,
+    now: ExactTimeStamp.Local,
+    searchCriteria: SearchCriteria,
+    page: Int,
+    projectKey: ProjectKey<*>?,
+    mapper: (Instance, MutableMap<InstanceKey, T>) -> T,
 ): Pair<List<T>, Boolean> {
     DomainThreadChecker.instance.requireDomainThread()
 
@@ -244,7 +244,7 @@ fun <T : Comparable<T>> DomainFactory.searchInstances(
 
         val children = getChildInstanceDatas(it, now, mapper, childSearchCriteria, !debugMode)
 
-        mapper(it, now, children)
+        mapper(it, children)
     }
 
     return instanceDatas.sorted().take(desiredCount) to hasMore

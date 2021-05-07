@@ -210,21 +210,21 @@ fun DomainFactory.getEditInstancesSearchData(
     return LockerManager.setLocker { now ->
         getDomainResultInterrupting {
             val (instanceEntryDatas, hasMore) = searchInstances<EditInstancesSearchViewModel.InstanceEntryData>(
-                    now,
-                    searchCriteria,
-                    page,
-                    projectKey,
-            ) { instance, _, children ->
+                now,
+                searchCriteria,
+                page,
+                projectKey,
+            ) { instance, children ->
                 EditInstancesSearchViewModel.InstanceEntryData(
-                        instance.name,
-                        children.values,
-                        instance.instanceKey,
-                        if (instance.isRootInstance()) instance.instanceDateTime.getDisplayText() else null,
-                        instance.task.note,
-                        instance.run { EditInstancesSearchViewModel.SortKey(instanceDateTime.timeStamp, task.ordinal) },
-                        instance.instanceDateTime.timeStamp,
-                        instance.task.ordinal,
-                        instance.instanceKey,
+                    instance.name,
+                    children.values,
+                    instance.instanceKey,
+                    if (instance.isRootInstance()) instance.instanceDateTime.getDisplayText() else null,
+                    instance.task.note,
+                    instance.run { EditInstancesSearchViewModel.SortKey(instanceDateTime.timeStamp, task.ordinal) },
+                    instance.instanceDateTime.timeStamp,
+                    instance.task.ordinal,
+                    instance.instanceKey,
                 )
             }
 

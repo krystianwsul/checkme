@@ -89,9 +89,6 @@ class PrivateProjectRecord(
     override fun getScheduleRecordId(taskId: String) =
             databaseWrapper.newPrivateScheduleRecordId(projectKey, taskId)
 
-    override fun getProjectTaskHierarchyRecordId() =
-            databaseWrapper.newPrivateProjectTaskHierarchyRecordId(projectKey)
-
     override fun newNestedTaskHierarchyRecordId(taskId: String) =
             databaseWrapper.newPrivateNestedTaskHierarchyRecordId(projectKey, taskId)
 

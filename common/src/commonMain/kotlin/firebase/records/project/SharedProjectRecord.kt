@@ -129,9 +129,6 @@ class SharedProjectRecord(
     override fun getScheduleRecordId(taskId: String) =
             databaseWrapper.newSharedScheduleRecordId(projectKey, taskId)
 
-    override fun getProjectTaskHierarchyRecordId() =
-            databaseWrapper.newSharedProjectTaskHierarchyRecordId(projectKey)
-
     override fun newNestedTaskHierarchyRecordId(taskId: String) =
             databaseWrapper.newSharedNestedTaskHierarchyRecordId(projectKey, taskId)
 

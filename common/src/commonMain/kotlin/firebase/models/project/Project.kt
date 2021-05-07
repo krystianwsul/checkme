@@ -5,7 +5,6 @@ import com.krystianwsul.common.domain.ProjectToProjectConversion
 import com.krystianwsul.common.domain.ProjectUndoData
 import com.krystianwsul.common.domain.TaskHierarchyContainer
 import com.krystianwsul.common.firebase.json.InstanceJson
-import com.krystianwsul.common.firebase.json.taskhierarchies.ProjectTaskHierarchyJson
 import com.krystianwsul.common.firebase.json.tasks.TaskJson
 import com.krystianwsul.common.firebase.models.*
 import com.krystianwsul.common.firebase.models.task.ProjectTask
@@ -78,25 +77,7 @@ abstract class Project<T : ProjectType>(
     ): ProjectTask
 
     fun createTaskHierarchy(parentTask: ProjectTask, childTask: ProjectTask, now: ExactTimeStamp.Local): TaskHierarchyKey {
-        return if (TaskHierarchy.WRITE_NESTED_TASK_HIERARCHIES) {
-            childTask.createParentNestedTaskHierarchy(parentTask, now)
-        } else {
-            val taskHierarchyJson = ProjectTaskHierarchyJson(
-                parentTask.id,
-                childTask.id,
-                now.long,
-                now.offset,
-            )
-
-            val taskHierarchyRecord = projectRecord.newTaskHierarchyRecord(taskHierarchyJson)
-
-            val taskHierarchy = ProjectTaskHierarchy(this, taskHierarchyRecord)
-
-            taskHierarchyContainer.add(taskHierarchy.id, taskHierarchy)
-            taskHierarchy.invalidateTasks()
-
-            return taskHierarchy.taskHierarchyKey
-        }
+        return childTask.createParentNestedTaskHierarchy(parentTask, now)
     }
 
     protected abstract fun copyTaskRecord(
@@ -260,32 +241,13 @@ abstract class Project<T : ProjectType>(
         return instanceJson to updater
     }
 
-    fun <V : TaskHierarchy> copyTaskHierarchy(
+    fun copyTaskHierarchy(
         now: ExactTimeStamp.Local,
-        startTaskHierarchy: V,
+        startTaskHierarchy: TaskHierarchy,
         parentTaskId: String,
         childTask: ProjectTask,
     ) {
-        if (TaskHierarchy.WRITE_NESTED_TASK_HIERARCHIES) {
-            childTask.copyParentNestedTaskHierarchy(now, startTaskHierarchy, parentTaskId)
-        } else {
-            check(parentTaskId.isNotEmpty())
-
-            val taskHierarchyJson = ProjectTaskHierarchyJson(
-                parentTaskId,
-                childTask.id,
-                now.long,
-                now.offset,
-                startTaskHierarchy.endExactTimeStampOffset?.long,
-                startTaskHierarchy.endExactTimeStampOffset?.offset,
-            )
-
-            val taskHierarchyRecord = projectRecord.newTaskHierarchyRecord(taskHierarchyJson)
-            val taskHierarchy = ProjectTaskHierarchy(this, taskHierarchyRecord)
-
-            taskHierarchyContainer.add(taskHierarchy.id, taskHierarchy)
-            taskHierarchy.invalidateTasks()
-        }
+        childTask.copyParentNestedTaskHierarchy(now, startTaskHierarchy, parentTaskId)
     }
 
     fun deleteTask(task: ProjectTask) {

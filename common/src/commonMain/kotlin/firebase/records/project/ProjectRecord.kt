@@ -1,7 +1,6 @@
 package com.krystianwsul.common.firebase.records.project
 
 import com.krystianwsul.common.firebase.json.projects.ProjectJson
-import com.krystianwsul.common.firebase.json.taskhierarchies.ProjectTaskHierarchyJson
 import com.krystianwsul.common.firebase.records.RemoteRecord
 import com.krystianwsul.common.firebase.records.RootTaskParentDelegate
 import com.krystianwsul.common.firebase.records.customtime.ProjectCustomTimeRecord
@@ -67,15 +66,6 @@ abstract class ProjectRecord<T : ProjectType>(
         }
     }
 
-    fun newTaskHierarchyRecord(taskHierarchyJson: ProjectTaskHierarchyJson): ProjectTaskHierarchyRecord {
-        val taskHierarchyRecord = ProjectTaskHierarchyRecord(this, taskHierarchyJson)
-        check(!taskHierarchyRecords.containsKey(taskHierarchyRecord.id))
-
-        taskHierarchyRecords[taskHierarchyRecord.id] = taskHierarchyRecord
-        return taskHierarchyRecord
-    }
-
-    abstract fun getProjectTaskHierarchyRecordId(): String
     abstract fun newNestedTaskHierarchyRecordId(taskId: String): String
 
     abstract fun getTaskRecordId(): String

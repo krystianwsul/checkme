@@ -54,22 +54,22 @@ import kotlin.properties.Delegates.observable
 
 @Suppress("LeakingThis")
 class DomainFactory(
-        val localFactory: LocalFactory,
-        val myUserFactory: MyUserFactory,
-        val projectsFactory: ProjectsFactory,
-        val friendsFactory: FriendsFactory,
-        _deviceDbInfo: DeviceDbInfo,
-        startTime: ExactTimeStamp.Local,
-        readTime: ExactTimeStamp.Local,
-        domainDisposable: CompositeDisposable,
-        private val databaseWrapper: DatabaseWrapper,
-        val rootTasksFactory: RootTasksFactory,
-        private val getDomainUpdater: (DomainFactory) -> DomainUpdater,
+    val localFactory: LocalFactory,
+    val myUserFactory: MyUserFactory,
+    val projectsFactory: ProjectsFactory,
+    val friendsFactory: FriendsFactory,
+    _deviceDbInfo: DeviceDbInfo,
+    startTime: ExactTimeStamp.Local,
+    readTime: ExactTimeStamp.Local,
+    domainDisposable: CompositeDisposable,
+    private val databaseWrapper: DatabaseWrapper,
+    val rootTasksFactory: RootTasksFactory,
+    private val getDomainUpdater: (DomainFactory) -> DomainUpdater,
 ) :
-        Task.ProjectUpdater,
-        FactoryProvider.Domain,
-        JsonTime.UserCustomTimeProvider,
-        Project.CustomTimeMigrationHelper {
+    Task.ProjectUpdater,
+    FactoryProvider.Domain,
+    JsonTime.UserCustomTimeProvider,
+    Project.CustomTimeMigrationHelper {
 
     companion object {
 
@@ -113,8 +113,8 @@ class DomainFactory(
         }
 
         tryNotifyListeners(
-                "DomainFactory.init",
-                if (firstRun) RunType.APP_START else RunType.SIGN_IN,
+            "DomainFactory.init",
+            if (firstRun) RunType.APP_START else RunType.SIGN_IN,
         )
 
         firstRun = false
@@ -122,19 +122,19 @@ class DomainFactory(
         updateShortcuts(now)
 
         listOf(
-                changeTypeRelay.filter { it == ChangeType.REMOTE } // todo changetype debounce
-                        .firstOrError()
-                        .map { "remote change" },
-                Single.just(Unit)
-                        .delay(1, TimeUnit.MINUTES)
-                        .observeOnDomain()
-                        .map { "timeout" },
-        ).map { it.toObservable() }
-                .merge()
+            changeTypeRelay.filter { it == ChangeType.REMOTE } // todo changetype debounce
                 .firstOrError()
-                .flatMapCompletable { getDomainUpdater(this).fixOffsets(it) }
-                .subscribe()
-                .addTo(domainDisposable)
+                .map { "remote change" },
+            Single.just(Unit)
+                .delay(1, TimeUnit.MINUTES)
+                .observeOnDomain()
+                .map { "timeout" },
+        ).map { it.toObservable() }
+            .merge()
+            .firstOrError()
+            .flatMapCompletable { getDomainUpdater(this).fixOffsets(it) }
+            .subscribe()
+            .addTo(domainDisposable)
     }
 
     val defaultProjectId by lazy { projectsFactory.privateProject.projectKey }
@@ -166,8 +166,8 @@ class DomainFactory(
                 if (saveParamsList.size < 2) return saveParamsList.singleOrEmpty()
 
                 return SaveParams(
-                        NotificationType.merge(saveParamsList.map { it.notificationType })!!,
-                        saveParamsList.any { it.forceDomainChanged },
+                    NotificationType.merge(saveParamsList.map { it.notificationType })!!,
+                    saveParamsList.any { it.forceDomainChanged },
                 )
             }
         }
@@ -204,20 +204,20 @@ class DomainFactory(
         }
 
         val shortcutTasks = ShortcutManager.getShortcuts()
-                .map { Pair(it.value, getTaskIfPresent(it.key)) }
-                .filter { it.second?.isVisible(now) == true }
-                .map { Pair(it.first, it.second!!) }
+            .map { Pair(it.value, getTaskIfPresent(it.key)) }
+            .filter { it.second?.isVisible(now) == true }
+            .map { Pair(it.first, it.second!!) }
 
         ShortcutManager.keepShortcuts(shortcutTasks.map { it.second.taskKey })
 
         val maxShortcuts =
-                ShortcutManagerCompat.getMaxShortcutCountPerActivity(MyApplication.context) - 4
+            ShortcutManagerCompat.getMaxShortcutCountPerActivity(MyApplication.context) - 4
 
         if (maxShortcuts <= 0) return
 
         val shortcutDatas = shortcutTasks.sortedBy { it.first }
-                .takeLast(maxShortcuts)
-                .map { ShortcutQueue.ShortcutData(deviceDbInfo, it.second) }
+            .takeLast(maxShortcuts)
+            .map { ShortcutQueue.ShortcutData(deviceDbInfo, it.second) }
 
         ShortcutQueue.updateShortcuts(shortcutDatas)
     }
@@ -251,9 +251,9 @@ class DomainFactory(
             if (!tickData.waiting) tickData.release()
 
             return Notifier.Params(
-                    "${tickData.notifierParams.sourceName}, runType: $runType",
-                    tickData.notifierParams.silent && !forceNotify,
-                    tick = true,
+                "${tickData.notifierParams.sourceName}, runType: $runType",
+                tickData.notifierParams.silent && !forceNotify,
+                tick = true,
             )
         }
 
@@ -282,12 +282,12 @@ class DomainFactory(
         }
 
         getDomainUpdater(this).performDomainUpdate(
-                CompletableDomainUpdate.create("tryNotifyListeners") {
-                    DomainUpdater.Params(
-                            notifyParams,
-                            SaveParams(NotificationType.All, runType == RunType.REMOTE),
-                    )
-                }
+            CompletableDomainUpdate.create("tryNotifyListeners") {
+                DomainUpdater.Params(
+                    notifyParams,
+                    SaveParams(NotificationType.All, runType == RunType.REMOTE),
+                )
+            }
         )
     }
 
@@ -299,10 +299,10 @@ class DomainFactory(
     // sets
 
     fun setTaskEndTimeStamps(
-            notificationType: NotificationType,
-            taskKeys: Set<TaskKey>,
-            deleteInstances: Boolean,
-            now: ExactTimeStamp.Local,
+        notificationType: NotificationType,
+        taskKeys: Set<TaskKey>,
+        deleteInstances: Boolean,
+        now: ExactTimeStamp.Local,
     ): Pair<TaskUndoData, DomainUpdater.Params> {
         check(taskKeys.isNotEmpty())
 
@@ -311,8 +311,8 @@ class DomainFactory(
         }.flatten()
 
         val tasks = taskKeys.map { getTaskForce(it).getAllChildren() }
-                .flatten()
-                .toSet()
+            .flatten()
+            .toSet()
 
         tasks.forEach { it.requireCurrent(now) }
 
@@ -327,29 +327,29 @@ class DomainFactory(
 
     fun processTaskUndoData(taskUndoData: TaskUndoData, now: ExactTimeStamp.Local) {
         taskUndoData.taskKeys
-                .forEach { (taskKey, scheduleIds) ->
-                    val task = getTaskForce(taskKey)
+            .forEach { (taskKey, scheduleIds) ->
+                val task = getTaskForce(taskKey)
 
-                    task.requireNotCurrent(now)
-                    task.clearEndExactTimeStamp(now)
+                task.requireNotCurrent(now)
+                task.clearEndExactTimeStamp(now)
 
-                    scheduleIds.forEach { scheduleId ->
-                        task.schedules.single { it.id == scheduleId }.clearEndExactTimeStamp(now)
-                    }
+                scheduleIds.forEach { scheduleId ->
+                    task.schedules.single { it.id == scheduleId }.clearEndExactTimeStamp(now)
                 }
+            }
 
         taskUndoData.taskHierarchyKeys
-                .asSequence()
-                .map(::getTaskHierarchy)
-                .forEach { it.clearEndExactTimeStamp(now) }
+            .asSequence()
+            .map(::getTaskHierarchy)
+            .forEach { it.clearEndExactTimeStamp(now) }
     }
 
     private fun getTaskHierarchy(taskHierarchyKey: TaskHierarchyKey): TaskHierarchy {
         return when (taskHierarchyKey) {
             is TaskHierarchyKey.Project -> projectsFactory.getProjectForce(taskHierarchyKey.projectId)
-                    .getProjectTaskHierarchy(taskHierarchyKey.taskHierarchyId)
+                .getProjectTaskHierarchy(taskHierarchyKey.taskHierarchyId)
             is TaskHierarchyKey.Nested -> getTaskForce(taskHierarchyKey.childTaskKey)
-                    .getNestedTaskHierarchy(taskHierarchyKey.taskHierarchyId)
+                .getNestedTaskHierarchy(taskHierarchyKey.taskHierarchyId)
             else -> throw UnsupportedOperationException()
         }
     }
@@ -359,17 +359,17 @@ class DomainFactory(
     fun getInstance(instanceKey: InstanceKey) = getTaskForce(instanceKey.taskKey).getInstance(instanceKey.scheduleKey)
 
     fun getRootInstances(
-            startExactTimeStamp: ExactTimeStamp.Offset?,
-            endExactTimeStamp: ExactTimeStamp.Offset?,
-            now: ExactTimeStamp.Local,
-            searchCriteria: SearchCriteria? = null,
-            filterVisible: Boolean = true,
-            projectKey: ProjectKey<*>? = null,
+        startExactTimeStamp: ExactTimeStamp.Offset?,
+        endExactTimeStamp: ExactTimeStamp.Offset?,
+        now: ExactTimeStamp.Local,
+        searchCriteria: SearchCriteria? = null,
+        filterVisible: Boolean = true,
+        projectKey: ProjectKey<*>? = null,
     ): Sequence<Instance> {
         val searchData = searchCriteria?.let { Project.SearchData(it, myUserFactory.user) }
 
         val projects =
-                projectKey?.let { listOf(projectsFactory.getProjectForce(it)) } ?: projectsFactory.projects.values
+            projectKey?.let { listOf(projectsFactory.getProjectForce(it)) } ?: projectsFactory.projects.values
 
         val instanceSequences = projects.map {
             it.getRootInstances(startExactTimeStamp, endExactTimeStamp, now, searchData, filterVisible)
@@ -386,82 +386,82 @@ class DomainFactory(
     }
 
     fun instanceToGroupListData(
-            instance: Instance,
-            now: ExactTimeStamp.Local,
-            children: MutableMap<InstanceKey, GroupListDataWrapper.InstanceData>,
+        instance: Instance,
+        now: ExactTimeStamp.Local,
+        children: MutableMap<InstanceKey, GroupListDataWrapper.InstanceData>,
     ): GroupListDataWrapper.InstanceData {
         val isRootInstance = instance.isRootInstance()
 
         return GroupListDataWrapper.InstanceData(
-                instance.done,
-                instance.instanceKey,
-                if (isRootInstance) instance.instanceDateTime.getDisplayText() else null,
-                instance.name,
-                instance.instanceDateTime.timeStamp,
-                instance.instanceDateTime,
-                instance.task.current(now),
-                instance.canAddSubtask(now),
-                instance.isRootInstance(),
-                instance.getCreateTaskTimePair(now, projectsFactory.privateProject),
-                instance.task.note,
-                children,
-                instance.task.ordinal,
-                instance.getNotificationShown(localFactory),
-                instance.task.getImage(deviceDbInfo),
-                instance.isAssignedToMe(now, myUserFactory.user),
-                instance.getProjectInfo(now),
+            instance.done,
+            instance.instanceKey,
+            if (isRootInstance) instance.instanceDateTime.getDisplayText() else null,
+            instance.name,
+            instance.instanceDateTime.timeStamp,
+            instance.instanceDateTime,
+            instance.task.current(now),
+            instance.canAddSubtask(now),
+            instance.isRootInstance(),
+            instance.getCreateTaskTimePair(now, projectsFactory.privateProject),
+            instance.task.note,
+            children,
+            instance.task.ordinal,
+            instance.getNotificationShown(localFactory),
+            instance.task.getImage(deviceDbInfo),
+            instance.isAssignedToMe(now, myUserFactory.user),
+            instance.getProjectInfo(now),
         )
     }
 
     fun <T> getChildInstanceDatas(
-            instance: Instance,
-            now: ExactTimeStamp.Local,
-            mapper: (Instance, ExactTimeStamp.Local, MutableMap<InstanceKey, T>) -> T,
-            searchCriteria: SearchCriteria = SearchCriteria.empty,
-            filterVisible: Boolean = true,
+        instance: Instance,
+        now: ExactTimeStamp.Local,
+        mapper: (Instance, ExactTimeStamp.Local, MutableMap<InstanceKey, T>) -> T,
+        searchCriteria: SearchCriteria = SearchCriteria.empty,
+        filterVisible: Boolean = true,
     ): MutableMap<InstanceKey, T> {
         return instance.getChildInstances()
-                .asSequence()
-                .filter {
-                    !filterVisible || it.isVisible(now, Instance.VisibilityOptions(assumeChildOfVisibleParent = true))
-                }
-                .filterSearchCriteria(searchCriteria, now, myUserFactory.user)
-                .mapNotNull { childInstance ->
-                    val childTask = childInstance.task
+            .asSequence()
+            .filter {
+                !filterVisible || it.isVisible(now, Instance.VisibilityOptions(assumeChildOfVisibleParent = true))
+            }
+            .filterSearchCriteria(searchCriteria, now, myUserFactory.user)
+            .mapNotNull { childInstance ->
+                val childTask = childInstance.task
 
-                    val childTaskMatches = childTask.matchesQuery(searchCriteria.query)
+                val childTaskMatches = childTask.matchesQuery(searchCriteria.query)
 
-                    /*
-                    We know this instance matches SearchCriteria.showAssignedToOthers.  If it also matches the query, we
-                    can skip filtering child instances, since showAssignedToOthers is meaningless for child instances.
-                     */
-                    val childrenQuery = if (childTaskMatches) searchCriteria.copy(query = "") else searchCriteria
+                /*
+                We know this instance matches SearchCriteria.showAssignedToOthers.  If it also matches the query, we
+                can skip filtering child instances, since showAssignedToOthers is meaningless for child instances.
+                 */
+                val childrenQuery = if (childTaskMatches) searchCriteria.copy(query = "") else searchCriteria
 
-                    val children = getChildInstanceDatas(childInstance, now, mapper, childrenQuery, filterVisible)
+                val children = getChildInstanceDatas(childInstance, now, mapper, childrenQuery, filterVisible)
 
-                    if (childTaskMatches || children.isNotEmpty())
-                        childInstance.instanceKey to mapper(childInstance, now, children)
-                    else
-                        null
-                }
-                .toMap()
-                .toMutableMap()
+                if (childTaskMatches || children.isNotEmpty())
+                    childInstance.instanceKey to mapper(childInstance, now, children)
+                else
+                    null
+            }
+            .toMap()
+            .toMutableMap()
     }
 
     fun getChildInstanceDatas(
-            instance: Instance,
-            now: ExactTimeStamp.Local,
-            searchCriteria: SearchCriteria = SearchCriteria.empty,
-            filterVisible: Boolean = true,
+        instance: Instance,
+        now: ExactTimeStamp.Local,
+        searchCriteria: SearchCriteria = SearchCriteria.empty,
+        filterVisible: Boolean = true,
     ): MutableMap<InstanceKey, GroupListDataWrapper.InstanceData> =
-            getChildInstanceDatas(instance, now, ::instanceToGroupListData, searchCriteria, filterVisible)
+        getChildInstanceDatas(instance, now, ::instanceToGroupListData, searchCriteria, filterVisible)
 
     val ownerKey get() = myUserFactory.user.userKey
 
     override fun convertProject(
-            now: ExactTimeStamp.Local,
-            startingTask: ProjectTask,
-            projectId: ProjectKey<*>,
+        now: ExactTimeStamp.Local,
+        startingTask: ProjectTask,
+        projectId: ProjectKey<*>,
     ): ProjectTask {
         val remoteToRemoteConversion = ProjectToProjectConversion()
         val startProject = startingTask.project
@@ -473,11 +473,11 @@ class DomainFactory(
 
         for (pair in remoteToRemoteConversion.startTasks.values) {
             val (task, updaters) = newProject.copyTask(
-                    pair.first,
-                    pair.second,
-                    now,
-                    this,
-                    startProject.projectKey,
+                pair.first,
+                pair.second,
+                now,
+                this,
+                startProject.projectKey,
             )
 
             remoteToRemoteConversion.endTasks[pair.first.id] = task
@@ -510,9 +510,9 @@ class DomainFactory(
 
         remoteToRemoteConversion.endTasks.forEach {
             it.value
-                    .existingInstances
-                    .values
-                    .forEach { it.addToParentInstanceHierarchyContainer() }
+                .existingInstances
+                .values
+                .forEach { it.addToParentInstanceHierarchyContainer() }
         }
 
         copiedTaskKeys.putAll(remoteToRemoteConversion.copiedTaskKeys)
@@ -531,35 +531,37 @@ class DomainFactory(
     fun getTaskForce(taskKey: TaskKey) = getTaskIfPresent(taskKey)!!
 
     fun getTaskListChildTaskDatas(
-            parentTask: Task,
-            now: ExactTimeStamp.Local,
-            parentHierarchyExactTimeStamp: ExactTimeStamp,
+        parentTask: Task,
+        now: ExactTimeStamp.Local,
+        parentHierarchyExactTimeStamp: ExactTimeStamp,
+        includeProjectInfo: Boolean = true,
     ): List<TaskListFragment.ChildTaskData> {
         return parentTask.getChildTaskHierarchies(parentHierarchyExactTimeStamp, true)
-                .map { taskHierarchy ->
-                    val childTask = taskHierarchy.childTask
+            .map { taskHierarchy ->
+                val childTask = taskHierarchy.childTask
 
-                    val childHierarchyExactTimeStamp =
-                            childTask.getHierarchyExactTimeStamp(parentHierarchyExactTimeStamp)
+                val childHierarchyExactTimeStamp =
+                    childTask.getHierarchyExactTimeStamp(parentHierarchyExactTimeStamp)
 
-                    TaskListFragment.ChildTaskData(
-                            childTask.name,
-                            childTask.getScheduleText(ScheduleText, childHierarchyExactTimeStamp),
-                            getTaskListChildTaskDatas(
-                                    childTask,
-                                    now,
-                                    childHierarchyExactTimeStamp,
-                            ),
-                            childTask.note,
-                            childTask.taskKey,
-                            childTask.getImage(deviceDbInfo),
-                            childTask.current(now),
-                            childTask.isVisible(now),
-                            childTask.ordinal,
-                            childTask.getProjectInfo(now),
-                            childTask.isAssignedToMe(now, myUserFactory.user),
-                    )
-                }
+                TaskListFragment.ChildTaskData(
+                    childTask.name,
+                    childTask.getScheduleText(ScheduleText, childHierarchyExactTimeStamp),
+                    getTaskListChildTaskDatas(
+                        childTask,
+                        now,
+                        childHierarchyExactTimeStamp,
+                        includeProjectInfo,
+                    ),
+                    childTask.note,
+                    childTask.taskKey,
+                    childTask.getImage(deviceDbInfo),
+                    childTask.current(now),
+                    childTask.isVisible(now),
+                    childTask.ordinal,
+                    childTask.takeIf { includeProjectInfo }?.getProjectInfo(now),
+                    childTask.isAssignedToMe(now, myUserFactory.user),
+                )
+            }
     }
 
     data class CloudParams(val projects: Collection<Project<*>>, val userKeys: Collection<UserKey> = emptySet()) {
@@ -590,8 +592,8 @@ class DomainFactory(
     }
 
     fun getTime(timePair: TimePair) = timePair.customTimeKey
-            ?.let(::getCustomTime)
-            ?: Time.Normal(timePair.hourMinute!!)
+        ?.let(::getCustomTime)
+        ?: Time.Normal(timePair.hourMinute!!)
 
     fun getDateTime(dateTimePair: DateTimePair) = dateTimePair.run { DateTime(date, getTime(timePair)) }
 
@@ -618,16 +620,16 @@ class DomainFactory(
     }
 
     override fun tryMigrateProjectCustomTime(
-            customTime: Time.Custom.Project<*>,
-            now: ExactTimeStamp.Local,
+        customTime: Time.Custom.Project<*>,
+        now: ExactTimeStamp.Local,
     ): Time.Custom.User? {
         val privateCustomTime = when (customTime) {
             is PrivateCustomTime -> customTime
             is SharedCustomTime -> {
                 if (customTime.ownerKey == ownerKey) {
                     val privateCustomTimeKey = CustomTimeKey.Project.Private(
-                            ownerKey.toPrivateProjectKey(),
-                            customTime.privateKey!!,
+                        ownerKey.toPrivateProjectKey(),
+                        customTime.privateKey!!,
                     )
 
                     getCustomTime(privateCustomTimeKey) as PrivateCustomTime
@@ -639,11 +641,11 @@ class DomainFactory(
         } ?: return null
 
         myUserFactory.user
-                .customTimes
-                .values
-                .filter { it.customTimeRecord.privateCustomTimeId == privateCustomTime.id } // this could go south if two users migrate the same time simultaneously
-                .singleOrEmpty()
-                ?.let { return it }
+            .customTimes
+            .values
+            .filter { it.customTimeRecord.privateCustomTimeId == privateCustomTime.id } // this could go south if two users migrate the same time simultaneously
+            .singleOrEmpty()
+            ?.let { return it }
 
         return migratePrivateCustomTime(privateCustomTime, now)
     }
@@ -660,9 +662,9 @@ class DomainFactory(
     inner class Converter {
 
         fun convertToRoot(
-                now: ExactTimeStamp.Local,
-                startTask: ProjectTask,
-                newProjectKey: ProjectKey<*>,
+            now: ExactTimeStamp.Local,
+            startTask: ProjectTask,
+            newProjectKey: ProjectKey<*>,
         ): RootTask {
             val projectToRootConversion = ProjectToRootConversion()
             convertProjectToRootHelper(now, projectToRootConversion, startTask)
@@ -671,11 +673,11 @@ class DomainFactory(
 
             for (pair in projectToRootConversion.startTasks.values) {
                 val task = copyTask(
-                        deviceDbInfo,
-                        pair.first,
-                        now,
-                        newProject,
-                        this@DomainFactory,
+                    deviceDbInfo,
+                    pair.first,
+                    now,
+                    newProject,
+                    this@DomainFactory,
                 )
 
                 projectToRootConversion.endTasks[pair.first.id] = task
@@ -704,9 +706,9 @@ class DomainFactory(
 
             projectToRootConversion.endTasks.forEach {
                 it.value
-                        .existingInstances
-                        .values
-                        .forEach { it.addToParentInstanceHierarchyContainer() }
+                    .existingInstances
+                    .values
+                    .forEach { it.addToParentInstanceHierarchyContainer() }
             }
 
             copiedTaskKeys.putAll(projectToRootConversion.copiedTaskKeys)
@@ -715,22 +717,22 @@ class DomainFactory(
         }
 
         private fun convertProjectToRootHelper(
-                now: ExactTimeStamp.Local,
-                projectToRootConversion: ProjectToRootConversion,
-                startTask: ProjectTask,
+            now: ExactTimeStamp.Local,
+            projectToRootConversion: ProjectToRootConversion,
+            startTask: ProjectTask,
         ) {
             if (projectToRootConversion.startTasks.containsKey(startTask.id)) return
 
             projectToRootConversion.startTasks[startTask.id] = Pair(
-                    startTask,
-                    startTask.existingInstances
-                            .values
-                            .filter {
-                                listOf(
-                                        it.scheduleDateTime,
-                                        it.instanceDateTime,
-                                ).maxOrNull()!!.toLocalExactTimeStamp() >= now
-                            },
+                startTask,
+                startTask.existingInstances
+                    .values
+                    .filter {
+                        listOf(
+                            it.scheduleDateTime,
+                            it.instanceDateTime,
+                        ).maxOrNull()!!.toLocalExactTimeStamp() >= now
+                    },
             )
 
             val childTaskHierarchies = startTask.getChildTaskHierarchies(now)
@@ -745,20 +747,22 @@ class DomainFactory(
         }
 
         private fun copyTask(
-                deviceDbInfo: DeviceDbInfo,
-                oldTask: ProjectTask,
-                now: ExactTimeStamp.Local,
-                newProject: Project<*>,
-                customTimeMigrationHelper: Project.CustomTimeMigrationHelper,
+            deviceDbInfo: DeviceDbInfo,
+            oldTask: ProjectTask,
+            now: ExactTimeStamp.Local,
+            newProject: Project<*>,
+            customTimeMigrationHelper: Project.CustomTimeMigrationHelper,
         ): RootTask {
-            val newTask = rootTasksFactory.newTask(RootTaskJson(
+            val newTask = rootTasksFactory.newTask(
+                RootTaskJson(
                     oldTask.name,
                     now.long,
                     now.offset,
                     oldTask.endExactTimeStamp?.long,
                     oldTask.note,
                     ordinal = oldTask.ordinal,
-            ))
+                )
+            )
 
             val currentSchedules = oldTask.getCurrentScheduleIntervals(now).map { it.schedule }
             val currentNoScheduleOrParent = oldTask.getCurrentNoScheduleOrParent(now)?.noScheduleOrParent
@@ -767,11 +771,11 @@ class DomainFactory(
                 check(currentNoScheduleOrParent == null)
 
                 newTask.copySchedules(
-                        now,
-                        currentSchedules,
-                        customTimeMigrationHelper,
-                        oldTask.project.projectKey,
-                        newProject.projectKey,
+                    now,
+                    currentSchedules,
+                    customTimeMigrationHelper,
+                    oldTask.project.projectKey,
+                    newProject.projectKey,
                 )
             } else {
                 currentNoScheduleOrParent?.let { newTask.setNoScheduleOrParent(now, newProject.projectKey) }

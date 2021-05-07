@@ -5,7 +5,6 @@ import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.ScheduleText
-import com.krystianwsul.checkme.domainmodel.getProjectInfo
 import com.krystianwsul.checkme.gui.tasks.ShowTasksActivity
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.viewmodels.ShowTasksViewModel
@@ -23,21 +22,22 @@ fun DomainFactory.getShowTasksData(parameters: ShowTasksActivity.Parameters): Sh
 
     fun Task.toChildTaskData(hierarchyExactTimeStamp: ExactTimeStamp): TaskListFragment.ChildTaskData {
         return TaskListFragment.ChildTaskData(
-                name,
-                getScheduleText(ScheduleText, hierarchyExactTimeStamp),
-                getTaskListChildTaskDatas(
-                        this,
-                        now,
-                        hierarchyExactTimeStamp,
-                ),
-                note,
-                taskKey,
-                getImage(deviceDbInfo),
-                current(now),
-                isVisible(now),
-                ordinal,
-                getProjectInfo(now),
-                isAssignedToMe(now, myUserFactory.user),
+            name,
+            getScheduleText(ScheduleText, hierarchyExactTimeStamp),
+            getTaskListChildTaskDatas(
+                this,
+                now,
+                hierarchyExactTimeStamp,
+                false,
+            ),
+            note,
+            taskKey,
+            getImage(deviceDbInfo),
+            current(now),
+            isVisible(now),
+            ordinal,
+            null,
+            isAssignedToMe(now, myUserFactory.user),
         )
     }
 
@@ -48,15 +48,15 @@ fun DomainFactory.getShowTasksData(parameters: ShowTasksActivity.Parameters): Sh
     when (parameters) {
         ShowTasksActivity.Parameters.Unscheduled -> {
             entryDatas = projectsFactory.projects
-                    .values
-                    .map {
-                        val childTaskDatas = it.getAllTasks()
-                                .filter { it.current(now) && it.isUnscheduled(now) }
-                                .map { it.toChildTaskData(it.getHierarchyExactTimeStamp(now)) }
+                .values
+                .map {
+                    val childTaskDatas = it.getAllTasks()
+                        .filter { it.current(now) && it.isUnscheduled(now) }
+                        .map { it.toChildTaskData(it.getHierarchyExactTimeStamp(now)) }
 
-                        it.toProjectData(childTaskDatas)
-                    }
-                    .filter { it.children.isNotEmpty() }
+                    it.toProjectData(childTaskDatas)
+                }
+                .filter { it.children.isNotEmpty() }
 
             title = MyApplication.context.getString(R.string.noReminder)
 
@@ -64,9 +64,9 @@ fun DomainFactory.getShowTasksData(parameters: ShowTasksActivity.Parameters): Sh
         }
         is ShowTasksActivity.Parameters.Copy -> {
             entryDatas = parameters.taskKeys
-                    .map(::getTaskForce)
-                    .map { it.toChildTaskData(it.getHierarchyExactTimeStamp(now)) }
-                    .sorted()
+                .map(::getTaskForce)
+                .map { it.toChildTaskData(it.getHierarchyExactTimeStamp(now)) }
+                .sorted()
 
             title = MyApplication.context.getString(R.string.copyingTasksTitle)
 
@@ -76,11 +76,11 @@ fun DomainFactory.getShowTasksData(parameters: ShowTasksActivity.Parameters): Sh
             val project = projectsFactory.getProjectForce(parameters.projectKey)
 
             entryDatas = project.getAllTasks()
-                    .asSequence()
-                    .map { Pair(it, it.getHierarchyExactTimeStamp(now)) }
-                    .filter { (task, hierarchyExactTimeStamp) -> task.isTopLevelTask(hierarchyExactTimeStamp) }
-                    .map { (task, hierarchyExactTimeStamp) -> task.toChildTaskData(hierarchyExactTimeStamp) }
-                    .toList()
+                .asSequence()
+                .map { Pair(it, it.getHierarchyExactTimeStamp(now)) }
+                .filter { (task, hierarchyExactTimeStamp) -> task.isTopLevelTask(hierarchyExactTimeStamp) }
+                .map { (task, hierarchyExactTimeStamp) -> task.toChildTaskData(hierarchyExactTimeStamp) }
+                .toList()
 
             title = project.getDisplayName()
 
@@ -89,8 +89,8 @@ fun DomainFactory.getShowTasksData(parameters: ShowTasksActivity.Parameters): Sh
     }
 
     return ShowTasksViewModel.Data(
-            TaskListFragment.TaskData(entryDatas, null, !parameters.copying, null),
-            title,
-            isSharedProject,
+        TaskListFragment.TaskData(entryDatas, null, !parameters.copying, null),
+        title,
+        isSharedProject,
     )
 }

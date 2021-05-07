@@ -51,7 +51,7 @@ fun DomainFactory.getShowTaskInstancesData(
     }.takeAndHasMore(desiredCount)
 
     val instanceDatas = instances.map {
-        val children = getChildInstanceDatas(it, now)
+        val children = getChildInstanceDatas(it, now, includeProjectInfo = parameters.includeProjectInfo)
 
         GroupListDataWrapper.InstanceData(
                 it.done,
@@ -60,17 +60,17 @@ fun DomainFactory.getShowTaskInstancesData(
                 it.name,
                 it.instanceDateTime.timeStamp,
                 it.instanceDateTime,
-                it.task.current(now),
-                it.canAddSubtask(now),
-                it.isRootInstance(),
-                it.getCreateTaskTimePair(now, projectsFactory.privateProject),
-                it.task.note,
-                children,
-                it.task.ordinal,
-                it.getNotificationShown(localFactory),
-                it.task.getImage(deviceDbInfo),
-                it.isAssignedToMe(now, myUserFactory.user),
-                it.getProjectInfo(now),
+            it.task.current(now),
+            it.canAddSubtask(now),
+            it.isRootInstance(),
+            it.getCreateTaskTimePair(now, projectsFactory.privateProject),
+            it.task.note,
+            children,
+            it.task.ordinal,
+            it.getNotificationShown(localFactory),
+            it.task.getImage(deviceDbInfo),
+            it.isAssignedToMe(now, myUserFactory.user),
+            it.takeIf { parameters.includeProjectInfo }?.getProjectInfo(now),
         )
     }
 

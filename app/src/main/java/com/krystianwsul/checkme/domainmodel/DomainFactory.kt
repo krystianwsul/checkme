@@ -389,6 +389,7 @@ class DomainFactory(
         instance: Instance,
         now: ExactTimeStamp.Local,
         children: MutableMap<InstanceKey, GroupListDataWrapper.InstanceData>,
+        includeProjectInfo: Boolean = true,
     ): GroupListDataWrapper.InstanceData {
         val isRootInstance = instance.isRootInstance()
 
@@ -409,7 +410,7 @@ class DomainFactory(
             instance.getNotificationShown(localFactory),
             instance.task.getImage(deviceDbInfo),
             instance.isAssignedToMe(now, myUserFactory.user),
-            instance.getProjectInfo(now),
+            instance.takeIf { includeProjectInfo }?.getProjectInfo(now),
         )
     }
 
@@ -453,8 +454,15 @@ class DomainFactory(
         now: ExactTimeStamp.Local,
         searchCriteria: SearchCriteria = SearchCriteria.empty,
         filterVisible: Boolean = true,
+        includeProjectInfo: Boolean = true,
     ): MutableMap<InstanceKey, GroupListDataWrapper.InstanceData> =
-        getChildInstanceDatas(instance, now, ::instanceToGroupListData, searchCriteria, filterVisible)
+        getChildInstanceDatas(
+            instance,
+            now,
+            { instance, now, children -> instanceToGroupListData(instance, now, children, includeProjectInfo) },
+            searchCriteria,
+            filterVisible,
+        )
 
     val ownerKey get() = myUserFactory.user.userKey
 

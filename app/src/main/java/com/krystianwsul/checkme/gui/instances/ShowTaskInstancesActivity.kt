@@ -189,10 +189,18 @@ class ShowTaskInstancesActivity : AbstractActivity(), GroupListListener {
 
     sealed class Parameters : Parcelable {
 
-        @Parcelize
-        data class Task(val taskKey: TaskKey) : Parameters()
+        abstract val includeProjectInfo: Boolean
 
         @Parcelize
-        data class Project(val projectKey: ProjectKey<*>) : Parameters()
+        data class Task(val taskKey: TaskKey) : Parameters() {
+
+            override val includeProjectInfo = true
+        }
+
+        @Parcelize
+        data class Project(val projectKey: ProjectKey<*>) : Parameters() {
+
+            override val includeProjectInfo = false
+        }
     }
 }

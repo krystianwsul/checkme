@@ -464,7 +464,7 @@ class DomainFactory(
             filterVisible,
         )
 
-    val ownerKey get() = myUserFactory.user.userKey
+    private val ownerKey get() = myUserFactory.user.userKey
 
     override fun convertProject(
         now: ExactTimeStamp.Local,
@@ -681,7 +681,6 @@ class DomainFactory(
 
             for (pair in projectToRootConversion.startTasks.values) {
                 val task = copyTask(
-                    deviceDbInfo,
                     pair.first,
                     now,
                     newProject,
@@ -755,7 +754,6 @@ class DomainFactory(
         }
 
         private fun copyTask(
-            deviceDbInfo: DeviceDbInfo,
             oldTask: ProjectTask,
             now: ExactTimeStamp.Local,
             newProject: Project<*>,
@@ -766,7 +764,6 @@ class DomainFactory(
                     oldTask.name,
                     now.long,
                     now.offset,
-                    oldTask.endExactTimeStamp?.long,
                     oldTask.note,
                     ordinal = oldTask.ordinal,
                 )

@@ -77,15 +77,7 @@ abstract class TaskRecord protected constructor(
 
     abstract val taskKey: TaskKey
 
-    var endData
-        get() = taskJson.endData ?: taskJson.endTime?.let { TaskJson.EndData(it, null, false) }
-        set(value) {
-            if (value == taskJson.endData)
-                return
-
-            setProperty(taskJson::endData, value)
-            setProperty(taskJson::endTime, value?.time)
-        }
+    abstract var endData: TaskJson.EndData?
 
     var note by Committer(taskJson::note)
 

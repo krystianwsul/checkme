@@ -13,8 +13,7 @@ import kotlin.jvm.JvmOverloads
 data class RootTaskJson @JvmOverloads constructor(
         override var name: String = "",
         override val startTime: Long = 0,
-        override var startTimeOffset: Double? = null,
-        override var endTime: Long? = null,
+        override var startTimeOffset: Double? = null, // todo task non-null
         override var note: String? = null,
         override var instances: MutableMap<String, InstanceJson> = mutableMapOf(),
         override var schedules: MutableMap<String, RootScheduleWrapper> = mutableMapOf(),

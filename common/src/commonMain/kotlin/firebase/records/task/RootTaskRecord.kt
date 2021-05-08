@@ -64,6 +64,14 @@ class RootTaskRecord private constructor(
 
     override val taskKey = TaskKey.Root(id)
 
+    override var endData
+        get() = taskJson.endData
+        set(value) {
+            if (value == taskJson.endData) return
+
+            setProperty(taskJson::endData, value)
+        }
+
     constructor(id: String, taskJson: RootTaskJson, databaseWrapper: DatabaseWrapper, parent: Parent) :
             this(false, id, taskJson, databaseWrapper, parent)
 

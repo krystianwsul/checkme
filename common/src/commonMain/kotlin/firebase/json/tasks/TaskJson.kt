@@ -16,7 +16,6 @@ interface TaskJson {
     val startTime: Long
     val startTimeOffset: Double? // this is nullable only for project tasks
 
-    var endTime: Long?
     var endData: EndData?
 
     var instances: MutableMap<String, InstanceJson>

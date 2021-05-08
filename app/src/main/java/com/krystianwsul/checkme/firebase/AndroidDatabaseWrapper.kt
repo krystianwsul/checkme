@@ -36,14 +36,14 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
 
     val root: String by lazy {
         MyApplication.instance
-                .resources
-                .getString(R.string.firebase_root)
+            .resources
+            .getString(R.string.firebase_root)
     }
 
     private val rootReference by lazy {
         FirebaseDatabase.getInstance()
-                .reference
-                .child(root)
+            .reference
+            .child(root)
     }
 
     private val rxPaperBook = RxPaperBook.with("firebaseCache")
@@ -56,16 +56,16 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
     override fun getUserObservable(userKey: UserKey) = getUserQuery(userKey).typedSnapshotChanges<UserWrapper>()
 
     fun getUsersObservable() = rootReference.child(USERS_KEY)
-            .orderByKey()
-            .indicatorSnapshotChanges<Map<String, UserWrapper>>()
+        .orderByKey()
+        .indicatorSnapshotChanges<Map<String, UserWrapper>>()
 
     private fun Path.toKey() = toString().replace('/', '-')
 
     private inline fun <reified T : Any> writeNullable(path: Path, value: T?): Completable {
         return if (ENABLE_PAPER) {
             rxPaperBook.write(path.toKey(), NullableWrapper(value))
-                    .toV3()
-                    .subscribeOn(Schedulers.io())
+                .toV3()
+                .subscribeOn(Schedulers.io())
         } else {
             Completable.complete()
         }
@@ -73,81 +73,75 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
 
     private inline fun <reified T : Any> readNullable(path: Path): Maybe<NullableWrapper<T>> {
         if (ENABLE_PAPER) {
-            val key = path.toKey()
-
-            return rxPaperBook.contains(key)
-                    .toV3()
-                    .subscribeOn(Schedulers.io())
-                    .filter { it }
-                    .flatMapSingle {
-                        rxPaperBook.read<NullableWrapper<T>>(path.toKey())
-                                .toV3()
-                                .subscribeOn(Schedulers.io())
-                    }
+            return rxPaperBook.read<NullableWrapper<T>>(path.toKey())
+                .toV3()
+                .subscribeOn(Schedulers.io())
+                .toMaybe()
+                .onErrorComplete()
         } else {
-            return Maybe.never()
+            return Maybe.empty()
         }
     }
 
     private class SnapshotConverter<T : Parsable>(
-            path: Path,
-            private val customPrintDiff: ((paper: T?, firebase: T?) -> String)? = null,
+        path: Path,
+        private val customPrintDiff: ((paper: T?, firebase: T?) -> String)? = null,
     ) : Converter<NullableWrapper<T>, Snapshot<T>>(
-            { Snapshot(path.back.asString(), it.value) },
-            { NullableWrapper(it.value) },
+        { Snapshot(path.back.asString(), it.value) },
+        { NullableWrapper(it.value) },
     ) {
 
         override fun printDiff(paper: NullableWrapper<T>, firebase: NullableWrapper<T>) =
-                customPrintDiff?.invoke(paper.value, firebase.value) ?: super.printDiff(paper, firebase)
+            customPrintDiff?.invoke(paper.value, firebase.value) ?: super.printDiff(paper, firebase)
     }
 
     private inline fun <reified T : Parsable> Query.typedSnapshotChanges(
-            noinline customPrintDiff: ((paper: T?, firebase: T?) -> String)? = null,
+        noinline customPrintDiff: ((paper: T?, firebase: T?) -> String)? = null,
     ): Observable<Snapshot<T>> {
         return cache(
-                { Snapshot.fromParsable(it, T::class) },
-                SnapshotConverter(path, customPrintDiff),
-                { readNullable(it) },
-                { path, value -> writeNullable(path, value) },
+            { Snapshot.fromParsable(it, T::class) },
+            SnapshotConverter(path, customPrintDiff),
+            { readNullable(it) },
+            { path, value -> writeNullable(path, value) },
         )
     }
 
     private inline fun <reified T : Any> Query.indicatorSnapshotChanges(): Observable<Snapshot<T>> =
-            cache(
-                    { Snapshot.fromTypeIndicator(it, object : GenericTypeIndicator<T>() {}) },
-                    Converter(
-                            { Snapshot(path.back.asString(), it.value) },
-                            { NullableWrapper(it.value) },
-                    ),
-                    { readNullable(it) },
-                    { path, value -> writeNullable(path, value) },
-            )
+        cache(
+            { Snapshot.fromTypeIndicator(it, object : GenericTypeIndicator<T>() {}) },
+            Converter(
+                { Snapshot(path.back.asString(), it.value) },
+                { NullableWrapper(it.value) },
+            ),
+            { readNullable(it) },
+            { path, value -> writeNullable(path, value) },
+        )
 
     private fun <T : Any, U : Snapshot<T>> Query.cache(
-            firebaseToSnapshot: (dataSnapshot: DataSnapshot) -> U,
-            converter: Converter<NullableWrapper<T>, U>,
-            readNullable: (path: Path) -> Maybe<NullableWrapper<T>>,
-            writeNullable: (path: Path, T?) -> Completable,
+        firebaseToSnapshot: (dataSnapshot: DataSnapshot) -> U,
+        converter: Converter<NullableWrapper<T>, U>,
+        readNullable: (path: Path) -> Maybe<NullableWrapper<T>>,
+        writeNullable: (path: Path, T?) -> Completable,
     ): Observable<U> {
 
         val firebaseObservable = dataChanges().toV3()
-                .subscribeOn(Schedulers.io())
-                .observeOn(Schedulers.computation())
-                .map { firebaseToSnapshot(it) }
-                .doOnNext { writeNullable(path, it.value).subscribe() }
+            .subscribeOn(Schedulers.io())
+            .observeOn(Schedulers.computation())
+            .map { firebaseToSnapshot(it) }
+            .doOnNext { writeNullable(path, it.value).subscribe() }
 
         return mergePaperAndRx(readNullable(path), firebaseObservable, converter, path.toString()).observeOnDomain()
     }
 
     override fun getNewId(path: String) = rootReference.child(path)
-            .push()
-            .key!!
+        .push()
+        .key!!
 
     private fun sharedProjectQuery(projectKey: ProjectKey.Shared) =
-            rootReference.child("$RECORDS_KEY/${projectKey.key}")
+        rootReference.child("$RECORDS_KEY/${projectKey.key}")
 
     override fun getSharedProjectObservable(projectKey: ProjectKey.Shared) =
-            sharedProjectQuery(projectKey).typedSnapshotChanges<JsonWrapper>()
+        sharedProjectQuery(projectKey).typedSnapshotChanges<JsonWrapper>()
 
     override fun update(values: Map<String, Any?>, callback: DatabaseCallback) {
         rootReference.updateChildren(values).addOnCompleteListener {
@@ -156,38 +150,38 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
     }
 
     private fun privateProjectQuery(key: ProjectKey.Private) =
-            rootReference.child("$PRIVATE_PROJECTS_KEY/${key.key}")
+        rootReference.child("$PRIVATE_PROJECTS_KEY/${key.key}")
 
     override fun getPrivateProjectObservable(key: ProjectKey.Private) =
-            privateProjectQuery(key).typedSnapshotChanges<PrivateProjectJson> { paper, firebase ->
-                when {
-                    paper == null && firebase == null -> "both are null, WTF?"
-                    paper == null || firebase == null -> "one is null, paper: $paper, firebase: $firebase"
-                    else -> {
-                        "fields are different:\n" + PrivateProjectJson::class
-                            .java
-                            .fields
-                            .mapNotNull {
-                                val paperField = it.get(paper)
-                                val firebaseField = it.get(firebase)
+        privateProjectQuery(key).typedSnapshotChanges<PrivateProjectJson> { paper, firebase ->
+            when {
+                paper == null && firebase == null -> "both are null, WTF?"
+                paper == null || firebase == null -> "one is null, paper: $paper, firebase: $firebase"
+                else -> {
+                    "fields are different:\n" + PrivateProjectJson::class
+                        .java
+                        .fields
+                        .mapNotNull {
+                            val paperField = it.get(paper)
+                            val firebaseField = it.get(firebase)
 
-                                if (paperField != firebaseField) {
-                                    "field: ${it.name}, paper: $paperField, firebase: $firebaseField"
-                                } else {
-                                    null
-                                    }
-                                }
-                                .joinToString("; ")
-                    }
+                            if (paperField != firebaseField) {
+                                "field: ${it.name}, paper: $paperField, firebase: $firebaseField"
+                            } else {
+                                null
+                            }
+                        }
+                        .joinToString("; ")
                 }
-
             }
 
+        }
+
     private fun rootTaskQuery(rootTaskKey: TaskKey.Root) =
-            rootReference.child("$TASKS_KEY/${rootTaskKey.taskId}")
+        rootReference.child("$TASKS_KEY/${rootTaskKey.taskId}")
 
     override fun getRootTaskObservable(rootTaskKey: TaskKey.Root) =
-            rootTaskQuery(rootTaskKey).typedSnapshotChanges<RootTaskJson>() // todo task rxpaper
+        rootTaskQuery(rootTaskKey).typedSnapshotChanges<RootTaskJson>() // todo task rxpaper
 
     sealed class LoadState<T : Any> {
 

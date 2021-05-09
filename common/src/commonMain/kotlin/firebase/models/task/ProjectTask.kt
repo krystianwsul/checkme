@@ -32,7 +32,7 @@ class ProjectTask(override val project: Project<*>, private val taskRecord: Proj
 
     override val projectCustomTimeIdProvider = project.projectRecord
 
-    override fun setNoScheduleOrParent(now: ExactTimeStamp.Local, projectKey: ProjectKey<*>) { // todo task
+    override fun setNoScheduleOrParent(now: ExactTimeStamp.Local, projectKey: ProjectKey<*>) { // todo task edit
         val noScheduleOrParentRecord =
             taskRecord.newNoScheduleOrParentRecord(ProjectNoScheduleOrParentJson(now.long, now.offset))
 
@@ -74,13 +74,6 @@ class ProjectTask(override val project: Project<*>, private val taskRecord: Proj
         parentProjectTaskHierarchiesProperty.invalidate()
         invalidateIntervals()
     }
-
-    fun updateProject(
-        // todo task
-        projectUpdater: ProjectUpdater,
-        now: ExactTimeStamp.Local,
-        projectKey: ProjectKey<*>,
-    ) = projectUpdater.convertProject(now, this, projectKey)
 
     fun fixOffsets() {
         if (taskRecord.startTimeOffset == null) taskRecord.startTimeOffset = startExactTimeStamp.offset

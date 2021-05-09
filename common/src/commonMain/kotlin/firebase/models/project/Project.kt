@@ -68,7 +68,7 @@ abstract class Project<T : ProjectType>(
     }
 
     abstract fun createChildTask(
-        // todo task
+        // todo task edit
         parentTask: ProjectTask,
         now: ExactTimeStamp.Local,
         name: String,
@@ -116,6 +116,7 @@ abstract class Project<T : ProjectType>(
 
     @Suppress("ConstantConditionIf")
     fun copyTask(
+        // todo task edit
         oldTask: ProjectTask,
         instances: Collection<Instance>,
         now: ExactTimeStamp.Local,
@@ -436,7 +437,7 @@ abstract class Project<T : ProjectType>(
     }
 
     abstract fun createTask(
-        // todo task
+        // todo task edit
         now: ExactTimeStamp.Local,
         image: TaskJson.Image?,
         name: String,
@@ -466,7 +467,7 @@ abstract class Project<T : ProjectType>(
     private class MissingTaskException(projectId: ProjectKey<*>, taskId: String) :
         Exception("projectId: $projectId, taskId: $taskId")
 
-    interface CustomTimeMigrationHelper { // todo task
+    interface CustomTimeMigrationHelper { // todo task edit
 
         fun tryMigrateProjectCustomTime(
             customTime: Time.Custom.Project<*>,

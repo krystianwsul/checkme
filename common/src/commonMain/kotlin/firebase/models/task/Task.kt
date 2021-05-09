@@ -617,7 +617,7 @@ sealed class Task(
     ): Time
 
     fun createSchedules(
-        // todo task move to rootTask
+        // todo task edit move to rootTask
         now: ExactTimeStamp.Local,
         scheduleDatas: List<Pair<ScheduleData, Time>>,
         assignedTo: Set<UserKey>,
@@ -1070,7 +1070,7 @@ sealed class Task(
         fun getScheduleText(scheduleGroup: ScheduleGroup, customTimeProvider: JsonTime.CustomTimeProvider): String
     }
 
-    interface ProjectUpdater {
+    interface ProjectUpdater { // todo task edit
 
         fun convertProject(now: ExactTimeStamp.Local, startingTask: ProjectTask, projectId: ProjectKey<*>): ProjectTask
     }

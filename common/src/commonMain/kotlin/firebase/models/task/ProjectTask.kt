@@ -84,7 +84,8 @@ class ProjectTask(override val project: Project<*>, private val taskRecord: Proj
         invalidateIntervals()
     }
 
-    override fun updateProject(
+    fun updateProject(
+        // todo task
         projectUpdater: ProjectUpdater,
         now: ExactTimeStamp.Local,
         projectKey: ProjectKey<*>,

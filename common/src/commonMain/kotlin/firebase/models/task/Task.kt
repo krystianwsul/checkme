@@ -23,7 +23,7 @@ import com.krystianwsul.common.interrupt.InterruptionChecker
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.*
 
-abstract class Task(
+sealed class Task(
     private val copyScheduleHelper: CopyScheduleHelper,
     val customTimeProvider: JsonTime.CustomTimeProvider,
     private val taskRecord: TaskRecord,
@@ -918,12 +918,6 @@ abstract class Task(
     fun invalidateChildTaskHierarchies() = childHierarchyIntervalsProperty.invalidate()
 
     fun invalidateIntervals() = intervalsProperty.invalidate()
-
-    abstract fun updateProject(
-        projectUpdater: ProjectUpdater,
-        now: ExactTimeStamp.Local,
-        projectKey: ProjectKey<*>,
-    ): Task
 
     fun getScheduleTextMultiline(
         scheduleTextFactory: ScheduleTextFactory,

@@ -137,7 +137,7 @@ class RootTask(
 
     override fun invalidateProjectParentTaskHierarchies() = invalidateIntervals()
 
-    override fun updateProject(
+    fun updateProject(
         projectUpdater: ProjectUpdater,
         now: ExactTimeStamp.Local,
         projectKey: ProjectKey<*>,

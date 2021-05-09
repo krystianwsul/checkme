@@ -1,6 +1,5 @@
 package com.krystianwsul.common.firebase.models
 
-import arrow.core.extensions.sequence.foldable.isEmpty
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.json.schedule.PrivateScheduleWrapper
 import com.krystianwsul.common.firebase.json.schedule.PrivateWeeklyScheduleJson
@@ -145,11 +144,11 @@ class InstanceGenerationTest {
         )
 
         assertTrue(
-                task.getInstances(
-                        null,
-                        endExactTimeStamp.plusOne(),
-                        now,
-                ).isEmpty(),
+            task.getInstances(
+                null,
+                endExactTimeStamp.plusOne(),
+                now,
+            ).none(),
         )
     }
 

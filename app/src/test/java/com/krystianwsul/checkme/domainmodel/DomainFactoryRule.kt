@@ -30,6 +30,7 @@ import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.utils.ProjectKey
+import com.krystianwsul.common.utils.TaskHierarchyId
 import com.krystianwsul.common.utils.UserKey
 import io.mockk.*
 import io.reactivex.rxjava3.android.plugins.RxAndroidPlugins
@@ -152,12 +153,12 @@ class DomainFactoryRule : TestRule {
 
             var projectTaskHierarchyId = 0
             every { newPrivateProjectTaskHierarchyRecordId(any()) } answers {
-                "projectTaskHierarchyId" + ++projectTaskHierarchyId
+                TaskHierarchyId("projectTaskHierarchyId" + ++projectTaskHierarchyId)
             }
 
             var nestedTaskHierarchyId = 0
             every { newPrivateNestedTaskHierarchyRecordId(any(), any()) } answers {
-                "nestedTaskHierarchyId" + ++nestedTaskHierarchyId
+                TaskHierarchyId("nestedTaskHierarchyId" + ++nestedTaskHierarchyId)
             }
 
             var privateCustomTimeId = 0
@@ -181,7 +182,7 @@ class DomainFactoryRule : TestRule {
 
             var rootTaskNestedTaskHierarchyRecordId = 0
             every { newRootTaskNestedTaskHierarchyRecordId(any()) } answers {
-                "rootTaskNestedTaskHierarchyRecordId" + ++rootTaskNestedTaskHierarchyRecordId
+                TaskHierarchyId("rootTaskNestedTaskHierarchyRecordId" + ++rootTaskNestedTaskHierarchyRecordId)
             }
         }
 

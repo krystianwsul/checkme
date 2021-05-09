@@ -1,9 +1,6 @@
 package com.krystianwsul.common.utils
 
-import kotlin.jvm.JvmInline
+data class TaskHierarchyId(val value: String) {
 
-@JvmInline
-value class TaskHierarchyId(val value: String) {
-
-    override fun toString() = value // todo backend not sure if this is needed
+    override fun toString() = value
 }

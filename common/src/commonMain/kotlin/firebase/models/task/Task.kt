@@ -1071,9 +1071,9 @@ abstract class Task(
     }
 
     fun deleteNestedTaskHierarchy(nestedTaskHierarchy: NestedTaskHierarchy) {
-        check(nestedParentTaskHierarchies.containsKey(nestedTaskHierarchy.id as TaskHierarchyId))
+        check(nestedParentTaskHierarchies.containsKey(nestedTaskHierarchy.id))
 
-        nestedParentTaskHierarchies.remove(nestedTaskHierarchy.id as TaskHierarchyId)
+        nestedParentTaskHierarchies.remove(nestedTaskHierarchy.id)
 
         nestedTaskHierarchy.invalidateTasks()
     }
@@ -1090,7 +1090,7 @@ abstract class Task(
         val taskHierarchyRecord = taskRecord.newTaskHierarchyRecord(nestedTaskHierarchyJson)
         val taskHierarchy = NestedTaskHierarchy(this, taskHierarchyRecord, parentTaskDelegate)
 
-        nestedParentTaskHierarchies[taskHierarchy.id as TaskHierarchyId] = taskHierarchy
+        nestedParentTaskHierarchies[taskHierarchy.id] = taskHierarchy
 
         taskHierarchy.invalidateTasks()
 

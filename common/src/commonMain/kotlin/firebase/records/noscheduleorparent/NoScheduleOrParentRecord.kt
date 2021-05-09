@@ -3,15 +3,12 @@ package com.krystianwsul.common.firebase.records.noscheduleorparent
 import com.krystianwsul.common.firebase.json.noscheduleorparent.NoScheduleOrParentJson
 import com.krystianwsul.common.firebase.models.ProjectIdOwner
 import com.krystianwsul.common.firebase.records.RemoteRecord
-import com.krystianwsul.common.firebase.records.schedule.ProjectHelper
 import com.krystianwsul.common.firebase.records.task.TaskRecord
-import com.krystianwsul.common.utils.ProjectKey
 
 abstract class NoScheduleOrParentRecord(
     taskRecord: TaskRecord,
     final override val createObject: NoScheduleOrParentJson,
     _id: String?,
-    val projectHelper: ProjectHelper,
 ) : RemoteRecord(_id == null), ProjectIdOwner {
 
     companion object {
@@ -29,8 +26,5 @@ abstract class NoScheduleOrParentRecord(
     var endTime by Committer(createObject::endTime)
     var endTimeOffset by Committer(createObject::endTimeOffset)
 
-    val projectId get() = projectHelper.getProjectId(createObject)
-
-    override fun updateProject(projectKey: ProjectKey<*>) =
-            projectHelper.setProjectId(createObject, projectKey.key, ::addValue)
+    abstract val projectId: String?
 }

@@ -842,7 +842,7 @@ private fun DomainFactory.convertAndUpdateProject(
     projectKey: ProjectKey<*>,
 ): RootTask {
     return when (task) {
-        is RootTask -> task.updateProject(this, now, projectKey)
+        is RootTask -> task.updateProject(projectKey)
         is ProjectTask -> converter.convertToRoot(now, task, projectKey)
     }
 }

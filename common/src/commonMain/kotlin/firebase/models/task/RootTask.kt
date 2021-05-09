@@ -137,11 +137,7 @@ class RootTask(
 
     override fun invalidateProjectParentTaskHierarchies() = invalidateIntervals()
 
-    fun updateProject(
-        projectUpdater: ProjectUpdater,
-        now: ExactTimeStamp.Local,
-        projectKey: ProjectKey<*>,
-    ): RootTask {
+    fun updateProject(projectKey: ProjectKey<*>): RootTask {
         if (project.projectKey == projectKey) return this
 
         val interval = intervals.last()

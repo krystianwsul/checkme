@@ -66,7 +66,6 @@ class DomainFactory(
     val rootTasksFactory: RootTasksFactory,
     private val getDomainUpdater: (DomainFactory) -> DomainUpdater,
 ) :
-    Task.ProjectUpdater,
     FactoryProvider.Domain,
     JsonTime.UserCustomTimeProvider,
     Project.CustomTimeMigrationHelper {
@@ -465,69 +464,6 @@ class DomainFactory(
         )
 
     private val ownerKey get() = myUserFactory.user.userKey
-
-    override fun convertProject(
-        // todo task edit
-        now: ExactTimeStamp.Local,
-        startingTask: ProjectTask,
-        projectId: ProjectKey<*>,
-    ): ProjectTask {
-        val remoteToRemoteConversion = ProjectToProjectConversion()
-        val startProject = startingTask.project
-        startProject.convertRemoteToRemoteHelper(now, remoteToRemoteConversion, startingTask)
-
-        val newProject = projectsFactory.getProjectForce(projectId)
-
-        val allUpdaters = mutableListOf<(Map<String, String>) -> Any?>()
-
-        for (pair in remoteToRemoteConversion.startTasks.values) {
-            val (task, updaters) = newProject.copyTask(
-                pair.first,
-                pair.second,
-                now,
-                this,
-                startProject.projectKey,
-            )
-
-            remoteToRemoteConversion.endTasks[pair.first.id] = task
-            remoteToRemoteConversion.copiedTaskKeys[pair.first.taskKey] = task.taskKey
-            allUpdaters += updaters
-        }
-
-        for (startTaskHierarchy in remoteToRemoteConversion.startTaskHierarchies) {
-            val parentTask = remoteToRemoteConversion.endTasks.getValue(startTaskHierarchy.parentTaskId)
-            val childTask = remoteToRemoteConversion.endTasks.getValue(startTaskHierarchy.childTaskId)
-
-            newProject.copyTaskHierarchy(now, startTaskHierarchy, parentTask.id, childTask)
-        }
-
-        val endData = Task.EndData(now, true)
-
-        for (pair in remoteToRemoteConversion.startTasks.values) {
-            pair.second.forEach { if (!it.hidden) it.hide() }
-
-            // I think this might no longer be necessary, since setEndData doesn't recurse on children
-            if (pair.first.endData != null)
-                check(pair.first.endData == endData)
-            else
-                pair.first.setEndData(endData)
-        }
-
-        val taskKeyMap = remoteToRemoteConversion.endTasks.mapValues { it.value.taskKey.taskId }
-
-        allUpdaters.forEach { it(taskKeyMap) }
-
-        remoteToRemoteConversion.endTasks.forEach {
-            it.value
-                .existingInstances
-                .values
-                .forEach { it.addToParentInstanceHierarchyContainer() }
-        }
-
-        copiedTaskKeys.putAll(remoteToRemoteConversion.copiedTaskKeys)
-
-        return remoteToRemoteConversion.endTasks.getValue(startingTask.id)
-    }
 
     fun getTaskIfPresent(taskKey: TaskKey): Task? {
         return when (taskKey) {

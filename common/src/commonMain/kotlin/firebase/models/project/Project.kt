@@ -244,6 +244,7 @@ abstract class Project<T : ProjectType>(
     }
 
     fun copyTaskHierarchy(
+        // todo task edit
         now: ExactTimeStamp.Local,
         startTaskHierarchy: TaskHierarchy,
         parentTaskId: String,
@@ -338,6 +339,7 @@ abstract class Project<T : ProjectType>(
         DateTime(scheduleKey.scheduleDate, getTime(scheduleKey.scheduleTimePair))
 
     fun convertRemoteToRemoteHelper(
+        // todo task edit
         now: ExactTimeStamp.Local,
         projectToProjectConversion: ProjectToProjectConversion,
         startTask: ProjectTask,

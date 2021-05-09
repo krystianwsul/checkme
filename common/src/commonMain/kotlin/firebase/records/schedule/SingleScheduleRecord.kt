@@ -8,18 +8,20 @@ import com.krystianwsul.common.time.Date
 
 
 open class SingleScheduleRecord(
-        taskRecord: TaskRecord,
-        scheduleWrapper: ScheduleWrapper,
-        override val projectHelper: ProjectHelper,
-        id: String? = null,
-        override val scheduleWrapperBridge: ScheduleWrapperBridge =
-                ScheduleWrapperBridge.fromScheduleWrapper(scheduleWrapper),
+    taskRecord: TaskRecord,
+    scheduleWrapper: ScheduleWrapper,
+    override val projectHelper: ProjectHelper,
+    projectRootDelegate: ProjectRootDelegate,
+    id: String? = null,
+    override val scheduleWrapperBridge: ScheduleWrapperBridge =
+        ScheduleWrapperBridge.fromScheduleWrapper(scheduleWrapper),
 ) : ScheduleRecord(
-        taskRecord,
-        scheduleWrapper,
-        scheduleWrapperBridge.singleScheduleJson!!,
-        "singleScheduleJson",
-        id,
+    taskRecord,
+    scheduleWrapper,
+    scheduleWrapperBridge.singleScheduleJson!!,
+    "singleScheduleJson",
+    id,
+    projectRootDelegate,
 ) {
 
     val singleScheduleJson by lazy { scheduleWrapperBridge.singleScheduleJson!! }

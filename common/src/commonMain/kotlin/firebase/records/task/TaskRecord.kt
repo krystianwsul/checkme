@@ -25,6 +25,7 @@ abstract class TaskRecord protected constructor(
     override val key: String,
     private val parent: Parent,
     private val projectHelper: ProjectHelper,
+    private val newProjectRootDelegate: (taskRecord: TaskRecord, scheduleJson: ScheduleJson) -> ProjectRootDelegate,
 ) : RemoteRecord(create) {
 
     companion object {
@@ -114,10 +115,12 @@ abstract class TaskRecord protected constructor(
                     check(scheduleWrapperBridge.monthlyWeekScheduleJson == null)
                     check(scheduleWrapperBridge.yearlyScheduleJson == null)
 
+                    @Suppress("LeakingThis")
                     singleScheduleRecords[id] = SingleScheduleRecord(
                         this,
                         scheduleWrapper,
                         projectHelper,
+                        newProjectRootDelegate(this, scheduleWrapperBridge.singleScheduleJson!!),
                         id,
                         scheduleWrapperBridge,
                     )
@@ -127,10 +130,12 @@ abstract class TaskRecord protected constructor(
                     check(scheduleWrapperBridge.monthlyWeekScheduleJson == null)
                     check(scheduleWrapperBridge.yearlyScheduleJson == null)
 
+                    @Suppress("LeakingThis")
                     weeklyScheduleRecords[id] = WeeklyScheduleRecord(
                         this,
                         scheduleWrapper,
                         projectHelper,
+                        newProjectRootDelegate(this, scheduleWrapperBridge.weeklyScheduleJson!!),
                         id,
                         scheduleWrapperBridge,
                     )
@@ -139,10 +144,12 @@ abstract class TaskRecord protected constructor(
                     check(scheduleWrapperBridge.monthlyWeekScheduleJson == null)
                     check(scheduleWrapperBridge.yearlyScheduleJson == null)
 
+                    @Suppress("LeakingThis")
                     monthlyDayScheduleRecords[id] = MonthlyDayScheduleRecord(
                         this,
                         scheduleWrapper,
                         projectHelper,
+                        newProjectRootDelegate(this, scheduleWrapperBridge.monthlyDayScheduleJson!!),
                         id,
                         scheduleWrapperBridge,
                     )
@@ -150,10 +157,12 @@ abstract class TaskRecord protected constructor(
                 scheduleWrapperBridge.monthlyWeekScheduleJson != null -> {
                     check(scheduleWrapperBridge.yearlyScheduleJson == null)
 
+                    @Suppress("LeakingThis")
                     monthlyWeekScheduleRecords[id] = MonthlyWeekScheduleRecord(
                         this,
                         scheduleWrapper,
                         projectHelper,
+                        newProjectRootDelegate(this, scheduleWrapperBridge.monthlyWeekScheduleJson!!),
                         id,
                         scheduleWrapperBridge,
                     )
@@ -161,10 +170,12 @@ abstract class TaskRecord protected constructor(
                 else -> {
                     check(scheduleWrapperBridge.yearlyScheduleJson != null)
 
+                    @Suppress("LeakingThis")
                     yearlyScheduleRecords[id] = YearlyScheduleRecord(
                         this,
                         scheduleWrapper,
                         projectHelper,
+                        newProjectRootDelegate(this, scheduleWrapperBridge.yearlyScheduleJson!!),
                         id,
                         scheduleWrapperBridge,
                     )
@@ -203,6 +214,7 @@ abstract class TaskRecord protected constructor(
             this,
             newScheduleWrapper(singleScheduleJson = singleScheduleJson),
             projectHelper,
+            newProjectRootDelegate(this, singleScheduleJson),
         )
 
         check(!singleScheduleRecords.containsKey(singleScheduleRecord.id))
@@ -216,6 +228,7 @@ abstract class TaskRecord protected constructor(
             this,
             newScheduleWrapper(weeklyScheduleJson = weeklyScheduleJson),
             projectHelper,
+            newProjectRootDelegate(this, weeklyScheduleJson),
         )
 
         check(!weeklyScheduleRecords.containsKey(weeklyScheduleRecord.id))
@@ -229,6 +242,7 @@ abstract class TaskRecord protected constructor(
             this,
             newScheduleWrapper(monthlyDayScheduleJson = monthlyDayScheduleJson),
             projectHelper,
+            newProjectRootDelegate(this, monthlyDayScheduleJson),
         )
 
         check(!monthlyDayScheduleRecords.containsKey(monthlyDayScheduleRecord.id))
@@ -242,6 +256,7 @@ abstract class TaskRecord protected constructor(
             this,
             newScheduleWrapper(monthlyWeekScheduleJson = monthlyWeekScheduleJson),
             projectHelper,
+            newProjectRootDelegate(this, monthlyWeekScheduleJson),
         )
 
         check(!monthlyWeekScheduleRecords.containsKey(monthlyWeekScheduleRecord.id))
@@ -255,6 +270,7 @@ abstract class TaskRecord protected constructor(
             this,
             newScheduleWrapper(yearlyScheduleJson = yearlyScheduleJson),
             projectHelper,
+            newProjectRootDelegate(this, yearlyScheduleJson),
         )
 
         check(!yearlyScheduleRecords.containsKey(yearlyScheduleRecord.id))

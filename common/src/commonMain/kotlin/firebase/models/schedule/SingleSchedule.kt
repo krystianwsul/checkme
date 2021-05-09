@@ -34,11 +34,11 @@ class SingleSchedule(topLevelTask: Task, val singleScheduleRecord: SingleSchedul
     fun getInstance(task: Task) = task.getInstance(originalScheduleDateTime)
 
     override fun getDateTimesInRange(
-            scheduleInterval: ScheduleInterval,
-            givenStartExactTimeStamp: ExactTimeStamp.Offset?,
-            givenEndExactTimeStamp: ExactTimeStamp.Offset?,
-            originalDateTime: Boolean,
-            checkOldestVisible: Boolean,
+        scheduleInterval: ScheduleInterval,
+        givenStartExactTimeStamp: ExactTimeStamp.Offset?,
+        givenEndExactTimeStamp: ExactTimeStamp.Offset?,
+        originalDateTime: Boolean,
+        checkOldestVisible: Boolean,
     ): Sequence<DateTime> {
         val dateTime = if (originalDateTime) originalScheduleDateTime else dateTime
 
@@ -64,20 +64,21 @@ class SingleSchedule(topLevelTask: Task, val singleScheduleRecord: SingleSchedul
 
     fun setAssignedTo(assignedTo: Set<UserKey>) {
         val writeAssignedToJson = singleScheduleRecord.singleScheduleJson as? WriteAssignedToJson
-                ?: throw UnsupportedOperationException()
+            ?: throw UnsupportedOperationException()
 
         topLevelTask.project
-                .assignedToHelper
-                .setAssignedTo(writeAssignedToJson, singleScheduleRecord, assignedTo.map { it.key }.toSet())
+            .assignedToHelper
+            .setAssignedTo(writeAssignedToJson, singleScheduleRecord, assignedTo.map { it.key }.toSet())
     }
 
     override fun toString() = super.toString() + ", dateTime: $dateTime"
 
     private inner class MockRecord(private val instance: Instance, projectHelper: ProjectHelper) : SingleScheduleRecord(
-            singleScheduleRecord.taskRecord,
-            singleScheduleRecord.createObject,
-            projectHelper,
-            singleScheduleRecord.id,
+        singleScheduleRecord.taskRecord,
+        singleScheduleRecord.createObject,
+        projectHelper,
+        singleScheduleRecord.projectRootDelegate,
+        singleScheduleRecord.id,
     ) {
 
         override val date get() = instance.instanceDate

@@ -18,4 +18,4 @@ data class PrivateMonthlyDayScheduleJson @JvmOverloads constructor(
         override val until: String? = null,
         override var oldestVisible: String? = null,
         override val time: String? = null,
-) : MonthlyDayScheduleJson
+) : MonthlyDayScheduleJson, ProjectScheduleJson

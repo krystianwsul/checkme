@@ -6,20 +6,17 @@ import com.krystianwsul.common.firebase.json.schedule.ScheduleWrapper
 import com.krystianwsul.common.firebase.json.schedule.ScheduleWrapperBridge
 import com.krystianwsul.common.firebase.models.ProjectIdOwner
 import com.krystianwsul.common.firebase.records.RemoteRecord
-import com.krystianwsul.common.firebase.records.task.ProjectTaskRecord
 import com.krystianwsul.common.firebase.records.task.TaskRecord
-import com.krystianwsul.common.time.HourMinute
-import com.krystianwsul.common.time.JsonTime
-import com.krystianwsul.common.time.TimePair
 import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.ProjectKey
 
 abstract class ScheduleRecord(
-        val taskRecord: TaskRecord,
-        final override val createObject: ScheduleWrapper,
-        private val scheduleJson: ScheduleJson,
-        scheduleTypeSubkey: String,
-        _id: String?,
+    val taskRecord: TaskRecord,
+    final override val createObject: ScheduleWrapper,
+    private val scheduleJson: ScheduleJson,
+    scheduleTypeSubkey: String,
+    _id: String?,
+    val projectRootDelegate: ProjectRootDelegate,
 ) : RemoteRecord(_id == null), ProjectIdOwner {
 
     companion object {
@@ -34,28 +31,17 @@ abstract class ScheduleRecord(
     val keyPlusSubkey = "$key/$scheduleTypeSubkey"
 
     val startTime get() = scheduleJson.startTime
-    open var startTimeOffset by Committer(scheduleJson::startTimeOffset, keyPlusSubkey)
+
+    open var startTimeOffset
+        get() = projectRootDelegate.startTimeOffset
+        set(value) = projectRootDelegate.setStartTimeOffset(this, value)
 
     open var endTime by Committer(scheduleJson::endTime, keyPlusSubkey)
     open var endTimeOffset by Committer(scheduleJson::endTimeOffset, keyPlusSubkey)
 
     val taskId = taskRecord.id
 
-    open val timePair by lazy {
-        scheduleJson.run {
-            if (time != null) {
-                val jsonTime = JsonTime.fromJson(taskRecord.projectCustomTimeIdAndKeyProvider, time!!)
-
-                jsonTime.toTimePair(taskRecord.projectCustomTimeIdAndKeyProvider)
-            } else { // this part is only for old data
-                check(taskRecord is ProjectTaskRecord)
-
-                customTimeId?.let {
-                    TimePair(taskRecord.projectRecord.getProjectCustomTimeKey(it))
-                } ?: TimePair(HourMinute(hour!!, minute!!))
-            }
-        }
-    }
+    open val timePair get() = projectRootDelegate.timePair
 
     val customTimeKey: CustomTimeKey? get() = timePair.customTimeKey
 
@@ -68,7 +54,7 @@ abstract class ScheduleRecord(
     val projectId get() = projectHelper.getProjectId(scheduleJson)
 
     override fun updateProject(projectKey: ProjectKey<*>) =
-            projectHelper.setProjectId(scheduleJson, projectKey.key) { subKey, value ->
-                addValue("$keyPlusSubkey/$subKey", value)
-            }
+        projectHelper.setProjectId(scheduleJson, projectKey.key) { subKey, value ->
+            addValue("$keyPlusSubkey/$subKey", value)
+        }
 }

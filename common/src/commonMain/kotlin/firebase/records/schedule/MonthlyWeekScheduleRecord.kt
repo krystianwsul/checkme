@@ -7,18 +7,20 @@ import com.krystianwsul.common.firebase.records.task.TaskRecord
 
 
 class MonthlyWeekScheduleRecord(
-        taskRecord: TaskRecord,
-        scheduleWrapper: ScheduleWrapper,
-        override val projectHelper: ProjectHelper,
-        id: String? = null,
-        override val scheduleWrapperBridge: ScheduleWrapperBridge =
-                ScheduleWrapperBridge.fromScheduleWrapper(scheduleWrapper),
+    taskRecord: TaskRecord,
+    scheduleWrapper: ScheduleWrapper,
+    override val projectHelper: ProjectHelper,
+    projectRootDelegate: ProjectRootDelegate,
+    id: String? = null,
+    override val scheduleWrapperBridge: ScheduleWrapperBridge =
+        ScheduleWrapperBridge.fromScheduleWrapper(scheduleWrapper),
 ) : RepeatingScheduleRecord(
-        taskRecord,
-        scheduleWrapper,
-        scheduleWrapperBridge.monthlyWeekScheduleJson!!,
-        "monthlyWeekScheduleJson",
-        id,
+    taskRecord,
+    scheduleWrapper,
+    scheduleWrapperBridge.monthlyWeekScheduleJson!!,
+    "monthlyWeekScheduleJson",
+    id,
+    projectRootDelegate,
 ) {
 
     private val monthlyWeekScheduleJson by lazy { scheduleWrapperBridge.monthlyWeekScheduleJson!! }

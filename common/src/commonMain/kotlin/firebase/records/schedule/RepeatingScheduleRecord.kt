@@ -6,17 +6,19 @@ import com.krystianwsul.common.firebase.records.task.TaskRecord
 import com.krystianwsul.common.time.Date
 
 abstract class RepeatingScheduleRecord(
-        taskRecord: TaskRecord,
-        createObject: ScheduleWrapper,
-        repeatingScheduleJson: RepeatingScheduleJson,
-        endTimeKey: String,
-        id: String?,
+    taskRecord: TaskRecord,
+    createObject: ScheduleWrapper,
+    repeatingScheduleJson: RepeatingScheduleJson,
+    endTimeKey: String,
+    id: String?,
+    projectRootDelegate: ProjectRootDelegate,
 ) : ScheduleRecord(
-        taskRecord,
-        createObject,
-        repeatingScheduleJson,
-        endTimeKey,
-        id,
+    taskRecord,
+    createObject,
+    repeatingScheduleJson,
+    endTimeKey,
+    id,
+    projectRootDelegate,
 ) {
 
     val from by lazy {

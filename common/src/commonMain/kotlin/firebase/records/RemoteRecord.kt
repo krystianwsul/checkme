@@ -65,7 +65,7 @@ abstract class RemoteRecord(create: Boolean) {
         children.forEach { it.setCreated() }
     }
 
-    protected fun addValue(key: String, obj: Any?) {
+    fun addValue(key: String, obj: Any?) {
         check(!shouldDelete)
 
         update?.put(key, obj)

@@ -20,4 +20,4 @@ data class SharedMonthlyWeekScheduleJson @JvmOverloads constructor(
         override var oldestVisible: String? = null,
         override val assignedTo: Map<String, Boolean> = mapOf(),
         override val time: String? = null,
-) : MonthlyWeekScheduleJson, AssignedToJson
+) : MonthlyWeekScheduleJson, AssignedToJson, ProjectScheduleJson

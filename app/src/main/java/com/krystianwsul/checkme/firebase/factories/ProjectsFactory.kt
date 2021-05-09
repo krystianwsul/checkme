@@ -13,7 +13,6 @@ import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.json.JsonWrapper
 import com.krystianwsul.common.firebase.json.projects.PrivateProjectJson
 import com.krystianwsul.common.firebase.json.projects.SharedProjectJson
-import com.krystianwsul.common.firebase.json.tasks.TaskJson
 import com.krystianwsul.common.firebase.models.RootUser
 import com.krystianwsul.common.firebase.models.project.PrivateProject
 import com.krystianwsul.common.firebase.models.project.Project
@@ -121,42 +120,6 @@ class ProjectsFactory(
     val projects get() = sharedProjects + mapOf(privateProject.projectKey to privateProject)
 
     val projectTasks get() = projects.values.flatMap { it.projectTasks }
-
-    fun createNoScheduleOrParentTask(
-        // todo task
-        now: ExactTimeStamp.Local,
-        name: String,
-        note: String?,
-        projectKey: ProjectKey<*>,
-        imageUuid: String?,
-        deviceDbInfo: DeviceDbInfo,
-        ordinal: Double?,
-    ) = createTaskHelper(
-        now,
-        name,
-            note,
-            projectKey,
-            imageUuid,
-            deviceDbInfo,
-            ordinal,
-    ).apply { setNoScheduleOrParent(now, projectKey) }
-
-    private fun createTaskHelper(
-        // todo task
-        now: ExactTimeStamp.Local,
-        name: String,
-        note: String?,
-        projectKey: ProjectKey<*>,
-        imageUuid: String?,
-        deviceDbInfo: DeviceDbInfo,
-        ordinal: Double? = null,
-    ) = getProjectForce(projectKey).createTask(
-        now,
-        imageUuid?.let { TaskJson.Image(imageUuid, deviceDbInfo.uuid) },
-            name,
-            note,
-            ordinal,
-    )
 
     fun createProject(
             name: String,

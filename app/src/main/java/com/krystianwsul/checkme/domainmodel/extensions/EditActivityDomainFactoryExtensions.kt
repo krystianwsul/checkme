@@ -284,7 +284,6 @@ fun DomainUpdater.createTopLevelTask(
         note,
         finalProjectId,
         imageUuid,
-        deviceDbInfo,
     )
 
     updateProjectRootIds(task)
@@ -589,7 +588,6 @@ fun DomainUpdater.createJoinTopLevelTask(
         note,
         finalProjectId,
         imageUuid,
-        deviceDbInfo,
         ordinal,
     )
 
@@ -600,7 +598,7 @@ fun DomainUpdater.createJoinTopLevelTask(
     imageUuid?.let { Uploader.addUpload(deviceDbInfo, newParentTask.taskKey, it, imagePath) }
 
     DomainUpdater.Result(
-        newParentTask.taskKey,
+        newParentTask.taskKey as TaskKey, // todo task
         true,
         notificationType,
         DomainFactory.CloudParams(newParentTask.project),
@@ -840,23 +838,8 @@ private fun DomainFactory.createNoScheduleOrParentTask(
     note: String?,
     projectKey: ProjectKey<*>,
     imageUuid: String?,
-    deviceDbInfo: DeviceDbInfo,
     ordinal: Double? = null,
-): Task {
-    return if (Task.WRITE_ROOT_TASKS) {
-        createRootTask(now, imageUuid, name, note, ordinal).apply { setNoScheduleOrParent(now, projectKey) }
-    } else {
-        projectsFactory.createNoScheduleOrParentTask(
-            now,
-            name,
-            note,
-            projectKey,
-            imageUuid,
-            deviceDbInfo,
-            ordinal,
-        )
-    }
-}
+) = createRootTask(now, imageUuid, name, note, ordinal).apply { setNoScheduleOrParent(now, projectKey) }
 
 private fun DomainFactory.createRootTask(
     now: ExactTimeStamp.Local,

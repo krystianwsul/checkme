@@ -150,16 +150,17 @@ class ProjectsFactory(
     }
 
     fun createNoScheduleOrParentTask(
-            now: ExactTimeStamp.Local,
-            name: String,
-            note: String?,
-            projectKey: ProjectKey<*>,
-            imageUuid: String?,
-            deviceDbInfo: DeviceDbInfo,
-            ordinal: Double?,
+        // todo task
+        now: ExactTimeStamp.Local,
+        name: String,
+        note: String?,
+        projectKey: ProjectKey<*>,
+        imageUuid: String?,
+        deviceDbInfo: DeviceDbInfo,
+        ordinal: Double?,
     ) = createTaskHelper(
-            now,
-            name,
+        now,
+        name,
             note,
             projectKey,
             imageUuid,

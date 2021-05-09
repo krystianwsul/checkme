@@ -219,7 +219,7 @@ fun DomainUpdater.createScheduleTopLevelTask(
     )
 }.perform(this)
 
-private fun Task.toCreateResult(now: ExactTimeStamp.Local) =
+private fun RootTask.toCreateResult(now: ExactTimeStamp.Local) =
     getInstances(null, null, now).singleOrNull()
         ?.let { EditDelegate.CreateResult.Instance(it.instanceKey) }
         ?: EditDelegate.CreateResult.Task(taskKey)
@@ -307,7 +307,7 @@ fun DomainUpdater.updateScheduleTask(
     note: String?,
     sharedProjectParameters: EditDelegate.SharedProjectParameters?,
     imagePath: NullableWrapper<Pair<String, Uri>>?,
-): Single<TaskKey> = SingleDomainUpdate.create("updateScheduleTask") { now ->
+): Single<TaskKey.Root> = SingleDomainUpdate.create("updateScheduleTask") { now ->
     check(name.isNotEmpty())
     check(scheduleDatas.isNotEmpty())
 
@@ -353,7 +353,7 @@ fun DomainUpdater.updateChildTask(
     imagePath: NullableWrapper<Pair<String, Uri>>?,
     removeInstanceKey: InstanceKey?,
     allReminders: Boolean,
-): Single<TaskKey> = SingleDomainUpdate.create("updateChildTask") { now ->
+): Single<TaskKey.Root> = SingleDomainUpdate.create("updateChildTask") { now ->
     check(name.isNotEmpty())
 
     val task = convertToRoot(getTaskForce(taskKey), now)
@@ -413,12 +413,12 @@ fun DomainUpdater.updateTopLevelTask(
     note: String?,
     sharedProjectKey: ProjectKey.Shared?,
     imagePath: NullableWrapper<Pair<String, Uri>>?,
-): Single<TaskKey> = SingleDomainUpdate.create("updateTopLevelTask") { now ->
+): Single<TaskKey.Root> = SingleDomainUpdate.create("updateTopLevelTask") { now ->
     check(name.isNotEmpty())
 
     val projectKey = sharedProjectKey ?: defaultProjectId
 
-    val task = getTaskForce(taskKey).also {
+    val task = getTaskForce(taskKey).let {
         it.requireCurrent(now)
         convertAndUpdateProject(it, now, projectKey)
     }.apply {
@@ -452,7 +452,7 @@ fun DomainUpdater.createScheduleJoinTopLevelTask(
     sharedProjectParameters: EditDelegate.SharedProjectParameters?,
     imagePath: Pair<String, Uri>?,
     allReminders: Boolean,
-): Single<TaskKey> = SingleDomainUpdate.create("createScheduleJoinTopLevelTask") { now ->
+): Single<TaskKey.Root> = SingleDomainUpdate.create("createScheduleJoinTopLevelTask") { now ->
     check(name.isNotEmpty())
     check(scheduleDatas.isNotEmpty())
     check(joinables.size > 1)
@@ -499,7 +499,7 @@ fun DomainUpdater.createScheduleJoinTopLevelTask(
     imageUuid?.let { Uploader.addUpload(deviceDbInfo, newParentTask.taskKey, it, imagePath) }
 
     DomainUpdater.Result(
-        newParentTask.taskKey as TaskKey, // todo task
+        newParentTask.taskKey,
         true,
         notificationType,
         DomainFactory.CloudParams(newParentTask.project),
@@ -515,11 +515,11 @@ fun DomainUpdater.createJoinChildTask(
     note: String?,
     imagePath: Pair<String, Uri>?,
     removeInstanceKeys: List<InstanceKey>,
-): Single<TaskKey> = SingleDomainUpdate.create("createJoinChildTask") { now ->
+): Single<TaskKey.Root> = SingleDomainUpdate.create("createJoinChildTask") { now ->
     check(name.isNotEmpty())
     check(joinTaskKeys.size > 1)
 
-    val parentTask = getTaskForce(parentTaskKey)
+    val parentTask = convertToRoot(getTaskForce(parentTaskKey), now)
     parentTask.requireCurrent(now)
 
     check(joinTaskKeys.map { (it as TaskKey.Project).projectKey }.distinct().size == 1)
@@ -562,7 +562,7 @@ fun DomainUpdater.createJoinTopLevelTask(
     sharedProjectKey: ProjectKey.Shared?,
     imagePath: Pair<String, Uri>?,
     removeInstanceKeys: List<InstanceKey>,
-): Single<TaskKey> = SingleDomainUpdate.create("createJoinTopLevelTask") { now ->
+): Single<TaskKey.Root> = SingleDomainUpdate.create("createJoinTopLevelTask") { now ->
     check(name.isNotEmpty())
     check(joinTaskKeys.size > 1)
 
@@ -595,7 +595,7 @@ fun DomainUpdater.createJoinTopLevelTask(
     imageUuid?.let { Uploader.addUpload(deviceDbInfo, newParentTask.taskKey, it, imagePath) }
 
     DomainUpdater.Result(
-        newParentTask.taskKey as TaskKey, // todo task
+        newParentTask.taskKey,
         true,
         notificationType,
         DomainFactory.CloudParams(newParentTask.project),
@@ -752,7 +752,7 @@ private fun DomainFactory.getTaskListChildTaskDatas(
         }
         .toList()
 
-private fun DomainFactory.copyTask(now: ExactTimeStamp.Local, task: Task, copyTaskKey: TaskKey) {
+private fun DomainFactory.copyTask(now: ExactTimeStamp.Local, task: RootTask, copyTaskKey: TaskKey) {
     val copiedTask = getTaskForce(copyTaskKey)
 
     copiedTask.getChildTaskHierarchies(now).forEach {
@@ -772,13 +772,13 @@ private fun DomainFactory.copyTask(now: ExactTimeStamp.Local, task: Task, copyTa
 
 private fun DomainFactory.createChildTask(
     now: ExactTimeStamp.Local,
-    parentTask: Task,
+    parentTask: RootTask,
     name: String,
     note: String?,
     imageJson: TaskJson.Image?,
     copyTaskKey: TaskKey? = null,
     ordinal: Double? = null,
-): Task {
+): RootTask {
     check(name.isNotEmpty())
     parentTask.requireCurrent(now)
 
@@ -840,14 +840,14 @@ private fun DomainFactory.convertAndUpdateProject(
     task: Task,
     now: ExactTimeStamp.Local,
     projectKey: ProjectKey<*>,
-): Task {
+): RootTask {
     return when (task) {
         is RootTask -> task.updateProject(this, now, projectKey)
         is ProjectTask -> converter.convertToRoot(now, task, projectKey)
     }
 }
 
-private fun DomainFactory.convertToRoot(task: Task, now: ExactTimeStamp.Local): Task {
+private fun DomainFactory.convertToRoot(task: Task, now: ExactTimeStamp.Local): RootTask {
     if (task is RootTask) return task
 
     return converter.convertToRoot(now, task as ProjectTask, task.project.projectKey)

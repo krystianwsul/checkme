@@ -141,7 +141,7 @@ class RootTask(
         projectUpdater: ProjectUpdater,
         now: ExactTimeStamp.Local,
         projectKey: ProjectKey<*>,
-    ): Task {
+    ): RootTask {
         if (project.projectKey == projectKey) return this
 
         val interval = intervals.last()

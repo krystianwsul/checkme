@@ -44,7 +44,7 @@ abstract class EditDelegate(
             }(data)(savedInstanceState)(compositeDisposable)(storeParentKey)
         }
 
-        fun Single<TaskKey>.toCreateResult() = map<CreateResult>(CreateResult::Task)!!
+        fun Single<TaskKey.Root>.toCreateResult() = map<CreateResult>(CreateResult::Task)!!
         fun Single<CreateResult>.applyCreatedTaskKey() = doOnSuccess { EditActivity.createdTaskKey = it.taskKey }!!
     }
 
@@ -253,17 +253,17 @@ abstract class EditDelegate(
 
     sealed class CreateResult {
 
-        abstract val taskKey: TaskKey
+        abstract val taskKey: TaskKey.Root
         abstract val intent: Intent
 
-        class Task(override val taskKey: TaskKey) : CreateResult() {
+        class Task(override val taskKey: TaskKey.Root) : CreateResult() {
 
             override val intent get() = ShowTaskActivity.newIntent(taskKey)
         }
 
         class Instance(private val instanceKey: InstanceKey) : CreateResult() {
 
-            override val taskKey = instanceKey.taskKey
+            override val taskKey = instanceKey.taskKey as TaskKey.Root
 
             override val intent get() = ShowInstanceActivity.getIntent(MyApplication.instance, instanceKey)
         }

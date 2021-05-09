@@ -26,7 +26,6 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.subscribeBy
 import kotlinx.parcelize.Parcelize
-import java.io.Serializable
 import java.util.*
 
 class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel() {
@@ -151,7 +150,7 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
         clearedDisposable.dispose()
     }
 
-    sealed class ScheduleDataWrapper : Serializable {
+    sealed class ScheduleDataWrapper : Parcelable {
 
         companion object {
 
@@ -202,11 +201,12 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
 
         protected abstract fun getScheduleDialogDataHelper(suggestedDate: Date): ScheduleDialogData
 
+        @Parcelize
         data class Single(override val scheduleData: ScheduleData.Single) : ScheduleDataWrapper() {
 
             override fun getText(
-                    customTimeDatas: Map<CustomTimeKey, CustomTimeData>,
-                    context: Context,
+                customTimeDatas: Map<CustomTimeKey, CustomTimeData>,
+                context: Context,
             ): String {
                 return ScheduleText.Single.getScheduleText(scheduleData) {
                     timePairCallback(it, customTimeDatas, scheduleData.date.dayOfWeek)
@@ -218,27 +218,28 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
 
                 @Suppress("BooleanLiteralArgument")
                 return ScheduleDialogData(
-                        scheduleData.date,
-                        setOf(scheduleData.date.dayOfWeek),
-                        true,
-                        monthDayNumber,
-                        dayOfMonthToWeekOfMonth(monthDayNumber),
-                        scheduleData.date.dayOfWeek,
-                        beginningOfMonth,
-                        TimePairPersist(timePair),
-                        ScheduleType.SINGLE,
-                        null,
-                        null,
-                        1,
+                    scheduleData.date,
+                    setOf(scheduleData.date.dayOfWeek),
+                    true,
+                    monthDayNumber,
+                    dayOfMonthToWeekOfMonth(monthDayNumber),
+                    scheduleData.date.dayOfWeek,
+                    beginningOfMonth,
+                    TimePairPersist(timePair),
+                    ScheduleType.SINGLE,
+                    null,
+                    null,
+                    1,
                 )
             }
         }
 
+        @Parcelize
         data class Weekly(override val scheduleData: ScheduleData.Weekly) : ScheduleDataWrapper() {
 
             override fun getText(
-                    customTimeDatas: Map<CustomTimeKey, CustomTimeData>,
-                    context: Context,
+                customTimeDatas: Map<CustomTimeKey, CustomTimeData>,
+                context: Context,
             ): String {
                 return ScheduleText.Weekly.getScheduleText(scheduleData) {
                     timePairCallback(it, customTimeDatas)
@@ -249,27 +250,28 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
                 val (monthDayNumber, beginningOfMonth) = dateToDayFromBeginningOrEnd(suggestedDate)
 
                 return ScheduleDialogData(
-                        suggestedDate,
-                        scheduleData.daysOfWeek,
-                        true,
-                        monthDayNumber,
-                        dayOfMonthToWeekOfMonth(monthDayNumber),
-                        suggestedDate.dayOfWeek,
-                        beginningOfMonth,
-                        TimePairPersist(timePair),
-                        ScheduleType.WEEKLY,
-                        scheduleData.from,
-                        scheduleData.until,
-                        scheduleData.interval
+                    suggestedDate,
+                    scheduleData.daysOfWeek,
+                    true,
+                    monthDayNumber,
+                    dayOfMonthToWeekOfMonth(monthDayNumber),
+                    suggestedDate.dayOfWeek,
+                    beginningOfMonth,
+                    TimePairPersist(timePair),
+                    ScheduleType.WEEKLY,
+                    scheduleData.from,
+                    scheduleData.until,
+                    scheduleData.interval
                 )
             }
         }
 
+        @Parcelize
         data class MonthlyDay(override val scheduleData: ScheduleData.MonthlyDay) : ScheduleDataWrapper() {
 
             override fun getText(
-                    customTimeDatas: Map<CustomTimeKey, CustomTimeData>,
-                    context: Context,
+                customTimeDatas: Map<CustomTimeKey, CustomTimeData>,
+                context: Context,
             ): String {
                 return ScheduleText.MonthlyDay.getScheduleText(scheduleData) {
                     timePairCallback(it, customTimeDatas)
@@ -278,35 +280,36 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
 
             override fun getScheduleDialogDataHelper(suggestedDate: Date): ScheduleDialogData {
                 val date = getDateInMonth(
-                        suggestedDate.year,
-                        suggestedDate.month,
-                        scheduleData.dayOfMonth,
-                        scheduleData.beginningOfMonth
+                    suggestedDate.year,
+                    suggestedDate.month,
+                    scheduleData.dayOfMonth,
+                    scheduleData.beginningOfMonth
                 )
 
                 @Suppress("BooleanLiteralArgument")
                 return ScheduleDialogData(
-                        date,
-                        setOf(date.dayOfWeek),
-                        true,
-                        scheduleData.dayOfMonth,
-                        dayOfMonthToWeekOfMonth(scheduleData.dayOfMonth),
-                        date.dayOfWeek,
-                        scheduleData.beginningOfMonth,
-                        TimePairPersist(timePair),
-                        ScheduleType.MONTHLY_DAY,
-                        scheduleData.from,
-                        scheduleData.until,
-                        1,
+                    date,
+                    setOf(date.dayOfWeek),
+                    true,
+                    scheduleData.dayOfMonth,
+                    dayOfMonthToWeekOfMonth(scheduleData.dayOfMonth),
+                    date.dayOfWeek,
+                    scheduleData.beginningOfMonth,
+                    TimePairPersist(timePair),
+                    ScheduleType.MONTHLY_DAY,
+                    scheduleData.from,
+                    scheduleData.until,
+                    1,
                 )
             }
         }
 
+        @Parcelize
         data class MonthlyWeek(override val scheduleData: ScheduleData.MonthlyWeek) : ScheduleDataWrapper() {
 
             override fun getText(
-                    customTimeDatas: Map<CustomTimeKey, CustomTimeData>,
-                    context: Context,
+                customTimeDatas: Map<CustomTimeKey, CustomTimeData>,
+                context: Context,
             ): String {
                 return ScheduleText.MonthlyWeek.getScheduleText(scheduleData) {
                     timePairCallback(it, customTimeDatas)
@@ -315,11 +318,11 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
 
             override fun getScheduleDialogDataHelper(suggestedDate: Date): ScheduleDialogData {
                 val date = getDateInMonth(
-                        suggestedDate.year,
-                        suggestedDate.month,
-                        scheduleData.weekOfMonth,
-                        scheduleData.dayOfWeek,
-                        scheduleData.beginningOfMonth
+                    suggestedDate.year,
+                    suggestedDate.month,
+                    scheduleData.weekOfMonth,
+                    scheduleData.dayOfWeek,
+                    scheduleData.beginningOfMonth
                 )
 
                 val dayNumber = if (scheduleData.beginningOfMonth)
@@ -329,27 +332,28 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
 
                 @Suppress("BooleanLiteralArgument")
                 return ScheduleDialogData(
-                        date,
-                        setOf(scheduleData.dayOfWeek),
-                        false,
-                        listOf(dayNumber, ScheduleDialogData.MAX_MONTH_DAY).minOrNull()!!,
-                        scheduleData.weekOfMonth,
-                        scheduleData.dayOfWeek,
-                        scheduleData.beginningOfMonth,
-                        TimePairPersist(timePair),
-                        ScheduleType.MONTHLY_WEEK,
-                        scheduleData.from,
-                        scheduleData.until,
-                        1
+                    date,
+                    setOf(scheduleData.dayOfWeek),
+                    false,
+                    listOf(dayNumber, ScheduleDialogData.MAX_MONTH_DAY).minOrNull()!!,
+                    scheduleData.weekOfMonth,
+                    scheduleData.dayOfWeek,
+                    scheduleData.beginningOfMonth,
+                    TimePairPersist(timePair),
+                    ScheduleType.MONTHLY_WEEK,
+                    scheduleData.from,
+                    scheduleData.until,
+                    1
                 )
             }
         }
 
+        @Parcelize
         data class Yearly(override val scheduleData: ScheduleData.Yearly) : ScheduleDataWrapper() {
 
             override fun getText(
-                    customTimeDatas: Map<CustomTimeKey, CustomTimeData>,
-                    context: Context,
+                customTimeDatas: Map<CustomTimeKey, CustomTimeData>,
+                context: Context,
             ): String {
                 return ScheduleText.Yearly.getScheduleText(scheduleData) {
                     timePairCallback(it, customTimeDatas)
@@ -358,28 +362,28 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
 
             override fun getScheduleDialogDataHelper(suggestedDate: Date): ScheduleDialogData {
                 val date = getDateInMonth(
-                        suggestedDate.year,
-                        scheduleData.month,
-                        scheduleData.day,
-                        true,
+                    suggestedDate.year,
+                    scheduleData.month,
+                    scheduleData.day,
+                    true,
                 )
 
                 val (monthDayNumber, beginningOfMonth) = dateToDayFromBeginningOrEnd(date)
 
                 @Suppress("BooleanLiteralArgument")
                 return ScheduleDialogData(
-                        date,
-                        setOf(date.dayOfWeek),
-                        true,
-                        monthDayNumber,
-                        dayOfMonthToWeekOfMonth(monthDayNumber),
-                        date.dayOfWeek,
-                        beginningOfMonth,
-                        TimePairPersist(timePair),
-                        ScheduleType.YEARLY,
-                        scheduleData.from,
-                        scheduleData.until,
-                        1,
+                    date,
+                    setOf(date.dayOfWeek),
+                    true,
+                    monthDayNumber,
+                    dayOfMonthToWeekOfMonth(monthDayNumber),
+                    date.dayOfWeek,
+                    beginningOfMonth,
+                    TimePairPersist(timePair),
+                    ScheduleType.YEARLY,
+                    scheduleData.from,
+                    scheduleData.until,
+                    1,
                 )
             }
         }

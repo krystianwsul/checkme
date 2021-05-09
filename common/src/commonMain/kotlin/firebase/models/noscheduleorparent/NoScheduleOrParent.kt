@@ -50,13 +50,4 @@ abstract class NoScheduleOrParent(
         deleteFromParent()
         noScheduleOrParentRecord.delete()
     }
-
-    fun fixOffsets() {
-        if (noScheduleOrParentRecord.startTimeOffset == null)
-            noScheduleOrParentRecord.startTimeOffset = startExactTimeStamp.offset
-
-        endExactTimeStamp?.let {
-            if (noScheduleOrParentRecord.endTimeOffset == null) noScheduleOrParentRecord.endTimeOffset = it.offset
-        }
-    }
 }

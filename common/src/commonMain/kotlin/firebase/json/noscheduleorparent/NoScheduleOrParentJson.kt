@@ -3,7 +3,7 @@ package com.krystianwsul.common.firebase.json.noscheduleorparent
 interface NoScheduleOrParentJson {
 
         val startTime: Long
-        var startTimeOffset: Double? // this is nullable only for project tasks
+        val startTimeOffset: Double?
 
         var endTime: Long?
         var endTimeOffset: Double?

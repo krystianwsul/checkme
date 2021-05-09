@@ -12,6 +12,8 @@ class ProjectNoScheduleOrParentRecord(
 
     override val createObject = projectNoScheduleOrParentJson
 
+    override var startTimeOffset by Committer(projectNoScheduleOrParentJson::startTimeOffset)
+
     override fun deleteFromParent() = check(projectTaskRecord.noScheduleOrParentRecords.remove(id) == this)
 
     override fun updateProject(projectKey: ProjectKey<*>) = throw UnsupportedOperationException()

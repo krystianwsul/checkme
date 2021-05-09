@@ -21,7 +21,7 @@ abstract class NoScheduleOrParentRecord(
     override val key = "${taskRecord.key}/$NO_SCHEDULE_OR_PARENT/$id"
 
     val startTime = noScheduleOrParentJson.startTime
-    var startTimeOffset by Committer(noScheduleOrParentJson::startTimeOffset)
+    abstract val startTimeOffset: Double?
 
     var endTime by Committer(noScheduleOrParentJson::endTime)
     var endTimeOffset by Committer(noScheduleOrParentJson::endTimeOffset)

@@ -26,8 +26,6 @@ abstract class NoScheduleOrParent(
 
     val id = noScheduleOrParentRecord.id
 
-    val projectId get() = noScheduleOrParentRecord.projectId
-
     override fun setEndExactTimeStamp(endExactTimeStamp: ExactTimeStamp) {
         requireCurrentOffset(endExactTimeStamp)
 

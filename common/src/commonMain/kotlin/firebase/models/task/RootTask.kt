@@ -31,7 +31,7 @@ class RootTask(
 
         when (val type = interval.type) {
             is Type.Schedule -> type.getParentProjectSchedule().projectId
-            is Type.NoSchedule -> type.noScheduleOrParent!!.projectId!!
+            is Type.NoSchedule -> (type.noScheduleOrParent as RootNoScheduleOrParent).projectId
             is Type.Child -> {
                 val parentTask = type.parentTaskHierarchy.parentTask as RootTask
 

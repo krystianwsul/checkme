@@ -25,6 +25,4 @@ abstract class NoScheduleOrParentRecord(
 
     var endTime by Committer(noScheduleOrParentJson::endTime)
     var endTimeOffset by Committer(noScheduleOrParentJson::endTimeOffset)
-
-    abstract val projectId: String?
 }

@@ -14,7 +14,7 @@ class RootNoScheduleOrParentRecord(
 
     override val createObject = rootNoScheduleOrParentJson
 
-    override val projectId get() = projectHelper.getProjectId(createObject)
+    val projectId get() = projectHelper.getProjectId(createObject)
 
     override fun deleteFromParent() = check(rootTaskRecord.noScheduleOrParentRecords.remove(id) == this)
 

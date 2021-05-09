@@ -16,7 +16,6 @@ import com.krystianwsul.checkme.gui.edit.delegates.EditDelegate
 import com.krystianwsul.checkme.upload.Uploader
 import com.krystianwsul.checkme.utils.newUuid
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
-import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.ScheduleGroup
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.MyCustomTime
@@ -202,7 +201,6 @@ fun DomainUpdater.createScheduleTopLevelTask(
         note,
         finalProjectId,
         imageUuid,
-        deviceDbInfo,
         this,
         assignedTo = sharedProjectParameters.nonNullAssignedTo,
     )
@@ -486,7 +484,6 @@ fun DomainUpdater.createScheduleJoinTopLevelTask(
         note,
         finalProjectKey,
         imageUuid,
-        deviceDbInfo,
         this,
         ordinal,
         sharedProjectParameters.nonNullAssignedTo,
@@ -502,7 +499,7 @@ fun DomainUpdater.createScheduleJoinTopLevelTask(
     imageUuid?.let { Uploader.addUpload(deviceDbInfo, newParentTask.taskKey, it, imagePath) }
 
     DomainUpdater.Result(
-        newParentTask.taskKey,
+        newParentTask.taskKey as TaskKey, // todo task
         true,
         notificationType,
         DomainFactory.CloudParams(newParentTask.project),
@@ -805,29 +802,11 @@ private fun DomainFactory.createScheduleTopLevelTask(
     note: String?,
     projectKey: ProjectKey<*>,
     imageUuid: String?,
-    deviceDbInfo: DeviceDbInfo,
     customTimeMigrationHelper: Project.CustomTimeMigrationHelper,
     ordinal: Double? = null,
     assignedTo: Set<UserKey> = setOf(),
-): Task {
-    return if (Task.WRITE_ROOT_TASKS) {
-        createRootTask(now, imageUuid, name, note, ordinal).apply {
-            createSchedules(now, scheduleDatas, assignedTo, customTimeMigrationHelper, projectKey)
-        }
-    } else {
-        projectsFactory.createScheduleTopLevelTask(
-            now,
-            name,
-            scheduleDatas,
-            note,
-            projectKey,
-            imageUuid,
-            deviceDbInfo,
-            customTimeMigrationHelper,
-            ordinal,
-            assignedTo,
-        )
-    }
+) = createRootTask(now, imageUuid, name, note, ordinal).apply {
+    createSchedules(now, scheduleDatas, assignedTo, customTimeMigrationHelper, projectKey)
 }
 
 private fun DomainFactory.getTaskJsonImage(imageUuid: String) = TaskJson.Image(imageUuid, deviceDbInfo.uuid)

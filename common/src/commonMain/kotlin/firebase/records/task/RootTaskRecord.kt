@@ -1,12 +1,15 @@
 package com.krystianwsul.common.firebase.records.task
 
 import com.krystianwsul.common.firebase.DatabaseWrapper
+import com.krystianwsul.common.firebase.json.noscheduleorparent.NoScheduleOrParentJson
 import com.krystianwsul.common.firebase.json.noscheduleorparent.RootNoScheduleOrParentJson
 import com.krystianwsul.common.firebase.json.schedule.*
 import com.krystianwsul.common.firebase.json.tasks.RootTaskJson
 import com.krystianwsul.common.firebase.records.AssignedToHelper
 import com.krystianwsul.common.firebase.records.InstanceRecord
 import com.krystianwsul.common.firebase.records.RootTaskParentDelegate
+import com.krystianwsul.common.firebase.records.noscheduleorparent.NoScheduleOrParentRecord
+import com.krystianwsul.common.firebase.records.noscheduleorparent.RootNoScheduleOrParentRecord
 import com.krystianwsul.common.firebase.records.schedule.ProjectHelper
 import com.krystianwsul.common.firebase.records.schedule.ProjectRootDelegate
 import com.krystianwsul.common.time.JsonTime
@@ -31,6 +34,10 @@ class RootTaskRecord private constructor(
         ProjectRootDelegate.Root(taskRecord as RootTaskRecord, scheduleJson as RootScheduleJson)
     },
 ) {
+
+    override val noScheduleOrParentRecords: MutableMap<String, NoScheduleOrParentRecord> = taskJson.noScheduleOrParent
+        .mapValues { RootNoScheduleOrParentRecord(this, it.value, it.key, ProjectHelper.Root) }
+        .toMutableMap()
 
     override val createObject: RootTaskJson // because of duplicate functionality when converting local task
         get() {
@@ -91,6 +98,20 @@ class RootTaskRecord private constructor(
         override fun addValue(subKey: String, value: Boolean?) {
             this@RootTaskRecord.addValue("$key/$subKey", value)
         }
+    }
+
+    override fun newNoScheduleOrParentRecord(noScheduleOrParentJson: NoScheduleOrParentJson): RootNoScheduleOrParentRecord {
+        val noScheduleOrParentRecord = RootNoScheduleOrParentRecord(
+            this,
+            noScheduleOrParentJson,
+            null,
+            ProjectHelper.Project,
+        )
+
+        check(!noScheduleOrParentRecords.containsKey(noScheduleOrParentRecord.id))
+
+        noScheduleOrParentRecords[noScheduleOrParentRecord.id] = noScheduleOrParentRecord
+        return noScheduleOrParentRecord
     }
 
     override fun getScheduleRecordId() = databaseWrapper.newRootTaskScheduleRecordId(id)

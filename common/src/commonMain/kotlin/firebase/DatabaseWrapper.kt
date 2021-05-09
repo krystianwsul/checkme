@@ -1,7 +1,7 @@
 package com.krystianwsul.common.firebase
 
-import com.krystianwsul.common.firebase.records.NoScheduleOrParentRecord
 import com.krystianwsul.common.firebase.records.customtime.CustomTimeRecord
+import com.krystianwsul.common.firebase.records.noscheduleorparent.NoScheduleOrParentRecord
 import com.krystianwsul.common.firebase.records.project.ProjectRecord
 import com.krystianwsul.common.firebase.records.schedule.ScheduleRecord
 import com.krystianwsul.common.firebase.records.task.TaskRecord

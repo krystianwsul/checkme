@@ -1,12 +1,12 @@
 package com.krystianwsul.common.firebase.models
 
 import com.krystianwsul.common.firebase.models.task.Task
-import com.krystianwsul.common.firebase.records.NoScheduleOrParentRecord
+import com.krystianwsul.common.firebase.records.noscheduleorparent.NoScheduleOrParentRecord
 import com.krystianwsul.common.time.ExactTimeStamp
 
 class NoScheduleOrParent(
-        private val task: Task,
-        private val noScheduleOrParentRecord: NoScheduleOrParentRecord,
+    private val task: Task,
+    private val noScheduleOrParentRecord: NoScheduleOrParentRecord,
 ) : TaskParentEntry, ProjectIdOwner by noScheduleOrParentRecord {
 
     override val startExactTimeStamp = ExactTimeStamp.Local(noScheduleOrParentRecord.startTime)

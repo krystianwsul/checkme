@@ -7,8 +7,8 @@ import com.krystianwsul.common.firebase.json.taskhierarchies.NestedTaskHierarchy
 import com.krystianwsul.common.firebase.json.tasks.TaskJson
 import com.krystianwsul.common.firebase.records.AssignedToHelper
 import com.krystianwsul.common.firebase.records.InstanceRecord
-import com.krystianwsul.common.firebase.records.NoScheduleOrParentRecord
 import com.krystianwsul.common.firebase.records.RemoteRecord
+import com.krystianwsul.common.firebase.records.noscheduleorparent.NoScheduleOrParentRecord
 import com.krystianwsul.common.firebase.records.schedule.*
 import com.krystianwsul.common.firebase.records.taskhierarchy.NestedTaskHierarchyRecord
 import com.krystianwsul.common.time.JsonTime
@@ -64,9 +64,7 @@ abstract class TaskRecord protected constructor(
 
     val yearlyScheduleRecords: MutableMap<String, YearlyScheduleRecord> = mutableMapOf()
 
-    val noScheduleOrParentRecords = taskJson.noScheduleOrParent
-        .mapValues { NoScheduleOrParentRecord(this, it.value, it.key, projectHelper) }
-        .toMutableMap()
+    abstract val noScheduleOrParentRecords: Map<String, NoScheduleOrParentRecord>
 
     val taskHierarchyRecords = taskJson.taskHierarchies
         .entries
@@ -279,19 +277,7 @@ abstract class TaskRecord protected constructor(
         return yearlyScheduleRecord
     }
 
-    fun newNoScheduleOrParentRecord(noScheduleOrParentJson: NoScheduleOrParentJson): NoScheduleOrParentRecord {
-        val noScheduleOrParentRecord = NoScheduleOrParentRecord(
-            this,
-            noScheduleOrParentJson,
-            null,
-            projectHelper,
-        )
-
-        check(!noScheduleOrParentRecords.containsKey(noScheduleOrParentRecord.id))
-
-        noScheduleOrParentRecords[noScheduleOrParentRecord.id] = noScheduleOrParentRecord
-        return noScheduleOrParentRecord
-    }
+    abstract fun newNoScheduleOrParentRecord(noScheduleOrParentJson: NoScheduleOrParentJson): NoScheduleOrParentRecord
 
     fun newTaskHierarchyRecord(taskHierarchyJson: NestedTaskHierarchyJson): NestedTaskHierarchyRecord {
         val taskHierarchyRecord = NestedTaskHierarchyRecord(this, taskHierarchyJson)

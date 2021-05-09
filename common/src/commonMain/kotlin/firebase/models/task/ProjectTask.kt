@@ -33,17 +33,9 @@ class ProjectTask(override val project: Project<*>, private val taskRecord: Proj
 
     override val projectCustomTimeIdProvider = project.projectRecord
 
-    override val addProjectIdToNoScheduleOrParent = false
-
     override fun setNoScheduleOrParent(now: ExactTimeStamp.Local, projectKey: ProjectKey<*>) {
-        val noScheduleOrParentRecord = taskRecord.newNoScheduleOrParentRecord(
-            ProjectNoScheduleOrParentJson(
-                // todo task
-                now.long,
-                now.offset,
-                projectId = projectKey.takeIf { addProjectIdToNoScheduleOrParent }?.key,
-            )
-        )
+        val noScheduleOrParentRecord =
+            taskRecord.newNoScheduleOrParentRecord(ProjectNoScheduleOrParentJson(now.long, now.offset))
 
         check(!noScheduleOrParentsMap.containsKey(noScheduleOrParentRecord.id))
 

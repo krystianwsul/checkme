@@ -9,5 +9,4 @@ data class ProjectNoScheduleOrParentJson @JvmOverloads constructor(
     override var startTimeOffset: Double? = null, // this is nullable only for project tasks
     override var endTime: Long? = null,
     override var endTimeOffset: Double? = null,
-    override var projectId: String? = null, // this is nullable only for project tasks
 ) : NoScheduleOrParentJson

@@ -1003,8 +1003,6 @@ abstract class Task(
 
     private class IntervalException(message: String, cause: Throwable) : Exception(message, cause)
 
-    protected abstract val addProjectIdToNoScheduleOrParent: Boolean
-
     abstract fun setNoScheduleOrParent(now: ExactTimeStamp.Local, projectKey: ProjectKey<*>)
 
     fun correctIntervalEndExactTimeStamps() = intervals.asSequence()

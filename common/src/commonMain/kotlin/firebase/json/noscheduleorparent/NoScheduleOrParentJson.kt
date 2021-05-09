@@ -7,6 +7,4 @@ interface NoScheduleOrParentJson {
 
         var endTime: Long?
         var endTimeOffset: Double?
-
-        var projectId: String? // this is nullable only for project tasks
 }

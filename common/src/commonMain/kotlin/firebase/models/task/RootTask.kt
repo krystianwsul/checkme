@@ -76,7 +76,7 @@ class RootTask(
         invalidateIntervals()
     }
 
-    override fun createChildTask(
+    fun createChildTask(
         now: ExactTimeStamp.Local,
         name: String,
         note: String?,

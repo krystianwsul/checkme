@@ -540,15 +540,6 @@ sealed class Task(
         endDataProperty.invalidate()
     }
 
-    abstract fun createChildTask(
-        // todo task
-        now: ExactTimeStamp.Local,
-        name: String,
-        note: String?,
-        image: TaskJson.Image?,
-        ordinal: Double? = null,
-    ): Task
-
     protected abstract fun deleteProjectRootTaskId()
     protected abstract fun deleteFromParent()
 

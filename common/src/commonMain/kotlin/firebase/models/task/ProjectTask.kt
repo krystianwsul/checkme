@@ -1,7 +1,6 @@
 package com.krystianwsul.common.firebase.models.task
 
 import com.krystianwsul.common.firebase.json.noscheduleorparent.ProjectNoScheduleOrParentJson
-import com.krystianwsul.common.firebase.json.tasks.TaskJson
 import com.krystianwsul.common.firebase.models.noscheduleorparent.NoScheduleOrParent
 import com.krystianwsul.common.firebase.models.noscheduleorparent.ProjectNoScheduleOrParent
 import com.krystianwsul.common.firebase.models.project.Project
@@ -44,14 +43,6 @@ class ProjectTask(override val project: Project<*>, private val taskRecord: Proj
 
         invalidateIntervals()
     }
-
-    override fun createChildTask(
-        now: ExactTimeStamp.Local,
-        name: String,
-        note: String?,
-        image: TaskJson.Image?,
-        ordinal: Double?,
-    ) = project.createChildTask(this, now, name, note, image, ordinal)
 
     override fun deleteProjectRootTaskId() {
         // only for root projects

@@ -34,7 +34,7 @@ class RootTaskRecord private constructor(
 ) {
 
     override val noScheduleOrParentRecords = taskJson.noScheduleOrParent
-        .mapValues { RootNoScheduleOrParentRecord(this, it.value, it.key, ProjectHelper.Root) }
+        .mapValues { RootNoScheduleOrParentRecord(this, it.value, it.key) }
         .toMutableMap()
 
     override val createObject: RootTaskJson // because of duplicate functionality when converting local task
@@ -65,8 +65,7 @@ class RootTaskRecord private constructor(
 
             taskJson.schedules = scheduleWrappers
 
-            taskJson.noScheduleOrParent =
-                noScheduleOrParentRecords.mapValues { it.value.createObject as RootNoScheduleOrParentJson } // todo task
+            taskJson.noScheduleOrParent = noScheduleOrParentRecords.mapValues { it.value.createObject }
 
             taskJson.taskHierarchies = taskHierarchyRecords.values.associate { it.id.value to it.createObject }
 
@@ -103,7 +102,6 @@ class RootTaskRecord private constructor(
             this,
             noScheduleOrParentJson,
             null,
-            ProjectHelper.Project,
         )
 
         check(!noScheduleOrParentRecords.containsKey(noScheduleOrParentRecord.id))

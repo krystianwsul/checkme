@@ -31,7 +31,7 @@ abstract class ProjectTaskRecord protected constructor(
 ) {
 
     override val noScheduleOrParentRecords = projectTaskJson.noScheduleOrParent
-        .mapValues { ProjectNoScheduleOrParentRecord(this, it.value, it.key, ProjectHelper.Project) }
+        .mapValues { ProjectNoScheduleOrParentRecord(this, it.value, it.key) }
         .toMutableMap()
 
     abstract override var startTimeOffset: Double?
@@ -54,7 +54,6 @@ abstract class ProjectTaskRecord protected constructor(
             this,
             noScheduleOrParentJson,
             null,
-            ProjectHelper.Project,
         )
 
         check(!noScheduleOrParentRecords.containsKey(noScheduleOrParentRecord.id))

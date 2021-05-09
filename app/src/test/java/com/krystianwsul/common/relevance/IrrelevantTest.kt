@@ -1,6 +1,10 @@
 package com.krystianwsul.common.relevance
 
+import com.krystianwsul.checkme.firebase.factories.ProjectsFactory
+import com.krystianwsul.checkme.firebase.managers.AndroidRootTasksManager
+import com.krystianwsul.checkme.firebase.roottask.LoadDependencyTrackerManager
 import com.krystianwsul.checkme.firebase.roottask.RootTasksFactory
+import com.krystianwsul.checkme.firebase.roottask.RootTasksLoader
 import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.DomainThreadChecker
@@ -22,6 +26,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.spyk
 import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import org.junit.After
 import org.junit.Assert.*
@@ -39,8 +44,8 @@ class IrrelevantTest {
         }
 
         private val databaseWrapper = mockk<DatabaseWrapper> {
-            every { newPrivateTaskRecordId(any()) } returns "taskRecordId"
-            every { newPrivateNoScheduleOrParentRecordId(any(), any()) } returns "noScheduleOrParentRecordId"
+            every { newRootTaskRecordId() } returns "taskRecordId"
+            every { newRootTaskNoScheduleOrParentRecordId(any()) } returns "noScheduleOrParentRecordId"
         }
 
         private val shownFactory = mockk<Instance.ShownFactory> {
@@ -77,20 +82,43 @@ class IrrelevantTest {
         val projectJson = PrivateProjectJson(startTime = now.long)
         val projectRecord = PrivateProjectRecord(databaseWrapper, userInfo, projectJson)
 
-        val rootTasksFactory = RootTasksFactory(
+        val rootTasksManager = AndroidRootTasksManager(databaseWrapper)
+
+        val loadDependencyTrackerManager = mockk<LoadDependencyTrackerManager> {
+            every { isTaskKeyTracked(any()) } returns false
+            every { startTrackingTaskLoad(any()) } returns mockk(relaxed = true)
+        }
+
+        val rootTaskLoader = RootTasksLoader(
             mockk {
-                every { addChangeEvents } returns Observable.never()
-                every { removeEvents } returns Observable.never()
+                every { rootTaskKeysObservable } returns Observable.just(setOf())
             },
-            mockk(),
-            mockk(),
+            mockk {
+                every { getRootTaskObservable(any()) } returns Observable.never()
+            },
             compositeDisposable,
-            mockk(),
-            mockk(),
-            mockk(),
+            rootTasksManager,
+            loadDependencyTrackerManager,
         )
 
-        val project = PrivateProject(projectRecord, mockk(), rootTasksFactory)
+        lateinit var project: PrivateProject
+
+        val projectsFactory = mockk<ProjectsFactory> {
+            every { getProjectForce(any()) } answers { project }
+        }
+
+        val rootTasksFactory = RootTasksFactory(
+            rootTaskLoader,
+            mockk(), // todo task test
+            mockk {
+                every { getDependencies(any()) } returns Single.just(mockk())
+            },
+            compositeDisposable,
+            mockk(), // todo task test
+            loadDependencyTrackerManager,
+        ) { projectsFactory }
+
+        project = PrivateProject(projectRecord, mockk(), rootTasksFactory)
 
         now = ExactTimeStamp.Local(day1, hour2)
 

@@ -14,7 +14,7 @@ interface TaskJson {
     var ordinal: Double?
 
     val startTime: Long
-    val startTimeOffset: Double? // this is nullable only for project tasks
+    val startTimeOffset: Double?
 
     var endData: EndData?
 
@@ -25,14 +25,14 @@ interface TaskJson {
 
     @Serializable
     data class Image(
-            val imageUuid: String = "",
-            val uploaderUuid: String? = null,
+        val imageUuid: String = "",
+        val uploaderUuid: String? = null,
     )
 
     @Serializable
     data class EndData(
-            val time: Long = 0,
-            val offset: Double? = null,
-            val deleteInstances: Boolean = false,
+        val time: Long = 0,
+        val offset: Double? = null,
+        val deleteInstances: Boolean = false,
     )
 }

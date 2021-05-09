@@ -13,7 +13,6 @@ import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.firebase.models.taskhierarchy.ProjectTaskHierarchy
 import com.krystianwsul.common.firebase.models.taskhierarchy.TaskHierarchy
 import com.krystianwsul.common.firebase.records.AssignedToHelper
-import com.krystianwsul.common.firebase.records.InstanceRecord
 import com.krystianwsul.common.firebase.records.project.ProjectRecord
 import com.krystianwsul.common.firebase.records.task.ProjectTaskRecord
 import com.krystianwsul.common.interrupt.InterruptionChecker
@@ -82,12 +81,14 @@ abstract class Project<T : ProjectType>(
     }
 
     protected abstract fun copyTaskRecord(
+        // todo task edit
         oldTask: ProjectTask,
         now: ExactTimeStamp.Local,
         instanceJsons: MutableMap<String, InstanceJson>,
     ): ProjectTaskRecord
 
     private fun convertScheduleKey(
+        // todo task edit
         oldTask: ProjectTask,
         oldScheduleKey: ScheduleKey,
         customTimeMigrationHelper: CustomTimeMigrationHelper,
@@ -106,76 +107,6 @@ abstract class Project<T : ProjectType>(
         }
 
         return ScheduleKey(oldScheduleDate, convertedTime.timePair)
-    }
-
-    private class InstanceConversionData(
-        val newInstanceJson: InstanceJson,
-        val newScheduleKey: ScheduleKey,
-        val updater: (Map<String, String>) -> Any?,
-    )
-
-    @Suppress("ConstantConditionIf")
-    fun copyTask(
-        // todo task edit
-        oldTask: ProjectTask,
-        instances: Collection<Instance>,
-        now: ExactTimeStamp.Local,
-        customTimeMigrationHelper: CustomTimeMigrationHelper,
-        oldProjectKey: ProjectKey<*>,
-    ): Pair<ProjectTask, List<(Map<String, String>) -> Any?>> {
-        val instanceDatas = instances.map { oldInstance ->
-            val (newInstance, updater) = getInstanceJson(
-                oldInstance,
-                projectKey,
-                customTimeMigrationHelper,
-                now,
-            )
-
-            val newScheduleKey = convertScheduleKey(
-                oldTask,
-                oldInstance.scheduleKey,
-                customTimeMigrationHelper,
-                now,
-            )
-
-            InstanceConversionData(newInstance, newScheduleKey, updater)
-        }
-
-        // todo migrate tasks this just makes a bigger mess of things
-        @Suppress("SimplifyBooleanWithConstants")
-        val instanceJsons = if (true) {
-            mutableMapOf()
-        } else {
-            instanceDatas.associate {
-                InstanceRecord.scheduleKeyToString(it.newScheduleKey) to it.newInstanceJson
-            }.toMutableMap()
-        }
-
-        val taskRecord = copyTaskRecord(oldTask, now, instanceJsons)
-
-        val newTask = ProjectTask(this, taskRecord)
-        check(!_tasks.containsKey(newTask.id))
-
-        _tasks[newTask.id] = newTask
-
-        val currentSchedules = oldTask.getCurrentScheduleIntervals(now).map { it.schedule }
-        val currentNoScheduleOrParent = oldTask.getCurrentNoScheduleOrParent(now)?.noScheduleOrParent
-
-        if (currentSchedules.isNotEmpty()) {
-            check(currentNoScheduleOrParent == null)
-
-            newTask.copySchedules(
-                now,
-                currentSchedules,
-                customTimeMigrationHelper,
-                oldProjectKey,
-                projectKey,
-            )
-        } else {
-            currentNoScheduleOrParent?.let { newTask.setNoScheduleOrParent(now, projectKey) }
-        }
-
-        return newTask to instanceDatas.map { it.updater }
     }
 
     private fun getOrCreateCustomTime(
@@ -202,6 +133,7 @@ abstract class Project<T : ProjectType>(
     }
 
     private fun getInstanceJson(
+        // todo task edit
         instance: Instance,
         newProjectKey: ProjectKey<*>,
         customTimeMigrationHelper: CustomTimeMigrationHelper,

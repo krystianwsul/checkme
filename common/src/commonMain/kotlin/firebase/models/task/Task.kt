@@ -771,11 +771,12 @@ sealed class Task(
     }
 
     fun copySchedules(
-            now: ExactTimeStamp.Local,
-            schedules: List<Schedule>,
-            customTimeMigrationHelper: Project.CustomTimeMigrationHelper,
-            oldProjectKey: ProjectKey<*>,
-            newProjectKey: ProjectKey<*>,
+        // todo task edit move to roo
+        now: ExactTimeStamp.Local,
+        schedules: List<Schedule>,
+        customTimeMigrationHelper: Project.CustomTimeMigrationHelper,
+        oldProjectKey: ProjectKey<*>,
+        newProjectKey: ProjectKey<*>,
     ) {
         for (schedule in schedules) {
             val today = Date.today()

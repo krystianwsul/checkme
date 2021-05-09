@@ -5,12 +5,11 @@ import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.json.projects.PrivateProjectJson
-import com.krystianwsul.common.firebase.json.schedule.PrivateScheduleWrapper
-import com.krystianwsul.common.firebase.json.schedule.PrivateSingleScheduleJson
-import com.krystianwsul.common.firebase.json.schedule.PrivateWeeklyScheduleJson
+import com.krystianwsul.common.firebase.json.schedule.*
 import com.krystianwsul.common.firebase.json.taskhierarchies.NestedTaskHierarchyJson
 import com.krystianwsul.common.firebase.json.taskhierarchies.ProjectTaskHierarchyJson
 import com.krystianwsul.common.firebase.json.tasks.PrivateTaskJson
+import com.krystianwsul.common.firebase.json.tasks.RootTaskJson
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.project.PrivateProject
 import com.krystianwsul.common.firebase.models.task.Task
@@ -70,7 +69,7 @@ class IrrelevantTest {
         val day2 = Date(2020, 1, 2)
         val hour1 = HourMinute(1, 1).toHourMilli()
         val hour2 = HourMinute(2, 1).toHourMilli()
-        val hour3 = HourMinute(3, 1).toHourMilli()
+        val hour3 = HourMinute(3, 1)
         val hour4 = HourMinute(4, 1)
 
         var now = ExactTimeStamp.Local(day1, hour1)
@@ -95,24 +94,25 @@ class IrrelevantTest {
 
         now = ExactTimeStamp.Local(day1, hour2)
 
-        val scheduleWrapper = PrivateScheduleWrapper(
-            singleScheduleJson = PrivateSingleScheduleJson(
+        val scheduleWrapper = RootScheduleWrapper(
+            singleScheduleJson = RootSingleScheduleJson(
                 startTime = now.long,
+                startTimeOffset = now.offset,
                 year = day1.year,
                 month = day1.month,
                 day = day1.day,
-                hour = hour3.hour,
-                minute = hour3.minute,
+                time = hour3.toJson(),
             )
         )
 
-        val taskJson = PrivateTaskJson(
+        val taskJson = RootTaskJson(
             name = "task",
             startTime = now.long,
+            startTimeOffset = now.offset,
             schedules = mutableMapOf("scheduleKey" to scheduleWrapper),
         )
 
-        val task = project.newTask(taskJson)
+        val task = rootTasksFactory.newTask(taskJson)
 
         // 2: once reminded, add one hour
 

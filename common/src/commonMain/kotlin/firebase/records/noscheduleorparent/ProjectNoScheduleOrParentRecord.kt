@@ -1,16 +1,18 @@
 package com.krystianwsul.common.firebase.records.noscheduleorparent
 
-import com.krystianwsul.common.firebase.json.noscheduleorparent.NoScheduleOrParentJson
+import com.krystianwsul.common.firebase.json.noscheduleorparent.ProjectNoScheduleOrParentJson
 import com.krystianwsul.common.firebase.records.schedule.ProjectHelper
 import com.krystianwsul.common.firebase.records.task.ProjectTaskRecord
 import com.krystianwsul.common.utils.ProjectKey
 
 class ProjectNoScheduleOrParentRecord(
     private val projectTaskRecord: ProjectTaskRecord,
-    createObject: NoScheduleOrParentJson,
+    private val projectNoScheduleOrParentJson: ProjectNoScheduleOrParentJson,
     _id: String?,
     private val projectHelper: ProjectHelper,
-) : NoScheduleOrParentRecord(projectTaskRecord, createObject, _id) {
+) : NoScheduleOrParentRecord(projectTaskRecord, projectNoScheduleOrParentJson, _id) {
+
+    override val createObject = projectNoScheduleOrParentJson
 
     override val projectId get() = projectHelper.getProjectId(createObject)
 

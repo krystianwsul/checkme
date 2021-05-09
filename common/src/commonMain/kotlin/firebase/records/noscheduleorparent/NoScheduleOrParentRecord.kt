@@ -7,7 +7,7 @@ import com.krystianwsul.common.firebase.records.task.TaskRecord
 
 abstract class NoScheduleOrParentRecord(
     taskRecord: TaskRecord,
-    final override val createObject: NoScheduleOrParentJson,
+    private val noScheduleOrParentJson: NoScheduleOrParentJson,
     _id: String?,
 ) : RemoteRecord(_id == null), ProjectIdOwner {
 
@@ -20,11 +20,11 @@ abstract class NoScheduleOrParentRecord(
 
     override val key = "${taskRecord.key}/$NO_SCHEDULE_OR_PARENT/$id"
 
-    val startTime = createObject.startTime
-    var startTimeOffset by Committer(createObject::startTimeOffset)
+    val startTime = noScheduleOrParentJson.startTime
+    var startTimeOffset by Committer(noScheduleOrParentJson::startTimeOffset)
 
-    var endTime by Committer(createObject::endTime)
-    var endTimeOffset by Committer(createObject::endTimeOffset)
+    var endTime by Committer(noScheduleOrParentJson::endTime)
+    var endTimeOffset by Committer(noScheduleOrParentJson::endTimeOffset)
 
     abstract val projectId: String?
 }

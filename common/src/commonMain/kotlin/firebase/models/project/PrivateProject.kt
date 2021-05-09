@@ -82,6 +82,7 @@ class PrivateProject(
         getProjectCustomTime(projectCustomTimeKey.customTimeId)
 
     override fun createChildTask(
+        // todo task edit
         parentTask: ProjectTask,
         now: ExactTimeStamp.Local,
         name: String,
@@ -107,6 +108,7 @@ class PrivateProject(
     }
 
     override fun copyTaskRecord(
+        // todo task edit
         oldTask: ProjectTask,
         now: ExactTimeStamp.Local,
         instanceJsons: MutableMap<String, InstanceJson>,
@@ -122,7 +124,7 @@ class PrivateProject(
         )
     )
 
-    fun newTask(taskJson: PrivateTaskJson): ProjectTask {
+    fun newTask(taskJson: PrivateTaskJson): ProjectTask { // todo task edit
         val taskRecord = projectRecord.newTaskRecord(taskJson)
 
         val task = ProjectTask(this, taskRecord)
@@ -134,6 +136,7 @@ class PrivateProject(
     }
 
     override fun createTask(
+        // todo task edit
         now: ExactTimeStamp.Local,
         image: TaskJson.Image?,
         name: String,

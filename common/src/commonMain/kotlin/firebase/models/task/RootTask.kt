@@ -51,7 +51,7 @@ class RootTask(
         .mapValues { RootNoScheduleOrParent(this, it.value) }
         .toMutableMap()
 
-    override val noScheduleOrParents get() = noScheduleOrParentsMap.values
+    override val noScheduleOrParents: Collection<RootNoScheduleOrParent> get() = noScheduleOrParentsMap.values
 
     override val taskKey get() = TaskKey.Root(taskRecord.id)
 

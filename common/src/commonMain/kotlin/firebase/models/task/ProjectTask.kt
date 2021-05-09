@@ -21,7 +21,7 @@ class ProjectTask(override val project: Project<*>, private val taskRecord: Proj
         .mapValues { ProjectNoScheduleOrParent(this, it.value) }
         .toMutableMap()
 
-    override val noScheduleOrParents get() = noScheduleOrParentsMap.values
+    override val noScheduleOrParents: Collection<ProjectNoScheduleOrParent> get() = noScheduleOrParentsMap.values
 
     override val taskKey get() = TaskKey.Project(project.projectKey, taskRecord.id)
 

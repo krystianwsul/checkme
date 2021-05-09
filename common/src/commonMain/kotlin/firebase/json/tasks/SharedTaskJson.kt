@@ -18,7 +18,7 @@ data class SharedTaskJson @JvmOverloads constructor(
     override var schedules: MutableMap<String, SharedScheduleWrapper> = mutableMapOf(),
     override var image: TaskJson.Image? = null,
     override var endData: TaskJson.EndData? = null,
-    override var noScheduleOrParent: Map<String, NoScheduleOrParentJson> = mutableMapOf(),
+    override var noScheduleOrParent: Map<String, NoScheduleOrParentJson> = mapOf(),
     override var ordinal: Double? = null,
     override var taskHierarchies: Map<String, NestedTaskHierarchyJson> = mapOf(),
 ) : ProjectTaskJson

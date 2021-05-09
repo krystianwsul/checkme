@@ -20,7 +20,7 @@ interface TaskJson {
 
     var instances: MutableMap<String, InstanceJson>
     val schedules: Map<String, ScheduleWrapper>
-    var noScheduleOrParent: Map<String, NoScheduleOrParentJson>
+    val noScheduleOrParent: Map<String, NoScheduleOrParentJson>
     val taskHierarchies: Map<String, NestedTaskHierarchyJson>
 
     @Serializable
@@ -32,7 +32,7 @@ interface TaskJson {
     @Serializable
     data class EndData(
         val time: Long = 0,
-        val offset: Double? = null,
+        val offset: Double? = null, // todo task
         val deleteInstances: Boolean = false,
     )
 }

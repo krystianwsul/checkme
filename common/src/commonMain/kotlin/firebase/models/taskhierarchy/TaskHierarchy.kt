@@ -10,12 +10,6 @@ import com.krystianwsul.common.utils.TaskKey
 
 abstract class TaskHierarchy(private val parentTaskDelegate: ParentTaskDelegate) : TaskParentEntry {
 
-    companion object {
-
-        // todo after flipping this, remove all code for creating ProjectTaskHierarchies.  make json properties val
-        const val WRITE_NESTED_TASK_HIERARCHIES = false // todo published on 2021.04.20
-    }
-
     protected abstract val taskHierarchyRecord: TaskHierarchyRecord<*>
 
     final override val startExactTimeStamp by lazy { ExactTimeStamp.Local(taskHierarchyRecord.startTime) }

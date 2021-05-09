@@ -1,10 +1,12 @@
-package com.krystianwsul.common.firebase.models
+package com.krystianwsul.common.firebase.models.noscheduleorparent
 
+import com.krystianwsul.common.firebase.models.ProjectIdOwner
+import com.krystianwsul.common.firebase.models.TaskParentEntry
 import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.firebase.records.noscheduleorparent.NoScheduleOrParentRecord
 import com.krystianwsul.common.time.ExactTimeStamp
 
-class NoScheduleOrParent(
+abstract class NoScheduleOrParent(
     private val task: Task,
     private val noScheduleOrParentRecord: NoScheduleOrParentRecord,
 ) : TaskParentEntry, ProjectIdOwner by noScheduleOrParentRecord {
@@ -44,8 +46,10 @@ class NoScheduleOrParent(
         task.invalidateIntervals()
     }
 
+    protected abstract fun deleteFromParent()
+
     fun delete() {
-        task.deleteNoScheduleOrParent(this)
+        deleteFromParent()
         noScheduleOrParentRecord.delete()
     }
 

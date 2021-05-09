@@ -6,11 +6,11 @@ import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.ScheduleGroup
 import com.krystianwsul.common.domain.TaskUndoData
 import com.krystianwsul.common.firebase.json.*
-import com.krystianwsul.common.firebase.json.noscheduleorparent.RootNoScheduleOrParentJson
 import com.krystianwsul.common.firebase.json.taskhierarchies.NestedTaskHierarchyJson
 import com.krystianwsul.common.firebase.json.tasks.TaskJson
 import com.krystianwsul.common.firebase.models.*
 import com.krystianwsul.common.firebase.models.interval.*
+import com.krystianwsul.common.firebase.models.noscheduleorparent.NoScheduleOrParent
 import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.schedule.*
 import com.krystianwsul.common.firebase.models.taskhierarchy.NestedTaskHierarchy
@@ -58,11 +58,7 @@ abstract class Task(
 
     private val _schedules = mutableListOf<Schedule>()
 
-    private val noScheduleOrParentsMap = taskRecord.noScheduleOrParentRecords
-        .mapValues { NoScheduleOrParent(this, it.value) }
-        .toMutableMap()
-
-    val noScheduleOrParents: Collection<NoScheduleOrParent> get() = noScheduleOrParentsMap.values
+    abstract val noScheduleOrParents: Collection<NoScheduleOrParent>
 
     val name get() = taskRecord.name
 
@@ -586,13 +582,6 @@ abstract class Task(
         invalidateIntervals()
     }
 
-    fun deleteNoScheduleOrParent(noScheduleOrParent: NoScheduleOrParent) {
-        check(noScheduleOrParentsMap.containsKey(noScheduleOrParent.id))
-
-        noScheduleOrParentsMap.remove(noScheduleOrParent.id)
-        invalidateIntervals()
-    }
-
     fun createRemoteInstanceRecord(instance: Instance): InstanceRecord {
         check(generatedInstances.containsKey(instance.instanceKey))
 
@@ -1016,23 +1005,7 @@ abstract class Task(
 
     protected abstract val addProjectIdToNoScheduleOrParent: Boolean
 
-    fun setNoScheduleOrParent(now: ExactTimeStamp.Local, projectKey: ProjectKey<*>) {
-        val noScheduleOrParentRecord = taskRecord.newNoScheduleOrParentRecord(
-            RootNoScheduleOrParentJson(
-                // todo task
-                now.long,
-                now.offset,
-                projectId = projectKey.takeIf { addProjectIdToNoScheduleOrParent }?.key,
-            )
-        )
-
-        check(!noScheduleOrParentsMap.containsKey(noScheduleOrParentRecord.id))
-
-        noScheduleOrParentsMap[noScheduleOrParentRecord.id] =
-            NoScheduleOrParent(this, noScheduleOrParentRecord)
-
-        invalidateIntervals()
-    }
+    abstract fun setNoScheduleOrParent(now: ExactTimeStamp.Local, projectKey: ProjectKey<*>)
 
     fun correctIntervalEndExactTimeStamps() = intervals.asSequence()
         .filterIsInstance<Interval.Ended>()

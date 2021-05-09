@@ -1,11 +1,10 @@
 package com.krystianwsul.common.firebase.records.task
 
-import com.krystianwsul.common.firebase.json.noscheduleorparent.NoScheduleOrParentJson
+import com.krystianwsul.common.firebase.json.noscheduleorparent.ProjectNoScheduleOrParentJson
 import com.krystianwsul.common.firebase.json.schedule.ProjectScheduleJson
 import com.krystianwsul.common.firebase.json.tasks.ProjectTaskJson
 import com.krystianwsul.common.firebase.json.tasks.TaskJson
 import com.krystianwsul.common.firebase.records.AssignedToHelper
-import com.krystianwsul.common.firebase.records.noscheduleorparent.NoScheduleOrParentRecord
 import com.krystianwsul.common.firebase.records.noscheduleorparent.ProjectNoScheduleOrParentRecord
 import com.krystianwsul.common.firebase.records.project.ProjectRecord
 import com.krystianwsul.common.firebase.records.schedule.ProjectHelper
@@ -31,7 +30,7 @@ abstract class ProjectTaskRecord protected constructor(
     },
 ) {
 
-    override val noScheduleOrParentRecords: MutableMap<String, NoScheduleOrParentRecord> = projectTaskJson.noScheduleOrParent
+    override val noScheduleOrParentRecords = projectTaskJson.noScheduleOrParent
         .mapValues { ProjectNoScheduleOrParentRecord(this, it.value, it.key, ProjectHelper.Project) }
         .toMutableMap()
 
@@ -50,9 +49,7 @@ abstract class ProjectTaskRecord protected constructor(
             setProperty(projectTaskJson::endTime, value?.time)
         }
 
-    override fun newNoScheduleOrParentRecord(
-        noScheduleOrParentJson: NoScheduleOrParentJson,
-    ): ProjectNoScheduleOrParentRecord {
+    fun newNoScheduleOrParentRecord(noScheduleOrParentJson: ProjectNoScheduleOrParentJson): ProjectNoScheduleOrParentRecord {
         val noScheduleOrParentRecord = ProjectNoScheduleOrParentRecord(
             this,
             noScheduleOrParentJson,

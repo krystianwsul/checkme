@@ -1,7 +1,6 @@
 package com.krystianwsul.common.firebase.records.task
 
 import com.krystianwsul.common.firebase.json.InstanceJson
-import com.krystianwsul.common.firebase.json.noscheduleorparent.NoScheduleOrParentJson
 import com.krystianwsul.common.firebase.json.schedule.*
 import com.krystianwsul.common.firebase.json.taskhierarchies.NestedTaskHierarchyJson
 import com.krystianwsul.common.firebase.json.tasks.TaskJson
@@ -276,8 +275,6 @@ abstract class TaskRecord protected constructor(
         yearlyScheduleRecords[yearlyScheduleRecord.id] = yearlyScheduleRecord
         return yearlyScheduleRecord
     }
-
-    abstract fun newNoScheduleOrParentRecord(noScheduleOrParentJson: NoScheduleOrParentJson): NoScheduleOrParentRecord
 
     fun newTaskHierarchyRecord(taskHierarchyJson: NestedTaskHierarchyJson): NestedTaskHierarchyRecord {
         val taskHierarchyRecord = NestedTaskHierarchyRecord(this, taskHierarchyJson)

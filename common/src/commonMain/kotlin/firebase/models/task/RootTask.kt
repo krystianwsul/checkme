@@ -1,8 +1,11 @@
 package com.krystianwsul.common.firebase.models.task
 
+import com.krystianwsul.common.firebase.json.noscheduleorparent.RootNoScheduleOrParentJson
 import com.krystianwsul.common.firebase.json.tasks.TaskJson
 import com.krystianwsul.common.firebase.models.CopyScheduleHelper
 import com.krystianwsul.common.firebase.models.interval.Type
+import com.krystianwsul.common.firebase.models.noscheduleorparent.NoScheduleOrParent
+import com.krystianwsul.common.firebase.models.noscheduleorparent.RootNoScheduleOrParent
 import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.taskhierarchy.ParentTaskDelegate
 import com.krystianwsul.common.firebase.models.taskhierarchy.ProjectTaskHierarchy
@@ -44,6 +47,12 @@ class RootTask(
 
     override val project get() = parent.getProject(projectId)
 
+    private val noScheduleOrParentsMap = taskRecord.noScheduleOrParentRecords
+        .mapValues { RootNoScheduleOrParent(this, it.value) }
+        .toMutableMap()
+
+    override val noScheduleOrParents get() = noScheduleOrParentsMap.values
+
     override val taskKey get() = TaskKey.Root(taskRecord.id)
 
     override val projectParentTaskHierarchies = setOf<ProjectTaskHierarchy>()
@@ -51,6 +60,24 @@ class RootTask(
     override val projectCustomTimeIdProvider = JsonTime.ProjectCustomTimeIdProvider.rootTask
 
     override val addProjectIdToNoScheduleOrParent = true
+
+    override fun setNoScheduleOrParent(now: ExactTimeStamp.Local, projectKey: ProjectKey<*>) {
+        val noScheduleOrParentRecord = taskRecord.newNoScheduleOrParentRecord(
+            RootNoScheduleOrParentJson(
+                // todo task
+                now.long,
+                now.offset,
+                projectId = projectKey.takeIf { addProjectIdToNoScheduleOrParent }?.key,
+            )
+        )
+
+        check(!noScheduleOrParentsMap.containsKey(noScheduleOrParentRecord.id))
+
+        noScheduleOrParentsMap[noScheduleOrParentRecord.id] =
+            RootNoScheduleOrParent(this, noScheduleOrParentRecord)
+
+        invalidateIntervals()
+    }
 
     override fun createChildTask(
         now: ExactTimeStamp.Local,
@@ -94,6 +121,13 @@ class RootTask(
         addRootTask(childTask as RootTask)
 
         return taskHierarchyKey
+    }
+
+    fun deleteNoScheduleOrParent(noScheduleOrParent: NoScheduleOrParent) {
+        check(noScheduleOrParentsMap.containsKey(noScheduleOrParent.id))
+
+        noScheduleOrParentsMap.remove(noScheduleOrParent.id)
+        invalidateIntervals()
     }
 
     fun addRootTask(childTask: RootTask) {

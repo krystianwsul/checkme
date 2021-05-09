@@ -1,6 +1,9 @@
 package com.krystianwsul.common.firebase.models.task
 
+import com.krystianwsul.common.firebase.json.noscheduleorparent.ProjectNoScheduleOrParentJson
 import com.krystianwsul.common.firebase.json.tasks.TaskJson
+import com.krystianwsul.common.firebase.models.noscheduleorparent.NoScheduleOrParent
+import com.krystianwsul.common.firebase.models.noscheduleorparent.ProjectNoScheduleOrParent
 import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.taskhierarchy.ParentTaskDelegate
 import com.krystianwsul.common.firebase.records.task.ProjectTaskRecord
@@ -14,6 +17,12 @@ class ProjectTask(override val project: Project<*>, private val taskRecord: Proj
 
     override val parent = project
 
+    private val noScheduleOrParentsMap = taskRecord.noScheduleOrParentRecords
+        .mapValues { ProjectNoScheduleOrParent(this, it.value) }
+        .toMutableMap()
+
+    override val noScheduleOrParents get() = noScheduleOrParentsMap.values
+
     override val taskKey get() = TaskKey.Project(project.projectKey, taskRecord.id)
 
     private val parentProjectTaskHierarchiesProperty = invalidatableLazy {
@@ -26,12 +35,30 @@ class ProjectTask(override val project: Project<*>, private val taskRecord: Proj
 
     override val addProjectIdToNoScheduleOrParent = false
 
+    override fun setNoScheduleOrParent(now: ExactTimeStamp.Local, projectKey: ProjectKey<*>) {
+        val noScheduleOrParentRecord = taskRecord.newNoScheduleOrParentRecord(
+            ProjectNoScheduleOrParentJson(
+                // todo task
+                now.long,
+                now.offset,
+                projectId = projectKey.takeIf { addProjectIdToNoScheduleOrParent }?.key,
+            )
+        )
+
+        check(!noScheduleOrParentsMap.containsKey(noScheduleOrParentRecord.id))
+
+        noScheduleOrParentsMap[noScheduleOrParentRecord.id] =
+            ProjectNoScheduleOrParent(this, noScheduleOrParentRecord)
+
+        invalidateIntervals()
+    }
+
     override fun createChildTask(
-            now: ExactTimeStamp.Local,
-            name: String,
-            note: String?,
-            image: TaskJson.Image?,
-            ordinal: Double?,
+        now: ExactTimeStamp.Local,
+        name: String,
+        note: String?,
+        image: TaskJson.Image?,
+        ordinal: Double?,
     ) = project.createChildTask(this, now, name, note, image, ordinal)
 
     override fun deleteProjectRootTaskId() {
@@ -53,15 +80,22 @@ class ProjectTask(override val project: Project<*>, private val taskRecord: Proj
         return project.createTaskHierarchy(this, childTask as ProjectTask, now)
     }
 
+    fun deleteNoScheduleOrParent(noScheduleOrParent: NoScheduleOrParent) {
+        check(noScheduleOrParentsMap.containsKey(noScheduleOrParent.id))
+
+        noScheduleOrParentsMap.remove(noScheduleOrParent.id)
+        invalidateIntervals()
+    }
+
     override fun invalidateProjectParentTaskHierarchies() {
         parentProjectTaskHierarchiesProperty.invalidate()
         invalidateIntervals()
     }
 
     override fun updateProject(
-            projectUpdater: ProjectUpdater,
-            now: ExactTimeStamp.Local,
-            projectKey: ProjectKey<*>,
+        projectUpdater: ProjectUpdater,
+        now: ExactTimeStamp.Local,
+        projectKey: ProjectKey<*>,
     ) = projectUpdater.convertProject(now, this, projectKey)
 
     fun fixOffsets() {

@@ -1,7 +1,7 @@
 package com.krystianwsul.common.firebase.models.interval
 
 import com.krystianwsul.common.ErrorLogger
-import com.krystianwsul.common.firebase.models.NoScheduleOrParent
+import com.krystianwsul.common.firebase.models.noscheduleorparent.NoScheduleOrParent
 import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.firebase.models.taskhierarchy.TaskHierarchy
 import com.krystianwsul.common.time.ExactTimeStamp
@@ -196,7 +196,7 @@ object IntervalBuilder {
         }
 
         class NoScheduleOrParent(
-                val noScheduleOrParent: com.krystianwsul.common.firebase.models.NoScheduleOrParent,
+            val noScheduleOrParent: com.krystianwsul.common.firebase.models.noscheduleorparent.NoScheduleOrParent,
         ) : TypeBuilder() {
 
             override val startExactTimeStampOffset = noScheduleOrParent.startExactTimeStampOffset
@@ -255,8 +255,8 @@ object IntervalBuilder {
         }
 
         data class NoSchedule(
-                override val startExactTimeStampOffset: ExactTimeStamp.Offset,
-                val noScheduleOrParent: NoScheduleOrParent? = null,
+            override val startExactTimeStampOffset: ExactTimeStamp.Offset,
+            val noScheduleOrParent: NoScheduleOrParent? = null,
         ) : IntervalBuilder() {
 
             override val endExactTimeStampOffset = noScheduleOrParent?.endExactTimeStampOffset

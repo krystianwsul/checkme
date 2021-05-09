@@ -2,7 +2,7 @@ package com.krystianwsul.common.relevance
 
 
 import com.krystianwsul.common.firebase.models.Instance
-import com.krystianwsul.common.firebase.models.NoScheduleOrParent
+import com.krystianwsul.common.firebase.models.noscheduleorparent.NoScheduleOrParent
 import com.krystianwsul.common.firebase.models.project.PrivateProject
 import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.project.SharedProject
@@ -209,12 +209,12 @@ object Irrelevant {
     private class VisibleIrrelevantTasksException(message: String) : Exception(message)
 
     data class Result(
-            val irrelevantExistingInstances: Collection<Instance>,
-            val irrelevantTaskHierarchies: Collection<TaskHierarchy>,
-            val irrelevantSchedules: Collection<Schedule>,
-            val irrelevantNoScheduleOrParents: Collection<NoScheduleOrParent>,
-            val irrelevantTasks: Collection<Task>,
-            val irrelevantRemoteCustomTimes: Collection<Time.Custom.Project<*>>,
-            val removedSharedProjects: Collection<SharedProject>,
+        val irrelevantExistingInstances: Collection<Instance>,
+        val irrelevantTaskHierarchies: Collection<TaskHierarchy>,
+        val irrelevantSchedules: Collection<Schedule>,
+        val irrelevantNoScheduleOrParents: Collection<NoScheduleOrParent>,
+        val irrelevantTasks: Collection<Task>,
+        val irrelevantRemoteCustomTimes: Collection<Time.Custom.Project<*>>,
+        val removedSharedProjects: Collection<SharedProject>,
     )
 }

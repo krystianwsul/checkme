@@ -319,7 +319,10 @@ class ChangeTypeSourceTest {
                     taskKey1,
                     RootTaskJson(
                             noScheduleOrParent = mapOf(
-                                    "noScheduleOrParentId" to NoScheduleOrParentJson(projectId = privateProjectId),
+                                "noScheduleOrParentId" to NoScheduleOrParentJson(
+                                    startTimeOffset = 0.0,
+                                    projectId = privateProjectId,
+                                ),
                             ),
                     ),
             )
@@ -344,7 +347,10 @@ class ChangeTypeSourceTest {
                     taskKey1,
                     RootTaskJson(
                             noScheduleOrParent = mapOf(
-                                    "noScheduleOrParentId" to NoScheduleOrParentJson(projectId = privateProjectId),
+                                "noScheduleOrParentId" to NoScheduleOrParentJson(
+                                    startTimeOffset = 0.0,
+                                    projectId = privateProjectId,
+                                ),
                             ),
                     ),
             )
@@ -369,7 +375,10 @@ class ChangeTypeSourceTest {
                     taskKey1,
                     RootTaskJson(
                             noScheduleOrParent = mapOf(
-                                    "noScheduleOrParentId" to NoScheduleOrParentJson(projectId = privateProjectId),
+                                "noScheduleOrParentId" to NoScheduleOrParentJson(
+                                    startTimeOffset = 0.0,
+                                    projectId = privateProjectId,
+                                ),
                             ),
                     ),
             )
@@ -390,7 +399,10 @@ class ChangeTypeSourceTest {
                 taskKey1,
                 RootTaskJson(
                         noScheduleOrParent = mapOf(
-                                "noScheduleOrParentId" to NoScheduleOrParentJson(projectId = privateProjectId),
+                            "noScheduleOrParentId" to NoScheduleOrParentJson(
+                                startTimeOffset = 0.0,
+                                projectId = privateProjectId,
+                            ),
                         ),
                 ),
         )
@@ -413,7 +425,10 @@ class ChangeTypeSourceTest {
                 taskKey1,
                 RootTaskJson(
                         noScheduleOrParent = mapOf(
-                                "noScheduleOrParentId" to NoScheduleOrParentJson(projectId = privateProjectId),
+                            "noScheduleOrParentId" to NoScheduleOrParentJson(
+                                startTimeOffset = 0.0,
+                                projectId = privateProjectId,
+                            ),
                         ),
                         rootTaskIds = mutableMapOf(taskKey2.taskId to true),
                 ),
@@ -425,7 +440,10 @@ class ChangeTypeSourceTest {
                     RootTaskJson(
                             startTimeOffset = 0.0,
                             taskHierarchies = mapOf(
-                                    "taskHierarchyId" to NestedTaskHierarchyJson(parentTaskId = taskKey1.taskId),
+                                "taskHierarchyId" to NestedTaskHierarchyJson(
+                                    startTimeOffset = 0.0,
+                                    parentTaskId = taskKey1.taskId,
+                                ),
                             ),
                     ),
             )
@@ -445,7 +463,10 @@ class ChangeTypeSourceTest {
                 taskKey1,
                 RootTaskJson(
                         noScheduleOrParent = mapOf(
-                                "noScheduleOrParentId" to NoScheduleOrParentJson(projectId = privateProjectId),
+                            "noScheduleOrParentId" to NoScheduleOrParentJson(
+                                startTimeOffset = 0.0,
+                                projectId = privateProjectId,
+                            ),
                         ),
                         rootTaskIds = mutableMapOf(taskKey2.taskId to true, taskKey3.taskId to true),
                 ),
@@ -456,7 +477,10 @@ class ChangeTypeSourceTest {
                 RootTaskJson(
                         startTimeOffset = 0.0,
                         taskHierarchies = mapOf(
-                                "taskHierarchyId" to NestedTaskHierarchyJson(parentTaskId = taskKey1.taskId),
+                            "taskHierarchyId" to NestedTaskHierarchyJson(
+                                startTimeOffset = 0.0,
+                                parentTaskId = taskKey1.taskId,
+                            ),
                         ),
                 ),
         )
@@ -466,7 +490,10 @@ class ChangeTypeSourceTest {
                     taskKey1,
                     RootTaskJson(
                             noScheduleOrParent = mapOf(
-                                    "noScheduleOrParentId" to NoScheduleOrParentJson(projectId = privateProjectId),
+                                "noScheduleOrParentId" to NoScheduleOrParentJson(
+                                    startTimeOffset = 0.0,
+                                    projectId = privateProjectId,
+                                ),
                             ),
                             rootTaskIds = mutableMapOf(taskKey2.taskId to true),
                     ),
@@ -485,7 +512,10 @@ class ChangeTypeSourceTest {
                 taskKey1,
                 RootTaskJson(
                         noScheduleOrParent = mapOf(
-                                "noScheduleOrParentId" to NoScheduleOrParentJson(projectId = privateProjectId),
+                            "noScheduleOrParentId" to NoScheduleOrParentJson(
+                                startTimeOffset = 0.0,
+                                projectId = privateProjectId,
+                            ),
                         ),
                 ),
         )
@@ -498,7 +528,10 @@ class ChangeTypeSourceTest {
                     RootTaskJson(
                             name = "changedName",
                             noScheduleOrParent = mapOf(
-                                    "noScheduleOrParentId" to NoScheduleOrParentJson(projectId = privateProjectId),
+                                "noScheduleOrParentId" to NoScheduleOrParentJson(
+                                    startTimeOffset = 0.0,
+                                    projectId = privateProjectId,
+                                ),
                             ),
                     ),
             )
@@ -515,7 +548,10 @@ class ChangeTypeSourceTest {
                 taskKey1,
                 RootTaskJson(
                         noScheduleOrParent = mapOf(
-                                "noScheduleOrParentId" to NoScheduleOrParentJson(projectId = privateProjectId),
+                            "noScheduleOrParentId" to NoScheduleOrParentJson(
+                                startTimeOffset = 0.0,
+                                projectId = privateProjectId,
+                            ),
                         ),
                 ),
         )
@@ -533,7 +569,10 @@ class ChangeTypeSourceTest {
                 taskKey1,
                 RootTaskJson(
                         noScheduleOrParent = mapOf(
-                                "noScheduleOrParentId" to NoScheduleOrParentJson(projectId = privateProjectId),
+                            "noScheduleOrParentId" to NoScheduleOrParentJson(
+                                startTimeOffset = 0.0,
+                                projectId = privateProjectId,
+                            ),
                         ),
                         rootTaskIds = mutableMapOf(taskKey2.taskId to true)
                 ),
@@ -544,7 +583,10 @@ class ChangeTypeSourceTest {
                 RootTaskJson(
                         startTimeOffset = 0.0,
                         taskHierarchies = mapOf(
-                                "taskHierarchyId" to NestedTaskHierarchyJson(parentTaskId = taskKey1.taskId)
+                            "taskHierarchyId" to NestedTaskHierarchyJson(
+                                startTimeOffset = 0.0,
+                                parentTaskId = taskKey1.taskId,
+                            )
                         ),
                 ),
         )
@@ -555,7 +597,10 @@ class ChangeTypeSourceTest {
                     taskKey1,
                     RootTaskJson(
                             noScheduleOrParent = mapOf(
-                                    "noScheduleOrParentId" to NoScheduleOrParentJson(projectId = privateProjectId),
+                                "noScheduleOrParentId" to NoScheduleOrParentJson(
+                                    startTimeOffset = 0.0,
+                                    projectId = privateProjectId,
+                                ),
                             ),
                     ),
             )
@@ -571,7 +616,10 @@ class ChangeTypeSourceTest {
                 taskKey1,
                 RootTaskJson(
                         noScheduleOrParent = mapOf(
-                                "noScheduleOrParentId" to NoScheduleOrParentJson(projectId = privateProjectId),
+                            "noScheduleOrParentId" to NoScheduleOrParentJson(
+                                startTimeOffset = 0.0,
+                                projectId = privateProjectId,
+                            ),
                         ),
                         rootTaskIds = mutableMapOf(taskKey2.taskId to true)
                 ),
@@ -582,7 +630,10 @@ class ChangeTypeSourceTest {
                 RootTaskJson(
                         startTimeOffset = 0.0,
                         taskHierarchies = mapOf(
-                                "taskHierarchyId" to NestedTaskHierarchyJson(parentTaskId = taskKey1.taskId)
+                            "taskHierarchyId" to NestedTaskHierarchyJson(
+                                startTimeOffset = 0.0,
+                                parentTaskId = taskKey1.taskId,
+                            )
                         ),
                 ),
         )
@@ -595,7 +646,10 @@ class ChangeTypeSourceTest {
                             name = "changedName",
                             startTimeOffset = 0.0,
                             taskHierarchies = mapOf(
-                                    "taskHierarchyId" to NestedTaskHierarchyJson(parentTaskId = taskKey1.taskId)
+                                "taskHierarchyId" to NestedTaskHierarchyJson(
+                                    startTimeOffset = 0.0,
+                                    parentTaskId = taskKey1.taskId,
+                                )
                             ),
                     ),
             )
@@ -630,7 +684,10 @@ class ChangeTypeSourceTest {
                 taskKey1,
                 RootTaskJson(
                         noScheduleOrParent = mapOf(
-                                "noScheduleOrParentId" to NoScheduleOrParentJson(projectId = privateProjectId),
+                            "noScheduleOrParentId" to NoScheduleOrParentJson(
+                                startTimeOffset = 0.0,
+                                projectId = privateProjectId,
+                            ),
                         ),
                 ),
         )
@@ -640,7 +697,10 @@ class ChangeTypeSourceTest {
                 RootTaskJson(
                         name = "changedName",
                         noScheduleOrParent = mapOf(
-                                "noScheduleOrParentId" to NoScheduleOrParentJson(projectId = privateProjectId),
+                            "noScheduleOrParentId" to NoScheduleOrParentJson(
+                                startTimeOffset = 0.0,
+                                projectId = privateProjectId,
+                            ),
                         ),
                 ),
         )
@@ -662,7 +722,10 @@ class ChangeTypeSourceTest {
                 taskKey1,
                 RootTaskJson(
                         noScheduleOrParent = mapOf(
-                                "noScheduleOrParentId" to NoScheduleOrParentJson(projectId = privateProjectId),
+                            "noScheduleOrParentId" to NoScheduleOrParentJson(
+                                startTimeOffset = 0.0,
+                                projectId = privateProjectId,
+                            ),
                         ),
                         rootTaskIds = mutableMapOf(taskKey2.taskId to true)
                 ),
@@ -674,7 +737,10 @@ class ChangeTypeSourceTest {
                 RootTaskJson(
                         startTimeOffset = 0.0,
                         taskHierarchies = mapOf(
-                                "taskHierarchyId" to NestedTaskHierarchyJson(parentTaskId = taskKey1.taskId)
+                            "taskHierarchyId" to NestedTaskHierarchyJson(
+                                startTimeOffset = 0.0,
+                                parentTaskId = taskKey1.taskId,
+                            )
                         ),
                 ),
         )
@@ -696,7 +762,10 @@ class ChangeTypeSourceTest {
                 taskKey1,
                 RootTaskJson(
                         noScheduleOrParent = mapOf(
-                                "noScheduleOrParentId" to NoScheduleOrParentJson(projectId = privateProjectId),
+                            "noScheduleOrParentId" to NoScheduleOrParentJson(
+                                startTimeOffset = 0.0,
+                                projectId = privateProjectId,
+                            ),
                         ),
                         rootTaskIds = mutableMapOf(taskKey2.taskId to true)
                 ),
@@ -707,7 +776,10 @@ class ChangeTypeSourceTest {
                 RootTaskJson(
                         "task1Changed",
                         noScheduleOrParent = mapOf(
-                                "noScheduleOrParentId" to NoScheduleOrParentJson(projectId = privateProjectId),
+                            "noScheduleOrParentId" to NoScheduleOrParentJson(
+                                startTimeOffset = 0.0,
+                                projectId = privateProjectId,
+                            ),
                         ),
                         rootTaskIds = mutableMapOf(taskKey2.taskId to true)
                 ),
@@ -720,7 +792,10 @@ class ChangeTypeSourceTest {
                 RootTaskJson(
                         startTimeOffset = 0.0,
                         taskHierarchies = mapOf(
-                                "taskHierarchyId" to NestedTaskHierarchyJson(parentTaskId = taskKey1.taskId)
+                            "taskHierarchyId" to NestedTaskHierarchyJson(
+                                startTimeOffset = 0.0,
+                                parentTaskId = taskKey1.taskId,
+                            )
                         ),
                 ),
         )
@@ -742,7 +817,10 @@ class ChangeTypeSourceTest {
                 taskKey1,
                 RootTaskJson(
                         noScheduleOrParent = mapOf(
-                                "noScheduleOrParentId" to NoScheduleOrParentJson(projectId = privateProjectId),
+                            "noScheduleOrParentId" to NoScheduleOrParentJson(
+                                startTimeOffset = 0.0,
+                                projectId = privateProjectId,
+                            ),
                         ),
                         rootTaskIds = mutableMapOf(taskKey2.taskId to true)
                 ),
@@ -754,7 +832,10 @@ class ChangeTypeSourceTest {
                 RootTaskJson(
                         startTimeOffset = 0.0,
                         taskHierarchies = mapOf(
-                                "taskHierarchyId" to NestedTaskHierarchyJson(parentTaskId = taskKey1.taskId)
+                            "taskHierarchyId" to NestedTaskHierarchyJson(
+                                startTimeOffset = 0.0,
+                                parentTaskId = taskKey1.taskId,
+                            )
                         ),
                 ),
         )
@@ -765,7 +846,10 @@ class ChangeTypeSourceTest {
                         name = "changedName",
                         startTimeOffset = 0.0,
                         taskHierarchies = mapOf(
-                                "taskHierarchyId" to NestedTaskHierarchyJson(parentTaskId = taskKey1.taskId)
+                            "taskHierarchyId" to NestedTaskHierarchyJson(
+                                startTimeOffset = 0.0,
+                                parentTaskId = taskKey1.taskId,
+                            )
                         ),
                 ),
         )
@@ -787,7 +871,10 @@ class ChangeTypeSourceTest {
                 taskKey1,
                 RootTaskJson(
                         noScheduleOrParent = mapOf(
-                                "noScheduleOrParentId" to NoScheduleOrParentJson(projectId = privateProjectId),
+                            "noScheduleOrParentId" to NoScheduleOrParentJson(
+                                startTimeOffset = 0.0,
+                                projectId = privateProjectId,
+                            ),
                         ),
                         rootTaskIds = mutableMapOf(taskKey2.taskId to true)
                 ),
@@ -798,7 +885,10 @@ class ChangeTypeSourceTest {
                 RootTaskJson(
                         startTimeOffset = 0.0,
                         taskHierarchies = mapOf(
-                                "taskHierarchyId" to NestedTaskHierarchyJson(parentTaskId = taskKey1.taskId)
+                            "taskHierarchyId" to NestedTaskHierarchyJson(
+                                startTimeOffset = 0.0,
+                                parentTaskId = taskKey1.taskId,
+                            )
                         ),
                 ),
         )
@@ -821,7 +911,10 @@ class ChangeTypeSourceTest {
                 taskKey1,
                 RootTaskJson(
                         noScheduleOrParent = mapOf(
-                                "noScheduleOrParentId" to NoScheduleOrParentJson(projectId = privateProjectId),
+                            "noScheduleOrParentId" to NoScheduleOrParentJson(
+                                startTimeOffset = 0.0,
+                                projectId = privateProjectId,
+                            ),
                         ),
                         rootTaskIds = mutableMapOf(taskKey2.taskId to true)
                 ),
@@ -832,7 +925,10 @@ class ChangeTypeSourceTest {
                 RootTaskJson(
                         startTimeOffset = 0.0,
                         taskHierarchies = mapOf(
-                                "taskHierarchyId" to NestedTaskHierarchyJson(parentTaskId = taskKey1.taskId)
+                            "taskHierarchyId" to NestedTaskHierarchyJson(
+                                startTimeOffset = 0.0,
+                                parentTaskId = taskKey1.taskId,
+                            )
                         ),
                 ),
         )
@@ -884,7 +980,10 @@ class ChangeTypeSourceTest {
                     taskKey1,
                     RootTaskJson(
                             noScheduleOrParent = mapOf(
-                                    "noScheduleOrParentId" to NoScheduleOrParentJson(projectId = sharedProjectKey.key),
+                                "noScheduleOrParentId" to NoScheduleOrParentJson(
+                                    startTimeOffset = 0.0,
+                                    projectId = sharedProjectKey.key,
+                                ),
                             ),
                     ),
             )
@@ -941,7 +1040,10 @@ class ChangeTypeSourceTest {
                     taskKey1,
                     RootTaskJson(
                             noScheduleOrParent = mapOf(
-                                    "noScheduleOrParentId" to NoScheduleOrParentJson(projectId = privateProjectId),
+                                "noScheduleOrParentId" to NoScheduleOrParentJson(
+                                    startTimeOffset = 0.0,
+                                    projectId = privateProjectId,
+                                ),
                             ),
                     ),
             )

@@ -18,9 +18,7 @@ import com.krystianwsul.common.firebase.models.RootUser
 import com.krystianwsul.common.firebase.models.project.PrivateProject
 import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.project.SharedProject
-import com.krystianwsul.common.firebase.models.task.ProjectTask
 import com.krystianwsul.common.time.ExactTimeStamp
-import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.*
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
@@ -124,32 +122,6 @@ class ProjectsFactory(
 
     val projectTasks get() = projects.values.flatMap { it.projectTasks }
 
-    fun createScheduleTopLevelTask(
-        // todo task
-        now: ExactTimeStamp.Local,
-        name: String,
-        scheduleDatas: List<Pair<ScheduleData, Time>>,
-        note: String?,
-        projectKey: ProjectKey<*>,
-        imageUuid: String?,
-        deviceDbInfo: DeviceDbInfo,
-        customTimeMigrationHelper: Project.CustomTimeMigrationHelper,
-        ordinal: Double?,
-        assignedTo: Set<UserKey>,
-    ): ProjectTask {
-        return createTaskHelper(
-                now,
-                name,
-                note,
-                projectKey,
-                imageUuid,
-                deviceDbInfo,
-                ordinal,
-        ).apply {
-            createSchedules(now, scheduleDatas, assignedTo, customTimeMigrationHelper, projectKey)
-        }
-    }
-
     fun createNoScheduleOrParentTask(
         // todo task
         now: ExactTimeStamp.Local,
@@ -170,16 +142,17 @@ class ProjectsFactory(
     ).apply { setNoScheduleOrParent(now, projectKey) }
 
     private fun createTaskHelper(
-            now: ExactTimeStamp.Local,
-            name: String,
-            note: String?,
-            projectKey: ProjectKey<*>,
-            imageUuid: String?,
-            deviceDbInfo: DeviceDbInfo,
-            ordinal: Double? = null,
+        // todo task
+        now: ExactTimeStamp.Local,
+        name: String,
+        note: String?,
+        projectKey: ProjectKey<*>,
+        imageUuid: String?,
+        deviceDbInfo: DeviceDbInfo,
+        ordinal: Double? = null,
     ) = getProjectForce(projectKey).createTask(
-            now,
-            imageUuid?.let { TaskJson.Image(imageUuid, deviceDbInfo.uuid) },
+        now,
+        imageUuid?.let { TaskJson.Image(imageUuid, deviceDbInfo.uuid) },
             name,
             note,
             ordinal,

@@ -626,11 +626,12 @@ sealed class Task(
     ): Time
 
     fun createSchedules(
-            now: ExactTimeStamp.Local,
-            scheduleDatas: List<Pair<ScheduleData, Time>>,
-            assignedTo: Set<UserKey>,
-            customTimeMigrationHelper: Project.CustomTimeMigrationHelper,
-            projectKey: ProjectKey<*>,
+        // todo task move to rootTask
+        now: ExactTimeStamp.Local,
+        scheduleDatas: List<Pair<ScheduleData, Time>>,
+        assignedTo: Set<UserKey>,
+        customTimeMigrationHelper: Project.CustomTimeMigrationHelper,
+        projectKey: ProjectKey<*>,
     ) {
         val assignedToKeys = assignedTo.map { it.key }.toSet()
 

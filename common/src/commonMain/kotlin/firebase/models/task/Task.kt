@@ -1017,7 +1017,8 @@ abstract class Task(
 
     fun setNoScheduleOrParent(now: ExactTimeStamp.Local, projectKey: ProjectKey<*>) {
         val noScheduleOrParentRecord = taskRecord.newNoScheduleOrParentRecord(
-            NoScheduleOrParentJson(
+            RootNoScheduleOrParentJson(
+                // todo task
                 now.long,
                 now.offset,
                 projectId = projectKey.takeIf { addProjectIdToNoScheduleOrParent }?.key,

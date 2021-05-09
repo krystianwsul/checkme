@@ -1,8 +1,8 @@
 package com.krystianwsul.common.firebase.json.tasks
 
 import com.krystianwsul.common.firebase.json.InstanceJson
-import com.krystianwsul.common.firebase.json.NoScheduleOrParentJson
 import com.krystianwsul.common.firebase.json.Parsable
+import com.krystianwsul.common.firebase.json.RootNoScheduleOrParentJson
 import com.krystianwsul.common.firebase.json.RootTaskParentJson
 import com.krystianwsul.common.firebase.json.schedule.RootScheduleWrapper
 import com.krystianwsul.common.firebase.json.taskhierarchies.NestedTaskHierarchyJson
@@ -19,7 +19,7 @@ data class RootTaskJson @JvmOverloads constructor(
     override var schedules: MutableMap<String, RootScheduleWrapper> = mutableMapOf(),
     override var image: TaskJson.Image? = null,
     override var endData: TaskJson.EndData? = null,
-    override var noScheduleOrParent: Map<String, NoScheduleOrParentJson> = mapOf(),
+    override var noScheduleOrParent: Map<String, RootNoScheduleOrParentJson> = mapOf(),
     override var ordinal: Double? = null,
     override var taskHierarchies: Map<String, NestedTaskHierarchyJson> = mapOf(),
     override val rootTaskIds: MutableMap<String, Boolean> = mutableMapOf(),

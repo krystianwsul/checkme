@@ -1,5 +1,6 @@
 package com.krystianwsul.common.firebase.records.task
 
+import com.krystianwsul.common.firebase.json.ProjectNoScheduleOrParentJson
 import com.krystianwsul.common.firebase.json.schedule.*
 import com.krystianwsul.common.firebase.json.tasks.SharedTaskJson
 import com.krystianwsul.common.firebase.records.AssignedToHelper
@@ -41,7 +42,8 @@ class SharedTaskRecord private constructor(
 
             taskJson.schedules = scheduleWrappers
 
-            taskJson.noScheduleOrParent = noScheduleOrParentRecords.mapValues { it.value.createObject }
+            taskJson.noScheduleOrParent =
+                noScheduleOrParentRecords.mapValues { it.value.createObject as ProjectNoScheduleOrParentJson } // todo task
 
             taskJson.taskHierarchies = taskHierarchyRecords.values.associate { it.id.value to it.createObject }
 

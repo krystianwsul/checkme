@@ -1,6 +1,7 @@
 package com.krystianwsul.common.firebase.records.task
 
 import com.krystianwsul.common.firebase.DatabaseWrapper
+import com.krystianwsul.common.firebase.json.RootNoScheduleOrParentJson
 import com.krystianwsul.common.firebase.json.schedule.*
 import com.krystianwsul.common.firebase.json.tasks.RootTaskJson
 import com.krystianwsul.common.firebase.records.AssignedToHelper
@@ -59,7 +60,8 @@ class RootTaskRecord private constructor(
 
             taskJson.schedules = scheduleWrappers
 
-            taskJson.noScheduleOrParent = noScheduleOrParentRecords.mapValues { it.value.createObject }
+            taskJson.noScheduleOrParent =
+                noScheduleOrParentRecords.mapValues { it.value.createObject as RootNoScheduleOrParentJson } // todo task
 
             taskJson.taskHierarchies = taskHierarchyRecords.values.associate { it.id.value to it.createObject }
 

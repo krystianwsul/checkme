@@ -1,13 +1,12 @@
 package com.krystianwsul.common.firebase.json
 
-import kotlinx.serialization.Serializable
-import kotlin.jvm.JvmOverloads
+interface NoScheduleOrParentJson {
 
-@Serializable
-data class NoScheduleOrParentJson @JvmOverloads constructor(
-        val startTime: Long = 0,
-        var startTimeOffset: Double? = null, // this is nullable only for project tasks
-        var endTime: Long? = null,
-        var endTimeOffset: Double? = null,
-        var projectId: String? = null, // this is nullable only for project tasks
-)
+        val startTime: Long
+        var startTimeOffset: Double? // this is nullable only for project tasks
+
+        var endTime: Long?
+        var endTimeOffset: Double?
+
+        var projectId: String? // this is nullable only for project tasks
+}

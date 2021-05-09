@@ -1,7 +1,6 @@
 package com.krystianwsul.common.firebase.models.project
 
 import com.krystianwsul.common.criteria.SearchCriteria
-import com.krystianwsul.common.domain.ProjectToProjectConversion
 import com.krystianwsul.common.domain.ProjectUndoData
 import com.krystianwsul.common.domain.TaskHierarchyContainer
 import com.krystianwsul.common.firebase.json.InstanceJson
@@ -269,37 +268,6 @@ abstract class Project<T : ProjectType>(
 
     fun getDateTime(scheduleKey: ScheduleKey) =
         DateTime(scheduleKey.scheduleDate, getTime(scheduleKey.scheduleTimePair))
-
-    fun convertRemoteToRemoteHelper(
-        // todo task edit
-        now: ExactTimeStamp.Local,
-        projectToProjectConversion: ProjectToProjectConversion,
-        startTask: ProjectTask,
-    ) {
-        if (projectToProjectConversion.startTasks.containsKey(startTask.id)) return
-
-        projectToProjectConversion.startTasks[startTask.id] = Pair(
-            startTask,
-            startTask.existingInstances
-                .values
-                .filter {
-                    listOf(
-                        it.scheduleDateTime,
-                        it.instanceDateTime,
-                    ).maxOrNull()!!.toLocalExactTimeStamp() >= now
-                }
-        )
-
-        val childTaskHierarchies = startTask.getChildTaskHierarchies(now)
-
-        projectToProjectConversion.startTaskHierarchies.addAll(childTaskHierarchies)
-
-        childTaskHierarchies.map { it.childTask }.forEach {
-            it.requireCurrent(now)
-
-            convertRemoteToRemoteHelper(now, projectToProjectConversion, it as ProjectTask)
-        }
-    }
 
     fun fixNotificationShown(
         shownFactory: Instance.ShownFactory,

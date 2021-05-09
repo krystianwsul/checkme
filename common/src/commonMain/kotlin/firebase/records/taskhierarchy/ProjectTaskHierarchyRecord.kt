@@ -2,13 +2,14 @@ package com.krystianwsul.common.firebase.records.taskhierarchy
 
 import com.krystianwsul.common.firebase.json.taskhierarchies.ProjectTaskHierarchyJson
 import com.krystianwsul.common.firebase.records.project.ProjectRecord
+import com.krystianwsul.common.utils.TaskHierarchyId
 
 
 class ProjectTaskHierarchyRecord(
-        create: Boolean,
-        id: String,
-        private val projectRecord: ProjectRecord<*>,
-        createObject: ProjectTaskHierarchyJson,
+    create: Boolean,
+    id: TaskHierarchyId,
+    private val projectRecord: ProjectRecord<*>,
+    createObject: ProjectTaskHierarchyJson,
 ) : TaskHierarchyRecord<ProjectTaskHierarchyJson>(create, id, createObject) {
 
     override val key get() = projectRecord.childKey + "/" + TASK_HIERARCHIES + "/" + id
@@ -18,19 +19,19 @@ class ProjectTaskHierarchyRecord(
     override val childTaskId get() = createObject.childTaskId
 
     constructor(
-            id: String,
-            projectRecord: ProjectRecord<*>,
-            taskHierarchyJson: ProjectTaskHierarchyJson,
+        id: TaskHierarchyId,
+        projectRecord: ProjectRecord<*>,
+        taskHierarchyJson: ProjectTaskHierarchyJson,
     ) : this(false, id, projectRecord, taskHierarchyJson)
 
     constructor(
-            projectRecord: ProjectRecord<*>,
-            taskHierarchyJson: ProjectTaskHierarchyJson,
+        projectRecord: ProjectRecord<*>,
+        taskHierarchyJson: ProjectTaskHierarchyJson,
     ) : this(
-            true,
-            projectRecord.getProjectTaskHierarchyRecordId(),
-            projectRecord,
-            taskHierarchyJson,
+        true,
+        projectRecord.getProjectTaskHierarchyRecordId(),
+        projectRecord,
+        taskHierarchyJson,
     )
 
     override fun deleteFromParent() = check(projectRecord.taskHierarchyRecords.remove(id) == this)

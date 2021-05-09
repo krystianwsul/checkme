@@ -23,10 +23,10 @@ import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.*
 
 abstract class Task(
-        private val copyScheduleHelper: CopyScheduleHelper,
-        val customTimeProvider: JsonTime.CustomTimeProvider,
-        private val taskRecord: TaskRecord,
-        private val parentTaskDelegate: ParentTaskDelegate,
+    private val copyScheduleHelper: CopyScheduleHelper,
+    val customTimeProvider: JsonTime.CustomTimeProvider,
+    private val taskRecord: TaskRecord,
+    private val parentTaskDelegate: ParentTaskDelegate,
 ) : Current, CurrentOffset, QueryMatchable, Assignable {
 
     companion object {
@@ -47,9 +47,9 @@ abstract class Task(
     private val endDataProperty = invalidatableLazyCallbacks {
         taskRecord.endData?.let {
             EndData(
-                    ExactTimeStamp.Local(it.time),
-                    it.deleteInstances,
-                    ExactTimeStamp.Offset.fromOffset(it.time, it.offset),
+                ExactTimeStamp.Local(it.time),
+                it.deleteInstances,
+                ExactTimeStamp.Offset.fromOffset(it.time, it.offset),
             )
         }
     }
@@ -58,8 +58,8 @@ abstract class Task(
     private val _schedules = mutableListOf<Schedule>()
 
     private val noScheduleOrParentsMap = taskRecord.noScheduleOrParentRecords
-            .mapValues { NoScheduleOrParent(this, it.value) }
-            .toMutableMap()
+        .mapValues { NoScheduleOrParent(this, it.value) }
+        .toMutableMap()
 
     val noScheduleOrParents: Collection<NoScheduleOrParent> get() = noScheduleOrParentsMap.values
 
@@ -89,8 +89,8 @@ abstract class Task(
     protected abstract val projectParentTaskHierarchies: Set<ProjectTaskHierarchy>
 
     val nestedParentTaskHierarchies = taskRecord.taskHierarchyRecords
-            .mapValues { NestedTaskHierarchy(this, it.value, parentTaskDelegate) }
-            .toMutableMap()
+        .mapValues { NestedTaskHierarchy(this, it.value, parentTaskDelegate) }
+        .toMutableMap()
 
     val parentTaskHierarchies get() = projectParentTaskHierarchies + nestedParentTaskHierarchies.values
 
@@ -111,18 +111,18 @@ abstract class Task(
 
     private val childHierarchyIntervalsProperty = invalidatableLazy {
         parent.getTaskHierarchiesByParentTaskKey(taskKey)
-                .map { it.childTask }
-                .distinct()
-                .flatMap { it.parentHierarchyIntervals }
-                .filter { it.taskHierarchy.parentTaskKey == taskKey }
+            .map { it.childTask }
+            .distinct()
+            .flatMap { it.parentHierarchyIntervals }
+            .filter { it.taskHierarchy.parentTaskKey == taskKey }
     }
     val childHierarchyIntervals by childHierarchyIntervalsProperty
 
     private val _existingInstances = taskRecord.instanceRecords
-            .values
-            .map { Instance(this, it) }
-            .associateBy { it.scheduleKey }
-            .toMutableMap()
+        .values
+        .map { Instance(this, it) }
+        .associateBy { it.scheduleKey }
+        .toMutableMap()
 
     var ordinal
         get() = taskRecord.ordinal ?: startExactTimeStamp.long.toDouble()
@@ -159,25 +159,25 @@ abstract class Task(
     }
 
     private fun getTopLevelTask(exactTimeStamp: ExactTimeStamp): Task =
-            getParentTask(exactTimeStamp)?.getTopLevelTask(exactTimeStamp) ?: this
+        getParentTask(exactTimeStamp)?.getTopLevelTask(exactTimeStamp) ?: this
 
     fun getCurrentScheduleIntervals(exactTimeStamp: ExactTimeStamp): List<ScheduleInterval> {
         requireCurrentOffset(exactTimeStamp)
 
         return getInterval(exactTimeStamp).let {
             (it.type as? Type.Schedule)?.getScheduleIntervals(it)
-                    ?.filter { it.schedule.currentOffset(exactTimeStamp) }
-                    ?: listOf()
+                ?.filter { it.schedule.currentOffset(exactTimeStamp) }
+                ?: listOf()
         }
     }
 
     fun getCurrentNoScheduleOrParent(now: ExactTimeStamp.Local) =
-            getInterval(now).let {
-                (it.type as? Type.NoSchedule)?.getNoScheduleOrParentInterval(it)
-            }?.also {
-                check(it.currentOffset(now))
-                check(it.noScheduleOrParent.currentOffset(now))
-            }
+        getInterval(now).let {
+            (it.type as? Type.NoSchedule)?.getNoScheduleOrParentInterval(it)
+        }?.also {
+            check(it.currentOffset(now))
+            check(it.noScheduleOrParent.currentOffset(now))
+        }
 
     fun isTopLevelTask(exactTimeStamp: ExactTimeStamp): Boolean {
         requireCurrentOffset(exactTimeStamp)
@@ -186,10 +186,10 @@ abstract class Task(
     }
 
     fun setEndData(
-            // this is not recursive on children.  Get the whole tree beforehand.
-            endData: EndData,
-            taskUndoData: TaskUndoData? = null,
-            recursive: Boolean = false,
+        // this is not recursive on children.  Get the whole tree beforehand.
+        endData: EndData,
+        taskUndoData: TaskUndoData? = null,
+        recursive: Boolean = false,
     ) {
         val now = endData.exactTimeStampLocal
 
@@ -220,18 +220,18 @@ abstract class Task(
     }
 
     fun endAllCurrentTaskHierarchies(now: ExactTimeStamp.Local) = parentTaskHierarchies.filter { it.currentOffset(now) }
-            .onEach { it.setEndExactTimeStamp(now) }
-            .map { it.taskHierarchyKey }
+        .onEach { it.setEndExactTimeStamp(now) }
+        .map { it.taskHierarchyKey }
 
     fun endAllCurrentSchedules(now: ExactTimeStamp.Local) = schedules.filter { it.currentOffset(now) }
-            .onEach { it.setEndExactTimeStamp(now.toOffset()) }
-            .map { it.id }
+        .onEach { it.setEndExactTimeStamp(now.toOffset()) }
+        .map { it.id }
 
     fun endAllCurrentNoScheduleOrParents(now: ExactTimeStamp.Local) = noScheduleOrParents.filter { it.currentOffset(now) }
-            .onEach { it.setEndExactTimeStamp(now.toOffset()) }
-            .map { it.id }
+        .onEach { it.setEndExactTimeStamp(now.toOffset()) }
+        .map { it.id }
 
-    fun getNestedTaskHierarchy(taskHierarchyId: String) = nestedParentTaskHierarchies.getValue(taskHierarchyId)
+    fun getNestedTaskHierarchy(taskHierarchyId: TaskHierarchyId) = nestedParentTaskHierarchies.getValue(taskHierarchyId)
 
     private fun getParentTaskHierarchy(exactTimeStamp: ExactTimeStamp): HierarchyInterval? {
         requireCurrentOffset(exactTimeStamp)
@@ -257,21 +257,21 @@ abstract class Task(
     }
 
     private fun getExistingInstances(
-            startExactTimeStamp: ExactTimeStamp.Offset?,
-            endExactTimeStamp: ExactTimeStamp.Offset?,
-            bySchedule: Boolean,
-            onlyRoot: Boolean,
+        startExactTimeStamp: ExactTimeStamp.Offset?,
+        endExactTimeStamp: ExactTimeStamp.Offset?,
+        bySchedule: Boolean,
+        onlyRoot: Boolean,
     ): Sequence<Instance> {
         return _existingInstances.values
-                .asSequence()
-                .run { if (onlyRoot) filter { it.isRootInstance() } else this }
-                .map { it.getSequenceDate(bySchedule) to it }
-                .filterByDateTime(startExactTimeStamp, endExactTimeStamp)
+            .asSequence()
+            .run { if (onlyRoot) filter { it.isRootInstance() } else this }
+            .map { it.getSequenceDate(bySchedule) to it }
+            .filterByDateTime(startExactTimeStamp, endExactTimeStamp)
     }
 
     private fun <T> Sequence<Pair<DateTime, T>>.filterByDateTime(
-            startExactTimeStamp: ExactTimeStamp.Offset?,
-            endExactTimeStamp: ExactTimeStamp.Offset?,
+        startExactTimeStamp: ExactTimeStamp.Offset?,
+        endExactTimeStamp: ExactTimeStamp.Offset?,
     ) = filter {
         InterruptionChecker.throwIfInterrupted()
 
@@ -286,21 +286,21 @@ abstract class Task(
 
     // contains only generated instances
     private fun getParentInstances(
-            givenStartExactTimeStamp: ExactTimeStamp.Offset?,
-            givenEndExactTimeStamp: ExactTimeStamp.Offset?,
-            now: ExactTimeStamp.Local,
-            bySchedule: Boolean,
+        givenStartExactTimeStamp: ExactTimeStamp.Offset?,
+        givenEndExactTimeStamp: ExactTimeStamp.Offset?,
+        now: ExactTimeStamp.Local,
+        bySchedule: Boolean,
     ): Sequence<Instance> {
         val instanceSequences = parentHierarchyIntervals.map {
             it.taskHierarchy
-                    .parentTask
-                    .getInstances(givenStartExactTimeStamp, givenEndExactTimeStamp, now, bySchedule)
-                    .filter { it.isVisible(now, Instance.VisibilityOptions(hack24 = true)) }
-                    .mapNotNull {
-                        it.getChildInstances()
-                                .singleOrNull { it.taskKey == taskKey }
-                                ?.takeIf { !it.exists() }
-                    }
+                .parentTask
+                .getInstances(givenStartExactTimeStamp, givenEndExactTimeStamp, now, bySchedule)
+                .filter { it.isVisible(now, Instance.VisibilityOptions(hack24 = true)) }
+                .mapNotNull {
+                    it.getChildInstances()
+                        .singleOrNull { it.taskKey == taskKey }
+                        ?.takeIf { !it.exists() }
+                }
         }
 
         return combineInstanceSequences(instanceSequences, bySchedule)
@@ -308,8 +308,8 @@ abstract class Task(
 
     // contains only generated, root instances that aren't virtual parents
     private fun getScheduleInstances(
-            startExactTimeStamp: ExactTimeStamp.Offset?,
-            endExactTimeStamp: ExactTimeStamp.Offset?,
+        startExactTimeStamp: ExactTimeStamp.Offset?,
+        endExactTimeStamp: ExactTimeStamp.Offset?,
     ): Sequence<Instance> {
         val scheduleSequence = getScheduleDateTimes(startExactTimeStamp, endExactTimeStamp)
 
@@ -317,10 +317,10 @@ abstract class Task(
             InterruptionChecker.throwIfInterrupted()
 
             it.asSequence()
-                    .map { it.first }
-                    .distinct()
-                    .map(::getInstance)
-                    .filter { !it.exists() && it.isRootInstance() } // I don't know if the root part is necessary, now that group tasks are removed
+                .map { it.first }
+                .distinct()
+                .map(::getInstance)
+                .filter { !it.exists() && it.isRootInstance() } // I don't know if the root part is necessary, now that group tasks are removed
         }
     }
 
@@ -329,20 +329,20 @@ abstract class Task(
      customTimes, for example.
      */
     fun getScheduleDateTimes(
-            startExactTimeStamp: ExactTimeStamp.Offset?,
-            endExactTimeStamp: ExactTimeStamp.Offset?,
-            originalDateTime: Boolean = false,
-            checkOldestVisible: Boolean = true,
+        startExactTimeStamp: ExactTimeStamp.Offset?,
+        endExactTimeStamp: ExactTimeStamp.Offset?,
+        originalDateTime: Boolean = false,
+        checkOldestVisible: Boolean = true,
     ): Sequence<List<Pair<DateTime, ScheduleInterval>>> {
         if (endExactTimeStamp != null && startExactTimeStamp != null && endExactTimeStamp < startExactTimeStamp)
             return sequenceOf()
 
         val scheduleResults = scheduleIntervals.map { scheduleInterval ->
             scheduleInterval.getDateTimesInRange(
-                    startExactTimeStamp,
-                    endExactTimeStamp,
-                    originalDateTime,
-                    checkOldestVisible
+                startExactTimeStamp,
+                endExactTimeStamp,
+                originalDateTime,
+                checkOldestVisible
             ).map { it to scheduleInterval }
         }
 
@@ -350,50 +350,50 @@ abstract class Task(
             InterruptionChecker.throwIfInterrupted()
 
             val nextDateTime = it.filterNotNull()
-                    .minByOrNull { it.first }!!
-                    .first
+                .minByOrNull { it.first }!!
+                .first
 
             it.mapIndexed { index, dateTime -> index to dateTime }
-                    .filter { it.second?.first?.compareTo(nextDateTime) == 0 }
-                    .map { it.first }
+                .filter { it.second?.first?.compareTo(nextDateTime) == 0 }
+                .map { it.first }
         }
     }
 
     fun mayHaveRootInstances() = _schedules.isNotEmpty() || _existingInstances.isNotEmpty()
 
     fun getInstances(
-            startExactTimeStamp: ExactTimeStamp.Offset?,
-            endExactTimeStamp: ExactTimeStamp.Offset?,
-            now: ExactTimeStamp.Local,
-            bySchedule: Boolean = false,
-            onlyRoot: Boolean = false,
-            filterVisible: Boolean = true,
+        startExactTimeStamp: ExactTimeStamp.Offset?,
+        endExactTimeStamp: ExactTimeStamp.Offset?,
+        now: ExactTimeStamp.Local,
+        bySchedule: Boolean = false,
+        onlyRoot: Boolean = false,
+        filterVisible: Boolean = true,
     ): Sequence<Instance> {
         InterruptionChecker.throwIfInterrupted()
 
         return if (filterVisible && !notDeleted(now) && endData!!.deleteInstances) {
             getExistingInstances(
-                    startExactTimeStamp,
-                    endExactTimeStamp,
-                    bySchedule,
-                    onlyRoot
+                startExactTimeStamp,
+                endExactTimeStamp,
+                bySchedule,
+                onlyRoot
             ).filter { it.done != null }
         } else {
             val instanceSequences = mutableListOf<Sequence<Instance>>()
 
             instanceSequences += getExistingInstances(
-                    startExactTimeStamp,
-                    endExactTimeStamp,
-                    bySchedule,
-                    onlyRoot,
+                startExactTimeStamp,
+                endExactTimeStamp,
+                bySchedule,
+                onlyRoot,
             )
 
             if (!onlyRoot) {
                 instanceSequences += getParentInstances(
-                        startExactTimeStamp,
-                        endExactTimeStamp,
-                        now,
-                        bySchedule,
+                    startExactTimeStamp,
+                    endExactTimeStamp,
+                    now,
+                    bySchedule,
                 )
             }
 
@@ -406,13 +406,13 @@ abstract class Task(
     private data class ScheduleDiffKey(val scheduleData: ScheduleData, val assignedTo: Set<UserKey>)
 
     fun updateSchedules(
-            ownerKey: UserKey,
-            shownFactory: Instance.ShownFactory,
-            scheduleDatas: List<Pair<ScheduleData, Time>>,
-            now: ExactTimeStamp.Local,
-            assignedTo: Set<UserKey>,
-            customTimeMigrationHelper: Project.CustomTimeMigrationHelper,
-            projectKey: ProjectKey<*>,
+        ownerKey: UserKey,
+        shownFactory: Instance.ShownFactory,
+        scheduleDatas: List<Pair<ScheduleData, Time>>,
+        now: ExactTimeStamp.Local,
+        assignedTo: Set<UserKey>,
+        customTimeMigrationHelper: Project.CustomTimeMigrationHelper,
+        projectKey: ProjectKey<*>,
     ) {
         val removeSchedules = mutableListOf<Schedule>()
         val addScheduleDatas = scheduleDatas.map { ScheduleDiffKey(it.first, assignedTo) to it }.toMutableList()
@@ -448,38 +448,38 @@ abstract class Task(
             if (assignedTo.isNotEmpty()) singleRemoveSchedule.setAssignedTo(assignedTo)
 
             singleRemoveSchedule.getInstance(this).setInstanceDateTime(
-                    shownFactory,
-                    ownerKey,
-                    singleAddSchedulePair.second.run { DateTime((first as ScheduleData.Single).date, second) },
-                    customTimeMigrationHelper,
-                    now,
+                shownFactory,
+                ownerKey,
+                singleAddSchedulePair.second.run { DateTime((first as ScheduleData.Single).date, second) },
+                customTimeMigrationHelper,
+                now,
             )
         } else {
             removeSchedules.forEach { it.setEndExactTimeStamp(now.toOffset()) }
 
             createSchedules(
-                    ownerKey,
-                    now,
-                    addScheduleDatas.map { it.second },
-                    assignedTo,
-                    customTimeMigrationHelper,
-                    projectKey,
+                ownerKey,
+                now,
+                addScheduleDatas.map { it.second },
+                assignedTo,
+                customTimeMigrationHelper,
+                projectKey,
             )
         }
     }
 
     fun getHierarchyExactTimeStamp(exactTimeStamp: ExactTimeStamp) =
-            exactTimeStamp.coerceIn(startExactTimeStampOffset, endExactTimeStampOffset?.minusOne())
+        exactTimeStamp.coerceIn(startExactTimeStampOffset, endExactTimeStampOffset?.minusOne())
 
     fun getChildTaskHierarchies(
-            exactTimeStamp: ExactTimeStamp,
-            currentByHierarchy: Boolean = false,
+        exactTimeStamp: ExactTimeStamp,
+        currentByHierarchy: Boolean = false,
     ): List<TaskHierarchy> {
         val taskHierarchies = childHierarchyIntervals.filter {
             val currentCheckExactTimeStamp = if (currentByHierarchy) {
                 it.taskHierarchy
-                        .childTask
-                        .getHierarchyExactTimeStamp(exactTimeStamp)
+                    .childTask
+                    .getHierarchyExactTimeStamp(exactTimeStamp)
             } else {
                 exactTimeStamp
             }
@@ -488,8 +488,8 @@ abstract class Task(
                     && it.taskHierarchy.currentOffset(currentCheckExactTimeStamp)
                     && it.taskHierarchy.childTask.currentOffset(currentCheckExactTimeStamp)
         }
-                .map { it.taskHierarchy }
-                .toMutableSet()
+            .map { it.taskHierarchy }
+            .toMutableSet()
 
         return taskHierarchies.sortedBy { it.childTask.ordinal }
     }
@@ -518,24 +518,24 @@ abstract class Task(
 
     init {
         _schedules += taskRecord.singleScheduleRecords
-                .values
-                .map { SingleSchedule(this, it) }
+            .values
+            .map { SingleSchedule(this, it) }
 
         _schedules += taskRecord.weeklyScheduleRecords
-                .values
-                .map { WeeklySchedule(this, it) }
+            .values
+            .map { WeeklySchedule(this, it) }
 
         _schedules += taskRecord.monthlyDayScheduleRecords
-                .values
-                .map { MonthlyDaySchedule(this, it) }
+            .values
+            .map { MonthlyDaySchedule(this, it) }
 
         _schedules += taskRecord.monthlyWeekScheduleRecords
-                .values
-                .map { MonthlyWeekSchedule(this, it) }
+            .values
+            .map { MonthlyWeekSchedule(this, it) }
 
         _schedules += taskRecord.yearlyScheduleRecords
-                .values
-                .map { YearlySchedule(this, it) }
+            .values
+            .map { YearlySchedule(this, it) }
     }
 
     protected fun setMyEndExactTimeStamp(endData: EndData?) {
@@ -547,11 +547,11 @@ abstract class Task(
     }
 
     abstract fun createChildTask(
-            now: ExactTimeStamp.Local,
-            name: String,
-            note: String?,
-            image: TaskJson.Image?,
-            ordinal: Double? = null,
+        now: ExactTimeStamp.Local,
+        name: String,
+        note: String?,
+        image: TaskJson.Image?,
+        ordinal: Double? = null,
     ): Task
 
     protected abstract fun deleteProjectRootTaskId()
@@ -561,8 +561,8 @@ abstract class Task(
         deleteProjectRootTaskId()
 
         existingInstances.values
-                .toMutableList()
-                .forEach { it.delete() }
+            .toMutableList()
+            .forEach { it.delete() }
 
         schedules.toMutableList().forEach { it.delete() }
 
@@ -631,20 +631,20 @@ abstract class Task(
     fun getInstance(scheduleKey: ScheduleKey) = getInstance(getDateTime(scheduleKey))
 
     abstract fun getOrCopyTime(
-            ownerKey: UserKey,
-            dayOfWeek: DayOfWeek,
-            time: Time,
-            customTimeMigrationHelper: Project.CustomTimeMigrationHelper,
-            now: ExactTimeStamp.Local,
+        ownerKey: UserKey,
+        dayOfWeek: DayOfWeek,
+        time: Time,
+        customTimeMigrationHelper: Project.CustomTimeMigrationHelper,
+        now: ExactTimeStamp.Local,
     ): Time
 
     fun createSchedules(
-            ownerKey: UserKey,
-            now: ExactTimeStamp.Local,
-            scheduleDatas: List<Pair<ScheduleData, Time>>,
-            assignedTo: Set<UserKey>,
-            customTimeMigrationHelper: Project.CustomTimeMigrationHelper,
-            projectKey: ProjectKey<*>,
+        ownerKey: UserKey,
+        now: ExactTimeStamp.Local,
+        scheduleDatas: List<Pair<ScheduleData, Time>>,
+        assignedTo: Set<UserKey>,
+        customTimeMigrationHelper: Project.CustomTimeMigrationHelper,
+        projectKey: ProjectKey<*>,
     ) {
         val assignedToKeys = assignedTo.map { it.key }.toSet()
 
@@ -654,26 +654,26 @@ abstract class Task(
                     val date = scheduleData.date
 
                     val copiedTime = getOrCopyTime(
-                            ownerKey,
-                            date.dayOfWeek,
-                            time,
-                            customTimeMigrationHelper,
-                            now,
+                        ownerKey,
+                        date.dayOfWeek,
+                        time,
+                        customTimeMigrationHelper,
+                        now,
                     )
 
                     val singleScheduleRecord = taskRecord.newSingleScheduleRecord(
-                            copyScheduleHelper.newSingle(
-                                    now.long,
-                                    now.offset,
-                                    null,
-                                    null,
-                                    date.year,
-                                    date.month,
-                                    date.day,
-                                    copiedTime,
-                                    assignedToKeys,
-                                    projectKey,
-                            )
+                        copyScheduleHelper.newSingle(
+                            now.long,
+                            now.offset,
+                            null,
+                            null,
+                            date.year,
+                            date.month,
+                            date.day,
+                            copiedTime,
+                            assignedToKeys,
+                            projectKey,
+                        )
                     )
 
                     _schedules += SingleSchedule(this, singleScheduleRecord)
@@ -681,27 +681,27 @@ abstract class Task(
                 is ScheduleData.Weekly -> {
                     for (dayOfWeek in scheduleData.daysOfWeek) {
                         val copiedTime = getOrCopyTime(
-                                ownerKey,
-                                dayOfWeek,
-                                time,
-                                customTimeMigrationHelper,
-                                now,
+                            ownerKey,
+                            dayOfWeek,
+                            time,
+                            customTimeMigrationHelper,
+                            now,
                         )
 
                         val weeklyScheduleRecord = taskRecord.newWeeklyScheduleRecord(
-                                copyScheduleHelper.newWeekly(
-                                        now.long,
-                                        now.offset,
-                                        null,
-                                        null,
-                                        dayOfWeek.ordinal,
-                                        copiedTime,
-                                        scheduleData.from?.toJson(),
-                                        scheduleData.until?.toJson(),
-                                        scheduleData.interval,
-                                        assignedToKeys,
-                                        projectKey,
-                                )
+                            copyScheduleHelper.newWeekly(
+                                now.long,
+                                now.offset,
+                                null,
+                                null,
+                                dayOfWeek.ordinal,
+                                copiedTime,
+                                scheduleData.from?.toJson(),
+                                scheduleData.until?.toJson(),
+                                scheduleData.interval,
+                                assignedToKeys,
+                                projectKey,
+                            )
                         )
 
                         _schedules += WeeklySchedule(this, weeklyScheduleRecord)
@@ -713,28 +713,28 @@ abstract class Task(
                     val today = Date.today()
 
                     val dayOfWeek = getDateInMonth(
-                            today.year,
-                            today.month,
-                            scheduleData.dayOfMonth,
-                            scheduleData.beginningOfMonth,
+                        today.year,
+                        today.month,
+                        scheduleData.dayOfMonth,
+                        scheduleData.beginningOfMonth,
                     ).dayOfWeek
 
                     val copiedTime = getOrCopyTime(ownerKey, dayOfWeek, time, customTimeMigrationHelper, now)
 
                     val monthlyDayScheduleRecord = taskRecord.newMonthlyDayScheduleRecord(
-                            copyScheduleHelper.newMonthlyDay(
-                                    now.long,
-                                    now.offset,
-                                    null,
-                                    null,
-                                    dayOfMonth,
-                                    beginningOfMonth,
-                                    copiedTime,
-                                    scheduleData.from?.toJson(),
-                                    scheduleData.until?.toJson(),
-                                    assignedToKeys,
-                                    projectKey,
-                            )
+                        copyScheduleHelper.newMonthlyDay(
+                            now.long,
+                            now.offset,
+                            null,
+                            null,
+                            dayOfMonth,
+                            beginningOfMonth,
+                            copiedTime,
+                            scheduleData.from?.toJson(),
+                            scheduleData.until?.toJson(),
+                            assignedToKeys,
+                            projectKey,
+                        )
                     )
 
                     _schedules += MonthlyDaySchedule(this, monthlyDayScheduleRecord)
@@ -744,47 +744,47 @@ abstract class Task(
                     val copiedTime = getOrCopyTime(ownerKey, dayOfWeek, time, customTimeMigrationHelper, now)
 
                     val monthlyWeekScheduleRecord = taskRecord.newMonthlyWeekScheduleRecord(
-                            copyScheduleHelper.newMonthlyWeek(
-                                    now.long,
-                                    now.offset,
-                                    null,
-                                    null,
-                                    weekOfMonth,
-                                    dayOfWeek.ordinal,
-                                    beginningOfMonth,
-                                    copiedTime,
-                                    scheduleData.from?.toJson(),
-                                    scheduleData.until?.toJson(),
-                                    assignedToKeys,
-                                    projectKey,
-                            )
+                        copyScheduleHelper.newMonthlyWeek(
+                            now.long,
+                            now.offset,
+                            null,
+                            null,
+                            weekOfMonth,
+                            dayOfWeek.ordinal,
+                            beginningOfMonth,
+                            copiedTime,
+                            scheduleData.from?.toJson(),
+                            scheduleData.until?.toJson(),
+                            assignedToKeys,
+                            projectKey,
+                        )
                     )
 
                     _schedules += MonthlyWeekSchedule(this, monthlyWeekScheduleRecord)
                 }
                 is ScheduleData.Yearly -> {
                     val copiedTime = getOrCopyTime(
-                            ownerKey,
-                            Date(Date.today().year, scheduleData.month, scheduleData.day).dayOfWeek,
-                            time,
-                            customTimeMigrationHelper,
-                            now,
+                        ownerKey,
+                        Date(Date.today().year, scheduleData.month, scheduleData.day).dayOfWeek,
+                        time,
+                        customTimeMigrationHelper,
+                        now,
                     )
 
                     val yearlyScheduleRecord = taskRecord.newYearlyScheduleRecord(
-                            copyScheduleHelper.newYearly(
-                                    now.long,
-                                    now.offset,
-                                    null,
-                                    null,
-                                    scheduleData.month,
-                                    scheduleData.day,
-                                    copiedTime,
-                                    scheduleData.from?.toJson(),
-                                    scheduleData.until?.toJson(),
-                                    assignedToKeys,
-                                    projectKey,
-                            )
+                        copyScheduleHelper.newYearly(
+                            now.long,
+                            now.offset,
+                            null,
+                            null,
+                            scheduleData.month,
+                            scheduleData.day,
+                            copiedTime,
+                            scheduleData.from?.toJson(),
+                            scheduleData.until?.toJson(),
+                            assignedToKeys,
+                            projectKey,
+                        )
                     )
 
                     _schedules += YearlySchedule(this, yearlyScheduleRecord)
@@ -796,12 +796,12 @@ abstract class Task(
     }
 
     fun copySchedules(
-            deviceDbInfo: DeviceDbInfo,
-            now: ExactTimeStamp.Local,
-            schedules: List<Schedule>,
-            customTimeMigrationHelper: Project.CustomTimeMigrationHelper,
-            oldProjectKey: ProjectKey<*>,
-            newProjectKey: ProjectKey<*>,
+        deviceDbInfo: DeviceDbInfo,
+        now: ExactTimeStamp.Local,
+        schedules: List<Schedule>,
+        customTimeMigrationHelper: Project.CustomTimeMigrationHelper,
+        oldProjectKey: ProjectKey<*>,
+        newProjectKey: ProjectKey<*>,
     ) {
         for (schedule in schedules) {
             val today = Date.today()
@@ -816,113 +816,113 @@ abstract class Task(
             }
 
             val copiedTime = getOrCopyTime(
-                    deviceDbInfo.key,
-                    dayOfWeek,
-                    schedule.time,
-                    customTimeMigrationHelper,
-                    now,
+                deviceDbInfo.key,
+                dayOfWeek,
+                schedule.time,
+                customTimeMigrationHelper,
+                now,
             )
 
             val assignedTo = schedule.takeIf { oldProjectKey == newProjectKey }
-                    ?.assignedTo
-                    .orEmpty()
-                    .map { it.key }
-                    .toSet()
+                ?.assignedTo
+                .orEmpty()
+                .map { it.key }
+                .toSet()
 
             when (schedule) {
                 is SingleSchedule -> {
                     val date = schedule.date
 
                     val singleScheduleRecord = taskRecord.newSingleScheduleRecord(
-                            copyScheduleHelper.newSingle(
-                                    now.long,
-                                    now.offset,
-                                    schedule.endExactTimeStamp?.long,
-                                    schedule.endExactTimeStamp?.offset,
-                                    date.year,
-                                    date.month,
-                                    date.day,
-                                    copiedTime,
-                                    assignedTo,
-                                    newProjectKey,
-                            )
+                        copyScheduleHelper.newSingle(
+                            now.long,
+                            now.offset,
+                            schedule.endExactTimeStamp?.long,
+                            schedule.endExactTimeStamp?.offset,
+                            date.year,
+                            date.month,
+                            date.day,
+                            copiedTime,
+                            assignedTo,
+                            newProjectKey,
+                        )
                     )
 
                     _schedules += SingleSchedule(this, singleScheduleRecord)
                 }
                 is WeeklySchedule -> {
                     val weeklyScheduleRecord = taskRecord.newWeeklyScheduleRecord(
-                            copyScheduleHelper.newWeekly(
-                                    now.long,
-                                    now.offset,
-                                    schedule.endExactTimeStamp?.long,
-                                    schedule.endExactTimeStamp?.offset,
-                                    schedule.dayOfWeek.ordinal,
-                                    copiedTime,
-                                    schedule.from?.toJson(),
-                                    schedule.until?.toJson(),
-                                    schedule.interval,
-                                    assignedTo,
-                                    newProjectKey,
-                            )
+                        copyScheduleHelper.newWeekly(
+                            now.long,
+                            now.offset,
+                            schedule.endExactTimeStamp?.long,
+                            schedule.endExactTimeStamp?.offset,
+                            schedule.dayOfWeek.ordinal,
+                            copiedTime,
+                            schedule.from?.toJson(),
+                            schedule.until?.toJson(),
+                            schedule.interval,
+                            assignedTo,
+                            newProjectKey,
+                        )
                     )
 
                     _schedules += WeeklySchedule(this, weeklyScheduleRecord)
                 }
                 is MonthlyDaySchedule -> {
                     val monthlyDayScheduleRecord = taskRecord.newMonthlyDayScheduleRecord(
-                            copyScheduleHelper.newMonthlyDay(
-                                    now.long,
-                                    now.offset,
-                                    schedule.endExactTimeStamp?.long,
-                                    schedule.endExactTimeStamp?.offset,
-                                    schedule.dayOfMonth,
-                                    schedule.beginningOfMonth,
-                                    copiedTime,
-                                    schedule.from?.toJson(),
-                                    schedule.until?.toJson(),
-                                    assignedTo,
-                                    newProjectKey,
-                            )
+                        copyScheduleHelper.newMonthlyDay(
+                            now.long,
+                            now.offset,
+                            schedule.endExactTimeStamp?.long,
+                            schedule.endExactTimeStamp?.offset,
+                            schedule.dayOfMonth,
+                            schedule.beginningOfMonth,
+                            copiedTime,
+                            schedule.from?.toJson(),
+                            schedule.until?.toJson(),
+                            assignedTo,
+                            newProjectKey,
+                        )
                     )
 
                     _schedules += MonthlyDaySchedule(this, monthlyDayScheduleRecord)
                 }
                 is MonthlyWeekSchedule -> {
                     val monthlyWeekScheduleRecord = taskRecord.newMonthlyWeekScheduleRecord(
-                            copyScheduleHelper.newMonthlyWeek(
-                                    now.long,
-                                    now.offset,
-                                    schedule.endExactTimeStamp?.long,
-                                    schedule.endExactTimeStamp?.offset,
-                                    schedule.weekOfMonth,
-                                    schedule.dayOfWeek.ordinal,
-                                    schedule.beginningOfMonth,
-                                    copiedTime,
-                                    schedule.from?.toJson(),
-                                    schedule.until?.toJson(),
-                                    assignedTo,
-                                    newProjectKey,
-                            )
+                        copyScheduleHelper.newMonthlyWeek(
+                            now.long,
+                            now.offset,
+                            schedule.endExactTimeStamp?.long,
+                            schedule.endExactTimeStamp?.offset,
+                            schedule.weekOfMonth,
+                            schedule.dayOfWeek.ordinal,
+                            schedule.beginningOfMonth,
+                            copiedTime,
+                            schedule.from?.toJson(),
+                            schedule.until?.toJson(),
+                            assignedTo,
+                            newProjectKey,
+                        )
                     )
 
                     _schedules += MonthlyWeekSchedule(this, monthlyWeekScheduleRecord)
                 }
                 is YearlySchedule -> {
                     val yearlyScheduleRecord = taskRecord.newYearlyScheduleRecord(
-                            copyScheduleHelper.newYearly(
-                                    now.long,
-                                    now.offset,
-                                    schedule.endExactTimeStamp?.long,
-                                    schedule.endExactTimeStamp?.offset,
-                                    schedule.month,
-                                    schedule.day,
-                                    copiedTime,
-                                    schedule.from?.toJson(),
-                                    schedule.until?.toJson(),
-                                    assignedTo,
-                                    newProjectKey,
-                            )
+                        copyScheduleHelper.newYearly(
+                            now.long,
+                            now.offset,
+                            schedule.endExactTimeStamp?.long,
+                            schedule.endExactTimeStamp?.offset,
+                            schedule.month,
+                            schedule.day,
+                            copiedTime,
+                            schedule.from?.toJson(),
+                            schedule.until?.toJson(),
+                            assignedTo,
+                            newProjectKey,
+                        )
                     )
 
                     _schedules += YearlySchedule(this, yearlyScheduleRecord)
@@ -940,14 +940,14 @@ abstract class Task(
     fun invalidateIntervals() = intervalsProperty.invalidate()
 
     abstract fun updateProject(
-            projectUpdater: ProjectUpdater,
-            now: ExactTimeStamp.Local,
-            projectKey: ProjectKey<*>,
+        projectUpdater: ProjectUpdater,
+        now: ExactTimeStamp.Local,
+        projectKey: ProjectKey<*>,
     ): Task
 
     fun getScheduleTextMultiline(
-            scheduleTextFactory: ScheduleTextFactory,
-            exactTimeStamp: ExactTimeStamp,
+        scheduleTextFactory: ScheduleTextFactory,
+        exactTimeStamp: ExactTimeStamp,
     ): String {
         requireCurrentOffset(exactTimeStamp)
 
@@ -971,13 +971,17 @@ abstract class Task(
         }
 
         return generatedInstances[instanceKey]
-                ?: throw InstanceKeyNotFoundException("instanceKey: $instanceKey; \nmap keys: " + generatedInstances.keys.joinToString(", \n") + "; \n log: " + generatedInstancesLog.joinToString(", \n"))
+            ?: throw InstanceKeyNotFoundException(
+                "instanceKey: $instanceKey; \nmap keys: " + generatedInstances.keys.joinToString(
+                    ", \n"
+                ) + "; \n log: " + generatedInstancesLog.joinToString(", \n")
+            )
     }
 
     fun getScheduleText(
-            scheduleTextFactory: ScheduleTextFactory,
-            exactTimeStamp: ExactTimeStamp,
-            showParent: Boolean = false,
+        scheduleTextFactory: ScheduleTextFactory,
+        exactTimeStamp: ExactTimeStamp,
+        showParent: Boolean = false,
     ): String? {
         requireCurrentOffset(exactTimeStamp)
 
@@ -1008,11 +1012,11 @@ abstract class Task(
             }
         } catch (throwable: Throwable) {
             throw IntervalException(
-                    "error getting interval for task $name. exactTimeStamp: $exactTimeStamp, intervals:\n"
-                            + intervals.joinToString("\n") {
-                        "${it.startExactTimeStampOffset} - ${it.endExactTimeStampOffset}"
-                    },
-                    throwable
+                "error getting interval for task $name. exactTimeStamp: $exactTimeStamp, intervals:\n"
+                        + intervals.joinToString("\n") {
+                    "${it.startExactTimeStampOffset} - ${it.endExactTimeStampOffset}"
+                },
+                throwable
             )
         }
     }
@@ -1022,31 +1026,33 @@ abstract class Task(
     protected abstract val addProjectIdToNoScheduleOrParent: Boolean
 
     fun setNoScheduleOrParent(now: ExactTimeStamp.Local, projectKey: ProjectKey<*>) {
-        val noScheduleOrParentRecord = taskRecord.newNoScheduleOrParentRecord(NoScheduleOrParentJson(
+        val noScheduleOrParentRecord = taskRecord.newNoScheduleOrParentRecord(
+            NoScheduleOrParentJson(
                 now.long,
                 now.offset,
                 projectId = projectKey.takeIf { addProjectIdToNoScheduleOrParent }?.key,
-        ))
+            )
+        )
 
         check(!noScheduleOrParentsMap.containsKey(noScheduleOrParentRecord.id))
 
         noScheduleOrParentsMap[noScheduleOrParentRecord.id] =
-                NoScheduleOrParent(this, noScheduleOrParentRecord)
+            NoScheduleOrParent(this, noScheduleOrParentRecord)
 
         invalidateIntervals()
     }
 
     fun correctIntervalEndExactTimeStamps() = intervals.asSequence()
-            .filterIsInstance<Interval.Ended>()
-            .forEach { it.correctEndExactTimeStamps() }
+        .filterIsInstance<Interval.Ended>()
+        .forEach { it.correctEndExactTimeStamps() }
 
     fun hasOtherVisibleInstances(now: ExactTimeStamp.Local, instanceKey: InstanceKey?) = getInstances(
-            null,
-            null,
-            now,
+        null,
+        null,
+        now,
     ).filter { it.instanceKey != instanceKey }
-            .filter { it.isVisible(now, Instance.VisibilityOptions()) }
-            .any()
+        .filter { it.isVisible(now, Instance.VisibilityOptions()) }
+        .any()
 
     final override fun toString() = super.toString() + ", name: $name, taskKey: $taskKey"
 
@@ -1057,17 +1063,17 @@ abstract class Task(
             listOf()
         } else {
             currentScheduleIntervals.map { it.schedule.assignedTo }
-                    .distinct()
-                    .single()
-                    .let(project::getAssignedTo)
-                    .map { it.value }
+                .distinct()
+                .single()
+                .let(project::getAssignedTo)
+                .map { it.value }
         }
     }
 
     fun deleteNestedTaskHierarchy(nestedTaskHierarchy: NestedTaskHierarchy) {
-        check(nestedParentTaskHierarchies.containsKey(nestedTaskHierarchy.childTaskId))
+        check(nestedParentTaskHierarchies.containsKey(nestedTaskHierarchy.id as TaskHierarchyId))
 
-        nestedParentTaskHierarchies.remove(nestedTaskHierarchy.childTaskId)
+        nestedParentTaskHierarchies.remove(nestedTaskHierarchy.id as TaskHierarchyId)
 
         nestedTaskHierarchy.invalidateTasks()
     }
@@ -1079,12 +1085,12 @@ abstract class Task(
     }
 
     private fun createParentNestedTaskHierarchy(
-            nestedTaskHierarchyJson: NestedTaskHierarchyJson,
+        nestedTaskHierarchyJson: NestedTaskHierarchyJson,
     ): NestedTaskHierarchy {
         val taskHierarchyRecord = taskRecord.newTaskHierarchyRecord(nestedTaskHierarchyJson)
         val taskHierarchy = NestedTaskHierarchy(this, taskHierarchyRecord, parentTaskDelegate)
 
-        nestedParentTaskHierarchies[taskHierarchy.id] = taskHierarchy
+        nestedParentTaskHierarchies[taskHierarchy.id as TaskHierarchyId] = taskHierarchy
 
         taskHierarchy.invalidateTasks()
 
@@ -1092,18 +1098,18 @@ abstract class Task(
     }
 
     fun <V : TaskHierarchy> copyParentNestedTaskHierarchy(
-            now: ExactTimeStamp.Local,
-            startTaskHierarchy: V,
-            parentTaskId: String,
+        now: ExactTimeStamp.Local,
+        startTaskHierarchy: V,
+        parentTaskId: String,
     ) {
         check(parentTaskId.isNotEmpty())
 
         val taskHierarchyJson = NestedTaskHierarchyJson(
-                parentTaskId,
-                now.long,
-                now.offset,
-                startTaskHierarchy.endExactTimeStampOffset?.long,
-                startTaskHierarchy.endExactTimeStampOffset?.offset,
+            parentTaskId,
+            now.long,
+            now.offset,
+            startTaskHierarchy.endExactTimeStampOffset?.long,
+            startTaskHierarchy.endExactTimeStampOffset?.offset,
         )
 
         createParentNestedTaskHierarchy(taskHierarchyJson)
@@ -1120,9 +1126,9 @@ abstract class Task(
     }
 
     data class EndData(
-            val exactTimeStampLocal: ExactTimeStamp.Local,
-            val deleteInstances: Boolean,
-            val exactTimeStampOffset: ExactTimeStamp.Offset = exactTimeStampLocal.toOffset(),
+        val exactTimeStampLocal: ExactTimeStamp.Local,
+        val deleteInstances: Boolean,
+        val exactTimeStampOffset: ExactTimeStamp.Offset = exactTimeStampLocal.toOffset(),
     )
 
     private class InstanceKeyNotFoundException(message: String) : Exception(message)

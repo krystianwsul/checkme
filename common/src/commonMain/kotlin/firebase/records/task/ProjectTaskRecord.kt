@@ -6,20 +6,20 @@ import com.krystianwsul.common.firebase.records.project.ProjectRecord
 import com.krystianwsul.common.firebase.records.schedule.ProjectHelper
 
 abstract class ProjectTaskRecord protected constructor(
-        create: Boolean,
-        id: String,
-        val projectRecord: ProjectRecord<*>,
-        taskJson: TaskJson,
-        assignedToHelper: AssignedToHelper,
+    create: Boolean,
+    id: String,
+    val projectRecord: ProjectRecord<*>,
+    taskJson: TaskJson,
+    assignedToHelper: AssignedToHelper,
 ) : TaskRecord(
-        create,
-        id,
-        taskJson,
-        assignedToHelper,
-        projectRecord,
-        projectRecord.childKey + "/" + TASKS + "/" + id,
-        projectRecord,
-        ProjectHelper.Project,
+    create,
+    id,
+    taskJson,
+    assignedToHelper,
+    projectRecord,
+    projectRecord.childKey + "/" + TASKS + "/" + id,
+    projectRecord,
+    ProjectHelper.Project,
 ) {
 
     abstract override var startTimeOffset: Double?

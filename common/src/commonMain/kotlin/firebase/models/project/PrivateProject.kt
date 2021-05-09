@@ -23,14 +23,14 @@ import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.UserKey
 
 class PrivateProject(
-        override val projectRecord: PrivateProjectRecord,
-        userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
-        rootTaskProvider: RootTaskProvider,
+    override val projectRecord: PrivateProjectRecord,
+    userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
+    rootTaskProvider: RootTaskProvider,
 ) : Project<ProjectType.Private>(
-        CopyScheduleHelper.Private,
-        AssignedToHelper.Private,
-        userCustomTimeProvider,
-        rootTaskProvider,
+    CopyScheduleHelper.Private,
+    AssignedToHelper.Private,
+    userCustomTimeProvider,
+    rootTaskProvider,
 ) {
 
     override val projectKey = projectRecord.projectKey
@@ -56,15 +56,15 @@ class PrivateProject(
         }
 
         _tasks = projectRecord.taskRecords
-                .values
-                .map { ProjectTask(this, it) }
-                .associateBy { it.id }
-                .toMutableMap()
+            .values
+            .map { ProjectTask(this, it) }
+            .associateBy { it.id }
+            .toMutableMap()
 
         projectRecord.taskHierarchyRecords
-                .values
-                .map { ProjectTaskHierarchy(this, it) }
-                .forEach { taskHierarchyContainer.add(it.id, it) }
+            .values
+            .map { ProjectTaskHierarchy(this, it) }
+            .forEach { taskHierarchyContainer.add(it.id, it) }
 
         initializeInstanceHierarchyContainers()
     }
@@ -94,11 +94,11 @@ class PrivateProject(
     }
 
     override fun getProjectCustomTime(projectCustomTimeKey: CustomTimeKey.Project<ProjectType.Private>): PrivateCustomTime =
-            getProjectCustomTime(projectCustomTimeKey.customTimeId)
+        getProjectCustomTime(projectCustomTimeKey.customTimeId)
 
     override fun getOrCreateCustomTimeOld(
-            ownerKey: UserKey,
-            customTime: Time.Custom.Project<*>,
+        ownerKey: UserKey,
+        customTime: Time.Custom.Project<*>,
     ): PrivateCustomTime = when (customTime) {
         is PrivateCustomTime -> customTime
         is SharedCustomTime -> {
@@ -106,21 +106,21 @@ class PrivateProject(
                 customTimes.single { it.id == customTime.privateKey }
             } else {
                 val customTimeJson = PrivateCustomTimeJson(
-                        customTime.name,
-                        customTime.getHourMinute(DayOfWeek.SUNDAY).hour,
-                        customTime.getHourMinute(DayOfWeek.SUNDAY).minute,
-                        customTime.getHourMinute(DayOfWeek.MONDAY).hour,
-                        customTime.getHourMinute(DayOfWeek.MONDAY).minute,
-                        customTime.getHourMinute(DayOfWeek.TUESDAY).hour,
-                        customTime.getHourMinute(DayOfWeek.TUESDAY).minute,
-                        customTime.getHourMinute(DayOfWeek.WEDNESDAY).hour,
-                        customTime.getHourMinute(DayOfWeek.WEDNESDAY).minute,
-                        customTime.getHourMinute(DayOfWeek.THURSDAY).hour,
-                        customTime.getHourMinute(DayOfWeek.THURSDAY).minute,
-                        customTime.getHourMinute(DayOfWeek.FRIDAY).hour,
-                        customTime.getHourMinute(DayOfWeek.FRIDAY).minute,
-                        customTime.getHourMinute(DayOfWeek.SATURDAY).hour,
-                        customTime.getHourMinute(DayOfWeek.SATURDAY).minute
+                    customTime.name,
+                    customTime.getHourMinute(DayOfWeek.SUNDAY).hour,
+                    customTime.getHourMinute(DayOfWeek.SUNDAY).minute,
+                    customTime.getHourMinute(DayOfWeek.MONDAY).hour,
+                    customTime.getHourMinute(DayOfWeek.MONDAY).minute,
+                    customTime.getHourMinute(DayOfWeek.TUESDAY).hour,
+                    customTime.getHourMinute(DayOfWeek.TUESDAY).minute,
+                    customTime.getHourMinute(DayOfWeek.WEDNESDAY).hour,
+                    customTime.getHourMinute(DayOfWeek.WEDNESDAY).minute,
+                    customTime.getHourMinute(DayOfWeek.THURSDAY).hour,
+                    customTime.getHourMinute(DayOfWeek.THURSDAY).minute,
+                    customTime.getHourMinute(DayOfWeek.FRIDAY).hour,
+                    customTime.getHourMinute(DayOfWeek.FRIDAY).minute,
+                    customTime.getHourMinute(DayOfWeek.SATURDAY).hour,
+                    customTime.getHourMinute(DayOfWeek.SATURDAY).minute
                 )
 
                 newRemoteCustomTime(customTimeJson)
@@ -130,21 +130,21 @@ class PrivateProject(
     }
 
     override fun createChildTask(
-            parentTask: ProjectTask,
-            now: ExactTimeStamp.Local,
-            name: String,
-            note: String?,
-            image: TaskJson.Image?,
-            ordinal: Double?,
+        parentTask: ProjectTask,
+        now: ExactTimeStamp.Local,
+        name: String,
+        note: String?,
+        image: TaskJson.Image?,
+        ordinal: Double?,
     ): ProjectTask {
         val taskJson = PrivateTaskJson(
-                name,
-                now.long,
-                now.offset,
-                null,
-                note,
-                image = image,
-                ordinal = ordinal
+            name,
+            now.long,
+            now.offset,
+            null,
+            note,
+            image = image,
+            ordinal = ordinal
         )
 
         val childTask = newTask(taskJson)
@@ -155,10 +155,11 @@ class PrivateProject(
     }
 
     override fun copyTaskRecord(
-            oldTask: ProjectTask,
-            now: ExactTimeStamp.Local,
-            instanceJsons: MutableMap<String, InstanceJson>,
-    ) = projectRecord.newTaskRecord(PrivateTaskJson(
+        oldTask: ProjectTask,
+        now: ExactTimeStamp.Local,
+        instanceJsons: MutableMap<String, InstanceJson>,
+    ) = projectRecord.newTaskRecord(
+        PrivateTaskJson(
             oldTask.name,
             now.long,
             now.offset,
@@ -166,7 +167,8 @@ class PrivateProject(
             oldTask.note,
             instanceJsons,
             ordinal = oldTask.ordinal
-    ))
+        )
+    )
 
     fun newTask(taskJson: PrivateTaskJson): ProjectTask {
         val taskRecord = projectRecord.newTaskRecord(taskJson)
@@ -180,19 +182,21 @@ class PrivateProject(
     }
 
     override fun createTask(
-            now: ExactTimeStamp.Local,
-            image: TaskJson.Image?,
-            name: String,
-            note: String?,
-            ordinal: Double?,
-    ) = newTask(PrivateTaskJson(
+        now: ExactTimeStamp.Local,
+        image: TaskJson.Image?,
+        name: String,
+        note: String?,
+        ordinal: Double?,
+    ) = newTask(
+        PrivateTaskJson(
             name,
             now.long,
             now.offset,
             note = note,
             image = image,
             ordinal = ordinal
-    ))
+        )
+    )
 
     override fun getAssignedTo(userKeys: Set<UserKey>) = mapOf<UserKey, ProjectUser>()
 }

@@ -19,8 +19,8 @@ import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.json.JsonWrapper
-import com.krystianwsul.common.firebase.json.RootNoScheduleOrParentJson
 import com.krystianwsul.common.firebase.json.UserJson
+import com.krystianwsul.common.firebase.json.noscheduleorparent.RootNoScheduleOrParentJson
 import com.krystianwsul.common.firebase.json.projects.PrivateProjectJson
 import com.krystianwsul.common.firebase.json.projects.SharedProjectJson
 import com.krystianwsul.common.firebase.json.taskhierarchies.NestedTaskHierarchyJson

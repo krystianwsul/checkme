@@ -1,6 +1,6 @@
 package com.krystianwsul.common.firebase.records.schedule
 
-import com.krystianwsul.common.firebase.json.NoScheduleOrParentJson
+import com.krystianwsul.common.firebase.json.noscheduleorparent.NoScheduleOrParentJson
 import com.krystianwsul.common.firebase.json.schedule.RootScheduleJson
 import com.krystianwsul.common.firebase.json.schedule.ScheduleJson
 
@@ -17,9 +17,9 @@ sealed class ProjectHelper {
     )
 
     abstract fun setProjectId(
-            noScheduleOrParentJson: NoScheduleOrParentJson,
-            projectId: String,
-            addValue: (subKey: String, value: String) -> Unit,
+        noScheduleOrParentJson: NoScheduleOrParentJson,
+        projectId: String,
+        addValue: (subKey: String, value: String) -> Unit,
     )
 
     object Project : ProjectHelper() {
@@ -47,9 +47,9 @@ sealed class ProjectHelper {
         }
 
         override fun setProjectId(
-                noScheduleOrParentJson: NoScheduleOrParentJson,
-                projectId: String,
-                addValue: (subKey: String, value: String) -> Unit,
+            noScheduleOrParentJson: NoScheduleOrParentJson,
+            projectId: String,
+            addValue: (subKey: String, value: String) -> Unit,
         ) {
             check(noScheduleOrParentJson.projectId == null)
 
@@ -76,9 +76,9 @@ sealed class ProjectHelper {
         }
 
         override fun setProjectId(
-                noScheduleOrParentJson: NoScheduleOrParentJson,
-                projectId: String,
-                addValue: (subKey: String, String) -> Unit,
+            noScheduleOrParentJson: NoScheduleOrParentJson,
+            projectId: String,
+            addValue: (subKey: String, String) -> Unit,
         ) {
             if (noScheduleOrParentJson.projectId == projectId) return
 

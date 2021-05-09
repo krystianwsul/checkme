@@ -1,16 +1,16 @@
 package com.krystianwsul.common.firebase.records
 
-import com.krystianwsul.common.firebase.json.NoScheduleOrParentJson
+import com.krystianwsul.common.firebase.json.noscheduleorparent.NoScheduleOrParentJson
 import com.krystianwsul.common.firebase.models.ProjectIdOwner
 import com.krystianwsul.common.firebase.records.schedule.ProjectHelper
 import com.krystianwsul.common.firebase.records.task.TaskRecord
 import com.krystianwsul.common.utils.ProjectKey
 
 class NoScheduleOrParentRecord(
-        private val taskRecord: TaskRecord,
-        override val createObject: NoScheduleOrParentJson,
-        _id: String?,
-        val projectHelper: ProjectHelper,
+    private val taskRecord: TaskRecord,
+    override val createObject: NoScheduleOrParentJson,
+    _id: String?,
+    val projectHelper: ProjectHelper,
 ) : RemoteRecord(_id == null), ProjectIdOwner {
 
     companion object {

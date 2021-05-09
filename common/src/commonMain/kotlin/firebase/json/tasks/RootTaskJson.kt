@@ -2,8 +2,8 @@ package com.krystianwsul.common.firebase.json.tasks
 
 import com.krystianwsul.common.firebase.json.InstanceJson
 import com.krystianwsul.common.firebase.json.Parsable
-import com.krystianwsul.common.firebase.json.RootNoScheduleOrParentJson
 import com.krystianwsul.common.firebase.json.RootTaskParentJson
+import com.krystianwsul.common.firebase.json.noscheduleorparent.RootNoScheduleOrParentJson
 import com.krystianwsul.common.firebase.json.schedule.RootScheduleWrapper
 import com.krystianwsul.common.firebase.json.taskhierarchies.NestedTaskHierarchyJson
 import kotlinx.serialization.Serializable

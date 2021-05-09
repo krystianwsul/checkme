@@ -1,6 +1,6 @@
 package com.krystianwsul.common.firebase.records.task
 
-import com.krystianwsul.common.firebase.json.ProjectNoScheduleOrParentJson
+import com.krystianwsul.common.firebase.json.noscheduleorparent.ProjectNoScheduleOrParentJson
 import com.krystianwsul.common.firebase.json.schedule.*
 import com.krystianwsul.common.firebase.json.tasks.PrivateTaskJson
 import com.krystianwsul.common.firebase.records.AssignedToHelper

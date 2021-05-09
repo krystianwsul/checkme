@@ -7,18 +7,18 @@ import com.krystianwsul.common.firebase.records.InstanceRecord
 import com.krystianwsul.common.firebase.records.project.SharedProjectRecord
 
 class SharedTaskRecord private constructor(
-        create: Boolean,
-        id: String,
-        sharedProjectRecord: SharedProjectRecord,
-        private val taskJson: SharedTaskJson,
+    create: Boolean,
+    id: String,
+    sharedProjectRecord: SharedProjectRecord,
+    private val taskJson: SharedTaskJson,
 ) : ProjectTaskRecord(create, id, sharedProjectRecord, taskJson, AssignedToHelper.Shared) {
 
     override val createObject: SharedTaskJson // because of duplicate functionality when converting local task
         get() {
             if (update != null)
                 taskJson.instances = instanceRecords.entries
-                        .associateBy({ InstanceRecord.scheduleKeyToString(it.key) }, { it.value.createObject })
-                        .toMutableMap()
+                    .associateBy({ InstanceRecord.scheduleKeyToString(it.key) }, { it.value.createObject })
+                    .toMutableMap()
 
             val scheduleWrappers = HashMap<String, SharedScheduleWrapper>()
 
@@ -29,10 +29,12 @@ class SharedTaskRecord private constructor(
                 scheduleWrappers[weeklyScheduleRecord.id] = weeklyScheduleRecord.createObject as SharedScheduleWrapper
 
             for (monthlyDayScheduleRecord in monthlyDayScheduleRecords.values)
-                scheduleWrappers[monthlyDayScheduleRecord.id] = monthlyDayScheduleRecord.createObject as SharedScheduleWrapper
+                scheduleWrappers[monthlyDayScheduleRecord.id] =
+                    monthlyDayScheduleRecord.createObject as SharedScheduleWrapper
 
             for (monthlyWeekScheduleRecord in monthlyWeekScheduleRecords.values)
-                scheduleWrappers[monthlyWeekScheduleRecord.id] = monthlyWeekScheduleRecord.createObject as SharedScheduleWrapper
+                scheduleWrappers[monthlyWeekScheduleRecord.id] =
+                    monthlyWeekScheduleRecord.createObject as SharedScheduleWrapper
 
             for (yearlyScheduleRecord in yearlyScheduleRecords.values)
                 scheduleWrappers[yearlyScheduleRecord.id] = yearlyScheduleRecord.createObject as SharedScheduleWrapper
@@ -41,7 +43,7 @@ class SharedTaskRecord private constructor(
 
             taskJson.noScheduleOrParent = noScheduleOrParentRecords.mapValues { it.value.createObject }
 
-            taskJson.taskHierarchies = taskHierarchyRecords.mapValues { it.value.createObject }
+            taskJson.taskHierarchies = taskHierarchyRecords.values.associate { it.id.value to it.createObject }
 
             return taskJson
         }
@@ -49,30 +51,30 @@ class SharedTaskRecord private constructor(
     override var startTimeOffset by Committer(taskJson::startTimeOffset)
 
     constructor(id: String, projectRecord: SharedProjectRecord, taskJson: SharedTaskJson) : this(
-            false,
-            id,
-            projectRecord,
-            taskJson,
+        false,
+        id,
+        projectRecord,
+        taskJson,
     )
 
     constructor(projectRecord: SharedProjectRecord, taskJson: SharedTaskJson) : this(
-            true,
-            projectRecord.getTaskRecordId(),
-            projectRecord,
-            taskJson,
+        true,
+        projectRecord.getTaskRecordId(),
+        projectRecord,
+        taskJson,
     )
 
     override fun newScheduleWrapper(
-            singleScheduleJson: SingleScheduleJson?,
-            weeklyScheduleJson: WeeklyScheduleJson?,
-            monthlyDayScheduleJson: MonthlyDayScheduleJson?,
-            monthlyWeekScheduleJson: MonthlyWeekScheduleJson?,
-            yearlyScheduleJson: YearlyScheduleJson?,
+        singleScheduleJson: SingleScheduleJson?,
+        weeklyScheduleJson: WeeklyScheduleJson?,
+        monthlyDayScheduleJson: MonthlyDayScheduleJson?,
+        monthlyWeekScheduleJson: MonthlyWeekScheduleJson?,
+        yearlyScheduleJson: YearlyScheduleJson?,
     ) = SharedScheduleWrapper(
-            singleScheduleJson as? SharedSingleScheduleJson,
-            weeklyScheduleJson as? SharedWeeklyScheduleJson,
-            monthlyDayScheduleJson as? SharedMonthlyDayScheduleJson,
-            monthlyWeekScheduleJson as? SharedMonthlyWeekScheduleJson,
-            yearlyScheduleJson as? SharedYearlyScheduleJson,
+        singleScheduleJson as? SharedSingleScheduleJson,
+        weeklyScheduleJson as? SharedWeeklyScheduleJson,
+        monthlyDayScheduleJson as? SharedMonthlyDayScheduleJson,
+        monthlyWeekScheduleJson as? SharedMonthlyWeekScheduleJson,
+        yearlyScheduleJson as? SharedYearlyScheduleJson,
     )
 }

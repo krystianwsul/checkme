@@ -310,7 +310,7 @@ abstract class Project<T : ProjectType>(
         projectRecord.endTimeOffset = null
     }
 
-    fun getProjectTaskHierarchy(id: String) = taskHierarchyContainer.getById(id)
+    fun getProjectTaskHierarchy(id: TaskHierarchyId) = taskHierarchyContainer.getById(id)
 
     abstract fun deleteCustomTime(remoteCustomTime: Time.Custom.Project<T>)
 
@@ -466,7 +466,10 @@ abstract class Project<T : ProjectType>(
 
     interface CustomTimeMigrationHelper {
 
-        fun tryMigrateProjectCustomTime(customTime: Time.Custom.Project<*>, now: ExactTimeStamp.Local): Time.Custom.User?
+        fun tryMigrateProjectCustomTime(
+            customTime: Time.Custom.Project<*>,
+            now: ExactTimeStamp.Local
+        ): Time.Custom.User?
     }
 
     interface RootTaskProvider {

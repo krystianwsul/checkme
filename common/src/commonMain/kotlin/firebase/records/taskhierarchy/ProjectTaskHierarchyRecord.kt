@@ -2,10 +2,11 @@ package com.krystianwsul.common.firebase.records.taskhierarchy
 
 import com.krystianwsul.common.firebase.json.taskhierarchies.ProjectTaskHierarchyJson
 import com.krystianwsul.common.firebase.records.project.ProjectRecord
+import com.krystianwsul.common.utils.TaskHierarchyId
 
 
 class ProjectTaskHierarchyRecord(
-    id: String,
+    id: TaskHierarchyId,
     private val projectRecord: ProjectRecord<*>,
     createObject: ProjectTaskHierarchyJson,
 ) : TaskHierarchyRecord<ProjectTaskHierarchyJson>(false, id, createObject) {

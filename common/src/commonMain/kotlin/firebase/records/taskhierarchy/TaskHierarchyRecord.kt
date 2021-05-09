@@ -2,12 +2,13 @@ package com.krystianwsul.common.firebase.records.taskhierarchy
 
 import com.krystianwsul.common.firebase.json.taskhierarchies.TaskHierarchyJson
 import com.krystianwsul.common.firebase.records.RemoteRecord
+import com.krystianwsul.common.utils.TaskHierarchyId
 
 
 abstract class TaskHierarchyRecord<T : TaskHierarchyJson>(
-        create: Boolean,
-        val id: String,
-        final override val createObject: T,
+    create: Boolean,
+    val id: TaskHierarchyId,
+    final override val createObject: T,
 ) : RemoteRecord(create) {
 
     companion object {

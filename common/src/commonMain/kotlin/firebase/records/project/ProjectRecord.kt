@@ -12,10 +12,10 @@ import com.krystianwsul.common.utils.*
 
 @Suppress("LeakingThis")
 abstract class ProjectRecord<T : ProjectType>(
-        create: Boolean,
-        private val projectJson: ProjectJson<T>,
-        private val _id: ProjectKey<T>,
-        committerKey: String,
+    create: Boolean,
+    private val projectJson: ProjectJson<T>,
+    private val _id: ProjectKey<T>,
+    committerKey: String,
 ) : RemoteRecord(create), JsonTime.ProjectCustomTimeIdAndKeyProvider, TaskRecord.Parent {
 
     companion object {
@@ -29,17 +29,20 @@ abstract class ProjectRecord<T : ProjectType>(
 
     abstract val taskRecords: Map<String, ProjectTaskRecord>
 
-    lateinit var taskHierarchyRecords: MutableMap<String, ProjectTaskHierarchyRecord>
+    lateinit var taskHierarchyRecords: MutableMap<TaskHierarchyId, ProjectTaskHierarchyRecord>
         private set
 
     protected fun initTaskHierarchyRecords() {
         taskHierarchyRecords = projectJson.taskHierarchies
-                .mapValues { (id, taskHierarchyJson) ->
-                    check(id.isNotEmpty())
+            .entries
+            .associate { (untypedId, taskHierarchyJson) ->
+                check(untypedId.isNotEmpty())
 
-                    ProjectTaskHierarchyRecord(id, this, taskHierarchyJson)
-                }
-                .toMutableMap()
+                val typedId = TaskHierarchyId(untypedId)
+
+                typedId to ProjectTaskHierarchyRecord(typedId, this, taskHierarchyJson)
+            }
+            .toMutableMap()
     }
 
     override val key get() = _id.key
@@ -66,7 +69,7 @@ abstract class ProjectRecord<T : ProjectType>(
         }
     }
 
-    abstract fun newNestedTaskHierarchyRecordId(taskId: String): String
+    abstract fun newNestedTaskHierarchyRecordId(taskId: String): TaskHierarchyId
 
     abstract fun getTaskRecordId(): String
 

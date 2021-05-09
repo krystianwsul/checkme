@@ -72,7 +72,8 @@ abstract class TaskHierarchy(private val parentTaskDelegate: ParentTaskDelegate)
         taskHierarchyRecord.delete()
     }
 
-    override fun toString() = super.toString() + ", taskHierarchyKey: $taskHierarchyKey, startExactTimeStamp: $startExactTimeStamp, endExactTimeStamp: $endExactTimeStamp, parentTaskKey: $parentTaskKey, childTaskKey: $childTaskKey"
+    override fun toString() =
+        super.toString() + ", taskHierarchyKey: $taskHierarchyKey, startExactTimeStamp: $startExactTimeStamp, endExactTimeStamp: $endExactTimeStamp, parentTaskKey: $parentTaskKey, childTaskKey: $childTaskKey"
 
     abstract fun fixOffsets()
 }

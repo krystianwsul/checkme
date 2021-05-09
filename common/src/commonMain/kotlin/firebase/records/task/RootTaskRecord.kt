@@ -11,28 +11,28 @@ import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.utils.TaskKey
 
 class RootTaskRecord private constructor(
-        create: Boolean,
-        id: String,
-        private val taskJson: RootTaskJson,
-        private val databaseWrapper: DatabaseWrapper,
-        parent: Parent,
+    create: Boolean,
+    id: String,
+    private val taskJson: RootTaskJson,
+    private val databaseWrapper: DatabaseWrapper,
+    parent: Parent,
 ) : TaskRecord(
-        create,
-        id,
-        taskJson,
-        AssignedToHelper.Shared,
-        JsonTime.ProjectCustomTimeIdAndKeyProvider.rootTask,
-        id,
-        parent,
-        ProjectHelper.Root,
+    create,
+    id,
+    taskJson,
+    AssignedToHelper.Shared,
+    JsonTime.ProjectCustomTimeIdAndKeyProvider.rootTask,
+    id,
+    parent,
+    ProjectHelper.Root,
 ) {
 
     override val createObject: RootTaskJson // because of duplicate functionality when converting local task
         get() {
             if (update != null)
                 taskJson.instances = instanceRecords.entries
-                        .associateBy({ InstanceRecord.scheduleKeyToString(it.key) }, { it.value.createObject })
-                        .toMutableMap()
+                    .associateBy({ InstanceRecord.scheduleKeyToString(it.key) }, { it.value.createObject })
+                    .toMutableMap()
 
             val scheduleWrappers = HashMap<String, RootScheduleWrapper>()
 
@@ -43,10 +43,12 @@ class RootTaskRecord private constructor(
                 scheduleWrappers[weeklyScheduleRecord.id] = weeklyScheduleRecord.createObject as RootScheduleWrapper
 
             for (monthlyDayScheduleRecord in monthlyDayScheduleRecords.values)
-                scheduleWrappers[monthlyDayScheduleRecord.id] = monthlyDayScheduleRecord.createObject as RootScheduleWrapper
+                scheduleWrappers[monthlyDayScheduleRecord.id] =
+                    monthlyDayScheduleRecord.createObject as RootScheduleWrapper
 
             for (monthlyWeekScheduleRecord in monthlyWeekScheduleRecords.values)
-                scheduleWrappers[monthlyWeekScheduleRecord.id] = monthlyWeekScheduleRecord.createObject as RootScheduleWrapper
+                scheduleWrappers[monthlyWeekScheduleRecord.id] =
+                    monthlyWeekScheduleRecord.createObject as RootScheduleWrapper
 
             for (yearlyScheduleRecord in yearlyScheduleRecords.values)
                 scheduleWrappers[yearlyScheduleRecord.id] = yearlyScheduleRecord.createObject as RootScheduleWrapper
@@ -55,7 +57,7 @@ class RootTaskRecord private constructor(
 
             taskJson.noScheduleOrParent = noScheduleOrParentRecords.mapValues { it.value.createObject }
 
-            taskJson.taskHierarchies = taskHierarchyRecords.mapValues { it.value.createObject }
+            taskJson.taskHierarchies = taskHierarchyRecords.values.associate { it.id.value to it.createObject }
 
             return taskJson
         }
@@ -82,19 +84,19 @@ class RootTaskRecord private constructor(
     override fun newTaskHierarchyRecordId() = databaseWrapper.newRootTaskNestedTaskHierarchyRecordId(id)
 
     override fun newScheduleWrapper(
-            singleScheduleJson: SingleScheduleJson?,
-            weeklyScheduleJson: WeeklyScheduleJson?,
-            monthlyDayScheduleJson: MonthlyDayScheduleJson?,
-            monthlyWeekScheduleJson: MonthlyWeekScheduleJson?,
-            yearlyScheduleJson: YearlyScheduleJson?,
+        singleScheduleJson: SingleScheduleJson?,
+        weeklyScheduleJson: WeeklyScheduleJson?,
+        monthlyDayScheduleJson: MonthlyDayScheduleJson?,
+        monthlyWeekScheduleJson: MonthlyWeekScheduleJson?,
+        yearlyScheduleJson: YearlyScheduleJson?,
     ) = RootScheduleWrapper(
-            singleScheduleJson as? RootSingleScheduleJson,
-            weeklyScheduleJson as? RootWeeklyScheduleJson,
-            monthlyDayScheduleJson as? RootMonthlyDayScheduleJson,
-            monthlyWeekScheduleJson as? RootMonthlyWeekScheduleJson,
-            yearlyScheduleJson as? RootYearlyScheduleJson,
+        singleScheduleJson as? RootSingleScheduleJson,
+        weeklyScheduleJson as? RootWeeklyScheduleJson,
+        monthlyDayScheduleJson as? RootMonthlyDayScheduleJson,
+        monthlyWeekScheduleJson as? RootMonthlyWeekScheduleJson,
+        yearlyScheduleJson as? RootYearlyScheduleJson,
     )
 
     fun getDependentTaskKeys(): Set<TaskKey.Root> =
-            rootTaskParentDelegate.rootTaskKeys + taskHierarchyRecords.map { TaskKey.Root(it.value.parentTaskId) }
+        rootTaskParentDelegate.rootTaskKeys + taskHierarchyRecords.map { TaskKey.Root(it.value.parentTaskId) }
 }

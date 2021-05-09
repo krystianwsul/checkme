@@ -1,16 +1,17 @@
 package com.krystianwsul.common.domain
 
 import com.krystianwsul.common.firebase.models.taskhierarchy.ProjectTaskHierarchy
+import com.krystianwsul.common.utils.TaskHierarchyId
 import com.krystianwsul.common.utils.TaskKey
 
 class TaskHierarchyContainer {
 
-    private val taskHierarchiesById = HashMap<String, ProjectTaskHierarchy>()
+    private val taskHierarchiesById = HashMap<TaskHierarchyId, ProjectTaskHierarchy>()
 
     private val taskHierarchiesByParent = MultiMap()
     private val taskHierarchiesByChild = MultiMap()
 
-    fun add(id: String, taskHierarchy: ProjectTaskHierarchy) {
+    fun add(id: TaskHierarchyId, taskHierarchy: ProjectTaskHierarchy) {
         check(!taskHierarchiesById.containsKey(id))
 
         taskHierarchiesById[id] = taskHierarchy
@@ -18,10 +19,10 @@ class TaskHierarchyContainer {
         check(taskHierarchiesByParent.put(taskHierarchy.parentTaskKey as TaskKey.Project, taskHierarchy))
     }
 
-    fun removeForce(id: String) {
+    fun removeForce(id: TaskHierarchyId) {
         check(taskHierarchiesById.containsKey(id))
 
-        val taskHierarchy = taskHierarchiesById[id]!!
+        val taskHierarchy = taskHierarchiesById.getValue(id)
 
         taskHierarchiesById.remove(id)
 
@@ -37,12 +38,12 @@ class TaskHierarchyContainer {
     }
 
     fun getByChildTaskKey(childTaskKey: TaskKey.Project): Set<ProjectTaskHierarchy> =
-            taskHierarchiesByChild.get(childTaskKey)
+        taskHierarchiesByChild.get(childTaskKey)
 
     fun getByParentTaskKey(parentTaskKey: TaskKey.Project): Set<ProjectTaskHierarchy> =
-            taskHierarchiesByParent.get(parentTaskKey)
+        taskHierarchiesByParent.get(parentTaskKey)
 
-    fun getById(id: String) = taskHierarchiesById.getValue(id)
+    fun getById(id: TaskHierarchyId) = taskHierarchiesById.getValue(id)
 
     val all: Collection<ProjectTaskHierarchy> get() = taskHierarchiesById.values
 
@@ -57,13 +58,13 @@ class TaskHierarchyContainer {
         }
 
         fun containsEntry(
-                taskKey: TaskKey.Project,
-                taskHierarchy: ProjectTaskHierarchy,
+            taskKey: TaskKey.Project,
+            taskHierarchy: ProjectTaskHierarchy,
         ) = values[taskKey]?.contains(taskHierarchy) ?: false
 
         fun remove(
-                taskKey: TaskKey.Project,
-                taskHierarchy: ProjectTaskHierarchy,
+            taskKey: TaskKey.Project,
+            taskHierarchy: ProjectTaskHierarchy,
         ) = values[taskKey]?.remove(taskHierarchy) ?: false
 
         fun get(taskKey: TaskKey.Project) = values[taskKey]?.toMutableSet() ?: mutableSetOf()

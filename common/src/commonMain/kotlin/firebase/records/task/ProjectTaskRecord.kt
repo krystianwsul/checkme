@@ -1,6 +1,5 @@
 package com.krystianwsul.common.firebase.records.task
 
-import com.krystianwsul.common.firebase.json.noscheduleorparent.ProjectNoScheduleOrParentJson
 import com.krystianwsul.common.firebase.json.schedule.ProjectScheduleJson
 import com.krystianwsul.common.firebase.json.tasks.ProjectTaskJson
 import com.krystianwsul.common.firebase.json.tasks.TaskJson
@@ -48,20 +47,6 @@ abstract class ProjectTaskRecord protected constructor(
             setProperty(projectTaskJson::endData, value)
             setProperty(projectTaskJson::endTime, value?.time)
         }
-
-    // todo task edit
-    fun newNoScheduleOrParentRecord(noScheduleOrParentJson: ProjectNoScheduleOrParentJson): ProjectNoScheduleOrParentRecord {
-        val noScheduleOrParentRecord = ProjectNoScheduleOrParentRecord(
-            this,
-            noScheduleOrParentJson,
-            null,
-        )
-
-        check(!noScheduleOrParentRecords.containsKey(noScheduleOrParentRecord.id))
-
-        noScheduleOrParentRecords[noScheduleOrParentRecord.id] = noScheduleOrParentRecord
-        return noScheduleOrParentRecord
-    }
 
     override fun getScheduleRecordId() = projectRecord.getScheduleRecordId(id)
     override fun newNoScheduleOrParentRecordId() = projectRecord.newNoScheduleOrParentRecordId(id)

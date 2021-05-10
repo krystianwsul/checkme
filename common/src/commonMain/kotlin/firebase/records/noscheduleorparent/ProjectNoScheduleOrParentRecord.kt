@@ -7,7 +7,7 @@ import com.krystianwsul.common.utils.ProjectKey
 class ProjectNoScheduleOrParentRecord(
     private val projectTaskRecord: ProjectTaskRecord,
     private val projectNoScheduleOrParentJson: ProjectNoScheduleOrParentJson,
-    _id: String?,
+    _id: String,
 ) : NoScheduleOrParentRecord(projectTaskRecord, projectNoScheduleOrParentJson, _id) {
 
     override val createObject = projectNoScheduleOrParentJson

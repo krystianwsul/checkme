@@ -81,32 +81,6 @@ class PrivateProject(
     override fun getProjectCustomTime(projectCustomTimeKey: CustomTimeKey.Project<ProjectType.Private>): PrivateCustomTime =
         getProjectCustomTime(projectCustomTimeKey.customTimeId)
 
-    override fun createChildTask(
-        // todo task edit
-        parentTask: ProjectTask,
-        now: ExactTimeStamp.Local,
-        name: String,
-        note: String?,
-        image: TaskJson.Image?,
-        ordinal: Double?,
-    ): ProjectTask {
-        val taskJson = PrivateTaskJson(
-            name,
-            now.long,
-            now.offset,
-            null,
-            note,
-            image = image,
-            ordinal = ordinal
-        )
-
-        val childTask = newTask(taskJson)
-
-        createTaskHierarchy(parentTask, childTask, now)
-
-        return childTask
-    }
-
     override fun copyTaskRecord(
         // todo task edit
         oldTask: ProjectTask,

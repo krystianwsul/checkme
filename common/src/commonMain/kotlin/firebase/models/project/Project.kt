@@ -65,16 +65,7 @@ abstract class Project<T : ProjectType>(
         }
     }
 
-    abstract fun createChildTask(
-        // todo task edit
-        parentTask: ProjectTask,
-        now: ExactTimeStamp.Local,
-        name: String,
-        note: String?,
-        image: TaskJson.Image?,
-        ordinal: Double?,
-    ): ProjectTask
-
+    // todo task edit
     fun createTaskHierarchy(parentTask: ProjectTask, childTask: ProjectTask, now: ExactTimeStamp.Local): TaskHierarchyKey {
         return childTask.createParentNestedTaskHierarchy(parentTask, now)
     }

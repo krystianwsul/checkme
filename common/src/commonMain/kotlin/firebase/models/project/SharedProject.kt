@@ -139,21 +139,6 @@ class SharedProject(
     override fun getProjectCustomTime(projectCustomTimeKey: CustomTimeKey.Project<ProjectType.Shared>): SharedCustomTime =
         getProjectCustomTime(projectCustomTimeKey.customTimeId)
 
-    override fun createChildTask(
-        parentTask: ProjectTask,
-        now: ExactTimeStamp.Local,
-        name: String,
-        note: String?,
-        image: TaskJson.Image?,
-        ordinal: Double?,
-    ): ProjectTask {
-        val childTask = createTask(now, image, name, note, ordinal)
-
-        createTaskHierarchy(parentTask, childTask, now)
-
-        return childTask
-    }
-
     override fun copyTaskRecord(
         oldTask: ProjectTask,
         now: ExactTimeStamp.Local,
@@ -182,6 +167,7 @@ class SharedProject(
     }
 
     override fun createTask(
+        // todo task edit
         now: ExactTimeStamp.Local,
         image: TaskJson.Image?,
         name: String,

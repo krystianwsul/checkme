@@ -2,7 +2,7 @@ package com.krystianwsul.common.firebase.records.task
 
 import com.krystianwsul.common.firebase.json.schedule.ProjectScheduleJson
 import com.krystianwsul.common.firebase.json.tasks.ProjectTaskJson
-import com.krystianwsul.common.firebase.json.tasks.TaskJson
+import com.krystianwsul.common.firebase.json.tasks.RootTaskJson
 import com.krystianwsul.common.firebase.records.AssignedToHelper
 import com.krystianwsul.common.firebase.records.noscheduleorparent.ProjectNoScheduleOrParentRecord
 import com.krystianwsul.common.firebase.records.project.ProjectRecord
@@ -39,15 +39,16 @@ abstract class ProjectTaskRecord protected constructor(
 
     override val endData
         get() = projectTaskJson.endData ?: projectTaskJson.endTime?.let {
-            TaskJson.EndData(it, null, false)
+            ProjectTaskJson.EndData(it, null, false)
         }
 
-    override fun setEndData(endData: TaskJson.EndData?) {
+    override fun setEndData(endData: RootTaskJson.EndData?) {
+        val compatEndData = endData?.toCompat()
 
-        if (endData == projectTaskJson.endData) return
+        if (compatEndData == projectTaskJson.endData) return
 
-        setProperty(projectTaskJson::endData, endData)
-        setProperty(projectTaskJson::endTime, endData?.time)
+        setProperty(projectTaskJson::endData, compatEndData)
+        setProperty(projectTaskJson::endTime, compatEndData?.time)
     }
 
     override fun getScheduleRecordId() = projectRecord.getScheduleRecordId(id)

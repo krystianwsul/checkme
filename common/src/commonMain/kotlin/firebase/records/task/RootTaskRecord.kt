@@ -4,7 +4,6 @@ import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.json.noscheduleorparent.RootNoScheduleOrParentJson
 import com.krystianwsul.common.firebase.json.schedule.*
 import com.krystianwsul.common.firebase.json.tasks.RootTaskJson
-import com.krystianwsul.common.firebase.json.tasks.TaskJson
 import com.krystianwsul.common.firebase.records.AssignedToHelper
 import com.krystianwsul.common.firebase.records.InstanceRecord
 import com.krystianwsul.common.firebase.records.RootTaskParentDelegate
@@ -79,7 +78,7 @@ class RootTaskRecord private constructor(
 
     override val endData get() = taskJson.endData
 
-    override fun setEndData(endData: TaskJson.EndData?) {
+    override fun setEndData(endData: RootTaskJson.EndData?) {
         if (endData == taskJson.endData) return
 
         setProperty(taskJson::endData, endData)

@@ -17,7 +17,7 @@ data class PrivateTaskJson @JvmOverloads constructor(
     override var instances: MutableMap<String, InstanceJson> = mutableMapOf(),
     override var schedules: MutableMap<String, PrivateScheduleWrapper> = mutableMapOf(),
     override var image: TaskJson.Image? = null,
-    override var endData: TaskJson.EndData? = null,
+    override var endData: ProjectTaskJson.EndData? = null,
     override var noScheduleOrParent: Map<String, ProjectNoScheduleOrParentJson> = mapOf(),
     override var ordinal: Double? = null,
     override var taskHierarchies: Map<String, NestedTaskHierarchyJson> = mapOf(),

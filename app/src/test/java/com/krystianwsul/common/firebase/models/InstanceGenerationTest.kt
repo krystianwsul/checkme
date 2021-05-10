@@ -4,7 +4,7 @@ import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.json.schedule.PrivateScheduleWrapper
 import com.krystianwsul.common.firebase.json.schedule.PrivateWeeklyScheduleJson
 import com.krystianwsul.common.firebase.json.tasks.PrivateTaskJson
-import com.krystianwsul.common.firebase.json.tasks.TaskJson
+import com.krystianwsul.common.firebase.json.tasks.ProjectTaskJson
 import com.krystianwsul.common.firebase.models.task.ProjectTask
 import com.krystianwsul.common.firebase.records.task.PrivateTaskRecord
 import com.krystianwsul.common.time.*
@@ -57,11 +57,11 @@ class InstanceGenerationTest {
         )
 
         val taskJson = PrivateTaskJson(
-                name = "task",
-                startTime = startExactTimeStamp.long,
-                startTimeOffset = startExactTimeStamp.offset,
-                endData = TaskJson.EndData(endExactTimeStamp.long, endExactTimeStamp.offset),
-                schedules = mutableMapOf("scheduleKey" to PrivateScheduleWrapper(weeklyScheduleJson = weeklyScheduleJson)),
+            name = "task",
+            startTime = startExactTimeStamp.long,
+            startTimeOffset = startExactTimeStamp.offset,
+            endData = ProjectTaskJson.EndData(endExactTimeStamp.long, endExactTimeStamp.offset),
+            schedules = mutableMapOf("scheduleKey" to PrivateScheduleWrapper(weeklyScheduleJson = weeklyScheduleJson)),
         )
 
         return ProjectTask(

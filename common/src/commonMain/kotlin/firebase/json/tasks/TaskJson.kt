@@ -29,10 +29,10 @@ interface TaskJson {
         val uploaderUuid: String? = null,
     )
 
-    @Serializable
-    data class EndData(
-        val time: Long = 0,
-        val offset: Double? = null, // todo task json
-        val deleteInstances: Boolean = false,
-    )
+    interface EndData {
+
+        val time: Long
+        val offset: Double?
+        val deleteInstances: Boolean
+    }
 }

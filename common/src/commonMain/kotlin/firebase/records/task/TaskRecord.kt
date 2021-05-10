@@ -3,6 +3,7 @@ package com.krystianwsul.common.firebase.records.task
 import com.krystianwsul.common.firebase.json.InstanceJson
 import com.krystianwsul.common.firebase.json.schedule.*
 import com.krystianwsul.common.firebase.json.taskhierarchies.NestedTaskHierarchyJson
+import com.krystianwsul.common.firebase.json.tasks.RootTaskJson
 import com.krystianwsul.common.firebase.json.tasks.TaskJson
 import com.krystianwsul.common.firebase.records.AssignedToHelper
 import com.krystianwsul.common.firebase.records.InstanceRecord
@@ -83,7 +84,7 @@ abstract class TaskRecord protected constructor(
 
     abstract val endData: TaskJson.EndData?
 
-    abstract fun setEndData(endData: TaskJson.EndData?)
+    abstract fun setEndData(endData: RootTaskJson.EndData?)
 
     var note by Committer(taskJson::note)
 

@@ -18,9 +18,20 @@ data class RootTaskJson @JvmOverloads constructor(
     override var instances: MutableMap<String, InstanceJson> = mutableMapOf(),
     override var schedules: MutableMap<String, RootScheduleWrapper> = mutableMapOf(),
     override var image: TaskJson.Image? = null,
-    override var endData: TaskJson.EndData? = null,
+    override var endData: EndData? = null,
     override var noScheduleOrParent: Map<String, RootNoScheduleOrParentJson> = mapOf(),
     override var ordinal: Double? = null,
     override var taskHierarchies: Map<String, NestedTaskHierarchyJson> = mapOf(),
     override val rootTaskIds: MutableMap<String, Boolean> = mutableMapOf(),
-) : TaskJson, Parsable, RootTaskParentJson
+) : TaskJson, Parsable, RootTaskParentJson {
+
+    @Serializable
+    data class EndData(
+        override val time: Long = 0,
+        override val offset: Double = 0.0,
+        override val deleteInstances: Boolean = false,
+    ) : TaskJson.EndData {
+
+        fun toCompat() = ProjectTaskJson.EndData(time, offset, deleteInstances)
+    }
+}

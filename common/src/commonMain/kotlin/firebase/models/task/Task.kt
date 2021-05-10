@@ -6,7 +6,6 @@ import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.ScheduleGroup
 import com.krystianwsul.common.domain.TaskUndoData
 import com.krystianwsul.common.firebase.json.*
-import com.krystianwsul.common.firebase.json.taskhierarchies.NestedTaskHierarchyJson
 import com.krystianwsul.common.firebase.json.tasks.TaskJson
 import com.krystianwsul.common.firebase.models.*
 import com.krystianwsul.common.firebase.models.interval.*
@@ -26,7 +25,7 @@ import com.krystianwsul.common.utils.*
 sealed class Task(
     val customTimeProvider: JsonTime.CustomTimeProvider,
     private val taskRecord: TaskRecord,
-    private val parentTaskDelegate: ParentTaskDelegate,
+    protected val parentTaskDelegate: ParentTaskDelegate, // todo task edit?
 ) : Current, CurrentOffset, QueryMatchable, Assignable {
 
     companion object {
@@ -670,39 +669,6 @@ sealed class Task(
         nestedParentTaskHierarchies.remove(nestedTaskHierarchy.id)
 
         nestedTaskHierarchy.invalidateTasks()
-    }
-
-    protected fun createParentNestedTaskHierarchy(
-        // todo task edit
-        nestedTaskHierarchyJson: NestedTaskHierarchyJson,
-    ): NestedTaskHierarchy {
-        val taskHierarchyRecord = taskRecord.newTaskHierarchyRecord(nestedTaskHierarchyJson)
-        val taskHierarchy = NestedTaskHierarchy(this, taskHierarchyRecord, parentTaskDelegate)
-
-        nestedParentTaskHierarchies[taskHierarchy.id] = taskHierarchy
-
-        taskHierarchy.invalidateTasks()
-
-        return taskHierarchy
-    }
-
-    fun <V : TaskHierarchy> copyParentNestedTaskHierarchy(
-        // todo task edit move to rootTask?
-        now: ExactTimeStamp.Local,
-        startTaskHierarchy: V,
-        parentTaskId: String,
-    ) {
-        check(parentTaskId.isNotEmpty())
-
-        val taskHierarchyJson = NestedTaskHierarchyJson(
-            parentTaskId,
-            now.long,
-            now.offset,
-            startTaskHierarchy.endExactTimeStampOffset?.long,
-            startTaskHierarchy.endExactTimeStampOffset?.offset,
-        )
-
-        createParentNestedTaskHierarchy(taskHierarchyJson)
     }
 
     interface ScheduleTextFactory {

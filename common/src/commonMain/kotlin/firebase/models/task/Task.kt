@@ -33,7 +33,6 @@ sealed class Task(
         /**
          * todo after flipping switch:
          *
-         * make json properties val, make all updates in EditActivityExtensions return RootTask
          * add todo to add paper for rootTasks a week later
          */
 

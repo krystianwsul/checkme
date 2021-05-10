@@ -11,7 +11,8 @@ class WeeklyScheduleRecord(
     scheduleWrapper: ScheduleWrapper,
     override val projectHelper: ProjectHelper,
     projectRootDelegate: ProjectRootDelegate,
-    id: String? = null,
+    id: String,
+    create: Boolean,
     override val scheduleWrapperBridge: ScheduleWrapperBridge =
         ScheduleWrapperBridge.fromScheduleWrapper(scheduleWrapper),
 ) : RepeatingScheduleRecord(
@@ -20,6 +21,7 @@ class WeeklyScheduleRecord(
     scheduleWrapperBridge.weeklyScheduleJson!!,
     "weeklyScheduleJson",
     id,
+    create,
     projectRootDelegate,
 ) {
 

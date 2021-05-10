@@ -12,7 +12,8 @@ open class SingleScheduleRecord(
     scheduleWrapper: ScheduleWrapper,
     override val projectHelper: ProjectHelper,
     projectRootDelegate: ProjectRootDelegate,
-    id: String? = null,
+    id: String,
+    create: Boolean,
     override val scheduleWrapperBridge: ScheduleWrapperBridge =
         ScheduleWrapperBridge.fromScheduleWrapper(scheduleWrapper),
 ) : ScheduleRecord(
@@ -21,6 +22,7 @@ open class SingleScheduleRecord(
     scheduleWrapperBridge.singleScheduleJson!!,
     "singleScheduleJson",
     id,
+    create,
     projectRootDelegate,
 ) {
 

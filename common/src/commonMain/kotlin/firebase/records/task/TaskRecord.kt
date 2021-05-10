@@ -119,6 +119,7 @@ abstract class TaskRecord protected constructor(
                         projectHelper,
                         newProjectRootDelegate(this, scheduleWrapperBridge.singleScheduleJson!!),
                         id,
+                        false,
                         scheduleWrapperBridge,
                     )
                 }
@@ -134,6 +135,7 @@ abstract class TaskRecord protected constructor(
                         projectHelper,
                         newProjectRootDelegate(this, scheduleWrapperBridge.weeklyScheduleJson!!),
                         id,
+                        false,
                         scheduleWrapperBridge,
                     )
                 }
@@ -148,6 +150,7 @@ abstract class TaskRecord protected constructor(
                         projectHelper,
                         newProjectRootDelegate(this, scheduleWrapperBridge.monthlyDayScheduleJson!!),
                         id,
+                        false,
                         scheduleWrapperBridge,
                     )
                 }
@@ -161,6 +164,7 @@ abstract class TaskRecord protected constructor(
                         projectHelper,
                         newProjectRootDelegate(this, scheduleWrapperBridge.monthlyWeekScheduleJson!!),
                         id,
+                        false,
                         scheduleWrapperBridge,
                     )
                 }
@@ -174,6 +178,7 @@ abstract class TaskRecord protected constructor(
                         projectHelper,
                         newProjectRootDelegate(this, scheduleWrapperBridge.yearlyScheduleJson!!),
                         id,
+                        false,
                         scheduleWrapperBridge,
                     )
                 }

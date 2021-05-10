@@ -10,7 +10,8 @@ abstract class RepeatingScheduleRecord(
     createObject: ScheduleWrapper,
     repeatingScheduleJson: RepeatingScheduleJson,
     endTimeKey: String,
-    id: String?,
+    id: String,
+    create: Boolean,
     projectRootDelegate: ProjectRootDelegate,
 ) : ScheduleRecord(
     taskRecord,
@@ -18,6 +19,7 @@ abstract class RepeatingScheduleRecord(
     repeatingScheduleJson,
     endTimeKey,
     id,
+    create,
     projectRootDelegate,
 ) {
 

@@ -139,6 +139,8 @@ class RootTaskRecord private constructor(
             newScheduleWrapper(singleScheduleJson = singleScheduleJson),
             projectHelper,
             newProjectRootDelegate(this, singleScheduleJson),
+            getScheduleRecordId(),
+            true,
         )
 
         check(!singleScheduleRecords.containsKey(singleScheduleRecord.id))
@@ -153,6 +155,8 @@ class RootTaskRecord private constructor(
             newScheduleWrapper(weeklyScheduleJson = weeklyScheduleJson),
             projectHelper,
             newProjectRootDelegate(this, weeklyScheduleJson),
+            getScheduleRecordId(),
+            true,
         )
 
         check(!weeklyScheduleRecords.containsKey(weeklyScheduleRecord.id))
@@ -167,6 +171,8 @@ class RootTaskRecord private constructor(
             newScheduleWrapper(monthlyDayScheduleJson = monthlyDayScheduleJson),
             projectHelper,
             newProjectRootDelegate(this, monthlyDayScheduleJson),
+            getScheduleRecordId(),
+            true,
         )
 
         check(!monthlyDayScheduleRecords.containsKey(monthlyDayScheduleRecord.id))
@@ -181,6 +187,8 @@ class RootTaskRecord private constructor(
             newScheduleWrapper(monthlyWeekScheduleJson = monthlyWeekScheduleJson),
             projectHelper,
             newProjectRootDelegate(this, monthlyWeekScheduleJson),
+            getScheduleRecordId(),
+            true,
         )
 
         check(!monthlyWeekScheduleRecords.containsKey(monthlyWeekScheduleRecord.id))
@@ -195,6 +203,8 @@ class RootTaskRecord private constructor(
             newScheduleWrapper(yearlyScheduleJson = yearlyScheduleJson),
             projectHelper,
             newProjectRootDelegate(this, yearlyScheduleJson),
+            getScheduleRecordId(),
+            true,
         )
 
         check(!yearlyScheduleRecords.containsKey(yearlyScheduleRecord.id))

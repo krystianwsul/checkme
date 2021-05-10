@@ -15,16 +15,15 @@ abstract class ScheduleRecord(
     final override val createObject: ScheduleWrapper,
     private val scheduleJson: ScheduleJson,
     scheduleTypeSubkey: String,
-    _id: String?,
+    val id: String,
+    create: Boolean,
     val projectRootDelegate: ProjectRootDelegate,
-) : RemoteRecord(_id == null), ProjectIdOwner {
+) : RemoteRecord(create), ProjectIdOwner {
 
     companion object {
 
         const val SCHEDULES = "schedules"
     }
-
-    val id = _id ?: taskRecord.getScheduleRecordId()
 
     final override val key get() = taskRecord.key + "/" + SCHEDULES + "/" + id
 

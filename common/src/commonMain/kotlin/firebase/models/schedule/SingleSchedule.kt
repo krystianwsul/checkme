@@ -79,6 +79,7 @@ class SingleSchedule(topLevelTask: Task, val singleScheduleRecord: SingleSchedul
         projectHelper,
         singleScheduleRecord.projectRootDelegate,
         singleScheduleRecord.id,
+        false,
     ) {
 
         override val date get() = instance.instanceDate

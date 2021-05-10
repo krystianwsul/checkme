@@ -143,7 +143,7 @@ class SharedProjectRecord(
     override fun newNoScheduleOrParentRecordId(taskId: String) =
         databaseWrapper.newSharedNoScheduleOrParentRecordId(projectKey, taskId)
 
-    fun newTaskRecord(taskJson: SharedTaskJson): SharedTaskRecord {
+    fun newTaskRecord(taskJson: SharedTaskJson): SharedTaskRecord { // todo task edit
         val remoteTaskRecord = SharedTaskRecord(this, taskJson)
         check(!taskRecords.containsKey(remoteTaskRecord.id))
 

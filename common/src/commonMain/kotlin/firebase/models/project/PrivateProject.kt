@@ -1,7 +1,6 @@
 package com.krystianwsul.common.firebase.models.project
 
 import com.krystianwsul.common.domain.TaskHierarchyContainer
-import com.krystianwsul.common.firebase.json.InstanceJson
 import com.krystianwsul.common.firebase.json.tasks.PrivateTaskJson
 import com.krystianwsul.common.firebase.json.tasks.TaskJson
 import com.krystianwsul.common.firebase.models.CopyScheduleHelper
@@ -80,23 +79,6 @@ class PrivateProject(
 
     override fun getProjectCustomTime(projectCustomTimeKey: CustomTimeKey.Project<ProjectType.Private>): PrivateCustomTime =
         getProjectCustomTime(projectCustomTimeKey.customTimeId)
-
-    override fun copyTaskRecord(
-        // todo task edit
-        oldTask: ProjectTask,
-        now: ExactTimeStamp.Local,
-        instanceJsons: MutableMap<String, InstanceJson>,
-    ) = projectRecord.newTaskRecord(
-        PrivateTaskJson(
-            oldTask.name,
-            now.long,
-            now.offset,
-            oldTask.endExactTimeStamp?.long,
-            oldTask.note,
-            instanceJsons,
-            ordinal = oldTask.ordinal
-        )
-    )
 
     fun newTask(taskJson: PrivateTaskJson): ProjectTask { // todo task edit
         val taskRecord = projectRecord.newTaskRecord(taskJson)

@@ -32,7 +32,7 @@ interface TaskJson {
     @Serializable
     data class EndData(
         val time: Long = 0,
-        val offset: Double? = null, // todo task edit
+        val offset: Double? = null, // todo task json
         val deleteInstances: Boolean = false,
     )
 }

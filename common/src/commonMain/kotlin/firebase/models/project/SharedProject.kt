@@ -3,7 +3,6 @@ package com.krystianwsul.common.firebase.models.project
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.DeviceInfo
 import com.krystianwsul.common.domain.TaskHierarchyContainer
-import com.krystianwsul.common.firebase.json.InstanceJson
 import com.krystianwsul.common.firebase.json.tasks.SharedTaskJson
 import com.krystianwsul.common.firebase.json.tasks.TaskJson
 import com.krystianwsul.common.firebase.models.CopyScheduleHelper
@@ -138,22 +137,6 @@ class SharedProject(
 
     override fun getProjectCustomTime(projectCustomTimeKey: CustomTimeKey.Project<ProjectType.Shared>): SharedCustomTime =
         getProjectCustomTime(projectCustomTimeKey.customTimeId)
-
-    override fun copyTaskRecord(
-        oldTask: ProjectTask,
-        now: ExactTimeStamp.Local,
-        instanceJsons: MutableMap<String, InstanceJson>,
-    ) = projectRecord.newTaskRecord(
-        SharedTaskJson(
-            oldTask.name,
-            now.long,
-            now.offset,
-            oldTask.endExactTimeStamp?.long,
-            oldTask.note,
-            instanceJsons,
-            ordinal = oldTask.ordinal,
-        )
-    )
 
     private fun newTask(taskJson: SharedTaskJson): ProjectTask {
         val taskRecord = projectRecord.newTaskRecord(taskJson)

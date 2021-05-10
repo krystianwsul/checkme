@@ -103,7 +103,7 @@ class PrivateProjectRecord(
     override fun newNoScheduleOrParentRecordId(taskId: String) =
         databaseWrapper.newPrivateNoScheduleOrParentRecordId(projectKey, taskId)
 
-    fun newTaskRecord(taskJson: PrivateTaskJson): PrivateTaskRecord {
+    fun newTaskRecord(taskJson: PrivateTaskJson): PrivateTaskRecord { // todo task edit
         val remoteTaskRecord = PrivateTaskRecord(this, taskJson)
         check(!taskRecords.containsKey(remoteTaskRecord.id))
 

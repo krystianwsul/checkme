@@ -13,7 +13,6 @@ import com.krystianwsul.common.firebase.models.taskhierarchy.ProjectTaskHierarch
 import com.krystianwsul.common.firebase.models.taskhierarchy.TaskHierarchy
 import com.krystianwsul.common.firebase.records.AssignedToHelper
 import com.krystianwsul.common.firebase.records.project.ProjectRecord
-import com.krystianwsul.common.firebase.records.task.ProjectTaskRecord
 import com.krystianwsul.common.interrupt.InterruptionChecker
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.*
@@ -69,13 +68,6 @@ abstract class Project<T : ProjectType>(
     fun createTaskHierarchy(parentTask: ProjectTask, childTask: ProjectTask, now: ExactTimeStamp.Local): TaskHierarchyKey {
         return childTask.createParentNestedTaskHierarchy(parentTask, now)
     }
-
-    protected abstract fun copyTaskRecord(
-        // todo task edit
-        oldTask: ProjectTask,
-        now: ExactTimeStamp.Local,
-        instanceJsons: MutableMap<String, InstanceJson>,
-    ): ProjectTaskRecord
 
     private fun convertScheduleKey(
         // todo task edit

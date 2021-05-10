@@ -24,8 +24,8 @@ abstract class TaskRecord protected constructor(
     val projectCustomTimeIdAndKeyProvider: JsonTime.ProjectCustomTimeIdAndKeyProvider,
     override val key: String,
     private val parent: Parent,
-    protected val projectHelper: ProjectHelper, // todo task edit
-    protected val newProjectRootDelegate: (taskRecord: TaskRecord, scheduleJson: ScheduleJson) -> ProjectRootDelegate, // todo task edit
+    protected val projectHelper: ProjectHelper,
+    protected val newProjectRootDelegate: (taskRecord: TaskRecord, scheduleJson: ScheduleJson) -> ProjectRootDelegate,
 ) : RemoteRecord(create) {
 
     companion object {

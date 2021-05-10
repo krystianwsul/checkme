@@ -9,8 +9,7 @@ import com.krystianwsul.common.firebase.models.interval.Type
 import com.krystianwsul.common.firebase.models.noscheduleorparent.NoScheduleOrParent
 import com.krystianwsul.common.firebase.models.noscheduleorparent.RootNoScheduleOrParent
 import com.krystianwsul.common.firebase.models.project.Project
-import com.krystianwsul.common.firebase.models.schedule.Schedule
-import com.krystianwsul.common.firebase.models.schedule.SingleSchedule
+import com.krystianwsul.common.firebase.models.schedule.*
 import com.krystianwsul.common.firebase.models.taskhierarchy.ParentTaskDelegate
 import com.krystianwsul.common.firebase.models.taskhierarchy.ProjectTaskHierarchy
 import com.krystianwsul.common.firebase.records.task.RootTaskRecord
@@ -215,6 +214,161 @@ class RootTask(
                 projectKey,
             )
         }
+    }
+
+    fun createSchedules(
+        now: ExactTimeStamp.Local,
+        scheduleDatas: List<Pair<ScheduleData, Time>>,
+        assignedTo: Set<UserKey>,
+        customTimeMigrationHelper: Project.CustomTimeMigrationHelper,
+        projectKey: ProjectKey<*>,
+    ) {
+        val assignedToKeys = assignedTo.map { it.key }.toSet()
+
+        val copyScheduleHelper = CopyScheduleHelper.Root // todo task edit
+
+        for ((scheduleData, time) in scheduleDatas) {
+            when (scheduleData) {
+                is ScheduleData.Single -> {
+                    val date = scheduleData.date
+
+                    val copiedTime = getOrCopyTime(
+                        date.dayOfWeek,
+                        time,
+                        customTimeMigrationHelper,
+                        now,
+                    )
+
+                    val singleScheduleRecord = taskRecord.newSingleScheduleRecord(
+                        copyScheduleHelper.newSingle(
+                            now.long,
+                            now.offset,
+                            null,
+                            null,
+                            date.year,
+                            date.month,
+                            date.day,
+                            copiedTime,
+                            assignedToKeys,
+                            projectKey,
+                        )
+                    )
+
+                    _schedules += SingleSchedule(this, singleScheduleRecord)
+                }
+                is ScheduleData.Weekly -> {
+                    for (dayOfWeek in scheduleData.daysOfWeek) {
+                        val copiedTime = getOrCopyTime(
+                            dayOfWeek,
+                            time,
+                            customTimeMigrationHelper,
+                            now,
+                        )
+
+                        val weeklyScheduleRecord = taskRecord.newWeeklyScheduleRecord(
+                            copyScheduleHelper.newWeekly(
+                                now.long,
+                                now.offset,
+                                null,
+                                null,
+                                dayOfWeek.ordinal,
+                                copiedTime,
+                                scheduleData.from?.toJson(),
+                                scheduleData.until?.toJson(),
+                                scheduleData.interval,
+                                assignedToKeys,
+                                projectKey,
+                            )
+                        )
+
+                        _schedules += WeeklySchedule(this, weeklyScheduleRecord)
+                    }
+                }
+                is ScheduleData.MonthlyDay -> {
+                    val (dayOfMonth, beginningOfMonth, _) = scheduleData
+
+                    val today = Date.today()
+
+                    val dayOfWeek = getDateInMonth(
+                        today.year,
+                        today.month,
+                        scheduleData.dayOfMonth,
+                        scheduleData.beginningOfMonth,
+                    ).dayOfWeek
+
+                    val copiedTime = getOrCopyTime(dayOfWeek, time, customTimeMigrationHelper, now)
+
+                    val monthlyDayScheduleRecord = taskRecord.newMonthlyDayScheduleRecord(
+                        copyScheduleHelper.newMonthlyDay(
+                            now.long,
+                            now.offset,
+                            null,
+                            null,
+                            dayOfMonth,
+                            beginningOfMonth,
+                            copiedTime,
+                            scheduleData.from?.toJson(),
+                            scheduleData.until?.toJson(),
+                            assignedToKeys,
+                            projectKey,
+                        )
+                    )
+
+                    _schedules += MonthlyDaySchedule(this, monthlyDayScheduleRecord)
+                }
+                is ScheduleData.MonthlyWeek -> {
+                    val (weekOfMonth, dayOfWeek, beginningOfMonth) = scheduleData
+                    val copiedTime = getOrCopyTime(dayOfWeek, time, customTimeMigrationHelper, now)
+
+                    val monthlyWeekScheduleRecord = taskRecord.newMonthlyWeekScheduleRecord(
+                        copyScheduleHelper.newMonthlyWeek(
+                            now.long,
+                            now.offset,
+                            null,
+                            null,
+                            weekOfMonth,
+                            dayOfWeek.ordinal,
+                            beginningOfMonth,
+                            copiedTime,
+                            scheduleData.from?.toJson(),
+                            scheduleData.until?.toJson(),
+                            assignedToKeys,
+                            projectKey,
+                        )
+                    )
+
+                    _schedules += MonthlyWeekSchedule(this, monthlyWeekScheduleRecord)
+                }
+                is ScheduleData.Yearly -> {
+                    val copiedTime = getOrCopyTime(
+                        Date(Date.today().year, scheduleData.month, scheduleData.day).dayOfWeek,
+                        time,
+                        customTimeMigrationHelper,
+                        now,
+                    )
+
+                    val yearlyScheduleRecord = taskRecord.newYearlyScheduleRecord(
+                        copyScheduleHelper.newYearly(
+                            now.long,
+                            now.offset,
+                            null,
+                            null,
+                            scheduleData.month,
+                            scheduleData.day,
+                            copiedTime,
+                            scheduleData.from?.toJson(),
+                            scheduleData.until?.toJson(),
+                            assignedToKeys,
+                            projectKey,
+                        )
+                    )
+
+                    _schedules += YearlySchedule(this, yearlyScheduleRecord)
+                }
+            }
+        }
+
+        intervalsProperty.invalidate()
     }
 
     interface Parent : Task.Parent, Project.RootTaskProvider {

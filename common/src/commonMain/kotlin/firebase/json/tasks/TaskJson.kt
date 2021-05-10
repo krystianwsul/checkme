@@ -10,7 +10,7 @@ interface TaskJson {
 
     val name: String
     val note: String?
-    var image: Image? // todo task json
+    val image: Image?
     var ordinal: Double?
 
     val startTime: Long

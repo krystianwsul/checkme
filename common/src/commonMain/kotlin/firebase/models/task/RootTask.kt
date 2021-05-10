@@ -2,6 +2,7 @@ package com.krystianwsul.common.firebase.models.task
 
 import com.krystianwsul.common.domain.ScheduleGroup
 import com.krystianwsul.common.firebase.json.noscheduleorparent.RootNoScheduleOrParentJson
+import com.krystianwsul.common.firebase.json.schedule.*
 import com.krystianwsul.common.firebase.json.tasks.TaskJson
 import com.krystianwsul.common.firebase.models.CopyScheduleHelper
 import com.krystianwsul.common.firebase.models.Instance
@@ -247,8 +248,8 @@ class RootTask(
                             date.year,
                             date.month,
                             date.day,
-                            copiedTime,
                             assignedToKeys,
+                            copiedTime,
                             projectKey,
                         )
                     )
@@ -271,11 +272,11 @@ class RootTask(
                                 null,
                                 null,
                                 dayOfWeek.ordinal,
-                                copiedTime,
                                 scheduleData.from?.toJson(),
                                 scheduleData.until?.toJson(),
                                 scheduleData.interval,
                                 assignedToKeys,
+                                copiedTime,
                                 projectKey,
                             )
                         )
@@ -305,10 +306,10 @@ class RootTask(
                             null,
                             dayOfMonth,
                             beginningOfMonth,
-                            copiedTime,
                             scheduleData.from?.toJson(),
                             scheduleData.until?.toJson(),
                             assignedToKeys,
+                            copiedTime,
                             projectKey,
                         )
                     )
@@ -328,10 +329,10 @@ class RootTask(
                             weekOfMonth,
                             dayOfWeek.ordinal,
                             beginningOfMonth,
-                            copiedTime,
                             scheduleData.from?.toJson(),
                             scheduleData.until?.toJson(),
                             assignedToKeys,
+                            copiedTime,
                             projectKey,
                         )
                     )
@@ -354,10 +355,10 @@ class RootTask(
                             null,
                             scheduleData.month,
                             scheduleData.day,
-                            copiedTime,
                             scheduleData.from?.toJson(),
                             scheduleData.until?.toJson(),
                             assignedToKeys,
+                            copiedTime,
                             projectKey,
                         )
                     )
@@ -369,6 +370,8 @@ class RootTask(
 
         intervalsProperty.invalidate()
     }
+
+    private fun Set<String>.toAssociateMap() = associate { it to true }
 
     fun copySchedules(
         now: ExactTimeStamp.Local,
@@ -401,15 +404,16 @@ class RootTask(
                 .orEmpty()
                 .map { it.key }
                 .toSet()
+                .toAssociateMap()
 
-            val copyScheduleHelper = CopyScheduleHelper.Root // todo task edit
+            val timeJson = JsonTime.fromTime(copiedTime).toJson()
 
             when (schedule) {
                 is SingleSchedule -> {
                     val date = schedule.date
 
                     val singleScheduleRecord = taskRecord.newSingleScheduleRecord(
-                        copyScheduleHelper.newSingle(
+                        RootSingleScheduleJson(
                             now.long,
                             now.offset,
                             schedule.endExactTimeStamp?.long,
@@ -417,9 +421,9 @@ class RootTask(
                             date.year,
                             date.month,
                             date.day,
-                            copiedTime,
                             assignedTo,
-                            newProjectKey,
+                            timeJson,
+                            newProjectKey.key,
                         )
                     )
 
@@ -427,18 +431,18 @@ class RootTask(
                 }
                 is WeeklySchedule -> {
                     val weeklyScheduleRecord = taskRecord.newWeeklyScheduleRecord(
-                        copyScheduleHelper.newWeekly(
+                        RootWeeklyScheduleJson(
                             now.long,
                             now.offset,
                             schedule.endExactTimeStamp?.long,
                             schedule.endExactTimeStamp?.offset,
                             schedule.dayOfWeek.ordinal,
-                            copiedTime,
                             schedule.from?.toJson(),
                             schedule.until?.toJson(),
                             schedule.interval,
-                            assignedTo,
-                            newProjectKey,
+                            assignedTo = assignedTo,
+                            time = timeJson,
+                            projectId = newProjectKey.key,
                         )
                     )
 
@@ -446,18 +450,18 @@ class RootTask(
                 }
                 is MonthlyDaySchedule -> {
                     val monthlyDayScheduleRecord = taskRecord.newMonthlyDayScheduleRecord(
-                        copyScheduleHelper.newMonthlyDay(
+                        RootMonthlyDayScheduleJson(
                             now.long,
                             now.offset,
                             schedule.endExactTimeStamp?.long,
                             schedule.endExactTimeStamp?.offset,
                             schedule.dayOfMonth,
                             schedule.beginningOfMonth,
-                            copiedTime,
                             schedule.from?.toJson(),
                             schedule.until?.toJson(),
-                            assignedTo,
-                            newProjectKey,
+                            assignedTo = assignedTo,
+                            time = timeJson,
+                            projectId = newProjectKey.key,
                         )
                     )
 
@@ -465,7 +469,7 @@ class RootTask(
                 }
                 is MonthlyWeekSchedule -> {
                     val monthlyWeekScheduleRecord = taskRecord.newMonthlyWeekScheduleRecord(
-                        copyScheduleHelper.newMonthlyWeek(
+                        RootMonthlyWeekScheduleJson(
                             now.long,
                             now.offset,
                             schedule.endExactTimeStamp?.long,
@@ -473,11 +477,11 @@ class RootTask(
                             schedule.weekOfMonth,
                             schedule.dayOfWeek.ordinal,
                             schedule.beginningOfMonth,
-                            copiedTime,
                             schedule.from?.toJson(),
                             schedule.until?.toJson(),
-                            assignedTo,
-                            newProjectKey,
+                            assignedTo = assignedTo,
+                            time = timeJson,
+                            projectId = newProjectKey.key,
                         )
                     )
 
@@ -485,18 +489,18 @@ class RootTask(
                 }
                 is YearlySchedule -> {
                     val yearlyScheduleRecord = taskRecord.newYearlyScheduleRecord(
-                        copyScheduleHelper.newYearly(
+                        RootYearlyScheduleJson(
                             now.long,
                             now.offset,
                             schedule.endExactTimeStamp?.long,
                             schedule.endExactTimeStamp?.offset,
                             schedule.month,
                             schedule.day,
-                            copiedTime,
                             schedule.from?.toJson(),
                             schedule.until?.toJson(),
-                            assignedTo,
-                            newProjectKey,
+                            assignedTo = assignedTo,
+                            time = timeJson,
+                            projectId = newProjectKey.key,
                         )
                     )
 

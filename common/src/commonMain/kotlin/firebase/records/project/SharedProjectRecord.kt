@@ -3,7 +3,6 @@ package com.krystianwsul.common.firebase.records.project
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.json.JsonWrapper
 import com.krystianwsul.common.firebase.json.UserJson
-import com.krystianwsul.common.firebase.json.tasks.SharedTaskJson
 import com.krystianwsul.common.firebase.records.ProjectUserRecord
 import com.krystianwsul.common.firebase.records.customtime.SharedCustomTimeRecord
 import com.krystianwsul.common.firebase.records.task.SharedTaskRecord
@@ -142,15 +141,6 @@ class SharedProjectRecord(
 
     override fun newNoScheduleOrParentRecordId(taskId: String) =
         databaseWrapper.newSharedNoScheduleOrParentRecordId(projectKey, taskId)
-
-    fun newTaskRecord(taskJson: SharedTaskJson): SharedTaskRecord { // todo task edit
-        val remoteTaskRecord = SharedTaskRecord(this, taskJson)
-        check(!taskRecords.containsKey(remoteTaskRecord.id))
-
-        taskRecords[remoteTaskRecord.id] = remoteTaskRecord
-
-        return remoteTaskRecord
-    }
 
     override fun deleteTaskRecord(taskRecord: TaskRecord) {
         check(taskRecords.remove(taskRecord.id) == taskRecord)

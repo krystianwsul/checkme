@@ -58,6 +58,7 @@ class SharedTaskRecord private constructor(
     )
 
     constructor(projectRecord: SharedProjectRecord, taskJson: SharedTaskJson) : this(
+        // todo task edit
         true,
         projectRecord.getTaskRecordId(),
         projectRecord,

@@ -58,6 +58,7 @@ class PrivateTaskRecord private constructor(
     )
 
     constructor(projectRecord: PrivateProjectRecord, taskJson: PrivateTaskJson) : this(
+        // todo task edit
         true,
         projectRecord.getTaskRecordId(),
         projectRecord,

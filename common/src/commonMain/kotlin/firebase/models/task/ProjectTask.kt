@@ -9,7 +9,6 @@ import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.ScheduleKey
-import com.krystianwsul.common.utils.TaskHierarchyKey
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.common.utils.invalidatableLazy
 
@@ -48,10 +47,6 @@ class ProjectTask(override val project: Project<*>, private val taskRecord: Proj
         customTimeMigrationHelper: Project.CustomTimeMigrationHelper,
         now: ExactTimeStamp.Local,
     ) = project.getOrCopyTime(dayOfWeek, time, customTimeMigrationHelper, now)
-
-    override fun addChild(childTask: Task, now: ExactTimeStamp.Local): TaskHierarchyKey { // todo task edit
-        return project.createTaskHierarchy(this, childTask as ProjectTask, now)
-    }
 
     fun deleteNoScheduleOrParent(noScheduleOrParent: NoScheduleOrParent) {
         check(noScheduleOrParentsMap.containsKey(noScheduleOrParent.id))

@@ -113,7 +113,7 @@ class RootTask(
         is Time.Normal -> time
     }
 
-    override fun addChild(childTask: Task, now: ExactTimeStamp.Local): TaskHierarchyKey {
+    fun addChild(childTask: Task, now: ExactTimeStamp.Local): TaskHierarchyKey {
         val taskHierarchyKey = childTask.createParentNestedTaskHierarchy(this, now)
         addRootTask(childTask as RootTask)
 

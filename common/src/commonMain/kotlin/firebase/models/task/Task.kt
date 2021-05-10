@@ -565,8 +565,6 @@ sealed class Task(
         normalizedFieldsDelegate.invalidate()
     }
 
-    abstract fun addChild(childTask: Task, now: ExactTimeStamp.Local): TaskHierarchyKey
-
     fun deleteSchedule(schedule: Schedule) {
         check(_schedules.contains(schedule))
 

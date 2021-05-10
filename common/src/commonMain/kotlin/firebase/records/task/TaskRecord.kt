@@ -81,7 +81,9 @@ abstract class TaskRecord protected constructor(
 
     abstract val taskKey: TaskKey
 
-    abstract var endData: TaskJson.EndData?
+    abstract val endData: TaskJson.EndData?
+
+    abstract fun setEndData(endData: TaskJson.EndData?)
 
     var note by Committer(taskJson::note)
 

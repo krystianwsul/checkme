@@ -37,16 +37,18 @@ abstract class ProjectTaskRecord protected constructor(
 
     override val taskKey by lazy { projectRecord.getTaskKey(id) }
 
-    override var endData
+    override val endData
         get() = projectTaskJson.endData ?: projectTaskJson.endTime?.let {
             TaskJson.EndData(it, null, false)
         }
-        set(value) {
-            if (value == projectTaskJson.endData) return
 
-            setProperty(projectTaskJson::endData, value)
-            setProperty(projectTaskJson::endTime, value?.time)
-        }
+    override fun setEndData(endData: TaskJson.EndData?) {
+
+        if (endData == projectTaskJson.endData) return
+
+        setProperty(projectTaskJson::endData, endData)
+        setProperty(projectTaskJson::endTime, endData?.time)
+    }
 
     override fun getScheduleRecordId() = projectRecord.getScheduleRecordId(id)
     override fun newNoScheduleOrParentRecordId() = projectRecord.newNoScheduleOrParentRecordId(id)

@@ -470,9 +470,11 @@ sealed class Task(
     }
 
     protected fun setMyEndExactTimeStamp(endData: EndData?) {
-        taskRecord.endData = endData?.let {
-            TaskJson.EndData(it.exactTimeStampLocal.long, it.exactTimeStampLocal.offset, it.deleteInstances)
-        }
+        taskRecord.setEndData(
+            endData?.let {
+                TaskJson.EndData(it.exactTimeStampLocal.long, it.exactTimeStampLocal.offset, it.deleteInstances)
+            }
+        )
 
         endDataProperty.invalidate()
     }
@@ -545,10 +547,10 @@ sealed class Task(
     fun getInstance(scheduleKey: ScheduleKey) = getInstance(getDateTime(scheduleKey))
 
     abstract fun getOrCopyTime(
-            dayOfWeek: DayOfWeek,
-            time: Time,
-            customTimeMigrationHelper: Project.CustomTimeMigrationHelper,
-            now: ExactTimeStamp.Local,
+        dayOfWeek: DayOfWeek,
+        time: Time,
+        customTimeMigrationHelper: Project.CustomTimeMigrationHelper,
+        now: ExactTimeStamp.Local,
     ): Time
 
     abstract fun invalidateProjectParentTaskHierarchies()

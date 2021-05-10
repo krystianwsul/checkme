@@ -63,7 +63,6 @@ abstract class Project<T : ProjectType>(
     }
 
     private fun getOrCreateCustomTime(
-        // todo task maybe
         dayOfWeek: DayOfWeek,
         customTime: Time.Custom.Project<*>,
         customTimeMigrationHelper: CustomTimeMigrationHelper,
@@ -74,7 +73,6 @@ abstract class Project<T : ProjectType>(
     }
 
     fun getOrCopyTime(
-        // todo task maybe
         dayOfWeek: DayOfWeek,
         time: Time,
         customTimeMigrationHelper: CustomTimeMigrationHelper,
@@ -263,7 +261,7 @@ abstract class Project<T : ProjectType>(
     private class MissingTaskException(projectId: ProjectKey<*>, taskId: String) :
         Exception("projectId: $projectId, taskId: $taskId")
 
-    interface CustomTimeMigrationHelper { // todo task maybe
+    interface CustomTimeMigrationHelper {
 
         fun tryMigrateProjectCustomTime(
             customTime: Time.Custom.Project<*>,

@@ -3,7 +3,6 @@ package com.krystianwsul.common.firebase.records.project
 import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.json.projects.PrivateProjectJson
-import com.krystianwsul.common.firebase.json.tasks.PrivateTaskJson
 import com.krystianwsul.common.firebase.records.customtime.PrivateCustomTimeRecord
 import com.krystianwsul.common.firebase.records.task.PrivateTaskRecord
 import com.krystianwsul.common.firebase.records.task.TaskRecord
@@ -102,15 +101,6 @@ class PrivateProjectRecord(
 
     override fun newNoScheduleOrParentRecordId(taskId: String) =
         databaseWrapper.newPrivateNoScheduleOrParentRecordId(projectKey, taskId)
-
-    fun newTaskRecord(taskJson: PrivateTaskJson): PrivateTaskRecord { // todo task edit
-        val remoteTaskRecord = PrivateTaskRecord(this, taskJson)
-        check(!taskRecords.containsKey(remoteTaskRecord.id))
-
-        taskRecords[remoteTaskRecord.id] = remoteTaskRecord
-
-        return remoteTaskRecord
-    }
 
     override fun deleteTaskRecord(taskRecord: TaskRecord) {
         check(taskRecords.remove(taskRecord.id) == taskRecord)

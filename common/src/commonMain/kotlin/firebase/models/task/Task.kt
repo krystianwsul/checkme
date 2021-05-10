@@ -403,12 +403,13 @@ sealed class Task(
     private data class ScheduleDiffKey(val scheduleData: ScheduleData, val assignedTo: Set<UserKey>)
 
     fun updateSchedules(
-            shownFactory: Instance.ShownFactory,
-            scheduleDatas: List<Pair<ScheduleData, Time>>,
-            now: ExactTimeStamp.Local,
-            assignedTo: Set<UserKey>,
-            customTimeMigrationHelper: Project.CustomTimeMigrationHelper,
-            projectKey: ProjectKey<*>,
+        // todo task edit move into RootTask
+        shownFactory: Instance.ShownFactory,
+        scheduleDatas: List<Pair<ScheduleData, Time>>,
+        now: ExactTimeStamp.Local,
+        assignedTo: Set<UserKey>,
+        customTimeMigrationHelper: Project.CustomTimeMigrationHelper,
+        projectKey: ProjectKey<*>,
     ) {
         val removeSchedules = mutableListOf<Schedule>()
         val addScheduleDatas = scheduleDatas.map { ScheduleDiffKey(it.first, assignedTo) to it }.toMutableList()

@@ -264,7 +264,7 @@ abstract class Project<T : ProjectType>(
     private class MissingTaskException(projectId: ProjectKey<*>, taskId: String) :
         Exception("projectId: $projectId, taskId: $taskId")
 
-    interface CustomTimeMigrationHelper { // todo task edit
+    interface CustomTimeMigrationHelper { // todo task maybe
 
         fun tryMigrateProjectCustomTime(
             customTime: Time.Custom.Project<*>,

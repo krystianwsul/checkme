@@ -64,29 +64,8 @@ abstract class Project<T : ProjectType>(
         }
     }
 
-    private fun convertScheduleKey(
-        // todo task edit
-        oldTask: ProjectTask,
-        oldScheduleKey: ScheduleKey,
-        customTimeMigrationHelper: CustomTimeMigrationHelper,
-        now: ExactTimeStamp.Local,
-    ): ScheduleKey {
-        check(oldTask.project != this)
-
-        val (oldScheduleDate, oldScheduleTimePair) = oldScheduleKey
-
-        if (oldScheduleTimePair.customTimeKey == null) return oldScheduleKey
-
-        val convertedTime = when (val customTime = oldTask.project.getCustomTime(oldScheduleTimePair.customTimeKey)) {
-            is Time.Custom.Project<*> ->
-                getOrCreateCustomTime(oldScheduleDate.dayOfWeek, customTime, customTimeMigrationHelper, now)
-            is Time.Custom.User -> customTime
-        }
-
-        return ScheduleKey(oldScheduleDate, convertedTime.timePair)
-    }
-
     private fun getOrCreateCustomTime(
+        // todo task edit?
         dayOfWeek: DayOfWeek,
         customTime: Time.Custom.Project<*>,
         customTimeMigrationHelper: CustomTimeMigrationHelper,

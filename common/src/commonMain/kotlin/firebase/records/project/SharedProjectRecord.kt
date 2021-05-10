@@ -123,8 +123,6 @@ class SharedProjectRecord(
 
     override fun deleteFromParent() = parent.remove(projectKey)
 
-    override fun getTaskRecordId() = databaseWrapper.newSharedTaskRecordId(projectKey) // todo task edit
-
     override fun getScheduleRecordId(taskId: String) =
         databaseWrapper.newSharedScheduleRecordId(projectKey, taskId)
 

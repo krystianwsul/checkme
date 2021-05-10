@@ -24,7 +24,6 @@ import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.*
 
 sealed class Task(
-    private val copyScheduleHelper: CopyScheduleHelper, // todo task edit
     val customTimeProvider: JsonTime.CustomTimeProvider,
     private val taskRecord: TaskRecord,
     private val parentTaskDelegate: ParentTaskDelegate,

@@ -21,7 +21,6 @@ class RootTask(
     override val parent: Parent,
     private val userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
 ) : Task(
-    CopyScheduleHelper.Root,
     JsonTime.CustomTimeProvider.getForRootTask(userCustomTimeProvider),
     taskRecord,
     ParentTaskDelegate.Root(parent),

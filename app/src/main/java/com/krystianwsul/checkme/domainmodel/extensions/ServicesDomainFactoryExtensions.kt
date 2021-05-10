@@ -72,7 +72,7 @@ fun DomainUpdater.setTaskImageUploadedService(
         taskKey: TaskKey,
         imageUuid: String,
 ): Completable = CompletableDomainUpdate.create("clearProjectEndTimeStamps") {
-    val task = getTaskIfPresent(taskKey)
+    val task = rootTasksFactory.getRootTaskIfPresent(taskKey as TaskKey.Root)
     if (task?.getImage(deviceDbInfo) != ImageState.Local(imageUuid)) {
         DomainUpdater.Params()
     } else {

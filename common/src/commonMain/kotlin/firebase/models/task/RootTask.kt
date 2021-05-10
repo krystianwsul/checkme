@@ -1,10 +1,12 @@
 package com.krystianwsul.common.firebase.models.task
 
+import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.ScheduleGroup
 import com.krystianwsul.common.firebase.json.noscheduleorparent.RootNoScheduleOrParentJson
 import com.krystianwsul.common.firebase.json.schedule.*
 import com.krystianwsul.common.firebase.json.taskhierarchies.NestedTaskHierarchyJson
 import com.krystianwsul.common.firebase.json.tasks.TaskJson
+import com.krystianwsul.common.firebase.models.ImageState
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.interval.Type
 import com.krystianwsul.common.firebase.models.noscheduleorparent.NoScheduleOrParent
@@ -106,6 +108,15 @@ class RootTask(
         taskRecord.note = note
 
         normalizedFieldsDelegate.invalidate()
+    }
+
+    fun setImage(deviceDbInfo: DeviceDbInfo, imageState: ImageState?) {
+        taskRecord.image = when (imageState) {
+            null -> null
+            is ImageState.Remote -> TaskJson.Image(imageState.uuid)
+            is ImageState.Local -> TaskJson.Image(imageState.uuid, deviceDbInfo.uuid)
+            is ImageState.Uploading -> throw IllegalArgumentException()
+        }
     }
 
     override fun getDateTime(scheduleKey: ScheduleKey) =

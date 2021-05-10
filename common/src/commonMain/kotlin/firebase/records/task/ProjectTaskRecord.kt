@@ -35,6 +35,7 @@ abstract class ProjectTaskRecord protected constructor(
 
     override val name get() = projectTaskJson.name
     override val note get() = projectTaskJson.note
+    override val image get() = projectTaskJson.image
 
     abstract override var startTimeOffset: Double?
 

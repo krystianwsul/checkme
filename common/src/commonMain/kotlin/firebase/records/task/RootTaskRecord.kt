@@ -74,6 +74,7 @@ class RootTaskRecord private constructor(
 
     override var name by Committer(taskJson::name)
     override var note by Committer(taskJson::note)
+    override var image by Committer(taskJson::image)
 
     override val startTimeOffset get() = taskJson.startTimeOffset
 

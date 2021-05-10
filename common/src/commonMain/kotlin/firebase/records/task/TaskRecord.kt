@@ -77,6 +77,7 @@ abstract class TaskRecord protected constructor(
 
     abstract val name: String
     abstract val note: String?
+    abstract val image: TaskJson.Image?
 
     val startTime get() = taskJson.startTime
     abstract val startTimeOffset: Double?
@@ -86,8 +87,6 @@ abstract class TaskRecord protected constructor(
     abstract val endData: TaskJson.EndData?
 
     abstract fun setEndData(endData: RootTaskJson.EndData?)
-
-    var image by Committer(taskJson::image)
 
     var ordinal by Committer(taskJson::ordinal)
 
@@ -201,6 +200,7 @@ abstract class TaskRecord protected constructor(
     }
 
     protected abstract fun newScheduleWrapper(
+        // todo task edit
         singleScheduleJson: SingleScheduleJson? = null,
         weeklyScheduleJson: WeeklyScheduleJson? = null,
         monthlyDayScheduleJson: MonthlyDayScheduleJson? = null,
@@ -208,7 +208,7 @@ abstract class TaskRecord protected constructor(
         yearlyScheduleJson: YearlyScheduleJson? = null,
     ): ScheduleWrapper
 
-    fun newSingleScheduleRecord(singleScheduleJson: SingleScheduleJson): SingleScheduleRecord {
+    fun newSingleScheduleRecord(singleScheduleJson: SingleScheduleJson): SingleScheduleRecord { // todo task edit
         val singleScheduleRecord = SingleScheduleRecord(
             this,
             newScheduleWrapper(singleScheduleJson = singleScheduleJson),
@@ -222,7 +222,7 @@ abstract class TaskRecord protected constructor(
         return singleScheduleRecord
     }
 
-    fun newWeeklyScheduleRecord(weeklyScheduleJson: WeeklyScheduleJson): WeeklyScheduleRecord {
+    fun newWeeklyScheduleRecord(weeklyScheduleJson: WeeklyScheduleJson): WeeklyScheduleRecord { // todo task edit
         val weeklyScheduleRecord = WeeklyScheduleRecord(
             this,
             newScheduleWrapper(weeklyScheduleJson = weeklyScheduleJson),
@@ -236,7 +236,7 @@ abstract class TaskRecord protected constructor(
         return weeklyScheduleRecord
     }
 
-    fun newMonthlyDayScheduleRecord(monthlyDayScheduleJson: MonthlyDayScheduleJson): MonthlyDayScheduleRecord {
+    fun newMonthlyDayScheduleRecord(monthlyDayScheduleJson: MonthlyDayScheduleJson): MonthlyDayScheduleRecord { // todo task edit
         val monthlyDayScheduleRecord = MonthlyDayScheduleRecord(
             this,
             newScheduleWrapper(monthlyDayScheduleJson = monthlyDayScheduleJson),
@@ -250,7 +250,7 @@ abstract class TaskRecord protected constructor(
         return monthlyDayScheduleRecord
     }
 
-    fun newMonthlyWeekScheduleRecord(monthlyWeekScheduleJson: MonthlyWeekScheduleJson): MonthlyWeekScheduleRecord {
+    fun newMonthlyWeekScheduleRecord(monthlyWeekScheduleJson: MonthlyWeekScheduleJson): MonthlyWeekScheduleRecord { // todo task edit
         val monthlyWeekScheduleRecord = MonthlyWeekScheduleRecord(
             this,
             newScheduleWrapper(monthlyWeekScheduleJson = monthlyWeekScheduleJson),
@@ -264,7 +264,7 @@ abstract class TaskRecord protected constructor(
         return monthlyWeekScheduleRecord
     }
 
-    fun newYearlyScheduleRecord(yearlyScheduleJson: YearlyScheduleJson): YearlyScheduleRecord {
+    fun newYearlyScheduleRecord(yearlyScheduleJson: YearlyScheduleJson): YearlyScheduleRecord { // todo task edit
         val yearlyScheduleRecord = YearlyScheduleRecord(
             this,
             newScheduleWrapper(yearlyScheduleJson = yearlyScheduleJson),
@@ -278,7 +278,7 @@ abstract class TaskRecord protected constructor(
         return yearlyScheduleRecord
     }
 
-    fun newTaskHierarchyRecord(taskHierarchyJson: NestedTaskHierarchyJson): NestedTaskHierarchyRecord {
+    fun newTaskHierarchyRecord(taskHierarchyJson: NestedTaskHierarchyJson): NestedTaskHierarchyRecord { // todo task edit
         val taskHierarchyRecord = NestedTaskHierarchyRecord(this, taskHierarchyJson)
         check(!taskHierarchyRecords.containsKey(taskHierarchyRecord.id))
 
@@ -286,9 +286,9 @@ abstract class TaskRecord protected constructor(
         return taskHierarchyRecord
     }
 
-    abstract fun getScheduleRecordId(): String
-    abstract fun newNoScheduleOrParentRecordId(): String
-    abstract fun newTaskHierarchyRecordId(): TaskHierarchyId
+    abstract fun getScheduleRecordId(): String // todo task edit
+    abstract fun newNoScheduleOrParentRecordId(): String // todo task edit
+    abstract fun newTaskHierarchyRecordId(): TaskHierarchyId // todo task edit
 
     final override fun deleteFromParent() = parent.deleteTaskRecord(this)
 

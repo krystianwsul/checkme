@@ -7,7 +7,6 @@ import com.krystianwsul.common.domain.ScheduleGroup
 import com.krystianwsul.common.domain.TaskUndoData
 import com.krystianwsul.common.firebase.json.*
 import com.krystianwsul.common.firebase.json.tasks.RootTaskJson
-import com.krystianwsul.common.firebase.json.tasks.TaskJson
 import com.krystianwsul.common.firebase.models.*
 import com.krystianwsul.common.firebase.models.interval.*
 import com.krystianwsul.common.firebase.models.noscheduleorparent.NoScheduleOrParent
@@ -436,15 +435,6 @@ sealed class Task(
                 ImageState.Uploading
         } else {
             ImageState.Remote(image.imageUuid)
-        }
-    }
-
-    fun setImage(deviceDbInfo: DeviceDbInfo, imageState: ImageState?) {
-        taskRecord.image = when (imageState) {
-            null -> null
-            is ImageState.Remote -> TaskJson.Image(imageState.uuid)
-            is ImageState.Local -> TaskJson.Image(imageState.uuid, deviceDbInfo.uuid)
-            is ImageState.Uploading -> throw IllegalArgumentException()
         }
     }
 

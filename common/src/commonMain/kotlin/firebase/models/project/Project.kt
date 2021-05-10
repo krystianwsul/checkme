@@ -321,15 +321,6 @@ abstract class Project<T : ProjectType>(
         _tasks.values.forEach { it.fixOffsets() }
     }
 
-    abstract fun createTask(
-        // todo task edit
-        now: ExactTimeStamp.Local,
-        image: TaskJson.Image?,
-        name: String,
-        note: String?,
-        ordinal: Double?,
-    ): ProjectTask
-
     abstract fun getAssignedTo(userKeys: Set<UserKey>): Map<UserKey, ProjectUser>
 
     override fun getTask(taskKey: TaskKey) = when (taskKey) {

@@ -2,7 +2,6 @@ package com.krystianwsul.common.firebase.models.project
 
 import com.krystianwsul.common.domain.TaskHierarchyContainer
 import com.krystianwsul.common.firebase.json.tasks.PrivateTaskJson
-import com.krystianwsul.common.firebase.json.tasks.TaskJson
 import com.krystianwsul.common.firebase.models.CopyScheduleHelper
 import com.krystianwsul.common.firebase.models.ProjectUser
 import com.krystianwsul.common.firebase.models.customtime.PrivateCustomTime
@@ -10,7 +9,6 @@ import com.krystianwsul.common.firebase.models.task.ProjectTask
 import com.krystianwsul.common.firebase.models.taskhierarchy.ProjectTaskHierarchy
 import com.krystianwsul.common.firebase.records.AssignedToHelper
 import com.krystianwsul.common.firebase.records.project.PrivateProjectRecord
-import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.CustomTimeId
@@ -90,24 +88,6 @@ class PrivateProject(
 
         return task
     }
-
-    override fun createTask(
-        // todo task edit
-        now: ExactTimeStamp.Local,
-        image: TaskJson.Image?,
-        name: String,
-        note: String?,
-        ordinal: Double?,
-    ) = newTask(
-        PrivateTaskJson(
-            name,
-            now.long,
-            now.offset,
-            note = note,
-            image = image,
-            ordinal = ordinal
-        )
-    )
 
     override fun getAssignedTo(userKeys: Set<UserKey>) = mapOf<UserKey, ProjectUser>()
 }

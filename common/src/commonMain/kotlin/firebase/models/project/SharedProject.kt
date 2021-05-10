@@ -4,7 +4,6 @@ import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.DeviceInfo
 import com.krystianwsul.common.domain.TaskHierarchyContainer
 import com.krystianwsul.common.firebase.json.tasks.SharedTaskJson
-import com.krystianwsul.common.firebase.json.tasks.TaskJson
 import com.krystianwsul.common.firebase.models.CopyScheduleHelper
 import com.krystianwsul.common.firebase.models.ProjectUser
 import com.krystianwsul.common.firebase.models.RootUser
@@ -13,7 +12,6 @@ import com.krystianwsul.common.firebase.models.task.ProjectTask
 import com.krystianwsul.common.firebase.models.taskhierarchy.ProjectTaskHierarchy
 import com.krystianwsul.common.firebase.records.AssignedToHelper
 import com.krystianwsul.common.firebase.records.project.SharedProjectRecord
-import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.CustomTimeId
@@ -138,7 +136,7 @@ class SharedProject(
     override fun getProjectCustomTime(projectCustomTimeKey: CustomTimeKey.Project<ProjectType.Shared>): SharedCustomTime =
         getProjectCustomTime(projectCustomTimeKey.customTimeId)
 
-    private fun newTask(taskJson: SharedTaskJson): ProjectTask {
+    private fun newTask(taskJson: SharedTaskJson): ProjectTask { // todo task edit
         val taskRecord = projectRecord.newTaskRecord(taskJson)
 
         val task = ProjectTask(this, taskRecord)
@@ -148,24 +146,6 @@ class SharedProject(
 
         return task
     }
-
-    override fun createTask(
-        // todo task edit
-        now: ExactTimeStamp.Local,
-        image: TaskJson.Image?,
-        name: String,
-        note: String?,
-        ordinal: Double?,
-    ) = newTask(
-        SharedTaskJson(
-            name,
-            now.long,
-            now.offset,
-            note = note,
-            image = image,
-            ordinal = ordinal,
-        )
-    )
 
     override fun getAssignedTo(userKeys: Set<UserKey>) = remoteUsers.filterKeys { it in userKeys }
 }

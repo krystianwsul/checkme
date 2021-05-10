@@ -64,7 +64,7 @@ abstract class Project<T : ProjectType>(
     }
 
     private fun getOrCreateCustomTime(
-        // todo task edit?
+        // todo task maybe
         dayOfWeek: DayOfWeek,
         customTime: Time.Custom.Project<*>,
         customTimeMigrationHelper: CustomTimeMigrationHelper,
@@ -75,7 +75,7 @@ abstract class Project<T : ProjectType>(
     }
 
     fun getOrCopyTime(
-        // todo task edit?
+        // todo task maybe
         dayOfWeek: DayOfWeek,
         time: Time,
         customTimeMigrationHelper: CustomTimeMigrationHelper,
@@ -86,16 +86,6 @@ abstract class Project<T : ProjectType>(
             is Time.Custom.User -> it
             is Time.Normal -> it
         }
-    }
-
-    fun copyTaskHierarchy(
-        // todo task edit
-        now: ExactTimeStamp.Local,
-        startTaskHierarchy: TaskHierarchy,
-        parentTaskId: String,
-        childTask: ProjectTask,
-    ) {
-        childTask.copyParentNestedTaskHierarchy(now, startTaskHierarchy, parentTaskId)
     }
 
     fun deleteTask(task: ProjectTask) {

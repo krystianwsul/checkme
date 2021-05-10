@@ -1048,6 +1048,7 @@ sealed class Task(
     }
 
     fun <V : TaskHierarchy> copyParentNestedTaskHierarchy(
+        // todo task edit move to rootTask?
         now: ExactTimeStamp.Local,
         startTaskHierarchy: V,
         parentTaskId: String,
@@ -1068,11 +1069,6 @@ sealed class Task(
     interface ScheduleTextFactory {
 
         fun getScheduleText(scheduleGroup: ScheduleGroup, customTimeProvider: JsonTime.CustomTimeProvider): String
-    }
-
-    interface ProjectUpdater { // todo task edit
-
-        fun convertProject(now: ExactTimeStamp.Local, startingTask: ProjectTask, projectId: ProjectKey<*>): ProjectTask
     }
 
     data class EndData(

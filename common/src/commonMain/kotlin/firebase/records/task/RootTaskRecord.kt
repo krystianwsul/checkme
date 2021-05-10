@@ -115,7 +115,7 @@ class RootTaskRecord private constructor(
         return noScheduleOrParentRecord
     }
 
-    override fun getScheduleRecordId() = databaseWrapper.newRootTaskScheduleRecordId(id)
+    private fun getScheduleRecordId() = databaseWrapper.newRootTaskScheduleRecordId(id)
     override fun newNoScheduleOrParentRecordId() = databaseWrapper.newRootTaskNoScheduleOrParentRecordId(id)
     override fun newTaskHierarchyRecordId() = databaseWrapper.newRootTaskNestedTaskHierarchyRecordId(id)
 

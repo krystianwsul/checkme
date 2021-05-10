@@ -83,9 +83,6 @@ class PrivateProjectRecord(
 
     override fun deleteFromParent() = throw UnsupportedOperationException()
 
-    override fun getScheduleRecordId(taskId: String) =
-        databaseWrapper.newPrivateScheduleRecordId(projectKey, taskId)
-
     override fun newNestedTaskHierarchyRecordId(taskId: String) =
         databaseWrapper.newPrivateNestedTaskHierarchyRecordId(projectKey, taskId)
 

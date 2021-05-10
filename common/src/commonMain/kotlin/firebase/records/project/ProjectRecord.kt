@@ -71,8 +71,6 @@ abstract class ProjectRecord<T : ProjectType>(
 
     abstract fun newNestedTaskHierarchyRecordId(taskId: String): TaskHierarchyId
 
-    abstract fun getScheduleRecordId(taskId: String): String
-
     abstract fun getCustomTimeRecord(id: String): ProjectCustomTimeRecord<T>
 
     abstract fun newNoScheduleOrParentRecordId(taskId: String): String

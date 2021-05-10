@@ -123,9 +123,6 @@ class SharedProjectRecord(
 
     override fun deleteFromParent() = parent.remove(projectKey)
 
-    override fun getScheduleRecordId(taskId: String) =
-        databaseWrapper.newSharedScheduleRecordId(projectKey, taskId)
-
     override fun newNestedTaskHierarchyRecordId(taskId: String) =
         databaseWrapper.newSharedNestedTaskHierarchyRecordId(projectKey, taskId)
 

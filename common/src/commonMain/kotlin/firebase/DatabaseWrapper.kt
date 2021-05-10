@@ -25,9 +25,6 @@ abstract class DatabaseWrapper {
 
     abstract fun update(values: Map<String, Any?>, callback: DatabaseCallback)
 
-    fun newPrivateScheduleRecordId(projectId: ProjectKey<ProjectType.Private>, taskId: String) =
-        getNewId("$PRIVATE_PROJECTS_KEY/$projectId/${ProjectRecord.PROJECT_JSON}/${TaskRecord.TASKS}/$taskId/${ScheduleRecord.SCHEDULES}")
-
     fun newPrivateNoScheduleOrParentRecordId(projectId: ProjectKey<ProjectType.Private>, taskId: String) =
         getNewId("$PRIVATE_PROJECTS_KEY/$projectId/${ProjectRecord.PROJECT_JSON}/${TaskRecord.TASKS}/$taskId/${NoScheduleOrParentRecord.NO_SCHEDULE_OR_PARENT}")
 
@@ -40,9 +37,6 @@ abstract class DatabaseWrapper {
     fun newRootUserCustomTimeId(userKey: UserKey) = getNewId("$USERS_KEY/${userKey.key}/${CustomTimeRecord.CUSTOM_TIMES}")
 
     fun newSharedProjectRecordId() = ProjectKey.Shared(getNewId(RECORDS_KEY))
-
-    fun newSharedScheduleRecordId(projectId: ProjectKey<ProjectType.Shared>, taskId: String) =
-        getNewId("$RECORDS_KEY/$projectId/${ProjectRecord.PROJECT_JSON}/${TaskRecord.TASKS}/$taskId/${ScheduleRecord.SCHEDULES}")
 
     fun newSharedNoScheduleOrParentRecordId(projectId: ProjectKey<ProjectType.Shared>, taskId: String) =
         getNewId("$RECORDS_KEY/$projectId/${ProjectRecord.PROJECT_JSON}/${TaskRecord.TASKS}/$taskId/${NoScheduleOrParentRecord.NO_SCHEDULE_OR_PARENT}")

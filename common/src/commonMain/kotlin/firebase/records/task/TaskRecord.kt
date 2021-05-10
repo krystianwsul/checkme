@@ -204,7 +204,6 @@ abstract class TaskRecord protected constructor(
         return projectInstanceRecord
     }
 
-    abstract fun getScheduleRecordId(): String // todo task edit
     abstract fun newNoScheduleOrParentRecordId(): String // todo task edit
     abstract fun newTaskHierarchyRecordId(): TaskHierarchyId // todo task edit
 

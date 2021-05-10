@@ -13,7 +13,7 @@ data class SharedTaskJson @JvmOverloads constructor(
     override val startTime: Long = 0,
     override var startTimeOffset: Double? = null,
     override var endTime: Long? = null,
-    override var note: String? = null,
+    override val note: String? = null,
     override var instances: MutableMap<String, InstanceJson> = mutableMapOf(),
     override var schedules: MutableMap<String, SharedScheduleWrapper> = mutableMapOf(),
     override var image: TaskJson.Image? = null,

@@ -9,7 +9,7 @@ import kotlinx.serialization.Serializable
 interface TaskJson {
 
     val name: String
-    var note: String? // todo task json
+    val note: String?
     var image: Image? // todo task json
     var ordinal: Double?
 

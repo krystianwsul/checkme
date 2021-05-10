@@ -76,6 +76,7 @@ abstract class TaskRecord protected constructor(
         .toMutableMap()
 
     abstract val name: String
+    abstract val note: String?
 
     val startTime get() = taskJson.startTime
     abstract val startTimeOffset: Double?
@@ -85,8 +86,6 @@ abstract class TaskRecord protected constructor(
     abstract val endData: TaskJson.EndData?
 
     abstract fun setEndData(endData: RootTaskJson.EndData?)
-
-    var note by Committer(taskJson::note)
 
     var image by Committer(taskJson::image)
 

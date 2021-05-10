@@ -34,6 +34,7 @@ abstract class ProjectTaskRecord protected constructor(
         .toMutableMap()
 
     override val name get() = projectTaskJson.name
+    override val note get() = projectTaskJson.note
 
     abstract override var startTimeOffset: Double?
 

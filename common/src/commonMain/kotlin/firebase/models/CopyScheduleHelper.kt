@@ -103,7 +103,7 @@ sealed class CopyScheduleHelper {
         projectKey: ProjectKey<*>,
     ): YearlyScheduleJson
 
-    object Private : CopyScheduleHelper() {
+    object Private : CopyScheduleHelper() { // todo task edit
 
         override fun newSingle(
             startTime: Long,
@@ -271,7 +271,7 @@ sealed class CopyScheduleHelper {
         }
     }
 
-    object Shared : CopyScheduleHelper() {
+    object Shared : CopyScheduleHelper() { // todo task edit
 
         override fun newSingle(
             startTime: Long,

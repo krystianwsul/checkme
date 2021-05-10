@@ -1,7 +1,6 @@
 package com.krystianwsul.common.firebase.models.project
 
 import com.krystianwsul.common.domain.TaskHierarchyContainer
-import com.krystianwsul.common.firebase.models.CopyScheduleHelper
 import com.krystianwsul.common.firebase.models.ProjectUser
 import com.krystianwsul.common.firebase.models.customtime.PrivateCustomTime
 import com.krystianwsul.common.firebase.models.task.ProjectTask
@@ -19,12 +18,7 @@ class PrivateProject(
     override val projectRecord: PrivateProjectRecord,
     userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
     rootTaskProvider: RootTaskProvider,
-) : Project<ProjectType.Private>(
-    CopyScheduleHelper.Private,
-    AssignedToHelper.Private,
-    userCustomTimeProvider,
-    rootTaskProvider,
-) {
+) : Project<ProjectType.Private>(AssignedToHelper.Private, userCustomTimeProvider, rootTaskProvider) {
 
     override val projectKey = projectRecord.projectKey
 

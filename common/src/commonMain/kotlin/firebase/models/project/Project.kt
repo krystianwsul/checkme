@@ -17,7 +17,6 @@ import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.*
 
 abstract class Project<T : ProjectType>(
-    val copyScheduleHelper: CopyScheduleHelper, // todo task edit
     val assignedToHelper: AssignedToHelper,
     val userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
     val rootTaskProvider: RootTaskProvider,

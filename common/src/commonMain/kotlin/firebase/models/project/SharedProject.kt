@@ -3,7 +3,6 @@ package com.krystianwsul.common.firebase.models.project
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.DeviceInfo
 import com.krystianwsul.common.domain.TaskHierarchyContainer
-import com.krystianwsul.common.firebase.models.CopyScheduleHelper
 import com.krystianwsul.common.firebase.models.ProjectUser
 import com.krystianwsul.common.firebase.models.RootUser
 import com.krystianwsul.common.firebase.models.customtime.SharedCustomTime
@@ -22,12 +21,7 @@ class SharedProject(
     override val projectRecord: SharedProjectRecord,
     userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
     rootTaskProvider: RootTaskProvider,
-) : Project<ProjectType.Shared>(
-    CopyScheduleHelper.Shared,
-    AssignedToHelper.Shared,
-    userCustomTimeProvider,
-    rootTaskProvider,
-) {
+) : Project<ProjectType.Shared>(AssignedToHelper.Shared, userCustomTimeProvider, rootTaskProvider) {
 
     override val projectKey = projectRecord.projectKey
 

@@ -678,7 +678,7 @@ private fun Task.showAsParent(now: ExactTimeStamp.Local, excludedTaskKeys: Set<T
 }
 
 private fun DomainFactory.joinJoinables(
-    newParentTask: Task,
+    newParentTask: RootTask,
     joinables: List<EditParameters.Join.Joinable>,
     now: ExactTimeStamp.Local,
 ) {
@@ -691,7 +691,7 @@ private fun DomainFactory.joinJoinables(
     val parentTaskHasOtherInstances = newParentTask.hasOtherVisibleInstances(now, parentInstanceKey)
 
     joinables.forEach { joinable ->
-        val task = getTaskForce(joinable.taskKey)
+        val task = convertToRoot(getTaskForce(joinable.taskKey), now)
 
         fun addChildToParent(instance: Instance? = null) = addChildToParent(task, newParentTask, now, instance)
 
@@ -711,8 +711,8 @@ private fun DomainFactory.joinJoinables(
 }
 
 private fun DomainFactory.joinTasks(
-    newParentTask: Task,
-    joinTasks: List<Task>,
+    newParentTask: RootTask,
+    joinTasks: List<RootTask>,
     now: ExactTimeStamp.Local,
     removeInstanceKeys: List<InstanceKey>,
 ) {

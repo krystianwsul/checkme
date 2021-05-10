@@ -20,6 +20,7 @@ import com.krystianwsul.common.firebase.models.FilterResult
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.filterQuery
 import com.krystianwsul.common.firebase.models.project.Project
+import com.krystianwsul.common.firebase.models.task.RootTask
 import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.time.Date
@@ -283,10 +284,10 @@ private class AddChildToParentUndoData(
 }
 
 fun addChildToParent(
-        childTask: Task,
-        parentTask: Task,
-        now: ExactTimeStamp.Local,
-        hideInstance: Instance? = null,
+    childTask: RootTask,
+    parentTask: RootTask,
+    now: ExactTimeStamp.Local,
+    hideInstance: Instance? = null,
 ): UndoData {
     childTask.requireCurrent(now)
 

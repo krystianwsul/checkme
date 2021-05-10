@@ -16,6 +16,7 @@ import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.MyCustomTime
 import com.krystianwsul.common.firebase.models.Instance
+import com.krystianwsul.common.firebase.models.task.RootTask
 import com.krystianwsul.common.locker.LockerManager
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.InstanceKey
@@ -184,7 +185,11 @@ fun DomainUpdater.setInstancesParent(
 
             undoData
         } else {
-            addChildToParent(it.task, parentTask, now)
+            addChildToParent(
+                it.task as RootTask,
+                parentTask as RootTask,
+                now
+            ) // this is very rare, so I'll just hope for the best
         }
     }
 

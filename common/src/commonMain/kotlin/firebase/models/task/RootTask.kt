@@ -3,6 +3,7 @@ package com.krystianwsul.common.firebase.models.task
 import com.krystianwsul.common.domain.ScheduleGroup
 import com.krystianwsul.common.firebase.json.noscheduleorparent.RootNoScheduleOrParentJson
 import com.krystianwsul.common.firebase.json.schedule.*
+import com.krystianwsul.common.firebase.json.taskhierarchies.NestedTaskHierarchyJson
 import com.krystianwsul.common.firebase.json.tasks.TaskJson
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.interval.Type
@@ -115,11 +116,17 @@ class RootTask(
         is Time.Normal -> time
     }
 
-    fun addChild(childTask: Task, now: ExactTimeStamp.Local): TaskHierarchyKey {
+    fun addChild(childTask: RootTask, now: ExactTimeStamp.Local): TaskHierarchyKey {
         val taskHierarchyKey = childTask.createParentNestedTaskHierarchy(this, now)
-        addRootTask(childTask as RootTask)
+        addRootTask(childTask)
 
         return taskHierarchyKey
+    }
+
+    private fun createParentNestedTaskHierarchy(parentTask: Task, now: ExactTimeStamp.Local): TaskHierarchyKey.Nested {
+        val taskHierarchyJson = NestedTaskHierarchyJson(parentTask.id, now.long, now.offset)
+
+        return createParentNestedTaskHierarchy(taskHierarchyJson).taskHierarchyKey
     }
 
     fun deleteNoScheduleOrParent(noScheduleOrParent: NoScheduleOrParent) {

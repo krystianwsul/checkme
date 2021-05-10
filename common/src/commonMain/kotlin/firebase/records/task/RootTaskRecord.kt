@@ -35,7 +35,7 @@ class RootTaskRecord private constructor(
 ) {
 
     override val noScheduleOrParentRecords = taskJson.noScheduleOrParent
-        .mapValues { RootNoScheduleOrParentRecord(this, it.value, it.key) }
+        .mapValues { RootNoScheduleOrParentRecord(this, it.value, it.key, false) }
         .toMutableMap()
 
     override val createObject: RootTaskJson // because of duplicate functionality when converting local task
@@ -106,7 +106,8 @@ class RootTaskRecord private constructor(
         val noScheduleOrParentRecord = RootNoScheduleOrParentRecord(
             this,
             noScheduleOrParentJson,
-            null,
+            databaseWrapper.newRootTaskNoScheduleOrParentRecordId(id),
+            true,
         )
 
         check(!noScheduleOrParentRecords.containsKey(noScheduleOrParentRecord.id))
@@ -115,8 +116,7 @@ class RootTaskRecord private constructor(
         return noScheduleOrParentRecord
     }
 
-    private fun getScheduleRecordId() = databaseWrapper.newRootTaskScheduleRecordId(id)
-    override fun newNoScheduleOrParentRecordId() = databaseWrapper.newRootTaskNoScheduleOrParentRecordId(id)
+    private fun newScheduleRecordId() = databaseWrapper.newRootTaskScheduleRecordId(id)
     override fun newTaskHierarchyRecordId() = databaseWrapper.newRootTaskNestedTaskHierarchyRecordId(id)
 
     fun newSingleScheduleRecord(singleScheduleJson: RootSingleScheduleJson): SingleScheduleRecord {
@@ -125,7 +125,7 @@ class RootTaskRecord private constructor(
             RootScheduleWrapper(singleScheduleJson = singleScheduleJson),
             projectHelper,
             newProjectRootDelegate(this, singleScheduleJson),
-            getScheduleRecordId(),
+            newScheduleRecordId(),
             true,
         )
 
@@ -141,7 +141,7 @@ class RootTaskRecord private constructor(
             RootScheduleWrapper(weeklyScheduleJson = weeklyScheduleJson),
             projectHelper,
             newProjectRootDelegate(this, weeklyScheduleJson),
-            getScheduleRecordId(),
+            newScheduleRecordId(),
             true,
         )
 
@@ -157,7 +157,7 @@ class RootTaskRecord private constructor(
             RootScheduleWrapper(monthlyDayScheduleJson = monthlyDayScheduleJson),
             projectHelper,
             newProjectRootDelegate(this, monthlyDayScheduleJson),
-            getScheduleRecordId(),
+            newScheduleRecordId(),
             true,
         )
 
@@ -173,7 +173,7 @@ class RootTaskRecord private constructor(
             RootScheduleWrapper(monthlyWeekScheduleJson = monthlyWeekScheduleJson),
             projectHelper,
             newProjectRootDelegate(this, monthlyWeekScheduleJson),
-            getScheduleRecordId(),
+            newScheduleRecordId(),
             true,
         )
 
@@ -189,7 +189,7 @@ class RootTaskRecord private constructor(
             RootScheduleWrapper(yearlyScheduleJson = yearlyScheduleJson),
             projectHelper,
             newProjectRootDelegate(this, yearlyScheduleJson),
-            getScheduleRecordId(),
+            newScheduleRecordId(),
             true,
         )
 

@@ -94,9 +94,6 @@ class PrivateProjectRecord(
     override fun getProjectCustomTimeKey(projectCustomTimeId: CustomTimeId.Project) =
         CustomTimeKey.Project.Private(projectKey, projectCustomTimeId as CustomTimeId.Project.Private)
 
-    override fun newNoScheduleOrParentRecordId(taskId: String) =
-        databaseWrapper.newPrivateNoScheduleOrParentRecordId(projectKey, taskId)
-
     override fun deleteTaskRecord(taskRecord: TaskRecord) {
         check(taskRecords.remove(taskRecord.id) == taskRecord)
     }

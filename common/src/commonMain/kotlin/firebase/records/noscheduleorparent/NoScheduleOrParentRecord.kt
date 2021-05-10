@@ -8,15 +8,14 @@ import com.krystianwsul.common.firebase.records.task.TaskRecord
 abstract class NoScheduleOrParentRecord(
     taskRecord: TaskRecord,
     private val noScheduleOrParentJson: NoScheduleOrParentJson,
-    _id: String?,
-) : RemoteRecord(_id == null), ProjectIdOwner {
+    val id: String,
+    create: Boolean,
+) : RemoteRecord(create), ProjectIdOwner {
 
     companion object {
 
         const val NO_SCHEDULE_OR_PARENT = "noScheduleOrParent"
     }
-
-    val id = _id ?: taskRecord.newNoScheduleOrParentRecordId()
 
     override val key = "${taskRecord.key}/$NO_SCHEDULE_OR_PARENT/$id"
 

@@ -7,8 +7,9 @@ import com.krystianwsul.common.utils.ProjectKey
 class RootNoScheduleOrParentRecord(
     private val rootTaskRecord: RootTaskRecord,
     private val rootNoScheduleOrParentJson: RootNoScheduleOrParentJson,
-    _id: String?,
-) : NoScheduleOrParentRecord(rootTaskRecord, rootNoScheduleOrParentJson, _id) {
+    id: String,
+    create: Boolean,
+) : NoScheduleOrParentRecord(rootTaskRecord, rootNoScheduleOrParentJson, id, create) {
 
     override val createObject = rootNoScheduleOrParentJson
 

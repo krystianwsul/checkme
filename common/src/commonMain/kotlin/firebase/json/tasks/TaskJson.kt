@@ -16,7 +16,7 @@ interface TaskJson {
     val startTime: Long
     val startTimeOffset: Double?
 
-    var endData: EndData?
+    val endData: EndData?
 
     var instances: MutableMap<String, InstanceJson>
     val schedules: Map<String, ScheduleWrapper>

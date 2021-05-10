@@ -400,69 +400,6 @@ sealed class Task(
         }
     }
 
-    private data class ScheduleDiffKey(val scheduleData: ScheduleData, val assignedTo: Set<UserKey>)
-
-    fun updateSchedules(
-        // todo task edit move into RootTask
-        shownFactory: Instance.ShownFactory,
-        scheduleDatas: List<Pair<ScheduleData, Time>>,
-        now: ExactTimeStamp.Local,
-        assignedTo: Set<UserKey>,
-        customTimeMigrationHelper: Project.CustomTimeMigrationHelper,
-        projectKey: ProjectKey<*>,
-    ) {
-        val removeSchedules = mutableListOf<Schedule>()
-        val addScheduleDatas = scheduleDatas.map { ScheduleDiffKey(it.first, assignedTo) to it }.toMutableList()
-
-        val oldSchedules = getCurrentScheduleIntervals(now).map { it.schedule }
-
-        val oldScheduleDatas = ScheduleGroup.getGroups(oldSchedules).map {
-            ScheduleDiffKey(it.scheduleData, it.assignedTo) to it.schedules
-        }
-
-        for ((key, value) in oldScheduleDatas) {
-            val existing = addScheduleDatas.singleOrNull { it.first == key }
-
-            if (existing != null)
-                addScheduleDatas.remove(existing)
-            else
-                removeSchedules.addAll(value)
-        }
-
-        /*
-            requirements for mock:
-                there was one old schedule, it was single and mocked, and it's getting replaced
-                by another single schedule
-         */
-
-        val singleRemoveSchedule = removeSchedules.singleOrNull() as? SingleSchedule
-
-        val singleAddSchedulePair = addScheduleDatas.singleOrNull()?.takeIf {
-            it.first.scheduleData is ScheduleData.Single
-        }
-
-        if (singleRemoveSchedule != null && singleAddSchedulePair != null) {
-            if (assignedTo.isNotEmpty()) singleRemoveSchedule.setAssignedTo(assignedTo)
-
-            singleRemoveSchedule.getInstance(this).setInstanceDateTime(
-                    shownFactory,
-                    singleAddSchedulePair.second.run { DateTime((first as ScheduleData.Single).date, second) },
-                    customTimeMigrationHelper,
-                    now,
-            )
-        } else {
-            removeSchedules.forEach { it.setEndExactTimeStamp(now.toOffset()) }
-
-            createSchedules(
-                    now,
-                    addScheduleDatas.map { it.second },
-                    assignedTo,
-                    customTimeMigrationHelper,
-                    projectKey,
-            )
-        }
-    }
-
     fun getHierarchyExactTimeStamp(exactTimeStamp: ExactTimeStamp) =
         exactTimeStamp.coerceIn(startExactTimeStampOffset, endExactTimeStampOffset?.minusOne())
 

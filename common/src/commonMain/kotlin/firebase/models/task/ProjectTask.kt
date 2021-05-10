@@ -1,6 +1,5 @@
 package com.krystianwsul.common.firebase.models.task
 
-import com.krystianwsul.common.firebase.json.noscheduleorparent.ProjectNoScheduleOrParentJson
 import com.krystianwsul.common.firebase.models.noscheduleorparent.NoScheduleOrParent
 import com.krystianwsul.common.firebase.models.noscheduleorparent.ProjectNoScheduleOrParent
 import com.krystianwsul.common.firebase.models.project.Project
@@ -9,7 +8,10 @@ import com.krystianwsul.common.firebase.records.task.ProjectTaskRecord
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.Time
-import com.krystianwsul.common.utils.*
+import com.krystianwsul.common.utils.ScheduleKey
+import com.krystianwsul.common.utils.TaskHierarchyKey
+import com.krystianwsul.common.utils.TaskKey
+import com.krystianwsul.common.utils.invalidatableLazy
 
 class ProjectTask(override val project: Project<*>, private val taskRecord: ProjectTaskRecord) :
         Task(project.copyScheduleHelper, project, taskRecord, ParentTaskDelegate.Project(project)) {
@@ -31,18 +33,6 @@ class ProjectTask(override val project: Project<*>, private val taskRecord: Proj
     override val projectParentTaskHierarchies by parentProjectTaskHierarchiesProperty
 
     override val projectCustomTimeIdProvider = project.projectRecord
-
-    fun setNoScheduleOrParent(now: ExactTimeStamp.Local, projectKey: ProjectKey<*>) { // todo task edit
-        val noScheduleOrParentRecord =
-            taskRecord.newNoScheduleOrParentRecord(ProjectNoScheduleOrParentJson(now.long, now.offset))
-
-        check(!noScheduleOrParentsMap.containsKey(noScheduleOrParentRecord.id))
-
-        noScheduleOrParentsMap[noScheduleOrParentRecord.id] =
-            ProjectNoScheduleOrParent(this, noScheduleOrParentRecord)
-
-        invalidateIntervals()
-    }
 
     override fun deleteProjectRootTaskId() {
         // only for root projects

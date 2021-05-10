@@ -49,6 +49,7 @@ abstract class ProjectTaskRecord protected constructor(
             setProperty(projectTaskJson::endTime, value?.time)
         }
 
+    // todo task edit
     fun newNoScheduleOrParentRecord(noScheduleOrParentJson: ProjectNoScheduleOrParentJson): ProjectNoScheduleOrParentRecord {
         val noScheduleOrParentRecord = ProjectNoScheduleOrParentRecord(
             this,

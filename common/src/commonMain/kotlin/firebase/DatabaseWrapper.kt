@@ -31,9 +31,6 @@ abstract class DatabaseWrapper {
     fun newPrivateNoScheduleOrParentRecordId(projectId: ProjectKey<ProjectType.Private>, taskId: String) =
         getNewId("$PRIVATE_PROJECTS_KEY/$projectId/${ProjectRecord.PROJECT_JSON}/${TaskRecord.TASKS}/$taskId/${NoScheduleOrParentRecord.NO_SCHEDULE_OR_PARENT}")
 
-    fun newPrivateTaskRecordId(projectId: ProjectKey<ProjectType.Private>) = // todo task edit
-        getNewId("$PRIVATE_PROJECTS_KEY/$projectId/${ProjectRecord.PROJECT_JSON}/${TaskRecord.TASKS}")
-
     fun newPrivateProjectTaskHierarchyRecordId(projectId: ProjectKey<ProjectType.Private>) =
         TaskHierarchyId(getNewId("$PRIVATE_PROJECTS_KEY/$projectId/${ProjectRecord.PROJECT_JSON}/${TaskHierarchyRecord.TASK_HIERARCHIES}"))
 

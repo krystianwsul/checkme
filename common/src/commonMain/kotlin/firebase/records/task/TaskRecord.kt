@@ -2,7 +2,6 @@ package com.krystianwsul.common.firebase.records.task
 
 import com.krystianwsul.common.firebase.json.InstanceJson
 import com.krystianwsul.common.firebase.json.schedule.*
-import com.krystianwsul.common.firebase.json.taskhierarchies.NestedTaskHierarchyJson
 import com.krystianwsul.common.firebase.json.tasks.RootTaskJson
 import com.krystianwsul.common.firebase.json.tasks.TaskJson
 import com.krystianwsul.common.firebase.records.AssignedToHelper
@@ -24,8 +23,8 @@ abstract class TaskRecord protected constructor(
     val projectCustomTimeIdAndKeyProvider: JsonTime.ProjectCustomTimeIdAndKeyProvider,
     override val key: String,
     private val parent: Parent,
-    private val projectHelper: ProjectHelper,
-    private val newProjectRootDelegate: (taskRecord: TaskRecord, scheduleJson: ScheduleJson) -> ProjectRootDelegate,
+    protected val projectHelper: ProjectHelper, // todo task edit
+    protected val newProjectRootDelegate: (taskRecord: TaskRecord, scheduleJson: ScheduleJson) -> ProjectRootDelegate, // todo task edit
 ) : RemoteRecord(create) {
 
     companion object {
@@ -207,84 +206,6 @@ abstract class TaskRecord protected constructor(
         monthlyWeekScheduleJson: MonthlyWeekScheduleJson? = null,
         yearlyScheduleJson: YearlyScheduleJson? = null,
     ): ScheduleWrapper
-
-    fun newSingleScheduleRecord(singleScheduleJson: SingleScheduleJson): SingleScheduleRecord { // todo task edit
-        val singleScheduleRecord = SingleScheduleRecord(
-            this,
-            newScheduleWrapper(singleScheduleJson = singleScheduleJson),
-            projectHelper,
-            newProjectRootDelegate(this, singleScheduleJson),
-        )
-
-        check(!singleScheduleRecords.containsKey(singleScheduleRecord.id))
-
-        singleScheduleRecords[singleScheduleRecord.id] = singleScheduleRecord
-        return singleScheduleRecord
-    }
-
-    fun newWeeklyScheduleRecord(weeklyScheduleJson: WeeklyScheduleJson): WeeklyScheduleRecord { // todo task edit
-        val weeklyScheduleRecord = WeeklyScheduleRecord(
-            this,
-            newScheduleWrapper(weeklyScheduleJson = weeklyScheduleJson),
-            projectHelper,
-            newProjectRootDelegate(this, weeklyScheduleJson),
-        )
-
-        check(!weeklyScheduleRecords.containsKey(weeklyScheduleRecord.id))
-
-        weeklyScheduleRecords[weeklyScheduleRecord.id] = weeklyScheduleRecord
-        return weeklyScheduleRecord
-    }
-
-    fun newMonthlyDayScheduleRecord(monthlyDayScheduleJson: MonthlyDayScheduleJson): MonthlyDayScheduleRecord { // todo task edit
-        val monthlyDayScheduleRecord = MonthlyDayScheduleRecord(
-            this,
-            newScheduleWrapper(monthlyDayScheduleJson = monthlyDayScheduleJson),
-            projectHelper,
-            newProjectRootDelegate(this, monthlyDayScheduleJson),
-        )
-
-        check(!monthlyDayScheduleRecords.containsKey(monthlyDayScheduleRecord.id))
-
-        monthlyDayScheduleRecords[monthlyDayScheduleRecord.id] = monthlyDayScheduleRecord
-        return monthlyDayScheduleRecord
-    }
-
-    fun newMonthlyWeekScheduleRecord(monthlyWeekScheduleJson: MonthlyWeekScheduleJson): MonthlyWeekScheduleRecord { // todo task edit
-        val monthlyWeekScheduleRecord = MonthlyWeekScheduleRecord(
-            this,
-            newScheduleWrapper(monthlyWeekScheduleJson = monthlyWeekScheduleJson),
-            projectHelper,
-            newProjectRootDelegate(this, monthlyWeekScheduleJson),
-        )
-
-        check(!monthlyWeekScheduleRecords.containsKey(monthlyWeekScheduleRecord.id))
-
-        monthlyWeekScheduleRecords[monthlyWeekScheduleRecord.id] = monthlyWeekScheduleRecord
-        return monthlyWeekScheduleRecord
-    }
-
-    fun newYearlyScheduleRecord(yearlyScheduleJson: YearlyScheduleJson): YearlyScheduleRecord { // todo task edit
-        val yearlyScheduleRecord = YearlyScheduleRecord(
-            this,
-            newScheduleWrapper(yearlyScheduleJson = yearlyScheduleJson),
-            projectHelper,
-            newProjectRootDelegate(this, yearlyScheduleJson),
-        )
-
-        check(!yearlyScheduleRecords.containsKey(yearlyScheduleRecord.id))
-
-        yearlyScheduleRecords[yearlyScheduleRecord.id] = yearlyScheduleRecord
-        return yearlyScheduleRecord
-    }
-
-    fun newTaskHierarchyRecord(taskHierarchyJson: NestedTaskHierarchyJson): NestedTaskHierarchyRecord { // todo task edit
-        val taskHierarchyRecord = NestedTaskHierarchyRecord(this, taskHierarchyJson)
-        check(!taskHierarchyRecords.containsKey(taskHierarchyRecord.id))
-
-        taskHierarchyRecords[taskHierarchyRecord.id] = taskHierarchyRecord
-        return taskHierarchyRecord
-    }
 
     abstract fun getScheduleRecordId(): String // todo task edit
     abstract fun newNoScheduleOrParentRecordId(): String // todo task edit

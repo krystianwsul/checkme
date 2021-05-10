@@ -204,8 +204,6 @@ abstract class TaskRecord protected constructor(
         return projectInstanceRecord
     }
 
-    abstract fun newTaskHierarchyRecordId(): TaskHierarchyId // todo task edit
-
     final override fun deleteFromParent() = parent.deleteTaskRecord(this)
 
     interface Parent {

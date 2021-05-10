@@ -1,6 +1,7 @@
 package com.krystianwsul.common.firebase.records.taskhierarchy
 
 import com.krystianwsul.common.firebase.json.taskhierarchies.NestedTaskHierarchyJson
+import com.krystianwsul.common.firebase.records.task.RootTaskRecord
 import com.krystianwsul.common.firebase.records.task.TaskRecord
 import com.krystianwsul.common.utils.TaskHierarchyId
 
@@ -25,7 +26,7 @@ class NestedTaskHierarchyRecord(
     ) : this(false, id, taskRecord, taskHierarchyJson)
 
     constructor(
-        taskRecord: TaskRecord,
+        taskRecord: RootTaskRecord,
         taskHierarchyJson: NestedTaskHierarchyJson,
     ) : this(
         true,

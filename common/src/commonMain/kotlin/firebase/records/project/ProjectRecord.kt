@@ -69,8 +69,6 @@ abstract class ProjectRecord<T : ProjectType>(
         }
     }
 
-    abstract fun newNestedTaskHierarchyRecordId(taskId: String): TaskHierarchyId
-
     abstract fun getCustomTimeRecord(id: String): ProjectCustomTimeRecord<T>
 
     abstract override fun getProjectCustomTimeKey(projectCustomTimeId: CustomTimeId.Project): CustomTimeKey.Project<T>

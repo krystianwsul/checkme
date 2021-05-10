@@ -134,11 +134,6 @@ class DomainFactoryRule : TestRule {
                 ProjectKey.Shared("sharedProjectId" + ++sharedProjectId)
             }
 
-            var nestedTaskHierarchyId = 0
-            every { newPrivateNestedTaskHierarchyRecordId(any(), any()) } answers {
-                TaskHierarchyId("nestedTaskHierarchyId" + ++nestedTaskHierarchyId)
-            }
-
             var userCustomTimeId = 0
             every { newRootUserCustomTimeId(any()) } answers { "userCustomTimeId" + ++userCustomTimeId }
 

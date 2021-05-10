@@ -54,6 +54,4 @@ abstract class ProjectTaskRecord protected constructor(
         setProperty(projectTaskJson::endData, compatEndData)
         setProperty(projectTaskJson::endTime, compatEndData?.time)
     }
-
-    override fun newTaskHierarchyRecordId() = projectRecord.newNestedTaskHierarchyRecordId(id)
 }

@@ -117,7 +117,7 @@ class RootTaskRecord private constructor(
     }
 
     private fun newScheduleRecordId() = databaseWrapper.newRootTaskScheduleRecordId(id)
-    override fun newTaskHierarchyRecordId() = databaseWrapper.newRootTaskNestedTaskHierarchyRecordId(id)
+    fun newTaskHierarchyRecordId() = databaseWrapper.newRootTaskNestedTaskHierarchyRecordId(id)
 
     fun newSingleScheduleRecord(singleScheduleJson: RootSingleScheduleJson): SingleScheduleRecord {
         val singleScheduleRecord = SingleScheduleRecord(

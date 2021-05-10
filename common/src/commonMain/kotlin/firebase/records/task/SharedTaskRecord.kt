@@ -1,6 +1,6 @@
 package com.krystianwsul.common.firebase.records.task
 
-import com.krystianwsul.common.firebase.json.schedule.*
+import com.krystianwsul.common.firebase.json.schedule.SharedScheduleWrapper
 import com.krystianwsul.common.firebase.json.tasks.SharedTaskJson
 import com.krystianwsul.common.firebase.records.AssignedToHelper
 import com.krystianwsul.common.firebase.records.InstanceRecord
@@ -48,18 +48,4 @@ class SharedTaskRecord(
         }
 
     override var startTimeOffset by Committer(taskJson::startTimeOffset)
-
-    override fun newScheduleWrapper(
-        singleScheduleJson: SingleScheduleJson?,
-        weeklyScheduleJson: WeeklyScheduleJson?,
-        monthlyDayScheduleJson: MonthlyDayScheduleJson?,
-        monthlyWeekScheduleJson: MonthlyWeekScheduleJson?,
-        yearlyScheduleJson: YearlyScheduleJson?,
-    ) = SharedScheduleWrapper(
-        singleScheduleJson as? SharedSingleScheduleJson,
-        weeklyScheduleJson as? SharedWeeklyScheduleJson,
-        monthlyDayScheduleJson as? SharedMonthlyDayScheduleJson,
-        monthlyWeekScheduleJson as? SharedMonthlyWeekScheduleJson,
-        yearlyScheduleJson as? SharedYearlyScheduleJson,
-    )
 }

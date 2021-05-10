@@ -1,7 +1,8 @@
 package com.krystianwsul.common.firebase.records.task
 
 import com.krystianwsul.common.firebase.json.InstanceJson
-import com.krystianwsul.common.firebase.json.schedule.*
+import com.krystianwsul.common.firebase.json.schedule.ScheduleJson
+import com.krystianwsul.common.firebase.json.schedule.ScheduleWrapperBridge
 import com.krystianwsul.common.firebase.json.tasks.RootTaskJson
 import com.krystianwsul.common.firebase.json.tasks.TaskJson
 import com.krystianwsul.common.firebase.records.AssignedToHelper
@@ -202,15 +203,6 @@ abstract class TaskRecord protected constructor(
         instanceRecords[projectInstanceRecord.scheduleKey] = projectInstanceRecord
         return projectInstanceRecord
     }
-
-    protected abstract fun newScheduleWrapper(
-        // todo task edit
-        singleScheduleJson: SingleScheduleJson? = null,
-        weeklyScheduleJson: WeeklyScheduleJson? = null,
-        monthlyDayScheduleJson: MonthlyDayScheduleJson? = null,
-        monthlyWeekScheduleJson: MonthlyWeekScheduleJson? = null,
-        yearlyScheduleJson: YearlyScheduleJson? = null,
-    ): ScheduleWrapper
 
     abstract fun getScheduleRecordId(): String // todo task edit
     abstract fun newNoScheduleOrParentRecordId(): String // todo task edit

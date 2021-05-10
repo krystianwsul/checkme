@@ -119,24 +119,10 @@ class RootTaskRecord private constructor(
     override fun newNoScheduleOrParentRecordId() = databaseWrapper.newRootTaskNoScheduleOrParentRecordId(id)
     override fun newTaskHierarchyRecordId() = databaseWrapper.newRootTaskNestedTaskHierarchyRecordId(id)
 
-    override fun newScheduleWrapper(
-        singleScheduleJson: SingleScheduleJson?,
-        weeklyScheduleJson: WeeklyScheduleJson?,
-        monthlyDayScheduleJson: MonthlyDayScheduleJson?,
-        monthlyWeekScheduleJson: MonthlyWeekScheduleJson?,
-        yearlyScheduleJson: YearlyScheduleJson?,
-    ) = RootScheduleWrapper(
-        singleScheduleJson as? RootSingleScheduleJson,
-        weeklyScheduleJson as? RootWeeklyScheduleJson,
-        monthlyDayScheduleJson as? RootMonthlyDayScheduleJson,
-        monthlyWeekScheduleJson as? RootMonthlyWeekScheduleJson,
-        yearlyScheduleJson as? RootYearlyScheduleJson,
-    )
-
     fun newSingleScheduleRecord(singleScheduleJson: RootSingleScheduleJson): SingleScheduleRecord {
         val singleScheduleRecord = SingleScheduleRecord(
             this,
-            newScheduleWrapper(singleScheduleJson = singleScheduleJson),
+            RootScheduleWrapper(singleScheduleJson = singleScheduleJson),
             projectHelper,
             newProjectRootDelegate(this, singleScheduleJson),
             getScheduleRecordId(),
@@ -152,7 +138,7 @@ class RootTaskRecord private constructor(
     fun newWeeklyScheduleRecord(weeklyScheduleJson: RootWeeklyScheduleJson): WeeklyScheduleRecord {
         val weeklyScheduleRecord = WeeklyScheduleRecord(
             this,
-            newScheduleWrapper(weeklyScheduleJson = weeklyScheduleJson),
+            RootScheduleWrapper(weeklyScheduleJson = weeklyScheduleJson),
             projectHelper,
             newProjectRootDelegate(this, weeklyScheduleJson),
             getScheduleRecordId(),
@@ -168,7 +154,7 @@ class RootTaskRecord private constructor(
     fun newMonthlyDayScheduleRecord(monthlyDayScheduleJson: RootMonthlyDayScheduleJson): MonthlyDayScheduleRecord {
         val monthlyDayScheduleRecord = MonthlyDayScheduleRecord(
             this,
-            newScheduleWrapper(monthlyDayScheduleJson = monthlyDayScheduleJson),
+            RootScheduleWrapper(monthlyDayScheduleJson = monthlyDayScheduleJson),
             projectHelper,
             newProjectRootDelegate(this, monthlyDayScheduleJson),
             getScheduleRecordId(),
@@ -184,7 +170,7 @@ class RootTaskRecord private constructor(
     fun newMonthlyWeekScheduleRecord(monthlyWeekScheduleJson: RootMonthlyWeekScheduleJson): MonthlyWeekScheduleRecord {
         val monthlyWeekScheduleRecord = MonthlyWeekScheduleRecord(
             this,
-            newScheduleWrapper(monthlyWeekScheduleJson = monthlyWeekScheduleJson),
+            RootScheduleWrapper(monthlyWeekScheduleJson = monthlyWeekScheduleJson),
             projectHelper,
             newProjectRootDelegate(this, monthlyWeekScheduleJson),
             getScheduleRecordId(),
@@ -200,7 +186,7 @@ class RootTaskRecord private constructor(
     fun newYearlyScheduleRecord(yearlyScheduleJson: RootYearlyScheduleJson): YearlyScheduleRecord {
         val yearlyScheduleRecord = YearlyScheduleRecord(
             this,
-            newScheduleWrapper(yearlyScheduleJson = yearlyScheduleJson),
+            RootScheduleWrapper(yearlyScheduleJson = yearlyScheduleJson),
             projectHelper,
             newProjectRootDelegate(this, yearlyScheduleJson),
             getScheduleRecordId(),

@@ -134,9 +134,6 @@ class DomainFactoryRule : TestRule {
                 ProjectKey.Shared("sharedProjectId" + ++sharedProjectId)
             }
 
-            var sharedTaskId = 0
-            every { newSharedTaskRecordId(any()) } answers { "sharedTaskId" + ++sharedTaskId }
-
             var privateScheduleId = 0
             every { newPrivateScheduleRecordId(any(), any()) } answers { "privateScheduleId" + ++privateScheduleId }
 

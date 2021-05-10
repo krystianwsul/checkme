@@ -3,7 +3,6 @@ package com.krystianwsul.common.firebase.models.project
 import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.domain.ProjectUndoData
 import com.krystianwsul.common.domain.TaskHierarchyContainer
-import com.krystianwsul.common.firebase.json.InstanceJson
 import com.krystianwsul.common.firebase.json.tasks.TaskJson
 import com.krystianwsul.common.firebase.models.*
 import com.krystianwsul.common.firebase.models.task.ProjectTask
@@ -76,6 +75,7 @@ abstract class Project<T : ProjectType>(
     }
 
     fun getOrCopyTime(
+        // todo task edit?
         dayOfWeek: DayOfWeek,
         time: Time,
         customTimeMigrationHelper: CustomTimeMigrationHelper,
@@ -86,49 +86,6 @@ abstract class Project<T : ProjectType>(
             is Time.Custom.User -> it
             is Time.Normal -> it
         }
-    }
-
-    private fun getInstanceJson(
-        // todo task edit
-        instance: Instance,
-        newProjectKey: ProjectKey<*>,
-        customTimeMigrationHelper: CustomTimeMigrationHelper,
-        now: ExactTimeStamp.Local,
-    ): Pair<InstanceJson, (Map<String, String>) -> Any?> {
-        val done = instance.doneOffset
-
-        val instanceDate = instance.instanceDate
-
-        val newInstanceTime = getOrCopyTime(
-            instanceDate.dayOfWeek,
-            instance.instanceTime,
-            customTimeMigrationHelper,
-            now,
-        )
-
-        val instanceTimeString = JsonTime.fromTime(newInstanceTime).toJson()
-
-        val parentState = instance.parentState
-
-        val instanceJson = InstanceJson(
-            done?.long,
-            done?.offset,
-            instanceDate.toJson(),
-            instanceTimeString,
-            parentJson = parentState.parentInstanceKey?.let(InstanceJson::ParentJson),
-            noParent = parentState.noParent,
-        )
-
-        val updater = { taskKeyMap: Map<String, String> ->
-            parentState.parentInstanceKey?.let { oldKey ->
-                val newTaskId = taskKeyMap.getValue((oldKey.taskKey as TaskKey.Project).taskId)
-                val newTaskKey = TaskKey.Project(newProjectKey, newTaskId)
-
-                instanceJson.parentJson = InstanceJson.ParentJson(InstanceKey(newTaskKey, oldKey.scheduleKey))
-            }
-        }
-
-        return instanceJson to updater
     }
 
     fun copyTaskHierarchy(

@@ -64,11 +64,6 @@ abstract class Project<T : ProjectType>(
         }
     }
 
-    // todo task edit
-    fun createTaskHierarchy(parentTask: ProjectTask, childTask: ProjectTask, now: ExactTimeStamp.Local): TaskHierarchyKey {
-        return childTask.createParentNestedTaskHierarchy(parentTask, now)
-    }
-
     private fun convertScheduleKey(
         // todo task edit
         oldTask: ProjectTask,

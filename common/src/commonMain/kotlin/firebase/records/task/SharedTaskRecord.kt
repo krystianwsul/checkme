@@ -6,12 +6,11 @@ import com.krystianwsul.common.firebase.records.AssignedToHelper
 import com.krystianwsul.common.firebase.records.InstanceRecord
 import com.krystianwsul.common.firebase.records.project.SharedProjectRecord
 
-class SharedTaskRecord private constructor(
-    create: Boolean,
+class SharedTaskRecord(
     id: String,
     sharedProjectRecord: SharedProjectRecord,
     private val taskJson: SharedTaskJson,
-) : ProjectTaskRecord(create, id, sharedProjectRecord, taskJson, AssignedToHelper.Shared) {
+) : ProjectTaskRecord(false, id, sharedProjectRecord, taskJson, AssignedToHelper.Shared) {
 
     override val createObject: SharedTaskJson // because of duplicate functionality when converting local task
         get() {
@@ -49,21 +48,6 @@ class SharedTaskRecord private constructor(
         }
 
     override var startTimeOffset by Committer(taskJson::startTimeOffset)
-
-    constructor(id: String, projectRecord: SharedProjectRecord, taskJson: SharedTaskJson) : this(
-        false,
-        id,
-        projectRecord,
-        taskJson,
-    )
-
-    constructor(projectRecord: SharedProjectRecord, taskJson: SharedTaskJson) : this(
-        // todo task edit
-        true,
-        projectRecord.getTaskRecordId(),
-        projectRecord,
-        taskJson,
-    )
 
     override fun newScheduleWrapper(
         singleScheduleJson: SingleScheduleJson?,

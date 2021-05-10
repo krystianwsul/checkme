@@ -1025,7 +1025,10 @@ sealed class Task(
         nestedTaskHierarchy.invalidateTasks()
     }
 
-    fun createParentNestedTaskHierarchy(parentTask: Task, now: ExactTimeStamp.Local): TaskHierarchyKey.Nested {
+    fun createParentNestedTaskHierarchy(
+        parentTask: Task,
+        now: ExactTimeStamp.Local
+    ): TaskHierarchyKey.Nested { // todo task edit move into RootTask
         val taskHierarchyJson = NestedTaskHierarchyJson(parentTask.id, now.long, now.offset)
 
         return createParentNestedTaskHierarchy(taskHierarchyJson).taskHierarchyKey

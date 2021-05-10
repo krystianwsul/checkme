@@ -991,8 +991,6 @@ sealed class Task(
 
     private class IntervalException(message: String, cause: Throwable) : Exception(message, cause)
 
-    abstract fun setNoScheduleOrParent(now: ExactTimeStamp.Local, projectKey: ProjectKey<*>)
-
     fun correctIntervalEndExactTimeStamps() = intervals.asSequence()
         .filterIsInstance<Interval.Ended>()
         .forEach { it.correctEndExactTimeStamps() }

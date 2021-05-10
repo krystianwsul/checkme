@@ -59,7 +59,7 @@ class RootTask(
 
     override val projectCustomTimeIdProvider = JsonTime.ProjectCustomTimeIdProvider.rootTask
 
-    override fun setNoScheduleOrParent(now: ExactTimeStamp.Local, projectKey: ProjectKey<*>) {
+    fun setNoScheduleOrParent(now: ExactTimeStamp.Local, projectKey: ProjectKey<*>) {
         val noScheduleOrParentRecord = taskRecord.newNoScheduleOrParentRecord(
             RootNoScheduleOrParentJson(
                 now.long,

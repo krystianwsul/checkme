@@ -3,7 +3,6 @@ package com.krystianwsul.common.firebase.models.project
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.DeviceInfo
 import com.krystianwsul.common.domain.TaskHierarchyContainer
-import com.krystianwsul.common.firebase.json.tasks.SharedTaskJson
 import com.krystianwsul.common.firebase.models.CopyScheduleHelper
 import com.krystianwsul.common.firebase.models.ProjectUser
 import com.krystianwsul.common.firebase.models.RootUser
@@ -135,17 +134,6 @@ class SharedProject(
 
     override fun getProjectCustomTime(projectCustomTimeKey: CustomTimeKey.Project<ProjectType.Shared>): SharedCustomTime =
         getProjectCustomTime(projectCustomTimeKey.customTimeId)
-
-    private fun newTask(taskJson: SharedTaskJson): ProjectTask { // todo task edit
-        val taskRecord = projectRecord.newTaskRecord(taskJson)
-
-        val task = ProjectTask(this, taskRecord)
-        check(!_tasks.containsKey(task.id))
-
-        _tasks[task.id] = task
-
-        return task
-    }
 
     override fun getAssignedTo(userKeys: Set<UserKey>) = remoteUsers.filterKeys { it in userKeys }
 }

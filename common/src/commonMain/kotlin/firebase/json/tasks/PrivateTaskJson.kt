@@ -9,7 +9,7 @@ import kotlin.jvm.JvmOverloads
 
 @Serializable
 data class PrivateTaskJson @JvmOverloads constructor(
-    override var name: String = "",
+    override val name: String = "",
     override val startTime: Long = 0,
     override var startTimeOffset: Double? = null,
     override var endTime: Long? = null,

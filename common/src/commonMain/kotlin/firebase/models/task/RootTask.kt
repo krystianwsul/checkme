@@ -99,6 +99,15 @@ class RootTask(
     override fun deleteProjectRootTaskId() = project.removeRootTask(taskKey)
     override fun deleteFromParent() = parent.deleteRootTask(this)
 
+    fun setName(name: String, note: String?) {
+        check(name.isNotEmpty())
+
+        taskRecord.name = name
+        taskRecord.note = note
+
+        normalizedFieldsDelegate.invalidate()
+    }
+
     override fun getDateTime(scheduleKey: ScheduleKey) =
         DateTime(scheduleKey.scheduleDate, getTime(scheduleKey.scheduleTimePair))
 

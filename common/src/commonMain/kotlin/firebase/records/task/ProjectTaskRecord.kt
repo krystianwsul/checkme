@@ -33,6 +33,8 @@ abstract class ProjectTaskRecord protected constructor(
         .mapValues { ProjectNoScheduleOrParentRecord(this, it.value, it.key) }
         .toMutableMap()
 
+    override val name get() = projectTaskJson.name
+
     abstract override var startTimeOffset: Double?
 
     override val taskKey by lazy { projectRecord.getTaskKey(id) }

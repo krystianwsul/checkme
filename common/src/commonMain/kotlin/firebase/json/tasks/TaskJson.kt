@@ -8,9 +8,9 @@ import kotlinx.serialization.Serializable
 
 interface TaskJson {
 
-    var name: String
-    var note: String?
-    var image: Image?
+    val name: String
+    var note: String? // todo task json
+    var image: Image? // todo task json
     var ordinal: Double?
 
     val startTime: Long

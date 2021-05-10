@@ -75,7 +75,7 @@ abstract class TaskRecord protected constructor(
         }
         .toMutableMap()
 
-    var name by Committer(taskJson::name)
+    abstract val name: String
 
     val startTime get() = taskJson.startTime
     abstract val startTimeOffset: Double?

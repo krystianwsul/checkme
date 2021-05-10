@@ -496,15 +496,6 @@ sealed class Task(
         taskRecord.delete()
     }
 
-    fun setName(name: String, note: String?) {
-        check(name.isNotEmpty())
-
-        taskRecord.name = name
-        taskRecord.note = note
-
-        normalizedFieldsDelegate.invalidate()
-    }
-
     fun deleteSchedule(schedule: Schedule) {
         check(_schedules.contains(schedule))
 

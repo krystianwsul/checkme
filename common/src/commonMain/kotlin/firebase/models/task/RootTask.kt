@@ -392,13 +392,6 @@ class RootTask(
                 else -> throw UnsupportedOperationException()
             }
 
-            val copiedTime = getOrCopyTime(
-                dayOfWeek,
-                schedule.time,
-                customTimeMigrationHelper,
-                now,
-            )
-
             val assignedTo = schedule.takeIf { oldProjectKey == newProjectKey }
                 ?.assignedTo
                 .orEmpty()
@@ -406,7 +399,12 @@ class RootTask(
                 .toSet()
                 .toAssociateMap()
 
-            val timeJson = JsonTime.fromTime(copiedTime).toJson()
+            val timeJson = getOrCopyTime(
+                dayOfWeek,
+                schedule.time,
+                customTimeMigrationHelper,
+                now,
+            ).let(JsonTime::fromTime).toJson()
 
             when (schedule) {
                 is SingleSchedule -> {

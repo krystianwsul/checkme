@@ -244,32 +244,6 @@ class ProjectsFactoryTest {
     }
 
     @Test
-    fun testLocalPrivateAddTaskNoInstances() {
-        val privateProjectKey = ProjectKey.Private("key")
-
-        privateProjectRelay.accept(Snapshot(privateProjectKey.key, PrivateProjectJson()))
-
-        projectKeysRelay.accept(setOf())
-
-        initProjectsFactory()
-
-        val taskJson = PrivateTaskJson("task")
-
-        val taskKey = projectsFactory.privateProject
-                .newTask(taskJson)
-                .taskKey
-
-        projectsFactory.save()
-
-        privateProjectRelay.accept(Snapshot(
-                privateProjectKey.key,
-                PrivateProjectJson(tasks = mutableMapOf(taskKey.taskId to taskJson)),
-        ))
-
-        // doesn't emit ChangeType.LOCAL
-    }
-
-    @Test
     fun testRemotePrivateChangeTask() {
         val privateProjectKey = ProjectKey.Private("key")
         val taskKey = TaskKey.Project(privateProjectKey, "taskKey") // todo task tests

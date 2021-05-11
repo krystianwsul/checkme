@@ -315,37 +315,6 @@ class NotDoneGroupNode(
         else -> throw IllegalArgumentException()
     }
 
-    fun addInstanceData(instanceData: GroupListDataWrapper.InstanceData, placeholder: TreeViewAdapter.Placeholder) {
-        check(instanceData.instanceTimeStamp.toLocalExactTimeStamp() == exactTimeStamp)
-
-        check(instanceDatas.isNotEmpty())
-        if (instanceDatas.size == 1) {
-            check(notDoneInstanceNodes.isEmpty())
-
-            treeNode.removeAll(placeholder)
-            singleInstanceNodeCollection = null
-
-            val instanceData1 = instanceDatas.single()
-
-            val notDoneInstanceNode = NotDoneInstanceNode(
-                    indentation,
-                    instanceData1,
-                    this@NotDoneGroupNode,
-            )
-
-            notDoneInstanceNodes.add(notDoneInstanceNode)
-
-            treeNode.add(
-                    notDoneInstanceNode.initialize(mapOf(), false, listOf(), listOf(), treeNode),
-                    placeholder,
-            )
-        }
-
-        instanceDatas.add(instanceData)
-
-        treeNode.add(newChildTreeNode(instanceData, mapOf(), false, listOf(), listOf()), placeholder)
-    }
-
     private fun newChildTreeNode(
             instanceData: GroupListDataWrapper.InstanceData,
             expandedInstances: Map<InstanceKey, CollectionExpansionState>,

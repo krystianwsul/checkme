@@ -7,7 +7,6 @@ import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.treeadapter.NodeContainer
 import com.krystianwsul.treeadapter.TreeNode
-import com.krystianwsul.treeadapter.TreeViewAdapter
 
 
 class NotDoneGroupCollection(
@@ -52,35 +51,6 @@ class NotDoneGroupCollection(
                     selectedInstances,
                     selectedGroups
             )
-        }
-    }
-
-    fun remove(notDoneGroupNode: NotDoneGroupNode, placeholder: TreeViewAdapter.Placeholder) {
-        check(notDoneGroupNodes.contains(notDoneGroupNode))
-
-        notDoneGroupNodes.remove(notDoneGroupNode)
-        nodeContainer.remove(notDoneGroupNode.treeNode, placeholder)
-    }
-
-    fun add(instanceData: GroupListDataWrapper.InstanceData, placeholder: TreeViewAdapter.Placeholder) {
-        val exactTimeStamp = instanceData.instanceTimeStamp.toLocalExactTimeStamp()
-
-        notDoneGroupNodes.filter { it.exactTimeStamp == exactTimeStamp }.let {
-            if (it.isEmpty() || !nodeCollection.useGroups) {
-                nodeCollection.nodeContainer.add(
-                        newNotDoneGroupNode(
-                                this,
-                                mutableListOf(instanceData),
-                                mapOf(),
-                                mapOf(),
-                                listOf(),
-                                listOf(),
-                        ),
-                        placeholder,
-                )
-            } else {
-                it.single().addInstanceData(instanceData, placeholder)
-            }
         }
     }
 

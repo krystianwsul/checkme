@@ -13,7 +13,6 @@ import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.NodeContainer
 import com.krystianwsul.treeadapter.TreeNode
-import com.krystianwsul.treeadapter.TreeViewAdapter
 import java.util.*
 
 class DividerNode(
@@ -39,9 +38,9 @@ class DividerNode(
 
     override val delegates by lazy {
         listOf(
-                ExpandableDelegate(treeNode),
-                SingleLineDelegate(this),
-                IndentationDelegate(this)
+            ExpandableDelegate(treeNode),
+            SingleLineDelegate(this),
+            IndentationDelegate(this),
         )
     }
 
@@ -88,18 +87,6 @@ class DividerNode(
     val instanceExpansionStates get() = doneInstanceNodes.map { it.instanceExpansionStates }.flatten()
 
     override val text by lazy { groupListFragment.activity.getString(R.string.done) }
-
-    fun remove(doneInstanceNode: DoneInstanceNode, placeholder: TreeViewAdapter.Placeholder) {
-        check(doneInstanceNodes.contains(doneInstanceNode))
-        doneInstanceNodes.remove(doneInstanceNode)
-
-        treeNode.remove(doneInstanceNode.treeNode, placeholder)
-    }
-
-    fun add(
-            instanceData: GroupListDataWrapper.InstanceData,
-            placeholder: TreeViewAdapter.Placeholder
-    ) = treeNode.add(newChildTreeNode(instanceData, mapOf(), listOf()), placeholder)
 
     override fun compareTo(other: ModelNode<AbstractHolder>): Int {
         check(

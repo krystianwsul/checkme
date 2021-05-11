@@ -376,12 +376,6 @@ class TreeNode<T : TreeHolder>(
         if (isExpanded && 0 == childTreeNodes.map { it.displayedNodes.size }.sum()) expansionState = ExpansionState()
     }
 
-    fun removeAll(placeholder: TreeViewAdapter.Placeholder) {
-        checkChildTreeNodesSet()
-
-        ArrayList(childTreeNodes).forEach { remove(it, placeholder) }
-    }
-
     override fun add(treeNode: TreeNode<T>, placeholder: TreeViewAdapter.Placeholder) {
         checkChildTreeNodesSet()
 

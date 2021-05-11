@@ -354,12 +354,16 @@ class UserListFragment : AbstractFragment(), FabUser {
             return SaveState(addedIds, removedIds, selectedIds)
         }
 
-        fun removeSelected(@Suppress("UNUSED_PARAMETER") x: TreeViewAdapter.Placeholder) {
+        fun removeSelected(placeholder: TreeViewAdapter.Placeholder) {
             val selectedUserDataWrappers = getSelected()
 
             for (userDataWrapper in selectedUserDataWrappers) {
                 userNodes.remove(userDataWrapper)
-                (treeViewAdapter.treeModelAdapter as FriendListAdapter).treeNodeCollection.remove(userDataWrapper.treeNode, x)
+
+                (treeViewAdapter.treeModelAdapter as FriendListAdapter).treeNodeCollection.remove(
+                    userDataWrapper.treeNode,
+                    placeholder,
+                )
             }
         }
     }

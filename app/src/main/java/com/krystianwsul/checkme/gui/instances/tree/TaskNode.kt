@@ -26,35 +26,35 @@ import com.krystianwsul.treeadapter.*
 import io.reactivex.rxjava3.kotlin.addTo
 
 class TaskNode(
-        override val indentation: Int,
-        val taskData: GroupListDataWrapper.TaskData,
-        private val taskParent: TaskParent,
-        override val parentNode: ModelNode<AbstractHolder>?,
+    override val indentation: Int,
+    val taskData: GroupListDataWrapper.TaskData,
+    private val taskParent: TaskParent,
+    override val parentNode: ModelNode<AbstractHolder>?,
 ) :
-        AbstractModelNode(),
-        TaskParent,
-        MultiLineModelNode,
-        InvisibleCheckboxModelNode,
-        ThumbnailModelNode,
-        IndentationModelNode,
-        Sortable {
+    AbstractModelNode(),
+    TaskParent,
+    MultiLineModelNode,
+    InvisibleCheckboxModelNode,
+    ThumbnailModelNode,
+    IndentationModelNode,
+    Sortable {
 
     companion object {
 
         fun getTaskChildren(
-                treeNode: TreeNode<*>,
-                note: String?,
-                getChildName: (treeNode: TreeNode<*>) -> String?,
+            treeNode: TreeNode<*>,
+            note: String?,
+            getChildName: (treeNode: TreeNode<*>) -> String?,
         ): String? {
             return if (treeNode.isExpanded) {
                 null
             } else {
                 treeNode.allChildren
-                        .filter { it.canBeShown() }
-                        .mapNotNull(getChildName)
-                        .takeIf { it.isNotEmpty() }
-                        ?.joinToString(", ")
-                        ?: note.takeIf { !it.isNullOrEmpty() }
+                    .filter { it.canBeShown() }
+                    .mapNotNull(getChildName)
+                    .takeIf { it.isNotEmpty() }
+                    ?.joinToString(", ")
+                    ?: note.takeIf { !it.isNullOrEmpty() }
             }
         }
     }
@@ -76,20 +76,20 @@ class TaskNode(
 
     override val delegates by lazy {
         listOf(
-                ExpandableDelegate(treeNode),
-                MultiLineDelegate(this),
-                InvisibleCheckboxDelegate(this),
-                ThumbnailDelegate(this),
-                IndentationDelegate(this)
+            ExpandableDelegate(treeNode),
+            MultiLineDelegate(this),
+            InvisibleCheckboxDelegate(this),
+            ThumbnailDelegate(this),
+            IndentationDelegate(this)
         )
     }
 
     override val widthKey
         get() = MultiLineDelegate.WidthKey(
-                indentation,
-                true,
-                thumbnail != null,
-                true
+            indentation,
+            true,
+            thumbnail != null,
+            true
         )
 
     override val checkBoxInvisible = true
@@ -97,27 +97,25 @@ class TaskNode(
     override val isDraggable = true
 
     fun initialize(
-            nodeContainer: NodeContainer<AbstractHolder>,
-            taskExpansionStates: Map<TaskKey, TreeNode.ExpansionState>,
-            selectedTaskKeys: List<TaskKey>,
+        nodeContainer: NodeContainer<AbstractHolder>,
+        taskExpansionStates: Map<TaskKey, TreeNode.ExpansionState>,
+        selectedTaskKeys: List<TaskKey>,
     ): TreeNode<AbstractHolder> {
         treeNode = TreeNode(
-                this,
-                nodeContainer,
-                selectedTaskKeys.contains(taskData.taskKey),
-                taskExpansionStates[taskData.taskKey],
+            this,
+            nodeContainer,
+            selectedTaskKeys.contains(taskData.taskKey),
+            taskExpansionStates[taskData.taskKey],
         )
 
         val treeNodes = mutableListOf<TreeNode<AbstractHolder>>()
 
-        if (taskData.projectInfo != null || !taskData.note.isNullOrEmpty()) {
-            treeNodes += DetailsNode(
-                    taskData.projectInfo,
-                    taskData.note,
-                    this,
-                    indentation + 1
-            ).initialize(nodeContainer)
-        }
+        DetailsNode.getIfHasData(
+            taskData.projectInfo,
+            taskData.note,
+            this,
+            indentation + 1
+        )?.let { treeNodes += it.initialize(nodeContainer) }
 
         treeNodes += taskData.children.map { newChildTreeNode(it, taskExpansionStates, selectedTaskKeys) }
 
@@ -127,9 +125,9 @@ class TaskNode(
     }
 
     private fun newChildTreeNode(
-            taskData: GroupListDataWrapper.TaskData,
-            taskExpansionStates: Map<TaskKey, TreeNode.ExpansionState>,
-            selectedTaskKeys: List<TaskKey>,
+        taskData: GroupListDataWrapper.TaskData,
+        taskExpansionStates: Map<TaskKey, TreeNode.ExpansionState>,
+        selectedTaskKeys: List<TaskKey>,
     ) = TaskNode(indentation + 1, taskData, this, this).let {
         taskNodes.add(it)
 
@@ -140,14 +138,14 @@ class TaskNode(
 
     override fun compareTo(other: ModelNode<AbstractHolder>) = if (other is TaskNode) {
         other.taskData
-                .startExactTimeStamp
-                .let {
-                    if (indentation == 0) {
-                        -taskData.startExactTimeStamp.compareTo(it)
-                    } else {
-                        taskData.startExactTimeStamp.compareTo(it)
-                    }
+            .startExactTimeStamp
+            .let {
+                if (indentation == 0) {
+                    -taskData.startExactTimeStamp.compareTo(it)
+                } else {
+                    taskData.startExactTimeStamp.compareTo(it)
                 }
+            }
     } else {
         1
     }
@@ -168,13 +166,13 @@ class TaskNode(
     override val thumbnail = taskData.imageState
 
     override fun matchesFilterParams(filterParams: FilterCriteria.Full.FilterParams) =
-            taskData.matchesFilterParams(filterParams)
+        taskData.matchesFilterParams(filterParams)
 
     override fun getMatchResult(query: String) = ModelNode.MatchResult.fromBoolean(taskData.matchesQuery(query))
 
     override fun tryStartDrag(viewHolder: RecyclerView.ViewHolder): Boolean {
         return if (groupAdapter.treeNodeCollection.selectedChildren.isEmpty()
-                && treeNode.parent.displayedChildNodes.none { it.isExpanded }
+            && treeNode.parent.displayedChildNodes.none { it.isExpanded }
         ) {
             groupListFragment.dragHelper.startDrag(viewHolder)
 
@@ -188,7 +186,7 @@ class TaskNode(
 
     override fun setOrdinal(ordinal: Double) {
         AndroidDomainUpdater.setOrdinal(groupListFragment.parameters.dataId.toFirst(), taskData.taskKey, ordinal)
-                .subscribe()
-                .addTo(groupListFragment.attachedToWindowDisposable)
+            .subscribe()
+            .addTo(groupListFragment.attachedToWindowDisposable)
     }
 }

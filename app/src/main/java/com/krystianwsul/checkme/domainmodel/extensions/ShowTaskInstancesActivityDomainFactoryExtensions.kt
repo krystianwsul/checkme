@@ -14,8 +14,8 @@ import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.Current
 
 fun DomainFactory.getShowTaskInstancesData(
-        parameters: ShowTaskInstancesActivity.Parameters,
-        page: Int,
+    parameters: ShowTaskInstancesActivity.Parameters,
+    page: Int,
 ): ShowTaskInstancesViewModel.Data {
     MyCrashlytics.log("DomainFactory.getShowTaskInstancesData")
 
@@ -54,12 +54,12 @@ fun DomainFactory.getShowTaskInstancesData(
         val children = getChildInstanceDatas(it, now, includeProjectInfo = parameters.includeProjectInfo)
 
         GroupListDataWrapper.InstanceData(
-                it.done,
-                it.instanceKey,
-                it.instanceDateTime.getDisplayText(),
-                it.name,
-                it.instanceDateTime.timeStamp,
-                it.instanceDateTime,
+            it.done,
+            it.instanceKey,
+            it.instanceDateTime.getDisplayText(),
+            it.name,
+            it.instanceDateTime.timeStamp,
+            it.instanceDateTime,
             it.task.current(now),
             it.canAddSubtask(now),
             it.isRootInstance(),
@@ -70,18 +70,18 @@ fun DomainFactory.getShowTaskInstancesData(
             it.getNotificationShown(localFactory),
             it.task.getImage(deviceDbInfo),
             it.isAssignedToMe(now, myUserFactory.user),
-            it.takeIf { parameters.includeProjectInfo }?.getProjectInfo(now),
+            it.getProjectInfo(now, parameters.includeProjectInfo),
         )
     }
 
     val dataWrapper = GroupListDataWrapper(
-            customTimeDatas,
-            parent.current(now),
-            listOf(),
-            null,
-            instanceDatas,
-            null,
-            null
+        customTimeDatas,
+        parent.current(now),
+        listOf(),
+        null,
+        instanceDatas,
+        null,
+        null
     )
 
     return ShowTaskInstancesViewModel.Data(dataWrapper, hasMore)

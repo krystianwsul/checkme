@@ -409,7 +409,7 @@ class DomainFactory(
             instance.getNotificationShown(localFactory),
             instance.task.getImage(deviceDbInfo),
             instance.isAssignedToMe(now, myUserFactory.user),
-            instance.takeIf { includeProjectInfo }?.getProjectInfo(now),
+            instance.getProjectInfo(now, includeProjectInfo),
         )
     }
 
@@ -503,7 +503,7 @@ class DomainFactory(
                     childTask.current(now),
                     childTask.isVisible(now),
                     childTask.ordinal,
-                    childTask.takeIf { includeProjectInfo }?.getProjectInfo(now),
+                    childTask.getProjectInfo(now, includeProjectInfo),
                     childTask.isAssignedToMe(now, myUserFactory.user),
                 )
             }

@@ -17,12 +17,27 @@ import com.krystianwsul.treeadapter.ModelState
 import com.krystianwsul.treeadapter.NodeContainer
 import com.krystianwsul.treeadapter.TreeNode
 
-class DetailsNode(
-        private val projectInfo: ProjectInfo?,
-        private val note: String?,
-        override val parentNode: ModelNode<AbstractHolder>?,
-        indentation: Int,
+class DetailsNode private constructor(
+    private val projectInfo: ProjectInfo?,
+    private val note: String?,
+    override val parentNode: ModelNode<AbstractHolder>?,
+    indentation: Int,
 ) : AbstractModelNode(), IndentationModelNode, QueryMatchable {
+
+    companion object {
+
+        fun getIfHasData(
+            projectInfo: ProjectInfo?,
+            note: String?,
+            parentNode: ModelNode<AbstractHolder>?,
+            indentation: Int,
+        ): DetailsNode? {
+            if (projectInfo?.name.isNullOrEmpty() && projectInfo?.assignedTo.isNullOrEmpty() && note.isNullOrEmpty())
+                return null
+
+            return DetailsNode(projectInfo, note, parentNode, indentation)
+        }
+    }
 
     override lateinit var treeNode: TreeNode<AbstractHolder>
         private set
@@ -82,18 +97,18 @@ class DetailsNode(
 
             assignedTo.forEach { user ->
                 RowAssignedChipDetailsBinding.inflate(
-                        LayoutInflater.from(viewHolder.itemView.context),
-                        rowAssignedTo,
-                        true
+                    LayoutInflater.from(viewHolder.itemView.context),
+                    rowAssignedTo,
+                    true
                 )
-                        .root
-                        .apply {
-                            text = user.name
-                            loadPhoto(user.photoUrl)
-                            isCloseIconVisible = false
-                            rippleColor = null
-                            isClickable = false
-                        }
+                    .root
+                    .apply {
+                        text = user.name
+                        loadPhoto(user.photoUrl)
+                        isCloseIconVisible = false
+                        rippleColor = null
+                        isClickable = false
+                    }
             }
 
             val noteVisible = !note.isNullOrEmpty()
@@ -123,8 +138,8 @@ class DetailsNode(
     }
 
     class Holder(
-            override val baseAdapter: BaseAdapter,
-            binding: RowListDetailsBinding,
+        override val baseAdapter: BaseAdapter,
+        binding: RowListDetailsBinding,
     ) : AbstractHolder(binding.root), IndentationHolder {
 
         val rowTopMargin = binding.rowListDetailsTopMargin

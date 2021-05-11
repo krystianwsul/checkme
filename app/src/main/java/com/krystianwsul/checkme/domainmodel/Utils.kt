@@ -48,9 +48,14 @@ fun <T> Sequence<T>.takeAndHasMore(n: Int): Pair<List<T>, Boolean> {
     return Pair(elements, hasMore)
 }
 
-fun Task.getProjectInfo(now: ExactTimeStamp.Local): DetailsNode.ProjectInfo? {
+fun Task.getProjectInfo(now: ExactTimeStamp.Local, includeProjectName: Boolean = true): DetailsNode.ProjectInfo? {
     return if (isTopLevelTask(getHierarchyExactTimeStamp(now)) && project is SharedProject) {
-        DetailsNode.ProjectInfo(project.name, DetailsNode.User.fromProjectUsers(getAssignedTo(now)))
+        DetailsNode.ProjectInfo(
+            project.name
+                .takeIf { includeProjectName }
+                .orEmpty(),
+            DetailsNode.User.fromProjectUsers(getAssignedTo(now)),
+        )
     } else {
         check(getAssignedTo(now).isEmpty())
 
@@ -58,9 +63,15 @@ fun Task.getProjectInfo(now: ExactTimeStamp.Local): DetailsNode.ProjectInfo? {
     }
 }
 
-fun Instance.getProjectInfo(now: ExactTimeStamp.Local): DetailsNode.ProjectInfo? {
+fun Instance.getProjectInfo(now: ExactTimeStamp.Local, includeProjectName: Boolean = true): DetailsNode.ProjectInfo? {
     return if (isRootInstance() && task.project is SharedProject) {
-        DetailsNode.ProjectInfo(task.project.name, DetailsNode.User.fromProjectUsers(getAssignedTo(now)))
+        DetailsNode.ProjectInfo(
+            task.project
+                .name
+                .takeIf { includeProjectName }
+                .orEmpty(),
+            DetailsNode.User.fromProjectUsers(getAssignedTo(now)),
+        )
     } else {
         check(getAssignedTo(now).isEmpty())
 

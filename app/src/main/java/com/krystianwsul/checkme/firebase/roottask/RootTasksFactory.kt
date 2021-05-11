@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.firebase.roottask
 
+import com.jakewharton.rxrelay3.BehaviorRelay
 import com.krystianwsul.checkme.firebase.UserKeyStore
 import com.krystianwsul.checkme.firebase.factories.ProjectsFactory
 import com.krystianwsul.checkme.utils.publishImmediate
@@ -13,80 +14,76 @@ import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.common.utils.mapValuesNotNull
-import com.krystianwsul.treeadapter.getCurrentValue
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
+import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.merge
 import io.reactivex.rxjava3.kotlin.plusAssign
 
 class RootTasksFactory(
-        private val rootTasksLoader: RootTasksLoader,
-        private val userKeyStore: UserKeyStore,
-        private val rootTaskDependencyCoordinator: RootTaskDependencyCoordinator,
-        domainDisposable: CompositeDisposable,
-        private val rootTaskKeySource: RootTaskKeySource,
-        loadDependencyTrackerManager: LoadDependencyTrackerManager,
-        private val getProjectsFactory: () -> ProjectsFactory,
+    private val rootTasksLoader: RootTasksLoader,
+    private val userKeyStore: UserKeyStore,
+    private val rootTaskDependencyCoordinator: RootTaskDependencyCoordinator,
+    domainDisposable: CompositeDisposable,
+    private val rootTaskKeySource: RootTaskKeySource,
+    loadDependencyTrackerManager: LoadDependencyTrackerManager,
+    private val getProjectsFactory: () -> ProjectsFactory,
 ) : RootTask.Parent {
 
-    private val rootTaskFactoriesObservable: Observable<Map<TaskKey.Root, RootTaskFactory>>
-
-    val rootTasks: Map<TaskKey.Root, RootTask>
-        get() = rootTaskFactoriesObservable.getCurrentValue().mapValuesNotNull { it.value.task }
+    private val rootTaskFactoriesRelay = BehaviorRelay.create<Map<TaskKey.Root, RootTaskFactory>>()
+    private val rootTaskFactories get() = rootTaskFactoriesRelay.value!!
+    val rootTasks get() = rootTaskFactories.mapValuesNotNull { it.value.task }
 
     val unfilteredChanges: Observable<Unit>
     val changeTypes: Observable<ChangeType>
 
     init {
-        rootTaskFactoriesObservable = rootTasksLoader.addChangeEvents
-                .groupBy { it.rootTaskRecord.taskKey }
-                .scan(mapOf<TaskKey.Root, RootTaskFactory>()) { oldMap, group ->
-                    check(!oldMap.containsKey(group.key))
+        rootTasksLoader.addChangeEvents
+            .groupBy { it.rootTaskRecord.taskKey }
+            .scan(mapOf<TaskKey.Root, RootTaskFactory>()) { oldMap, group ->
+                check(!oldMap.containsKey(group.key))
 
-                    oldMap.toMutableMap().also {
-                        it[group.key] = RootTaskFactory(
-                                loadDependencyTrackerManager,
-                                rootTaskDependencyCoordinator,
-                                this,
-                                domainDisposable,
-                                group,
-                        )
-                    }
+                oldMap.toMutableMap().also {
+                    it[group.key] = RootTaskFactory(
+                        loadDependencyTrackerManager,
+                        rootTaskDependencyCoordinator,
+                        this,
+                        domainDisposable,
+                        group,
+                    )
                 }
-                .replay(1)
-
-        domainDisposable += rootTaskFactoriesObservable.connect()
-
-        fun getFactory(taskKey: TaskKey.Root) = rootTaskFactoriesObservable.getCurrentValue()[taskKey]
+            }
+            .subscribe(rootTaskFactoriesRelay)
+            .addTo(domainDisposable)
 
         val removeEvents = rootTasksLoader.removeEvents
-                .doOnNext {
-                    it.taskKeys.forEach { getFactory(it)?.onRemove() }
+            .doOnNext {
+                it.taskKeys.forEach { rootTaskFactories[it]?.onRemove() }
 
-                    userKeyStore.onTasksRemoved(it.taskKeys)
-                    rootTaskKeySource.onRootTasksRemoved(it.taskKeys)
-                }
+                userKeyStore.onTasksRemoved(it.taskKeys)
+                rootTaskKeySource.onRootTasksRemoved(it.taskKeys)
+            }
 
-        changeTypes = rootTaskFactoriesObservable.switchMap {
+        changeTypes = rootTaskFactoriesRelay.switchMap {
             it.map { it.value.changeTypes }.merge()
         }.publishImmediate(domainDisposable)
 
-        val factoryUnfilteredChanges = rootTaskFactoriesObservable.switchMap {
+        val factoryUnfilteredChanges = rootTaskFactoriesRelay.switchMap {
             it.map { it.value.unfilteredChanges }.merge()
         }
 
         unfilteredChanges =
-                listOf(factoryUnfilteredChanges, removeEvents.map { }).merge().publishImmediate(domainDisposable)
+            listOf(factoryUnfilteredChanges, removeEvents.map { }).merge().publishImmediate(domainDisposable)
 
-        domainDisposable += rootTaskFactoriesObservable.subscribe {
+        domainDisposable += rootTaskFactoriesRelay.subscribe {
             it.forEach { it.value.connect() }
         }
     }
 
     override fun getTaskHierarchiesByParentTaskKey(parentTaskKey: TaskKey): Set<TaskHierarchy> {
         return rootTasks.flatMap { it.value.nestedParentTaskHierarchies.values }
-                .filter { it.parentTaskKey == parentTaskKey }
-                .toSet()
+            .filter { it.parentTaskKey == parentTaskKey }
+            .toSet()
     }
 
     override fun deleteRootTask(task: RootTask) = throw UnsupportedOperationException()
@@ -106,7 +103,7 @@ class RootTasksFactory(
     }
 
     override fun getRootTasksForProject(projectKey: ProjectKey<*>) =
-            rootTasks.values.filter { it.projectId == projectKey.key }
+        rootTasks.values.filter { it.projectId == projectKey.key }
 
     fun newTask(taskJson: RootTaskJson): RootTask {
         val taskKey = rootTasksLoader.addTask(taskJson)
@@ -115,11 +112,11 @@ class RootTasksFactory(
     }
 
     override fun createTask(
-            now: ExactTimeStamp.Local,
-            image: TaskJson.Image?,
-            name: String,
-            note: String?,
-            ordinal: Double?,
+        now: ExactTimeStamp.Local,
+        image: TaskJson.Image?,
+        name: String,
+        note: String?,
+        ordinal: Double?,
     ) = newTask(RootTaskJson(name, now.long, now.offset, note = note, image = image, ordinal = ordinal))
 
     override fun updateProjectRecord(projectKey: ProjectKey<*>, dependentRootTaskKeys: Set<TaskKey.Root>) {

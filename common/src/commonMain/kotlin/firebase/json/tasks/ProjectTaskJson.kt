@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 interface ProjectTaskJson : TaskJson {
 
     var endTime: Long?
-    override var endData: EndData?
+    var endData: EndData?
 
     override val noScheduleOrParent: Map<String, ProjectNoScheduleOrParentJson>
 

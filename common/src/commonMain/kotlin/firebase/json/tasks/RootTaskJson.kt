@@ -18,7 +18,7 @@ data class RootTaskJson @JvmOverloads constructor(
     override var instances: MutableMap<String, InstanceJson> = mutableMapOf(),
     override var schedules: MutableMap<String, RootScheduleWrapper> = mutableMapOf(),
     override var image: TaskJson.Image? = null,
-    override var endData: EndData? = null,
+    var endData: EndData? = null,
     override var noScheduleOrParent: Map<String, RootNoScheduleOrParentJson> = mapOf(),
     override var ordinal: Double? = null,
     override var taskHierarchies: Map<String, NestedTaskHierarchyJson> = mapOf(),

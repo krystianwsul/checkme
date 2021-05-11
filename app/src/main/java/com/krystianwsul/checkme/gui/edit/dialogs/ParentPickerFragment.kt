@@ -21,7 +21,7 @@ import com.krystianwsul.checkme.gui.tree.delegates.indentation.IndentationDelega
 import com.krystianwsul.checkme.gui.tree.delegates.indentation.IndentationModelNode
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineDelegate
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineModelNode
-import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineNameData
+import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineRow
 import com.krystianwsul.checkme.gui.utils.ResettableProperty
 import com.krystianwsul.checkme.utils.getMap
 import com.krystianwsul.checkme.utils.putMap
@@ -319,7 +319,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
                 return treeNode
             }
 
-            override val name get() = MultiLineNameData.Visible(entryData.name)
+            override val name get() = MultiLineRow.Visible(entryData.name)
 
             override val details: Pair<String, Int>?
                 get() = entryData.details.let {

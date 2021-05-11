@@ -25,7 +25,7 @@ import com.krystianwsul.checkme.gui.tree.BaseAdapter
 import com.krystianwsul.checkme.gui.tree.HolderType
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineDelegate
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineModelNode
-import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineNameData
+import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineRow
 import com.krystianwsul.checkme.gui.utils.ResettableProperty
 import com.krystianwsul.checkme.gui.utils.SelectionCallback
 import com.krystianwsul.checkme.gui.widgets.MyBottomBar
@@ -286,7 +286,7 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
             it.setChildTreeNodes(listOf())
         }
 
-        override val name = MultiLineNameData.Visible(customTimeData.name)
+        override val name = MultiLineRow.Visible(customTimeData.name)
 
         override val details = Pair(customTimeData.details, R.color.textSecondary)
 

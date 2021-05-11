@@ -38,7 +38,7 @@ import com.krystianwsul.checkme.gui.tree.delegates.invisible_checkbox.InvisibleC
 import com.krystianwsul.checkme.gui.tree.delegates.invisible_checkbox.InvisibleCheckboxModelNode
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineDelegate
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineModelNode
-import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineNameData
+import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineRow
 import com.krystianwsul.checkme.gui.tree.delegates.thumbnail.ThumbnailDelegate
 import com.krystianwsul.checkme.gui.tree.delegates.thumbnail.ThumbnailModelNode
 import com.krystianwsul.checkme.gui.utils.*
@@ -618,7 +618,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         protected val disabledOverride = R.color.textDisabled.takeUnless { entryData.canAddSubtask }
 
         override val name
-            get() = MultiLineNameData.Visible(entryData.name, disabledOverride ?: R.color.textPrimary)
+            get() = MultiLineRow.Visible(entryData.name, disabledOverride ?: R.color.textPrimary)
 
         override fun compareTo(other: ModelNode<AbstractHolder>) = if (other is Node) {
             var comparison = entryData.compareTo(other.entryData)

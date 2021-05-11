@@ -29,7 +29,7 @@ import com.krystianwsul.checkme.gui.tree.delegates.avatar.AvatarDelegate
 import com.krystianwsul.checkme.gui.tree.delegates.avatar.AvatarModelNode
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineDelegate
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineModelNode
-import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineNameData
+import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineRow
 import com.krystianwsul.checkme.gui.utils.ResettableProperty
 import com.krystianwsul.checkme.gui.utils.SelectionCallback
 import com.krystianwsul.checkme.gui.widgets.MyBottomBar
@@ -269,7 +269,7 @@ class FriendListFragment : AbstractFragment(), FabUser {
             AvatarModelNode,
             MultiLineModelNode {
 
-        override val name = MultiLineNameData.Visible(userListData.name)
+        override val name = MultiLineRow.Visible(userListData.name)
 
         override val details = Pair(userListData.email, R.color.textSecondary)
 

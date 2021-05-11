@@ -81,14 +81,14 @@ class MultiLineDelegate(private val modelNode: MultiLineModelNode) : NodeDelegat
             rowName.run {
                 modelNode.name.let {
                     when (it) {
-                        is MultiLineNameData.Visible -> {
+                        is MultiLineRow.Visible -> {
                             visibility = View.VISIBLE
                             text = it.text
                             setTextColor(ContextCompat.getColor(context, it.colorId))
 
                             allocateTextViews += this
                         }
-                        MultiLineNameData.Invisible -> {
+                        MultiLineRow.Invisible -> {
                             visibility = View.INVISIBLE
 
                             setSingleLine()
@@ -141,7 +141,7 @@ class MultiLineDelegate(private val modelNode: MultiLineModelNode) : NodeDelegat
         }
     }
 
-    data class State(val name: MultiLineNameData, val details: Pair<String, Int>?, val children: Pair<String, Int>?)
+    data class State(val name: MultiLineRow, val details: Pair<String, Int>?, val children: Pair<String, Int>?)
 
     data class WidthKey(
             val indentation: Int,

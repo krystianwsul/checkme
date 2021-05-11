@@ -17,7 +17,7 @@ import com.krystianwsul.checkme.gui.tree.delegates.invisible_checkbox.InvisibleC
 import com.krystianwsul.checkme.gui.tree.delegates.invisible_checkbox.InvisibleCheckboxModelNode
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineDelegate
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineModelNode
-import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineNameData
+import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineRow
 import com.krystianwsul.checkme.gui.tree.delegates.thumbnail.ThumbnailDelegate
 import com.krystianwsul.checkme.gui.tree.delegates.thumbnail.ThumbnailModelNode
 import com.krystianwsul.checkme.gui.utils.flatten
@@ -150,7 +150,7 @@ class TaskNode(
         1
     }
 
-    override val name get() = MultiLineNameData.Visible(taskData.name)
+    override val name get() = MultiLineRow.Visible(taskData.name)
 
     override val children
         get() = getTaskChildren(treeNode, taskData.note) {

@@ -17,7 +17,7 @@ import com.krystianwsul.checkme.gui.tree.delegates.indentation.IndentationDelega
 import com.krystianwsul.checkme.gui.tree.delegates.indentation.IndentationModelNode
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineDelegate
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineModelNode
-import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineNameData
+import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineRow
 import com.krystianwsul.checkme.gui.tree.delegates.thumbnail.ThumbnailDelegate
 import com.krystianwsul.checkme.gui.tree.delegates.thumbnail.ThumbnailModelNode
 import com.krystianwsul.common.utils.InstanceKey
@@ -115,9 +115,9 @@ class DoneInstanceNode(
     override val groupAdapter by lazy { parentNodeCollection.groupAdapter }
 
     override val name
-        get() = MultiLineNameData.Visible(
-                instanceData.name,
-                if (instanceData.taskCurrent) R.color.textPrimary else R.color.textDisabled
+        get() = MultiLineRow.Visible(
+            instanceData.name,
+            if (instanceData.taskCurrent) R.color.textPrimary else R.color.textDisabled
         )
 
     override val details

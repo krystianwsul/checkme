@@ -2,7 +2,7 @@ package com.krystianwsul.checkme.gui.tree.delegates.multiline
 
 interface MultiLineModelNode {
 
-    val name: MultiLineNameData
+    val name: MultiLineRow
 
     val details: Pair<String, Int>? get() = null
 

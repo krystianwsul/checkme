@@ -122,8 +122,10 @@ class DoneInstanceNode(
 
     override val details
         get() = instanceData.displayText
-                .takeUnless { it.isNullOrEmpty() }
-                ?.let { Pair(it, if (instanceData.taskCurrent) R.color.textSecondary else R.color.textDisabled) }
+            .takeUnless { it.isNullOrEmpty() }
+            ?.let {
+                MultiLineRow.Visible(it, if (instanceData.taskCurrent) R.color.textSecondary else R.color.textDisabled)
+            }
 
     override val children get() = NotDoneGroupNode.NotDoneInstanceNode.getChildrenText(treeNode, instanceData)
 

@@ -100,30 +100,31 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
     fun initialize(delegate: Delegate) = delegateRelay.accept(delegate)
 
+    @SuppressLint("MissingSuperCall") // weird error, the call is right there
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
         binding.parentPickerRecycler.layoutManager = LinearLayoutManager(activity)
 
         delegateRelay.switchMap { it.adapterDataObservable }
-                .subscribe(::initialize)
-                .addTo(viewCreatedDisposable)
+            .subscribe(::initialize)
+            .addTo(viewCreatedDisposable)
 
         delegateRelay.switchMap { it.filterCriteriaObservable }
-                .distinctUntilChanged()
-                .subscribe { filterCriteria -> treeViewAdapter!!.updateDisplayedNodes { search(filterCriteria, it) } }
-                .addTo(viewCreatedDisposable)
+            .distinctUntilChanged()
+            .subscribe { filterCriteria -> treeViewAdapter!!.updateDisplayedNodes { search(filterCriteria, it) } }
+            .addTo(viewCreatedDisposable)
 
         viewCreatedDisposable += Observables.combineLatest(
-                delegateRelay,
-                searchChanges
+            delegateRelay,
+            searchChanges
         ).subscribe { (delegate, query) -> delegate.onSearch(query) }
 
         delegateRelay.switchMap { delegate ->
             getProgressShownObservable(binding.parentPickerRecycler) { treeViewAdapter!! }.map { delegate }!!
         }
-                .subscribe { it.onPaddingShown() }
-                .addTo(viewCreatedDisposable)
+            .subscribe { it.onPaddingShown() }
+            .addTo(viewCreatedDisposable)
     }
 
     private fun initialize(adapterData: AdapterData) {
@@ -321,9 +322,9 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
             override val name get() = MultiLineRow.Visible(entryData.name)
 
-            override val details: Pair<String, Int>?
+            override val details: MultiLineRow.Visible?
                 get() = entryData.details.let {
-                    if (it.isNullOrEmpty()) null else Pair(it, R.color.textSecondary)
+                    if (it.isNullOrEmpty()) null else MultiLineRow.Visible(it, R.color.textSecondary)
                 }
 
             override val children: Pair<String, Int>?

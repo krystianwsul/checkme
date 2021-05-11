@@ -207,9 +207,9 @@ class NotDoneGroupNode(
             if (singleInstanceData.displayText.isNullOrEmpty()) {
                 null
             } else {
-                Pair(
-                        singleInstanceData.displayText!!,
-                        if (singleInstanceData.taskCurrent) R.color.textSecondary else R.color.textDisabled
+                MultiLineRow.Visible(
+                    singleInstanceData.displayText!!,
+                    if (singleInstanceData.taskCurrent) R.color.textSecondary else R.color.textDisabled,
                 )
             }
         } else {
@@ -221,7 +221,7 @@ class NotDoneGroupNode(
 
             val text = date.getDisplayText() + ", " + timeText
 
-            Pair(text, R.color.textSecondary)
+            MultiLineRow.Visible(text, R.color.textSecondary)
         }
 
     override val children

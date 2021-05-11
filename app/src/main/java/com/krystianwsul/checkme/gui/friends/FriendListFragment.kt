@@ -271,7 +271,7 @@ class FriendListFragment : AbstractFragment(), FabUser {
 
         override val name = MultiLineRow.Visible(userListData.name)
 
-        override val details = Pair(userListData.email, R.color.textSecondary)
+        override val details = MultiLineRow.Visible(userListData.email, R.color.textSecondary)
 
         public override lateinit var treeNode: TreeNode<AbstractHolder>
             private set

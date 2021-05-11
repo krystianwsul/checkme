@@ -789,7 +789,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             get() = if (childTaskData.scheduleText.isNullOrEmpty()) {
                 null
             } else {
-                Pair(childTaskData.scheduleText, disabledOverride ?: R.color.textSecondary)
+                MultiLineRow.Visible(childTaskData.scheduleText, disabledOverride ?: R.color.textSecondary)
             }
 
         override val isSelectable = !copying

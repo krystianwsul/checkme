@@ -140,7 +140,7 @@ class DomainFactory(
 
     // misc
 
-    fun getAllTasks() = projectsFactory.projectTasks + rootTasksFactory.rootTasks.values
+    fun getAllTasks() = projectsFactory.allTasks
 
     val taskCount get() = getAllTasks().size
     val instanceCount get() = getAllTasks().map { it.existingInstances.size }.sum()

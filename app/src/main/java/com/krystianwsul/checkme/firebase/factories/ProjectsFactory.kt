@@ -110,10 +110,10 @@ class ProjectsFactory(
         }
 
         changeTypes = listOf(
-                privateProjectFactory.changeTypes,
-                sharedProjectFactoryChangeTypes,
-                addProjectChangeTypes,
-                removeProjectChangeTypes,
+            privateProjectFactory.changeTypes,
+            sharedProjectFactoryChangeTypes,
+            addProjectChangeTypes,
+            removeProjectChangeTypes,
         ).merge().publishImmediate(domainDisposable)
     }
 
@@ -121,13 +121,15 @@ class ProjectsFactory(
 
     val projectTasks get() = projects.values.flatMap { it.projectTasks }
 
+    val allTasks get() = projects.values.flatMap { it.getAllTasks() }
+
     fun createProject(
-            name: String,
-            now: ExactTimeStamp.Local,
-            recordOf: Set<UserKey>,
-            rootUser: RootUser,
-            userInfo: UserInfo,
-            friendsFactory: FriendsFactory,
+        name: String,
+        now: ExactTimeStamp.Local,
+        recordOf: Set<UserKey>,
+        rootUser: RootUser,
+        userInfo: UserInfo,
+        friendsFactory: FriendsFactory,
     ): SharedProject {
         check(name.isNotEmpty())
 

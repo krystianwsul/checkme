@@ -21,15 +21,15 @@ data class GroupListDataWrapper(
 ) {
 
     data class TaskData(
-            override val taskKey: TaskKey,
-            override val name: String,
-            val children: List<TaskData>,
-            val startExactTimeStamp: ExactTimeStamp.Local,
-            override val note: String?,
-            val imageState: ImageState?,
-            override val isAssignedToMe: Boolean,
-            val projectInfo: DetailsNode.ProjectInfo?,
-            val ordinal: Double,
+        override val taskKey: TaskKey,
+        override val name: String,
+        val children: List<TaskData>,
+        val startExactTimeStamp: ExactTimeStamp.Local,
+        override val note: String?,
+        val imageState: ImageState?,
+        override val isAssignedToMe: Boolean,
+        val projectInfo: DetailsNode.ProjectInfo?, // todo project
+        val ordinal: Double,
     ) : SelectedData, QueryMatchable, FilterParamsMatchable {
 
         init {
@@ -45,23 +45,23 @@ data class GroupListDataWrapper(
     }
 
     data class InstanceData(
-            val done: ExactTimeStamp.Local?,
-            val instanceKey: InstanceKey,
-            val displayText: String?,
-            override val name: String,
-            val instanceTimeStamp: TimeStamp,
-            val instanceDateTime: DateTime,
-            override val taskCurrent: Boolean,
-            override val canAddSubtask: Boolean,
-            val isRootInstance: Boolean,
-            val createTaskTimePair: TimePair,
-            override val note: String?,
-            val children: Map<InstanceKey, InstanceData>,
-            val ordinal: Double,
-            val notificationShown: Boolean,
-            val imageState: ImageState?,
-            override val isAssignedToMe: Boolean,
-            val projectInfo: DetailsNode.ProjectInfo?,
+        val done: ExactTimeStamp.Local?,
+        val instanceKey: InstanceKey,
+        val displayText: String?,
+        override val name: String,
+        val instanceTimeStamp: TimeStamp,
+        val instanceDateTime: DateTime,
+        override val taskCurrent: Boolean,
+        override val canAddSubtask: Boolean,
+        val isRootInstance: Boolean,
+        val createTaskTimePair: TimePair,
+        override val note: String?,
+        val children: Map<InstanceKey, InstanceData>,
+        val ordinal: Double,
+        val notificationShown: Boolean,
+        val imageState: ImageState?,
+        override val isAssignedToMe: Boolean,
+        val projectInfo: DetailsNode.ProjectInfo?, // todo project
     ) : Comparable<InstanceData>, SelectedData, QueryMatchable, FilterParamsMatchable {
 
         override val normalizedFields by lazy { listOfNotNull(name, note).map { it.normalized() } }

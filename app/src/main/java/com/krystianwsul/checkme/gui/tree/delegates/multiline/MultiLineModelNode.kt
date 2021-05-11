@@ -8,7 +8,11 @@ interface MultiLineModelNode {
 
     val children: MultiLineRow.Visible? get() = null
 
+    val project: MultiLineRow.Visible? get() = null
+
     val widthKey: MultiLineDelegate.WidthKey
 
-    val rows get() = listOfNotNull(name, details, children).take(MultiLineDelegate.TOTAL_LINES)
+    val rows get() = listOfNotNull(name, details, children, project).take(MultiLineDelegate.TOTAL_LINES)
+
+    val projectShown get() = project?.let { rows.contains(it) } ?: false
 }

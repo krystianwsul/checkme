@@ -32,7 +32,7 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
     fun updateNotifications(now: ExactTimeStamp.Local, params: Params) {
         val (sourceName, silent, _, clear) = params
 
-        Preferences.tickLog.logLineDate("updateNotifications start $sourceName")
+        Preferences.tickLog.logLineDate("updateNotifications start $params")
 
         notificationWrapper.hideTemporary(Ticker.TICK_NOTIFICATION_ID, sourceName)
 

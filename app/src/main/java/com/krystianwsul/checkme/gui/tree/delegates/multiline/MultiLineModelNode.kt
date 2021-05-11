@@ -9,4 +9,6 @@ interface MultiLineModelNode {
     val children: MultiLineRow.Visible? get() = null
 
     val widthKey: MultiLineDelegate.WidthKey
+
+    val rows get() = listOfNotNull(name, details, children).take(MultiLineDelegate.TOTAL_LINES)
 }

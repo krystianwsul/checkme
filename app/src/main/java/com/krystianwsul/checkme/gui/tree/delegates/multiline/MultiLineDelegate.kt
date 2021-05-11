@@ -20,7 +20,7 @@ class MultiLineDelegate(private val modelNode: MultiLineModelNode) : NodeDelegat
         private val textWidths = InitMap<Pair<Int, WidthKey>, BehaviorRelay<Int>> { BehaviorRelay.create() }
     }
 
-    override val state get() = modelNode.run { State(name, details, children) }
+    override val state get() = modelNode.run { State(rows) }
 
     override fun onBindViewHolder(viewHolder: RecyclerView.ViewHolder) {
         (viewHolder as MultiLineHolder).apply {
@@ -78,59 +78,36 @@ class MultiLineDelegate(private val modelNode: MultiLineModelNode) : NodeDelegat
 
             val allocateTextViews = mutableListOf<TextView>()
 
-            rowName.run {
-                modelNode.name.let {
-                    when (it) {
-                        is MultiLineRow.Visible -> {
-                            visibility = View.VISIBLE
-                            text = it.text
-                            setTextColor(ContextCompat.getColor(context, it.colorId))
-
-                            allocateTextViews += this
-                        }
-                        MultiLineRow.Invisible -> {
-                            visibility = View.INVISIBLE
-
-                            setSingleLine()
-                        }
-                    }
-                }
-            }
-
-            rowDetails.run {
-                modelNode.details.let {
-                    if (it != null) {
+            fun TextView.displayRow(row: MultiLineRow?) {
+                when (row) {
+                    is MultiLineRow.Visible -> {
                         visibility = View.VISIBLE
-                        text = it.text
-                        setTextColor(ContextCompat.getColor(context, it.colorId))
+                        text = row.text
+                        setTextColor(ContextCompat.getColor(context, row.colorId))
 
                         allocateTextViews += this
-                    } else {
-                        visibility = View.GONE
                     }
+                    MultiLineRow.Invisible -> {
+                        visibility = View.INVISIBLE
+
+                        setSingleLine()
+                    }
+                    null -> visibility = View.GONE
                 }
             }
 
-            rowChildren.run {
-                modelNode.children.let {
-                    if (it != null) {
-                        visibility = View.VISIBLE
-                        text = it.text
-                        setTextColor(ContextCompat.getColor(context, it.colorId))
+            val rows = modelNode.rows
 
-                        allocateTextViews += this
-                    } else {
-                        visibility = View.GONE
-                    }
-                }
-            }
+            rowName.displayRow(rows.getOrNull(0))
+            rowDetails.displayRow(rows.getOrNull(1))
+            rowChildren.displayRow(rows.getOrNull(2))
 
             allocateLines(allocateTextViews)
 
             if (textWidthRelay.value == null) {
                 textWidthRelay.distinctUntilChanged()
-                        .subscribe { allocateLines(allocateTextViews) }
-                        .addTo(compositeDisposable)
+                    .subscribe { allocateLines(allocateTextViews) }
+                    .addTo(compositeDisposable)
             }
 
             rowTextLayout.apply {
@@ -141,7 +118,7 @@ class MultiLineDelegate(private val modelNode: MultiLineModelNode) : NodeDelegat
         }
     }
 
-    data class State(val name: MultiLineRow, val details: MultiLineRow?, val children: MultiLineRow.Visible?)
+    data class State(val rows: List<MultiLineRow>)
 
     data class WidthKey(
             val indentation: Int,

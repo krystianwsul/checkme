@@ -155,7 +155,7 @@ class TaskNode(
     override val children
         get() = getTaskChildren(treeNode, taskData.note) {
             (it.modelNode as? TaskNode)?.taskData?.name
-        }?.let { Pair(it, R.color.textSecondary) }
+        }?.let { MultiLineRow.Visible(it, R.color.textSecondary) }
 
     override fun onClick(holder: AbstractHolder) {
         groupListFragment.activity.startActivity(ShowTaskActivity.newIntent(taskData.taskKey))

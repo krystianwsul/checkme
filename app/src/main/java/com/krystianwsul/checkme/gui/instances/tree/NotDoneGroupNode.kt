@@ -412,23 +412,23 @@ class NotDoneGroupNode(
         companion object {
 
             fun getChildrenText(
-                    treeNode: TreeNode<AbstractHolder>,
-                    instanceData: GroupListDataWrapper.InstanceData,
-            ): Pair<String, Int>? {
+                treeNode: TreeNode<AbstractHolder>,
+                instanceData: GroupListDataWrapper.InstanceData,
+            ): MultiLineRow.Visible? {
                 val text = if (treeNode.isExpanded) {
                     null
                 } else {
                     treeNode.allChildren
-                            .filter { it.modelNode is NotDoneGroupNode && it.canBeShown() }
-                            .map { it.modelNode as NotDoneGroupNode }
-                            .takeIf { it.isNotEmpty() }
-                            ?.sorted()
-                            ?.joinToString(", ") { it.singleInstanceData.name }
-                            ?: instanceData.note.takeIf { !it.isNullOrEmpty() }
+                        .filter { it.modelNode is NotDoneGroupNode && it.canBeShown() }
+                        .map { it.modelNode as NotDoneGroupNode }
+                        .takeIf { it.isNotEmpty() }
+                        ?.sorted()
+                        ?.joinToString(", ") { it.singleInstanceData.name }
+                        ?: instanceData.note.takeIf { !it.isNullOrEmpty() }
                 }
 
                 return text?.let {
-                    Pair(it, if (instanceData.taskCurrent) R.color.textSecondary else R.color.textDisabled)
+                    MultiLineRow.Visible(it, if (instanceData.taskCurrent) R.color.textSecondary else R.color.textDisabled)
                 }
             }
         }

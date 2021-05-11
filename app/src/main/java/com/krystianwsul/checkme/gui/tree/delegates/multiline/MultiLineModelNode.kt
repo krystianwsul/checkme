@@ -6,7 +6,7 @@ interface MultiLineModelNode {
 
     val details: MultiLineRow.Visible? get() = null
 
-    val children: Pair<String, Int>? get() = null
+    val children: MultiLineRow.Visible? get() = null
 
     val widthKey: MultiLineDelegate.WidthKey
 }

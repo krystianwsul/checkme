@@ -327,17 +327,17 @@ class ParentPickerFragment : AbstractDialogFragment() {
                     if (it.isNullOrEmpty()) null else MultiLineRow.Visible(it, R.color.textSecondary)
                 }
 
-            override val children: Pair<String, Int>?
+            override val children: MultiLineRow.Visible?
                 get() {
                     val text = treeNode.takeIf { !it.isExpanded }
-                            ?.allChildren
-                            ?.filter { it.modelNode is TaskAdapter.TaskWrapper && it.canBeShown() }
-                            ?.map { it.modelNode as TaskAdapter.TaskWrapper }
-                            ?.takeIf { it.isNotEmpty() }
-                            ?.joinToString(", ") { it.entryData.name }
-                            ?: entryData.note.takeIf { !it.isNullOrEmpty() }
+                        ?.allChildren
+                        ?.filter { it.modelNode is TaskAdapter.TaskWrapper && it.canBeShown() }
+                        ?.map { it.modelNode as TaskAdapter.TaskWrapper }
+                        ?.takeIf { it.isNotEmpty() }
+                        ?.joinToString(", ") { it.entryData.name }
+                        ?: entryData.note.takeIf { !it.isNullOrEmpty() }
 
-                    return text?.let { Pair(it, R.color.textSecondary) }
+                    return text?.let { MultiLineRow.Visible(it, R.color.textSecondary) }
                 }
 
             override fun onClick(holder: AbstractHolder) {

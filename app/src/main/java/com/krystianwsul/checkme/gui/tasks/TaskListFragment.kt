@@ -669,7 +669,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         override val children
             get() = InstanceTreeTaskNode.getTaskChildren(treeNode, null) {
                 (it.modelNode as? TaskNode)?.childTaskData?.name
-            }?.let { Pair(it, disabledOverride ?: R.color.textSecondary) }
+            }?.let { MultiLineRow.Visible(it, disabledOverride ?: R.color.textSecondary) }
 
         override val isSelectable = true
 
@@ -783,7 +783,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         override val children
             get() = InstanceTreeTaskNode.getTaskChildren(treeNode, childTaskData.note) {
                 (it.modelNode as? TaskNode)?.childTaskData?.name
-            }?.let { Pair(it, disabledOverride ?: R.color.textSecondary) }
+            }?.let { MultiLineRow.Visible(it, disabledOverride ?: R.color.textSecondary) }
 
         override val details
             get() = if (childTaskData.scheduleText.isNullOrEmpty()) {

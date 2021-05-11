@@ -28,17 +28,6 @@ sealed class Task(
     protected val parentTaskDelegate: ParentTaskDelegate,
 ) : Current, CurrentOffset, QueryMatchable, Assignable {
 
-    companion object {
-
-        /**
-         * todo after flipping switch:
-         *
-         * add todo to add paper for rootTasks a week later
-         */
-
-        const val WRITE_ROOT_TASKS = false // todo published on 2021.05.04
-    }
-
     abstract val parent: Parent
     abstract val project: Project<*>
 

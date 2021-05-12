@@ -35,19 +35,19 @@ import io.reactivex.rxjava3.kotlin.addTo
 import java.util.*
 
 class NotDoneGroupNode(
-        override val indentation: Int,
-        private val notDoneGroupCollection: NotDoneGroupCollection,
-        val instanceDatas: MutableList<GroupListDataWrapper.InstanceData>,
-        private val searchResults: Boolean,
-        override val parentNode: ModelNode<AbstractHolder>?,
+    override val indentation: Int,
+    private val notDoneGroupCollection: NotDoneGroupCollection,
+    val instanceDatas: MutableList<GroupListDataWrapper.InstanceData>,
+    private val searchResults: Boolean,
+    override val parentNode: ModelNode<AbstractHolder>?,
 ) :
-        AbstractModelNode(),
-        NodeCollectionParent,
-        Sortable,
-        CheckableModelNode,
-        MultiLineModelNode,
-        ThumbnailModelNode,
-        IndentationModelNode {
+    AbstractModelNode(),
+    NodeCollectionParent,
+    Sortable,
+    CheckableModelNode,
+    MultiLineModelNode,
+    ThumbnailModelNode,
+    IndentationModelNode {
 
     private val instanceNodeDelegate = if (singleInstance()) {
         InstanceNodeDelegate(singleInstanceData)
@@ -76,39 +76,39 @@ class NotDoneGroupNode(
 
     override val delegates by lazy {
         listOf(
-                ExpandableDelegate(treeNode),
-                CheckableDelegate(this),
-                MultiLineDelegate(this),
-                ThumbnailDelegate(this),
-                IndentationDelegate(this)
+            ExpandableDelegate(treeNode),
+            CheckableDelegate(this),
+            MultiLineDelegate(this),
+            ThumbnailDelegate(this),
+            IndentationDelegate(this)
         )
     }
 
     override val widthKey
         get() = MultiLineDelegate.WidthKey(
-                indentation,
-                checkBoxState != CheckBoxState.Gone,
-                thumbnail != null,
-                true
+            indentation,
+            checkBoxState != CheckBoxState.Gone,
+            thumbnail != null,
+            true
         )
 
     init {
         check(instanceDatas.isNotEmpty())
 
         exactTimeStamp = instanceDatas.map { it.instanceTimeStamp }
-                .distinct()
-                .single()
-                .toLocalExactTimeStamp()
+            .distinct()
+            .single()
+            .toLocalExactTimeStamp()
 
         check(instanceDatas.all { it.instanceTimeStamp.toLocalExactTimeStamp() == exactTimeStamp })
     }
 
     fun initialize(
-            expandedGroups: Map<TimeStamp, TreeNode.ExpansionState>,
-            expandedInstances: Map<InstanceKey, CollectionExpansionState>,
-            selectedInstances: List<InstanceKey>,
-            selectedGroups: List<Long>,
-            nodeContainer: NodeContainer<AbstractHolder>,
+        expandedGroups: Map<TimeStamp, TreeNode.ExpansionState>,
+        expandedInstances: Map<InstanceKey, CollectionExpansionState>,
+        selectedInstances: List<InstanceKey>,
+        selectedGroups: List<Long>,
+        nodeContainer: NodeContainer<AbstractHolder>,
     ): TreeNode<AbstractHolder> {
         check(instanceDatas.isNotEmpty())
 
@@ -126,16 +126,17 @@ class NotDoneGroupNode(
 
         if (instanceData != null) {
             singleInstanceNodeCollection = NodeCollection(
-                    indentation + 1,
-                    groupAdapter,
-                    false,
-                    treeNode,
-                    instanceData.note,
-                    this,
-                    instanceData.projectInfo,
+                indentation + 1,
+                groupAdapter,
+                false,
+                treeNode,
+                instanceData.note,
+                this,
+                instanceData.projectInfo,
             )
 
-            treeNode.setChildTreeNodes(singleInstanceNodeCollection!!.initialize(
+            treeNode.setChildTreeNodes(
+                singleInstanceNodeCollection!!.initialize(
                     instanceData.children.values,
                     expandedGroups,
                     expandedInstances,
@@ -147,18 +148,19 @@ class NotDoneGroupNode(
                     mapOf(),
                     listOf(),
                     null
-            ))
+                )
+            )
         } else {
             treeNode.setChildTreeNodes(
-                    instanceDatas.map {
-                        newChildTreeNode(
-                                it,
-                                expandedInstances,
-                                selectedInstances.contains(it.instanceKey),
-                                selectedInstances,
-                                selectedGroups
-                        )
-                    }
+                instanceDatas.map {
+                    newChildTreeNode(
+                        it,
+                        expandedInstances,
+                        selectedInstances.contains(it.instanceKey),
+                        selectedInstances,
+                        selectedGroups
+                    )
+                }
             )
         }
 
@@ -175,7 +177,7 @@ class NotDoneGroupNode(
         get(): Map<InstanceKey, CollectionExpansionState> {
             return if (singleInstance()) {
                 val collectionExpansionState = CollectionExpansionState(
-                        treeNode.expansionState,
+                    treeNode.expansionState,
                     singleInstanceNodeCollection!!.doneExpansionState
                 )
 
@@ -186,26 +188,36 @@ class NotDoneGroupNode(
             }
         }
 
+    class InstanceRowsDelegate(
+        private val instanceNodeDelegate: InstanceNodeDelegate,
+        private val treeNode: TreeNode<*>,
+    ) : MultiLineModelNode.RowsDelegate {
 
-    override val rowsDelegate = object : MultiLineModelNode.RowsDelegate {
+        override val name = instanceNodeDelegate.name
 
-        private fun getGroupName(): MultiLineRow {
-            return if (treeNode.isExpanded) {
-                MultiLineRow.Invisible
-            } else {
-                MultiLineRow.Visible(
-                    treeNode.allChildren
-                        .filter { it.modelNode is NotDoneInstanceNode && it.canBeShown() }
-                        .map { it.modelNode as NotDoneInstanceNode }
-                        .sorted()
-                        .joinToString(", ") { it.instanceData.name }
-                )
+        override val details = instanceNodeDelegate.details
+
+        override val children get() = instanceNodeDelegate.getChildren(treeNode)
+    }
+
+    private inner class GroupRowsDelegate : MultiLineModelNode.RowsDelegate {
+
+        override val name: MultiLineRow
+            get() {
+                return if (treeNode.isExpanded) {
+                    MultiLineRow.Invisible
+                } else {
+                    MultiLineRow.Visible(
+                        treeNode.allChildren
+                            .filter { it.modelNode is NotDoneInstanceNode && it.canBeShown() }
+                            .map { it.modelNode as NotDoneInstanceNode }
+                            .sorted()
+                            .joinToString(", ") { it.instanceData.name }
+                    )
+                }
             }
-        }
 
-        override val name get() = instanceNodeDelegate?.name ?: getGroupName()
-
-        private val groupDetails by lazy {
+        override val details by lazy {
             val date = exactTimeStamp.date
             val hourMinute = exactTimeStamp.toTimeStamp().hourMinute
 
@@ -215,10 +227,13 @@ class NotDoneGroupNode(
 
             MultiLineRow.Visible(text, R.color.textSecondary)
         }
+    }
 
-        override val details get() = instanceNodeDelegate?.details ?: groupDetails
-
-        override val children get() = instanceNodeDelegate?.getChildren(treeNode)
+    override val rowsDelegate by lazy {
+        if (singleInstance())
+            InstanceRowsDelegate(instanceNodeDelegate!!, treeNode)
+        else
+            GroupRowsDelegate()
     }
 
     override val groupAdapter by lazy { nodeCollection.groupAdapter }
@@ -242,16 +257,16 @@ class NotDoneGroupNode(
                     val instanceKey = singleInstanceData.instanceKey
 
                     fun setDone(done: Boolean) = AndroidDomainUpdater.setInstanceDone(
-                            groupAdapter.dataId.toFirst(),
-                            instanceKey,
-                            done,
+                        groupAdapter.dataId.toFirst(),
+                        instanceKey,
+                        done,
                     )
 
                     setDone(true).observeOn(AndroidSchedulers.mainThread())
-                            .andThen(Maybe.defer { groupListFragment.listener.showSnackbarDoneMaybe(1) })
-                            .flatMapCompletable { setDone(false) }
-                            .subscribe()
-                            .addTo(groupListFragment.attachedToWindowDisposable)
+                        .andThen(Maybe.defer { groupListFragment.listener.showSnackbarDoneMaybe(1) })
+                        .flatMapCompletable { setDone(false) }
+                        .subscribe()
+                        .addTo(groupListFragment.attachedToWindowDisposable)
 
                     /**
                      * todo it would be better to move all of this out of the node, and both handle the snackbar and
@@ -269,10 +284,10 @@ class NotDoneGroupNode(
         val groupListFragment = groupAdapter.groupListFragment
 
         return if (singleInstance()
-                && groupListFragment.parameters.groupListDataWrapper.taskEditable != false
-                && groupAdapter.treeNodeCollection.selectedChildren.isEmpty()
-                && treeNode.parent.displayedChildNodes.none { it.isExpanded }
-                && (groupListFragment.parameters.draggable || indentation != 0)
+            && groupListFragment.parameters.groupListDataWrapper.taskEditable != false
+            && groupAdapter.treeNodeCollection.selectedChildren.isEmpty()
+            && treeNode.parent.displayedChildNodes.none { it.isExpanded }
+            && (groupListFragment.parameters.draggable || indentation != 0)
         ) {
             groupListFragment.dragHelper.startDrag(viewHolder)
 
@@ -283,15 +298,20 @@ class NotDoneGroupNode(
     }
 
     override fun onClick(holder: AbstractHolder) {
-        groupListFragment.activity.startActivity(if (singleInstance()) {
-            ShowInstanceActivity.getIntent(groupListFragment.activity, singleInstanceData.instanceKey)
-        } else {
-            ShowGroupActivity.getIntent((treeNode.modelNode as NotDoneGroupNode).exactTimeStamp, groupListFragment.activity)
-        })
+        groupListFragment.activity.startActivity(
+            if (singleInstance()) {
+                ShowInstanceActivity.getIntent(groupListFragment.activity, singleInstanceData.instanceKey)
+            } else {
+                ShowGroupActivity.getIntent(
+                    (treeNode.modelNode as NotDoneGroupNode).exactTimeStamp,
+                    groupListFragment.activity
+                )
+            }
+        )
     }
 
     private fun getCustomTimeData(dayOfWeek: DayOfWeek, hourMinute: HourMinute) =
-            groupAdapter.customTimeDatas.firstOrNull { it.hourMinutes[dayOfWeek] == hourMinute }
+        groupAdapter.customTimeDatas.firstOrNull { it.hourMinutes[dayOfWeek] == hourMinute }
 
     override fun compareTo(other: ModelNode<AbstractHolder>) = when (other) {
         is ImageNode, is DetailsNode -> 1
@@ -312,24 +332,24 @@ class NotDoneGroupNode(
     }
 
     private fun newChildTreeNode(
-            instanceData: GroupListDataWrapper.InstanceData,
-            expandedInstances: Map<InstanceKey, CollectionExpansionState>,
-            selected: Boolean,
-            selectedInstances: List<InstanceKey>,
-            selectedGroups: List<Long>,
+        instanceData: GroupListDataWrapper.InstanceData,
+        expandedInstances: Map<InstanceKey, CollectionExpansionState>,
+        selected: Boolean,
+        selectedInstances: List<InstanceKey>,
+        selectedGroups: List<Long>,
     ): TreeNode<AbstractHolder> {
         val notDoneInstanceNode = NotDoneInstanceNode(
-                indentation,
-                instanceData,
-                this,
+            indentation,
+            instanceData,
+            this,
         )
 
         val childTreeNode = notDoneInstanceNode.initialize(
-                expandedInstances,
-                selected,
-                selectedInstances,
-                selectedGroups,
-                treeNode,
+            expandedInstances,
+            selected,
+            selectedInstances,
+            selectedGroups,
+            treeNode,
         )
 
         notDoneInstanceNodes.add(notDoneInstanceNode)
@@ -345,12 +365,12 @@ class NotDoneGroupNode(
 
     override fun setOrdinal(ordinal: Double) {
         AndroidDomainUpdater.setOrdinal(
-                groupListFragment.parameters.dataId.toFirst(),
-                singleInstanceData.taskKey,
-                ordinal,
+            groupListFragment.parameters.dataId.toFirst(),
+            singleInstanceData.taskKey,
+            ordinal,
         )
-                .subscribe()
-                .addTo(groupListFragment.attachedToWindowDisposable)
+            .subscribe()
+            .addTo(groupListFragment.attachedToWindowDisposable)
     }
 
     override val id: Any = if (nodeCollection.useGroups) {
@@ -364,10 +384,10 @@ class NotDoneGroupNode(
     override fun normalize() = instanceDatas.forEach { it.normalize() }
 
     override fun matchesFilterParams(filterParams: FilterCriteria.Full.FilterParams) =
-            instanceDatas.any { it.matchesFilterParams(filterParams) }
+        instanceDatas.any { it.matchesFilterParams(filterParams) }
 
     override fun getMatchResult(query: String) =
-            ModelNode.MatchResult.fromBoolean(instanceDatas.any { it.matchesQuery(query) })
+        ModelNode.MatchResult.fromBoolean(instanceDatas.any { it.matchesQuery(query) })
 
     override fun ordinalDesc() = if (singleInstance()) {
         singleInstanceData.run { "$name $ordinal" }
@@ -393,17 +413,17 @@ class NotDoneGroupNode(
     }
 
     class NotDoneInstanceNode(
-            override val indentation: Int,
-            val instanceData: GroupListDataWrapper.InstanceData,
-            private val parentNotDoneGroupNode: NotDoneGroupNode,
+        override val indentation: Int,
+        val instanceData: GroupListDataWrapper.InstanceData,
+        private val parentNotDoneGroupNode: NotDoneGroupNode,
     ) :
-            AbstractModelNode(),
-            NodeCollectionParent,
-            CheckableModelNode,
-            MultiLineModelNode,
-            ThumbnailModelNode,
-            IndentationModelNode,
-            Sortable {
+        AbstractModelNode(),
+        NodeCollectionParent,
+        CheckableModelNode,
+        MultiLineModelNode,
+        ThumbnailModelNode,
+        IndentationModelNode,
+        Sortable {
 
         private val instanceNodeDelegate = InstanceNodeDelegate(instanceData)
 
@@ -426,47 +446,48 @@ class NotDoneGroupNode(
 
         override val delegates by lazy {
             listOf(
-                    ExpandableDelegate(treeNode),
-                    CheckableDelegate(this),
-                    MultiLineDelegate(this),
-                    ThumbnailDelegate(this),
-                    IndentationDelegate(this)
+                ExpandableDelegate(treeNode),
+                CheckableDelegate(this),
+                MultiLineDelegate(this),
+                ThumbnailDelegate(this),
+                IndentationDelegate(this)
             )
         }
 
         override val widthKey
             get() = MultiLineDelegate.WidthKey(
-                    indentation,
-                    true,
-                    thumbnail != null,
-                    true
+                indentation,
+                true,
+                thumbnail != null,
+                true
             )
 
         override val isDraggable = true
 
         fun initialize(
-                expandedInstances: Map<InstanceKey, CollectionExpansionState>,
-                selected: Boolean,
-                selectedInstances: List<InstanceKey>,
-                selectedGroups: List<Long>,
-                notDoneGroupTreeNode: TreeNode<AbstractHolder>,
+            expandedInstances: Map<InstanceKey, CollectionExpansionState>,
+            selected: Boolean,
+            selectedInstances: List<InstanceKey>,
+            selectedGroups: List<Long>,
+            notDoneGroupTreeNode: TreeNode<AbstractHolder>,
         ): TreeNode<AbstractHolder> {
             val (expansionState, doneExpansionState) =
-                    expandedInstances[instanceData.instanceKey] ?: CollectionExpansionState()
+                expandedInstances[instanceData.instanceKey] ?: CollectionExpansionState()
 
             treeNode = TreeNode(this, notDoneGroupTreeNode, selected, expansionState)
 
             nodeCollection = NodeCollection(
-                    indentation + 1,
-                    groupAdapter,
-                    false,
-                    treeNode,
-                    instanceData.note,
-                    this,
-                    instanceData.projectInfo,
+                indentation + 1,
+                groupAdapter,
+                false,
+                treeNode,
+                instanceData.note,
+                this,
+                instanceData.projectInfo,
             )
 
-            treeNode.setChildTreeNodes(nodeCollection.initialize(
+            treeNode.setChildTreeNodes(
+                nodeCollection.initialize(
                     instanceData.children.values,
                     mapOf(),
                     expandedInstances,
@@ -478,7 +499,8 @@ class NotDoneGroupNode(
                     mapOf(),
                     listOf(),
                     null,
-            ))
+                )
+            )
 
             return treeNode
         }
@@ -513,32 +535,34 @@ class NotDoneGroupNode(
                     val instanceKey = instanceData.instanceKey
 
                     AndroidDomainUpdater.setInstanceDone(
-                            DomainListenerManager.NotificationType.First(groupAdapter.dataId),
-                            instanceKey,
-                            true
+                        DomainListenerManager.NotificationType.First(groupAdapter.dataId),
+                        instanceKey,
+                        true
                     )
-                            .observeOn(AndroidSchedulers.mainThread())
-                            .andThen(Maybe.defer { groupListFragment.listener.showSnackbarDoneMaybe(1) })
-                            .flatMapCompletable {
-                                AndroidDomainUpdater.setInstanceDone(
-                                        DomainListenerManager.NotificationType.First(groupAdapter.dataId),
-                                        instanceKey,
-                                        false,
-                                )
-                            }
-                            .subscribe()
-                            .addTo(groupListFragment.attachedToWindowDisposable)
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .andThen(Maybe.defer { groupListFragment.listener.showSnackbarDoneMaybe(1) })
+                        .flatMapCompletable {
+                            AndroidDomainUpdater.setInstanceDone(
+                                DomainListenerManager.NotificationType.First(groupAdapter.dataId),
+                                instanceKey,
+                                false,
+                            )
+                        }
+                        .subscribe()
+                        .addTo(groupListFragment.attachedToWindowDisposable)
                 }
             }
 
         override fun onClick(holder: AbstractHolder) =
-                groupListFragment.activity.startActivity(ShowInstanceActivity.getIntent(
-                        groupListFragment.activity,
-                        instanceData.instanceKey,
-                ))
+            groupListFragment.activity.startActivity(
+                ShowInstanceActivity.getIntent(
+                    groupListFragment.activity,
+                    instanceData.instanceKey,
+                )
+            )
 
         override fun compareTo(other: ModelNode<AbstractHolder>) =
-                instanceData.compareTo((other as NotDoneInstanceNode).instanceData)
+            instanceData.compareTo((other as NotDoneInstanceNode).instanceData)
 
         override val id = Id(instanceData.instanceKey)
 
@@ -549,7 +573,7 @@ class NotDoneGroupNode(
         override fun normalize() = instanceData.normalize()
 
         override fun matchesFilterParams(filterParams: FilterCriteria.Full.FilterParams) =
-                instanceData.matchesFilterParams(filterParams)
+            instanceData.matchesFilterParams(filterParams)
 
         override fun getMatchResult(query: String) = ModelNode.MatchResult.fromBoolean(instanceData.matchesQuery(query))
 
@@ -557,8 +581,8 @@ class NotDoneGroupNode(
             val groupListFragment = groupAdapter.groupListFragment
 
             return if (groupListFragment.parameters.groupListDataWrapper.taskEditable != false
-                    && groupAdapter.treeNodeCollection.selectedChildren.isEmpty()
-                    && treeNode.parent.displayedChildNodes.none { it.isExpanded }
+                && groupAdapter.treeNodeCollection.selectedChildren.isEmpty()
+                && treeNode.parent.displayedChildNodes.none { it.isExpanded }
             ) {
                 groupListFragment.dragHelper.startDrag(viewHolder)
 
@@ -572,12 +596,12 @@ class NotDoneGroupNode(
 
         override fun setOrdinal(ordinal: Double) {
             AndroidDomainUpdater.setOrdinal(
-                    groupListFragment.parameters.dataId.toFirst(),
-                    instanceData.taskKey,
-                    ordinal,
+                groupListFragment.parameters.dataId.toFirst(),
+                instanceData.taskKey,
+                ordinal,
             )
-                    .subscribe()
-                    .addTo(groupListFragment.attachedToWindowDisposable)
+                .subscribe()
+                .addTo(groupListFragment.attachedToWindowDisposable)
         }
 
         data class Id(val instanceKey: InstanceKey)

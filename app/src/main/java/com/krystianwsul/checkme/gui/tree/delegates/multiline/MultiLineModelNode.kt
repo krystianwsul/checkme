@@ -13,6 +13,6 @@ interface MultiLineModelNode {
         val children: MultiLineRow? get() = null
         val project: MultiLineRow.Visible? get() = null
 
-        val rows get() = listOfNotNull(name, details, children, project).take(MultiLineDelegate.TOTAL_LINES)
+        val rows get() = listOfNotNull(name, details, children, project)
     }
 }

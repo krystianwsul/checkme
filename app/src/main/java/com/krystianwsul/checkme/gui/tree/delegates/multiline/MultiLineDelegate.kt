@@ -20,7 +20,12 @@ class MultiLineDelegate(private val modelNode: MultiLineModelNode) : NodeDelegat
         private val textWidths = InitMap<Pair<Int, WidthKey>, BehaviorRelay<Int>> { BehaviorRelay.create() }
     }
 
-    override val state get() = modelNode.run { State(rowsDelegate.rows) }
+    private val rows
+        get() = modelNode.rowsDelegate
+            .rows
+            .take(TOTAL_LINES)
+
+    override val state get() = modelNode.run { State(rows) }
 
     override fun onBindViewHolder(viewHolder: RecyclerView.ViewHolder) {
         (viewHolder as MultiLineHolder).apply {
@@ -97,7 +102,7 @@ class MultiLineDelegate(private val modelNode: MultiLineModelNode) : NodeDelegat
                 }
             }
 
-            val rows = modelNode.rowsDelegate.rows
+            val rows = rows
 
             rowName.displayRow(rows.getOrNull(0))
             rowDetails.displayRow(rows.getOrNull(1))

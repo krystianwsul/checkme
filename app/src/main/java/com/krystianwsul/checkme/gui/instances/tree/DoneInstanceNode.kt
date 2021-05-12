@@ -37,8 +37,6 @@ class DoneInstanceNode(
         ThumbnailModelNode,
         IndentationModelNode {
 
-    private val instanceNodeDelegate = InstanceNodeDelegate(instanceData)
-
     public override lateinit var treeNode: TreeNode<AbstractHolder>
         private set
 
@@ -114,11 +112,8 @@ class DoneInstanceNode(
 
     override val groupAdapter by lazy { parentNodeCollection.groupAdapter }
 
-    override val rowsDelegate = object : MultiLineModelNode.RowsDelegate {
-
-        override val name = instanceNodeDelegate.name
-        override val details = instanceNodeDelegate.details
-        override val children get() = instanceNodeDelegate.getChildren(treeNode)
+    override val rowsDelegate by lazy {
+        InstanceRowsDelegate(InstanceNodeDelegate(instanceData), treeNode)
     }
 
     override val checkBoxState

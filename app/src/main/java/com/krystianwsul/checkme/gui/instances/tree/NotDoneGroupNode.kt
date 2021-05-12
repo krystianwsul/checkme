@@ -49,12 +49,6 @@ class NotDoneGroupNode(
     ThumbnailModelNode,
     IndentationModelNode {
 
-    private val instanceNodeDelegate = if (singleInstance()) {
-        InstanceNodeDelegate(singleInstanceData)
-    } else {
-        null
-    }
-
     public override lateinit var treeNode: TreeNode<AbstractHolder>
         private set
 
@@ -188,18 +182,6 @@ class NotDoneGroupNode(
             }
         }
 
-    class InstanceRowsDelegate(
-        private val instanceNodeDelegate: InstanceNodeDelegate,
-        private val treeNode: TreeNode<*>,
-    ) : MultiLineModelNode.RowsDelegate {
-
-        override val name = instanceNodeDelegate.name
-
-        override val details = instanceNodeDelegate.details
-
-        override val children get() = instanceNodeDelegate.getChildren(treeNode)
-    }
-
     private inner class GroupRowsDelegate : MultiLineModelNode.RowsDelegate {
 
         override val name: MultiLineRow
@@ -231,7 +213,7 @@ class NotDoneGroupNode(
 
     override val rowsDelegate by lazy {
         if (singleInstance())
-            InstanceRowsDelegate(instanceNodeDelegate!!, treeNode)
+            InstanceRowsDelegate(InstanceNodeDelegate(singleInstanceData), treeNode)
         else
             GroupRowsDelegate()
     }
@@ -425,8 +407,6 @@ class NotDoneGroupNode(
         IndentationModelNode,
         Sortable {
 
-        private val instanceNodeDelegate = InstanceNodeDelegate(instanceData)
-
         override val holderType = HolderType.CHECKABLE
 
         override val isSelectable = true
@@ -517,10 +497,11 @@ class NotDoneGroupNode(
 
         override val groupAdapter by lazy { parentNotDoneGroupNode.groupAdapter }
 
-        override val rowsDelegate = object : MultiLineModelNode.RowsDelegate {
+        override val rowsDelegate by lazy {
+            object : InstanceRowsDelegate(InstanceNodeDelegate(instanceData), treeNode) {
 
-            override val name = instanceNodeDelegate.name
-            override val children get() = instanceNodeDelegate.getChildren(treeNode)
+                override val details: MultiLineRow.Visible? get() = null
+            }
         }
 
         override val checkBoxState

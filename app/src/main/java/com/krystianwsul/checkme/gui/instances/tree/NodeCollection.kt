@@ -21,8 +21,7 @@ class NodeCollection(
     val useDoneNode: Boolean = true,
 ) {
 
-    lateinit var notDoneGroupCollection: NotDoneGroupCollection
-        private set
+    private lateinit var notDoneGroupCollection: NotDoneGroupCollection
 
     lateinit var dividerNode: DividerNode
         private set
@@ -57,12 +56,14 @@ class NodeCollection(
         val doneInstanceDatas = instanceDatas.filterNot { it.filterNotDone() }
 
         return mutableListOf<TreeNode<AbstractHolder>>().apply {
-            DetailsNode.getIfHasData(
-                projectInfo,
-                note,
-                parentNode,
-                indentation
-            )?.let { add(it.initialize(nodeContainer)) }
+            add(
+                DetailsNode(
+                    projectInfo,
+                    note,
+                    parentNode,
+                    indentation,
+                ).initialize(nodeContainer)
+            )
 
             imageData?.let {
                 check(indentation == 0)

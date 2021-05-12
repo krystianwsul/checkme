@@ -110,12 +110,12 @@ class TaskNode(
 
         val treeNodes = mutableListOf<TreeNode<AbstractHolder>>()
 
-        DetailsNode.getIfHasData(
+        treeNodes += DetailsNode(
             taskData.projectInfo,
             taskData.note,
             this,
-            indentation + 1
-        )?.let { treeNodes += it.initialize(nodeContainer) }
+            indentation + 1,
+        ).initialize(nodeContainer)
 
         treeNodes += taskData.children.map { newChildTreeNode(it, taskExpansionStates, selectedTaskKeys) }
 

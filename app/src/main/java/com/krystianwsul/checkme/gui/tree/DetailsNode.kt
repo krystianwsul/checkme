@@ -17,27 +17,12 @@ import com.krystianwsul.treeadapter.ModelState
 import com.krystianwsul.treeadapter.NodeContainer
 import com.krystianwsul.treeadapter.TreeNode
 
-class DetailsNode private constructor(
+class DetailsNode(
     private val projectInfo: ProjectInfo?,
     private val note: String?,
     override val parentNode: ModelNode<AbstractHolder>?,
     indentation: Int,
 ) : AbstractModelNode(), IndentationModelNode, QueryMatchable {
-
-    companion object {
-
-        fun getIfHasData(
-            projectInfo: ProjectInfo?,
-            note: String?,
-            parentNode: ModelNode<AbstractHolder>?,
-            indentation: Int,
-        ): DetailsNode? {
-            if (projectInfo?.name.isNullOrEmpty() && projectInfo?.assignedTo.isNullOrEmpty() && note.isNullOrEmpty())
-                return null
-
-            return DetailsNode(projectInfo, note, parentNode, indentation)
-        }
-    }
 
     override lateinit var treeNode: TreeNode<AbstractHolder>
         private set
@@ -60,10 +45,6 @@ class DetailsNode private constructor(
 
     override val showSeparatorWhenParentExpanded = false
 
-    init {
-        check(projectInfo != null || !note.isNullOrEmpty())
-    }
-
     fun initialize(nodeContainer: NodeContainer<AbstractHolder>): TreeNode<AbstractHolder> {
         this.nodeContainer = nodeContainer
 
@@ -76,7 +57,16 @@ class DetailsNode private constructor(
     override fun isVisible(actionMode: Boolean, hasVisibleChildren: Boolean): Boolean {
         if (actionMode) return false
 
-        return true
+        // check if has contents
+        projectInfo?.let {
+            if (it.name.isNotEmpty()) return true
+
+            if (it.assignedTo.isNotEmpty()) return true
+        }
+
+        if (!note.isNullOrEmpty()) return true
+
+        return false
     }
 
     override val delegates by lazy { listOf(IndentationDelegate(this)) }

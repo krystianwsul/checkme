@@ -213,7 +213,7 @@ class NotDoneGroupNode(
 
     override val rowsDelegate by lazy {
         if (singleInstance())
-            InstanceRowsDelegate(InstanceNodeDelegate(singleInstanceData), treeNode)
+            InstanceRowsDelegate(singleInstanceData, treeNode)
         else
             GroupRowsDelegate()
     }
@@ -497,9 +497,7 @@ class NotDoneGroupNode(
 
         override val groupAdapter by lazy { parentNotDoneGroupNode.groupAdapter }
 
-        override val rowsDelegate by lazy {
-            InstanceRowsDelegate(InstanceNodeDelegate(instanceData), treeNode, false)
-        }
+        override val rowsDelegate by lazy { InstanceRowsDelegate(instanceData, treeNode, false) }
 
         override val checkBoxState
             get() = if (groupListFragment.selectionCallback.hasActionMode) {

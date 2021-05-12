@@ -36,8 +36,6 @@ class InstanceRowsDelegate(
                 ?.joinToString(", ") { it.singleInstanceData.name }
                 ?: instanceData.note.takeIf { !it.isNullOrEmpty() }
 
-            return text?.let {
-                MultiLineRow.Visible(it, if (instanceData.taskCurrent) R.color.textSecondary else R.color.textDisabled)
-            }
+            return text?.let { MultiLineRow.Visible(it, secondaryColor) }
         }
 }

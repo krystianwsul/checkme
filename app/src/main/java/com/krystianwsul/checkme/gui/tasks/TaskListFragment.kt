@@ -671,7 +671,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                 get() = this@ProjectNode.name
 
             override val children
-                get() = InstanceTreeTaskNode.getTaskChildren(treeNode, null) {
+                get() = InstanceTreeTaskNode.getTaskChildren(treeNode.isExpanded, treeNode.allChildren, null) {
                     (it.modelNode as? TaskNode)?.childTaskData?.name
                 }?.let { MultiLineRow.Visible(it, disabledOverride ?: R.color.textSecondary) }
         }
@@ -791,7 +791,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                 get() = this@TaskNode.name
 
             override val children
-                get() = InstanceTreeTaskNode.getTaskChildren(treeNode, childTaskData.note) {
+                get() = InstanceTreeTaskNode.getTaskChildren(treeNode.isExpanded, treeNode.allChildren, childTaskData.note) {
                     (it.modelNode as? TaskNode)?.childTaskData?.name
                 }?.let { MultiLineRow.Visible(it, disabledOverride ?: R.color.textSecondary) }
 

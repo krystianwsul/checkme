@@ -498,10 +498,7 @@ class NotDoneGroupNode(
         override val groupAdapter by lazy { parentNotDoneGroupNode.groupAdapter }
 
         override val rowsDelegate by lazy {
-            object : InstanceRowsDelegate(InstanceNodeDelegate(instanceData), treeNode) {
-
-                override val details: MultiLineRow.Visible? get() = null
-            }
+            InstanceRowsDelegate(InstanceNodeDelegate(instanceData), treeNode, false)
         }
 
         override val checkBoxState

@@ -320,25 +320,28 @@ class ParentPickerFragment : AbstractDialogFragment() {
                 return treeNode
             }
 
-            override val name get() = MultiLineRow.Visible(entryData.name)
+            override val rowsDelegate = object : MultiLineModelNode.RowsDelegate {
 
-            override val details: MultiLineRow.Visible?
-                get() = entryData.details.let {
-                    if (it.isNullOrEmpty()) null else MultiLineRow.Visible(it, R.color.textSecondary)
-                }
+                override val name get() = MultiLineRow.Visible(entryData.name)
 
-            override val children: MultiLineRow.Visible?
-                get() {
-                    val text = treeNode.takeIf { !it.isExpanded }
-                        ?.allChildren
-                        ?.filter { it.modelNode is TaskAdapter.TaskWrapper && it.canBeShown() }
-                        ?.map { it.modelNode as TaskAdapter.TaskWrapper }
-                        ?.takeIf { it.isNotEmpty() }
-                        ?.joinToString(", ") { it.entryData.name }
-                        ?: entryData.note.takeIf { !it.isNullOrEmpty() }
+                override val details: MultiLineRow.Visible?
+                    get() = entryData.details.let {
+                        if (it.isNullOrEmpty()) null else MultiLineRow.Visible(it, R.color.textSecondary)
+                    }
 
-                    return text?.let { MultiLineRow.Visible(it, R.color.textSecondary) }
-                }
+                override val children: MultiLineRow.Visible?
+                    get() {
+                        val text = treeNode.takeIf { !it.isExpanded }
+                            ?.allChildren
+                            ?.filter { it.modelNode is TaskAdapter.TaskWrapper && it.canBeShown() }
+                            ?.map { it.modelNode as TaskAdapter.TaskWrapper }
+                            ?.takeIf { it.isNotEmpty() }
+                            ?.joinToString(", ") { it.entryData.name }
+                            ?: entryData.note.takeIf { !it.isNullOrEmpty() }
+
+                        return text?.let { MultiLineRow.Visible(it, R.color.textSecondary) }
+                    }
+            }
 
             override fun onClick(holder: AbstractHolder) {
                 this@ParentPickerFragment.dismiss()

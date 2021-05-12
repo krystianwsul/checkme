@@ -617,8 +617,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
         protected val disabledOverride = R.color.textDisabled.takeUnless { entryData.canAddSubtask }
 
-        override val name
-            get() = MultiLineRow.Visible(entryData.name, disabledOverride ?: R.color.textPrimary)
+        protected val name = MultiLineRow.Visible(entryData.name, disabledOverride ?: R.color.textPrimary)
 
         override fun compareTo(other: ModelNode<AbstractHolder>) = if (other is Node) {
             var comparison = entryData.compareTo(other.entryData)
@@ -663,13 +662,19 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                 indentation,
                 false,
                 false,
-                true
+                true,
             )
 
-        override val children
-            get() = InstanceTreeTaskNode.getTaskChildren(treeNode, null) {
-                (it.modelNode as? TaskNode)?.childTaskData?.name
-            }?.let { MultiLineRow.Visible(it, disabledOverride ?: R.color.textSecondary) }
+        override val rowsDelegate = object : MultiLineModelNode.RowsDelegate {
+
+            override val name: MultiLineRow
+                get() = this@ProjectNode.name
+
+            override val children
+                get() = InstanceTreeTaskNode.getTaskChildren(treeNode, null) {
+                    (it.modelNode as? TaskNode)?.childTaskData?.name
+                }?.let { MultiLineRow.Visible(it, disabledOverride ?: R.color.textSecondary) }
+        }
 
         override val isSelectable = true
 
@@ -780,17 +785,23 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             return treeNode
         }
 
-        override val children
-            get() = InstanceTreeTaskNode.getTaskChildren(treeNode, childTaskData.note) {
-                (it.modelNode as? TaskNode)?.childTaskData?.name
-            }?.let { MultiLineRow.Visible(it, disabledOverride ?: R.color.textSecondary) }
+        override val rowsDelegate = object : MultiLineModelNode.RowsDelegate {
 
-        override val details
-            get() = if (childTaskData.scheduleText.isNullOrEmpty()) {
-                null
-            } else {
-                MultiLineRow.Visible(childTaskData.scheduleText, disabledOverride ?: R.color.textSecondary)
-            }
+            override val name: MultiLineRow
+                get() = this@TaskNode.name
+
+            override val children
+                get() = InstanceTreeTaskNode.getTaskChildren(treeNode, childTaskData.note) {
+                    (it.modelNode as? TaskNode)?.childTaskData?.name
+                }?.let { MultiLineRow.Visible(it, disabledOverride ?: R.color.textSecondary) }
+
+            override val details
+                get() = if (childTaskData.scheduleText.isNullOrEmpty()) {
+                    null
+                } else {
+                    MultiLineRow.Visible(childTaskData.scheduleText, disabledOverride ?: R.color.textSecondary)
+                }
+        }
 
         override val isSelectable = !copying
 

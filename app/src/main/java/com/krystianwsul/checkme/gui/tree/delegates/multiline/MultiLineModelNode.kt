@@ -2,17 +2,17 @@ package com.krystianwsul.checkme.gui.tree.delegates.multiline
 
 interface MultiLineModelNode {
 
-    val name: MultiLineRow
-
-    val details: MultiLineRow.Visible? get() = null
-
-    val children: MultiLineRow? get() = null
-
-    val project: MultiLineRow.Visible? get() = null
+    val rowsDelegate: RowsDelegate
 
     val widthKey: MultiLineDelegate.WidthKey
 
-    val rows get() = listOfNotNull(name, details, children, project).take(MultiLineDelegate.TOTAL_LINES)
+    interface RowsDelegate {
 
-    val projectShown get() = project?.let { rows.contains(it) } ?: false
+        val name: MultiLineRow
+        val details: MultiLineRow.Visible? get() = null
+        val children: MultiLineRow? get() = null
+        val project: MultiLineRow.Visible? get() = null
+
+        val rows get() = listOfNotNull(name, details, children, project).take(MultiLineDelegate.TOTAL_LINES)
+    }
 }

@@ -278,17 +278,20 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
         override val id = customTimeData.id
 
         fun initialize(treeNodeCollection: TreeNodeCollection<AbstractHolder>) = TreeNode(
-                this,
-                treeNodeCollection,
-                selectedCustomTimeKeys?.contains(customTimeData.id) ?: false,
+            this,
+            treeNodeCollection,
+            selectedCustomTimeKeys?.contains(customTimeData.id) ?: false,
         ).also {
             treeNode = it
             it.setChildTreeNodes(listOf())
         }
 
-        override val name = MultiLineRow.Visible(customTimeData.name)
+        override val rowsDelegate = object : MultiLineModelNode.RowsDelegate {
 
-        override val details = MultiLineRow.Visible(customTimeData.details, R.color.textSecondary)
+            override val name = MultiLineRow.Visible(customTimeData.name)
+
+            override val details = MultiLineRow.Visible(customTimeData.details, R.color.textSecondary)
+        }
 
         override val isSelectable = true
 

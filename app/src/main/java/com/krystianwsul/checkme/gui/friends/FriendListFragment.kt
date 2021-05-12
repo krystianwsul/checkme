@@ -269,9 +269,12 @@ class FriendListFragment : AbstractFragment(), FabUser {
             AvatarModelNode,
             MultiLineModelNode {
 
-        override val name = MultiLineRow.Visible(userListData.name)
+        override val rowsDelegate = object : MultiLineModelNode.RowsDelegate {
 
-        override val details = MultiLineRow.Visible(userListData.email, R.color.textSecondary)
+            override val name = MultiLineRow.Visible(userListData.name)
+
+            override val details = MultiLineRow.Visible(userListData.email, R.color.textSecondary)
+        }
 
         public override lateinit var treeNode: TreeNode<AbstractHolder>
             private set

@@ -150,12 +150,15 @@ class TaskNode(
         1
     }
 
-    override val name get() = MultiLineRow.Visible(taskData.name)
+    override val rowsDelegate = object : MultiLineModelNode.RowsDelegate {
 
-    override val children
-        get() = getTaskChildren(treeNode, taskData.note) {
-            (it.modelNode as? TaskNode)?.taskData?.name
-        }?.let { MultiLineRow.Visible(it, R.color.textSecondary) }
+        override val name get() = MultiLineRow.Visible(taskData.name)
+
+        override val children
+            get() = getTaskChildren(treeNode, taskData.note) {
+                (it.modelNode as? TaskNode)?.taskData?.name
+            }?.let { MultiLineRow.Visible(it, R.color.textSecondary) }
+    }
 
     override fun onClick(holder: AbstractHolder) {
         groupListFragment.activity.startActivity(ShowTaskActivity.newIntent(taskData.taskKey))

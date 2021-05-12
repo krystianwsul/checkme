@@ -186,38 +186,42 @@ class NotDoneGroupNode(
             }
         }
 
-    private fun getGroupName(): MultiLineRow {
-        return if (treeNode.isExpanded) {
-            MultiLineRow.Invisible
-        } else {
-            MultiLineRow.Visible(
-                treeNode.allChildren
-                    .filter { it.modelNode is NotDoneInstanceNode && it.canBeShown() }
-                    .map { it.modelNode as NotDoneInstanceNode }
-                    .sorted()
-                    .joinToString(", ") { it.instanceData.name }
-            )
-        }
-    }
 
-    override val name get() = instanceNodeDelegate?.name ?: getGroupName()
+    override val rowsDelegate = object : MultiLineModelNode.RowsDelegate {
+
+        private fun getGroupName(): MultiLineRow {
+            return if (treeNode.isExpanded) {
+                MultiLineRow.Invisible
+            } else {
+                MultiLineRow.Visible(
+                    treeNode.allChildren
+                        .filter { it.modelNode is NotDoneInstanceNode && it.canBeShown() }
+                        .map { it.modelNode as NotDoneInstanceNode }
+                        .sorted()
+                        .joinToString(", ") { it.instanceData.name }
+                )
+            }
+        }
+
+        override val name get() = instanceNodeDelegate?.name ?: getGroupName()
+
+        private val groupDetails by lazy {
+            val date = exactTimeStamp.date
+            val hourMinute = exactTimeStamp.toTimeStamp().hourMinute
+
+            val timeText = getCustomTimeData(date.dayOfWeek, hourMinute)?.name ?: hourMinute.toString()
+
+            val text = date.getDisplayText() + ", " + timeText
+
+            MultiLineRow.Visible(text, R.color.textSecondary)
+        }
+
+        override val details get() = instanceNodeDelegate?.details ?: groupDetails
+
+        override val children get() = instanceNodeDelegate?.getChildren(treeNode)
+    }
 
     override val groupAdapter by lazy { nodeCollection.groupAdapter }
-
-    private val groupDetails by lazy {
-        val date = exactTimeStamp.date
-        val hourMinute = exactTimeStamp.toTimeStamp().hourMinute
-
-        val timeText = getCustomTimeData(date.dayOfWeek, hourMinute)?.name ?: hourMinute.toString()
-
-        val text = date.getDisplayText() + ", " + timeText
-
-        MultiLineRow.Visible(text, R.color.textSecondary)
-    }
-
-    override val details = instanceNodeDelegate?.details ?: groupDetails
-
-    override val children get() = instanceNodeDelegate?.getChildren(treeNode)
 
     override val checkBoxState
         get() = if (singleInstance()) {
@@ -491,8 +495,11 @@ class NotDoneGroupNode(
 
         override val groupAdapter by lazy { parentNotDoneGroupNode.groupAdapter }
 
-        override val name = instanceNodeDelegate.name
-        override val children get() = instanceNodeDelegate.getChildren(treeNode)
+        override val rowsDelegate = object : MultiLineModelNode.RowsDelegate {
+
+            override val name = instanceNodeDelegate.name
+            override val children get() = instanceNodeDelegate.getChildren(treeNode)
+        }
 
         override val checkBoxState
             get() = if (groupListFragment.selectionCallback.hasActionMode) {

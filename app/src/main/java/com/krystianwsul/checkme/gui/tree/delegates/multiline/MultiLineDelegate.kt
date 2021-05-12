@@ -20,21 +20,22 @@ class MultiLineDelegate(private val modelNode: MultiLineModelNode) : NodeDelegat
         private val textWidths = InitMap<Pair<Int, WidthKey>, BehaviorRelay<Int>> { BehaviorRelay.create() }
     }
 
-    override val state get() = modelNode.run { State(rows) }
+    override val state get() = modelNode.run { State(rowsDelegate.rows) }
 
     override fun onBindViewHolder(viewHolder: RecyclerView.ViewHolder) {
         (viewHolder as MultiLineHolder).apply {
             val widthKey = Pair(
-                    rowName.context
-                            .resources
-                            .configuration
-                            .orientation,
-                    modelNode.widthKey,
+                rowName.context
+                    .resources
+                    .configuration
+                    .orientation,
+                modelNode.widthKey,
             )
 
             val textWidthRelay = textWidths[widthKey]
 
-            val minLines = modelNode.run { 1 + (details?.let { 1 } ?: 0) + (children?.let { 1 } ?: 0) }
+            val minLines =
+                modelNode.run { 1 + (rowsDelegate.details?.let { 1 } ?: 0) + (rowsDelegate.children?.let { 1 } ?: 0) }
 
             fun allocateLines(textViews: List<TextView>) {
                 var remainingLines = TOTAL_LINES - minLines
@@ -43,8 +44,8 @@ class MultiLineDelegate(private val modelNode: MultiLineModelNode) : NodeDelegat
                     fun getWantLines(text: String): Int {
                         return if (textWidthRelay.value != null) {
                             StaticLayout.Builder
-                                    .obtain(text, 0, text.length, textView.paint, textWidthRelay.value!!)
-                                    .setAlignment(Layout.Alignment.ALIGN_NORMAL)
+                                .obtain(text, 0, text.length, textView.paint, textWidthRelay.value!!)
+                                .setAlignment(Layout.Alignment.ALIGN_NORMAL)
                                     .setLineSpacing(textView.lineSpacingExtra, textView.lineSpacingMultiplier)
                                     .setIncludePad(textView.includeFontPadding)
                                     .build()
@@ -96,7 +97,7 @@ class MultiLineDelegate(private val modelNode: MultiLineModelNode) : NodeDelegat
                 }
             }
 
-            val rows = modelNode.rows
+            val rows = modelNode.rowsDelegate.rows
 
             rowName.displayRow(rows.getOrNull(0))
             rowDetails.displayRow(rows.getOrNull(1))

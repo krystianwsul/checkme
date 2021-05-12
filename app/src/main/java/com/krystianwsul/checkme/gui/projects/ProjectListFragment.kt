@@ -323,9 +323,12 @@ class ProjectListFragment : AbstractFragment(), FabUser {
                 return treeNode
             }
 
-            override val name get() = MultiLineRow.Visible(projectData.name)
+            override val rowsDelegate = object : MultiLineModelNode.RowsDelegate {
 
-            override val details get() = MultiLineRow.Visible(projectData.users, R.color.textSecondary)
+                override val name get() = MultiLineRow.Visible(projectData.name)
+
+                override val details get() = MultiLineRow.Visible(projectData.users, R.color.textSecondary)
+            }
 
             override val isSelectable = true
 

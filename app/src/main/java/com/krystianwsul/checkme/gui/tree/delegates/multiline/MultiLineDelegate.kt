@@ -39,8 +39,9 @@ class MultiLineDelegate(private val modelNode: MultiLineModelNode) : NodeDelegat
 
             val textWidthRelay = textWidths[widthKey]
 
-            val minLines =
-                modelNode.run { 1 + (rowsDelegate.details?.let { 1 } ?: 0) + (rowsDelegate.children?.let { 1 } ?: 0) }
+            val rows = rows
+
+            val minLines = rows.size
 
             fun allocateLines(textViews: List<TextView>) {
                 var remainingLines = TOTAL_LINES - minLines
@@ -101,8 +102,6 @@ class MultiLineDelegate(private val modelNode: MultiLineModelNode) : NodeDelegat
                     null -> visibility = View.GONE
                 }
             }
-
-            val rows = rows
 
             rowName.displayRow(rows.getOrNull(0))
             rowDetails.displayRow(rows.getOrNull(1))

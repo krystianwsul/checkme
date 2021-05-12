@@ -39,7 +39,6 @@ import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.treeadapter.*
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
-import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.plusAssign
 import java.io.Serializable
 import java.util.*
@@ -325,9 +324,10 @@ class ProjectListFragment : AbstractFragment(), FabUser {
 
             override val rowsDelegate = object : MultiLineModelNode.RowsDelegate {
 
-                override val name get() = MultiLineRow.Visible(projectData.name)
+                private val name get() = MultiLineRow.Visible(projectData.name)
+                private val details get() = MultiLineRow.Visible(projectData.users, R.color.textSecondary)
 
-                override val details get() = MultiLineRow.Visible(projectData.users, R.color.textSecondary)
+                override fun getRows(isExpanded: Boolean, allChildren: List<TreeNode<*>>) = listOf(name, details)
             }
 
             override val isSelectable = true

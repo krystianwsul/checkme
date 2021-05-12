@@ -377,9 +377,10 @@ class UserListFragment : AbstractFragment(), FabUser {
 
         override val rowsDelegate = object : MultiLineModelNode.RowsDelegate {
 
-            override val name = MultiLineRow.Visible(userListData.name)
+            private val name = MultiLineRow.Visible(userListData.name)
+            private val details = MultiLineRow.Visible(userListData.email, R.color.textSecondary)
 
-            override val details = MultiLineRow.Visible(userListData.email, R.color.textSecondary)
+            override fun getRows(isExpanded: Boolean, allChildren: List<TreeNode<*>>) = listOf(name, details)
         }
 
         public override lateinit var treeNode: TreeNode<AbstractHolder>

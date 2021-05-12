@@ -152,12 +152,15 @@ class TaskNode(
 
     override val rowsDelegate = object : MultiLineModelNode.RowsDelegate {
 
-        override val name get() = MultiLineRow.Visible(taskData.name)
+        private val name get() = MultiLineRow.Visible(taskData.name)
 
-        override val children
-            get() = getTaskChildren(treeNode.isExpanded, treeNode.allChildren, taskData.note) {
+        override fun getRows(isExpanded: Boolean, allChildren: List<TreeNode<*>>): List<MultiLineRow> {
+            val children = getTaskChildren(isExpanded, allChildren, taskData.note) {
                 (it.modelNode as? TaskNode)?.taskData?.name
             }?.let { MultiLineRow.Visible(it, R.color.textSecondary) }
+
+            return listOfNotNull(name, children)
+        }
     }
 
     override fun onClick(holder: AbstractHolder) {

@@ -288,9 +288,10 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
 
         override val rowsDelegate = object : MultiLineModelNode.RowsDelegate {
 
-            override val name = MultiLineRow.Visible(customTimeData.name)
+            private val name = MultiLineRow.Visible(customTimeData.name)
+            private val details = MultiLineRow.Visible(customTimeData.details, R.color.textSecondary)
 
-            override val details = MultiLineRow.Visible(customTimeData.details, R.color.textSecondary)
+            override fun getRows(isExpanded: Boolean, allChildren: List<TreeNode<*>>) = listOf(name, details)
         }
 
         override val isSelectable = true

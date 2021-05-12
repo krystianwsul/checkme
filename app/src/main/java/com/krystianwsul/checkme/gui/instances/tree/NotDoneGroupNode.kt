@@ -22,7 +22,6 @@ import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineRow
 import com.krystianwsul.checkme.gui.tree.delegates.thumbnail.ThumbnailDelegate
 import com.krystianwsul.checkme.gui.tree.delegates.thumbnail.ThumbnailModelNode
 import com.krystianwsul.checkme.gui.utils.flatten
-import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.HourMinute
@@ -184,22 +183,7 @@ class NotDoneGroupNode(
 
     private inner class GroupRowsDelegate : MultiLineModelNode.RowsDelegate {
 
-        override val name: MultiLineRow
-            get() {
-                return if (treeNode.isExpanded) {
-                    MultiLineRow.Invisible
-                } else {
-                    MultiLineRow.Visible(
-                        treeNode.allChildren
-                            .filter { it.modelNode is NotDoneInstanceNode && it.canBeShown() }
-                            .map { it.modelNode as NotDoneInstanceNode }
-                            .sorted()
-                            .joinToString(", ") { it.instanceData.name }
-                    )
-                }
-            }
-
-        override val details by lazy {
+        private val details by lazy {
             val date = exactTimeStamp.date
             val hourMinute = exactTimeStamp.toTimeStamp().hourMinute
 
@@ -208,6 +192,21 @@ class NotDoneGroupNode(
             val text = date.getDisplayText() + ", " + timeText
 
             MultiLineRow.Visible(text, R.color.textSecondary)
+        }
+
+        override fun getRows(isExpanded: Boolean, allChildren: List<TreeNode<*>>): List<MultiLineRow> {
+            val name = if (isExpanded) {
+                MultiLineRow.Invisible
+            } else {
+                MultiLineRow.Visible(
+                    allChildren.filter { it.modelNode is NotDoneInstanceNode && it.canBeShown() }
+                        .map { it.modelNode as NotDoneInstanceNode }
+                        .sorted()
+                        .joinToString(", ") { it.instanceData.name }
+                )
+            }
+
+            return listOf(name, details)
         }
     }
 

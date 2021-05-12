@@ -12,11 +12,6 @@ interface MultiLineModelNode {
 
     interface RowsDelegate {
 
-        val name: MultiLineRow
-        val details: MultiLineRow.Visible? get() = null
-        val children: MultiLineRow? get() = null
-        val project: MultiLineRow.Visible? get() = null
-
-        fun getRows(isExpanded: Boolean, allChildren: List<TreeNode<*>>) = listOfNotNull(name, details, children, project)
+        fun getRows(isExpanded: Boolean, allChildren: List<TreeNode<*>>): List<MultiLineRow>
     }
 }

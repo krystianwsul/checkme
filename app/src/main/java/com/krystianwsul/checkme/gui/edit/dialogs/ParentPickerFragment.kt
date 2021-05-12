@@ -44,8 +44,8 @@ class ParentPickerFragment : AbstractDialogFragment() {
         private const val KEY_SHOW_ADD = "showAdd"
 
         fun newInstance(
-                showDelete: Boolean,
-                showAdd: Boolean,
+            showDelete: Boolean,
+            showAdd: Boolean,
         ) = ParentPickerFragment().apply {
             arguments = Bundle().apply {
                 putBoolean(SHOW_DELETE_KEY, showDelete)
@@ -80,22 +80,22 @@ class ParentPickerFragment : AbstractDialogFragment() {
         binding = FragmentParentPickerBinding.inflate(layoutInflater)
 
         searchChanges = binding.parentPickerSearch
-                .textChanges()
-                .map { it.toString().normalized() }
+            .textChanges()
+            .map { it.toString().normalized() }
 
         return MaterialAlertDialogBuilder(requireContext()).setView(binding.root)
-                .apply {
-                    if (requireArguments().getBoolean(KEY_SHOW_ADD)) {
-                        setPositiveButton(R.string.add_task) { _, _ ->
-                            delegateRelay.value!!.onNewEntry(binding.parentPickerSearch.text?.toString())
-                        }
+            .apply {
+                if (requireArguments().getBoolean(KEY_SHOW_ADD)) {
+                    setPositiveButton(R.string.add_task) { _, _ ->
+                        delegateRelay.value!!.onNewEntry(binding.parentPickerSearch.text?.toString())
                     }
-
-                    if (requireArguments().getBoolean(SHOW_DELETE_KEY))
-                        setNeutralButton(R.string.delete) { _, _ -> delegateRelay.value!!.onEntryDeleted() }
                 }
-                .setNegativeButton(android.R.string.cancel, null)
-                .create()
+
+                if (requireArguments().getBoolean(SHOW_DELETE_KEY))
+                    setNeutralButton(R.string.delete) { _, _ -> delegateRelay.value!!.onEntryDeleted() }
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .create()
     }
 
     fun initialize(delegate: Delegate) = delegateRelay.accept(delegate)
@@ -137,9 +137,9 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
             treeViewAdapter!!.updateDisplayedNodes { placeholder ->
                 (treeViewAdapter!!.treeModelAdapter as TaskAdapter).initialize(
-                        adapterData.entryDatas,
-                        expansionStates,
-                        adapterData.showProgress
+                    adapterData.entryDatas,
+                    expansionStates,
+                    adapterData.showProgress
                 )
 
                 adapterData.filterCriteria?.let { treeViewAdapter!!.setFilterCriteria(it, placeholder) }
@@ -204,15 +204,15 @@ class ParentPickerFragment : AbstractDialogFragment() {
     }
 
     private inner class TaskAdapter :
-            BaseAdapter(),
-            TaskParent {
+        BaseAdapter(),
+        TaskParent {
 
         private lateinit var taskWrappers: MutableList<TaskWrapper>
 
         val treeViewAdapter = TreeViewAdapter(
-                this,
-                TreeViewAdapter.PaddingData(R.layout.row_parent_picker_dialog_padding, R.id.paddingProgress, true),
-                filterCriteria
+            this,
+            TreeViewAdapter.PaddingData(R.layout.row_parent_picker_dialog_padding, R.id.paddingProgress, true),
+            filterCriteria
         )
 
         override val taskAdapter = this
@@ -223,9 +223,9 @@ class ParentPickerFragment : AbstractDialogFragment() {
             private set
 
         fun initialize(
-                entryDatas: Collection<EntryData>,
-                expansionStates: Map<Parcelable, TreeNode.ExpansionState>?,
-                showProgress: Boolean,
+            entryDatas: Collection<EntryData>,
+            expansionStates: Map<Parcelable, TreeNode.ExpansionState>?,
+            showProgress: Boolean,
         ) {
             treeNodeCollection = TreeNodeCollection(treeViewAdapter)
 
@@ -250,15 +250,15 @@ class ParentPickerFragment : AbstractDialogFragment() {
         override val hasActionMode = false
 
         override fun incrementSelected(placeholder: TreeViewAdapter.Placeholder, initial: Boolean) =
-                throw UnsupportedOperationException()
+            throw UnsupportedOperationException()
 
         override fun decrementSelected(placeholder: TreeViewAdapter.Placeholder) = throw UnsupportedOperationException()
 
         private inner class TaskWrapper(
-                override val indentation: Int,
-                private val taskParent: TaskParent,
-                val entryData: EntryData,
-                override val parentNode: ModelNode<AbstractHolder>?,
+            override val indentation: Int,
+            private val taskParent: TaskParent,
+            val entryData: EntryData,
+            override val parentNode: ModelNode<AbstractHolder>?,
         ) : AbstractModelNode(), TaskParent, MultiLineModelNode, IndentationModelNode {
 
             override lateinit var treeNode: TreeNode<AbstractHolder>
@@ -278,29 +278,29 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
             override val delegates by lazy {
                 listOf(
-                        ExpandableDelegate(treeNode),
-                        MultiLineDelegate(this),
-                        IndentationDelegate(this)
+                    ExpandableDelegate(treeNode),
+                    MultiLineDelegate(this),
+                    IndentationDelegate(this)
                 )
             }
 
             override val widthKey
                 get() = MultiLineDelegate.WidthKey(
-                        indentation,
-                        false,
-                        false,
-                        true,
-                        true
+                    indentation,
+                    false,
+                    false,
+                    true,
+                    true
                 )
 
             fun initialize(
-                    nodeContainer: NodeContainer<AbstractHolder>,
-                    expansionStates: Map<Parcelable, TreeNode.ExpansionState>?,
+                nodeContainer: NodeContainer<AbstractHolder>,
+                expansionStates: Map<Parcelable, TreeNode.ExpansionState>?,
             ): TreeNode<AbstractHolder> {
                 treeNode = TreeNode(
-                        this,
-                        nodeContainer,
-                        initialExpansionState = expansionStates?.get(entryData.entryKey)
+                    this,
+                    nodeContainer,
+                    initialExpansionState = expansionStates?.get(entryData.entryKey)
                 )
 
                 taskWrappers = ArrayList()
@@ -322,25 +322,29 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
             override val rowsDelegate = object : MultiLineModelNode.RowsDelegate {
 
-                override val name get() = MultiLineRow.Visible(entryData.name)
+                private val name = MultiLineRow.Visible(entryData.name)
 
-                override val details: MultiLineRow.Visible?
-                    get() = entryData.details.let {
-                        if (it.isNullOrEmpty()) null else MultiLineRow.Visible(it, R.color.textSecondary)
+                private val details = entryData.details.let {
+                    if (it.isNullOrEmpty()) null else MultiLineRow.Visible(it, R.color.textSecondary)
+                }
+
+                override fun getRows(isExpanded: Boolean, allChildren: List<TreeNode<*>>): List<MultiLineRow> {
+                    val rows = listOfNotNull(name, details).toMutableList()
+
+                    val childrenText = treeNode.takeIf { !it.isExpanded }
+                        ?.allChildren
+                        ?.filter { it.modelNode is TaskAdapter.TaskWrapper && it.canBeShown() }
+                        ?.map { it.modelNode as TaskAdapter.TaskWrapper }
+                        ?.takeIf { it.isNotEmpty() }
+                        ?.joinToString(", ") { it.entryData.name }
+                        ?: entryData.note.takeIf { !it.isNullOrEmpty() }
+
+                    if (childrenText != null) {
+                        rows += MultiLineRow.Visible(childrenText, R.color.textSecondary)
                     }
 
-                override val children: MultiLineRow.Visible?
-                    get() {
-                        val text = treeNode.takeIf { !it.isExpanded }
-                            ?.allChildren
-                            ?.filter { it.modelNode is TaskAdapter.TaskWrapper && it.canBeShown() }
-                            ?.map { it.modelNode as TaskAdapter.TaskWrapper }
-                            ?.takeIf { it.isNotEmpty() }
-                            ?.joinToString(", ") { it.entryData.name }
-                            ?: entryData.note.takeIf { !it.isNullOrEmpty() }
-
-                        return text?.let { MultiLineRow.Visible(it, R.color.textSecondary) }
-                    }
+                    return rows
+                }
             }
 
             override fun onClick(holder: AbstractHolder) {
@@ -367,7 +371,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
             }
 
             override fun getMatchResult(query: String) =
-                    ModelNode.MatchResult.fromBoolean(entryData.matchesQuery(query))
+                ModelNode.MatchResult.fromBoolean(entryData.matchesQuery(query))
         }
     }
 
@@ -394,9 +398,9 @@ class ParentPickerFragment : AbstractDialogFragment() {
     }
 
     data class AdapterData(
-            val entryDatas: Collection<EntryData>,
-            val filterCriteria: FilterCriteria.ExpandOnly? = null,
-            val showProgress: Boolean = false,
+        val entryDatas: Collection<EntryData>,
+        val filterCriteria: FilterCriteria.ExpandOnly? = null,
+        val showProgress: Boolean = false,
     )
 
     interface EntryData : QueryMatchable {

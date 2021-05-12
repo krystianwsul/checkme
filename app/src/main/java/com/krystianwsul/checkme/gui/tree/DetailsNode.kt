@@ -73,7 +73,11 @@ class DetailsNode private constructor(
         return treeNode
     }
 
-    override val isVisibleDuringActionMode = false
+    override fun isVisible(actionMode: Boolean): Boolean {
+        if (actionMode) return false
+
+        return true
+    }
 
     override val delegates by lazy { listOf(IndentationDelegate(this)) }
 

@@ -12,6 +12,8 @@ class TreeNode<T : TreeHolder>(
         private val initialExpansionState: ExpansionState? = null,
 ) : Comparable<TreeNode<T>>, NodeContainer<T> {
 
+    override val treeNodeCollection by lazy { parent.treeNodeCollection }
+
     lateinit var expansionState: ExpansionState
         private set
 
@@ -64,7 +66,7 @@ class TreeNode<T : TreeHolder>(
 
             if (selected) {
                 check(modelNode.isSelectable)
-                check(modelNode.isVisibleDuringActionMode)
+                check(modelNodeVisible)
 
                 selectedTreeNodes += this
             }
@@ -137,7 +139,7 @@ class TreeNode<T : TreeHolder>(
     init {
         if (selected && !modelNode.isSelectable) throw NotSelectableSelectedException()
 
-        if (modelNode.isSelectable && !modelNode.isVisibleDuringActionMode) throw SelectableNotVisibleException()
+        if (modelNode.isSelectable && !modelNodeVisible) throw SelectableNotVisibleException()
     }
 
     fun setChildTreeNodes(childTreeNodes: List<TreeNode<T>>) {
@@ -235,7 +237,7 @@ class TreeNode<T : TreeHolder>(
 
         if (selected) {
             check(modelNode.isSelectable)
-            check(modelNode.isVisibleDuringActionMode)
+            check(modelNodeVisible)
 
             selected = false
         }
@@ -254,7 +256,7 @@ class TreeNode<T : TreeHolder>(
 
         if (!modelNode.isSelectable) return
 
-        check(modelNode.isVisibleDuringActionMode)
+        check(modelNodeVisible)
 
         selected = true
 
@@ -291,6 +293,8 @@ class TreeNode<T : TreeHolder>(
 
     private fun getLocker() = treeViewAdapter.locker?.getNodeLocker(this)
 
+    private val modelNodeVisible get() = modelNode.isVisible(hasActionMode())
+
     /**
      * todo: consider adding a cache that can be used when these values are known not to change, such as after
      * updateDisplayedNodes finishes running
@@ -298,7 +302,7 @@ class TreeNode<T : TreeHolder>(
     fun canBeShown(): Boolean {
         checkChildTreeNodesSet()
 
-        if (!modelNode.isVisibleDuringActionMode && hasActionMode()) return false
+        if (!modelNodeVisible) return false
 
         fun checkVisibleWhenEmpty() = modelNode.isVisibleWhenEmpty || childTreeNodes.any { it.canBeShown() }
 
@@ -391,8 +395,6 @@ class TreeNode<T : TreeHolder>(
 
             return childTreeNodes.filter { it.isSelected }
         }
-
-    override val treeNodeCollection by lazy { parent.treeNodeCollection }
 
     override val indentation by lazy { parent.indentation + 1 }
 

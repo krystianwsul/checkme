@@ -49,6 +49,12 @@ class NotDoneGroupNode(
         ThumbnailModelNode,
         IndentationModelNode {
 
+    private val instanceNodeDelegate = if (singleInstance()) {
+        InstanceNodeDelegate(singleInstanceData)
+    } else {
+        null
+    }
+
     public override lateinit var treeNode: TreeNode<AbstractHolder>
         private set
 
@@ -170,7 +176,7 @@ class NotDoneGroupNode(
             return if (singleInstance()) {
                 val collectionExpansionState = CollectionExpansionState(
                         treeNode.expansionState,
-                        singleInstanceNodeCollection!!.doneExpansionState
+                    singleInstanceNodeCollection!!.doneExpansionState
                 )
 
                 mapOf(singleInstanceData.instanceKey to collectionExpansionState) +
@@ -180,52 +186,38 @@ class NotDoneGroupNode(
             }
         }
 
-    override val name
-        get() = if (singleInstance()) {
-            MultiLineRow.Visible(
-                singleInstanceData.name,
-                if (singleInstanceData.taskCurrent) R.color.textPrimary else R.color.textDisabled,
-            )
+    private fun getGroupName(): MultiLineRow {
+        return if (treeNode.isExpanded) {
+            MultiLineRow.Invisible
         } else {
-            if (treeNode.isExpanded) {
-                MultiLineRow.Invisible
-            } else {
-                MultiLineRow.Visible(
-                    treeNode.allChildren
-                        .filter { it.modelNode is NotDoneInstanceNode && it.canBeShown() }
-                        .map { it.modelNode as NotDoneInstanceNode }
-                        .sorted()
-                        .joinToString(", ") { it.instanceData.name }
-                )
-            }
+            MultiLineRow.Visible(
+                treeNode.allChildren
+                    .filter { it.modelNode is NotDoneInstanceNode && it.canBeShown() }
+                    .map { it.modelNode as NotDoneInstanceNode }
+                    .sorted()
+                    .joinToString(", ") { it.instanceData.name }
+            )
         }
+    }
+
+    override val name get() = instanceNodeDelegate?.name ?: getGroupName()
 
     override val groupAdapter by lazy { nodeCollection.groupAdapter }
 
-    override val details
-        get() = if (singleInstance()) {
-            if (singleInstanceData.displayText.isNullOrEmpty()) {
-                null
-            } else {
-                MultiLineRow.Visible(
-                    singleInstanceData.displayText!!,
-                    if (singleInstanceData.taskCurrent) R.color.textSecondary else R.color.textDisabled,
-                )
-            }
-        } else {
-            val date = exactTimeStamp.date
-            val hourMinute = exactTimeStamp.toTimeStamp().hourMinute
+    private val groupDetails by lazy {
+        val date = exactTimeStamp.date
+        val hourMinute = exactTimeStamp.toTimeStamp().hourMinute
 
-            val timeText = getCustomTimeData(date.dayOfWeek, hourMinute)?.name
-                    ?: hourMinute.toString()
+        val timeText = getCustomTimeData(date.dayOfWeek, hourMinute)?.name ?: hourMinute.toString()
 
-            val text = date.getDisplayText() + ", " + timeText
+        val text = date.getDisplayText() + ", " + timeText
 
-            MultiLineRow.Visible(text, R.color.textSecondary)
-        }
+        MultiLineRow.Visible(text, R.color.textSecondary)
+    }
 
-    override val children
-        get() = if (singleInstance()) NotDoneInstanceNode.getChildrenText(treeNode, singleInstanceData) else null
+    override val details = instanceNodeDelegate?.details ?: groupDetails
+
+    override val children get() = instanceNodeDelegate?.getChildren(treeNode)
 
     override val checkBoxState
         get() = if (singleInstance()) {
@@ -409,29 +401,7 @@ class NotDoneGroupNode(
             IndentationModelNode,
             Sortable {
 
-        companion object {
-
-            fun getChildrenText(
-                treeNode: TreeNode<AbstractHolder>,
-                instanceData: GroupListDataWrapper.InstanceData,
-            ): MultiLineRow.Visible? {
-                val text = if (treeNode.isExpanded) {
-                    null
-                } else {
-                    treeNode.allChildren
-                        .filter { it.modelNode is NotDoneGroupNode && it.canBeShown() }
-                        .map { it.modelNode as NotDoneGroupNode }
-                        .takeIf { it.isNotEmpty() }
-                        ?.sorted()
-                        ?.joinToString(", ") { it.singleInstanceData.name }
-                        ?: instanceData.note.takeIf { !it.isNullOrEmpty() }
-                }
-
-                return text?.let {
-                    MultiLineRow.Visible(it, if (instanceData.taskCurrent) R.color.textSecondary else R.color.textDisabled)
-                }
-            }
-        }
+        private val instanceNodeDelegate = InstanceNodeDelegate(instanceData)
 
         override val holderType = HolderType.CHECKABLE
 
@@ -512,8 +482,8 @@ class NotDoneGroupNode(
         val instanceExpansionStates: Map<InstanceKey, CollectionExpansionState>
             get() {
                 val collectionExpansionState = CollectionExpansionState(
-                        treeNode.expansionState,
-                        nodeCollection.doneExpansionState,
+                    treeNode.expansionState,
+                    nodeCollection.doneExpansionState,
                 )
 
                 return mapOf(instanceData.instanceKey to collectionExpansionState) + nodeCollection.instanceExpansionStates
@@ -521,13 +491,8 @@ class NotDoneGroupNode(
 
         override val groupAdapter by lazy { parentNotDoneGroupNode.groupAdapter }
 
-        override val name
-            get() = MultiLineRow.Visible(
-                instanceData.name,
-                if (instanceData.taskCurrent) R.color.textPrimary else R.color.textDisabled
-            )
-
-        override val children get() = getChildrenText(treeNode, instanceData)
+        override val name = instanceNodeDelegate.name
+        override val children get() = instanceNodeDelegate.getChildren(treeNode)
 
         override val checkBoxState
             get() = if (groupListFragment.selectionCallback.hasActionMode) {

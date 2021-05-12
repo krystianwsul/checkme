@@ -6,7 +6,7 @@ interface MultiLineModelNode {
 
     val details: MultiLineRow.Visible? get() = null
 
-    val children: MultiLineRow.Visible? get() = null
+    val children: MultiLineRow? get() = null
 
     val project: MultiLineRow.Visible? get() = null
 

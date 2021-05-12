@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
-import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.extensions.setInstanceDone
 import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
@@ -17,7 +16,6 @@ import com.krystianwsul.checkme.gui.tree.delegates.indentation.IndentationDelega
 import com.krystianwsul.checkme.gui.tree.delegates.indentation.IndentationModelNode
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineDelegate
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineModelNode
-import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineRow
 import com.krystianwsul.checkme.gui.tree.delegates.thumbnail.ThumbnailDelegate
 import com.krystianwsul.checkme.gui.tree.delegates.thumbnail.ThumbnailModelNode
 import com.krystianwsul.common.utils.InstanceKey
@@ -38,6 +36,8 @@ class DoneInstanceNode(
         MultiLineModelNode,
         ThumbnailModelNode,
         IndentationModelNode {
+
+    private val instanceNodeDelegate = InstanceNodeDelegate(instanceData)
 
     public override lateinit var treeNode: TreeNode<AbstractHolder>
         private set
@@ -105,8 +105,8 @@ class DoneInstanceNode(
     val instanceExpansionStates: Map<InstanceKey, CollectionExpansionState>
         get() {
             val collectionExpansionState = CollectionExpansionState(
-                    treeNode.expansionState,
-                    nodeCollection.doneExpansionState,
+                treeNode.expansionState,
+                nodeCollection.doneExpansionState,
             )
 
             return mapOf(instanceData.instanceKey to collectionExpansionState) + nodeCollection.instanceExpansionStates
@@ -114,20 +114,9 @@ class DoneInstanceNode(
 
     override val groupAdapter by lazy { parentNodeCollection.groupAdapter }
 
-    override val name
-        get() = MultiLineRow.Visible(
-            instanceData.name,
-            if (instanceData.taskCurrent) R.color.textPrimary else R.color.textDisabled
-        )
-
-    override val details
-        get() = instanceData.displayText
-            .takeUnless { it.isNullOrEmpty() }
-            ?.let {
-                MultiLineRow.Visible(it, if (instanceData.taskCurrent) R.color.textSecondary else R.color.textDisabled)
-            }
-
-    override val children get() = NotDoneGroupNode.NotDoneInstanceNode.getChildrenText(treeNode, instanceData)
+    override val name = instanceNodeDelegate.name
+    override val details = instanceNodeDelegate.details
+    override val children get() = instanceNodeDelegate.getChildren(treeNode)
 
     override val checkBoxState
         get() = if (groupListFragment.selectionCallback.hasActionMode) {

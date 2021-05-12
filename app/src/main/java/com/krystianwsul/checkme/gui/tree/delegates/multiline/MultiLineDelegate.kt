@@ -21,9 +21,9 @@ class MultiLineDelegate(private val modelNode: MultiLineModelNode) : NodeDelegat
     }
 
     private val rows
-        get() = modelNode.rowsDelegate
-            .rows
-            .take(TOTAL_LINES)
+        get() = modelNode.run {
+            rowsDelegate.getRows(treeNode.isExpanded, treeNode.allChildren).take(TOTAL_LINES)
+        }
 
     override val state get() = modelNode.run { State(rows) }
 
@@ -51,18 +51,18 @@ class MultiLineDelegate(private val modelNode: MultiLineModelNode) : NodeDelegat
                             StaticLayout.Builder
                                 .obtain(text, 0, text.length, textView.paint, textWidthRelay.value!!)
                                 .setAlignment(Layout.Alignment.ALIGN_NORMAL)
-                                    .setLineSpacing(textView.lineSpacingExtra, textView.lineSpacingMultiplier)
-                                    .setIncludePad(textView.includeFontPadding)
-                                    .build()
-                                    .lineCount
+                                .setLineSpacing(textView.lineSpacingExtra, textView.lineSpacingMultiplier)
+                                .setIncludePad(textView.includeFontPadding)
+                                .build()
+                                .lineCount
                         } else {
                             1
                         }
                     }
 
                     val wantLines = textView.text.toString()
-                            .split('\n')
-                            .map { getWantLines(it) }.sum()
+                        .split('\n')
+                        .map { getWantLines(it) }.sum()
 
                     val lines = listOf(wantLines, remainingLines + 1).minOrNull()!!
 
@@ -127,11 +127,11 @@ class MultiLineDelegate(private val modelNode: MultiLineModelNode) : NodeDelegat
     data class State(val rows: List<MultiLineRow>)
 
     data class WidthKey(
-            val indentation: Int,
-            val checkboxOrAvatarVisible: Boolean,
-            val thumbnailVisible: Boolean,
-            val expandVisible: Boolean,
-            val dialog: Boolean = false,
+        val indentation: Int,
+        val checkboxOrAvatarVisible: Boolean,
+        val thumbnailVisible: Boolean,
+        val expandVisible: Boolean,
+        val dialog: Boolean = false,
     )
 
     private class InitMap<T, U>(private val initializer: (T) -> U) {

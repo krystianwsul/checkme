@@ -73,7 +73,7 @@ class DetailsNode private constructor(
         return treeNode
     }
 
-    override fun isVisible(actionMode: Boolean): Boolean {
+    override fun isVisible(actionMode: Boolean, hasVisibleChildren: Boolean): Boolean {
         if (actionMode) return false
 
         return true

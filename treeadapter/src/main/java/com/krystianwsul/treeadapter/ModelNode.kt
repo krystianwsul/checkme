@@ -8,8 +8,6 @@ interface ModelNode<T : TreeHolder> : Comparable<ModelNode<T>> {
 
     val isSelectable get() = false
 
-    val isVisibleWhenEmpty get() = true
-
     val isSeparatorVisibleWhenNotExpanded get() = false
 
     val showSeparatorWhenParentExpanded get() = true
@@ -45,7 +43,7 @@ interface ModelNode<T : TreeHolder> : Comparable<ModelNode<T>> {
 
     fun tryStartDrag(viewHolder: RecyclerView.ViewHolder): Boolean = throw UnsupportedOperationException()
 
-    fun isVisible(actionMode: Boolean): Boolean = true
+    fun isVisible(actionMode: Boolean, hasVisibleChildren: Boolean): Boolean = true
 
     enum class MatchResult {
 

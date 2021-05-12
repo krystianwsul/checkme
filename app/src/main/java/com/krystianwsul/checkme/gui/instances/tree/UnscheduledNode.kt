@@ -101,5 +101,8 @@ class UnscheduledNode(
 
     override val text by lazy { groupListFragment.activity.getString(R.string.noReminder) }
 
-    override val isVisibleWhenEmpty = false
+
+    override fun isVisible(actionMode: Boolean, hasVisibleChildren: Boolean): Boolean {
+        return hasVisibleChildren
+    }
 }

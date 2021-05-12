@@ -90,14 +90,16 @@ class DividerNode(
 
     override fun compareTo(other: ModelNode<AbstractHolder>): Int {
         check(
-                other is NotDoneGroupNode
-                        || other is UnscheduledNode
-                        || other is ImageNode
-                        || other is DetailsNode
+            other is NotDoneGroupNode
+                    || other is UnscheduledNode
+                    || other is ImageNode
+                    || other is DetailsNode
         )
 
         return 1
     }
 
-    override val isVisibleWhenEmpty = false
+    override fun isVisible(actionMode: Boolean, hasVisibleChildren: Boolean): Boolean {
+        return hasVisibleChildren
+    }
 }

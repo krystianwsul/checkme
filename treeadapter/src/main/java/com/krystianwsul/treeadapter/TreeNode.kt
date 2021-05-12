@@ -138,8 +138,6 @@ class TreeNode<T : TreeHolder>(
 
     init {
         if (selected && !modelNode.isSelectable) throw NotSelectableSelectedException()
-
-        if (modelNode.isSelectable && !modelNodeVisible) throw SelectableNotVisibleException()
     }
 
     fun setChildTreeNodes(childTreeNodes: List<TreeNode<T>>) {
@@ -293,7 +291,7 @@ class TreeNode<T : TreeHolder>(
 
     private fun getLocker() = treeViewAdapter.locker?.getNodeLocker(this)
 
-    private val modelNodeVisible get() = modelNode.isVisible(hasActionMode())
+    private val modelNodeVisible get() = modelNode.isVisible(hasActionMode(), childTreeNodes.any { it.canBeShown() })
 
     /**
      * todo: consider adding a cache that can be used when these values are known not to change, such as after
@@ -304,28 +302,17 @@ class TreeNode<T : TreeHolder>(
 
         if (!modelNodeVisible) return false
 
-        fun checkVisibleWhenEmpty() = modelNode.isVisibleWhenEmpty || childTreeNodes.any { it.canBeShown() }
-
         return when (val filterCriteria = treeViewAdapter.filterCriteria) {
             is FilterCriteria.Full -> {
                 if (!matchesFilterParams(filterCriteria.filterParams)) return false
 
                 when (modelNode.getMatchResult(filterCriteria.query)) {
-                    ModelNode.MatchResult.ALWAYS_VISIBLE -> checkVisibleWhenEmpty()
-                    ModelNode.MatchResult.MATCHES -> {
-                        check(modelNode.isVisibleWhenEmpty)
-
-                        true
-                    }
-                    ModelNode.MatchResult.DOESNT_MATCH -> {
-                        check(modelNode.isVisibleWhenEmpty)
-
+                    ModelNode.MatchResult.ALWAYS_VISIBLE, ModelNode.MatchResult.MATCHES -> true
+                    ModelNode.MatchResult.DOESNT_MATCH ->
                         parentHierarchyMatchesQuery() || childHierarchyMatchesFilterCriteria(filterCriteria)
-                    }
                 }
-
             }
-            is FilterCriteria.ExpandOnly, FilterCriteria.None -> checkVisibleWhenEmpty()
+            is FilterCriteria.ExpandOnly, FilterCriteria.None -> true
         }
     }
 

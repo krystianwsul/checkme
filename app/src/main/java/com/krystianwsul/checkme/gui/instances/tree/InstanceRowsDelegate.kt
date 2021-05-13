@@ -18,25 +18,33 @@ class InstanceRowsDelegate(
         if (instanceData.taskCurrent) R.color.textPrimary else R.color.textDisabled,
     )
 
+    private fun String?.toSecondary() = takeIf { !it.isNullOrEmpty() }?.let { MultiLineRow.Visible(it, secondaryColor) }
+
     private val details: MultiLineRow.Visible? = instanceData.takeIf { showDetails }
         ?.displayText
-        .takeUnless { it.isNullOrEmpty() }
-        ?.let { MultiLineRow.Visible(it, secondaryColor) }
+        .toSecondary()
+
+    private val note = instanceData.note.toSecondary()
+
+    private val project = instanceData.projectInfo
+        ?.name
+        .toSecondary()
 
     override fun getRows(isExpanded: Boolean, allChildren: List<TreeNode<*>>): List<MultiLineRow> {
-        val children = if (isExpanded) {
-            val text = allChildren.filter { it.modelNode is NotDoneGroupNode && it.canBeShown() }
-                .map { it.modelNode as NotDoneGroupNode }
-                .takeIf { it.isNotEmpty() }
-                ?.sorted()
-                ?.joinToString(", ") { it.singleInstanceData.name }
-                ?: instanceData.note.takeIf { !it.isNullOrEmpty() }
+        val children = allChildren.takeIf { !isExpanded }
+            ?.filter { it.modelNode is NotDoneGroupNode && it.canBeShown() }
+            ?.map { it.modelNode as NotDoneGroupNode }
+            ?.takeIf { it.isNotEmpty() }
+            ?.sorted()
+            ?.joinToString(", ") { it.singleInstanceData.name }
+            .toSecondary()
 
-            text?.let { MultiLineRow.Visible(it, secondaryColor) }
-        } else {
-            null
-        }
-
-        return listOfNotNull(name, details, children)
+        return listOfNotNull(
+            name,
+            details,
+            children,
+            note.takeIf { !isExpanded },
+            project?.takeIf { !isExpanded },
+        )
     }
 }

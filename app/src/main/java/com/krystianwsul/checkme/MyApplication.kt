@@ -6,6 +6,8 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.res.Configuration
+import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
 import androidx.core.content.pm.ShortcutInfoCompat
 import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.graphics.drawable.IconCompat
@@ -29,10 +31,10 @@ import com.krystianwsul.checkme.firebase.AndroidDatabaseWrapper
 import com.krystianwsul.checkme.firebase.loaders.FactoryLoader
 import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.checkme.gui.edit.EditActivity
+import com.krystianwsul.checkme.gui.main.MainActivity
 import com.krystianwsul.checkme.persistencemodel.PersistenceManager
 import com.krystianwsul.checkme.upload.Queue
 import com.krystianwsul.checkme.upload.Uploader
-import com.krystianwsul.checkme.utils.mapNotNull
 import com.krystianwsul.checkme.utils.toSingle
 import com.krystianwsul.checkme.utils.toV3
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
@@ -186,17 +188,42 @@ class MyApplication : Application() {
 
         Contacts.initialize(this)
 
+        fun createShortcut(id: String, @StringRes label: Int, @DrawableRes icon: Int, intent: Intent): ShortcutInfoCompat {
+            return ShortcutInfoCompat.Builder(this, id)
+                .setShortLabel(getString(label))
+                .setIcon(IconCompat.createWithResource(this, icon))
+                .setIntent(intent)
+                .build()
+        }
+
         Completable.fromCallable {
             ShortcutManagerCompat.addDynamicShortcuts(
                 this,
                 listOf(
-                    ShortcutInfoCompat.Builder(this, "Add")
-                        .setShortLabel(getString(R.string.add_task))
-                        .setIcon(IconCompat.createWithResource(this, R.mipmap.launcher_add))
-                        .setIntent(
-                            EditActivity.getShortcutIntent(null).addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT)
-                        )
-                        .build()
+                    createShortcut(
+                        "add",
+                        R.string.add_task,
+                        R.mipmap.launcher_add,
+                        EditActivity.getShortcutIntent(null).addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT)
+                    ),
+                    createShortcut(
+                        "search",
+                        R.string.search,
+                        R.mipmap.launcher_search,
+                        MainActivity.newIntent().setAction("com.krystianwsul.checkme.SEARCH")
+                    ),
+                    createShortcut(
+                        "tasks",
+                        R.string.tasks,
+                        R.mipmap.launcher_tasks,
+                        MainActivity.newIntent().setAction("com.krystianwsul.checkme.TASKS")
+                    ),
+                    createShortcut(
+                        "instances",
+                        R.string.instances,
+                        R.mipmap.launcher_instances,
+                        MainActivity.newIntent().setAction("com.krystianwsul.checkme.INSTANCES")
+                    ),
                 ),
             )
         }

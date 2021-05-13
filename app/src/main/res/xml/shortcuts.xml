@@ -1,48 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<shortcuts xmlns:tools="http://schemas.android.com/tools"
-    xmlns:android="http://schemas.android.com/apk/res/android">
-
-    <shortcut
-        android:shortcutId="search"
-        android:enabled="true"
-        tools:ignore="UnusedAttribute"
-        android:icon="@mipmap/launcher_search"
-        android:shortcutShortLabel="@string/search">
-
-        <intent
-            android:action="com.krystianwsul.checkme.SEARCH"
-            android:targetPackage="com.krystianwsul.checkme"
-            android:targetClass="com.krystianwsul.checkme.gui.main.MainActivity" />
-
-    </shortcut>
-
-    <shortcut
-        android:shortcutId="tasks"
-        android:enabled="true"
-        tools:ignore="UnusedAttribute"
-        android:icon="@mipmap/launcher_tasks"
-        android:shortcutShortLabel="@string/tasks">
-
-        <intent
-            android:action="com.krystianwsul.checkme.TASKS"
-            android:targetPackage="com.krystianwsul.checkme"
-            android:targetClass="com.krystianwsul.checkme.gui.main.MainActivity" />
-
-    </shortcut>
-
-    <shortcut
-        android:shortcutId="instances"
-        android:enabled="true"
-        tools:ignore="UnusedAttribute"
-        android:icon="@mipmap/launcher_instances"
-        android:shortcutShortLabel="@string/instances">
-
-        <intent
-            android:action="com.krystianwsul.checkme.INSTANCES"
-            android:targetPackage="com.krystianwsul.checkme"
-            android:targetClass="com.krystianwsul.checkme.gui.main.MainActivity" />
-
-    </shortcut>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
 
     <share-target android:targetClass="com.krystianwsul.checkme.gui.edit.EditActivity">
         <data android:mimeType="text/plain" />

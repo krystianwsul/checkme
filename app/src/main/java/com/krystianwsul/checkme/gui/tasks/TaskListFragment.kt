@@ -667,13 +667,13 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
         override val rowsDelegate = object : MultiLineModelNode.RowsDelegate {
 
-            override val name: MultiLineRow
-                get() = this@ProjectNode.name
-
-            override val children
-                get() = InstanceTreeTaskNode.getTaskChildren(treeNode.isExpanded, treeNode.allChildren, null) {
+            override fun getRows(isExpanded: Boolean, allChildren: List<TreeNode<*>>): List<MultiLineRow> {
+                val children = InstanceTreeTaskNode.getTaskChildren(isExpanded, allChildren, null) {
                     (it.modelNode as? TaskNode)?.childTaskData?.name
                 }?.let { MultiLineRow.Visible(it, disabledOverride ?: R.color.textSecondary) }
+
+                return listOfNotNull(name, children)
+            }
         }
 
         override val isSelectable = true
@@ -787,20 +787,17 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
         override val rowsDelegate = object : MultiLineModelNode.RowsDelegate {
 
-            override val name: MultiLineRow
-                get() = this@TaskNode.name
+            private val details = childTaskData.scheduleText
+                .takeIf { !it.isNullOrEmpty() }
+                ?.let { MultiLineRow.Visible(it, disabledOverride ?: R.color.textSecondary) }
 
-            override val children
-                get() = InstanceTreeTaskNode.getTaskChildren(treeNode.isExpanded, treeNode.allChildren, childTaskData.note) {
+            override fun getRows(isExpanded: Boolean, allChildren: List<TreeNode<*>>): List<MultiLineRow> {
+                val children = InstanceTreeTaskNode.getTaskChildren(isExpanded, allChildren, childTaskData.note) {
                     (it.modelNode as? TaskNode)?.childTaskData?.name
                 }?.let { MultiLineRow.Visible(it, disabledOverride ?: R.color.textSecondary) }
 
-            override val details
-                get() = if (childTaskData.scheduleText.isNullOrEmpty()) {
-                    null
-                } else {
-                    MultiLineRow.Visible(childTaskData.scheduleText, disabledOverride ?: R.color.textSecondary)
-                }
+                return listOfNotNull(name, details, children)
+            }
         }
 
         override val isSelectable = !copying

@@ -16,17 +16,11 @@ class InstanceRowsDelegate(instanceData: GroupListDataWrapper.InstanceData, show
         if (instanceData.taskCurrent) R.color.textPrimary else R.color.textDisabled,
     )
 
-    private fun String?.toSecondaryRow() = takeIf { !it.isNullOrEmpty() }?.let { MultiLineRow.Visible(it, secondaryColor) }
-
     private val details: MultiLineRow.Visible? = instanceData.takeIf { showDetails }
         ?.displayText
         .toSecondaryRow()
 
     private val note = instanceData.note.toSecondaryRow()
-
-    val project = instanceData.projectInfo
-        ?.name
-        .toSecondaryRow()
 
     override fun getRows(isExpanded: Boolean, allChildren: List<TreeNode<*>>): List<MultiLineRow> {
         val children = allChildren.takeIf { !isExpanded }

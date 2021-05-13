@@ -9,6 +9,7 @@ import com.krystianwsul.checkme.gui.tree.delegates.indentation.IndentationDelega
 import com.krystianwsul.checkme.gui.tree.delegates.indentation.IndentationHolder
 import com.krystianwsul.checkme.gui.tree.delegates.indentation.IndentationModelNode
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineModelNode
+import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineRow
 import com.krystianwsul.checkme.utils.loadPhoto
 import com.krystianwsul.common.criteria.QueryMatchable
 import com.krystianwsul.common.firebase.models.ProjectUser
@@ -173,5 +174,10 @@ class DetailsNode(
     abstract class ProjectRowsDelegate(projectInfo: ProjectInfo?) : MultiLineModelNode.RowsDelegate {
 
         protected abstract val secondaryColor: Int
+
+        protected fun String?.toSecondaryRow() =
+            takeIf { !it.isNullOrEmpty() }?.let { MultiLineRow.Visible(it, secondaryColor) }
+
+        protected val project = projectInfo?.name.toSecondaryRow()
     }
 }

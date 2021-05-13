@@ -723,7 +723,8 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
     ) :
         Node(childTaskData, nodeParent, reverseSortOrder),
         Sortable,
-        ThumbnailModelNode {
+        ThumbnailModelNode,
+        DetailsNode.Parent {
 
         override val taskExpansionStates: Map<TaskKey, TreeNode.ExpansionState>
             get() = mapOf(childTaskData.taskKey to treeNode.expansionState) +

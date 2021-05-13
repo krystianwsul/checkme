@@ -47,7 +47,8 @@ class NotDoneGroupNode(
     CheckableModelNode,
     MultiLineModelNode,
     ThumbnailModelNode,
-    IndentationModelNode {
+    IndentationModelNode,
+    DetailsNode.Parent {
 
     public override lateinit var treeNode: TreeNode<AbstractHolder>
         private set
@@ -413,7 +414,8 @@ class NotDoneGroupNode(
         MultiLineModelNode,
         ThumbnailModelNode,
         IndentationModelNode,
-        Sortable {
+        Sortable,
+        DetailsNode.Parent {
 
         override val holderType = HolderType.CHECKABLE
 

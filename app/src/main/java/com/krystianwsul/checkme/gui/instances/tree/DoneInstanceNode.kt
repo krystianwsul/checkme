@@ -7,6 +7,7 @@ import com.krystianwsul.checkme.gui.instances.ShowInstanceActivity
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
 import com.krystianwsul.checkme.gui.tree.AbstractModelNode
+import com.krystianwsul.checkme.gui.tree.DetailsNode
 import com.krystianwsul.checkme.gui.tree.HolderType
 import com.krystianwsul.checkme.gui.tree.delegates.checkable.CheckBoxState
 import com.krystianwsul.checkme.gui.tree.delegates.checkable.CheckableDelegate
@@ -27,15 +28,16 @@ import io.reactivex.rxjava3.core.Maybe
 import io.reactivex.rxjava3.kotlin.addTo
 
 class DoneInstanceNode(
-        override val indentation: Int,
-        val instanceData: GroupListDataWrapper.InstanceData,
-        private val dividerNode: DividerNode,
+    override val indentation: Int,
+    val instanceData: GroupListDataWrapper.InstanceData,
+    private val dividerNode: DividerNode,
 ) : AbstractModelNode(),
-        NodeCollectionParent,
-        CheckableModelNode,
-        MultiLineModelNode,
-        ThumbnailModelNode,
-        IndentationModelNode {
+    NodeCollectionParent,
+    CheckableModelNode,
+    MultiLineModelNode,
+    ThumbnailModelNode,
+    IndentationModelNode,
+    DetailsNode.Parent {
 
     public override lateinit var treeNode: TreeNode<AbstractHolder>
         private set
@@ -54,37 +56,38 @@ class DoneInstanceNode(
 
     override val delegates by lazy {
         listOf(
-                ExpandableDelegate(treeNode),
-                CheckableDelegate(this),
-                MultiLineDelegate(this),
-                ThumbnailDelegate(this),
-                IndentationDelegate(this)
+            ExpandableDelegate(treeNode),
+            CheckableDelegate(this),
+            MultiLineDelegate(this),
+            ThumbnailDelegate(this),
+            IndentationDelegate(this)
         )
     }
 
     fun initialize(
-            dividerTreeNode: TreeNode<AbstractHolder>,
-            expandedInstances: Map<InstanceKey, CollectionExpansionState>,
-            selectedInstances: List<InstanceKey>,
+        dividerTreeNode: TreeNode<AbstractHolder>,
+        expandedInstances: Map<InstanceKey, CollectionExpansionState>,
+        selectedInstances: List<InstanceKey>,
     ): TreeNode<AbstractHolder> {
         val selected = selectedInstances.contains(instanceData.instanceKey)
 
         val (expansionState, doneExpansionState) =
-                expandedInstances[instanceData.instanceKey] ?: CollectionExpansionState()
+            expandedInstances[instanceData.instanceKey] ?: CollectionExpansionState()
 
         treeNode = TreeNode(this, dividerTreeNode, selected, expansionState)
 
         nodeCollection = NodeCollection(
-                indentation + 1,
-                groupAdapter,
-                false,
-                treeNode,
-                instanceData.note,
-                this,
-                instanceData.projectInfo
+            indentation + 1,
+            groupAdapter,
+            false,
+            treeNode,
+            instanceData.note,
+            this,
+            instanceData.projectInfo
         )
 
-        treeNode.setChildTreeNodes(nodeCollection.initialize(
+        treeNode.setChildTreeNodes(
+            nodeCollection.initialize(
                 instanceData.children.values,
                 mapOf(),
                 expandedInstances,
@@ -95,7 +98,9 @@ class DoneInstanceNode(
                 null,
                 mapOf(),
                 listOf(),
-                null))
+                null
+            )
+        )
 
         return treeNode
     }
@@ -123,30 +128,30 @@ class DoneInstanceNode(
                 val groupAdapter = nodeCollection.groupAdapter
 
                 AndroidDomainUpdater.setInstanceDone(
-                        DomainListenerManager.NotificationType.First(groupAdapter.dataId),
-                        instanceData.instanceKey,
-                        false,
+                    DomainListenerManager.NotificationType.First(groupAdapter.dataId),
+                    instanceData.instanceKey,
+                    false,
                 )
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .andThen(Maybe.defer { groupListFragment.listener.showSnackbarNotDoneMaybe(1) })
-                        .flatMapCompletable {
-                            AndroidDomainUpdater.setInstanceDone(
-                                    DomainListenerManager.NotificationType.First(groupAdapter.dataId),
-                                    instanceData.instanceKey,
-                                    true,
-                            )
-                        }
-                        .subscribe()
-                        .addTo(groupListFragment.attachedToWindowDisposable)
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .andThen(Maybe.defer { groupListFragment.listener.showSnackbarNotDoneMaybe(1) })
+                    .flatMapCompletable {
+                        AndroidDomainUpdater.setInstanceDone(
+                            DomainListenerManager.NotificationType.First(groupAdapter.dataId),
+                            instanceData.instanceKey,
+                            true,
+                        )
+                    }
+                    .subscribe()
+                    .addTo(groupListFragment.attachedToWindowDisposable)
             }
         }
 
     override val widthKey
         get() = MultiLineDelegate.WidthKey(
-                indentation,
-                true,
-                thumbnail != null,
-                true
+            indentation,
+            true,
+            thumbnail != null,
+            true
         )
 
     override fun compareTo(other: ModelNode<AbstractHolder>): Int {
@@ -161,7 +166,7 @@ class DoneInstanceNode(
     override val isSelectable = true
 
     override fun onClick(holder: AbstractHolder) = groupListFragment.activity.startActivity(
-            ShowInstanceActivity.getIntent(groupListFragment.activity, instanceData.instanceKey)
+        ShowInstanceActivity.getIntent(groupListFragment.activity, instanceData.instanceKey)
     )
 
     override val id = instanceData.instanceKey
@@ -169,7 +174,7 @@ class DoneInstanceNode(
     override fun normalize() = instanceData.normalize()
 
     override fun matchesFilterParams(filterParams: FilterCriteria.Full.FilterParams) =
-            instanceData.matchesFilterParams(filterParams)
+        instanceData.matchesFilterParams(filterParams)
 
     override fun getMatchResult(query: String) = ModelNode.MatchResult.fromBoolean(instanceData.matchesQuery(query))
 }

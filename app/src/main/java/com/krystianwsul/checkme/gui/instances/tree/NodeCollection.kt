@@ -6,7 +6,6 @@ import com.krystianwsul.checkme.gui.tree.*
 import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.TaskKey
-import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.NodeContainer
 import com.krystianwsul.treeadapter.TreeNode
 
@@ -16,7 +15,7 @@ class NodeCollection(
     val useGroups: Boolean,
     val nodeContainer: NodeContainer<AbstractHolder>,
     private val note: String?,
-    val parentNode: ModelNode<AbstractHolder>?,
+    val parentNode: DetailsNode.Parent?,
     private val projectInfo: DetailsNode.ProjectInfo?,
     val useDoneNode: Boolean = true,
     private val projectNameShownInParent: () -> Boolean = { false },

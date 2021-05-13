@@ -20,7 +20,7 @@ import com.krystianwsul.treeadapter.TreeNode
 class DetailsNode(
     private val projectInfo: ProjectInfo?,
     private val note: String?,
-    override val parentNode: ModelNode<AbstractHolder>?,
+    override val parentNode: Parent?,
     indentation: Int,
     private val projectNameShownInParent: () -> Boolean = { false }, // todo project
 ) : AbstractModelNode(), IndentationModelNode, QueryMatchable {
@@ -163,4 +163,6 @@ class DetailsNode(
             fun fromProjectUsers(users: List<ProjectUser>) = users.map { User(it.name, it.photoUrl) }
         }
     }
+
+    interface Parent : ModelNode<AbstractHolder>
 }

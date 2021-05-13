@@ -37,7 +37,8 @@ class TaskNode(
     InvisibleCheckboxModelNode,
     ThumbnailModelNode,
     IndentationModelNode,
-    Sortable {
+    Sortable,
+    DetailsNode.Parent {
 
     companion object {
 

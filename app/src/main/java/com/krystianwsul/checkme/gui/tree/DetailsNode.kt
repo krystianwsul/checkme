@@ -171,13 +171,24 @@ class DetailsNode(
         val rowsDelegate: ProjectRowsDelegate
     }
 
-    abstract class ProjectRowsDelegate(projectInfo: ProjectInfo?) : MultiLineModelNode.RowsDelegate {
-
-        protected abstract val secondaryColor: Int
+    abstract class ProjectRowsDelegate(
+        projectInfo: ProjectInfo?,
+        private val secondaryColor: Int,
+    ) : MultiLineModelNode.RowsDelegate {
 
         protected fun String?.toSecondaryRow() =
             takeIf { !it.isNullOrEmpty() }?.let { MultiLineRow.Visible(it, secondaryColor) }
 
-        protected val project = projectInfo?.name.toSecondaryRow()
+        val project = projectInfo?.name.toSecondaryRow() // todo project make protected
+
+        final override fun getRows(isExpanded: Boolean, allChildren: List<TreeNode<*>>): List<MultiLineRow> {
+            val rows = getRowsWithoutProject(isExpanded, allChildren).toMutableList()
+
+            project.takeIf { !isExpanded }?.let { rows += it }
+
+            return rows
+        }
+
+        protected abstract fun getRowsWithoutProject(isExpanded: Boolean, allChildren: List<TreeNode<*>>): List<MultiLineRow>
     }
 }

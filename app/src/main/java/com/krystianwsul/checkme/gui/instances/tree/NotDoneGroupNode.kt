@@ -191,9 +191,7 @@ class NotDoneGroupNode(
             }
         }
 
-    private inner class GroupRowsDelegate : DetailsNode.ProjectRowsDelegate(null) {
-
-        override val secondaryColor = R.color.textSecondary
+    private inner class GroupRowsDelegate : DetailsNode.ProjectRowsDelegate(null, R.color.textSecondary) {
 
         private val details by lazy {
             val date = exactTimeStamp.date
@@ -206,7 +204,7 @@ class NotDoneGroupNode(
             MultiLineRow.Visible(text, R.color.textSecondary)
         }
 
-        override fun getRows(isExpanded: Boolean, allChildren: List<TreeNode<*>>): List<MultiLineRow> {
+        override fun getRowsWithoutProject(isExpanded: Boolean, allChildren: List<TreeNode<*>>): List<MultiLineRow> {
             val name = if (isExpanded) {
                 MultiLineRow.Invisible
             } else {

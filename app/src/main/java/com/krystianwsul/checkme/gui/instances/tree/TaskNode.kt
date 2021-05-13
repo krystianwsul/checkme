@@ -151,13 +151,11 @@ class TaskNode(
         1
     }
 
-    override val rowsDelegate = object : DetailsNode.ProjectRowsDelegate(taskData.projectInfo) {
-
-        override val secondaryColor = R.color.textSecondary
+    override val rowsDelegate = object : DetailsNode.ProjectRowsDelegate(taskData.projectInfo, R.color.textSecondary) {
 
         private val name get() = MultiLineRow.Visible(taskData.name)
 
-        override fun getRows(isExpanded: Boolean, allChildren: List<TreeNode<*>>): List<MultiLineRow> {
+        override fun getRowsWithoutProject(isExpanded: Boolean, allChildren: List<TreeNode<*>>): List<MultiLineRow> {
             val children = getTaskChildren(isExpanded, allChildren, taskData.note) {
                 (it.modelNode as? TaskNode)?.taskData?.name
             }?.let { MultiLineRow.Visible(it, R.color.textSecondary) }

@@ -786,15 +786,16 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             return treeNode
         }
 
-        override val rowsDelegate = object : DetailsNode.ProjectRowsDelegate(childTaskData.projectInfo) {
-
-            override val secondaryColor = disabledOverride ?: R.color.textSecondary
+        override val rowsDelegate = object : DetailsNode.ProjectRowsDelegate(
+            childTaskData.projectInfo,
+            disabledOverride ?: R.color.textSecondary,
+        ) {
 
             private val details = childTaskData.scheduleText
                 .takeIf { !it.isNullOrEmpty() }
                 ?.let { MultiLineRow.Visible(it, disabledOverride ?: R.color.textSecondary) }
 
-            override fun getRows(isExpanded: Boolean, allChildren: List<TreeNode<*>>): List<MultiLineRow> {
+            override fun getRowsWithoutProject(isExpanded: Boolean, allChildren: List<TreeNode<*>>): List<MultiLineRow> {
                 val children = InstanceTreeTaskNode.getTaskChildren(isExpanded, allChildren, childTaskData.note) {
                     (it.modelNode as? TaskNode)?.childTaskData?.name
                 }?.let { MultiLineRow.Visible(it, disabledOverride ?: R.color.textSecondary) }

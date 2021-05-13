@@ -7,9 +7,10 @@ import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineRow
 import com.krystianwsul.treeadapter.TreeNode
 
 class InstanceRowsDelegate(instanceData: GroupListDataWrapper.InstanceData, showDetails: Boolean = true) :
-    DetailsNode.ProjectRowsDelegate(instanceData.projectInfo) {
-
-    override val secondaryColor = if (instanceData.taskCurrent) R.color.textSecondary else R.color.textDisabled
+    DetailsNode.ProjectRowsDelegate(
+        instanceData.projectInfo,
+        if (instanceData.taskCurrent) R.color.textSecondary else R.color.textDisabled,
+    ) {
 
     private val name = MultiLineRow.Visible(
         instanceData.name,
@@ -22,7 +23,7 @@ class InstanceRowsDelegate(instanceData: GroupListDataWrapper.InstanceData, show
 
     private val note = instanceData.note.toSecondaryRow()
 
-    override fun getRows(isExpanded: Boolean, allChildren: List<TreeNode<*>>): List<MultiLineRow> {
+    override fun getRowsWithoutProject(isExpanded: Boolean, allChildren: List<TreeNode<*>>): List<MultiLineRow> {
         val children = allChildren.takeIf { !isExpanded }
             ?.filter { it.modelNode is NotDoneGroupNode && it.canBeShown() }
             ?.map { it.modelNode as NotDoneGroupNode }
@@ -36,7 +37,6 @@ class InstanceRowsDelegate(instanceData: GroupListDataWrapper.InstanceData, show
             details,
             children,
             note.takeIf { !isExpanded },
-            project?.takeIf { !isExpanded },
         )
     }
 }

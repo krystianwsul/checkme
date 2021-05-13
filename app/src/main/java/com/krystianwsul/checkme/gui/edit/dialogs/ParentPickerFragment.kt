@@ -331,8 +331,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
                 override fun getRows(isExpanded: Boolean, allChildren: List<TreeNode<*>>): List<MultiLineRow> {
                     val rows = listOfNotNull(name, details).toMutableList()
 
-                    val childrenText = treeNode.takeIf { !it.isExpanded }
-                        ?.allChildren
+                    val childrenText = allChildren.takeIf { !isExpanded }
                         ?.filter { it.modelNode is TaskAdapter.TaskWrapper && it.canBeShown() }
                         ?.map { it.modelNode as TaskAdapter.TaskWrapper }
                         ?.takeIf { it.isNotEmpty() }

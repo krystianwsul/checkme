@@ -28,7 +28,7 @@ data class GroupListDataWrapper(
         override val note: String?,
         val imageState: ImageState?,
         override val isAssignedToMe: Boolean,
-        val projectInfo: DetailsNode.ProjectInfo?, // todo project
+        val projectInfo: DetailsNode.ProjectInfo?,
         val ordinal: Double,
     ) : SelectedData, QueryMatchable, FilterParamsMatchable {
 
@@ -61,7 +61,7 @@ data class GroupListDataWrapper(
         val notificationShown: Boolean,
         val imageState: ImageState?,
         override val isAssignedToMe: Boolean,
-        val projectInfo: DetailsNode.ProjectInfo?, // todo project
+        val projectInfo: DetailsNode.ProjectInfo?,
     ) : Comparable<InstanceData>, SelectedData, QueryMatchable, FilterParamsMatchable {
 
         override val normalizedFields by lazy { listOfNotNull(name, note).map { it.normalized() } }

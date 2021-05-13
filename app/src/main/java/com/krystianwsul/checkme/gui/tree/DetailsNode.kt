@@ -163,11 +163,6 @@ class DetailsNode(
         override val rowSeparator = binding.rowListDetailsSeparator
     }
 
-    /**
-     * todo project: add "project" member to every Node that uses this.  Show only in collapsed state.
-     * Use MultiLineModelNode.projectShown to determine if project name should be stripped out of projectInfo
-     */
-
     data class ProjectInfo(val name: String, val assignedTo: List<User>)
 
     data class User(val name: String, val photoUrl: String?) {

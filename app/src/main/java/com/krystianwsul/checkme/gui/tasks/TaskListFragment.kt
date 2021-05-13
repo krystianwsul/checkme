@@ -859,7 +859,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         val entryDatas: List<EntryData>,
         val note: String?,
         val showFab: Boolean,
-        val projectInfo: DetailsNode.ProjectInfo?, // todo project
+        val projectInfo: DetailsNode.ProjectInfo?,
     )
 
     interface EntryData : Comparable<EntryData>, QueryMatchable, FilterParamsMatchable {
@@ -908,7 +908,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         val current: Boolean,
         override val canAddSubtask: Boolean,
         val ordinal: Double,
-        val projectInfo: DetailsNode.ProjectInfo?, // todo project
+        val projectInfo: DetailsNode.ProjectInfo?,
         override val isAssignedToMe: Boolean,
     ) : EntryData {
 

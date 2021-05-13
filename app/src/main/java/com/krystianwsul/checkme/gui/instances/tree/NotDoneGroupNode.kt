@@ -127,7 +127,15 @@ class NotDoneGroupNode(
                 instanceData.note,
                 this,
                 instanceData.projectInfo,
-            )
+            ) {
+                (rowsDelegate as InstanceRowsDelegate).let {
+                    if (it.project == null) {
+                        false
+                    } else {
+                        it.getRows(false, treeNode.allChildren).contains(it.project)
+                    }
+                }
+            }
 
             treeNode.setChildTreeNodes(
                 singleInstanceNodeCollection!!.initialize(

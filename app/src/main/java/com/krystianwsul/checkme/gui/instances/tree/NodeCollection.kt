@@ -19,6 +19,7 @@ class NodeCollection(
     val parentNode: ModelNode<AbstractHolder>?,
     private val projectInfo: DetailsNode.ProjectInfo?,
     val useDoneNode: Boolean = true,
+    private val projectNameShownInParent: () -> Boolean = { false },
 ) {
 
     private lateinit var notDoneGroupCollection: NotDoneGroupCollection
@@ -62,6 +63,7 @@ class NodeCollection(
                     note,
                     parentNode,
                     indentation,
+                    projectNameShownInParent,
                 ).initialize(nodeContainer)
             )
 

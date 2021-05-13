@@ -6,10 +6,8 @@ import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineModelNode
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineRow
 import com.krystianwsul.treeadapter.TreeNode
 
-class InstanceRowsDelegate(
-    private val instanceData: GroupListDataWrapper.InstanceData,
-    showDetails: Boolean = true,
-) : MultiLineModelNode.RowsDelegate {
+class InstanceRowsDelegate(instanceData: GroupListDataWrapper.InstanceData, showDetails: Boolean = true) :
+    MultiLineModelNode.RowsDelegate {
 
     private val secondaryColor = if (instanceData.taskCurrent) R.color.textSecondary else R.color.textDisabled
 
@@ -26,7 +24,7 @@ class InstanceRowsDelegate(
 
     private val note = instanceData.note.toSecondary()
 
-    private val project = instanceData.projectInfo
+    val project = instanceData.projectInfo
         ?.name
         .toSecondary()
 

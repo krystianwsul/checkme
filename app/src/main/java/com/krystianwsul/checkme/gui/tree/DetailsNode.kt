@@ -22,6 +22,7 @@ class DetailsNode(
     private val note: String?,
     override val parentNode: ModelNode<AbstractHolder>?,
     indentation: Int,
+    private val projectNameShownInParent: () -> Boolean = { false }, // todo project
 ) : AbstractModelNode(), IndentationModelNode, QueryMatchable {
 
     override lateinit var treeNode: TreeNode<AbstractHolder>
@@ -59,7 +60,7 @@ class DetailsNode(
 
         // check if has contents
         projectInfo?.let {
-            if (it.name.isNotEmpty()) return true
+            if (it.name.isNotEmpty() && !projectNameShownInParent()) return true
 
             if (it.assignedTo.isNotEmpty()) return true
         }

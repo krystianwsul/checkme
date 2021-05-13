@@ -3,8 +3,12 @@ package com.krystianwsul.checkme
 import android.annotation.SuppressLint
 import android.app.Application
 import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
 import android.content.res.Configuration
+import androidx.core.content.pm.ShortcutInfoCompat
+import androidx.core.content.pm.ShortcutManagerCompat
+import androidx.core.graphics.drawable.IconCompat
 import androidx.preference.PreferenceManager
 import com.akexorcist.localizationactivity.core.LocalizationApplicationDelegate
 import com.akexorcist.localizationactivity.core.LocalizationUtility
@@ -24,6 +28,7 @@ import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
 import com.krystianwsul.checkme.firebase.AndroidDatabaseWrapper
 import com.krystianwsul.checkme.firebase.loaders.FactoryLoader
 import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
+import com.krystianwsul.checkme.gui.edit.EditActivity
 import com.krystianwsul.checkme.persistencemodel.PersistenceManager
 import com.krystianwsul.checkme.upload.Queue
 import com.krystianwsul.checkme.upload.Uploader
@@ -35,7 +40,9 @@ import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.miguelbcr.ui.rx_paparazzo2.RxPaparazzo
 import com.pacoworks.rxpaper2.RxPaperBook
+import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Maybe
+import io.reactivex.rxjava3.schedulers.Schedulers
 import rxdogtag2.RxDogTag
 import java.io.File
 import java.util.*
@@ -178,6 +185,23 @@ class MyApplication : Application() {
         ImageManager.init()
 
         Contacts.initialize(this)
+
+        Completable.fromCallable {
+            ShortcutManagerCompat.addDynamicShortcuts(
+                this,
+                listOf(
+                    ShortcutInfoCompat.Builder(this, "Add")
+                        .setShortLabel(getString(R.string.add_task))
+                        .setIcon(IconCompat.createWithResource(this, R.mipmap.launcher_add))
+                        .setIntent(
+                            EditActivity.getShortcutIntent(null).addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT)
+                        )
+                        .build()
+                ),
+            )
+        }
+            .subscribeOn(Schedulers.io())
+            .subscribe()
     }
 
     fun getRxPaparazzoDir() = File(instance.filesDir.absolutePath + "/RxPaparazzo/")

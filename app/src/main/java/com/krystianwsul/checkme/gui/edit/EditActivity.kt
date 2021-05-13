@@ -87,15 +87,19 @@ class EditActivity : NavBarActivity() {
             putExtra(KEY_PARAMETERS, editParameters)
         }
 
-        fun getShortcutIntent(parentTaskKeyHint: TaskKey) = Intent(MyApplication.instance, EditActivity::class.java).apply {
+        fun getShortcutIntent(parentTaskKeyHint: TaskKey?) = Intent(MyApplication.instance, EditActivity::class.java).apply {
             action = Intent.ACTION_DEFAULT
 
-            if (parentTaskKeyHint is TaskKey.Project) {
-                putExtra(KEY_PARENT_PROJECT_KEY, parentTaskKeyHint.projectKey.key)
-                putExtra(KEY_PARENT_PROJECT_TYPE, parentTaskKeyHint.projectKey.type.ordinal)
-            }
+            if (parentTaskKeyHint != null) {
 
-            putExtra(KEY_PARENT_TASK, parentTaskKeyHint.taskId)
+                if (parentTaskKeyHint is TaskKey.Project) {
+                    putExtra(KEY_PARENT_PROJECT_KEY, parentTaskKeyHint.projectKey.key)
+                    putExtra(KEY_PARENT_PROJECT_TYPE, parentTaskKeyHint.projectKey.type.ordinal)
+                }
+
+                putExtra(KEY_PARENT_TASK, parentTaskKeyHint.taskId)
+
+            }
         }
 
         var createdTaskKey: TaskKey? = null

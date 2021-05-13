@@ -17,39 +17,42 @@ import io.reactivex.rxjava3.schedulers.Schedulers
 @SuppressLint("CheckResult")
 object ShortcutQueue {
 
+    private const val CATEGORY = "ADD_TO_LIST"
+
     private val relay = PublishRelay.create<List<ShortcutData>>()
 
     init {
         relay.toFlowable(BackpressureStrategy.BUFFER)
-                .observeOn(Schedulers.io())
-                .subscribe {
-                    val shortcuts = it.map {
-                        val icon = it.uuid
-                                ?.let { ImageManager.getLargeIcon(it) }
+            .observeOn(Schedulers.io())
+            .subscribe {
+                val shortcuts = it.map {
+                    val icon = it.uuid
+                        ?.let { ImageManager.getLargeIcon(it) }
                                 ?.invoke()
                                 ?.let { IconCompat.createWithAdaptiveBitmap(it) }
-                                ?: IconCompat.createWithResource(MyApplication.instance, R.mipmap.launcher_add)
+                        ?: IconCompat.createWithResource(MyApplication.instance, R.mipmap.launcher_add)
 
-                        ShortcutInfoCompat.Builder(MyApplication.instance, it.taskKey.toShortcut())
-                                .setShortLabel(MyApplication.instance.getString(R.string.addTo) + " " + it.name)
-                                .setIcon(icon)
-                                .setCategories(setOf("ADD_TO_LIST"))
-                                .setIntent(EditActivity.getShortcutIntent(it.taskKey))
-                                .build()
-                    }
+                    ShortcutInfoCompat.Builder(MyApplication.instance, it.taskKey.toShortcut())
+                        .setShortLabel(MyApplication.instance.getString(R.string.addTo) + " " + it.name)
+                        .setIcon(icon)
+                        .setCategories(setOf(CATEGORY))
+                        .setIntent(EditActivity.getShortcutIntent(it.taskKey))
+                        .build()
+                }
 
-                    val existingShortcuts =
-                            ShortcutManagerCompat.getDynamicShortcuts(MyApplication.context).map { it.id }
+                val existingShortcuts = ShortcutManagerCompat.getDynamicShortcuts(MyApplication.context)
+                    .filter { it.categories.orEmpty().contains(CATEGORY) }
+                    .map { it.id }
 
-                    val addShortcuts = shortcuts.filter { it.id !in existingShortcuts }
-                    val updateShortcuts = shortcuts.filter { it.id in existingShortcuts }
+                val addShortcuts = shortcuts.filter { it.id !in existingShortcuts }
+                val updateShortcuts = shortcuts.filter { it.id in existingShortcuts }
 
-                    val shortcutIds = shortcuts.map { it.id }
-                    val removeShortcuts = existingShortcuts.filter { it !in shortcutIds }
+                val shortcutIds = shortcuts.map { it.id }
+                val removeShortcuts = existingShortcuts.filter { it !in shortcutIds }
 
-                    ShortcutManagerCompat.removeDynamicShortcuts(MyApplication.context, removeShortcuts)
-                    ShortcutManagerCompat.addDynamicShortcuts(MyApplication.context, addShortcuts)
-                    ShortcutManagerCompat.updateShortcuts(MyApplication.context, updateShortcuts)
+                ShortcutManagerCompat.removeDynamicShortcuts(MyApplication.context, removeShortcuts)
+                ShortcutManagerCompat.addDynamicShortcuts(MyApplication.context, addShortcuts)
+                ShortcutManagerCompat.updateShortcuts(MyApplication.context, updateShortcuts)
                 }
     }
 

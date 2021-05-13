@@ -786,7 +786,9 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             return treeNode
         }
 
-        override val rowsDelegate = object : MultiLineModelNode.RowsDelegate {
+        override val rowsDelegate = object : DetailsNode.ProjectRowsDelegate(childTaskData.projectInfo) {
+
+            override val secondaryColor = disabledOverride ?: R.color.textSecondary
 
             private val details = childTaskData.scheduleText
                 .takeIf { !it.isNullOrEmpty() }

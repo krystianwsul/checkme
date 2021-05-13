@@ -191,7 +191,9 @@ class NotDoneGroupNode(
             }
         }
 
-    private inner class GroupRowsDelegate : MultiLineModelNode.RowsDelegate {
+    private inner class GroupRowsDelegate : DetailsNode.ProjectRowsDelegate(null) {
+
+        override val secondaryColor = R.color.textSecondary
 
         private val details by lazy {
             val date = exactTimeStamp.date

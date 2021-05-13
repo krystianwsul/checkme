@@ -2,31 +2,31 @@ package com.krystianwsul.checkme.gui.instances.tree
 
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
-import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineModelNode
+import com.krystianwsul.checkme.gui.tree.DetailsNode
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineRow
 import com.krystianwsul.treeadapter.TreeNode
 
 class InstanceRowsDelegate(instanceData: GroupListDataWrapper.InstanceData, showDetails: Boolean = true) :
-    MultiLineModelNode.RowsDelegate {
+    DetailsNode.ProjectRowsDelegate(instanceData.projectInfo) {
 
-    private val secondaryColor = if (instanceData.taskCurrent) R.color.textSecondary else R.color.textDisabled
+    override val secondaryColor = if (instanceData.taskCurrent) R.color.textSecondary else R.color.textDisabled
 
     private val name = MultiLineRow.Visible(
         instanceData.name,
         if (instanceData.taskCurrent) R.color.textPrimary else R.color.textDisabled,
     )
 
-    private fun String?.toSecondary() = takeIf { !it.isNullOrEmpty() }?.let { MultiLineRow.Visible(it, secondaryColor) }
+    private fun String?.toSecondaryRow() = takeIf { !it.isNullOrEmpty() }?.let { MultiLineRow.Visible(it, secondaryColor) }
 
     private val details: MultiLineRow.Visible? = instanceData.takeIf { showDetails }
         ?.displayText
-        .toSecondary()
+        .toSecondaryRow()
 
-    private val note = instanceData.note.toSecondary()
+    private val note = instanceData.note.toSecondaryRow()
 
     val project = instanceData.projectInfo
         ?.name
-        .toSecondary()
+        .toSecondaryRow()
 
     override fun getRows(isExpanded: Boolean, allChildren: List<TreeNode<*>>): List<MultiLineRow> {
         val children = allChildren.takeIf { !isExpanded }
@@ -35,7 +35,7 @@ class InstanceRowsDelegate(instanceData: GroupListDataWrapper.InstanceData, show
             ?.takeIf { it.isNotEmpty() }
             ?.sorted()
             ?.joinToString(", ") { it.singleInstanceData.name }
-            .toSecondary()
+            .toSecondaryRow()
 
         return listOfNotNull(
             name,

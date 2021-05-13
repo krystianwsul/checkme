@@ -151,7 +151,9 @@ class TaskNode(
         1
     }
 
-    override val rowsDelegate = object : MultiLineModelNode.RowsDelegate {
+    override val rowsDelegate = object : DetailsNode.ProjectRowsDelegate(taskData.projectInfo) {
+
+        override val secondaryColor = R.color.textSecondary
 
         private val name get() = MultiLineRow.Visible(taskData.name)
 

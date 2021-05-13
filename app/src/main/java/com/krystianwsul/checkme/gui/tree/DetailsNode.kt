@@ -8,6 +8,7 @@ import com.krystianwsul.checkme.databinding.RowListDetailsBinding
 import com.krystianwsul.checkme.gui.tree.delegates.indentation.IndentationDelegate
 import com.krystianwsul.checkme.gui.tree.delegates.indentation.IndentationHolder
 import com.krystianwsul.checkme.gui.tree.delegates.indentation.IndentationModelNode
+import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineModelNode
 import com.krystianwsul.checkme.utils.loadPhoto
 import com.krystianwsul.common.criteria.QueryMatchable
 import com.krystianwsul.common.firebase.models.ProjectUser
@@ -164,5 +165,13 @@ class DetailsNode(
         }
     }
 
-    interface Parent : ModelNode<AbstractHolder>
+    interface Parent : ModelNode<AbstractHolder> {
+
+        val rowsDelegate: ProjectRowsDelegate
+    }
+
+    abstract class ProjectRowsDelegate(projectInfo: ProjectInfo?) : MultiLineModelNode.RowsDelegate {
+
+        protected abstract val secondaryColor: Int
+    }
 }

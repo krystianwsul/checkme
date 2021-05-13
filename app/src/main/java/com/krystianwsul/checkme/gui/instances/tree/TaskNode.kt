@@ -42,17 +42,18 @@ class TaskNode(
 
     companion object {
 
-        fun getTaskChildren(
+        inline fun <reified T : ModelNode<*>> getTaskChildren(
             isExpanded: Boolean,
             allChildren: List<TreeNode<*>>,
             note: String?,
-            getChildName: (treeNode: TreeNode<*>) -> String?,
+            getChildName: (treeNode: T) -> String?,
         ): String? {
             return if (isExpanded) {
                 null
             } else {
-                allChildren.filter { it.canBeShown() }
-                    .mapNotNull(getChildName)
+                allChildren.filter { it.modelNode is T }
+                    .filter { it.canBeShown() }
+                    .mapNotNull { getChildName(it.modelNode as T) }
                     .takeIf { it.isNotEmpty() }
                     ?.joinToString(", ")
                     ?: note.takeIf { !it.isNullOrEmpty() }
@@ -156,9 +157,8 @@ class TaskNode(
         private val name get() = MultiLineRow.Visible(taskData.name)
 
         override fun getRowsWithoutProject(isExpanded: Boolean, allChildren: List<TreeNode<*>>): List<MultiLineRow> {
-            val children = getTaskChildren(isExpanded, allChildren, taskData.note) {
-                (it.modelNode as? TaskNode)?.taskData?.name
-            }?.let { MultiLineRow.Visible(it, R.color.textSecondary) }
+            val children = getTaskChildren<TaskNode>(isExpanded, allChildren, taskData.note) { it.taskData.name }
+                ?.let { MultiLineRow.Visible(it, R.color.textSecondary) }
 
             return listOfNotNull(name, children)
         }

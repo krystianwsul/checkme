@@ -668,8 +668,8 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         override val rowsDelegate = object : MultiLineModelNode.RowsDelegate {
 
             override fun getRows(isExpanded: Boolean, allChildren: List<TreeNode<*>>): List<MultiLineRow> {
-                val children = InstanceTreeTaskNode.getTaskChildren(isExpanded, allChildren, null) {
-                    (it.modelNode as? TaskNode)?.childTaskData?.name
+                val children = InstanceTreeTaskNode.getTaskChildren<TaskNode>(isExpanded, allChildren, null) {
+                    it.childTaskData.name
                 }?.let { MultiLineRow.Visible(it, disabledOverride ?: R.color.textSecondary) }
 
                 return listOfNotNull(name, children)
@@ -796,8 +796,8 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                 ?.let { MultiLineRow.Visible(it, disabledOverride ?: R.color.textSecondary) }
 
             override fun getRowsWithoutProject(isExpanded: Boolean, allChildren: List<TreeNode<*>>): List<MultiLineRow> {
-                val children = InstanceTreeTaskNode.getTaskChildren(isExpanded, allChildren, childTaskData.note) {
-                    (it.modelNode as? TaskNode)?.childTaskData?.name
+                val children = InstanceTreeTaskNode.getTaskChildren<TaskNode>(isExpanded, allChildren, childTaskData.note) {
+                    it.childTaskData.name
                 }?.let { MultiLineRow.Visible(it, disabledOverride ?: R.color.textSecondary) }
 
                 return listOfNotNull(name, details, children)

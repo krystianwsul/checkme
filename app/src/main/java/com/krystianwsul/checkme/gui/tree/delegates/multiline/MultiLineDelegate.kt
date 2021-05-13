@@ -18,12 +18,11 @@ class MultiLineDelegate(private val modelNode: MultiLineModelNode) : NodeDelegat
         const val TOTAL_LINES = 3
 
         private val textWidths = InitMap<Pair<Int, WidthKey>, BehaviorRelay<Int>> { BehaviorRelay.create() }
+
+        fun takeMaxRows(allRows: List<MultiLineRow>) = allRows.take(TOTAL_LINES)
     }
 
-    private val rows
-        get() = modelNode.run {
-            rowsDelegate.getRows(treeNode.isExpanded, treeNode.allChildren).take(TOTAL_LINES)
-        }
+    private val rows get() = modelNode.run { takeMaxRows(rowsDelegate.getRows(treeNode.isExpanded, treeNode.allChildren)) }
 
     override val state get() = modelNode.run { State(rows) }
 

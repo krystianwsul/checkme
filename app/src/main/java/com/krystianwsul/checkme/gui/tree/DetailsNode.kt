@@ -8,6 +8,7 @@ import com.krystianwsul.checkme.databinding.RowListDetailsBinding
 import com.krystianwsul.checkme.gui.tree.delegates.indentation.IndentationDelegate
 import com.krystianwsul.checkme.gui.tree.delegates.indentation.IndentationHolder
 import com.krystianwsul.checkme.gui.tree.delegates.indentation.IndentationModelNode
+import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineDelegate
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineModelNode
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineRow
 import com.krystianwsul.checkme.utils.loadPhoto
@@ -24,7 +25,6 @@ class DetailsNode(
     private val note: String?,
     override val parentNode: Parent?,
     indentation: Int,
-    private val projectNameShownInParent: () -> Boolean = { false }, // todo project
 ) : AbstractModelNode(), IndentationModelNode, QueryMatchable {
 
     override lateinit var treeNode: TreeNode<AbstractHolder>
@@ -55,6 +55,18 @@ class DetailsNode(
         treeNode.setChildTreeNodes(listOf())
 
         return treeNode
+    }
+
+    private fun projectNameShownInParent(): Boolean {
+        if (parentNode == null) return false
+
+        val projectRowsDelegate = parentNode.rowsDelegate
+        if (projectRowsDelegate.project == null) return false
+
+        val collapsedRows =
+            MultiLineDelegate.takeMaxRows(projectRowsDelegate.getRows(false, parentNode.treeNode.allChildren))
+
+        return collapsedRows.contains(projectRowsDelegate.project)
     }
 
     override fun isVisible(actionMode: Boolean, hasVisibleChildren: Boolean): Boolean {
@@ -169,6 +181,8 @@ class DetailsNode(
     interface Parent : ModelNode<AbstractHolder> {
 
         val rowsDelegate: ProjectRowsDelegate
+
+        val treeNode: TreeNode<AbstractHolder>
     }
 
     abstract class ProjectRowsDelegate(
@@ -179,7 +193,7 @@ class DetailsNode(
         protected fun String?.toSecondaryRow() =
             takeIf { !it.isNullOrEmpty() }?.let { MultiLineRow.Visible(it, secondaryColor) }
 
-        val project = projectInfo?.name.toSecondaryRow() // todo project make protected
+        val project = projectInfo?.name.toSecondaryRow()
 
         final override fun getRows(isExpanded: Boolean, allChildren: List<TreeNode<*>>): List<MultiLineRow> {
             val rows = getRowsWithoutProject(isExpanded, allChildren).toMutableList()

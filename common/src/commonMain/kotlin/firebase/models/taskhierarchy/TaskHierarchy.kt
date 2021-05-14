@@ -8,7 +8,7 @@ import com.krystianwsul.common.utils.TaskHierarchyKey
 import com.krystianwsul.common.utils.TaskKey
 
 
-abstract class TaskHierarchy(private val parentTaskDelegate: ParentTaskDelegate) : TaskParentEntry {
+sealed class TaskHierarchy(private val parentTaskDelegate: ParentTaskDelegate) : TaskParentEntry {
 
     protected abstract val taskHierarchyRecord: TaskHierarchyRecord<*>
 

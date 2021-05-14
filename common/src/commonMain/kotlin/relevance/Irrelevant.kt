@@ -9,6 +9,8 @@ import com.krystianwsul.common.firebase.models.project.SharedProject
 import com.krystianwsul.common.firebase.models.schedule.Schedule
 import com.krystianwsul.common.firebase.models.schedule.SingleSchedule
 import com.krystianwsul.common.firebase.models.task.Task
+import com.krystianwsul.common.firebase.models.taskhierarchy.NestedTaskHierarchy
+import com.krystianwsul.common.firebase.models.taskhierarchy.ProjectTaskHierarchy
 import com.krystianwsul.common.firebase.models.taskhierarchy.TaskHierarchy
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.Time
@@ -79,18 +81,28 @@ object Irrelevant {
         val visibleIrrelevantTasks = irrelevantTasks.filter { it.isVisible(now, true) }
         if (visibleIrrelevantTasks.isNotEmpty()) {
             throw VisibleIrrelevantTasksException(
-                    visibleIrrelevantTasks.joinToString(", ") { it.taskKey.toString() }
+                visibleIrrelevantTasks.joinToString(", ") { it.taskKey.toString() }
             )
         }
 
         val relevantTaskHierarchyRelevances = taskHierarchyRelevances.values.filter { it.relevant }
         val relevantTaskHierarchies = relevantTaskHierarchyRelevances.map { it.taskHierarchy }
 
-        val irrelevantTaskHierarchies = taskHierarchies - relevantTaskHierarchies
+        val irrelevantTaskHierarchies = (taskHierarchies - relevantTaskHierarchies).filter {
+            when (it) {
+                is ProjectTaskHierarchy -> true
+                is NestedTaskHierarchy -> { // we need to delete only those hierarchies whose "owner" task won't be deleted
+                    val childTaskRelevance = taskRelevances.getValue(it.childTaskKey)
+
+                    childTaskRelevance.relevant
+                }
+                else -> throw UnsupportedOperationException() // compilation in unit tests
+            }
+        }
 
         val relevantInstances = instanceRelevances.values
-                .filter { it.relevant }
-                .map { it.instance }
+            .filter { it.relevant }
+            .map { it.instance }
 
         val relevantExistingInstances = relevantInstances.filter { it.exists() }
         val irrelevantExistingInstances = existingInstances - relevantExistingInstances

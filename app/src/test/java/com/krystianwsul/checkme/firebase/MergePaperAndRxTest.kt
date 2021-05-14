@@ -64,7 +64,6 @@ class MergePaperAndRxTest {
         testObserver.assertValues(1)
 
         paperSubject.accept(10)
-        verify(exactly = 1) { MyCrashlytics.logException(any()) }
 
         firebaseSubject.accept(2)
         testObserver.assertValues(1, 2)

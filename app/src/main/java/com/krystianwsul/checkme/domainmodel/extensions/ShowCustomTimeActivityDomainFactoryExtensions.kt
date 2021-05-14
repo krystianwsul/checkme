@@ -33,10 +33,10 @@ fun DomainFactory.getShowCustomTimeData(customTimeKey: CustomTimeKey): ShowCusto
 
 @CheckResult
 fun DomainUpdater.updateCustomTime(
-        notificationType: DomainListenerManager.NotificationType,
-        customTimeId: CustomTimeKey,
-        name: String,
-        hourMinutes: Map<DayOfWeek, HourMinute>,
+    notificationType: DomainListenerManager.NotificationType,
+    customTimeId: CustomTimeKey,
+    name: String,
+    hourMinutes: Map<DayOfWeek, HourMinute>,
 ): Completable = CompletableDomainUpdate.create("updateCustomTime") { now ->
     check(name.isNotEmpty())
 
@@ -63,9 +63,11 @@ fun DomainFactory.migratePrivateCustomTime(
     privateCustomTime: PrivateCustomTime,
     now: ExactTimeStamp.Local,
 ): MyUserCustomTime {
-    privateCustomTime.endExactTimeStamp = now
+    val myUserCustomTime = createUserCustomTime(privateCustomTime.name, privateCustomTime.hourMinutes, privateCustomTime)
 
-    return createUserCustomTime(privateCustomTime.name, privateCustomTime.hourMinutes, privateCustomTime)
+    if (privateCustomTime.endExactTimeStamp == null) privateCustomTime.endExactTimeStamp = now
+
+    return myUserCustomTime
 }
 
 @CheckResult
@@ -84,10 +86,11 @@ fun DomainUpdater.createCustomTime(
 }.perform(this)
 
 private fun DomainFactory.createUserCustomTime(
-        name: String,
-        hourMinutes: Map<DayOfWeek, HourMinute>,
-        fromPrivateCustomTime: PrivateCustomTime?,
-) = myUserFactory.user.newCustomTime(UserCustomTimeJson(
+    name: String,
+    hourMinutes: Map<DayOfWeek, HourMinute>,
+    fromPrivateCustomTime: PrivateCustomTime?,
+) = myUserFactory.user.newCustomTime(
+    UserCustomTimeJson(
         name,
         hourMinutes.getValue(DayOfWeek.SUNDAY).hour,
         hourMinutes.getValue(DayOfWeek.SUNDAY).minute,
@@ -103,5 +106,7 @@ private fun DomainFactory.createUserCustomTime(
         hourMinutes.getValue(DayOfWeek.FRIDAY).minute,
         hourMinutes.getValue(DayOfWeek.SATURDAY).hour,
         hourMinutes.getValue(DayOfWeek.SATURDAY).minute,
-        privateCustomTimeId = fromPrivateCustomTime?.id?.value,
-))
+        fromPrivateCustomTime?.endExactTimeStamp?.long,
+        fromPrivateCustomTime?.id?.value,
+    )
+)

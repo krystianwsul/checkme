@@ -5,6 +5,7 @@ import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.tasks.ShowTasksActivity
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
 import com.krystianwsul.checkme.gui.tree.AbstractModelNode
+import com.krystianwsul.checkme.gui.tree.DetailsNode
 import com.krystianwsul.checkme.gui.tree.HolderType
 import com.krystianwsul.checkme.gui.tree.delegates.expandable.ExpandableDelegate
 import com.krystianwsul.checkme.gui.tree.delegates.indentation.IndentationDelegate
@@ -91,6 +92,7 @@ class UnscheduledNode(
 
     override fun compareTo(other: ModelNode<AbstractHolder>) = when {
         searchResults -> -1
+        other is DetailsNode -> -1
         other is DividerNode -> -1
         else -> {
             check(other is NotDoneGroupNode)

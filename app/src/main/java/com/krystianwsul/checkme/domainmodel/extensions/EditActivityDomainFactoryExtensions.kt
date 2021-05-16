@@ -459,21 +459,19 @@ fun DomainUpdater.createScheduleJoinTopLevelTask(
 
     val finalProjectKey = sharedProjectParameters?.key ?: defaultProjectId
 
-    val joinableTaskKeys = joinables.map { it.taskKey }
-
-    val joinTasks = if (allReminders) {
-        joinableTaskKeys.map { convertAndUpdateProject(getTaskForce(it), now, finalProjectKey) }
+    val joinableMap = if (allReminders) {
+        joinables.map { it to convertAndUpdateProject(getTaskForce(it.taskKey), now, finalProjectKey) }
     } else {
-        joinableTaskKeys.map { convertToRoot(getTaskForce(it), now) }
+        joinables.map { it to convertToRoot(getTaskForce(it.taskKey), now) }
     }
 
     check(
-        joinTasks.map { it.project.projectKey }
+        joinableMap.map { it.second.project.projectKey }
             .distinct()
             .single() == finalProjectKey
     )
 
-    val ordinal = joinTasks.map { it.ordinal }.minOrNull()
+    val ordinal = joinableMap.map { it.second.ordinal }.minOrNull()
 
     val imageUuid = imagePath?.let { newUuid() }
 
@@ -490,11 +488,11 @@ fun DomainUpdater.createScheduleJoinTopLevelTask(
     )
 
     if (allReminders)
-        joinTasks(newParentTask, joinTasks, now, joinables.mapNotNull { it.instanceKey })
+        joinTasks(newParentTask, joinableMap.map { it.second }, now, joinables.mapNotNull { it.instanceKey })
     else
-        joinJoinables(newParentTask, joinables, now)
+        joinJoinables(newParentTask, joinableMap, now)
 
-    updateProjectRootIds(joinTasks + newParentTask)
+    updateProjectRootIds(joinableMap.map { it.second } + newParentTask)
 
     imageUuid?.let { Uploader.addUpload(deviceDbInfo, newParentTask.taskKey, it, imagePath) }
 
@@ -679,10 +677,10 @@ private fun Task.showAsParent(now: ExactTimeStamp.Local, excludedTaskKeys: Set<T
 
 private fun DomainFactory.joinJoinables(
     newParentTask: RootTask,
-    joinables: List<EditParameters.Join.Joinable>,
+    joinableMap: List<Pair<EditParameters.Join.Joinable, RootTask>>,
     now: ExactTimeStamp.Local,
 ) {
-    check(joinables.map { getTaskForce(it.taskKey).project }.distinct().size == 1)
+    check(joinableMap.map { it.second.project }.distinct().size == 1)
 
     val parentInstanceKey = newParentTask.getInstances(null, null, now)
         .single()
@@ -690,18 +688,30 @@ private fun DomainFactory.joinJoinables(
 
     val parentTaskHasOtherInstances = newParentTask.hasOtherVisibleInstances(now, parentInstanceKey)
 
-    joinables.forEach { joinable ->
-        val task = convertToRoot(getTaskForce(joinable.taskKey), now)
-
+    joinableMap.forEach { (joinable, task) ->
         fun addChildToParent(instance: Instance? = null) = addChildToParent(task, newParentTask, now, instance)
 
         when (joinable) {
             is EditParameters.Join.Joinable.Task -> addChildToParent()
             is EditParameters.Join.Joinable.Instance -> {
-                val instance = task.getInstance(joinable.instanceKey.scheduleKey)
+                val migratedScheduleKey = joinable.instanceKey
+                    .scheduleKey
+                    .run {
+                        val originalTime = getTime(scheduleTimePair)
+                        val migratedTime = task.getOrCopyTime(
+                            scheduleDate.dayOfWeek,
+                            originalTime,
+                            this@joinJoinables,
+                            now,
+                        )
+
+                        ScheduleKey(scheduleDate, migratedTime.timePair)
+                    }
+
+                val instance = task.getInstance(migratedScheduleKey)
 
                 if (parentTaskHasOtherInstances || task.hasOtherVisibleInstances(now, joinable.instanceKey)) {
-                    getInstance(joinable.instanceKey).setParentState(Instance.ParentState.Parent(parentInstanceKey))
+                    instance.setParentState(Instance.ParentState.Parent(parentInstanceKey))
                 } else {
                     addChildToParent(instance)
                 }

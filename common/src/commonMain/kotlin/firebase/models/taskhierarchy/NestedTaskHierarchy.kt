@@ -21,8 +21,12 @@ class NestedTaskHierarchy(
         childTask.invalidateIntervals()
     }
 
-    override fun deleteFromParent() {
+    fun deleteFromParentTask() {
         parentTaskDelegate.removeRootChildTaskFromParent(parentTask, childTask)
+    }
+
+    override fun deleteFromParent() {
+        deleteFromParentTask()
 
         childTask.deleteNestedTaskHierarchy(this)
     }

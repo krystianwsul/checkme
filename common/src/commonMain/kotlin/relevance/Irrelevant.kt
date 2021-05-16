@@ -88,10 +88,14 @@ object Irrelevant {
         val relevantTaskHierarchyRelevances = taskHierarchyRelevances.values.filter { it.relevant }
         val relevantTaskHierarchies = relevantTaskHierarchyRelevances.map { it.taskHierarchy }
 
-        val irrelevantTaskHierarchies = (taskHierarchies - relevantTaskHierarchies).filter {
+        /**
+         * The first is removed normally.  The second is for nested task hierarchies, inside tasks that will also be deleted.
+         * We don't want to, uh, double-delete them, but we do need to remove Project.rootTaskIds entries.
+         */
+        val (irrelevantTaskHierarchies, irrelevantNestedTaskHierarchies) = (taskHierarchies - relevantTaskHierarchies).partition {
             when (it) {
                 is ProjectTaskHierarchy -> true
-                is NestedTaskHierarchy -> { // we need to delete only those hierarchies whose "owner" task won't be deleted
+                is NestedTaskHierarchy -> {
                     val childTaskRelevance = taskRelevances.getValue(it.childTaskKey)
 
                     childTaskRelevance.relevant
@@ -159,6 +163,7 @@ object Irrelevant {
             irrelevantSchedules.forEach { it.delete() }
             irrelevantNoScheduleOrParents.forEach { it.delete() }
             irrelevantTaskHierarchies.forEach { it.delete() }
+            irrelevantNestedTaskHierarchies.forEach { (it as NestedTaskHierarchy).deleteFromParentTask() }
             irrelevantTasks.forEach { it.delete() }
         }
 

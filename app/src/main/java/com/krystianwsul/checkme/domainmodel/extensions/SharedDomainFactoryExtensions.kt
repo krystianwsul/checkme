@@ -263,6 +263,8 @@ private class AddChildToParentUndoData(
     override fun undo(domainFactory: DomainFactory, now: ExactTimeStamp.Local) = domainFactory.run {
         val task = getTaskForce(taskKey)
 
+        val initialProject = task.project
+
         unhideInstanceKey?.let(::getInstance)?.unhide()
 
         task.parentTaskHierarchies.single { it.taskHierarchyKey == deleteTaskHierarchyKey }.delete()
@@ -279,7 +281,9 @@ private class AddChildToParentUndoData(
             task.parentTaskHierarchies.single { it.taskHierarchyKey == taskHierarchyKey }
         }.forEach { it.clearEndExactTimeStamp(now) }
 
-        setOf(task.project)
+        val finalProject = task.project
+
+        setOf(initialProject, finalProject)
     }
 }
 

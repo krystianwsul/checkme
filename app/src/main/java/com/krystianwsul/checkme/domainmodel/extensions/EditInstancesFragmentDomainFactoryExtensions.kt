@@ -157,9 +157,13 @@ private class SetInstanceParentUndoData(
             domainFactory: DomainFactory,
             now: ExactTimeStamp.Local,
     ) = domainFactory.getInstance(instanceKey).let {
+        val initialProject = it.task.project
+
         it.setParentState(parentState)
 
-        setOf(it.task.project)
+        val finalProject = it.task.project
+
+        setOf(initialProject, finalProject)
     }
 }
 
@@ -172,6 +176,8 @@ fun DomainUpdater.setInstancesParent(
     check(instanceKeys.isNotEmpty())
 
     val instances = instanceKeys.map(this::getInstance)
+
+    val originalProjects = instances.map { it.task.project }
 
     val parentTask = getTaskForce(parentInstanceKey.taskKey)
 
@@ -193,13 +199,13 @@ fun DomainUpdater.setInstancesParent(
         }
     }
 
-    val projects = instances.map { it.task.project }.toSet()
+    val finalProjects = instances.map { it.task.project }.toSet()
 
     DomainUpdater.Result(
-            ListUndoData(undoDatas) as UndoData,
-            true,
-            notificationType,
-            DomainFactory.CloudParams(projects),
+        ListUndoData(undoDatas) as UndoData,
+        true,
+        notificationType,
+        DomainFactory.CloudParams(originalProjects + finalProjects),
     )
 }.perform(this)
 

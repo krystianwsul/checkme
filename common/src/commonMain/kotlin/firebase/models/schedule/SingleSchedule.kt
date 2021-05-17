@@ -9,6 +9,7 @@ import com.krystianwsul.common.firebase.records.schedule.ProjectHelper
 import com.krystianwsul.common.firebase.records.schedule.SingleScheduleRecord
 import com.krystianwsul.common.time.DateTime
 import com.krystianwsul.common.time.ExactTimeStamp
+import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ScheduleType
 import com.krystianwsul.common.utils.UserKey
 
@@ -109,5 +110,7 @@ class SingleSchedule(topLevelTask: Task, val singleScheduleRecord: SingleSchedul
             }
 
         override fun delete() = singleScheduleRecord.delete()
+
+        override fun updateProject(projectKey: ProjectKey<*>) = singleScheduleRecord.updateProject(projectKey)
     }
 }

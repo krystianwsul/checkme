@@ -205,7 +205,11 @@ class RootTask(
             is Type.Schedule -> type.getParentProjectSchedule()
             is Type.NoSchedule -> type.noScheduleOrParent!!
             is Type.Child -> null // called redundantly
-        }?.updateProject(projectKey)
+        }?.let {
+            it.updateProject(projectKey)
+
+            projectIdProperty.invalidate()
+        }
 
         return this
     }

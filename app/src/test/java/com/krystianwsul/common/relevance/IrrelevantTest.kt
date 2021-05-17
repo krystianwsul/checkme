@@ -3,6 +3,7 @@ package com.krystianwsul.common.relevance
 import com.krystianwsul.checkme.firebase.factories.ProjectsFactory
 import com.krystianwsul.checkme.firebase.managers.AndroidRootTasksManager
 import com.krystianwsul.checkme.firebase.roottask.LoadDependencyTrackerManager
+import com.krystianwsul.checkme.firebase.roottask.RootTaskKeySource
 import com.krystianwsul.checkme.firebase.roottask.RootTasksFactory
 import com.krystianwsul.checkme.firebase.roottask.RootTasksLoader
 import com.krystianwsul.common.domain.UserInfo
@@ -89,10 +90,13 @@ class IrrelevantTest {
             every { startTrackingTaskLoad(any()) } returns mockk(relaxed = true)
         }
 
+        val rootTaskKeySource = mockk<RootTaskKeySource> {
+            every { rootTaskKeysObservable } returns Observable.just(setOf())
+            every { onProjectAddedOrUpdated(any(), any()) } returns Unit
+        }
+
         val rootTaskLoader = RootTasksLoader(
-            mockk {
-                every { rootTaskKeysObservable } returns Observable.just(setOf())
-            },
+            rootTaskKeySource,
             mockk {
                 every { getRootTaskObservable(any()) } returns Observable.never()
             },
@@ -114,7 +118,7 @@ class IrrelevantTest {
                 every { getDependencies(any()) } returns Single.just(mockk())
             },
             compositeDisposable,
-            mockk(), // todo task test
+            rootTaskKeySource,
             loadDependencyTrackerManager,
         ) { projectsFactory }
 

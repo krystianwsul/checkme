@@ -248,13 +248,20 @@ abstract class Project<T : ProjectType>(
 
     fun addRootTask(taskKey: TaskKey.Root) {
         projectRecord.rootTaskParentDelegate.addRootTask(taskKey) { updateRootTaskKeys(it) }
-    }
+    } // todo id remove
 
-    fun removeRootTask(taskKey: TaskKey.Root) {
+    fun removeRootTask(taskKey: TaskKey.Root) { // todo id remove
         projectRecord.rootTaskParentDelegate.removeRootTask(taskKey) { updateRootTaskKeys(it) }
     }
 
     private fun updateRootTaskKeys(rootTaskKeys: Set<TaskKey.Root>) {
+        rootTaskProvider.updateProjectRecord(projectKey, rootTaskKeys)
+    }
+
+    fun updateRootTaskKeys() {
+        val rootTaskKeys = getAllTasks().mapNotNull { it.taskKey as? TaskKey.Root }.toSet()
+
+        projectRecord.rootTaskParentDelegate.setRootTaskKeys(rootTaskKeys)
         rootTaskProvider.updateProjectRecord(projectKey, rootTaskKeys)
     }
 

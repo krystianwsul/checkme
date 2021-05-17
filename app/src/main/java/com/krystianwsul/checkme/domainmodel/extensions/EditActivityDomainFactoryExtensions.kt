@@ -205,7 +205,7 @@ fun DomainUpdater.createScheduleTopLevelTask(
         assignedTo = sharedProjectParameters.nonNullAssignedTo,
     )
 
-    updateProjectRootIds(task)
+    updateProjectRootIds()
 
     copyTaskKey?.let { copyTask(now, task, it) }
 
@@ -249,7 +249,7 @@ fun DomainUpdater.createChildTask(
         copyTaskKey,
     )
 
-    updateProjectRootIds(childTask)
+    updateProjectRootIds()
 
     imageUuid?.let { Uploader.addUpload(deviceDbInfo, childTask.taskKey, it, imagePath) }
 
@@ -284,7 +284,7 @@ fun DomainUpdater.createTopLevelTask(
         imageUuid,
     )
 
-    updateProjectRootIds(task)
+    updateProjectRootIds()
 
     copyTaskKey?.let { copyTask(now, task, it) }
 
@@ -336,7 +336,7 @@ fun DomainUpdater.updateScheduleTask(
         if (imagePath != null) setImage(deviceDbInfo, imageUuid?.let { ImageState.Local(imageUuid) })
     }
 
-    updateProjectRootIds(task)
+    updateProjectRootIds()
 
     imageUuid?.let { Uploader.addUpload(deviceDbInfo, task.taskKey, it, imagePath.value) }
 
@@ -385,7 +385,7 @@ fun DomainUpdater.updateChildTask(
         task.endAllCurrentNoScheduleOrParents(now)
     }
 
-    updateProjectRootIds(task)
+    updateProjectRootIds()
 
     val imageUuid = imagePath?.value?.let { newUuid() }
     if (imagePath != null) task.setImage(deviceDbInfo, imageUuid?.let { ImageState.Local(imageUuid) })
@@ -431,7 +431,7 @@ fun DomainUpdater.updateTopLevelTask(
         setNoScheduleOrParent(now, projectKey)
     }
 
-    updateProjectRootIds(task)
+    updateProjectRootIds()
 
     val imageUuid = imagePath?.value?.let { newUuid() }
 
@@ -492,7 +492,7 @@ fun DomainUpdater.createScheduleJoinTopLevelTask(
     else
         joinJoinables(newParentTask, joinableMap, now)
 
-    updateProjectRootIds(joinableMap.map { it.second } + newParentTask)
+    updateProjectRootIds()
 
     imageUuid?.let { Uploader.addUpload(deviceDbInfo, newParentTask.taskKey, it, imagePath) }
 
@@ -539,7 +539,7 @@ fun DomainUpdater.createJoinChildTask(
 
     joinTasks(childTask, joinTasks, now, removeInstanceKeys)
 
-    updateProjectRootIds(joinTasks + childTask)
+    updateProjectRootIds()
 
     imageUuid?.let { Uploader.addUpload(deviceDbInfo, childTask.taskKey, it, imagePath) }
 
@@ -588,7 +588,7 @@ fun DomainUpdater.createJoinTopLevelTask(
 
     joinTasks(newParentTask, joinTasks, now, removeInstanceKeys)
 
-    updateProjectRootIds(joinTasks + newParentTask)
+    updateProjectRootIds()
 
     imageUuid?.let { Uploader.addUpload(deviceDbInfo, newParentTask.taskKey, it, imagePath) }
 
@@ -863,21 +863,8 @@ private fun DomainFactory.convertToRoot(task: Task, now: ExactTimeStamp.Local): 
     return converter.convertToRoot(now, task as ProjectTask, task.project.projectKey)
 }
 
-private fun DomainFactory.updateProjectRootIds(editedTask: Task) = updateProjectRootIds(listOf(editedTask))
-
-private fun DomainFactory.updateProjectRootIds(editedTasks: Collection<Task>) {
-    val rootTasks = editedTasks.filterIsInstance<RootTask>()
-
-    rootTasks.forEach { task ->
-        val currentProject = task.project
-
-        projectsFactory.projects
-            .values
-            .forEach { project ->
-                if (project == currentProject)
-                    project.addRootTask(task.taskKey)
-                else
-                    project.removeRootTask(task.taskKey)
-            }
-    }
+private fun DomainFactory.updateProjectRootIds() {
+    projectsFactory.projects
+        .values
+        .forEach { it.updateRootTaskKeys() }
 }

@@ -26,25 +26,47 @@ abstract class RootTaskParentDelegate(private val rootTaskParentJson: RootTaskPa
         val rootTaskId = rootTaskKey.taskId
 
         if (!rootTaskIds.containsKey(rootTaskId)) {
-            rootTaskIds[rootTaskId] = true
-
-            addValue("$ROOT_TASK_IDS_KEY/$rootTaskId", true)
+            addRootTaskId(rootTaskId)
 
             rootTaskKeysProperty.invalidate()
             onKeysChangedCallback(rootTaskKeys)
         }
     }
 
+    private fun addRootTaskId(rootTaskId: String) {
+        check(!rootTaskIds.containsKey(rootTaskId))
+
+        rootTaskIds[rootTaskId] = true
+        addValue("$ROOT_TASK_IDS_KEY/$rootTaskId", true)
+    }
+
     fun removeRootTask(rootTaskKey: TaskKey.Root, onKeysChangedCallback: (Set<TaskKey.Root>) -> Unit) {
         val rootTaskId = rootTaskKey.taskId
 
         if (rootTaskIds.containsKey(rootTaskId)) {
-            rootTaskIds.remove(rootTaskId)
-
-            addValue("$ROOT_TASK_IDS_KEY/$rootTaskId", null)
+            removeRootTaskId(rootTaskId)
 
             rootTaskKeysProperty.invalidate()
             onKeysChangedCallback(rootTaskKeys)
         }
+    }
+
+    private fun removeRootTaskId(rootTaskId: String) {
+        check(rootTaskIds.containsKey(rootTaskId))
+
+        rootTaskIds.remove(rootTaskId)
+        addValue("$ROOT_TASK_IDS_KEY/$rootTaskId", null)
+    }
+
+    fun setRootTaskKeys(rootTaskKeys: Set<TaskKey.Root>) {
+        val newRootTaskIds = rootTaskKeys.map { it.taskId }
+
+        val addedRootTaskIds = newRootTaskIds - rootTaskIds.keys
+        val removedRootTaskIds = rootTaskIds.keys - newRootTaskIds
+
+        addedRootTaskIds.forEach(::addRootTaskId)
+        removedRootTaskIds.forEach(::removeRootTaskId)
+
+        if (addedRootTaskIds.isNotEmpty() || removedRootTaskIds.isNotEmpty()) rootTaskKeysProperty.invalidate()
     }
 }

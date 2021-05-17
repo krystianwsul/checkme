@@ -6,8 +6,6 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.GenericTypeIndicator
 import com.google.firebase.database.Query
 import com.google.firebase.database.core.Path
-import com.krystianwsul.checkme.MyApplication
-import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.observeOnDomain
 import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
@@ -158,20 +156,33 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
                 paper == null && firebase == null -> "both are null, WTF?"
                 paper == null || firebase == null -> "one is null, paper: $paper, firebase: $firebase"
                 else -> {
-                    "fields are different:\n" + PrivateProjectJson::class
-                        .java
-                        .fields
-                        .mapNotNull {
-                            val paperField = it.get(paper)
-                            val firebaseField = it.get(firebase)
+                    val stringBuilder = StringBuilder("fields are different: \n")
 
-                            if (paperField != firebaseField) {
-                                "field: ${it.name}, paper: $paperField, firebase: $firebaseField"
-                            } else {
-                                null
-                            }
+                    val fieldsList = listOf(
+                        PrivateProjectJson::name,
+                        PrivateProjectJson::startTime,
+                        PrivateProjectJson::startTimeOffset,
+                        PrivateProjectJson::endTime,
+                        PrivateProjectJson::endTimeOffset,
+                        PrivateProjectJson::tasks,
+                        PrivateProjectJson::taskHierarchies,
+                        PrivateProjectJson::customTimes,
+                        PrivateProjectJson::defaultTimesCreated,
+                        PrivateProjectJson::rootTaskIds,
+                    )
+
+                    fieldsList.forEach { field ->
+                        val paperField = field.get(paper)
+                        val firebaseField = field.get(firebase)
+
+                        if (paperField != firebaseField) {
+                            stringBuilder.appendLine("field ${field.name} different, paper: $paperField, firebase: $firebaseField ; ")
+                        } else {
+                            stringBuilder.appendLine("field ${field.name} same ; ")
                         }
-                        .joinToString("; ")
+                    }
+
+                    stringBuilder.toString()
                 }
             }
 

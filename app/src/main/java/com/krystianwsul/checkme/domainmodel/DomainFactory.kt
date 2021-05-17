@@ -512,6 +512,8 @@ class DomainFactory(
     data class CloudParams(val projects: Collection<Project<*>>, val userKeys: Collection<UserKey> = emptySet()) {
 
         constructor(project: Project<*>, userKeys: Collection<UserKey> = emptySet()) : this(setOf(project), userKeys)
+
+        constructor(vararg projects: Project<*>) : this(projects.toSet())
     }
 
     fun notifyCloud(cloudParams: CloudParams) {

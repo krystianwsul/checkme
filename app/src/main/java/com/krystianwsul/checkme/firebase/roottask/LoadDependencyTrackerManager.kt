@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.firebase.roottask
 
+import com.krystianwsul.checkme.firebase.LoadStatus
 import com.krystianwsul.common.firebase.records.project.ProjectRecord
 import com.krystianwsul.common.firebase.records.task.RootTaskRecord
 import com.krystianwsul.common.utils.ProjectKey
@@ -55,7 +56,14 @@ class LoadDependencyTrackerManager {
             override val dependentTaskKeys: Set<TaskKey.Root>,
     ) : Tracker {
 
-        fun stopTracking() = loadDependencyTrackerManager.stopTrackingProjectLoad(this)
+        init {
+            LoadStatus.incrementCounter()
+        }
+
+        fun stopTracking() {
+            LoadStatus.decrementCounter()
+            loadDependencyTrackerManager.stopTrackingProjectLoad(this)
+        }
     }
 
     class TaskTracker(
@@ -64,6 +72,13 @@ class LoadDependencyTrackerManager {
             override val dependentTaskKeys: Set<TaskKey.Root>,
     ) : Tracker {
 
-        fun stopTracking() = loadDependencyTrackerManager.stopTrackingTaskLoad(this)
+        init {
+            LoadStatus.incrementCounter()
+        }
+
+        fun stopTracking() {
+            LoadStatus.decrementCounter()
+            loadDependencyTrackerManager.stopTrackingTaskLoad(this)
+        }
     }
 }

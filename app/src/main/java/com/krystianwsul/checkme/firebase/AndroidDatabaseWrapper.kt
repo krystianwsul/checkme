@@ -34,7 +34,11 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
 
     private const val ENABLE_PAPER = true
 
-    val root: String = "production"
+    val root: String by lazy {
+        MyApplication.instance
+            .resources
+            .getString(R.string.firebase_root)
+    }
 
     private val rootReference by lazy {
         FirebaseDatabase.getInstance()

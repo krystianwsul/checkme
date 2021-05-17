@@ -33,10 +33,6 @@ class ProjectTask(override val project: Project<*>, private val taskRecord: Proj
 
     override val projectCustomTimeIdProvider = project.projectRecord
 
-    override fun deleteProjectRootTaskId() {
-        // only for root projects
-    }
-
     override fun deleteFromParent() = project.deleteTask(this)
 
     override fun getDateTime(scheduleKey: ScheduleKey) = project.getDateTime(scheduleKey)

@@ -86,8 +86,8 @@ object RelevanceChecker {
                 val rootTaskManager = JsRootTasksManager(databaseWrapper, rootTaskMap)
 
                 lateinit var projectMap: Map<ProjectKey<*>, Project<*>>
-                lateinit var rootTasksByTaskKey: Map<TaskKey.Root, RootTask>
-                lateinit var rootTasksByProjectId: Map<String, List<RootTask>>
+                lateinit var rootTasksByTaskKey: MutableMap<TaskKey.Root, RootTask>
+                lateinit var rootTasksByProjectId: MutableMap<String, MutableSet<RootTask>>
 
                 val rootTaskParent = object : RootTask.Parent {
 
@@ -135,14 +135,21 @@ object RelevanceChecker {
                     }
 
                     override fun deleteRootTask(task: RootTask) {
-                        // not really needed
+                        rootTasksByTaskKey.remove(task.taskKey)
+
+                        rootTasksByProjectId.values.forEach { it.remove(task) }
                     }
                 }
 
                 rootTasksByTaskKey = rootTaskManager.records
                     .map { RootTask(it.value, rootTaskParent, userCustomTimeProvider) }
                     .associateBy { it.taskKey }
-                rootTasksByProjectId = rootTasksByTaskKey.values.groupBy { it.projectId }
+                    .toMutableMap()
+
+                rootTasksByProjectId = rootTasksByTaskKey.values
+                    .groupBy { it.projectId }
+                    .mapValues { it.value.toMutableSet() }
+                    .toMutableMap()
 
                 val privateProjectManager = JsPrivateProjectManager(databaseWrapper, privateProjectMap)
 

@@ -208,6 +208,8 @@ object Irrelevant {
                 .filter { it.relevant }
                 .map { it.project }
 
+        relevantRemoteProjects.forEach { it.updateRootTaskKeys() }
+
         val irrelevantRemoteProjects = remoteProjects - relevantRemoteProjects
 
         if (delete) irrelevantRemoteProjects.forEach { it.delete() }

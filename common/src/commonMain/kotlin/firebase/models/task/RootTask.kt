@@ -98,7 +98,6 @@ class RootTask(
         return childTask
     }
 
-    override fun deleteProjectRootTaskId() = project.removeRootTask(taskKey)
     override fun deleteFromParent() = parent.deleteRootTask(this)
 
     fun setName(name: String, note: String?) {

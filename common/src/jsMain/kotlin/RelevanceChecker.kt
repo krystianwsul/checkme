@@ -184,14 +184,13 @@ object RelevanceChecker {
                 val removedSharedProjects = sharedProjects.values.mapNotNull { sharedProject ->
                     response += "checking relevance for shared project ${sharedProject.projectKey}: ${sharedProject.name}"
 
-                    val removedSharedProjects = Irrelevant.setIrrelevant(
-                            userCustomTimeRelevances,
-                            sharedProject,
-                            ExactTimeStamp.Local.now,
-                    ).removedSharedProjects
-                    check(removedSharedProjects.size < 2)
+                    val removedSharedProject = Irrelevant.setIrrelevant(
+                        userCustomTimeRelevances,
+                        sharedProject,
+                        ExactTimeStamp.Local.now,
+                    ).removedSharedProject
 
-                    removedSharedProjects.singleOrNull()
+                    removedSharedProject
                 }
 
                 userCustomTimeRelevances.values

@@ -278,7 +278,7 @@ sealed class Task(
         val instanceSequences = parentHierarchyIntervals.map {
             it.taskHierarchy
                 .parentTask
-                .getInstances(givenStartExactTimeStamp, givenEndExactTimeStamp, now, bySchedule)
+                .getInstances(givenStartExactTimeStamp, givenEndExactTimeStamp, now)
                 .filter { it.isVisible(now, Instance.VisibilityOptions(hack24 = true)) }
                 .mapNotNull {
                     it.getChildInstances()
@@ -349,7 +349,6 @@ sealed class Task(
         startExactTimeStamp: ExactTimeStamp.Offset?,
         endExactTimeStamp: ExactTimeStamp.Offset?,
         now: ExactTimeStamp.Local,
-        bySchedule: Boolean = false,
         onlyRoot: Boolean = false,
         filterVisible: Boolean = true,
     ): Sequence<Instance> {
@@ -359,7 +358,7 @@ sealed class Task(
             getExistingInstances(
                 startExactTimeStamp,
                 endExactTimeStamp,
-                bySchedule,
+                false, // todo project group
                 onlyRoot
             ).filter { it.done != null }
         } else {
@@ -368,7 +367,7 @@ sealed class Task(
             instanceSequences += getExistingInstances(
                 startExactTimeStamp,
                 endExactTimeStamp,
-                bySchedule,
+                false, // todo project group
                 onlyRoot,
             )
 
@@ -377,13 +376,13 @@ sealed class Task(
                     startExactTimeStamp,
                     endExactTimeStamp,
                     now,
-                    bySchedule,
+                    false, // todo project group
                 )
             }
 
             instanceSequences += getScheduleInstances(startExactTimeStamp, endExactTimeStamp)
 
-            return combineInstanceSequences(instanceSequences, bySchedule)
+            return combineInstanceSequences(instanceSequences)
         }
     }
 

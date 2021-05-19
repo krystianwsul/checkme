@@ -154,7 +154,6 @@ class IrrelevantTest {
             null,
             now.toOffset().plusOne(),
             now,
-            bySchedule = true,
             onlyRoot = true,
         ).single()
 
@@ -254,7 +253,6 @@ class IrrelevantTest {
             null,
             now.toOffset().plusOne(),
             now,
-            bySchedule = true,
             onlyRoot = true,
         ).single()
 
@@ -270,8 +268,7 @@ class IrrelevantTest {
                 null,
                 now.toOffset().plusOne(),
                 now,
-                bySchedule = true,
-                onlyRoot = true
+                onlyRoot = true,
             )
                 .single()
                 .isVisible(now, Instance.VisibilityOptions(hack24 = true))
@@ -286,8 +283,7 @@ class IrrelevantTest {
                 null,
                 now.toOffset().plusOne(),
                 now,
-                bySchedule = true,
-                onlyRoot = true
+                onlyRoot = true,
             )
                 .toList()
                 .isEmpty()
@@ -389,7 +385,6 @@ class IrrelevantTest {
             null,
             now.toOffset().plusOne(),
             now,
-            bySchedule = true,
             onlyRoot = true
         ).single()
         assertEquals(2, parentInstance.getChildInstances().size)
@@ -521,7 +516,6 @@ class IrrelevantTest {
             null,
             now.toOffset().plusOne(),
             now,
-            bySchedule = true,
             onlyRoot = true,
         ).single()
         assertEquals(2, parentInstance.getChildInstances().size)

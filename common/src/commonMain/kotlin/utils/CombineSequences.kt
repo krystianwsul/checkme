@@ -47,8 +47,8 @@ fun <T : Any> combineSequences(sequences: List<Sequence<T>>, selector: (List<T?>
 }
 
 fun combineInstanceSequences(
-        instanceSequences: List<Sequence<Instance>>,
-        bySchedule: Boolean = false,
+    instanceSequences: List<Sequence<Instance>>,
+    bySchedule: Boolean = false, // todo project group
 ): Sequence<Instance> {
     return combineSequences(instanceSequences) {
         val finalPair = it.mapIndexed { index, instance ->

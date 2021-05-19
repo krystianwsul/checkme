@@ -46,16 +46,13 @@ fun <T : Any> combineSequences(sequences: List<Sequence<T>>, selector: (List<T?>
     }
 }
 
-fun combineInstanceSequences(
-    instanceSequences: List<Sequence<Instance>>,
-    bySchedule: Boolean = false, // todo project group
-): Sequence<Instance> {
+fun combineInstanceSequences(instanceSequences: List<Sequence<Instance>>): Sequence<Instance> {
     return combineSequences(instanceSequences) {
         val finalPair = it.mapIndexed { index, instance ->
-            instance?.let { Pair(it.getSequenceDate(bySchedule), it.task.ordinal) } to index
+            instance?.let { Pair(it.getSequenceDate(false), it.task.ordinal) } to index
         }
-                .filter { it.first != null }
-                .minWithOrNull(compareBy({ it.first!!.first }, { it.first!!.second }))!!
+            .filter { it.first != null }
+            .minWithOrNull(compareBy({ it.first!!.first }, { it.first!!.second }))!!
 
         finalPair.second
     }

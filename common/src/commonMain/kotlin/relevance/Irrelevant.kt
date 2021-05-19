@@ -188,20 +188,18 @@ object Irrelevant {
                 .forEach { customTimeRelevanceCollection.getRelevance(it.key).setRelevant() }
         }
 
-        val remoteProjects = listOf(project)
-        val remoteProjectRelevances = remoteProjects.associate { it.projectKey to RemoteProjectRelevance(it) }
+        val remoteProjectRelevance = RemoteProjectRelevance(project)
 
-        remoteProjects.filter { it.current(getIrrelevantNow(it.endExactTimeStamp)) }
-            .map { remoteProjectRelevances.getValue(it.projectKey) }
-            .forEach { it.setRelevant() }
+        if (project.current(getIrrelevantNow(project.endExactTimeStamp)))
+            remoteProjectRelevance.setRelevant()
 
         taskRelevances.values
             .filter { it.relevant }
-            .forEach { it.setRemoteRelevant(customTimeRelevanceCollection, remoteProjectRelevances) }
+            .forEach { it.setRemoteRelevant(customTimeRelevanceCollection, remoteProjectRelevance) }
 
         instanceRelevances.values
             .filter { it.relevant }
-            .forEach { it.setRemoteRelevant(customTimeRelevanceCollection, remoteProjectRelevances) }
+            .forEach { it.setRemoteRelevant(customTimeRelevanceCollection, remoteProjectRelevance) }
 
         val relevantRemoteCustomTimes = customTimeRelevanceCollection.projectCustomTimeRelevances
             .values
@@ -212,13 +210,9 @@ object Irrelevant {
 
         if (delete) irrelevantRemoteCustomTimes.forEach { it.delete() }
 
-        val relevantRemoteProjects = remoteProjectRelevances.values
-            .filter { it.relevant }
-            .map { it.project }
+        if (remoteProjectRelevance.relevant) {
+            project.updateRootTaskKeys()
 
-        relevantRemoteProjects.forEach { it.updateRootTaskKeys() }
-
-        relevantRemoteProjects.forEach { project ->
             project.projectRecord
                 .rootTaskParentDelegate
                 .rootTaskKeys
@@ -230,9 +224,7 @@ object Irrelevant {
                 }
         }
 
-        val irrelevantRemoteProjects = remoteProjects - relevantRemoteProjects
-
-        if (delete) irrelevantRemoteProjects.forEach { it.delete() }
+        if (delete && !remoteProjectRelevance.relevant) project.delete()
 
         return Result(
             irrelevantExistingInstances,
@@ -241,7 +233,7 @@ object Irrelevant {
             irrelevantNoScheduleOrParents,
             irrelevantTasks,
             irrelevantRemoteCustomTimes,
-            irrelevantRemoteProjects.map { it as SharedProject },
+            project.takeIf { !remoteProjectRelevance.relevant }?.let { it as SharedProject },
         )
     }
 
@@ -254,7 +246,7 @@ object Irrelevant {
         val irrelevantNoScheduleOrParents: Collection<NoScheduleOrParent>,
         val irrelevantTasks: Collection<Task>,
         val irrelevantRemoteCustomTimes: Collection<Time.Custom.Project<*>>,
-        val removedSharedProjects: Collection<SharedProject>,
+        val removedSharedProject: SharedProject?,
     )
 
     private class MissingRelevanceException(taskKey: TaskKey, projectKey: ProjectKey<*>) :

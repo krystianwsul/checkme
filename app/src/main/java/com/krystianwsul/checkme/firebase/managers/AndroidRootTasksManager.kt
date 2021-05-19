@@ -18,12 +18,21 @@ class AndroidRootTasksManager(databaseWrapper: DatabaseWrapper) : RootTasksManag
             snapshot.toKey(),
             { it.createObject != snapshot.value },
             {
+                /**
+                 * In principle, this if { exists } is fine.  Once loaded, a root task should disappear only once it's
+                 * garbage collected by the backend, at which point it wasn't being used for anything, anyway - by
+                 * definition.
+                 *
+                 * There is, however, an edge case where it does make a difference: if the backend mistakenly garbage
+                 * collects the task, but doesn't remove its reference in Project.rootTaskIds, the app will keep hobbling
+                 * along with the old data, without knowing that it's technically in an inconsistent state.
+                 */
                 snapshot.takeIf { it.exists }?.let {
                     RootTaskRecord(
-                            it.key,
-                            it.value!!,
-                            databaseWrapper,
-                            this,
+                        it.key,
+                        it.value!!,
+                        databaseWrapper,
+                        this,
                     )
                 }
             },

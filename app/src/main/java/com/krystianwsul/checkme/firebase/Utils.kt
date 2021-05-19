@@ -32,7 +32,7 @@ fun <T : Any, U : Any> mergePaperAndRx(
         .mergeWith(firebaseObservable.skip(1))
 }
 
-open class Converter<T : Any, U : Any>(val paperToSnapshot: (T) -> U, val snapshotToPaper: (U) -> T) {
+open class Converter<T : Any, U : Any>(val paperToSnapshot: (T) -> U, val snapshotToPaper: (U) -> T, val logDiff: Boolean) {
 
     open fun printDiff(paper: T, firebase: T) = "paper: $paper, firebase: $firebase"
 }
@@ -123,14 +123,13 @@ private sealed class PairState<T : Any, U : Any> {
                  * This isn't necessarily an issue, but I'm expecting them always to be consistent.  It would be nice
                  * to know what happened.
                  */
-                MyCrashlytics.logException(
-                    PaperCacheException(
-                        "firebase was different than paper, path: $path, " + converter.printDiff(
-                            paper,
-                            firebase
+                if (converter.logDiff) {
+                    MyCrashlytics.logException(
+                        PaperCacheException(
+                            "firebase was different than paper, path: $path, " + converter.printDiff(paper, firebase)
                         )
                     )
-                )
+                }
 
                 Terminal(newFirebaseState.value)
             }

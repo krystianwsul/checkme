@@ -53,7 +53,7 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
     }
 
     private fun getUserQuery(userKey: UserKey) = rootReference.child("$USERS_KEY/${userKey.key}")
-    override fun getUserObservable(userKey: UserKey) = getUserQuery(userKey).typedSnapshotChanges<UserWrapper>()
+    override fun getUserObservable(userKey: UserKey) = getUserQuery(userKey).typedSnapshotChanges<UserWrapper>(false)
 
     fun getUsersObservable() = rootReference.child(USERS_KEY)
         .orderByKey()
@@ -85,10 +85,12 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
 
     private class SnapshotConverter<T : Parsable>(
         path: Path,
+        logDiff: Boolean,
         private val customPrintDiff: ((paper: T?, firebase: T?) -> String)? = null,
     ) : Converter<NullableWrapper<T>, Snapshot<T>>(
         { Snapshot(path.back.asString(), it.value) },
         { NullableWrapper(it.value) },
+        logDiff,
     ) {
 
         override fun printDiff(paper: NullableWrapper<T>, firebase: NullableWrapper<T>) =
@@ -96,11 +98,12 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
     }
 
     private inline fun <reified T : Parsable> Query.typedSnapshotChanges(
+        logDiff: Boolean,
         noinline customPrintDiff: ((paper: T?, firebase: T?) -> String)? = null,
     ): Observable<Snapshot<T>> {
         return cache(
             { Snapshot.fromParsable(it, T::class) },
-            SnapshotConverter(path, customPrintDiff),
+            SnapshotConverter(path, logDiff, customPrintDiff),
             { readNullable(it) },
             { path, value -> writeNullable(path, value) },
         )
@@ -112,6 +115,7 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
             Converter(
                 { Snapshot(path.back.asString(), it.value) },
                 { NullableWrapper(it.value) },
+                true,
             ),
             { readNullable(it) },
             { path, value -> writeNullable(path, value) },
@@ -141,7 +145,7 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
         rootReference.child("$RECORDS_KEY/${projectKey.key}")
 
     override fun getSharedProjectObservable(projectKey: ProjectKey.Shared) =
-        sharedProjectQuery(projectKey).typedSnapshotChanges<JsonWrapper>()
+        sharedProjectQuery(projectKey).typedSnapshotChanges<JsonWrapper>(true)
 
     override fun update(values: Map<String, Any?>, callback: DatabaseCallback) {
         rootReference.updateChildren(values).addOnCompleteListener {
@@ -153,7 +157,7 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
         rootReference.child("$PRIVATE_PROJECTS_KEY/${key.key}")
 
     override fun getPrivateProjectObservable(key: ProjectKey.Private) =
-        privateProjectQuery(key).typedSnapshotChanges<PrivateProjectJson> { paper, firebase ->
+        privateProjectQuery(key).typedSnapshotChanges<PrivateProjectJson>(true) { paper, firebase ->
             when {
                 paper == null && firebase == null -> "both are null, WTF?"
                 paper == null || firebase == null -> "one is null, paper: $paper, firebase: $firebase"
@@ -194,7 +198,7 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
         rootReference.child("$TASKS_KEY/${rootTaskKey.taskId}")
 
     override fun getRootTaskObservable(rootTaskKey: TaskKey.Root) =
-        rootTaskQuery(rootTaskKey).typedSnapshotChanges<RootTaskJson>()
+        rootTaskQuery(rootTaskKey).typedSnapshotChanges<RootTaskJson>(true)
 
     sealed class LoadState<T : Any> {
 

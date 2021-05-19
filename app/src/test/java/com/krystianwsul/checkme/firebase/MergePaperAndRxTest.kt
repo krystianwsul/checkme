@@ -26,10 +26,10 @@ class MergePaperAndRxTest {
         firebaseSubject = PublishRelay.create()
 
         testObserver = mergePaperAndRx(
-                paperSubject.firstElement(),
-                firebaseSubject,
-                Converter({ it }, { it }),
-                "",
+            paperSubject.firstElement(),
+            firebaseSubject,
+            Converter({ it }, { it }, true),
+            "",
         ).test()
 
         mockkObject(MyApplication)

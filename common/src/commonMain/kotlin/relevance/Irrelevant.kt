@@ -15,15 +15,17 @@ import com.krystianwsul.common.firebase.models.taskhierarchy.TaskHierarchy
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.CustomTimeKey
+import com.krystianwsul.common.utils.ProjectKey
+import com.krystianwsul.common.utils.TaskKey
 import com.soywiz.klock.days
 
 object Irrelevant {
 
     fun setIrrelevant(
-            userCustomTimeRelevances: Map<CustomTimeKey.User, CustomTimeRelevance>,
-            project: Project<*>,
-            now: ExactTimeStamp.Local,
-            delete: Boolean = true,
+        userCustomTimeRelevances: Map<CustomTimeKey.User, CustomTimeRelevance>,
+        project: Project<*>,
+        now: ExactTimeStamp.Local,
+        delete: Boolean = true,
     ): Result {
         val tasks = project.getAllTasks()
 
@@ -43,35 +45,41 @@ object Irrelevant {
         val rootInstances = project.getRootInstances(null, now.toOffset().plusOne(), now).toList()
 
         val instanceRelevances = (existingInstances + rootInstances)
-                .asSequence()
-                .distinct()
-                .associate { it.instanceKey to InstanceRelevance(it) }
-                .toMutableMap()
+            .asSequence()
+            .distinct()
+            .associate { it.instanceKey to InstanceRelevance(it) }
+            .toMutableMap()
 
         val yesterday = ExactTimeStamp.Local(now.toDateTimeSoy() - 1.days)
 
         // delay deleting removed tasks by a day
         fun getIrrelevantNow(endExactTimeStamp: ExactTimeStamp.Local?) = endExactTimeStamp?.takeIf { it > yesterday }
-                ?.minusOne()
-                ?: now
+            ?.minusOne()
+            ?: now
 
         tasks.asSequence()
-                .filter {
-                    val exactTimeStamp = getIrrelevantNow(it.endExactTimeStamp)
+            .filter {
+                val exactTimeStamp = getIrrelevantNow(it.endExactTimeStamp)
 
-                    it.current(exactTimeStamp)
-                            && it.isTopLevelTask(exactTimeStamp)
-                            && it.isVisible(exactTimeStamp, true)
-                }
-                .map { taskRelevances.getValue(it.taskKey) }
-                .forEach { it.setRelevant(taskRelevances, taskHierarchyRelevances, instanceRelevances, now) }
+                it.current(exactTimeStamp)
+                        && it.isTopLevelTask(exactTimeStamp)
+                        && it.isVisible(exactTimeStamp, true)
+            }
+            .map { taskRelevances.getValue(it.taskKey) }
+            .forEach { it.setRelevant(taskRelevances, taskHierarchyRelevances, instanceRelevances, now) }
 
-        rootInstances.map { instanceRelevances[it.instanceKey]!! }.forEach { it.setRelevant(taskRelevances, taskHierarchyRelevances, instanceRelevances, now) }
+        rootInstances.map { instanceRelevances[it.instanceKey]!! }
+            .forEach { it.setRelevant(taskRelevances, taskHierarchyRelevances, instanceRelevances, now) }
 
         existingInstances.asSequence()
-                .filter { it.isVisible(now, Instance.VisibilityOptions(hack24 = true)) } // this probably makes the recursive set in tasks redundant
-                .map { instanceRelevances.getValue(it.instanceKey) }
-                .forEach { it.setRelevant(taskRelevances, taskHierarchyRelevances, instanceRelevances, now) }
+            .filter {
+                it.isVisible(
+                    now,
+                    Instance.VisibilityOptions(hack24 = true)
+                )
+            } // this probably makes the recursive set in tasks redundant
+            .map { instanceRelevances.getValue(it.instanceKey) }
+            .forEach { it.setRelevant(taskRelevances, taskHierarchyRelevances, instanceRelevances, now) }
 
         val relevantTaskRelevances = taskRelevances.values.filter { it.relevant }
         val relevantTasks = relevantTaskRelevances.map { it.task }
@@ -128,16 +136,16 @@ object Irrelevant {
                      * relevant, since removing it would make the task unscheduled.
                      */
                     !schedule.getInstance(it).isVisible(
-                            now,
-                            Instance.VisibilityOptions(hack24 = true)
+                        now,
+                        Instance.VisibilityOptions(hack24 = true)
                     )
                 } else {
                     if (scheduleInterval.currentOffset(now) && schedule.current(now)) {
                         false
                     } else {
                         val oldestVisibleExactTimeStamp = schedule.oldestVisible
-                                .date
-                                ?.toMidnightExactTimeStamp()
+                            .date
+                            ?.toMidnightExactTimeStamp()
 
                         val scheduleEndExactTimeStamp = schedule.endExactTimeStampOffset
 
@@ -152,8 +160,8 @@ object Irrelevant {
             }.map { it.schedule }
 
             val relevantNoScheduleOrParents = it.noScheduleOrParentIntervals
-                    .filter { it.currentOffset(now) }
-                    .map { it.noScheduleOrParent }
+                .filter { it.currentOffset(now) }
+                .map { it.noScheduleOrParent }
 
             irrelevantNoScheduleOrParents += it.noScheduleOrParents - relevantNoScheduleOrParents
         }
@@ -170,58 +178,70 @@ object Irrelevant {
         val remoteCustomTimes = project.customTimes
 
         val customTimeRelevanceCollection = CustomTimeRelevanceCollection(
-                userCustomTimeRelevances,
-                remoteCustomTimes.associate { it.key to CustomTimeRelevance(it) },
+            userCustomTimeRelevances,
+            remoteCustomTimes.associate { it.key to CustomTimeRelevance(it) },
         )
 
         if (project is PrivateProject) {
             project.customTimes
-                    .filter { it.notDeleted(getIrrelevantNow(it.endExactTimeStamp)) }
-                    .forEach { customTimeRelevanceCollection.getRelevance(it.key).setRelevant() }
+                .filter { it.notDeleted(getIrrelevantNow(it.endExactTimeStamp)) }
+                .forEach { customTimeRelevanceCollection.getRelevance(it.key).setRelevant() }
         }
 
         val remoteProjects = listOf(project)
         val remoteProjectRelevances = remoteProjects.associate { it.projectKey to RemoteProjectRelevance(it) }
 
         remoteProjects.filter { it.current(getIrrelevantNow(it.endExactTimeStamp)) }
-                .map { remoteProjectRelevances.getValue(it.projectKey) }
-                .forEach { it.setRelevant() }
+            .map { remoteProjectRelevances.getValue(it.projectKey) }
+            .forEach { it.setRelevant() }
 
         taskRelevances.values
-                .filter { it.relevant }
-                .forEach { it.setRemoteRelevant(customTimeRelevanceCollection, remoteProjectRelevances) }
+            .filter { it.relevant }
+            .forEach { it.setRemoteRelevant(customTimeRelevanceCollection, remoteProjectRelevances) }
 
         instanceRelevances.values
-                .filter { it.relevant }
-                .forEach { it.setRemoteRelevant(customTimeRelevanceCollection, remoteProjectRelevances) }
+            .filter { it.relevant }
+            .forEach { it.setRemoteRelevant(customTimeRelevanceCollection, remoteProjectRelevances) }
 
         val relevantRemoteCustomTimes = customTimeRelevanceCollection.projectCustomTimeRelevances
-                .values
-                .filter { it.relevant }
-                .map { it.customTime as Time.Custom.Project<*> }
+            .values
+            .filter { it.relevant }
+            .map { it.customTime as Time.Custom.Project<*> }
 
         val irrelevantRemoteCustomTimes = remoteCustomTimes - relevantRemoteCustomTimes
 
         if (delete) irrelevantRemoteCustomTimes.forEach { it.delete() }
 
         val relevantRemoteProjects = remoteProjectRelevances.values
-                .filter { it.relevant }
-                .map { it.project }
+            .filter { it.relevant }
+            .map { it.project }
 
         relevantRemoteProjects.forEach { it.updateRootTaskKeys() }
+
+        relevantRemoteProjects.forEach { project ->
+            project.projectRecord
+                .rootTaskParentDelegate
+                .rootTaskKeys
+                .forEach { taskKey ->
+                    val taskRelevance =
+                        taskRelevances[taskKey] ?: throw MissingRelevanceException(taskKey, project.projectKey)
+
+                    if (!taskRelevance.relevant) throw TaskIrrelevantException(taskKey, project.projectKey)
+                }
+        }
 
         val irrelevantRemoteProjects = remoteProjects - relevantRemoteProjects
 
         if (delete) irrelevantRemoteProjects.forEach { it.delete() }
 
         return Result(
-                irrelevantExistingInstances,
-                irrelevantTaskHierarchies,
-                irrelevantSchedules,
-                irrelevantNoScheduleOrParents,
-                irrelevantTasks,
-                irrelevantRemoteCustomTimes,
-                irrelevantRemoteProjects.map { it as SharedProject },
+            irrelevantExistingInstances,
+            irrelevantTaskHierarchies,
+            irrelevantSchedules,
+            irrelevantNoScheduleOrParents,
+            irrelevantTasks,
+            irrelevantRemoteCustomTimes,
+            irrelevantRemoteProjects.map { it as SharedProject },
         )
     }
 
@@ -236,4 +256,10 @@ object Irrelevant {
         val irrelevantRemoteCustomTimes: Collection<Time.Custom.Project<*>>,
         val removedSharedProjects: Collection<SharedProject>,
     )
+
+    private class MissingRelevanceException(taskKey: TaskKey, projectKey: ProjectKey<*>) :
+        Exception("missing relevance for $taskKey in $projectKey")
+
+    private class TaskIrrelevantException(taskKey: TaskKey, projectKey: ProjectKey<*>) :
+        Exception("task incorrectly relevant: $taskKey in $projectKey")
 }

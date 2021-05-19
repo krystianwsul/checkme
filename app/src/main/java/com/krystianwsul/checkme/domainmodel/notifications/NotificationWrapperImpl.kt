@@ -26,6 +26,7 @@ import com.krystianwsul.checkme.notifications.NotificationActionReceiver
 import com.krystianwsul.checkme.ticks.AlarmReceiver
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.firebase.models.Instance
+import com.krystianwsul.common.firebase.models.project.SharedProject
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.InstanceKey
@@ -166,19 +167,22 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         if (childNames.isNotEmpty()) {
             text = childNames.joinToString(", ")
 
-            val pair = getInboxStyle(childNames, false)
+            val pair = getInboxStyle(childNames, false, instanceData.project)
             style = pair.first
             styleHash = pair.second
         } else if (!instanceData.note.isNullOrEmpty()) {
-            text = instanceData.note
+            text = listOfNotNull(instanceData.project, instanceData.note).joinToString("\n")
+
             style = {
                 NotificationCompat.BigTextStyle().also { it.bigText(text) }
             }
+
             styleHash = NotificationHash.Style.Text(text)
         } else {
+            text = instanceData.project
+
             val bigPicture = ImageManager.getBigPicture(instanceData.uuid)
             if (bigPicture != null) {
-                text = null
                 style = {
                     NotificationCompat.BigPictureStyle().also {
                         it.bigPicture(bigPicture())
@@ -187,7 +191,6 @@ open class NotificationWrapperImpl : NotificationWrapper() {
                 }
                 styleHash = NotificationHash.Style.Picture(instanceData.uuid!!)
             } else {
-                text = null
                 style = null
                 styleHash = null
             }
@@ -200,14 +203,14 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         val largeIcon = ImageManager.getLargeIcon(instanceData.uuid)
 
         val notificationHash = NotificationHash(
-                instanceData.name,
-                text,
-                notificationId,
-                timeStampLong,
-                styleHash,
-                sortKey,
-                largeIcon?.let { instanceData.uuid!! },
-                null
+            instanceData.name,
+            text,
+            notificationId,
+            timeStampLong,
+            styleHash,
+            sortKey,
+            largeIcon?.let { instanceData.uuid!! },
+            null,
         )
 
         notify(
@@ -259,8 +262,9 @@ open class NotificationWrapperImpl : NotificationWrapper() {
     protected open fun getExtraCount(lines: List<String>, summary: Boolean) = lines.size - maxInboxLines
 
     private fun getInboxStyle(
-            lines: List<String>,
-            summary: Boolean,
+        lines: List<String>,
+        summary: Boolean,
+        extraDescription: String? = null,
     ): Pair<() -> NotificationCompat.InboxStyle, NotificationHash.Style.Inbox> {
         check(lines.isNotEmpty())
 
@@ -276,6 +280,8 @@ open class NotificationWrapperImpl : NotificationWrapper() {
 
         if (extraCount > 0)
             inboxStyle.setSummaryText("+" + extraCount + " " + MyApplication.instance.getString(R.string.more))
+        else if (extraDescription != null)
+            inboxStyle.setSummaryText(extraDescription)
 
         return Pair({ inboxStyle }, NotificationHash.Style.Inbox(finalLines, extraCount))
     }
@@ -584,7 +590,6 @@ open class NotificationWrapperImpl : NotificationWrapper() {
             val silent: Boolean,
             val highPriority: Boolean,
     ) {
-
         val notificationId = instance.notificationId
 
         val instanceKey = instance.instanceKey
@@ -596,13 +601,17 @@ open class NotificationWrapperImpl : NotificationWrapper() {
                 ?.uuid
 
         val timeStampLong = instance.instanceDateTime
-                .timeStamp
-                .long
+            .timeStamp
+            .long
 
         val ordinal = instance.task.ordinal
 
         val name = instance.name
 
         val childNames = getChildNames(instance, now)
+
+        val project = instance.getProject()
+            .takeIf { it is SharedProject }
+            ?.name
     }
 }

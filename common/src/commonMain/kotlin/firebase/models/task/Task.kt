@@ -243,13 +243,12 @@ sealed class Task(
     private fun getExistingInstances(
         startExactTimeStamp: ExactTimeStamp.Offset?,
         endExactTimeStamp: ExactTimeStamp.Offset?,
-        bySchedule: Boolean,
         onlyRoot: Boolean,
     ): Sequence<Instance> {
         return _existingInstances.values
             .asSequence()
             .run { if (onlyRoot) filter { it.isRootInstance() } else this }
-            .map { it.getSequenceDate(bySchedule) to it }
+            .map { it.getSequenceDate(false) to it } // todo project group
             .filterByDateTime(startExactTimeStamp, endExactTimeStamp)
     }
 
@@ -273,7 +272,6 @@ sealed class Task(
         givenStartExactTimeStamp: ExactTimeStamp.Offset?,
         givenEndExactTimeStamp: ExactTimeStamp.Offset?,
         now: ExactTimeStamp.Local,
-        bySchedule: Boolean,
     ): Sequence<Instance> {
         val instanceSequences = parentHierarchyIntervals.map {
             it.taskHierarchy
@@ -287,7 +285,7 @@ sealed class Task(
                 }
         }
 
-        return combineInstanceSequences(instanceSequences, bySchedule)
+        return combineInstanceSequences(instanceSequences)
     }
 
     // contains only generated, root instances that aren't virtual parents
@@ -355,30 +353,13 @@ sealed class Task(
         InterruptionChecker.throwIfInterrupted()
 
         return if (filterVisible && !notDeleted(now) && endData!!.deleteInstances) {
-            getExistingInstances(
-                startExactTimeStamp,
-                endExactTimeStamp,
-                false, // todo project group
-                onlyRoot
-            ).filter { it.done != null }
+            getExistingInstances(startExactTimeStamp, endExactTimeStamp, onlyRoot).filter { it.done != null }
         } else {
             val instanceSequences = mutableListOf<Sequence<Instance>>()
 
-            instanceSequences += getExistingInstances(
-                startExactTimeStamp,
-                endExactTimeStamp,
-                false, // todo project group
-                onlyRoot,
-            )
+            instanceSequences += getExistingInstances(startExactTimeStamp, endExactTimeStamp, onlyRoot)
 
-            if (!onlyRoot) {
-                instanceSequences += getParentInstances(
-                    startExactTimeStamp,
-                    endExactTimeStamp,
-                    now,
-                    false, // todo project group
-                )
-            }
+            if (!onlyRoot) instanceSequences += getParentInstances(startExactTimeStamp, endExactTimeStamp, now)
 
             instanceSequences += getScheduleInstances(startExactTimeStamp, endExactTimeStamp)
 

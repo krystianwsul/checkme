@@ -156,23 +156,28 @@ object RelevanceChecker {
                 val sharedProjectManager = JsSharedProjectManager(databaseWrapper, sharedProjectMap)
 
                 val privateProjects = privateProjectManager.value
-                        .map { PrivateProject(it, userCustomTimeProvider, rootTaskParent) }
-                        .associateBy { it.projectKey }
+                    .map { PrivateProject(it, userCustomTimeProvider, rootTaskParent) }
+                    .associateBy { it.projectKey }
 
                 val sharedProjects = sharedProjectManager.records
-                        .values
-                        .map { SharedProject(it, userCustomTimeProvider, rootTaskParent) }
-                        .associateBy { it.projectKey }
+                    .values
+                    .map { SharedProject(it, userCustomTimeProvider, rootTaskParent) }
+                    .associateBy { it.projectKey }
 
                 projectMap = privateProjects + sharedProjects
+
+                rootTasksByTaskKey.values.forEach {
+                    if (!it.project.projectRecord.rootTaskParentDelegate.rootTaskKeys.contains(it.taskKey))
+                        throw InconsistentRootTaskIdsException(it.taskKey, it.project.projectKey)
+                }
 
                 privateProjects.values.forEach { privateProject ->
                     response += "checking relevance for private project ${privateProject.projectKey}"
 
                     Irrelevant.setIrrelevant(
-                            userCustomTimeRelevances,
-                            privateProject,
-                            ExactTimeStamp.Local.now,
+                        userCustomTimeRelevances,
+                        privateProject,
+                        ExactTimeStamp.Local.now,
                     )
                 }
 
@@ -255,4 +260,7 @@ object RelevanceChecker {
             }
         }
     }
+
+    private class InconsistentRootTaskIdsException(taskKey: TaskKey.Root, projectKey: ProjectKey<*>) :
+        Exception("rootTaskId $taskKey missing from $projectKey")
 }

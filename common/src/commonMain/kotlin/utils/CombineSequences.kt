@@ -1,6 +1,7 @@
 package com.krystianwsul.common.utils
 
 import com.krystianwsul.common.firebase.models.Instance
+import com.krystianwsul.common.time.DateTime
 
 fun <T : Any> combineSequencesGrouping(
         sequences: List<Sequence<T>>,
@@ -47,14 +48,17 @@ fun <T : Any> combineSequences(sequences: List<Sequence<T>>, selector: (List<T?>
 }
 
 fun combineInstanceSequences(instanceSequences: List<Sequence<Instance>>): Sequence<Instance> {
+    data class InstanceInfo(val dateTime: DateTime, val ordinal: Double)
+    data class Entry(val instanceInfo: InstanceInfo?, val index: Int)
+
     return combineSequences(instanceSequences) {
         val finalPair = it.mapIndexed { index, instance ->
-            instance?.let { Pair(it.getSequenceDate(false), it.task.ordinal) } to index
+            Entry(instance?.let { InstanceInfo(it.instanceDateTime, it.task.ordinal) }, index)
         }
-            .filter { it.first != null }
-            .minWithOrNull(compareBy({ it.first!!.first }, { it.first!!.second }))!!
+            .filter { it.instanceInfo != null }
+            .minWithOrNull(compareBy({ it.instanceInfo!!.dateTime }, { it.instanceInfo!!.ordinal }))!!
 
-        finalPair.second
+        finalPair.index
     }
 }
 

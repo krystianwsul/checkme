@@ -248,7 +248,7 @@ sealed class Task(
         return _existingInstances.values
             .asSequence()
             .run { if (onlyRoot) filter { it.isRootInstance() } else this }
-            .map { it.getSequenceDate(false) to it } // todo project group
+            .map { it.instanceDateTime to it }
             .filterByDateTime(startExactTimeStamp, endExactTimeStamp)
     }
 

@@ -491,8 +491,6 @@ class Instance private constructor(val task: Task, private var data: Data) : Ass
         }
     }
 
-    fun getSequenceDate(bySchedule: Boolean) = if (bySchedule) scheduleDateTime else instanceDateTime
-
     fun fixOffsets() {
         done?.let {
             val instanceRecord = (data as Data.Real).instanceRecord

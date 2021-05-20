@@ -78,6 +78,7 @@ class NotDoneInstanceNode(
     override val isDraggable = true
 
     fun initialize(
+        collectionState: CollectionState,
         expandedInstances: Map<InstanceKey, CollectionExpansionState>,
         selected: Boolean,
         selectedInstances: List<InstanceKey>,
@@ -102,7 +103,7 @@ class NotDoneInstanceNode(
         treeNode.setChildTreeNodes(
             nodeCollection.initialize(
                 instanceData.children.values,
-                mapOf(),
+                collectionState,
                 expandedInstances,
                 doneExpansionState,
                 selectedInstances,

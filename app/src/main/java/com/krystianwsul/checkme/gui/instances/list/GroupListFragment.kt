@@ -1027,18 +1027,18 @@ class GroupListFragment @JvmOverloads constructor(
             )
 
             treeNodeCollection.nodes = nodeCollection.initialize(
-                    instanceDatas,
-                    groupListState.groupExpansionStates,
-                    groupListState.instanceExpansionStates,
-                    groupListState.doneExpansionState,
-                    groupListState.selectedInstances,
-                    groupListState.selectedGroups,
-                    taskDatas,
-                    groupListState.unscheduledExpansionState,
-                    groupListState.taskExpansionStates,
-                    groupListState.selectedTaskKeys,
-                    imageState?.let {
-                        ImageNode.ImageData(
+                instanceDatas,
+                groupListState.toCollectionState(),
+                groupListState.instanceExpansionStates,
+                groupListState.doneExpansionState,
+                groupListState.selectedInstances,
+                groupListState.selectedGroups,
+                taskDatas,
+                groupListState.unscheduledExpansionState,
+                groupListState.taskExpansionStates,
+                groupListState.selectedTaskKeys,
+                imageState?.let {
+                    ImageNode.ImageData(
                                 it,
                                 { viewer ->
                                     check(groupListFragment.imageViewerData == null)

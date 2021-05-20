@@ -47,19 +47,22 @@ class DividerNode(
     override val disableRipple = true
 
     fun initialize(
-            initialExpansionState: TreeNode.ExpansionState?,
-            nodeContainer: NodeContainer<AbstractHolder>,
-            doneInstanceDatas: List<GroupListDataWrapper.InstanceData>,
-            expandedInstances: Map<InstanceKey, CollectionExpansionState>,
-            selectedInstances: List<InstanceKey>,
+        initialExpansionState: TreeNode.ExpansionState?,
+        nodeContainer: NodeContainer<AbstractHolder>,
+        doneInstanceDatas: List<GroupListDataWrapper.InstanceData>,
+        collectionState: CollectionState,
+        expandedInstances: Map<InstanceKey, CollectionExpansionState>,
+        selectedInstances: List<InstanceKey>,
     ): TreeNode<AbstractHolder> {
         treeNode = TreeNode(
-                this,
-                nodeContainer,
-                initialExpansionState = initialExpansionState.takeIf { doneInstanceDatas.isNotEmpty() },
+            this,
+            nodeContainer,
+            initialExpansionState = initialExpansionState.takeIf { doneInstanceDatas.isNotEmpty() },
         )
 
-        val childTreeNodes = doneInstanceDatas.map { newChildTreeNode(it, expandedInstances, selectedInstances) }
+        val childTreeNodes = doneInstanceDatas.map {
+            newChildTreeNode(it, collectionState, expandedInstances, selectedInstances)
+        }
 
         treeNode.setChildTreeNodes(childTreeNodes)
 
@@ -67,15 +70,16 @@ class DividerNode(
     }
 
     private fun newChildTreeNode(
-            instanceData: GroupListDataWrapper.InstanceData,
-            expandedInstances: Map<InstanceKey, CollectionExpansionState>,
-            selectedInstances: List<InstanceKey>,
+        instanceData: GroupListDataWrapper.InstanceData,
+        collectionState: CollectionState,
+        expandedInstances: Map<InstanceKey, CollectionExpansionState>,
+        selectedInstances: List<InstanceKey>,
     ): TreeNode<AbstractHolder> {
         checkNotNull(instanceData.done)
 
         val doneInstanceNode = DoneInstanceNode(indentation, instanceData, this)
 
-        val childTreeNode = doneInstanceNode.initialize(treeNode, expandedInstances, selectedInstances)
+        val childTreeNode = doneInstanceNode.initialize(treeNode, collectionState, expandedInstances, selectedInstances)
 
         doneInstanceNodes.add(doneInstanceNode)
 

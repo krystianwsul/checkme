@@ -3,7 +3,6 @@ package com.krystianwsul.checkme.gui.instances.tree
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
 import com.krystianwsul.checkme.gui.utils.flatten
-import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.treeadapter.NodeContainer
 import com.krystianwsul.treeadapter.TreeNode
@@ -24,7 +23,7 @@ class NotDoneGroupCollection(
 
     fun initialize(
         notDoneInstanceDatas: List<GroupListDataWrapper.InstanceData>,
-        expandedGroups: Map<TimeStamp, TreeNode.ExpansionState>,
+        collectionState: CollectionState,
         expandedInstances: Map<InstanceKey, CollectionExpansionState>,
         selectedInstances: List<InstanceKey>,
         selectedGroups: List<Long>,
@@ -34,7 +33,7 @@ class NotDoneGroupCollection(
             .map {
                 newNotDoneGroupNode(
                     it.toMutableList(),
-                    expandedGroups,
+                    collectionState,
                     expandedInstances,
                     selectedInstances,
                     selectedGroups,
@@ -44,7 +43,7 @@ class NotDoneGroupCollection(
         notDoneInstanceDatas.map {
             newNotDoneGroupNode(
                 mutableListOf(it),
-                expandedGroups,
+                collectionState,
                 expandedInstances,
                 selectedInstances,
                 selectedGroups,
@@ -54,7 +53,7 @@ class NotDoneGroupCollection(
 
     private fun newNotDoneGroupNode(
         instanceDatas: MutableList<GroupListDataWrapper.InstanceData>,
-        expandedGroups: Map<TimeStamp, TreeNode.ExpansionState>,
+        collectionState: CollectionState,
         expandedInstances: Map<InstanceKey, CollectionExpansionState>,
         selectedInstances: List<InstanceKey>,
         selectedGroups: List<Long>,
@@ -64,7 +63,7 @@ class NotDoneGroupCollection(
         val notDoneGroupNode = NotDoneGroupNode(indentation, nodeCollection, instanceDatas)
 
         val notDoneGroupTreeNode = notDoneGroupNode.initialize(
-            expandedGroups,
+            collectionState,
             expandedInstances,
             selectedInstances,
             selectedGroups,

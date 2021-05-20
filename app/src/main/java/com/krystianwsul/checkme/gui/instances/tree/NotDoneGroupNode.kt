@@ -25,7 +25,6 @@ import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.HourMinute
-import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.treeadapter.*
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
@@ -96,7 +95,7 @@ class NotDoneGroupNode(
     }
 
     fun initialize(
-        expandedGroups: Map<TimeStamp, TreeNode.ExpansionState>,
+        collectionState: CollectionState,
         expandedInstances: Map<InstanceKey, CollectionExpansionState>,
         selectedInstances: List<InstanceKey>,
         selectedGroups: List<Long>,
@@ -108,7 +107,7 @@ class NotDoneGroupNode(
 
         val (expansionState, doneExpansionState) = instanceData?.let {
             expandedInstances[it.instanceKey] ?: CollectionExpansionState()
-        } ?: CollectionExpansionState(expandedGroups[exactTimeStamp.toTimeStamp()], null)
+        } ?: CollectionExpansionState(collectionState.expandedGroups[exactTimeStamp.toTimeStamp()], null)
 
         val selected = instanceData?.let {
             selectedInstances.contains(it.instanceKey)
@@ -130,7 +129,7 @@ class NotDoneGroupNode(
             treeNode.setChildTreeNodes(
                 singleInstanceNodeCollection!!.initialize(
                     instanceData.children.values,
-                    expandedGroups,
+                    collectionState,
                     expandedInstances,
                     doneExpansionState,
                     selectedInstances,
@@ -147,10 +146,11 @@ class NotDoneGroupNode(
                 instanceDatas.map {
                     newChildTreeNode(
                         it,
+                        collectionState,
                         expandedInstances,
                         selectedInstances.contains(it.instanceKey),
                         selectedInstances,
-                        selectedGroups
+                        selectedGroups,
                     )
                 }
             )
@@ -313,6 +313,7 @@ class NotDoneGroupNode(
 
     private fun newChildTreeNode(
         instanceData: GroupListDataWrapper.InstanceData,
+        collectionState: CollectionState,
         expandedInstances: Map<InstanceKey, CollectionExpansionState>,
         selected: Boolean,
         selectedInstances: List<InstanceKey>,
@@ -326,6 +327,7 @@ class NotDoneGroupNode(
         )
 
         val childTreeNode = notDoneInstanceNode.initialize(
+            collectionState,
             expandedInstances,
             selected,
             selectedInstances,

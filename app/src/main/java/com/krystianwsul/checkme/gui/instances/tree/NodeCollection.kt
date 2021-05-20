@@ -5,7 +5,6 @@ import com.krystianwsul.checkme.gui.instances.list.GroupListFragment
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
 import com.krystianwsul.checkme.gui.tree.DetailsNode
 import com.krystianwsul.checkme.gui.tree.ImageNode
-import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.treeadapter.NodeContainer
@@ -41,7 +40,7 @@ class NodeCollection(
 
     fun initialize(
         instanceDatas: Collection<GroupListDataWrapper.InstanceData>,
-        expandedGroups: Map<TimeStamp, TreeNode.ExpansionState>,
+        collectionState: CollectionState,
         expandedInstances: Map<InstanceKey, CollectionExpansionState>,
         doneExpansionState: TreeNode.ExpansionState?,
         selectedInstances: List<InstanceKey>,
@@ -76,7 +75,7 @@ class NodeCollection(
         treeNodes.addAll(
             notDoneGroupCollection.initialize(
                 notDoneInstanceDatas,
-                expandedGroups,
+                collectionState,
                 expandedInstances,
                 selectedInstances,
                 selectedGroups,
@@ -105,6 +104,7 @@ class NodeCollection(
                 doneExpansionState,
                 nodeContainer,
                 doneInstanceDatas,
+                collectionState,
                 expandedInstances,
                 selectedInstances,
             )

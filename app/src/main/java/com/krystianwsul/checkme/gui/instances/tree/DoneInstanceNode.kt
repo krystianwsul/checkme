@@ -60,19 +60,19 @@ class DoneInstanceNode(
             CheckableDelegate(this),
             MultiLineDelegate(this),
             ThumbnailDelegate(this),
-            IndentationDelegate(this)
+            IndentationDelegate(this),
         )
     }
 
     fun initialize(
         dividerTreeNode: TreeNode<AbstractHolder>,
+        collectionState: CollectionState,
         expandedInstances: Map<InstanceKey, CollectionExpansionState>,
         selectedInstances: List<InstanceKey>,
     ): TreeNode<AbstractHolder> {
         val selected = selectedInstances.contains(instanceData.instanceKey)
 
-        val (expansionState, doneExpansionState) =
-            expandedInstances[instanceData.instanceKey] ?: CollectionExpansionState()
+        val (expansionState, doneExpansionState) = expandedInstances[instanceData.instanceKey] ?: CollectionExpansionState()
 
         treeNode = TreeNode(this, dividerTreeNode, selected, expansionState)
 
@@ -83,13 +83,13 @@ class DoneInstanceNode(
             treeNode,
             instanceData.note,
             this,
-            instanceData.projectInfo
+            instanceData.projectInfo,
         )
 
         treeNode.setChildTreeNodes(
             nodeCollection.initialize(
                 instanceData.children.values,
-                mapOf(),
+                collectionState,
                 expandedInstances,
                 doneExpansionState,
                 listOf(),
@@ -98,7 +98,7 @@ class DoneInstanceNode(
                 null,
                 mapOf(),
                 listOf(),
-                null
+                null,
             )
         )
 
@@ -151,7 +151,7 @@ class DoneInstanceNode(
             indentation,
             true,
             thumbnail != null,
-            true
+            true,
         )
 
     override fun compareTo(other: ModelNode<AbstractHolder>): Int {

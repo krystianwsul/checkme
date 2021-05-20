@@ -10,74 +10,65 @@ import com.krystianwsul.treeadapter.TreeNode
 
 
 class NotDoneGroupCollection(
-        private val indentation: Int,
-        val nodeCollection: NodeCollection,
-        private val nodeContainer: NodeContainer<AbstractHolder>,
+    private val indentation: Int,
+    private val nodeCollection: NodeCollection,
+    private val nodeContainer: NodeContainer<AbstractHolder>,
 ) {
 
     private val notDoneGroupNodes = mutableListOf<NotDoneGroupNode>()
 
     val groupExpansionStates
         get() = notDoneGroupNodes.filter { !it.singleInstance() }
-                .map { it.exactTimeStamp.toTimeStamp() to it.expansionState }
-                .toMap()
+            .map { it.exactTimeStamp.toTimeStamp() to it.expansionState }
+            .toMap()
 
     fun initialize(
-            notDoneInstanceDatas: List<GroupListDataWrapper.InstanceData>,
-            expandedGroups: Map<TimeStamp, TreeNode.ExpansionState>,
-            expandedInstances: Map<InstanceKey, CollectionExpansionState>,
-            selectedInstances: List<InstanceKey>,
-            selectedGroups: List<Long>,
+        notDoneInstanceDatas: List<GroupListDataWrapper.InstanceData>,
+        expandedGroups: Map<TimeStamp, TreeNode.ExpansionState>,
+        expandedInstances: Map<InstanceKey, CollectionExpansionState>,
+        selectedInstances: List<InstanceKey>,
+        selectedGroups: List<Long>,
     ) = if (nodeCollection.useGroups) {
         notDoneInstanceDatas.groupBy { it.instanceTimeStamp }
-                .values
-                .map {
-                    newNotDoneGroupNode(
-                            this,
-                            it.toMutableList(),
-                            expandedGroups,
-                            expandedInstances,
-                            selectedInstances,
-                            selectedGroups
-                    )
-                }
-    } else {
-        notDoneInstanceDatas.map {
-            newNotDoneGroupNode(
-                    this,
-                    mutableListOf(it),
+            .values
+            .map {
+                newNotDoneGroupNode(
+                    it.toMutableList(),
                     expandedGroups,
                     expandedInstances,
                     selectedInstances,
-                    selectedGroups
+                    selectedGroups,
+                )
+            }
+    } else {
+        notDoneInstanceDatas.map {
+            newNotDoneGroupNode(
+                mutableListOf(it),
+                expandedGroups,
+                expandedInstances,
+                selectedInstances,
+                selectedGroups,
             )
         }
     }
 
     private fun newNotDoneGroupNode(
-            notDoneGroupCollection: NotDoneGroupCollection,
-            instanceDatas: MutableList<GroupListDataWrapper.InstanceData>,
-            expandedGroups: Map<TimeStamp, TreeNode.ExpansionState>,
-            expandedInstances: Map<InstanceKey, CollectionExpansionState>,
-            selectedInstances: List<InstanceKey>,
-            selectedGroups: List<Long>,
+        instanceDatas: MutableList<GroupListDataWrapper.InstanceData>,
+        expandedGroups: Map<TimeStamp, TreeNode.ExpansionState>,
+        expandedInstances: Map<InstanceKey, CollectionExpansionState>,
+        selectedInstances: List<InstanceKey>,
+        selectedGroups: List<Long>,
     ): TreeNode<AbstractHolder> {
         check(instanceDatas.isNotEmpty())
 
-        val notDoneGroupNode = NotDoneGroupNode(
-                indentation,
-                notDoneGroupCollection,
-                instanceDatas,
-                nodeCollection.searchResults,
-                nodeCollection.parentNode
-        )
+        val notDoneGroupNode = NotDoneGroupNode(indentation, nodeCollection, instanceDatas)
 
         val notDoneGroupTreeNode = notDoneGroupNode.initialize(
-                expandedGroups,
-                expandedInstances,
-                selectedInstances,
-                selectedGroups,
-                nodeContainer
+            expandedGroups,
+            expandedInstances,
+            selectedInstances,
+            selectedGroups,
+            nodeContainer,
         )
 
         notDoneGroupNodes.add(notDoneGroupNode)

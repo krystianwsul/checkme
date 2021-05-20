@@ -35,10 +35,8 @@ import java.util.*
 
 class NotDoneGroupNode(
     override val indentation: Int,
-    private val notDoneGroupCollection: NotDoneGroupCollection,
+    private val nodeCollection: NodeCollection,
     val instanceDatas: MutableList<GroupListDataWrapper.InstanceData>,
-    private val searchResults: Boolean,
-    override val parentNode: ModelNode<AbstractHolder>?,
 ) :
     AbstractModelNode(),
     NodeCollectionParent,
@@ -48,6 +46,8 @@ class NotDoneGroupNode(
     ThumbnailModelNode,
     IndentationModelNode,
     DetailsNode.Parent {
+
+    override val parentNode get() = nodeCollection.parentNode
 
     public override lateinit var treeNode: TreeNode<AbstractHolder>
         private set
@@ -61,8 +61,6 @@ class NotDoneGroupNode(
     val exactTimeStamp: ExactTimeStamp.Local
 
     val singleInstanceData get() = instanceDatas.single()
-
-    private val nodeCollection get() = notDoneGroupCollection.nodeCollection
 
     private val groupListFragment get() = groupAdapter.groupListFragment
 
@@ -308,7 +306,7 @@ class NotDoneGroupNode(
                 singleInstanceData.compareTo(other.singleInstanceData)
             }
         }
-        is UnscheduledNode -> if (searchResults) 1 else -1
+        is UnscheduledNode -> if (nodeCollection.searchResults) 1 else -1
         is DividerNode -> -1
         else -> throw IllegalArgumentException()
     }

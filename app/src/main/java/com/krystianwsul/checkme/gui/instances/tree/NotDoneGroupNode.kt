@@ -97,7 +97,6 @@ class NotDoneGroupNode(
     fun initialize(
         collectionState: CollectionState,
         selectedInstances: List<InstanceKey>,
-        selectedGroups: List<Long>,
         nodeContainer: NodeContainer<AbstractHolder>,
     ): TreeNode<AbstractHolder> {
         check(instanceDatas.isNotEmpty())
@@ -110,7 +109,7 @@ class NotDoneGroupNode(
 
         val selected = instanceData?.let {
             selectedInstances.contains(it.instanceKey)
-        } ?: selectedGroups.contains(exactTimeStamp.long)
+        } ?: collectionState.selectedGroups.contains(exactTimeStamp.long)
 
         treeNode = TreeNode(this, nodeContainer, selected, expansionState)
 
@@ -131,7 +130,6 @@ class NotDoneGroupNode(
                     collectionState,
                     doneExpansionState,
                     selectedInstances,
-                    selectedGroups,
                     listOf(),
                     null,
                     mapOf(),
@@ -147,7 +145,6 @@ class NotDoneGroupNode(
                         collectionState,
                         selectedInstances.contains(it.instanceKey),
                         selectedInstances,
-                        selectedGroups,
                     )
                 }
             )
@@ -313,7 +310,6 @@ class NotDoneGroupNode(
         collectionState: CollectionState,
         selected: Boolean,
         selectedInstances: List<InstanceKey>,
-        selectedGroups: List<Long>,
     ): TreeNode<AbstractHolder> {
         val notDoneInstanceNode = NotDoneInstanceNode(
             indentation,
@@ -326,7 +322,6 @@ class NotDoneGroupNode(
             collectionState,
             selected,
             selectedInstances,
-            selectedGroups,
             treeNode,
         )
 

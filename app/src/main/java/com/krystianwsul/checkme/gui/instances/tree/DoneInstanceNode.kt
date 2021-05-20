@@ -93,7 +93,6 @@ class DoneInstanceNode(
                 doneExpansionState,
                 listOf(),
                 listOf(),
-                listOf(),
                 null,
                 mapOf(),
                 listOf(),

@@ -25,45 +25,24 @@ class NotDoneGroupCollection(
         notDoneInstanceDatas: List<GroupListDataWrapper.InstanceData>,
         collectionState: CollectionState,
         selectedInstances: List<InstanceKey>,
-        selectedGroups: List<Long>,
     ) = if (nodeCollection.useGroups) {
         notDoneInstanceDatas.groupBy { it.instanceTimeStamp }
             .values
-            .map {
-                newNotDoneGroupNode(
-                    it.toMutableList(),
-                    collectionState,
-                    selectedInstances,
-                    selectedGroups,
-                )
-            }
+            .map { newNotDoneGroupNode(it.toMutableList(), collectionState, selectedInstances) }
     } else {
-        notDoneInstanceDatas.map {
-            newNotDoneGroupNode(
-                mutableListOf(it),
-                collectionState,
-                selectedInstances,
-                selectedGroups,
-            )
-        }
+        notDoneInstanceDatas.map { newNotDoneGroupNode(mutableListOf(it), collectionState, selectedInstances) }
     }
 
     private fun newNotDoneGroupNode(
         instanceDatas: MutableList<GroupListDataWrapper.InstanceData>,
         collectionState: CollectionState,
         selectedInstances: List<InstanceKey>,
-        selectedGroups: List<Long>,
     ): TreeNode<AbstractHolder> {
         check(instanceDatas.isNotEmpty())
 
         val notDoneGroupNode = NotDoneGroupNode(indentation, nodeCollection, instanceDatas)
 
-        val notDoneGroupTreeNode = notDoneGroupNode.initialize(
-            collectionState,
-            selectedInstances,
-            selectedGroups,
-            nodeContainer,
-        )
+        val notDoneGroupTreeNode = notDoneGroupNode.initialize(collectionState, selectedInstances, nodeContainer)
 
         notDoneGroupNodes.add(notDoneGroupNode)
 

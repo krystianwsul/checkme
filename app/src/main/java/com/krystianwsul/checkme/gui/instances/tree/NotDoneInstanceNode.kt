@@ -81,7 +81,6 @@ class NotDoneInstanceNode(
         collectionState: CollectionState,
         selected: Boolean,
         selectedInstances: List<InstanceKey>,
-        selectedGroups: List<Long>,
         notDoneGroupTreeNode: TreeNode<AbstractHolder>,
     ): TreeNode<AbstractHolder> {
         val (expansionState, doneExpansionState) =
@@ -105,7 +104,6 @@ class NotDoneInstanceNode(
                 collectionState,
                 doneExpansionState,
                 selectedInstances,
-                selectedGroups,
                 listOf(),
                 null,
                 mapOf(),

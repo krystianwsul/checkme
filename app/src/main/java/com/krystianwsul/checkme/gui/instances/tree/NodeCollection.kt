@@ -43,7 +43,6 @@ class NodeCollection(
         collectionState: CollectionState,
         doneExpansionState: TreeNode.ExpansionState?,
         selectedInstances: List<InstanceKey>,
-        selectedGroups: List<Long>,
         taskDatas: List<GroupListDataWrapper.TaskData>,
         unscheduledExpansionState: TreeNode.ExpansionState?,
         taskExpansionStates: Map<TaskKey, TreeNode.ExpansionState>,
@@ -72,12 +71,7 @@ class NodeCollection(
         notDoneGroupCollection = NotDoneGroupCollection(indentation, this, nodeContainer)
 
         treeNodes.addAll(
-            notDoneGroupCollection.initialize(
-                notDoneInstanceDatas,
-                collectionState,
-                selectedInstances,
-                selectedGroups,
-            )
+            notDoneGroupCollection.initialize(notDoneInstanceDatas, collectionState, selectedInstances)
         )
 
         check(indentation == 0 || taskDatas.isEmpty())

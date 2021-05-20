@@ -2,7 +2,9 @@ package com.krystianwsul.checkme.gui.instances.tree
 
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.instances.list.GroupListFragment
-import com.krystianwsul.checkme.gui.tree.*
+import com.krystianwsul.checkme.gui.tree.AbstractHolder
+import com.krystianwsul.checkme.gui.tree.DetailsNode
+import com.krystianwsul.checkme.gui.tree.ImageNode
 import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.TaskKey
@@ -50,72 +52,66 @@ class NodeCollection(
         selectedTaskKeys: List<TaskKey>,
         imageData: ImageNode.ImageData?,
     ): List<TreeNode<AbstractHolder>> {
-        fun GroupListDataWrapper.InstanceData.filterNotDone() = done == null || !useDoneNode
-        val notDoneInstanceDatas = instanceDatas.filter { it.filterNotDone() }
-        val doneInstanceDatas = instanceDatas.filterNot { it.filterNotDone() }
+        val (notDoneInstanceDatas, doneInstanceDatas) = instanceDatas.partition { it.done == null || !useDoneNode }
 
-        return mutableListOf<TreeNode<AbstractHolder>>().apply {
-            add(
-                DetailsNode(
-                    projectInfo,
-                    note,
-                    parentNode,
-                    indentation,
-                ).initialize(nodeContainer)
-            )
+        val treeNodes = mutableListOf<TreeNode<AbstractHolder>>()
 
-            imageData?.let {
-                check(indentation == 0)
-
-                add(ImageNode(it, parentNode).initialize(nodeContainer))
-            }
-
-            notDoneGroupCollection = NotDoneGroupCollection(
+        treeNodes.add(
+            DetailsNode(
+                projectInfo,
+                note,
+                parentNode,
                 indentation,
-                this@NodeCollection,
-                nodeContainer
+            ).initialize(nodeContainer)
+        )
+
+        imageData?.let {
+            check(indentation == 0)
+
+            treeNodes.add(ImageNode(it, parentNode).initialize(nodeContainer))
+        }
+
+        notDoneGroupCollection = NotDoneGroupCollection(indentation, this, nodeContainer)
+
+        treeNodes.addAll(
+            notDoneGroupCollection.initialize(
+                notDoneInstanceDatas,
+                expandedGroups,
+                expandedInstances,
+                selectedInstances,
+                selectedGroups,
             )
+        )
 
-            addAll(
-                notDoneGroupCollection.initialize(
-                    notDoneInstanceDatas,
-                    expandedGroups,
-                    expandedInstances,
-                    selectedInstances,
-                    selectedGroups
-                )
-            )
+        check(indentation == 0 || taskDatas.isEmpty())
+        if (taskDatas.isNotEmpty()) {
+            unscheduledNode = UnscheduledNode(this, searchResults)
 
-            check(indentation == 0 || taskDatas.isEmpty())
-            if (taskDatas.isNotEmpty()) {
-                unscheduledNode = UnscheduledNode(this@NodeCollection, searchResults)
-
-                add(
-                    unscheduledNode!!.initialize(
-                        unscheduledExpansionState,
-                        nodeContainer,
-                        taskDatas,
-                        taskExpansionStates,
-                        selectedTaskKeys
-                    )
-                )
-            }
-
-            dividerNode = DividerNode(indentation, this@NodeCollection, parentNode)
-
-            add(
-                dividerNode.initialize(
-                    doneExpansionState,
+            treeNodes.add(
+                unscheduledNode!!.initialize(
+                    unscheduledExpansionState,
                     nodeContainer,
-                    doneInstanceDatas,
-                    expandedInstances,
-                    selectedInstances
+                    taskDatas,
+                    taskExpansionStates,
+                    selectedTaskKeys,
                 )
             )
         }
+
+        dividerNode = DividerNode(indentation, this, parentNode)
+
+        treeNodes.add(
+            dividerNode.initialize(
+                doneExpansionState,
+                nodeContainer,
+                doneInstanceDatas,
+                expandedInstances,
+                selectedInstances,
+            )
+        )
+
+        return treeNodes
     }
 
-    val instanceExpansionStates
-        get() =
-            notDoneGroupCollection.instanceExpansionStates + dividerNode.instanceExpansionStates
+    val instanceExpansionStates get() = notDoneGroupCollection.instanceExpansionStates + dividerNode.instanceExpansionStates
 }

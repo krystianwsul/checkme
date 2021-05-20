@@ -23,7 +23,6 @@ import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.checkme.firebase.roottask.RootTasksFactory
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
-import com.krystianwsul.checkme.utils.checkError
 import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.criteria.SearchCriteria
@@ -681,12 +680,16 @@ class DomainFactory(
                     },
             )
 
-            val childTaskHierarchies = startTask.getChildTaskHierarchies(now).associateBy { it.taskHierarchyKey }
+            val childTaskHierarchies = startTask.getChildTaskHierarchies(now)
+            val parentTaskHierarchies = startTask.parentTaskHierarchies
 
-            projectToRootConversion.startTaskHierarchies.putAll(childTaskHierarchies)
+            val taskHierarchyMap = (childTaskHierarchies + parentTaskHierarchies).associateBy { it.taskHierarchyKey }
+            val newTaskHierarchyMap = taskHierarchyMap - projectToRootConversion.startTaskHierarchies.keys
 
-            childTaskHierarchies.values
-                .map { it.childTask }
+            projectToRootConversion.startTaskHierarchies.putAll(newTaskHierarchyMap)
+
+            newTaskHierarchyMap.values
+                .flatMap { listOf(it.parentTask, it.childTask) }
                 .forEach {
                     it.requireCurrent(now)
 

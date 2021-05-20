@@ -90,8 +90,6 @@ class NotDoneGroupNode(
             .distinct()
             .single()
             .toLocalExactTimeStamp()
-
-        check(instanceDatas.all { it.instanceTimeStamp.toLocalExactTimeStamp() == exactTimeStamp })
     }
 
     fun initialize(

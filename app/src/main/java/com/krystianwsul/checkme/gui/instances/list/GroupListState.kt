@@ -21,5 +21,6 @@ data class GroupListState(
         val selectedTaskKeys: List<TaskKey> = listOf(),
 ) : Parcelable {
 
-        fun toCollectionState() = CollectionState(groupExpansionStates, instanceExpansionStates, selectedGroups)
+        fun toCollectionState() =
+                CollectionState(groupExpansionStates, instanceExpansionStates, selectedGroups, selectedInstances)
 }

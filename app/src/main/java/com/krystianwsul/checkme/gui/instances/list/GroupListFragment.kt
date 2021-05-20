@@ -1030,7 +1030,6 @@ class GroupListFragment @JvmOverloads constructor(
                 instanceDatas,
                 groupListState.toCollectionState(),
                 groupListState.doneExpansionState,
-                groupListState.selectedInstances,
                 taskDatas,
                 groupListState.unscheduledExpansionState,
                 groupListState.taskExpansionStates,

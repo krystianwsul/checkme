@@ -5,7 +5,6 @@ import com.krystianwsul.checkme.gui.instances.list.GroupListFragment
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
 import com.krystianwsul.checkme.gui.tree.DetailsNode
 import com.krystianwsul.checkme.gui.tree.ImageNode
-import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.treeadapter.NodeContainer
 import com.krystianwsul.treeadapter.TreeNode
@@ -42,7 +41,6 @@ class NodeCollection(
         instanceDatas: Collection<GroupListDataWrapper.InstanceData>,
         collectionState: CollectionState,
         doneExpansionState: TreeNode.ExpansionState?,
-        selectedInstances: List<InstanceKey>,
         taskDatas: List<GroupListDataWrapper.TaskData>,
         unscheduledExpansionState: TreeNode.ExpansionState?,
         taskExpansionStates: Map<TaskKey, TreeNode.ExpansionState>,
@@ -53,52 +51,43 @@ class NodeCollection(
 
         val treeNodes = mutableListOf<TreeNode<AbstractHolder>>()
 
-        treeNodes.add(
-            DetailsNode(
-                projectInfo,
-                note,
-                parentNode,
-                indentation,
-            ).initialize(nodeContainer)
-        )
+        treeNodes += DetailsNode(
+            projectInfo,
+            note,
+            parentNode,
+            indentation,
+        ).initialize(nodeContainer)
 
         imageData?.let {
             check(indentation == 0)
 
-            treeNodes.add(ImageNode(it, parentNode).initialize(nodeContainer))
+            treeNodes += ImageNode(it, parentNode).initialize(nodeContainer)
         }
 
         notDoneGroupCollection = NotDoneGroupCollection(indentation, this, nodeContainer)
 
-        treeNodes.addAll(
-            notDoneGroupCollection.initialize(notDoneInstanceDatas, collectionState, selectedInstances)
-        )
+        treeNodes += notDoneGroupCollection.initialize(notDoneInstanceDatas, collectionState)
 
         check(indentation == 0 || taskDatas.isEmpty())
         if (taskDatas.isNotEmpty()) {
             unscheduledNode = UnscheduledNode(this, searchResults)
 
-            treeNodes.add(
-                unscheduledNode!!.initialize(
-                    unscheduledExpansionState,
-                    nodeContainer,
-                    taskDatas,
-                    taskExpansionStates,
-                    selectedTaskKeys,
-                )
+            treeNodes += unscheduledNode!!.initialize(
+                unscheduledExpansionState,
+                nodeContainer,
+                taskDatas,
+                taskExpansionStates,
+                selectedTaskKeys,
             )
         }
 
         dividerNode = DividerNode(indentation, this, parentNode)
 
-        treeNodes.add(
-            dividerNode.initialize(
-                doneExpansionState,
-                nodeContainer,
-                doneInstanceDatas,
-                collectionState,
-                selectedInstances,
-            )
+        treeNodes += dividerNode.initialize(
+            doneExpansionState,
+            nodeContainer,
+            doneInstanceDatas,
+            collectionState,
         )
 
         return treeNodes

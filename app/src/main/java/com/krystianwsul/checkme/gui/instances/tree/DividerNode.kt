@@ -9,7 +9,6 @@ import com.krystianwsul.checkme.gui.tree.delegates.indentation.IndentationModelN
 import com.krystianwsul.checkme.gui.tree.delegates.singleline.SingleLineDelegate
 import com.krystianwsul.checkme.gui.tree.delegates.singleline.SingleLineModelNode
 import com.krystianwsul.checkme.gui.utils.flatten
-import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.NodeContainer
 import com.krystianwsul.treeadapter.TreeNode
@@ -51,7 +50,6 @@ class DividerNode(
         nodeContainer: NodeContainer<AbstractHolder>,
         doneInstanceDatas: List<GroupListDataWrapper.InstanceData>,
         collectionState: CollectionState,
-        selectedInstances: List<InstanceKey>,
     ): TreeNode<AbstractHolder> {
         treeNode = TreeNode(
             this,
@@ -59,7 +57,7 @@ class DividerNode(
             initialExpansionState = initialExpansionState.takeIf { doneInstanceDatas.isNotEmpty() },
         )
 
-        val childTreeNodes = doneInstanceDatas.map { newChildTreeNode(it, collectionState, selectedInstances) }
+        val childTreeNodes = doneInstanceDatas.map { newChildTreeNode(it, collectionState) }
 
         treeNode.setChildTreeNodes(childTreeNodes)
 
@@ -69,13 +67,12 @@ class DividerNode(
     private fun newChildTreeNode(
         instanceData: GroupListDataWrapper.InstanceData,
         collectionState: CollectionState,
-        selectedInstances: List<InstanceKey>,
     ): TreeNode<AbstractHolder> {
         checkNotNull(instanceData.done)
 
         val doneInstanceNode = DoneInstanceNode(indentation, instanceData, this)
 
-        val childTreeNode = doneInstanceNode.initialize(treeNode, collectionState, selectedInstances)
+        val childTreeNode = doneInstanceNode.initialize(treeNode, collectionState)
 
         doneInstanceNodes.add(doneInstanceNode)
 

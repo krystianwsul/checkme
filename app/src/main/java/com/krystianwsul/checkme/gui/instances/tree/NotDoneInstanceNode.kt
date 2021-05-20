@@ -80,7 +80,6 @@ class NotDoneInstanceNode(
     fun initialize(
         collectionState: CollectionState,
         selected: Boolean,
-        selectedInstances: List<InstanceKey>,
         notDoneGroupTreeNode: TreeNode<AbstractHolder>,
     ): TreeNode<AbstractHolder> {
         val (expansionState, doneExpansionState) =
@@ -103,7 +102,6 @@ class NotDoneInstanceNode(
                 instanceData.children.values,
                 collectionState,
                 doneExpansionState,
-                selectedInstances,
                 listOf(),
                 null,
                 mapOf(),

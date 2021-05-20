@@ -96,7 +96,6 @@ class NotDoneGroupNode(
 
     fun initialize(
         collectionState: CollectionState,
-        expandedInstances: Map<InstanceKey, CollectionExpansionState>,
         selectedInstances: List<InstanceKey>,
         selectedGroups: List<Long>,
         nodeContainer: NodeContainer<AbstractHolder>,
@@ -106,7 +105,7 @@ class NotDoneGroupNode(
         val instanceData = instanceDatas.singleOrNull()
 
         val (expansionState, doneExpansionState) = instanceData?.let {
-            expandedInstances[it.instanceKey] ?: CollectionExpansionState()
+            collectionState.expandedInstances[it.instanceKey] ?: CollectionExpansionState()
         } ?: CollectionExpansionState(collectionState.expandedGroups[exactTimeStamp.toTimeStamp()], null)
 
         val selected = instanceData?.let {
@@ -130,7 +129,6 @@ class NotDoneGroupNode(
                 singleInstanceNodeCollection!!.initialize(
                     instanceData.children.values,
                     collectionState,
-                    expandedInstances,
                     doneExpansionState,
                     selectedInstances,
                     selectedGroups,
@@ -138,7 +136,7 @@ class NotDoneGroupNode(
                     null,
                     mapOf(),
                     listOf(),
-                    null
+                    null,
                 )
             )
         } else {
@@ -147,7 +145,6 @@ class NotDoneGroupNode(
                     newChildTreeNode(
                         it,
                         collectionState,
-                        expandedInstances,
                         selectedInstances.contains(it.instanceKey),
                         selectedInstances,
                         selectedGroups,
@@ -314,7 +311,6 @@ class NotDoneGroupNode(
     private fun newChildTreeNode(
         instanceData: GroupListDataWrapper.InstanceData,
         collectionState: CollectionState,
-        expandedInstances: Map<InstanceKey, CollectionExpansionState>,
         selected: Boolean,
         selectedInstances: List<InstanceKey>,
         selectedGroups: List<Long>,
@@ -328,7 +324,6 @@ class NotDoneGroupNode(
 
         val childTreeNode = notDoneInstanceNode.initialize(
             collectionState,
-            expandedInstances,
             selected,
             selectedInstances,
             selectedGroups,

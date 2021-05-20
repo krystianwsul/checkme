@@ -24,7 +24,6 @@ class NotDoneGroupCollection(
     fun initialize(
         notDoneInstanceDatas: List<GroupListDataWrapper.InstanceData>,
         collectionState: CollectionState,
-        expandedInstances: Map<InstanceKey, CollectionExpansionState>,
         selectedInstances: List<InstanceKey>,
         selectedGroups: List<Long>,
     ) = if (nodeCollection.useGroups) {
@@ -34,7 +33,6 @@ class NotDoneGroupCollection(
                 newNotDoneGroupNode(
                     it.toMutableList(),
                     collectionState,
-                    expandedInstances,
                     selectedInstances,
                     selectedGroups,
                 )
@@ -44,7 +42,6 @@ class NotDoneGroupCollection(
             newNotDoneGroupNode(
                 mutableListOf(it),
                 collectionState,
-                expandedInstances,
                 selectedInstances,
                 selectedGroups,
             )
@@ -54,7 +51,6 @@ class NotDoneGroupCollection(
     private fun newNotDoneGroupNode(
         instanceDatas: MutableList<GroupListDataWrapper.InstanceData>,
         collectionState: CollectionState,
-        expandedInstances: Map<InstanceKey, CollectionExpansionState>,
         selectedInstances: List<InstanceKey>,
         selectedGroups: List<Long>,
     ): TreeNode<AbstractHolder> {
@@ -64,7 +60,6 @@ class NotDoneGroupCollection(
 
         val notDoneGroupTreeNode = notDoneGroupNode.initialize(
             collectionState,
-            expandedInstances,
             selectedInstances,
             selectedGroups,
             nodeContainer,

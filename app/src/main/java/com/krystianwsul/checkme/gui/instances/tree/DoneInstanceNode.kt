@@ -67,12 +67,12 @@ class DoneInstanceNode(
     fun initialize(
         dividerTreeNode: TreeNode<AbstractHolder>,
         collectionState: CollectionState,
-        expandedInstances: Map<InstanceKey, CollectionExpansionState>,
         selectedInstances: List<InstanceKey>,
     ): TreeNode<AbstractHolder> {
         val selected = selectedInstances.contains(instanceData.instanceKey)
 
-        val (expansionState, doneExpansionState) = expandedInstances[instanceData.instanceKey] ?: CollectionExpansionState()
+        val (expansionState, doneExpansionState) =
+            collectionState.expandedInstances[instanceData.instanceKey] ?: CollectionExpansionState()
 
         treeNode = TreeNode(this, dividerTreeNode, selected, expansionState)
 
@@ -90,7 +90,6 @@ class DoneInstanceNode(
             nodeCollection.initialize(
                 instanceData.children.values,
                 collectionState,
-                expandedInstances,
                 doneExpansionState,
                 listOf(),
                 listOf(),

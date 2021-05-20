@@ -41,7 +41,6 @@ class NodeCollection(
     fun initialize(
         instanceDatas: Collection<GroupListDataWrapper.InstanceData>,
         collectionState: CollectionState,
-        expandedInstances: Map<InstanceKey, CollectionExpansionState>,
         doneExpansionState: TreeNode.ExpansionState?,
         selectedInstances: List<InstanceKey>,
         selectedGroups: List<Long>,
@@ -76,7 +75,6 @@ class NodeCollection(
             notDoneGroupCollection.initialize(
                 notDoneInstanceDatas,
                 collectionState,
-                expandedInstances,
                 selectedInstances,
                 selectedGroups,
             )
@@ -105,7 +103,6 @@ class NodeCollection(
                 nodeContainer,
                 doneInstanceDatas,
                 collectionState,
-                expandedInstances,
                 selectedInstances,
             )
         )

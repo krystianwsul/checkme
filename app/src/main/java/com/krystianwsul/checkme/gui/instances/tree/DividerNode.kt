@@ -51,7 +51,6 @@ class DividerNode(
         nodeContainer: NodeContainer<AbstractHolder>,
         doneInstanceDatas: List<GroupListDataWrapper.InstanceData>,
         collectionState: CollectionState,
-        expandedInstances: Map<InstanceKey, CollectionExpansionState>,
         selectedInstances: List<InstanceKey>,
     ): TreeNode<AbstractHolder> {
         treeNode = TreeNode(
@@ -60,9 +59,7 @@ class DividerNode(
             initialExpansionState = initialExpansionState.takeIf { doneInstanceDatas.isNotEmpty() },
         )
 
-        val childTreeNodes = doneInstanceDatas.map {
-            newChildTreeNode(it, collectionState, expandedInstances, selectedInstances)
-        }
+        val childTreeNodes = doneInstanceDatas.map { newChildTreeNode(it, collectionState, selectedInstances) }
 
         treeNode.setChildTreeNodes(childTreeNodes)
 
@@ -72,14 +69,13 @@ class DividerNode(
     private fun newChildTreeNode(
         instanceData: GroupListDataWrapper.InstanceData,
         collectionState: CollectionState,
-        expandedInstances: Map<InstanceKey, CollectionExpansionState>,
         selectedInstances: List<InstanceKey>,
     ): TreeNode<AbstractHolder> {
         checkNotNull(instanceData.done)
 
         val doneInstanceNode = DoneInstanceNode(indentation, instanceData, this)
 
-        val childTreeNode = doneInstanceNode.initialize(treeNode, collectionState, expandedInstances, selectedInstances)
+        val childTreeNode = doneInstanceNode.initialize(treeNode, collectionState, selectedInstances)
 
         doneInstanceNodes.add(doneInstanceNode)
 

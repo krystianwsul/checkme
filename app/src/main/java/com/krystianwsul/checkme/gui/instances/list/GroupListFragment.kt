@@ -1029,7 +1029,6 @@ class GroupListFragment @JvmOverloads constructor(
             treeNodeCollection.nodes = nodeCollection.initialize(
                 instanceDatas,
                 groupListState.toCollectionState(),
-                groupListState.instanceExpansionStates,
                 groupListState.doneExpansionState,
                 groupListState.selectedInstances,
                 groupListState.selectedGroups,

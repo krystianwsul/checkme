@@ -5,7 +5,6 @@ import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.extensions.setInstanceDone
 import com.krystianwsul.checkme.domainmodel.extensions.setOrdinal
 import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
-import com.krystianwsul.checkme.gui.instances.ShowInstanceActivity
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.instances.list.GroupListFragment
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
@@ -61,7 +60,11 @@ class NotDoneInstanceNode(
             instanceData.projectInfo,
         )
 
-        (contentDelegate as ContentDelegate.Instance).initialize(treeNode, nodeCollection) // todo project contentDelegate
+        (contentDelegate as ContentDelegate.Instance).initialize(
+            groupAdapter,
+            treeNode,
+            nodeCollection
+        ) // todo project contentDelegate
 
         treeNode.setChildTreeNodes(
             nodeCollection.initialize(
@@ -104,14 +107,6 @@ class NotDoneInstanceNode(
                     .addTo(groupListFragment.attachedToWindowDisposable)
             }
         }
-
-    override fun onClick(holder: AbstractHolder) =
-        groupListFragment.activity.startActivity(
-            ShowInstanceActivity.getIntent(
-                groupListFragment.activity,
-                instanceData.instanceKey,
-            )
-        )
 
     override fun compareTo(other: ModelNode<AbstractHolder>) =
         instanceData.compareTo((other as NotDoneInstanceNode).instanceData)

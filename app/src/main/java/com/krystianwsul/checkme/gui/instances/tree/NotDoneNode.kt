@@ -1,6 +1,8 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
 import com.krystianwsul.checkme.R
+import com.krystianwsul.checkme.gui.instances.ShowGroupActivity
+import com.krystianwsul.checkme.gui.instances.ShowInstanceActivity
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.instances.list.GroupListFragment
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
@@ -58,20 +60,32 @@ sealed class NotDoneNode(protected val contentDelegate: ContentDelegate) :
 
     val instanceExpansionStates get() = contentDelegate.instanceExpansionStates
 
+    final override fun onClick(holder: AbstractHolder) = contentDelegate.onClick(holder)
+
     protected sealed class ContentDelegate {
 
-        abstract val rowsDelegate: DetailsNode.ProjectRowsDelegate
+        protected abstract val groupAdapter: GroupListFragment.GroupAdapter
+        protected val groupListFragment get() = groupAdapter.groupListFragment
 
+        abstract val rowsDelegate: DetailsNode.ProjectRowsDelegate
         abstract val instanceExpansionStates: Map<InstanceKey, CollectionExpansionState>
+
+        abstract fun onClick(holder: AbstractHolder)
 
         class Instance(private val instanceData: GroupListDataWrapper.InstanceData) : ContentDelegate() {
 
+            override lateinit var groupAdapter: GroupListFragment.GroupAdapter
             private lateinit var treeNode: TreeNode<*>
             private lateinit var nodeCollection: NodeCollection
 
             override val rowsDelegate = InstanceRowsDelegate(instanceData)
 
-            fun initialize(treeNode: TreeNode<*>, nodeCollection: NodeCollection) {
+            fun initialize(
+                groupAdapter: GroupListFragment.GroupAdapter,
+                treeNode: TreeNode<*>,
+                nodeCollection: NodeCollection,
+            ) {
+                this.groupAdapter = groupAdapter
                 this.treeNode = treeNode
                 this.nodeCollection = nodeCollection
             }
@@ -86,10 +100,14 @@ sealed class NotDoneNode(protected val contentDelegate: ContentDelegate) :
                     return mapOf(instanceData.instanceKey to collectionExpansionState) +
                             nodeCollection.instanceExpansionStates
                 }
+
+            override fun onClick(holder: AbstractHolder) = groupListFragment.activity.let {
+                it.startActivity(ShowInstanceActivity.getIntent(it, instanceData.instanceKey))
+            }
         }
 
         class Group(
-            groupAdapter: GroupListFragment.GroupAdapter,
+            override val groupAdapter: GroupListFragment.GroupAdapter,
             instanceDatas: List<GroupListDataWrapper.InstanceData>,
         ) : ContentDelegate() {
 
@@ -112,6 +130,9 @@ sealed class NotDoneNode(protected val contentDelegate: ContentDelegate) :
             }
 
             override val instanceExpansionStates get() = notDoneInstanceNodes.map { it.instanceExpansionStates }.flatten()
+
+            override fun onClick(holder: AbstractHolder) =
+                groupListFragment.activity.let { it.startActivity(ShowGroupActivity.getIntent(exactTimeStamp, it)) }
 
             private class GroupRowsDelegate(
                 private val groupAdapter: GroupListFragment.GroupAdapter,

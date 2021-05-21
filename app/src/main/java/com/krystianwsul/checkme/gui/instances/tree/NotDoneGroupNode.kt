@@ -4,8 +4,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.krystianwsul.checkme.domainmodel.extensions.setInstanceDone
 import com.krystianwsul.checkme.domainmodel.extensions.setOrdinal
 import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
-import com.krystianwsul.checkme.gui.instances.ShowGroupActivity
-import com.krystianwsul.checkme.gui.instances.ShowInstanceActivity
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
 import com.krystianwsul.checkme.gui.tree.DetailsNode
@@ -98,7 +96,7 @@ class NotDoneGroupNode(
                 instanceData.projectInfo,
             )
 
-            (contentDelegate as ContentDelegate.Instance).initialize(treeNode, singleInstanceNodeCollection!!)
+            (contentDelegate as ContentDelegate.Instance).initialize(groupAdapter, treeNode, singleInstanceNodeCollection!!)
 
             treeNode.setChildTreeNodes(
                 singleInstanceNodeCollection!!.initialize(
@@ -192,19 +190,6 @@ class NotDoneGroupNode(
         } else {
             false
         }
-    }
-
-    override fun onClick(holder: AbstractHolder) {
-        groupListFragment.activity.startActivity(
-            if (singleInstance()) {
-                ShowInstanceActivity.getIntent(groupListFragment.activity, singleInstanceData.instanceKey)
-            } else {
-                ShowGroupActivity.getIntent(
-                    (treeNode.modelNode as NotDoneGroupNode).exactTimeStamp,
-                    groupListFragment.activity
-                )
-            }
-        )
     }
 
     override fun compareTo(other: ModelNode<AbstractHolder>) = when (other) {

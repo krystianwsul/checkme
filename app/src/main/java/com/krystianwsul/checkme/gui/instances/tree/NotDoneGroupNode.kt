@@ -14,7 +14,6 @@ import com.krystianwsul.checkme.gui.tree.ImageNode
 import com.krystianwsul.checkme.gui.tree.delegates.checkable.CheckBoxState
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineDelegate
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineRow
-import com.krystianwsul.checkme.gui.utils.flatten
 import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.ExactTimeStamp
@@ -35,7 +34,7 @@ class NotDoneGroupNode(
     val instanceDatas: MutableList<GroupListDataWrapper.InstanceData>,
 ) : NotDoneNode(
     instanceDatas.singleOrNull()
-        ?.let { ContentDelegate.Instance() }
+        ?.let(ContentDelegate::Instance)
         ?: ContentDelegate.Group()
 ) {
 
@@ -104,6 +103,8 @@ class NotDoneGroupNode(
                 instanceData.projectInfo,
             )
 
+            (contentDelegate as ContentDelegate.Instance).initialize(treeNode, singleInstanceNodeCollection!!)
+
             treeNode.setChildTreeNodes(
                 singleInstanceNodeCollection!!.initialize(
                     instanceData.children.values,
@@ -126,6 +127,8 @@ class NotDoneGroupNode(
                     )
                 }
             )
+
+            (contentDelegate as ContentDelegate.Group).initialize(notDoneInstanceNodes)
         }
 
         return treeNode
@@ -136,21 +139,6 @@ class NotDoneGroupNode(
 
         return instanceDatas.size == 1
     }
-
-    val instanceExpansionStates
-        get(): Map<InstanceKey, CollectionExpansionState> {
-            return if (singleInstance()) {
-                val collectionExpansionState = CollectionExpansionState(
-                    treeNode.expansionState,
-                    singleInstanceNodeCollection!!.doneExpansionState
-                )
-
-                mapOf(singleInstanceData.instanceKey to collectionExpansionState) +
-                        singleInstanceNodeCollection!!.instanceExpansionStates
-            } else {
-                notDoneInstanceNodes.map { it.instanceExpansionStates }.flatten()
-            }
-        }
 
     private inner class GroupRowsDelegate : DetailsNode.ProjectRowsDelegate(null, R.color.textSecondary) {
 

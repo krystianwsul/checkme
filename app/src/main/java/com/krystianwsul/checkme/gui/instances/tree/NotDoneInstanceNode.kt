@@ -24,7 +24,7 @@ class NotDoneInstanceNode(
     val instanceData: GroupListDataWrapper.InstanceData,
     override val parentNode: ModelNode<AbstractHolder>,
     override val groupAdapter: GroupListFragment.GroupAdapter,
-) : NotDoneNode(ContentDelegate.Instance()) {
+) : NotDoneNode(ContentDelegate.Instance(instanceData)) {
 
     public override lateinit var treeNode: TreeNode<AbstractHolder>
         private set
@@ -61,6 +61,8 @@ class NotDoneInstanceNode(
             instanceData.projectInfo,
         )
 
+        (contentDelegate as ContentDelegate.Instance).initialize(treeNode, nodeCollection) // todo project contentDelegate
+
         treeNode.setChildTreeNodes(
             nodeCollection.initialize(
                 instanceData.children.values,
@@ -76,16 +78,6 @@ class NotDoneInstanceNode(
 
         return treeNode
     }
-
-    val instanceExpansionStates: Map<InstanceKey, CollectionExpansionState>
-        get() {
-            val collectionExpansionState = CollectionExpansionState(
-                treeNode.expansionState,
-                nodeCollection.doneExpansionState,
-            )
-
-            return mapOf(instanceData.instanceKey to collectionExpansionState) + nodeCollection.instanceExpansionStates
-        }
 
     override val rowsDelegate by lazy { InstanceRowsDelegate(instanceData, false) }
 

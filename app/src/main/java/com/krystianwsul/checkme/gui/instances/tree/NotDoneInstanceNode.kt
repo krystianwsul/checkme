@@ -16,9 +16,6 @@ class NotDoneInstanceNode(
     override val groupAdapter: GroupListFragment.GroupAdapter,
 ) : NotDoneNode(ContentDelegate.Instance(instanceData)) {
 
-    public override lateinit var treeNode: TreeNode<AbstractHolder>
-        private set
-
     private lateinit var nodeCollection: NodeCollection
 
     fun initialize(
@@ -29,7 +26,7 @@ class NotDoneInstanceNode(
         val (expansionState, doneExpansionState) =
             collectionState.expandedInstances[instanceData.instanceKey] ?: CollectionExpansionState()
 
-        treeNode = TreeNode(this, notDoneGroupTreeNode, selected, expansionState)
+        val treeNode = TreeNode(this, notDoneGroupTreeNode, selected, expansionState)
 
         nodeCollection = NodeCollection(
             indentation + 1,

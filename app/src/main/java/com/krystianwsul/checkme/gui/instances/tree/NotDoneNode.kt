@@ -52,7 +52,7 @@ sealed class NotDoneNode(protected val contentDelegate: ContentDelegate) :
 
     final override val isDraggable = true
 
-    abstract override val treeNode: TreeNode<AbstractHolder>
+    final override val treeNode get() = contentDelegate.treeNode
 
     final override val delegates by lazy {
         listOf(
@@ -85,20 +85,21 @@ sealed class NotDoneNode(protected val contentDelegate: ContentDelegate) :
 
         abstract val rowsDelegate: DetailsNode.ProjectRowsDelegate
         abstract val instanceExpansionStates: Map<InstanceKey, CollectionExpansionState>
+        abstract val treeNode: TreeNode<AbstractHolder>
 
         abstract fun onClick(holder: AbstractHolder)
 
         class Instance(private val instanceData: GroupListDataWrapper.InstanceData) : ContentDelegate() {
 
             override lateinit var groupAdapter: GroupListFragment.GroupAdapter
-            private lateinit var treeNode: TreeNode<*>
+            override lateinit var treeNode: TreeNode<AbstractHolder>
             private lateinit var nodeCollection: NodeCollection
 
             override val rowsDelegate = InstanceRowsDelegate(instanceData)
 
             fun initialize(
                 groupAdapter: GroupListFragment.GroupAdapter,
-                treeNode: TreeNode<*>,
+                treeNode: TreeNode<AbstractHolder>,
                 nodeCollection: NodeCollection,
             ) {
                 this.groupAdapter = groupAdapter
@@ -181,10 +182,10 @@ sealed class NotDoneNode(protected val contentDelegate: ContentDelegate) :
             override val rowsDelegate: DetailsNode.ProjectRowsDelegate =
                 GroupRowsDelegate(groupAdapter, exactTimeStamp)
 
-            private lateinit var treeNode: TreeNode<*>
+            override lateinit var treeNode: TreeNode<AbstractHolder>
             private lateinit var notDoneInstanceNodes: List<NotDoneInstanceNode>
 
-            fun initialize(treeNode: TreeNode<*>, notDoneInstanceNodes: List<NotDoneInstanceNode>) {
+            fun initialize(treeNode: TreeNode<AbstractHolder>, notDoneInstanceNodes: List<NotDoneInstanceNode>) {
                 this.treeNode = treeNode
                 this.notDoneInstanceNodes = notDoneInstanceNodes
             }

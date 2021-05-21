@@ -25,9 +25,6 @@ class NotDoneGroupNode(
 
     override val parentNode get() = nodeCollection.parentNode
 
-    public override lateinit var treeNode: TreeNode<AbstractHolder>
-        private set
-
     private val notDoneInstanceNodes = ArrayList<NotDoneInstanceNode>()
 
     private var singleInstanceNodeCollection: NodeCollection? = null
@@ -63,7 +60,7 @@ class NotDoneGroupNode(
             instanceData?.let { selectedInstances.contains(it.instanceKey) } ?: selectedGroups.contains(exactTimeStamp.long)
         }
 
-        treeNode = TreeNode(this, nodeContainer, selected, expansionState)
+        val treeNode = TreeNode(this, nodeContainer, selected, expansionState)
 
         if (instanceData != null) {
             singleInstanceNodeCollection = NodeCollection(
@@ -97,6 +94,7 @@ class NotDoneGroupNode(
                         it,
                         collectionState,
                         collectionState.selectedInstances.contains(it.instanceKey),
+                        treeNode,
                     )
                 }
             )
@@ -154,6 +152,7 @@ class NotDoneGroupNode(
         instanceData: GroupListDataWrapper.InstanceData,
         collectionState: CollectionState,
         selected: Boolean,
+        treeNode: TreeNode<AbstractHolder>,
     ): TreeNode<AbstractHolder> {
         val notDoneInstanceNode = NotDoneInstanceNode(
             indentation,

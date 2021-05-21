@@ -170,9 +170,6 @@ class NotDoneGroupNode(
 
     override val toggleDescendants get() = !singleInstance()
 
-    override fun getMatchResult(query: String) =
-        ModelNode.MatchResult.fromBoolean(instanceDatas.any { it.matchesQuery(query) })
-
     override fun ordinalDesc() = if (singleInstance()) {
         singleInstanceData.run { "$name $ordinal" }
     } else {

@@ -31,6 +31,7 @@ import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.treeadapter.FilterCriteria
+import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.Sortable
 import com.krystianwsul.treeadapter.TreeNode
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
@@ -88,6 +89,8 @@ sealed class NotDoneNode(protected val contentDelegate: ContentDelegate) :
     final override fun matchesFilterParams(filterParams: FilterCriteria.Full.FilterParams) =
         contentDelegate.matchesFilterParams(filterParams)
 
+    final override fun getMatchResult(query: String) = contentDelegate.getMatchResult(query)
+
     protected sealed class ContentDelegate : ThumbnailModelNode, Sortable, CheckableModelNode {
 
         protected abstract val groupAdapter: GroupListFragment.GroupAdapter
@@ -102,6 +105,7 @@ sealed class NotDoneNode(protected val contentDelegate: ContentDelegate) :
         abstract fun onClick(holder: AbstractHolder)
         abstract fun normalize()
         abstract fun matchesFilterParams(filterParams: FilterCriteria.Full.FilterParams): Boolean
+        abstract fun getMatchResult(query: String): ModelNode.MatchResult
 
         class Instance(private val instanceData: GroupListDataWrapper.InstanceData) : ContentDelegate() {
 
@@ -187,6 +191,8 @@ sealed class NotDoneNode(protected val contentDelegate: ContentDelegate) :
             override fun matchesFilterParams(filterParams: FilterCriteria.Full.FilterParams) =
                 instanceData.matchesFilterParams(filterParams)
 
+            override fun getMatchResult(query: String) = ModelNode.MatchResult.fromBoolean(instanceData.matchesQuery(query))
+
             private data class Id(val instanceKey: InstanceKey)
         }
 
@@ -235,6 +241,9 @@ sealed class NotDoneNode(protected val contentDelegate: ContentDelegate) :
 
             override fun matchesFilterParams(filterParams: FilterCriteria.Full.FilterParams) =
                 instanceDatas.any { it.matchesFilterParams(filterParams) }
+
+            override fun getMatchResult(query: String) =
+                ModelNode.MatchResult.fromBoolean(instanceDatas.any { it.matchesQuery(query) })
 
             private class GroupRowsDelegate(
                 private val groupAdapter: GroupListFragment.GroupAdapter,

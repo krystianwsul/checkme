@@ -72,7 +72,7 @@ class DividerNode(
 
         val doneInstanceNode = DoneInstanceNode(indentation, instanceData, this)
 
-        val childTreeNode = doneInstanceNode.initialize(treeNode, collectionState)
+        val childTreeNode = doneInstanceNode.initialize(collectionState, treeNode)
 
         doneInstanceNodes.add(doneInstanceNode)
 

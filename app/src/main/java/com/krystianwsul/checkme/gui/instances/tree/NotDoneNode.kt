@@ -49,8 +49,6 @@ sealed class NotDoneNode(protected val contentDelegate: ContentDelegate) :
 
     final override val isSelectable = true
 
-    final override val isDraggable = true
-
     final override val treeNode get() = contentDelegate.treeNode
 
     final override val delegates by lazy {
@@ -75,7 +73,7 @@ sealed class NotDoneNode(protected val contentDelegate: ContentDelegate) :
             true,
         )
 
-    final override val id get() = contentDelegate.id
+    override val id get() = contentDelegate.id
 
     final override val toggleDescendants = contentDelegate.toggleDescendants
 

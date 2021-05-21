@@ -13,6 +13,12 @@ class NotDoneInstanceNode(
     override val groupAdapter: GroupListFragment.GroupAdapter,
 ) : NotDoneNode(ContentDelegate.Instance(groupAdapter, instanceData, indentation)) {
 
+    override val isDraggable = true
+
+    override val id: Any = Id(super.id)
+
+    private data class Id(val innerId: Any)
+
     override fun compareTo(other: ModelNode<AbstractHolder>) =
         instanceData.compareTo((other as NotDoneInstanceNode).instanceData)
 

@@ -18,6 +18,8 @@ class NotDoneGroupNode(
         ?: ContentDelegate.Group(nodeCollection.groupAdapter, instanceDatas, indentation)
 ) {
 
+    override val isDraggable = true
+
     override val parentNode get() = nodeCollection.parentNode
 
     val exactTimeStamp: ExactTimeStamp.Local

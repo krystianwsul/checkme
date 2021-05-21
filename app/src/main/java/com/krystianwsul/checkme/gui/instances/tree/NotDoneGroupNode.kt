@@ -7,8 +7,6 @@ import com.krystianwsul.checkme.gui.tree.DetailsNode
 import com.krystianwsul.checkme.gui.tree.ImageNode
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.treeadapter.ModelNode
-import com.krystianwsul.treeadapter.NodeContainer
-import com.krystianwsul.treeadapter.TreeNode
 
 class NotDoneGroupNode(
     override val indentation: Int,
@@ -33,21 +31,6 @@ class NotDoneGroupNode(
             .distinct()
             .single()
             .toLocalExactTimeStamp()
-    }
-
-    fun initialize(
-        collectionState: CollectionState,
-        nodeContainer: NodeContainer<AbstractHolder>,
-    ): TreeNode<AbstractHolder> {
-        check(instanceDatas.isNotEmpty())
-
-        val instanceData = instanceDatas.singleOrNull()
-
-        if (instanceData != null) {
-            return (contentDelegate as ContentDelegate.Instance).initialize(collectionState, nodeContainer, this)
-        } else {
-            return (contentDelegate as ContentDelegate.Group).initialize(collectionState, nodeContainer, this)
-        }
     }
 
     fun singleInstance(): Boolean {

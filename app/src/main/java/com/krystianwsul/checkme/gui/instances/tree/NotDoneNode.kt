@@ -79,6 +79,9 @@ sealed class NotDoneNode(protected val contentDelegate: ContentDelegate) :
 
     final override val toggleDescendants = contentDelegate.toggleDescendants
 
+    fun initialize(collectionState: CollectionState, nodeContainer: NodeContainer<AbstractHolder>) =
+        contentDelegate.initialize(collectionState, nodeContainer, this)
+
     final override fun onClick(holder: AbstractHolder) = contentDelegate.onClick(holder)
 
     final override fun normalize() = contentDelegate.normalize()
@@ -99,6 +102,12 @@ sealed class NotDoneNode(protected val contentDelegate: ContentDelegate) :
         abstract val id: Any
         abstract val toggleDescendants: Boolean
 
+        abstract fun initialize(
+            collectionState: CollectionState,
+            nodeContainer: NodeContainer<AbstractHolder>,
+            modelNode: DetailsNode.Parent,
+        ): TreeNode<AbstractHolder>
+
         abstract fun onClick(holder: AbstractHolder)
         abstract fun normalize()
         abstract fun matchesFilterParams(filterParams: FilterCriteria.Full.FilterParams): Boolean
@@ -113,7 +122,7 @@ sealed class NotDoneNode(protected val contentDelegate: ContentDelegate) :
             override lateinit var treeNode: TreeNode<AbstractHolder>
             private lateinit var nodeCollection: NodeCollection
 
-            fun initialize(
+            override fun initialize(
                 collectionState: CollectionState,
                 nodeContainer: NodeContainer<AbstractHolder>,
                 modelNode: DetailsNode.Parent,
@@ -243,7 +252,7 @@ sealed class NotDoneNode(protected val contentDelegate: ContentDelegate) :
             override lateinit var treeNode: TreeNode<AbstractHolder>
             private lateinit var notDoneInstanceNodes: List<NotDoneInstanceNode>
 
-            fun initialize(
+            override fun initialize(
                 collectionState: CollectionState,
                 nodeContainer: NodeContainer<AbstractHolder>,
                 modelNode: DetailsNode.Parent,

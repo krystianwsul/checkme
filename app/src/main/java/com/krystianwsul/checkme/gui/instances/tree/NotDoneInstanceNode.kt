@@ -5,7 +5,6 @@ import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.instances.list.GroupListFragment
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
 import com.krystianwsul.treeadapter.ModelNode
-import com.krystianwsul.treeadapter.NodeContainer
 
 class NotDoneInstanceNode(
     override val indentation: Int,
@@ -13,11 +12,6 @@ class NotDoneInstanceNode(
     override val parentNode: ModelNode<AbstractHolder>,
     override val groupAdapter: GroupListFragment.GroupAdapter,
 ) : NotDoneNode(ContentDelegate.Instance(groupAdapter, instanceData, indentation)) {
-
-    fun initialize(
-        collectionState: CollectionState,
-        nodeContainer: NodeContainer<AbstractHolder>,
-    ) = (contentDelegate as ContentDelegate.Instance).initialize(collectionState, nodeContainer, this)
 
     override fun compareTo(other: ModelNode<AbstractHolder>) =
         instanceData.compareTo((other as NotDoneInstanceNode).instanceData)

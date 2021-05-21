@@ -16,7 +16,7 @@ class NotDoneGroupNode(
     val instanceDatas: MutableList<GroupListDataWrapper.InstanceData>,
 ) : NotDoneNode(
     instanceDatas.singleOrNull()
-        ?.let { ContentDelegate.Instance(nodeCollection.groupAdapter, it) }
+        ?.let { ContentDelegate.Instance(nodeCollection.groupAdapter, it, indentation) }
         ?: ContentDelegate.Group(nodeCollection.groupAdapter, instanceDatas)
 ) {
 
@@ -44,37 +44,7 @@ class NotDoneGroupNode(
         val instanceData = instanceDatas.singleOrNull()
 
         if (instanceData != null) {
-            val (expansionState, doneExpansionState) =
-                collectionState.expandedInstances[instanceData.instanceKey] ?: CollectionExpansionState()
-
-            val selected = collectionState.selectedInstances.contains(instanceData.instanceKey)
-
-            val treeNode = TreeNode(this, nodeContainer, selected, expansionState)
-
-            val singleInstanceNodeCollection = NodeCollection(
-                indentation + 1,
-                groupAdapter,
-                false,
-                treeNode,
-                instanceData.note,
-                this,
-                instanceData.projectInfo,
-            )
-
-            (contentDelegate as ContentDelegate.Instance).initialize(treeNode, singleInstanceNodeCollection)
-
-            treeNode.setChildTreeNodes(
-                singleInstanceNodeCollection.initialize(
-                    instanceData.children.values,
-                    collectionState,
-                    doneExpansionState,
-                    listOf(),
-                    null,
-                    mapOf(),
-                    listOf(),
-                    null,
-                )
-            )
+            return (contentDelegate as ContentDelegate.Instance).initialize(collectionState, nodeContainer, this)
         } else {
             val expansionState = collectionState.expandedGroups[exactTimeStamp.toTimeStamp()]
 

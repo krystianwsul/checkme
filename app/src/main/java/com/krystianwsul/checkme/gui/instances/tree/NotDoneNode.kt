@@ -30,10 +30,7 @@ import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.utils.InstanceKey
-import com.krystianwsul.treeadapter.FilterCriteria
-import com.krystianwsul.treeadapter.ModelNode
-import com.krystianwsul.treeadapter.Sortable
-import com.krystianwsul.treeadapter.TreeNode
+import com.krystianwsul.treeadapter.*
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Maybe
 import io.reactivex.rxjava3.kotlin.addTo
@@ -110,20 +107,51 @@ sealed class NotDoneNode(protected val contentDelegate: ContentDelegate) :
         class Instance(
             override val groupAdapter: GroupListFragment.GroupAdapter,
             val instanceData: GroupListDataWrapper.InstanceData,
+            private val indentation: Int,
         ) : ContentDelegate() {
 
             override lateinit var treeNode: TreeNode<AbstractHolder>
             private lateinit var nodeCollection: NodeCollection
 
-            override val rowsDelegate = InstanceRowsDelegate(instanceData)
-
             fun initialize(
-                treeNode: TreeNode<AbstractHolder>,
-                nodeCollection: NodeCollection,
-            ) {
-                this.treeNode = treeNode
-                this.nodeCollection = nodeCollection
+                collectionState: CollectionState,
+                nodeContainer: NodeContainer<AbstractHolder>,
+                modelNode: DetailsNode.Parent,
+            ): TreeNode<AbstractHolder> {
+                val (expansionState, doneExpansionState) =
+                    collectionState.expandedInstances[instanceData.instanceKey] ?: CollectionExpansionState()
+
+                val selected = collectionState.selectedInstances.contains(instanceData.instanceKey)
+
+                treeNode = TreeNode(modelNode, nodeContainer, selected, expansionState)
+
+                nodeCollection = NodeCollection(
+                    indentation + 1,
+                    groupAdapter,
+                    false,
+                    treeNode,
+                    instanceData.note,
+                    modelNode,
+                    instanceData.projectInfo,
+                )
+
+                treeNode.setChildTreeNodes(
+                    nodeCollection.initialize(
+                        instanceData.children.values,
+                        collectionState,
+                        doneExpansionState,
+                        listOf(),
+                        null,
+                        mapOf(),
+                        listOf(),
+                        null,
+                    )
+                )
+
+                return treeNode
             }
+
+            override val rowsDelegate = InstanceRowsDelegate(instanceData)
 
             override val instanceExpansionStates: Map<InstanceKey, CollectionExpansionState>
                 get() {

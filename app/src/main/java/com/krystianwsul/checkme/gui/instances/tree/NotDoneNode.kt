@@ -122,6 +122,7 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
             override val groupAdapter: GroupListFragment.GroupAdapter,
             val instanceData: GroupListDataWrapper.InstanceData,
             private val indentation: Int,
+            showDetails: Boolean = true,
         ) : ContentDelegate() {
 
             override val instanceDatas = listOf(instanceData)
@@ -170,7 +171,7 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
                 return treeNode
             }
 
-            override val rowsDelegate = InstanceRowsDelegate(instanceData)
+            override val rowsDelegate = InstanceRowsDelegate(instanceData, showDetails)
 
             override val instanceExpansionStates: Map<InstanceKey, CollectionExpansionState>
                 get() {

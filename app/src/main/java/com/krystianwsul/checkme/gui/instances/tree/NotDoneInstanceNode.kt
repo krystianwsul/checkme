@@ -11,7 +11,7 @@ class NotDoneInstanceNode(
     val instanceData: GroupListDataWrapper.InstanceData,
     override val parentNode: ModelNode<AbstractHolder>,
     override val groupAdapter: GroupListFragment.GroupAdapter,
-) : NotDoneNode(ContentDelegate.Instance(groupAdapter, instanceData, indentation)) {
+) : NotDoneNode(ContentDelegate.Instance(groupAdapter, instanceData, indentation, false)) {
 
     override val isDraggable = true
 

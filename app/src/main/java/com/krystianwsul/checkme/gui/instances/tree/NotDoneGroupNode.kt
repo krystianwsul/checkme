@@ -171,8 +171,6 @@ class NotDoneGroupNode(
 
     override val toggleDescendants get() = !singleInstance()
 
-    override fun normalize() = instanceDatas.forEach { it.normalize() }
-
     override fun matchesFilterParams(filterParams: FilterCriteria.Full.FilterParams) =
         instanceDatas.any { it.matchesFilterParams(filterParams) }
 

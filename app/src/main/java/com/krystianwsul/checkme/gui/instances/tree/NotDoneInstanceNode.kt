@@ -62,8 +62,6 @@ class NotDoneInstanceNode(
     override fun compareTo(other: ModelNode<AbstractHolder>) =
         instanceData.compareTo((other as NotDoneInstanceNode).instanceData)
 
-    override fun normalize() = instanceData.normalize()
-
     override fun matchesFilterParams(filterParams: FilterCriteria.Full.FilterParams) =
         instanceData.matchesFilterParams(filterParams)
 

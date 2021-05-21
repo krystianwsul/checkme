@@ -82,6 +82,8 @@ sealed class NotDoneNode(protected val contentDelegate: ContentDelegate) :
 
     final override fun onClick(holder: AbstractHolder) = contentDelegate.onClick(holder)
 
+    final override fun normalize() = contentDelegate.normalize()
+
     protected sealed class ContentDelegate : ThumbnailModelNode, Sortable, CheckableModelNode {
 
         protected abstract val groupAdapter: GroupListFragment.GroupAdapter
@@ -94,6 +96,7 @@ sealed class NotDoneNode(protected val contentDelegate: ContentDelegate) :
         abstract val deselectParent: Boolean
 
         abstract fun onClick(holder: AbstractHolder)
+        abstract fun normalize()
 
         class Instance(private val instanceData: GroupListDataWrapper.InstanceData) : ContentDelegate() {
 
@@ -174,12 +177,14 @@ sealed class NotDoneNode(protected val contentDelegate: ContentDelegate) :
                     .addTo(groupListFragment.attachedToWindowDisposable)
             }
 
+            override fun normalize() = instanceData.normalize()
+
             private data class Id(val instanceKey: InstanceKey)
         }
 
         class Group(
             override val groupAdapter: GroupListFragment.GroupAdapter,
-            instanceDatas: List<GroupListDataWrapper.InstanceData>,
+            private val instanceDatas: List<GroupListDataWrapper.InstanceData>,
         ) : ContentDelegate() {
 
             init {
@@ -218,6 +223,8 @@ sealed class NotDoneNode(protected val contentDelegate: ContentDelegate) :
             override fun getOrdinal(): Double = throw UnsupportedOperationException()
 
             override fun setOrdinal(ordinal: Double) = throw UnsupportedOperationException()
+
+            override fun normalize() = instanceDatas.forEach { it.normalize() }
 
             private class GroupRowsDelegate(
                 private val groupAdapter: GroupListFragment.GroupAdapter,

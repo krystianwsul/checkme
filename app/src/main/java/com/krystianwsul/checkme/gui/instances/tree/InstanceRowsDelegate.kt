@@ -29,7 +29,7 @@ class InstanceRowsDelegate(instanceData: GroupListDataWrapper.InstanceData, show
             ?.map { it.modelNode as NotDoneGroupNode }
             ?.takeIf { it.isNotEmpty() }
             ?.sorted()
-            ?.joinToString(", ") { it.singleInstanceData.name }
+            ?.joinToString(", ") { (it.contentDelegate as NotDoneNode.ContentDelegate.Instance).instanceData.name }
             .toSecondaryRow()
 
         return listOfNotNull(

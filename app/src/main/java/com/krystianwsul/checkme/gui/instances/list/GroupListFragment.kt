@@ -898,8 +898,8 @@ class GroupListFragment @JvmOverloads constructor(
                 when (val modelNode = it.modelNode) {
                     is NotDoneGroupNode -> {
                         if (it.isExpanded) {
-                            if (modelNode.singleInstance()) {
-                                modelNode.singleInstanceData.taskKey == scrollToTaskKey
+                            if (modelNode.contentDelegate is NotDoneNode.ContentDelegate.Instance) {
+                                modelNode.contentDelegate.instanceData.taskKey == scrollToTaskKey
                             } else {
                                 false
                             }
@@ -973,10 +973,13 @@ class GroupListFragment @JvmOverloads constructor(
                     selectedDatas.filterIsInstance<GroupListDataWrapper.InstanceData>().map { it.instanceKey }
                 val selectedTasks = selectedDatas.filterIsInstance<GroupListDataWrapper.TaskData>().map { it.taskKey }
 
-                val selectedGroups = selectedNodes.map { it.modelNode }
-                    .filterIsInstance<NotDoneNode>().map { it.contentDelegate }
+                val selectedGroups = selectedNodes.asSequence()
+                    .map { it.modelNode }
+                    .filterIsInstance<NotDoneNode>()
+                    .map { it.contentDelegate }
                     .filterIsInstance<NotDoneNode.ContentDelegate.Group>()
                     .map { it.timeStamp.long }
+                    .toList()
 
                 return GroupListState(
                     doneExpanded,

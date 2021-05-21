@@ -29,8 +29,6 @@ class NotDoneGroupNode(
         .distinct()
         .single()
 
-    val singleInstanceData get() = instanceDatas.single()
-
     fun singleInstance() = contentDelegate is ContentDelegate.Instance
 
     override val groupAdapter by lazy { nodeCollection.groupAdapter }

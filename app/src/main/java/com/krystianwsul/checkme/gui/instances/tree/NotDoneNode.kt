@@ -78,6 +78,8 @@ sealed class NotDoneNode(protected val contentDelegate: ContentDelegate) :
 
     final override val id get() = contentDelegate.id
 
+    final override val deselectParent get() = contentDelegate.deselectParent
+
     final override fun onClick(holder: AbstractHolder) = contentDelegate.onClick(holder)
 
     protected sealed class ContentDelegate : ThumbnailModelNode, Sortable, CheckableModelNode {
@@ -89,6 +91,7 @@ sealed class NotDoneNode(protected val contentDelegate: ContentDelegate) :
         abstract val instanceExpansionStates: Map<InstanceKey, CollectionExpansionState>
         abstract val treeNode: TreeNode<AbstractHolder>
         abstract val id: Any
+        abstract val deselectParent: Boolean
 
         abstract fun onClick(holder: AbstractHolder)
 
@@ -153,6 +156,8 @@ sealed class NotDoneNode(protected val contentDelegate: ContentDelegate) :
 
             override val id: Any by lazy { Id(instanceData.instanceKey) }
 
+            override val deselectParent = true
+
             override fun onClick(holder: AbstractHolder) = groupListFragment.activity.let {
                 it.startActivity(ShowInstanceActivity.getIntent(it, instanceData.instanceKey))
             }
@@ -204,6 +209,8 @@ sealed class NotDoneNode(protected val contentDelegate: ContentDelegate) :
             override val checkBoxState get() = if (treeNode.isExpanded) CheckBoxState.Gone else CheckBoxState.Invisible
 
             override val id: Any by lazy { Id(instanceDatas.map { it.instanceKey }.toSet(), exactTimeStamp) }
+
+            override val deselectParent = false
 
             override fun onClick(holder: AbstractHolder) =
                 groupListFragment.activity.let { it.startActivity(ShowGroupActivity.getIntent(exactTimeStamp, it)) }

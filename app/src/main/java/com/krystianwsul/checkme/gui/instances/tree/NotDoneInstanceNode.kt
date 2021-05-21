@@ -4,7 +4,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.instances.list.GroupListFragment
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
-import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.treeadapter.FilterCriteria
 import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.TreeNode
@@ -63,8 +62,6 @@ class NotDoneInstanceNode(
     override fun compareTo(other: ModelNode<AbstractHolder>) =
         instanceData.compareTo((other as NotDoneInstanceNode).instanceData)
 
-    override val deselectParent get() = true
-
     override fun normalize() = instanceData.normalize()
 
     override fun matchesFilterParams(filterParams: FilterCriteria.Full.FilterParams) =
@@ -86,6 +83,4 @@ class NotDoneInstanceNode(
             false
         }
     }
-
-    data class Id(val instanceKey: InstanceKey)
 }

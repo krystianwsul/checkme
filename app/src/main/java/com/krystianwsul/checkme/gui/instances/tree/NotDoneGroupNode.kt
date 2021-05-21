@@ -17,7 +17,7 @@ class NotDoneGroupNode(
 ) : NotDoneNode(
     instanceDatas.singleOrNull()
         ?.let { ContentDelegate.Instance(nodeCollection.groupAdapter, it, indentation) }
-        ?: ContentDelegate.Group(nodeCollection.groupAdapter, instanceDatas)
+        ?: ContentDelegate.Group(nodeCollection.groupAdapter, instanceDatas, indentation)
 ) {
 
     override val parentNode get() = nodeCollection.parentNode
@@ -46,20 +46,8 @@ class NotDoneGroupNode(
         if (instanceData != null) {
             return (contentDelegate as ContentDelegate.Instance).initialize(collectionState, nodeContainer, this)
         } else {
-            val expansionState = collectionState.expandedGroups[exactTimeStamp.toTimeStamp()]
-
-            val selected = collectionState.selectedGroups.contains(exactTimeStamp.long)
-
-            val treeNode = TreeNode(this, nodeContainer, selected, expansionState)
-
-            val nodePairs = instanceDatas.map { newChildTreeNode(it, collectionState, treeNode) }
-
-            treeNode.setChildTreeNodes(nodePairs.map { it.first })
-
-            (contentDelegate as ContentDelegate.Group).initialize(treeNode, nodePairs.map { it.second })
+            return (contentDelegate as ContentDelegate.Group).initialize(collectionState, nodeContainer, this)
         }
-
-        return treeNode
     }
 
     fun singleInstance(): Boolean {
@@ -102,22 +90,5 @@ class NotDoneGroupNode(
         is UnscheduledNode -> if (nodeCollection.searchResults) 1 else -1
         is DividerNode -> -1
         else -> throw IllegalArgumentException()
-    }
-
-    private fun newChildTreeNode(
-        instanceData: GroupListDataWrapper.InstanceData,
-        collectionState: CollectionState,
-        treeNode: TreeNode<AbstractHolder>,
-    ): Pair<TreeNode<AbstractHolder>, NotDoneInstanceNode> {
-        val notDoneInstanceNode = NotDoneInstanceNode(
-            indentation,
-            instanceData,
-            this,
-            groupAdapter,
-        )
-
-        val childTreeNode = notDoneInstanceNode.initialize(collectionState, treeNode)
-
-        return childTreeNode to notDoneInstanceNode
     }
 }

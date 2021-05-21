@@ -225,6 +225,7 @@ sealed class NotDoneNode(protected val contentDelegate: ContentDelegate) :
         class Group(
             override val groupAdapter: GroupListFragment.GroupAdapter,
             private val instanceDatas: List<GroupListDataWrapper.InstanceData>,
+            private val indentation: Int,
         ) : ContentDelegate() {
 
             init {
@@ -242,9 +243,42 @@ sealed class NotDoneNode(protected val contentDelegate: ContentDelegate) :
             override lateinit var treeNode: TreeNode<AbstractHolder>
             private lateinit var notDoneInstanceNodes: List<NotDoneInstanceNode>
 
-            fun initialize(treeNode: TreeNode<AbstractHolder>, notDoneInstanceNodes: List<NotDoneInstanceNode>) {
-                this.treeNode = treeNode
-                this.notDoneInstanceNodes = notDoneInstanceNodes
+            fun initialize(
+                collectionState: CollectionState,
+                nodeContainer: NodeContainer<AbstractHolder>,
+                modelNode: DetailsNode.Parent,
+            ): TreeNode<AbstractHolder> {
+                val expansionState = collectionState.expandedGroups[exactTimeStamp.toTimeStamp()]
+
+                val selected = collectionState.selectedGroups.contains(exactTimeStamp.long)
+
+                treeNode = TreeNode(modelNode, nodeContainer, selected, expansionState)
+
+                val nodePairs = instanceDatas.map { newChildTreeNode(it, collectionState, treeNode, modelNode) }
+
+                treeNode.setChildTreeNodes(nodePairs.map { it.first })
+
+                notDoneInstanceNodes = nodePairs.map { it.second }
+
+                return treeNode
+            }
+
+            private fun newChildTreeNode(
+                instanceData: GroupListDataWrapper.InstanceData,
+                collectionState: CollectionState,
+                treeNode: TreeNode<AbstractHolder>,
+                modelNode: DetailsNode.Parent,
+            ): Pair<TreeNode<AbstractHolder>, NotDoneInstanceNode> {
+                val notDoneInstanceNode = NotDoneInstanceNode(
+                    indentation,
+                    instanceData,
+                    modelNode,
+                    groupAdapter,
+                )
+
+                val childTreeNode = notDoneInstanceNode.initialize(collectionState, treeNode)
+
+                return childTreeNode to notDoneInstanceNode
             }
 
             override val instanceExpansionStates get() = notDoneInstanceNodes.map { it.instanceExpansionStates }.flatten()

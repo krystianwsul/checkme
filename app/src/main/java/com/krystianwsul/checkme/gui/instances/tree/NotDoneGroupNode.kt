@@ -46,8 +46,6 @@ class NotDoneGroupNode(
 
     private val groupListFragment get() = groupAdapter.groupListFragment
 
-    override val thumbnail get() = if (singleInstance()) singleInstanceData.imageState else null
-
     override val widthKey
         get() = MultiLineDelegate.WidthKey(
             indentation,

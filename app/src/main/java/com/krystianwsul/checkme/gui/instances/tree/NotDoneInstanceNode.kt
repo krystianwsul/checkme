@@ -115,8 +115,6 @@ class NotDoneInstanceNode(
 
     override val deselectParent get() = true
 
-    override val thumbnail = instanceData.imageState
-
     override fun normalize() = instanceData.normalize()
 
     override fun matchesFilterParams(filterParams: FilterCriteria.Full.FilterParams) =

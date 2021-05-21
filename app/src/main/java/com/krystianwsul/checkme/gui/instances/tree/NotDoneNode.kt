@@ -21,6 +21,7 @@ import com.krystianwsul.checkme.gui.tree.delegates.thumbnail.ThumbnailDelegate
 import com.krystianwsul.checkme.gui.tree.delegates.thumbnail.ThumbnailModelNode
 import com.krystianwsul.checkme.gui.utils.flatten
 import com.krystianwsul.checkme.utils.time.getDisplayText
+import com.krystianwsul.common.firebase.models.ImageState
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.HourMinute
@@ -58,6 +59,8 @@ sealed class NotDoneNode(protected val contentDelegate: ContentDelegate) :
 
     final override val rowsDelegate get() = contentDelegate.rowsDelegate
 
+    final override val thumbnail get() = contentDelegate.thumbnail
+
     val instanceExpansionStates get() = contentDelegate.instanceExpansionStates
 
     final override fun onClick(holder: AbstractHolder) = contentDelegate.onClick(holder)
@@ -69,6 +72,7 @@ sealed class NotDoneNode(protected val contentDelegate: ContentDelegate) :
 
         abstract val rowsDelegate: DetailsNode.ProjectRowsDelegate
         abstract val instanceExpansionStates: Map<InstanceKey, CollectionExpansionState>
+        abstract val thumbnail: ImageState?
 
         abstract fun onClick(holder: AbstractHolder)
 
@@ -101,6 +105,8 @@ sealed class NotDoneNode(protected val contentDelegate: ContentDelegate) :
                             nodeCollection.instanceExpansionStates
                 }
 
+            override val thumbnail = instanceData.imageState
+
             override fun onClick(holder: AbstractHolder) = groupListFragment.activity.let {
                 it.startActivity(ShowInstanceActivity.getIntent(it, instanceData.instanceKey))
             }
@@ -130,6 +136,8 @@ sealed class NotDoneNode(protected val contentDelegate: ContentDelegate) :
             }
 
             override val instanceExpansionStates get() = notDoneInstanceNodes.map { it.instanceExpansionStates }.flatten()
+
+            override val thumbnail: ImageState? = null
 
             override fun onClick(holder: AbstractHolder) =
                 groupListFragment.activity.let { it.startActivity(ShowGroupActivity.getIntent(exactTimeStamp, it)) }

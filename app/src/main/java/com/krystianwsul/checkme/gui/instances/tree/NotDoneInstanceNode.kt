@@ -3,7 +3,6 @@ package com.krystianwsul.checkme.gui.instances.tree
 import androidx.recyclerview.widget.RecyclerView
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.extensions.setInstanceDone
-import com.krystianwsul.checkme.domainmodel.extensions.setOrdinal
 import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.instances.list.GroupListFragment
@@ -135,18 +134,6 @@ class NotDoneInstanceNode(
         } else {
             false
         }
-    }
-
-    override fun getOrdinal() = instanceData.ordinal
-
-    override fun setOrdinal(ordinal: Double) {
-        AndroidDomainUpdater.setOrdinal(
-            groupListFragment.parameters.dataId.toFirst(),
-            instanceData.taskKey,
-            ordinal,
-        )
-            .subscribe()
-            .addTo(groupListFragment.attachedToWindowDisposable)
     }
 
     data class Id(val instanceKey: InstanceKey)

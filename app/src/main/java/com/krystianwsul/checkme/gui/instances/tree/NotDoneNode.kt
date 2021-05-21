@@ -1,6 +1,8 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
 import com.krystianwsul.checkme.R
+import com.krystianwsul.checkme.domainmodel.extensions.setOrdinal
+import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
 import com.krystianwsul.checkme.gui.instances.ShowGroupActivity
 import com.krystianwsul.checkme.gui.instances.ShowInstanceActivity
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
@@ -28,14 +30,15 @@ import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.treeadapter.Sortable
 import com.krystianwsul.treeadapter.TreeNode
+import io.reactivex.rxjava3.kotlin.addTo
 
 sealed class NotDoneNode(protected val contentDelegate: ContentDelegate) :
     AbstractModelNode(),
     NodeCollectionParent,
-    Sortable,
+    Sortable by contentDelegate,
     CheckableModelNode,
     MultiLineModelNode,
-    ThumbnailModelNode,
+    ThumbnailModelNode by contentDelegate,
     IndentationModelNode,
     DetailsNode.Parent {
 
@@ -59,20 +62,17 @@ sealed class NotDoneNode(protected val contentDelegate: ContentDelegate) :
 
     final override val rowsDelegate get() = contentDelegate.rowsDelegate
 
-    final override val thumbnail get() = contentDelegate.thumbnail
-
     val instanceExpansionStates get() = contentDelegate.instanceExpansionStates
 
     final override fun onClick(holder: AbstractHolder) = contentDelegate.onClick(holder)
 
-    protected sealed class ContentDelegate {
+    protected sealed class ContentDelegate : ThumbnailModelNode, Sortable {
 
         protected abstract val groupAdapter: GroupListFragment.GroupAdapter
         protected val groupListFragment get() = groupAdapter.groupListFragment
 
         abstract val rowsDelegate: DetailsNode.ProjectRowsDelegate
         abstract val instanceExpansionStates: Map<InstanceKey, CollectionExpansionState>
-        abstract val thumbnail: ImageState?
 
         abstract fun onClick(holder: AbstractHolder)
 
@@ -110,6 +110,18 @@ sealed class NotDoneNode(protected val contentDelegate: ContentDelegate) :
             override fun onClick(holder: AbstractHolder) = groupListFragment.activity.let {
                 it.startActivity(ShowInstanceActivity.getIntent(it, instanceData.instanceKey))
             }
+
+            override fun getOrdinal() = instanceData.ordinal
+
+            override fun setOrdinal(ordinal: Double) {
+                AndroidDomainUpdater.setOrdinal(
+                    groupListFragment.parameters.dataId.toFirst(),
+                    instanceData.taskKey,
+                    ordinal,
+                )
+                    .subscribe()
+                    .addTo(groupListFragment.attachedToWindowDisposable)
+            }
         }
 
         class Group(
@@ -141,6 +153,10 @@ sealed class NotDoneNode(protected val contentDelegate: ContentDelegate) :
 
             override fun onClick(holder: AbstractHolder) =
                 groupListFragment.activity.let { it.startActivity(ShowGroupActivity.getIntent(exactTimeStamp, it)) }
+
+            override fun getOrdinal(): Double = throw UnsupportedOperationException()
+
+            override fun setOrdinal(ordinal: Double) = throw UnsupportedOperationException()
 
             private class GroupRowsDelegate(
                 private val groupAdapter: GroupListFragment.GroupAdapter,

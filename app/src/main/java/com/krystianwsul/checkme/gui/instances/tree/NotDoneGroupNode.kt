@@ -2,7 +2,6 @@ package com.krystianwsul.checkme.gui.instances.tree
 
 import androidx.recyclerview.widget.RecyclerView
 import com.krystianwsul.checkme.domainmodel.extensions.setInstanceDone
-import com.krystianwsul.checkme.domainmodel.extensions.setOrdinal
 import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
@@ -228,18 +227,6 @@ class NotDoneGroupNode(
     }
 
     val expansionState get() = treeNode.expansionState
-
-    override fun getOrdinal() = singleInstanceData.ordinal
-
-    override fun setOrdinal(ordinal: Double) {
-        AndroidDomainUpdater.setOrdinal(
-            groupListFragment.parameters.dataId.toFirst(),
-            singleInstanceData.taskKey,
-            ordinal,
-        )
-            .subscribe()
-            .addTo(groupListFragment.attachedToWindowDisposable)
-    }
 
     override val id: Any = if (nodeCollection.useGroups) {
         GroupId(instanceDatas.map { it.instanceKey }.toSet(), exactTimeStamp)

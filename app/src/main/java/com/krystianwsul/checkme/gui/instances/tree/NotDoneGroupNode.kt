@@ -169,10 +169,4 @@ class NotDoneGroupNode(
     val expansionState get() = treeNode.expansionState
 
     override val toggleDescendants get() = !singleInstance()
-
-    override fun ordinalDesc() = if (singleInstance()) {
-        singleInstanceData.run { "$name $ordinal" }
-    } else {
-        null
-    }
 }

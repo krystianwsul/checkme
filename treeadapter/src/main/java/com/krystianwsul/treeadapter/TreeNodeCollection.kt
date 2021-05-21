@@ -24,15 +24,9 @@ class TreeNodeCollection<T : TreeHolder>(val treeViewAdapter: TreeViewAdapter<T>
             if (treeNodesRelay.value != null) throw SetTreeNodesCalledTwiceException()
 
             treeNodesRelay.accept(rootTreeNodes.sorted())
-
-            printOrdinals("setNodes")
         }
 
     override val wantsSeparators = false
-
-    private fun printOrdinals(prefix: String) = treeNodesRelay.value!!.mapNotNull {
-        it.modelNode.ordinalDesc()?.let { "ordinal $prefix $it" }
-    }
 
     override fun getNode(position: Int, positionMode: PositionMode): TreeNode<T> {
         return positionMode.getRecursiveNodes(this)[position]
@@ -180,11 +174,7 @@ class TreeNodeCollection<T : TreeHolder>(val treeViewAdapter: TreeViewAdapter<T>
             previousOrdinal = nextOrdinal - 1000
         }
 
-        printOrdinals("setNewItemPosition before")
-
         (currentNode as Sortable).setOrdinal((previousOrdinal + nextOrdinal) / 2)
-
-        printOrdinals("setNewItemPosition after")
     }
 
     fun selectNode(position: Int) = treeViewAdapter.updateDisplayedNodes { displayedNodes[position].select(it) }

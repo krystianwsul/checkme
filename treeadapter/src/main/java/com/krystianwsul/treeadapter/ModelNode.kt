@@ -39,8 +39,6 @@ interface ModelNode<T : TreeHolder> : Comparable<ModelNode<T>> {
 
     fun getMatchResult(query: String) = MatchResult.ALWAYS_VISIBLE
 
-    fun ordinalDesc(): String? = null
-
     fun tryStartDrag(viewHolder: RecyclerView.ViewHolder): Boolean = throw UnsupportedOperationException()
 
     fun isVisible(actionMode: Boolean, hasVisibleChildren: Boolean): Boolean = true

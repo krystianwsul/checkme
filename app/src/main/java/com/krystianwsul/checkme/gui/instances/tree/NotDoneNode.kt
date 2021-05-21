@@ -30,6 +30,7 @@ import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.utils.InstanceKey
+import com.krystianwsul.treeadapter.FilterCriteria
 import com.krystianwsul.treeadapter.Sortable
 import com.krystianwsul.treeadapter.TreeNode
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
@@ -84,6 +85,9 @@ sealed class NotDoneNode(protected val contentDelegate: ContentDelegate) :
 
     final override fun normalize() = contentDelegate.normalize()
 
+    final override fun matchesFilterParams(filterParams: FilterCriteria.Full.FilterParams) =
+        contentDelegate.matchesFilterParams(filterParams)
+
     protected sealed class ContentDelegate : ThumbnailModelNode, Sortable, CheckableModelNode {
 
         protected abstract val groupAdapter: GroupListFragment.GroupAdapter
@@ -97,6 +101,7 @@ sealed class NotDoneNode(protected val contentDelegate: ContentDelegate) :
 
         abstract fun onClick(holder: AbstractHolder)
         abstract fun normalize()
+        abstract fun matchesFilterParams(filterParams: FilterCriteria.Full.FilterParams): Boolean
 
         class Instance(private val instanceData: GroupListDataWrapper.InstanceData) : ContentDelegate() {
 
@@ -179,6 +184,9 @@ sealed class NotDoneNode(protected val contentDelegate: ContentDelegate) :
 
             override fun normalize() = instanceData.normalize()
 
+            override fun matchesFilterParams(filterParams: FilterCriteria.Full.FilterParams) =
+                instanceData.matchesFilterParams(filterParams)
+
             private data class Id(val instanceKey: InstanceKey)
         }
 
@@ -221,10 +229,12 @@ sealed class NotDoneNode(protected val contentDelegate: ContentDelegate) :
                 groupListFragment.activity.let { it.startActivity(ShowGroupActivity.getIntent(exactTimeStamp, it)) }
 
             override fun getOrdinal(): Double = throw UnsupportedOperationException()
-
             override fun setOrdinal(ordinal: Double) = throw UnsupportedOperationException()
 
             override fun normalize() = instanceDatas.forEach { it.normalize() }
+
+            override fun matchesFilterParams(filterParams: FilterCriteria.Full.FilterParams) =
+                instanceDatas.any { it.matchesFilterParams(filterParams) }
 
             private class GroupRowsDelegate(
                 private val groupAdapter: GroupListFragment.GroupAdapter,

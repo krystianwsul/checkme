@@ -6,7 +6,6 @@ import com.krystianwsul.checkme.gui.tree.AbstractHolder
 import com.krystianwsul.checkme.gui.tree.DetailsNode
 import com.krystianwsul.checkme.gui.tree.ImageNode
 import com.krystianwsul.common.time.ExactTimeStamp
-import com.krystianwsul.treeadapter.FilterCriteria
 import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.NodeContainer
 import com.krystianwsul.treeadapter.TreeNode
@@ -170,9 +169,6 @@ class NotDoneGroupNode(
     val expansionState get() = treeNode.expansionState
 
     override val toggleDescendants get() = !singleInstance()
-
-    override fun matchesFilterParams(filterParams: FilterCriteria.Full.FilterParams) =
-        instanceDatas.any { it.matchesFilterParams(filterParams) }
 
     override fun getMatchResult(query: String) =
         ModelNode.MatchResult.fromBoolean(instanceDatas.any { it.matchesQuery(query) })

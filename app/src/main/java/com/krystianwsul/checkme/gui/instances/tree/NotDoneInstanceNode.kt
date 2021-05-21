@@ -24,7 +24,7 @@ class NotDoneInstanceNode(
     val instanceData: GroupListDataWrapper.InstanceData,
     override val parentNode: ModelNode<AbstractHolder>,
     override val groupAdapter: GroupListFragment.GroupAdapter,
-) : NotDoneNode() {
+) : NotDoneNode(ContentDelegate.Instance()) {
 
     public override lateinit var treeNode: TreeNode<AbstractHolder>
         private set

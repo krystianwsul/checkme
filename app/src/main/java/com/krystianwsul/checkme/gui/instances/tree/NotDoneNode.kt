@@ -14,7 +14,7 @@ import com.krystianwsul.checkme.gui.tree.delegates.thumbnail.ThumbnailDelegate
 import com.krystianwsul.checkme.gui.tree.delegates.thumbnail.ThumbnailModelNode
 import com.krystianwsul.treeadapter.Sortable
 
-sealed class NotDoneNode :
+sealed class NotDoneNode(private val contentDelegate: ContentDelegate) :
     AbstractModelNode(),
     NodeCollectionParent,
     Sortable,
@@ -38,5 +38,12 @@ sealed class NotDoneNode :
             ThumbnailDelegate(this),
             IndentationDelegate(this)
         )
+    }
+
+    protected sealed class ContentDelegate {
+
+        class Instance : ContentDelegate()
+
+        class Group : ContentDelegate()
     }
 }

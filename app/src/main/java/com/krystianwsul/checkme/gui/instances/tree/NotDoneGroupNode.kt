@@ -33,7 +33,11 @@ class NotDoneGroupNode(
     override val indentation: Int,
     private val nodeCollection: NodeCollection,
     val instanceDatas: MutableList<GroupListDataWrapper.InstanceData>,
-) : NotDoneNode() {
+) : NotDoneNode(
+    instanceDatas.singleOrNull()
+        ?.let { ContentDelegate.Instance() }
+        ?: ContentDelegate.Group()
+) {
 
     override val parentNode get() = nodeCollection.parentNode
 

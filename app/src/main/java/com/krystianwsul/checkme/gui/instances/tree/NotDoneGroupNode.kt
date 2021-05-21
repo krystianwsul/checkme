@@ -16,7 +16,7 @@ class NotDoneGroupNode(
     val instanceDatas: MutableList<GroupListDataWrapper.InstanceData>,
 ) : NotDoneNode(
     instanceDatas.singleOrNull()
-        ?.let(ContentDelegate::Instance)
+        ?.let { ContentDelegate.Instance(nodeCollection.groupAdapter, it) }
         ?: ContentDelegate.Group(nodeCollection.groupAdapter, instanceDatas)
 ) {
 
@@ -61,7 +61,7 @@ class NotDoneGroupNode(
                 instanceData.projectInfo,
             )
 
-            (contentDelegate as ContentDelegate.Instance).initialize(groupAdapter, treeNode, singleInstanceNodeCollection)
+            (contentDelegate as ContentDelegate.Instance).initialize(treeNode, singleInstanceNodeCollection)
 
             treeNode.setChildTreeNodes(
                 singleInstanceNodeCollection.initialize(

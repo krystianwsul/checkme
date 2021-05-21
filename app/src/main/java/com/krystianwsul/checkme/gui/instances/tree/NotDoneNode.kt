@@ -107,20 +107,20 @@ sealed class NotDoneNode(protected val contentDelegate: ContentDelegate) :
         abstract fun matchesFilterParams(filterParams: FilterCriteria.Full.FilterParams): Boolean
         abstract fun getMatchResult(query: String): ModelNode.MatchResult
 
-        class Instance(val instanceData: GroupListDataWrapper.InstanceData) : ContentDelegate() {
+        class Instance(
+            override val groupAdapter: GroupListFragment.GroupAdapter,
+            val instanceData: GroupListDataWrapper.InstanceData,
+        ) : ContentDelegate() {
 
-            override lateinit var groupAdapter: GroupListFragment.GroupAdapter
             override lateinit var treeNode: TreeNode<AbstractHolder>
             private lateinit var nodeCollection: NodeCollection
 
             override val rowsDelegate = InstanceRowsDelegate(instanceData)
 
             fun initialize(
-                groupAdapter: GroupListFragment.GroupAdapter,
                 treeNode: TreeNode<AbstractHolder>,
                 nodeCollection: NodeCollection,
             ) {
-                this.groupAdapter = groupAdapter
                 this.treeNode = treeNode
                 this.nodeCollection = nodeCollection
             }

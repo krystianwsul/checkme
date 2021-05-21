@@ -13,7 +13,7 @@ class NotDoneInstanceNode(
     val instanceData: GroupListDataWrapper.InstanceData,
     override val parentNode: ModelNode<AbstractHolder>,
     override val groupAdapter: GroupListFragment.GroupAdapter,
-) : NotDoneNode(ContentDelegate.Instance(instanceData)) {
+) : NotDoneNode(ContentDelegate.Instance(groupAdapter, instanceData)) {
 
     fun initialize(
         collectionState: CollectionState,

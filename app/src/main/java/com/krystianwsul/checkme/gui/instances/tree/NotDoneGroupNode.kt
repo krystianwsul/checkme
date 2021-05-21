@@ -10,7 +10,7 @@ import com.krystianwsul.treeadapter.ModelNode
 class NotDoneGroupNode(
     override val indentation: Int,
     private val nodeCollection: NodeCollection,
-    val instanceDatas: MutableList<GroupListDataWrapper.InstanceData>,
+    val instanceDatas: List<GroupListDataWrapper.InstanceData>,
 ) : NotDoneNode(
     instanceDatas.singleOrNull()
         ?.let { ContentDelegate.Instance(nodeCollection.groupAdapter, it, indentation) }

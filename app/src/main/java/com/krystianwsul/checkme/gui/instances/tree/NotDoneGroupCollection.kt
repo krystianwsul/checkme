@@ -24,27 +24,30 @@ class NotDoneGroupCollection(
     fun initialize(
         notDoneInstanceDatas: List<GroupListDataWrapper.InstanceData>,
         collectionState: CollectionState,
-    ) = if (nodeCollection.useGroups) {
-        notDoneInstanceDatas.groupBy { it.instanceTimeStamp }
-            .values
-            .map { newNotDoneGroupNode(it.toMutableList(), collectionState) }
-    } else {
-        notDoneInstanceDatas.map { newNotDoneGroupNode(mutableListOf(it), collectionState) }
-    }
+    ): List<TreeNode<AbstractHolder>> {
+        val nodePairs = if (nodeCollection.useGroups) {
+            notDoneInstanceDatas.groupBy { it.instanceTimeStamp }
+                .values
+                .map {
+                    val notDoneGroupNode = NotDoneGroupNode(indentation, nodeCollection, it)
 
-    private fun newNotDoneGroupNode(
-        instanceDatas: MutableList<GroupListDataWrapper.InstanceData>,
-        collectionState: CollectionState,
-    ): TreeNode<AbstractHolder> {
-        check(instanceDatas.isNotEmpty())
+                    val notDoneGroupTreeNode = notDoneGroupNode.initialize(collectionState, nodeContainer)
 
-        val notDoneGroupNode = NotDoneGroupNode(indentation, nodeCollection, instanceDatas)
+                    notDoneGroupTreeNode to notDoneGroupNode
+                }
+        } else {
+            notDoneInstanceDatas.map {
+                val notDoneGroupNode = NotDoneGroupNode(indentation, nodeCollection, listOf(it))
 
-        val notDoneGroupTreeNode = notDoneGroupNode.initialize(collectionState, nodeContainer)
+                val notDoneGroupTreeNode = notDoneGroupNode.initialize(collectionState, nodeContainer)
 
-        notDoneGroupNodes.add(notDoneGroupNode)
+                notDoneGroupTreeNode to notDoneGroupNode
+            }
+        }
 
-        return notDoneGroupTreeNode
+        notDoneGroupNodes += nodePairs.map { it.second }
+
+        return nodePairs.map { it.first }
     }
 
     val instanceExpansionStates get() = notDoneGroupNodes.map { it.instanceExpansionStates }.flatten()

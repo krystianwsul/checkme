@@ -82,6 +82,8 @@ sealed class NotDoneNode(protected val contentDelegate: ContentDelegate) :
 
     final override val deselectParent get() = contentDelegate.deselectParent
 
+    final override val toggleDescendants = contentDelegate.toggleDescendants
+
     final override fun onClick(holder: AbstractHolder) = contentDelegate.onClick(holder)
 
     final override fun normalize() = contentDelegate.normalize()
@@ -101,6 +103,7 @@ sealed class NotDoneNode(protected val contentDelegate: ContentDelegate) :
         abstract val treeNode: TreeNode<AbstractHolder>
         abstract val id: Any
         abstract val deselectParent: Boolean
+        abstract val toggleDescendants: Boolean
 
         abstract fun onClick(holder: AbstractHolder)
         abstract fun normalize()
@@ -170,6 +173,8 @@ sealed class NotDoneNode(protected val contentDelegate: ContentDelegate) :
 
             override val deselectParent = true
 
+            override val toggleDescendants = false
+
             override fun onClick(holder: AbstractHolder) = groupListFragment.activity.let {
                 it.startActivity(ShowInstanceActivity.getIntent(it, instanceData.instanceKey))
             }
@@ -230,6 +235,8 @@ sealed class NotDoneNode(protected val contentDelegate: ContentDelegate) :
             override val id: Any by lazy { Id(instanceDatas.map { it.instanceKey }.toSet(), exactTimeStamp) }
 
             override val deselectParent = false
+
+            override val toggleDescendants = true
 
             override fun onClick(holder: AbstractHolder) =
                 groupListFragment.activity.let { it.startActivity(ShowGroupActivity.getIntent(exactTimeStamp, it)) }

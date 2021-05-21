@@ -167,6 +167,4 @@ class NotDoneGroupNode(
     }
 
     val expansionState get() = treeNode.expansionState
-
-    override val toggleDescendants get() = !singleInstance()
 }

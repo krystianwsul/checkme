@@ -25,12 +25,23 @@ class NotDoneGroupCollection(
         notDoneInstanceDatas: List<GroupListDataWrapper.InstanceData>,
         collectionState: CollectionState,
     ): List<TreeNode<AbstractHolder>> {
-        val instanceGroups = if (nodeCollection.useGroups)
+        val instanceGroups = if (nodeCollection.useGroups) {
             notDoneInstanceDatas.groupBy { it.instanceTimeStamp }.values
-        else
+        } else {
             notDoneInstanceDatas.map(::listOf)
+        }
 
-        val nodePairs = instanceGroups.map {
+        val contentDelegates = instanceGroups.map {
+            check(it.isNotEmpty())
+
+            if (it.size > 1) {
+                NotDoneNode.ContentDelegate.Group(nodeCollection.groupAdapter, it, indentation)
+            } else {
+                NotDoneNode.ContentDelegate.Instance(nodeCollection.groupAdapter, it.single(), indentation)
+            }
+        }
+
+        val nodePairs = contentDelegates.map {
             val notDoneGroupNode = NotDoneGroupNode(indentation, nodeCollection, it)
 
             val notDoneGroupTreeNode = notDoneGroupNode.initialize(collectionState, nodeContainer)

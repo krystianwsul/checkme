@@ -1,7 +1,6 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
 import androidx.recyclerview.widget.RecyclerView
-import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
 import com.krystianwsul.checkme.gui.tree.DetailsNode
 import com.krystianwsul.checkme.gui.tree.ImageNode
@@ -10,12 +9,8 @@ import com.krystianwsul.treeadapter.ModelNode
 class NotDoneGroupNode(
     override val indentation: Int,
     private val nodeCollection: NodeCollection,
-    val instanceDatas: List<GroupListDataWrapper.InstanceData>,
-) : NotDoneNode(
-    instanceDatas.singleOrNull()
-        ?.let { ContentDelegate.Instance(nodeCollection.groupAdapter, it, indentation) }
-        ?: ContentDelegate.Group(nodeCollection.groupAdapter, instanceDatas, indentation)
-) {
+    contentDelegate: ContentDelegate,
+) : NotDoneNode(contentDelegate) {
 
     override val isDraggable = true
 

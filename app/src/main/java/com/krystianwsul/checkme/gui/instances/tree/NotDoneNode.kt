@@ -80,8 +80,6 @@ sealed class NotDoneNode(protected val contentDelegate: ContentDelegate) :
 
     final override val id get() = contentDelegate.id
 
-    final override val deselectParent get() = contentDelegate.deselectParent
-
     final override val toggleDescendants = contentDelegate.toggleDescendants
 
     final override fun onClick(holder: AbstractHolder) = contentDelegate.onClick(holder)
@@ -102,7 +100,6 @@ sealed class NotDoneNode(protected val contentDelegate: ContentDelegate) :
         abstract val instanceExpansionStates: Map<InstanceKey, CollectionExpansionState>
         abstract val treeNode: TreeNode<AbstractHolder>
         abstract val id: Any
-        abstract val deselectParent: Boolean
         abstract val toggleDescendants: Boolean
 
         abstract fun onClick(holder: AbstractHolder)
@@ -145,8 +142,6 @@ sealed class NotDoneNode(protected val contentDelegate: ContentDelegate) :
                 get() = if (groupListFragment.selectionCallback.hasActionMode || treeNode.isSelected/* drag hack */) {
                     CheckBoxState.Invisible
                 } else {
-                    val groupAdapter = nodeCollection.groupAdapter
-
                     val done = instanceData.done != null
 
                     CheckBoxState.Visible(done) {
@@ -170,8 +165,6 @@ sealed class NotDoneNode(protected val contentDelegate: ContentDelegate) :
                 }
 
             override val id: Any by lazy { Id(instanceData.instanceKey) }
-
-            override val deselectParent = true
 
             override val toggleDescendants = false
 
@@ -233,8 +226,6 @@ sealed class NotDoneNode(protected val contentDelegate: ContentDelegate) :
             override val checkBoxState get() = if (treeNode.isExpanded) CheckBoxState.Gone else CheckBoxState.Invisible
 
             override val id: Any by lazy { Id(instanceDatas.map { it.instanceKey }.toSet(), exactTimeStamp) }
-
-            override val deselectParent = false
 
             override val toggleDescendants = true
 

@@ -75,4 +75,6 @@ class NotDoneInstanceNode(
             false
         }
     }
+
+    override val deselectParent = true
 }

@@ -5,8 +5,6 @@ import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
 import com.krystianwsul.checkme.gui.tree.DetailsNode
 import com.krystianwsul.checkme.gui.tree.ImageNode
-import com.krystianwsul.checkme.gui.tree.delegates.checkable.CheckBoxState
-import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineDelegate
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.treeadapter.FilterCriteria
@@ -37,16 +35,6 @@ class NotDoneGroupNode(
     val exactTimeStamp: ExactTimeStamp.Local // todo project contentDelegate
 
     val singleInstanceData get() = instanceDatas.single()
-
-    private val groupListFragment get() = groupAdapter.groupListFragment
-
-    override val widthKey
-        get() = MultiLineDelegate.WidthKey(
-            indentation,
-            checkBoxState != CheckBoxState.Gone,
-            thumbnail != null,
-            true,
-        )
 
     init {
         check(instanceDatas.isNotEmpty())

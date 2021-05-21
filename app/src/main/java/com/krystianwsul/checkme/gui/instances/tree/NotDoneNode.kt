@@ -68,6 +68,14 @@ sealed class NotDoneNode(protected val contentDelegate: ContentDelegate) :
 
     val instanceExpansionStates get() = contentDelegate.instanceExpansionStates
 
+    final override val widthKey
+        get() = MultiLineDelegate.WidthKey(
+            indentation,
+            checkBoxState != CheckBoxState.Gone,
+            thumbnail != null,
+            true,
+        )
+
     final override fun onClick(holder: AbstractHolder) = contentDelegate.onClick(holder)
 
     protected sealed class ContentDelegate : ThumbnailModelNode, Sortable, CheckableModelNode {

@@ -4,7 +4,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.instances.list.GroupListFragment
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
-import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineDelegate
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.treeadapter.FilterCriteria
 import com.krystianwsul.treeadapter.ModelNode
@@ -21,16 +20,6 @@ class NotDoneInstanceNode(
         private set
 
     private lateinit var nodeCollection: NodeCollection
-
-    private val groupListFragment get() = groupAdapter.groupListFragment
-
-    override val widthKey
-        get() = MultiLineDelegate.WidthKey(
-            indentation,
-            true,
-            thumbnail != null,
-            true,
-        )
 
     fun initialize(
         collectionState: CollectionState,

@@ -5,6 +5,7 @@ import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.instances.list.GroupListFragment
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
 import com.krystianwsul.treeadapter.ModelNode
+import com.krystianwsul.treeadapter.NodeContainer
 import com.krystianwsul.treeadapter.TreeNode
 
 class NotDoneInstanceNode(
@@ -16,13 +17,14 @@ class NotDoneInstanceNode(
 
     fun initialize(
         collectionState: CollectionState,
-        selected: Boolean,
-        notDoneGroupTreeNode: TreeNode<AbstractHolder>,
+        nodeContainer: NodeContainer<AbstractHolder>,
     ): TreeNode<AbstractHolder> {
         val (expansionState, doneExpansionState) =
             collectionState.expandedInstances[instanceData.instanceKey] ?: CollectionExpansionState()
 
-        val treeNode = TreeNode(this, notDoneGroupTreeNode, selected, expansionState)
+        val selected = collectionState.selectedInstances.contains(instanceData.instanceKey)
+
+        val treeNode = TreeNode(this, nodeContainer, selected, expansionState)
 
         val nodeCollection = NodeCollection(
             indentation + 1,

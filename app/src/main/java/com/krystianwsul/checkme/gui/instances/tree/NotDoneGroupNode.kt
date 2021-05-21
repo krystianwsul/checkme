@@ -82,14 +82,7 @@ class NotDoneGroupNode(
 
             val treeNode = TreeNode(this, nodeContainer, selected, expansionState)
 
-            val nodePairs = instanceDatas.map {
-                newChildTreeNode(
-                    it,
-                    collectionState,
-                    collectionState.selectedInstances.contains(it.instanceKey),
-                    treeNode,
-                )
-            }
+            val nodePairs = instanceDatas.map { newChildTreeNode(it, collectionState, treeNode) }
 
             treeNode.setChildTreeNodes(nodePairs.map { it.first })
 
@@ -144,7 +137,6 @@ class NotDoneGroupNode(
     private fun newChildTreeNode(
         instanceData: GroupListDataWrapper.InstanceData,
         collectionState: CollectionState,
-        selected: Boolean,
         treeNode: TreeNode<AbstractHolder>,
     ): Pair<TreeNode<AbstractHolder>, NotDoneInstanceNode> {
         val notDoneInstanceNode = NotDoneInstanceNode(
@@ -154,7 +146,7 @@ class NotDoneGroupNode(
             groupAdapter,
         )
 
-        val childTreeNode = notDoneInstanceNode.initialize(collectionState, selected, treeNode)
+        val childTreeNode = notDoneInstanceNode.initialize(collectionState, treeNode)
 
         return childTreeNode to notDoneInstanceNode
     }

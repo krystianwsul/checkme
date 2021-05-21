@@ -29,14 +29,12 @@ class NotDoneGroupNode(
         .distinct()
         .single()
 
-    fun singleInstance() = contentDelegate is ContentDelegate.Instance
-
     override val groupAdapter by lazy { nodeCollection.groupAdapter }
 
     override fun tryStartDrag(viewHolder: RecyclerView.ViewHolder): Boolean {
         val groupListFragment = groupAdapter.groupListFragment
 
-        return if (singleInstance()
+        return if (contentDelegate is ContentDelegate.Instance
             && groupListFragment.parameters.groupListDataWrapper.taskEditable != false
             && groupAdapter.treeNodeCollection.selectedChildren.isEmpty()
             && treeNode.parent.displayedChildNodes.none { it.isExpanded }

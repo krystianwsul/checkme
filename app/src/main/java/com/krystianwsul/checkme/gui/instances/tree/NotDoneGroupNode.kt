@@ -8,7 +8,10 @@ import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
 import com.krystianwsul.checkme.gui.instances.ShowGroupActivity
 import com.krystianwsul.checkme.gui.instances.ShowInstanceActivity
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
-import com.krystianwsul.checkme.gui.tree.*
+import com.krystianwsul.checkme.gui.tree.AbstractHolder
+import com.krystianwsul.checkme.gui.tree.DetailsNode
+import com.krystianwsul.checkme.gui.tree.HolderType
+import com.krystianwsul.checkme.gui.tree.ImageNode
 import com.krystianwsul.checkme.gui.tree.delegates.checkable.CheckBoxState
 import com.krystianwsul.checkme.gui.tree.delegates.checkable.CheckableDelegate
 import com.krystianwsul.checkme.gui.tree.delegates.checkable.CheckableModelNode
@@ -37,7 +40,7 @@ class NotDoneGroupNode(
     private val nodeCollection: NodeCollection,
     val instanceDatas: MutableList<GroupListDataWrapper.InstanceData>,
 ) :
-    AbstractModelNode(),
+    NotDoneNode(),
     NodeCollectionParent,
     Sortable,
     CheckableModelNode,

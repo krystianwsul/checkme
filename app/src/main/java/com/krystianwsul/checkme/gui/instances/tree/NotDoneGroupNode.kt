@@ -135,10 +135,9 @@ class NotDoneGroupNode(
             if (timeStampComparison != 0) {
                 timeStampComparison
             } else {
-                check(singleInstance())
-                check(other.singleInstance())
+                fun NotDoneGroupNode.instanceData() = (contentDelegate as ContentDelegate.Instance).instanceData
 
-                singleInstanceData.compareTo(other.singleInstanceData)
+                instanceData().compareTo(other.instanceData())
             }
         }
         is UnscheduledNode -> if (nodeCollection.searchResults) 1 else -1
@@ -165,6 +164,4 @@ class NotDoneGroupNode(
 
         return childTreeNode
     }
-
-    val expansionState get() = treeNode.expansionState
 }

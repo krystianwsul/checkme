@@ -9,13 +9,8 @@ import com.krystianwsul.checkme.gui.instances.ShowInstanceActivity
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.instances.list.GroupListFragment
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
-import com.krystianwsul.checkme.gui.tree.HolderType
 import com.krystianwsul.checkme.gui.tree.delegates.checkable.CheckBoxState
-import com.krystianwsul.checkme.gui.tree.delegates.checkable.CheckableDelegate
-import com.krystianwsul.checkme.gui.tree.delegates.expandable.ExpandableDelegate
-import com.krystianwsul.checkme.gui.tree.delegates.indentation.IndentationDelegate
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineDelegate
-import com.krystianwsul.checkme.gui.tree.delegates.thumbnail.ThumbnailDelegate
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.treeadapter.FilterCriteria
 import com.krystianwsul.treeadapter.ModelNode
@@ -31,26 +26,12 @@ class NotDoneInstanceNode(
     override val groupAdapter: GroupListFragment.GroupAdapter,
 ) : NotDoneNode() {
 
-    override val holderType = HolderType.CHECKABLE
-
-    override val isSelectable = true
-
     public override lateinit var treeNode: TreeNode<AbstractHolder>
         private set
 
     private lateinit var nodeCollection: NodeCollection
 
     private val groupListFragment get() = groupAdapter.groupListFragment
-
-    override val delegates by lazy {
-        listOf(
-            ExpandableDelegate(treeNode),
-            CheckableDelegate(this),
-            MultiLineDelegate(this),
-            ThumbnailDelegate(this),
-            IndentationDelegate(this)
-        )
-    }
 
     override val widthKey
         get() = MultiLineDelegate.WidthKey(

@@ -63,8 +63,6 @@ class NotDoneInstanceNode(
     override fun compareTo(other: ModelNode<AbstractHolder>) =
         instanceData.compareTo((other as NotDoneInstanceNode).instanceData)
 
-    override val id = Id(instanceData.instanceKey)
-
     override val deselectParent get() = true
 
     override fun normalize() = instanceData.normalize()

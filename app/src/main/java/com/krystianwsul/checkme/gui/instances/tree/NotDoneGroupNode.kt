@@ -170,12 +170,6 @@ class NotDoneGroupNode(
 
     val expansionState get() = treeNode.expansionState
 
-    override val id: Any = if (nodeCollection.useGroups) {
-        GroupId(instanceDatas.map { it.instanceKey }.toSet(), exactTimeStamp)
-    } else {
-        SingleId(singleInstanceData.instanceKey)
-    }
-
     override val toggleDescendants get() = !singleInstance()
 
     override fun normalize() = instanceDatas.forEach { it.normalize() }

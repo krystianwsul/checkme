@@ -76,6 +76,8 @@ sealed class NotDoneNode(protected val contentDelegate: ContentDelegate) :
             true,
         )
 
+    final override val id get() = contentDelegate.id
+
     final override fun onClick(holder: AbstractHolder) = contentDelegate.onClick(holder)
 
     protected sealed class ContentDelegate : ThumbnailModelNode, Sortable, CheckableModelNode {
@@ -86,6 +88,7 @@ sealed class NotDoneNode(protected val contentDelegate: ContentDelegate) :
         abstract val rowsDelegate: DetailsNode.ProjectRowsDelegate
         abstract val instanceExpansionStates: Map<InstanceKey, CollectionExpansionState>
         abstract val treeNode: TreeNode<AbstractHolder>
+        abstract val id: Any
 
         abstract fun onClick(holder: AbstractHolder)
 
@@ -148,6 +151,8 @@ sealed class NotDoneNode(protected val contentDelegate: ContentDelegate) :
                     }
                 }
 
+            override val id: Any by lazy { Id(instanceData.instanceKey) }
+
             override fun onClick(holder: AbstractHolder) = groupListFragment.activity.let {
                 it.startActivity(ShowInstanceActivity.getIntent(it, instanceData.instanceKey))
             }
@@ -163,6 +168,8 @@ sealed class NotDoneNode(protected val contentDelegate: ContentDelegate) :
                     .subscribe()
                     .addTo(groupListFragment.attachedToWindowDisposable)
             }
+
+            private data class Id(val instanceKey: InstanceKey)
         }
 
         class Group(
@@ -195,6 +202,8 @@ sealed class NotDoneNode(protected val contentDelegate: ContentDelegate) :
             override val thumbnail: ImageState? = null
 
             override val checkBoxState get() = if (treeNode.isExpanded) CheckBoxState.Gone else CheckBoxState.Invisible
+
+            override val id: Any by lazy { Id(instanceDatas.map { it.instanceKey }.toSet(), exactTimeStamp) }
 
             override fun onClick(holder: AbstractHolder) =
                 groupListFragment.activity.let { it.startActivity(ShowGroupActivity.getIntent(exactTimeStamp, it)) }
@@ -235,6 +244,19 @@ sealed class NotDoneNode(protected val contentDelegate: ContentDelegate) :
                     }
 
                     return listOf(name, details)
+                }
+            }
+
+            private class Id(val instanceKeys: Set<InstanceKey>, val exactTimeStamp: ExactTimeStamp.Local) {
+
+                override fun hashCode() = 1
+
+                override fun equals(other: Any?): Boolean {
+                    if (other === this) return true
+
+                    if (other !is Id) return false
+
+                    return instanceKeys == other.instanceKeys || exactTimeStamp == other.exactTimeStamp
                 }
             }
         }

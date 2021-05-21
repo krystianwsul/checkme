@@ -79,8 +79,6 @@ class NotDoneInstanceNode(
         return treeNode
     }
 
-    override val rowsDelegate by lazy { InstanceRowsDelegate(instanceData, false) }
-
     override val checkBoxState
         get() = if (groupListFragment.selectionCallback.hasActionMode) {
             CheckBoxState.Invisible

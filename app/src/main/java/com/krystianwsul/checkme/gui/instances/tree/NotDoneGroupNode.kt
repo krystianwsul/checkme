@@ -1,7 +1,6 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
 import androidx.recyclerview.widget.RecyclerView
-import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.extensions.setInstanceDone
 import com.krystianwsul.checkme.domainmodel.extensions.setOrdinal
 import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
@@ -13,11 +12,7 @@ import com.krystianwsul.checkme.gui.tree.DetailsNode
 import com.krystianwsul.checkme.gui.tree.ImageNode
 import com.krystianwsul.checkme.gui.tree.delegates.checkable.CheckBoxState
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineDelegate
-import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineRow
-import com.krystianwsul.checkme.utils.time.getDisplayText
-import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.ExactTimeStamp
-import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.treeadapter.FilterCriteria
 import com.krystianwsul.treeadapter.ModelNode
@@ -35,7 +30,7 @@ class NotDoneGroupNode(
 ) : NotDoneNode(
     instanceDatas.singleOrNull()
         ?.let(ContentDelegate::Instance)
-        ?: ContentDelegate.Group()
+        ?: ContentDelegate.Group(nodeCollection.groupAdapter, instanceDatas)
 ) {
 
     override val parentNode get() = nodeCollection.parentNode
@@ -47,7 +42,7 @@ class NotDoneGroupNode(
 
     private var singleInstanceNodeCollection: NodeCollection? = null
 
-    val exactTimeStamp: ExactTimeStamp.Local
+    val exactTimeStamp: ExactTimeStamp.Local // todo project contentDelegate
 
     val singleInstanceData get() = instanceDatas.single()
 
@@ -140,42 +135,6 @@ class NotDoneGroupNode(
         return instanceDatas.size == 1
     }
 
-    private inner class GroupRowsDelegate : DetailsNode.ProjectRowsDelegate(null, R.color.textSecondary) {
-
-        private val details by lazy {
-            val date = exactTimeStamp.date
-            val hourMinute = exactTimeStamp.toTimeStamp().hourMinute
-
-            val timeText = getCustomTimeData(date.dayOfWeek, hourMinute)?.name ?: hourMinute.toString()
-
-            val text = date.getDisplayText() + ", " + timeText
-
-            MultiLineRow.Visible(text, R.color.textSecondary)
-        }
-
-        override fun getRowsWithoutProject(isExpanded: Boolean, allChildren: List<TreeNode<*>>): List<MultiLineRow> {
-            val name = if (isExpanded) {
-                MultiLineRow.Invisible
-            } else {
-                MultiLineRow.Visible(
-                    allChildren.filter { it.modelNode is NotDoneInstanceNode && it.canBeShown() }
-                        .map { it.modelNode as NotDoneInstanceNode }
-                        .sorted()
-                        .joinToString(", ") { it.instanceData.name }
-                )
-            }
-
-            return listOf(name, details)
-        }
-    }
-
-    override val rowsDelegate by lazy {
-        if (singleInstance())
-            InstanceRowsDelegate(singleInstanceData)
-        else
-            GroupRowsDelegate()
-    }
-
     override val groupAdapter by lazy { nodeCollection.groupAdapter }
 
     override val checkBoxState
@@ -247,9 +206,6 @@ class NotDoneGroupNode(
             }
         )
     }
-
-    private fun getCustomTimeData(dayOfWeek: DayOfWeek, hourMinute: HourMinute) =
-        groupAdapter.customTimeDatas.firstOrNull { it.hourMinutes[dayOfWeek] == hourMinute }
 
     override fun compareTo(other: ModelNode<AbstractHolder>) = when (other) {
         is ImageNode, is DetailsNode -> 1

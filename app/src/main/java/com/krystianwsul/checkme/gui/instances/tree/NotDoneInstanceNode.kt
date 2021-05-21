@@ -9,22 +9,16 @@ import com.krystianwsul.checkme.gui.instances.ShowInstanceActivity
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.instances.list.GroupListFragment
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
-import com.krystianwsul.checkme.gui.tree.DetailsNode
 import com.krystianwsul.checkme.gui.tree.HolderType
 import com.krystianwsul.checkme.gui.tree.delegates.checkable.CheckBoxState
 import com.krystianwsul.checkme.gui.tree.delegates.checkable.CheckableDelegate
-import com.krystianwsul.checkme.gui.tree.delegates.checkable.CheckableModelNode
 import com.krystianwsul.checkme.gui.tree.delegates.expandable.ExpandableDelegate
 import com.krystianwsul.checkme.gui.tree.delegates.indentation.IndentationDelegate
-import com.krystianwsul.checkme.gui.tree.delegates.indentation.IndentationModelNode
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineDelegate
-import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineModelNode
 import com.krystianwsul.checkme.gui.tree.delegates.thumbnail.ThumbnailDelegate
-import com.krystianwsul.checkme.gui.tree.delegates.thumbnail.ThumbnailModelNode
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.treeadapter.FilterCriteria
 import com.krystianwsul.treeadapter.ModelNode
-import com.krystianwsul.treeadapter.Sortable
 import com.krystianwsul.treeadapter.TreeNode
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Maybe
@@ -35,15 +29,7 @@ class NotDoneInstanceNode(
     val instanceData: GroupListDataWrapper.InstanceData,
     override val parentNode: ModelNode<AbstractHolder>,
     override val groupAdapter: GroupListFragment.GroupAdapter,
-) :
-    NotDoneNode(),
-    NodeCollectionParent,
-    CheckableModelNode,
-    MultiLineModelNode,
-    ThumbnailModelNode,
-    IndentationModelNode,
-    Sortable,
-    DetailsNode.Parent {
+) : NotDoneNode() {
 
     override val holderType = HolderType.CHECKABLE
 

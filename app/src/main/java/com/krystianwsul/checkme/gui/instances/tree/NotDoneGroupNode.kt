@@ -14,22 +14,21 @@ import com.krystianwsul.checkme.gui.tree.HolderType
 import com.krystianwsul.checkme.gui.tree.ImageNode
 import com.krystianwsul.checkme.gui.tree.delegates.checkable.CheckBoxState
 import com.krystianwsul.checkme.gui.tree.delegates.checkable.CheckableDelegate
-import com.krystianwsul.checkme.gui.tree.delegates.checkable.CheckableModelNode
 import com.krystianwsul.checkme.gui.tree.delegates.expandable.ExpandableDelegate
 import com.krystianwsul.checkme.gui.tree.delegates.indentation.IndentationDelegate
-import com.krystianwsul.checkme.gui.tree.delegates.indentation.IndentationModelNode
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineDelegate
-import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineModelNode
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineRow
 import com.krystianwsul.checkme.gui.tree.delegates.thumbnail.ThumbnailDelegate
-import com.krystianwsul.checkme.gui.tree.delegates.thumbnail.ThumbnailModelNode
 import com.krystianwsul.checkme.gui.utils.flatten
 import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.utils.InstanceKey
-import com.krystianwsul.treeadapter.*
+import com.krystianwsul.treeadapter.FilterCriteria
+import com.krystianwsul.treeadapter.ModelNode
+import com.krystianwsul.treeadapter.NodeContainer
+import com.krystianwsul.treeadapter.TreeNode
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Maybe
 import io.reactivex.rxjava3.kotlin.addTo
@@ -39,15 +38,7 @@ class NotDoneGroupNode(
     override val indentation: Int,
     private val nodeCollection: NodeCollection,
     val instanceDatas: MutableList<GroupListDataWrapper.InstanceData>,
-) :
-    NotDoneNode(),
-    NodeCollectionParent,
-    Sortable,
-    CheckableModelNode,
-    MultiLineModelNode,
-    ThumbnailModelNode,
-    IndentationModelNode,
-    DetailsNode.Parent {
+) : NotDoneNode() {
 
     override val parentNode get() = nodeCollection.parentNode
 

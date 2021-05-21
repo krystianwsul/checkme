@@ -50,7 +50,7 @@ class NotDoneGroupNode(
             indentation,
             checkBoxState != CheckBoxState.Gone,
             thumbnail != null,
-            true
+            true,
         )
 
     init {
@@ -139,7 +139,7 @@ class NotDoneGroupNode(
             } else {
                 val groupAdapter = nodeCollection.groupAdapter
 
-                val checked = if (nodeCollection.useDoneNode) {
+                val done = if (nodeCollection.useDoneNode) {
                     check(singleInstanceData.done == null)
 
                     false
@@ -147,18 +147,16 @@ class NotDoneGroupNode(
                     singleInstanceData.done != null
                 }
 
-                CheckBoxState.Visible(checked) {
-                    val instanceKey = singleInstanceData.instanceKey
-
+                CheckBoxState.Visible(done) {
                     fun setDone(done: Boolean) = AndroidDomainUpdater.setInstanceDone(
                         groupAdapter.dataId.toFirst(),
-                        instanceKey,
+                        singleInstanceData.instanceKey,
                         done,
                     )
 
-                    setDone(true).observeOn(AndroidSchedulers.mainThread())
+                    setDone(!done).observeOn(AndroidSchedulers.mainThread())
                         .andThen(Maybe.defer { groupListFragment.listener.showSnackbarDoneMaybe(1) })
-                        .flatMapCompletable { setDone(false) }
+                        .flatMapCompletable { setDone(done) }
                         .subscribe()
                         .addTo(groupListFragment.attachedToWindowDisposable)
 

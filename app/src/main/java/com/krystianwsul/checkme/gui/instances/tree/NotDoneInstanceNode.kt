@@ -36,7 +36,7 @@ class NotDoneInstanceNode(
             indentation,
             true,
             thumbnail != null,
-            true
+            true,
         )
 
     fun initialize(

@@ -195,7 +195,7 @@ object RelevanceChecker {
 
                 userCustomTimeRelevances.values
                         .filter { !it.relevant }
-                        .forEach { (it.customTime as Time.Custom.User).delete() }
+                    .forEach { (it.customTime as Time.Custom.User).delete() }
 
                 val removedSharedProjectKeys = removedSharedProjects.map { it.projectKey }
 
@@ -204,6 +204,28 @@ object RelevanceChecker {
                         remoteUser.removeProject(it)
                     }
                 }
+
+                projectMap.values.forEach { project ->
+                    project.projectRecord
+                        .rootTaskParentDelegate
+                        .rootTaskKeys
+                        .forEach {
+                            val task = rootTasksByTaskKey[it] ?: throw MissingTaskException(it, project.projectKey)
+
+                            if (task.deleted) throw DeletedTaskException(it, project.projectKey)
+                        }
+                }
+
+                rootTaskManager.records
+                    .values
+                    .filter { it.shouldDelete }
+                    .map { it.taskKey }
+                    .forEach { taskKey ->
+                        projectMap.values.forEach { project ->
+                            if (project.projectRecord.rootTaskParentDelegate.rootTaskKeys.contains(taskKey))
+                                throw DeletedRecordStillPresentException(taskKey, project.projectKey)
+                        }
+                    }
 
                 val values = mutableMapOf<String, Any?>()
 
@@ -262,4 +284,13 @@ object RelevanceChecker {
 
     private class InconsistentRootTaskIdsException(taskKey: TaskKey.Root, projectKey: ProjectKey<*>) :
         Exception("rootTaskId $taskKey missing from $projectKey")
+
+    private class MissingTaskException(taskKey: TaskKey.Root, projectKey: ProjectKey<*>) :
+        Exception("rootTaskId $taskKey from $projectKey is missing from map")
+
+    private class DeletedTaskException(taskKey: TaskKey.Root, projectKey: ProjectKey<*>) :
+        Exception("rootTaskId $taskKey from $projectKey is deleted")
+
+    private class DeletedRecordStillPresentException(taskKey: TaskKey.Root, projectKey: ProjectKey<*>) :
+        Exception("deleted task $taskKey still present in $projectKey")
 }

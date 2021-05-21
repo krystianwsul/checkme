@@ -440,7 +440,12 @@ sealed class Task(
 
     protected abstract fun deleteFromParent()
 
+    var deleted = false
+        private set
+
     fun delete() {
+        deleted = true
+
         existingInstances.values
             .toMutableList()
             .forEach { it.delete() }

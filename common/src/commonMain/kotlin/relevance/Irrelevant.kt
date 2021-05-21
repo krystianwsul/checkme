@@ -172,7 +172,12 @@ object Irrelevant {
             irrelevantNoScheduleOrParents.forEach { it.delete() }
             irrelevantTaskHierarchies.forEach { it.delete() }
             irrelevantNestedTaskHierarchies.forEach { (it as NestedTaskHierarchy).deleteFromParentTask() }
+
             irrelevantTasks.forEach { it.delete() }
+
+            irrelevantTasks.forEach {
+                if (project.getAllTasks().contains(it)) throw IrrelevantTaskFetchedException(it.taskKey, project.projectKey)
+            }
         }
 
         val remoteCustomTimes = project.customTimes
@@ -217,6 +222,9 @@ object Irrelevant {
                 .rootTaskParentDelegate
                 .rootTaskKeys
                 .forEach { taskKey ->
+                    if (irrelevantTasks.any { it.taskKey == taskKey })
+                        throw TaskInIrrelevantException(taskKey, project.projectKey)
+
                     val taskRelevance =
                         taskRelevances[taskKey] ?: throw MissingRelevanceException(taskKey, project.projectKey)
 
@@ -254,4 +262,10 @@ object Irrelevant {
 
     private class TaskIrrelevantException(taskKey: TaskKey, projectKey: ProjectKey<*>) :
         Exception("task incorrectly relevant: $taskKey in $projectKey")
+
+    private class TaskInIrrelevantException(taskKey: TaskKey, projectKey: ProjectKey<*>) :
+        Exception("task incorrectly irrelevant: $taskKey in $projectKey")
+
+    private class IrrelevantTaskFetchedException(taskKey: TaskKey, projectKey: ProjectKey<*>) :
+        Exception("irrelevant task incorrectly present in results: $taskKey, $projectKey")
 }

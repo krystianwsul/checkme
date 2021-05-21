@@ -12,12 +12,12 @@ import com.krystianwsul.treeadapter.TreeNode
 class NodeCollection(
     private val indentation: Int,
     val groupAdapter: GroupListFragment.GroupAdapter,
-    val useGroups: Boolean,
+    val groupingMode: GroupingMode,
     val nodeContainer: NodeContainer<AbstractHolder>,
     private val note: String?,
     val parentNode: DetailsNode.Parent?,
     private val projectInfo: DetailsNode.ProjectInfo?,
-    val useDoneNode: Boolean = true,
+    private val useDoneNode: Boolean = true,
 ) {
 
     private lateinit var notDoneGroupCollection: NotDoneGroupCollection
@@ -94,4 +94,9 @@ class NodeCollection(
     }
 
     val instanceExpansionStates get() = notDoneGroupCollection.instanceExpansionStates + dividerNode.instanceExpansionStates
+
+    enum class GroupingMode {
+
+        NONE, TIME
+    }
 }

@@ -148,7 +148,7 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
                 nodeCollection = NodeCollection(
                     indentation + 1,
                     groupAdapter,
-                    false,
+                    NodeCollection.GroupingMode.NONE, // todo project
                     treeNode,
                     instanceData.note,
                     modelNode,

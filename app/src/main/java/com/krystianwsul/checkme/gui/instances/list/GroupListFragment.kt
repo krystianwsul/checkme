@@ -1019,7 +1019,7 @@ class GroupListFragment @JvmOverloads constructor(
             nodeCollection = NodeCollection(
                 0,
                 this,
-                useGroups,
+                if (useGroups) NodeCollection.GroupingMode.TIME else NodeCollection.GroupingMode.NONE,
                 treeNodeCollection,
                 note,
                 null,

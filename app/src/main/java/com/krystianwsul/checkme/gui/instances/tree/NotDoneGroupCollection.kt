@@ -25,7 +25,7 @@ class NotDoneGroupCollection(
         notDoneInstanceDatas: List<GroupListDataWrapper.InstanceData>,
         collectionState: CollectionState,
     ): List<TreeNode<AbstractHolder>> {
-        val instanceGroups = if (nodeCollection.useGroups) {
+        val instanceGroups = if (nodeCollection.groupingMode == NodeCollection.GroupingMode.TIME) { // todo project
             notDoneInstanceDatas.groupBy { it.instanceTimeStamp }.values
         } else {
             notDoneInstanceDatas.map(::listOf)

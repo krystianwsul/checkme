@@ -6,7 +6,6 @@ import com.krystianwsul.checkme.gui.tree.AbstractHolder
 import com.krystianwsul.checkme.gui.tree.DetailsNode
 import com.krystianwsul.checkme.gui.tree.ImageNode
 import com.krystianwsul.common.time.ExactTimeStamp
-import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.treeadapter.FilterCriteria
 import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.NodeContainer
@@ -184,22 +183,5 @@ class NotDoneGroupNode(
         singleInstanceData.run { "$name $ordinal" }
     } else {
         null
-    }
-
-    data class SingleId(val instanceKey: InstanceKey)
-
-    class GroupId(val instanceKeys: Set<InstanceKey>, val exactTimeStamp: ExactTimeStamp.Local) {
-
-        override fun hashCode() = 1
-
-        override fun equals(other: Any?): Boolean {
-            if (other === this)
-                return true
-
-            if (other !is GroupId)
-                return false
-
-            return instanceKeys == other.instanceKeys || exactTimeStamp == other.exactTimeStamp
-        }
     }
 }

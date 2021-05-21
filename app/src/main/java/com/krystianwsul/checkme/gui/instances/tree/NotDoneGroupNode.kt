@@ -17,17 +17,9 @@ class NotDoneGroupNode(
         ?: ContentDelegate.Group(nodeCollection.groupAdapter, instanceDatas, indentation)
 ) {
 
-    init {
-        check(instanceDatas.isNotEmpty())
-    }
-
     override val isDraggable = true
 
     override val parentNode get() = nodeCollection.parentNode
-
-    val timeStamp = instanceDatas.map { it.instanceTimeStamp }
-        .distinct()
-        .single()
 
     override val groupAdapter by lazy { nodeCollection.groupAdapter }
 
@@ -51,7 +43,7 @@ class NotDoneGroupNode(
     override fun compareTo(other: ModelNode<AbstractHolder>) = when (other) {
         is ImageNode, is DetailsNode -> 1
         is NotDoneGroupNode -> {
-            val timeStampComparison = timeStamp.compareTo(other.timeStamp)
+            val timeStampComparison = contentDelegate.timeStamp.compareTo(other.contentDelegate.timeStamp)
             if (timeStampComparison != 0) {
                 timeStampComparison
             } else {

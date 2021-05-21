@@ -91,6 +91,7 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
 
     sealed class ContentDelegate : ThumbnailModelNode, Sortable, CheckableModelNode {
 
+        abstract val instanceDatas: List<GroupListDataWrapper.InstanceData>
         protected abstract val groupAdapter: GroupListFragment.GroupAdapter
         protected val groupListFragment get() = groupAdapter.groupListFragment
 
@@ -99,6 +100,12 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
         abstract val treeNode: TreeNode<AbstractHolder>
         abstract val id: Any
         abstract val toggleDescendants: Boolean
+
+        val timeStamp by lazy {
+            instanceDatas.map { it.instanceTimeStamp }
+                .distinct()
+                .single()
+        }
 
         abstract fun initialize(
             collectionState: CollectionState,
@@ -116,6 +123,8 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
             val instanceData: GroupListDataWrapper.InstanceData,
             private val indentation: Int,
         ) : ContentDelegate() {
+
+            override val instanceDatas = listOf(instanceData)
 
             override lateinit var treeNode: TreeNode<AbstractHolder>
             private lateinit var nodeCollection: NodeCollection
@@ -234,17 +243,13 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
 
         class Group(
             override val groupAdapter: GroupListFragment.GroupAdapter,
-            private val instanceDatas: List<GroupListDataWrapper.InstanceData>,
+            override val instanceDatas: List<GroupListDataWrapper.InstanceData>,
             private val indentation: Int,
         ) : ContentDelegate() {
 
             init {
                 check(instanceDatas.size > 1)
             }
-
-            val timeStamp = instanceDatas.map { it.instanceTimeStamp }
-                .distinct()
-                .single()
 
             override val rowsDelegate: DetailsNode.ProjectRowsDelegate =
                 GroupRowsDelegate(groupAdapter, timeStamp)

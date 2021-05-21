@@ -9,7 +9,6 @@ import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.NodeContainer
 import com.krystianwsul.treeadapter.TreeNode
-import java.util.*
 
 class NotDoneGroupNode(
     override val indentation: Int,
@@ -23,11 +22,7 @@ class NotDoneGroupNode(
 
     override val parentNode get() = nodeCollection.parentNode
 
-    private val notDoneInstanceNodes = ArrayList<NotDoneInstanceNode>()
-
-    private var singleInstanceNodeCollection: NodeCollection? = null
-
-    val exactTimeStamp: ExactTimeStamp.Local // todo project contentDelegate
+    val exactTimeStamp: ExactTimeStamp.Local
 
     val singleInstanceData get() = instanceDatas.single()
 
@@ -56,7 +51,7 @@ class NotDoneGroupNode(
 
             val treeNode = TreeNode(this, nodeContainer, selected, expansionState)
 
-            singleInstanceNodeCollection = NodeCollection(
+            val singleInstanceNodeCollection = NodeCollection(
                 indentation + 1,
                 groupAdapter,
                 false,
@@ -66,10 +61,10 @@ class NotDoneGroupNode(
                 instanceData.projectInfo,
             )
 
-            (contentDelegate as ContentDelegate.Instance).initialize(groupAdapter, treeNode, singleInstanceNodeCollection!!)
+            (contentDelegate as ContentDelegate.Instance).initialize(groupAdapter, treeNode, singleInstanceNodeCollection)
 
             treeNode.setChildTreeNodes(
-                singleInstanceNodeCollection!!.initialize(
+                singleInstanceNodeCollection.initialize(
                     instanceData.children.values,
                     collectionState,
                     doneExpansionState,
@@ -87,18 +82,18 @@ class NotDoneGroupNode(
 
             val treeNode = TreeNode(this, nodeContainer, selected, expansionState)
 
-            treeNode.setChildTreeNodes(
-                instanceDatas.map {
-                    newChildTreeNode(
-                        it,
-                        collectionState,
-                        collectionState.selectedInstances.contains(it.instanceKey),
-                        treeNode,
-                    )
-                }
-            )
+            val nodePairs = instanceDatas.map {
+                newChildTreeNode(
+                    it,
+                    collectionState,
+                    collectionState.selectedInstances.contains(it.instanceKey),
+                    treeNode,
+                )
+            }
 
-            (contentDelegate as ContentDelegate.Group).initialize(treeNode, notDoneInstanceNodes)
+            treeNode.setChildTreeNodes(nodePairs.map { it.first })
+
+            (contentDelegate as ContentDelegate.Group).initialize(treeNode, nodePairs.map { it.second })
         }
 
         return treeNode
@@ -151,7 +146,7 @@ class NotDoneGroupNode(
         collectionState: CollectionState,
         selected: Boolean,
         treeNode: TreeNode<AbstractHolder>,
-    ): TreeNode<AbstractHolder> {
+    ): Pair<TreeNode<AbstractHolder>, NotDoneInstanceNode> {
         val notDoneInstanceNode = NotDoneInstanceNode(
             indentation,
             instanceData,
@@ -161,8 +156,6 @@ class NotDoneGroupNode(
 
         val childTreeNode = notDoneInstanceNode.initialize(collectionState, selected, treeNode)
 
-        notDoneInstanceNodes.add(notDoneInstanceNode)
-
-        return childTreeNode
+        return childTreeNode to notDoneInstanceNode
     }
 }

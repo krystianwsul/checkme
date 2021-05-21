@@ -5,7 +5,6 @@ import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
 import com.krystianwsul.checkme.gui.tree.DetailsNode
 import com.krystianwsul.checkme.gui.tree.ImageNode
-import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.treeadapter.ModelNode
 
 class NotDoneGroupNode(
@@ -18,28 +17,21 @@ class NotDoneGroupNode(
         ?: ContentDelegate.Group(nodeCollection.groupAdapter, instanceDatas, indentation)
 ) {
 
+    init {
+        check(instanceDatas.isNotEmpty())
+    }
+
     override val isDraggable = true
 
     override val parentNode get() = nodeCollection.parentNode
 
-    val exactTimeStamp: ExactTimeStamp.Local
+    val timeStamp = instanceDatas.map { it.instanceTimeStamp }
+        .distinct()
+        .single()
 
     val singleInstanceData get() = instanceDatas.single()
 
-    init {
-        check(instanceDatas.isNotEmpty())
-
-        exactTimeStamp = instanceDatas.map { it.instanceTimeStamp }
-            .distinct()
-            .single()
-            .toLocalExactTimeStamp()
-    }
-
-    fun singleInstance(): Boolean {
-        check(instanceDatas.isNotEmpty())
-
-        return instanceDatas.size == 1
-    }
+    fun singleInstance() = contentDelegate is ContentDelegate.Instance
 
     override val groupAdapter by lazy { nodeCollection.groupAdapter }
 
@@ -63,7 +55,7 @@ class NotDoneGroupNode(
     override fun compareTo(other: ModelNode<AbstractHolder>) = when (other) {
         is ImageNode, is DetailsNode -> 1
         is NotDoneGroupNode -> {
-            val timeStampComparison = exactTimeStamp.compareTo(other.exactTimeStamp)
+            val timeStampComparison = timeStamp.compareTo(other.timeStamp)
             if (timeStampComparison != 0) {
                 timeStampComparison
             } else {

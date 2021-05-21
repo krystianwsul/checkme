@@ -974,8 +974,9 @@ class GroupListFragment @JvmOverloads constructor(
                 val selectedTasks = selectedDatas.filterIsInstance<GroupListDataWrapper.TaskData>().map { it.taskKey }
 
                 val selectedGroups = selectedNodes.map { it.modelNode }
-                    .filterIsInstance<NotDoneGroupNode>().filterNot { it.singleInstance() }
-                    .map { it.exactTimeStamp.long }
+                    .filterIsInstance<NotDoneNode>().map { it.contentDelegate }
+                    .filterIsInstance<NotDoneNode.ContentDelegate.Group>()
+                    .map { it.timeStamp.long }
 
                 return GroupListState(
                     doneExpanded,

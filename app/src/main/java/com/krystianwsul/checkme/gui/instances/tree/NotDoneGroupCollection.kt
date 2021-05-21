@@ -17,7 +17,7 @@ class NotDoneGroupCollection(
 
     val groupExpansionStates
         get() = notDoneGroupNodes.filter { !it.singleInstance() }
-            .map { it.exactTimeStamp.toTimeStamp() to it.treeNode.expansionState }
+            .map { it.timeStamp to it.treeNode.expansionState }
             .toMap()
 
     fun initialize(

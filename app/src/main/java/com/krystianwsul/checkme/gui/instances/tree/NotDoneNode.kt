@@ -27,15 +27,15 @@ import com.krystianwsul.checkme.gui.utils.flatten
 import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.common.firebase.models.ImageState
 import com.krystianwsul.common.time.DayOfWeek
-import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.HourMinute
+import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.treeadapter.*
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Maybe
 import io.reactivex.rxjava3.kotlin.addTo
 
-sealed class NotDoneNode(protected val contentDelegate: ContentDelegate) :
+sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
     AbstractModelNode(),
     NodeCollectionParent,
     Sortable by contentDelegate,
@@ -89,7 +89,7 @@ sealed class NotDoneNode(protected val contentDelegate: ContentDelegate) :
 
     final override fun getMatchResult(query: String) = contentDelegate.getMatchResult(query)
 
-    protected sealed class ContentDelegate : ThumbnailModelNode, Sortable, CheckableModelNode {
+    sealed class ContentDelegate : ThumbnailModelNode, Sortable, CheckableModelNode {
 
         protected abstract val groupAdapter: GroupListFragment.GroupAdapter
         protected val groupListFragment get() = groupAdapter.groupListFragment
@@ -242,13 +242,12 @@ sealed class NotDoneNode(protected val contentDelegate: ContentDelegate) :
                 check(instanceDatas.size > 1)
             }
 
-            val exactTimeStamp = instanceDatas.map { it.instanceTimeStamp }
+            val timeStamp = instanceDatas.map { it.instanceTimeStamp }
                 .distinct()
                 .single()
-                .toLocalExactTimeStamp()
 
             override val rowsDelegate: DetailsNode.ProjectRowsDelegate =
-                GroupRowsDelegate(groupAdapter, exactTimeStamp)
+                GroupRowsDelegate(groupAdapter, timeStamp)
 
             override lateinit var treeNode: TreeNode<AbstractHolder>
             private lateinit var notDoneInstanceNodes: List<NotDoneInstanceNode>
@@ -261,8 +260,8 @@ sealed class NotDoneNode(protected val contentDelegate: ContentDelegate) :
                 treeNode = TreeNode(
                     modelNode,
                     nodeContainer,
-                    collectionState.selectedGroups.contains(exactTimeStamp.long),
-                    collectionState.expandedGroups[exactTimeStamp.toTimeStamp()],
+                    collectionState.selectedGroups.contains(timeStamp.long),
+                    collectionState.expandedGroups[timeStamp],
                 )
 
                 val nodePairs = instanceDatas.map {
@@ -286,12 +285,12 @@ sealed class NotDoneNode(protected val contentDelegate: ContentDelegate) :
 
             override val checkBoxState get() = if (treeNode.isExpanded) CheckBoxState.Gone else CheckBoxState.Invisible
 
-            override val id: Any by lazy { Id(instanceDatas.map { it.instanceKey }.toSet(), exactTimeStamp) }
+            override val id: Any by lazy { Id(instanceDatas.map { it.instanceKey }.toSet(), timeStamp) }
 
             override val toggleDescendants = true
 
             override fun onClick(holder: AbstractHolder) =
-                groupListFragment.activity.let { it.startActivity(ShowGroupActivity.getIntent(exactTimeStamp, it)) }
+                groupListFragment.activity.let { it.startActivity(ShowGroupActivity.getIntent(timeStamp, it)) }
 
             override fun getOrdinal(): Double = throw UnsupportedOperationException()
             override fun setOrdinal(ordinal: Double) = throw UnsupportedOperationException()
@@ -306,15 +305,15 @@ sealed class NotDoneNode(protected val contentDelegate: ContentDelegate) :
 
             private class GroupRowsDelegate(
                 private val groupAdapter: GroupListFragment.GroupAdapter,
-                private val exactTimeStamp: ExactTimeStamp.Local,
+                private val timeStamp: TimeStamp,
             ) : DetailsNode.ProjectRowsDelegate(null, R.color.textSecondary) {
 
                 private fun getCustomTimeData(dayOfWeek: DayOfWeek, hourMinute: HourMinute) =
                     groupAdapter.customTimeDatas.firstOrNull { it.hourMinutes[dayOfWeek] == hourMinute }
 
                 private val details by lazy {
-                    val date = exactTimeStamp.date
-                    val hourMinute = exactTimeStamp.toTimeStamp().hourMinute
+                    val date = timeStamp.date
+                    val hourMinute = timeStamp.hourMinute
 
                     val timeText = getCustomTimeData(date.dayOfWeek, hourMinute)?.name ?: hourMinute.toString()
 
@@ -339,7 +338,7 @@ sealed class NotDoneNode(protected val contentDelegate: ContentDelegate) :
                 }
             }
 
-            private class Id(val instanceKeys: Set<InstanceKey>, val exactTimeStamp: ExactTimeStamp.Local) {
+            private class Id(val instanceKeys: Set<InstanceKey>, val timeStamp: TimeStamp) {
 
                 override fun hashCode() = 1
 
@@ -348,7 +347,7 @@ sealed class NotDoneNode(protected val contentDelegate: ContentDelegate) :
 
                     if (other !is Id) return false
 
-                    return instanceKeys == other.instanceKeys || exactTimeStamp == other.exactTimeStamp
+                    return instanceKeys == other.instanceKeys || timeStamp == other.timeStamp
                 }
             }
         }

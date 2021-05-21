@@ -20,7 +20,6 @@ import com.krystianwsul.checkme.utils.tryGetFragment
 import com.krystianwsul.checkme.viewmodels.DataId
 import com.krystianwsul.checkme.viewmodels.ShowGroupViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
-import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.treeadapter.FilterCriteria
@@ -39,10 +38,10 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
 
         private const val TAG_DELETE_INSTANCES = "deleteInstances"
 
-        fun getIntent(exactTimeStamp: ExactTimeStamp.Local, context: Context) = Intent(
-                context,
-                ShowGroupActivity::class.java
-        ).apply { putExtra(TIME_KEY, exactTimeStamp.long) }
+        fun getIntent(timeStamp: TimeStamp, context: Context) = Intent(
+            context,
+            ShowGroupActivity::class.java
+        ).apply { putExtra(TIME_KEY, timeStamp.long) }
     }
 
     private lateinit var timeStamp: TimeStamp

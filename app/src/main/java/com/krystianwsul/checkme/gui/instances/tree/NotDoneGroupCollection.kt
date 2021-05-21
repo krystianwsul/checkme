@@ -16,7 +16,8 @@ class NotDoneGroupCollection(
     private val notDoneGroupNodes = mutableListOf<NotDoneGroupNode>()
 
     val groupExpansionStates
-        get() = notDoneGroupNodes.filter { !it.singleInstance() }
+        get() = notDoneGroupNodes.map { it.contentDelegate }
+            .filterIsInstance<NotDoneNode.ContentDelegate.Group>()
             .map { it.timeStamp to it.treeNode.expansionState }
             .toMap()
 

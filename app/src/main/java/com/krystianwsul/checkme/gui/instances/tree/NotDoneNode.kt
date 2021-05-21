@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
 import com.krystianwsul.checkme.R
+import com.krystianwsul.checkme.domainmodel.extensions.setInstanceDone
 import com.krystianwsul.checkme.domainmodel.extensions.setOrdinal
 import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
 import com.krystianwsul.checkme.gui.instances.ShowGroupActivity
@@ -11,6 +12,7 @@ import com.krystianwsul.checkme.gui.tree.AbstractHolder
 import com.krystianwsul.checkme.gui.tree.AbstractModelNode
 import com.krystianwsul.checkme.gui.tree.DetailsNode
 import com.krystianwsul.checkme.gui.tree.HolderType
+import com.krystianwsul.checkme.gui.tree.delegates.checkable.CheckBoxState
 import com.krystianwsul.checkme.gui.tree.delegates.checkable.CheckableDelegate
 import com.krystianwsul.checkme.gui.tree.delegates.checkable.CheckableModelNode
 import com.krystianwsul.checkme.gui.tree.delegates.expandable.ExpandableDelegate
@@ -30,13 +32,15 @@ import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.treeadapter.Sortable
 import com.krystianwsul.treeadapter.TreeNode
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.core.Maybe
 import io.reactivex.rxjava3.kotlin.addTo
 
 sealed class NotDoneNode(protected val contentDelegate: ContentDelegate) :
     AbstractModelNode(),
     NodeCollectionParent,
     Sortable by contentDelegate,
-    CheckableModelNode,
+    CheckableModelNode by contentDelegate,
     MultiLineModelNode,
     ThumbnailModelNode by contentDelegate,
     IndentationModelNode,
@@ -66,7 +70,7 @@ sealed class NotDoneNode(protected val contentDelegate: ContentDelegate) :
 
     final override fun onClick(holder: AbstractHolder) = contentDelegate.onClick(holder)
 
-    protected sealed class ContentDelegate : ThumbnailModelNode, Sortable {
+    protected sealed class ContentDelegate : ThumbnailModelNode, Sortable, CheckableModelNode {
 
         protected abstract val groupAdapter: GroupListFragment.GroupAdapter
         protected val groupListFragment get() = groupAdapter.groupListFragment
@@ -107,6 +111,34 @@ sealed class NotDoneNode(protected val contentDelegate: ContentDelegate) :
 
             override val thumbnail = instanceData.imageState
 
+            override val checkBoxState
+                get() = if (groupListFragment.selectionCallback.hasActionMode || treeNode.isSelected/* drag hack */) {
+                    CheckBoxState.Invisible
+                } else {
+                    val groupAdapter = nodeCollection.groupAdapter
+
+                    val done = instanceData.done != null
+
+                    CheckBoxState.Visible(done) {
+                        fun setDone(done: Boolean) = AndroidDomainUpdater.setInstanceDone(
+                            groupAdapter.dataId.toFirst(),
+                            instanceData.instanceKey,
+                            done,
+                        )
+
+                        setDone(!done).observeOn(AndroidSchedulers.mainThread())
+                            .andThen(Maybe.defer { groupListFragment.listener.showSnackbarDoneMaybe(1) })
+                            .flatMapCompletable { setDone(done) }
+                            .subscribe()
+                            .addTo(groupListFragment.attachedToWindowDisposable)
+
+                        /**
+                         * todo it would be better to move all of this out of the node, and both handle the snackbar and
+                         * the subscription there
+                         */
+                    }
+                }
+
             override fun onClick(holder: AbstractHolder) = groupListFragment.activity.let {
                 it.startActivity(ShowInstanceActivity.getIntent(it, instanceData.instanceKey))
             }
@@ -141,15 +173,19 @@ sealed class NotDoneNode(protected val contentDelegate: ContentDelegate) :
             override val rowsDelegate: DetailsNode.ProjectRowsDelegate =
                 GroupRowsDelegate(groupAdapter, exactTimeStamp)
 
+            private lateinit var treeNode: TreeNode<*>
             private lateinit var notDoneInstanceNodes: List<NotDoneInstanceNode>
 
-            fun initialize(notDoneInstanceNodes: List<NotDoneInstanceNode>) {
+            fun initialize(treeNode: TreeNode<*>, notDoneInstanceNodes: List<NotDoneInstanceNode>) {
+                this.treeNode = treeNode
                 this.notDoneInstanceNodes = notDoneInstanceNodes
             }
 
             override val instanceExpansionStates get() = notDoneInstanceNodes.map { it.instanceExpansionStates }.flatten()
 
             override val thumbnail: ImageState? = null
+
+            override val checkBoxState get() = if (treeNode.isExpanded) CheckBoxState.Gone else CheckBoxState.Invisible
 
             override fun onClick(holder: AbstractHolder) =
                 groupListFragment.activity.let { it.startActivity(ShowGroupActivity.getIntent(exactTimeStamp, it)) }

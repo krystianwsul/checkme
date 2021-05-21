@@ -1,8 +1,6 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
 import androidx.recyclerview.widget.RecyclerView
-import com.krystianwsul.checkme.domainmodel.extensions.setInstanceDone
-import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
 import com.krystianwsul.checkme.gui.tree.DetailsNode
@@ -15,9 +13,6 @@ import com.krystianwsul.treeadapter.FilterCriteria
 import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.NodeContainer
 import com.krystianwsul.treeadapter.TreeNode
-import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
-import io.reactivex.rxjava3.core.Maybe
-import io.reactivex.rxjava3.kotlin.addTo
 import java.util.*
 
 class NotDoneGroupNode(
@@ -118,7 +113,7 @@ class NotDoneGroupNode(
                 }
             )
 
-            (contentDelegate as ContentDelegate.Group).initialize(notDoneInstanceNodes)
+            (contentDelegate as ContentDelegate.Group).initialize(treeNode, notDoneInstanceNodes)
         }
 
         return treeNode
@@ -131,44 +126,6 @@ class NotDoneGroupNode(
     }
 
     override val groupAdapter by lazy { nodeCollection.groupAdapter }
-
-    override val checkBoxState
-        get() = if (singleInstance()) {
-            if (groupListFragment.selectionCallback.hasActionMode || treeNode.isSelected/* drag hack */) {
-                CheckBoxState.Invisible
-            } else {
-                val groupAdapter = nodeCollection.groupAdapter
-
-                val done = if (nodeCollection.useDoneNode) {
-                    check(singleInstanceData.done == null)
-
-                    false
-                } else {
-                    singleInstanceData.done != null
-                }
-
-                CheckBoxState.Visible(done) {
-                    fun setDone(done: Boolean) = AndroidDomainUpdater.setInstanceDone(
-                        groupAdapter.dataId.toFirst(),
-                        singleInstanceData.instanceKey,
-                        done,
-                    )
-
-                    setDone(!done).observeOn(AndroidSchedulers.mainThread())
-                        .andThen(Maybe.defer { groupListFragment.listener.showSnackbarDoneMaybe(1) })
-                        .flatMapCompletable { setDone(done) }
-                        .subscribe()
-                        .addTo(groupListFragment.attachedToWindowDisposable)
-
-                    /**
-                     * todo it would be better to move all of this out of the node, and both handle the snackbar and
-                     * the subscription there
-                     */
-                }
-            }
-        } else {
-            if (treeNode.isExpanded) CheckBoxState.Gone else CheckBoxState.Invisible
-        }
 
     override fun tryStartDrag(viewHolder: RecyclerView.ViewHolder): Boolean {
         val groupListFragment = groupAdapter.groupListFragment

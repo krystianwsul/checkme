@@ -1,21 +1,14 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
 import androidx.recyclerview.widget.RecyclerView
-import com.krystianwsul.checkme.domainmodel.DomainListenerManager
-import com.krystianwsul.checkme.domainmodel.extensions.setInstanceDone
-import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.instances.list.GroupListFragment
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
-import com.krystianwsul.checkme.gui.tree.delegates.checkable.CheckBoxState
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineDelegate
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.treeadapter.FilterCriteria
 import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.TreeNode
-import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
-import io.reactivex.rxjava3.core.Maybe
-import io.reactivex.rxjava3.kotlin.addTo
 
 class NotDoneInstanceNode(
     override val indentation: Int,
@@ -80,32 +73,6 @@ class NotDoneInstanceNode(
 
         return treeNode
     }
-
-    override val checkBoxState
-        get() = if (groupListFragment.selectionCallback.hasActionMode) {
-            CheckBoxState.Invisible
-        } else {
-            CheckBoxState.Visible(false) {
-                val instanceKey = instanceData.instanceKey
-
-                AndroidDomainUpdater.setInstanceDone(
-                    DomainListenerManager.NotificationType.First(groupAdapter.dataId),
-                    instanceKey,
-                    true
-                )
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .andThen(Maybe.defer { groupListFragment.listener.showSnackbarDoneMaybe(1) })
-                    .flatMapCompletable {
-                        AndroidDomainUpdater.setInstanceDone(
-                            DomainListenerManager.NotificationType.First(groupAdapter.dataId),
-                            instanceKey,
-                            false,
-                        )
-                    }
-                    .subscribe()
-                    .addTo(groupListFragment.attachedToWindowDisposable)
-            }
-        }
 
     override fun compareTo(other: ModelNode<AbstractHolder>) =
         instanceData.compareTo((other as NotDoneInstanceNode).instanceData)

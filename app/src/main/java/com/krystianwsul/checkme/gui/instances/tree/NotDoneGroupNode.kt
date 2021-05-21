@@ -48,19 +48,14 @@ class NotDoneGroupNode(
 
         val instanceData = instanceDatas.singleOrNull()
 
-        val (expansionState, doneExpansionState) = collectionState.run {
-            instanceData?.let {
-                expandedInstances[it.instanceKey] ?: CollectionExpansionState()
-            } ?: CollectionExpansionState(expandedGroups[exactTimeStamp.toTimeStamp()], null)
-        }
-
-        val selected = collectionState.run {
-            instanceData?.let { selectedInstances.contains(it.instanceKey) } ?: selectedGroups.contains(exactTimeStamp.long)
-        }
-
-        val treeNode = TreeNode(this, nodeContainer, selected, expansionState)
-
         if (instanceData != null) {
+            val (expansionState, doneExpansionState) =
+                collectionState.expandedInstances[instanceData.instanceKey] ?: CollectionExpansionState()
+
+            val selected = collectionState.selectedInstances.contains(instanceData.instanceKey)
+
+            val treeNode = TreeNode(this, nodeContainer, selected, expansionState)
+
             singleInstanceNodeCollection = NodeCollection(
                 indentation + 1,
                 groupAdapter,
@@ -86,6 +81,12 @@ class NotDoneGroupNode(
                 )
             )
         } else {
+            val expansionState = collectionState.expandedGroups[exactTimeStamp.toTimeStamp()]
+
+            val selected = collectionState.selectedGroups.contains(exactTimeStamp.long)
+
+            val treeNode = TreeNode(this, nodeContainer, selected, expansionState)
+
             treeNode.setChildTreeNodes(
                 instanceDatas.map {
                     newChildTreeNode(

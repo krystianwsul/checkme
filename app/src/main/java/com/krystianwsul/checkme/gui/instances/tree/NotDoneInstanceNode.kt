@@ -41,8 +41,6 @@ class NotDoneInstanceNode(
             true
         )
 
-    override val isDraggable = true
-
     fun initialize(
         collectionState: CollectionState,
         selected: Boolean,

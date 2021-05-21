@@ -226,8 +226,6 @@ class NotDoneGroupNode(
             if (treeNode.isExpanded) CheckBoxState.Gone else CheckBoxState.Invisible
         }
 
-    override val isDraggable = true
-
     override fun tryStartDrag(viewHolder: RecyclerView.ViewHolder): Boolean {
         val groupListFragment = groupAdapter.groupListFragment
 

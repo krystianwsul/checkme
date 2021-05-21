@@ -28,6 +28,8 @@ sealed class NotDoneNode :
 
     override val isSelectable = true
 
+    override val isDraggable = true
+
     override val delegates by lazy {
         listOf(
             ExpandableDelegate(treeNode),

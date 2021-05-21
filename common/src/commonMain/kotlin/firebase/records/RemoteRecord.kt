@@ -12,7 +12,8 @@ abstract class RemoteRecord(create: Boolean) {
         DomainThreadChecker.instance.requireDomainThread()
     }
 
-    private var shouldDelete = false
+    var shouldDelete = false
+        private set
 
     var update = if (create) null else mutableMapOf<String, Any?>()
 

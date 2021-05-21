@@ -630,7 +630,7 @@ class DomainFactory(
                 projectToRootConversion.copiedTaskKeys[pair.first.taskKey] = task.taskKey
             }
 
-            for (startTaskHierarchy in projectToRootConversion.startTaskHierarchies) {
+            for (startTaskHierarchy in projectToRootConversion.startTaskHierarchies.values) {
                 val parentTask = projectToRootConversion.endTasks.getValue(startTaskHierarchy.parentTaskId)
                 val childTask = projectToRootConversion.endTasks.getValue(startTaskHierarchy.childTaskId)
 
@@ -682,14 +682,20 @@ class DomainFactory(
             )
 
             val childTaskHierarchies = startTask.getChildTaskHierarchies(now)
+            val parentTaskHierarchies = startTask.parentTaskHierarchies
 
-            projectToRootConversion.startTaskHierarchies.addAll(childTaskHierarchies)
+            val taskHierarchyMap = (childTaskHierarchies + parentTaskHierarchies).associateBy { it.taskHierarchyKey }
+            val newTaskHierarchyMap = taskHierarchyMap - projectToRootConversion.startTaskHierarchies.keys
 
-            childTaskHierarchies.map { it.childTask }.forEach {
-                it.requireCurrent(now)
+            projectToRootConversion.startTaskHierarchies.putAll(newTaskHierarchyMap)
 
-                convertProjectToRootHelper(now, projectToRootConversion, it as ProjectTask)
-            }
+            newTaskHierarchyMap.values
+                .flatMap { listOf(it.parentTask, it.childTask) }
+                .forEach {
+                    it.requireCurrent(now)
+
+                    convertProjectToRootHelper(now, projectToRootConversion, it as ProjectTask)
+                }
         }
 
         private fun copyTask(

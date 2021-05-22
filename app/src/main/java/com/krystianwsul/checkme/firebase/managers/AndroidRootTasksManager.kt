@@ -37,5 +37,5 @@ class AndroidRootTasksManager(databaseWrapper: DatabaseWrapper) : RootTasksManag
                 )
             }
         },
-    )?.data.let { NullableWrapper(it) }
+    )?.let { NullableWrapper(it.data) }
 }

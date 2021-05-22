@@ -256,7 +256,7 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
                 GroupRowsDelegate(groupAdapter, timeStamp)
 
             override lateinit var treeNode: TreeNode<AbstractHolder>
-            private lateinit var notDoneInstanceNodes: List<NotDoneInstanceNode>
+            private lateinit var notDoneNodes: List<NotDoneNode>
 
             override fun initialize(
                 collectionState: CollectionState,
@@ -280,12 +280,13 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
 
                 treeNode.setChildTreeNodes(nodePairs.map { it.first })
 
-                notDoneInstanceNodes = nodePairs.map { it.second }
+                notDoneNodes = nodePairs.map { it.second }
 
                 return treeNode
             }
 
-            override val instanceExpansionStates get() = notDoneInstanceNodes.map { it.instanceExpansionStates }.flatten()
+            override val instanceExpansionStates
+                get() = notDoneNodes.map { it.contentDelegate.instanceExpansionStates }.flatten()
 
             override val thumbnail: ImageState? = null
 

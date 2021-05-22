@@ -97,6 +97,6 @@ class NodeCollection(
 
     enum class GroupingMode {
 
-        NONE, TIME
+        NONE, PROJECT, TIME
     }
 }

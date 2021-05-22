@@ -14,6 +14,7 @@ import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.merge
+import io.reactivex.rxjava3.kotlin.ofType
 import io.reactivex.rxjava3.kotlin.plusAssign
 
 class RootTasksLoader(
@@ -53,41 +54,50 @@ class RootTasksLoader(
             { it.databaseRx.disposable.dispose() },
     ).replayImmediate()
 
-    private data class RecordData(val record: RootTaskRecord, val isAddedLocally: Boolean)
+    private data class RecordData(val record: RootTaskRecord?, val isAddedLocally: Boolean)
 
-    val addChangeEvents: Observable<AddChangeEvent> = databaseRxObservable.switchMap { mapChanges ->
+    private val databaseEvents: Observable<Event> = databaseRxObservable.switchMap { mapChanges ->
         mapChanges.newMap
-                .map { (_, taskData) ->
-                    val recordObservable = taskData.databaseRx
-                            .observable
-                            .mapNotNull(rootTasksManager::set)
-                            .map { RecordData(it, false) }
-                            .let {
-                                val initialRecord = taskData.initialRecord
-                                if (initialRecord != null) {
-                                    taskData.initialRecord = null
+            .map { (taskKey, taskData) ->
+                val recordObservable = taskData.databaseRx
+                    .observable
+                    .mapNotNull(rootTasksManager::set)
+                    .map { RecordData(it.value, false) }
+                    .let {
+                        val initialRecord = taskData.initialRecord
+                        if (initialRecord != null) {
+                            taskData.initialRecord = null
 
-                                    it.startWithItem(RecordData(initialRecord, true))
+                            it.startWithItem(RecordData(initialRecord, true))
                                 } else {
                                     it
                                 }
                             }
 
                     recordObservable.map { (taskRecord, isAddedLocally) ->
-                        val isTaskKeyTracked = loadDependencyTrackerManager.isTaskKeyTracked(taskRecord.taskKey)
+                        if (taskRecord != null) {
+                            val isTaskKeyTracked = loadDependencyTrackerManager.isTaskKeyTracked(taskRecord.taskKey)
 
-                        // there's no reason why we'd be tracking a change for a locally added record
-                        check(!isTaskKeyTracked || !isAddedLocally)
+                            // there's no reason why we'd be tracking a change for a locally added record
+                            check(!isTaskKeyTracked || !isAddedLocally)
 
-                        AddChangeEvent(taskRecord, isTaskKeyTracked || isAddedLocally)
+                            AddChangeEvent(taskRecord, isTaskKeyTracked || isAddedLocally)
+                        } else {
+                            RemoveEvent(setOf(taskKey))
+                        }
                     }
-                }.merge()
+            }.merge()
     }.replayImmediate()
 
-    val removeEvents: Observable<RemoveEvent> = databaseRxObservable.map { it.removedEntries }
-            .filter { it.isNotEmpty() }
-            .map { RemoveEvent(it.keys) }
-            .replayImmediate()
+    private val removeEntryEvents: Observable<RemoveEvent> = databaseRxObservable.map { it.removedEntries }
+        .filter { it.isNotEmpty() }
+        .map { RemoveEvent(it.keys) }
+        .replayImmediate()
+
+    val allEvents = listOf(databaseEvents, removeEntryEvents).merge()
+
+    val addChangeEvents = allEvents.ofType<AddChangeEvent>()
+    val removeEvents = allEvents.ofType<RemoveEvent>()
 
     fun addTask(taskJson: RootTaskJson): TaskKey.Root {
         val taskRecord = rootTasksManager.newTaskRecord(taskJson)
@@ -97,7 +107,7 @@ class RootTasksLoader(
         check(!currentKeyMap.containsKey(taskKey))
 
         taskKeyRelay.accept(
-                currentKeyMap.toMutableMap().apply { put(taskRecord.taskKey, taskRecord) }
+            currentKeyMap.toMutableMap().apply { put(taskRecord.taskKey, taskRecord) }
         )
 
         return taskKey
@@ -113,9 +123,11 @@ class RootTasksLoader(
         ignoreKeyUpdates = false
     }
 
-    data class AddChangeEvent(val rootTaskRecord: RootTaskRecord, val skipChangeTypeEmission: Boolean)
+    sealed interface Event
 
-    data class RemoveEvent(val taskKeys: Set<TaskKey.Root>)
+    data class AddChangeEvent(val rootTaskRecord: RootTaskRecord, val skipChangeTypeEmission: Boolean) : Event
+
+    data class RemoveEvent(val taskKeys: Set<TaskKey.Root>) : Event
 
     interface Provider {
 

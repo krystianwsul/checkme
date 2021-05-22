@@ -24,10 +24,9 @@ interface RootTaskDependencyCoordinator {
             rootTaskKeySource.onRootTaskAddedOrUpdated(rootTaskRecord.taskKey, rootTaskRecord.getDependentTaskKeys())
 
             return listOf(
-                    Observable.just(Unit),
-                    rootTasksLoader.addChangeEvents,
-                    rootTasksLoader.removeEvents,
-                    userCustomTimeProviderSource.getTimeChangeObservable(),
+                Observable.just(Unit),
+                rootTasksLoader.allEvents,
+                userCustomTimeProviderSource.getTimeChangeObservable(),
             ).merge()
                     .filter { hasDependencies(rootTaskRecord) }
                     .firstOrError()

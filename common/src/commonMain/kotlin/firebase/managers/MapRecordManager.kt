@@ -41,9 +41,23 @@ abstract class MapRecordManager<T, U : Any> : RecordManager {
         recordMap[key] = record
     }
 
-    protected fun set(key: T, valueChanged: (U) -> Boolean, recordCallback: () -> U?): ChangeWrapper<U>? { // lazy to prevent parsing if LOCAL
+    protected fun set(
+        key: T,
+        valueChanged: (U) -> Boolean,
+        recordCallback: () -> U?
+    ): ChangeWrapper<U>? { // lazy to prevent parsing if LOCAL
+        return setNullable(key, valueChanged, recordCallback)?.let { changeWrapper ->
+            changeWrapper.data?.let { changeWrapper.newData(it) }
+        }
+    }
+
+    protected fun setNullable(
+        key: T,
+        valueChanged: (U) -> Boolean,
+        recordCallback: () -> U?
+    ): ChangeWrapper<U?>? { // lazy to prevent parsing if LOCAL
         return if (recordMap[key]?.let(valueChanged) != false) {
-            val record = recordCallback() ?: return null
+            val record = recordCallback() ?: return ChangeWrapper(ChangeType.REMOTE, null)
 
             recordMap[key] = record
 

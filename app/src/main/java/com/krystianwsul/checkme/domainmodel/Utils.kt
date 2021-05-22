@@ -8,11 +8,11 @@ import com.krystianwsul.checkme.viewmodels.DomainResult
 import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.models.ImageState
 import com.krystianwsul.common.firebase.models.Instance
-import com.krystianwsul.common.firebase.models.project.SharedProject
 import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.interrupt.DomainInterruptedException
 import com.krystianwsul.common.interrupt.InterruptionChecker
 import com.krystianwsul.common.time.ExactTimeStamp
+import com.krystianwsul.common.utils.ProjectKey
 
 fun FirebaseUser.toUserInfo() = UserInfo(email!!, displayName!!, uid)
 
@@ -48,12 +48,12 @@ fun <T> Sequence<T>.takeAndHasMore(n: Int): Pair<List<T>, Boolean> {
     return Pair(elements, hasMore)
 }
 
-fun Task.getProjectInfo(now: ExactTimeStamp.Local, includeProjectName: Boolean = true): DetailsNode.ProjectInfo? {
-    return if (isTopLevelTask(getHierarchyExactTimeStamp(now)) && project is SharedProject) {
+fun Task.getProjectInfo(now: ExactTimeStamp.Local, includeProjectDetails: Boolean = true): DetailsNode.ProjectInfo? {
+    val sharedProjectKey = project.projectKey as? ProjectKey.Shared
+
+    return if (isTopLevelTask(getHierarchyExactTimeStamp(now)) && sharedProjectKey != null) {
         DetailsNode.ProjectInfo(
-            project.name
-                .takeIf { includeProjectName }
-                .orEmpty(),
+            project.takeIf { includeProjectDetails }?.let { DetailsNode.ProjectDetails(it.name, sharedProjectKey) },
             DetailsNode.User.fromProjectUsers(getAssignedTo(now)),
         )
     } else {
@@ -63,13 +63,14 @@ fun Task.getProjectInfo(now: ExactTimeStamp.Local, includeProjectName: Boolean =
     }
 }
 
-fun Instance.getProjectInfo(now: ExactTimeStamp.Local, includeProjectName: Boolean = true): DetailsNode.ProjectInfo? {
-    return if (isRootInstance() && task.project is SharedProject) {
+fun Instance.getProjectInfo(now: ExactTimeStamp.Local, includeProjectDetails: Boolean = true): DetailsNode.ProjectInfo? {
+    val sharedProjectKey = task.project.projectKey as? ProjectKey.Shared
+
+    return if (isRootInstance() && sharedProjectKey != null) {
         DetailsNode.ProjectInfo(
             task.project
-                .name
-                .takeIf { includeProjectName }
-                .orEmpty(),
+                .takeIf { includeProjectDetails }
+                ?.let { DetailsNode.ProjectDetails(it.name, sharedProjectKey) },
             DetailsNode.User.fromProjectUsers(getAssignedTo(now)),
         )
     } else {

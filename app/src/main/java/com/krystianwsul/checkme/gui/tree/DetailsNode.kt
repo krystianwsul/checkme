@@ -14,6 +14,7 @@ import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineRow
 import com.krystianwsul.checkme.utils.loadPhoto
 import com.krystianwsul.common.criteria.QueryMatchable
 import com.krystianwsul.common.firebase.models.ProjectUser
+import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.normalized
 import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.ModelState
@@ -74,7 +75,7 @@ class DetailsNode(
 
         // check if has contents
         projectInfo?.let {
-            if (it.name.isNotEmpty() && !projectNameShownInParent()) return true
+            if (it.projectDetails != null && !projectNameShownInParent()) return true
 
             if (it.assignedTo.isNotEmpty()) return true
         }
@@ -92,9 +93,9 @@ class DetailsNode(
         (viewHolder as Holder).apply {
             rowTopMargin.isVisible = treeNode.treeNodeCollection.getPosition(treeNode) == 0
 
-            val projectRowVisible = projectInfo?.name?.isNotEmpty() == true
+            val projectRowVisible = projectInfo?.projectDetails != null
             rowProjectContainer.isVisible = projectRowVisible
-            rowProject.text = projectInfo?.name
+            rowProject.text = projectInfo?.projectDetails?.name
 
             val assignedTo = projectInfo?.assignedTo.orEmpty()
             val assignedToVisible = assignedTo.isNotEmpty()
@@ -163,7 +164,9 @@ class DetailsNode(
         override val rowSeparator = binding.rowListDetailsSeparator
     }
 
-    data class ProjectInfo(val name: String, val assignedTo: List<User>)
+    data class ProjectInfo(val projectDetails: ProjectDetails?, val assignedTo: List<User>)
+
+    data class ProjectDetails(val name: String, val projectKey: ProjectKey.Shared)
 
     data class User(val name: String, val photoUrl: String?) {
 
@@ -188,7 +191,9 @@ class DetailsNode(
         protected fun String?.toSecondaryRow() =
             takeIf { !it.isNullOrEmpty() }?.let { MultiLineRow.Visible(it, secondaryColor) }
 
-        val project = projectInfo?.name.toSecondaryRow()
+        val project = projectInfo?.projectDetails
+            ?.name
+            .toSecondaryRow()
 
         final override fun getRows(isExpanded: Boolean, allChildren: List<TreeNode<*>>): List<MultiLineRow> {
             val rows = getRowsWithoutProject(isExpanded, allChildren).toMutableList()

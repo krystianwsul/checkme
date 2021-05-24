@@ -115,9 +115,7 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
         abstract fun onClick(holder: AbstractHolder)
 
         override fun compareTo(other: ContentDelegate): Int {
-            fun ContentDelegate.instanceData() = instanceDatas.first()
-
-            return instanceData().compareTo(other.instanceData())
+            return firstInstanceData.compareTo(other.firstInstanceData)
         }
 
         class Instance(
@@ -261,10 +259,6 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
             private val groupingMode: NodeCollection.GroupingMode,
             private val nodeCollection: NodeCollection,
         ) : ContentDelegate() {
-
-            init {
-                check(instanceDatas.size > 1)
-            }
 
             override val instanceDatas get() = groupType.instanceDatas // todo project InstanceDatas
 

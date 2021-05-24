@@ -93,6 +93,7 @@ sealed class GroupType {
             indentation,
             NodeCollection.GroupingMode.PROJECT,
             nodeCollection,
+            groupTypes,
         )
     }
 
@@ -116,6 +117,7 @@ sealed class GroupType {
             indentation,
             NodeCollection.GroupingMode.NONE,
             nodeCollection,
+            instanceDatas.map(::Single),
         ) // todo project new delegate
     }
 
@@ -138,6 +140,7 @@ sealed class GroupType {
             indentation,
             NodeCollection.GroupingMode.NONE,
             nodeCollection,
+            instanceDatas.map(::Single),
         ) // todo project new delegate
     }
 

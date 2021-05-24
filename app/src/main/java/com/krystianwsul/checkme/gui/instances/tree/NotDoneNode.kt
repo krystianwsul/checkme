@@ -126,7 +126,7 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
         ) : ContentDelegate() {
 
             override val instanceDatas = listOf(instanceData)
-            override val directInstanceDatas = instanceDatas
+            override val directInstanceDatas = instanceDatas // todo project InstanceDatas
             override val firstInstanceData = instanceData
 
             override lateinit var treeNode: TreeNode<AbstractHolder>
@@ -258,12 +258,13 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
             private val indentation: Int,
             private val groupingMode: NodeCollection.GroupingMode,
             private val nodeCollection: NodeCollection,
+            private val childGroupTypes: List<GroupType>,
         ) : ContentDelegate() {
 
             override val instanceDatas get() = groupType.instanceDatas // todo project InstanceDatas
 
             private val timeStamp by lazy {
-                instanceDatas.map { it.instanceTimeStamp }
+                instanceDatas.map { it.instanceTimeStamp } // todo project InstanceDatas
                     .distinct()
                     .single()
             }
@@ -289,17 +290,16 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
                 )
 
                 val nodePairs = if (false) {
-                    GroupType.getGroupTypeTree(instanceDatas, groupingMode)
-                        .map { it.toContentDelegate(groupAdapter, indentation, nodeCollection) }
-                        .map {
-                            val notDoneGroupNode = NotDoneGroupNode(indentation, nodeCollection, it)
+                    childGroupTypes.map { it.toContentDelegate(groupAdapter, indentation, nodeCollection) }.map {
+                        // todo project not sure about the whole group/instanceNode thing
+                        val notDoneGroupNode = NotDoneGroupNode(indentation, nodeCollection, it)
 
-                            val childTreeNode = notDoneGroupNode.initialize(contentDelegateStates, treeNode)
+                        val childTreeNode = notDoneGroupNode.initialize(contentDelegateStates, treeNode)
 
-                            childTreeNode to notDoneGroupNode
-                        }
+                        childTreeNode to notDoneGroupNode
+                    }
                 } else {
-                    instanceDatas.map {
+                    instanceDatas.map { // todo project InstanceDatas
                         val notDoneInstanceNode = NotDoneInstanceNode(indentation, it, modelNode, groupAdapter)
 
                         val childTreeNode = notDoneInstanceNode.initialize(contentDelegateStates, treeNode)

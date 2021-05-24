@@ -38,27 +38,34 @@ sealed class GroupType {
                         }
                     }
                 }
-                NodeCollection.GroupingMode.PROJECT -> {
-                    // we'll potentially group these by project
-
-                    val projectGroups = instanceDatas.groupBy { it.projectInfo?.projectDetails?.projectKey }
-
-                    val groupTypesForShared = projectGroups.filterKeys { it != null }.map { (projectKey, instanceDatas) ->
-                        check(instanceDatas.isNotEmpty())
-
-                        if (instanceDatas.size > 1) {
-                            Project(projectKey!!, instanceDatas)
-                        } else {
-                            Single(instanceDatas.single())
-                        }
-                    }
-
-                    val groupTypesForPrivate = projectGroups[null]?.map(GroupType::Single).orEmpty()
-
-                    listOf(groupTypesForShared, groupTypesForPrivate).flatten()
-                }
+                NodeCollection.GroupingMode.PROJECT -> groupByProject(instanceDatas, ::Project)
                 NodeCollection.GroupingMode.NONE -> instanceDatas.map(GroupType::Single)
             }
+        }
+
+        private fun groupByProject(
+            instanceDatas: List<GroupListDataWrapper.InstanceData>,
+            newProjectGroup: (ProjectKey.Shared, List<GroupListDataWrapper.InstanceData>) -> GroupType,
+        ): List<GroupType> {
+            if (instanceDatas.isEmpty()) return emptyList()
+
+            check(instanceDatas.map { it.instanceTimeStamp }.distinct().size == 1)
+
+            val projectGroups = instanceDatas.groupBy { it.projectInfo?.projectDetails?.projectKey }
+
+            val groupTypesForShared = projectGroups.filterKeys { it != null }.map { (projectKey, instanceDatas) ->
+                check(instanceDatas.isNotEmpty())
+
+                if (instanceDatas.size > 1) {
+                    newProjectGroup(projectKey!!, instanceDatas)
+                } else {
+                    Single(instanceDatas.single())
+                }
+            }
+
+            val groupTypesForPrivate = projectGroups[null]?.map(GroupType::Single).orEmpty()
+
+            return listOf(groupTypesForShared, groupTypesForPrivate).flatten()
         }
     }
 
@@ -70,8 +77,8 @@ sealed class GroupType {
 
     data class Time(
         val timeStamp: TimeStamp,
-        override val instanceDatas: List<GroupListDataWrapper.InstanceData>,
-    ) : GroupType(), Multi {
+        val instanceDatas: List<GroupListDataWrapper.InstanceData>,
+    ) : GroupType() {
 
         override fun toContentDelegate(
             groupAdapter: GroupListFragment.GroupAdapter,
@@ -89,8 +96,8 @@ sealed class GroupType {
     data class TimeProject(
         val timeStamp: TimeStamp,
         val projectKey: ProjectKey.Shared,
-        override val instanceDatas: List<GroupListDataWrapper.InstanceData>,
-    ) : GroupType(), Multi {
+        val instanceDatas: List<GroupListDataWrapper.InstanceData>,
+    ) : GroupType() {
 
         override fun toContentDelegate(
             groupAdapter: GroupListFragment.GroupAdapter,
@@ -107,8 +114,8 @@ sealed class GroupType {
 
     data class Project(
         val projectKey: ProjectKey.Shared,
-        override val instanceDatas: List<GroupListDataWrapper.InstanceData>,
-    ) : GroupType(), Multi {
+        val instanceDatas: List<GroupListDataWrapper.InstanceData>,
+    ) : GroupType() {
 
         override fun toContentDelegate(
             groupAdapter: GroupListFragment.GroupAdapter,
@@ -121,11 +128,6 @@ sealed class GroupType {
             NodeCollection.GroupingMode.NONE,
             nodeCollection,
         ) // todo project new delegate
-    }
-
-    sealed interface Multi {
-
-        val instanceDatas: List<GroupListDataWrapper.InstanceData>
     }
 
     data class Single(val instanceData: GroupListDataWrapper.InstanceData) : GroupType() {

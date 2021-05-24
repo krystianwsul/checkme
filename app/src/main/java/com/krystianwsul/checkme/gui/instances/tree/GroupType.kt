@@ -31,22 +31,19 @@ sealed class GroupType {
 
                             projectKey?.let {
                                 TimeProject(timeStamp, projectKey, instanceDatas)
-                            } ?: Time(timeStamp, instanceDatas)
+                            } ?: Time(timeStamp, groupByProject(instanceDatas))
                         } else {
                             // if there's just one, there's our node
                             Single(instanceDatas.single())
                         }
                     }
                 }
-                NodeCollection.GroupingMode.PROJECT -> groupByProject(instanceDatas, ::Project)
+                NodeCollection.GroupingMode.PROJECT -> groupByProject(instanceDatas)
                 NodeCollection.GroupingMode.NONE -> instanceDatas.map(GroupType::Single)
             }
         }
 
-        private fun groupByProject(
-            instanceDatas: List<GroupListDataWrapper.InstanceData>,
-            newProjectGroup: (ProjectKey.Shared, List<GroupListDataWrapper.InstanceData>) -> GroupType,
-        ): List<GroupType> {
+        private fun groupByProject(instanceDatas: List<GroupListDataWrapper.InstanceData>): List<GroupType> {
             if (instanceDatas.isEmpty()) return emptyList()
 
             check(instanceDatas.map { it.instanceTimeStamp }.distinct().size == 1)
@@ -57,7 +54,7 @@ sealed class GroupType {
                 check(instanceDatas.isNotEmpty())
 
                 if (instanceDatas.size > 1) {
-                    newProjectGroup(projectKey!!, instanceDatas)
+                    Project(projectKey!!, instanceDatas)
                 } else {
                     Single(instanceDatas.single())
                 }
@@ -69,6 +66,8 @@ sealed class GroupType {
         }
     }
 
+    abstract val instanceDatas: List<GroupListDataWrapper.InstanceData> // todo project InstanceDatas
+
     abstract fun toContentDelegate(
         groupAdapter: GroupListFragment.GroupAdapter,
         indentation: Int,
@@ -77,8 +76,10 @@ sealed class GroupType {
 
     data class Time(
         val timeStamp: TimeStamp,
-        val instanceDatas: List<GroupListDataWrapper.InstanceData>,
+        val groupTypes: List<GroupType>
     ) : GroupType() {
+
+        override val instanceDatas = groupTypes.flatMap { it.instanceDatas }
 
         override fun toContentDelegate(
             groupAdapter: GroupListFragment.GroupAdapter,
@@ -96,7 +97,7 @@ sealed class GroupType {
     data class TimeProject(
         val timeStamp: TimeStamp,
         val projectKey: ProjectKey.Shared,
-        val instanceDatas: List<GroupListDataWrapper.InstanceData>,
+        override val instanceDatas: List<GroupListDataWrapper.InstanceData>,
     ) : GroupType() {
 
         override fun toContentDelegate(
@@ -114,7 +115,7 @@ sealed class GroupType {
 
     data class Project(
         val projectKey: ProjectKey.Shared,
-        val instanceDatas: List<GroupListDataWrapper.InstanceData>,
+        override val instanceDatas: List<GroupListDataWrapper.InstanceData>,
     ) : GroupType() {
 
         override fun toContentDelegate(
@@ -131,6 +132,8 @@ sealed class GroupType {
     }
 
     data class Single(val instanceData: GroupListDataWrapper.InstanceData) : GroupType() {
+
+        override val instanceDatas = listOf(instanceData)
 
         override fun toContentDelegate(
             groupAdapter: GroupListFragment.GroupAdapter,

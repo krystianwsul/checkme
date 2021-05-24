@@ -87,7 +87,7 @@ sealed class GroupType {
             nodeCollection: NodeCollection,
         ) = NotDoneNode.ContentDelegate.Group(
             groupAdapter,
-            instanceDatas,
+            this,
             indentation,
             NodeCollection.GroupingMode.PROJECT,
             nodeCollection,
@@ -106,7 +106,7 @@ sealed class GroupType {
             nodeCollection: NodeCollection,
         ) = NotDoneNode.ContentDelegate.Group(
             groupAdapter,
-            instanceDatas,
+            this,
             indentation,
             NodeCollection.GroupingMode.NONE,
             nodeCollection,
@@ -124,7 +124,7 @@ sealed class GroupType {
             nodeCollection: NodeCollection,
         ) = NotDoneNode.ContentDelegate.Group(
             groupAdapter,
-            instanceDatas,
+            this,
             indentation,
             NodeCollection.GroupingMode.NONE,
             nodeCollection,

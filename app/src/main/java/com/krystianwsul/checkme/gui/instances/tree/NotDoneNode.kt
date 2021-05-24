@@ -249,7 +249,7 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
 
         class Group(
             override val groupAdapter: GroupListFragment.GroupAdapter,
-            override val instanceDatas: List<GroupListDataWrapper.InstanceData>,
+            private val groupType: GroupType,
             private val indentation: Int,
             private val groupingMode: NodeCollection.GroupingMode,
             private val nodeCollection: NodeCollection,
@@ -258,6 +258,8 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
             init {
                 check(instanceDatas.size > 1)
             }
+
+            override val instanceDatas get() = groupType.instanceDatas // todo project InstanceDatas
 
             private val timeStamp by lazy {
                 instanceDatas.map { it.instanceTimeStamp }

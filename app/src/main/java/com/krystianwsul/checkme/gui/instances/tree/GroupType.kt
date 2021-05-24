@@ -30,23 +30,30 @@ sealed class GroupType {
                                 .singleOrNull()
 
                             projectKey?.let {
-                                TimeProject(timeStamp, projectKey, instanceDatas)
-                            } ?: Time(timeStamp, groupByProject(instanceDatas))
+                                Project(timeStamp, projectKey, instanceDatas, true)
+                            } ?: Time(timeStamp, groupByProject(timeStamp, instanceDatas))
                         } else {
                             // if there's just one, there's our node
                             Single(instanceDatas.single())
                         }
                     }
                 }
-                NodeCollection.GroupingMode.PROJECT -> groupByProject(instanceDatas)
+                NodeCollection.GroupingMode.PROJECT -> {
+                    val timeStamp = instanceDatas.map { it.instanceTimeStamp }
+                        .distinct()
+                        .single()
+
+                    groupByProject(timeStamp, instanceDatas)
+                }
                 NodeCollection.GroupingMode.NONE -> instanceDatas.map(GroupType::Single)
             }
         }
 
-        private fun groupByProject(instanceDatas: List<GroupListDataWrapper.InstanceData>): List<GroupType> {
+        private fun groupByProject(
+            timeStamp: TimeStamp,
+            instanceDatas: List<GroupListDataWrapper.InstanceData>,
+        ): List<GroupType> {
             if (instanceDatas.isEmpty()) return emptyList()
-
-            check(instanceDatas.map { it.instanceTimeStamp }.distinct().size == 1)
 
             val projectGroups = instanceDatas.groupBy { it.projectInfo?.projectDetails?.projectKey }
 
@@ -54,7 +61,7 @@ sealed class GroupType {
                 check(instanceDatas.isNotEmpty())
 
                 if (instanceDatas.size > 1) {
-                    Project(projectKey!!, instanceDatas)
+                    Project(timeStamp, projectKey!!, instanceDatas, false)
                 } else {
                     Single(instanceDatas.single())
                 }
@@ -94,13 +101,15 @@ sealed class GroupType {
             NodeCollection.GroupingMode.PROJECT,
             nodeCollection,
             groupTypes,
+            NotDoneNode.ContentDelegate.Group.Id.Time(timeStamp),
         )
     }
 
-    data class TimeProject(
+    data class Project(
         val timeStamp: TimeStamp,
         val projectKey: ProjectKey.Shared,
         override val instanceDatas: List<GroupListDataWrapper.InstanceData>,
+        val showTime: Boolean,
     ) : GroupType(), TimeChild {
 
         override val firstInstanceData = instanceDatas.first()
@@ -118,29 +127,7 @@ sealed class GroupType {
             NodeCollection.GroupingMode.NONE,
             nodeCollection,
             instanceDatas.map(::Single),
-        ) // todo project new delegate
-    }
-
-    data class Project(
-        val projectKey: ProjectKey.Shared,
-        override val instanceDatas: List<GroupListDataWrapper.InstanceData>,
-    ) : GroupType(), TimeChild {
-
-        override val firstInstanceData = instanceDatas.first()
-
-        override fun toContentDelegate(
-            groupAdapter: GroupListFragment.GroupAdapter,
-            indentation: Int,
-            nodeCollection: NodeCollection,
-        ) = NotDoneNode.ContentDelegate.Group(
-            groupAdapter,
-            this,
-            instanceDatas,
-            firstInstanceData,
-            indentation,
-            NodeCollection.GroupingMode.NONE,
-            nodeCollection,
-            instanceDatas.map(::Single),
+            NotDoneNode.ContentDelegate.Group.Id.Project(timeStamp, projectKey),
         ) // todo project new delegate
     }
 

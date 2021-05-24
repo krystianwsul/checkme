@@ -31,6 +31,7 @@ import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.InstanceKey
+import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.treeadapter.*
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Maybe
@@ -261,13 +262,14 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
             private val groupingMode: NodeCollection.GroupingMode,
             private val nodeCollection: NodeCollection,
             private val childGroupTypes: List<GroupType>,
+            override val id: Id,
         ) : ContentDelegate() {
 
             override val instanceDatas get() = groupType.instanceDatas // todo project InstanceDatas
 
             override val allInstanceDatas get() = notDoneNodes.flatMap { it.contentDelegate.directInstanceDatas }
 
-            private val timeStamp by lazy { // todo project InstanceDatas
+            private val timeStamp by lazy { // todo project later
                 allInstanceDatas.map { it.instanceTimeStamp }
                     .distinct()
                     .single()
@@ -323,8 +325,6 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
 
             override val checkBoxState get() = if (treeNode.isExpanded) CheckBoxState.Gone else CheckBoxState.Invisible
 
-            override val id: ContentDelegate.Id by lazy { Id(timeStamp) }
-
             override val toggleDescendants = true
 
             override val states: Map<ContentDelegate.Id, ContentDelegate.State>
@@ -377,8 +377,14 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
                 }
             }
 
-            @Parcelize
-            private data class Id(val timeStamp: TimeStamp) : ContentDelegate.Id
+            sealed interface Id : ContentDelegate.Id {
+
+                @Parcelize
+                data class Time(val timeStamp: TimeStamp) : Id
+
+                @Parcelize
+                data class Project(val timeStamp: TimeStamp, val projectKey: ProjectKey.Shared) : Id
+            }
 
             @Parcelize
             private data class State(

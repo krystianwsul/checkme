@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.firebase
 
-import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.utils.mapNotNull
 import io.reactivex.rxjava3.core.Maybe
 import io.reactivex.rxjava3.core.Observable
@@ -10,7 +9,6 @@ fun <T : Any, U : Any> mergePaperAndRx(
     paperMaybe: Maybe<T>,
     firebaseObservable: Observable<U>,
     converter: Converter<T, U>,
-    path: String,
 ): Observable<U> {
 
     /**
@@ -25,17 +23,14 @@ fun <T : Any, U : Any> mergePaperAndRx(
             .map<AndroidDatabaseWrapper.LoadState<T>> { AndroidDatabaseWrapper.LoadState.Loaded(it) }
             .startWithItem(AndroidDatabaseWrapper.LoadState.Initial()),
     )
-        .scan<PairState<T, U>>(PairState.Initial(converter, path)) { oldPairState, (newFirebaseState, newPaperState) ->
+        .scan<PairState<T, U>>(PairState.Initial(converter)) { oldPairState, (newFirebaseState, newPaperState) ->
             oldPairState.processNextPair(newPaperState, newFirebaseState)
         }
         .mapNotNull { it.emission }
         .mergeWith(firebaseObservable.skip(1))
 }
 
-open class Converter<T : Any, U : Any>(val paperToSnapshot: (T) -> U, val snapshotToPaper: (U) -> T, val logDiff: Boolean) {
-
-    open fun printDiff(paper: T, firebase: T) = "paper: $paper, firebase: $firebase"
-}
+open class Converter<T : Any, U : Any>(val paperToSnapshot: (T) -> U, val snapshotToPaper: (U) -> T)
 
 private sealed class PairState<T : Any, U : Any> {
 
@@ -46,7 +41,7 @@ private sealed class PairState<T : Any, U : Any> {
         newFirebaseState: AndroidDatabaseWrapper.LoadState<U>,
     ): PairState<T, U>
 
-    class Initial<T : Any, U : Any>(private val converter: Converter<T, U>, private val path: String) : PairState<T, U>() {
+    class Initial<T : Any, U : Any>(private val converter: Converter<T, U>) : PairState<T, U>() {
 
         override val emission: U? get() = null
 
@@ -57,12 +52,11 @@ private sealed class PairState<T : Any, U : Any> {
             check(newPaperState is AndroidDatabaseWrapper.LoadState.Initial)
             check(newFirebaseState is AndroidDatabaseWrapper.LoadState.Initial)
 
-            return SkippingFirst(converter, path)
+            return SkippingFirst(converter)
         }
     }
 
-    class SkippingFirst<T : Any, U : Any>(private val converter: Converter<T, U>, private val path: String) :
-        PairState<T, U>() {
+    class SkippingFirst<T : Any, U : Any>(private val converter: Converter<T, U>) : PairState<T, U>() {
 
         override val emission: U? = null
 
@@ -78,7 +72,7 @@ private sealed class PairState<T : Any, U : Any> {
                 check(newPaperState is AndroidDatabaseWrapper.LoadState.Loaded)
                 check(newFirebaseState is AndroidDatabaseWrapper.LoadState.Initial)
 
-                PaperCameFirst(newPaperState.value, converter, path)
+                PaperCameFirst(newPaperState.value, converter)
             }
         }
     }
@@ -100,11 +94,8 @@ private sealed class PairState<T : Any, U : Any> {
         }
     }
 
-    class PaperCameFirst<T : Any, U : Any>(
-        private val paper: T,
-        private val converter: Converter<T, U>,
-        private val path: String,
-    ) : PairState<T, U>() {
+    class PaperCameFirst<T : Any, U : Any>(private val paper: T, private val converter: Converter<T, U>) :
+        PairState<T, U>() {
 
         override val emission = converter.paperToSnapshot(paper)
 
@@ -119,18 +110,6 @@ private sealed class PairState<T : Any, U : Any> {
             return if (firebase == paper) {
                 Terminal(null)
             } else {
-                /**
-                 * This isn't necessarily an issue, but I'm expecting them always to be consistent.  It would be nice
-                 * to know what happened.
-                 */
-                if (converter.logDiff) {
-                    MyCrashlytics.logException(
-                        PaperCacheException(
-                            "firebase was different than paper, path: $path, " + converter.printDiff(paper, firebase)
-                        )
-                    )
-                }
-
                 Terminal(newFirebaseState.value)
             }
         }
@@ -144,5 +123,3 @@ private sealed class PairState<T : Any, U : Any> {
         ): PairState<T, U> = throw IllegalStateException()
     }
 }
-
-private class PaperCacheException(message: String) : Exception(message)

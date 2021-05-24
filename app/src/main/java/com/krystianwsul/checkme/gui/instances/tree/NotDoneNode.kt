@@ -334,7 +334,14 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
             override fun getOrdinal(): Double = throw UnsupportedOperationException()
             override fun setOrdinal(ordinal: Double) = throw UnsupportedOperationException()
 
-            override fun matchesFilterParams(filterParams: FilterCriteria.Full.FilterParams) = false
+            // I don't really understand, or feel like understanding, why these three funs need to access allInstanceDatas
+            override fun normalize() = allInstanceDatas.forEach { it.normalize() }
+
+            override fun matchesFilterParams(filterParams: FilterCriteria.Full.FilterParams) =
+                allInstanceDatas.any { it.matchesFilterParams(filterParams) }
+
+            override fun getMatchResult(query: String) =
+                ModelNode.MatchResult.fromBoolean(allInstanceDatas.any { it.matchesQuery(query) })
 
             private class GroupRowsDelegate(
                 private val groupAdapter: GroupListFragment.GroupAdapter,

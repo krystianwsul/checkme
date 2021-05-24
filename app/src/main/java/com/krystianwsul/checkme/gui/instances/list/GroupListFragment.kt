@@ -538,23 +538,23 @@ class GroupListFragment @JvmOverloads constructor(
 
         override fun initializeModelAdapter(
             modelAdapter: GroupAdapter,
-            data: GroupListParameters,
+            groupListParameters: GroupListParameters,
             filterCriteria: FilterCriteria,
         ) {
             if (treeViewAdapterInitialized) state = modelAdapter.groupListState
 
             modelAdapter.initialize(
-                data.dataId,
-                data.groupListDataWrapper.customTimeDatas,
-                data.useGroups,
-                data.groupListDataWrapper.instanceDatas,
+                groupListParameters.dataId,
+                groupListParameters.groupListDataWrapper.customTimeDatas,
+                groupListParameters.groupingMode,
+                groupListParameters.groupListDataWrapper.instanceDatas,
                 state,
-                data.groupListDataWrapper.taskDatas,
-                data.groupListDataWrapper.note,
-                data.groupListDataWrapper.imageData,
-                data.showProgress,
-                data.useDoneNode,
-                data.groupListDataWrapper.projectInfo,
+                groupListParameters.groupListDataWrapper.taskDatas,
+                groupListParameters.groupListDataWrapper.note,
+                groupListParameters.groupListDataWrapper.imageData,
+                groupListParameters.showProgress,
+                groupListParameters.useDoneNode,
+                groupListParameters.groupListDataWrapper.projectInfo,
             )
         }
 
@@ -985,7 +985,7 @@ class GroupListFragment @JvmOverloads constructor(
         fun initialize(
             dataId: DataId,
             customTimeDatas: List<GroupListDataWrapper.CustomTimeData>,
-            useGroups: Boolean,
+            groupingMode: NodeCollection.GroupingMode,
             instanceDatas: Collection<GroupListDataWrapper.InstanceData>,
             groupListState: GroupListState,
             taskDatas: List<GroupListDataWrapper.TaskData>,
@@ -1003,7 +1003,7 @@ class GroupListFragment @JvmOverloads constructor(
             nodeCollection = NodeCollection(
                 0,
                 this,
-                if (useGroups) NodeCollection.GroupingMode.TIME else NodeCollection.GroupingMode.NONE,
+                groupingMode,
                 treeNodeCollection,
                 note,
                 null,

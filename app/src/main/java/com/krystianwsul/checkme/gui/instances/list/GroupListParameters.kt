@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.gui.instances.list
 
 import com.krystianwsul.checkme.Preferences
+import com.krystianwsul.checkme.gui.instances.tree.NodeCollection
 import com.krystianwsul.checkme.viewmodels.DataId
 import com.krystianwsul.treeadapter.FilterCriteria
 
@@ -14,7 +15,7 @@ sealed class GroupListParameters(val draggable: Boolean = true) {
     open val useDoneNode = true
     open val fabActionMode = FabActionMode.SUBTASK
 
-    open val useGroups = false
+    open val groupingMode = NodeCollection.GroupingMode.NONE
 
     data class All(
             override val dataId: DataId,
@@ -27,7 +28,7 @@ sealed class GroupListParameters(val draggable: Boolean = true) {
 
         override val fabActionMode = FabActionMode.BOTH
 
-        override val useGroups = true
+        override val groupingMode = NodeCollection.GroupingMode.TIME
     }
 
     data class TimeStamp(

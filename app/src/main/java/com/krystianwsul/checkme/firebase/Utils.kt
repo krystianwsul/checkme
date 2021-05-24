@@ -30,10 +30,7 @@ fun <T : Any, U : Any> mergePaperAndRx(
         .mergeWith(firebaseObservable.skip(1))
 }
 
-open class Converter<T : Any, U : Any>(val paperToSnapshot: (T) -> U, val snapshotToPaper: (U) -> T, val logDiff: Boolean) {
-
-    open fun printDiff(paper: T, firebase: T) = "paper: $paper, firebase: $firebase"
-}
+open class Converter<T : Any, U : Any>(val paperToSnapshot: (T) -> U, val snapshotToPaper: (U) -> T)
 
 private sealed class PairState<T : Any, U : Any> {
 

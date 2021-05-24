@@ -91,7 +91,7 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
 
     sealed class ContentDelegate : ThumbnailModelNode, Sortable, CheckableModelNode {
 
-        abstract val instanceDatas: List<GroupListDataWrapper.InstanceData>
+        abstract val instanceDatas: List<GroupListDataWrapper.InstanceData> // todo project instanceDatas
         protected abstract val groupAdapter: GroupListFragment.GroupAdapter
         protected val groupListFragment get() = groupAdapter.groupListFragment
 
@@ -102,7 +102,7 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
         abstract val toggleDescendants: Boolean
 
         val timeStamp by lazy {
-            instanceDatas.map { it.instanceTimeStamp }
+            instanceDatas.map { it.instanceTimeStamp } // todo project instanceDatas
                 .distinct()
                 .single()
         }
@@ -251,7 +251,7 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
         ) : ContentDelegate() {
 
             init {
-                check(instanceDatas.size > 1)
+                check(instanceDatas.size > 1) // todo project instanceDatas
             }
 
             override val rowsDelegate: DetailsNode.ProjectRowsDelegate =
@@ -273,7 +273,7 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
                 )
 
                 val nodePairs = GroupType.getContentDelegates(
-                    instanceDatas,
+                    instanceDatas, // todo project instanceDatas
                     groupingMode,
                     groupAdapter,
                     indentation,
@@ -300,7 +300,12 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
 
             override val checkBoxState get() = if (treeNode.isExpanded) CheckBoxState.Gone else CheckBoxState.Invisible
 
-            override val id: Any by lazy { Id(instanceDatas.map { it.instanceKey }.toSet(), timeStamp) }
+            override val id: Any by lazy {
+                Id(
+                    instanceDatas.map { it.instanceKey }.toSet(),
+                    timeStamp
+                )
+            } // todo project instanceDatas
 
             override val toggleDescendants = true
 
@@ -310,13 +315,13 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
             override fun getOrdinal(): Double = throw UnsupportedOperationException()
             override fun setOrdinal(ordinal: Double) = throw UnsupportedOperationException()
 
-            override fun normalize() = instanceDatas.forEach { it.normalize() }
+            override fun normalize() = instanceDatas.forEach { it.normalize() } // todo project instanceDatas
 
             override fun matchesFilterParams(filterParams: FilterCriteria.Full.FilterParams) =
-                instanceDatas.any { it.matchesFilterParams(filterParams) }
+                instanceDatas.any { it.matchesFilterParams(filterParams) } // todo project instanceDatas
 
             override fun getMatchResult(query: String) =
-                ModelNode.MatchResult.fromBoolean(instanceDatas.any { it.matchesQuery(query) })
+                ModelNode.MatchResult.fromBoolean(instanceDatas.any { it.matchesQuery(query) }) // todo project instanceDatas
 
             private class GroupRowsDelegate(
                 private val groupAdapter: GroupListFragment.GroupAdapter,

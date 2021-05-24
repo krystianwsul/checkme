@@ -102,7 +102,7 @@ class GroupListFragment @JvmOverloads constructor(
 
             treeNodes.map { it.modelNode }.forEach {
                 when (it) {
-                    is NotDoneNode -> instanceDatas += it.contentDelegate.instanceDatas
+                    is NotDoneNode -> instanceDatas += it.contentDelegate.instanceDatas // todo project instanceDatas
                     is TaskNode -> instanceDatas += it.taskData
                     else -> throw IllegalArgumentException()
                 }
@@ -903,7 +903,7 @@ class GroupListFragment @JvmOverloads constructor(
                             }
                         } else {
                             modelNode.contentDelegate
-                                .instanceDatas
+                                .instanceDatas // todo project instanceDatas
                                 .map { it.allTaskKeys }
                                 .flatten()
                                 .contains(scrollToTaskKey)

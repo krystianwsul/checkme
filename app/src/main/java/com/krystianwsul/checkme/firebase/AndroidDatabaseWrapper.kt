@@ -72,14 +72,14 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
     }
 
     private inline fun <reified T : Any> readNullable(path: Path): Maybe<NullableWrapper<T>> {
-        if (ENABLE_PAPER) {
-            return rxPaperBook.read<NullableWrapper<T>>(path.toKey())
+        return if (ENABLE_PAPER) {
+            rxPaperBook.read<NullableWrapper<T>>(path.toKey())
                 .toV3()
                 .subscribeOn(Schedulers.io())
                 .toMaybe()
                 .onErrorComplete()
         } else {
-            return Maybe.empty()
+            Maybe.empty()
         }
     }
 
@@ -134,7 +134,7 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
             .map { firebaseToSnapshot(it) }
             .doOnNext { writeNullable(path, it.value).subscribe() }
 
-        return mergePaperAndRx(readNullable(path), firebaseObservable, converter, path.toString()).observeOnDomain()
+        return mergePaperAndRx(readNullable(path), firebaseObservable, converter).observeOnDomain()
     }
 
     override fun getNewId(path: String) = rootReference.child(path)

@@ -376,6 +376,12 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
                     MultiLineRow.Visible(text, R.color.textSecondary)
                 }
 
+                protected fun getChildren(allChildren: List<TreeNode<*>>) =
+                    allChildren.filter { it.modelNode is NotDoneNode && it.canBeShown() }
+                        .map { it.modelNode as NotDoneNode }
+                        .sorted()
+                        .joinToString(", ") { it.contentDelegate.name }
+
                 class Time(
                     override val groupAdapter: GroupListFragment.GroupAdapter,
                     override val timeStamp: TimeStamp,
@@ -385,16 +391,10 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
                         isExpanded: Boolean,
                         allChildren: List<TreeNode<*>>
                     ): List<MultiLineRow> {
-                        val name = if (isExpanded) {
+                        val name = if (isExpanded)
                             MultiLineRow.Invisible
-                        } else {
-                            MultiLineRow.Visible(
-                                allChildren.filter { it.modelNode is NotDoneNode && it.canBeShown() }
-                                    .map { it.modelNode as NotDoneNode }
-                                    .sorted()
-                                    .joinToString(", ") { it.contentDelegate.name }
-                            )
-                        }
+                        else
+                            MultiLineRow.Visible(getChildren(allChildren))
 
                         return listOf(name, timeRow)
                     }
@@ -415,16 +415,10 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
                     ): List<MultiLineRow> {
                         val details = if (showTime) timeRow else null
 
-                        val children = if (isExpanded) {
-                            MultiLineRow.Invisible
-                        } else {
-                            MultiLineRow.Visible(
-                                allChildren.filter { it.modelNode is NotDoneNode && it.canBeShown() }
-                                    .map { it.modelNode as NotDoneNode }
-                                    .sorted()
-                                    .joinToString(", ") { it.contentDelegate.name }
-                            )
-                        }
+                        val children = if (isExpanded)
+                            null
+                        else
+                            MultiLineRow.Visible(getChildren(allChildren), R.color.textSecondary)
 
                         return listOfNotNull(name, details, children)
                     }

@@ -38,14 +38,9 @@ class NotDoneGroupNode(
     override fun compareTo(other: ModelNode<AbstractHolder>) = when (other) {
         is ImageNode, is DetailsNode -> 1
         is NotDoneGroupNode -> {
-            val timeStampComparison = contentDelegate.timeStamp.compareTo(other.contentDelegate.timeStamp)
-            if (timeStampComparison != 0) {
-                timeStampComparison
-            } else {
-                fun NotDoneGroupNode.instanceData() = contentDelegate.instanceDatas.first() // todo project instanceDatas
+            fun NotDoneGroupNode.instanceData() = contentDelegate.instanceDatas.first() // todo project instanceDatas
 
-                instanceData().compareTo(other.instanceData())
-            }
+            instanceData().compareTo(other.instanceData())
         }
         is UnscheduledNode -> if (nodeCollection.searchResults) 1 else -1
         is DividerNode -> -1

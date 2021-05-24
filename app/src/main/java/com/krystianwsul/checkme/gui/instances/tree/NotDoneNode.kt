@@ -101,7 +101,7 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
         abstract val id: Any
         abstract val toggleDescendants: Boolean
 
-        val timeStamp by lazy {
+        val timeStamp by lazy { // todo project instanceDatas will this be needed after other changes?
             instanceDatas.map { it.instanceTimeStamp } // todo project instanceDatas
                 .distinct()
                 .single()

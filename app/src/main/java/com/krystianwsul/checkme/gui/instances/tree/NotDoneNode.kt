@@ -95,6 +95,7 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
         abstract val instanceDatas: List<GroupListDataWrapper.InstanceData> // todo project InstanceDatas
         abstract val directInstanceDatas: List<GroupListDataWrapper.InstanceData>
         abstract val firstInstanceData: GroupListDataWrapper.InstanceData
+        abstract val allInstanceDatas: List<GroupListDataWrapper.InstanceData>
 
         protected abstract val groupAdapter: GroupListFragment.GroupAdapter
         protected val groupListFragment get() = groupAdapter.groupListFragment
@@ -126,8 +127,9 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
         ) : ContentDelegate() {
 
             override val instanceDatas = listOf(instanceData)
-            override val directInstanceDatas = instanceDatas // todo project InstanceDatas
+            override val directInstanceDatas = instanceDatas
             override val firstInstanceData = instanceData
+            override val allInstanceDatas = instanceDatas
 
             override lateinit var treeNode: TreeNode<AbstractHolder>
             private lateinit var nodeCollection: NodeCollection
@@ -262,6 +264,7 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
         ) : ContentDelegate() {
 
             override val instanceDatas get() = groupType.instanceDatas // todo project InstanceDatas
+            override val allInstanceDatas get() = instanceDatas // todo project InstanceDatas
 
             private val timeStamp by lazy {
                 instanceDatas.map { it.instanceTimeStamp } // todo project InstanceDatas

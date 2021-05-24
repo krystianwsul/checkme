@@ -102,7 +102,7 @@ class GroupListFragment @JvmOverloads constructor(
 
             treeNodes.map { it.modelNode }.forEach {
                 when (it) {
-                    is NotDoneNode -> instanceDatas += it.contentDelegate.instanceDatas // todo project InstanceDatas
+                    is NotDoneNode -> instanceDatas += it.contentDelegate.allInstanceDatas
                     is TaskNode -> instanceDatas += it.taskData
                     else -> throw IllegalArgumentException()
                 }

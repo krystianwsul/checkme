@@ -93,7 +93,6 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
 
     sealed class ContentDelegate : ThumbnailModelNode, Sortable, CheckableModelNode, Comparable<ContentDelegate>, Matchable {
 
-        abstract val instanceDatas: List<GroupListDataWrapper.InstanceData> // todo project later InstanceDatas
         abstract val directInstanceDatas: List<GroupListDataWrapper.InstanceData>
         abstract val firstInstanceData: GroupListDataWrapper.InstanceData
         abstract val allInstanceDatas: List<GroupListDataWrapper.InstanceData>
@@ -127,10 +126,9 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
             showDetails: Boolean = true,
         ) : ContentDelegate() {
 
-            override val instanceDatas = listOf(instanceData)
-            override val directInstanceDatas = instanceDatas
+            override val directInstanceDatas = listOf(instanceData)
             override val firstInstanceData = instanceData
-            override val allInstanceDatas = instanceDatas
+            override val allInstanceDatas = directInstanceDatas
 
             override lateinit var treeNode: TreeNode<AbstractHolder>
             private lateinit var nodeCollection: NodeCollection
@@ -259,13 +257,10 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
             override val directInstanceDatas: List<GroupListDataWrapper.InstanceData>,
             override val firstInstanceData: GroupListDataWrapper.InstanceData,
             private val indentation: Int,
-            private val groupingMode: NodeCollection.GroupingMode,
             private val nodeCollection: NodeCollection,
             private val childGroupTypes: List<GroupType>,
             override val id: Id,
         ) : ContentDelegate() {
-
-            override val instanceDatas get() = groupType.instanceDatas // todo project InstanceDatas
 
             override val allInstanceDatas get() = notDoneNodes.flatMap { it.contentDelegate.directInstanceDatas }
 
@@ -275,8 +270,7 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
                     .single()
             }
 
-            override val rowsDelegate: DetailsNode.ProjectRowsDelegate =
-                GroupRowsDelegate(groupAdapter, timeStamp)
+            override val rowsDelegate: DetailsNode.ProjectRowsDelegate by lazy { GroupRowsDelegate(groupAdapter, timeStamp) }
 
             override lateinit var treeNode: TreeNode<AbstractHolder>
             private lateinit var notDoneNodes: List<NotDoneNode>
@@ -305,7 +299,7 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
                         childTreeNode to notDoneGroupNode
                     }
                 } else {
-                    instanceDatas.map { // todo project InstanceDatas
+                    groupType.instanceDatas.map { // todo project InstanceDatas
                         val notDoneInstanceNode = NotDoneInstanceNode(indentation, it, modelNode, groupAdapter)
 
                         val childTreeNode = notDoneInstanceNode.initialize(contentDelegateStates, treeNode)

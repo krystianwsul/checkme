@@ -43,7 +43,8 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
     MultiLineModelNode,
     ThumbnailModelNode by contentDelegate,
     IndentationModelNode,
-    DetailsNode.Parent {
+    DetailsNode.Parent,
+    Matchable by contentDelegate {
 
     final override val holderType = HolderType.CHECKABLE
 
@@ -82,14 +83,7 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
 
     final override fun onClick(holder: AbstractHolder) = contentDelegate.onClick(holder)
 
-    final override fun normalize() = contentDelegate.normalize()
-
-    final override fun matchesFilterParams(filterParams: FilterCriteria.Full.FilterParams) =
-        contentDelegate.matchesFilterParams(filterParams)
-
-    final override fun getMatchResult(query: String) = contentDelegate.getMatchResult(query)
-
-    sealed class ContentDelegate : ThumbnailModelNode, Sortable, CheckableModelNode, Comparable<ContentDelegate> {
+    sealed class ContentDelegate : ThumbnailModelNode, Sortable, CheckableModelNode, Comparable<ContentDelegate>, Matchable {
 
         abstract val instanceDatas: List<GroupListDataWrapper.InstanceData> // todo project instanceDatas
         protected abstract val groupAdapter: GroupListFragment.GroupAdapter
@@ -114,9 +108,6 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
         ): TreeNode<AbstractHolder>
 
         abstract fun onClick(holder: AbstractHolder)
-        abstract fun normalize()
-        abstract fun matchesFilterParams(filterParams: FilterCriteria.Full.FilterParams): Boolean
-        abstract fun getMatchResult(query: String): ModelNode.MatchResult
 
         override fun compareTo(other: ContentDelegate): Int {
             fun ContentDelegate.instanceData() = instanceDatas.first() // todo project instanceDatas

@@ -2,7 +2,7 @@ package com.krystianwsul.treeadapter
 
 import androidx.recyclerview.widget.RecyclerView
 
-interface ModelNode<T : TreeHolder> : Comparable<ModelNode<T>> {
+interface ModelNode<T : TreeHolder> : Comparable<ModelNode<T>>, Matchable {
 
     val itemViewType: Int
 
@@ -32,12 +32,6 @@ interface ModelNode<T : TreeHolder> : Comparable<ModelNode<T>> {
             throw UnsupportedOperationException()
 
     fun onClick(holder: T) = Unit
-
-    fun normalize() = Unit
-
-    fun matchesFilterParams(filterParams: FilterCriteria.Full.FilterParams) = true
-
-    fun getMatchResult(query: String) = MatchResult.ALWAYS_VISIBLE
 
     fun tryStartDrag(viewHolder: RecyclerView.ViewHolder): Boolean = throw UnsupportedOperationException()
 

@@ -62,29 +62,31 @@ private fun DomainFactory.getGroupListData(
         )
     }
 
+    val includeProjectInfo = projectKey == null
+
     val instanceDatas = currentInstances.map { instance ->
         val task = instance.task
 
-        val children = getChildInstanceDatas(instance, now)
+        val children = getChildInstanceDatas(instance, now, includeProjectInfo = includeProjectInfo)
 
         GroupListDataWrapper.InstanceData(
-                instance.done,
-                instance.instanceKey,
-                null,
+            instance.done,
+            instance.instanceKey,
+            null,
                 instance.name,
                 instance.instanceDateTime.timeStamp,
                 instance.instanceDateTime,
-                task.current(now),
-                instance.canAddSubtask(now),
-                instance.isRootInstance(),
-                instance.getCreateTaskTimePair(now, projectsFactory.privateProject),
-                task.note,
-                children,
-                task.ordinal,
-                instance.getNotificationShown(localFactory),
-                task.getImage(deviceDbInfo),
-                instance.isAssignedToMe(now, myUserFactory.user),
-                instance.getProjectInfo(now),
+            task.current(now),
+            instance.canAddSubtask(now),
+            instance.isRootInstance(),
+            instance.getCreateTaskTimePair(now, projectsFactory.privateProject),
+            task.note,
+            children,
+            task.ordinal,
+            instance.getNotificationShown(localFactory),
+            task.getImage(deviceDbInfo),
+            instance.isAssignedToMe(now, myUserFactory.user),
+            instance.getProjectInfo(now, includeProjectInfo),
         )
     }
 

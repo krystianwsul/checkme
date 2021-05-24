@@ -19,13 +19,9 @@ class NotDoneGroupCollection(
         notDoneInstanceDatas: List<GroupListDataWrapper.InstanceData>,
         contentDelegateStates: Map<NotDoneNode.ContentDelegate.Id, NotDoneNode.ContentDelegate.State>,
     ): List<TreeNode<AbstractHolder>> {
-        val contentDelegates = GroupType.getContentDelegates(
-            notDoneInstanceDatas,
-            nodeCollection.groupingMode,
-            nodeCollection.groupAdapter,
-            indentation,
-            nodeCollection,
-        )
+        val contentDelegates = GroupType.getGroupTypeTree(notDoneInstanceDatas, nodeCollection.groupingMode).map {
+            it.toContentDelegate(nodeCollection.groupAdapter, indentation, nodeCollection)
+        }
 
         val nodePairs = contentDelegates.map {
             val notDoneGroupNode = NotDoneGroupNode(indentation, nodeCollection, it)

@@ -9,16 +9,13 @@ sealed class GroupType {
 
     companion object {
 
-        fun getContentDelegates(
+        fun getGroupTypeTree(
             instanceDatas: List<GroupListDataWrapper.InstanceData>,
             groupingMode: NodeCollection.GroupingMode,
-            groupAdapter: GroupListFragment.GroupAdapter,
-            indentation: Int,
-            nodeCollection: NodeCollection,
-        ): List<NotDoneNode.ContentDelegate> {
+        ): List<GroupType> {
             if (instanceDatas.isEmpty()) return emptyList()
 
-            val groupTypes: List<GroupType> = when (groupingMode) {
+            return when (groupingMode) {
                 NodeCollection.GroupingMode.TIME -> {
                     val timeGroups = instanceDatas.groupBy { it.instanceTimeStamp }
 
@@ -62,8 +59,6 @@ sealed class GroupType {
                 }
                 NodeCollection.GroupingMode.NONE -> instanceDatas.map(GroupType::Single)
             }
-
-            return groupTypes.map { it.toContentDelegate(groupAdapter, indentation, nodeCollection) }
         }
     }
 

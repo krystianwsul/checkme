@@ -286,19 +286,15 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
                 )
 
                 val nodePairs = if (false) {
-                    GroupType.getContentDelegates(
-                        instanceDatas,
-                        groupingMode,
-                        groupAdapter,
-                        indentation,
-                        nodeCollection,
-                    ).map {
-                        val notDoneGroupNode = NotDoneGroupNode(indentation, nodeCollection, it)
+                    GroupType.getGroupTypeTree(instanceDatas, groupingMode)
+                        .map { it.toContentDelegate(groupAdapter, indentation, nodeCollection) }
+                        .map {
+                            val notDoneGroupNode = NotDoneGroupNode(indentation, nodeCollection, it)
 
-                        val childTreeNode = notDoneGroupNode.initialize(contentDelegateStates, treeNode)
+                            val childTreeNode = notDoneGroupNode.initialize(contentDelegateStates, treeNode)
 
-                        childTreeNode to notDoneGroupNode
-                    }
+                            childTreeNode to notDoneGroupNode
+                        }
                 } else {
                     instanceDatas.map {
                         val notDoneInstanceNode = NotDoneInstanceNode(indentation, it, modelNode, groupAdapter)

@@ -82,7 +82,7 @@ sealed class GroupType {
         nodeCollection: NodeCollection,
     ): NotDoneNode.ContentDelegate
 
-    data class Time(
+    class Time(
         val timeStamp: TimeStamp,
         val groupTypes: List<GroupType>
     ) : GroupType() {
@@ -107,12 +107,14 @@ sealed class GroupType {
         )
     }
 
-    data class Project(
+    class Project(
         val timeStamp: TimeStamp,
         val projectDetails: DetailsNode.ProjectDetails,
-        override val instanceDatas: List<GroupListDataWrapper.InstanceData>,
-        val nested: Boolean,
+        _instanceDatas: List<GroupListDataWrapper.InstanceData>,
+        private val nested: Boolean,
     ) : GroupType(), TimeChild {
+
+        override val instanceDatas = _instanceDatas.map { it.copy(projectInfo = null) }
 
         override val firstInstanceData = instanceDatas.first()
 
@@ -146,7 +148,7 @@ sealed class GroupType {
         val firstInstanceData: GroupListDataWrapper.InstanceData
     }
 
-    data class Single(val instanceData: GroupListDataWrapper.InstanceData) : GroupType(), TimeChild {
+    class Single(val instanceData: GroupListDataWrapper.InstanceData) : GroupType(), TimeChild {
 
         override val instanceDatas = listOf(instanceData)
 

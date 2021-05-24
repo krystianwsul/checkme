@@ -89,6 +89,7 @@ sealed class GroupType {
             groupAdapter,
             this,
             groupTypes.filterIsInstance<Single>().map { it.instanceData },
+            (groupTypes.first() as TimeChild).firstInstanceData,
             indentation,
             NodeCollection.GroupingMode.PROJECT,
             nodeCollection,
@@ -99,7 +100,9 @@ sealed class GroupType {
         val timeStamp: TimeStamp,
         val projectKey: ProjectKey.Shared,
         override val instanceDatas: List<GroupListDataWrapper.InstanceData>,
-    ) : GroupType() {
+    ) : GroupType(), TimeChild {
+
+        override val firstInstanceData = instanceDatas.first()
 
         override fun toContentDelegate(
             groupAdapter: GroupListFragment.GroupAdapter,
@@ -109,6 +112,7 @@ sealed class GroupType {
             groupAdapter,
             this,
             instanceDatas,
+            firstInstanceData,
             indentation,
             NodeCollection.GroupingMode.NONE,
             nodeCollection,
@@ -118,7 +122,9 @@ sealed class GroupType {
     data class Project(
         val projectKey: ProjectKey.Shared,
         override val instanceDatas: List<GroupListDataWrapper.InstanceData>,
-    ) : GroupType() {
+    ) : GroupType(), TimeChild {
+
+        override val firstInstanceData = instanceDatas.first()
 
         override fun toContentDelegate(
             groupAdapter: GroupListFragment.GroupAdapter,
@@ -128,15 +134,23 @@ sealed class GroupType {
             groupAdapter,
             this,
             instanceDatas,
+            firstInstanceData,
             indentation,
             NodeCollection.GroupingMode.NONE,
             nodeCollection,
         ) // todo project new delegate
     }
 
-    data class Single(val instanceData: GroupListDataWrapper.InstanceData) : GroupType() {
+    private interface TimeChild {
+
+        val firstInstanceData: GroupListDataWrapper.InstanceData
+    }
+
+    data class Single(val instanceData: GroupListDataWrapper.InstanceData) : GroupType(), TimeChild {
 
         override val instanceDatas = listOf(instanceData)
+
+        override val firstInstanceData = instanceData
 
         override fun toContentDelegate(
             groupAdapter: GroupListFragment.GroupAdapter,

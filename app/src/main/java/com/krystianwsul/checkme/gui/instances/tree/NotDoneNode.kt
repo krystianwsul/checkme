@@ -94,6 +94,7 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
 
         abstract val instanceDatas: List<GroupListDataWrapper.InstanceData>
         abstract val directInstanceDatas: List<GroupListDataWrapper.InstanceData>
+        abstract val firstInstanceData: GroupListDataWrapper.InstanceData
 
         protected abstract val groupAdapter: GroupListFragment.GroupAdapter
         protected val groupListFragment get() = groupAdapter.groupListFragment
@@ -128,6 +129,7 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
 
             override val instanceDatas = listOf(instanceData)
             override val directInstanceDatas = instanceDatas
+            override val firstInstanceData = instanceData
 
             override lateinit var treeNode: TreeNode<AbstractHolder>
             private lateinit var nodeCollection: NodeCollection
@@ -254,6 +256,7 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
             override val groupAdapter: GroupListFragment.GroupAdapter,
             private val groupType: GroupType,
             override val directInstanceDatas: List<GroupListDataWrapper.InstanceData>,
+            override val firstInstanceData: GroupListDataWrapper.InstanceData,
             private val indentation: Int,
             private val groupingMode: NodeCollection.GroupingMode,
             private val nodeCollection: NodeCollection,

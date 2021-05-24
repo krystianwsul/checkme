@@ -29,7 +29,7 @@ sealed class GroupType {
                                 .singleOrNull()
 
                             projectDetails?.let {
-                                Project(timeStamp, projectDetails, instanceDatas, true)
+                                Project(timeStamp, projectDetails, instanceDatas, false)
                             } ?: Time(timeStamp, groupByProject(timeStamp, instanceDatas))
                         } else {
                             // if there's just one, there's our node
@@ -60,7 +60,7 @@ sealed class GroupType {
                 check(instanceDatas.isNotEmpty())
 
                 if (instanceDatas.size > 1) {
-                    Project(timeStamp, projectDetails!!, instanceDatas, false)
+                    Project(timeStamp, projectDetails!!, instanceDatas, true)
                 } else {
                     Single(instanceDatas.single())
                 }
@@ -103,6 +103,7 @@ sealed class GroupType {
             groupTypes,
             NotDoneNode.ContentDelegate.Group.Id.Time(timeStamp),
             NotDoneNode.ContentDelegate.Group.GroupRowsDelegate.Time(groupAdapter, timeStamp),
+            true,
         )
     }
 
@@ -110,7 +111,7 @@ sealed class GroupType {
         val timeStamp: TimeStamp,
         val projectDetails: DetailsNode.ProjectDetails,
         override val instanceDatas: List<GroupListDataWrapper.InstanceData>,
-        val showTime: Boolean,
+        val nested: Boolean,
     ) : GroupType(), TimeChild {
 
         override val firstInstanceData = instanceDatas.first()
@@ -126,7 +127,7 @@ sealed class GroupType {
             this,
             instanceDatas,
             firstInstanceData,
-            indentation,
+            indentation + (if (nested) 1 else 0),
             nodeCollection,
             instanceDatas.map(::Single),
             NotDoneNode.ContentDelegate.Group.Id.Project(timeStamp, projectDetails.projectKey),
@@ -134,8 +135,9 @@ sealed class GroupType {
                 groupAdapter,
                 timeStamp,
                 projectDetails.name,
-                showTime,
+                !nested,
             ),
+            !nested,
         ) // todo project new delegate
     }
 

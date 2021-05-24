@@ -97,6 +97,8 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
         abstract val firstInstanceData: GroupListDataWrapper.InstanceData
         abstract val allInstanceDatas: List<GroupListDataWrapper.InstanceData>
 
+        protected abstract val indentation: Int
+
         protected abstract val groupAdapter: GroupListFragment.GroupAdapter
         protected val groupListFragment get() = groupAdapter.groupListFragment
 
@@ -124,7 +126,7 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
         class Instance(
             override val groupAdapter: GroupListFragment.GroupAdapter,
             val instanceData: GroupListDataWrapper.InstanceData,
-            private val indentation: Int,
+            override val indentation: Int,
             showDetails: Boolean = true,
         ) : ContentDelegate() {
 
@@ -260,11 +262,12 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
             private val groupType: GroupType,
             override val directInstanceDatas: List<GroupListDataWrapper.InstanceData>,
             override val firstInstanceData: GroupListDataWrapper.InstanceData,
-            private val indentation: Int,
+            override val indentation: Int,
             private val nodeCollection: NodeCollection,
             private val childGroupTypes: List<GroupType>,
             override val id: Id,
             override val rowsDelegate: GroupRowsDelegate,
+            private val indentCheckBox: Boolean,
         ) : ContentDelegate() {
 
             override val allInstanceDatas get() = notDoneNodes.flatMap { it.contentDelegate.directInstanceDatas }
@@ -296,9 +299,9 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
                     childGroupTypes.map { it.toContentDelegate(groupAdapter, indentation, nodeCollection) }.map {
                         // todo project not sure about the whole group/instanceNode thing
                         val notDoneNode = if (it is Instance) {
-                            NotDoneInstanceNode(indentation, it.instanceData, modelNode, nodeCollection.groupAdapter)
+                            NotDoneInstanceNode(it.indentation, it.instanceData, modelNode, nodeCollection.groupAdapter)
                         } else {
-                            NotDoneGroupNode(indentation, nodeCollection, it)
+                            NotDoneGroupNode(it.indentation, nodeCollection, it)
                         }
 
                         val childTreeNode = notDoneNode.initialize(contentDelegateStates, treeNode)
@@ -324,7 +327,9 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
 
             override val thumbnail: ImageState? = null
 
-            override val checkBoxState get() = if (treeNode.isExpanded) CheckBoxState.Gone else CheckBoxState.Invisible
+            override val checkBoxState
+                get() =
+                    if (treeNode.isExpanded || !indentCheckBox) CheckBoxState.Gone else CheckBoxState.Invisible
 
             override val toggleDescendants = true
 

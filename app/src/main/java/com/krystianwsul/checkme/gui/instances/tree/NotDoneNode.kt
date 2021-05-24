@@ -296,11 +296,15 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
                 val nodePairs = if (true) {
                     childGroupTypes.map { it.toContentDelegate(groupAdapter, indentation, nodeCollection) }.map {
                         // todo project not sure about the whole group/instanceNode thing
-                        val notDoneGroupNode = NotDoneGroupNode(indentation, nodeCollection, it)
+                        val notDoneNode = if (it is Instance) {
+                            NotDoneInstanceNode(indentation, it.instanceData, modelNode, nodeCollection.groupAdapter)
+                        } else {
+                            NotDoneGroupNode(indentation, nodeCollection, it)
+                        }
 
-                        val childTreeNode = notDoneGroupNode.initialize(contentDelegateStates, treeNode)
+                        val childTreeNode = notDoneNode.initialize(contentDelegateStates, treeNode)
 
-                        childTreeNode to notDoneGroupNode
+                        childTreeNode to notDoneNode
                     }
                 } else {
                     groupType.instanceDatas.map { // todo project InstanceDatas

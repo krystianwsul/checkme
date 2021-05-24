@@ -72,8 +72,6 @@ sealed class GroupType {
         }
     }
 
-    abstract val instanceDatas: List<GroupListDataWrapper.InstanceData> // todo project later InstanceDatas
-
     open val name: String get() = throw UnsupportedOperationException()
 
     abstract fun toContentDelegate(
@@ -86,8 +84,6 @@ sealed class GroupType {
         val timeStamp: TimeStamp,
         val groupTypes: List<GroupType>
     ) : GroupType() {
-
-        override val instanceDatas = groupTypes.flatMap { it.instanceDatas }
 
         override fun toContentDelegate(
             groupAdapter: GroupListFragment.GroupAdapter,
@@ -114,7 +110,7 @@ sealed class GroupType {
         private val nested: Boolean,
     ) : GroupType(), TimeChild {
 
-        override val instanceDatas = _instanceDatas.map { it.copy(projectInfo = null) }
+        private val instanceDatas = _instanceDatas.map { it.copy(projectInfo = null) }
 
         override val firstInstanceData = instanceDatas.first()
 
@@ -140,7 +136,7 @@ sealed class GroupType {
                 !nested,
             ),
             !nested,
-        ) // todo project new delegate
+        )
     }
 
     private interface TimeChild {
@@ -149,8 +145,6 @@ sealed class GroupType {
     }
 
     class Single(val instanceData: GroupListDataWrapper.InstanceData) : GroupType(), TimeChild {
-
-        override val instanceDatas = listOf(instanceData)
 
         override val firstInstanceData = instanceData
 

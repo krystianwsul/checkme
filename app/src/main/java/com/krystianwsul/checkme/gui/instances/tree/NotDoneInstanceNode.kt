@@ -20,7 +20,7 @@ class NotDoneInstanceNode(
     private data class Id(val innerId: Any)
 
     override fun compareTo(other: ModelNode<AbstractHolder>) =
-        instanceData.compareTo((other as NotDoneInstanceNode).instanceData)
+        contentDelegate.compareTo((other as NotDoneInstanceNode).contentDelegate)
 
     override fun tryStartDrag(viewHolder: RecyclerView.ViewHolder): Boolean {
         val groupListFragment = groupAdapter.groupListFragment

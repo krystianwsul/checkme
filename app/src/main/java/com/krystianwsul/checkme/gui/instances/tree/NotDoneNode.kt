@@ -89,7 +89,7 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
 
     final override fun getMatchResult(query: String) = contentDelegate.getMatchResult(query)
 
-    sealed class ContentDelegate : ThumbnailModelNode, Sortable, CheckableModelNode {
+    sealed class ContentDelegate : ThumbnailModelNode, Sortable, CheckableModelNode, Comparable<ContentDelegate> {
 
         abstract val instanceDatas: List<GroupListDataWrapper.InstanceData> // todo project instanceDatas
         protected abstract val groupAdapter: GroupListFragment.GroupAdapter
@@ -117,6 +117,12 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
         abstract fun normalize()
         abstract fun matchesFilterParams(filterParams: FilterCriteria.Full.FilterParams): Boolean
         abstract fun getMatchResult(query: String): ModelNode.MatchResult
+
+        override fun compareTo(other: ContentDelegate): Int {
+            fun ContentDelegate.instanceData() = instanceDatas.first() // todo project instanceDatas
+
+            return instanceData().compareTo(other.instanceData())
+        }
 
         class Instance(
             override val groupAdapter: GroupListFragment.GroupAdapter,

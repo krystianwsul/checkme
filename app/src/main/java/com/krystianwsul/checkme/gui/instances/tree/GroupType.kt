@@ -37,7 +37,7 @@ sealed class GroupType {
                             } ?: Time(timeStamp, instanceDatas)
                         } else {
                             // if there's just one, there's our node
-                            None(instanceDatas.single())
+                            Single(instanceDatas.single())
                         }
                     }
                 }
@@ -52,15 +52,15 @@ sealed class GroupType {
                         if (instanceDatas.size > 1) {
                             Project(projectKey!!, instanceDatas)
                         } else {
-                            None(instanceDatas.single())
+                            Single(instanceDatas.single())
                         }
                     }
 
-                    val groupTypesForPrivate = projectGroups[null]?.map(GroupType::None).orEmpty()
+                    val groupTypesForPrivate = projectGroups[null]?.map(GroupType::Single).orEmpty()
 
                     listOf(groupTypesForShared, groupTypesForPrivate).flatten()
                 }
-                NodeCollection.GroupingMode.NONE -> instanceDatas.map(GroupType::None)
+                NodeCollection.GroupingMode.NONE -> instanceDatas.map(GroupType::Single)
             }
 
             return groupTypes.map { it.toContentDelegate(groupAdapter, indentation, nodeCollection) }
@@ -125,7 +125,7 @@ sealed class GroupType {
         ) // todo project new delegate
     }
 
-    data class None(val instanceData: GroupListDataWrapper.InstanceData) : GroupType() {
+    data class Single(val instanceData: GroupListDataWrapper.InstanceData) : GroupType() {
 
         override fun toContentDelegate(
             groupAdapter: GroupListFragment.GroupAdapter,

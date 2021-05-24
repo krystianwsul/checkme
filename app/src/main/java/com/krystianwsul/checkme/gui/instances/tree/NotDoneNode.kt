@@ -268,15 +268,10 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
             override val id: Id,
             override val rowsDelegate: GroupRowsDelegate,
             private val indentCheckBox: Boolean,
+            private val showGroupActivityParameters: ShowGroupActivity.Parameters,
         ) : ContentDelegate() {
 
             override val allInstanceDatas get() = notDoneNodes.flatMap { it.contentDelegate.directInstanceDatas }
-
-            private val timeStamp by lazy { // todo project later
-                allInstanceDatas.map { it.instanceTimeStamp }
-                    .distinct()
-                    .single()
-            }
 
             override lateinit var treeNode: TreeNode<AbstractHolder>
             private lateinit var notDoneNodes: List<NotDoneNode>
@@ -331,8 +326,9 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
 
             override val name get() = groupType.name
 
-            override fun onClick(holder: AbstractHolder) =
-                groupListFragment.activity.let { it.startActivity(ShowGroupActivity.getIntent(timeStamp, it)) }
+            override fun onClick(holder: AbstractHolder) = groupListFragment.activity.let {
+                it.startActivity(ShowGroupActivity.getIntent(it, showGroupActivityParameters))
+            }
 
             override fun getOrdinal(): Double = throw UnsupportedOperationException()
             override fun setOrdinal(ordinal: Double) = throw UnsupportedOperationException()

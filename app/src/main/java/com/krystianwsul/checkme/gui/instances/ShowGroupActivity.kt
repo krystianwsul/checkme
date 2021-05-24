@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.os.Parcelable
 import androidx.appcompat.view.ActionMode
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.ActivityShowGroupBinding
@@ -21,6 +22,8 @@ import com.krystianwsul.checkme.viewmodels.DataId
 import com.krystianwsul.checkme.viewmodels.ShowGroupViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.common.time.TimeStamp
+import com.krystianwsul.common.utils.Parcelize
+import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.treeadapter.FilterCriteria
 import com.krystianwsul.treeadapter.TreeViewAdapter
@@ -34,17 +37,17 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
 
     companion object {
 
-        private const val TIME_KEY = "time"
+        private const val KEY_PARAMETERS = "parameters"
 
         private const val TAG_DELETE_INSTANCES = "deleteInstances"
 
-        fun getIntent(timeStamp: TimeStamp, context: Context) = Intent(
+        fun getIntent(context: Context, parameters: Parameters) = Intent(
             context,
             ShowGroupActivity::class.java
-        ).apply { putExtra(TIME_KEY, timeStamp.long) }
+        ).apply { putExtra(KEY_PARAMETERS, parameters) }
     }
 
-    private lateinit var timeStamp: TimeStamp
+    private lateinit var parameters: Parameters
 
     private var selectAllVisible = false
 
@@ -94,12 +97,7 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
 
         binding.groupListFragment.listener = this
 
-        check(intent.hasExtra(TIME_KEY))
-
-        val time = intent.getLongExtra(TIME_KEY, -1)
-        check(time != -1L)
-
-        timeStamp = TimeStamp.fromMillis(time)
+        parameters = intent.getParcelableExtra(KEY_PARAMETERS)!!
 
         binding.groupListFragment.setFab(bottomBinding.bottomFab)
 
@@ -118,7 +116,7 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
         initBottomBar()
 
         showGroupViewModel.apply {
-            start(timeStamp)
+            start(parameters)
 
             createDisposable += data.subscribe { onLoadFinished(it) }
         }
@@ -164,10 +162,10 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
         }
 
         binding.groupListFragment.setTimeStamp(
-                timeStamp,
-                showGroupViewModel.dataId,
-                immediate,
-                data.groupListDataWrapper,
+            parameters.timeStamp, // todo project later
+            showGroupViewModel.dataId,
+            immediate,
+            data.groupListDataWrapper,
         )
 
         updateTopMenu()
@@ -219,12 +217,27 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
 
     private fun updateBottomMenu() {
         bottomBinding.bottomAppBar
-                .menu
-                .findItem(R.id.action_select_all)
-                ?.isVisible = selectAllVisible
+            .menu
+            .findItem(R.id.action_select_all)
+            ?.isVisible = selectAllVisible
     }
 
     override fun setToolbarExpanded(expanded: Boolean) = binding.showGroupToolbarCollapseInclude
-            .collapseAppBarLayout
-            .setExpanded(expanded)
+        .collapseAppBarLayout
+        .setExpanded(expanded)
+
+    sealed class Parameters : Parcelable {
+
+        abstract val timeStamp: TimeStamp
+        abstract val projectKey: ProjectKey.Shared?
+
+        @Parcelize
+        data class Time(override val timeStamp: TimeStamp) : Parameters() {
+
+            override val projectKey: ProjectKey.Shared? get() = null
+        }
+
+        @Parcelize
+        data class Project(override val timeStamp: TimeStamp, override val projectKey: ProjectKey.Shared) : Parameters()
+    }
 }

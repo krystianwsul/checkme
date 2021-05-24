@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
+import com.krystianwsul.checkme.gui.instances.ShowGroupActivity
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.instances.list.GroupListFragment
 import com.krystianwsul.checkme.gui.tree.DetailsNode
@@ -100,6 +101,7 @@ sealed class GroupType {
             NotDoneNode.ContentDelegate.Group.Id.Time(timeStamp),
             NotDoneNode.ContentDelegate.Group.GroupRowsDelegate.Time(groupAdapter, timeStamp),
             true,
+            ShowGroupActivity.Parameters.Time(timeStamp),
         )
     }
 
@@ -136,6 +138,7 @@ sealed class GroupType {
                 !nested,
             ),
             !nested,
+            ShowGroupActivity.Parameters.Project(timeStamp, projectDetails.projectKey),
         )
     }
 

@@ -2,20 +2,20 @@ package com.krystianwsul.checkme.viewmodels
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.extensions.getShowGroupData
+import com.krystianwsul.checkme.gui.instances.ShowGroupActivity
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
-import com.krystianwsul.common.time.TimeStamp
 
 class ShowGroupViewModel : DomainViewModel<ShowGroupViewModel.Data>() {
 
     override val domainListener = object : DomainListener<Data>() {
 
-        override fun getData(domainFactory: DomainFactory) = domainFactory.getShowGroupData(timeStamp)
+        override fun getData(domainFactory: DomainFactory) = domainFactory.getShowGroupData(parameters)
     }
 
-    private lateinit var timeStamp: TimeStamp
+    private lateinit var parameters: ShowGroupActivity.Parameters
 
-    fun start(timeStamp: TimeStamp) {
-        this.timeStamp = timeStamp
+    fun start(parameters: ShowGroupActivity.Parameters) {
+        this.parameters = parameters
 
         internalStart()
     }

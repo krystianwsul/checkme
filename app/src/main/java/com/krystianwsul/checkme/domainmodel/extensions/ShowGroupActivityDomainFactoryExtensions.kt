@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.domainmodel.extensions
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.getProjectInfo
+import com.krystianwsul.checkme.gui.instances.ShowGroupActivity
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.utils.time.calendar
 import com.krystianwsul.checkme.utils.time.getDisplayText
@@ -13,15 +14,17 @@ import com.krystianwsul.common.time.DateTime
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.time.TimeStamp
+import com.krystianwsul.common.utils.ProjectKey
 import java.util.*
 
-fun DomainFactory.getShowGroupData(timeStamp: TimeStamp): ShowGroupViewModel.Data {
+fun DomainFactory.getShowGroupData(parameters: ShowGroupActivity.Parameters): ShowGroupViewModel.Data {
     MyCrashlytics.log("DomainFactory.getShowGroupData")
 
     DomainThreadChecker.instance.requireDomainThread()
 
     val now = ExactTimeStamp.Local.now
 
+    val timeStamp = parameters.timeStamp
     val date = timeStamp.date
     val dayOfWeek = date.dayOfWeek
     val hourMinute = timeStamp.hourMinute
@@ -32,21 +35,30 @@ fun DomainFactory.getShowGroupData(timeStamp: TimeStamp): ShowGroupViewModel.Dat
 
     val displayText = DateTime(date, time).getDisplayText()
 
-    return ShowGroupViewModel.Data(displayText, getGroupListData(timeStamp, now))
+    return ShowGroupViewModel.Data(displayText, getGroupListData(timeStamp, now, parameters.projectKey))
 }
 
-private fun DomainFactory.getGroupListData(timeStamp: TimeStamp, now: ExactTimeStamp.Local): GroupListDataWrapper {
+private fun DomainFactory.getGroupListData(
+    timeStamp: TimeStamp,
+    now: ExactTimeStamp.Local,
+    projectKey: ProjectKey.Shared? = null,
+): GroupListDataWrapper {
     val endCalendar = timeStamp.calendar.apply { add(Calendar.MINUTE, 1) }
     val endExactTimeStamp = ExactTimeStamp.Local(endCalendar.toDateTimeSoy()).toOffset()
 
-    val rootInstances = getRootInstances(timeStamp.toLocalExactTimeStamp().toOffset(), endExactTimeStamp, now).toList()
+    val rootInstances = getRootInstances(
+        timeStamp.toLocalExactTimeStamp().toOffset(),
+        endExactTimeStamp,
+        now,
+        projectKey = projectKey,
+    ).toList()
 
     val currentInstances = rootInstances.filter { it.instanceDateTime.timeStamp.compareTo(timeStamp) == 0 }
 
     val customTimeDatas = getCurrentRemoteCustomTimes(now).map {
         GroupListDataWrapper.CustomTimeData(
-                it.name,
-                it.hourMinutes.toSortedMap()
+            it.name,
+            it.hourMinutes.toSortedMap()
         )
     }
 

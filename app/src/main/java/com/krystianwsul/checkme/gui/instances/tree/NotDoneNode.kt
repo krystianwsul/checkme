@@ -103,12 +103,6 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
 
         abstract val states: Map<Id, State>
 
-        val timeStamp by lazy { // todo project instanceDatas will this be needed after other changes?
-            instanceDatas.map { it.instanceTimeStamp } // todo project instanceDatas
-                .distinct()
-                .single()
-        }
-
         abstract fun initialize(
             contentDelegateStates: Map<Id, State>,
             nodeContainer: NodeContainer<AbstractHolder>,
@@ -263,6 +257,12 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
 
             init {
                 check(instanceDatas.size > 1) // todo project instanceDatas
+            }
+
+            private val timeStamp by lazy {
+                instanceDatas.map { it.instanceTimeStamp } // todo project instanceDatas
+                    .distinct()
+                    .single()
             }
 
             override val rowsDelegate: DetailsNode.ProjectRowsDelegate =

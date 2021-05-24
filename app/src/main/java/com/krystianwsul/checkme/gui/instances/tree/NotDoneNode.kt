@@ -85,7 +85,7 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
 
     sealed class ContentDelegate : ThumbnailModelNode, Sortable, CheckableModelNode, Comparable<ContentDelegate>, Matchable {
 
-        abstract val instanceDatas: List<GroupListDataWrapper.InstanceData> // todo project instanceDatas
+        abstract val instanceDatas: List<GroupListDataWrapper.InstanceData> // todo project later instanceDatas
         protected abstract val groupAdapter: GroupListFragment.GroupAdapter
         protected val groupListFragment get() = groupAdapter.groupListFragment
 

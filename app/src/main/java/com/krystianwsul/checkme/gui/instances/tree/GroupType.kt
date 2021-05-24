@@ -73,7 +73,10 @@ sealed class GroupType {
         nodeCollection: NodeCollection,
     ): NotDoneNode.ContentDelegate
 
-    data class Time(val timeStamp: TimeStamp, val instanceDatas: List<GroupListDataWrapper.InstanceData>) : GroupType() {
+    data class Time(
+        val timeStamp: TimeStamp,
+        override val instanceDatas: List<GroupListDataWrapper.InstanceData>,
+    ) : GroupType(), Multi {
 
         override fun toContentDelegate(
             groupAdapter: GroupListFragment.GroupAdapter,
@@ -91,8 +94,8 @@ sealed class GroupType {
     data class TimeProject(
         val timeStamp: TimeStamp,
         val projectKey: ProjectKey.Shared,
-        val instanceDatas: List<GroupListDataWrapper.InstanceData>,
-    ) : GroupType() {
+        override val instanceDatas: List<GroupListDataWrapper.InstanceData>,
+    ) : GroupType(), Multi {
 
         override fun toContentDelegate(
             groupAdapter: GroupListFragment.GroupAdapter,
@@ -109,8 +112,8 @@ sealed class GroupType {
 
     data class Project(
         val projectKey: ProjectKey.Shared,
-        val instanceDatas: List<GroupListDataWrapper.InstanceData>,
-    ) : GroupType() {
+        override val instanceDatas: List<GroupListDataWrapper.InstanceData>,
+    ) : GroupType(), Multi {
 
         override fun toContentDelegate(
             groupAdapter: GroupListFragment.GroupAdapter,
@@ -123,6 +126,11 @@ sealed class GroupType {
             NodeCollection.GroupingMode.NONE,
             nodeCollection,
         ) // todo project new delegate
+    }
+
+    sealed interface Multi {
+
+        val instanceDatas: List<GroupListDataWrapper.InstanceData>
     }
 
     data class Single(val instanceData: GroupListDataWrapper.InstanceData) : GroupType() {

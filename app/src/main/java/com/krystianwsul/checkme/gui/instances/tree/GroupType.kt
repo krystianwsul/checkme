@@ -66,7 +66,7 @@ sealed class GroupType {
         }
     }
 
-    abstract val instanceDatas: List<GroupListDataWrapper.InstanceData> // todo project InstanceDatas
+    abstract val instanceDatas: List<GroupListDataWrapper.InstanceData> // todo project later InstanceDatas
 
     abstract fun toContentDelegate(
         groupAdapter: GroupListFragment.GroupAdapter,

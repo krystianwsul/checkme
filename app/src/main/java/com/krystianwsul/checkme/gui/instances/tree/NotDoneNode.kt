@@ -92,7 +92,7 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
 
     sealed class ContentDelegate : ThumbnailModelNode, Sortable, CheckableModelNode, Comparable<ContentDelegate>, Matchable {
 
-        abstract val instanceDatas: List<GroupListDataWrapper.InstanceData> // todo project InstanceDatas
+        abstract val instanceDatas: List<GroupListDataWrapper.InstanceData> // todo project later InstanceDatas
         abstract val directInstanceDatas: List<GroupListDataWrapper.InstanceData>
         abstract val firstInstanceData: GroupListDataWrapper.InstanceData
         abstract val allInstanceDatas: List<GroupListDataWrapper.InstanceData>
@@ -264,10 +264,11 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
         ) : ContentDelegate() {
 
             override val instanceDatas get() = groupType.instanceDatas // todo project InstanceDatas
-            override val allInstanceDatas get() = instanceDatas // todo project InstanceDatas
 
-            private val timeStamp by lazy {
-                instanceDatas.map { it.instanceTimeStamp } // todo project InstanceDatas
+            override val allInstanceDatas get() = notDoneNodes.flatMap { it.contentDelegate.directInstanceDatas }
+
+            private val timeStamp by lazy { // todo project InstanceDatas
+                allInstanceDatas.map { it.instanceTimeStamp }
                     .distinct()
                     .single()
             }

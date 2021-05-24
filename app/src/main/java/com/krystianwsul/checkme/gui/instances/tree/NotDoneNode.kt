@@ -295,27 +295,16 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
                     state.expansionState,
                 )
 
-                val nodePairs = if (true) {
-                    childGroupTypes.map { it.toContentDelegate(groupAdapter, indentation, nodeCollection) }.map {
-                        // todo project not sure about the whole group/instanceNode thing
-                        val notDoneNode = if (it is Instance) {
-                            NotDoneInstanceNode(it.indentation, it.instanceData, modelNode, nodeCollection.groupAdapter)
-                        } else {
-                            NotDoneGroupNode(it.indentation, nodeCollection, it)
-                        }
-
-                        val childTreeNode = notDoneNode.initialize(contentDelegateStates, treeNode)
-
-                        childTreeNode to notDoneNode
+                val nodePairs = childGroupTypes.map { it.toContentDelegate(groupAdapter, indentation, nodeCollection) }.map {
+                    val notDoneNode = if (it is Instance) {
+                        NotDoneInstanceNode(it.indentation, it.instanceData, modelNode, nodeCollection.groupAdapter)
+                    } else {
+                        NotDoneGroupNode(it.indentation, nodeCollection, it)
                     }
-                } else {
-                    groupType.instanceDatas.map { // todo project InstanceDatas
-                        val notDoneInstanceNode = NotDoneInstanceNode(indentation, it, modelNode, groupAdapter)
 
-                        val childTreeNode = notDoneInstanceNode.initialize(contentDelegateStates, treeNode)
+                    val childTreeNode = notDoneNode.initialize(contentDelegateStates, treeNode)
 
-                        childTreeNode to notDoneInstanceNode
-                    }
+                    childTreeNode to notDoneNode
                 }
 
                 val (childTreeNodes, notDoneNodes) = nodePairs.unzip()

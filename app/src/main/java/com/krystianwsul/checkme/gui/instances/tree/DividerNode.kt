@@ -49,7 +49,7 @@ class DividerNode(
         initialExpansionState: TreeNode.ExpansionState?,
         nodeContainer: NodeContainer<AbstractHolder>,
         doneInstanceDatas: List<GroupListDataWrapper.InstanceData>,
-        collectionState: CollectionState,
+        contentDelegateStates: Map<NotDoneNode.ContentDelegate.Id, NotDoneNode.ContentDelegate.State>,
     ): TreeNode<AbstractHolder> {
         treeNode = TreeNode(
             this,
@@ -57,7 +57,7 @@ class DividerNode(
             initialExpansionState = initialExpansionState.takeIf { doneInstanceDatas.isNotEmpty() },
         )
 
-        val childTreeNodes = doneInstanceDatas.map { newChildTreeNode(it, collectionState) }
+        val childTreeNodes = doneInstanceDatas.map { newChildTreeNode(it, contentDelegateStates) }
 
         treeNode.setChildTreeNodes(childTreeNodes)
 
@@ -66,13 +66,13 @@ class DividerNode(
 
     private fun newChildTreeNode(
         instanceData: GroupListDataWrapper.InstanceData,
-        collectionState: CollectionState,
+        contentDelegateStates: Map<NotDoneNode.ContentDelegate.Id, NotDoneNode.ContentDelegate.State>,
     ): TreeNode<AbstractHolder> {
         checkNotNull(instanceData.done)
 
         val doneInstanceNode = DoneInstanceNode(indentation, instanceData, this)
 
-        val childTreeNode = doneInstanceNode.initialize(collectionState, treeNode)
+        val childTreeNode = doneInstanceNode.initialize(contentDelegateStates, treeNode)
 
         doneInstanceNodes.add(doneInstanceNode)
 
@@ -81,7 +81,7 @@ class DividerNode(
 
     val expansionState get() = treeNode.expansionState
 
-    val instanceExpansionStates get() = doneInstanceNodes.map { it.instanceExpansionStates }.flatten()
+    val contentDelegateStates get() = doneInstanceNodes.map { it.contentDelegate.states }.flatten()
 
     override val text by lazy { groupListFragment.activity.getString(R.string.done) }
 

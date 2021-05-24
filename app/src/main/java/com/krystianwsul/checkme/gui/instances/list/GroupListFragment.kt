@@ -959,36 +959,20 @@ class GroupListFragment @JvmOverloads constructor(
 
         val groupListState: GroupListState
             get() {
-                val groupExpansionStates = nodeCollection.groupExpansionStates
-                val instanceExpansionStates = nodeCollection.instanceExpansionStates
-
                 val doneExpanded = nodeCollection.doneExpansionState
                 val unscheduledExpansionState = nodeCollection.unscheduledExpansionState
                 val taskExpansionStates = nodeCollection.taskExpansionStates
 
                 val selectedNodes = treeViewAdapter.selectedNodes
                 val selectedDatas = nodesToSelectedDatas(selectedNodes)
-                val selectedInstances =
-                    selectedDatas.filterIsInstance<GroupListDataWrapper.InstanceData>().map { it.instanceKey }
                 val selectedTasks = selectedDatas.filterIsInstance<GroupListDataWrapper.TaskData>().map { it.taskKey }
-
-                val selectedGroups = selectedNodes.asSequence()
-                    .map { it.modelNode }
-                    .filterIsInstance<NotDoneNode>()
-                    .map { it.contentDelegate }
-                    .filterIsInstance<NotDoneNode.ContentDelegate.Group>()
-                    .map { it.timeStamp.long }
-                    .toList()
 
                 return GroupListState(
                     doneExpanded,
-                    groupExpansionStates,
-                    instanceExpansionStates,
+                    nodeCollection.contentDelegateStates,
                     unscheduledExpansionState,
                     taskExpansionStates,
-                    selectedInstances,
-                    selectedGroups,
-                    selectedTasks
+                    selectedTasks,
                 )
             }
 
@@ -1029,7 +1013,7 @@ class GroupListFragment @JvmOverloads constructor(
 
             treeNodeCollection.nodes = nodeCollection.initialize(
                 instanceDatas,
-                groupListState.toCollectionState(),
+                groupListState.contentDelegateStates,
                 groupListState.doneExpansionState,
                 taskDatas,
                 groupListState.unscheduledExpansionState,

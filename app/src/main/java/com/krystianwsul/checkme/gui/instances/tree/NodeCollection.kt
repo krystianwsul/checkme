@@ -27,8 +27,6 @@ class NodeCollection(
 
     private var unscheduledNode: UnscheduledNode? = null
 
-    val groupExpansionStates get() = notDoneGroupCollection.groupExpansionStates
-
     val unscheduledExpansionState get() = unscheduledNode?.expansionState
 
     val taskExpansionStates get() = unscheduledNode?.taskExpansionStates.orEmpty()
@@ -39,7 +37,7 @@ class NodeCollection(
 
     fun initialize(
         instanceDatas: Collection<GroupListDataWrapper.InstanceData>,
-        collectionState: CollectionState,
+        contentDelegateStates: Map<NotDoneNode.ContentDelegate.Id, NotDoneNode.ContentDelegate.State>,
         doneExpansionState: TreeNode.ExpansionState?,
         taskDatas: List<GroupListDataWrapper.TaskData>,
         unscheduledExpansionState: TreeNode.ExpansionState?,
@@ -66,7 +64,7 @@ class NodeCollection(
 
         notDoneGroupCollection = NotDoneGroupCollection(indentation, this, nodeContainer)
 
-        treeNodes += notDoneGroupCollection.initialize(notDoneInstanceDatas, collectionState)
+        treeNodes += notDoneGroupCollection.initialize(notDoneInstanceDatas, contentDelegateStates)
 
         check(indentation == 0 || taskDatas.isEmpty())
         if (taskDatas.isNotEmpty()) {
@@ -87,13 +85,15 @@ class NodeCollection(
             doneExpansionState,
             nodeContainer,
             doneInstanceDatas,
-            collectionState,
+            contentDelegateStates,
         )
 
         return treeNodes
     }
 
-    val instanceExpansionStates get() = notDoneGroupCollection.instanceExpansionStates + dividerNode.instanceExpansionStates
+    val contentDelegateStates: Map<NotDoneNode.ContentDelegate.Id, NotDoneNode.ContentDelegate.State>
+        get() =
+            notDoneGroupCollection.contentDelegateStates + dividerNode.contentDelegateStates
 
     enum class GroupingMode {
 

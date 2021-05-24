@@ -15,15 +15,9 @@ class NotDoneGroupCollection(
 
     private val notDoneGroupNodes = mutableListOf<NotDoneGroupNode>()
 
-    val groupExpansionStates
-        get() = notDoneGroupNodes.map { it.contentDelegate }
-            .filterIsInstance<NotDoneNode.ContentDelegate.Group>()
-            .map { it.timeStamp to it.treeNode.expansionState }
-            .toMap()
-
     fun initialize(
         notDoneInstanceDatas: List<GroupListDataWrapper.InstanceData>,
-        collectionState: CollectionState,
+        contentDelegateStates: Map<NotDoneNode.ContentDelegate.Id, NotDoneNode.ContentDelegate.State>,
     ): List<TreeNode<AbstractHolder>> {
         val contentDelegates = GroupType.getContentDelegates(
             notDoneInstanceDatas,
@@ -36,7 +30,7 @@ class NotDoneGroupCollection(
         val nodePairs = contentDelegates.map {
             val notDoneGroupNode = NotDoneGroupNode(indentation, nodeCollection, it)
 
-            val notDoneGroupTreeNode = notDoneGroupNode.initialize(collectionState, nodeContainer)
+            val notDoneGroupTreeNode = notDoneGroupNode.initialize(contentDelegateStates, nodeContainer)
 
             notDoneGroupTreeNode to notDoneGroupNode
         }
@@ -46,5 +40,5 @@ class NotDoneGroupCollection(
         return nodePairs.map { it.first }
     }
 
-    val instanceExpansionStates get() = notDoneGroupNodes.map { it.instanceExpansionStates }.flatten()
+    val contentDelegateStates get() = notDoneGroupNodes.map { it.contentDelegate.states }.flatten()
 }

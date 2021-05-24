@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
+import android.os.Parcelable
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.extensions.setInstanceDone
 import com.krystianwsul.checkme.domainmodel.extensions.setOrdinal
@@ -34,6 +35,7 @@ import com.krystianwsul.treeadapter.*
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Maybe
 import io.reactivex.rxjava3.kotlin.addTo
+import kotlinx.parcelize.Parcelize
 
 sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
     AbstractModelNode(),
@@ -64,8 +66,6 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
 
     final override val rowsDelegate get() = contentDelegate.rowsDelegate
 
-    val instanceExpansionStates get() = contentDelegate.instanceExpansionStates
-
     final override val widthKey
         get() = MultiLineDelegate.WidthKey(
             indentation,
@@ -74,12 +74,19 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
             true,
         )
 
-    override val id get() = contentDelegate.id
+    /**
+     * Note: there is a difference between the node's ID and the contents' ID.  (So far.)  For example, this ID is used for
+     * animations, which is why DoneInstanceNode has a different implementation: we don't want toggling done/not done to
+     * animate as movement.
+     */
+    override val id: Any get() = contentDelegate.id
 
     final override val toggleDescendants = contentDelegate.toggleDescendants
 
-    fun initialize(collectionState: CollectionState, nodeContainer: NodeContainer<AbstractHolder>) =
-        contentDelegate.initialize(collectionState, nodeContainer, this)
+    fun initialize(
+        contentDelegateStates: Map<ContentDelegate.Id, ContentDelegate.State>,
+        nodeContainer: NodeContainer<AbstractHolder>,
+    ) = contentDelegate.initialize(contentDelegateStates, nodeContainer, this)
 
     final override fun onClick(holder: AbstractHolder) = contentDelegate.onClick(holder)
 
@@ -90,10 +97,11 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
         protected val groupListFragment get() = groupAdapter.groupListFragment
 
         abstract val rowsDelegate: DetailsNode.ProjectRowsDelegate
-        abstract val instanceExpansionStates: Map<InstanceKey, CollectionExpansionState>
         abstract val treeNode: TreeNode<AbstractHolder>
-        abstract val id: Any
+        abstract val id: Id
         abstract val toggleDescendants: Boolean
+
+        abstract val states: Map<Id, State>
 
         val timeStamp by lazy { // todo project instanceDatas will this be needed after other changes?
             instanceDatas.map { it.instanceTimeStamp } // todo project instanceDatas
@@ -102,7 +110,7 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
         }
 
         abstract fun initialize(
-            collectionState: CollectionState,
+            contentDelegateStates: Map<Id, State>,
             nodeContainer: NodeContainer<AbstractHolder>,
             modelNode: DetailsNode.Parent,
         ): TreeNode<AbstractHolder>
@@ -128,19 +136,14 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
             private lateinit var nodeCollection: NodeCollection
 
             override fun initialize(
-                collectionState: CollectionState,
+                contentDelegateStates: Map<ContentDelegate.Id, ContentDelegate.State>,
                 nodeContainer: NodeContainer<AbstractHolder>,
                 modelNode: DetailsNode.Parent,
             ): TreeNode<AbstractHolder> {
-                val (expansionState, doneExpansionState) =
-                    collectionState.expandedInstances[instanceData.instanceKey] ?: CollectionExpansionState()
+                val state = contentDelegateStates[id] as? State ?: State()
+                val (expansionState, doneExpansionState) = state.collectionExpansionState
 
-                treeNode = TreeNode(
-                    modelNode,
-                    nodeContainer,
-                    collectionState.selectedInstances.contains(instanceData.instanceKey),
-                    expansionState,
-                )
+                treeNode = TreeNode(modelNode, nodeContainer, state.selected, expansionState)
 
                 nodeCollection = NodeCollection(
                     indentation + 1,
@@ -155,7 +158,7 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
                 treeNode.setChildTreeNodes(
                     nodeCollection.initialize(
                         instanceData.children.values,
-                        collectionState,
+                        contentDelegateStates,
                         doneExpansionState,
                         listOf(),
                         null,
@@ -169,17 +172,6 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
             }
 
             override val rowsDelegate = InstanceRowsDelegate(instanceData, showDetails)
-
-            override val instanceExpansionStates: Map<InstanceKey, CollectionExpansionState>
-                get() {
-                    val collectionExpansionState = CollectionExpansionState(
-                        treeNode.expansionState,
-                        nodeCollection.doneExpansionState,
-                    )
-
-                    return mapOf(instanceData.instanceKey to collectionExpansionState) +
-                            nodeCollection.instanceExpansionStates
-                }
 
             override val thumbnail = instanceData.imageState
 
@@ -209,9 +201,21 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
                     }
                 }
 
-            override val id: Any by lazy { Id(instanceData.instanceKey) }
+            override val id: ContentDelegate.Id by lazy { Id(instanceData.instanceKey) }
 
             override val toggleDescendants = false
+
+            override val states: Map<ContentDelegate.Id, ContentDelegate.State>
+                get() {
+                    val collectionExpansionState = CollectionExpansionState(
+                        treeNode.expansionState,
+                        nodeCollection.doneExpansionState,
+                    )
+
+                    val myState = mapOf(id to State(treeNode.isSelected, collectionExpansionState))
+
+                    return myState + nodeCollection.contentDelegateStates
+                }
 
             override fun onClick(holder: AbstractHolder) = groupListFragment.activity.let {
                 it.startActivity(ShowInstanceActivity.getIntent(it, instanceData.instanceKey))
@@ -236,7 +240,17 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
 
             override fun getMatchResult(query: String) = ModelNode.MatchResult.fromBoolean(instanceData.matchesQuery(query))
 
-            private data class Id(val instanceKey: InstanceKey)
+            @Parcelize
+            private data class Id(val instanceKey: InstanceKey) : ContentDelegate.Id
+
+            @Parcelize
+            private data class State(
+                val selected: Boolean,
+                val collectionExpansionState: CollectionExpansionState,
+            ) : ContentDelegate.State {
+
+                constructor() : this(false, CollectionExpansionState())
+            }
         }
 
         class Group(
@@ -258,15 +272,17 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
             private lateinit var notDoneNodes: List<NotDoneNode>
 
             override fun initialize(
-                collectionState: CollectionState,
+                contentDelegateStates: Map<ContentDelegate.Id, ContentDelegate.State>,
                 nodeContainer: NodeContainer<AbstractHolder>,
                 modelNode: DetailsNode.Parent,
             ): TreeNode<AbstractHolder> {
+                val state = contentDelegateStates[id] as? State ?: State()
+
                 treeNode = TreeNode(
                     modelNode,
                     nodeContainer,
-                    collectionState.selectedGroups.contains(timeStamp.long),
-                    collectionState.expandedGroups[timeStamp],
+                    state.selected,
+                    state.expansionState,
                 )
 
                 val nodePairs = if (false) {
@@ -279,7 +295,7 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
                     ).map {
                         val notDoneGroupNode = NotDoneGroupNode(indentation, nodeCollection, it)
 
-                        val childTreeNode = notDoneGroupNode.initialize(collectionState, treeNode)
+                        val childTreeNode = notDoneGroupNode.initialize(contentDelegateStates, treeNode)
 
                         childTreeNode to notDoneGroupNode
                     }
@@ -287,7 +303,7 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
                     instanceDatas.map {
                         val notDoneInstanceNode = NotDoneInstanceNode(indentation, it, modelNode, groupAdapter)
 
-                        val childTreeNode = notDoneInstanceNode.initialize(collectionState, treeNode)
+                        val childTreeNode = notDoneInstanceNode.initialize(contentDelegateStates, treeNode)
 
                         childTreeNode to notDoneInstanceNode
                     }
@@ -300,21 +316,20 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
                 return treeNode
             }
 
-            override val instanceExpansionStates
-                get() = notDoneNodes.map { it.contentDelegate.instanceExpansionStates }.flatten()
-
             override val thumbnail: ImageState? = null
 
             override val checkBoxState get() = if (treeNode.isExpanded) CheckBoxState.Gone else CheckBoxState.Invisible
 
-            override val id: Any by lazy {
-                Id(
-                    instanceDatas.map { it.instanceKey }.toSet(),
-                    timeStamp
-                )
-            } // todo project instanceDatas
+            override val id: ContentDelegate.Id by lazy { Id(timeStamp) }
 
             override val toggleDescendants = true
+
+            override val states: Map<ContentDelegate.Id, ContentDelegate.State>
+                get() {
+                    val myState = mapOf(id to State(treeNode.isSelected, treeNode.expansionState))
+
+                    return myState + notDoneNodes.map { it.contentDelegate.states }.flatten()
+                }
 
             override fun onClick(holder: AbstractHolder) =
                 groupListFragment.activity.let { it.startActivity(ShowGroupActivity.getIntent(timeStamp, it)) }
@@ -365,18 +380,21 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
                 }
             }
 
-            private class Id(val instanceKeys: Set<InstanceKey>, val timeStamp: TimeStamp) {
+            @Parcelize
+            private data class Id(val timeStamp: TimeStamp) : ContentDelegate.Id
 
-                override fun hashCode() = 1
+            @Parcelize
+            private data class State(
+                val selected: Boolean,
+                val expansionState: TreeNode.ExpansionState,
+            ) : ContentDelegate.State {
 
-                override fun equals(other: Any?): Boolean {
-                    if (other === this) return true
-
-                    if (other !is Id) return false
-
-                    return instanceKeys == other.instanceKeys || timeStamp == other.timeStamp
-                }
+                constructor() : this(false, TreeNode.ExpansionState())
             }
         }
+
+        sealed interface Id : Parcelable
+
+        sealed interface State : Parcelable
     }
 }

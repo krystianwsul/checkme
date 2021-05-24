@@ -450,8 +450,6 @@ class TreeNode<T : TreeHolder>(
 
     class NotSelectableSelectedException : IllegalStateException("A TreeNode cannot be selected if its ModelNode is not selectable.")
 
-    class SelectableNotVisibleException : IllegalStateException("A TreeNode cannot be selectable if it isn't visible during action mode.")
-
     class EmptyExpandedException : IllegalStateException("A TreeNode cannot be expanded if it has no children.")
 
     class NoSuchNodeException : IllegalArgumentException("The given node is not a direct descendant of this TreeNode.")

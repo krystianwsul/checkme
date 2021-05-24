@@ -25,12 +25,7 @@ class MergePaperAndRxTest {
         paperSubject = PublishRelay.create()
         firebaseSubject = PublishRelay.create()
 
-        testObserver = mergePaperAndRx(
-            paperSubject.firstElement(),
-            firebaseSubject,
-            Converter({ it }, { it }, true),
-            "",
-        ).test()
+        testObserver = mergePaperAndRx(paperSubject.firstElement(), firebaseSubject, Converter({ it }, { it })).test()
 
         mockkObject(MyApplication)
         every { MyApplication.context } returns mockk(relaxed = true)
@@ -104,7 +99,6 @@ class MergePaperAndRxTest {
 
         firebaseSubject.accept(2)
         testObserver.assertValues(1, 2)
-        verify(exactly = 1) { MyCrashlytics.logException(any()) }
 
         firebaseSubject.accept(3)
         testObserver.assertValues(1, 2, 3)

@@ -20,10 +20,14 @@ class ShowGroupViewModel : DomainViewModel<ShowGroupViewModel.Data>() {
         internalStart()
     }
 
-    data class Data(val displayText: String, val groupListDataWrapper: GroupListDataWrapper?) : DomainData() {
+    data class Data(
+        val title: String,
+        val subTitle: String?,
+        val groupListDataWrapper: GroupListDataWrapper?,
+    ) : DomainData() {
 
         init {
-            check(displayText.isNotEmpty())
+            check(title.isNotEmpty())
         }
     }
 }

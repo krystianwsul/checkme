@@ -152,8 +152,8 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
         val immediate = data.immediate
 
         binding.showGroupToolbarCollapseInclude
-                .collapseAppBarLayout
-                .setText(data.displayText, null, binding.groupListFragment.emptyTextLayout, immediate)
+            .collapseAppBarLayout
+            .setText(data.title, data.subTitle, binding.groupListFragment.emptyTextLayout, immediate)
 
         if (data.groupListDataWrapper == null) {
             finish()

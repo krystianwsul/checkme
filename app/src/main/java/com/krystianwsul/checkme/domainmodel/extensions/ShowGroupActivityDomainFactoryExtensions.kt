@@ -30,12 +30,16 @@ fun DomainFactory.getShowGroupData(parameters: ShowGroupActivity.Parameters): Sh
     val hourMinute = timeStamp.hourMinute
 
     val time = getCurrentRemoteCustomTimes(now).map { it as Time.Custom }
-            .firstOrNull { it.getHourMinute(dayOfWeek) == hourMinute }
-            ?: Time.Normal(hourMinute)
+        .firstOrNull { it.getHourMinute(dayOfWeek) == hourMinute }
+        ?: Time.Normal(hourMinute)
 
     val displayText = DateTime(date, time).getDisplayText()
 
-    return ShowGroupViewModel.Data(displayText, getGroupListData(timeStamp, now, parameters.projectKey))
+    val subtitle = parameters.projectKey
+        ?.let(projectsFactory::getProjectForce)
+        ?.name
+
+    return ShowGroupViewModel.Data(displayText, subtitle, getGroupListData(timeStamp, now, parameters.projectKey))
 }
 
 private fun DomainFactory.getGroupListData(

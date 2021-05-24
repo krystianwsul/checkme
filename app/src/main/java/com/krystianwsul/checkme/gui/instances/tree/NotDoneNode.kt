@@ -264,6 +264,7 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
             private val nodeCollection: NodeCollection,
             private val childGroupTypes: List<GroupType>,
             override val id: Id,
+            override val rowsDelegate: GroupRowsDelegate,
         ) : ContentDelegate() {
 
             override val allInstanceDatas get() = notDoneNodes.flatMap { it.contentDelegate.directInstanceDatas }
@@ -273,8 +274,6 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
                     .distinct()
                     .single()
             }
-
-            override val rowsDelegate: DetailsNode.ProjectRowsDelegate by lazy { TimeRowsDelegate(groupAdapter, timeStamp) }
 
             override lateinit var treeNode: TreeNode<AbstractHolder>
             private lateinit var notDoneNodes: List<NotDoneNode>
@@ -353,38 +352,44 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
             override fun getMatchResult(query: String) =
                 ModelNode.MatchResult.fromBoolean(allInstanceDatas.any { it.matchesQuery(query) })
 
-            class TimeRowsDelegate(
-                private val groupAdapter: GroupListFragment.GroupAdapter,
-                private val timeStamp: TimeStamp,
-            ) : DetailsNode.ProjectRowsDelegate(null, R.color.textSecondary) {
+            sealed class GroupRowsDelegate : DetailsNode.ProjectRowsDelegate(null, R.color.textSecondary) {
 
-                private fun getCustomTimeData(dayOfWeek: DayOfWeek, hourMinute: HourMinute) =
-                    groupAdapter.customTimeDatas.firstOrNull { it.hourMinutes[dayOfWeek] == hourMinute }
+                class Time(
+                    private val groupAdapter: GroupListFragment.GroupAdapter,
+                    private val timeStamp: TimeStamp,
+                ) : GroupRowsDelegate() {
 
-                private val details by lazy {
-                    val date = timeStamp.date
-                    val hourMinute = timeStamp.hourMinute
+                    private fun getCustomTimeData(dayOfWeek: DayOfWeek, hourMinute: HourMinute) =
+                        groupAdapter.customTimeDatas.firstOrNull { it.hourMinutes[dayOfWeek] == hourMinute }
 
-                    val timeText = getCustomTimeData(date.dayOfWeek, hourMinute)?.name ?: hourMinute.toString()
+                    private val details by lazy {
+                        val date = timeStamp.date
+                        val hourMinute = timeStamp.hourMinute
 
-                    val text = date.getDisplayText() + ", " + timeText
+                        val timeText = getCustomTimeData(date.dayOfWeek, hourMinute)?.name ?: hourMinute.toString()
 
-                    MultiLineRow.Visible(text, R.color.textSecondary)
-                }
+                        val text = date.getDisplayText() + ", " + timeText
 
-                override fun getRowsWithoutProject(isExpanded: Boolean, allChildren: List<TreeNode<*>>): List<MultiLineRow> {
-                    val name = if (isExpanded) {
-                        MultiLineRow.Invisible
-                    } else {
-                        MultiLineRow.Visible(
-                            allChildren.filter { it.modelNode is NotDoneNode && it.canBeShown() }
-                                .map { it.modelNode as NotDoneNode }
-                                .sorted()
-                                .joinToString(", ") { it.contentDelegate.name }
-                        )
+                        MultiLineRow.Visible(text, R.color.textSecondary)
                     }
 
-                    return listOf(name, details)
+                    override fun getRowsWithoutProject(
+                        isExpanded: Boolean,
+                        allChildren: List<TreeNode<*>>
+                    ): List<MultiLineRow> {
+                        val name = if (isExpanded) {
+                            MultiLineRow.Invisible
+                        } else {
+                            MultiLineRow.Visible(
+                                allChildren.filter { it.modelNode is NotDoneNode && it.canBeShown() }
+                                    .map { it.modelNode as NotDoneNode }
+                                    .sorted()
+                                    .joinToString(", ") { it.contentDelegate.name }
+                            )
+                        }
+
+                        return listOf(name, details)
+                    }
                 }
             }
 

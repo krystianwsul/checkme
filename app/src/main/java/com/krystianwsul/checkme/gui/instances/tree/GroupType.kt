@@ -102,6 +102,7 @@ sealed class GroupType {
             nodeCollection,
             groupTypes,
             NotDoneNode.ContentDelegate.Group.Id.Time(timeStamp),
+            NotDoneNode.ContentDelegate.Group.GroupRowsDelegate.Time(groupAdapter, timeStamp),
         )
     }
 
@@ -129,6 +130,7 @@ sealed class GroupType {
             nodeCollection,
             instanceDatas.map(::Single),
             NotDoneNode.ContentDelegate.Group.Id.Project(timeStamp, projectDetails.projectKey),
+            NotDoneNode.ContentDelegate.Group.GroupRowsDelegate.Time(groupAdapter, timeStamp),
         ) // todo project new delegate
     }
 

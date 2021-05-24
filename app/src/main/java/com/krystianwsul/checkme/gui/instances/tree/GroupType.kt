@@ -10,16 +10,17 @@ sealed class GroupType {
     companion object {
 
         fun getContentDelegates(
-            notDoneInstanceDatas: List<GroupListDataWrapper.InstanceData>,
+            instanceDatas: List<GroupListDataWrapper.InstanceData>,
             groupingMode: NodeCollection.GroupingMode,
             groupAdapter: GroupListFragment.GroupAdapter,
             indentation: Int,
+            nodeCollection: NodeCollection,
         ): List<NotDoneNode.ContentDelegate> {
-            if (notDoneInstanceDatas.isEmpty()) return emptyList()
+            if (instanceDatas.isEmpty()) return emptyList()
 
             val groupTypes: List<GroupType> = when (groupingMode) {
                 NodeCollection.GroupingMode.TIME -> {
-                    val timeGroups = notDoneInstanceDatas.groupBy { it.instanceTimeStamp }
+                    val timeGroups = instanceDatas.groupBy { it.instanceTimeStamp }
 
                     timeGroups.map { (timeStamp, instanceDatas) ->
                         check(instanceDatas.isNotEmpty())
@@ -43,7 +44,7 @@ sealed class GroupType {
                 NodeCollection.GroupingMode.PROJECT -> {
                     // we'll potentially group these by project
 
-                    val projectGroups = notDoneInstanceDatas.groupBy { it.projectInfo?.projectDetails?.projectKey }
+                    val projectGroups = instanceDatas.groupBy { it.projectInfo?.projectDetails?.projectKey }
 
                     val groupTypesForShared = projectGroups.filterKeys { it != null }.map { (projectKey, instanceDatas) ->
                         check(instanceDatas.isNotEmpty())
@@ -59,24 +60,32 @@ sealed class GroupType {
 
                     listOf(groupTypesForShared, groupTypesForPrivate).flatten()
                 }
-                NodeCollection.GroupingMode.NONE -> notDoneInstanceDatas.map(GroupType::None)
+                NodeCollection.GroupingMode.NONE -> instanceDatas.map(GroupType::None)
             }
 
-            return groupTypes.map { it.toContentDelegate(groupAdapter, indentation) }
+            return groupTypes.map { it.toContentDelegate(groupAdapter, indentation, nodeCollection) }
         }
     }
 
     abstract fun toContentDelegate(
         groupAdapter: GroupListFragment.GroupAdapter,
         indentation: Int,
+        nodeCollection: NodeCollection,
     ): NotDoneNode.ContentDelegate
 
     data class Time(val timeStamp: TimeStamp, val instanceDatas: List<GroupListDataWrapper.InstanceData>) : GroupType() {
 
         override fun toContentDelegate(
             groupAdapter: GroupListFragment.GroupAdapter,
-            indentation: Int
-        ) = NotDoneNode.ContentDelegate.Group(groupAdapter, instanceDatas, indentation)
+            indentation: Int,
+            nodeCollection: NodeCollection,
+        ) = NotDoneNode.ContentDelegate.Group(
+            groupAdapter,
+            instanceDatas,
+            indentation,
+            NodeCollection.GroupingMode.PROJECT,
+            nodeCollection,
+        )
     }
 
     data class TimeProject(
@@ -87,8 +96,15 @@ sealed class GroupType {
 
         override fun toContentDelegate(
             groupAdapter: GroupListFragment.GroupAdapter,
-            indentation: Int
-        ) = NotDoneNode.ContentDelegate.Group(groupAdapter, instanceDatas, indentation) // todo project new delegate
+            indentation: Int,
+            nodeCollection: NodeCollection,
+        ) = NotDoneNode.ContentDelegate.Group(
+            groupAdapter,
+            instanceDatas,
+            indentation,
+            NodeCollection.GroupingMode.NONE,
+            nodeCollection,
+        ) // todo project new delegate
     }
 
     data class Project(
@@ -98,15 +114,23 @@ sealed class GroupType {
 
         override fun toContentDelegate(
             groupAdapter: GroupListFragment.GroupAdapter,
-            indentation: Int
-        ) = NotDoneNode.ContentDelegate.Group(groupAdapter, instanceDatas, indentation) // todo project new delegate
+            indentation: Int,
+            nodeCollection: NodeCollection,
+        ) = NotDoneNode.ContentDelegate.Group(
+            groupAdapter,
+            instanceDatas,
+            indentation,
+            NodeCollection.GroupingMode.NONE,
+            nodeCollection,
+        ) // todo project new delegate
     }
 
     data class None(val instanceData: GroupListDataWrapper.InstanceData) : GroupType() {
 
         override fun toContentDelegate(
             groupAdapter: GroupListFragment.GroupAdapter,
-            indentation: Int
+            indentation: Int,
+            nodeCollection: NodeCollection,
         ) = NotDoneNode.ContentDelegate.Instance(groupAdapter, instanceData, indentation)
     }
 }

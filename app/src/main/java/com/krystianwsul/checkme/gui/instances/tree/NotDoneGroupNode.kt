@@ -42,7 +42,7 @@ class NotDoneGroupNode(
             if (timeStampComparison != 0) {
                 timeStampComparison
             } else {
-                fun NotDoneGroupNode.instanceData() = (contentDelegate as ContentDelegate.Instance).instanceData
+                fun NotDoneGroupNode.instanceData() = contentDelegate.instanceDatas.first()
 
                 instanceData().compareTo(other.instanceData())
             }

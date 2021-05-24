@@ -1,5 +1,6 @@
 package com.krystianwsul.treeadapter
 
+import android.util.Log
 import com.jakewharton.rxrelay3.BehaviorRelay
 import io.reactivex.rxjava3.core.Observable
 import kotlin.math.ceil
@@ -29,6 +30,7 @@ class TreeNodeCollection<T : TreeHolder>(val treeViewAdapter: TreeViewAdapter<T>
     override val wantsSeparators = false
 
     override fun getNode(position: Int, positionMode: PositionMode): TreeNode<T> {
+        Log.e("asdf", "magic positionMode: $positionMode") // todo project
         return positionMode.getRecursiveNodes(this)[position]
     }
 

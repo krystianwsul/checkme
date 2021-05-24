@@ -30,6 +30,7 @@ class NotDoneGroupCollection(
             nodeCollection.groupingMode,
             nodeCollection.groupAdapter,
             indentation,
+            nodeCollection,
         )
 
         val nodePairs = contentDelegates.map {

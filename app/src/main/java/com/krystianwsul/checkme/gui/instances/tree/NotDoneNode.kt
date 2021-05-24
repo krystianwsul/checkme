@@ -246,6 +246,8 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
             override val groupAdapter: GroupListFragment.GroupAdapter,
             override val instanceDatas: List<GroupListDataWrapper.InstanceData>,
             private val indentation: Int,
+            private val groupingMode: NodeCollection.GroupingMode,
+            private val nodeCollection: NodeCollection,
         ) : ContentDelegate() {
 
             init {
@@ -270,17 +272,23 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
                     collectionState.expandedGroups[timeStamp],
                 )
 
-                val nodePairs = instanceDatas.map {
-                    val notDoneInstanceNode = NotDoneInstanceNode(indentation, it, modelNode, groupAdapter)
+                val nodePairs = GroupType.getContentDelegates(
+                    instanceDatas,
+                    groupingMode,
+                    groupAdapter,
+                    indentation,
+                    nodeCollection,
+                ).map {
+                    val notDoneGroupNode = NotDoneGroupNode(indentation, nodeCollection, it)
 
-                    val childTreeNode = notDoneInstanceNode.initialize(collectionState, treeNode)
+                    val childTreeNode = notDoneGroupNode.initialize(collectionState, treeNode)
 
-                    childTreeNode to notDoneInstanceNode
+                    childTreeNode to notDoneGroupNode
                 }
 
-                treeNode.setChildTreeNodes(nodePairs.map { it.first })
-
-                notDoneNodes = nodePairs.map { it.second }
+                val (childTreeNodes, notDoneNodes) = nodePairs.unzip()
+                treeNode.setChildTreeNodes(childTreeNodes)
+                this.notDoneNodes = notDoneNodes
 
                 return treeNode
             }

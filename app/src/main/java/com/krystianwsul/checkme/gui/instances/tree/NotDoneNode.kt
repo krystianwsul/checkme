@@ -92,7 +92,7 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
 
     sealed class ContentDelegate : ThumbnailModelNode, Sortable, CheckableModelNode, Comparable<ContentDelegate>, Matchable {
 
-        abstract val instanceDatas: List<GroupListDataWrapper.InstanceData>
+        abstract val instanceDatas: List<GroupListDataWrapper.InstanceData> // todo project InstanceDatas
         abstract val directInstanceDatas: List<GroupListDataWrapper.InstanceData>
         abstract val firstInstanceData: GroupListDataWrapper.InstanceData
 
@@ -336,13 +336,7 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
             override fun getOrdinal(): Double = throw UnsupportedOperationException()
             override fun setOrdinal(ordinal: Double) = throw UnsupportedOperationException()
 
-            override fun normalize() = instanceDatas.forEach { it.normalize() }
-
-            override fun matchesFilterParams(filterParams: FilterCriteria.Full.FilterParams) =
-                instanceDatas.any { it.matchesFilterParams(filterParams) }
-
-            override fun getMatchResult(query: String) =
-                ModelNode.MatchResult.fromBoolean(instanceDatas.any { it.matchesQuery(query) })
+            override fun matchesFilterParams(filterParams: FilterCriteria.Full.FilterParams) = false
 
             private class GroupRowsDelegate(
                 private val groupAdapter: GroupListFragment.GroupAdapter,

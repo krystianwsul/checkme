@@ -92,7 +92,7 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
 
     sealed class ContentDelegate : ThumbnailModelNode, Sortable, CheckableModelNode, Comparable<ContentDelegate>, Matchable {
 
-        abstract val instanceDatas: List<GroupListDataWrapper.InstanceData> // todo project later instanceDatas
+        abstract val instanceDatas: List<GroupListDataWrapper.InstanceData>
         protected abstract val groupAdapter: GroupListFragment.GroupAdapter
         protected val groupListFragment get() = groupAdapter.groupListFragment
 
@@ -112,7 +112,7 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
         abstract fun onClick(holder: AbstractHolder)
 
         override fun compareTo(other: ContentDelegate): Int {
-            fun ContentDelegate.instanceData() = instanceDatas.first() // todo project instanceDatas
+            fun ContentDelegate.instanceData() = instanceDatas.first()
 
             return instanceData().compareTo(other.instanceData())
         }
@@ -256,11 +256,11 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
         ) : ContentDelegate() {
 
             init {
-                check(instanceDatas.size > 1) // todo project instanceDatas
+                check(instanceDatas.size > 1)
             }
 
             private val timeStamp by lazy {
-                instanceDatas.map { it.instanceTimeStamp } // todo project instanceDatas
+                instanceDatas.map { it.instanceTimeStamp }
                     .distinct()
                     .single()
             }
@@ -287,7 +287,7 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
 
                 val nodePairs = if (false) {
                     GroupType.getContentDelegates(
-                        instanceDatas, // todo project instanceDatas
+                        instanceDatas,
                         groupingMode,
                         groupAdapter,
                         indentation,
@@ -337,13 +337,13 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
             override fun getOrdinal(): Double = throw UnsupportedOperationException()
             override fun setOrdinal(ordinal: Double) = throw UnsupportedOperationException()
 
-            override fun normalize() = instanceDatas.forEach { it.normalize() } // todo project instanceDatas
+            override fun normalize() = instanceDatas.forEach { it.normalize() }
 
             override fun matchesFilterParams(filterParams: FilterCriteria.Full.FilterParams) =
-                instanceDatas.any { it.matchesFilterParams(filterParams) } // todo project instanceDatas
+                instanceDatas.any { it.matchesFilterParams(filterParams) }
 
             override fun getMatchResult(query: String) =
-                ModelNode.MatchResult.fromBoolean(instanceDatas.any { it.matchesQuery(query) }) // todo project instanceDatas
+                ModelNode.MatchResult.fromBoolean(instanceDatas.any { it.matchesQuery(query) })
 
             private class GroupRowsDelegate(
                 private val groupAdapter: GroupListFragment.GroupAdapter,

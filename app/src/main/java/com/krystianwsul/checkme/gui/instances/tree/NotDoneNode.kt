@@ -93,6 +93,8 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
     sealed class ContentDelegate : ThumbnailModelNode, Sortable, CheckableModelNode, Comparable<ContentDelegate>, Matchable {
 
         abstract val instanceDatas: List<GroupListDataWrapper.InstanceData>
+        abstract val directInstanceDatas: List<GroupListDataWrapper.InstanceData>
+
         protected abstract val groupAdapter: GroupListFragment.GroupAdapter
         protected val groupListFragment get() = groupAdapter.groupListFragment
 
@@ -125,6 +127,7 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
         ) : ContentDelegate() {
 
             override val instanceDatas = listOf(instanceData)
+            override val directInstanceDatas = instanceDatas
 
             override lateinit var treeNode: TreeNode<AbstractHolder>
             private lateinit var nodeCollection: NodeCollection
@@ -250,6 +253,7 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
         class Group(
             override val groupAdapter: GroupListFragment.GroupAdapter,
             private val groupType: GroupType,
+            override val directInstanceDatas: List<GroupListDataWrapper.InstanceData>,
             private val indentation: Int,
             private val groupingMode: NodeCollection.GroupingMode,
             private val nodeCollection: NodeCollection,

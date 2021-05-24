@@ -903,7 +903,7 @@ class GroupListFragment @JvmOverloads constructor(
                             }
                         } else {
                             modelNode.contentDelegate
-                                .instanceDatas
+                                .directInstanceDatas
                                 .map { it.allTaskKeys }
                                 .flatten()
                                 .contains(scrollToTaskKey)

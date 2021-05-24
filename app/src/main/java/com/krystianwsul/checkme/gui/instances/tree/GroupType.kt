@@ -2,8 +2,8 @@ package com.krystianwsul.checkme.gui.instances.tree
 
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.instances.list.GroupListFragment
+import com.krystianwsul.checkme.gui.tree.DetailsNode
 import com.krystianwsul.common.time.TimeStamp
-import com.krystianwsul.common.utils.ProjectKey
 
 sealed class GroupType {
 
@@ -24,13 +24,12 @@ sealed class GroupType {
 
                         // these are all instances at the same time
                         if (instanceDatas.size > 1) {
-                            // if there are multiple instances, we want to determine if they belong to a single shared project
-                            val projectKey = instanceDatas.map { it.projectInfo?.projectDetails?.projectKey }
+                            val projectDetails = instanceDatas.map { it.projectInfo?.projectDetails }
                                 .distinct()
                                 .singleOrNull()
 
-                            projectKey?.let {
-                                Project(timeStamp, projectKey, instanceDatas, true)
+                            projectDetails?.let {
+                                Project(timeStamp, projectDetails, instanceDatas, true)
                             } ?: Time(timeStamp, groupByProject(timeStamp, instanceDatas))
                         } else {
                             // if there's just one, there's our node
@@ -55,13 +54,13 @@ sealed class GroupType {
         ): List<GroupType> {
             if (instanceDatas.isEmpty()) return emptyList()
 
-            val projectGroups = instanceDatas.groupBy { it.projectInfo?.projectDetails?.projectKey }
+            val projectGroups = instanceDatas.groupBy { it.projectInfo?.projectDetails }
 
-            val groupTypesForShared = projectGroups.filterKeys { it != null }.map { (projectKey, instanceDatas) ->
+            val groupTypesForShared = projectGroups.filterKeys { it != null }.map { (projectDetails, instanceDatas) ->
                 check(instanceDatas.isNotEmpty())
 
                 if (instanceDatas.size > 1) {
-                    Project(timeStamp, projectKey!!, instanceDatas, false)
+                    Project(timeStamp, projectDetails!!, instanceDatas, false)
                 } else {
                     Single(instanceDatas.single())
                 }
@@ -74,6 +73,8 @@ sealed class GroupType {
     }
 
     abstract val instanceDatas: List<GroupListDataWrapper.InstanceData> // todo project later InstanceDatas
+
+    open val name: String get() = throw UnsupportedOperationException()
 
     abstract fun toContentDelegate(
         groupAdapter: GroupListFragment.GroupAdapter,
@@ -106,12 +107,14 @@ sealed class GroupType {
 
     data class Project(
         val timeStamp: TimeStamp,
-        val projectKey: ProjectKey.Shared,
+        val projectDetails: DetailsNode.ProjectDetails,
         override val instanceDatas: List<GroupListDataWrapper.InstanceData>,
         val showTime: Boolean,
     ) : GroupType(), TimeChild {
 
         override val firstInstanceData = instanceDatas.first()
+
+        override val name get() = projectDetails.name
 
         override fun toContentDelegate(
             groupAdapter: GroupListFragment.GroupAdapter,
@@ -125,7 +128,7 @@ sealed class GroupType {
             indentation,
             nodeCollection,
             instanceDatas.map(::Single),
-            NotDoneNode.ContentDelegate.Group.Id.Project(timeStamp, projectKey),
+            NotDoneNode.ContentDelegate.Group.Id.Project(timeStamp, projectDetails.projectKey),
         ) // todo project new delegate
     }
 

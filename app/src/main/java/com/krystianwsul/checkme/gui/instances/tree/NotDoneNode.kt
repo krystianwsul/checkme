@@ -107,6 +107,8 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
 
         abstract val states: Map<Id, State>
 
+        abstract val name: String
+
         abstract fun initialize(
             contentDelegateStates: Map<Id, State>,
             nodeContainer: NodeContainer<AbstractHolder>,
@@ -132,6 +134,8 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
 
             override lateinit var treeNode: TreeNode<AbstractHolder>
             private lateinit var nodeCollection: NodeCollection
+
+            override val name = instanceData.name
 
             override fun initialize(
                 contentDelegateStates: Map<ContentDelegate.Id, ContentDelegate.State>,
@@ -270,7 +274,7 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
                     .single()
             }
 
-            override val rowsDelegate: DetailsNode.ProjectRowsDelegate by lazy { GroupRowsDelegate(groupAdapter, timeStamp) }
+            override val rowsDelegate: DetailsNode.ProjectRowsDelegate by lazy { TimeRowsDelegate(groupAdapter, timeStamp) }
 
             override lateinit var treeNode: TreeNode<AbstractHolder>
             private lateinit var notDoneNodes: List<NotDoneNode>
@@ -289,7 +293,7 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
                     state.expansionState,
                 )
 
-                val nodePairs = if (false) {
+                val nodePairs = if (true) {
                     childGroupTypes.map { it.toContentDelegate(groupAdapter, indentation, nodeCollection) }.map {
                         // todo project not sure about the whole group/instanceNode thing
                         val notDoneGroupNode = NotDoneGroupNode(indentation, nodeCollection, it)
@@ -328,6 +332,8 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
                     return myState + notDoneNodes.map { it.contentDelegate.states }.flatten()
                 }
 
+            override val name get() = groupType.name
+
             override fun onClick(holder: AbstractHolder) =
                 groupListFragment.activity.let { it.startActivity(ShowGroupActivity.getIntent(timeStamp, it)) }
 
@@ -343,7 +349,7 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
             override fun getMatchResult(query: String) =
                 ModelNode.MatchResult.fromBoolean(allInstanceDatas.any { it.matchesQuery(query) })
 
-            private class GroupRowsDelegate(
+            class TimeRowsDelegate(
                 private val groupAdapter: GroupListFragment.GroupAdapter,
                 private val timeStamp: TimeStamp,
             ) : DetailsNode.ProjectRowsDelegate(null, R.color.textSecondary) {
@@ -367,10 +373,10 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
                         MultiLineRow.Invisible
                     } else {
                         MultiLineRow.Visible(
-                            allChildren.filter { it.modelNode is NotDoneInstanceNode && it.canBeShown() }
-                                .map { it.modelNode as NotDoneInstanceNode }
+                            allChildren.filter { it.modelNode is NotDoneNode && it.canBeShown() }
+                                .map { it.modelNode as NotDoneNode }
                                 .sorted()
-                                .joinToString(", ") { it.instanceData.name }
+                                .joinToString(", ") { it.contentDelegate.name }
                         )
                     }
 

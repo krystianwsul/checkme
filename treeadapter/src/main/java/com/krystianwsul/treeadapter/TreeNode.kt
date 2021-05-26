@@ -28,17 +28,10 @@ class TreeNode<T : TreeHolder>(
 
         if (!modelNode.isSelectable) return
 
-        if (modelNode.isDraggable) {
-            val startingDrag = modelNode.tryStartDrag(viewHolder)
-
-            if (!startingDrag) selected = !selected
-
-            modelNode.onBindViewHolder(viewHolder, startingDrag)
-
-            if (!startingDrag) treeViewAdapter.updateDisplayedNodes { updateSelect(it, true) }
-        } else {
+        if (modelNode.isDraggable && modelNode.tryStartDrag(viewHolder))
+            modelNode.onBindViewHolder(viewHolder, true)
+        else
             treeViewAdapter.updateDisplayedNodes(this::toggleSelected)
-        }
     }
 
     fun onClick(holder: T) {
@@ -163,10 +156,6 @@ class TreeNode<T : TreeHolder>(
 
         selected = !selected
 
-        updateSelect(placeholder, recursive)
-    }
-
-    private fun updateSelect(placeholder: TreeViewAdapter.Placeholder, recursive: Boolean) {
         if (selected)
             incrementSelected(placeholder)
         else

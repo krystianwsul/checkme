@@ -44,6 +44,7 @@ object Preferences {
     private const val KEY_LANGUAGE = "language"
     private const val KEY_VERSION_CODE = "versionCode"
     private const val KEY_SAVED_STATE_LOG = "savedStateLog"
+    private const val KEY_ROOT_TASK_LOG = "rootTaskLog"
 
     private val sharedPreferences by lazy { MyApplication.sharedPreferences }
 
@@ -83,11 +84,13 @@ object Preferences {
     val temporaryNotificationLog = Logger(KEY_TEMPORARY_NOTIFICATION_LOG)
 
     val tokenRelay =
-            BehaviorRelay.createDefault(NullableWrapper(sharedPreferences.getString(TOKEN_KEY, null)))!!
+        BehaviorRelay.createDefault(NullableWrapper(sharedPreferences.getString(TOKEN_KEY, null)))!!
 
     val mainTabsLog = Logger(KEY_MAIN_TABS_LOG, 10)
 
     val savedStateLog = Logger(KEY_SAVED_STATE_LOG, 10)
+
+    val rootTaskLog = Logger(KEY_ROOT_TASK_LOG, 20)
 
     val versionCode get() = sharedPreferences.getInt(KEY_VERSION_CODE, -1).takeIf { it != -1 }
 
@@ -95,9 +98,9 @@ object Preferences {
 
     init {
         tokenRelay.distinctUntilChanged()
-                .skip(1)
-                .subscribe { sharedPreferences.edit { putString(TOKEN_KEY, it.value) } }
-                .ignore()
+            .skip(1)
+            .subscribe { sharedPreferences.edit { putString(TOKEN_KEY, it.value) } }
+            .ignore()
     }
 
     var token: String?

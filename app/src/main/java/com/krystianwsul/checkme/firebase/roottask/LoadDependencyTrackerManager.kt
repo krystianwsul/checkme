@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.firebase.roottask
 
+import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.firebase.LoadStatus
 import com.krystianwsul.common.firebase.records.project.ProjectRecord
 import com.krystianwsul.common.firebase.records.task.RootTaskRecord
@@ -18,19 +19,18 @@ class LoadDependencyTrackerManager {
         check(!projectTrackers.containsKey(projectKey))
 
         return ProjectTracker(
-                this,
-                projectKey,
-                projectRecord.rootTaskParentDelegate.rootTaskKeys,
-        ).also {
-            projectTrackers[projectKey] = it
-        }
+            this,
+            projectKey,
+            projectRecord.name,
+            projectRecord.rootTaskParentDelegate.rootTaskKeys,
+        ).also { projectTrackers[projectKey] = it }
     }
 
     fun startTrackingTaskLoad(taskRecord: RootTaskRecord): TaskTracker {
         val taskKey = taskRecord.taskKey
         check(!taskTrackers.containsKey(taskKey))
 
-        return TaskTracker(this, taskKey, taskRecord.getDependentTaskKeys()).also {
+        return TaskTracker(this, taskKey, taskRecord.name, taskRecord.getDependentTaskKeys()).also {
             taskTrackers[taskKey] = it
         }
     }
@@ -45,40 +45,53 @@ class LoadDependencyTrackerManager {
 
     fun isTaskKeyTracked(taskKey: TaskKey.Root) = allTrackers.any { taskKey in it.dependentTaskKeys }
 
+    private fun logCurrentlyTracked() {
+        val projects = projectTrackers.values.map { "${it.projectName} + ${it.projectKey}" }
+        val tasks = taskTrackers.values.map { "${it.taskName} + ${it.taskKey}" }
+
+        Preferences.rootTaskLog.logLineHour("\n" + (projects + tasks).joinToString("\n") + "\n")
+    }
+
     interface Tracker {
 
         val dependentTaskKeys: Set<TaskKey.Root>
     }
 
     class ProjectTracker(
-            private val loadDependencyTrackerManager: LoadDependencyTrackerManager,
-            val projectKey: ProjectKey<*>,
-            override val dependentTaskKeys: Set<TaskKey.Root>,
+        private val loadDependencyTrackerManager: LoadDependencyTrackerManager,
+        val projectKey: ProjectKey<*>,
+        val projectName: String,
+        override val dependentTaskKeys: Set<TaskKey.Root>,
     ) : Tracker {
 
         init {
             LoadStatus.incrementCounter()
+            loadDependencyTrackerManager.logCurrentlyTracked()
         }
 
         fun stopTracking() {
             LoadStatus.decrementCounter()
             loadDependencyTrackerManager.stopTrackingProjectLoad(this)
+            loadDependencyTrackerManager.logCurrentlyTracked()
         }
     }
 
     class TaskTracker(
-            private val loadDependencyTrackerManager: LoadDependencyTrackerManager,
-            val taskKey: TaskKey.Root,
-            override val dependentTaskKeys: Set<TaskKey.Root>,
+        private val loadDependencyTrackerManager: LoadDependencyTrackerManager,
+        val taskKey: TaskKey.Root,
+        val taskName: String,
+        override val dependentTaskKeys: Set<TaskKey.Root>,
     ) : Tracker {
 
         init {
             LoadStatus.incrementCounter()
+            loadDependencyTrackerManager.logCurrentlyTracked()
         }
 
         fun stopTracking() {
             LoadStatus.decrementCounter()
             loadDependencyTrackerManager.stopTrackingTaskLoad(this)
+            loadDependencyTrackerManager.logCurrentlyTracked()
         }
     }
 }

@@ -315,13 +315,13 @@ class DomainFactory(
 
         tasks.forEach { it.requireCurrent(now) }
 
+        val projects = tasks.map { it.project }.toSet()
+
         val taskUndoData = TaskUndoData()
 
         tasks.forEach { it.setEndData(Task.EndData(now, deleteInstances), taskUndoData) }
 
-        val remoteProjects = tasks.map { it.project }.toSet()
-
-        return taskUndoData to DomainUpdater.Params(true, notificationType, CloudParams(remoteProjects))
+        return taskUndoData to DomainUpdater.Params(true, notificationType, CloudParams(projects))
     }
 
     fun processTaskUndoData(taskUndoData: TaskUndoData, now: ExactTimeStamp.Local) {

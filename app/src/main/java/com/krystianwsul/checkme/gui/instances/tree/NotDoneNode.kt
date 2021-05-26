@@ -261,7 +261,7 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
 
         class Group(
             override val groupAdapter: GroupListFragment.GroupAdapter,
-            private val groupType: GroupType,
+            val groupType: GroupType,
             override val directInstanceDatas: List<GroupListDataWrapper.InstanceData>,
             override val firstInstanceData: GroupListDataWrapper.InstanceData,
             override val indentation: Int,

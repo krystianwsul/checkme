@@ -762,7 +762,8 @@ class GroupListFragment @JvmOverloads constructor(
 
         return if (selectionCallback.hasActionMode) {
             if (parameters.fabActionMode != GroupListParameters.FabActionMode.NONE) {
-                val selectedDatas = nodesToSelectedDatas(searchDataManager.treeViewAdapter.selectedNodes)
+                val selectedNodes = searchDataManager.treeViewAdapter.selectedNodes
+                val selectedDatas = nodesToSelectedDatas(selectedNodes)
 
                 val singleSelectedData = selectedDatas.singleOrNull()
 
@@ -794,24 +795,30 @@ class GroupListFragment @JvmOverloads constructor(
                         )
                         else -> FabState.Hidden
                     }
-                } else if (parameters.fabActionMode.showTime
-                    && selectedDatas.all { it is GroupListDataWrapper.InstanceData }
-                ) {
-                    val instanceDatas = selectedDatas.map { it as GroupListDataWrapper.InstanceData }
+                } else {
+                    val notDoneNode = selectedNodes.singleOrNull()?.modelNode as? NotDoneNode
+                    val groupContentDelegate = notDoneNode?.contentDelegate as? NotDoneNode.ContentDelegate.Group
+                    val isProjectNode = groupContentDelegate?.groupType is GroupType.Project
 
-                    if (instanceDatas.asSequence()
-                            .filter { it.isRootInstance }
-                            .map { it.instanceTimeStamp }
-                            .distinct()
-                            .singleOrNull()
-                            ?.takeIf { it > TimeStamp.now } != null
-                    ) {
-                        getStartEditActivityFabState(instanceDatas.getHint(), true)
+                    val showTime = parameters.fabActionMode.showTime || isProjectNode
+
+                    if (showTime && selectedDatas.all { it is GroupListDataWrapper.InstanceData }) {
+                        val instanceDatas = selectedDatas.map { it as GroupListDataWrapper.InstanceData }
+
+                        if (instanceDatas.asSequence()
+                                .filter { it.isRootInstance }
+                                .map { it.instanceTimeStamp }
+                                .distinct()
+                                .singleOrNull()
+                                ?.takeIf { it > TimeStamp.now } != null
+                        ) {
+                            getStartEditActivityFabState(instanceDatas.getHint(), true)
+                        } else {
+                            FabState.Hidden
+                        }
                     } else {
                         FabState.Hidden
                     }
-                } else {
-                    FabState.Hidden
                 }
             } else {
                 FabState.Hidden

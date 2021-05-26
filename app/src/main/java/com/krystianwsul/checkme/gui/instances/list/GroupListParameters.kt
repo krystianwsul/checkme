@@ -38,7 +38,11 @@ sealed class GroupListParameters(val draggable: Boolean = true) {
         override val groupListDataWrapper: GroupListDataWrapper,
         val timeStamp: com.krystianwsul.common.time.TimeStamp,
         val projectKey: ProjectKey.Shared?,
-    ) : GroupListParameters() // todo project groupingMode
+    ) : GroupListParameters() {
+
+        override val groupingMode =
+            projectKey?.let { NodeCollection.GroupingMode.NONE } ?: NodeCollection.GroupingMode.PROJECT
+    }
 
     data class InstanceKey(
             override val dataId: DataId,

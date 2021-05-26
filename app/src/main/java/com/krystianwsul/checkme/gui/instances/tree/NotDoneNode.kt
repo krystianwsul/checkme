@@ -104,7 +104,9 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
 
         abstract val rowsDelegate: DetailsNode.ProjectRowsDelegate
         abstract val treeNode: TreeNode<AbstractHolder>
+
         abstract val id: Id
+
         abstract val toggleDescendants: Boolean
 
         abstract val states: Map<Id, State>
@@ -413,10 +415,40 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
             sealed interface Id : ContentDelegate.Id {
 
                 @Parcelize
-                data class Time(val timeStamp: TimeStamp) : Id
+                class Time(private val timeStamp: TimeStamp, private val instanceKeys: Set<InstanceKey>) : Id {
+
+                    override fun hashCode() = 1
+
+                    override fun equals(other: Any?): Boolean {
+                        if (other === this) return true
+
+                        if (other !is Time) return false
+
+                        // instanceKeys covers the scenario where all the instances' times are changes via "select all"
+                        return instanceKeys == other.instanceKeys || timeStamp == other.timeStamp
+                    }
+                }
 
                 @Parcelize
-                data class Project(val timeStamp: TimeStamp, val projectKey: ProjectKey.Shared) : Id
+                class Project(
+                    private val timeStamp: TimeStamp,
+                    private val instanceKeys: Set<InstanceKey>,
+                    private val projectKey: ProjectKey.Shared,
+                ) : Id {
+
+                    override fun hashCode() = 1
+
+                    override fun equals(other: Any?): Boolean {
+                        if (other === this) return true
+
+                        if (other !is Project) return false
+
+                        if (projectKey != other.projectKey) return false
+
+                        // instanceKeys covers the scenario where all the instances' times are changes via "select all"
+                        return instanceKeys == other.instanceKeys || timeStamp == other.timeStamp
+                    }
+                }
             }
 
             @Parcelize

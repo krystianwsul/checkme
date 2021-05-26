@@ -5,6 +5,7 @@ import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.instances.list.GroupListFragment
 import com.krystianwsul.checkme.gui.tree.DetailsNode
 import com.krystianwsul.common.time.TimeStamp
+import com.krystianwsul.common.utils.InstanceKey
 
 sealed class GroupType {
 
@@ -75,6 +76,8 @@ sealed class GroupType {
 
     open val name: String get() = throw UnsupportedOperationException()
 
+    protected abstract val allInstanceKeys: Set<InstanceKey>
+
     abstract fun toContentDelegate(
         groupAdapter: GroupListFragment.GroupAdapter,
         indentation: Int,
@@ -85,6 +88,8 @@ sealed class GroupType {
         val timeStamp: TimeStamp,
         val groupTypes: List<GroupType>
     ) : GroupType() {
+
+        override val allInstanceKeys = groupTypes.flatMap { it.allInstanceKeys }.toSet()
 
         override fun toContentDelegate(
             groupAdapter: GroupListFragment.GroupAdapter,
@@ -98,7 +103,7 @@ sealed class GroupType {
             indentation,
             nodeCollection,
             groupTypes,
-            NotDoneNode.ContentDelegate.Group.Id.Time(timeStamp),
+            NotDoneNode.ContentDelegate.Group.Id.Time(timeStamp, allInstanceKeys),
             NotDoneNode.ContentDelegate.Group.GroupRowsDelegate.Time(groupAdapter, timeStamp),
             true,
             ShowGroupActivity.Parameters.Time(timeStamp),
@@ -113,6 +118,8 @@ sealed class GroupType {
     ) : GroupType(), TimeChild {
 
         private val instanceDatas = _instanceDatas.map { it.copy(projectInfo = null) }
+
+        override val allInstanceKeys = instanceDatas.map { it.instanceKey }.toSet()
 
         override val firstInstanceData = instanceDatas.first()
 
@@ -130,7 +137,7 @@ sealed class GroupType {
             indentation + (if (nested) 1 else 0),
             nodeCollection,
             instanceDatas.map(::Single),
-            NotDoneNode.ContentDelegate.Group.Id.Project(timeStamp, projectDetails.projectKey),
+            NotDoneNode.ContentDelegate.Group.Id.Project(timeStamp, allInstanceKeys, projectDetails.projectKey),
             NotDoneNode.ContentDelegate.Group.GroupRowsDelegate.Project(
                 groupAdapter,
                 timeStamp,
@@ -150,6 +157,8 @@ sealed class GroupType {
     class Single(val instanceData: GroupListDataWrapper.InstanceData) : GroupType(), TimeChild {
 
         override val firstInstanceData = instanceData
+
+        override val allInstanceKeys = setOf(instanceData.instanceKey)
 
         override fun toContentDelegate(
             groupAdapter: GroupListFragment.GroupAdapter,

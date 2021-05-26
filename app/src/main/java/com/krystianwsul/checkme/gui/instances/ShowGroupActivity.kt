@@ -15,6 +15,7 @@ import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
 import com.krystianwsul.checkme.gui.base.AbstractActivity
 import com.krystianwsul.checkme.gui.dialogs.RemoveInstancesDialogFragment
 import com.krystianwsul.checkme.gui.instances.list.GroupListListener
+import com.krystianwsul.checkme.gui.instances.list.GroupListParameters
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
 import com.krystianwsul.checkme.utils.startDate
 import com.krystianwsul.checkme.utils.tryGetFragment
@@ -161,11 +162,14 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
             return
         }
 
-        binding.groupListFragment.setTimeStamp(
-            parameters.timeStamp, // todo project later
-            showGroupViewModel.dataId,
-            immediate,
-            data.groupListDataWrapper,
+        binding.groupListFragment.setParameters(
+            GroupListParameters.TimeStamp(
+                showGroupViewModel.dataId,
+                immediate,
+                data.groupListDataWrapper,
+                parameters.timeStamp,
+                parameters.projectKey,
+            )
         )
 
         updateTopMenu()

@@ -683,13 +683,6 @@ class GroupListFragment @JvmOverloads constructor(
         setParameters(GroupListParameters.All(dataId, immediate, groupListDataWrapper, position, timeRange, differentPage))
     }
 
-    fun setTimeStamp(
-        timeStamp: TimeStamp,
-        dataId: DataId,
-        immediate: Boolean,
-        groupListDataWrapper: GroupListDataWrapper,
-    ) = setParameters(GroupListParameters.TimeStamp(dataId, immediate, groupListDataWrapper, timeStamp))
-
     fun setInstanceKey(
         instanceKey: InstanceKey,
         dataId: DataId,

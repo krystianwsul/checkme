@@ -98,11 +98,12 @@ class TreeNode<T : TreeHolder>(
 
         treeViewAdapter.updateDisplayedNodes { placeholder ->
             expansionState.user = if (isExpanded) { // collapsing
-                childTreeNodes.forEach { it.deselectRecursive(placeholder) }
+                childTreeNodes.forEach { it.setSelected(false, placeholder, false, true) }
 
                 false
             } else { // expanding
-                if (selected) propagateSelection(true, placeholder)
+                if (selected)
+                    childTreeNodes.forEach { it.setSelected(true, placeholder, false, true) }
 
                 true
             }
@@ -149,32 +150,35 @@ class TreeNode<T : TreeHolder>(
 
     override fun compareTo(other: TreeNode<T>) = modelNode.compareTo(other.modelNode)
 
-    private fun toggleSelected(placeholder: TreeViewAdapter.Placeholder, recursive: Boolean = true) {
+    private fun toggleSelected(placeholder: TreeViewAdapter.Placeholder) =
+        setSelected(!selected, placeholder, true, true)
+
+    private fun setSelected(
+        selected: Boolean,
+        placeholder: TreeViewAdapter.Placeholder,
+        recurseParent: Boolean,
+        recurseChildren: Boolean,
+    ) {
         checkChildTreeNodesSet()
 
         if (!modelNode.isSelectable) return
+        if (this.selected == selected) return
 
-        selected = !selected
+        this.selected = selected
 
         if (selected)
             incrementSelected(placeholder)
         else
             decrementSelected(placeholder)
 
-        if (recursive && isExpanded) propagateSelection(selected, placeholder)
-
-        if (recursive && !selected && modelNode.deselectParent) {
-            (parent as TreeNode).takeIf { it.selected }?.toggleSelected(placeholder, false)
+        if (recurseChildren && isExpanded && modelNode.propagateSelection) {
+            childTreeNodes.forEach { it.setSelected(selected, placeholder, false, true) }
         }
-    }
 
-    private fun propagateSelection(selected: Boolean, placeholder: TreeViewAdapter.Placeholder) {
-        if (!modelNode.toggleDescendants) return
-
-        childTreeNodes.filter { it.selected != selected }.forEach {
-            it.toggleSelected(placeholder, false)
-
-            it.propagateSelection(selected, placeholder)
+        if (recurseParent && !selected) {
+            (parent as? TreeNode)?.takeIf {
+                it.modelNode.propagateSelection
+            }?.setSelected(false, placeholder, true, false)
         }
     }
 
@@ -378,12 +382,6 @@ class TreeNode<T : TreeHolder>(
         }
 
     override val indentation by lazy { parent.indentation + 1 }
-
-    private fun deselectRecursive(placeholder: TreeViewAdapter.Placeholder) {
-        checkChildTreeNodesSet()
-
-        if (selected) toggleSelected(placeholder, false)
-    }
 
     fun normalize() {
         modelNode.normalize()

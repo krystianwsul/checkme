@@ -16,9 +16,7 @@ interface ModelNode<T : TreeHolder> : Comparable<ModelNode<T>>, Matchable {
 
     val id: Any
 
-    val toggleDescendants get() = false
-
-    val deselectParent get() = false
+    val propagateSelection get() = false
 
     val parentNode: ModelNode<T>?
 

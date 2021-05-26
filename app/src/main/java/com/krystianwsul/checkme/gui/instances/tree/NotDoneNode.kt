@@ -82,7 +82,7 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
      */
     override val id: Any get() = contentDelegate.id
 
-    final override val toggleDescendants = contentDelegate.toggleDescendants
+    final override val propagateSelection = contentDelegate.propagateSelection
 
     fun initialize(
         contentDelegateStates: Map<ContentDelegate.Id, ContentDelegate.State>,
@@ -107,7 +107,7 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
 
         abstract val id: Id
 
-        abstract val toggleDescendants: Boolean
+        abstract val propagateSelection: Boolean
 
         abstract val states: Map<Id, State>
 
@@ -209,7 +209,7 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
 
             override val id: ContentDelegate.Id by lazy { Id(instanceData.instanceKey) }
 
-            override val toggleDescendants = false
+            override val propagateSelection = false
 
             override val states: Map<ContentDelegate.Id, ContentDelegate.State>
                 get() {
@@ -317,7 +317,7 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
                 get() =
                     if (treeNode.isExpanded || !indentCheckBox) CheckBoxState.Gone else CheckBoxState.Invisible
 
-            override val toggleDescendants = true
+            override val propagateSelection = true
 
             override val states: Map<ContentDelegate.Id, ContentDelegate.State>
                 get() {

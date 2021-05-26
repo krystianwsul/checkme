@@ -47,5 +47,9 @@ class SubtaskDialogFragment : AbstractDialogFragment() {
     }
 
     @Parcelize
-    data class ResultData(val taskKey: TaskKey, val instanceDate: Date, val createTaskTimePair: TimePair) : Parcelable
+    data class ResultData(
+        val taskKey: TaskKey,
+        val instanceDate: Date,
+        val createTaskTimePair: TimePair,
+    ) : Parcelable
 }

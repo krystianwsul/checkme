@@ -16,6 +16,7 @@ import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.InstanceKey
+import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
 import io.reactivex.rxjava3.core.Single
 
@@ -51,8 +52,8 @@ fun DomainFactory.getShowInstanceData(requestInstanceKey: InstanceKey): ShowInst
     val parentInstance = instance.parentInstance
 
     var displayText = listOfNotNull(
-            instance.getParentName().takeIf { it.isNotEmpty() },
-            instanceDateTime.takeIf { instance.isRootInstance() }?.getDisplayText(),
+        instance.getParentName().takeIf { it.isNotEmpty() },
+        instanceDateTime.takeIf { instance.isRootInstance() }?.getDisplayText(),
     ).joinToString("\n\n")
 
     if (debugMode) {
@@ -64,82 +65,85 @@ fun DomainFactory.getShowInstanceData(requestInstanceKey: InstanceKey): ShowInst
     }
 
     return ShowInstanceViewModel.Data(
-            instance.name,
-            instanceDateTime,
-            instance.done != null,
-            task.current(now),
-            parentInstance == null,
-            getGroupListData(instance, task, now),
-            instance.getNotificationShown(localFactory),
-            displayText,
-            task.taskKey,
-            debugMode || instance.isVisible(now, Instance.VisibilityOptions(hack24 = true)),
-            instanceKey,
+        instance.name,
+        instanceDateTime,
+        instance.done != null,
+        task.current(now),
+        parentInstance == null,
+        getGroupListData(instance, task, now),
+        instance.getNotificationShown(localFactory),
+        displayText,
+        task.taskKey,
+        debugMode || instance.isVisible(now, Instance.VisibilityOptions(hack24 = true)),
+        instanceKey,
     )
 }
 
 @CheckResult
 fun DomainUpdater.setTaskEndTimeStamps(
-        notificationType: DomainListenerManager.NotificationType,
-        taskKeys: Set<TaskKey>,
-        deleteInstances: Boolean,
-        instanceKey: InstanceKey,
+    notificationType: DomainListenerManager.NotificationType,
+    taskKeys: Set<TaskKey>,
+    deleteInstances: Boolean,
+    instanceKey: InstanceKey,
 ): Single<Pair<TaskUndoData, Boolean>> = SingleDomainUpdate.create("setTaskEndTimeStamps") { now ->
     val (taskUndoData, params) = setTaskEndTimeStamps(notificationType, taskKeys, deleteInstances, now)
 
     DomainUpdater.Result(
-            Pair(
-                    taskUndoData,
-                    debugMode || getInstance(instanceKey).isVisible(now, Instance.VisibilityOptions(hack24 = true)),
-            ),
-            params,
+        Pair(
+            taskUndoData,
+            debugMode || getInstance(instanceKey).isVisible(now, Instance.VisibilityOptions(hack24 = true)),
+        ),
+        params,
     )
 }.perform(this)
 
 private fun DomainFactory.getGroupListData(
-        instance: Instance,
-        task: Task,
-        now: ExactTimeStamp.Local,
+    instance: Instance,
+    task: Task,
+    now: ExactTimeStamp.Local,
 ): GroupListDataWrapper {
     val customTimeDatas = getCurrentRemoteCustomTimes(now).map {
         GroupListDataWrapper.CustomTimeData(it.name, it.hourMinutes.toSortedMap())
     }
 
     val instanceDatas = instance.getChildInstances()
-            .filter { it.isVisible(now, Instance.VisibilityOptions(assumeChildOfVisibleParent = true)) }
-            .map { childInstance ->
-                val childTask = childInstance.task
+        .filter { it.isVisible(now, Instance.VisibilityOptions(assumeChildOfVisibleParent = true)) }
+        .map { childInstance ->
+            val childTask = childInstance.task
 
-                val children = getChildInstanceDatas(childInstance, now)
+            val children = getChildInstanceDatas(childInstance, now)
 
-                GroupListDataWrapper.InstanceData(
-                        childInstance.done,
-                        childInstance.instanceKey,
-                        null,
-                        childInstance.name,
-                        childInstance.instanceDateTime.timeStamp,
-                        childInstance.instanceDateTime,
-                        childTask.current(now),
-                        childTask.isVisible(now),
-                        childInstance.isRootInstance(),
-                        childInstance.getCreateTaskTimePair(now, projectsFactory.privateProject),
-                        childTask.note,
-                        children,
-                        childTask.ordinal,
-                        childInstance.getNotificationShown(localFactory),
-                        childTask.getImage(deviceDbInfo),
-                        childInstance.isAssignedToMe(now, myUserFactory.user),
-                        childInstance.getProjectInfo(now),
-                )
-            }
+            GroupListDataWrapper.InstanceData(
+                childInstance.done,
+                childInstance.instanceKey,
+                null,
+                childInstance.name,
+                childInstance.instanceDateTime.timeStamp,
+                childInstance.instanceDateTime,
+                childTask.current(now),
+                childTask.isVisible(now),
+                childInstance.isRootInstance(),
+                childInstance.getCreateTaskTimePair(now, projectsFactory.privateProject),
+                childTask.note,
+                children,
+                childTask.ordinal,
+                childInstance.getNotificationShown(localFactory),
+                childTask.getImage(deviceDbInfo),
+                childInstance.isAssignedToMe(now, myUserFactory.user),
+                childInstance.getProjectInfo(now),
+                childInstance.task
+                    .project
+                    .projectKey as? ProjectKey.Shared,
+            )
+        }
 
     return GroupListDataWrapper(
-            customTimeDatas,
-            instance.canAddSubtask(now),
-            listOf(),
-            task.note,
-            instanceDatas,
-            task.getImage(deviceDbInfo),
-            instance.getProjectInfo(now),
+        customTimeDatas,
+        instance.canAddSubtask(now),
+        listOf(),
+        task.note,
+        instanceDatas,
+        task.getImage(deviceDbInfo),
+        instance.getProjectInfo(now),
     )
 }

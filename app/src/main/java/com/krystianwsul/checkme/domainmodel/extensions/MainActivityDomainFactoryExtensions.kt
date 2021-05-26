@@ -15,6 +15,7 @@ import com.krystianwsul.checkme.viewmodels.MainViewModel
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.ExactTimeStamp
+import com.krystianwsul.common.utils.ProjectKey
 import java.util.*
 
 fun DomainFactory.getMainData(now: ExactTimeStamp.Local = ExactTimeStamp.Local.now): MainViewModel.Data {
@@ -23,47 +24,47 @@ fun DomainFactory.getMainData(now: ExactTimeStamp.Local = ExactTimeStamp.Local.n
     DomainThreadChecker.instance.requireDomainThread()
 
     val projectDatas = projectsFactory.projects
-            .values
-            .map {
-                val childTaskDatas = it.getAllTasks()
-                        .asSequence()
-                        .map { Pair(it, it.getHierarchyExactTimeStamp(now)) }
-                        .filter { (task, hierarchyExactTimeStamp) -> task.isTopLevelTask(hierarchyExactTimeStamp) }
-                        .map { (task, hierarchyExactTimeStamp) ->
-                            TaskListFragment.ChildTaskData(
-                                    task.name,
-                                    task.getScheduleText(ScheduleText, hierarchyExactTimeStamp),
-                                    getTaskListChildTaskDatas(
-                                            task,
-                                            now,
-                                            hierarchyExactTimeStamp,
-                                    ),
-                                    task.note,
-                                    task.taskKey,
-                                    task.getImage(deviceDbInfo),
-                                    task.current(now),
-                                    task.isVisible(now),
-                                    task.ordinal,
-                                    task.getProjectInfo(now),
-                                    task.isAssignedToMe(now, myUserFactory.user),
-                            )
-                        }
-                        .sortedDescending()
-                        .toList()
+        .values
+        .map {
+            val childTaskDatas = it.getAllTasks()
+                .asSequence()
+                .map { Pair(it, it.getHierarchyExactTimeStamp(now)) }
+                .filter { (task, hierarchyExactTimeStamp) -> task.isTopLevelTask(hierarchyExactTimeStamp) }
+                .map { (task, hierarchyExactTimeStamp) ->
+                    TaskListFragment.ChildTaskData(
+                        task.name,
+                        task.getScheduleText(ScheduleText, hierarchyExactTimeStamp),
+                        getTaskListChildTaskDatas(
+                            task,
+                            now,
+                            hierarchyExactTimeStamp,
+                        ),
+                        task.note,
+                        task.taskKey,
+                        task.getImage(deviceDbInfo),
+                        task.current(now),
+                        task.isVisible(now),
+                        task.ordinal,
+                        task.getProjectInfo(now),
+                        task.isAssignedToMe(now, myUserFactory.user),
+                    )
+                }
+                .sortedDescending()
+                .toList()
 
-                it.toProjectData(childTaskDatas)
-            }
-            .filter { it.children.isNotEmpty() }
+            it.toProjectData(childTaskDatas)
+        }
+        .filter { it.children.isNotEmpty() }
 
     return MainViewModel.Data(
-            TaskListFragment.TaskData(projectDatas, null, true, null),
+        TaskListFragment.TaskData(projectDatas, null, true, null),
     )
 }
 
 fun DomainFactory.getGroupListData(
-        now: ExactTimeStamp.Local,
-        position: Int,
-        timeRange: Preferences.TimeRange,
+    now: ExactTimeStamp.Local,
+    position: Int,
+    timeRange: Preferences.TimeRange,
 ): DayViewModel.DayData {
     MyCrashlytics.log("DomainFactory.getGroupListData")
 
@@ -125,15 +126,15 @@ fun DomainFactory.getGroupListData(
     val taskDatas = if (position == 0) {
         getUnscheduledTasks(now).map {
             GroupListDataWrapper.TaskData(
-                    it.taskKey,
-                    it.name,
-                    getGroupListChildTaskDatas(it, now),
-                    it.startExactTimeStamp,
-                    it.note,
-                    it.getImage(deviceDbInfo),
-                    it.isAssignedToMe(now, myUserFactory.user),
-                    it.getProjectInfo(now),
-                    it.ordinal,
+                it.taskKey,
+                it.name,
+                getGroupListChildTaskDatas(it, now),
+                it.startExactTimeStamp,
+                it.note,
+                it.getImage(deviceDbInfo),
+                it.isAssignedToMe(now, myUserFactory.user),
+                it.getProjectInfo(now),
+                it.ordinal,
             )
         }.toList()
     } else {
@@ -146,34 +147,37 @@ fun DomainFactory.getGroupListData(
         val children = getChildInstanceDatas(instance, now)
 
         GroupListDataWrapper.InstanceData(
-                instance.done,
-                instance.instanceKey,
-                instance.getDisplayData()?.getDisplayText(),
-                instance.name,
-                instance.instanceDateTime.timeStamp,
-                instance.instanceDateTime,
-                task.current(now),
-                instance.canAddSubtask(now),
-                instance.isRootInstance(),
-                instance.getCreateTaskTimePair(now, projectsFactory.privateProject),
-                task.note,
-                children,
-                instance.task.ordinal,
-                instance.getNotificationShown(localFactory),
-                task.getImage(deviceDbInfo),
-                instance.isAssignedToMe(now, myUserFactory.user),
-                instance.getProjectInfo(now),
+            instance.done,
+            instance.instanceKey,
+            instance.getDisplayData()?.getDisplayText(),
+            instance.name,
+            instance.instanceDateTime.timeStamp,
+            instance.instanceDateTime,
+            task.current(now),
+            instance.canAddSubtask(now),
+            instance.isRootInstance(),
+            instance.getCreateTaskTimePair(now, projectsFactory.privateProject),
+            task.note,
+            children,
+            instance.task.ordinal,
+            instance.getNotificationShown(localFactory),
+            task.getImage(deviceDbInfo),
+            instance.isAssignedToMe(now, myUserFactory.user),
+            instance.getProjectInfo(now),
+            instance.task
+                .project
+                .projectKey as? ProjectKey.Shared,
         )
     }
 
     val dataWrapper = GroupListDataWrapper(
-            customTimeDatas,
-            null,
-            taskDatas,
-            null,
-            instanceDatas,
-            null,
-            null
+        customTimeDatas,
+        null,
+        taskDatas,
+        null,
+        instanceDatas,
+        null,
+        null
     )
 
     return DayViewModel.DayData(dataWrapper)

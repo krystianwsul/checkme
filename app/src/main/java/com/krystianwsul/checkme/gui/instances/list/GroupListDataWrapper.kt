@@ -6,6 +6,7 @@ import com.krystianwsul.common.criteria.QueryMatchable
 import com.krystianwsul.common.firebase.models.ImageState
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.InstanceKey
+import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.common.utils.normalized
 import java.util.*
@@ -61,7 +62,8 @@ data class GroupListDataWrapper(
         val notificationShown: Boolean,
         val imageState: ImageState?,
         override val isAssignedToMe: Boolean,
-        val projectInfo: DetailsNode.ProjectInfo?,
+        val projectInfo: DetailsNode.ProjectInfo?, // this is for what's displayed
+        val projectKey: ProjectKey.Shared? // this is for creating new tasks via ActionMode.  Always set
     ) : Comparable<InstanceData>, SelectedData, QueryMatchable, FilterParamsMatchable {
 
         override val normalizedFields by lazy { listOfNotNull(name, note).map { it.normalized() } }

@@ -9,6 +9,7 @@ import com.krystianwsul.checkme.viewmodels.ShowNotificationGroupViewModel
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.InstanceKey
+import com.krystianwsul.common.utils.ProjectKey
 
 fun DomainFactory.getShowNotificationGroupData(instanceKeys: Set<InstanceKey>): ShowNotificationGroupViewModel.Data {
     MyCrashlytics.log("DomainFactory.getShowNotificationGroupData")
@@ -20,8 +21,8 @@ fun DomainFactory.getShowNotificationGroupData(instanceKeys: Set<InstanceKey>): 
     val now = ExactTimeStamp.Local.now
 
     val instances = instanceKeys.map { getInstance(it) }
-            .filter { it.isRootInstance() }
-            .sortedBy { it.instanceDateTime }
+        .filter { it.isRootInstance() }
+        .sortedBy { it.instanceDateTime }
 
     val customTimeDatas = getCurrentRemoteCustomTimes(now).map {
         GroupListDataWrapper.CustomTimeData(it.name, it.hourMinutes.toSortedMap())
@@ -33,34 +34,37 @@ fun DomainFactory.getShowNotificationGroupData(instanceKeys: Set<InstanceKey>): 
         val children = getChildInstanceDatas(instance, now)
 
         GroupListDataWrapper.InstanceData(
-                instance.done,
-                instance.instanceKey,
-                instance.getDisplayData()?.getDisplayText(),
-                instance.name,
-                instance.instanceDateTime.timeStamp,
-                instance.instanceDateTime,
-                task.current(now),
-                instance.canAddSubtask(now),
-                instance.isRootInstance(),
-                instance.getCreateTaskTimePair(now, projectsFactory.privateProject),
-                task.note,
-                children,
-                instance.task.ordinal,
-                instance.getNotificationShown(localFactory),
-                task.getImage(deviceDbInfo),
-                instance.isAssignedToMe(now, myUserFactory.user),
-                instance.getProjectInfo(now),
+            instance.done,
+            instance.instanceKey,
+            instance.getDisplayData()?.getDisplayText(),
+            instance.name,
+            instance.instanceDateTime.timeStamp,
+            instance.instanceDateTime,
+            task.current(now),
+            instance.canAddSubtask(now),
+            instance.isRootInstance(),
+            instance.getCreateTaskTimePair(now, projectsFactory.privateProject),
+            task.note,
+            children,
+            instance.task.ordinal,
+            instance.getNotificationShown(localFactory),
+            task.getImage(deviceDbInfo),
+            instance.isAssignedToMe(now, myUserFactory.user),
+            instance.getProjectInfo(now),
+            instance.task
+                .project
+                .projectKey as? ProjectKey.Shared,
         )
     }
 
     val dataWrapper = GroupListDataWrapper(
-            customTimeDatas,
-            null,
-            listOf(),
-            null,
-            instanceDatas,
-            null,
-            null
+        customTimeDatas,
+        null,
+        listOf(),
+        null,
+        instanceDatas,
+        null,
+        null
     )
 
     return ShowNotificationGroupViewModel.Data(dataWrapper)

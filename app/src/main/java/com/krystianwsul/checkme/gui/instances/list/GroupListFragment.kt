@@ -539,23 +539,23 @@ class GroupListFragment @JvmOverloads constructor(
 
         override fun initializeModelAdapter(
             modelAdapter: GroupAdapter,
-            groupListParameters: GroupListParameters,
+            data: GroupListParameters,
             filterCriteria: FilterCriteria,
         ) {
             if (treeViewAdapterInitialized) state = modelAdapter.groupListState
 
             modelAdapter.initialize(
-                groupListParameters.dataId,
-                groupListParameters.groupListDataWrapper.customTimeDatas,
-                groupListParameters.groupingMode,
-                groupListParameters.groupListDataWrapper.instanceDatas,
+                data.dataId,
+                data.groupListDataWrapper.customTimeDatas,
+                data.groupingMode,
+                data.groupListDataWrapper.instanceDatas,
                 state,
-                groupListParameters.groupListDataWrapper.taskDatas,
-                groupListParameters.groupListDataWrapper.note,
-                groupListParameters.groupListDataWrapper.imageData,
-                groupListParameters.showProgress,
-                groupListParameters.useDoneNode,
-                groupListParameters.groupListDataWrapper.projectInfo,
+                data.groupListDataWrapper.taskDatas,
+                data.groupListDataWrapper.note,
+                data.groupListDataWrapper.imageData,
+                data.showProgress,
+                data.useDoneNode,
+                data.groupListDataWrapper.projectInfo,
             )
         }
 
@@ -624,7 +624,7 @@ class GroupListFragment @JvmOverloads constructor(
             .subscribe {
                 val hint = when (it) {
                     is SubtaskDialogFragment.Result.SameTime -> it.resultData
-                        .run { listOf(instanceDate to createTaskTimePair) }
+                        .run { listOf(Triple(instanceDate, createTaskTimePair, null)) }
                         .getHint()
                     is SubtaskDialogFragment.Result.Subtask -> EditActivity.Hint.Task(it.resultData.taskKey)
                 }
@@ -746,18 +746,19 @@ class GroupListFragment @JvmOverloads constructor(
         activity.startActivity(EditActivity.getParametersIntent(EditParameters.Create(hint)))
     }
 
-    private fun List<Pair<Date, TimePair>>.getHint(projectKey: ProjectKey.Shared? = null) =
-        (firstOrNull { it.second.customTimeKey != null }
-            ?: first()).let {
-            EditActivity.Hint.Schedule(it.first, it.second, projectKey)
-        }
+    private fun List<Triple<Date, TimePair, ProjectKey.Shared?>>.getHint(): EditActivity.Hint.Schedule {
+        val projectKey = map { it.third }.distinct().singleOrNull()
+        val (date, timePair) = firstOrNull { it.second.customTimeKey != null } ?: first()
+
+        return EditActivity.Hint.Schedule(date, timePair, projectKey)
+    }
 
     private fun getFabState(): FabState {
         if (!parametersRelay.hasValue()) return FabState.Hidden
 
-        fun List<GroupListDataWrapper.InstanceData>.getHint(projectKey: ProjectKey.Shared? = null) = map {
-            it.instanceDateTime.date to it.createTaskTimePair
-        }.getHint(projectKey)
+        fun List<GroupListDataWrapper.InstanceData>.getHint() = map {
+            Triple(it.instanceDateTime.date, it.createTaskTimePair, it.projectKey)
+        }.getHint()
 
         return if (selectionCallback.hasActionMode) {
             if (parameters.fabActionMode != GroupListParameters.FabActionMode.NONE) {
@@ -776,7 +777,11 @@ class GroupListFragment @JvmOverloads constructor(
                     when {
                         canAddToTime && canAddSubtask -> FabState.Visible {
                             listener.showSubtaskDialog(instanceData!!.run {
-                                SubtaskDialogFragment.ResultData(taskKey, instanceDateTime.date, createTaskTimePair)
+                                SubtaskDialogFragment.ResultData(
+                                    taskKey,
+                                    instanceDateTime.date,
+                                    createTaskTimePair,
+                                )
                             })
                         }
                         canAddSubtask -> getStartEditActivityFabState(
@@ -826,7 +831,7 @@ class GroupListFragment @JvmOverloads constructor(
                         .instanceDatas
                         .let {
                             if (it.isNotEmpty()) {
-                                it.getHint(parameters.projectKey)
+                                it.getHint()
                             } else {
                                 EditActivity.Hint.Schedule(
                                     parameters.timeStamp.date,

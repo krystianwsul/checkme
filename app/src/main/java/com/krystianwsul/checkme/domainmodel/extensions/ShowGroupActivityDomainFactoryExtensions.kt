@@ -91,6 +91,9 @@ private fun DomainFactory.getGroupListData(
             task.getImage(deviceDbInfo),
             instance.isAssignedToMe(now, myUserFactory.user),
             instance.getProjectInfo(now, includeProjectInfo),
+            instance.task
+                .project
+                .projectKey as? ProjectKey.Shared,
         )
     }
 

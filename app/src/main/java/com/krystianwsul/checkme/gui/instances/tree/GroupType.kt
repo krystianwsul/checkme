@@ -31,8 +31,8 @@ sealed class GroupType {
                                 .singleOrNull()
 
                             projectDetails?.let {
-                                Project(timeStamp, projectDetails, instanceDatas, false)
-                            } ?: Time(timeStamp, groupByProject(timeStamp, instanceDatas))
+                                Project(timeStamp, projectDetails, instanceDatas, false, true)
+                            } ?: Time(timeStamp, groupByProject(timeStamp, instanceDatas, true, false))
                         } else {
                             // if there's just one, there's our node
                             Single(instanceDatas.single())
@@ -44,7 +44,7 @@ sealed class GroupType {
                         .distinct()
                         .single()
 
-                    groupByProject(timeStamp, instanceDatas)
+                    groupByProject(timeStamp, instanceDatas, false, false)
                 }
                 NodeCollection.GroupingMode.NONE -> instanceDatas.map(GroupType::Single)
             }
@@ -53,6 +53,8 @@ sealed class GroupType {
         private fun groupByProject(
             timeStamp: TimeStamp,
             instanceDatas: List<GroupListDataWrapper.InstanceData>,
+            nested: Boolean,
+            showTime: Boolean,
         ): List<GroupType> {
             if (instanceDatas.isEmpty()) return emptyList()
 
@@ -62,7 +64,7 @@ sealed class GroupType {
                 check(instanceDatas.isNotEmpty())
 
                 if (instanceDatas.size > 1) {
-                    Project(timeStamp, projectDetails!!, instanceDatas, true)
+                    Project(timeStamp, projectDetails!!, instanceDatas, nested, showTime)
                 } else {
                     Single(instanceDatas.single())
                 }
@@ -115,6 +117,7 @@ sealed class GroupType {
         val projectDetails: DetailsNode.ProjectDetails,
         _instanceDatas: List<GroupListDataWrapper.InstanceData>,
         private val nested: Boolean,
+        private val showTime: Boolean
     ) : GroupType(), TimeChild {
 
         private val instanceDatas = _instanceDatas.map { it.copy(projectInfo = null) }
@@ -142,7 +145,7 @@ sealed class GroupType {
                 groupAdapter,
                 timeStamp,
                 projectDetails.name,
-                !nested,
+                showTime,
             ),
             !nested,
             ShowGroupActivity.Parameters.Project(timeStamp, projectDetails.projectKey),

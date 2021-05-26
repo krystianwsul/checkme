@@ -45,6 +45,7 @@ import com.krystianwsul.common.time.TimePair
 import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.NullableWrapper
+import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.treeadapter.*
 import com.skydoves.balloon.ArrowOrientation
@@ -745,17 +746,18 @@ class GroupListFragment @JvmOverloads constructor(
         activity.startActivity(EditActivity.getParametersIntent(EditParameters.Create(hint)))
     }
 
-    private fun List<Pair<Date, TimePair>>.getHint() = (firstOrNull { it.second.customTimeKey != null }
-        ?: first()).let {
-        EditActivity.Hint.Schedule(it.first, it.second)
-    }
+    private fun List<Pair<Date, TimePair>>.getHint(projectKey: ProjectKey.Shared? = null) =
+        (firstOrNull { it.second.customTimeKey != null }
+            ?: first()).let {
+            EditActivity.Hint.Schedule(it.first, it.second, projectKey)
+        }
 
     private fun getFabState(): FabState {
         if (!parametersRelay.hasValue()) return FabState.Hidden
 
-        fun List<GroupListDataWrapper.InstanceData>.getHint() = map {
+        fun List<GroupListDataWrapper.InstanceData>.getHint(projectKey: ProjectKey.Shared? = null) = map {
             it.instanceDateTime.date to it.createTaskTimePair
-        }.getHint()
+        }.getHint(projectKey)
 
         return if (selectionCallback.hasActionMode) {
             if (parameters.fabActionMode != GroupListParameters.FabActionMode.NONE) {
@@ -824,7 +826,7 @@ class GroupListFragment @JvmOverloads constructor(
                         .instanceDatas
                         .let {
                             if (it.isNotEmpty()) {
-                                it.getHint()
+                                it.getHint(parameters.projectKey)
                             } else {
                                 EditActivity.Hint.Schedule(
                                     parameters.timeStamp.date,

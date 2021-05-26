@@ -32,7 +32,7 @@ sealed class GroupType {
 
                             projectDetails?.let {
                                 Project(timeStamp, projectDetails, instanceDatas, false, true)
-                            } ?: Time(timeStamp, groupByProject(timeStamp, instanceDatas, true, false))
+                            } ?: Time(timeStamp, groupByProject(timeStamp, instanceDatas, true))
                         } else {
                             // if there's just one, there's our node
                             Single(instanceDatas.single())
@@ -44,7 +44,7 @@ sealed class GroupType {
                         .distinct()
                         .single()
 
-                    groupByProject(timeStamp, instanceDatas, false, false)
+                    groupByProject(timeStamp, instanceDatas, false)
                 }
                 NodeCollection.GroupingMode.NONE -> instanceDatas.map(GroupType::Single)
             }
@@ -54,7 +54,6 @@ sealed class GroupType {
             timeStamp: TimeStamp,
             instanceDatas: List<GroupListDataWrapper.InstanceData>,
             nested: Boolean,
-            showTime: Boolean,
         ): List<GroupType> {
             if (instanceDatas.isEmpty()) return emptyList()
 
@@ -64,7 +63,7 @@ sealed class GroupType {
                 check(instanceDatas.isNotEmpty())
 
                 if (instanceDatas.size > 1) {
-                    Project(timeStamp, projectDetails!!, instanceDatas, nested, showTime)
+                    Project(timeStamp, projectDetails!!, instanceDatas, nested, false)
                 } else {
                     Single(instanceDatas.single())
                 }

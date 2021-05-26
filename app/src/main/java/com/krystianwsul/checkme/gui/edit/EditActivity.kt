@@ -555,31 +555,45 @@ class EditActivity : NavBarActivity() {
 
     sealed class Hint : Parcelable {
 
+        companion object {
+
+            protected fun ProjectKey.Shared.toCurrentParent() =
+                EditViewModel.CurrentParentSource.Set(EditViewModel.ParentKey.Project(this))
+
+            protected fun ProjectKey.Shared.toParentKey() = EditViewModel.ParentKey.Project(this)
+        }
+
         abstract fun toCurrentParent(): EditViewModel.CurrentParentSource
+        abstract fun toParentKey(): EditViewModel.ParentKey?
 
         @Parcelize
-        class Schedule(val date: Date, val timePair: TimePair) : Hint() {
+        class Schedule(val date: Date, val timePair: TimePair, private val projectKey: ProjectKey.Shared? = null) : Hint() {
 
             constructor(
-                    date: Date,
-                    pair: Pair<Date, HourMinute> = HourMinute.getNextHour(date),
-            ) : this(pair.first, TimePair(pair.second))
+                date: Date,
+                pair: Pair<Date, HourMinute> = HourMinute.getNextHour(date),
+            ) : this(pair.first, TimePair(pair.second), null)
 
-            override fun toCurrentParent() = EditViewModel.CurrentParentSource.None
+            override fun toCurrentParent() = projectKey?.toCurrentParent() ?: EditViewModel.CurrentParentSource.None
+
+            override fun toParentKey() = projectKey?.toParentKey()
         }
 
         @Parcelize
-        class Task(val taskKey: TaskKey) : Hint() {
+        class Task(private val taskKey: TaskKey) : Hint() {
 
             override fun toCurrentParent() =
-                    EditViewModel.CurrentParentSource.Set(EditViewModel.ParentKey.Task(taskKey))
+                EditViewModel.CurrentParentSource.Set(EditViewModel.ParentKey.Task(taskKey))
+
+            override fun toParentKey() = EditViewModel.ParentKey.Task(taskKey)
         }
 
         @Parcelize
-        class Project(val projectKey: ProjectKey.Shared) : Hint() {
+        class Project(private val projectKey: ProjectKey.Shared) : Hint() {
 
-            override fun toCurrentParent() =
-                    EditViewModel.CurrentParentSource.Set(EditViewModel.ParentKey.Project(projectKey))
+            override fun toCurrentParent() = projectKey.toCurrentParent()
+
+            override fun toParentKey() = projectKey.toParentKey()
         }
     }
 

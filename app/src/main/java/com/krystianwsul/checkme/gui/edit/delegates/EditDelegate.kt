@@ -73,14 +73,6 @@ abstract class EditDelegate(
 
     protected fun TaskKey.toParentKey() = EditViewModel.ParentKey.Task(this)
 
-    protected fun EditActivity.Hint.toParentKey(): EditViewModel.ParentKey? {
-        return when (this) {
-            is EditActivity.Hint.Schedule -> null
-            is EditActivity.Hint.Task -> EditViewModel.ParentKey.Task(taskKey)
-            is EditActivity.Hint.Project -> EditViewModel.ParentKey.Project(projectKey)
-        }
-    }
-
     protected fun EditActivity.Hint.toScheduleHint() = this as? EditActivity.Hint.Schedule
 
     val firstScheduleEntry by lazy {

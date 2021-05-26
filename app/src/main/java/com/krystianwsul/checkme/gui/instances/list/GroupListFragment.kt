@@ -828,7 +828,8 @@ class GroupListFragment @JvmOverloads constructor(
                             } else {
                                 EditActivity.Hint.Schedule(
                                     parameters.timeStamp.date,
-                                    TimePair(parameters.timeStamp.hourMinute)
+                                    TimePair(parameters.timeStamp.hourMinute),
+                                    parameters.projectKey,
                                 )
                             }
                         }

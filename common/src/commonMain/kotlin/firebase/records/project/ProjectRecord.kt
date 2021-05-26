@@ -11,7 +11,7 @@ import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.utils.*
 
 @Suppress("LeakingThis")
-abstract class ProjectRecord<T : ProjectType>(
+sealed class ProjectRecord<T : ProjectType>(
     create: Boolean,
     private val projectJson: ProjectJson<T>,
     private val _id: ProjectKey<T>,

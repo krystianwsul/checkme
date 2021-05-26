@@ -13,8 +13,6 @@ class NotDoneInstanceNode(
     override val groupAdapter: GroupListFragment.GroupAdapter,
 ) : NotDoneNode(ContentDelegate.Instance(groupAdapter, instanceData, indentation, false)) {
 
-    override val isDraggable = true
-
     override val id: Any = Id(super.id)
 
     private data class Id(val innerId: Any)

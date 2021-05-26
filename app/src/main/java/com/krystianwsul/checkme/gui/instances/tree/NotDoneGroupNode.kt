@@ -12,8 +12,6 @@ class NotDoneGroupNode(
     contentDelegate: ContentDelegate,
 ) : NotDoneNode(contentDelegate) {
 
-    override val isDraggable = true
-
     override val parentNode get() = nodeCollection.parentNode
 
     override val groupAdapter by lazy { nodeCollection.groupAdapter }

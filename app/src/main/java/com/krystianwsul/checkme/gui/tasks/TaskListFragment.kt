@@ -806,8 +806,6 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
         override val isSelectable = !copying
 
-        override val isDraggable = true
-
         override fun tryStartDrag(viewHolder: RecyclerView.ViewHolder): Boolean {
             val treeNodeCollection = taskAdapter.treeNodeCollection
 

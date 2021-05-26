@@ -28,7 +28,7 @@ class TreeNode<T : TreeHolder>(
 
         if (!modelNode.isSelectable) return
 
-        if (modelNode.isDraggable && modelNode.tryStartDrag(viewHolder))
+        if (modelNode.tryStartDrag(viewHolder))
             modelNode.onBindViewHolder(viewHolder, true)
         else
             treeViewAdapter.updateDisplayedNodes(this::toggleSelected)

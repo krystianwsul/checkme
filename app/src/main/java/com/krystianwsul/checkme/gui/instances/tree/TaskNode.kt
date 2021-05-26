@@ -96,8 +96,6 @@ class TaskNode(
 
     override val checkBoxInvisible = true
 
-    override val isDraggable = true
-
     fun initialize(
         nodeContainer: NodeContainer<AbstractHolder>,
         taskExpansionStates: Map<TaskKey, TreeNode.ExpansionState>,

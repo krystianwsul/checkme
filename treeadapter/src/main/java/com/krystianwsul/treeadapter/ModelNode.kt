@@ -20,8 +20,6 @@ interface ModelNode<T : TreeHolder> : Comparable<ModelNode<T>>, Matchable {
 
     val parentNode: ModelNode<T>?
 
-    val isDraggable get() = false
-
     val expandOnMatch get() = true
 
     fun onBindViewHolder(viewHolder: RecyclerView.ViewHolder, startingDrag: Boolean = false)
@@ -31,7 +29,7 @@ interface ModelNode<T : TreeHolder> : Comparable<ModelNode<T>>, Matchable {
 
     fun onClick(holder: T) = Unit
 
-    fun tryStartDrag(viewHolder: RecyclerView.ViewHolder): Boolean = throw UnsupportedOperationException()
+    fun tryStartDrag(viewHolder: RecyclerView.ViewHolder): Boolean = false
 
     fun isVisible(actionMode: Boolean, hasVisibleChildren: Boolean): Boolean = true
 

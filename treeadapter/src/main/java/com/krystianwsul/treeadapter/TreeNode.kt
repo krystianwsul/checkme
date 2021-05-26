@@ -6,10 +6,10 @@ import kotlinx.parcelize.Parcelize
 import java.util.*
 
 class TreeNode<T : TreeHolder>(
-        val modelNode: ModelNode<T>,
-        val parent: NodeContainer<T>,
-        private var selected: Boolean = false,
-        private val initialExpansionState: ExpansionState? = null,
+    val modelNode: ModelNode<T>,
+    val parent: NodeContainer<T>,
+    private var selected: Boolean = false,
+    private val initialExpansionState: ExpansionState? = null,
 ) : Comparable<TreeNode<T>>, NodeContainer<T> {
 
     override val treeNodeCollection by lazy { parent.treeNodeCollection }
@@ -152,7 +152,7 @@ class TreeNode<T : TreeHolder>(
     fun onBindViewHolder(viewHolder: RecyclerView.ViewHolder) = modelNode.onBindViewHolder(viewHolder)
 
     fun onPayload(viewHolder: RecyclerView.ViewHolder, payloadSeparator: PayloadSeparator) =
-            modelNode.onPayload(viewHolder, payloadSeparator)
+        modelNode.onPayload(viewHolder, payloadSeparator)
 
     override fun compareTo(other: TreeNode<T>) = modelNode.compareTo(other.modelNode)
 
@@ -180,8 +180,13 @@ class TreeNode<T : TreeHolder>(
     }
 
     private fun propagateSelection(selected: Boolean, placeholder: TreeViewAdapter.Placeholder) {
-        if (modelNode.toggleDescendants)
-            childTreeNodes.filter { it.selected != selected }.forEach { it.toggleSelected(placeholder, false) }
+        if (!modelNode.toggleDescendants) return
+
+        childTreeNodes.filter { it.selected != selected }.forEach {
+            it.toggleSelected(placeholder, false)
+
+            it.propagateSelection(selected, placeholder)
+        }
     }
 
     private fun hasActionMode() = treeViewAdapter.hasActionMode
@@ -317,13 +322,13 @@ class TreeNode<T : TreeHolder>(
     }
 
     private fun matchesQuery(query: String) =
-            modelNode.getMatchResult(query) == ModelNode.MatchResult.MATCHES
+        modelNode.getMatchResult(query) == ModelNode.MatchResult.MATCHES
 
     private fun matchesFilterParams(filterParams: FilterCriteria.Full.FilterParams) =
-            modelNode.matchesFilterParams(filterParams)
+        modelNode.matchesFilterParams(filterParams)
 
     private fun matchesFilterCriteria(filterCriteria: FilterCriteria.Full) =
-            matchesFilterParams(filterCriteria.filterParams) && matchesQuery(filterCriteria.query)
+        matchesFilterParams(filterCriteria.filterParams) && matchesQuery(filterCriteria.query)
 
     private fun parentHierarchyMatchesQuery(): Boolean {
         return if (parent is TreeNode<T>) {
@@ -338,7 +343,7 @@ class TreeNode<T : TreeHolder>(
     }
 
     private fun childHierarchyMatchesQuery(query: String): Boolean =
-            childTreeNodes.any { it.matchesQuery(query) || it.childHierarchyMatchesQuery(query) }
+        childTreeNodes.any { it.matchesQuery(query) || it.childHierarchyMatchesQuery(query) }
 
     fun visible(): Boolean {
         checkChildTreeNodesSet()
@@ -426,9 +431,9 @@ class TreeNode<T : TreeHolder>(
     }
 
     override fun swapNodePositions(
-            fromTreeNode: TreeNode<T>,
-            toTreeNode: TreeNode<T>,
-            placeholder: TreeViewAdapter.Placeholder,
+        fromTreeNode: TreeNode<T>,
+        toTreeNode: TreeNode<T>,
+        placeholder: TreeViewAdapter.Placeholder,
     ) {
         check(treeViewAdapter.locker == null)
 
@@ -446,9 +451,11 @@ class TreeNode<T : TreeHolder>(
 
     class SetChildTreeNodesNotCalledException : InitializationException("TreeNode.setChildTreeNodes() has not been called.")
 
-    class SetChildTreeNodesCalledTwiceException : InitializationException("TreeNode.setChildTreeNodes() has already been called.")
+    class SetChildTreeNodesCalledTwiceException :
+        InitializationException("TreeNode.setChildTreeNodes() has already been called.")
 
-    class NotSelectableSelectedException : IllegalStateException("A TreeNode cannot be selected if its ModelNode is not selectable.")
+    class NotSelectableSelectedException :
+        IllegalStateException("A TreeNode cannot be selected if its ModelNode is not selectable.")
 
     class EmptyExpandedException : IllegalStateException("A TreeNode cannot be expanded if it has no children.")
 
@@ -459,18 +466,18 @@ class TreeNode<T : TreeHolder>(
     class NoChildrenException : UnsupportedOperationException("Can't get selected children of a node that has no children.")
 
     data class State(
-            val isExpanded: Boolean,
-            val isSelected: Boolean,
-            val expandVisible: Boolean,
-            val separatorVisibility: Boolean,
-            val modelState: ModelState,
+        val isExpanded: Boolean,
+        val isSelected: Boolean,
+        val expandVisible: Boolean,
+        val separatorVisibility: Boolean,
+        val modelState: ModelState,
     ) {
 
         fun getPayload(other: State) = if (isExpanded == other.isExpanded &&
-                isSelected == other.isSelected &&
-                expandVisible == other.expandVisible &&
-                separatorVisibility != other.separatorVisibility &&
-                modelState == other.modelState
+            isSelected == other.isSelected &&
+            expandVisible == other.expandVisible &&
+            separatorVisibility != other.separatorVisibility &&
+            modelState == other.modelState
         ) PayloadSeparator else null
     }
 

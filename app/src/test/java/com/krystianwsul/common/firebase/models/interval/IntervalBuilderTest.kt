@@ -81,7 +81,7 @@ class IntervalBuilderTest {
 
     private fun ProjectTask.check(vararg expected: Interval) {
         val actual = IntervalBuilder.build(this)
-        assertEquals(expected.toList(), actual)
+        assertEquals(expected.toList(), actual.intervals)
     }
 
     @Before

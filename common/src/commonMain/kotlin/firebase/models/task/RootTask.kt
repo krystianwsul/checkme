@@ -46,7 +46,7 @@ class RootTask(
             }
         }
     }.apply {
-        addTo(intervalsProperty)
+        addTo(intervalInfoProperty)
         addCallback { normalizedFieldsDelegate.invalidate() }
     }
 
@@ -428,7 +428,7 @@ class RootTask(
             }
         }
 
-        intervalsProperty.invalidate()
+        intervalInfoProperty.invalidate()
     }
 
     private fun Set<String>.toAssociateMap() = associate { it to true }
@@ -569,7 +569,7 @@ class RootTask(
             }
         }
 
-        intervalsProperty.invalidate()
+        intervalInfoProperty.invalidate()
     }
 
     interface Parent : Task.Parent, Project.RootTaskProvider {

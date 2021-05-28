@@ -78,12 +78,13 @@ sealed class Task(
 
     val parentTaskHierarchies get() = projectParentTaskHierarchies + nestedParentTaskHierarchies.values
 
-    val intervalsProperty = invalidatableLazyCallbacks { IntervalBuilder.build(this) }
-    val intervals by intervalsProperty
+    val intervalInfoProperty = invalidatableLazyCallbacks { IntervalBuilder.build(this) }
+    val intervalInfo by intervalInfoProperty
+    val intervals get() = intervalInfo.intervals
 
     val scheduleIntervalsProperty = invalidatableLazyCallbacks {
         intervals.mapNotNull { (it.type as? Type.Schedule)?.getScheduleIntervals(it) }.flatten()
-    }.apply { addTo(intervalsProperty) }
+    }.apply { addTo(intervalInfoProperty) }
     val scheduleIntervals by scheduleIntervalsProperty
 
     val parentHierarchyIntervals get() = intervals.mapNotNull { (it.type as? Type.Child)?.getHierarchyInterval(it) }
@@ -529,7 +530,7 @@ sealed class Task(
 
     fun invalidateChildTaskHierarchies() = childHierarchyIntervalsProperty.invalidate()
 
-    fun invalidateIntervals() = intervalsProperty.invalidate()
+    fun invalidateIntervals() = intervalInfoProperty.invalidate()
 
     fun getScheduleTextMultiline(
         scheduleTextFactory: ScheduleTextFactory,

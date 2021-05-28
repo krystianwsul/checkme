@@ -201,12 +201,12 @@ class Instance private constructor(val task: Task, private var data: Data) : Ass
 
     private fun addLazyCallbacks() {
         schedulesCallback = task.scheduleIntervalsProperty.addCallback(matchingScheduleIntervalsProperty::invalidate)
-        intervalsCallback = task.intervalsProperty.addCallback(::invalidateParentInstanceData)
+        intervalsCallback = task.intervalInfoProperty.addCallback(::invalidateParentInstanceData)
     }
 
     private fun removeLazyCallbacks() {
         task.scheduleIntervalsProperty.removeCallback(schedulesCallback)
-        task.intervalsProperty.removeCallback(intervalsCallback)
+        task.intervalInfoProperty.removeCallback(intervalsCallback)
 
         tearDownParentInstanceData()
     }

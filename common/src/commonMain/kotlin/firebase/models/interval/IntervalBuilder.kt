@@ -12,14 +12,14 @@ object IntervalBuilder {
      Note: this will return NoSchedule for the time spans that were covered by irrelevant schedules
      and task hierarchies.  These periods, by definition, shouldn't be needed for anything.
      */
-    fun build(task: Task): List<Interval> {
+    fun build(task: Task): IntervalInfo {
         val allTypeBuilders = listOf(
-                task.schedules.map { TypeBuilder.Schedule(it) },
-                task.parentTaskHierarchies.map { TypeBuilder.Parent(it) },
-                task.noScheduleOrParents.map { TypeBuilder.NoScheduleOrParent(it) },
+            task.schedules.map { TypeBuilder.Schedule(it) },
+            task.parentTaskHierarchies.map { TypeBuilder.Parent(it) },
+            task.noScheduleOrParents.map { TypeBuilder.NoScheduleOrParent(it) },
         ).flatten()
-                .sortedBy { it.startExactTimeStampOffset }
-                .toMutableList()
+            .sortedBy { it.startExactTimeStampOffset }
+            .toMutableList()
 
         fun getNextTypeBuilder() = allTypeBuilders.takeIf { it.isNotEmpty() }?.removeAt(0)
 
@@ -37,7 +37,7 @@ object IntervalBuilder {
                 Interval.Ended(Type.NoSchedule(), taskStartExactTimeStampOffset, taskEndExactTimeStampOffset)
             }
 
-            return listOf(interval)
+            return IntervalInfo(task, listOf(interval))
         } else {
             check(typeBuilder.startExactTimeStampOffset >= taskStartExactTimeStampOffset) {
                 "IntervalBuilder $task check 1: ${typeBuilder!!.startExactTimeStampOffset.details()} >= ${taskStartExactTimeStampOffset.details()}"
@@ -159,7 +159,7 @@ object IntervalBuilder {
 
             check(intervals.isNotEmpty()) { "IntervalBuilder $task check 9: ${intervals.isNotEmpty()}" }
 
-            return intervals
+            return IntervalInfo(task, intervals)
         }
     }
 
@@ -215,14 +215,6 @@ object IntervalBuilder {
                 Interval.Ended(toType(), startExactTimeStampOffset, endExactTimeStampOffset)
 
         fun toCurrentInterval() = Interval.Current(toType(), startExactTimeStampOffset)
-
-        fun toInterval(endExactTimeStampOffset: ExactTimeStamp.Offset?): Interval {
-            return if (endExactTimeStampOffset != null) {
-                toEndedInterval(endExactTimeStampOffset)
-            } else {
-                toCurrentInterval()
-            }
-        }
 
         abstract fun toType(): Type
 

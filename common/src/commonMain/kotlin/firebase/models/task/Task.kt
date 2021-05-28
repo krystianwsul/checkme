@@ -81,15 +81,14 @@ sealed class Task(
     val intervalInfoProperty = invalidatableLazyCallbacks { IntervalBuilder.build(this) }
     val intervalInfo by intervalInfoProperty
 
-    val parentHierarchyIntervals get() = intervalInfo.parentHierarchyIntervals // todo interval
-    val noScheduleOrParentIntervals get() = intervalInfo.noScheduleOrParentIntervals // todo interval
-
     private val childHierarchyIntervalsProperty = invalidatableLazy {
         parent.getTaskHierarchiesByParentTaskKey(taskKey)
+            .asSequence()
             .map { it.childTask }
             .distinct()
-            .flatMap { it.parentHierarchyIntervals }
+            .flatMap { it.intervalInfo.parentHierarchyIntervals }
             .filter { it.taskHierarchy.parentTaskKey == taskKey }
+            .toList()
     }
     val childHierarchyIntervals by childHierarchyIntervalsProperty
 
@@ -267,7 +266,7 @@ sealed class Task(
         now: ExactTimeStamp.Local,
         bySchedule: Boolean,
     ): Sequence<Instance> {
-        val instanceSequences = parentHierarchyIntervals.map {
+        val instanceSequences = intervalInfo.parentHierarchyIntervals.map {
             it.taskHierarchy
                 .parentTask
                 .getInstances(givenStartExactTimeStamp, givenEndExactTimeStamp, now, bySchedule)

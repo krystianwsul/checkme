@@ -161,7 +161,8 @@ object Irrelevant {
                 result
             }.map { it.schedule }
 
-            val relevantNoScheduleOrParents = it.noScheduleOrParentIntervals
+            val relevantNoScheduleOrParents = it.intervalInfo
+                .noScheduleOrParentIntervals
                 .filter { it.currentOffset(now) }
                 .map { it.noScheduleOrParent }
 

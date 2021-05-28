@@ -64,8 +64,9 @@ class ProjectTask(override val project: Project<*>, private val taskRecord: Proj
         }
 
         intervalInfo.scheduleIntervals.forEach { it.schedule.fixOffsets() }
-        parentHierarchyIntervals.forEach { it.taskHierarchy.fixOffsets() }
-        noScheduleOrParentIntervals.forEach { (it.noScheduleOrParent as ProjectNoScheduleOrParent).fixOffsets() }
+        intervalInfo.parentHierarchyIntervals.forEach { it.taskHierarchy.fixOffsets() }
+        intervalInfo.noScheduleOrParentIntervals.forEach { (it.noScheduleOrParent as ProjectNoScheduleOrParent).fixOffsets() }
+
         existingInstances.values.forEach { it.fixOffsets() }
     }
 }

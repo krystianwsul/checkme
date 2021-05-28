@@ -1,8 +1,10 @@
 package com.krystianwsul.common.firebase.models.task
 
 import com.krystianwsul.common.domain.ScheduleGroup
+import com.krystianwsul.common.firebase.json.noscheduleorparent.RootNoScheduleOrParentJson
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.interval.IntervalInfo
+import com.krystianwsul.common.firebase.models.noscheduleorparent.RootNoScheduleOrParent
 import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.schedule.Schedule
 import com.krystianwsul.common.firebase.models.schedule.SingleSchedule
@@ -96,6 +98,22 @@ class IntervalUpdate(val task: RootTask, val intervalInfo: IntervalInfo) {
                 projectKey,
             )
         }
+    }
+
+    fun setNoScheduleOrParent(now: ExactTimeStamp.Local, projectKey: ProjectKey<*>) {
+        val noScheduleOrParentRecord = task.taskRecord.newNoScheduleOrParentRecord(
+            RootNoScheduleOrParentJson(
+                now.long,
+                now.offset,
+                projectId = projectKey.key,
+            )
+        )
+
+        check(!task.noScheduleOrParentsMap.containsKey(noScheduleOrParentRecord.id))
+
+        task.noScheduleOrParentsMap[noScheduleOrParentRecord.id] = RootNoScheduleOrParent(task, noScheduleOrParentRecord)
+
+        invalidateIntervals()
     }
 }
 

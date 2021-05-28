@@ -42,6 +42,7 @@ import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.task.ProjectTask
 import com.krystianwsul.common.firebase.models.task.RootTask
 import com.krystianwsul.common.firebase.models.task.Task
+import com.krystianwsul.common.firebase.models.task.performIntervalUpdate
 import com.krystianwsul.common.firebase.models.taskhierarchy.TaskHierarchy
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.*
@@ -717,18 +718,20 @@ class DomainFactory(
             val currentSchedules = oldTask.intervalInfo.getCurrentScheduleIntervals(now).map { it.schedule }
             val currentNoScheduleOrParent = oldTask.intervalInfo.getCurrentNoScheduleOrParent(now)?.noScheduleOrParent
 
-            if (currentSchedules.isNotEmpty()) {
-                check(currentNoScheduleOrParent == null)
+            newTask.performIntervalUpdate {
+                if (currentSchedules.isNotEmpty()) {
+                    check(currentNoScheduleOrParent == null)
 
-                newTask.copySchedules(
-                    now,
-                    currentSchedules,
-                    customTimeMigrationHelper,
-                    oldTask.project.projectKey,
-                    newProject.projectKey,
-                )
-            } else {
-                currentNoScheduleOrParent?.let { newTask.setNoScheduleOrParent(now, newProject.projectKey) }
+                    newTask.copySchedules(
+                        now,
+                        currentSchedules,
+                        customTimeMigrationHelper,
+                        oldTask.project.projectKey,
+                        newProject.projectKey,
+                    )
+                } else {
+                    currentNoScheduleOrParent?.let { setNoScheduleOrParent(now, newProject.projectKey) }
+                }
             }
 
             return newTask

@@ -1,7 +1,6 @@
 package com.krystianwsul.common.firebase.models.task
 
 import com.krystianwsul.common.domain.DeviceDbInfo
-import com.krystianwsul.common.firebase.json.noscheduleorparent.RootNoScheduleOrParentJson
 import com.krystianwsul.common.firebase.json.schedule.*
 import com.krystianwsul.common.firebase.json.taskhierarchies.NestedTaskHierarchyJson
 import com.krystianwsul.common.firebase.json.tasks.TaskJson
@@ -52,7 +51,7 @@ class RootTask(
 
     override val project get() = parent.getProject(projectId)
 
-    private val noScheduleOrParentsMap = taskRecord.noScheduleOrParentRecords
+    val noScheduleOrParentsMap = taskRecord.noScheduleOrParentRecords
         .mapValues { RootNoScheduleOrParent(this, it.value) }
         .toMutableMap()
 
@@ -63,23 +62,6 @@ class RootTask(
     override val projectParentTaskHierarchies = setOf<ProjectTaskHierarchy>()
 
     override val projectCustomTimeIdProvider = JsonTime.ProjectCustomTimeIdProvider.rootTask
-
-    fun setNoScheduleOrParent(now: ExactTimeStamp.Local, projectKey: ProjectKey<*>) { // todo interval require update
-        val noScheduleOrParentRecord = taskRecord.newNoScheduleOrParentRecord(
-            RootNoScheduleOrParentJson(
-                now.long,
-                now.offset,
-                projectId = projectKey.key,
-            )
-        )
-
-        check(!noScheduleOrParentsMap.containsKey(noScheduleOrParentRecord.id))
-
-        noScheduleOrParentsMap[noScheduleOrParentRecord.id] =
-            RootNoScheduleOrParent(this, noScheduleOrParentRecord)
-
-        invalidateIntervals()
-    }
 
     fun createChildTask(
         now: ExactTimeStamp.Local,
@@ -372,6 +354,7 @@ class RootTask(
     private fun Time.toJson() = JsonTime.fromTime(this).toJson()
 
     fun copySchedules(
+        // todo interval update
         now: ExactTimeStamp.Local,
         schedules: List<Schedule>,
         customTimeMigrationHelper: Project.CustomTimeMigrationHelper,

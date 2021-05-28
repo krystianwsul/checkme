@@ -856,7 +856,9 @@ private fun DomainFactory.createNoScheduleOrParentTask(
     projectKey: ProjectKey<*>,
     imageUuid: String?,
     ordinal: Double? = null,
-) = createRootTask(now, imageUuid, name, note, ordinal).apply { setNoScheduleOrParent(now, projectKey) }
+) = createRootTask(now, imageUuid, name, note, ordinal).apply {
+    performIntervalUpdate { setNoScheduleOrParent(now, projectKey) }
+}
 
 private fun DomainFactory.createRootTask(
     now: ExactTimeStamp.Local,

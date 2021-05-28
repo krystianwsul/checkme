@@ -79,15 +79,15 @@ sealed class Task(
     val parentTaskHierarchies get() = projectParentTaskHierarchies + nestedParentTaskHierarchies.values
 
     val intervalInfoProperty = invalidatableLazyCallbacks { IntervalBuilder.build(this) }
-    val intervalInfo by intervalInfoProperty // todo interval
+    val intervalInfo by intervalInfoProperty
 
     val scheduleIntervals get() = intervalInfo.scheduleIntervals // todo interval
 
     val parentHierarchyIntervals
         get() =
-            intervalInfo.intervals.mapNotNull { (it.type as? Type.Child)?.getHierarchyInterval(it) }
+            intervalInfo.intervals.mapNotNull { (it.type as? Type.Child)?.getHierarchyInterval(it) } // todo interval
 
-    val noScheduleOrParentIntervals
+    val noScheduleOrParentIntervals // todo interval
         get() = intervalInfo.intervals.mapNotNull {
             (it.type as? Type.NoSchedule)?.getNoScheduleOrParentInterval(it)
         }
@@ -590,7 +590,7 @@ sealed class Task(
     fun isUnscheduled(now: ExactTimeStamp.Local) = getInterval(now).type is Type.NoSchedule
 
     private fun getInterval(exactTimeStamp: ExactTimeStamp): Interval {
-        val intervals = intervalInfo.intervals
+        val intervals = intervalInfo.intervals // todo interval
 
         try {
             return intervals.single {

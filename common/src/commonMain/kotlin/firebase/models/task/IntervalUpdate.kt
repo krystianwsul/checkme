@@ -2,17 +2,21 @@ package com.krystianwsul.common.firebase.models.task
 
 import com.krystianwsul.common.domain.ScheduleGroup
 import com.krystianwsul.common.firebase.json.noscheduleorparent.RootNoScheduleOrParentJson
+import com.krystianwsul.common.firebase.json.taskhierarchies.NestedTaskHierarchyJson
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.interval.IntervalInfo
 import com.krystianwsul.common.firebase.models.noscheduleorparent.RootNoScheduleOrParent
 import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.schedule.Schedule
 import com.krystianwsul.common.firebase.models.schedule.SingleSchedule
+import com.krystianwsul.common.firebase.models.taskhierarchy.NestedTaskHierarchy
+import com.krystianwsul.common.firebase.models.taskhierarchy.TaskHierarchy
 import com.krystianwsul.common.time.DateTime
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ScheduleData
+import com.krystianwsul.common.utils.TaskHierarchyKey
 import com.krystianwsul.common.utils.UserKey
 
 class IntervalUpdate(val task: RootTask, val intervalInfo: IntervalInfo) {
@@ -114,6 +118,41 @@ class IntervalUpdate(val task: RootTask, val intervalInfo: IntervalInfo) {
         task.noScheduleOrParentsMap[noScheduleOrParentRecord.id] = RootNoScheduleOrParent(task, noScheduleOrParentRecord)
 
         invalidateIntervals()
+    }
+
+    fun createParentNestedTaskHierarchy(parentTask: Task, now: ExactTimeStamp.Local): TaskHierarchyKey.Nested {
+        val taskHierarchyJson = NestedTaskHierarchyJson(parentTask.id, now.long, now.offset)
+
+        return createParentNestedTaskHierarchy(taskHierarchyJson).taskHierarchyKey
+    }
+
+    fun copyParentNestedTaskHierarchy(
+        now: ExactTimeStamp.Local,
+        startTaskHierarchy: TaskHierarchy,
+        parentTaskId: String,
+    ) {
+        check(parentTaskId.isNotEmpty())
+
+        val taskHierarchyJson = NestedTaskHierarchyJson(
+            parentTaskId,
+            now.long,
+            now.offset,
+            startTaskHierarchy.endExactTimeStampOffset?.long,
+            startTaskHierarchy.endExactTimeStampOffset?.offset,
+        )
+
+        createParentNestedTaskHierarchy(taskHierarchyJson)
+    }
+
+    private fun createParentNestedTaskHierarchy(nestedTaskHierarchyJson: NestedTaskHierarchyJson): NestedTaskHierarchy {
+        val taskHierarchyRecord = task.taskRecord.newTaskHierarchyRecord(nestedTaskHierarchyJson)
+        val taskHierarchy = NestedTaskHierarchy(task, taskHierarchyRecord, task.parentTaskDelegate)
+
+        task.nestedParentTaskHierarchies[taskHierarchy.id] = taskHierarchy
+
+        taskHierarchy.invalidateTasks()
+
+        return taskHierarchy
     }
 }
 

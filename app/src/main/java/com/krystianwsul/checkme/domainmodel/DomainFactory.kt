@@ -633,9 +633,11 @@ class DomainFactory(
 
             for (startTaskHierarchy in projectToRootConversion.startTaskHierarchies.values) {
                 val parentTask = projectToRootConversion.endTasks.getValue(startTaskHierarchy.parentTaskId)
+
                 val childTask = projectToRootConversion.endTasks.getValue(startTaskHierarchy.childTaskId)
 
-                childTask.copyParentNestedTaskHierarchy(now, startTaskHierarchy, parentTask.id)
+                childTask.performIntervalUpdate { copyParentNestedTaskHierarchy(now, startTaskHierarchy, parentTask.id) }
+
                 parentTask.addRootTask(childTask)
             }
 

@@ -2,7 +2,6 @@ package com.krystianwsul.common.firebase.models.task
 
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.firebase.json.schedule.*
-import com.krystianwsul.common.firebase.json.taskhierarchies.NestedTaskHierarchyJson
 import com.krystianwsul.common.firebase.json.tasks.TaskJson
 import com.krystianwsul.common.firebase.models.ImageState
 import com.krystianwsul.common.firebase.models.interval.Type
@@ -10,10 +9,8 @@ import com.krystianwsul.common.firebase.models.noscheduleorparent.NoScheduleOrPa
 import com.krystianwsul.common.firebase.models.noscheduleorparent.RootNoScheduleOrParent
 import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.schedule.*
-import com.krystianwsul.common.firebase.models.taskhierarchy.NestedTaskHierarchy
 import com.krystianwsul.common.firebase.models.taskhierarchy.ParentTaskDelegate
 import com.krystianwsul.common.firebase.models.taskhierarchy.ProjectTaskHierarchy
-import com.krystianwsul.common.firebase.models.taskhierarchy.TaskHierarchy
 import com.krystianwsul.common.firebase.records.task.RootTaskRecord
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.*
@@ -72,7 +69,8 @@ class RootTask(
     ): RootTask {
         val childTask = parent.createTask(now, image, name, note, ordinal)
 
-        childTask.createParentNestedTaskHierarchy(this, now)
+        childTask.performIntervalUpdate { createParentNestedTaskHierarchy(this@RootTask, now) }
+
         addRootTask(childTask)
 
         return childTask
@@ -117,46 +115,11 @@ class RootTask(
         is Time.Normal -> time
     }
 
-    fun addChild(childTask: RootTask, now: ExactTimeStamp.Local): TaskHierarchyKey { // todo interval require update on child
-        val taskHierarchyKey = childTask.createParentNestedTaskHierarchy(this, now)
-        addRootTask(childTask)
+    fun addChild(childTaskIntervalUpdate: IntervalUpdate, now: ExactTimeStamp.Local): TaskHierarchyKey {
+        val taskHierarchyKey = childTaskIntervalUpdate.createParentNestedTaskHierarchy(this, now)
+        addRootTask(childTaskIntervalUpdate.task)
 
         return taskHierarchyKey
-    }
-
-    private fun createParentNestedTaskHierarchy(parentTask: Task, now: ExactTimeStamp.Local): TaskHierarchyKey.Nested {
-        val taskHierarchyJson = NestedTaskHierarchyJson(parentTask.id, now.long, now.offset)
-
-        return createParentNestedTaskHierarchy(taskHierarchyJson).taskHierarchyKey
-    }
-
-    private fun createParentNestedTaskHierarchy(nestedTaskHierarchyJson: NestedTaskHierarchyJson): NestedTaskHierarchy {
-        val taskHierarchyRecord = taskRecord.newTaskHierarchyRecord(nestedTaskHierarchyJson)
-        val taskHierarchy = NestedTaskHierarchy(this, taskHierarchyRecord, parentTaskDelegate)
-
-        nestedParentTaskHierarchies[taskHierarchy.id] = taskHierarchy
-
-        taskHierarchy.invalidateTasks()
-
-        return taskHierarchy
-    }
-
-    fun copyParentNestedTaskHierarchy(
-        now: ExactTimeStamp.Local,
-        startTaskHierarchy: TaskHierarchy,
-        parentTaskId: String,
-    ) {
-        check(parentTaskId.isNotEmpty())
-
-        val taskHierarchyJson = NestedTaskHierarchyJson(
-            parentTaskId,
-            now.long,
-            now.offset,
-            startTaskHierarchy.endExactTimeStampOffset?.long,
-            startTaskHierarchy.endExactTimeStampOffset?.offset,
-        )
-
-        createParentNestedTaskHierarchy(taskHierarchyJson)
     }
 
     fun deleteNoScheduleOrParent(noScheduleOrParent: NoScheduleOrParent) {
@@ -354,7 +317,6 @@ class RootTask(
     private fun Time.toJson() = JsonTime.fromTime(this).toJson()
 
     fun copySchedules(
-        // todo interval update
         now: ExactTimeStamp.Local,
         schedules: List<Schedule>,
         customTimeMigrationHelper: Project.CustomTimeMigrationHelper,

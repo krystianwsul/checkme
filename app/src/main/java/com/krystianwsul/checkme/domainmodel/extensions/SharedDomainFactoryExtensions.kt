@@ -299,14 +299,16 @@ fun addChildToParent(
     lateinit var taskHierarchyKeys: List<TaskHierarchyKey>
     lateinit var scheduleIds: List<String>
     lateinit var noScheduleOrParentsIds: List<String>
+    lateinit var deleteTaskHierarchyKey: TaskHierarchyKey
 
     childTask.performIntervalUpdate {
         taskHierarchyKeys = endAllCurrentTaskHierarchies(now)
         scheduleIds = endAllCurrentSchedules(now)
         noScheduleOrParentsIds = endAllCurrentNoScheduleOrParents(now)
+
+        deleteTaskHierarchyKey = parentTask.addChild(this, now)
     }
 
-    val deleteTaskHierarchyKey = parentTask.addChild(childTask, now)
 
     val unhideInstanceKey = hideInstance?.takeIf {
         it.parentInstance?.task != parentTask &&

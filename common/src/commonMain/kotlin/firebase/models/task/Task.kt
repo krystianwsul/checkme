@@ -25,7 +25,7 @@ import com.krystianwsul.common.utils.*
 sealed class Task(
     val customTimeProvider: JsonTime.CustomTimeProvider,
     private val taskRecord: TaskRecord,
-    protected val parentTaskDelegate: ParentTaskDelegate,
+    val parentTaskDelegate: ParentTaskDelegate,
 ) : Current, CurrentOffset, QueryMatchable, Assignable {
 
     abstract val parent: Parent

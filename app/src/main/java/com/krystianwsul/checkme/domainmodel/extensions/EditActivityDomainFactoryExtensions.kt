@@ -388,7 +388,7 @@ fun DomainUpdater.updateChildTask(
         if (task.getParentTask(now) != newParentTask) {
             if (allReminders) endAllCurrentTaskHierarchies(now)
 
-            newParentTask.addChild(task, now)
+            newParentTask.addChild(this, now)
         }
 
         if (allReminders) {

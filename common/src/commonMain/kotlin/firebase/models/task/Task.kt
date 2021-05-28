@@ -83,9 +83,7 @@ sealed class Task(
 
     val scheduleIntervals get() = intervalInfo.scheduleIntervals
     val parentHierarchyIntervals get() = intervalInfo.parentHierarchyIntervals
-
-    val noScheduleOrParentIntervals // todo interval
-        get() = intervalInfo.noScheduleOrParentIntervals
+    val noScheduleOrParentIntervals get() = intervalInfo.noScheduleOrParentIntervals
 
     private val childHierarchyIntervalsProperty = invalidatableLazy {
         parent.getTaskHierarchiesByParentTaskKey(taskKey)
@@ -142,7 +140,7 @@ sealed class Task(
     fun getCurrentScheduleIntervals(exactTimeStamp: ExactTimeStamp): List<ScheduleInterval> {
         requireCurrentOffset(exactTimeStamp)
 
-        return getInterval(exactTimeStamp).let {
+        return intervalInfo.getInterval(exactTimeStamp).let {
             (it.type as? Type.Schedule)?.getScheduleIntervals(it)
                 ?.filter { it.schedule.currentOffset(exactTimeStamp) }
                 ?: listOf()
@@ -150,12 +148,12 @@ sealed class Task(
     }
 
     fun getCurrentNoScheduleOrParent(now: ExactTimeStamp.Local) =
-        getInterval(now).let {
-            (it.type as? Type.NoSchedule)?.getNoScheduleOrParentInterval(it)
-        }?.also {
-            check(it.currentOffset(now))
-            check(it.noScheduleOrParent.currentOffset(now))
-        }
+        intervalInfo.getInterval(now)
+            .let { (it.type as? Type.NoSchedule)?.getNoScheduleOrParentInterval(it) }
+            ?.also {
+                check(it.currentOffset(now))
+                check(it.noScheduleOrParent.currentOffset(now))
+            }
 
     fun isTopLevelTask(exactTimeStamp: ExactTimeStamp): Boolean {
         requireCurrentOffset(exactTimeStamp)
@@ -215,7 +213,7 @@ sealed class Task(
     private fun getParentTaskHierarchy(exactTimeStamp: ExactTimeStamp): HierarchyInterval? {
         requireCurrentOffset(exactTimeStamp)
 
-        return getInterval(exactTimeStamp).let { (it.type as? Type.Child)?.getHierarchyInterval(it) }
+        return intervalInfo.getInterval(exactTimeStamp).let { (it.type as? Type.Child)?.getHierarchyInterval(it) }
     }
 
     fun clearEndExactTimeStamp(now: ExactTimeStamp.Local) {
@@ -582,27 +580,7 @@ sealed class Task(
         }
     }
 
-    fun isUnscheduled(now: ExactTimeStamp.Local) = getInterval(now).type is Type.NoSchedule
-
-    private fun getInterval(exactTimeStamp: ExactTimeStamp): Interval {
-        val intervals = intervalInfo.intervals // todo interval
-
-        try {
-            return intervals.single {
-                it.containsExactTimeStamp(exactTimeStamp)
-            }
-        } catch (throwable: Throwable) {
-            throw IntervalException(
-                "error getting interval for task $name. exactTimeStamp: $exactTimeStamp, intervals:\n"
-                        + intervals.joinToString("\n") {
-                    "${it.startExactTimeStampOffset} - ${it.endExactTimeStampOffset}"
-                },
-                throwable
-            )
-        }
-    }
-
-    private class IntervalException(message: String, cause: Throwable) : Exception(message, cause)
+    fun isUnscheduled(now: ExactTimeStamp.Local) = intervalInfo.getInterval(now).type is Type.NoSchedule
 
     fun correctIntervalEndExactTimeStamps() = intervalInfo.intervals
         .asSequence()

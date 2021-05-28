@@ -332,6 +332,8 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
                 it.startActivity(ShowGroupActivity.getIntent(it, showGroupActivityParameters))
             }
 
+            override val sortable = false
+
             override fun getOrdinal(): Double = throw UnsupportedOperationException()
             override fun setOrdinal(ordinal: Double) = throw UnsupportedOperationException()
 

@@ -11,8 +11,8 @@ class TreeNodeCollection<T : TreeHolder>(val treeViewAdapter: TreeViewAdapter<T>
 
     val selectedNodes
         get() = treeNodesRelay.value
-                ?.flatMap { it.selectedNodes }
-                ?: throw SetTreeNodesNotCalledException()
+            ?.flatMap { it.selectedNodes }
+            ?: throw SetTreeNodesNotCalledException()
 
     val nodesObservable: Observable<List<TreeNode<T>>> = treeNodesRelay
 
@@ -58,17 +58,17 @@ class TreeNodeCollection<T : TreeHolder>(val treeViewAdapter: TreeViewAdapter<T>
 
     override val displayableNodes
         get() = treeNodesRelay.value
-                ?.flatMap { it.displayableNodes }
-                ?: throw SetTreeNodesNotCalledException()
+            ?.flatMap { it.displayableNodes }
+            ?: throw SetTreeNodesNotCalledException()
 
     fun unselect(x: TreeViewAdapter.Placeholder) = treeNodesRelay.value
-            ?.forEach { it.unselect(x) }
-            ?: throw SetTreeNodesNotCalledException()
+        ?.forEach { it.unselect(x) }
+        ?: throw SetTreeNodesNotCalledException()
 
     override fun add(treeNode: TreeNode<T>, placeholder: TreeViewAdapter.Placeholder) {
         val treeNodes = treeNodesRelay.value
-                ?.toMutableList()
-                ?: throw SetTreeNodesNotCalledException()
+            ?.toMutableList()
+            ?: throw SetTreeNodesNotCalledException()
 
         treeNodes.add(treeNode)
         treeNodes.sort()
@@ -80,8 +80,8 @@ class TreeNodeCollection<T : TreeHolder>(val treeViewAdapter: TreeViewAdapter<T>
 
     override fun remove(treeNode: TreeNode<T>, placeholder: TreeViewAdapter.Placeholder) {
         val treeNodes = treeNodesRelay.value
-                ?.toMutableList()
-                ?: throw SetTreeNodesNotCalledException()
+            ?.toMutableList()
+            ?: throw SetTreeNodesNotCalledException()
 
         check(treeNodes.contains(treeNode))
 
@@ -107,21 +107,21 @@ class TreeNodeCollection<T : TreeHolder>(val treeViewAdapter: TreeViewAdapter<T>
         val toTreeNode = getNode(toPosition, PositionMode.DISPLAYED)
 
         listOf(fromTreeNode, toTreeNode).map { it.parent }
-                .distinct()
-                .single()
-                .swapNodePositions(fromTreeNode, toTreeNode, placeholder)
+            .distinct()
+            .single()
+            .swapNodePositions(fromTreeNode, toTreeNode, placeholder)
     }
 
     override fun swapNodePositions(
-            fromTreeNode: TreeNode<T>,
-            toTreeNode: TreeNode<T>,
-            placeholder: TreeViewAdapter.Placeholder,
+        fromTreeNode: TreeNode<T>,
+        toTreeNode: TreeNode<T>,
+        placeholder: TreeViewAdapter.Placeholder,
     ) {
         check(treeViewAdapter.locker == null)
 
         val treeNodes = treeNodesRelay.value
-                ?.toMutableList()
-                ?: throw SetTreeNodesNotCalledException()
+            ?.toMutableList()
+            ?: throw SetTreeNodesNotCalledException()
 
         val fromPosition = treeNodes.indexOf(fromTreeNode)
         check(fromPosition >= 0)
@@ -147,14 +147,16 @@ class TreeNodeCollection<T : TreeHolder>(val treeViewAdapter: TreeViewAdapter<T>
         val currentPositionInParent = displayedNodesInParent.indexOf(currentTreeNode)
 
         val previousNode = currentPositionInParent.takeIf { it > 0 }
-                ?.let { displayedNodesInParent[currentPositionInParent - 1] }
-                ?.modelNode
-                as? Sortable
+            ?.let { displayedNodesInParent[currentPositionInParent - 1] }
+            ?.modelNode
+            ?.let { it as? Sortable }
+            ?.takeIf { it.sortable }
 
         val nextNode = currentPositionInParent.takeIf { it < displayedNodesInParent.size - 1 }
-                ?.let { displayedNodesInParent[currentPositionInParent + 1] }
-                ?.modelNode
-                as? Sortable
+            ?.let { displayedNodesInParent[currentPositionInParent + 1] }
+            ?.modelNode
+            ?.let { it as? Sortable }
+            ?.takeIf { it.sortable }
 
         check(previousNode != null || nextNode != null)
 
@@ -180,8 +182,8 @@ class TreeNodeCollection<T : TreeHolder>(val treeViewAdapter: TreeViewAdapter<T>
     fun selectNode(position: Int) = treeViewAdapter.updateDisplayedNodes { displayedNodes[position].select(it) }
 
     fun normalize() = treeNodesRelay.value
-            ?.forEach { it.normalize() }
-            ?: throw SetTreeNodesNotCalledException()
+        ?.forEach { it.normalize() }
+        ?: throw SetTreeNodesNotCalledException()
 
     fun resetExpansion(onlyProgrammatic: Boolean, placeholder: TreeViewAdapter.Placeholder) {
         treeNodesRelay.value!!.forEach { it.resetExpansion(onlyProgrammatic, placeholder) }
@@ -193,7 +195,8 @@ class TreeNodeCollection<T : TreeHolder>(val treeViewAdapter: TreeViewAdapter<T>
 
     class SetTreeNodesNotCalledException : InitializationException("TreeNodeCollection.setTreeNodes() has not been called.")
 
-    class SetTreeNodesCalledTwiceException : InitializationException("TreeNodeCollection.setTreeNodes() has already been called.")
+    class SetTreeNodesCalledTwiceException :
+        InitializationException("TreeNodeCollection.setTreeNodes() has already been called.")
 
     override val id = Id
 

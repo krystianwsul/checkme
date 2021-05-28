@@ -100,7 +100,7 @@ abstract class DragHelper(callback: MyCallback = MyCallback()) : ItemTouchHelper
         val thisTreeNode = treeNodeCollection.getNode(startPosition!!)
         val otherTreeNode = treeNodeCollection.getNode(position)
 
-        if (otherTreeNode.modelNode !is Sortable) return false
+        if ((otherTreeNode.modelNode as? Sortable)?.sortable != true) return false
 
         return thisTreeNode.parent == otherTreeNode.parent
     }

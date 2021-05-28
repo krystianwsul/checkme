@@ -83,14 +83,11 @@ sealed class Task(
 
     val scheduleIntervals get() = intervalInfo.scheduleIntervals
 
-    val parentHierarchyIntervals
-        get() =
-            intervalInfo.intervals.mapNotNull { (it.type as? Type.Child)?.getHierarchyInterval(it) } // todo interval
+    val parentHierarchyIntervals // todo interval
+        get() = intervalInfo.parentHierarchyIntervals
 
     val noScheduleOrParentIntervals // todo interval
-        get() = intervalInfo.intervals.mapNotNull {
-            (it.type as? Type.NoSchedule)?.getNoScheduleOrParentInterval(it)
-        }
+        get() = intervalInfo.noScheduleOrParentIntervals
 
     private val childHierarchyIntervalsProperty = invalidatableLazy {
         parent.getTaskHierarchiesByParentTaskKey(taskKey)

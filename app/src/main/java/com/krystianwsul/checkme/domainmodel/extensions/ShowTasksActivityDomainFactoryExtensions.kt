@@ -52,7 +52,7 @@ fun DomainFactory.getShowTasksData(parameters: ShowTasksActivity.Parameters): Sh
                 .values
                 .map {
                     val childTaskDatas = it.getAllTasks()
-                        .filter { it.current(now) && it.isUnscheduled(now) }
+                        .filter { it.current(now) && it.intervalInfo.isUnscheduled(now) }
                         .map { it.toChildTaskData(it.getHierarchyExactTimeStamp(now)) }
 
                     it.toProjectData(childTaskDatas)

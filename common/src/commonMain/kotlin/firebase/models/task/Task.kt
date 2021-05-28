@@ -126,7 +126,7 @@ sealed class Task(
         val topLevelTask = getTopLevelTask(now)
 
         // if it's in the unscheduled tasks list, we can add a subtask
-        if (topLevelTask.isUnscheduled(now)) return true
+        if (topLevelTask.intervalInfo.isUnscheduled(now)) return true
 
         // ... and if not, we can just use getInstances() and check all of them.
         return getInstances(null, null, now).any { it.canAddSubtask(now, hack24) }
@@ -134,14 +134,6 @@ sealed class Task(
 
     private fun getTopLevelTask(exactTimeStamp: ExactTimeStamp): Task =
         getParentTask(exactTimeStamp)?.getTopLevelTask(exactTimeStamp) ?: this
-
-    fun getCurrentNoScheduleOrParent(now: ExactTimeStamp.Local) =
-        intervalInfo.getInterval(now) // todo interval
-            .let { (it.type as? Type.NoSchedule)?.getNoScheduleOrParentInterval(it) }
-            ?.also {
-                check(it.currentOffset(now))
-                check(it.noScheduleOrParent.currentOffset(now))
-            }
 
     fun isTopLevelTask(exactTimeStamp: ExactTimeStamp): Boolean {
         requireCurrentOffset(exactTimeStamp)
@@ -172,7 +164,7 @@ sealed class Task(
         taskUndoData?.taskKeys?.put(taskKey, scheduleIds)
 
         if (!recursive) {
-            getParentTaskHierarchy(now)?.let {
+            intervalInfo.getParentTaskHierarchy(now)?.let {
                 it.requireCurrentOffset(now)
                 it.taskHierarchy.requireCurrent(now)
 
@@ -193,18 +185,12 @@ sealed class Task(
         .onEach { it.setEndExactTimeStamp(now.toOffset()) }
         .map { it.id }
 
-    // todo interval
+    // todo interval add update asserts
     fun endAllCurrentNoScheduleOrParents(now: ExactTimeStamp.Local) = noScheduleOrParents.filter { it.currentOffset(now) }
         .onEach { it.setEndExactTimeStamp(now.toOffset()) }
         .map { it.id }
 
     fun getNestedTaskHierarchy(taskHierarchyId: TaskHierarchyId) = nestedParentTaskHierarchies.getValue(taskHierarchyId)
-
-    private fun getParentTaskHierarchy(exactTimeStamp: ExactTimeStamp): HierarchyInterval? {
-        requireCurrentOffset(exactTimeStamp) // todo interval
-
-        return intervalInfo.getInterval(exactTimeStamp).let { (it.type as? Type.Child)?.getHierarchyInterval(it) }
-    }
 
     fun clearEndExactTimeStamp(now: ExactTimeStamp.Local) {
         requireNotCurrent(now)
@@ -215,7 +201,7 @@ sealed class Task(
     fun getParentTask(exactTimeStamp: ExactTimeStamp): Task? {
         requireNotDeletedOffset(exactTimeStamp)
 
-        return getParentTaskHierarchy(exactTimeStamp)?.run {
+        return intervalInfo.getParentTaskHierarchy(exactTimeStamp)?.run {
             requireNotDeletedOffset(exactTimeStamp)
             taskHierarchy.requireNotDeletedOffset(exactTimeStamp)
 
@@ -569,8 +555,6 @@ sealed class Task(
             parentTask.name.takeIf { showParent }
         }
     }
-
-    fun isUnscheduled(now: ExactTimeStamp.Local) = intervalInfo.getInterval(now).type is Type.NoSchedule // todo interval
 
     fun correctIntervalEndExactTimeStamps() = intervalInfo.intervals
         .asSequence()

@@ -186,7 +186,7 @@ fun DomainUpdater.updatePhotoUrl(
 }.perform(this)
 
 fun DomainFactory.getUnscheduledTasks(now: ExactTimeStamp.Local) =
-        getAllTasks().filter { it.current(now) && it.isUnscheduled(now) }
+        getAllTasks().filter { it.current(now) && it.intervalInfo.isUnscheduled(now) }
 
 fun DomainFactory.getGroupListChildTaskDatas(
         parentTask: Task,

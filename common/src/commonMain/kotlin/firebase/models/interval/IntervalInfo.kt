@@ -15,7 +15,7 @@ class IntervalInfo(val task: Task, val intervals: List<Interval>) {
     val noScheduleOrParentIntervals
         get() = intervals.mapNotNull { (it.type as? Type.NoSchedule)?.getNoScheduleOrParentInterval(it) }
 
-    fun getInterval(exactTimeStamp: ExactTimeStamp): Interval { // todo interval make private
+    private fun getInterval(exactTimeStamp: ExactTimeStamp): Interval {
         try {
             return intervals.single {
                 it.containsExactTimeStamp(exactTimeStamp)
@@ -40,6 +40,20 @@ class IntervalInfo(val task: Task, val intervals: List<Interval>) {
                 ?: listOf()
         }
     }
+
+    fun getCurrentNoScheduleOrParent(now: ExactTimeStamp.Local) =
+        getInterval(now).let { (it.type as? Type.NoSchedule)?.getNoScheduleOrParentInterval(it) }?.also {
+            check(it.currentOffset(now))
+            check(it.noScheduleOrParent.currentOffset(now))
+        }
+
+    fun getParentTaskHierarchy(exactTimeStamp: ExactTimeStamp): HierarchyInterval? {
+        task.requireCurrentOffset(exactTimeStamp)
+
+        return getInterval(exactTimeStamp).let { (it.type as? Type.Child)?.getHierarchyInterval(it) }
+    }
+
+    fun isUnscheduled(now: ExactTimeStamp.Local) = getInterval(now).type is Type.NoSchedule // todo interval
 
     private class IntervalException(message: String, cause: Throwable) : Exception(message, cause)
 }

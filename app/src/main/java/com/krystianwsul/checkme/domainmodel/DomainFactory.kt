@@ -715,7 +715,7 @@ class DomainFactory(
             )
 
             val currentSchedules = oldTask.intervalInfo.getCurrentScheduleIntervals(now).map { it.schedule }
-            val currentNoScheduleOrParent = oldTask.getCurrentNoScheduleOrParent(now)?.noScheduleOrParent
+            val currentNoScheduleOrParent = oldTask.intervalInfo.getCurrentNoScheduleOrParent(now)?.noScheduleOrParent
 
             if (currentSchedules.isNotEmpty()) {
                 check(currentNoScheduleOrParent == null)

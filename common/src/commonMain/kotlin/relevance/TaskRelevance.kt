@@ -16,31 +16,31 @@ class TaskRelevance(val task: Task) {
         private set
 
     fun setRelevant(
-            taskRelevances: Map<TaskKey, TaskRelevance>,
-            taskHierarchyRelevances: Map<TaskHierarchyKey, TaskHierarchyRelevance>,
-            instanceRelevances: MutableMap<InstanceKey, InstanceRelevance>,
-            now: ExactTimeStamp.Local,
+        taskRelevances: Map<TaskKey, TaskRelevance>,
+        taskHierarchyRelevances: Map<TaskHierarchyKey, TaskHierarchyRelevance>,
+        instanceRelevances: MutableMap<InstanceKey, InstanceRelevance>,
+        now: ExactTimeStamp.Local,
     ) {
         if (relevant) return
 
         relevant = true
 
         (task.parentHierarchyIntervals + task.childHierarchyIntervals)
-                .asSequence()
-                .filter {
-                    val hierarchyExactTimeStamp = task.getHierarchyExactTimeStamp(now)
+            .asSequence()
+            .filter {
+                val hierarchyExactTimeStamp = task.getHierarchyExactTimeStamp(now)
 
-                    it.notDeletedOffset(hierarchyExactTimeStamp)
-                            && it.taskHierarchy.notDeletedOffset(hierarchyExactTimeStamp)
-                }
-                .forEach {
-                    taskHierarchyRelevances.getValue(it.taskHierarchy.taskHierarchyKey).setRelevant(
-                            taskRelevances,
-                            taskHierarchyRelevances,
-                            instanceRelevances,
-                            now
-                    )
-                }
+                it.notDeletedOffset(hierarchyExactTimeStamp)
+                        && it.taskHierarchy.notDeletedOffset(hierarchyExactTimeStamp)
+            }
+            .forEach {
+                taskHierarchyRelevances.getValue(it.taskHierarchy.taskHierarchyKey).setRelevant(
+                    taskRelevances,
+                    taskHierarchyRelevances,
+                    instanceRelevances,
+                    now
+                )
+            }
 
         fun Instance.filterOldestVisible(now: ExactTimeStamp.Local, ignoreHidden: Boolean = false): Boolean {
             val oldestVisibles = getOldestVisibles()
@@ -51,12 +51,12 @@ class TaskRelevance(val task: Task) {
                 oldestVisibles.map {
                     when (it) {
                         Schedule.OldestVisible.Single -> isVisible(
-                                now,
-                                Instance.VisibilityOptions(
-                                        hack24 = true,
-                                        ignoreHidden = ignoreHidden,
-                                        assumeRoot = true
-                                )
+                            now,
+                            Instance.VisibilityOptions(
+                                hack24 = true,
+                                ignoreHidden = ignoreHidden,
+                                assumeRoot = true
+                            )
                         )
                         Schedule.OldestVisible.RepeatingNull -> true
                         is Schedule.OldestVisible.RepeatingNonNull -> scheduleDate >= it.date
@@ -66,10 +66,10 @@ class TaskRelevance(val task: Task) {
         }
 
         task.existingInstances
-                .values
-                .filter { it.isRootInstance() && it.filterOldestVisible(now, true) }
-                .map { instanceRelevances.getValue(it.instanceKey) }
-                .forEach { it.setRelevant(taskRelevances, taskHierarchyRelevances, instanceRelevances, now) }
+            .values
+            .filter { it.isRootInstance() && it.filterOldestVisible(now, true) }
+            .map { instanceRelevances.getValue(it.instanceKey) }
+            .forEach { it.setRelevant(taskRelevances, taskHierarchyRelevances, instanceRelevances, now) }
     }
 
     fun setRemoteRelevant(
@@ -79,10 +79,11 @@ class TaskRelevance(val task: Task) {
         check(relevant)
         check(task.project == remoteProjectRelevance.project)
 
-        task.scheduleIntervals
-                .mapNotNull { it.schedule.customTimeKey }
-                .map { customTimeRelevanceCollection.getRelevance(it) }
-                .forEach { it.setRelevant() }
+        task.intervalInfo
+            .scheduleIntervals
+            .mapNotNull { it.schedule.customTimeKey }
+            .map { customTimeRelevanceCollection.getRelevance(it) }
+            .forEach { it.setRelevant() }
 
         remoteProjectRelevance.setRelevant()
     }

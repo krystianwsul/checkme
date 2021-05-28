@@ -34,7 +34,7 @@ class RootTask(
     private fun Type.Schedule.getParentProjectSchedule() = taskParentEntries.maxByOrNull { it.startExactTimeStamp }!!
 
     private val projectIdProperty = invalidatableLazyCallbacks {
-        val interval = intervalInfo.intervals.last() // todo interval
+        val interval = intervalInfo.intervals.last()
 
         when (val type = interval.type) {
             is Type.Schedule -> type.getParentProjectSchedule().projectId

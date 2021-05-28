@@ -82,9 +82,7 @@ sealed class Task(
     val intervalInfo by intervalInfoProperty
 
     val scheduleIntervals get() = intervalInfo.scheduleIntervals
-
-    val parentHierarchyIntervals // todo interval
-        get() = intervalInfo.parentHierarchyIntervals
+    val parentHierarchyIntervals get() = intervalInfo.parentHierarchyIntervals
 
     val noScheduleOrParentIntervals // todo interval
         get() = intervalInfo.noScheduleOrParentIntervals

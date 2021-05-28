@@ -81,7 +81,7 @@ sealed class Task(
     val intervalInfoProperty = invalidatableLazyCallbacks { IntervalBuilder.build(this) }
     val intervalInfo by intervalInfoProperty
 
-    val scheduleIntervals get() = intervalInfo.scheduleIntervals // todo interval
+    val scheduleIntervals get() = intervalInfo.scheduleIntervals
 
     val parentHierarchyIntervals
         get() =

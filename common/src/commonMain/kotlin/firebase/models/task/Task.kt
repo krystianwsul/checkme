@@ -78,7 +78,11 @@ sealed class Task(
 
     val parentTaskHierarchies get() = projectParentTaskHierarchies + nestedParentTaskHierarchies.values
 
-    val intervalInfoProperty = invalidatableLazyCallbacks { IntervalBuilder.build(this) }
+    val intervalInfoProperty = invalidatableLazyCallbacks {
+        checkNoIntervalUpdate()
+
+        IntervalBuilder.build(this)
+    }
     val intervalInfo by intervalInfoProperty
 
     private val childHierarchyIntervalsProperty = invalidatableLazy {
@@ -176,19 +180,6 @@ sealed class Task(
 
         setMyEndExactTimeStamp(endData)
     }
-
-    fun endAllCurrentTaskHierarchies(now: ExactTimeStamp.Local) = parentTaskHierarchies.filter { it.currentOffset(now) }
-        .onEach { it.setEndExactTimeStamp(now) }
-        .map { it.taskHierarchyKey }
-
-    fun endAllCurrentSchedules(now: ExactTimeStamp.Local) = schedules.filter { it.currentOffset(now) }
-        .onEach { it.setEndExactTimeStamp(now.toOffset()) }
-        .map { it.id }
-
-    // todo interval add update asserts
-    fun endAllCurrentNoScheduleOrParents(now: ExactTimeStamp.Local) = noScheduleOrParents.filter { it.currentOffset(now) }
-        .onEach { it.setEndExactTimeStamp(now.toOffset()) }
-        .map { it.id }
 
     fun getNestedTaskHierarchy(taskHierarchyId: TaskHierarchyId) = nestedParentTaskHierarchies.getValue(taskHierarchyId)
 
@@ -498,7 +489,15 @@ sealed class Task(
 
     fun invalidateChildTaskHierarchies() = childHierarchyIntervalsProperty.invalidate()
 
-    fun invalidateIntervals() = intervalInfoProperty.invalidate()
+    fun invalidateIntervals() {
+        val intervalUpdate = getIntervalUpdate()
+
+        if (intervalUpdate != null) {
+            intervalUpdate.invalidateIntervals()
+        } else {
+            intervalInfoProperty.invalidate()
+        }
+    }
 
     fun getScheduleTextMultiline(
         scheduleTextFactory: ScheduleTextFactory,

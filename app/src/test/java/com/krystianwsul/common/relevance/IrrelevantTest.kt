@@ -18,6 +18,7 @@ import com.krystianwsul.common.firebase.json.tasks.RootTaskJson
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.project.PrivateProject
 import com.krystianwsul.common.firebase.models.task.Task
+import com.krystianwsul.common.firebase.models.task.performIntervalUpdate
 import com.krystianwsul.common.firebase.records.project.PrivateProjectRecord
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.ProjectKey
@@ -164,12 +165,12 @@ class IrrelevantTest {
 
         now = ExactTimeStamp.Local(day1, hour4.toHourMilli())
 
-        task.apply {
+        task.performIntervalUpdate {
             endAllCurrentTaskHierarchies(now)
             endAllCurrentSchedules(now)
             endAllCurrentNoScheduleOrParents(now)
 
-            setNoScheduleOrParent(now, project.projectKey)
+            task.setNoScheduleOrParent(now, project.projectKey)
         }
 
         instance.setDone(shownFactory, true, now)

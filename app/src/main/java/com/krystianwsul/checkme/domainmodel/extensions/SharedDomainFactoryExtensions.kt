@@ -22,6 +22,7 @@ import com.krystianwsul.common.firebase.models.filterQuery
 import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.task.RootTask
 import com.krystianwsul.common.firebase.models.task.Task
+import com.krystianwsul.common.firebase.models.task.performIntervalUpdate
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.utils.InstanceKey
@@ -295,9 +296,15 @@ fun addChildToParent(
 ): UndoData {
     childTask.requireCurrent(now)
 
-    val taskHierarchyKeys = childTask.endAllCurrentTaskHierarchies(now)
-    val scheduleIds = childTask.endAllCurrentSchedules(now)
-    val noScheduleOrParentsIds = childTask.endAllCurrentNoScheduleOrParents(now)
+    lateinit var taskHierarchyKeys: List<TaskHierarchyKey>
+    lateinit var scheduleIds: List<String>
+    lateinit var noScheduleOrParentsIds: List<String>
+
+    childTask.performIntervalUpdate {
+        taskHierarchyKeys = endAllCurrentTaskHierarchies(now)
+        scheduleIds = endAllCurrentSchedules(now)
+        noScheduleOrParentsIds = endAllCurrentNoScheduleOrParents(now)
+    }
 
     val deleteTaskHierarchyKey = parentTask.addChild(childTask, now)
 

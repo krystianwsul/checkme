@@ -25,6 +25,7 @@ import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.task.ProjectTask
 import com.krystianwsul.common.firebase.models.task.RootTask
 import com.krystianwsul.common.firebase.models.task.Task
+import com.krystianwsul.common.firebase.models.task.performIntervalUpdate
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.*
@@ -321,17 +322,19 @@ fun DomainUpdater.updateScheduleTask(
     val finalTask = convertAndUpdateProject(originalTask, now, projectKey).apply {
         setName(name, note)
 
-        endAllCurrentTaskHierarchies(now)
-        endAllCurrentNoScheduleOrParents(now)
+        performIntervalUpdate {
+            endAllCurrentTaskHierarchies(now)
+            endAllCurrentNoScheduleOrParents(now)
 
-        updateSchedules(
-            localFactory,
-            scheduleDatas.map { it to getTime(it.timePair) },
-            now,
-            sharedProjectParameters.nonNullAssignedTo,
-            this@create,
-            projectKey,
-        )
+            updateSchedules(
+                localFactory,
+                scheduleDatas.map { it to getTime(it.timePair) },
+                now,
+                sharedProjectParameters.nonNullAssignedTo,
+                this@create,
+                projectKey,
+            )
+        }
 
         if (imagePath != null) setImage(deviceDbInfo, imageUuid?.let { ImageState.Local(imageUuid) })
     }
@@ -381,15 +384,17 @@ fun DomainUpdater.updateChildTask(
 
     check(!newParentTask.hasAncestor(taskKey))
 
-    if (task.getParentTask(now) != newParentTask) {
-        if (allReminders) task.endAllCurrentTaskHierarchies(now)
+    task.performIntervalUpdate {
+        if (task.getParentTask(now) != newParentTask) {
+            if (allReminders) endAllCurrentTaskHierarchies(now)
 
-        newParentTask.addChild(task, now)
-    }
+            newParentTask.addChild(task, now)
+        }
 
-    if (allReminders) {
-        task.endAllCurrentSchedules(now)
-        task.endAllCurrentNoScheduleOrParents(now)
+        if (allReminders) {
+            endAllCurrentSchedules(now)
+            endAllCurrentNoScheduleOrParents(now)
+        }
     }
 
     updateProjectRootIds()
@@ -438,11 +443,13 @@ fun DomainUpdater.updateTopLevelTask(
     val finalTask = convertAndUpdateProject(originalTask, now, projectKey).apply {
         setName(name, note)
 
-        endAllCurrentTaskHierarchies(now)
-        endAllCurrentSchedules(now)
-        endAllCurrentNoScheduleOrParents(now)
+        performIntervalUpdate {
+            endAllCurrentTaskHierarchies(now)
+            endAllCurrentSchedules(now)
+            endAllCurrentNoScheduleOrParents(now)
 
-        setNoScheduleOrParent(now, projectKey)
+            setNoScheduleOrParent(now, projectKey)
+        }
     }
 
     updateProjectRootIds()

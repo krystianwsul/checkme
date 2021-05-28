@@ -1,13 +1,11 @@
 package com.krystianwsul.common.firebase.models.task
 
 import com.krystianwsul.common.domain.DeviceDbInfo
-import com.krystianwsul.common.domain.ScheduleGroup
 import com.krystianwsul.common.firebase.json.noscheduleorparent.RootNoScheduleOrParentJson
 import com.krystianwsul.common.firebase.json.schedule.*
 import com.krystianwsul.common.firebase.json.taskhierarchies.NestedTaskHierarchyJson
 import com.krystianwsul.common.firebase.json.tasks.TaskJson
 import com.krystianwsul.common.firebase.models.ImageState
-import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.interval.Type
 import com.krystianwsul.common.firebase.models.noscheduleorparent.NoScheduleOrParent
 import com.krystianwsul.common.firebase.models.noscheduleorparent.RootNoScheduleOrParent
@@ -66,7 +64,7 @@ class RootTask(
 
     override val projectCustomTimeIdProvider = JsonTime.ProjectCustomTimeIdProvider.rootTask
 
-    fun setNoScheduleOrParent(now: ExactTimeStamp.Local, projectKey: ProjectKey<*>) {
+    fun setNoScheduleOrParent(now: ExactTimeStamp.Local, projectKey: ProjectKey<*>) { // todo interval require update
         val noScheduleOrParentRecord = taskRecord.newNoScheduleOrParentRecord(
             RootNoScheduleOrParentJson(
                 now.long,
@@ -137,7 +135,7 @@ class RootTask(
         is Time.Normal -> time
     }
 
-    fun addChild(childTask: RootTask, now: ExactTimeStamp.Local): TaskHierarchyKey {
+    fun addChild(childTask: RootTask, now: ExactTimeStamp.Local): TaskHierarchyKey { // todo interval require update on child
         val taskHierarchyKey = childTask.createParentNestedTaskHierarchy(this, now)
         addRootTask(childTask)
 
@@ -212,68 +210,6 @@ class RootTask(
         }
 
         return this
-    }
-
-    private data class ScheduleDiffKey(val scheduleData: ScheduleData, val assignedTo: Set<UserKey>)
-
-    fun updateSchedules(
-        shownFactory: Instance.ShownFactory,
-        scheduleDatas: List<Pair<ScheduleData, Time>>,
-        now: ExactTimeStamp.Local,
-        assignedTo: Set<UserKey>,
-        customTimeMigrationHelper: Project.CustomTimeMigrationHelper,
-        projectKey: ProjectKey<*>,
-    ) {
-        val removeSchedules = mutableListOf<Schedule>()
-        val addScheduleDatas = scheduleDatas.map { ScheduleDiffKey(it.first, assignedTo) to it }.toMutableList()
-
-        val oldSchedules = intervalInfo.getCurrentScheduleIntervals(now).map { it.schedule }
-
-        val oldScheduleDatas = ScheduleGroup.getGroups(oldSchedules).map {
-            ScheduleDiffKey(it.scheduleData, it.assignedTo) to it.schedules
-        }
-
-        for ((key, value) in oldScheduleDatas) {
-            val existing = addScheduleDatas.singleOrNull { it.first == key }
-
-            if (existing != null)
-                addScheduleDatas.remove(existing)
-            else
-                removeSchedules.addAll(value)
-        }
-
-        /*
-            requirements for mock:
-                there was one old schedule, it was single and mocked, and it's getting replaced
-                by another single schedule
-         */
-
-        val singleRemoveSchedule = removeSchedules.singleOrNull() as? SingleSchedule
-
-        val singleAddSchedulePair = addScheduleDatas.singleOrNull()?.takeIf {
-            it.first.scheduleData is ScheduleData.Single
-        }
-
-        if (singleRemoveSchedule != null && singleAddSchedulePair != null) {
-            if (assignedTo.isNotEmpty()) singleRemoveSchedule.setAssignedTo(assignedTo)
-
-            singleRemoveSchedule.getInstance(this).setInstanceDateTime(
-                shownFactory,
-                singleAddSchedulePair.second.run { DateTime((first as ScheduleData.Single).date, second) },
-                customTimeMigrationHelper,
-                now,
-            )
-        } else {
-            removeSchedules.forEach { it.setEndExactTimeStamp(now.toOffset()) }
-
-            createSchedules(
-                now,
-                addScheduleDatas.map { it.second },
-                assignedTo,
-                customTimeMigrationHelper,
-                projectKey,
-            )
-        }
     }
 
     fun createSchedules(
@@ -428,7 +364,7 @@ class RootTask(
             }
         }
 
-        intervalInfoProperty.invalidate()
+        invalidateIntervals()
     }
 
     private fun Set<String>.toAssociateMap() = associate { it to true }
@@ -569,7 +505,7 @@ class RootTask(
             }
         }
 
-        intervalInfoProperty.invalidate()
+        invalidateIntervals()
     }
 
     interface Parent : Task.Parent, Project.RootTaskProvider {

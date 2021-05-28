@@ -79,18 +79,16 @@ sealed class Task(
     val parentTaskHierarchies get() = projectParentTaskHierarchies + nestedParentTaskHierarchies.values
 
     val intervalInfoProperty = invalidatableLazyCallbacks { IntervalBuilder.build(this) }
-    val intervalInfo by intervalInfoProperty
-    val intervals get() = intervalInfo.intervals
+    val intervalInfo by intervalInfoProperty // todo interval
 
-    val scheduleIntervalsProperty = invalidatableLazyCallbacks {
-        intervals.mapNotNull { (it.type as? Type.Schedule)?.getScheduleIntervals(it) }.flatten()
-    }.apply { addTo(intervalInfoProperty) }
-    val scheduleIntervals by scheduleIntervalsProperty
+    val scheduleIntervals get() = intervalInfo.scheduleIntervals // todo interval
 
-    val parentHierarchyIntervals get() = intervals.mapNotNull { (it.type as? Type.Child)?.getHierarchyInterval(it) }
+    val parentHierarchyIntervals
+        get() =
+            intervalInfo.intervals.mapNotNull { (it.type as? Type.Child)?.getHierarchyInterval(it) }
 
     val noScheduleOrParentIntervals
-        get() = intervals.mapNotNull {
+        get() = intervalInfo.intervals.mapNotNull {
             (it.type as? Type.NoSchedule)?.getNoScheduleOrParentInterval(it)
         }
 
@@ -212,6 +210,7 @@ sealed class Task(
         .onEach { it.setEndExactTimeStamp(now.toOffset()) }
         .map { it.id }
 
+    // todo interval
     fun endAllCurrentNoScheduleOrParents(now: ExactTimeStamp.Local) = noScheduleOrParents.filter { it.currentOffset(now) }
         .onEach { it.setEndExactTimeStamp(now.toOffset()) }
         .map { it.id }
@@ -591,7 +590,7 @@ sealed class Task(
     fun isUnscheduled(now: ExactTimeStamp.Local) = getInterval(now).type is Type.NoSchedule
 
     private fun getInterval(exactTimeStamp: ExactTimeStamp): Interval {
-        val intervals = intervals
+        val intervals = intervalInfo.intervals
 
         try {
             return intervals.single {
@@ -610,7 +609,8 @@ sealed class Task(
 
     private class IntervalException(message: String, cause: Throwable) : Exception(message, cause)
 
-    fun correctIntervalEndExactTimeStamps() = intervals.asSequence()
+    fun correctIntervalEndExactTimeStamps() = intervalInfo.intervals
+        .asSequence()
         .filterIsInstance<Interval.Ended>()
         .forEach { it.correctEndExactTimeStamps() }
 

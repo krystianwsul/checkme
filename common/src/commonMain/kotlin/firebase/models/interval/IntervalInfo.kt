@@ -15,7 +15,7 @@ class IntervalInfo(val task: Task, val intervals: List<Interval>) {
     val noScheduleOrParentIntervals
         get() = intervals.mapNotNull { (it.type as? Type.NoSchedule)?.getNoScheduleOrParentInterval(it) }
 
-    fun getInterval(exactTimeStamp: ExactTimeStamp): Interval {
+    fun getInterval(exactTimeStamp: ExactTimeStamp): Interval { // todo interval make private
         try {
             return intervals.single {
                 it.containsExactTimeStamp(exactTimeStamp)
@@ -28,6 +28,16 @@ class IntervalInfo(val task: Task, val intervals: List<Interval>) {
                 },
                 throwable
             )
+        }
+    }
+
+    fun getCurrentScheduleIntervals(exactTimeStamp: ExactTimeStamp): List<ScheduleInterval> {
+        task.requireCurrentOffset(exactTimeStamp)
+
+        return getInterval(exactTimeStamp).let {
+            (it.type as? Type.Schedule)?.getScheduleIntervals(it)
+                ?.filter { it.schedule.currentOffset(exactTimeStamp) }
+                ?: listOf()
         }
     }
 

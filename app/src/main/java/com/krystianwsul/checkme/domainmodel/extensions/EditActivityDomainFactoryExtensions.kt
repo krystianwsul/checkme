@@ -50,11 +50,9 @@ fun DomainFactory.getCreateTaskData(
         var assignedTo: Set<UserKey> = setOf()
 
         if (task.isTopLevelTask(now)) {
-            val schedules = task.getCurrentScheduleIntervals(now)
+            val schedules = task.intervalInfo.getCurrentScheduleIntervals(now)
 
-            customTimes += schedules.mapNotNull { it.schedule.customTimeKey }.map {
-                it to getCustomTime(it)
-            }
+            customTimes += schedules.mapNotNull { it.schedule.customTimeKey }.map { it to getCustomTime(it) }
 
             parentKey = task.project
                 .projectKey

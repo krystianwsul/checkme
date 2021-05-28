@@ -227,7 +227,7 @@ class RootTask(
         val removeSchedules = mutableListOf<Schedule>()
         val addScheduleDatas = scheduleDatas.map { ScheduleDiffKey(it.first, assignedTo) to it }.toMutableList()
 
-        val oldSchedules = getCurrentScheduleIntervals(now).map { it.schedule }
+        val oldSchedules = intervalInfo.getCurrentScheduleIntervals(now).map { it.schedule }
 
         val oldScheduleDatas = ScheduleGroup.getGroups(oldSchedules).map {
             ScheduleDiffKey(it.scheduleData, it.assignedTo) to it.schedules

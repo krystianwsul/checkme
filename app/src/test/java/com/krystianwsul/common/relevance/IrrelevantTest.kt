@@ -177,7 +177,7 @@ class IrrelevantTest {
         fun Task.isReminderless() = current(now)
                 && this.isVisible(now, true)
                 && isTopLevelTask(now)
-                && getCurrentScheduleIntervals(now).isEmpty()
+                && intervalInfo.getCurrentScheduleIntervals(now).isEmpty()
 
         assertTrue(task.isReminderless())
 
@@ -246,7 +246,7 @@ class IrrelevantTest {
 
         // 2. Mark single instance done
 
-        assertTrue(task.getCurrentScheduleIntervals(now).size == 2)
+        assertTrue(task.intervalInfo.getCurrentScheduleIntervals(now).size == 2)
 
         now = ExactTimeStamp.Local(day1, hour2)
 
@@ -276,11 +276,11 @@ class IrrelevantTest {
                 .single()
                 .isVisible(now, Instance.VisibilityOptions(hack24 = true))
         )
-        assertTrue(task.getCurrentScheduleIntervals(now).size == 2)
+        assertTrue(task.intervalInfo.getCurrentScheduleIntervals(now).size == 2)
 
         Irrelevant.setIrrelevant(mapOf(), project, now)
 
-        assertTrue(task.getCurrentScheduleIntervals(now).size == 1)
+        assertTrue(task.intervalInfo.getCurrentScheduleIntervals(now).size == 1)
         assertTrue(
             task.getInstances(
                 null,

@@ -135,16 +135,6 @@ sealed class Task(
     private fun getTopLevelTask(exactTimeStamp: ExactTimeStamp): Task =
         getParentTask(exactTimeStamp)?.getTopLevelTask(exactTimeStamp) ?: this
 
-    fun getCurrentScheduleIntervals(exactTimeStamp: ExactTimeStamp): List<ScheduleInterval> {
-        requireCurrentOffset(exactTimeStamp)
-
-        return intervalInfo.getInterval(exactTimeStamp).let { // todo interval
-            (it.type as? Type.Schedule)?.getScheduleIntervals(it)
-                ?.filter { it.schedule.currentOffset(exactTimeStamp) }
-                ?: listOf()
-        }
-    }
-
     fun getCurrentNoScheduleOrParent(now: ExactTimeStamp.Local) =
         intervalInfo.getInterval(now) // todo interval
             .let { (it.type as? Type.NoSchedule)?.getNoScheduleOrParentInterval(it) }
@@ -169,13 +159,15 @@ sealed class Task(
 
         requireCurrent(now)
 
-        val scheduleIds = getCurrentScheduleIntervals(now).map {
-            it.requireCurrentOffset(now)
+        val scheduleIds = intervalInfo.getCurrentScheduleIntervals(now)
+            .map {
+                it.requireCurrentOffset(now)
 
-            it.schedule.setEndExactTimeStamp(now.toOffset())
+                it.schedule.setEndExactTimeStamp(now.toOffset())
 
-            it.schedule.id
-        }.toSet()
+                it.schedule.id
+            }
+            .toSet()
 
         taskUndoData?.taskKeys?.put(taskKey, scheduleIds)
 
@@ -528,7 +520,7 @@ sealed class Task(
     ): String {
         requireCurrentOffset(exactTimeStamp)
 
-        val currentScheduleIntervals = getCurrentScheduleIntervals(exactTimeStamp)
+        val currentScheduleIntervals = intervalInfo.getCurrentScheduleIntervals(exactTimeStamp)
         currentScheduleIntervals.forEach { it.requireCurrentOffset(exactTimeStamp) }
 
         return ScheduleGroup.getGroups(currentScheduleIntervals.map { it.schedule }).joinToString("\n") {
@@ -562,7 +554,7 @@ sealed class Task(
     ): String? {
         requireCurrentOffset(exactTimeStamp)
 
-        val currentScheduleIntervals = getCurrentScheduleIntervals(exactTimeStamp)
+        val currentScheduleIntervals = intervalInfo.getCurrentScheduleIntervals(exactTimeStamp)
         val parentTask = getParentTask(exactTimeStamp)
 
         return if (parentTask == null) {
@@ -596,7 +588,7 @@ sealed class Task(
     final override fun toString() = super.toString() + ", name: $name, taskKey: $taskKey"
 
     final override fun getAssignedTo(now: ExactTimeStamp.Local): List<ProjectUser> {
-        val currentScheduleIntervals = getCurrentScheduleIntervals(getHierarchyExactTimeStamp(now))
+        val currentScheduleIntervals = intervalInfo.getCurrentScheduleIntervals(getHierarchyExactTimeStamp(now))
 
         return if (currentScheduleIntervals.isEmpty()) {
             listOf()

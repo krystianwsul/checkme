@@ -155,6 +155,8 @@ sealed class Task(
 
         requireCurrent(now)
 
+        val intervalInfo = intervalInfo // need cached value, since Schedule.setEndExactTimeStamp will invalidate it
+
         val scheduleIds = intervalInfo.getCurrentScheduleIntervals(now)
             .map {
                 it.requireCurrentOffset(now)

@@ -463,11 +463,58 @@ class DomainFactoryTest {
         domainFactory.getShowInstanceData(instanceKey)
 
         assertEquals(
-                1,
-                domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
-                        .groupListDataWrapper
-                        .instanceDatas
-                        .size,
+            1,
+            domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
+                .groupListDataWrapper
+                .instanceDatas
+                .size,
         )
+    }
+
+    @Test
+    fun testDeletingTask() {
+        val today = Date(2021, 5, 29)
+        val hourMinute1 = HourMinute(1, 0)
+        val hourMinute2 = HourMinute(2, 0)
+
+        var now = ExactTimeStamp.Local(today, hourMinute1)
+
+        val taskName = "taskName"
+
+        val createResult = domainUpdater(now).createScheduleTopLevelTask(
+            DomainListenerManager.NotificationType.All,
+            taskName,
+            listOf(ScheduleData.Single(Date(2021, 12, 20), TimePair(HourMinute(20, 0)))),
+            null,
+            null,
+            null,
+        ).blockingGet()
+
+        assertEquals(
+            taskName,
+            domainFactory.getMainData()
+                .taskData
+                .entryDatas
+                .single()
+                .children
+                .single()
+                .name
+        )
+
+        val taskKey = createResult.taskKey
+
+        val task = domainFactory.getTaskForce(taskKey)
+
+        val projectKey = task.project.projectKey
+
+        now = ExactTimeStamp.Local(today, hourMinute2)
+
+        domainUpdater(now).setTaskEndTimeStamps(
+            DomainListenerManager.NotificationType.All,
+            setOf(taskKey),
+            false,
+        ).blockingGet()
+
+        assertEquals(projectKey, task.project.projectKey)
     }
 }

@@ -58,6 +58,8 @@ class RootTask(
 
     override val projectParentTaskHierarchies = setOf<ProjectTaskHierarchy>()
 
+    override val allowPlaceholderCurrentNoSchedule = false
+
     override val projectCustomTimeIdProvider = JsonTime.ProjectCustomTimeIdProvider.rootTask
 
     fun createChildTask(

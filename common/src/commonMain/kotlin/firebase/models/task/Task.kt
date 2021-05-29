@@ -78,10 +78,12 @@ sealed class Task(
 
     val parentTaskHierarchies get() = projectParentTaskHierarchies + nestedParentTaskHierarchies.values
 
+    protected abstract val allowPlaceholderCurrentNoSchedule: Boolean
+
     val intervalInfoProperty = invalidatableLazyCallbacks {
         checkNoIntervalUpdate()
 
-        IntervalBuilder.build(this)
+        IntervalBuilder.build(this, allowPlaceholderCurrentNoSchedule)
     }
     val intervalInfo by intervalInfoProperty
 
@@ -155,7 +157,11 @@ sealed class Task(
 
         requireCurrent(now)
 
-        val intervalInfo = intervalInfo // need cached value, since Schedule.setEndExactTimeStamp will invalidate it
+        /**
+         * Need cached value, since Schedule.setEndExactTimeStamp will invalidate it.  It would be better to do this in
+         * IntervalUpdate, but that's supposed to apply only to RootTasks.
+         */
+        val intervalInfo = intervalInfo
 
         val scheduleIds = intervalInfo.getCurrentScheduleIntervals(now)
             .map {

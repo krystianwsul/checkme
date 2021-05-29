@@ -31,6 +31,9 @@ class ProjectTask(override val project: Project<*>, private val taskRecord: Proj
 
     override val projectParentTaskHierarchies by parentProjectTaskHierarchiesProperty
 
+    // It's possible this is necessary for legacy data
+    override val allowPlaceholderCurrentNoSchedule = true
+
     override val projectCustomTimeIdProvider = project.projectRecord
 
     override fun deleteFromParent() = project.deleteTask(this)

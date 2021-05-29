@@ -12,7 +12,7 @@ object IntervalBuilder {
      Note: this will return NoSchedule for the time spans that were covered by irrelevant schedules
      and task hierarchies.  These periods, by definition, shouldn't be needed for anything.
      */
-    fun build(task: Task): IntervalInfo {
+    fun build(task: Task, allowPlaceholderCurrentNoSchedule: Boolean): IntervalInfo {
         val allTypeBuilders = listOf(
             task.schedules.map { TypeBuilder.Schedule(it) },
             task.parentTaskHierarchies.map { TypeBuilder.Parent(it) },
@@ -150,6 +150,10 @@ object IntervalBuilder {
 
                 check(oldTimeStamp == currentInterval.startExactTimeStampOffset) {
                     "IntervalBuilder $task check 7: $oldTimeStamp == ${currentInterval.startExactTimeStampOffset}"
+                }
+
+                if (!allowPlaceholderCurrentNoSchedule) {
+                    (currentInterval.type as? Type.NoSchedule)?.let { checkNotNull(it.noScheduleOrParent) }
                 }
             } else {
                 check(oldTimeStamp == task.endExactTimeStampOffset) {

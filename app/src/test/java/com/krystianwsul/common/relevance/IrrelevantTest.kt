@@ -17,6 +17,7 @@ import com.krystianwsul.common.firebase.json.tasks.PrivateTaskJson
 import com.krystianwsul.common.firebase.json.tasks.RootTaskJson
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.project.PrivateProject
+import com.krystianwsul.common.firebase.models.task.ProjectRootTaskIdTracker
 import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.firebase.models.task.performIntervalUpdate
 import com.krystianwsul.common.firebase.records.project.PrivateProjectRecord
@@ -31,6 +32,7 @@ import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import org.junit.After
+import org.junit.AfterClass
 import org.junit.Assert.*
 import org.junit.BeforeClass
 import org.junit.Test
@@ -58,6 +60,14 @@ class IrrelevantTest {
         @BeforeClass
         fun beforeClass() {
             DomainThreadChecker.instance = mockk(relaxed = true)
+
+            ProjectRootTaskIdTracker.instance = object : ProjectRootTaskIdTracker {}
+        }
+
+        @JvmStatic
+        @AfterClass
+        fun afterClass() {
+            ProjectRootTaskIdTracker.instance = null
         }
     }
 

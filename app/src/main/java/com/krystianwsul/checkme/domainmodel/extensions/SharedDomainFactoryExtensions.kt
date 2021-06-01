@@ -383,7 +383,7 @@ fun DomainUpdater.setFirebaseTickListener(newTickData: TickData): Completable {
     }.perform(this)
 }
 
-// todo track throw in updateProject if not tracking.  Same for creating task, schedule, taskHierarchy, noScheduleOrParent
+// todo track  creating task, schedule, taskHierarchy, noScheduleOrParent
 fun <T> DomainFactory.trackProjectRootTaskIds(action: () -> T): T {
     check(ProjectRootTaskIdTracker.instance == null)
 

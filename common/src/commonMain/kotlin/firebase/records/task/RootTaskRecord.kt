@@ -5,6 +5,7 @@ import com.krystianwsul.common.firebase.json.noscheduleorparent.RootNoScheduleOr
 import com.krystianwsul.common.firebase.json.schedule.*
 import com.krystianwsul.common.firebase.json.taskhierarchies.NestedTaskHierarchyJson
 import com.krystianwsul.common.firebase.json.tasks.RootTaskJson
+import com.krystianwsul.common.firebase.models.task.ProjectRootTaskIdTracker
 import com.krystianwsul.common.firebase.records.AssignedToHelper
 import com.krystianwsul.common.firebase.records.InstanceRecord
 import com.krystianwsul.common.firebase.records.RootTaskParentDelegate
@@ -93,7 +94,9 @@ class RootTaskRecord private constructor(
             this(false, id, taskJson, databaseWrapper, parent)
 
     constructor(taskJson: RootTaskJson, databaseWrapper: DatabaseWrapper, parent: Parent) :
-            this(true, databaseWrapper.newRootTaskRecordId(), taskJson, databaseWrapper, parent)
+            this(true, databaseWrapper.newRootTaskRecordId(), taskJson, databaseWrapper, parent) {
+        ProjectRootTaskIdTracker.checkTracking()
+    }
 
     val rootTaskParentDelegate = object : RootTaskParentDelegate(taskJson) {
 

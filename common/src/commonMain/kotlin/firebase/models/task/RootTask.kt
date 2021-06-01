@@ -142,6 +142,8 @@ class RootTask(
     override fun invalidateProjectParentTaskHierarchies() = invalidateIntervals()
 
     fun updateProject(projectKey: ProjectKey<*>): RootTask {
+        ProjectRootTaskIdTracker.checkTracking()
+
         if (project.projectKey == projectKey) return this
 
         val interval = intervalInfo.intervals.last()

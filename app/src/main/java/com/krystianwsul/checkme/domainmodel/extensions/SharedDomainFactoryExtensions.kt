@@ -411,4 +411,15 @@ fun DomainFactory.trackProjectRootTaskIds(action: () -> Unit) {
 
     addPairs.forEach { (taskKey, projectKey) -> getDelegate(projectKey).addRootTaskKey(taskKey) }
     removePairs.forEach { (taskKey, projectKey) -> getDelegate(projectKey).removeRootTaskKey(taskKey) }
+
+    val allProjectKeys = addPairs.map { it.second } + removePairs.map { it.second }
+
+    allProjectKeys.distinct().forEach {
+        val rootTaskKeys = projectsFactory.getProjectForce(it)
+            .getAllTasks()
+            .mapNotNull { it.taskKey as? TaskKey.Root }
+            .toSet()
+
+        rootTasksFactory.updateProjectRecord(it, rootTaskKeys)
+    }
 }

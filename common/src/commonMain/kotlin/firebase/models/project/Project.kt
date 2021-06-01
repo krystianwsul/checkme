@@ -246,10 +246,6 @@ abstract class Project<T : ProjectType>(
         is TaskKey.Root -> rootTaskProvider.getRootTask(taskKey)
     }
 
-    private fun updateRootTaskKeys(rootTaskKeys: Set<TaskKey.Root>) {
-        rootTaskProvider.updateProjectRecord(projectKey, rootTaskKeys)
-    }
-
     fun updateRootTaskKeys() {
         val rootTaskKeys = getAllTasks().mapNotNull { it.taskKey as? TaskKey.Root }.toSet()
 

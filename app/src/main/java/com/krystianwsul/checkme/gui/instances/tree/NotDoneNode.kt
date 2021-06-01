@@ -96,7 +96,6 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
         abstract val groupType: GroupType
 
         abstract val directInstanceDatas: List<GroupListDataWrapper.InstanceData>
-        abstract val firstInstanceData: GroupListDataWrapper.InstanceData // todo project compare
         abstract val allInstanceDatas: List<GroupListDataWrapper.InstanceData>
 
         protected abstract val indentation: Int
@@ -140,7 +139,6 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
             val instanceData get() = groupType.instanceData
 
             override val directInstanceDatas = listOf(instanceData)
-            override val firstInstanceData = instanceData
             override val allInstanceDatas = directInstanceDatas
 
             override lateinit var treeNode: TreeNode<AbstractHolder>
@@ -270,7 +268,6 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
             override val groupAdapter: GroupListFragment.GroupAdapter,
             override val groupType: GroupType,
             override val directInstanceDatas: List<GroupListDataWrapper.InstanceData>,
-            override val firstInstanceData: GroupListDataWrapper.InstanceData,
             override val indentation: Int,
             private val nodeCollection: NodeCollection,
             private val childGroupTypes: List<GroupType>,

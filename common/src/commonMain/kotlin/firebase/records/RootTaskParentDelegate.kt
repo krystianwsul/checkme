@@ -22,7 +22,7 @@ abstract class RootTaskParentDelegate(private val rootTaskParentJson: RootTaskPa
 
     protected abstract fun addValue(subKey: String, value: Boolean?)
 
-    fun addRootTask(rootTaskKey: TaskKey.Root, onKeysChangedCallback: (Set<TaskKey.Root>) -> Unit) {
+    fun addRootTaskKey(rootTaskKey: TaskKey.Root, onKeysChangedCallback: (Set<TaskKey.Root>) -> Unit = {}) {
         val rootTaskId = rootTaskKey.taskId
 
         if (!rootTaskIds.containsKey(rootTaskId)) {
@@ -40,7 +40,7 @@ abstract class RootTaskParentDelegate(private val rootTaskParentJson: RootTaskPa
         addValue("$ROOT_TASK_IDS_KEY/$rootTaskId", true)
     }
 
-    fun removeRootTask(rootTaskKey: TaskKey.Root, onKeysChangedCallback: (Set<TaskKey.Root>) -> Unit) {
+    fun removeRootTaskKey(rootTaskKey: TaskKey.Root, onKeysChangedCallback: (Set<TaskKey.Root>) -> Unit = {}) {
         val rootTaskId = rootTaskKey.taskId
 
         if (rootTaskIds.containsKey(rootTaskId)) {

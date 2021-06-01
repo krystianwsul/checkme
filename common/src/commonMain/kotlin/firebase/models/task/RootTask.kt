@@ -132,11 +132,11 @@ class RootTask(
     }
 
     fun addRootTask(childTask: RootTask) {
-        taskRecord.rootTaskParentDelegate.addRootTask(childTask.taskKey) { parent.updateTaskRecord(taskKey, it) }
+        taskRecord.rootTaskParentDelegate.addRootTaskKey(childTask.taskKey) { parent.updateTaskRecord(taskKey, it) }
     }
 
     fun removeRootTask(childTask: RootTask) {
-        taskRecord.rootTaskParentDelegate.removeRootTask(childTask.taskKey) { parent.updateTaskRecord(taskKey, it) }
+        taskRecord.rootTaskParentDelegate.removeRootTaskKey(childTask.taskKey) { parent.updateTaskRecord(taskKey, it) }
     }
 
     override fun invalidateProjectParentTaskHierarchies() = invalidateIntervals()

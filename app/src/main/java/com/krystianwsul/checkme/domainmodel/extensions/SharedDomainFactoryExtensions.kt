@@ -381,3 +381,34 @@ fun DomainUpdater.setFirebaseTickListener(newTickData: TickData): Completable {
             ?: DomainUpdater.Params()
     }.perform(this)
 }
+
+// todo track throw in updateProject if not tracking.  Same for creating task, schedule, taskHierarchy, noScheduleOrParent
+fun DomainFactory.trackProjectRootTaskIds(action: () -> Unit) {
+    fun getMap() = rootTasksFactory.rootTasks.mapValues { (_, task) -> task.project.projectKey }
+
+    val oldMap = getMap()
+    action()
+    val newMap = getMap()
+
+    check(oldMap.keys.all { newMap.containsKey(it) })
+
+    val (otherEntries, addedEntries) = newMap.entries.partition { oldMap.containsKey(it.key) }
+
+    val changedTriples = otherEntries.map { (taskKey, newProjectKey) ->
+        val oldProjectKey = oldMap.getValue(taskKey)
+
+        Triple(taskKey, oldProjectKey, newProjectKey)
+    }.filter { (_, oldProjectKey, newProjectKey) -> oldProjectKey != newProjectKey }
+
+    val addPairs = addedEntries.map { it.key to it.value } +
+            changedTriples.map { (taskKey, _, newProjectKey) -> taskKey to newProjectKey }
+
+    val removePairs = changedTriples.map { (taskKey, oldProjectKey, _) -> taskKey to oldProjectKey }
+
+    fun getDelegate(projectKey: ProjectKey<*>) = projectsFactory.getProjectForce(projectKey)
+        .projectRecord
+        .rootTaskParentDelegate
+
+    addPairs.forEach { (taskKey, projectKey) -> getDelegate(projectKey).addRootTaskKey(taskKey) }
+    removePairs.forEach { (taskKey, projectKey) -> getDelegate(projectKey).removeRootTaskKey(taskKey) }
+}

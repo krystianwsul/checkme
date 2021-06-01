@@ -276,14 +276,10 @@ class GroupListFragment @JvmOverloads constructor(
                         .addTo(attachedToWindowDisposable)
                 }
                 R.id.action_group_notify -> {
-                    val instanceDatas = selectedDatas.map { it as GroupListDataWrapper.InstanceData }
+                    val instanceDatas =
+                        selectedDatas.filter { it.canShowNotification() }.map { it as GroupListDataWrapper.InstanceData }
 
-                    check(instanceDatas.all {
-                        it.isRootInstance
-                                && it.done == null
-                                && it.instanceTimeStamp <= TimeStamp.now
-                                && !it.notificationShown
-                    })
+                    check(instanceDatas.isNotEmpty())
 
                     val instanceKeys = instanceDatas.map { it.instanceKey }
 
@@ -321,6 +317,14 @@ class GroupListFragment @JvmOverloads constructor(
                     && it.instanceTimeStamp <= TimeStamp.now
         }
 
+        fun GroupListDataWrapper.SelectedData.canShowNotification(): Boolean {
+            return this is GroupListDataWrapper.InstanceData
+                    && isRootInstance
+                    && done == null
+                    && instanceTimeStamp <= TimeStamp.now
+                    && !notificationShown
+        }
+
         override fun getItemVisibilities(): List<Pair<Int, Boolean>> {
             checkNotNull(actionMode)
 
@@ -328,13 +332,7 @@ class GroupListFragment @JvmOverloads constructor(
             check(selectedDatas.isNotEmpty())
 
             val itemVisibilities = mutableListOf(
-                R.id.action_group_notify to selectedDatas.all {
-                    it is GroupListDataWrapper.InstanceData
-                            && it.isRootInstance
-                            && it.done == null
-                            && it.instanceTimeStamp <= TimeStamp.now
-                            && !it.notificationShown
-                },
+                R.id.action_group_notify to selectedDatas.any { it.canShowNotification() },
                 R.id.actionGroupHour to showHour(selectedDatas),
                 R.id.action_group_edit_instance to selectedDatas.all {
                     it is GroupListDataWrapper.InstanceData && it.done == null

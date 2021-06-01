@@ -718,12 +718,9 @@ class DomainFactory(
             )
 
             val currentSchedules = oldTask.intervalInfo.getCurrentScheduleIntervals(now).map { it.schedule }
-            val currentNoScheduleOrParent = oldTask.intervalInfo.getCurrentNoScheduleOrParent(now)?.noScheduleOrParent
 
             newTask.performIntervalUpdate {
                 if (currentSchedules.isNotEmpty()) {
-                    check(currentNoScheduleOrParent == null)
-
                     newTask.copySchedules(
                         now,
                         currentSchedules,
@@ -731,8 +728,8 @@ class DomainFactory(
                         oldTask.project.projectKey,
                         newProject.projectKey,
                     )
-                } else {
-                    currentNoScheduleOrParent?.let { setNoScheduleOrParent(now, newProject.projectKey) }
+                } else if (oldTask.isTopLevelTask(now)) {
+                    setNoScheduleOrParent(now, newProject.projectKey)
                 }
             }
 

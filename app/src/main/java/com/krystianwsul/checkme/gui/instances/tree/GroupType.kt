@@ -92,8 +92,6 @@ sealed class GroupType : Comparable<GroupType> {
 
         override val allInstanceKeys = groupTypes.flatMap { it.allInstanceKeys }.toSet()
 
-        val firstInstanceData = (groupTypes.first() as TimeChild).firstInstanceData // todo project compare
-
         override fun toContentDelegate(
             groupAdapter: GroupListFragment.GroupAdapter,
             indentation: Int,
@@ -132,8 +130,6 @@ sealed class GroupType : Comparable<GroupType> {
 
         override val allInstanceKeys = instanceDatas.map { it.instanceKey }.toSet()
 
-        override val firstInstanceData = instanceDatas.first()
-
         override val name get() = projectDetails.name
 
         override fun toContentDelegate(
@@ -167,16 +163,11 @@ sealed class GroupType : Comparable<GroupType> {
         }
     }
 
-    private interface TimeChild {
-
-        val firstInstanceData: GroupListDataWrapper.InstanceData // todo project compare
-    }
+    private interface TimeChild
 
     interface SingleParent
 
     class Single(val instanceData: GroupListDataWrapper.InstanceData) : GroupType(), TimeChild {
-
-        override val firstInstanceData = instanceData  // todo project compare
 
         override val allInstanceKeys = setOf(instanceData.instanceKey)
 

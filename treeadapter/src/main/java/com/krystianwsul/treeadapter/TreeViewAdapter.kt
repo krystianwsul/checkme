@@ -183,7 +183,8 @@ class TreeViewAdapter<T : TreeHolder>(
             override fun onRemoved(position: Int, count: Int) = notifyItemRangeRemoved(position, count)
 
             override fun onMoved(fromPosition: Int, toPosition: Int) {
-                notifyItemMoved(fromPosition, toPosition)
+                notifyItemRemoved(fromPosition)
+                notifyItemInserted(toPosition)
 
                 if (toPosition == 0) treeModelAdapter.scrollToTop()
             }

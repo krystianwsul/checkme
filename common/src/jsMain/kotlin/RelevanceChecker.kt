@@ -166,10 +166,13 @@ object RelevanceChecker {
 
                 projectMap = privateProjects + sharedProjects
 
-                rootTasksByTaskKey.values.forEach {
-                    if (!it.project.projectRecord.rootTaskParentDelegate.rootTaskKeys.contains(it.taskKey))
-                        throw InconsistentRootTaskIdsException(it.taskKey, it.project.projectKey)
-                }
+                rootTasksByTaskKey.values
+                    .filter { !it.project.projectRecord.rootTaskParentDelegate.rootTaskKeys.contains(it.taskKey) }
+                    .sortedBy { it.projectId }
+                    .takeIf { it.isNotEmpty() }
+                    ?.let {
+                        throw InconsistentRootTaskIdsException(it.map { it.taskKey to it.project.projectKey })
+                    }
 
                 privateProjects.values.forEach { privateProject ->
                     response += "checking relevance for private project ${privateProject.projectKey}"
@@ -282,8 +285,10 @@ object RelevanceChecker {
         }
     }
 
-    private class InconsistentRootTaskIdsException(taskKey: TaskKey.Root, projectKey: ProjectKey<*>) :
-        Exception("rootTaskId $taskKey missing from $projectKey")
+    private class InconsistentRootTaskIdsException(pairs: List<Pair<TaskKey.Root, ProjectKey<*>>>) : Exception(
+        "rootTaskIds missing from projects:\n" +
+                pairs.joinToString(";\n") { "${it.first} missing from ${it.second}" }
+    )
 
     private class MissingTaskException(taskKey: TaskKey.Root, projectKey: ProjectKey<*>) :
         Exception("rootTaskId $taskKey from $projectKey is missing from map")

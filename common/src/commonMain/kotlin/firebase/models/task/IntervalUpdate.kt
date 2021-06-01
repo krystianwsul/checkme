@@ -21,10 +21,10 @@ import com.krystianwsul.common.utils.UserKey
 
 class IntervalUpdate(val task: RootTask, val intervalInfo: IntervalInfo) {
 
-    var invalidateIntervals = false
+    var intervalsInvalid = false
 
     fun invalidateIntervals() {
-        invalidateIntervals = true
+        intervalsInvalid = true
     }
 
     fun endAllCurrentTaskHierarchies(now: ExactTimeStamp.Local) = task.parentTaskHierarchies
@@ -172,7 +172,7 @@ fun RootTask.performIntervalUpdate(action: IntervalUpdate.() -> Unit) {
         intervalUpdates.remove(this)
     }
 
-    if (intervalUpdate.invalidateIntervals) intervalInfoProperty.invalidate()
+    if (intervalUpdate.intervalsInvalid) intervalInfoProperty.invalidate()
 }
 
 fun Task.checkNoIntervalUpdate() = check(!intervalUpdates.containsKey(this))

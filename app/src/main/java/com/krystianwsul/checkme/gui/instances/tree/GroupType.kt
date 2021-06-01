@@ -7,7 +7,7 @@ import com.krystianwsul.checkme.gui.tree.DetailsNode
 import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.InstanceKey
 
-sealed class GroupType {
+sealed class GroupType : Comparable<GroupType> {
 
     companion object {
 
@@ -88,9 +88,11 @@ sealed class GroupType {
     class Time(
         val timeStamp: TimeStamp,
         val groupTypes: List<GroupType>
-    ) : GroupType() {
+    ) : GroupType(), SingleParent {
 
         override val allInstanceKeys = groupTypes.flatMap { it.allInstanceKeys }.toSet()
+
+        val firstInstanceData = (groupTypes.first() as TimeChild).firstInstanceData // todo project compare
 
         override fun toContentDelegate(
             groupAdapter: GroupListFragment.GroupAdapter,
@@ -100,7 +102,7 @@ sealed class GroupType {
             groupAdapter,
             this,
             groupTypes.filterIsInstance<Single>().map { it.instanceData },
-            (groupTypes.first() as TimeChild).firstInstanceData,
+            firstInstanceData,
             indentation,
             nodeCollection,
             groupTypes,
@@ -109,6 +111,14 @@ sealed class GroupType {
             true,
             ShowGroupActivity.Parameters.Time(timeStamp),
         )
+
+        override fun compareTo(other: GroupType): Int { // todo project compare
+            return when (other) {
+                is Time -> firstInstanceData.compareTo(other.firstInstanceData)
+                is Project -> firstInstanceData.compareTo(other.firstInstanceData)
+                is Single -> firstInstanceData.compareTo(other.firstInstanceData)
+            }
+        }
     }
 
     class Project(
@@ -117,7 +127,7 @@ sealed class GroupType {
         _instanceDatas: List<GroupListDataWrapper.InstanceData>,
         private val nested: Boolean,
         private val showTime: Boolean
-    ) : GroupType(), TimeChild {
+    ) : GroupType(), TimeChild, SingleParent {
 
         private val instanceDatas = _instanceDatas.map { it.copy(projectInfo = null) }
 
@@ -149,16 +159,26 @@ sealed class GroupType {
             !nested,
             ShowGroupActivity.Parameters.Project(timeStamp, projectDetails.projectKey),
         )
+
+        override fun compareTo(other: GroupType): Int { // todo project compare
+            return when (other) {
+                is Time -> firstInstanceData.compareTo(other.firstInstanceData)
+                is Project -> firstInstanceData.compareTo(other.firstInstanceData)
+                is Single -> firstInstanceData.compareTo(other.firstInstanceData)
+            }
+        }
     }
 
     private interface TimeChild {
 
-        val firstInstanceData: GroupListDataWrapper.InstanceData
+        val firstInstanceData: GroupListDataWrapper.InstanceData // todo project compare
     }
+
+    interface SingleParent
 
     class Single(val instanceData: GroupListDataWrapper.InstanceData) : GroupType(), TimeChild {
 
-        override val firstInstanceData = instanceData
+        override val firstInstanceData = instanceData  // todo project compare
 
         override val allInstanceKeys = setOf(instanceData.instanceKey)
 
@@ -166,6 +186,14 @@ sealed class GroupType {
             groupAdapter: GroupListFragment.GroupAdapter,
             indentation: Int,
             nodeCollection: NodeCollection,
-        ) = NotDoneNode.ContentDelegate.Instance(groupAdapter, instanceData, indentation)
+        ) = NotDoneNode.ContentDelegate.Instance(groupAdapter, this, indentation)
+
+        override fun compareTo(other: GroupType): Int { // todo project compare
+            return when (other) {
+                is Time -> firstInstanceData.compareTo(other.firstInstanceData)
+                is Project -> firstInstanceData.compareTo(other.firstInstanceData)
+                is Single -> firstInstanceData.compareTo(other.firstInstanceData)
+            }
+        }
     }
 }

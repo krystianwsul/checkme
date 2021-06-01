@@ -91,7 +91,9 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
 
     final override fun onClick(holder: AbstractHolder) = contentDelegate.onClick(holder)
 
-    sealed class ContentDelegate : ThumbnailModelNode, Sortable, CheckableModelNode, Comparable<ContentDelegate>, Matchable {
+    sealed class ContentDelegate : ThumbnailModelNode, Sortable, CheckableModelNode, Matchable {
+
+        abstract val groupType: GroupType
 
         abstract val directInstanceDatas: List<GroupListDataWrapper.InstanceData>
         abstract val firstInstanceData: GroupListDataWrapper.InstanceData
@@ -121,16 +123,21 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
 
         abstract fun onClick(holder: AbstractHolder)
 
-        override fun compareTo(other: ContentDelegate): Int {
-            return firstInstanceData.compareTo(other.firstInstanceData)
-        }
-
         class Instance(
             override val groupAdapter: GroupListFragment.GroupAdapter,
-            val instanceData: GroupListDataWrapper.InstanceData,
+            override val groupType: GroupType.Single,
             override val indentation: Int,
             showDetails: Boolean = true,
         ) : ContentDelegate() {
+
+            constructor(
+                groupAdapter: GroupListFragment.GroupAdapter,
+                instanceData: GroupListDataWrapper.InstanceData,
+                indentation: Int,
+                showDetails: Boolean = true,
+            ) : this(groupAdapter, GroupType.Single(instanceData), indentation, showDetails)
+
+            val instanceData get() = groupType.instanceData
 
             override val directInstanceDatas = listOf(instanceData)
             override val firstInstanceData = instanceData
@@ -261,7 +268,7 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
 
         class Group(
             override val groupAdapter: GroupListFragment.GroupAdapter,
-            val groupType: GroupType,
+            override val groupType: GroupType,
             override val directInstanceDatas: List<GroupListDataWrapper.InstanceData>,
             override val firstInstanceData: GroupListDataWrapper.InstanceData,
             override val indentation: Int,
@@ -272,6 +279,10 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
             private val indentCheckBox: Boolean,
             private val showGroupActivityParameters: ShowGroupActivity.Parameters,
         ) : ContentDelegate() {
+
+            init {
+                check(groupType is GroupType.SingleParent)
+            }
 
             override val allInstanceDatas get() = notDoneNodes.flatMap { it.contentDelegate.directInstanceDatas }
 

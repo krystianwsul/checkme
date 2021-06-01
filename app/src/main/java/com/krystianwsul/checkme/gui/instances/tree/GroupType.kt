@@ -112,7 +112,7 @@ sealed class GroupType : Comparable<GroupType> {
         override fun compareTo(other: GroupType): Int {
             return when (other) {
                 is Time -> timeStamp.compareTo(timeStamp)
-                is Project -> throw IllegalStateException()
+                is Project -> timeStamp.compareTo(timeStamp)
                 is Single -> timeStamp.compareTo(other.instanceData.instanceTimeStamp)
             }
         }
@@ -156,7 +156,7 @@ sealed class GroupType : Comparable<GroupType> {
 
         override fun compareTo(other: GroupType): Int {
             return when (other) {
-                is Time -> throw IllegalStateException()
+                is Time -> timeStamp.compareTo(other.timeStamp)
                 is Project -> projectDetails.projectKey.compareTo(other.projectDetails.projectKey)
                 is Single -> -1
             }

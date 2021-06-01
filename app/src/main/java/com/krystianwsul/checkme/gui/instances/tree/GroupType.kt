@@ -112,11 +112,11 @@ sealed class GroupType : Comparable<GroupType> {
             ShowGroupActivity.Parameters.Time(timeStamp),
         )
 
-        override fun compareTo(other: GroupType): Int { // todo project compare
+        override fun compareTo(other: GroupType): Int {
             return when (other) {
-                is Time -> firstInstanceData.compareTo(other.firstInstanceData)
-                is Project -> firstInstanceData.compareTo(other.firstInstanceData)
-                is Single -> firstInstanceData.compareTo(other.firstInstanceData)
+                is Time -> timeStamp.compareTo(timeStamp)
+                is Project -> throw IllegalStateException()
+                is Single -> timeStamp.compareTo(other.instanceData.instanceTimeStamp)
             }
         }
     }
@@ -160,11 +160,11 @@ sealed class GroupType : Comparable<GroupType> {
             ShowGroupActivity.Parameters.Project(timeStamp, projectDetails.projectKey),
         )
 
-        override fun compareTo(other: GroupType): Int { // todo project compare
+        override fun compareTo(other: GroupType): Int {
             return when (other) {
-                is Time -> firstInstanceData.compareTo(other.firstInstanceData)
-                is Project -> firstInstanceData.compareTo(other.firstInstanceData)
-                is Single -> firstInstanceData.compareTo(other.firstInstanceData)
+                is Time -> throw IllegalStateException()
+                is Project -> projectDetails.projectKey.compareTo(other.projectDetails.projectKey)
+                is Single -> -1
             }
         }
     }
@@ -188,11 +188,11 @@ sealed class GroupType : Comparable<GroupType> {
             nodeCollection: NodeCollection,
         ) = NotDoneNode.ContentDelegate.Instance(groupAdapter, this, indentation)
 
-        override fun compareTo(other: GroupType): Int { // todo project compare
+        override fun compareTo(other: GroupType): Int {
             return when (other) {
-                is Time -> firstInstanceData.compareTo(other.firstInstanceData)
-                is Project -> firstInstanceData.compareTo(other.firstInstanceData)
-                is Single -> firstInstanceData.compareTo(other.firstInstanceData)
+                is Time -> instanceData.instanceTimeStamp.compareTo(other.timeStamp)
+                is Project -> 1
+                is Single -> instanceData.compareTo(other.instanceData)
             }
         }
     }

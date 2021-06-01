@@ -1,7 +1,9 @@
 package com.krystianwsul.common.firebase.models.taskhierarchy
 
+import com.krystianwsul.common.firebase.models.task.ProjectRootTaskIdTracker
 import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.firebase.records.taskhierarchy.NestedTaskHierarchyRecord
+import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.TaskHierarchyKey
 
 
@@ -32,4 +34,10 @@ class NestedTaskHierarchy(
     }
 
     override fun fixOffsets() {}
+
+    override fun setEndExactTimeStamp(endExactTimeStamp: ExactTimeStamp) {
+        ProjectRootTaskIdTracker.checkTracking()
+
+        super.setEndExactTimeStamp(endExactTimeStamp)
+    }
 }

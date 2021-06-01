@@ -4,6 +4,7 @@ package com.krystianwsul.common.firebase.models.schedule
 import com.krystianwsul.common.firebase.models.ProjectIdOwner
 import com.krystianwsul.common.firebase.models.TaskParentEntry
 import com.krystianwsul.common.firebase.models.interval.ScheduleInterval
+import com.krystianwsul.common.firebase.models.task.ProjectRootTaskIdTracker
 import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.firebase.records.schedule.ScheduleRecord
 import com.krystianwsul.common.time.*
@@ -53,6 +54,8 @@ abstract class Schedule(val topLevelTask: Task) : TaskParentEntry, ProjectIdOwne
     }
 
     override fun setEndExactTimeStamp(endExactTimeStamp: ExactTimeStamp) {
+        ProjectRootTaskIdTracker.checkTracking()
+
         requireCurrentOffset(endExactTimeStamp)
 
         scheduleRecord.endTime = endExactTimeStamp.long

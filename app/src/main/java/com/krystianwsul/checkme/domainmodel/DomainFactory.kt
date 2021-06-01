@@ -636,6 +636,7 @@ class DomainFactory(
 
                 val childTask = projectToRootConversion.endTasks.getValue(startTaskHierarchy.childTaskId)
 
+                // todo tracker check tracking
                 childTask.performIntervalUpdate { copyParentNestedTaskHierarchy(now, startTaskHierarchy, parentTask.id) }
 
                 parentTask.addRootTask(childTask)
@@ -719,6 +720,7 @@ class DomainFactory(
 
             val currentSchedules = oldTask.intervalInfo.getCurrentScheduleIntervals(now).map { it.schedule }
 
+            // todo tracker check tracking
             newTask.performIntervalUpdate {
                 if (currentSchedules.isNotEmpty()) {
                     newTask.copySchedules(

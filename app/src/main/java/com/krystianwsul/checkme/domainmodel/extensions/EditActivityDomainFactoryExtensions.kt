@@ -326,7 +326,7 @@ fun DomainUpdater.updateScheduleTask(
     trackProjectRootTaskIds {
         finalTask = convertAndUpdateProject(originalTask, now, projectKey)
 
-        finalTask.performIntervalUpdate {
+        finalTask.performIntervalUpdate { // todo tracker check tracking
             endAllCurrentTaskHierarchies(now)
             endAllCurrentNoScheduleOrParents(now)
 
@@ -392,7 +392,7 @@ fun DomainUpdater.updateChildTask(
 
         check(!parentTask.hasAncestor(taskKey))
 
-        task.performIntervalUpdate {
+        task.performIntervalUpdate { // todo tracker check tracking
             if (task.getParentTask(now) != parentTask) {
                 if (allReminders) endAllCurrentTaskHierarchies(now)
 
@@ -454,7 +454,7 @@ fun DomainUpdater.updateTopLevelTask(
     trackProjectRootTaskIds {
         finalTask = convertAndUpdateProject(originalTask, now, projectKey)
 
-        finalTask.performIntervalUpdate {
+        finalTask.performIntervalUpdate { // todo tracker check tracking
             endAllCurrentTaskHierarchies(now)
             endAllCurrentSchedules(now)
             endAllCurrentNoScheduleOrParents(now)
@@ -870,7 +870,7 @@ private fun DomainFactory.createNoScheduleOrParentTask(
     imageUuid: String?,
     ordinal: Double? = null,
 ) = createRootTask(now, imageUuid, name, note, ordinal).apply {
-    performIntervalUpdate { setNoScheduleOrParent(now, projectKey) }
+    performIntervalUpdate { setNoScheduleOrParent(now, projectKey) } // todo tracker check tracking
 }
 
 private fun DomainFactory.createRootTask(

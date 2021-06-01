@@ -20,6 +20,7 @@ import com.krystianwsul.common.firebase.models.FilterResult
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.filterQuery
 import com.krystianwsul.common.firebase.models.project.Project
+import com.krystianwsul.common.firebase.models.task.ProjectRootTaskIdTracker
 import com.krystianwsul.common.firebase.models.task.RootTask
 import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.firebase.models.task.performIntervalUpdate
@@ -300,7 +301,7 @@ fun addChildToParent(
     lateinit var noScheduleOrParentsIds: List<String>
     lateinit var deleteTaskHierarchyKey: TaskHierarchyKey
 
-    childTask.performIntervalUpdate {
+    childTask.performIntervalUpdate { // todo tracker check tracking
         taskHierarchyKeys = endAllCurrentTaskHierarchies(now)
         scheduleIds = endAllCurrentSchedules(now)
         noScheduleOrParentsIds = endAllCurrentNoScheduleOrParents(now)
@@ -384,6 +385,10 @@ fun DomainUpdater.setFirebaseTickListener(newTickData: TickData): Completable {
 
 // todo track throw in updateProject if not tracking.  Same for creating task, schedule, taskHierarchy, noScheduleOrParent
 fun DomainFactory.trackProjectRootTaskIds(action: () -> Unit) {
+    check(ProjectRootTaskIdTracker.instance == null)
+
+    ProjectRootTaskIdTracker.instance = object : ProjectRootTaskIdTracker {}
+
     fun getMap() = rootTasksFactory.rootTasks.mapValues { (_, task) -> task.project.projectKey }
 
     val oldMap = getMap()
@@ -422,4 +427,8 @@ fun DomainFactory.trackProjectRootTaskIds(action: () -> Unit) {
 
         rootTasksFactory.updateProjectRecord(it, rootTaskKeys)
     }
+
+    checkNotNull(ProjectRootTaskIdTracker.instance)
+
+    ProjectRootTaskIdTracker.instance = null
 }

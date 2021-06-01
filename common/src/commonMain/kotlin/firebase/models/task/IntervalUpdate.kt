@@ -158,7 +158,7 @@ class IntervalUpdate(val task: RootTask, val intervalInfo: IntervalInfo) {
 
 private val intervalUpdates = mutableMapOf<Task, IntervalUpdate>()
 
-fun RootTask.performIntervalUpdate(action: IntervalUpdate.() -> Unit) {
+fun RootTask.performIntervalUpdate(action: IntervalUpdate.() -> Unit) { // todo track check always inside tracked changed
     checkNoIntervalUpdate()
 
     val intervalUpdate = IntervalUpdate(this, intervalInfo)

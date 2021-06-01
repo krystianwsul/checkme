@@ -301,7 +301,7 @@ fun addChildToParent(
     lateinit var noScheduleOrParentsIds: List<String>
     lateinit var deleteTaskHierarchyKey: TaskHierarchyKey
 
-    childTask.performIntervalUpdate { // todo tracker check tracking
+    childTask.performIntervalUpdate {
         taskHierarchyKeys = endAllCurrentTaskHierarchies(now)
         scheduleIds = endAllCurrentSchedules(now)
         noScheduleOrParentsIds = endAllCurrentNoScheduleOrParents(now)
@@ -384,7 +384,7 @@ fun DomainUpdater.setFirebaseTickListener(newTickData: TickData): Completable {
 }
 
 // todo track throw in updateProject if not tracking.  Same for creating task, schedule, taskHierarchy, noScheduleOrParent
-fun DomainFactory.trackProjectRootTaskIds(action: () -> Unit) {
+fun <T> DomainFactory.trackProjectRootTaskIds(action: () -> T): T {
     check(ProjectRootTaskIdTracker.instance == null)
 
     ProjectRootTaskIdTracker.instance = object : ProjectRootTaskIdTracker {}
@@ -392,7 +392,7 @@ fun DomainFactory.trackProjectRootTaskIds(action: () -> Unit) {
     fun getMap() = rootTasksFactory.rootTasks.mapValues { (_, task) -> task.project.projectKey }
 
     val oldMap = getMap()
-    action()
+    val result = action()
     val newMap = getMap()
 
     check(oldMap.keys.all { newMap.containsKey(it) })
@@ -431,4 +431,6 @@ fun DomainFactory.trackProjectRootTaskIds(action: () -> Unit) {
     checkNotNull(ProjectRootTaskIdTracker.instance)
 
     ProjectRootTaskIdTracker.instance = null
+
+    return result
 }

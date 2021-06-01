@@ -71,7 +71,6 @@ class RootTask(
     ): RootTask {
         val childTask = parent.createTask(now, image, name, note, ordinal)
 
-        // todo tracker check tracking
         childTask.performIntervalUpdate { createParentNestedTaskHierarchy(this@RootTask, now) }
 
         addRootTask(childTask)

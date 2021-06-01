@@ -326,7 +326,7 @@ fun DomainUpdater.updateScheduleTask(
     trackProjectRootTaskIds {
         finalTask = convertAndUpdateProject(originalTask, now, projectKey)
 
-        finalTask.performIntervalUpdate { // todo tracker check tracking
+        finalTask.performIntervalUpdate {
             endAllCurrentTaskHierarchies(now)
             endAllCurrentNoScheduleOrParents(now)
 
@@ -383,16 +383,16 @@ fun DomainUpdater.updateChildTask(
         parentTask.requireCurrent(now)
 
         tailrec fun Task.hasAncestor(taskKey: TaskKey): Boolean {
-            val parentTask = getParentTask(now) ?: return false
+            val currParentTask = getParentTask(now) ?: return false
 
-            if (parentTask.taskKey == taskKey) return true
+            if (currParentTask.taskKey == taskKey) return true
 
-            return parentTask.hasAncestor(taskKey)
+            return currParentTask.hasAncestor(taskKey)
         }
 
         check(!parentTask.hasAncestor(taskKey))
 
-        task.performIntervalUpdate { // todo tracker check tracking
+        task.performIntervalUpdate {
             if (task.getParentTask(now) != parentTask) {
                 if (allReminders) endAllCurrentTaskHierarchies(now)
 
@@ -454,7 +454,7 @@ fun DomainUpdater.updateTopLevelTask(
     trackProjectRootTaskIds {
         finalTask = convertAndUpdateProject(originalTask, now, projectKey)
 
-        finalTask.performIntervalUpdate { // todo tracker check tracking
+        finalTask.performIntervalUpdate {
             endAllCurrentTaskHierarchies(now)
             endAllCurrentSchedules(now)
             endAllCurrentNoScheduleOrParents(now)
@@ -870,7 +870,7 @@ private fun DomainFactory.createNoScheduleOrParentTask(
     imageUuid: String?,
     ordinal: Double? = null,
 ) = createRootTask(now, imageUuid, name, note, ordinal).apply {
-    performIntervalUpdate { setNoScheduleOrParent(now, projectKey) } // todo tracker check tracking
+    performIntervalUpdate { setNoScheduleOrParent(now, projectKey) }
 }
 
 private fun DomainFactory.createRootTask(

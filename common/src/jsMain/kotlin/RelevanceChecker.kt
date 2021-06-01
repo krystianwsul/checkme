@@ -13,6 +13,7 @@ import com.krystianwsul.common.firebase.models.RootUser
 import com.krystianwsul.common.firebase.models.project.PrivateProject
 import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.project.SharedProject
+import com.krystianwsul.common.firebase.models.task.ProjectRootTaskIdTracker
 import com.krystianwsul.common.firebase.models.task.RootTask
 import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.firebase.models.taskhierarchy.TaskHierarchy
@@ -33,6 +34,8 @@ object RelevanceChecker {
             updateDatabase: Boolean,
             onComplete: () -> Unit,
     ) {
+        ProjectRootTaskIdTracker.instance = object : ProjectRootTaskIdTracker {}
+
         val roots = listOf("development", "production")
 
         val completed = roots.associateWith { false }.toMutableMap()

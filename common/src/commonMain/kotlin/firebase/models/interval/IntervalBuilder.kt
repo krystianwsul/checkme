@@ -12,14 +12,14 @@ object IntervalBuilder {
      Note: this will return NoSchedule for the time spans that were covered by irrelevant schedules
      and task hierarchies.  These periods, by definition, shouldn't be needed for anything.
      */
-    fun build(task: Task): List<Interval> {
+    fun build(task: Task, allowPlaceholderCurrentNoSchedule: Boolean): IntervalInfo {
         val allTypeBuilders = listOf(
-                task.schedules.map { TypeBuilder.Schedule(it) },
-                task.parentTaskHierarchies.map { TypeBuilder.Parent(it) },
-                task.noScheduleOrParents.map { TypeBuilder.NoScheduleOrParent(it) },
+            task.schedules.map { TypeBuilder.Schedule(it) },
+            task.parentTaskHierarchies.map { TypeBuilder.Parent(it) },
+            task.noScheduleOrParents.map { TypeBuilder.NoScheduleOrParent(it) },
         ).flatten()
-                .sortedBy { it.startExactTimeStampOffset }
-                .toMutableList()
+            .sortedBy { it.startExactTimeStampOffset }
+            .toMutableList()
 
         fun getNextTypeBuilder() = allTypeBuilders.takeIf { it.isNotEmpty() }?.removeAt(0)
 
@@ -27,7 +27,7 @@ object IntervalBuilder {
         val taskEndExactTimeStampOffset = task.endExactTimeStampOffset
 
         fun getCurrentPlaceholder(startExactTimeStampOffset: ExactTimeStamp.Offset) =
-                Interval.Current(Type.NoSchedule(), startExactTimeStampOffset)
+            Interval.Current(Type.NoSchedule(), startExactTimeStampOffset)
 
         var typeBuilder = getNextTypeBuilder()
         if (typeBuilder == null) {
@@ -37,7 +37,7 @@ object IntervalBuilder {
                 Interval.Ended(Type.NoSchedule(), taskStartExactTimeStampOffset, taskEndExactTimeStampOffset)
             }
 
-            return listOf(interval)
+            return IntervalInfo(task, listOf(interval))
         } else {
             check(typeBuilder.startExactTimeStampOffset >= taskStartExactTimeStampOffset) {
                 "IntervalBuilder $task check 1: ${typeBuilder!!.startExactTimeStampOffset.details()} >= ${taskStartExactTimeStampOffset.details()}"
@@ -61,14 +61,16 @@ object IntervalBuilder {
 
             while (typeBuilder != null) {
                 fun addIntervalBuilder(
-                        endExactTimeStampOffset: ExactTimeStamp.Offset,
-                        newIntervalBuilder: IntervalBuilder,
+                    endExactTimeStampOffset: ExactTimeStamp.Offset,
+                    newIntervalBuilder: IntervalBuilder,
                 ) {
                     if (intervalBuilder.badOverlap(endExactTimeStampOffset))
-                        ErrorLogger.instance.logException(OverlapException(
+                        ErrorLogger.instance.logException(
+                            OverlapException(
                                 "task: ${task.name}, taskKey: ${task.taskKey}, endExactTimeStampOffset: " +
                                         "$endExactTimeStampOffset, old interval builder: $intervalBuilder, new interval builder: $newIntervalBuilder"
-                        ))
+                            )
+                        )
 
                     check(intervalBuilder.endExactTimeStampOffset?.let { it < endExactTimeStampOffset } != true) {
                         "IntervalBuilder $task check 3: ${intervalBuilder.endExactTimeStampOffset}?.let { it < $endExactTimeStampOffset } != true"
@@ -83,9 +85,9 @@ object IntervalBuilder {
                 }
 
                 if (
-                        intervalBuilder.endExactTimeStampOffset?.let {
-                            it < typeBuilder!!.startExactTimeStampOffset
-                        } == true
+                    intervalBuilder.endExactTimeStampOffset?.let {
+                        it < typeBuilder!!.startExactTimeStampOffset
+                    } == true
                 ) {
                     endedIntervals += intervalBuilder.toEndedInterval(intervalBuilder.endExactTimeStampOffset!!)
                     intervalBuilder = IntervalBuilder.NoSchedule(intervalBuilder.endExactTimeStampOffset!!)
@@ -121,9 +123,9 @@ object IntervalBuilder {
                     }
                     taskEndExactTimeStampOffset > intervalEndExactTimeStampOffset -> {
                         endedIntervals += Interval.Ended(
-                                Type.NoSchedule(),
-                                intervalEndExactTimeStampOffset,
-                                taskEndExactTimeStampOffset
+                            Type.NoSchedule(),
+                            intervalEndExactTimeStampOffset,
+                            taskEndExactTimeStampOffset
                         )
                     }
                     else -> check(task.endExactTimeStampOffset == intervalEndExactTimeStampOffset) {
@@ -149,6 +151,10 @@ object IntervalBuilder {
                 check(oldTimeStamp == currentInterval.startExactTimeStampOffset) {
                     "IntervalBuilder $task check 7: $oldTimeStamp == ${currentInterval.startExactTimeStampOffset}"
                 }
+
+                if (!allowPlaceholderCurrentNoSchedule) {
+                    (currentInterval.type as? Type.NoSchedule)?.let { checkNotNull(it.noScheduleOrParent) }
+                }
             } else {
                 check(oldTimeStamp == task.endExactTimeStampOffset) {
                     "IntervalBuilder $task check 8: $oldTimeStamp == ${task.endExactTimeStampOffset}"
@@ -159,7 +165,7 @@ object IntervalBuilder {
 
             check(intervals.isNotEmpty()) { "IntervalBuilder $task check 9: ${intervals.isNotEmpty()}" }
 
-            return intervals
+            return IntervalInfo(task, intervals)
         }
     }
 
@@ -184,14 +190,14 @@ object IntervalBuilder {
         }
 
         class Schedule(
-                val schedule: com.krystianwsul.common.firebase.models.schedule.Schedule,
+            val schedule: com.krystianwsul.common.firebase.models.schedule.Schedule,
         ) : TypeBuilder() {
 
             override val startExactTimeStampOffset = schedule.startExactTimeStampOffset
 
             override fun toIntervalBuilder() = IntervalBuilder.Schedule(
-                    startExactTimeStampOffset,
-                    mutableListOf(schedule),
+                startExactTimeStampOffset,
+                mutableListOf(schedule),
             )
         }
 
@@ -202,7 +208,7 @@ object IntervalBuilder {
             override val startExactTimeStampOffset = noScheduleOrParent.startExactTimeStampOffset
 
             override fun toIntervalBuilder() =
-                    IntervalBuilder.NoSchedule(startExactTimeStampOffset, noScheduleOrParent)
+                IntervalBuilder.NoSchedule(startExactTimeStampOffset, noScheduleOrParent)
         }
     }
 
@@ -212,25 +218,18 @@ object IntervalBuilder {
         abstract val endExactTimeStampOffset: ExactTimeStamp.Offset?
 
         fun toEndedInterval(endExactTimeStampOffset: ExactTimeStamp.Offset) =
-                Interval.Ended(toType(), startExactTimeStampOffset, endExactTimeStampOffset)
+            Interval.Ended(toType(), startExactTimeStampOffset, endExactTimeStampOffset)
 
         fun toCurrentInterval() = Interval.Current(toType(), startExactTimeStampOffset)
 
-        fun toInterval(endExactTimeStampOffset: ExactTimeStamp.Offset?): Interval {
-            return if (endExactTimeStampOffset != null) {
-                toEndedInterval(endExactTimeStampOffset)
-            } else {
-                toCurrentInterval()
-            }
-        }
-
         abstract fun toType(): Type
 
-        open fun badOverlap(nextEndExactTimeStampOffset: ExactTimeStamp.Offset) = endExactTimeStampOffset?.let { it <= nextEndExactTimeStampOffset } != true
+        open fun badOverlap(nextEndExactTimeStampOffset: ExactTimeStamp.Offset) =
+            endExactTimeStampOffset?.let { it <= nextEndExactTimeStampOffset } != true
 
         data class Child(
-                override val startExactTimeStampOffset: ExactTimeStamp.Offset,
-                val parentTaskHierarchy: TaskHierarchy,
+            override val startExactTimeStampOffset: ExactTimeStamp.Offset,
+            val parentTaskHierarchy: TaskHierarchy,
         ) : IntervalBuilder() {
 
             override val endExactTimeStampOffset = parentTaskHierarchy.endExactTimeStampOffset
@@ -239,8 +238,8 @@ object IntervalBuilder {
         }
 
         data class Schedule(
-                override val startExactTimeStampOffset: ExactTimeStamp.Offset,
-                val schedules: MutableList<com.krystianwsul.common.firebase.models.schedule.Schedule>,
+            override val startExactTimeStampOffset: ExactTimeStamp.Offset,
+            val schedules: MutableList<com.krystianwsul.common.firebase.models.schedule.Schedule>,
         ) : IntervalBuilder() {
 
             override val endExactTimeStampOffset

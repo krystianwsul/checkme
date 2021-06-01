@@ -20,8 +20,10 @@ import com.krystianwsul.common.firebase.models.FilterResult
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.filterQuery
 import com.krystianwsul.common.firebase.models.project.Project
+import com.krystianwsul.common.firebase.models.task.ProjectRootTaskIdTracker
 import com.krystianwsul.common.firebase.models.task.RootTask
 import com.krystianwsul.common.firebase.models.task.Task
+import com.krystianwsul.common.firebase.models.task.performIntervalUpdate
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.utils.InstanceKey
@@ -36,37 +38,36 @@ const val SEARCH_PAGE_SIZE = 20
 
 @CheckResult
 fun DomainUpdater.setTaskEndTimeStamps(
-        notificationType: DomainListenerManager.NotificationType,
-        taskKeys: Set<TaskKey>,
-        deleteInstances: Boolean,
-): Single<TaskUndoData> = SingleDomainUpdate.create("setTaskEndTimeStamps") {
-    val (taskUndoData, params) =
-            setTaskEndTimeStamps(notificationType, taskKeys, deleteInstances, ExactTimeStamp.Local.now)
+    notificationType: DomainListenerManager.NotificationType,
+    taskKeys: Set<TaskKey>,
+    deleteInstances: Boolean,
+): Single<TaskUndoData> = SingleDomainUpdate.create("setTaskEndTimeStamps") { now ->
+    val (taskUndoData, params) = setTaskEndTimeStamps(notificationType, taskKeys, deleteInstances, now)
 
     DomainUpdater.Result(taskUndoData, params)
 }.perform(this)
 
 @CheckResult
 fun DomainUpdater.clearTaskEndTimeStamps(
-        notificationType: DomainListenerManager.NotificationType,
-        taskUndoData: TaskUndoData,
+    notificationType: DomainListenerManager.NotificationType,
+    taskUndoData: TaskUndoData,
 ): Completable = CompletableDomainUpdate.create("clearTaskEndTimeStamps") { now ->
     check(taskUndoData.taskKeys.isNotEmpty())
 
     processTaskUndoData(taskUndoData, now)
 
     val remoteProjects = taskUndoData.taskKeys
-            .map { getTaskForce(it.key).project }
-            .toSet()
+        .map { getTaskForce(it.key).project }
+        .toSet()
 
     DomainUpdater.Params(true, notificationType, DomainFactory.CloudParams(remoteProjects))
 }.perform(this)
 
 @CheckResult
 fun DomainUpdater.setOrdinal(
-        notificationType: DomainListenerManager.NotificationType,
-        taskKey: TaskKey,
-        ordinal: Double,
+    notificationType: DomainListenerManager.NotificationType,
+    taskKey: TaskKey,
+    ordinal: Double,
 ): Completable = CompletableDomainUpdate.create("setOrdinal") {
     val task = getTaskForce(taskKey)
 
@@ -77,8 +78,8 @@ fun DomainUpdater.setOrdinal(
 
 @CheckResult
 fun DomainUpdater.setInstancesNotNotified(
-        notificationType: DomainListenerManager.NotificationType,
-        instanceKeys: List<InstanceKey>,
+    notificationType: DomainListenerManager.NotificationType,
+    instanceKeys: List<InstanceKey>,
 ): Completable = CompletableDomainUpdate.create("setInstancesNotNotified") { now ->
     instanceKeys.forEach {
         val instance = getInstance(it)
@@ -96,8 +97,8 @@ fun DomainUpdater.setInstancesNotNotified(
 
 @CheckResult
 fun DomainUpdater.setInstancesAddHourActivity(
-        notificationType: DomainListenerManager.NotificationType,
-        instanceKeys: Collection<InstanceKey>,
+    notificationType: DomainListenerManager.NotificationType,
+    instanceKeys: Collection<InstanceKey>,
 ): Single<DomainFactory.HourUndoData> = SingleDomainUpdate.create("setInstanceAddHourActivity") { now ->
     check(instanceKeys.isNotEmpty())
 
@@ -112,27 +113,27 @@ fun DomainUpdater.setInstancesAddHourActivity(
 
     instances.forEach {
         it.setInstanceDateTime(
-                localFactory,
-                DateTime(date, Time.Normal(hourMinute)),
-                this,
-                now,
+            localFactory,
+            DateTime(date, Time.Normal(hourMinute)),
+            this,
+            now,
         )
     }
 
     val remoteProjects = instances.map { it.task.project }.toSet()
 
     DomainUpdater.Result(
-            DomainFactory.HourUndoData(instanceDateTimes),
-            true,
-            notificationType,
-            DomainFactory.CloudParams(remoteProjects),
+        DomainFactory.HourUndoData(instanceDateTimes),
+        true,
+        notificationType,
+        DomainFactory.CloudParams(remoteProjects),
     )
 }.perform(this)
 
 @CheckResult
 fun DomainUpdater.undoInstancesAddHour(
-        notificationType: DomainListenerManager.NotificationType,
-        hourUndoData: DomainFactory.HourUndoData,
+    notificationType: DomainListenerManager.NotificationType,
+    hourUndoData: DomainFactory.HourUndoData,
 ): Completable = CompletableDomainUpdate.create("setInstanceAddHourActivity") { now ->
     check(hourUndoData.instanceDateTimes.isNotEmpty())
 
@@ -149,9 +150,9 @@ fun DomainUpdater.undoInstancesAddHour(
 
 @CheckResult
 fun DomainUpdater.setInstanceDone(
-        notificationType: DomainListenerManager.NotificationType,
-        instanceKey: InstanceKey,
-        done: Boolean,
+    notificationType: DomainListenerManager.NotificationType,
+    instanceKey: InstanceKey,
+    done: Boolean,
 ): Completable = CompletableDomainUpdate.create("setInstanceDone") { now ->
     val instance = getInstance(instanceKey)
 
@@ -162,8 +163,8 @@ fun DomainUpdater.setInstanceDone(
 
 @CheckResult
 fun DomainUpdater.setInstanceNotified(
-        notificationType: DomainListenerManager.NotificationType,
-        instanceKey: InstanceKey,
+    notificationType: DomainListenerManager.NotificationType,
+    instanceKey: InstanceKey,
 ): Completable = CompletableDomainUpdate.create("setInstanceNotified") {
     val instance = getInstance(instanceKey)
 
@@ -174,8 +175,8 @@ fun DomainUpdater.setInstanceNotified(
 }.perform(this)
 
 fun DomainUpdater.updatePhotoUrl(
-        notificationType: DomainListenerManager.NotificationType,
-        photoUrl: String,
+    notificationType: DomainListenerManager.NotificationType,
+    photoUrl: String,
 ): Completable = CompletableDomainUpdate.create("updatePhotoUrl") {
     DomainThreadChecker.instance.requireDomainThread()
 
@@ -186,32 +187,32 @@ fun DomainUpdater.updatePhotoUrl(
 }.perform(this)
 
 fun DomainFactory.getUnscheduledTasks(now: ExactTimeStamp.Local) =
-        getAllTasks().filter { it.current(now) && it.isUnscheduled(now) }
+    getAllTasks().filter { it.current(now) && it.intervalInfo.isUnscheduled(now) }
 
 fun DomainFactory.getGroupListChildTaskDatas(
-        parentTask: Task,
-        now: ExactTimeStamp.Local,
-        searchCriteria: SearchCriteria? = null,
+    parentTask: Task,
+    now: ExactTimeStamp.Local,
+    searchCriteria: SearchCriteria? = null,
 ): List<GroupListDataWrapper.TaskData> = parentTask.getChildTaskHierarchies(now)
-        .asSequence()
-        .map { it.childTask }
-        .filterQuery(searchCriteria?.query)
-        .map { (childTask, filterResult) ->
-            val childQuery = if (filterResult == FilterResult.MATCHES) null else searchCriteria
+    .asSequence()
+    .map { it.childTask }
+    .filterQuery(searchCriteria?.query)
+    .map { (childTask, filterResult) ->
+        val childQuery = if (filterResult == FilterResult.MATCHES) null else searchCriteria
 
-            GroupListDataWrapper.TaskData(
-                    childTask.taskKey,
-                    childTask.name,
-                    getGroupListChildTaskDatas(childTask, now, childQuery),
-                    childTask.startExactTimeStamp,
-                    childTask.note,
-                    childTask.getImage(deviceDbInfo),
-                    childTask.isAssignedToMe(now, myUserFactory.user),
-                    childTask.getProjectInfo(now),
-                    childTask.ordinal,
-            )
-        }
-        .toList()
+        GroupListDataWrapper.TaskData(
+            childTask.taskKey,
+            childTask.name,
+            getGroupListChildTaskDatas(childTask, now, childQuery),
+            childTask.startExactTimeStamp,
+            childTask.note,
+            childTask.getImage(deviceDbInfo),
+            childTask.isAssignedToMe(now, myUserFactory.user),
+            childTask.getProjectInfo(now),
+            childTask.ordinal,
+        )
+    }
+    .toList()
 
 fun <T : Comparable<T>> DomainFactory.searchInstances(
     now: ExactTimeStamp.Local,
@@ -225,12 +226,12 @@ fun <T : Comparable<T>> DomainFactory.searchInstances(
     val desiredCount = (page + 1) * SEARCH_PAGE_SIZE
 
     val (instances, hasMore) = getRootInstances(
-            null,
-            null,
-            now,
-            searchCriteria,
-            filterVisible = !debugMode,
-            projectKey = projectKey,
+        null,
+        null,
+        now,
+        searchCriteria,
+        filterVisible = !debugMode,
+        projectKey = projectKey,
     ).takeAndHasMore(desiredCount)
 
     val instanceDatas = instances.map {
@@ -241,7 +242,7 @@ fun <T : Comparable<T>> DomainFactory.searchInstances(
         can skip filtering child instances, since showAssignedToOthers is meaningless for child instances.
          */
         val childSearchCriteria =
-                if (task.matchesQuery(searchCriteria.query)) searchCriteria.copy(query = "") else searchCriteria
+            if (task.matchesQuery(searchCriteria.query)) searchCriteria.copy(query = "") else searchCriteria
 
         val children = getChildInstanceDatas(it, now, mapper, childSearchCriteria, !debugMode)
 
@@ -252,12 +253,12 @@ fun <T : Comparable<T>> DomainFactory.searchInstances(
 }
 
 private class AddChildToParentUndoData(
-        val taskKey: TaskKey,
-        val taskHierarchyKeys: List<TaskHierarchyKey>,
-        val scheduleIds: List<String>,
-        val noScheduleOrParentsIds: List<String>,
-        val deleteTaskHierarchyKey: TaskHierarchyKey,
-        val unhideInstanceKey: InstanceKey?,
+    val taskKey: TaskKey,
+    val taskHierarchyKeys: List<TaskHierarchyKey>,
+    val scheduleIds: List<String>,
+    val noScheduleOrParentsIds: List<String>,
+    val deleteTaskHierarchyKey: TaskHierarchyKey,
+    val unhideInstanceKey: InstanceKey?,
 ) : UndoData {
 
     override fun undo(domainFactory: DomainFactory, now: ExactTimeStamp.Local) = domainFactory.run {
@@ -295,11 +296,19 @@ fun addChildToParent(
 ): UndoData {
     childTask.requireCurrent(now)
 
-    val taskHierarchyKeys = childTask.endAllCurrentTaskHierarchies(now)
-    val scheduleIds = childTask.endAllCurrentSchedules(now)
-    val noScheduleOrParentsIds = childTask.endAllCurrentNoScheduleOrParents(now)
+    lateinit var taskHierarchyKeys: List<TaskHierarchyKey>
+    lateinit var scheduleIds: List<String>
+    lateinit var noScheduleOrParentsIds: List<String>
+    lateinit var deleteTaskHierarchyKey: TaskHierarchyKey
 
-    val deleteTaskHierarchyKey = parentTask.addChild(childTask, now)
+    childTask.performIntervalUpdate {
+        taskHierarchyKeys = endAllCurrentTaskHierarchies(now)
+        scheduleIds = endAllCurrentSchedules(now)
+        noScheduleOrParentsIds = endAllCurrentNoScheduleOrParents(now)
+
+        deleteTaskHierarchyKey = parentTask.addChild(this, now)
+    }
+
 
     val unhideInstanceKey = hideInstance?.takeIf {
         it.parentInstance?.task != parentTask &&
@@ -311,39 +320,39 @@ fun addChildToParent(
     }
 
     return AddChildToParentUndoData(
-            childTask.taskKey,
-            taskHierarchyKeys,
-            scheduleIds,
-            noScheduleOrParentsIds,
-            deleteTaskHierarchyKey,
-            unhideInstanceKey,
+        childTask.taskKey,
+        taskHierarchyKeys,
+        scheduleIds,
+        noScheduleOrParentsIds,
+        deleteTaskHierarchyKey,
+        unhideInstanceKey,
     )
 }
 
 @CheckResult
 fun DomainUpdater.undo(notificationType: DomainListenerManager.NotificationType, undoData: UndoData): Completable =
-        CompletableDomainUpdate.create("undo") { now ->
-            val projects = undoData.undo(this, now)
-            check(projects.isNotEmpty())
+    CompletableDomainUpdate.create("undo") { now ->
+        val projects = undoData.undo(this, now)
+        check(projects.isNotEmpty())
 
-            DomainUpdater.Params(true, notificationType, DomainFactory.CloudParams(projects))
-        }.perform(this)
+        DomainUpdater.Params(true, notificationType, DomainFactory.CloudParams(projects))
+    }.perform(this)
 
 fun Project<*>.toProjectData(childTaskDatas: List<TaskListFragment.ChildTaskData>) = TaskListFragment.ProjectData(
-        getDisplayName(),
-        childTaskDatas,
-        projectKey,
-        endExactTimeStamp == null,
-        startExactTimeStamp.long
+    getDisplayName(),
+    childTaskDatas,
+    projectKey,
+    endExactTimeStamp == null,
+    startExactTimeStamp.long
 )
 
 fun Project<*>.getDisplayName() = name.takeIf { it.isNotEmpty() } ?: MyApplication.context.getString(R.string.myTasks)
 
 @CheckResult
 fun DomainUpdater.updateNotifications(notifierParams: Notifier.Params) =
-        CompletableDomainUpdate.create("updateNotifications") {
-            DomainUpdater.Params(notifierParams, DomainFactory.SaveParams(DomainListenerManager.NotificationType.All))
-        }.perform(this)
+    CompletableDomainUpdate.create("updateNotifications") {
+        DomainUpdater.Params(notifierParams, DomainFactory.SaveParams(DomainListenerManager.NotificationType.All))
+    }.perform(this)
 
 @CheckResult
 fun DomainUpdater.setFirebaseTickListener(newTickData: TickData): Completable {
@@ -355,21 +364,72 @@ fun DomainUpdater.setFirebaseTickListener(newTickData: TickData): Completable {
      */
     return CompletableDomainUpdate.create("setFirebaseTickListener") {
         TickHolder.getTickData()
-                ?.let {
-                    /**
-                     * If this is a TickData.Normal - meaning we're not waiting for a RunType.REMOTE - then we don't
-                     * need it to stick around.
-                     *
-                     * I don't know for sure if that's what I'm actually doing here, but I'll take my chances.
-                     */
+            ?.let {
+                /**
+                 * If this is a TickData.Normal - meaning we're not waiting for a RunType.REMOTE - then we don't
+                 * need it to stick around.
+                 *
+                 * I don't know for sure if that's what I'm actually doing here, but I'll take my chances.
+                 */
 
-                    if (!it.waiting) it.release()
+                if (!it.waiting) it.release()
 
-                    DomainUpdater.Params(
-                            it.notifierParams,
-                            DomainFactory.SaveParams(DomainListenerManager.NotificationType.All, it.domainChanged),
-                    )
-                }
-                ?: DomainUpdater.Params()
+                DomainUpdater.Params(
+                    it.notifierParams,
+                    DomainFactory.SaveParams(DomainListenerManager.NotificationType.All, it.domainChanged),
+                )
+            }
+            ?: DomainUpdater.Params()
     }.perform(this)
+}
+
+fun <T> DomainFactory.trackProjectRootTaskIds(action: () -> T): T {
+    check(ProjectRootTaskIdTracker.instance == null)
+
+    ProjectRootTaskIdTracker.instance = object : ProjectRootTaskIdTracker {}
+
+    fun getMap() = rootTasksFactory.rootTasks.mapValues { (_, task) -> task.project.projectKey }
+
+    val oldMap = getMap()
+    val result = action()
+    val newMap = getMap()
+
+    check(oldMap.keys.all { newMap.containsKey(it) })
+
+    val (otherEntries, addedEntries) = newMap.entries.partition { oldMap.containsKey(it.key) }
+
+    val changedTriples = otherEntries.map { (taskKey, newProjectKey) ->
+        val oldProjectKey = oldMap.getValue(taskKey)
+
+        Triple(taskKey, oldProjectKey, newProjectKey)
+    }.filter { (_, oldProjectKey, newProjectKey) -> oldProjectKey != newProjectKey }
+
+    val addPairs = addedEntries.map { it.key to it.value } +
+            changedTriples.map { (taskKey, _, newProjectKey) -> taskKey to newProjectKey }
+
+    val removePairs = changedTriples.map { (taskKey, oldProjectKey, _) -> taskKey to oldProjectKey }
+
+    fun getDelegate(projectKey: ProjectKey<*>) = projectsFactory.getProjectForce(projectKey)
+        .projectRecord
+        .rootTaskParentDelegate
+
+    addPairs.forEach { (taskKey, projectKey) -> getDelegate(projectKey).addRootTaskKey(taskKey) }
+    removePairs.forEach { (taskKey, projectKey) -> getDelegate(projectKey).removeRootTaskKey(taskKey) }
+
+    val allProjectKeys = addPairs.map { it.second } + removePairs.map { it.second }
+
+    allProjectKeys.distinct().forEach {
+        val rootTaskKeys = projectsFactory.getProjectForce(it)
+            .getAllTasks()
+            .mapNotNull { it.taskKey as? TaskKey.Root }
+            .toSet()
+
+        rootTasksFactory.updateProjectRecord(it, rootTaskKeys)
+    }
+
+    checkNotNull(ProjectRootTaskIdTracker.instance)
+
+    ProjectRootTaskIdTracker.instance = null
+
+    return result
 }

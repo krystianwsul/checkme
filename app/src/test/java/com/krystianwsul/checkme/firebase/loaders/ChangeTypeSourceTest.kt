@@ -25,6 +25,7 @@ import com.krystianwsul.common.firebase.json.projects.PrivateProjectJson
 import com.krystianwsul.common.firebase.json.projects.SharedProjectJson
 import com.krystianwsul.common.firebase.json.taskhierarchies.NestedTaskHierarchyJson
 import com.krystianwsul.common.firebase.json.tasks.RootTaskJson
+import com.krystianwsul.common.firebase.models.task.ProjectRootTaskIdTracker
 import com.krystianwsul.common.firebase.records.project.ProjectRecord
 import com.krystianwsul.common.firebase.records.task.RootTaskRecord
 import com.krystianwsul.common.time.*
@@ -36,10 +37,7 @@ import io.mockk.mockk
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.CompositeDisposable
-import org.junit.After
-import org.junit.Before
-import org.junit.BeforeClass
-import org.junit.Test
+import org.junit.*
 
 class ChangeTypeSourceTest {
 
@@ -59,7 +57,15 @@ class ChangeTypeSourceTest {
         fun beforeClass() {
             DomainThreadChecker.instance = mockk(relaxed = true)
 
+            ProjectRootTaskIdTracker.instance = object : ProjectRootTaskIdTracker {}
+
             mockBase64()
+        }
+
+        @JvmStatic
+        @AfterClass
+        fun afterClass() {
+            ProjectRootTaskIdTracker.instance = null
         }
     }
 

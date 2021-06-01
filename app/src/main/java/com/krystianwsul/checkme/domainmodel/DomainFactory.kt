@@ -42,6 +42,7 @@ import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.task.ProjectTask
 import com.krystianwsul.common.firebase.models.task.RootTask
 import com.krystianwsul.common.firebase.models.task.Task
+import com.krystianwsul.common.firebase.models.task.performIntervalUpdate
 import com.krystianwsul.common.firebase.models.taskhierarchy.TaskHierarchy
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.*
@@ -635,9 +636,11 @@ class DomainFactory(
 
             for (startTaskHierarchy in projectToRootConversion.startTaskHierarchies.values) {
                 val parentTask = projectToRootConversion.endTasks.getValue(startTaskHierarchy.parentTaskId)
+
                 val childTask = projectToRootConversion.endTasks.getValue(startTaskHierarchy.childTaskId)
 
-                childTask.copyParentNestedTaskHierarchy(now, startTaskHierarchy, parentTask.id)
+                childTask.performIntervalUpdate { copyParentNestedTaskHierarchy(now, startTaskHierarchy, parentTask.id) }
+
                 parentTask.addRootTask(childTask)
             }
 
@@ -717,21 +720,20 @@ class DomainFactory(
                 )
             )
 
-            val currentSchedules = oldTask.getCurrentScheduleIntervals(now).map { it.schedule }
-            val currentNoScheduleOrParent = oldTask.getCurrentNoScheduleOrParent(now)?.noScheduleOrParent
+            val currentSchedules = oldTask.intervalInfo.getCurrentScheduleIntervals(now).map { it.schedule }
 
-            if (currentSchedules.isNotEmpty()) {
-                check(currentNoScheduleOrParent == null)
-
-                newTask.copySchedules(
-                    now,
-                    currentSchedules,
-                    customTimeMigrationHelper,
-                    oldTask.project.projectKey,
-                    newProject.projectKey,
-                )
-            } else {
-                currentNoScheduleOrParent?.let { newTask.setNoScheduleOrParent(now, newProject.projectKey) }
+            newTask.performIntervalUpdate {
+                if (currentSchedules.isNotEmpty()) {
+                    newTask.copySchedules(
+                        now,
+                        currentSchedules,
+                        customTimeMigrationHelper,
+                        oldTask.project.projectKey,
+                        newProject.projectKey,
+                    )
+                } else if (oldTask.isTopLevelTask(now)) {
+                    setNoScheduleOrParent(now, newProject.projectKey)
+                }
             }
 
             return newTask

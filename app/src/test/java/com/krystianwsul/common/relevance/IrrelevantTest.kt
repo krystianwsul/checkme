@@ -17,7 +17,9 @@ import com.krystianwsul.common.firebase.json.tasks.PrivateTaskJson
 import com.krystianwsul.common.firebase.json.tasks.RootTaskJson
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.project.PrivateProject
+import com.krystianwsul.common.firebase.models.task.ProjectRootTaskIdTracker
 import com.krystianwsul.common.firebase.models.task.Task
+import com.krystianwsul.common.firebase.models.task.performIntervalUpdate
 import com.krystianwsul.common.firebase.records.project.PrivateProjectRecord
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.ProjectKey
@@ -30,6 +32,7 @@ import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import org.junit.After
+import org.junit.AfterClass
 import org.junit.Assert.*
 import org.junit.BeforeClass
 import org.junit.Test
@@ -57,6 +60,14 @@ class IrrelevantTest {
         @BeforeClass
         fun beforeClass() {
             DomainThreadChecker.instance = mockk(relaxed = true)
+
+            ProjectRootTaskIdTracker.instance = object : ProjectRootTaskIdTracker {}
+        }
+
+        @JvmStatic
+        @AfterClass
+        fun afterClass() {
+            ProjectRootTaskIdTracker.instance = null
         }
     }
 
@@ -163,7 +174,7 @@ class IrrelevantTest {
 
         now = ExactTimeStamp.Local(day1, hour4.toHourMilli())
 
-        task.apply {
+        task.performIntervalUpdate {
             endAllCurrentTaskHierarchies(now)
             endAllCurrentSchedules(now)
             endAllCurrentNoScheduleOrParents(now)
@@ -176,7 +187,7 @@ class IrrelevantTest {
         fun Task.isReminderless() = current(now)
                 && this.isVisible(now, true)
                 && isTopLevelTask(now)
-                && getCurrentScheduleIntervals(now).isEmpty()
+                && intervalInfo.getCurrentScheduleIntervals(now).isEmpty()
 
         assertTrue(task.isReminderless())
 
@@ -245,7 +256,7 @@ class IrrelevantTest {
 
         // 2. Mark single instance done
 
-        assertTrue(task.getCurrentScheduleIntervals(now).size == 2)
+        assertTrue(task.intervalInfo.getCurrentScheduleIntervals(now).size == 2)
 
         now = ExactTimeStamp.Local(day1, hour2)
 
@@ -273,11 +284,11 @@ class IrrelevantTest {
                 .single()
                 .isVisible(now, Instance.VisibilityOptions(hack24 = true))
         )
-        assertTrue(task.getCurrentScheduleIntervals(now).size == 2)
+        assertTrue(task.intervalInfo.getCurrentScheduleIntervals(now).size == 2)
 
         Irrelevant.setIrrelevant(mapOf(), project, now)
 
-        assertTrue(task.getCurrentScheduleIntervals(now).size == 1)
+        assertTrue(task.intervalInfo.getCurrentScheduleIntervals(now).size == 1)
         assertTrue(
             task.getInstances(
                 null,

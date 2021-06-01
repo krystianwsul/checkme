@@ -13,6 +13,7 @@ import com.krystianwsul.common.firebase.models.RootUser
 import com.krystianwsul.common.firebase.models.project.PrivateProject
 import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.project.SharedProject
+import com.krystianwsul.common.firebase.models.task.ProjectRootTaskIdTracker
 import com.krystianwsul.common.firebase.models.task.RootTask
 import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.firebase.models.taskhierarchy.TaskHierarchy
@@ -33,6 +34,8 @@ object RelevanceChecker {
             updateDatabase: Boolean,
             onComplete: () -> Unit,
     ) {
+        ProjectRootTaskIdTracker.instance = object : ProjectRootTaskIdTracker {}
+
         val roots = listOf("development", "production")
 
         val completed = roots.associateWith { false }.toMutableMap()
@@ -166,10 +169,13 @@ object RelevanceChecker {
 
                 projectMap = privateProjects + sharedProjects
 
-                rootTasksByTaskKey.values.forEach {
-                    if (!it.project.projectRecord.rootTaskParentDelegate.rootTaskKeys.contains(it.taskKey))
-                        throw InconsistentRootTaskIdsException(it.taskKey, it.project.projectKey)
-                }
+                rootTasksByTaskKey.values
+                    .filter { !it.project.projectRecord.rootTaskParentDelegate.rootTaskKeys.contains(it.taskKey) }
+                    .sortedBy { it.projectId }
+                    .takeIf { it.isNotEmpty() }
+                    ?.let {
+                        throw InconsistentRootTaskIdsException(it.map { it.taskKey to it.project.projectKey })
+                    }
 
                 privateProjects.values.forEach { privateProject ->
                     response += "checking relevance for private project ${privateProject.projectKey}"
@@ -282,8 +288,10 @@ object RelevanceChecker {
         }
     }
 
-    private class InconsistentRootTaskIdsException(taskKey: TaskKey.Root, projectKey: ProjectKey<*>) :
-        Exception("rootTaskId $taskKey missing from $projectKey")
+    private class InconsistentRootTaskIdsException(pairs: List<Pair<TaskKey.Root, ProjectKey<*>>>) : Exception(
+        "rootTaskIds missing from projects:\n" +
+                pairs.joinToString(";\n") { "${it.first} missing from ${it.second}" }
+    )
 
     private class MissingTaskException(taskKey: TaskKey.Root, projectKey: ProjectKey<*>) :
         Exception("rootTaskId $taskKey from $projectKey is missing from map")

@@ -80,8 +80,8 @@ class IntervalBuilderTest {
     private fun noScheduleMock() = Type.NoSchedule()
 
     private fun ProjectTask.check(vararg expected: Interval) {
-        val actual = IntervalBuilder.build(this)
-        assertEquals(expected.toList(), actual)
+        val actual = IntervalBuilder.build(this, true)
+        assertEquals(expected.toList(), actual.intervals)
     }
 
     @Before

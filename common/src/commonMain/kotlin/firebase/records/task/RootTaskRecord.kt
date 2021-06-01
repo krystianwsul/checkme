@@ -5,6 +5,7 @@ import com.krystianwsul.common.firebase.json.noscheduleorparent.RootNoScheduleOr
 import com.krystianwsul.common.firebase.json.schedule.*
 import com.krystianwsul.common.firebase.json.taskhierarchies.NestedTaskHierarchyJson
 import com.krystianwsul.common.firebase.json.tasks.RootTaskJson
+import com.krystianwsul.common.firebase.models.task.ProjectRootTaskIdTracker
 import com.krystianwsul.common.firebase.records.AssignedToHelper
 import com.krystianwsul.common.firebase.records.InstanceRecord
 import com.krystianwsul.common.firebase.records.RootTaskParentDelegate
@@ -93,7 +94,9 @@ class RootTaskRecord private constructor(
             this(false, id, taskJson, databaseWrapper, parent)
 
     constructor(taskJson: RootTaskJson, databaseWrapper: DatabaseWrapper, parent: Parent) :
-            this(true, databaseWrapper.newRootTaskRecordId(), taskJson, databaseWrapper, parent)
+            this(true, databaseWrapper.newRootTaskRecordId(), taskJson, databaseWrapper, parent) {
+        ProjectRootTaskIdTracker.checkTracking()
+    }
 
     val rootTaskParentDelegate = object : RootTaskParentDelegate(taskJson) {
 
@@ -103,6 +106,8 @@ class RootTaskRecord private constructor(
     }
 
     fun newNoScheduleOrParentRecord(noScheduleOrParentJson: RootNoScheduleOrParentJson): RootNoScheduleOrParentRecord {
+        ProjectRootTaskIdTracker.checkTracking()
+
         val noScheduleOrParentRecord = RootNoScheduleOrParentRecord(
             this,
             noScheduleOrParentJson,
@@ -120,6 +125,8 @@ class RootTaskRecord private constructor(
     fun newTaskHierarchyRecordId() = databaseWrapper.newRootTaskNestedTaskHierarchyRecordId(id)
 
     fun newSingleScheduleRecord(singleScheduleJson: RootSingleScheduleJson): SingleScheduleRecord {
+        ProjectRootTaskIdTracker.checkTracking()
+
         val singleScheduleRecord = SingleScheduleRecord(
             this,
             RootScheduleWrapper(singleScheduleJson = singleScheduleJson),
@@ -136,6 +143,8 @@ class RootTaskRecord private constructor(
     }
 
     fun newWeeklyScheduleRecord(weeklyScheduleJson: RootWeeklyScheduleJson): WeeklyScheduleRecord {
+        ProjectRootTaskIdTracker.checkTracking()
+
         val weeklyScheduleRecord = WeeklyScheduleRecord(
             this,
             RootScheduleWrapper(weeklyScheduleJson = weeklyScheduleJson),
@@ -152,6 +161,8 @@ class RootTaskRecord private constructor(
     }
 
     fun newMonthlyDayScheduleRecord(monthlyDayScheduleJson: RootMonthlyDayScheduleJson): MonthlyDayScheduleRecord {
+        ProjectRootTaskIdTracker.checkTracking()
+
         val monthlyDayScheduleRecord = MonthlyDayScheduleRecord(
             this,
             RootScheduleWrapper(monthlyDayScheduleJson = monthlyDayScheduleJson),
@@ -168,6 +179,8 @@ class RootTaskRecord private constructor(
     }
 
     fun newMonthlyWeekScheduleRecord(monthlyWeekScheduleJson: RootMonthlyWeekScheduleJson): MonthlyWeekScheduleRecord {
+        ProjectRootTaskIdTracker.checkTracking()
+
         val monthlyWeekScheduleRecord = MonthlyWeekScheduleRecord(
             this,
             RootScheduleWrapper(monthlyWeekScheduleJson = monthlyWeekScheduleJson),
@@ -184,6 +197,8 @@ class RootTaskRecord private constructor(
     }
 
     fun newYearlyScheduleRecord(yearlyScheduleJson: RootYearlyScheduleJson): YearlyScheduleRecord {
+        ProjectRootTaskIdTracker.checkTracking()
+
         val yearlyScheduleRecord = YearlyScheduleRecord(
             this,
             RootScheduleWrapper(yearlyScheduleJson = yearlyScheduleJson),
@@ -200,6 +215,8 @@ class RootTaskRecord private constructor(
     }
 
     fun newTaskHierarchyRecord(taskHierarchyJson: NestedTaskHierarchyJson): NestedTaskHierarchyRecord {
+        ProjectRootTaskIdTracker.checkTracking()
+
         val taskHierarchyRecord = NestedTaskHierarchyRecord(this, taskHierarchyJson)
         check(!taskHierarchyRecords.containsKey(taskHierarchyRecord.id))
 

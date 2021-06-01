@@ -31,6 +31,9 @@ class ProjectTask(override val project: Project<*>, private val taskRecord: Proj
 
     override val projectParentTaskHierarchies by parentProjectTaskHierarchiesProperty
 
+    // It's possible this is necessary for legacy data
+    override val allowPlaceholderCurrentNoSchedule = true
+
     override val projectCustomTimeIdProvider = project.projectRecord
 
     override fun deleteFromParent() = project.deleteTask(this)
@@ -63,9 +66,10 @@ class ProjectTask(override val project: Project<*>, private val taskRecord: Proj
             if (taskRecord.endData!!.offset == null) setMyEndExactTimeStamp(it)
         }
 
-        scheduleIntervals.forEach { it.schedule.fixOffsets() }
-        parentHierarchyIntervals.forEach { it.taskHierarchy.fixOffsets() }
-        noScheduleOrParentIntervals.forEach { (it.noScheduleOrParent as ProjectNoScheduleOrParent).fixOffsets() }
+        intervalInfo.scheduleIntervals.forEach { it.schedule.fixOffsets() }
+        intervalInfo.parentHierarchyIntervals.forEach { it.taskHierarchy.fixOffsets() }
+        intervalInfo.noScheduleOrParentIntervals.forEach { (it.noScheduleOrParent as ProjectNoScheduleOrParent).fixOffsets() }
+
         existingInstances.values.forEach { it.fixOffsets() }
     }
 }

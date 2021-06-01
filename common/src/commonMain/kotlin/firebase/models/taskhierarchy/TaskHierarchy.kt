@@ -38,7 +38,7 @@ sealed class TaskHierarchy(private val parentTaskDelegate: ParentTaskDelegate) :
 
     abstract val taskHierarchyKey: TaskHierarchyKey
 
-    final override fun setEndExactTimeStamp(endExactTimeStamp: ExactTimeStamp) {
+    override fun setEndExactTimeStamp(endExactTimeStamp: ExactTimeStamp) {
         requireCurrentOffset(endExactTimeStamp)
 
         taskHierarchyRecord.endTime = endExactTimeStamp.long

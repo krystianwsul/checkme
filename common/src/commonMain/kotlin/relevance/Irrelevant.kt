@@ -32,7 +32,9 @@ object Irrelevant {
         tasks.forEach {
             it.correctIntervalEndExactTimeStamps()
 
-            it.scheduleIntervals.forEach { it.updateOldestVisible(now) }
+            it.intervalInfo
+                .scheduleIntervals
+                .forEach { it.updateOldestVisible(now) }
         }
 
         // relevant hack
@@ -123,7 +125,7 @@ object Irrelevant {
         val irrelevantNoScheduleOrParents = mutableListOf<NoScheduleOrParent>()
 
         relevantTasks.forEach {
-            val scheduleIntervals = it.scheduleIntervals
+            val scheduleIntervals = it.intervalInfo.scheduleIntervals
 
             irrelevantSchedules += it.schedules - scheduleIntervals.map { it.schedule }
 
@@ -159,7 +161,8 @@ object Irrelevant {
                 result
             }.map { it.schedule }
 
-            val relevantNoScheduleOrParents = it.noScheduleOrParentIntervals
+            val relevantNoScheduleOrParents = it.intervalInfo
+                .noScheduleOrParentIntervals
                 .filter { it.currentOffset(now) }
                 .map { it.noScheduleOrParent }
 

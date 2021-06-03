@@ -11,6 +11,7 @@ import com.krystianwsul.checkme.domainmodel.extensions.setInstancesNotifiedServi
 import com.krystianwsul.checkme.domainmodel.notifications.NotificationWrapper
 import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
 import com.krystianwsul.common.utils.InstanceKey
+import com.krystianwsul.common.utils.ProjectKey
 import io.reactivex.rxjava3.core.Completable
 import kotlinx.parcelize.Parcelize
 
@@ -21,8 +22,9 @@ sealed class NotificationAction : Parcelable {
     @CheckResult
     abstract fun perform(): Completable
 
+    // todo groups actually implement projectKey
     @Parcelize
-    object DeleteGroupNotification : NotificationAction() {
+    data class DeleteGroupNotification(private val projectKey: ProjectKey.Shared? = null) : NotificationAction() {
 
         override val requestCode get() = 0
 

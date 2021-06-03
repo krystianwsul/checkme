@@ -535,11 +535,9 @@ class DomainFactory(
         BackendNotifier.notify(projects, deviceDbInfo.deviceInfo, userKeys)
     }
 
-    fun setInstanceNotified(instanceKey: InstanceKey) {
-        getInstance(instanceKey).apply {
-            setNotified(localFactory, true)
-            setNotificationShown(localFactory, false)
-        }
+    fun setInstanceNotified(instance: Instance) {
+        instance.setNotified(localFactory, true)
+        instance.setNotificationShown(localFactory, false)
     }
 
     fun getTime(timePair: TimePair) = timePair.customTimeKey

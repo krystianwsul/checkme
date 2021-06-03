@@ -169,7 +169,7 @@ fun DomainUpdater.setInstanceNotified(
     val instance = getInstance(instanceKey)
 
     Preferences.tickLog.logLineHour("DomainFactory: setting notified: ${instance.name}")
-    setInstanceNotified(instanceKey)
+    setInstanceNotified(getInstance(instanceKey))
 
     DomainUpdater.Params(false, notificationType)
 }.perform(this)

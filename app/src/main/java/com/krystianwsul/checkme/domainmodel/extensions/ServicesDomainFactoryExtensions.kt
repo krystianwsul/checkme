@@ -63,7 +63,7 @@ fun DomainUpdater.setInstancesNotifiedService(instanceKeys: List<InstanceKey>): 
         CompletableDomainUpdate.create("setInstancesNotified") {
             check(instanceKeys.isNotEmpty())
 
-            instanceKeys.forEach(::setInstanceNotified)
+            instanceKeys.forEach { setInstanceNotified(getInstance(it)) }
 
             DomainUpdater.Params(false, DomainListenerManager.NotificationType.All)
         }.perform(this)

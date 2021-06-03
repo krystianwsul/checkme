@@ -303,9 +303,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
         Preferences.tickLog.logLineHour("ShowInstanceActivity: setting notified")
 
         if (intent.hasExtra(NOTIFICATION_ID_KEY)) {
-            AndroidDomainUpdater.setInstanceNotified(showInstanceViewModel.dataId.toFirst(), instanceKey)
-                    .subscribe()
-                    .addTo(createDisposable)
+            AndroidDomainUpdater.setInstanceNotified(showInstanceViewModel.dataId.toFirst(), instanceKey).subscribe()
         }
     }
 

@@ -31,7 +31,7 @@ sealed class GroupType : Comparable<GroupType> {
                                 .singleOrNull()
 
                             projectDetails?.let {
-                                Project(timeStamp, projectDetails, instanceDatas, false, true)
+                                TimeProject(timeStamp, projectDetails, instanceDatas, false, true)
                             } ?: Time(timeStamp, groupByProject(timeStamp, instanceDatas, true))
                         } else {
                             // if there's just one, there's our node
@@ -85,10 +85,7 @@ sealed class GroupType : Comparable<GroupType> {
         nodeCollection: NodeCollection,
     ): NotDoneNode.ContentDelegate
 
-    class Time(
-        val timeStamp: TimeStamp,
-        val groupTypes: List<GroupType>
-    ) : GroupType(), SingleParent {
+    class Time(val timeStamp: TimeStamp, val groupTypes: List<GroupType>) : GroupType(), SingleParent {
 
         override val allInstanceKeys = groupTypes.flatMap { it.allInstanceKeys }.toSet()
 
@@ -112,13 +109,70 @@ sealed class GroupType : Comparable<GroupType> {
         override fun compareTo(other: GroupType): Int {
             return when (other) {
                 is Time -> timeStamp.compareTo(timeStamp)
-                is Project -> timeStamp.compareTo(timeStamp)
+                is TimeProject -> timeStamp.compareTo(timeStamp)
+                is Project -> throw UnsupportedOperationException()
                 is Single -> timeStamp.compareTo(other.instanceData.instanceTimeStamp)
             }
         }
     }
 
-    class Project(
+    /**
+     * This is a stand-alone item, when there are instances of exclusively one project at a given time.  Example list:
+     *
+     * Time
+     *      Project
+     *      Single
+     * TimeProject
+     *      Single
+     * Single
+     */
+    class TimeProject( // todo group clean up params
+        val timeStamp: TimeStamp,
+        val projectDetails: DetailsNode.ProjectDetails,
+        _instanceDatas: List<GroupListDataWrapper.InstanceData>,
+        private val nested: Boolean,
+        private val showTime: Boolean
+    ) : GroupType(), SingleParent {
+
+        private val instanceDatas = _instanceDatas.map { it.copy(projectInfo = null) }
+
+        override val allInstanceKeys = instanceDatas.map { it.instanceKey }.toSet()
+
+        override val name get() = projectDetails.name
+
+        override fun toContentDelegate(
+            groupAdapter: GroupListFragment.GroupAdapter,
+            indentation: Int,
+            nodeCollection: NodeCollection,
+        ) = NotDoneNode.ContentDelegate.Group(
+            groupAdapter,
+            this,
+            instanceDatas,
+            indentation + (if (nested) 1 else 0),
+            nodeCollection,
+            instanceDatas.map(::Single),
+            NotDoneNode.ContentDelegate.Group.Id.Project(timeStamp, allInstanceKeys, projectDetails.projectKey),
+            NotDoneNode.ContentDelegate.Group.GroupRowsDelegate.Project(
+                groupAdapter,
+                timeStamp,
+                projectDetails.name,
+                showTime,
+            ),
+            !nested,
+            ShowGroupActivity.Parameters.Project(timeStamp, projectDetails.projectKey),
+        )
+
+        override fun compareTo(other: GroupType): Int {
+            return when (other) {
+                is Time -> timeStamp.compareTo(other.timeStamp)
+                is TimeProject -> timeStamp.compareTo(other.timeStamp)
+                is Project -> throw UnsupportedOperationException()
+                is Single -> timeStamp.compareTo(other.instanceData.instanceTimeStamp)
+            }
+        }
+    }
+
+    class Project( // todo group clean up params
         val timeStamp: TimeStamp,
         val projectDetails: DetailsNode.ProjectDetails,
         _instanceDatas: List<GroupListDataWrapper.InstanceData>,
@@ -156,7 +210,8 @@ sealed class GroupType : Comparable<GroupType> {
 
         override fun compareTo(other: GroupType): Int {
             return when (other) {
-                is Time -> timeStamp.compareTo(other.timeStamp)
+                is Time -> throw UnsupportedOperationException()
+                is TimeProject -> throw UnsupportedOperationException()
                 is Project -> projectDetails.projectKey.compareTo(other.projectDetails.projectKey)
                 is Single -> -1
             }
@@ -180,6 +235,7 @@ sealed class GroupType : Comparable<GroupType> {
         override fun compareTo(other: GroupType): Int {
             return when (other) {
                 is Time -> instanceData.instanceTimeStamp.compareTo(other.timeStamp)
+                is TimeProject -> instanceData.instanceTimeStamp.compareTo(other.timeStamp)
                 is Project -> 1
                 is Single -> instanceData.compareTo(other.instanceData)
             }

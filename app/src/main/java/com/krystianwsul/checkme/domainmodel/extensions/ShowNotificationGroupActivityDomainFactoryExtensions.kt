@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.domainmodel.extensions
 
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.Notifier
 import com.krystianwsul.checkme.domainmodel.getProjectInfo
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.utils.time.getDisplayText
@@ -20,9 +21,10 @@ fun DomainFactory.getShowNotificationGroupData(instanceKeys: Set<InstanceKey>): 
 
     val now = ExactTimeStamp.Local.now
 
-    val instances = instanceKeys.map { getInstance(it) }
-        .filter { it.isRootInstance() }
-        .sortedBy { it.instanceDateTime }
+    val queriedInstances = instanceKeys.map { getInstance(it) }.filter { it.isRootInstance() }
+    val notificationInstances = Notifier.getNotificationInstances(this, now)
+
+    val instances = (queriedInstances + notificationInstances).distinct().sortedBy { it.instanceDateTime }
 
     val customTimeDatas = getCurrentRemoteCustomTimes(now).map {
         GroupListDataWrapper.CustomTimeData(it.name, it.hourMinutes.toSortedMap())

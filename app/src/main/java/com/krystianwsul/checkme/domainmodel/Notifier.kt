@@ -27,6 +27,16 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
 
         // To prevent spam if there's a huge backlog
         private const val MAX_NOTIFICATIONS_Q = 10
+
+        fun getNotificationInstances(domainFactory: DomainFactory, now: ExactTimeStamp.Local): List<Instance> {
+            return domainFactory.getRootInstances(null, now.toOffset().plusOne(), now /* 24 hack */)
+                .filter {
+                    it.done == null &&
+                            !it.getNotified(domainFactory.localFactory) &&
+                            it.isAssignedToMe(now, domainFactory.myUserFactory.user)
+                }
+                .toList()
+        }
     }
 
     fun updateNotifications(now: ExactTimeStamp.Local, params: Params) {
@@ -36,17 +46,10 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
 
         notificationWrapper.hideTemporary(Ticker.TICK_NOTIFICATION_ID, sourceName)
 
-        val notificationInstances = if (clear) {
+        val notificationInstances = if (clear)
             mapOf()
-        } else {
-            domainFactory.getRootInstances(null, now.toOffset().plusOne(), now /* 24 hack */)
-                    .filter {
-                        it.done == null
-                                && !it.getNotified(domainFactory.localFactory)
-                                && it.isAssignedToMe(now, domainFactory.myUserFactory.user)
-                    }
-                    .associateBy { it.instanceKey }
-        }
+        else
+            getNotificationInstances(domainFactory, now).associateBy { it.instanceKey }
 
         Preferences.tickLog.logLineHour(
                 "notification instances: " + notificationInstances.values.joinToString(", ") { it.name }

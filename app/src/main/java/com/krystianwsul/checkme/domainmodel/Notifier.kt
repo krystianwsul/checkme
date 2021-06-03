@@ -13,6 +13,7 @@ import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.DateTimeSoy
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.InstanceKey
+import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.singleOrEmpty
 import com.soywiz.klock.DateTime
 import com.soywiz.klock.Time
@@ -294,12 +295,22 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
     }
 
     private fun notifyInstances(notificationDatas: List<NotificationData>, now: ExactTimeStamp.Local) {
-        notificationDatas.forEach {
-            when (it) {
-                is NotificationData.Cancel -> notificationWrapper.cancelNotification(it.instanceId)
-                is NotificationData.Notify ->
-                    notificationWrapper.notifyInstance(domainFactory.deviceDbInfo, it.instance, it.silent, now)
-            }
+        notificationDatas.filterIsInstance<NotificationData.Cancel>().forEach {
+            notificationWrapper.cancelNotification(it.instanceId)
+        }
+
+        val notifies = notificationDatas.filterIsInstance<NotificationData.Notify>()
+
+        val projectGroups = notifies.groupBy { it.instance.getProject().projectKey }
+
+        val (private, shared) = projectGroups.entries.partition { it.key is ProjectKey.Private }
+
+        private.singleOrNull()
+            ?.value
+            ?.forEach { notificationWrapper.notifyInstance(domainFactory.deviceDbInfo, it.instance, it.silent, now) }
+
+        shared.forEach {
+            // todo groups
         }
     }
 

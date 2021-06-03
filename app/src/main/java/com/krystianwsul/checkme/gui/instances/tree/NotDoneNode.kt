@@ -357,12 +357,11 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
             sealed class GroupRowsDelegate : DetailsNode.ProjectRowsDelegate(null, R.color.textSecondary) {
 
                 protected abstract val groupAdapter: GroupListFragment.GroupAdapter
-                protected abstract val timeStamp: TimeStamp
 
                 private fun getCustomTimeData(dayOfWeek: DayOfWeek, hourMinute: HourMinute) =
                     groupAdapter.customTimeDatas.firstOrNull { it.hourMinutes[dayOfWeek] == hourMinute }
 
-                protected val timeRow by lazy {
+                protected fun getTimeRow(timeStamp: TimeStamp): MultiLineRow {
                     val date = timeStamp.date
                     val hourMinute = timeStamp.hourMinute
 
@@ -370,7 +369,7 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
 
                     val text = date.getDisplayText() + ", " + timeText
 
-                    MultiLineRow.Visible(text, R.color.textSecondary)
+                    return MultiLineRow.Visible(text, R.color.textSecondary)
                 }
 
                 protected fun getChildren(allChildren: List<TreeNode<*>>) =
@@ -381,8 +380,10 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
 
                 class Time(
                     override val groupAdapter: GroupListFragment.GroupAdapter,
-                    override val timeStamp: TimeStamp,
+                    private val timeStamp: TimeStamp,
                 ) : GroupRowsDelegate() {
+
+                    private val details by lazy { getTimeRow(timeStamp) }
 
                     override fun getRowsWithoutProject(
                         isExpanded: Boolean,
@@ -393,25 +394,24 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
                         else
                             MultiLineRow.Visible(getChildren(allChildren))
 
-                        return listOf(name, timeRow)
+                        return listOf(name, details)
                     }
                 }
 
                 class Project(
                     override val groupAdapter: GroupListFragment.GroupAdapter,
-                    override val timeStamp: TimeStamp,
+                    private val timeStamp: TimeStamp?,
                     projectName: String,
-                    private val showTime: Boolean,
                 ) : GroupRowsDelegate() {
 
                     private val name = MultiLineRow.Visible(projectName)
 
+                    private val details by lazy { timeStamp?.let(::getTimeRow) }
+
                     override fun getRowsWithoutProject(
                         isExpanded: Boolean,
-                        allChildren: List<TreeNode<*>>
+                        allChildren: List<TreeNode<*>>,
                     ): List<MultiLineRow> {
-                        val details = if (showTime) timeRow else null
-
                         val children = if (isExpanded)
                             null
                         else

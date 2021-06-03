@@ -150,13 +150,8 @@ sealed class GroupType : Comparable<GroupType> {
             nodeCollection,
             instanceDatas.map(::Single),
             NotDoneNode.ContentDelegate.Group.Id.Project(timeStamp, allInstanceKeys, projectDetails.projectKey),
-            NotDoneNode.ContentDelegate.Group.GroupRowsDelegate.Project(
-                groupAdapter,
-                timeStamp,
-                projectDetails.name,
-                true,
-            ),
-            true, // todo group check param
+            NotDoneNode.ContentDelegate.Group.GroupRowsDelegate.Project(groupAdapter, timeStamp, projectDetails.name),
+            true,
             ShowGroupActivity.Parameters.Project(timeStamp, projectDetails.projectKey),
         )
 
@@ -207,12 +202,7 @@ sealed class GroupType : Comparable<GroupType> {
             nodeCollection,
             instanceDatas.map(::Single),
             NotDoneNode.ContentDelegate.Group.Id.Project(timeStamp, allInstanceKeys, projectDetails.projectKey),
-            NotDoneNode.ContentDelegate.Group.GroupRowsDelegate.Project(
-                groupAdapter,
-                timeStamp,
-                projectDetails.name,
-                false, // todo group check usage (why am I passing in timeStamp?)
-            ),
+            NotDoneNode.ContentDelegate.Group.GroupRowsDelegate.Project(groupAdapter, null, projectDetails.name),
             !nested,
             ShowGroupActivity.Parameters.Project(timeStamp, projectDetails.projectKey),
         )

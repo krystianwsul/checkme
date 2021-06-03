@@ -46,13 +46,27 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
 
         notificationWrapper.hideTemporary(Ticker.TICK_NOTIFICATION_ID, sourceName)
 
+        val notificationDatas = mutableListOf<NotificationData>()
+
+        fun notifyInstance(instance: Instance, silent: Boolean) {
+            notificationDatas += NotificationData.Notify(instance, silent)
+        }
+
+        fun updateInstance(instance: Instance) {
+            notificationDatas += NotificationData.Notify(instance)
+        }
+
+        fun cancelInstance(instanceId: Int) {
+            notificationDatas += NotificationData.Cancel(instanceId)
+        }
+
         val notificationInstances = if (clear)
             mapOf()
         else
             getNotificationInstances(domainFactory, now).associateBy { it.instanceKey }
 
         Preferences.tickLog.logLineHour(
-                "notification instances: " + notificationInstances.values.joinToString(", ") { it.name }
+            "notification instances: " + notificationInstances.values.joinToString(", ") { it.name }
         )
 
         val instanceShownPairs = domainFactory.localFactory.instanceShownRecords
@@ -62,12 +76,12 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
         instanceShownPairs.filter { it.second == null }.forEach { (instanceShownRecord, _) ->
             val scheduleDate = instanceShownRecord.run { Date(scheduleYear, scheduleMonth, scheduleDay) }
 
-            NotificationWrapper.instance.cancelNotification(
-                    Instance.getNotificationId(
-                            scheduleDate,
-                            instanceShownRecord.scheduleTimeDescriptor,
-                            instanceShownRecord.taskKeyData,
-                    )
+            cancelInstance(
+                Instance.getNotificationId(
+                    scheduleDate,
+                    instanceShownRecord.scheduleTimeDescriptor,
+                    instanceShownRecord.taskKeyData,
+                )
             )
             instanceShownRecord.notificationShown = false
         }
@@ -118,9 +132,7 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
                     NotificationWrapper.instance.notifyGroup(notificationInstances.values, silentParam, now)
                 } else { // instances shown
                     for (shownInstanceKey in shownInstanceKeys) {
-                        notificationWrapper.cancelNotification(
-                                domainFactory.getInstance(shownInstanceKey).notificationId
-                        )
+                        cancelInstance(domainFactory.getInstance(shownInstanceKey).notificationId)
                     }
 
                     notificationWrapper.notifyGroup(notificationInstances.values, silent, now)
@@ -130,20 +142,18 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
                     NotificationWrapper.instance.cancelNotification(0)
 
                     for (instance in notificationInstances.values)
-                        notifyInstance(instance, silent, now)
+                        notifyInstance(instance, silent)
                 } else { // instances shown
                     for (hideInstanceKey in hideInstanceKeys) {
-                        notificationWrapper.cancelNotification(
-                                domainFactory.getInstance(hideInstanceKey).notificationId
-                        )
+                        cancelInstance(domainFactory.getInstance(hideInstanceKey).notificationId)
                     }
 
                     for (showInstanceKey in showInstanceKeys)
-                        notifyInstance(notificationInstances.getValue(showInstanceKey), silent, now)
+                        notifyInstance(notificationInstances.getValue(showInstanceKey), silent)
 
                     notificationInstances.values
-                            .filter { !showInstanceKeys.contains(it.instanceKey) }
-                            .forEach { updateInstance(it, now) }
+                        .filter { !showInstanceKeys.contains(it.instanceKey) }
+                        .forEach(::updateInstance)
                 }
             }
         } else if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
@@ -158,20 +168,20 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
             for (hideInstanceKey in hideInstanceKeys) {
                 val instance = domainFactory.getInstance(hideInstanceKey)
                 Preferences.tickLog.logLineHour("hiding '" + instance.name + "'")
-                NotificationWrapper.instance.cancelNotification(instance.notificationId)
+                cancelInstance(instance.notificationId)
             }
 
             for (showInstanceKey in showInstanceKeys) {
                 val instance = notificationInstances.getValue(showInstanceKey)
                 Preferences.tickLog.logLineHour("showing '" + instance.name + "'")
-                notifyInstance(instance, silent, now)
+                notifyInstance(instance, silent)
             }
 
             val updateInstances = notificationInstances.values.filter { !showInstanceKeys.contains(it.instanceKey) }
 
             updateInstances.forEach {
                 Preferences.tickLog.logLineHour("updating '" + it.name + "' " + it.instanceDateTime)
-                updateInstance(it, now)
+                updateInstance(it)
             }
         } else {
             /**
@@ -181,7 +191,7 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
 
             fun Collection<InstanceKey>.cancelNotifications() = map(domainFactory::getInstance).forEach {
                 Preferences.tickLog.logLineHour("hiding '" + it.name + "'")
-                NotificationWrapper.instance.cancelNotification(it.notificationId)
+                cancelInstance(it.notificationId)
             }
 
             fun showSummary() { // Android notification group thingy
@@ -222,7 +232,7 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
                     for (showInstanceKey in showInstanceKeys) {
                         val instance = notificationInstances.getValue(showInstanceKey)
                         Preferences.tickLog.logLineHour("showing '" + instance.name + "'")
-                        notifyInstance(instance, silent, now)
+                        notifyInstance(instance, silent)
                     }
 
                     // instances to be updated
@@ -230,7 +240,7 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
                             .filter { !showInstanceKeys.contains(it.instanceKey) }
                             .forEach {
                                 Preferences.tickLog.logLineHour("updating '${it.name}' ${it.instanceDateTime}")
-                                updateInstance(it, now)
+                                updateInstance(it)
                             }
                 }
                 else -> {
@@ -247,14 +257,16 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
             }
         }
 
+        notifyInstances(notificationDatas, now)
+
         if (!silent) Preferences.lastTick = now.long
 
         if (clear) {
             notificationWrapper.updateAlarm(null)
         } else {
             val nextAlarmInstance = domainFactory.getRootInstances(now.toOffset().plusOne(), null, now)
-                    .filter { it.isAssignedToMe(now, domainFactory.myUserFactory.user) }
-                    .firstOrNull()
+                .filter { it.isAssignedToMe(now, domainFactory.myUserFactory.user) }
+                .firstOrNull()
 
             if (nextAlarmInstance != null) {
                 val nextAlarmTimeStamp = nextAlarmInstance.instanceDateTime.timeStamp
@@ -274,11 +286,22 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
         }
     }
 
-    private fun notifyInstance(instance: Instance, silent: Boolean, now: ExactTimeStamp.Local) =
-            notificationWrapper.notifyInstance(domainFactory.deviceDbInfo, instance, silent, now)
+    private sealed class NotificationData {
 
-    private fun updateInstance(instance: Instance, now: ExactTimeStamp.Local) =
-            notificationWrapper.notifyInstance(domainFactory.deviceDbInfo, instance, true, now)
+        data class Cancel(val instanceId: Int) : NotificationData()
+
+        data class Notify(val instance: Instance, val silent: Boolean = true) : NotificationData()
+    }
+
+    private fun notifyInstances(notificationDatas: List<NotificationData>, now: ExactTimeStamp.Local) {
+        notificationDatas.forEach {
+            when (it) {
+                is NotificationData.Cancel -> notificationWrapper.cancelNotification(it.instanceId)
+                is NotificationData.Notify ->
+                    notificationWrapper.notifyInstance(domainFactory.deviceDbInfo, it.instance, it.silent, now)
+            }
+        }
+    }
 
     private fun setIrrelevant(now: ExactTimeStamp.Local) {
         @Suppress("ConstantConditionIf")

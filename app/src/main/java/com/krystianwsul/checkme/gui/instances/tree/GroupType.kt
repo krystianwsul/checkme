@@ -31,7 +31,7 @@ sealed class GroupType : Comparable<GroupType> {
                                 .singleOrNull()
 
                             projectDetails?.let {
-                                TimeProject(timeStamp, projectDetails, instanceDatas, false, true)
+                                TimeProject(timeStamp, projectDetails, instanceDatas)
                             } ?: Time(timeStamp, groupByProject(timeStamp, instanceDatas, true))
                         } else {
                             // if there's just one, there's our node
@@ -63,7 +63,7 @@ sealed class GroupType : Comparable<GroupType> {
                 check(instanceDatas.isNotEmpty())
 
                 if (instanceDatas.size > 1) {
-                    Project(timeStamp, projectDetails!!, instanceDatas, nested, false)
+                    Project(timeStamp, projectDetails!!, instanceDatas, nested)
                 } else {
                     Single(instanceDatas.single())
                 }
@@ -130,8 +130,6 @@ sealed class GroupType : Comparable<GroupType> {
         val timeStamp: TimeStamp,
         val projectDetails: DetailsNode.ProjectDetails,
         _instanceDatas: List<GroupListDataWrapper.InstanceData>,
-        private val nested: Boolean,
-        private val showTime: Boolean
     ) : GroupType(), SingleParent {
 
         private val instanceDatas = _instanceDatas.map { it.copy(projectInfo = null) }
@@ -148,7 +146,7 @@ sealed class GroupType : Comparable<GroupType> {
             groupAdapter,
             this,
             instanceDatas,
-            indentation + (if (nested) 1 else 0),
+            indentation + (if (false) 1 else 0), // todo group param
             nodeCollection,
             instanceDatas.map(::Single),
             NotDoneNode.ContentDelegate.Group.Id.Project(timeStamp, allInstanceKeys, projectDetails.projectKey),
@@ -156,9 +154,9 @@ sealed class GroupType : Comparable<GroupType> {
                 groupAdapter,
                 timeStamp,
                 projectDetails.name,
-                showTime,
+                true,
             ),
-            !nested,
+            !false, // todo group check param
             ShowGroupActivity.Parameters.Project(timeStamp, projectDetails.projectKey),
         )
 
@@ -172,12 +170,11 @@ sealed class GroupType : Comparable<GroupType> {
         }
     }
 
-    class Project( // todo group clean up params
+    class Project(
         val timeStamp: TimeStamp,
         val projectDetails: DetailsNode.ProjectDetails,
         _instanceDatas: List<GroupListDataWrapper.InstanceData>,
         private val nested: Boolean,
-        private val showTime: Boolean
     ) : GroupType(), TimeChild, SingleParent {
 
         private val instanceDatas = _instanceDatas.map { it.copy(projectInfo = null) }
@@ -202,7 +199,7 @@ sealed class GroupType : Comparable<GroupType> {
                 groupAdapter,
                 timeStamp,
                 projectDetails.name,
-                showTime,
+                false, // todo group check usage (why am I passing in timeStamp?)
             ),
             !nested,
             ShowGroupActivity.Parameters.Project(timeStamp, projectDetails.projectKey),

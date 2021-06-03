@@ -126,7 +126,7 @@ sealed class GroupType : Comparable<GroupType> {
      *      Single
      * Single
      */
-    class TimeProject( // todo group clean up params
+    class TimeProject(
         val timeStamp: TimeStamp,
         val projectDetails: DetailsNode.ProjectDetails,
         _instanceDatas: List<GroupListDataWrapper.InstanceData>,
@@ -146,7 +146,7 @@ sealed class GroupType : Comparable<GroupType> {
             groupAdapter,
             this,
             instanceDatas,
-            indentation + (if (false) 1 else 0), // todo group param
+            indentation,
             nodeCollection,
             instanceDatas.map(::Single),
             NotDoneNode.ContentDelegate.Group.Id.Project(timeStamp, allInstanceKeys, projectDetails.projectKey),
@@ -156,7 +156,7 @@ sealed class GroupType : Comparable<GroupType> {
                 projectDetails.name,
                 true,
             ),
-            !false, // todo group check param
+            true, // todo group check param
             ShowGroupActivity.Parameters.Project(timeStamp, projectDetails.projectKey),
         )
 
@@ -170,6 +170,18 @@ sealed class GroupType : Comparable<GroupType> {
         }
     }
 
+    /**
+     * If nested, this is a child of Time on the main list:
+     * Time
+     *      Project
+     *          Single
+     *      Single
+     *
+     * Otherwise, it's a top-level node in a place where all instances have the same timeStamp, like ShowGroupActivity:
+     * Project
+     *      Single
+     * Single
+     */
     class Project(
         val timeStamp: TimeStamp,
         val projectDetails: DetailsNode.ProjectDetails,

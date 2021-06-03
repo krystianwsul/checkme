@@ -6,6 +6,7 @@ import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.CustomTimeId
 import com.krystianwsul.common.utils.CustomTimeKey
+import com.krystianwsul.common.utils.UserKey
 
 
 open class RootUser(private val remoteRootUserRecord: RootUserRecord) :
@@ -26,5 +27,8 @@ open class RootUser(private val remoteRootUserRecord: RootUserRecord) :
     }
 
     override fun getUserCustomTime(userCustomTimeKey: CustomTimeKey.User) =
-            customTimes.getValue(userCustomTimeKey.customTimeId)
+        customTimes[userCustomTimeKey.customTimeId] ?: throw MissingCustomTimeException(userKey, userCustomTimeKey)
+
+    class MissingCustomTimeException(userKey: UserKey, userCustomTimeKey: CustomTimeKey.User) :
+        Exception("customTime $userCustomTimeKey missing from user $userKey")
 }

@@ -18,6 +18,7 @@ class DialogNodeHolder(
     override val rowDetails = rowListDialogBinding.rowListDialogDetails
     override val rowChildren = rowListDialogBinding.rowListDialogChildren
     override val rowExpand = rowListDialogBinding.rowListDialogExpand
+    override val rowExpandMargin = rowListDialogBinding.rowListDialogExpandMargin
     override val rowSeparator = rowListDialogBinding.rowListDialogSeparator
 
     override fun startRx() {

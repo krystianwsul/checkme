@@ -24,6 +24,7 @@ class ExpandableMultilineHolder(override val baseAdapter: BaseAdapter, binding: 
     override val rowChildren = binding.rowListExpandableMultilineChildren
     override val rowThumbnail = binding.rowListExpandableMultilineThumbnail
     override val rowExpand = binding.rowListExpandableMultilineExpand
+    override val rowExpandMargin = binding.rowListExpandableMultilineExpandMargin
     override val rowCheckBoxFrame = binding.rowListExpandableMultilineCheckboxInclude.rowCheckboxFrame
     override val rowMarginStart = binding.rowListExpandableMultilineMargin
     override val rowSeparator = binding.rowListExpandableMultilineSeparator

@@ -83,6 +83,11 @@
             android:src="@drawable/ic_expand_more_black_36dp"
             android:visibility="invisible" />
 
+        <View
+            android:id="@+id/rowListCheckableExpandMargin"
+            android:layout_width="16dp"
+            android:layout_height="0dp" />
+
     </LinearLayout>
 
     <View

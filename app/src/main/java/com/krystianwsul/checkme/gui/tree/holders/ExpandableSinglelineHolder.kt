@@ -15,6 +15,7 @@ class ExpandableSinglelineHolder(
     override val rowContainer = binding.rowListExpandableSingleLineContainer
     override val rowText = binding.rowListExpandableSingleLineName
     override val rowExpand = binding.rowListExpandableSingleLineExpand
+    override val rowExpandMargin = binding.rowListExpandableSingleLineExpandMargin
     override val rowSeparator = binding.rowListExpandableSingleLineSeparator
 
     override fun startRx() {

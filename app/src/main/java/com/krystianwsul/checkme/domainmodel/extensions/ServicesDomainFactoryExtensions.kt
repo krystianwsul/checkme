@@ -59,14 +59,14 @@ fun DomainUpdater.setInstanceNotificationDoneService(instanceKey: InstanceKey): 
             )
         }.perform(this)
 
-fun DomainUpdater.setInstancesNotifiedService(instanceKeys: List<InstanceKey>): Completable =
-        CompletableDomainUpdate.create("setInstancesNotified") {
-            check(instanceKeys.isNotEmpty())
+fun DomainUpdater.setInstancesNotifiedService(): Completable =
+    CompletableDomainUpdate.create("setInstancesNotified") { now ->
+        Notifier.getNotificationInstances(this, now)
+            .also { check(it.isNotEmpty()) }
+            .forEach(::setInstanceNotified)
 
-            instanceKeys.forEach { setInstanceNotified(getInstance(it)) }
-
-            DomainUpdater.Params(false, DomainListenerManager.NotificationType.All)
-        }.perform(this)
+        DomainUpdater.Params(false, DomainListenerManager.NotificationType.All)
+    }.perform(this)
 
 fun DomainUpdater.setTaskImageUploadedService(
         taskKey: TaskKey,

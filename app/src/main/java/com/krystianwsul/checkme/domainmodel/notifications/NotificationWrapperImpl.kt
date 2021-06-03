@@ -33,7 +33,6 @@ import com.krystianwsul.common.utils.InstanceKey
 import io.reactivex.rxjava3.core.BackpressureStrategy
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.schedulers.Schedulers
-import java.util.*
 
 open class NotificationWrapperImpl : NotificationWrapper() {
 
@@ -425,7 +424,6 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         inner class Instance(instance: com.krystianwsul.common.firebase.models.Instance) {
 
             val name = instance.name
-            val instanceKey = instance.instanceKey
             val timeStamp = instance.instanceDateTime.timeStamp
             val startExactTimeStamp = instance.task.startExactTimeStamp
             val text = getInstanceText(instance, now)
@@ -433,16 +431,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
     }
 
     private fun notifyGroupHelper(groupData: GroupData) {
-        val names = ArrayList<String>()
-        val instanceKeys = ArrayList<InstanceKey>()
-        groupData.instances.forEach {
-            names.add(it.name)
-            instanceKeys.add(it.instanceKey)
-        }
-
-        val pendingDeleteIntent = NotificationActionReceiver.newPendingIntent(
-                NotificationAction.DeleteGroupNotification(instanceKeys)
-        )
+        val pendingDeleteIntent = NotificationActionReceiver.newPendingIntent(NotificationAction.DeleteGroupNotification)
 
         val notificationId = if (groupData.summary) NOTIFICATION_ID_GROUP else NOTIFICATION_ID_GROUP_NOT_SUMMARY
 
@@ -460,8 +449,9 @@ open class NotificationWrapperImpl : NotificationWrapper() {
                 groupData.summary,
         )
 
-        val title = if (groupData.summary) groupData.instances.size.toString() + " " + MyApplication.instance.getString(R.string.multiple_reminders) else null
-        val text = names.joinToString(", ")
+        val title =
+            if (groupData.summary) groupData.instances.size.toString() + " " + MyApplication.instance.getString(R.string.multiple_reminders) else null
+        val text = groupData.instances.joinToString(", ") { it.name }
 
         val notificationHash = NotificationHash(
                 title,

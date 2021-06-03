@@ -22,23 +22,19 @@ sealed class NotificationAction : Parcelable {
     abstract fun perform(): Completable
 
     @Parcelize
-    data class DeleteGroupNotification(private val instanceKeys: List<InstanceKey>) : NotificationAction() {
+    object DeleteGroupNotification : NotificationAction() {
 
         override val requestCode get() = 0
 
-        override fun perform(): Completable {
-            check(instanceKeys.isNotEmpty())
-
-            return AndroidDomainUpdater.setInstancesNotifiedService(instanceKeys)
-        }
+        override fun perform() = AndroidDomainUpdater.setInstancesNotifiedService()
     }
 
     @Parcelize
     data class InstanceDone(
-            private val instanceKey: InstanceKey,
-            private val notificationId: Int,
-            private val name: String,
-            private val actionId: Int = 2,
+        private val instanceKey: InstanceKey,
+        private val notificationId: Int,
+        private val name: String,
+        private val actionId: Int = 2,
     ) : NotificationAction() {
 
         override val requestCode get() = hashCode()
@@ -54,10 +50,10 @@ sealed class NotificationAction : Parcelable {
 
     @Parcelize
     data class InstanceHour(
-            private val instanceKey: InstanceKey,
-            private val notificationId: Int,
-            private val name: String,
-            private val actionId: Int = 3,
+        private val instanceKey: InstanceKey,
+        private val notificationId: Int,
+        private val name: String,
+        private val actionId: Int = 3,
     ) : NotificationAction() {
 
         override val requestCode get() = hashCode()
@@ -73,13 +69,13 @@ sealed class NotificationAction : Parcelable {
 
     @Parcelize
     data class DeleteInstanceNotification(
-            val instanceKey: InstanceKey,
-            private val actionId: Int = 4,
+        val instanceKey: InstanceKey,
+        private val actionId: Int = 4,
     ) : NotificationAction() {
 
         override val requestCode get() = hashCode()
 
         override fun perform() =
-                AndroidDomainUpdater.setInstanceNotified(DomainListenerManager.NotificationType.All, instanceKey)
+            AndroidDomainUpdater.setInstanceNotified(DomainListenerManager.NotificationType.All, instanceKey)
     }
 }

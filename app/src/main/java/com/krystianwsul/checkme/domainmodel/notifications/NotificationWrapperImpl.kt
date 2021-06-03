@@ -447,10 +447,10 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         val notificationId = if (groupData.summary) NOTIFICATION_ID_GROUP else NOTIFICATION_ID_GROUP_NOT_SUMMARY
 
         val pendingContentIntent = PendingIntent.getActivity(
-                MyApplication.instance,
-                notificationId,
-                ShowNotificationGroupActivity.getIntent(MyApplication.instance, instanceKeys),
-                PendingIntent.FLAG_UPDATE_CURRENT,
+            MyApplication.instance,
+            notificationId,
+            ShowNotificationGroupActivity.getIntent(MyApplication.instance),
+            PendingIntent.FLAG_UPDATE_CURRENT,
         )
 
         val (inboxStyle, styleHash) = getInboxStyle(

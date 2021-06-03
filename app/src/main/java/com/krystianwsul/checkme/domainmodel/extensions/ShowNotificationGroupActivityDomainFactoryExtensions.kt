@@ -17,8 +17,6 @@ fun DomainFactory.getShowNotificationGroupData(instanceKeys: Set<InstanceKey>): 
 
     DomainThreadChecker.instance.requireDomainThread()
 
-    check(instanceKeys.isNotEmpty())
-
     val now = ExactTimeStamp.Local.now
 
     val queriedInstances = instanceKeys.map { getInstance(it) }.filter { it.isRootInstance() }

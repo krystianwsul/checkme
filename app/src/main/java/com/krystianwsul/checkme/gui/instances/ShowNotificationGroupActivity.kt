@@ -20,7 +20,6 @@ import com.krystianwsul.checkme.utils.tryGetFragment
 import com.krystianwsul.checkme.viewmodels.DataId
 import com.krystianwsul.checkme.viewmodels.ShowNotificationGroupViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
-import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.treeadapter.FilterCriteria
 import com.krystianwsul.treeadapter.TreeViewAdapter
@@ -35,19 +34,10 @@ class ShowNotificationGroupActivity : AbstractActivity(), GroupListListener {
 
     companion object {
 
-        private const val INSTANCES_KEY = "instanceKeys"
-
         private const val TAG_DELETE_INSTANCES = "deleteInstances"
 
-        fun getIntent(context: Context, instanceKeys: ArrayList<InstanceKey>) =
-            Intent(context, ShowNotificationGroupActivity::class.java).apply {
-                check(instanceKeys.isNotEmpty())
-
-                putParcelableArrayListExtra(INSTANCES_KEY, instanceKeys)
-            }
+        fun getIntent(context: Context) = Intent(context, ShowNotificationGroupActivity::class.java)
     }
-
-    private lateinit var instanceKeys: Set<InstanceKey>
 
     private var selectAllVisible = false
 
@@ -97,11 +87,6 @@ class ShowNotificationGroupActivity : AbstractActivity(), GroupListListener {
 
         binding.groupListFragment.listener = this
 
-        check(intent.hasExtra(INSTANCES_KEY))
-
-        instanceKeys = intent.getParcelableArrayListExtra<InstanceKey>(INSTANCES_KEY)!!.toSet()
-        check(instanceKeys.isNotEmpty())
-
         binding.showNotificationGroupToolbarCollapseInclude
             .collapseAppBarLayout
             .apply {
@@ -113,7 +98,7 @@ class ShowNotificationGroupActivity : AbstractActivity(), GroupListListener {
         initBottomBar()
 
         showNotificationGroupViewModel = getViewModel<ShowNotificationGroupViewModel>().apply {
-            start(this@ShowNotificationGroupActivity.instanceKeys)
+            start()
 
             createDisposable += data.subscribe {
                 this@ShowNotificationGroupActivity.data = it

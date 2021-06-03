@@ -219,16 +219,135 @@ open class NotificationWrapperImpl : NotificationWrapper() {
                 pendingDeleteIntent,
                 pendingContentIntent,
                 instanceData.silent,
-                actions,
-                timeStampLong,
-                style,
-                autoCancel = true,
-                summary = false,
-                sortKey = sortKey,
-                largeIcon = largeIcon,
-                notificationHash = notificationHash,
-                tag = null,
-                highPriority = instanceData.highPriority
+            actions,
+            timeStampLong,
+            style,
+            autoCancel = true,
+            summary = false,
+            sortKey = sortKey,
+            largeIcon = largeIcon,
+            notificationHash = notificationHash,
+            tag = null,
+            highPriority = instanceData.highPriority
+        )
+    }
+
+    private fun notifyProjectHelper(projectData: ProjectData) {
+        val notificationId = projectData.notificationId
+
+        val instanceKey = projectData.instanceKey
+
+        val pendingContentIntent = PendingIntent.getActivity(
+            MyApplication.instance,
+            notificationId,
+            ShowInstanceActivity.getNotificationIntent(MyApplication.instance, instanceKey, notificationId),
+            PendingIntent.FLAG_UPDATE_CURRENT
+        )
+
+        val pendingDeleteIntent = NotificationActionReceiver.newPendingIntent(
+            NotificationAction.DeleteInstanceNotification(instanceKey)
+        )
+
+        val pendingDoneIntent = NotificationActionReceiver.newPendingIntent(
+            NotificationAction.InstanceDone(
+                instanceKey,
+                notificationId,
+                projectData.name
+            )
+        )
+
+        val pendingHourIntent = NotificationActionReceiver.newPendingIntent(
+            NotificationAction.InstanceHour(
+                instanceKey,
+                notificationId,
+                projectData.name
+            )
+        )
+
+        fun action(
+            @DrawableRes icon: Int,
+            @StringRes text: Int,
+            pendingIntent: PendingIntent,
+        ) = NotificationCompat.Action
+            .Builder(icon, MyApplication.instance.getString(text), pendingIntent)
+            .build()
+
+        val actions = listOf(
+            action(R.drawable.ic_done_white_24dp, R.string.done, pendingDoneIntent),
+            action(R.drawable.ic_alarm_white_24dp, R.string.hour, pendingHourIntent)
+        )
+
+        val childNames = projectData.childNames
+
+        val text: String?
+        val style: (() -> NotificationCompat.Style)?
+        val styleHash: NotificationHash.Style?
+        if (childNames.isNotEmpty()) {
+            text = childNames.joinToString(", ")
+
+            val pair = getInboxStyle(childNames, false, projectData.project)
+            style = pair.first
+            styleHash = pair.second
+        } else if (!projectData.note.isNullOrEmpty()) {
+            text = listOfNotNull(projectData.project, projectData.note).joinToString("\n")
+
+            style = {
+                NotificationCompat.BigTextStyle().also { it.bigText(text) }
+            }
+
+            styleHash = NotificationHash.Style.Text(text)
+        } else {
+            text = projectData.project
+
+            val bigPicture = ImageManager.getBigPicture(projectData.uuid)
+            if (bigPicture != null) {
+                style = {
+                    NotificationCompat.BigPictureStyle().also {
+                        it.bigPicture(bigPicture())
+                        it.bigLargeIcon(null)
+                    }
+                }
+                styleHash = NotificationHash.Style.Picture(projectData.uuid!!)
+            } else {
+                style = null
+                styleHash = null
+            }
+        }
+
+        val timeStampLong = projectData.timeStampLong
+
+        val sortKey = timeStampLong.toString() + doubleToString(projectData.ordinal)
+
+        val largeIcon = ImageManager.getLargeIcon(projectData.uuid)
+
+        val notificationHash = NotificationHash(
+            projectData.name,
+            text,
+            notificationId,
+            timeStampLong,
+            styleHash,
+            sortKey,
+            largeIcon?.let { projectData.uuid!! },
+            null,
+        )
+
+        notify(
+            projectData.name,
+            text,
+            notificationId,
+            pendingDeleteIntent,
+            pendingContentIntent,
+            projectData.silent,
+            actions,
+            timeStampLong,
+            style,
+            autoCancel = true,
+            summary = false,
+            sortKey = sortKey,
+            largeIcon = largeIcon,
+            notificationHash = notificationHash,
+            tag = null,
+            highPriority = projectData.highPriority
         )
     }
 
@@ -589,6 +708,38 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         val uuid = instance.task
                 .getImage(deviceDbInfo)
                 ?.uuid
+
+        val timeStampLong = instance.instanceDateTime
+            .timeStamp
+            .long
+
+        val ordinal = instance.task.ordinal
+
+        val name = instance.name
+
+        val childNames = getChildNames(instance, now)
+
+        val project = instance.getProject()
+            .takeIf { it is SharedProject }
+            ?.name
+    }
+
+    protected inner class ProjectData(
+        deviceDbInfo: DeviceDbInfo,
+        instance: Instance,
+        now: ExactTimeStamp.Local,
+        val silent: Boolean,
+        val highPriority: Boolean,
+    ) {
+        val notificationId = instance.notificationId
+
+        val instanceKey = instance.instanceKey
+
+        val note = instance.task.note
+
+        val uuid = instance.task
+            .getImage(deviceDbInfo)
+            ?.uuid
 
         val timeStampLong = instance.instanceDateTime
             .timeStamp

@@ -305,12 +305,23 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
 
         val (private, shared) = projectGroups.entries.partition { it.key is ProjectKey.Private }
 
+        fun NotificationData.Notify.notify() =
+            notificationWrapper.notifyInstance(domainFactory.deviceDbInfo, instance, silent, now)
+
         private.singleOrNull()
             ?.value
-            ?.forEach { notificationWrapper.notifyInstance(domainFactory.deviceDbInfo, it.instance, it.silent, now) }
+            ?.forEach { it.notify() }
 
-        shared.forEach {
-            // todo groups
+        shared.forEach { (projectKey, sharedNotifies) ->
+            check(sharedNotifies.isNotEmpty())
+
+            if (sharedNotifies.size == 1) {
+                sharedNotifies.single().notify()
+            } else {
+                sharedNotifies.forEach { NotificationWrapper.instance.cancelNotification(it.instance.notificationId) }
+
+                // todo groups
+            }
         }
     }
 

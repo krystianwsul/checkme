@@ -323,7 +323,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
             actions,
             timeStampLong,
             style,
-            autoCancel = true,
+            autoCancel = false,
             summary = false,
             sortKey = sortKey,
             largeIcon = null,

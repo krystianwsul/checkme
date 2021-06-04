@@ -95,6 +95,18 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         notificationRelay.accept { notifyInstanceHelper(instanceData) }
     }
 
+    override fun notifyProject(
+        project: SharedProject,
+        instances: List<Instance>,
+        silent: Boolean,
+        now: ExactTimeStamp.Local,
+    ) {
+        val highPriority = getHighPriority() ?: return
+
+        val projectData = ProjectData(project, instances, now, silent, highPriority)
+        notificationRelay.accept { notifyProjectHelper(projectData) }
+    }
+
     protected open fun getInstanceData(
         deviceDbInfo: DeviceDbInfo,
         instance: Instance,

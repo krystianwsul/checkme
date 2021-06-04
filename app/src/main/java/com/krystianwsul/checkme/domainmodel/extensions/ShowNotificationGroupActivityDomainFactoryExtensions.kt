@@ -53,7 +53,7 @@ fun DomainFactory.getShowNotificationGroupData(
             instance.getNotificationShown(localFactory),
             task.getImage(deviceDbInfo),
             instance.isAssignedToMe(now, myUserFactory.user),
-            instance.getProjectInfo(now),
+            instance.getProjectInfo(now, projectKey == null),
             instance.task
                 .project
                 .projectKey as? ProjectKey.Shared,

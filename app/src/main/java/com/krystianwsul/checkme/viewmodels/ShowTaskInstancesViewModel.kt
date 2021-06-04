@@ -12,7 +12,7 @@ class ShowTaskInstancesViewModel : DomainViewModel<ShowTaskInstancesViewModel.Da
 
     override val domainListener = object : DomainListener<Data>() {
 
-        override fun getData(domainFactory: DomainFactory) = domainFactory.getShowTaskInstancesData(
+        override fun getDataResult(domainFactory: DomainFactory) = domainFactory.getShowTaskInstancesData(
             parameters.parameters,
             parameters.page,
             parameters.searchCriteria,

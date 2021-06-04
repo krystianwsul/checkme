@@ -22,13 +22,12 @@ sealed class NotificationAction : Parcelable {
     @CheckResult
     abstract fun perform(): Completable
 
-    // todo groups actually implement projectKey
     @Parcelize
     data class DeleteGroupNotification(private val projectKey: ProjectKey.Shared? = null) : NotificationAction() {
 
         override val requestCode get() = 0
 
-        override fun perform() = AndroidDomainUpdater.setInstancesNotifiedService()
+        override fun perform() = AndroidDomainUpdater.setInstancesNotifiedService(projectKey)
     }
 
     @Parcelize

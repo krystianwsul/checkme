@@ -14,6 +14,7 @@ import com.krystianwsul.common.time.DateTime
 import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.InstanceKey
+import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
 import io.reactivex.rxjava3.core.Completable
 import java.util.*
@@ -59,9 +60,9 @@ fun DomainUpdater.setInstanceNotificationDoneService(instanceKey: InstanceKey): 
             )
         }.perform(this)
 
-fun DomainUpdater.setInstancesNotifiedService(): Completable =
+fun DomainUpdater.setInstancesNotifiedService(projectKey: ProjectKey.Shared?): Completable =
     CompletableDomainUpdate.create("setInstancesNotified") { now ->
-        Notifier.getNotificationInstances(this, now)
+        Notifier.getNotificationInstances(this, now, projectKey)
             .also { check(it.isNotEmpty()) }
             .forEach(::setInstanceNotified)
 

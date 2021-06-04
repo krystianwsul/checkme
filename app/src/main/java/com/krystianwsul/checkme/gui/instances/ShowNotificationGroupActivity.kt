@@ -40,6 +40,8 @@ class ShowNotificationGroupActivity : AbstractActivity(), GroupListListener {
 
         private const val TAG_DELETE_INSTANCES = "deleteInstances"
 
+        // todo groups title
+        // todo groups projectInfo
         fun getIntent(context: Context, projectKey: ProjectKey.Shared? = null) =
             Intent(context, ShowNotificationGroupActivity::class.java).putExtra(KEY_PROJECT_KEY, projectKey as? Parcelable)
     }

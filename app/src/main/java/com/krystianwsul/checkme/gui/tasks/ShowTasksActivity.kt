@@ -15,8 +15,6 @@ import com.krystianwsul.checkme.gui.base.AbstractActivity
 import com.krystianwsul.checkme.gui.dialogs.ConfirmDialogFragment
 import com.krystianwsul.checkme.gui.edit.EditActivity
 import com.krystianwsul.checkme.gui.edit.EditParameters
-import com.krystianwsul.checkme.gui.instances.ShowTaskInstancesActivity
-import com.krystianwsul.checkme.gui.projects.ShowProjectActivity
 import com.krystianwsul.checkme.utils.exhaustive
 import com.krystianwsul.checkme.utils.getOrInitializeFragment
 import com.krystianwsul.checkme.utils.startDate
@@ -54,8 +52,8 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
 
     override val taskSearch by lazy {
         binding.showTasksToolbarCollapseInclude
-                .collapseAppBarLayout
-                .filterCriteria
+            .collapseAppBarLayout
+            .filterCriteria
     }
 
     private val receiver = object : BroadcastReceiver() {
@@ -80,14 +78,14 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
         copiedTaskKey = savedInstanceState?.getParcelable(KEY_COPIED_TASK_KEY)
 
         binding.showTasksToolbarCollapseInclude
-                .collapseAppBarLayout
-                .configureMenu(
-                        R.menu.show_task_menu_top,
-                        R.id.actionShowTaskSearch,
-                        R.id.actionTaskShowDeleted,
-                        R.id.actionTaskShowAssignedToOthers,
-                        R.id.actionTaskShowProjects,
-                )
+            .collapseAppBarLayout
+            .configureMenu(
+                R.menu.show_task_menu_top,
+                R.id.actionShowTaskSearch,
+                R.id.actionTaskShowDeleted,
+                R.id.actionTaskShowAssignedToOthers,
+                R.id.actionTaskShowProjects,
+            )
 
         updateTopMenu()
 
@@ -124,8 +122,8 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
         this.data = data
 
         binding.showTasksToolbarCollapseInclude
-                .collapseAppBarLayout
-                .setText(data.title, null, null, true)
+            .collapseAppBarLayout
+            .setText(data.title, null, null, true)
 
         updateTopMenu()
         updateBottomMenu()
@@ -147,35 +145,19 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
 
     private fun updateBottomMenu() {
         bottomBinding.bottomAppBar
-                .menu
-                .run {
-                    if (findItem(R.id.projectMenuEdit) == null) return
-
-                    val showProjectOptions = (parameters as? Parameters.Project)?.projectKey is ProjectKey.Shared
-
-                    findItem(R.id.projectMenuShowInstances).isVisible = showProjectOptions
-                    findItem(R.id.projectMenuEdit).isVisible = showProjectOptions
-                    findItem(R.id.projectMenuSelectAll).isVisible = selectAllVisible
-                }
+            .menu
+            .findItem(R.id.action_select_all)
+            ?.isVisible = selectAllVisible
     }
 
     override fun getBottomBar() = bottomBinding.bottomAppBar
 
     override fun initBottomBar() {
         bottomBinding.bottomAppBar.apply {
-            animateReplaceMenu(R.menu.menu_show_project_bottom, onEnd = ::updateBottomMenu)
+            animateReplaceMenu(R.menu.menu_select_all, onEnd = ::updateBottomMenu)
 
-            setOnMenuItemClickListener { item ->
-                val projectKey by lazy { (parameters as Parameters.Project).projectKey as ProjectKey.Shared }
-
-                when (item.itemId) {
-                    R.id.projectMenuShowInstances -> startActivity(
-                        ShowTaskInstancesActivity.newIntent(
-                            ShowTaskInstancesActivity.Parameters.Project(projectKey)
-                        )
-                    )
-                    R.id.projectMenuEdit ->
-                        startActivity(ShowProjectActivity.newIntent(this@ShowTasksActivity, projectKey))
+            setOnMenuItemClickListener {
+                when (it.itemId) {
                     R.id.projectMenuSelectAll -> taskListFragment.treeViewAdapter.selectAll()
                     else -> throw UnsupportedOperationException()
                 }
@@ -186,15 +168,15 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
     }
 
     override fun setToolbarExpanded(expanded: Boolean) = binding.showTasksToolbarCollapseInclude
-            .collapseAppBarLayout
-            .setExpanded(expanded)
+        .collapseAppBarLayout
+        .setExpanded(expanded)
 
     override fun startCopy(taskKey: TaskKey) {
         copiedTaskKey = taskKey
 
         startActivityForResult(
-                EditActivity.getParametersIntent(EditParameters.Copy(taskKey)),
-                REQUEST_COPY
+            EditActivity.getParametersIntent(EditParameters.Copy(taskKey)),
+            REQUEST_COPY
         )
     }
 
@@ -221,15 +203,17 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
     override fun onBackPressed() {
         if (binding.showTasksToolbarCollapseInclude.collapseAppBarLayout.isSearching) {
             binding.showTasksToolbarCollapseInclude
-                    .collapseAppBarLayout
-                    .closeSearch()
+                .collapseAppBarLayout
+                .closeSearch()
         } else {
             @Suppress("IMPLICIT_CAST_TO_ANY")
             when (parameters) {
-                is Parameters.Copy -> ConfirmDialogFragment.newInstance(ConfirmDialogFragment.Parameters(
+                is Parameters.Copy -> ConfirmDialogFragment.newInstance(
+                    ConfirmDialogFragment.Parameters(
                         R.string.stopCopyingMessage,
                         R.string.stopCopyingYes
-                )).also {
+                    )
+                ).also {
                     it.listener = this::onConfirm
                     it.show(supportFragmentManager, TAG_CONFIRM)
                 }
@@ -262,8 +246,8 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
             showProjects = false
         } else {
             val hasTasks = data.taskData
-                    .entryDatas
-                    .isNotEmpty()
+                .entryDatas
+                .isNotEmpty()
 
             showSearch = hasTasks
             showDeleted = hasTasks && parameters.showDeleted
@@ -272,17 +256,17 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
         }
 
         binding.showTasksToolbarCollapseInclude
-                .collapseAppBarLayout
-                .apply {
-                    setSearchMenuOptions(showDeleted, showAssignedToOthers, showProjects)
+            .collapseAppBarLayout
+            .apply {
+                setSearchMenuOptions(showDeleted, showAssignedToOthers, showProjects)
 
-                    menu.apply {
-                        findItem(R.id.actionShowTaskSearch).isVisible = showSearch
-                        findItem(R.id.actionTaskShowDeleted).isVisible = showDeleted
-                        findItem(R.id.actionTaskShowAssignedToOthers).isVisible = showAssignedToOthers
-                        findItem(R.id.actionTaskShowProjects).isVisible = showProjects
-                    }
+                menu.apply {
+                    findItem(R.id.actionShowTaskSearch).isVisible = showSearch
+                    findItem(R.id.actionTaskShowDeleted).isVisible = showDeleted
+                    findItem(R.id.actionTaskShowAssignedToOthers).isVisible = showAssignedToOthers
+                    findItem(R.id.actionTaskShowProjects).isVisible = showProjects
                 }
+            }
     }
 
     sealed class Parameters : Parcelable {
@@ -297,20 +281,20 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
         abstract fun getShowAssignedToOthers(data: ShowTasksViewModel.Data): Boolean
 
         protected fun mapDataToTaskListFragmentData(
-                dataId: DataId,
-                data: ShowTasksViewModel.Data,
+            dataId: DataId,
+            data: ShowTasksViewModel.Data,
         ) = TaskListFragment.Data(
-                dataId,
-                data.immediate,
-                data.taskData,
-                reverseOrderForTopLevelNodes,
-                copying,
-                false
+            dataId,
+            data.immediate,
+            data.taskData,
+            reverseOrderForTopLevelNodes,
+            copying,
+            false
         )
 
         abstract fun mapDataToTaskListFragmentParameters(
-                dataId: DataId,
-                data: ShowTasksViewModel.Data,
+            dataId: DataId,
+            data: ShowTasksViewModel.Data,
         ): TaskListFragment.Parameters
 
         @Parcelize
@@ -325,7 +309,7 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
             }
 
             override fun mapDataToTaskListFragmentParameters(dataId: DataId, data: ShowTasksViewModel.Data) =
-                    TaskListFragment.Parameters.All(mapDataToTaskListFragmentData(dataId, data), true)
+                TaskListFragment.Parameters.All(mapDataToTaskListFragmentData(dataId, data), true)
         }
 
         @Parcelize
@@ -344,7 +328,7 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
             }
 
             override fun mapDataToTaskListFragmentParameters(dataId: DataId, data: ShowTasksViewModel.Data) =
-                    TaskListFragment.Parameters.All(mapDataToTaskListFragmentData(dataId, data), false)
+                TaskListFragment.Parameters.All(mapDataToTaskListFragmentData(dataId, data), false)
         }
 
         @Parcelize
@@ -353,7 +337,7 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
             override fun getShowAssignedToOthers(data: ShowTasksViewModel.Data) = data.isSharedProject!!
 
             override fun mapDataToTaskListFragmentParameters(dataId: DataId, data: ShowTasksViewModel.Data) =
-                    TaskListFragment.Parameters.Project(mapDataToTaskListFragmentData(dataId, data), projectKey)
+                TaskListFragment.Parameters.Project(mapDataToTaskListFragmentData(dataId, data), projectKey)
         }
     }
 }

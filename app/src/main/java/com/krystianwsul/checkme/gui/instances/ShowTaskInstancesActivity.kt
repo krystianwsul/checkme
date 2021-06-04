@@ -17,6 +17,8 @@ import com.krystianwsul.checkme.gui.base.AbstractActivity
 import com.krystianwsul.checkme.gui.dialogs.RemoveInstancesDialogFragment
 import com.krystianwsul.checkme.gui.instances.list.GroupListListener
 import com.krystianwsul.checkme.gui.instances.list.GroupListParameters
+import com.krystianwsul.checkme.gui.projects.ShowProjectActivity
+import com.krystianwsul.checkme.gui.tasks.ShowTasksActivity
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
 import com.krystianwsul.checkme.utils.startDate
 import com.krystianwsul.checkme.utils.tryGetFragment
@@ -59,17 +61,17 @@ class ShowTaskInstancesActivity : AbstractActivity(), GroupListListener {
     private val deleteInstancesListener: (Serializable, Boolean) -> Unit = { taskKeys, removeInstances ->
         @Suppress("UNCHECKED_CAST")
         AndroidDomainUpdater.setTaskEndTimeStamps(
-                showTaskInstancesViewModel.dataId.toFirst(),
-                taskKeys as Set<TaskKey>,
-                removeInstances,
+            showTaskInstancesViewModel.dataId.toFirst(),
+            taskKeys as Set<TaskKey>,
+            removeInstances,
         )
-                .observeOn(AndroidSchedulers.mainThread())
-                .flatMapMaybe { showSnackbarRemovedMaybe(it.taskKeys.size).map { _ -> it } }
-                .flatMapCompletable {
-                    AndroidDomainUpdater.clearTaskEndTimeStamps(showTaskInstancesViewModel.dataId.toFirst(), it)
-                }
-                .subscribe()
-                .addTo(createDisposable)
+            .observeOn(AndroidSchedulers.mainThread())
+            .flatMapMaybe { showSnackbarRemovedMaybe(it.taskKeys.size).map { _ -> it } }
+            .flatMapCompletable {
+                AndroidDomainUpdater.clearTaskEndTimeStamps(showTaskInstancesViewModel.dataId.toFirst(), it)
+            }
+            .subscribe()
+            .addTo(createDisposable)
     }
 
     private val receiver = object : BroadcastReceiver() {
@@ -114,11 +116,11 @@ class ShowTaskInstancesActivity : AbstractActivity(), GroupListListener {
                     )
                 )
             }
-                    .switchMap { binding.groupListFragment.progressShown }
-                    .doOnNext { page += 1 }
-                    .startWithItem(Unit)
-                    .subscribe { start(parameters, page) }
-                    .addTo(createDisposable)
+                .switchMap { binding.groupListFragment.progressShown }
+                .doOnNext { page += 1 }
+                .startWithItem(Unit)
+                .subscribe { start(parameters, page) }
+                .addTo(createDisposable)
         }
 
         initBottomBar()
@@ -147,9 +149,9 @@ class ShowTaskInstancesActivity : AbstractActivity(), GroupListListener {
     }
 
     override fun onCreateGroupActionMode(
-            actionMode: ActionMode,
-            treeViewAdapter: TreeViewAdapter<AbstractHolder>,
-            initial: Boolean,
+        actionMode: ActionMode,
+        treeViewAdapter: TreeViewAdapter<AbstractHolder>,
+        initial: Boolean,
     ) = Unit
 
     override fun onDestroyGroupActionMode() = Unit
@@ -164,14 +166,24 @@ class ShowTaskInstancesActivity : AbstractActivity(), GroupListListener {
 
     override fun initBottomBar() {
         bottomBinding.bottomAppBar.apply {
-            replaceMenu(R.menu.menu_select_all)
+            replaceMenu(R.menu.menu_project_bottom)
 
             setOnMenuItemClickListener { item ->
-                check(item.itemId == R.id.action_select_all)
+                val projectKey by lazy { (parameters as Parameters.Project).projectKey }
 
-                binding.groupListFragment
+                when (item.itemId) {
+                    R.id.projectMenuShowTasks -> startActivity(
+                        ShowTasksActivity.newIntent(
+                            ShowTasksActivity.Parameters.Project(projectKey)
+                        )
+                    )
+                    R.id.projectMenuEdit ->
+                        startActivity(ShowProjectActivity.newIntent(this@ShowTaskInstancesActivity, projectKey))
+                    R.id.projectMenuSelectAll -> binding.groupListFragment
                         .treeViewAdapter
                         .selectAll()
+                    else -> throw IllegalArgumentException()
+                }
 
                 true
             }
@@ -180,20 +192,25 @@ class ShowTaskInstancesActivity : AbstractActivity(), GroupListListener {
 
     override fun deleteTasks(dataId: DataId, taskKeys: Set<TaskKey>) {
         RemoveInstancesDialogFragment.newInstance(taskKeys)
-                .also { it.listener = deleteInstancesListener }
-                .show(supportFragmentManager, TAG_DELETE_INSTANCES)
+            .also { it.listener = deleteInstancesListener }
+            .show(supportFragmentManager, TAG_DELETE_INSTANCES)
     }
 
     private fun updateBottomMenu() {
         bottomBinding.bottomAppBar
-                .menu
-                .findItem(R.id.action_select_all)
-                ?.isVisible = selectAllVisible
+            .menu
+            .apply {
+                val showProjectOptions = parameters.projectKey != null
+
+                findItem(R.id.projectMenuShowTasks)?.isVisible = showProjectOptions
+                findItem(R.id.projectMenuEdit)?.isVisible = showProjectOptions
+                findItem(R.id.projectMenuSelectAll)?.isVisible = selectAllVisible
+            }
     }
 
     override fun setToolbarExpanded(expanded: Boolean) = binding.showNotificationGroupToolbarCollapseInclude
-            .collapseAppBarLayout
-            .setExpanded(expanded)
+        .collapseAppBarLayout
+        .setExpanded(expanded)
 
     sealed class Parameters : Parcelable {
 

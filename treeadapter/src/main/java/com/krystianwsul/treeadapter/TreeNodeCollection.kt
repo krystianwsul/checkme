@@ -29,6 +29,8 @@ class TreeNodeCollection<T : TreeHolder>(val treeViewAdapter: TreeViewAdapter<T>
     override val wantsSeparators = false
 
     override fun getNode(position: Int, positionMode: PositionMode): TreeNode<T> {
+        check(position >= 0)
+
         return positionMode.getRecursiveNodes(this)[position]
     }
 

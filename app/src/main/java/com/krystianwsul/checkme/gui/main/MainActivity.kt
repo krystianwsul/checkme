@@ -634,17 +634,19 @@ class MainActivity :
                     binding.mainSearchGroupListFragment.progressShown,
                     createDisposable,
                     searchInstancesViewModel,
-                    {
-                        binding.mainSearchGroupListFragment.setParameters(GroupListParameters.Search(
-                                searchInstancesViewModel.dataId,
-                                it.immediate,
-                                it.groupListDataWrapper,
-                                it.showLoader,
-                                FilterCriteria.ExpandOnly(it.searchCriteria),
-                        ))
-                    },
-                    this::start,
-                    setOf()
+                {
+                    binding.mainSearchGroupListFragment.setParameters(
+                        GroupListParameters.Search(
+                            searchInstancesViewModel.dataId,
+                            it.immediate,
+                            it.groupListDataWrapper,
+                            it.showLoader,
+                            FilterCriteria.ExpandOnly(it.searchCriteria),
+                        )
+                    )
+                },
+                this::start,
+                setOf(),
             )
         }
 

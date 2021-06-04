@@ -20,6 +20,7 @@ import com.krystianwsul.checkme.gui.instances.list.GroupListParameters
 import com.krystianwsul.checkme.gui.projects.ShowProjectActivity
 import com.krystianwsul.checkme.gui.tasks.ShowTasksActivity
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
+import com.krystianwsul.checkme.gui.utils.connectInstanceSearch
 import com.krystianwsul.checkme.utils.startDate
 import com.krystianwsul.checkme.utils.tryGetFragment
 import com.krystianwsul.checkme.viewmodels.DataId
@@ -116,32 +117,43 @@ class ShowTaskInstancesActivity : AbstractActivity(), GroupListListener {
             }
 
         showTaskInstancesViewModel = getViewModel<ShowTaskInstancesViewModel>().apply {
-            data.doOnNext {
-                this@ShowTaskInstancesActivity.data = it
+            val instanceSearch = binding.showNotificationGroupToolbarCollapseInclude
+                .collapseAppBarLayout
+                .filterCriteria
 
-                val immediate = it.immediate
+            connectInstanceSearch(
+                instanceSearch,
+                true,
+                { page },
+                { page = it },
+                binding.groupListFragment.progressShown,
+                createDisposable,
+                this,
+                {
+                    this@ShowTaskInstancesActivity.data = it
 
-                binding.showNotificationGroupToolbarCollapseInclude
-                    .collapseAppBarLayout
-                    .setText(it.title, null, binding.groupListFragment.emptyTextLayout, immediate)
+                    val immediate = it.immediate
 
-                binding.groupListFragment.setParameters(
-                    GroupListParameters.Parent(
-                        showTaskInstancesViewModel.dataId,
-                        immediate,
-                        it.groupListDataWrapper,
-                        it.showLoader,
-                        parameters.projectKey,
+                    binding.showNotificationGroupToolbarCollapseInclude
+                        .collapseAppBarLayout
+                        .setText(it.title, null, binding.groupListFragment.emptyTextLayout, immediate)
+
+                    binding.groupListFragment.setParameters(
+                        GroupListParameters.Parent(
+                            dataId,
+                            immediate,
+                            it.groupListDataWrapper,
+                            it.showLoader,
+                            parameters.projectKey,
+//                        FilterCriteria.ExpandOnly(it.searchCriteria), // todo search
+                        )
                     )
-                )
 
-                updateTopMenu()
-            }
-                .switchMap { binding.groupListFragment.progressShown }
-                .doOnNext { page += 1 }
-                .startWithItem(Unit)
-                .subscribe { start(parameters, page) }
-                .addTo(createDisposable)
+                    updateTopMenu()
+                },
+                { searchCriteria, page -> start(parameters, page) }, // todo search
+                setOf(),
+            )
         }
 
         updateTopMenu()

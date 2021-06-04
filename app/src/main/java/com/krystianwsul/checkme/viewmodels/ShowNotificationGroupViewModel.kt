@@ -34,5 +34,5 @@ class ShowNotificationGroupViewModel : DomainViewModel<ShowNotificationGroupView
         internalStart()
     }
 
-    data class Data(val groupListDataWrapper: GroupListDataWrapper) : DomainData()
+    data class Data(val title: String?, val groupListDataWrapper: GroupListDataWrapper) : DomainData()
 }

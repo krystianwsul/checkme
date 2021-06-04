@@ -106,7 +106,7 @@ class CollapseAppBarLayout : AppBarLayout {
 
     private val bottomMargin by lazy { dpToPx(35).toInt() }
 
-    fun setText(title: String, text: String?, paddingLayout: View?, immediate: Boolean) {
+    fun setText(title: String?, text: String?, paddingLayout: View?, immediate: Boolean) {
         this.title = title
         this.paddingLayout = paddingLayout
 

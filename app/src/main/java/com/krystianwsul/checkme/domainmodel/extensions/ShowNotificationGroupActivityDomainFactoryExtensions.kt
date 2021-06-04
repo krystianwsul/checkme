@@ -70,5 +70,8 @@ fun DomainFactory.getShowNotificationGroupData(
         null
     )
 
-    return ShowNotificationGroupViewModel.Data(dataWrapper)
+    return ShowNotificationGroupViewModel.Data(
+        projectKey?.let(projectsFactory::getProjectForce)?.name,
+        dataWrapper,
+    )
 }

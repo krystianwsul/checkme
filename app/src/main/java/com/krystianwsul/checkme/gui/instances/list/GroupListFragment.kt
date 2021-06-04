@@ -854,6 +854,9 @@ class GroupListFragment @JvmOverloads constructor(
                     getStartEditActivityFabState(EditActivity.Hint.Task(parameters.instanceKey.taskKey))
                 else
                     FabState.Hidden
+                is GroupListParameters.Parent -> parameters.projectKey
+                    ?.let { getStartEditActivityFabState(EditActivity.Hint.Project(it)) }
+                    ?: FabState.Hidden
                 else -> FabState.Hidden
             }
         }

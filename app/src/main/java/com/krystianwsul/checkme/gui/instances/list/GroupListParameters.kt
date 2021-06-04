@@ -58,10 +58,11 @@ sealed class GroupListParameters(val draggable: Boolean = true) {
     ) : GroupListParameters(false)
 
     data class Parent(
-            override val dataId: DataId,
-            override val immediate: Boolean,
-            override val groupListDataWrapper: GroupListDataWrapper,
-            override val showProgress: Boolean,
+        override val dataId: DataId,
+        override val immediate: Boolean,
+        override val groupListDataWrapper: GroupListDataWrapper,
+        override val showProgress: Boolean,
+        val projectKey: ProjectKey.Shared? = null,
     ) : GroupListParameters(false) {
 
         override val useDoneNode = false

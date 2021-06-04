@@ -99,6 +99,8 @@ class ShowTaskInstancesActivity : AbstractActivity(), GroupListListener {
 
         savedInstanceState?.apply { page = getInt(KEY_PAGE) }
 
+        binding.groupListFragment.setFab(bottomBinding.bottomFab)
+
         showTaskInstancesViewModel = getViewModel<ShowTaskInstancesViewModel>().apply {
             data.doOnNext {
                 val immediate = it.immediate
@@ -113,6 +115,7 @@ class ShowTaskInstancesActivity : AbstractActivity(), GroupListListener {
                         immediate,
                         it.groupListDataWrapper,
                         it.showLoader,
+                        parameters.projectKey,
                     )
                 )
             }

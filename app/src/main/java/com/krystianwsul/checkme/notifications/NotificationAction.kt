@@ -4,10 +4,7 @@ import android.os.Parcelable
 import androidx.annotation.CheckResult
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
-import com.krystianwsul.checkme.domainmodel.extensions.setInstanceAddHourService
-import com.krystianwsul.checkme.domainmodel.extensions.setInstanceNotificationDoneService
-import com.krystianwsul.checkme.domainmodel.extensions.setInstanceNotified
-import com.krystianwsul.checkme.domainmodel.extensions.setInstancesNotifiedService
+import com.krystianwsul.checkme.domainmodel.extensions.*
 import com.krystianwsul.checkme.domainmodel.notifications.NotificationWrapper
 import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
 import com.krystianwsul.common.utils.InstanceKey
@@ -78,5 +75,23 @@ sealed class NotificationAction : Parcelable {
 
         override fun perform() =
             AndroidDomainUpdater.setInstanceNotified(DomainListenerManager.NotificationType.All, instanceKey)
+    }
+
+    @Parcelize
+    data class ProjectDone(
+        private val projectKey: ProjectKey.Shared,
+        private val notificationId: Int,
+        private val actionId: Int = 4,
+    ) : NotificationAction() {
+
+        override val requestCode get() = hashCode()
+
+        override fun perform(): Completable {
+            Preferences.tickLog.logLineDate("ProjectDone")
+
+            NotificationWrapper.instance.cleanGroup(notificationId)
+
+            return AndroidDomainUpdater.setProjectNotificationDoneService(projectKey)
+        }
     }
 }

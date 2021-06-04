@@ -9,10 +9,9 @@ import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
 import com.krystianwsul.checkme.utils.time.calendar
 import com.krystianwsul.checkme.utils.time.toDateTimeTz
 import com.krystianwsul.common.firebase.models.ImageState
+import com.krystianwsul.common.firebase.models.Instance
+import com.krystianwsul.common.time.*
 import com.krystianwsul.common.time.Date
-import com.krystianwsul.common.time.DateTime
-import com.krystianwsul.common.time.HourMinute
-import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
@@ -48,17 +47,38 @@ fun DomainUpdater.setInstanceAddHourService(instanceKey: InstanceKey): Completab
 fun DomainUpdater.setInstanceNotificationDoneService(instanceKey: InstanceKey): Completable =
         CompletableDomainUpdate.create("setInstanceNotificationDone") { now ->
             val instance = getInstance(instanceKey)
-            Preferences.tickLog.logLineHour("DomainFactory: setting ${instance.name} done")
 
-            instance.setDone(localFactory, true, now)
-            instance.setNotificationShown(localFactory, false)
+            setNotificationDone(instance, now)
 
             DomainUpdater.Params(
-                    Notifier.Params("setInstanceNotificationDone ${instance.name}"),
-                    DomainFactory.SaveParams(DomainListenerManager.NotificationType.All),
-                    DomainFactory.CloudParams(instance.task.project),
+                Notifier.Params("setInstanceNotificationDone ${instance.name}"),
+                DomainFactory.SaveParams(DomainListenerManager.NotificationType.All),
+                DomainFactory.CloudParams(instance.task.project),
             )
         }.perform(this)
+
+private fun DomainFactory.setNotificationDone(instance: Instance, now: ExactTimeStamp.Local) {
+    instance.apply {
+        Preferences.tickLog.logLineHour("DomainFactory: setting $name done")
+
+        setDone(localFactory, true, now)
+        setNotificationShown(localFactory, false)
+    }
+}
+
+fun DomainUpdater.setProjectNotificationDoneService(projectKey: ProjectKey.Shared): Completable =
+    CompletableDomainUpdate.create("setInstanceNotificationDone") { now ->
+        val project = projectsFactory.getProjectForce(projectKey)
+        val instances = Notifier.getNotificationInstances(this, now, projectKey)
+
+        instances.forEach { setNotificationDone(it, now) }
+
+        DomainUpdater.Params(
+            Notifier.Params("setInstanceNotificationDone ${project.name}"),
+            DomainFactory.SaveParams(DomainListenerManager.NotificationType.All),
+            DomainFactory.CloudParams(project),
+        )
+    }.perform(this)
 
 fun DomainUpdater.setInstancesNotifiedService(projectKey: ProjectKey.Shared?): Completable =
     CompletableDomainUpdate.create("setInstancesNotified") { now ->

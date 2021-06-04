@@ -262,14 +262,9 @@ open class NotificationWrapperImpl : NotificationWrapper() {
             NotificationAction.DeleteGroupNotification(projectData.projectKey)
         )
 
-        /* todo groups re-implement these later
         val pendingDoneIntent = NotificationActionReceiver.newPendingIntent(
-            NotificationAction.InstanceDone(
-                instanceKey,
-                notificationId,
-                projectData.name
-            )
-        )*/
+            NotificationAction.ProjectDone(projectData.projectKey, notificationId)
+        )
 
         /* todo groups re-implement these later
         val pendingHourIntent = NotificationActionReceiver.newPendingIntent(

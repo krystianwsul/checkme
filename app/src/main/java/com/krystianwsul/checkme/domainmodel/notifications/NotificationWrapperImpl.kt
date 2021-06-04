@@ -138,7 +138,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
             MyApplication.instance,
             notificationId,
             ShowInstanceActivity.getNotificationIntent(MyApplication.instance, instanceKey, notificationId),
-            PendingIntent.FLAG_UPDATE_CURRENT
+            PendingIntent.FLAG_UPDATE_CURRENT,
         )
 
         val pendingDeleteIntent = NotificationActionReceiver.newPendingIntent(
@@ -146,19 +146,11 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         )
 
         val pendingDoneIntent = NotificationActionReceiver.newPendingIntent(
-            NotificationAction.InstanceDone(
-                instanceKey,
-                notificationId,
-                instanceData.name
-            )
+            NotificationAction.InstanceDone(instanceKey, notificationId)
         )
 
         val pendingHourIntent = NotificationActionReceiver.newPendingIntent(
-            NotificationAction.InstanceHour(
-                instanceKey,
-                notificationId,
-                instanceData.name
-            )
+            NotificationAction.InstanceHour(instanceKey, notificationId)
         )
 
         fun action(
@@ -266,14 +258,9 @@ open class NotificationWrapperImpl : NotificationWrapper() {
             NotificationAction.ProjectDone(projectData.projectKey, notificationId)
         )
 
-        /* todo groups re-implement these later
         val pendingHourIntent = NotificationActionReceiver.newPendingIntent(
-            NotificationAction.InstanceHour(
-                instanceKey,
-                notificationId,
-                projectData.name
-            )
-        )*/
+            NotificationAction.ProjectHour(projectData.projectKey, notificationId)
+        )
 
         fun action(
             @DrawableRes icon: Int,
@@ -283,10 +270,10 @@ open class NotificationWrapperImpl : NotificationWrapper() {
             .Builder(icon, MyApplication.instance.getString(text), pendingIntent)
             .build()
 
-        val actions = emptyList<NotificationCompat.Action>() /* listOf( todo groups re-implement
+        val actions = listOf(
             action(R.drawable.ic_done_white_24dp, R.string.done, pendingDoneIntent),
-            action(R.drawable.ic_alarm_white_24dp, R.string.hour, pendingHourIntent)
-        )*/
+            action(R.drawable.ic_alarm_white_24dp, R.string.hour, pendingHourIntent),
+        )
 
         val childNames = projectData.childNames
 

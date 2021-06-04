@@ -19,10 +19,10 @@ class NotificationActionReceiver : BroadcastReceiver() {
         ).apply { putExtra(KEY_NOTIFICATION_ACTION, notificationAction) }
 
         fun newPendingIntent(notificationAction: NotificationAction) = PendingIntent.getBroadcast(
-                MyApplication.context,
-                notificationAction.requestCode,
-                newIntent(notificationAction),
-                PendingIntent.FLAG_UPDATE_CURRENT
+            MyApplication.context,
+            notificationAction.requestCode,
+            newIntent(notificationAction),
+            PendingIntent.FLAG_UPDATE_CURRENT,
         )!!
     }
 

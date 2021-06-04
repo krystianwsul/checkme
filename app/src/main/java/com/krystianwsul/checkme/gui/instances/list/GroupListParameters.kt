@@ -18,13 +18,15 @@ sealed class GroupListParameters(val draggable: Boolean = true) {
 
     open val groupingMode = NodeCollection.GroupingMode.NONE
 
+    open val unscheduledFirst = false
+
     data class All(
-            override val dataId: DataId,
-            override val immediate: Boolean,
-            override val groupListDataWrapper: GroupListDataWrapper,
-            val position: Int,
-            val timeRange: Preferences.TimeRange,
-            val differentPage: Boolean,
+        override val dataId: DataId,
+        override val immediate: Boolean,
+        override val groupListDataWrapper: GroupListDataWrapper,
+        val position: Int,
+        val timeRange: Preferences.TimeRange,
+        val differentPage: Boolean,
     ) : GroupListParameters(false) {
 
         override val fabActionMode = FabActionMode.BOTH
@@ -66,6 +68,8 @@ sealed class GroupListParameters(val draggable: Boolean = true) {
     ) : GroupListParameters(false) {
 
         override val useDoneNode = false
+
+        override val unscheduledFirst = true
     }
 
     data class Search(
@@ -79,6 +83,8 @@ sealed class GroupListParameters(val draggable: Boolean = true) {
         override val useDoneNode = false
 
         override val fabActionMode = FabActionMode.BOTH
+
+        override val unscheduledFirst = true
     }
 
     enum class FabActionMode(val showSubtask: Boolean, val showTime: Boolean) {

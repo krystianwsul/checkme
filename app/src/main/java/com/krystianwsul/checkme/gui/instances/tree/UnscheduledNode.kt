@@ -19,8 +19,8 @@ import com.krystianwsul.treeadapter.NodeContainer
 import com.krystianwsul.treeadapter.TreeNode
 
 class UnscheduledNode(
-        private val nodeCollection: NodeCollection,
-        private val searchResults: Boolean,
+    private val nodeCollection: NodeCollection,
+    private val unscheduledFirst: Boolean,
 ) : AbstractModelNode(), TaskParent, SingleLineModelNode, IndentationModelNode {
 
     override val holderType = HolderType.EXPANDABLE_SINGLELINE
@@ -91,7 +91,7 @@ class UnscheduledNode(
     override fun onClick(holder: AbstractHolder) = groupListFragment.activity.startActivity(ShowTasksActivity.newIntent(ShowTasksActivity.Parameters.Unscheduled))
 
     override fun compareTo(other: ModelNode<AbstractHolder>) = when {
-        searchResults -> -1
+        unscheduledFirst -> -1
         other is DetailsNode -> -1
         other is DividerNode -> -1
         else -> {

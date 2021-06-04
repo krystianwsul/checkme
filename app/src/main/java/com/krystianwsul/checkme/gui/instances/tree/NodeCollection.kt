@@ -33,7 +33,7 @@ class NodeCollection(
 
     val doneExpansionState get() = dividerNode.expansionState
 
-    val searchResults by lazy { groupAdapter.groupListFragment.searchResults }
+    val unscheduledFirst by lazy { groupAdapter.groupListFragment.unscheduledFirst }
 
     fun initialize(
         instanceDatas: Collection<GroupListDataWrapper.InstanceData>,
@@ -68,7 +68,7 @@ class NodeCollection(
 
         check(indentation == 0 || taskDatas.isEmpty())
         if (taskDatas.isNotEmpty()) {
-            unscheduledNode = UnscheduledNode(this, searchResults)
+            unscheduledNode = UnscheduledNode(this, unscheduledFirst)
 
             treeNodes += unscheduledNode!!.initialize(
                 unscheduledExpansionState,

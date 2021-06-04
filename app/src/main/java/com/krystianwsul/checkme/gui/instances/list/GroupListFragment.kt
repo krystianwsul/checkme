@@ -424,7 +424,7 @@ class GroupListFragment @JvmOverloads constructor(
     override val listItemAddedListener get() = listener
     override val recyclerView: RecyclerView get() = binding.groupListRecycler
 
-    val searchResults by lazy { parameters is GroupListParameters.Search }
+    val unscheduledFirst get() = parameters.unscheduledFirst
 
     private val binding = FragmentGroupListBinding.inflate(LayoutInflater.from(context), this)
 

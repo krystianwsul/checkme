@@ -36,7 +36,7 @@ class NotDoneGroupNode(
     override fun compareTo(other: ModelNode<AbstractHolder>) = when (other) {
         is ImageNode, is DetailsNode -> 1
         is NotDoneNode -> contentDelegate.groupType.compareTo(other.contentDelegate.groupType)
-        is UnscheduledNode -> if (nodeCollection.searchResults) 1 else -1
+        is UnscheduledNode -> if (nodeCollection.unscheduledFirst) 1 else -1
         is DividerNode -> -1
         else -> throw IllegalArgumentException()
     }

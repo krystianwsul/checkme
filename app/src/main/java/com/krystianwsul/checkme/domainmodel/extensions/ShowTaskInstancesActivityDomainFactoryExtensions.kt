@@ -32,18 +32,37 @@ fun DomainFactory.getShowTaskInstancesData(
 
     val parent: Current
     val instanceSequence: Sequence<Instance>
+    val taskDatas: List<GroupListDataWrapper.TaskData>
     when (parameters) {
         is ShowTaskInstancesActivity.Parameters.Task -> {
             val task = getTaskForce(parameters.taskKey)
 
             parent = task
+
             instanceSequence = task.getInstances(null, null, now)
+
+            taskDatas = listOf()
         }
         is ShowTaskInstancesActivity.Parameters.Project -> {
             val project = projectsFactory.getProjectForce(parameters.projectKey)
 
             parent = project
+
             instanceSequence = project.getRootInstances(null, null, now)
+
+            taskDatas = getUnscheduledTasks(now, parameters.projectKey).map {
+                GroupListDataWrapper.TaskData(
+                    it.taskKey,
+                    it.name,
+                    getGroupListChildTaskDatas(it, now),
+                    it.startExactTimeStamp,
+                    it.note,
+                    it.getImage(deviceDbInfo),
+                    it.isAssignedToMe(now, myUserFactory.user),
+                    it.getProjectInfo(now, false),
+                    it.ordinal,
+                )
+            }.toList()
         }
     }
 
@@ -81,7 +100,7 @@ fun DomainFactory.getShowTaskInstancesData(
     val dataWrapper = GroupListDataWrapper(
         customTimeDatas,
         parent.current(now),
-        listOf(),
+        taskDatas,
         null,
         instanceDatas,
         null,

@@ -68,7 +68,8 @@
             android:autoRemoveFromRecents="true" />
         <activity
             android:name=".gui.instances.ShowTaskInstancesActivity"
-            android:theme="@style/AppTheme.Toolbar" />
+            android:theme="@style/AppTheme.Toolbar"
+            android:windowSoftInputMode="adjustNothing" />
         <activity
             android:name=".gui.customtimes.ShowCustomTimeActivity"
             android:theme="@style/AppTheme" />

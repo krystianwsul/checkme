@@ -86,6 +86,8 @@ class ShowTaskInstancesActivity : AbstractActivity(), GroupListListener {
     private lateinit var binding: ActivityShowNotificationGroupBinding
     private lateinit var bottomBinding: BottomBinding
 
+    private var data: ShowTaskInstancesViewModel.Data? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -101,8 +103,22 @@ class ShowTaskInstancesActivity : AbstractActivity(), GroupListListener {
 
         binding.groupListFragment.setFab(bottomBinding.bottomFab)
 
+        binding.showNotificationGroupToolbarCollapseInclude
+            .collapseAppBarLayout
+            .apply {
+                setSearchMenuOptions(false, parameters is Parameters.Project, false)
+
+                configureMenu(
+                    R.menu.show_group_menu_top,
+                    R.id.actionShowGroupSearch,
+                    showAssignedToOthersId = R.id.actionShowGroupAssigned,
+                )
+            }
+
         showTaskInstancesViewModel = getViewModel<ShowTaskInstancesViewModel>().apply {
             data.doOnNext {
+                this@ShowTaskInstancesActivity.data = it
+
                 val immediate = it.immediate
 
                 binding.showNotificationGroupToolbarCollapseInclude
@@ -118,6 +134,8 @@ class ShowTaskInstancesActivity : AbstractActivity(), GroupListListener {
                         parameters.projectKey,
                     )
                 )
+
+                updateTopMenu()
             }
                 .switchMap { binding.groupListFragment.progressShown }
                 .doOnNext { page += 1 }
@@ -126,6 +144,7 @@ class ShowTaskInstancesActivity : AbstractActivity(), GroupListListener {
                 .addTo(createDisposable)
         }
 
+        updateTopMenu()
         initBottomBar()
 
         tryGetFragment<RemoveInstancesDialogFragment>(TAG_DELETE_INSTANCES)?.listener = deleteInstancesListener
@@ -197,6 +216,21 @@ class ShowTaskInstancesActivity : AbstractActivity(), GroupListListener {
         RemoveInstancesDialogFragment.newInstance(taskKeys)
             .also { it.listener = deleteInstancesListener }
             .show(supportFragmentManager, TAG_DELETE_INSTANCES)
+    }
+
+    private fun updateTopMenu() {
+        val showProjectOptions = parameters is Parameters.Project &&
+                !data?.groupListDataWrapper
+                    ?.instanceDatas
+                    .isNullOrEmpty()
+
+        binding.showNotificationGroupToolbarCollapseInclude
+            .collapseAppBarLayout
+            .menu
+            .apply {
+                findItem(R.id.actionShowGroupSearch).isVisible = showProjectOptions
+                findItem(R.id.actionShowGroupAssigned).isVisible = showProjectOptions
+            }
     }
 
     private fun updateBottomMenu() {

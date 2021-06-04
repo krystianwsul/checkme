@@ -110,6 +110,7 @@ fun DomainFactory.getShowTaskInstancesData(
                     ?.name,
                 dataWrapper,
                 hasMore,
+                searchCriteria,
             )
         }
     }

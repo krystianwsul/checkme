@@ -507,16 +507,15 @@ class GroupListFragment @JvmOverloads constructor(
         override val compositeDisposable = attachedToWindowDisposable
 
         override val filterCriteriaObservable = parametersRelay.switchMap {
-            when (it) {
-                is GroupListParameters.Search -> Observable.never()
-                else -> listener.instanceSearch
-            }
+            if (it.filterCriteria != null)
+                Observable.never()
+            else
+                listener.instanceSearch
         }
 
         override fun dataIsImmediate(data: GroupListParameters) = data.immediate
 
-        override fun getFilterCriteriaFromData(data: GroupListParameters) =
-            (data as? GroupListParameters.Search)?.filterCriteria
+        override fun getFilterCriteriaFromData(data: GroupListParameters) = data.filterCriteria
 
         override fun filterDataChangeRequiresReinitializingModelAdapter(
             oldFilterCriteria: FilterCriteria,

@@ -20,6 +20,8 @@ sealed class GroupListParameters(val draggable: Boolean = true) {
 
     open val unscheduledFirst = false
 
+    open val filterCriteria: FilterCriteria.ExpandOnly? = null
+
     data class All(
         override val dataId: DataId,
         override val immediate: Boolean,
@@ -65,6 +67,7 @@ sealed class GroupListParameters(val draggable: Boolean = true) {
         override val groupListDataWrapper: GroupListDataWrapper,
         override val showProgress: Boolean,
         val projectKey: ProjectKey.Shared? = null,
+        override val filterCriteria: FilterCriteria.ExpandOnly,
     ) : GroupListParameters(false) {
 
         override val useDoneNode = false
@@ -73,11 +76,11 @@ sealed class GroupListParameters(val draggable: Boolean = true) {
     }
 
     data class Search(
-            override val dataId: DataId,
-            override val immediate: Boolean,
-            override val groupListDataWrapper: GroupListDataWrapper,
-            override val showProgress: Boolean,
-            val filterCriteria: FilterCriteria,
+        override val dataId: DataId,
+        override val immediate: Boolean,
+        override val groupListDataWrapper: GroupListDataWrapper,
+        override val showProgress: Boolean,
+        override val filterCriteria: FilterCriteria.ExpandOnly,
     ) : GroupListParameters(false) {
 
         override val useDoneNode = false

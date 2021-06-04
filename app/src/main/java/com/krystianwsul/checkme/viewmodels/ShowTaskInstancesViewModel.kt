@@ -41,6 +41,7 @@ class ShowTaskInstancesViewModel : DomainViewModel<ShowTaskInstancesViewModel.Da
         val title: String?,
         val groupListDataWrapper: GroupListDataWrapper,
         val showLoader: Boolean,
+        val searchCriteria: SearchCriteria,
     ) : DomainData()
 
     private data class Parameters(

@@ -145,7 +145,7 @@ class ShowTaskInstancesActivity : AbstractActivity(), GroupListListener {
                             it.groupListDataWrapper,
                             it.showLoader,
                             parameters.projectKey,
-//                        FilterCriteria.ExpandOnly(it.searchCriteria), // todo search
+                            FilterCriteria.ExpandOnly(it.searchCriteria),
                         )
                     )
 

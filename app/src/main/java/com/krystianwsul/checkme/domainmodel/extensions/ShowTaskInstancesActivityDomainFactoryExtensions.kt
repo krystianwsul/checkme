@@ -35,70 +35,63 @@ fun DomainFactory.getShowTaskInstancesData(
             val desiredCount = (page + 1) * SEARCH_PAGE_SIZE
 
             val parent: Current
-            val instanceSequence: Sequence<Instance>
             val taskDatas: List<GroupListDataWrapper.TaskData>
+            val instanceDatas: List<GroupListDataWrapper.InstanceData>
+            val hasMore: Boolean
             when (parameters) {
                 is ShowTaskInstancesActivity.Parameters.Task -> {
                     val task = getTaskForce(parameters.taskKey)
 
                     parent = task
 
-                    instanceSequence = task.getInstances(null, null, now)
+                    val instanceSequence = task.getInstances(null, null, now)
 
                     taskDatas = listOf()
+
+                    val pair = instanceSequence.filter {
+                        it.isVisible(now, Instance.VisibilityOptions(hack24 = true))
+                    }.takeAndHasMore(desiredCount)
+
+                    hasMore = pair.second
+
+                    instanceDatas = pair.first.map {
+                        val children = getChildInstanceDatas(it, now, includeProjectInfo = true)
+
+                        GroupListDataWrapper.InstanceData(
+                            it.done,
+                            it.instanceKey,
+                            it.instanceDateTime.getDisplayText(),
+                            it.name,
+                            it.instanceDateTime.timeStamp,
+                            it.instanceDateTime,
+                            it.task.current(now),
+                            it.canAddSubtask(now),
+                            it.isRootInstance(),
+                            it.getCreateTaskTimePair(now, projectsFactory.privateProject),
+                            it.task.note,
+                            children,
+                            it.task.ordinal,
+                            it.getNotificationShown(localFactory),
+                            it.task.getImage(deviceDbInfo),
+                            it.isAssignedToMe(now, myUserFactory.user),
+                            it.getProjectInfo(now, parameters.projectKey == null),
+                            it.task
+                                .project
+                                .projectKey as? ProjectKey.Shared,
+                        )
+                    }
                 }
                 is ShowTaskInstancesActivity.Parameters.Project -> {
                     val project = projectsFactory.getProjectForce(parameters.projectKey)
 
                     parent = project
 
-                    instanceSequence = project.getRootInstances(null, null, now)
+                    val triple = getCappedInstanceAndTaskDatas(now, searchCriteria, page, parameters.projectKey)
 
-                    taskDatas = getUnscheduledTasks(now, parameters.projectKey).map {
-                        GroupListDataWrapper.TaskData(
-                            it.taskKey,
-                            it.name,
-                            getGroupListChildTaskDatas(it, now),
-                            it.startExactTimeStamp,
-                            it.note,
-                            it.getImage(deviceDbInfo),
-                            it.isAssignedToMe(now, myUserFactory.user),
-                            it.getProjectInfo(now, false),
-                            it.ordinal,
-                        )
-                    }.toList()
+                    instanceDatas = triple.first
+                    taskDatas = triple.second
+                    hasMore = triple.third
                 }
-            }
-
-            val (instances, hasMore) = instanceSequence.filter {
-                it.isVisible(now, Instance.VisibilityOptions(hack24 = true))
-            }.takeAndHasMore(desiredCount)
-
-            val instanceDatas = instances.map {
-                val children = getChildInstanceDatas(it, now, includeProjectInfo = parameters.projectKey == null)
-
-                GroupListDataWrapper.InstanceData(
-                    it.done,
-                    it.instanceKey,
-                    it.instanceDateTime.getDisplayText(),
-                    it.name,
-                    it.instanceDateTime.timeStamp,
-                    it.instanceDateTime,
-                    it.task.current(now),
-                    it.canAddSubtask(now),
-                    it.isRootInstance(),
-                    it.getCreateTaskTimePair(now, projectsFactory.privateProject),
-                    it.task.note,
-                    children,
-                    it.task.ordinal,
-                    it.getNotificationShown(localFactory),
-                    it.task.getImage(deviceDbInfo),
-                    it.isAssignedToMe(now, myUserFactory.user),
-                    it.getProjectInfo(now, parameters.projectKey == null),
-                    it.task
-                        .project
-                        .projectKey as? ProjectKey.Shared,
-                )
             }
 
             val dataWrapper = GroupListDataWrapper(

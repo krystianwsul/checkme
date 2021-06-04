@@ -4,25 +4,35 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.extensions.getShowTaskInstancesData
 import com.krystianwsul.checkme.gui.instances.ShowTaskInstancesActivity
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
+import com.krystianwsul.common.criteria.SearchCriteria
 
 class ShowTaskInstancesViewModel : DomainViewModel<ShowTaskInstancesViewModel.Data>() {
 
-    private lateinit var parameters: ShowTaskInstancesActivity.Parameters
-    private var page: Int = 0
+    private lateinit var parameters: Parameters
 
     override val domainListener = object : DomainListener<Data>() {
 
-        override fun getData(domainFactory: DomainFactory) = domainFactory.getShowTaskInstancesData(parameters, page)
+        override fun getData(domainFactory: DomainFactory) = domainFactory.getShowTaskInstancesData(
+            parameters.parameters,
+            parameters.page,
+            parameters.searchCriteria,
+        )
     }
 
-    fun start(parameters: ShowTaskInstancesActivity.Parameters, page: Int) {
-        this.parameters = parameters
+    fun start(parameters: ShowTaskInstancesActivity.Parameters, page: Int, searchCriteria: SearchCriteria) {
+        val newParameters = Parameters(parameters, page, searchCriteria)
 
-        if (this.page != page) {
-            this.page = page
+        if (this::parameters.isInitialized) {
+            if (this.parameters == newParameters) {
+                internalStart()
+            } else {
+                this.parameters = newParameters
 
-            refresh()
+                refresh()
+            }
         } else {
+            this.parameters = newParameters
+
             internalStart()
         }
     }
@@ -32,4 +42,10 @@ class ShowTaskInstancesViewModel : DomainViewModel<ShowTaskInstancesViewModel.Da
         val groupListDataWrapper: GroupListDataWrapper,
         val showLoader: Boolean,
     ) : DomainData()
+
+    private data class Parameters(
+        val parameters: ShowTaskInstancesActivity.Parameters,
+        val page: Int,
+        val searchCriteria: SearchCriteria,
+    )
 }

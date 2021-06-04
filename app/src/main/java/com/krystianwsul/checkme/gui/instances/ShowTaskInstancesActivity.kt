@@ -151,7 +151,7 @@ class ShowTaskInstancesActivity : AbstractActivity(), GroupListListener {
 
                     updateTopMenu()
                 },
-                { searchCriteria, page -> start(parameters, page) }, // todo search
+                { searchCriteria, page -> start(parameters, page, searchCriteria) },
                 setOf(),
             )
         }

@@ -89,7 +89,9 @@ class TreeViewAdapter<T : TreeHolder>(
 
     private fun getStates() = displayedNodes.map { it.state }
 
-    fun updateDisplayedNodes(action: (Placeholder) -> Unit) {
+    fun updateDisplayedNodes(action: (Placeholder) -> Unit) = updateDisplayedNodes(false, action)
+
+    fun updateDisplayedNodes(useMove: Boolean, action: (Placeholder) -> Unit) {
         check(!updating)
         checkNotNull(locker)
 
@@ -183,8 +185,12 @@ class TreeViewAdapter<T : TreeHolder>(
             override fun onRemoved(position: Int, count: Int) = notifyItemRangeRemoved(position, count)
 
             override fun onMoved(fromPosition: Int, toPosition: Int) {
-                notifyItemRemoved(fromPosition)
-                notifyItemInserted(toPosition)
+                if (useMove) {
+                    notifyItemMoved(fromPosition, toPosition)
+                } else {
+                    notifyItemRemoved(fromPosition)
+                    notifyItemInserted(toPosition)
+                }
 
                 if (toPosition == 0) treeModelAdapter.scrollToTop()
             }

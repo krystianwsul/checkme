@@ -61,12 +61,14 @@ abstract class DragHelper(callback: MyCallback = MyCallback()) : ItemTouchHelper
         MyCrashlytics.logMethod(this, "endPosition before: $endPosition")
 
         val from = viewHolder.adapterPosition
+        check(from >= 0)
+
         MyCrashlytics.logMethod(this, "from: $from")
         endPosition = target.adapterPosition
 
         MyCrashlytics.logMethod(this, "endPosition after: $endPosition")
 
-        getTreeViewAdapter().updateDisplayedNodes { getTreeViewAdapter().moveItem(from, endPosition!!, it) }
+        getTreeViewAdapter().updateDisplayedNodes(true) { getTreeViewAdapter().moveItem(from, endPosition!!, it) }
 
         fixDrag()
 

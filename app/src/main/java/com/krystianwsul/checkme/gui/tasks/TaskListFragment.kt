@@ -162,7 +162,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                         .show(childFragmentManager, TAG_REMOVE_INSTANCES)
                 }
                 R.id.action_task_show_instances -> startActivity(
-                    ShowTaskInstancesActivity.getIntent(
+                    ShowTaskInstancesActivity.newIntent(
                         ShowTaskInstancesActivity.Parameters.Task(taskKeys.single())
                     )
                 )

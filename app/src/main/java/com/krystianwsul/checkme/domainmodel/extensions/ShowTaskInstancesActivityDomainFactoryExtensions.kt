@@ -52,7 +52,7 @@ fun DomainFactory.getShowTaskInstancesData(
     }.takeAndHasMore(desiredCount)
 
     val instanceDatas = instances.map {
-        val children = getChildInstanceDatas(it, now, includeProjectInfo = parameters.includeProjectInfo)
+        val children = getChildInstanceDatas(it, now, includeProjectInfo = parameters.projectKey == null)
 
         GroupListDataWrapper.InstanceData(
             it.done,
@@ -71,7 +71,7 @@ fun DomainFactory.getShowTaskInstancesData(
             it.getNotificationShown(localFactory),
             it.task.getImage(deviceDbInfo),
             it.isAssignedToMe(now, myUserFactory.user),
-            it.getProjectInfo(now, parameters.includeProjectInfo),
+            it.getProjectInfo(now, parameters.projectKey == null),
             it.task
                 .project
                 .projectKey as? ProjectKey.Shared,
@@ -85,8 +85,14 @@ fun DomainFactory.getShowTaskInstancesData(
         null,
         instanceDatas,
         null,
-        null
+        null,
     )
 
-    return ShowTaskInstancesViewModel.Data(dataWrapper, hasMore)
+    return ShowTaskInstancesViewModel.Data(
+        parameters.projectKey
+            ?.let(projectsFactory::getProjectForce)
+            ?.name,
+        dataWrapper,
+        hasMore,
+    )
 }

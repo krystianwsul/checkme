@@ -28,7 +28,8 @@ class ShowTaskInstancesViewModel : DomainViewModel<ShowTaskInstancesViewModel.Da
     }
 
     data class Data(
-            val groupListDataWrapper: GroupListDataWrapper,
-            val showLoader: Boolean,
+        val title: String?,
+        val groupListDataWrapper: GroupListDataWrapper,
+        val showLoader: Boolean,
     ) : DomainData()
 }

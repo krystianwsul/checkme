@@ -43,7 +43,7 @@ class ShowTaskInstancesActivity : AbstractActivity(), GroupListListener {
 
         private const val KEY_PAGE = "page"
 
-        fun getIntent(parameters: Parameters) = Intent(MyApplication.instance, ShowTaskInstancesActivity::class.java).apply {
+        fun newIntent(parameters: Parameters) = Intent(MyApplication.instance, ShowTaskInstancesActivity::class.java).apply {
             putExtra(KEY_PARAMETERS, parameters)
         }
     }
@@ -99,12 +99,20 @@ class ShowTaskInstancesActivity : AbstractActivity(), GroupListListener {
 
         showTaskInstancesViewModel = getViewModel<ShowTaskInstancesViewModel>().apply {
             data.doOnNext {
-                binding.groupListFragment.setParameters(GroupListParameters.Parent(
+                val immediate = it.immediate
+
+                binding.showNotificationGroupToolbarCollapseInclude
+                    .collapseAppBarLayout
+                    .setText(it.title, null, binding.groupListFragment.emptyTextLayout, immediate)
+
+                binding.groupListFragment.setParameters(
+                    GroupListParameters.Parent(
                         showTaskInstancesViewModel.dataId,
-                        it.immediate,
+                        immediate,
                         it.groupListDataWrapper,
                         it.showLoader,
-                ))
+                    )
+                )
             }
                     .switchMap { binding.groupListFragment.progressShown }
                     .doOnNext { page += 1 }
@@ -189,18 +197,15 @@ class ShowTaskInstancesActivity : AbstractActivity(), GroupListListener {
 
     sealed class Parameters : Parcelable {
 
-        abstract val includeProjectInfo: Boolean
+        abstract val projectKey: ProjectKey.Shared?
 
         @Parcelize
         data class Task(val taskKey: TaskKey) : Parameters() {
 
-            override val includeProjectInfo = true
+            override val projectKey: ProjectKey.Shared? get() = null
         }
 
         @Parcelize
-        data class Project(val projectKey: ProjectKey<*>) : Parameters() {
-
-            override val includeProjectInfo = false
-        }
+        data class Project(override val projectKey: ProjectKey.Shared) : Parameters()
     }
 }

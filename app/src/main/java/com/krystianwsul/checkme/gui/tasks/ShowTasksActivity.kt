@@ -169,9 +169,11 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
                 val projectKey by lazy { (parameters as Parameters.Project).projectKey as ProjectKey.Shared }
 
                 when (item.itemId) {
-                    R.id.projectMenuShowInstances -> startActivity(ShowTaskInstancesActivity.getIntent(
+                    R.id.projectMenuShowInstances -> startActivity(
+                        ShowTaskInstancesActivity.newIntent(
                             ShowTaskInstancesActivity.Parameters.Project(projectKey)
-                    ))
+                        )
+                    )
                     R.id.projectMenuEdit ->
                         startActivity(ShowProjectActivity.newIntent(this@ShowTasksActivity, projectKey))
                     R.id.projectMenuSelectAll -> taskListFragment.treeViewAdapter.selectAll()

@@ -90,9 +90,11 @@ class ProjectListFragment : AbstractFragment(), FabUser {
             val projectKey by lazy { projectIds.single() }
 
             when (itemId) {
-                R.id.projectsMenuShowInstances -> startActivity(ShowTaskInstancesActivity.getIntent(
+                R.id.projectsMenuShowInstances -> startActivity(
+                    ShowTaskInstancesActivity.newIntent(
                         ShowTaskInstancesActivity.Parameters.Project(projectKey),
-                ))
+                    )
+                )
                 R.id.projectsMenuShowTasks ->
                     startActivity(ShowTasksActivity.newIntent(ShowTasksActivity.Parameters.Project(projectKey)))
                 R.id.projectsMenuEdit ->
@@ -346,7 +348,7 @@ class ProjectListFragment : AbstractFragment(), FabUser {
                 )
 
             override fun onClick(holder: AbstractHolder) =
-                    startActivity(ShowTasksActivity.newIntent(ShowTasksActivity.Parameters.Project(projectData.id)))
+                startActivity(ShowTaskInstancesActivity.newIntent(ShowTaskInstancesActivity.Parameters.Project(projectData.id)))
 
             override fun compareTo(other: ModelNode<AbstractHolder>): Int {
                 check(other is ProjectNode)

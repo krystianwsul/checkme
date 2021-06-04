@@ -12,7 +12,10 @@ import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.ProjectKey
 
-fun DomainFactory.getShowNotificationGroupData(instanceKeys: Set<InstanceKey>): ShowNotificationGroupViewModel.Data {
+fun DomainFactory.getShowNotificationGroupData(
+    projectKey: ProjectKey.Shared?,
+    instanceKeys: Set<InstanceKey>,
+): ShowNotificationGroupViewModel.Data {
     MyCrashlytics.log("DomainFactory.getShowNotificationGroupData")
 
     DomainThreadChecker.instance.requireDomainThread()
@@ -20,7 +23,7 @@ fun DomainFactory.getShowNotificationGroupData(instanceKeys: Set<InstanceKey>): 
     val now = ExactTimeStamp.Local.now
 
     val queriedInstances = instanceKeys.map { getInstance(it) }.filter { it.isRootInstance() }
-    val notificationInstances = Notifier.getNotificationInstances(this, now)
+    val notificationInstances = Notifier.getNotificationInstances(this, now, projectKey)
 
     val instances = (queriedInstances + notificationInstances).distinct().sortedBy { it.instanceDateTime }
 

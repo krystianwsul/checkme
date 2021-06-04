@@ -30,8 +30,17 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
         // To prevent spam if there's a huge backlog
         private const val MAX_NOTIFICATIONS_Q = 10
 
-        fun getNotificationInstances(domainFactory: DomainFactory, now: ExactTimeStamp.Local): List<Instance> {
-            return domainFactory.getRootInstances(null, now.toOffset().plusOne(), now /* 24 hack */)
+        fun getNotificationInstances(
+            domainFactory: DomainFactory,
+            now: ExactTimeStamp.Local,
+            projectKey: ProjectKey.Shared? = null,
+        ): List<Instance> {
+            return domainFactory.getRootInstances(
+                null,
+                now.toOffset().plusOne(),
+                now,
+                projectKey = projectKey,
+            )
                 .filter {
                     it.done == null &&
                             !it.getNotified(domainFactory.localFactory) &&

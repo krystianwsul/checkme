@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.os.Parcelable
 import androidx.appcompat.view.ActionMode
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.ActivityShowNotificationGroupBinding
@@ -35,11 +36,12 @@ class ShowNotificationGroupActivity : AbstractActivity(), GroupListListener {
 
     companion object {
 
+        private const val KEY_PROJECT_KEY = "projectKey"
+
         private const val TAG_DELETE_INSTANCES = "deleteInstances"
 
-        // todo groups actually implement projectKey
         fun getIntent(context: Context, projectKey: ProjectKey.Shared? = null) =
-            Intent(context, ShowNotificationGroupActivity::class.java)
+            Intent(context, ShowNotificationGroupActivity::class.java).putExtra(KEY_PROJECT_KEY, projectKey as? Parcelable)
     }
 
     private var selectAllVisible = false
@@ -100,8 +102,10 @@ class ShowNotificationGroupActivity : AbstractActivity(), GroupListListener {
         updateTopMenu()
         initBottomBar()
 
+        val projectKey = intent.getParcelableExtra<ProjectKey.Shared>(KEY_PROJECT_KEY)
+
         showNotificationGroupViewModel = getViewModel<ShowNotificationGroupViewModel>().apply {
-            start()
+            start(projectKey)
 
             createDisposable += data.subscribe {
                 this@ShowNotificationGroupActivity.data = it

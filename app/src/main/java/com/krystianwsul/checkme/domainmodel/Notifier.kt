@@ -7,6 +7,7 @@ import com.krystianwsul.checkme.domainmodel.notifications.NotificationWrapper
 import com.krystianwsul.checkme.domainmodel.notifications.NotificationWrapperImpl
 import com.krystianwsul.checkme.ticks.Ticker
 import com.krystianwsul.common.firebase.models.Instance
+import com.krystianwsul.common.firebase.models.project.SharedProject
 import com.krystianwsul.common.relevance.CustomTimeRelevance
 import com.krystianwsul.common.relevance.Irrelevant
 import com.krystianwsul.common.time.Date
@@ -312,15 +313,22 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
             ?.value
             ?.forEach { it.notify() }
 
-        shared.forEach { (projectKey, sharedNotifies) ->
+        shared.forEach { (_, sharedNotifies) ->
             check(sharedNotifies.isNotEmpty())
 
             if (sharedNotifies.size == 1) {
                 sharedNotifies.single().notify()
             } else {
-                sharedNotifies.forEach { NotificationWrapper.instance.cancelNotification(it.instance.notificationId) }
+                val instances = sharedNotifies.map { it.instance }
+                val silent = sharedNotifies.all { it.silent }
 
-                // todo groups
+                instances.forEach { NotificationWrapper.instance.cancelNotification(it.notificationId) }
+
+                val project = instances.map { it.getProject() }
+                    .distinct()
+                    .single() as SharedProject
+
+                NotificationWrapper.instance.notifyProject(project, instances, silent, now)
             }
         }
     }

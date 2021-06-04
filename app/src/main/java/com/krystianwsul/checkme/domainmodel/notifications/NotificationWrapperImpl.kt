@@ -340,7 +340,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
     }
 
     private fun getInstanceText(instance: Instance, now: ExactTimeStamp.Local): String {
-        val childNames = getChildNames(instance.getChildInstances(), now)
+        val childNames = getInstanceNames(instance.getChildInstances(), now, true)
 
         return if (childNames.isNotEmpty()) {
             " (" + childNames.joinToString(", ") + ")"
@@ -351,9 +351,13 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         }
     }
 
-    private fun getChildNames(childInstances: List<Instance>, now: ExactTimeStamp.Local) = childInstances.asSequence()
+    private fun getInstanceNames(
+        instances: List<Instance>,
+        now: ExactTimeStamp.Local,
+        assumeChild: Boolean,
+    ) = instances.asSequence()
         .filter { it.done == null }
-        .filter { it.isVisible(now, Instance.VisibilityOptions(assumeChildOfVisibleParent = true)) }
+        .filter { it.isVisible(now, Instance.VisibilityOptions(assumeChildOfVisibleParent = assumeChild)) }
         .sortedBy { it.task.ordinal }
         .map { it.name }
         .toList()
@@ -699,7 +703,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
 
         val name = instance.name
 
-        val childNames = getChildNames(instance.getChildInstances(), now)
+        val childNames = getInstanceNames(instance.getChildInstances(), now, true)
 
         val project = instance.getProject()
             .takeIf { it is SharedProject }
@@ -726,6 +730,6 @@ open class NotificationWrapperImpl : NotificationWrapper() {
 
         val name = project.name
 
-        val childNames = getChildNames(instances, now)
+        val childNames = getInstanceNames(instances, now, false)
     }
 }

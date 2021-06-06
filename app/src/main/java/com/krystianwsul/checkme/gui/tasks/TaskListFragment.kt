@@ -662,7 +662,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                 indentation,
                 false,
                 false,
-                true,
+                treeNode.expandVisible,
             )
 
         override val rowsDelegate = object : MultiLineModelNode.RowsDelegate {
@@ -744,7 +744,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                 indentation,
                 false,
                 thumbnail != null,
-                true
+                treeNode.expandVisible,
             )
 
         override fun initialize(

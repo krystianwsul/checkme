@@ -289,8 +289,8 @@ class ParentPickerFragment : AbstractDialogFragment() {
                     indentation,
                     false,
                     false,
+                    treeNode.expandVisible,
                     true,
-                    true
                 )
 
             fun initialize(

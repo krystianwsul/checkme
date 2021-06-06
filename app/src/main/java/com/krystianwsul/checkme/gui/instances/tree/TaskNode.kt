@@ -91,7 +91,7 @@ class TaskNode(
             indentation,
             true,
             thumbnail != null,
-            true
+            treeNode.expandVisible,
         )
 
     override val checkBoxInvisible = true

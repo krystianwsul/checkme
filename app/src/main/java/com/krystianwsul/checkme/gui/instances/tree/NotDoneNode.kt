@@ -59,9 +59,9 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
         listOf(
             ExpandableDelegate(treeNode),
             CheckableDelegate(this),
-            MultiLineDelegate(this),
             ThumbnailDelegate(this),
-            IndentationDelegate(this)
+            IndentationDelegate(this),
+            MultiLineDelegate(this), // this one always has to be last, because it depends on layout changes from prev
         )
     }
 
@@ -72,7 +72,7 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
             indentation,
             checkBoxState != CheckBoxState.Gone,
             thumbnail != null,
-            true,
+            treeNode.expandVisible,
         )
 
     /**

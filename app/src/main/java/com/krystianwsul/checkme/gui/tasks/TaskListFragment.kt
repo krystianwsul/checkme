@@ -607,9 +607,9 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         override val delegates by lazy {
             listOf(
                 ExpandableDelegate(treeNode),
-                MultiLineDelegate(this),
                 InvisibleCheckboxDelegate(this),
                 IndentationDelegate(this),
+                MultiLineDelegate(this), // this one always has to be last, because it depends on layout changes from prev
             )
         }
 

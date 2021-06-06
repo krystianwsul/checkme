@@ -63,13 +63,20 @@
 
         </LinearLayout>
 
-        <ImageView
-            android:id="@+id/rowListCheckableThumbnail"
+        <FrameLayout
+            android:id="@+id/rowListCheckableThumbnailLayout"
             android:layout_width="36dp"
             android:layout_height="36dp"
             android:layout_marginTop="8dp"
             android:layout_marginBottom="7dp"
-            android:visibility="gone" />
+            android:visibility="gone">
+
+            <ImageView
+                android:id="@+id/rowListCheckableThumbnail"
+                android:layout_width="36dp"
+                android:layout_height="36dp" />
+
+        </FrameLayout>
 
         <ImageView
             android:id="@+id/rowListCheckableExpand"

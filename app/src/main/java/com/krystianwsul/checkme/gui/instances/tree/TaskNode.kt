@@ -79,10 +79,10 @@ class TaskNode(
     override val delegates by lazy {
         listOf(
             ExpandableDelegate(treeNode),
-            MultiLineDelegate(this),
             InvisibleCheckboxDelegate(this),
             ThumbnailDelegate(this),
-            IndentationDelegate(this)
+            IndentationDelegate(this),
+            MultiLineDelegate(this), // this one always has to be last, because it depends on layout changes from prev
         )
     }
 

@@ -292,8 +292,8 @@ class FriendListFragment : AbstractFragment(), FabUser {
 
         override val delegates by lazy {
             listOf(
-                    AvatarDelegate(this),
-                    MultiLineDelegate(this)
+                AvatarDelegate(this),
+                MultiLineDelegate(this), // this one always has to be last, because it depends on layout changes from prev
             )
         }
 

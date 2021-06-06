@@ -1,6 +1,6 @@
 package com.krystianwsul.checkme.gui.tree.delegates.thumbnail
 
-import android.view.View
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import com.krystianwsul.checkme.domainmodel.toImageLoader
 import com.krystianwsul.checkme.gui.tree.NodeDelegate
@@ -13,14 +13,10 @@ class ThumbnailDelegate(private val modelNode: ThumbnailModelNode) : NodeDelegat
     override fun onBindViewHolder(viewHolder: RecyclerView.ViewHolder) {
         val thumbnail = modelNode.thumbnail
 
-        (viewHolder as ThumbnailHolder).rowThumbnail.let {
-            it.visibility = if (thumbnail != null) {
-                thumbnail.toImageLoader().load(it, true)
+        (viewHolder as ThumbnailHolder).apply {
+            rowThumbnailLayout.isVisible = thumbnail != null
 
-                View.VISIBLE
-            } else {
-                View.GONE
-            }
+            thumbnail?.toImageLoader()?.load(rowThumbnail, true)
         }
     }
 

@@ -22,7 +22,10 @@ class CheckableHolder(override val baseAdapter: BaseAdapter, binding: RowListChe
     override val rowName = binding.rowListCheckableName
     override val rowDetails = binding.rowListCheckableDetails
     override val rowChildren = binding.rowListCheckableChildren
+
+    override val rowThumbnailLayout = binding.rowListCheckableThumbnailLayout
     override val rowThumbnail = binding.rowListCheckableThumbnail
+
     override val rowExpand = binding.rowListCheckableExpand
     override val rowExpandMargin = binding.rowListCheckableExpandMargin
     override val rowCheckBoxFrame = binding.rowListCheckableCheckboxInclude.rowCheckboxFrame

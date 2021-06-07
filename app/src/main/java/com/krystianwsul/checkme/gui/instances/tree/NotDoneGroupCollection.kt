@@ -19,7 +19,7 @@ class NotDoneGroupCollection(
         notDoneInstanceDatas: List<GroupListDataWrapper.InstanceData>,
         contentDelegateStates: Map<NotDoneNode.ContentDelegate.Id, NotDoneNode.ContentDelegate.State>,
     ): List<TreeNode<AbstractHolder>> {
-        val contentDelegates = GroupType.TreeAdapterBridgeFactory()
+        val contentDelegates = GroupType.TreeAdapterBridgeFactory
             .getGroupTypeTree(notDoneInstanceDatas, nodeCollection.groupingMode)
             .map { it.toContentDelegate(nodeCollection.groupAdapter, indentation, nodeCollection) }
 

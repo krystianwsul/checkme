@@ -12,64 +12,71 @@ sealed class GroupType : Comparable<GroupType> {
     companion object {
 
         fun getGroupTypeTree(
-            instanceDatas: List<GroupListDataWrapper.InstanceData>,
+            bridgeFactory: BridgeFactory,
+            instanceDatas: List<BridgeFactory.InstanceDescriptor>,
             groupingMode: NodeCollection.GroupingMode,
         ): List<GroupType> {
             if (instanceDatas.isEmpty()) return emptyList()
 
             return when (groupingMode) {
                 NodeCollection.GroupingMode.TIME -> {
-                    val timeGroups = instanceDatas.groupBy { it.instanceTimeStamp }
+                    val timeGroups = instanceDatas.groupBy { it.timeStamp }
 
-                    timeGroups.map { (timeStamp, instanceDatas) ->
-                        check(instanceDatas.isNotEmpty())
+                    timeGroups.map { (timeStamp, instanceDescriptors) ->
+                        check(instanceDescriptors.isNotEmpty())
 
                         // these are all instances at the same time
-                        if (instanceDatas.size > 1) {
-                            val projectDetails = instanceDatas.map { it.projectInfo?.projectDetails }
+                        if (instanceDescriptors.size > 1) {
+                            val projectDescriptor = instanceDescriptors.map { it.projectDescriptor }
                                 .distinct()
                                 .singleOrNull()
 
-                            projectDetails?.let {
-                                TimeProject(timeStamp, projectDetails, instanceDatas)
-                            } ?: Time(timeStamp, groupByProject(timeStamp, instanceDatas, true))
+                            projectDescriptor?.let {
+                                bridgeFactory.createTimeProject(timeStamp, projectDescriptor, instanceDescriptors)
+                            } ?: bridgeFactory.createTime(
+                                timeStamp,
+                                groupByProject(bridgeFactory, timeStamp, instanceDescriptors, true)
+                            )
                         } else {
                             // if there's just one, there's our node
-                            Single(instanceDatas.single())
+                            bridgeFactory.createSingle(instanceDescriptors.single())
                         }
                     }
                 }
                 NodeCollection.GroupingMode.PROJECT -> {
-                    val timeStamp = instanceDatas.map { it.instanceTimeStamp }
+                    val timeStamp = instanceDatas.map { it.timeStamp }
                         .distinct()
                         .single()
 
-                    groupByProject(timeStamp, instanceDatas, false)
+                    groupByProject(bridgeFactory, timeStamp, instanceDatas, false)
                 }
-                NodeCollection.GroupingMode.NONE -> instanceDatas.map(GroupType::Single)
+                NodeCollection.GroupingMode.NONE -> instanceDatas.map(bridgeFactory::createSingle)
             }
         }
 
         private fun groupByProject(
+            bridgeFactory: BridgeFactory,
             timeStamp: TimeStamp,
-            instanceDatas: List<GroupListDataWrapper.InstanceData>,
+            instanceDescriptor: List<BridgeFactory.InstanceDescriptor>,
             nested: Boolean,
         ): List<GroupType> {
-            if (instanceDatas.isEmpty()) return emptyList()
+            if (instanceDescriptor.isEmpty()) return emptyList()
 
-            val projectGroups = instanceDatas.groupBy { it.projectInfo?.projectDetails }
+            val projectGroups = instanceDescriptor.groupBy { it.projectDescriptor }
 
-            val groupTypesForShared = projectGroups.filterKeys { it != null }.map { (projectDetails, instanceDatas) ->
-                check(instanceDatas.isNotEmpty())
+            val groupTypesForShared = projectGroups.entries
+                .filter { it.key != null }
+                .map { (projectDescriptor, instanceDescriptors) ->
+                    check(instanceDescriptors.isNotEmpty())
 
-                if (instanceDatas.size > 1) {
-                    Project(timeStamp, projectDetails!!, instanceDatas, nested)
-                } else {
-                    Single(instanceDatas.single())
+                    if (instanceDescriptors.size > 1) {
+                        bridgeFactory.createProject(timeStamp, projectDescriptor!!, instanceDescriptors, nested)
+                    } else {
+                        bridgeFactory.createSingle(instanceDescriptors.single())
+                    }
                 }
-            }
 
-            val groupTypesForPrivate = projectGroups[null]?.map(GroupType::Single).orEmpty()
+            val groupTypesForPrivate = projectGroups[null]?.map(bridgeFactory::createSingle).orEmpty()
 
             return listOf(groupTypesForShared, groupTypesForPrivate).flatten()
         }
@@ -243,14 +250,83 @@ sealed class GroupType : Comparable<GroupType> {
 
     interface BridgeFactory {
 
+        fun createTime(timeStamp: TimeStamp, groupTypes: List<GroupType>): Time
+
+        fun createTimeProject(
+            timeStamp: TimeStamp,
+            projectDescriptor: ProjectDescriptor,
+            instanceDescriptors: List<InstanceDescriptor>,
+        ): TimeProject
+
+        fun createProject(
+            timeStamp: TimeStamp,
+            projectDescriptor: ProjectDescriptor,
+            instanceDescriptors: List<InstanceDescriptor>,
+            nested: Boolean,
+        ): Project
+
+        fun createSingle(instanceDescriptor: InstanceDescriptor): Single
+
+        interface InstanceDescriptor {
+
+            val timeStamp: TimeStamp
+
+            val projectDescriptor: ProjectDescriptor?
+        }
+
+        interface ProjectDescriptor {
+
+        }
     }
 
-    class TreeAdapterBridgeFactory : BridgeFactory {
+    object TreeAdapterBridgeFactory : BridgeFactory {
 
         fun getGroupTypeTree(
             instanceDatas: List<GroupListDataWrapper.InstanceData>,
             groupingMode: NodeCollection.GroupingMode,
-        ): List<GroupType> = GroupType.getGroupTypeTree(instanceDatas, groupingMode)
+        ) = GroupType.getGroupTypeTree(this, instanceDatas.map(::InstanceDescriptor), groupingMode)
 
+        override fun createTime(timeStamp: TimeStamp, groupTypes: List<GroupType>) = Time(timeStamp, groupTypes)
+
+        override fun createTimeProject(
+            timeStamp: TimeStamp,
+            projectDescriptor: BridgeFactory.ProjectDescriptor,
+            instanceDescriptors: List<BridgeFactory.InstanceDescriptor>
+        ): TimeProject { // todo group use generics?
+            return TimeProject(
+                timeStamp,
+                (projectDescriptor as ProjectDescriptor).projectDetails,
+                instanceDescriptors.map { (it as InstanceDescriptor).instanceData },
+            )
+        }
+
+        override fun createProject(
+            timeStamp: TimeStamp,
+            projectDescriptor: BridgeFactory.ProjectDescriptor,
+            instanceDescriptors: List<BridgeFactory.InstanceDescriptor>,
+            nested: Boolean
+        ): Project {
+            return Project(
+                timeStamp,
+                (projectDescriptor as ProjectDescriptor).projectDetails,
+                instanceDescriptors.map { (it as InstanceDescriptor).instanceData },
+                nested,
+            )
+        }
+
+        override fun createSingle(instanceDescriptor: BridgeFactory.InstanceDescriptor): Single {
+            return Single((instanceDescriptor as InstanceDescriptor).instanceData)
+        }
+
+        class InstanceDescriptor(val instanceData: GroupListDataWrapper.InstanceData) : BridgeFactory.InstanceDescriptor {
+
+            override val timeStamp get() = instanceData.instanceTimeStamp
+
+            override val projectDescriptor = instanceData.projectInfo
+                ?.projectDetails
+                ?.let(::ProjectDescriptor)
+        }
+
+        data class ProjectDescriptor(val projectDetails: DetailsNode.ProjectDetails) : BridgeFactory.ProjectDescriptor
     }
 }

@@ -10,21 +10,26 @@ import com.krystianwsul.common.utils.InstanceKey
 
 object GroupTypeFactory : GroupType.Factory {
 
+    private fun GroupType.fix() = this as Bridge
+    private fun GroupType.TimeChild.fix() = this as TimeChild
+    private fun GroupType.InstanceDescriptor.fix() = this as InstanceDescriptor
+    private fun GroupType.ProjectDescriptor.fix() = this as ProjectDescriptor
+
     fun getGroupTypeTree(
         instanceDatas: List<GroupListDataWrapper.InstanceData>,
         groupingMode: NodeCollection.GroupingMode,
-    ) = GroupType.getGroupTypeTree(this, instanceDatas.map(::InstanceDescriptor), groupingMode).map { it as Bridge }
+    ) = GroupType.getGroupTypeTree(this, instanceDatas.map(::InstanceDescriptor), groupingMode).map { it.fix() }
 
     override fun createTime(timeStamp: TimeStamp, groupTypes: List<GroupType.TimeChild>) =
-        TimeBridge(timeStamp, groupTypes.map { it as TimeChild })
+        TimeBridge(timeStamp, groupTypes.map { it.fix() })
 
     override fun createTimeProject(
         timeStamp: TimeStamp,
         projectDescriptor: GroupType.ProjectDescriptor,
-        instanceDescriptors: List<GroupType.InstanceDescriptor>
+        instanceDescriptors: List<GroupType.InstanceDescriptor>,
     ): GroupType.TimeProject {
-        val projectDetails = (projectDescriptor as ProjectDescriptor).projectDetails
-        val instanceDatas = instanceDescriptors.map { (it as InstanceDescriptor).instanceData.copy(projectInfo = null) }
+        val projectDetails = projectDescriptor.fix().projectDetails
+        val instanceDatas = instanceDescriptors.map { it.fix().instanceData.copy(projectInfo = null) }
 
         return TimeProjectBridge(timeStamp, projectDetails, instanceDatas)
     }
@@ -35,14 +40,14 @@ object GroupTypeFactory : GroupType.Factory {
         instanceDescriptors: List<GroupType.InstanceDescriptor>,
         nested: Boolean,
     ): GroupType.Project {
-        val projectDetails = (projectDescriptor as ProjectDescriptor).projectDetails
-        val instanceDatas = instanceDescriptors.map { (it as InstanceDescriptor).instanceData.copy(projectInfo = null) }
+        val projectDetails = projectDescriptor.fix().projectDetails
+        val instanceDatas = instanceDescriptors.map { it.fix().instanceData.copy(projectInfo = null) }
 
         return ProjectBridge(timeStamp, projectDetails, instanceDatas, nested)
     }
 
     override fun createSingle(instanceDescriptor: GroupType.InstanceDescriptor): GroupType.Single {
-        val instanceData = (instanceDescriptor as InstanceDescriptor).instanceData
+        val instanceData = instanceDescriptor.fix().instanceData
 
         return SingleBridge(instanceData)
     }
@@ -128,11 +133,7 @@ object GroupTypeFactory : GroupType.Factory {
             nodeCollection,
             instanceDatas.map(::SingleBridge),
             NotDoneNode.ContentDelegate.Group.Id.Project(timeStamp, instanceKeys, projectDetails.projectKey),
-            NotDoneNode.ContentDelegate.Group.GroupRowsDelegate.Project(
-                groupAdapter,
-                timeStamp,
-                projectDetails.name,
-            ),
+            NotDoneNode.ContentDelegate.Group.GroupRowsDelegate.Project(groupAdapter, timeStamp, projectDetails.name),
             true,
             ShowGroupActivity.Parameters.Project(timeStamp, projectDetails.projectKey),
         )
@@ -169,11 +170,7 @@ object GroupTypeFactory : GroupType.Factory {
             indentation + (if (nested) 1 else 0),
             nodeCollection,
             instanceDatas.map(::SingleBridge),
-            NotDoneNode.ContentDelegate.Group.Id.Project(
-                timeStamp,
-                instanceKeys,
-                projectDetails.projectKey,
-            ),
+            NotDoneNode.ContentDelegate.Group.Id.Project(timeStamp, instanceKeys, projectDetails.projectKey),
             NotDoneNode.ContentDelegate.Group.GroupRowsDelegate.Project(groupAdapter, null, projectDetails.name),
             !nested,
             ShowGroupActivity.Parameters.Project(timeStamp, projectDetails.projectKey),

@@ -95,9 +95,18 @@ fun DomainUpdater.setProjectNotificationDoneService(projectKey: ProjectKey.Share
         )
     }.perform(this)
 
-fun DomainUpdater.setInstancesNotifiedService(projectKey: ProjectKey.Shared?): Completable =
+fun DomainUpdater.setInstancesNotifiedService(): Completable =
     CompletableDomainUpdate.create("setInstancesNotified") { now ->
-        Notifier.getNotificationInstances(this, now, projectKey)
+        Notifier.getNotificationInstances(this, now)
+            .also { check(it.isNotEmpty()) }
+            .forEach(::setInstanceNotified)
+
+        DomainUpdater.Params(false, DomainListenerManager.NotificationType.All)
+    }.perform(this)
+
+fun DomainUpdater.setInstancesNotifiedService(projectKey: ProjectKey.Shared, timeStamp: TimeStamp): Completable =
+    CompletableDomainUpdate.create("setInstancesNotified") { now ->
+        Notifier.getNotificationInstances(this, now, projectKey) // todo group
             .also { check(it.isNotEmpty()) }
             .forEach(::setInstanceNotified)
 
@@ -105,8 +114,8 @@ fun DomainUpdater.setInstancesNotifiedService(projectKey: ProjectKey.Shared?): C
     }.perform(this)
 
 fun DomainUpdater.setTaskImageUploadedService(
-        taskKey: TaskKey,
-        imageUuid: String,
+    taskKey: TaskKey,
+    imageUuid: String,
 ): Completable = CompletableDomainUpdate.create("clearProjectEndTimeStamps") {
     val task = rootTasksFactory.getRootTaskIfPresent(taskKey as TaskKey.Root)
     if (task?.getImage(deviceDbInfo) != ImageState.Local(imageUuid)) {

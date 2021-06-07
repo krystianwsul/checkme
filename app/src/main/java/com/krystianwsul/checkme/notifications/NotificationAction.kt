@@ -7,6 +7,7 @@ import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.extensions.*
 import com.krystianwsul.checkme.domainmodel.notifications.NotificationWrapper
 import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
+import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.ProjectKey
 import io.reactivex.rxjava3.core.Completable
@@ -20,9 +21,9 @@ sealed class NotificationAction : Parcelable {
     abstract fun perform(): Completable
 
     @Parcelize
-    data class DeleteGroupNotification(private val projectKey: ProjectKey.Shared? = null) : NotificationAction() {
+    object DeleteGroupNotification : NotificationAction() {
 
-        override fun perform() = AndroidDomainUpdater.setInstancesNotifiedService(projectKey)
+        override fun perform() = AndroidDomainUpdater.setInstancesNotifiedService()
     }
 
     @Parcelize
@@ -57,7 +58,11 @@ sealed class NotificationAction : Parcelable {
     }
 
     @Parcelize
-    data class ProjectDone(private val projectKey: ProjectKey.Shared, private val notificationId: Int) :
+    data class ProjectDone(
+        private val projectKey: ProjectKey.Shared,
+        private val timeStamp: TimeStamp,
+        private val notificationId: Int,
+    ) :
         NotificationAction() {
 
         override fun perform(): Completable {
@@ -65,20 +70,30 @@ sealed class NotificationAction : Parcelable {
 
             NotificationWrapper.instance.cleanGroup(notificationId)
 
-            return AndroidDomainUpdater.setProjectNotificationDoneService(projectKey)
+            return AndroidDomainUpdater.setProjectNotificationDoneService(projectKey) // todo group
         }
     }
 
     @Parcelize
-    data class ProjectHour(private val projectKey: ProjectKey.Shared, private val notificationId: Int) :
-        NotificationAction() {
+    data class ProjectHour(
+        private val projectKey: ProjectKey.Shared,
+        private val timeStamp: TimeStamp,
+        private val notificationId: Int,
+    ) : NotificationAction() {
 
         override fun perform(): Completable {
             Preferences.tickLog.logLineDate("ProjectHour")
 
             NotificationWrapper.instance.cleanGroup(notificationId)
 
-            return AndroidDomainUpdater.setProjectAddHourService(projectKey)
+            return AndroidDomainUpdater.setProjectAddHourService(projectKey) // todo group TIMESTAMP
         }
+    }
+
+    @Parcelize
+    data class DeleteProjectNotification(private val projectKey: ProjectKey.Shared, private val timeStamp: TimeStamp) :
+        NotificationAction() {
+
+        override fun perform() = AndroidDomainUpdater.setInstancesNotifiedService(projectKey, timeStamp)
     }
 }

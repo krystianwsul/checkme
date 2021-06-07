@@ -18,6 +18,7 @@ import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
+import com.krystianwsul.checkme.gui.instances.ShowGroupActivity
 import com.krystianwsul.checkme.gui.instances.ShowInstanceActivity
 import com.krystianwsul.checkme.gui.instances.ShowNotificationGroupActivity
 import com.krystianwsul.checkme.gui.main.MainActivity
@@ -102,7 +103,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
     override fun notifyProject(
         project: SharedProject,
         instances: List<Instance>,
-        timeStamp: TimeStamp, // todo group TIMESTAMP
+        timeStamp: TimeStamp,
         silent: Boolean,
         now: ExactTimeStamp.Local,
     ) {
@@ -248,23 +249,26 @@ open class NotificationWrapperImpl : NotificationWrapper() {
     private fun notifyProjectHelper(projectData: ProjectData) {
         val notificationId = projectData.notificationId
 
-        val pendingContentIntent = PendingIntent.getActivity( // todo group TIMESTAMP
+        val pendingContentIntent = PendingIntent.getActivity(
             MyApplication.instance,
             notificationId,
-            ShowNotificationGroupActivity.getIntent(MyApplication.instance, projectData.projectKey),
-            PendingIntent.FLAG_UPDATE_CURRENT
+            ShowGroupActivity.getIntent(
+                MyApplication.instance,
+                ShowGroupActivity.Parameters.Project(projectData.timeStamp, projectData.projectKey),
+            ),
+            PendingIntent.FLAG_UPDATE_CURRENT,
         )
 
-        val pendingDeleteIntent = NotificationActionReceiver.newPendingIntent( // todo group TIMESTAMP
-            NotificationAction.DeleteGroupNotification(projectData.projectKey)
+        val pendingDeleteIntent = NotificationActionReceiver.newPendingIntent(
+            NotificationAction.DeleteProjectNotification(projectData.projectKey, projectData.timeStamp)
         )
 
-        val pendingDoneIntent = NotificationActionReceiver.newPendingIntent( // todo group TIMESTAMP
-            NotificationAction.ProjectDone(projectData.projectKey, notificationId)
+        val pendingDoneIntent = NotificationActionReceiver.newPendingIntent(
+            NotificationAction.ProjectDone(projectData.projectKey, projectData.timeStamp, notificationId)
         )
 
-        val pendingHourIntent = NotificationActionReceiver.newPendingIntent( // todo group TIMESTAMP
-            NotificationAction.ProjectHour(projectData.projectKey, notificationId)
+        val pendingHourIntent = NotificationActionReceiver.newPendingIntent(
+            NotificationAction.ProjectHour(projectData.projectKey, projectData.timeStamp, notificationId)
         )
 
         fun action(
@@ -523,7 +527,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
     }
 
     private fun notifyGroupHelper(groupData: GroupData) {
-        val pendingDeleteIntent = NotificationActionReceiver.newPendingIntent(NotificationAction.DeleteGroupNotification())
+        val pendingDeleteIntent = NotificationActionReceiver.newPendingIntent(NotificationAction.DeleteGroupNotification)
 
         val notificationId = if (groupData.summary) NOTIFICATION_ID_GROUP else NOTIFICATION_ID_GROUP_NOT_SUMMARY
 

@@ -1,7 +1,6 @@
 package com.krystianwsul.checkme.domainmodel
 
 import com.krystianwsul.common.time.TimeStamp
-import com.krystianwsul.common.utils.ProjectKey
 
 interface GroupType {
 
@@ -24,7 +23,7 @@ interface GroupType {
                         // these are all instances at the same time
                         if (instanceDescriptors.size > 1) {
                             val projectDescriptor = instanceDescriptors.map { it.projectDescriptor }
-                                .distinctBy { it?.projectKey }
+                                .distinct()
                                 .singleOrNull()
 
                             projectDescriptor?.let {
@@ -138,10 +137,7 @@ interface GroupType {
         val projectDescriptor: ProjectDescriptor?
     }
 
-    interface ProjectDescriptor {
-
-        val projectKey: ProjectKey.Shared
-    }
+    interface ProjectDescriptor
 
     enum class GroupingMode {
 

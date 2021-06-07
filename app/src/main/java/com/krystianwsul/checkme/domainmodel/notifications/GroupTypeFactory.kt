@@ -45,10 +45,7 @@ object GroupTypeFactory : GroupType.Factory {
             ?.let(::ProjectDescriptor)
     }
 
-    class ProjectDescriptor(val project: SharedProject) : GroupType.ProjectDescriptor {
-
-        override val projectKey get() = project.projectKey
-    }
+    data class ProjectDescriptor(val project: SharedProject) : GroupType.ProjectDescriptor
 
     sealed interface Bridge {
 

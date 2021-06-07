@@ -93,7 +93,7 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
 
     sealed class ContentDelegate : ThumbnailModelNode, Sortable, CheckableModelNode, Matchable {
 
-        abstract val groupType: GroupType
+        abstract val bridge: GroupType.TreeAdapterBridgeFactory.Bridge
 
         abstract val directInstanceDatas: List<GroupListDataWrapper.InstanceData>
         abstract val allInstanceDatas: List<GroupListDataWrapper.InstanceData>
@@ -124,7 +124,7 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
 
         class Instance(
             override val groupAdapter: GroupListFragment.GroupAdapter,
-            override val groupType: GroupType.Single,
+            override val bridge: GroupType.TreeAdapterBridgeFactory.SingleBridge,
             override val indentation: Int,
             showDetails: Boolean = true,
         ) : ContentDelegate() {
@@ -136,12 +136,12 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
                 showDetails: Boolean = true,
             ) : this(
                 groupAdapter,
-                GroupType.Single(GroupType.TreeAdapterBridgeFactory.SingleBridge(instanceData), instanceData),
+                GroupType.TreeAdapterBridgeFactory.SingleBridge(instanceData),
                 indentation,
                 showDetails,
             )
 
-            val instanceData get() = groupType.instanceData
+            val instanceData get() = bridge.instanceData
 
             override val directInstanceDatas = listOf(instanceData)
             override val allInstanceDatas = directInstanceDatas
@@ -271,7 +271,7 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
 
         class Group(
             override val groupAdapter: GroupListFragment.GroupAdapter,
-            override val groupType: GroupType,
+            override val bridge: GroupType.TreeAdapterBridgeFactory.SingleParent,
             override val directInstanceDatas: List<GroupListDataWrapper.InstanceData>,
             override val indentation: Int,
             private val nodeCollection: NodeCollection,
@@ -281,12 +281,6 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
             private val indentCheckBox: Boolean,
             private val showGroupActivityParameters: ShowGroupActivity.Parameters,
         ) : ContentDelegate() {
-
-            init {
-                check(groupType is GroupType.SingleParent)
-            }
-
-            val bridge = groupType.bridge as GroupType.TreeAdapterBridgeFactory.SingleParent
 
             override val allInstanceDatas get() = notDoneNodes.flatMap { it.contentDelegate.directInstanceDatas }
 

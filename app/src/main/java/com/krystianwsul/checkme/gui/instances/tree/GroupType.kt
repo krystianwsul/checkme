@@ -204,7 +204,7 @@ sealed class GroupType {
             groupAdapter: GroupListFragment.GroupAdapter,
             indentation: Int,
             nodeCollection: NodeCollection,
-        ) = NotDoneNode.ContentDelegate.Instance(groupAdapter, this, indentation)
+        ) = bridge.toContentDelegate(this, groupAdapter, indentation, nodeCollection)
 
         interface Bridge : BridgeFactory.Bridge {
 
@@ -330,7 +330,7 @@ sealed class GroupType {
                 nodeCollection: NodeCollection,
             ) = NotDoneNode.ContentDelegate.Group(
                 groupAdapter,
-                time,
+                this,
                 time.groupTypes.filterIsInstance<Single>().map { it.instanceData },
                 indentation,
                 nodeCollection,
@@ -366,7 +366,7 @@ sealed class GroupType {
                 nodeCollection: NodeCollection,
             ) = NotDoneNode.ContentDelegate.Group(
                 groupAdapter,
-                timeProject,
+                this,
                 timeProject.instanceDatas,
                 indentation,
                 nodeCollection,
@@ -411,7 +411,7 @@ sealed class GroupType {
                 nodeCollection: NodeCollection,
             ) = NotDoneNode.ContentDelegate.Group(
                 groupAdapter,
-                project,
+                this,
                 project.instanceDatas,
                 indentation + (if (project.nested) 1 else 0),
                 nodeCollection,
@@ -443,7 +443,7 @@ sealed class GroupType {
                 groupAdapter: GroupListFragment.GroupAdapter,
                 indentation: Int,
                 nodeCollection: NodeCollection,
-            ) = NotDoneNode.ContentDelegate.Instance(groupAdapter, single, indentation)
+            ) = NotDoneNode.ContentDelegate.Instance(groupAdapter, this, indentation)
 
             override fun compareTo(other: Bridge): Int {
                 return when (other) {

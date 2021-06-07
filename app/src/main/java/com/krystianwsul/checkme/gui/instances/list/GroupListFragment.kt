@@ -795,7 +795,7 @@ class GroupListFragment @JvmOverloads constructor(
                 } else {
                     val notDoneNode = selectedNodes.singleOrNull()?.modelNode as? NotDoneNode
                     val groupContentDelegate = notDoneNode?.contentDelegate as? NotDoneNode.ContentDelegate.Group
-                    val isProjectNode = groupContentDelegate?.groupType is GroupType.Project
+                    val isProjectNode = groupContentDelegate?.bridge is GroupType.TreeAdapterBridgeFactory.ProjectBridge
 
                     val showTime = parameters.fabActionMode.showTime || isProjectNode
 

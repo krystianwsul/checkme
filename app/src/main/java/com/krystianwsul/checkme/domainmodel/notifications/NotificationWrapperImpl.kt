@@ -702,7 +702,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
 
         val projectKey = project.projectKey
 
-        val notificationId = instances.sumOf { it.notificationId }
+        val notificationId = projectKey.hashCode()
 
         val timeStampLong = instances.map { it.instanceDateTime.timeStamp }
             .minOrNull()!!

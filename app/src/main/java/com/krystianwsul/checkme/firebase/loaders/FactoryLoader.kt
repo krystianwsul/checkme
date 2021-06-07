@@ -26,10 +26,10 @@ import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.plusAssign
 
 class FactoryLoader(
-        localFactory: FactoryProvider.Local,
-        userInfoObservable: Observable<NullableWrapper<UserInfo>>,
-        factoryProvider: FactoryProvider,
-        tokenObservable: Observable<NullableWrapper<String>>,
+    localFactory: FactoryProvider.Local,
+    userInfoObservable: Observable<NullableWrapper<UserInfo>>,
+    factoryProvider: FactoryProvider,
+    tokenObservable: Observable<NullableWrapper<String>>,
 ) {
 
     val domainFactoryObservable: Observable<NullableWrapper<FactoryProvider.Domain>>
@@ -46,55 +46,55 @@ class FactoryLoader(
                 val userInfo = it.value
 
                 val deviceInfoObservable = tokenObservable.observeOnDomain()
-                        .map { DeviceInfo(userInfo, it.value) }
-                        .replay(1)
-                        .apply { domainDisposable += connect() }
+                    .map { DeviceInfo(userInfo, it.value) }
+                    .replay(1)
+                    .apply { domainDisposable += connect() }
 
                 deviceInfoObservable.firstOrError().flatMap {
                     fun getDeviceInfo() = deviceInfoObservable.getCurrentValue()
                     fun getDeviceDbInfo() = DeviceDbInfo(getDeviceInfo(), localFactory.uuid)
 
                     val userDatabaseRx = DatabaseRx(
-                            domainDisposable,
-                            factoryProvider.database.getUserObservable(getDeviceInfo().key),
+                        domainDisposable,
+                        factoryProvider.database.getUserObservable(getDeviceInfo().key),
                     )
 
                     val privateProjectKey = getDeviceInfo().key.toPrivateProjectKey()
 
                     val privateProjectDatabaseRx = DatabaseRx(
-                            domainDisposable,
-                            factoryProvider.database.getPrivateProjectObservable(privateProjectKey),
+                        domainDisposable,
+                        factoryProvider.database.getPrivateProjectObservable(privateProjectKey),
                     )
 
                     val privateProjectManager = AndroidPrivateProjectManager(userInfo, factoryProvider.database)
 
                     val userFactorySingle = userDatabaseRx.first
-                            .map { MyUserFactory(it, getDeviceDbInfo(), factoryProvider.database) }
-                            .cacheImmediate()
+                        .map { MyUserFactory(it, getDeviceDbInfo(), factoryProvider.database) }
+                        .cacheImmediate()
 
                     val userKeyStore = UserKeyStore(
-                            userFactorySingle.flatMapObservable { it.friendKeysObservable },
-                            domainDisposable,
+                        userFactorySingle.flatMapObservable { it.friendKeysObservable },
+                        domainDisposable,
                     )
 
                     val friendsLoader = FriendsLoader(userKeyStore, domainDisposable, factoryProvider.friendsProvider)
 
                     val friendsFactorySingle = friendsLoader.initialFriendsEvent
-                            .map {
-                                FriendsFactory(
-                                        friendsLoader,
-                                        it,
-                                        domainDisposable,
-                                        factoryProvider.database,
-                                )
-                            }
-                            .cacheImmediate()
+                        .map {
+                            FriendsFactory(
+                                friendsLoader,
+                                it,
+                                domainDisposable,
+                                factoryProvider.database,
+                            )
+                        }
+                        .cacheImmediate()
 
                     val userCustomTimeProviderSource = UserCustomTimeProviderSource.Impl(
-                            userInfo.key,
-                            userFactorySingle,
-                            friendsLoader,
-                            friendsFactorySingle,
+                        userInfo.key,
+                        userFactorySingle,
+                        friendsLoader,
+                        friendsFactorySingle,
                     )
 
                     val rootTaskKeySource = RootTaskKeySource()
@@ -104,48 +104,48 @@ class FactoryLoader(
                     val loadDependencyTrackerManager = LoadDependencyTrackerManager()
 
                     val rootTasksLoader = RootTasksLoader(
-                            rootTaskKeySource,
-                            factoryProvider.database,
-                            domainDisposable,
-                            rootTaskManager,
-                            loadDependencyTrackerManager,
+                        rootTaskKeySource,
+                        factoryProvider.database,
+                        domainDisposable,
+                        rootTaskManager,
+                        loadDependencyTrackerManager,
                     )
 
                     val taskRecordLoader =
-                            TaskRecordsLoadedTracker.Impl(rootTasksLoader, domainDisposable)
+                        TaskRecordsLoadedTracker.Impl(rootTasksLoader, domainDisposable)
 
                     val rootTaskToRootTaskCoordinator = RootTaskDependencyCoordinator.Impl(
-                            rootTaskKeySource,
-                            rootTasksLoader,
-                            userCustomTimeProviderSource,
-                            taskRecordLoader,
+                        rootTaskKeySource,
+                        rootTasksLoader,
+                        userCustomTimeProviderSource,
+                        taskRecordLoader,
                     )
 
                     // this is hacky as fuck, but I'll take my chances
                     lateinit var projectsFactorySingle: Single<ProjectsFactory>
 
                     val rootTasksFactory = RootTasksFactory(
-                            rootTasksLoader,
-                            userKeyStore,
-                            rootTaskToRootTaskCoordinator,
-                            domainDisposable,
-                            rootTaskKeySource,
-                            loadDependencyTrackerManager,
+                        rootTasksLoader,
+                        userKeyStore,
+                        rootTaskToRootTaskCoordinator,
+                        domainDisposable,
+                        rootTaskKeySource,
+                        loadDependencyTrackerManager,
                     ) { projectsFactorySingle.getCurrentValue() }
 
                     val projectToRootTaskCoordinator = ProjectToRootTaskCoordinator.Impl(
-                            rootTaskKeySource,
-                            rootTasksFactory,
+                        rootTaskKeySource,
+                        rootTasksFactory,
                     )
 
                     val privateProjectLoader = ProjectLoader.Impl(
-                            privateProjectDatabaseRx.observable,
-                            domainDisposable,
-                            privateProjectManager,
-                            null,
-                            userCustomTimeProviderSource,
-                            projectToRootTaskCoordinator,
-                            loadDependencyTrackerManager,
+                        privateProjectDatabaseRx.observable,
+                        domainDisposable,
+                        privateProjectManager,
+                        null,
+                        userCustomTimeProviderSource,
+                        projectToRootTaskCoordinator,
+                        loadDependencyTrackerManager,
                     )
 
                     val startTime = ExactTimeStamp.Local.now
@@ -153,89 +153,91 @@ class FactoryLoader(
                     val sharedProjectManager = AndroidSharedProjectManager(factoryProvider.database)
 
                     val sharedProjectsLoader = SharedProjectsLoader.Impl(
-                            userFactorySingle.flatMapObservable { it.sharedProjectKeysObservable },
-                            sharedProjectManager,
-                            domainDisposable,
-                            factoryProvider.sharedProjectsProvider,
-                            userCustomTimeProviderSource,
-                            userKeyStore,
-                            projectToRootTaskCoordinator,
-                            rootTaskKeySource,
-                            loadDependencyTrackerManager,
+                        userFactorySingle.flatMapObservable { it.sharedProjectKeysObservable },
+                        sharedProjectManager,
+                        domainDisposable,
+                        factoryProvider.sharedProjectsProvider,
+                        userCustomTimeProviderSource,
+                        userKeyStore,
+                        projectToRootTaskCoordinator,
+                        rootTaskKeySource,
+                        loadDependencyTrackerManager,
                     )
 
                     projectsFactorySingle = Single.zip(
-                            privateProjectLoader.initialProjectEvent.map {
-                                check(it.changeType == ChangeType.REMOTE)
+                        privateProjectLoader.initialProjectEvent.map {
+                            check(it.changeType == ChangeType.REMOTE)
 
-                                it.data
-                            },
-                            sharedProjectsLoader.initialProjectsEvent,
+                            it.data
+                        },
+                        sharedProjectsLoader.initialProjectsEvent,
                     ) { initialPrivateProjectEvent, initialSharedProjectsEvent ->
                         ProjectsFactory(
-                                localFactory,
-                                privateProjectLoader,
-                                initialPrivateProjectEvent,
-                                sharedProjectsLoader,
-                                initialSharedProjectsEvent,
-                                ExactTimeStamp.Local.now,
-                                factoryProvider,
-                                domainDisposable,
-                                rootTasksFactory,
-                                ::getDeviceDbInfo,
+                            localFactory,
+                            privateProjectLoader,
+                            initialPrivateProjectEvent,
+                            sharedProjectsLoader,
+                            initialSharedProjectsEvent,
+                            ExactTimeStamp.Local.now,
+                            factoryProvider,
+                            domainDisposable,
+                            rootTasksFactory,
+                            ::getDeviceDbInfo,
                         )
                     }.cacheImmediate()
 
                     val domainFactorySingle = Single.zip(
-                            userFactorySingle,
-                            projectsFactorySingle,
-                            friendsFactorySingle
-                    ) { remoteUserFactory, projectsFactory, friendsFactory ->
+                        userFactorySingle,
+                        projectsFactorySingle,
+                        friendsFactorySingle,
+                        factoryProvider.notificationStorageFactory.getNotificationStorage(),
+                    ) { remoteUserFactory, projectsFactory, friendsFactory, notificationStorage ->
                         factoryProvider.newDomain(
-                                localFactory,
-                                remoteUserFactory,
-                                projectsFactory,
-                                friendsFactory,
-                                getDeviceDbInfo(),
-                                startTime,
-                                ExactTimeStamp.Local.now,
-                                domainDisposable,
-                                rootTasksFactory,
+                            localFactory,
+                            remoteUserFactory,
+                            projectsFactory,
+                            friendsFactory,
+                            getDeviceDbInfo(),
+                            startTime,
+                            ExactTimeStamp.Local.now,
+                            domainDisposable,
+                            rootTasksFactory,
+                            notificationStorage,
                         )
                     }.cacheImmediate()
 
                     val changeTypeSource = ChangeTypeSource(
-                            projectsFactorySingle,
-                            friendsFactorySingle,
-                            userDatabaseRx,
-                            userFactorySingle,
-                            rootTasksFactory,
-                            domainDisposable,
+                        projectsFactorySingle,
+                        friendsFactorySingle,
+                        userDatabaseRx,
+                        userFactorySingle,
+                        rootTasksFactory,
+                        domainDisposable,
                     )
 
                     // ignore all change events that come in before the DomainFactory is initialized
                     domainFactorySingle.flatMapObservable { domainFactory ->
                         changeTypeSource.changeTypes.map { domainFactory to it }
                     }
-                            .subscribe { (domainFactory, changeType) ->
-                                domainFactory.onChangeTypeEvent(changeType, ExactTimeStamp.Local.now)
-                            }
-                            .addTo(domainDisposable)
+                        .subscribe { (domainFactory, changeType) ->
+                            domainFactory.onChangeTypeEvent(changeType, ExactTimeStamp.Local.now)
+                        }
+                        .addTo(domainDisposable)
 
                     tokenObservable.flatMapCompletable {
                         factoryProvider.domainUpdater.updateDeviceDbInfo(
-                                DeviceDbInfo(DeviceInfo(userInfo, it.value), localFactory.uuid)
+                            DeviceDbInfo(DeviceInfo(userInfo, it.value), localFactory.uuid)
                         )
                     }
-                            .subscribe()
-                            .addTo(domainDisposable)
+                        .subscribe()
+                        .addTo(domainDisposable)
 
                     domainFactorySingle.map(::NullableWrapper)
                 }
             } else {
                 factoryProvider.nullableInstance
-                        ?.clearUserInfo()
-                        ?.subscribe()
+                    ?.clearUserInfo()
+                    ?.subscribe()
 
                 Single.just(NullableWrapper())
             }

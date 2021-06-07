@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.firebase.loaders
 import androidx.annotation.CheckResult
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.local.LocalFactory
+import com.krystianwsul.checkme.domainmodel.notifications.ProjectNotificationKey
 import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
 import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
 import com.krystianwsul.checkme.firebase.AndroidDatabaseWrapper
@@ -21,6 +22,7 @@ import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.ProjectKey
 import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 
 interface FactoryProvider {
@@ -39,7 +41,7 @@ interface FactoryProvider {
             override val projectProvider = this@FactoryProvider.projectProvider
 
             override fun getSharedProjectObservable(projectKey: ProjectKey.Shared) =
-                    database.getSharedProjectObservable(projectKey)
+                database.getSharedProjectObservable(projectKey)
         }
 
     val friendsProvider
@@ -50,16 +52,19 @@ interface FactoryProvider {
 
     val domainUpdater: DomainUpdater
 
+    val notificationStorageFactory: NotificationStorageFactory
+
     fun newDomain(
-            localFactory: Local,
-            myUserFactory: MyUserFactory,
-            projectsFactory: ProjectsFactory,
-            friendsFactory: FriendsFactory,
-            deviceDbInfo: DeviceDbInfo,
-            startTime: ExactTimeStamp.Local,
-            readTime: ExactTimeStamp.Local,
-            domainDisposable: CompositeDisposable,
-            rootTasksFactory: RootTasksFactory,
+        localFactory: Local,
+        myUserFactory: MyUserFactory,
+        projectsFactory: ProjectsFactory,
+        friendsFactory: FriendsFactory,
+        deviceDbInfo: DeviceDbInfo,
+        startTime: ExactTimeStamp.Local,
+        readTime: ExactTimeStamp.Local,
+        domainDisposable: CompositeDisposable,
+        rootTasksFactory: RootTasksFactory,
+        notificationStorage: NotificationStorage,
     ): Domain
 
     interface Domain {
@@ -73,6 +78,18 @@ interface FactoryProvider {
     interface Local : Instance.ShownFactory {
 
         val uuid: String
+    }
+
+    interface NotificationStorageFactory {
+
+        fun getNotificationStorage(): Single<NotificationStorage>
+    }
+
+    interface NotificationStorage {
+
+        fun getKeys(): List<ProjectNotificationKey>
+
+        fun writeKeys(projectNotificationKeys: List<ProjectNotificationKey>)
     }
 
     abstract class Database : FriendsProvider.Database(), RootTasksLoader.Provider {
@@ -95,27 +112,32 @@ interface FactoryProvider {
 
         override val domainUpdater = AndroidDomainUpdater
 
+        override val notificationStorageFactory =
+            com.krystianwsul.checkme.domainmodel.notifications.NotificationStorage.Companion
+
         override fun newDomain(
-                localFactory: Local,
-                myUserFactory: MyUserFactory,
-                projectsFactory: ProjectsFactory,
-                friendsFactory: FriendsFactory,
-                deviceDbInfo: DeviceDbInfo,
-                startTime: ExactTimeStamp.Local,
-                readTime: ExactTimeStamp.Local,
-                domainDisposable: CompositeDisposable,
-                rootTasksFactory: RootTasksFactory,
+            localFactory: Local,
+            myUserFactory: MyUserFactory,
+            projectsFactory: ProjectsFactory,
+            friendsFactory: FriendsFactory,
+            deviceDbInfo: DeviceDbInfo,
+            startTime: ExactTimeStamp.Local,
+            readTime: ExactTimeStamp.Local,
+            domainDisposable: CompositeDisposable,
+            rootTasksFactory: RootTasksFactory,
+            notificationStorage: NotificationStorage,
         ) = DomainFactory(
-                localFactory as LocalFactory,
-                myUserFactory,
-                projectsFactory,
-                friendsFactory,
-                deviceDbInfo,
-                startTime,
-                readTime,
-                domainDisposable,
-                database,
-                rootTasksFactory,
+            localFactory as LocalFactory,
+            myUserFactory,
+            projectsFactory,
+            friendsFactory,
+            deviceDbInfo,
+            startTime,
+            readTime,
+            domainDisposable,
+            database,
+            rootTasksFactory,
+            notificationStorage,
         ) { AndroidDomainUpdater }
     }
 }

@@ -66,6 +66,7 @@ class DomainFactory(
     domainDisposable: CompositeDisposable,
     private val databaseWrapper: DatabaseWrapper,
     val rootTasksFactory: RootTasksFactory,
+    val notificationStorage: FactoryProvider.NotificationStorage,
     private val getDomainUpdater: (DomainFactory) -> DomainUpdater,
 ) :
     FactoryProvider.Domain,

@@ -82,8 +82,6 @@ sealed class GroupType {
         }
     }
 
-    abstract val allInstanceKeys: Set<InstanceKey>
-
     abstract val bridge: BridgeFactory.Bridge
 
     class Time(
@@ -91,8 +89,6 @@ sealed class GroupType {
         val timeStamp: TimeStamp,
         val groupTypes: List<GroupType>,
     ) : GroupType(), SingleParent {
-
-        override val allInstanceKeys = groupTypes.flatMap { it.allInstanceKeys }.toSet()
 
         interface Bridge : BridgeFactory.Bridge
     }
@@ -113,8 +109,6 @@ sealed class GroupType {
         val projectDetails: DetailsNode.ProjectDetails,
         val instanceDatas: List<GroupListDataWrapper.InstanceData>,
     ) : GroupType(), SingleParent {
-
-        override val allInstanceKeys = instanceDatas.map { it.instanceKey }.toSet()
 
         interface Bridge : BridgeFactory.Bridge
     }
@@ -139,8 +133,6 @@ sealed class GroupType {
         val nested: Boolean,
     ) : GroupType(), TimeChild, SingleParent {
 
-        override val allInstanceKeys = instanceDatas.map { it.instanceKey }.toSet()
-
         interface Bridge : BridgeFactory.Bridge
     }
 
@@ -149,8 +141,6 @@ sealed class GroupType {
     interface SingleParent
 
     class Single(override val bridge: Bridge, val instanceData: GroupListDataWrapper.InstanceData) : GroupType(), TimeChild {
-
-        override val allInstanceKeys = setOf(instanceData.instanceKey)
 
         interface Bridge : BridgeFactory.Bridge
     }

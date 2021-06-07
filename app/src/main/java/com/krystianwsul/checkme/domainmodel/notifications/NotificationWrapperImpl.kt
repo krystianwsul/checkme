@@ -104,7 +104,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
     ) {
         val highPriority = getHighPriority() ?: return
 
-        val projectData = ProjectData(project, instances, now, silent, highPriority)
+        val projectData = ProjectData(project, instances, now, silent, highPriority, timeStamp)
         notificationRelay.accept { notifyProjectHelper(projectData) }
     }
 
@@ -244,22 +244,22 @@ open class NotificationWrapperImpl : NotificationWrapper() {
     private fun notifyProjectHelper(projectData: ProjectData) {
         val notificationId = projectData.notificationId
 
-        val pendingContentIntent = PendingIntent.getActivity(
+        val pendingContentIntent = PendingIntent.getActivity( // todo group TIMESTAMP
             MyApplication.instance,
             notificationId,
             ShowNotificationGroupActivity.getIntent(MyApplication.instance, projectData.projectKey),
             PendingIntent.FLAG_UPDATE_CURRENT
         )
 
-        val pendingDeleteIntent = NotificationActionReceiver.newPendingIntent(
+        val pendingDeleteIntent = NotificationActionReceiver.newPendingIntent( // todo group TIMESTAMP
             NotificationAction.DeleteGroupNotification(projectData.projectKey)
         )
 
-        val pendingDoneIntent = NotificationActionReceiver.newPendingIntent(
+        val pendingDoneIntent = NotificationActionReceiver.newPendingIntent( // todo group TIMESTAMP
             NotificationAction.ProjectDone(projectData.projectKey, notificationId)
         )
 
-        val pendingHourIntent = NotificationActionReceiver.newPendingIntent(
+        val pendingHourIntent = NotificationActionReceiver.newPendingIntent( // todo group TIMESTAMP
             NotificationAction.ProjectHour(projectData.projectKey, notificationId)
         )
 
@@ -281,7 +281,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         val text = childNames.joinToString(", ")
         val (style, styleHash) = getInboxStyle(childNames, false, null)
 
-        val timeStampLong = projectData.timeStampLong
+        val timeStampLong = projectData.timeStamp.long
 
         val sortKey = timeStampLong.toString() + doubleToString(projectData.ordinal)
 
@@ -699,15 +699,12 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         now: ExactTimeStamp.Local,
         val silent: Boolean,
         val highPriority: Boolean,
+        val timeStamp: TimeStamp,
     ) {
 
         val projectKey = project.projectKey
 
-        val notificationId = projectKey.hashCode()
-
-        val timeStampLong = instances.map { it.instanceDateTime.timeStamp }
-            .minOrNull()!!
-            .long
+        val notificationId: Int = (projectKey.hashCode() + timeStamp.long).toInt()
 
         val ordinal = instances.map { it.task.ordinal }.minOrNull()!!
 

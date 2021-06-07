@@ -5,7 +5,6 @@ import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.project.SharedProject
 import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.InstanceKey
-import com.krystianwsul.common.utils.ProjectKey
 
 object GroupTypeFactory : GroupType.Factory {
 
@@ -26,30 +25,16 @@ object GroupTypeFactory : GroupType.Factory {
         timeStamp: TimeStamp,
         projectDescriptor: GroupType.ProjectDescriptor,
         instanceDescriptors: List<GroupType.InstanceDescriptor>,
-    ): GroupType.TimeProject {
-        val projectKey = projectDescriptor.fix().projectKey
-        val instances = instanceDescriptors.map { it.fix().instance } // todo group strip project data
-
-        return TimeProjectBridge(timeStamp, projectKey, instances)
-    }
+    ) = TimeProjectBridge(timeStamp, projectDescriptor.fix().project, instanceDescriptors.map { it.fix() })
 
     override fun createProject(
         timeStamp: TimeStamp,
         projectDescriptor: GroupType.ProjectDescriptor,
         instanceDescriptors: List<GroupType.InstanceDescriptor>,
         nested: Boolean,
-    ): GroupType.Project {
-        val projectKey = projectDescriptor.fix().projectKey
-        val instances = instanceDescriptors.map { it.fix().instance } // todo group strip project data
+    ) = ProjectBridge(timeStamp, projectDescriptor.fix().project, instanceDescriptors.map { it.fix() })
 
-        return ProjectBridge(timeStamp, projectKey, instances)
-    }
-
-    override fun createSingle(instanceDescriptor: GroupType.InstanceDescriptor): GroupType.Single {
-        val instance = instanceDescriptor.fix().instance
-
-        return SingleBridge(instance)
-    }
+    override fun createSingle(instanceDescriptor: GroupType.InstanceDescriptor) = SingleBridge(instanceDescriptor.fix())
 
     class InstanceDescriptor(val instance: Instance, val silent: Boolean) : GroupType.InstanceDescriptor {
 
@@ -65,7 +50,10 @@ object GroupTypeFactory : GroupType.Factory {
         override val projectKey get() = project.projectKey
     }
 
-    sealed interface Bridge
+    sealed interface Bridge {
+
+        fun getNotifications(): List<Notification>
+    }
 
     sealed interface SingleParent : Bridge, GroupType.SingleParent
 
@@ -74,29 +62,39 @@ object GroupTypeFactory : GroupType.Factory {
         val instanceKeys: Set<InstanceKey>
     }
 
-    class TimeBridge(val timeStamp: TimeStamp, private val timeChildren: List<TimeChild>) : GroupType.Time, SingleParent
+    class TimeBridge(val timeStamp: TimeStamp, private val timeChildren: List<TimeChild>) : GroupType.Time, SingleParent {
+
+        override fun getNotifications() = timeChildren.flatMap { it.getNotifications() }
+    }
 
     class TimeProjectBridge(
         val timeStamp: TimeStamp,
-        val projectKey: ProjectKey.Shared,
-        val instances: List<Instance>,
+        val project: SharedProject,
+        val instanceDescriptors: List<InstanceDescriptor>,
     ) : GroupType.TimeProject, SingleParent {
 
-        val instanceKeys = instances.map { it.instanceKey }.toSet()
+        val instanceKeys = instanceDescriptors.map { it.instance.instanceKey }.toSet()
+
+        override fun getNotifications() = listOf(Notification.Project(project, instanceDescriptors))
     }
 
     class ProjectBridge(
         val timeStamp: TimeStamp,
-        val projectKey: ProjectKey.Shared,
-        val instances: List<Instance>,
+        val project: SharedProject,
+        val instanceDescriptors: List<InstanceDescriptor>,
     ) : GroupType.Project, SingleParent, TimeChild {
 
-        override val instanceKeys = instances.map { it.instanceKey }.toSet()
+        override val instanceKeys = instanceDescriptors.map { it.instance.instanceKey }.toSet()
+
+        override fun getNotifications() = listOf(Notification.Project(project, instanceDescriptors))
     }
 
-    class SingleBridge(val instance: Instance) : GroupType.Single, TimeChild {
+    class SingleBridge(val instanceDescriptor: InstanceDescriptor) : GroupType.Single, TimeChild {
 
-        override val instanceKeys = setOf(instance.instanceKey)
+        override val instanceKeys = setOf(instanceDescriptor.instance.instanceKey)
+
+        override fun getNotifications() =
+            listOf(Notification.Instance(instanceDescriptor.instance, instanceDescriptor.silent))
     }
 
     sealed class Notification {
@@ -107,6 +105,13 @@ object GroupTypeFactory : GroupType.Factory {
             val project: SharedProject,
             val instances: List<com.krystianwsul.common.firebase.models.Instance>,
             val silent: Boolean,
-        ) : Notification()
+        ) : Notification() {
+
+            constructor(project: SharedProject, instanceDescriptors: List<InstanceDescriptor>) : this(
+                project,
+                instanceDescriptors.map { it.instance },
+                instanceDescriptors.all { it.silent },
+            )
+        }
     }
 }

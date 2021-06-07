@@ -7,7 +7,6 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.GroupType
 import com.krystianwsul.checkme.ticks.Ticker
 import com.krystianwsul.common.firebase.models.Instance
-import com.krystianwsul.common.firebase.models.project.SharedProject
 import com.krystianwsul.common.relevance.CustomTimeRelevance
 import com.krystianwsul.common.relevance.Irrelevant
 import com.krystianwsul.common.time.Date
@@ -81,8 +80,8 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
         )
 
         val instanceShownPairs = domainFactory.localFactory.instanceShownRecords
-                .filter { it.notificationShown }
-                .map { it to domainFactory.tryGetTask(it.taskKeyData) }
+            .filter { it.notificationShown }
+            .map { it to domainFactory.tryGetTask(it.taskKeyData) }
 
         instanceShownPairs.filter { it.second == null }.forEach { (instanceShownRecord, _) ->
             val scheduleDate = instanceShownRecord.run { Date(scheduleYear, scheduleMonth, scheduleDay) }
@@ -98,37 +97,37 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
         }
 
         val shownInstanceKeys = instanceShownPairs.filter { it.second != null }
-                .map { (instanceShownRecord, task) ->
-                    val scheduleJsonTime =
-                            instanceShownRecord.scheduleTimeDescriptor.toJsonTime(task!!.projectCustomTimeIdProvider)
+            .map { (instanceShownRecord, task) ->
+                val scheduleJsonTime =
+                    instanceShownRecord.scheduleTimeDescriptor.toJsonTime(task!!.projectCustomTimeIdProvider)
 
-                    val scheduleDate = instanceShownRecord.run { Date(scheduleYear, scheduleMonth, scheduleDay) }
+                val scheduleDate = instanceShownRecord.run { Date(scheduleYear, scheduleMonth, scheduleDay) }
 
-                    InstanceKey(task.taskKey, scheduleDate, scheduleJsonTime.toTimePair(task.project))
-                }
-                .toSet()
+                InstanceKey(task.taskKey, scheduleDate, scheduleJsonTime.toTimePair(task.project))
+            }
+            .toSet()
 
         val showInstanceKeys = notificationInstances.keys - shownInstanceKeys
 
         Preferences.tickLog.logLineHour(
-                "shown instances: " + shownInstanceKeys.joinToString(", ") {
-                    domainFactory.getInstance(it).name
-                }
+            "shown instances: " + shownInstanceKeys.joinToString(", ") {
+                domainFactory.getInstance(it).name
+            }
         )
 
         val hideInstanceKeys = shownInstanceKeys - notificationInstances.keys
 
         for (showInstanceKey in showInstanceKeys) {
             domainFactory.getInstance(showInstanceKey).setNotificationShown(
-                    domainFactory.localFactory,
-                    true,
+                domainFactory.localFactory,
+                true,
             )
         }
 
         for (hideInstanceKey in hideInstanceKeys) {
             domainFactory.getInstance(hideInstanceKey).setNotificationShown(
-                    domainFactory.localFactory,
-                    false,
+                domainFactory.localFactory,
+                false,
             )
         }
 
@@ -138,7 +137,7 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
             if (notificationInstances.size > MAX_NOTIFICATIONS_OLD) { // show group
                 if (shownInstanceKeys.size > MAX_NOTIFICATIONS_OLD) { // group shown
                     val silentParam =
-                            if (showInstanceKeys.isNotEmpty() || hideInstanceKeys.isNotEmpty()) silent else true
+                        if (showInstanceKeys.isNotEmpty() || hideInstanceKeys.isNotEmpty()) silent else true
 
                     NotificationWrapper.instance.notifyGroup(notificationInstances.values, silentParam, now)
                 } else { // instances shown
@@ -248,11 +247,11 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
 
                     // instances to be updated
                     notificationInstances.values
-                            .filter { !showInstanceKeys.contains(it.instanceKey) }
-                            .forEach {
-                                Preferences.tickLog.logLineHour("updating '${it.name}' ${it.instanceDateTime}")
-                                updateInstance(it)
-                            }
+                        .filter { !showInstanceKeys.contains(it.instanceKey) }
+                        .forEach {
+                            Preferences.tickLog.logLineHour("updating '${it.name}' ${it.instanceDateTime}")
+                            updateInstance(it)
+                        }
                 }
                 else -> {
                     check(notificationInstances.isEmpty())
@@ -311,40 +310,22 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
 
         val notifies = notificationDatas.filterIsInstance<NotificationData.Notify>()
 
-        val groupTypes = GroupTypeFactory.getGroupTypeTree(
+        GroupTypeFactory.getGroupTypeTree(
             notifies.map { GroupTypeFactory.InstanceDescriptor(it.instance, it.silent) },
             GroupType.GroupingMode.TIME,
         )
+            .flatMap { it.getNotifications() }
+            .forEach {
+                when (it) {
+                    is GroupTypeFactory.Notification.Instance ->
+                        notificationWrapper.notifyInstance(domainFactory.deviceDbInfo, it.instance, it.silent, now)
+                    is GroupTypeFactory.Notification.Project -> {
+                        it.instances.forEach { NotificationWrapper.instance.cancelNotification(it.notificationId) }
 
-        val projectGroups = notifies.groupBy { it.instance.getProject().projectKey }
-
-        val (private, shared) = projectGroups.entries.partition { it.key is ProjectKey.Private }
-
-        fun NotificationData.Notify.notify() =
-            notificationWrapper.notifyInstance(domainFactory.deviceDbInfo, instance, silent, now)
-
-        private.singleOrNull()
-            ?.value
-            ?.forEach { it.notify() }
-
-        shared.forEach { (_, sharedNotifies) ->
-            check(sharedNotifies.isNotEmpty())
-
-            if (sharedNotifies.size == 1) {
-                sharedNotifies.single().notify()
-            } else {
-                val instances = sharedNotifies.map { it.instance }
-                val silent = sharedNotifies.all { it.silent }
-
-                instances.forEach { NotificationWrapper.instance.cancelNotification(it.notificationId) }
-
-                val project = instances.map { it.getProject() }
-                    .distinct()
-                    .single() as SharedProject
-
-                NotificationWrapper.instance.notifyProject(project, instances, silent, now)
+                        notificationWrapper.notifyProject(it.project, it.instances, it.silent, now) // todo group TIMESTAMP
+                    }
+                }
             }
-        }
     }
 
     private fun setIrrelevant(now: ExactTimeStamp.Local) {
@@ -356,33 +337,33 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
 
             val userCustomTimeRelevances = domainFactory.run {
                 friendsFactory.userMap
-                        .map { it.value.value } +
+                    .map { it.value.value } +
                         myUserFactory.user
             }
-                    .flatMap { it.customTimes.values }
-                    .associate { it.key to CustomTimeRelevance(it) }
+                .flatMap { it.customTimes.values }
+                .associate { it.key to CustomTimeRelevance(it) }
 
             domainFactory.projectsFactory
-                    .projects
-                    .values
-                    .forEach {
-                        val results = Irrelevant.setIrrelevant(
-                                userCustomTimeRelevances,
-                                it,
-                                exactTimeStamp,
-                                false,
-                        )
+                .projects
+                .values
+                .forEach {
+                    val results = Irrelevant.setIrrelevant(
+                        userCustomTimeRelevances,
+                        it,
+                        exactTimeStamp,
+                        false,
+                    )
 
-                        results.irrelevantExistingInstances
-                                .sortedBy { it.scheduleDateTime }
-                                .forEach { Log.e("asdf", "magic irrelevant instance: $it") }
+                    results.irrelevantExistingInstances
+                        .sortedBy { it.scheduleDateTime }
+                        .forEach { Log.e("asdf", "magic irrelevant instance: $it") }
 
-                        results.irrelevantSchedules
-                                .sortedBy { it.startExactTimeStamp }
-                                .forEach {
-                                    Log.e("asdf", "magic irrelevant schedule, schedule: $it, task: ${it.topLevelTask}")
-                                }
-                    }
+                    results.irrelevantSchedules
+                        .sortedBy { it.startExactTimeStamp }
+                        .forEach {
+                            Log.e("asdf", "magic irrelevant schedule, schedule: $it, task: ${it.topLevelTask}")
+                        }
+                }
 
             throw Exception("Irrelevant.setIrrelevant write prevented")
         }
@@ -390,18 +371,18 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
         val instances = domainFactory.getRootInstances(null, now.toOffset().plusOne(), now).toList()
 
         val irrelevantInstanceShownRecords = domainFactory.localFactory
-                .instanceShownRecords
-                .toMutableList()
-                .apply { removeAll(instances.map { it.getShown(domainFactory.localFactory) }) }
+            .instanceShownRecords
+            .toMutableList()
+            .apply { removeAll(instances.map { it.getShown(domainFactory.localFactory) }) }
 
         irrelevantInstanceShownRecords.forEach { it.delete() }
     }
 
     data class Params(
-            val sourceName: String = "other",
-            val silent: Boolean = true,
-            val tick: Boolean = false,
-            val clear: Boolean = false,
+        val sourceName: String = "other",
+        val silent: Boolean = true,
+        val tick: Boolean = false,
+        val clear: Boolean = false,
     ) {
 
         companion object {
@@ -414,9 +395,9 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
                 val sourceName = "merged: (" + paramsList.joinToString(", ") { it.sourceName } + ")"
 
                 return Params(
-                        sourceName,
-                        paramsList.all { it.silent },
-                        paramsList.any { it.tick },
+                    sourceName,
+                    paramsList.all { it.silent },
+                    paramsList.any { it.tick },
                 )
             }
         }

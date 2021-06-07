@@ -82,8 +82,6 @@ sealed class GroupType {
         }
     }
 
-    open val name: String get() = throw UnsupportedOperationException()
-
     abstract val allInstanceKeys: Set<InstanceKey>
 
     abstract val bridge: BridgeFactory.Bridge
@@ -138,8 +136,6 @@ sealed class GroupType {
 
         override val allInstanceKeys = instanceDatas.map { it.instanceKey }.toSet()
 
-        override val name get() = projectDetails.name
-
         override fun toContentDelegate(
             groupAdapter: GroupListFragment.GroupAdapter,
             indentation: Int,
@@ -178,8 +174,6 @@ sealed class GroupType {
     ) : GroupType(), TimeChild, SingleParent {
 
         override val allInstanceKeys = instanceDatas.map { it.instanceKey }.toSet()
-
-        override val name get() = projectDetails.name
 
         override fun toContentDelegate(
             groupAdapter: GroupListFragment.GroupAdapter,
@@ -319,10 +313,15 @@ sealed class GroupType {
 
         sealed interface Bridge : Comparable<Bridge>
 
+        sealed interface SingleParent : Bridge {
+
+            val name: String get() = throw UnsupportedOperationException()
+        }
+
         class TimeBridge(
             val timeStamp: TimeStamp,
             val groupTypes: List<GroupType>,
-        ) : Time.Bridge, Bridge {
+        ) : Time.Bridge, SingleParent {
 
             override fun toContentDelegate(
                 time: Time, // todo group eliminate this
@@ -356,7 +355,9 @@ sealed class GroupType {
             val timeStamp: TimeStamp,
             val projectDetails: DetailsNode.ProjectDetails,
             val instanceDatas: List<GroupListDataWrapper.InstanceData>,
-        ) : TimeProject.Bridge, Bridge {
+        ) : TimeProject.Bridge, SingleParent {
+
+            override val name get() = projectDetails.name
 
             override fun toContentDelegate(
                 timeProject: TimeProject,
@@ -399,7 +400,9 @@ sealed class GroupType {
             val projectDetails: DetailsNode.ProjectDetails,
             val instanceDatas: List<GroupListDataWrapper.InstanceData>,
             val nested: Boolean,
-        ) : Project.Bridge, Bridge {
+        ) : Project.Bridge, SingleParent {
+
+            override val name get() = projectDetails.name
 
             override fun toContentDelegate(
                 project: Project,

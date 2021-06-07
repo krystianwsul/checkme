@@ -286,6 +286,8 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
                 check(groupType is GroupType.SingleParent)
             }
 
+            val bridge = groupType.bridge as GroupType.TreeAdapterBridgeFactory.SingleParent
+
             override val allInstanceDatas get() = notDoneNodes.flatMap { it.contentDelegate.directInstanceDatas }
 
             override lateinit var treeNode: TreeNode<AbstractHolder>
@@ -339,7 +341,7 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
                     return myState + notDoneNodes.map { it.contentDelegate.states }.flatten()
                 }
 
-            override val name get() = groupType.name
+            override val name get() = bridge.name
 
             override fun onClick(holder: AbstractHolder) = groupListFragment.activity.let {
                 it.startActivity(ShowGroupActivity.getIntent(it, showGroupActivityParameters))

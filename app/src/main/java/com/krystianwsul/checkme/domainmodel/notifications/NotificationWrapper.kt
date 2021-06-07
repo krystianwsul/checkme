@@ -32,6 +32,7 @@ abstract class NotificationWrapper {
     abstract fun notifyProject(
         project: SharedProject,
         instances: List<Instance>,
+        timeStamp: TimeStamp,
         silent: Boolean,
         now: ExactTimeStamp.Local,
     )

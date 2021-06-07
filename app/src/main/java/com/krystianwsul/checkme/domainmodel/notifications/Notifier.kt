@@ -322,7 +322,7 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
                     is GroupTypeFactory.Notification.Project -> {
                         it.instances.forEach { NotificationWrapper.instance.cancelNotification(it.notificationId) }
 
-                        notificationWrapper.notifyProject(it.project, it.instances, it.silent, now) // todo group TIMESTAMP
+                        notificationWrapper.notifyProject(it.project, it.instances, it.timeStamp, it.silent, now)
                     }
                 }
             }

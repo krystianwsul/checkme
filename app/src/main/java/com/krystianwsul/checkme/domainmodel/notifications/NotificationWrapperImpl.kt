@@ -98,6 +98,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
     override fun notifyProject(
         project: SharedProject,
         instances: List<Instance>,
+        timeStamp: TimeStamp, // todo group TIMESTAMP
         silent: Boolean,
         now: ExactTimeStamp.Local,
     ) {

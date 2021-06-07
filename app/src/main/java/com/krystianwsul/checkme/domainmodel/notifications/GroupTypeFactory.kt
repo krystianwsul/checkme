@@ -72,7 +72,7 @@ object GroupTypeFactory : GroupType.Factory {
 
         val instanceKeys = instanceDescriptors.map { it.instance.instanceKey }.toSet()
 
-        override fun getNotifications() = listOf(Notification.Project(project, instanceDescriptors))
+        override fun getNotifications() = listOf(Notification.Project(project, instanceDescriptors, timeStamp))
     }
 
     class ProjectBridge(
@@ -83,7 +83,7 @@ object GroupTypeFactory : GroupType.Factory {
 
         override val instanceKeys = instanceDescriptors.map { it.instance.instanceKey }.toSet()
 
-        override fun getNotifications() = listOf(Notification.Project(project, instanceDescriptors))
+        override fun getNotifications() = listOf(Notification.Project(project, instanceDescriptors, timeStamp))
     }
 
     class SingleBridge(val instanceDescriptor: InstanceDescriptor) : GroupType.Single, TimeChild {
@@ -101,12 +101,14 @@ object GroupTypeFactory : GroupType.Factory {
         class Project(
             val project: SharedProject,
             val instances: List<com.krystianwsul.common.firebase.models.Instance>,
+            val timeStamp: TimeStamp,
             val silent: Boolean,
         ) : Notification() {
 
-            constructor(project: SharedProject, instanceDescriptors: List<InstanceDescriptor>) : this(
+            constructor(project: SharedProject, instanceDescriptors: List<InstanceDescriptor>, timeStamp: TimeStamp) : this(
                 project,
                 instanceDescriptors.map { it.instance },
+                timeStamp,
                 instanceDescriptors.all { it.silent },
             )
         }

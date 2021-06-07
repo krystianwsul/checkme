@@ -61,7 +61,10 @@ object GroupTypeFactory : GroupType.Factory {
             ?.let(::ProjectDescriptor)
     }
 
-    data class ProjectDescriptor(val projectDetails: DetailsNode.ProjectDetails) : GroupType.ProjectDescriptor
+    class ProjectDescriptor(val projectDetails: DetailsNode.ProjectDetails) : GroupType.ProjectDescriptor {
+
+        override val projectKey get() = projectDetails.projectKey
+    }
 
     sealed interface Bridge : Comparable<Bridge> {
 

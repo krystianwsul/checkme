@@ -240,4 +240,17 @@ sealed class GroupType : Comparable<GroupType> {
             }
         }
     }
+
+    interface BridgeFactory {
+
+    }
+
+    class TreeAdapterBridgeFactory : BridgeFactory {
+
+        fun getGroupTypeTree(
+            instanceDatas: List<GroupListDataWrapper.InstanceData>,
+            groupingMode: NodeCollection.GroupingMode,
+        ): List<GroupType> = GroupType.getGroupTypeTree(instanceDatas, groupingMode)
+
+    }
 }

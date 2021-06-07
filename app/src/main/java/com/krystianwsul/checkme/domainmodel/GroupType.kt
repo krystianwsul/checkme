@@ -1,5 +1,6 @@
-package com.krystianwsul.checkme.gui.instances.tree
+package com.krystianwsul.checkme.domainmodel
 
+import com.krystianwsul.checkme.gui.instances.tree.NodeCollection
 import com.krystianwsul.common.time.TimeStamp
 
 interface GroupType {

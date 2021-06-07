@@ -310,22 +310,35 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
 
         val notifies = notificationDatas.filterIsInstance<NotificationData.Notify>()
 
-        GroupTypeFactory.getGroupTypeTree(
+        val notifications = GroupTypeFactory.getGroupTypeTree(
             notifies.map { GroupTypeFactory.InstanceDescriptor(it.instance, it.silent) },
             GroupType.GroupingMode.TIME,
-        )
-            .flatMap { it.getNotifications() }
-            .forEach {
-                when (it) {
-                    is GroupTypeFactory.Notification.Instance ->
-                        notificationWrapper.notifyInstance(domainFactory.deviceDbInfo, it.instance, it.silent, now)
-                    is GroupTypeFactory.Notification.Project -> {
-                        it.instances.forEach { NotificationWrapper.instance.cancelNotification(it.notificationId) }
+        ).flatMap { it.getNotifications() }
 
-                        notificationWrapper.notifyProject(it.project, it.instances, it.timeStamp, it.silent, now)
-                    }
+        notifications.forEach {
+            when (it) {
+                is GroupTypeFactory.Notification.Instance ->
+                    notificationWrapper.notifyInstance(domainFactory.deviceDbInfo, it.instance, it.silent, now)
+                is GroupTypeFactory.Notification.Project -> {
+                    it.instances.forEach { NotificationWrapper.instance.cancelNotification(it.notificationId) }
+
+                    notificationWrapper.notifyProject(it.project, it.instances, it.timeStamp, it.silent, now)
                 }
             }
+        }
+
+        val currentKeys = notifications.filterIsInstance<GroupTypeFactory.Notification.Project>()
+            .map { ProjectNotificationKey(it.project.projectKey, it.timeStamp) }
+
+        val oldKeys = domainFactory.notificationStorage.getKeys()
+
+        (oldKeys - currentKeys).forEach {
+            val notificationId = NotificationWrapperImpl.getProjectNotificationId(it.projectKey, it.timeStamp)
+
+            NotificationWrapper.instance.cancelNotification(notificationId)
+        }
+
+        domainFactory.notificationStorage.writeKeys(currentKeys)
     }
 
     private fun setIrrelevant(now: ExactTimeStamp.Local) {

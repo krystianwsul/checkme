@@ -93,7 +93,7 @@ sealed class GroupType : Comparable<GroupType> {
     ): NotDoneNode.ContentDelegate
 
     class Time(
-        private val bridge: Bridge,
+        val bridge: Bridge,
         val timeStamp: TimeStamp,
         val groupTypes: List<GroupType>,
     ) : GroupType(), SingleParent {
@@ -137,12 +137,13 @@ sealed class GroupType : Comparable<GroupType> {
      * Single
      */
     class TimeProject(
+        val bridge: Bridge,
         val timeStamp: TimeStamp,
         val projectDetails: DetailsNode.ProjectDetails,
         _instanceDatas: List<GroupListDataWrapper.InstanceData>,
     ) : GroupType(), SingleParent {
 
-        private val instanceDatas = _instanceDatas.map { it.copy(projectInfo = null) }
+        val instanceDatas = _instanceDatas.map { it.copy(projectInfo = null) }
 
         override val allInstanceKeys = instanceDatas.map { it.instanceKey }.toSet()
 
@@ -172,6 +173,16 @@ sealed class GroupType : Comparable<GroupType> {
                 is Project -> throw UnsupportedOperationException()
                 is Single -> timeStamp.compareTo(other.instanceData.instanceTimeStamp)
             }
+        }
+
+        interface Bridge {
+
+            fun toContentDelegate(
+                timeProject: TimeProject,
+                groupAdapter: GroupListFragment.GroupAdapter,
+                indentation: Int,
+                nodeCollection: NodeCollection,
+            ): NotDoneNode.ContentDelegate.Group
         }
     }
 
@@ -298,6 +309,7 @@ sealed class GroupType : Comparable<GroupType> {
             instanceDescriptors: List<BridgeFactory.InstanceDescriptor>
         ): TimeProject { // todo group use generics?
             return TimeProject(
+                TimeProjectBridge(),
                 timeStamp,
                 (projectDescriptor as ProjectDescriptor).projectDetails,
                 instanceDescriptors.map { (it as InstanceDescriptor).instanceData },
@@ -351,6 +363,35 @@ sealed class GroupType : Comparable<GroupType> {
                 NotDoneNode.ContentDelegate.Group.GroupRowsDelegate.Time(groupAdapter, time.timeStamp),
                 true,
                 ShowGroupActivity.Parameters.Time(time.timeStamp),
+            )
+        }
+
+        class TimeProjectBridge : TimeProject.Bridge {
+
+            override fun toContentDelegate(
+                timeProject: TimeProject,
+                groupAdapter: GroupListFragment.GroupAdapter,
+                indentation: Int,
+                nodeCollection: NodeCollection,
+            ) = NotDoneNode.ContentDelegate.Group(
+                groupAdapter,
+                timeProject,
+                timeProject.instanceDatas,
+                indentation,
+                nodeCollection,
+                timeProject.instanceDatas.map(::Single),
+                NotDoneNode.ContentDelegate.Group.Id.Project(
+                    timeProject.timeStamp,
+                    timeProject.allInstanceKeys,
+                    timeProject.projectDetails.projectKey
+                ),
+                NotDoneNode.ContentDelegate.Group.GroupRowsDelegate.Project(
+                    groupAdapter,
+                    timeProject.timeStamp,
+                    timeProject.projectDetails.name
+                ),
+                true,
+                ShowGroupActivity.Parameters.Project(timeProject.timeStamp, timeProject.projectDetails.projectKey),
             )
         }
     }

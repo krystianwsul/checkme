@@ -1,18 +1,13 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
-import com.krystianwsul.checkme.gui.instances.ShowGroupActivity
-import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
-import com.krystianwsul.checkme.gui.instances.list.GroupListFragment
-import com.krystianwsul.checkme.gui.tree.DetailsNode
 import com.krystianwsul.common.time.TimeStamp
-import com.krystianwsul.common.utils.InstanceKey
 
 interface GroupType {
 
     companion object {
 
         fun getGroupTypeTree(
-            bridgeFactory: BridgeFactory,
+            factory: Factory,
             instanceDatas: List<InstanceDescriptor>,
             groupingMode: NodeCollection.GroupingMode,
         ): List<GroupType> {
@@ -32,14 +27,14 @@ interface GroupType {
                                 .singleOrNull()
 
                             projectDescriptor?.let {
-                                bridgeFactory.createTimeProject(timeStamp, projectDescriptor, instanceDescriptors)
-                            } ?: bridgeFactory.createTime(
+                                factory.createTimeProject(timeStamp, projectDescriptor, instanceDescriptors)
+                            } ?: factory.createTime(
                                 timeStamp,
-                                groupByProject(bridgeFactory, timeStamp, instanceDescriptors, true)
+                                groupByProject(factory, timeStamp, instanceDescriptors, true)
                             )
                         } else {
                             // if there's just one, there's our node
-                            bridgeFactory.createSingle(instanceDescriptors.single())
+                            factory.createSingle(instanceDescriptors.single())
                         }
                     }
                 }
@@ -48,14 +43,14 @@ interface GroupType {
                         .distinct()
                         .single()
 
-                    groupByProject(bridgeFactory, timeStamp, instanceDatas, false)
+                    groupByProject(factory, timeStamp, instanceDatas, false)
                 }
-                NodeCollection.GroupingMode.NONE -> instanceDatas.map(bridgeFactory::createSingle)
+                NodeCollection.GroupingMode.NONE -> instanceDatas.map(factory::createSingle)
             }
         }
 
         private fun groupByProject(
-            bridgeFactory: BridgeFactory,
+            factory: Factory,
             timeStamp: TimeStamp,
             instanceDescriptor: List<InstanceDescriptor>,
             nested: Boolean,
@@ -70,13 +65,13 @@ interface GroupType {
                     check(instanceDescriptors.isNotEmpty())
 
                     if (instanceDescriptors.size > 1) {
-                        bridgeFactory.createProject(timeStamp, projectDescriptor!!, instanceDescriptors, nested)
+                        factory.createProject(timeStamp, projectDescriptor!!, instanceDescriptors, nested)
                     } else {
-                        bridgeFactory.createSingle(instanceDescriptors.single())
+                        factory.createSingle(instanceDescriptors.single())
                     }
                 }
 
-            val groupTypesForPrivate = projectGroups[null]?.map(bridgeFactory::createSingle).orEmpty()
+            val groupTypesForPrivate = projectGroups[null]?.map(factory::createSingle).orEmpty()
 
             return listOf(groupTypesForShared, groupTypesForPrivate).flatten()
         }
@@ -115,7 +110,7 @@ interface GroupType {
 
     interface Single : TimeChild
 
-    interface BridgeFactory {
+    interface Factory {
 
         fun createTime(timeStamp: TimeStamp, groupTypes: List<TimeChild>): Time
 
@@ -143,206 +138,4 @@ interface GroupType {
     }
 
     interface ProjectDescriptor
-
-    object TreeAdapterBridgeFactory : BridgeFactory {
-
-        fun getGroupTypeTree(
-            instanceDatas: List<GroupListDataWrapper.InstanceData>,
-            groupingMode: NodeCollection.GroupingMode,
-        ) = getGroupTypeTree(this, instanceDatas.map(::InstanceDescriptor), groupingMode).map { it as Bridge }
-
-        override fun createTime(timeStamp: TimeStamp, groupTypes: List<GroupType.TimeChild>) =
-            TimeBridge(timeStamp, groupTypes.map { it as TimeChild })
-
-        override fun createTimeProject(
-            timeStamp: TimeStamp,
-            projectDescriptor: GroupType.ProjectDescriptor,
-            instanceDescriptors: List<GroupType.InstanceDescriptor>
-        ): TimeProject {
-            val projectDetails = (projectDescriptor as ProjectDescriptor).projectDetails
-            val instanceDatas = instanceDescriptors.map { (it as InstanceDescriptor).instanceData.copy(projectInfo = null) }
-
-            return TimeProjectBridge(timeStamp, projectDetails, instanceDatas)
-        }
-
-        override fun createProject(
-            timeStamp: TimeStamp,
-            projectDescriptor: GroupType.ProjectDescriptor,
-            instanceDescriptors: List<GroupType.InstanceDescriptor>,
-            nested: Boolean,
-        ): Project {
-            val projectDetails = (projectDescriptor as ProjectDescriptor).projectDetails
-            val instanceDatas = instanceDescriptors.map { (it as InstanceDescriptor).instanceData.copy(projectInfo = null) }
-
-            return ProjectBridge(timeStamp, projectDetails, instanceDatas, nested)
-        }
-
-        override fun createSingle(instanceDescriptor: GroupType.InstanceDescriptor): Single {
-            val instanceData = (instanceDescriptor as InstanceDescriptor).instanceData
-
-            return SingleBridge(instanceData)
-        }
-
-        class InstanceDescriptor(val instanceData: GroupListDataWrapper.InstanceData) : GroupType.InstanceDescriptor {
-
-            override val timeStamp get() = instanceData.instanceTimeStamp
-
-            override val projectDescriptor = instanceData.projectInfo
-                ?.projectDetails
-                ?.let(::ProjectDescriptor)
-        }
-
-        data class ProjectDescriptor(val projectDetails: DetailsNode.ProjectDetails) : GroupType.ProjectDescriptor
-
-        sealed interface Bridge : Comparable<Bridge> {
-
-            fun toContentDelegate(
-                groupAdapter: GroupListFragment.GroupAdapter,
-                indentation: Int,
-                nodeCollection: NodeCollection,
-            ): NotDoneNode.ContentDelegate
-        }
-
-        sealed interface SingleParent : Bridge, GroupType.SingleParent {
-
-            val name: String get() = throw UnsupportedOperationException()
-        }
-
-        sealed interface TimeChild : Bridge, GroupType.TimeChild {
-
-            val instanceKeys: Set<InstanceKey>
-        }
-
-        class TimeBridge(val timeStamp: TimeStamp, private val timeChildren: List<TimeChild>) : Time, SingleParent {
-
-            override fun toContentDelegate(
-                groupAdapter: GroupListFragment.GroupAdapter,
-                indentation: Int,
-                nodeCollection: NodeCollection,
-            ) = NotDoneNode.ContentDelegate.Group(
-                groupAdapter,
-                this,
-                timeChildren.filterIsInstance<SingleBridge>().map { it.instanceData },
-                indentation,
-                nodeCollection,
-                timeChildren,
-                NotDoneNode.ContentDelegate.Group.Id.Time(timeStamp, timeChildren.flatMap { it.instanceKeys }.toSet()),
-                NotDoneNode.ContentDelegate.Group.GroupRowsDelegate.Time(groupAdapter, timeStamp),
-                true,
-                ShowGroupActivity.Parameters.Time(timeStamp),
-            )
-
-            override fun compareTo(other: Bridge): Int {
-                return when (other) {
-                    is TimeBridge -> timeStamp.compareTo(timeStamp)
-                    is TimeProjectBridge -> timeStamp.compareTo(timeStamp)
-                    is ProjectBridge -> throw UnsupportedOperationException()
-                    is SingleBridge -> timeStamp.compareTo(other.instanceData.instanceTimeStamp)
-                }
-            }
-        }
-
-        class TimeProjectBridge(
-            val timeStamp: TimeStamp,
-            val projectDetails: DetailsNode.ProjectDetails,
-            val instanceDatas: List<GroupListDataWrapper.InstanceData>,
-        ) : TimeProject, SingleParent {
-
-            override val name get() = projectDetails.name
-
-            val instanceKeys = instanceDatas.map { it.instanceKey }.toSet()
-
-            override fun toContentDelegate(
-                groupAdapter: GroupListFragment.GroupAdapter,
-                indentation: Int,
-                nodeCollection: NodeCollection,
-            ) = NotDoneNode.ContentDelegate.Group(
-                groupAdapter,
-                this,
-                instanceDatas,
-                indentation,
-                nodeCollection,
-                instanceDatas.map(::SingleBridge),
-                NotDoneNode.ContentDelegate.Group.Id.Project(timeStamp, instanceKeys, projectDetails.projectKey),
-                NotDoneNode.ContentDelegate.Group.GroupRowsDelegate.Project(
-                    groupAdapter,
-                    timeStamp,
-                    projectDetails.name,
-                ),
-                true,
-                ShowGroupActivity.Parameters.Project(timeStamp, projectDetails.projectKey),
-            )
-
-            override fun compareTo(other: Bridge): Int {
-                return when (other) {
-                    is TimeBridge -> timeStamp.compareTo(other.timeStamp)
-                    is TimeProjectBridge -> timeStamp.compareTo(other.timeStamp)
-                    is ProjectBridge -> throw UnsupportedOperationException()
-                    is SingleBridge -> timeStamp.compareTo(other.instanceData.instanceTimeStamp)
-                }
-            }
-        }
-
-        class ProjectBridge(
-            val timeStamp: TimeStamp,
-            val projectDetails: DetailsNode.ProjectDetails,
-            val instanceDatas: List<GroupListDataWrapper.InstanceData>,
-            private val nested: Boolean,
-        ) : Project, SingleParent, TimeChild {
-
-            override val name get() = projectDetails.name
-
-            override val instanceKeys = instanceDatas.map { it.instanceKey }.toSet()
-
-            override fun toContentDelegate(
-                groupAdapter: GroupListFragment.GroupAdapter,
-                indentation: Int,
-                nodeCollection: NodeCollection,
-            ) = NotDoneNode.ContentDelegate.Group(
-                groupAdapter,
-                this,
-                instanceDatas,
-                indentation + (if (nested) 1 else 0),
-                nodeCollection,
-                instanceDatas.map(::SingleBridge),
-                NotDoneNode.ContentDelegate.Group.Id.Project(
-                    timeStamp,
-                    instanceKeys,
-                    projectDetails.projectKey,
-                ),
-                NotDoneNode.ContentDelegate.Group.GroupRowsDelegate.Project(groupAdapter, null, projectDetails.name),
-                !nested,
-                ShowGroupActivity.Parameters.Project(timeStamp, projectDetails.projectKey),
-            )
-
-            override fun compareTo(other: Bridge): Int {
-                return when (other) {
-                    is TimeBridge -> throw UnsupportedOperationException()
-                    is TimeProjectBridge -> throw UnsupportedOperationException()
-                    is ProjectBridge -> projectDetails.projectKey.compareTo(other.projectDetails.projectKey)
-                    is SingleBridge -> -1
-                }
-            }
-        }
-
-        class SingleBridge(val instanceData: GroupListDataWrapper.InstanceData) : Single, TimeChild {
-
-            override val instanceKeys = setOf(instanceData.instanceKey)
-
-            override fun toContentDelegate(
-                groupAdapter: GroupListFragment.GroupAdapter,
-                indentation: Int,
-                nodeCollection: NodeCollection,
-            ) = NotDoneNode.ContentDelegate.Instance(groupAdapter, this, indentation)
-
-            override fun compareTo(other: Bridge): Int {
-                return when (other) {
-                    is TimeBridge -> instanceData.instanceTimeStamp.compareTo(other.timeStamp)
-                    is TimeProjectBridge -> instanceData.instanceTimeStamp.compareTo(other.timeStamp)
-                    is ProjectBridge -> 1
-                    is SingleBridge -> instanceData.compareTo(other.instanceData)
-                }
-            }
-        }
-    }
 }

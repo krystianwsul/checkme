@@ -93,7 +93,7 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
 
     sealed class ContentDelegate : ThumbnailModelNode, Sortable, CheckableModelNode, Matchable {
 
-        abstract val bridge: GroupType.TreeAdapterBridgeFactory.Bridge
+        abstract val bridge: GroupTypeFactory.Bridge
 
         abstract val directInstanceDatas: List<GroupListDataWrapper.InstanceData>
         abstract val allInstanceDatas: List<GroupListDataWrapper.InstanceData>
@@ -124,7 +124,7 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
 
         class Instance(
             override val groupAdapter: GroupListFragment.GroupAdapter,
-            override val bridge: GroupType.TreeAdapterBridgeFactory.SingleBridge,
+            override val bridge: GroupTypeFactory.SingleBridge,
             override val indentation: Int,
             showDetails: Boolean = true,
         ) : ContentDelegate() {
@@ -136,7 +136,7 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
                 showDetails: Boolean = true,
             ) : this(
                 groupAdapter,
-                GroupType.TreeAdapterBridgeFactory.SingleBridge(instanceData),
+                GroupTypeFactory.SingleBridge(instanceData),
                 indentation,
                 showDetails,
             )
@@ -271,11 +271,11 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
 
         class Group(
             override val groupAdapter: GroupListFragment.GroupAdapter,
-            override val bridge: GroupType.TreeAdapterBridgeFactory.SingleParent,
+            override val bridge: GroupTypeFactory.SingleParent,
             override val directInstanceDatas: List<GroupListDataWrapper.InstanceData>,
             override val indentation: Int,
             private val nodeCollection: NodeCollection,
-            private val timeChildren: List<GroupType.TreeAdapterBridgeFactory.TimeChild>,
+            private val timeChildren: List<GroupTypeFactory.TimeChild>,
             override val id: Id,
             override val rowsDelegate: GroupRowsDelegate,
             private val indentCheckBox: Boolean,

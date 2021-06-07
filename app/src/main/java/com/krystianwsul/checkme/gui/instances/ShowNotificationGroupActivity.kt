@@ -112,10 +112,6 @@ class ShowNotificationGroupActivity : AbstractActivity(), GroupListListener {
 
                 val immediate = it.immediate
 
-                binding.showNotificationGroupToolbarCollapseInclude
-                    .collapseAppBarLayout
-                    .setText(it.title, null, binding.groupListFragment.emptyTextLayout, immediate)
-
                 binding.groupListFragment.setInstanceKeys(
                     showNotificationGroupViewModel.dataId,
                     immediate,

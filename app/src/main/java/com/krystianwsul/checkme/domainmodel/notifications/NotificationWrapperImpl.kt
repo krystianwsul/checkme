@@ -242,7 +242,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
             largeIcon = largeIcon,
             notificationHash = notificationHash,
             tag = null,
-            highPriority = instanceData.highPriority
+            highPriority = instanceData.highPriority,
         )
     }
 

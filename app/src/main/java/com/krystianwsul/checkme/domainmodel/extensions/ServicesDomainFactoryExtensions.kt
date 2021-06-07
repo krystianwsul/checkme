@@ -42,7 +42,7 @@ private fun DomainFactory.addInstanceHour(instance: Instance, dateTime: DateTime
     }
 }
 
-fun DomainUpdater.setProjectAddHourService(projectKey: ProjectKey.Shared): Completable =
+fun DomainUpdater.setProjectAddHourService(projectKey: ProjectKey.Shared, timeStamp: TimeStamp): Completable =
     CompletableDomainUpdate.create("setProjectAddHourService") { now ->
         val project = projectsFactory.getProjectForce(projectKey)
 
@@ -50,7 +50,9 @@ fun DomainUpdater.setProjectAddHourService(projectKey: ProjectKey.Shared): Compl
 
         val dateTime = getDateTimeHour(now)
 
-        Notifier.getNotificationInstances(this, now, projectKey).forEach { addInstanceHour(it, dateTime, now) }
+        Notifier.getNotificationInstances(this, now, projectKey, timeStamp).forEach {
+            addInstanceHour(it, dateTime, now)
+        }
 
         DomainUpdater.Params(
             Notifier.Params("setProjectAddHourService ${project.name}"),
@@ -81,10 +83,10 @@ private fun DomainFactory.setNotificationDone(instance: Instance, now: ExactTime
     }
 }
 
-fun DomainUpdater.setProjectNotificationDoneService(projectKey: ProjectKey.Shared): Completable =
+fun DomainUpdater.setProjectNotificationDoneService(projectKey: ProjectKey.Shared, timeStamp: TimeStamp): Completable =
     CompletableDomainUpdate.create("setInstanceNotificationDone") { now ->
         val project = projectsFactory.getProjectForce(projectKey)
-        val instances = Notifier.getNotificationInstances(this, now, projectKey)
+        val instances = Notifier.getNotificationInstances(this, now, projectKey, timeStamp)
 
         instances.forEach { setNotificationDone(it, now) }
 
@@ -106,7 +108,7 @@ fun DomainUpdater.setInstancesNotifiedService(): Completable =
 
 fun DomainUpdater.setInstancesNotifiedService(projectKey: ProjectKey.Shared, timeStamp: TimeStamp): Completable =
     CompletableDomainUpdate.create("setInstancesNotified") { now ->
-        Notifier.getNotificationInstances(this, now, projectKey) // todo group
+        Notifier.getNotificationInstances(this, now, projectKey, timeStamp)
             .also { check(it.isNotEmpty()) }
             .forEach(::setInstanceNotified)
 

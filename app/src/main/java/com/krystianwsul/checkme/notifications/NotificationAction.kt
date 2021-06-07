@@ -70,7 +70,7 @@ sealed class NotificationAction : Parcelable {
 
             NotificationWrapper.instance.cleanGroup(notificationId)
 
-            return AndroidDomainUpdater.setProjectNotificationDoneService(projectKey) // todo group
+            return AndroidDomainUpdater.setProjectNotificationDoneService(projectKey, timeStamp)
         }
     }
 
@@ -86,7 +86,7 @@ sealed class NotificationAction : Parcelable {
 
             NotificationWrapper.instance.cleanGroup(notificationId)
 
-            return AndroidDomainUpdater.setProjectAddHourService(projectKey) // todo group TIMESTAMP
+            return AndroidDomainUpdater.setProjectAddHourService(projectKey, timeStamp)
         }
     }
 

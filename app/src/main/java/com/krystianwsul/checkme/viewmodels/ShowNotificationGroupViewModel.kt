@@ -15,8 +15,7 @@ class ShowNotificationGroupViewModel : DomainViewModel<ShowNotificationGroupView
 
     override val domainListener = object : DomainListener<Data>() {
 
-        override fun getData(domainFactory: DomainFactory) =
-            domainFactory.getShowNotificationGroupData(projectKey, cachedInstanceKeys)
+        override fun getData(domainFactory: DomainFactory) = domainFactory.getShowNotificationGroupData(cachedInstanceKeys)
     }
 
     init {
@@ -34,5 +33,5 @@ class ShowNotificationGroupViewModel : DomainViewModel<ShowNotificationGroupView
         internalStart()
     }
 
-    data class Data(val title: String?, val groupListDataWrapper: GroupListDataWrapper) : DomainData()
+    data class Data(val groupListDataWrapper: GroupListDataWrapper) : DomainData()
 }

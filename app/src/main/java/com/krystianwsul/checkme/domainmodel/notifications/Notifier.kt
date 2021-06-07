@@ -12,6 +12,7 @@ import com.krystianwsul.common.relevance.Irrelevant
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.DateTimeSoy
 import com.krystianwsul.common.time.ExactTimeStamp
+import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.singleOrEmpty
@@ -29,23 +30,34 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
         // To prevent spam if there's a huge backlog
         private const val MAX_NOTIFICATIONS_Q = 10
 
-        fun getNotificationInstances(
-            domainFactory: DomainFactory,
-            now: ExactTimeStamp.Local,
-            projectKey: ProjectKey.Shared? = null,
-        ): List<Instance> {
-            return domainFactory.getRootInstances(
+        private fun Sequence<Instance>.filterNotifications(domainFactory: DomainFactory, now: ExactTimeStamp.Local) =
+            filter {
+                it.done == null &&
+                        !it.getNotified(domainFactory.localFactory) &&
+                        it.isAssignedToMe(now, domainFactory.myUserFactory.user)
+            }.toList()
+
+        fun getNotificationInstances(domainFactory: DomainFactory, now: ExactTimeStamp.Local) =
+            domainFactory.getRootInstances(
                 null,
                 now.toOffset().plusOne(),
                 now,
+            ).filterNotifications(domainFactory, now)
+
+        fun getNotificationInstances(
+            domainFactory: DomainFactory,
+            now: ExactTimeStamp.Local,
+            projectKey: ProjectKey.Shared,
+            timeStamp: TimeStamp,
+        ): List<Instance> {
+            val offset = timeStamp.toLocalExactTimeStamp().toOffset()
+
+            return domainFactory.getRootInstances(
+                offset,
+                offset.plusOne(),
+                now,
                 projectKey = projectKey,
-            )
-                .filter {
-                    it.done == null &&
-                            !it.getNotified(domainFactory.localFactory) &&
-                            it.isAssignedToMe(now, domainFactory.myUserFactory.user)
-                }
-                .toList()
+            ).filterNotifications(domainFactory, now)
         }
     }
 

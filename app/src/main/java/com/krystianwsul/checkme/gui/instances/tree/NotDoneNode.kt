@@ -134,7 +134,12 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
                 instanceData: GroupListDataWrapper.InstanceData,
                 indentation: Int,
                 showDetails: Boolean = true,
-            ) : this(groupAdapter, GroupType.Single(instanceData), indentation, showDetails)
+            ) : this(
+                groupAdapter,
+                GroupType.Single(GroupType.TreeAdapterBridgeFactory.SingleBridge(), instanceData),
+                indentation,
+                showDetails,
+            )
 
             val instanceData get() = groupType.instanceData
 

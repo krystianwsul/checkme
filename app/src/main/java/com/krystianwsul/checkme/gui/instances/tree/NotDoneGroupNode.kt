@@ -35,7 +35,7 @@ class NotDoneGroupNode(
 
     override fun compareTo(other: ModelNode<AbstractHolder>) = when (other) {
         is ImageNode, is DetailsNode -> 1
-        is NotDoneNode -> contentDelegate.groupType.compareTo(other.contentDelegate.groupType)
+        is NotDoneNode -> (contentDelegate.groupType.bridge as GroupType.TreeAdapterBridgeFactory.Bridge).compareTo(other.contentDelegate.groupType.bridge as GroupType.TreeAdapterBridgeFactory.Bridge)
         is UnscheduledNode -> if (nodeCollection.unscheduledFirst) 1 else -1
         is DividerNode -> -1
         else -> throw IllegalArgumentException()

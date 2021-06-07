@@ -136,7 +136,7 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
                 showDetails: Boolean = true,
             ) : this(
                 groupAdapter,
-                GroupType.Single(GroupType.TreeAdapterBridgeFactory.SingleBridge(), instanceData),
+                GroupType.Single(GroupType.TreeAdapterBridgeFactory.SingleBridge(instanceData), instanceData),
                 indentation,
                 showDetails,
             )

@@ -17,8 +17,10 @@ class NotDoneInstanceNode(
 
     private data class Id(val innerId: Any)
 
+    private fun GroupType.toBridge() = bridge as GroupType.TreeAdapterBridgeFactory.Bridge
+
     override fun compareTo(other: ModelNode<AbstractHolder>) =
-        contentDelegate.groupType.compareTo((other as NotDoneNode).contentDelegate.groupType)
+        contentDelegate.groupType.toBridge().compareTo((other as NotDoneNode).contentDelegate.groupType.toBridge())
 
     override fun tryStartDrag(viewHolder: RecyclerView.ViewHolder): Boolean {
         val groupListFragment = groupAdapter.groupListFragment

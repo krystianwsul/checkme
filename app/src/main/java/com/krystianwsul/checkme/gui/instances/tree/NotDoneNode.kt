@@ -275,7 +275,7 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
             override val directInstanceDatas: List<GroupListDataWrapper.InstanceData>,
             override val indentation: Int,
             private val nodeCollection: NodeCollection,
-            private val childGroupTypes: List<GroupType>,
+            private val timeChildren: List<GroupType.TreeAdapterBridgeFactory.TimeChild>,
             override val id: Id,
             override val rowsDelegate: GroupRowsDelegate,
             private val indentCheckBox: Boolean,
@@ -301,17 +301,18 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
                     state.expansionState,
                 )
 
-                val nodePairs = childGroupTypes.map {
-                    (it.bridge as GroupType.TreeAdapterBridgeFactory.Bridge).toContentDelegate(
-                        groupAdapter,
-                        indentation,
-                        nodeCollection
-                    )
-                }.map {
-                    val notDoneNode = if (it is Instance) {
-                        NotDoneInstanceNode(it.indentation, it.instanceData, modelNode, nodeCollection.groupAdapter)
+                val nodePairs = timeChildren.map {
+                    val contentDelegate = it.toContentDelegate(groupAdapter, indentation, nodeCollection)
+
+                    val notDoneNode = if (contentDelegate is Instance) {
+                        NotDoneInstanceNode(
+                            contentDelegate.indentation,
+                            contentDelegate.instanceData,
+                            modelNode,
+                            nodeCollection.groupAdapter,
+                        )
                     } else {
-                        NotDoneGroupNode(it.indentation, nodeCollection, it)
+                        NotDoneGroupNode(contentDelegate.indentation, nodeCollection, contentDelegate)
                     }
 
                     val childTreeNode = notDoneNode.initialize(contentDelegateStates, treeNode)

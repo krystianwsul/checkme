@@ -279,10 +279,10 @@ sealed class GroupType {
             ) = NotDoneNode.ContentDelegate.Group(
                 groupAdapter,
                 this,
-                groupTypes.filterIsInstance<Single>().map { it.instanceData },
+                timeChildren.filterIsInstance<SingleBridge>().map { it.instanceData },
                 indentation,
                 nodeCollection,
-                groupTypes,
+                timeChildren,
                 NotDoneNode.ContentDelegate.Group.Id.Time(timeStamp, timeChildren.flatMap { it.instanceKeys }.toSet()),
                 NotDoneNode.ContentDelegate.Group.GroupRowsDelegate.Time(groupAdapter, timeStamp),
                 true,
@@ -319,7 +319,7 @@ sealed class GroupType {
                 instanceDatas,
                 indentation,
                 nodeCollection,
-                instanceDatas.map { Single(SingleBridge(it), it) },
+                instanceDatas.map(::SingleBridge),
                 NotDoneNode.ContentDelegate.Group.Id.Project(timeStamp, instanceKeys, projectDetails.projectKey),
                 NotDoneNode.ContentDelegate.Group.GroupRowsDelegate.Project(
                     groupAdapter,
@@ -361,7 +361,7 @@ sealed class GroupType {
                 instanceDatas,
                 indentation + (if (nested) 1 else 0),
                 nodeCollection,
-                instanceDatas.map { Single(SingleBridge(it), it) },
+                instanceDatas.map(::SingleBridge),
                 NotDoneNode.ContentDelegate.Group.Id.Project(
                     timeStamp,
                     instanceKeys,

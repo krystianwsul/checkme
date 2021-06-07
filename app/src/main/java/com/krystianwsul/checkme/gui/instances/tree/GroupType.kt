@@ -199,13 +199,14 @@ sealed class GroupType : Comparable<GroupType> {
      * Single
      */
     class Project(
+        val bridge: Bridge,
         val timeStamp: TimeStamp,
         val projectDetails: DetailsNode.ProjectDetails,
         _instanceDatas: List<GroupListDataWrapper.InstanceData>,
-        private val nested: Boolean,
+        val nested: Boolean,
     ) : GroupType(), TimeChild, SingleParent {
 
-        private val instanceDatas = _instanceDatas.map { it.copy(projectInfo = null) }
+        val instanceDatas = _instanceDatas.map { it.copy(projectInfo = null) }
 
         override val allInstanceKeys = instanceDatas.map { it.instanceKey }.toSet()
 
@@ -235,6 +236,16 @@ sealed class GroupType : Comparable<GroupType> {
                 is Project -> projectDetails.projectKey.compareTo(other.projectDetails.projectKey)
                 is Single -> -1
             }
+        }
+
+        interface Bridge {
+
+            fun toContentDelegate(
+                project: Project,
+                groupAdapter: GroupListFragment.GroupAdapter,
+                indentation: Int,
+                nodeCollection: NodeCollection,
+            ): NotDoneNode.ContentDelegate.Group
         }
     }
 
@@ -323,6 +334,7 @@ sealed class GroupType : Comparable<GroupType> {
             nested: Boolean
         ): Project {
             return Project(
+                ProjectBridge(),
                 timeStamp,
                 (projectDescriptor as ProjectDescriptor).projectDetails,
                 instanceDescriptors.map { (it as InstanceDescriptor).instanceData },
@@ -392,6 +404,31 @@ sealed class GroupType : Comparable<GroupType> {
                 ),
                 true,
                 ShowGroupActivity.Parameters.Project(timeProject.timeStamp, timeProject.projectDetails.projectKey),
+            )
+        }
+
+        class ProjectBridge : Project.Bridge {
+
+            override fun toContentDelegate(
+                project: Project,
+                groupAdapter: GroupListFragment.GroupAdapter,
+                indentation: Int,
+                nodeCollection: NodeCollection,
+            ) = NotDoneNode.ContentDelegate.Group(
+                groupAdapter,
+                project,
+                project.instanceDatas,
+                indentation + (if (project.nested) 1 else 0),
+                nodeCollection,
+                project.instanceDatas.map(::Single),
+                NotDoneNode.ContentDelegate.Group.Id.Project(
+                    project.timeStamp,
+                    project.allInstanceKeys,
+                    project.projectDetails.projectKey
+                ),
+                NotDoneNode.ContentDelegate.Group.GroupRowsDelegate.Project(groupAdapter, null, project.projectDetails.name),
+                !project.nested,
+                ShowGroupActivity.Parameters.Project(project.timeStamp, project.projectDetails.projectKey),
             )
         }
     }

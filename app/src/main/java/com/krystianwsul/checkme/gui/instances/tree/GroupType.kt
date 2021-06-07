@@ -7,7 +7,7 @@ import com.krystianwsul.checkme.gui.tree.DetailsNode
 import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.InstanceKey
 
-sealed class GroupType {
+sealed interface GroupType {
 
     companion object {
 
@@ -82,12 +82,10 @@ sealed class GroupType {
         }
     }
 
-    abstract val bridge: BridgeFactory.Bridge
+    interface TimeChild // todo group inherit
+    interface SingleParent // todo group inherit
 
-    class Time(override val bridge: Bridge) : GroupType(), SingleParent {
-
-        interface Bridge : BridgeFactory.Bridge
-    }
+    interface Time : GroupType, SingleParent
 
     /**
      * This is a stand-alone item, when there are instances of exclusively one project at a given time.  Example list:
@@ -99,10 +97,7 @@ sealed class GroupType {
      *      Single
      * Single
      */
-    class TimeProject(override val bridge: Bridge) : GroupType(), SingleParent {
-
-        interface Bridge : BridgeFactory.Bridge
-    }
+    interface TimeProject : GroupType, SingleParent
 
     /**
      * If nested, this is a child of Time on the main list:
@@ -116,19 +111,9 @@ sealed class GroupType {
      *      Single
      * Single
      */
-    class Project(override val bridge: Bridge) : GroupType(), TimeChild, SingleParent {
+    interface Project : GroupType, TimeChild, SingleParent
 
-        interface Bridge : BridgeFactory.Bridge
-    }
-
-    private interface TimeChild
-
-    interface SingleParent
-
-    class Single(override val bridge: Bridge) : GroupType(), TimeChild {
-
-        interface Bridge : BridgeFactory.Bridge
-    }
+    interface Single : GroupType, TimeChild
 
     interface BridgeFactory {
 
@@ -169,7 +154,7 @@ sealed class GroupType {
         ) = getGroupTypeTree(this, instanceDatas.map(::InstanceDescriptor), groupingMode)
 
         override fun createTime(timeStamp: TimeStamp, groupTypes: List<GroupType>) =
-            Time(TimeBridge(timeStamp, groupTypes.map { it.bridge as TimeChild }))
+            TimeBridge(timeStamp, groupTypes.map { it as TimeChild })
 
         override fun createTimeProject(
             timeStamp: TimeStamp,
@@ -179,7 +164,7 @@ sealed class GroupType {
             val projectDetails = (projectDescriptor as ProjectDescriptor).projectDetails
             val instanceDatas = instanceDescriptors.map { (it as InstanceDescriptor).instanceData.copy(projectInfo = null) }
 
-            return TimeProject(TimeProjectBridge(timeStamp, projectDetails, instanceDatas))
+            return TimeProjectBridge(timeStamp, projectDetails, instanceDatas)
         }
 
         override fun createProject(
@@ -191,13 +176,13 @@ sealed class GroupType {
             val projectDetails = (projectDescriptor as ProjectDescriptor).projectDetails
             val instanceDatas = instanceDescriptors.map { (it as InstanceDescriptor).instanceData.copy(projectInfo = null) }
 
-            return Project(ProjectBridge(timeStamp, projectDetails, instanceDatas, nested))
+            return ProjectBridge(timeStamp, projectDetails, instanceDatas, nested)
         }
 
         override fun createSingle(instanceDescriptor: BridgeFactory.InstanceDescriptor): Single {
             val instanceData = (instanceDescriptor as InstanceDescriptor).instanceData
 
-            return Single(SingleBridge(instanceData))
+            return SingleBridge(instanceData)
         }
 
         class InstanceDescriptor(val instanceData: GroupListDataWrapper.InstanceData) : BridgeFactory.InstanceDescriptor {
@@ -220,17 +205,17 @@ sealed class GroupType {
             ): NotDoneNode.ContentDelegate
         }
 
-        sealed interface SingleParent : Bridge {
+        sealed interface SingleParent : Bridge, GroupType.SingleParent {
 
             val name: String get() = throw UnsupportedOperationException()
         }
 
-        sealed interface TimeChild : Bridge {
+        sealed interface TimeChild : Bridge, GroupType.TimeChild {
 
             val instanceKeys: Set<InstanceKey>
         }
 
-        class TimeBridge(val timeStamp: TimeStamp, private val timeChildren: List<TimeChild>) : Time.Bridge, SingleParent {
+        class TimeBridge(val timeStamp: TimeStamp, private val timeChildren: List<TimeChild>) : Time, SingleParent {
 
             override fun toContentDelegate(
                 groupAdapter: GroupListFragment.GroupAdapter,
@@ -263,7 +248,7 @@ sealed class GroupType {
             val timeStamp: TimeStamp,
             val projectDetails: DetailsNode.ProjectDetails,
             val instanceDatas: List<GroupListDataWrapper.InstanceData>,
-        ) : TimeProject.Bridge, SingleParent {
+        ) : TimeProject, SingleParent {
 
             override val name get() = projectDetails.name
 
@@ -305,7 +290,7 @@ sealed class GroupType {
             val projectDetails: DetailsNode.ProjectDetails,
             val instanceDatas: List<GroupListDataWrapper.InstanceData>,
             private val nested: Boolean,
-        ) : Project.Bridge, SingleParent, TimeChild {
+        ) : Project, SingleParent, TimeChild {
 
             override val name get() = projectDetails.name
 
@@ -325,7 +310,7 @@ sealed class GroupType {
                 NotDoneNode.ContentDelegate.Group.Id.Project(
                     timeStamp,
                     instanceKeys,
-                    projectDetails.projectKey
+                    projectDetails.projectKey,
                 ),
                 NotDoneNode.ContentDelegate.Group.GroupRowsDelegate.Project(groupAdapter, null, projectDetails.name),
                 !nested,
@@ -342,7 +327,7 @@ sealed class GroupType {
             }
         }
 
-        class SingleBridge(val instanceData: GroupListDataWrapper.InstanceData) : Single.Bridge, TimeChild {
+        class SingleBridge(val instanceData: GroupListDataWrapper.InstanceData) : Single, TimeChild {
 
             override val instanceKeys = setOf(instanceData.instanceKey)
 

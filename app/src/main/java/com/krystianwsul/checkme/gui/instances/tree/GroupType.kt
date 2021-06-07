@@ -86,12 +86,6 @@ sealed class GroupType {
 
     abstract val bridge: BridgeFactory.Bridge
 
-    abstract fun toContentDelegate(
-        groupAdapter: GroupListFragment.GroupAdapter,
-        indentation: Int,
-        nodeCollection: NodeCollection,
-    ): NotDoneNode.ContentDelegate
-
     class Time(
         override val bridge: Bridge,
         val timeStamp: TimeStamp,
@@ -100,21 +94,7 @@ sealed class GroupType {
 
         override val allInstanceKeys = groupTypes.flatMap { it.allInstanceKeys }.toSet()
 
-        override fun toContentDelegate(
-            groupAdapter: GroupListFragment.GroupAdapter,
-            indentation: Int,
-            nodeCollection: NodeCollection,
-        ) = bridge.toContentDelegate(this, groupAdapter, indentation, nodeCollection)
-
-        interface Bridge : BridgeFactory.Bridge {
-
-            fun toContentDelegate(
-                time: Time,
-                groupAdapter: GroupListFragment.GroupAdapter,
-                indentation: Int,
-                nodeCollection: NodeCollection,
-            ): NotDoneNode.ContentDelegate.Group
-        }
+        interface Bridge : BridgeFactory.Bridge
     }
 
     /**
@@ -136,21 +116,7 @@ sealed class GroupType {
 
         override val allInstanceKeys = instanceDatas.map { it.instanceKey }.toSet()
 
-        override fun toContentDelegate(
-            groupAdapter: GroupListFragment.GroupAdapter,
-            indentation: Int,
-            nodeCollection: NodeCollection,
-        ) = bridge.toContentDelegate(this, groupAdapter, indentation, nodeCollection)
-
-        interface Bridge : BridgeFactory.Bridge {
-
-            fun toContentDelegate(
-                timeProject: TimeProject,
-                groupAdapter: GroupListFragment.GroupAdapter,
-                indentation: Int,
-                nodeCollection: NodeCollection,
-            ): NotDoneNode.ContentDelegate.Group
-        }
+        interface Bridge : BridgeFactory.Bridge
     }
 
     /**
@@ -175,21 +141,7 @@ sealed class GroupType {
 
         override val allInstanceKeys = instanceDatas.map { it.instanceKey }.toSet()
 
-        override fun toContentDelegate(
-            groupAdapter: GroupListFragment.GroupAdapter,
-            indentation: Int,
-            nodeCollection: NodeCollection,
-        ) = bridge.toContentDelegate(this, groupAdapter, indentation, nodeCollection)
-
-        interface Bridge : BridgeFactory.Bridge {
-
-            fun toContentDelegate(
-                project: Project,
-                groupAdapter: GroupListFragment.GroupAdapter,
-                indentation: Int,
-                nodeCollection: NodeCollection,
-            ): NotDoneNode.ContentDelegate.Group
-        }
+        interface Bridge : BridgeFactory.Bridge
     }
 
     private interface TimeChild
@@ -200,20 +152,7 @@ sealed class GroupType {
 
         override val allInstanceKeys = setOf(instanceData.instanceKey)
 
-        override fun toContentDelegate(
-            groupAdapter: GroupListFragment.GroupAdapter,
-            indentation: Int,
-            nodeCollection: NodeCollection,
-        ) = bridge.toContentDelegate(groupAdapter, indentation, nodeCollection)
-
-        interface Bridge : BridgeFactory.Bridge {
-
-            fun toContentDelegate(
-                groupAdapter: GroupListFragment.GroupAdapter,
-                indentation: Int,
-                nodeCollection: NodeCollection,
-            ): NotDoneNode.ContentDelegate.Instance
-        }
+        interface Bridge : BridgeFactory.Bridge
     }
 
     interface BridgeFactory {
@@ -308,7 +247,14 @@ sealed class GroupType {
 
         data class ProjectDescriptor(val projectDetails: DetailsNode.ProjectDetails) : BridgeFactory.ProjectDescriptor
 
-        sealed interface Bridge : Comparable<Bridge>
+        sealed interface Bridge : Comparable<Bridge> {
+
+            fun toContentDelegate(
+                groupAdapter: GroupListFragment.GroupAdapter,
+                indentation: Int,
+                nodeCollection: NodeCollection,
+            ): NotDoneNode.ContentDelegate
+        }
 
         sealed interface SingleParent : Bridge {
 
@@ -322,12 +268,11 @@ sealed class GroupType {
 
         class TimeBridge(
             val timeStamp: TimeStamp,
-            val groupTypes: List<GroupType>,
+            val groupTypes: List<GroupType>, // todo group remove
             val timeChildren: List<TimeChild>,
         ) : Time.Bridge, SingleParent {
 
             override fun toContentDelegate(
-                time: Time, // todo group eliminate this
                 groupAdapter: GroupListFragment.GroupAdapter,
                 indentation: Int,
                 nodeCollection: NodeCollection,
@@ -365,7 +310,6 @@ sealed class GroupType {
             val instanceKeys = instanceDatas.map { it.instanceKey }.toSet()
 
             override fun toContentDelegate(
-                timeProject: TimeProject,
                 groupAdapter: GroupListFragment.GroupAdapter,
                 indentation: Int,
                 nodeCollection: NodeCollection,
@@ -408,7 +352,6 @@ sealed class GroupType {
             override val instanceKeys = instanceDatas.map { it.instanceKey }.toSet()
 
             override fun toContentDelegate(
-                project: Project,
                 groupAdapter: GroupListFragment.GroupAdapter,
                 indentation: Int,
                 nodeCollection: NodeCollection,

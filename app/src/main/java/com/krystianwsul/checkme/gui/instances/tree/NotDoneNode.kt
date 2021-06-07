@@ -301,7 +301,13 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
                     state.expansionState,
                 )
 
-                val nodePairs = childGroupTypes.map { it.toContentDelegate(groupAdapter, indentation, nodeCollection) }.map {
+                val nodePairs = childGroupTypes.map {
+                    (it.bridge as GroupType.TreeAdapterBridgeFactory.Bridge).toContentDelegate(
+                        groupAdapter,
+                        indentation,
+                        nodeCollection
+                    )
+                }.map {
                     val notDoneNode = if (it is Instance) {
                         NotDoneInstanceNode(it.indentation, it.instanceData, modelNode, nodeCollection.groupAdapter)
                     } else {

@@ -21,7 +21,14 @@ class NotDoneGroupCollection(
     ): List<TreeNode<AbstractHolder>> {
         val contentDelegates = GroupType.TreeAdapterBridgeFactory
             .getGroupTypeTree(notDoneInstanceDatas, nodeCollection.groupingMode)
-            .map { it.toContentDelegate(nodeCollection.groupAdapter, indentation, nodeCollection) }
+            .map {
+                (it.bridge as GroupType.TreeAdapterBridgeFactory.Bridge).toContentDelegate(
+                    // todo group generic?
+                    nodeCollection.groupAdapter,
+                    indentation,
+                    nodeCollection,
+                )
+            }
 
         val nodePairs = contentDelegates.map {
             val notDoneGroupNode = NotDoneGroupNode(indentation, nodeCollection, it)

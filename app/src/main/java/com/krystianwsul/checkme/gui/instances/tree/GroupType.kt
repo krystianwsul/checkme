@@ -255,7 +255,7 @@ sealed class GroupType {
         ) = getGroupTypeTree(this, instanceDatas.map(::InstanceDescriptor), groupingMode)
 
         override fun createTime(timeStamp: TimeStamp, groupTypes: List<GroupType>) =
-            Time(TimeBridge(timeStamp, groupTypes), timeStamp, groupTypes)
+            Time(TimeBridge(timeStamp, groupTypes, groupTypes.map { it.bridge as TimeChild }), timeStamp, groupTypes)
 
         override fun createTimeProject(
             timeStamp: TimeStamp,
@@ -315,9 +315,15 @@ sealed class GroupType {
             val name: String get() = throw UnsupportedOperationException()
         }
 
+        sealed interface TimeChild : Bridge {
+
+            val instanceKeys: Set<InstanceKey>
+        }
+
         class TimeBridge(
             val timeStamp: TimeStamp,
             val groupTypes: List<GroupType>,
+            val timeChildren: List<TimeChild>,
         ) : Time.Bridge, SingleParent {
 
             override fun toContentDelegate(
@@ -332,7 +338,7 @@ sealed class GroupType {
                 indentation,
                 nodeCollection,
                 groupTypes,
-                NotDoneNode.ContentDelegate.Group.Id.Time(timeStamp, time.allInstanceKeys),
+                NotDoneNode.ContentDelegate.Group.Id.Time(timeStamp, timeChildren.flatMap { it.instanceKeys }.toSet()),
                 NotDoneNode.ContentDelegate.Group.GroupRowsDelegate.Time(groupAdapter, timeStamp),
                 true,
                 ShowGroupActivity.Parameters.Time(timeStamp),
@@ -356,6 +362,8 @@ sealed class GroupType {
 
             override val name get() = projectDetails.name
 
+            val instanceKeys = instanceDatas.map { it.instanceKey }.toSet()
+
             override fun toContentDelegate(
                 timeProject: TimeProject,
                 groupAdapter: GroupListFragment.GroupAdapter,
@@ -368,11 +376,7 @@ sealed class GroupType {
                 indentation,
                 nodeCollection,
                 instanceDatas.map { Single(SingleBridge(it), it) },
-                NotDoneNode.ContentDelegate.Group.Id.Project(
-                    timeStamp,
-                    timeProject.allInstanceKeys,
-                    projectDetails.projectKey
-                ),
+                NotDoneNode.ContentDelegate.Group.Id.Project(timeStamp, instanceKeys, projectDetails.projectKey),
                 NotDoneNode.ContentDelegate.Group.GroupRowsDelegate.Project(
                     groupAdapter,
                     timeStamp,
@@ -397,9 +401,11 @@ sealed class GroupType {
             val projectDetails: DetailsNode.ProjectDetails,
             val instanceDatas: List<GroupListDataWrapper.InstanceData>,
             private val nested: Boolean,
-        ) : Project.Bridge, SingleParent {
+        ) : Project.Bridge, SingleParent, TimeChild {
 
             override val name get() = projectDetails.name
+
+            override val instanceKeys = instanceDatas.map { it.instanceKey }.toSet()
 
             override fun toContentDelegate(
                 project: Project,
@@ -415,7 +421,7 @@ sealed class GroupType {
                 instanceDatas.map { Single(SingleBridge(it), it) },
                 NotDoneNode.ContentDelegate.Group.Id.Project(
                     timeStamp,
-                    project.allInstanceKeys,
+                    instanceKeys,
                     projectDetails.projectKey
                 ),
                 NotDoneNode.ContentDelegate.Group.GroupRowsDelegate.Project(groupAdapter, null, projectDetails.name),
@@ -433,7 +439,9 @@ sealed class GroupType {
             }
         }
 
-        class SingleBridge(val instanceData: GroupListDataWrapper.InstanceData) : Single.Bridge, Bridge {
+        class SingleBridge(val instanceData: GroupListDataWrapper.InstanceData) : Single.Bridge, TimeChild {
+
+            override val instanceKeys = setOf(instanceData.instanceKey)
 
             override fun toContentDelegate(
                 groupAdapter: GroupListFragment.GroupAdapter,

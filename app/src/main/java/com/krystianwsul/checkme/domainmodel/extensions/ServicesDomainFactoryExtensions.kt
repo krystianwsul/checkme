@@ -3,7 +3,7 @@ package com.krystianwsul.checkme.domainmodel.extensions
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
-import com.krystianwsul.checkme.domainmodel.Notifier
+import com.krystianwsul.checkme.domainmodel.notifications.Notifier
 import com.krystianwsul.checkme.domainmodel.update.CompletableDomainUpdate
 import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
 import com.krystianwsul.checkme.utils.time.calendar

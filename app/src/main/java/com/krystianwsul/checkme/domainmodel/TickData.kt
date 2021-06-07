@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.domainmodel
 import android.content.Context
 import android.os.PowerManager
 import com.krystianwsul.checkme.MyApplication
+import com.krystianwsul.checkme.domainmodel.notifications.Notifier
 import com.krystianwsul.checkme.utils.time.toExactTimeStamp
 import com.krystianwsul.common.time.ExactTimeStamp
 import org.joda.time.DateTime
@@ -36,11 +37,11 @@ sealed class TickData {
     }
 
     class Lock(
-            override val notifierParams: Notifier.Params,
-            override val domainChanged: Boolean,
-            val expires: ExactTimeStamp.Local = DateTime.now()
-                    .plusMillis(DURATION)
-                    .toExactTimeStamp(),
+        override val notifierParams: Notifier.Params,
+        override val domainChanged: Boolean,
+        val expires: ExactTimeStamp.Local = DateTime.now()
+            .plusMillis(DURATION)
+            .toExactTimeStamp(),
     ) : TickData() {
 
         companion object {

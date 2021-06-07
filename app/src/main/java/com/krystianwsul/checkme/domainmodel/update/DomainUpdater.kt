@@ -2,7 +2,7 @@ package com.krystianwsul.checkme.domainmodel.update
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
-import com.krystianwsul.checkme.domainmodel.Notifier
+import com.krystianwsul.checkme.domainmodel.notifications.Notifier
 import com.krystianwsul.common.time.ExactTimeStamp
 import io.reactivex.rxjava3.core.Single
 
@@ -29,10 +29,10 @@ abstract class DomainUpdater {
     data class Result<T : Any>(val data: T, val params: Params) {
 
         constructor(
-                data: T,
-                notifierParams: Notifier.Params? = null,
-                saveParams: DomainFactory.SaveParams? = null,
-                cloudParams: DomainFactory.CloudParams? = null,
+            data: T,
+            notifierParams: Notifier.Params? = null,
+            saveParams: DomainFactory.SaveParams? = null,
+            cloudParams: DomainFactory.CloudParams? = null,
         ) : this(data, Params(notifierParams, saveParams, cloudParams))
 
         constructor(
@@ -44,9 +44,9 @@ abstract class DomainUpdater {
     }
 
     data class Params(
-            val notifierParams: Notifier.Params? = null,
-            val saveParams: DomainFactory.SaveParams? = null,
-            val cloudParams: DomainFactory.CloudParams? = null,
+        val notifierParams: Notifier.Params? = null,
+        val saveParams: DomainFactory.SaveParams? = null,
+        val cloudParams: DomainFactory.CloudParams? = null,
     ) {
 
         companion object {

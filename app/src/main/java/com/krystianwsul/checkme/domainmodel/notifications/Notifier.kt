@@ -1,10 +1,9 @@
-package com.krystianwsul.checkme.domainmodel
+package com.krystianwsul.checkme.domainmodel.notifications
 
 import android.os.Build
 import android.util.Log
 import com.krystianwsul.checkme.Preferences
-import com.krystianwsul.checkme.domainmodel.notifications.NotificationWrapper
-import com.krystianwsul.checkme.domainmodel.notifications.NotificationWrapperImpl
+import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.ticks.Ticker
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.project.SharedProject

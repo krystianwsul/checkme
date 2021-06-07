@@ -1,5 +1,7 @@
 package com.krystianwsul.checkme.domainmodel
 
+import com.krystianwsul.checkme.domainmodel.notifications.Notifier
+
 object TickHolder {
 
     private var tickData: TickData? = null

@@ -84,7 +84,7 @@ sealed class GroupType : Comparable<GroupType> {
 
     open val name: String get() = throw UnsupportedOperationException()
 
-    protected abstract val allInstanceKeys: Set<InstanceKey>
+    abstract val allInstanceKeys: Set<InstanceKey>
 
     abstract fun toContentDelegate(
         groupAdapter: GroupListFragment.GroupAdapter,
@@ -92,7 +92,11 @@ sealed class GroupType : Comparable<GroupType> {
         nodeCollection: NodeCollection,
     ): NotDoneNode.ContentDelegate
 
-    class Time(val timeStamp: TimeStamp, val groupTypes: List<GroupType>) : GroupType(), SingleParent {
+    class Time(
+        private val bridge: Bridge,
+        val timeStamp: TimeStamp,
+        val groupTypes: List<GroupType>,
+    ) : GroupType(), SingleParent {
 
         override val allInstanceKeys = groupTypes.flatMap { it.allInstanceKeys }.toSet()
 
@@ -100,18 +104,7 @@ sealed class GroupType : Comparable<GroupType> {
             groupAdapter: GroupListFragment.GroupAdapter,
             indentation: Int,
             nodeCollection: NodeCollection,
-        ) = NotDoneNode.ContentDelegate.Group(
-            groupAdapter,
-            this,
-            groupTypes.filterIsInstance<Single>().map { it.instanceData },
-            indentation,
-            nodeCollection,
-            groupTypes,
-            NotDoneNode.ContentDelegate.Group.Id.Time(timeStamp, allInstanceKeys),
-            NotDoneNode.ContentDelegate.Group.GroupRowsDelegate.Time(groupAdapter, timeStamp),
-            true,
-            ShowGroupActivity.Parameters.Time(timeStamp),
-        )
+        ) = bridge.toContentDelegate(this, groupAdapter, indentation, nodeCollection)
 
         override fun compareTo(other: GroupType): Int {
             return when (other) {
@@ -120,6 +113,16 @@ sealed class GroupType : Comparable<GroupType> {
                 is Project -> throw UnsupportedOperationException()
                 is Single -> timeStamp.compareTo(other.instanceData.instanceTimeStamp)
             }
+        }
+
+        interface Bridge {
+
+            fun toContentDelegate(
+                time: Time,
+                groupAdapter: GroupListFragment.GroupAdapter,
+                indentation: Int,
+                nodeCollection: NodeCollection,
+            ): NotDoneNode.ContentDelegate.Group
         }
     }
 
@@ -286,7 +289,8 @@ sealed class GroupType : Comparable<GroupType> {
             groupingMode: NodeCollection.GroupingMode,
         ) = GroupType.getGroupTypeTree(this, instanceDatas.map(::InstanceDescriptor), groupingMode)
 
-        override fun createTime(timeStamp: TimeStamp, groupTypes: List<GroupType>) = Time(timeStamp, groupTypes)
+        override fun createTime(timeStamp: TimeStamp, groupTypes: List<GroupType>) =
+            Time(TimeBridge(), timeStamp, groupTypes)
 
         override fun createTimeProject(
             timeStamp: TimeStamp,
@@ -328,5 +332,26 @@ sealed class GroupType : Comparable<GroupType> {
         }
 
         data class ProjectDescriptor(val projectDetails: DetailsNode.ProjectDetails) : BridgeFactory.ProjectDescriptor
+
+        class TimeBridge : Time.Bridge {
+
+            override fun toContentDelegate(
+                time: Time, // todo group eliminate this
+                groupAdapter: GroupListFragment.GroupAdapter,
+                indentation: Int,
+                nodeCollection: NodeCollection,
+            ) = NotDoneNode.ContentDelegate.Group(
+                groupAdapter,
+                time,
+                time.groupTypes.filterIsInstance<Single>().map { it.instanceData },
+                indentation,
+                nodeCollection,
+                time.groupTypes,
+                NotDoneNode.ContentDelegate.Group.Id.Time(time.timeStamp, time.allInstanceKeys),
+                NotDoneNode.ContentDelegate.Group.GroupRowsDelegate.Time(groupAdapter, time.timeStamp),
+                true,
+                ShowGroupActivity.Parameters.Time(time.timeStamp),
+            )
+        }
     }
 }

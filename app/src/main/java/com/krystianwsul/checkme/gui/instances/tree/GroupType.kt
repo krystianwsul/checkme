@@ -204,12 +204,11 @@ sealed class GroupType {
             groupAdapter: GroupListFragment.GroupAdapter,
             indentation: Int,
             nodeCollection: NodeCollection,
-        ) = bridge.toContentDelegate(this, groupAdapter, indentation, nodeCollection)
+        ) = bridge.toContentDelegate(groupAdapter, indentation, nodeCollection)
 
         interface Bridge : BridgeFactory.Bridge {
 
             fun toContentDelegate(
-                single: Single,
                 groupAdapter: GroupListFragment.GroupAdapter,
                 indentation: Int,
                 nodeCollection: NodeCollection,
@@ -243,9 +242,7 @@ sealed class GroupType {
             val projectDescriptor: ProjectDescriptor?
         }
 
-        interface ProjectDescriptor {
-
-        }
+        interface ProjectDescriptor
 
         interface Bridge
     }
@@ -331,14 +328,14 @@ sealed class GroupType {
             ) = NotDoneNode.ContentDelegate.Group(
                 groupAdapter,
                 this,
-                time.groupTypes.filterIsInstance<Single>().map { it.instanceData },
+                groupTypes.filterIsInstance<Single>().map { it.instanceData },
                 indentation,
                 nodeCollection,
-                time.groupTypes,
-                NotDoneNode.ContentDelegate.Group.Id.Time(time.timeStamp, time.allInstanceKeys),
-                NotDoneNode.ContentDelegate.Group.GroupRowsDelegate.Time(groupAdapter, time.timeStamp),
+                groupTypes,
+                NotDoneNode.ContentDelegate.Group.Id.Time(timeStamp, time.allInstanceKeys),
+                NotDoneNode.ContentDelegate.Group.GroupRowsDelegate.Time(groupAdapter, timeStamp),
                 true,
-                ShowGroupActivity.Parameters.Time(time.timeStamp),
+                ShowGroupActivity.Parameters.Time(timeStamp),
             )
 
             override fun compareTo(other: Bridge): Int {
@@ -367,22 +364,22 @@ sealed class GroupType {
             ) = NotDoneNode.ContentDelegate.Group(
                 groupAdapter,
                 this,
-                timeProject.instanceDatas,
+                instanceDatas,
                 indentation,
                 nodeCollection,
-                timeProject.instanceDatas.map { Single(SingleBridge(it), it) },
+                instanceDatas.map { Single(SingleBridge(it), it) },
                 NotDoneNode.ContentDelegate.Group.Id.Project(
-                    timeProject.timeStamp,
+                    timeStamp,
                     timeProject.allInstanceKeys,
-                    timeProject.projectDetails.projectKey
+                    projectDetails.projectKey
                 ),
                 NotDoneNode.ContentDelegate.Group.GroupRowsDelegate.Project(
                     groupAdapter,
-                    timeProject.timeStamp,
-                    timeProject.projectDetails.name
+                    timeStamp,
+                    projectDetails.name,
                 ),
                 true,
-                ShowGroupActivity.Parameters.Project(timeProject.timeStamp, timeProject.projectDetails.projectKey),
+                ShowGroupActivity.Parameters.Project(timeStamp, projectDetails.projectKey),
             )
 
             override fun compareTo(other: Bridge): Int {
@@ -399,7 +396,7 @@ sealed class GroupType {
             val timeStamp: TimeStamp,
             val projectDetails: DetailsNode.ProjectDetails,
             val instanceDatas: List<GroupListDataWrapper.InstanceData>,
-            val nested: Boolean,
+            private val nested: Boolean,
         ) : Project.Bridge, SingleParent {
 
             override val name get() = projectDetails.name
@@ -412,18 +409,18 @@ sealed class GroupType {
             ) = NotDoneNode.ContentDelegate.Group(
                 groupAdapter,
                 this,
-                project.instanceDatas,
-                indentation + (if (project.nested) 1 else 0),
+                instanceDatas,
+                indentation + (if (nested) 1 else 0),
                 nodeCollection,
-                project.instanceDatas.map { Single(SingleBridge(it), it) },
+                instanceDatas.map { Single(SingleBridge(it), it) },
                 NotDoneNode.ContentDelegate.Group.Id.Project(
-                    project.timeStamp,
+                    timeStamp,
                     project.allInstanceKeys,
-                    project.projectDetails.projectKey
+                    projectDetails.projectKey
                 ),
-                NotDoneNode.ContentDelegate.Group.GroupRowsDelegate.Project(groupAdapter, null, project.projectDetails.name),
-                !project.nested,
-                ShowGroupActivity.Parameters.Project(project.timeStamp, project.projectDetails.projectKey),
+                NotDoneNode.ContentDelegate.Group.GroupRowsDelegate.Project(groupAdapter, null, projectDetails.name),
+                !nested,
+                ShowGroupActivity.Parameters.Project(timeStamp, projectDetails.projectKey),
             )
 
             override fun compareTo(other: Bridge): Int {
@@ -439,7 +436,6 @@ sealed class GroupType {
         class SingleBridge(val instanceData: GroupListDataWrapper.InstanceData) : Single.Bridge, Bridge {
 
             override fun toContentDelegate(
-                single: Single,
                 groupAdapter: GroupListFragment.GroupAdapter,
                 indentation: Int,
                 nodeCollection: NodeCollection,

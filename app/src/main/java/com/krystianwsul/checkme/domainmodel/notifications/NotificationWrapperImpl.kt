@@ -30,6 +30,7 @@ import com.krystianwsul.common.firebase.models.project.SharedProject
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.InstanceKey
+import com.krystianwsul.common.utils.ProjectKey
 import io.reactivex.rxjava3.core.BackpressureStrategy
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.schedulers.Schedulers
@@ -53,6 +54,9 @@ open class NotificationWrapperImpl : NotificationWrapper() {
                 .resources
                 .getBoolean(R.bool.release)
         }
+
+        fun getProjectNotificationId(projectKey: ProjectKey.Shared, timeStamp: TimeStamp) =
+            (projectKey.hashCode() + timeStamp.long).toInt()
     }
 
     protected open val maxInboxLines = 5
@@ -704,7 +708,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
 
         val projectKey = project.projectKey
 
-        val notificationId: Int = (projectKey.hashCode() + timeStamp.long).toInt()
+        val notificationId = getProjectNotificationId(projectKey, timeStamp)
 
         val ordinal = instances.map { it.task.ordinal }.minOrNull()!!
 

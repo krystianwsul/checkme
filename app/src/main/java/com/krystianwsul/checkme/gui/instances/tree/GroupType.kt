@@ -194,7 +194,7 @@ sealed class GroupType {
         ) = getGroupTypeTree(this, instanceDatas.map(::InstanceDescriptor), groupingMode)
 
         override fun createTime(timeStamp: TimeStamp, groupTypes: List<GroupType>) =
-            Time(TimeBridge(timeStamp, groupTypes, groupTypes.map { it.bridge as TimeChild }), timeStamp, groupTypes)
+            Time(TimeBridge(timeStamp, groupTypes.map { it.bridge as TimeChild }), timeStamp, groupTypes)
 
         override fun createTimeProject(
             timeStamp: TimeStamp,
@@ -266,11 +266,7 @@ sealed class GroupType {
             val instanceKeys: Set<InstanceKey>
         }
 
-        class TimeBridge(
-            val timeStamp: TimeStamp,
-            val groupTypes: List<GroupType>, // todo group remove
-            val timeChildren: List<TimeChild>,
-        ) : Time.Bridge, SingleParent {
+        class TimeBridge(val timeStamp: TimeStamp, private val timeChildren: List<TimeChild>) : Time.Bridge, SingleParent {
 
             override fun toContentDelegate(
                 groupAdapter: GroupListFragment.GroupAdapter,

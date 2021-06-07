@@ -56,10 +56,13 @@ sealed class GroupListParameters(val draggable: Boolean = true) {
     ) : GroupListParameters()
 
     data class InstanceKeys(
-            override val dataId: DataId,
-            override val immediate: Boolean,
-            override val groupListDataWrapper: GroupListDataWrapper,
-    ) : GroupListParameters(false)
+        override val dataId: DataId,
+        override val immediate: Boolean,
+        override val groupListDataWrapper: GroupListDataWrapper,
+    ) : GroupListParameters(false) {
+
+        override val groupingMode = GroupType.GroupingMode.TIME
+    }
 
     data class Parent(
         override val dataId: DataId,

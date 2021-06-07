@@ -7,13 +7,13 @@ import com.krystianwsul.checkme.gui.tree.DetailsNode
 import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.InstanceKey
 
-sealed interface GroupType {
+interface GroupType {
 
     companion object {
 
         fun getGroupTypeTree(
             bridgeFactory: BridgeFactory,
-            instanceDatas: List<BridgeFactory.InstanceDescriptor>,
+            instanceDatas: List<InstanceDescriptor>,
             groupingMode: NodeCollection.GroupingMode,
         ): List<GroupType> {
             if (instanceDatas.isEmpty()) return emptyList()
@@ -57,9 +57,9 @@ sealed interface GroupType {
         private fun groupByProject(
             bridgeFactory: BridgeFactory,
             timeStamp: TimeStamp,
-            instanceDescriptor: List<BridgeFactory.InstanceDescriptor>,
+            instanceDescriptor: List<InstanceDescriptor>,
             nested: Boolean,
-        ): List<GroupType> {
+        ): List<TimeChild> {
             if (instanceDescriptor.isEmpty()) return emptyList()
 
             val projectGroups = instanceDescriptor.groupBy { it.projectDescriptor }
@@ -82,10 +82,10 @@ sealed interface GroupType {
         }
     }
 
-    interface TimeChild // todo group inherit
-    interface SingleParent // todo group inherit
+    interface SingleParent : GroupType
+    interface TimeChild : GroupType
 
-    interface Time : GroupType, SingleParent
+    interface Time : SingleParent
 
     /**
      * This is a stand-alone item, when there are instances of exclusively one project at a given time.  Example list:
@@ -97,7 +97,7 @@ sealed interface GroupType {
      *      Single
      * Single
      */
-    interface TimeProject : GroupType, SingleParent
+    interface TimeProject : SingleParent
 
     /**
      * If nested, this is a child of Time on the main list:
@@ -111,13 +111,13 @@ sealed interface GroupType {
      *      Single
      * Single
      */
-    interface Project : GroupType, TimeChild, SingleParent
+    interface Project : TimeChild, SingleParent
 
-    interface Single : GroupType, TimeChild
+    interface Single : TimeChild
 
     interface BridgeFactory {
 
-        fun createTime(timeStamp: TimeStamp, groupTypes: List<GroupType>): Time
+        fun createTime(timeStamp: TimeStamp, groupTypes: List<TimeChild>): Time
 
         fun createTimeProject(
             timeStamp: TimeStamp,
@@ -133,34 +133,32 @@ sealed interface GroupType {
         ): Project
 
         fun createSingle(instanceDescriptor: InstanceDescriptor): Single
-
-        interface InstanceDescriptor {
-
-            val timeStamp: TimeStamp
-
-            val projectDescriptor: ProjectDescriptor?
-        }
-
-        interface ProjectDescriptor
-
-        interface Bridge
     }
+
+    interface InstanceDescriptor {
+
+        val timeStamp: TimeStamp
+
+        val projectDescriptor: ProjectDescriptor?
+    }
+
+    interface ProjectDescriptor
 
     object TreeAdapterBridgeFactory : BridgeFactory {
 
         fun getGroupTypeTree(
             instanceDatas: List<GroupListDataWrapper.InstanceData>,
             groupingMode: NodeCollection.GroupingMode,
-        ) = getGroupTypeTree(this, instanceDatas.map(::InstanceDescriptor), groupingMode)
+        ) = getGroupTypeTree(this, instanceDatas.map(::InstanceDescriptor), groupingMode).map { it as Bridge }
 
-        override fun createTime(timeStamp: TimeStamp, groupTypes: List<GroupType>) =
+        override fun createTime(timeStamp: TimeStamp, groupTypes: List<GroupType.TimeChild>) =
             TimeBridge(timeStamp, groupTypes.map { it as TimeChild })
 
         override fun createTimeProject(
             timeStamp: TimeStamp,
-            projectDescriptor: BridgeFactory.ProjectDescriptor,
-            instanceDescriptors: List<BridgeFactory.InstanceDescriptor>
-        ): TimeProject { // todo group use generics?
+            projectDescriptor: GroupType.ProjectDescriptor,
+            instanceDescriptors: List<GroupType.InstanceDescriptor>
+        ): TimeProject {
             val projectDetails = (projectDescriptor as ProjectDescriptor).projectDetails
             val instanceDatas = instanceDescriptors.map { (it as InstanceDescriptor).instanceData.copy(projectInfo = null) }
 
@@ -169,9 +167,9 @@ sealed interface GroupType {
 
         override fun createProject(
             timeStamp: TimeStamp,
-            projectDescriptor: BridgeFactory.ProjectDescriptor,
-            instanceDescriptors: List<BridgeFactory.InstanceDescriptor>,
-            nested: Boolean
+            projectDescriptor: GroupType.ProjectDescriptor,
+            instanceDescriptors: List<GroupType.InstanceDescriptor>,
+            nested: Boolean,
         ): Project {
             val projectDetails = (projectDescriptor as ProjectDescriptor).projectDetails
             val instanceDatas = instanceDescriptors.map { (it as InstanceDescriptor).instanceData.copy(projectInfo = null) }
@@ -179,13 +177,13 @@ sealed interface GroupType {
             return ProjectBridge(timeStamp, projectDetails, instanceDatas, nested)
         }
 
-        override fun createSingle(instanceDescriptor: BridgeFactory.InstanceDescriptor): Single {
+        override fun createSingle(instanceDescriptor: GroupType.InstanceDescriptor): Single {
             val instanceData = (instanceDescriptor as InstanceDescriptor).instanceData
 
             return SingleBridge(instanceData)
         }
 
-        class InstanceDescriptor(val instanceData: GroupListDataWrapper.InstanceData) : BridgeFactory.InstanceDescriptor {
+        class InstanceDescriptor(val instanceData: GroupListDataWrapper.InstanceData) : GroupType.InstanceDescriptor {
 
             override val timeStamp get() = instanceData.instanceTimeStamp
 
@@ -194,7 +192,7 @@ sealed interface GroupType {
                 ?.let(::ProjectDescriptor)
         }
 
-        data class ProjectDescriptor(val projectDetails: DetailsNode.ProjectDetails) : BridgeFactory.ProjectDescriptor
+        data class ProjectDescriptor(val projectDetails: DetailsNode.ProjectDetails) : GroupType.ProjectDescriptor
 
         sealed interface Bridge : Comparable<Bridge> {
 

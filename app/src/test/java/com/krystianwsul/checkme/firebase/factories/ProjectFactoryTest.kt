@@ -24,6 +24,7 @@ import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.common.utils.UserKey
+import io.mockk.every
 import io.mockk.mockk
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Single
@@ -78,16 +79,21 @@ class ProjectFactoryTest {
         override val domainUpdater: DomainUpdater
             get() = TODO("Not yet implemented")
 
+        override val notificationStorageFactory = mockk<FactoryProvider.NotificationStorageFactory> {
+            every { getNotificationStorage() } returns Single.just(mockk(relaxed = true))
+        }
+
         override fun newDomain(
-                localFactory: FactoryProvider.Local,
-                myUserFactory: MyUserFactory,
-                projectsFactory: ProjectsFactory,
-                friendsFactory: FriendsFactory,
-                deviceDbInfo: DeviceDbInfo,
-                startTime: ExactTimeStamp.Local,
-                readTime: ExactTimeStamp.Local,
-                domainDisposable: CompositeDisposable,
-                rootTasksFactory: RootTasksFactory,
+            localFactory: FactoryProvider.Local,
+            myUserFactory: MyUserFactory,
+            projectsFactory: ProjectsFactory,
+            friendsFactory: FriendsFactory,
+            deviceDbInfo: DeviceDbInfo,
+            startTime: ExactTimeStamp.Local,
+            readTime: ExactTimeStamp.Local,
+            domainDisposable: CompositeDisposable,
+            rootTasksFactory: RootTasksFactory,
+            notificationStorage: FactoryProvider.NotificationStorage,
         ): FactoryProvider.Domain {
             TODO("Not yet implemented")
         }

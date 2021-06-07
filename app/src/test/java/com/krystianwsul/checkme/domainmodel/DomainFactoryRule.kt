@@ -50,20 +50,20 @@ class DomainFactoryRule : TestRule {
     companion object {
 
         private val domainFactoryStartTime = ExactTimeStamp.Local(
-                Date(2020, 12, 20),
-                HourMinute(19, 0),
+            Date(2020, 12, 20),
+            HourMinute(19, 0),
         )
 
         private val userKey = UserKey("key")
 
         val deviceDbInfo = DeviceDbInfo(
-                DeviceInfo(
-                        spyk(UserInfo("email", "name", "uid")) {
-                            every { key } returns userKey
-                        },
-                        "token",
-                ),
-                "uuid",
+            DeviceInfo(
+                spyk(UserInfo("email", "name", "uid")) {
+                    every { key } returns userKey
+                },
+                "token",
+            ),
+            "uuid",
         )
     }
 
@@ -157,12 +157,12 @@ class DomainFactoryRule : TestRule {
             every { save(any()) } returns Unit
 
             every { user } returns MyUser(
-                    MyUserRecord(
-                            databaseWrapper,
-                            false,
-                            mockk(relaxed = true),
-                            userKey,
-                    )
+                MyUserRecord(
+                    databaseWrapper,
+                    false,
+                    mockk(relaxed = true),
+                    userKey,
+                )
             )
         }
 
@@ -179,11 +179,11 @@ class DomainFactoryRule : TestRule {
         }
 
         val rootTasksLoader = RootTasksLoader(
-                rootTaskKeySource,
-                rootTasksLoaderProvider,
-                compositeDisposable,
-                rootTasksManager,
-                mockk(relaxed = true), // todo task tests
+            rootTaskKeySource,
+            rootTasksLoaderProvider,
+            compositeDisposable,
+            rootTasksManager,
+            mockk(relaxed = true), // todo task tests
         )
 
         val rootTaskDependencyCoordinator = mockk<RootTaskDependencyCoordinator> {
@@ -191,54 +191,55 @@ class DomainFactoryRule : TestRule {
         }
 
         val rootTaskFactory = RootTasksFactory(
-                rootTasksLoader,
-                mockk(relaxed = true), // todo task tests
-                rootTaskDependencyCoordinator,
-                compositeDisposable,
-                rootTaskKeySource,
-                mockk(relaxed = true), // todo task tests
+            rootTasksLoader,
+            mockk(relaxed = true), // todo task tests
+            rootTaskDependencyCoordinator,
+            compositeDisposable,
+            rootTaskKeySource,
+            mockk(relaxed = true), // todo task tests
         ) { projectsFactory }
 
         val sharedProjectsLoader = SharedProjectsLoader.Impl(
-                Observable.just(setOf()),
-                spyk(AndroidSharedProjectManager(databaseWrapper)) {
-                    every { save(any()) } returns Unit
-                },
-                compositeDisposable,
-                mockk(relaxed = true) {
-                    every { getSharedProjectObservable(any()) } returns Observable.never()
-                },
-                TestUserCustomTimeProviderSource(),
-                mockk(relaxed = true),
-                object : ProjectToRootTaskCoordinator {
+            Observable.just(setOf()),
+            spyk(AndroidSharedProjectManager(databaseWrapper)) {
+                every { save(any()) } returns Unit
+            },
+            compositeDisposable,
+            mockk(relaxed = true) {
+                every { getSharedProjectObservable(any()) } returns Observable.never()
+            },
+            TestUserCustomTimeProviderSource(),
+            mockk(relaxed = true),
+            object : ProjectToRootTaskCoordinator {
 
-                    override fun getRootTasks(projectTracker: LoadDependencyTrackerManager.ProjectTracker) = Completable.complete() // todo task tests
-                },
-                rootTaskKeySource,
-                mockk(relaxed = true), // todo task tests
+                override fun getRootTasks(projectTracker: LoadDependencyTrackerManager.ProjectTracker) =
+                    Completable.complete() // todo task tests
+            },
+            rootTaskKeySource,
+            mockk(relaxed = true), // todo task tests
         )
 
         projectsFactory = ProjectsFactory(
-                mockk(),
+            mockk(),
+            mockk(relaxed = true),
+            ProjectLoader.InitialProjectEvent(
                 mockk(relaxed = true),
-                ProjectLoader.InitialProjectEvent(
-                        mockk(relaxed = true),
-                        PrivateProjectRecord(
-                                databaseWrapper,
-                                deviceDbInfo.userInfo,
-                                PrivateProjectJson(
-                                        startTime = domainFactoryStartTime.long,
-                                        startTimeOffset = domainFactoryStartTime.offset,
-                                ),
-                        ),
-                        myUserFactory.user,
+                PrivateProjectRecord(
+                    databaseWrapper,
+                    deviceDbInfo.userInfo,
+                    PrivateProjectJson(
+                        startTime = domainFactoryStartTime.long,
+                        startTimeOffset = domainFactoryStartTime.offset,
+                    ),
                 ),
-                sharedProjectsLoader,
-                SharedProjectsLoader.InitialProjectsEvent(listOf()),
-                domainFactoryStartTime,
-                mockk(relaxed = true),
-                compositeDisposable,
-                rootTaskFactory,
+                myUserFactory.user,
+            ),
+            sharedProjectsLoader,
+            SharedProjectsLoader.InitialProjectsEvent(listOf()),
+            domainFactoryStartTime,
+            mockk(relaxed = true),
+            compositeDisposable,
+            rootTaskFactory,
         ) { deviceDbInfo }
 
         val friendsFactory = mockk<FriendsFactory> {
@@ -248,16 +249,17 @@ class DomainFactoryRule : TestRule {
         }
 
         domainFactory = DomainFactory(
-                mockk(relaxed = true),
-                myUserFactory,
-                projectsFactory,
-                friendsFactory,
-                deviceDbInfo,
-                domainFactoryStartTime,
-                domainFactoryStartTime,
-                compositeDisposable,
-                databaseWrapper,
-                rootTaskFactory,
+            mockk(relaxed = true),
+            myUserFactory,
+            projectsFactory,
+            friendsFactory,
+            deviceDbInfo,
+            domainFactoryStartTime,
+            domainFactoryStartTime,
+            compositeDisposable,
+            databaseWrapper,
+            rootTaskFactory,
+            mockk(relaxed = true),
         ) { TestDomainUpdater(it, ExactTimeStamp.Local.now) }
     }
 

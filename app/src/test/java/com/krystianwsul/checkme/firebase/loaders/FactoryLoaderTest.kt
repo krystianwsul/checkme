@@ -27,10 +27,12 @@ import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.common.utils.TaskKeyData
 import com.krystianwsul.common.utils.UserKey
+import io.mockk.every
 import io.mockk.mockk
 import io.reactivex.plugins.RxJavaPlugins
 import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
 import org.junit.*
@@ -102,7 +104,7 @@ class FactoryLoaderTest {
         val userObservable = PublishRelay.create<Snapshot<UserWrapper>>()!!
 
         override fun getPrivateProjectObservable(key: ProjectKey.Private) =
-                privateProjectObservable.map { Snapshot(key.key, it) }!!
+            privateProjectObservable.map { Snapshot(key.key, it) }!!
 
         override fun getSharedProjectObservable(projectKey: ProjectKey.Shared) = sharedProjectObservable
 
@@ -134,16 +136,21 @@ class FactoryLoaderTest {
 
         override val domainUpdater = mockk<DomainUpdater>(relaxed = true)
 
+        override val notificationStorageFactory = mockk<FactoryProvider.NotificationStorageFactory> {
+            every { getNotificationStorage() } returns Single.just(mockk(relaxed = true))
+        }
+
         override fun newDomain(
-                localFactory: FactoryProvider.Local,
-                myUserFactory: MyUserFactory,
-                projectsFactory: ProjectsFactory,
-                friendsFactory: FriendsFactory,
-                deviceDbInfo: DeviceDbInfo,
-                startTime: ExactTimeStamp.Local,
-                readTime: ExactTimeStamp.Local,
-                domainDisposable: CompositeDisposable,
-                rootTasksFactory: RootTasksFactory,
+            localFactory: FactoryProvider.Local,
+            myUserFactory: MyUserFactory,
+            projectsFactory: ProjectsFactory,
+            friendsFactory: FriendsFactory,
+            deviceDbInfo: DeviceDbInfo,
+            startTime: ExactTimeStamp.Local,
+            readTime: ExactTimeStamp.Local,
+            domainDisposable: CompositeDisposable,
+            rootTasksFactory: RootTasksFactory,
+            notificationStorage: FactoryProvider.NotificationStorage,
         ) = domain
     }
 
@@ -184,8 +191,8 @@ class FactoryLoaderTest {
         domainFactoryRelay = BehaviorRelay.create()
 
         factoryLoader.domainFactoryObservable
-                .subscribe(domainFactoryRelay)
-                .addTo(compositeDisposable)
+            .subscribe(domainFactoryRelay)
+            .addTo(compositeDisposable)
 
         userInfoObservable.accept(userInfoWrapper)
     }
@@ -199,14 +206,14 @@ class FactoryLoaderTest {
 
     private fun initializeEmpty() {
         testFactoryProvider.database
-                .userObservable
-                .accept(Snapshot(userInfo.key.key, UserWrapper()))
+            .userObservable
+            .accept(Snapshot(userInfo.key.key, UserWrapper()))
 
         assertNull(domainFactoryRelay.value)
 
         testFactoryProvider.database
-                .privateProjectObservable
-                .accept(PrivateProjectJson())
+            .privateProjectObservable
+            .accept(PrivateProjectJson())
 
         assertNotNull(domainFactoryRelay.value)
     }
@@ -221,26 +228,28 @@ class FactoryLoaderTest {
         val sharedProjectKey = "sharedProject"
 
         testFactoryProvider.database
-                .userObservable
-                .accept(
-                        Snapshot(
-                                userInfo.key.key,
-                                UserWrapper(projects = mutableMapOf(sharedProjectKey to true)),
-                        )
+            .userObservable
+            .accept(
+                Snapshot(
+                    userInfo.key.key,
+                    UserWrapper(projects = mutableMapOf(sharedProjectKey to true)),
                 )
+            )
 
         testFactoryProvider.database
-                .privateProjectObservable
-                .accept(PrivateProjectJson())
+            .privateProjectObservable
+            .accept(PrivateProjectJson())
 
         assertNull(domainFactoryRelay.value)
 
         testFactoryProvider.database
-                .sharedProjectObservable
-                .accept(Snapshot(
-                        sharedProjectKey,
-                        JsonWrapper(SharedProjectJson(users = mutableMapOf(userInfo.key.key to UserJson()))),
-                ))
+            .sharedProjectObservable
+            .accept(
+                Snapshot(
+                    sharedProjectKey,
+                    JsonWrapper(SharedProjectJson(users = mutableMapOf(userInfo.key.key to UserJson()))),
+                )
+            )
 
         assertNotNull(domainFactoryRelay.value)
     }
@@ -250,33 +259,39 @@ class FactoryLoaderTest {
         val sharedProjectKey = "sharedProject"
 
         testFactoryProvider.database
-                .userObservable
-                .accept(
-                        Snapshot(
-                                userInfo.key.key,
-                                UserWrapper(projects = mutableMapOf(sharedProjectKey to true)),
-                        )
+            .userObservable
+            .accept(
+                Snapshot(
+                    userInfo.key.key,
+                    UserWrapper(projects = mutableMapOf(sharedProjectKey to true)),
                 )
+            )
 
         val privateTaskKey = "privateTask"
 
         testFactoryProvider.database
-                .privateProjectObservable
-                .accept(PrivateProjectJson(
-                        tasks = mutableMapOf(privateTaskKey to PrivateTaskJson(name = privateTaskKey)))
+            .privateProjectObservable
+            .accept(
+                PrivateProjectJson(
+                    tasks = mutableMapOf(privateTaskKey to PrivateTaskJson(name = privateTaskKey))
                 )
+            )
 
         val sharedTaskKey = "sharedTask"
 
         testFactoryProvider.database
-                .sharedProjectObservable
-                .accept(Snapshot(
-                        sharedProjectKey,
-                        JsonWrapper(SharedProjectJson(
-                                users = mutableMapOf(userInfo.key.key to UserJson()),
-                                tasks = mutableMapOf(sharedTaskKey to SharedTaskJson(name = sharedTaskKey))
-                        )),
-                ))
+            .sharedProjectObservable
+            .accept(
+                Snapshot(
+                    sharedProjectKey,
+                    JsonWrapper(
+                        SharedProjectJson(
+                            users = mutableMapOf(userInfo.key.key to UserJson()),
+                            tasks = mutableMapOf(sharedTaskKey to SharedTaskJson(name = sharedTaskKey))
+                        )
+                    ),
+                )
+            )
 
         assertNotNull(domainFactoryRelay.value)
     }
@@ -284,31 +299,35 @@ class FactoryLoaderTest {
     @Test
     fun testPrivateAndSharedInstances() {
         testFactoryProvider.database
-                .userObservable
-                .accept(
-                        Snapshot(
-                                userInfo.key.key,
-                                UserWrapper(projects = mutableMapOf(sharedProjectKey to true)),
-                        )
+            .userObservable
+            .accept(
+                Snapshot(
+                    userInfo.key.key,
+                    UserWrapper(projects = mutableMapOf(sharedProjectKey to true)),
                 )
+            )
 
         testFactoryProvider.database
-                .privateProjectObservable
-                .accept(
-                        PrivateProjectJson(
-                                tasks = mutableMapOf(privateTaskKey to PrivateTaskJson(name = privateTaskKey))
-                        )
+            .privateProjectObservable
+            .accept(
+                PrivateProjectJson(
+                    tasks = mutableMapOf(privateTaskKey to PrivateTaskJson(name = privateTaskKey))
                 )
+            )
 
         testFactoryProvider.database
-                .sharedProjectObservable
-                .accept(Snapshot(
-                        sharedProjectKey,
-                        JsonWrapper(SharedProjectJson(
-                                users = mutableMapOf(userInfo.key.key to UserJson()),
-                                tasks = mutableMapOf(sharedTaskKey to SharedTaskJson(name = sharedTaskKey))
-                        )),
-                ))
+            .sharedProjectObservable
+            .accept(
+                Snapshot(
+                    sharedProjectKey,
+                    JsonWrapper(
+                        SharedProjectJson(
+                            users = mutableMapOf(userInfo.key.key to UserJson()),
+                            tasks = mutableMapOf(sharedTaskKey to SharedTaskJson(name = sharedTaskKey))
+                        )
+                    ),
+                )
+            )
 
         assertNotNull(domainFactoryRelay.value)
     }
@@ -321,7 +340,7 @@ class FactoryLoaderTest {
 
             domain.checkChange {
                 database.privateProjectObservable.accept(
-                        PrivateProjectJson(tasks = mutableMapOf(privateTaskKey to PrivateTaskJson("task")))
+                    PrivateProjectJson(tasks = mutableMapOf(privateTaskKey to PrivateTaskJson("task")))
                 )
             }
         }

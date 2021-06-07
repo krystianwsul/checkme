@@ -1,11 +1,11 @@
 package com.krystianwsul.checkme.domainmodel.notifications
 
 import com.krystianwsul.checkme.domainmodel.GroupType
-import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
-import com.krystianwsul.checkme.gui.instances.tree.NodeCollection
-import com.krystianwsul.checkme.gui.tree.DetailsNode
+import com.krystianwsul.common.firebase.models.Instance
+import com.krystianwsul.common.firebase.models.project.SharedProject
 import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.InstanceKey
+import com.krystianwsul.common.utils.ProjectKey
 
 object GroupTypeFactory : GroupType.Factory {
 
@@ -15,9 +15,9 @@ object GroupTypeFactory : GroupType.Factory {
     private fun GroupType.ProjectDescriptor.fix() = this as ProjectDescriptor
 
     fun getGroupTypeTree(
-        instanceDatas: List<GroupListDataWrapper.InstanceData>,
-        groupingMode: NodeCollection.GroupingMode,
-    ) = GroupType.getGroupTypeTree(this, instanceDatas.map(::InstanceDescriptor), groupingMode).map { it.fix() }
+        instances: List<Instance>,
+        groupingMode: GroupType.GroupingMode,
+    ) = GroupType.getGroupTypeTree(this, instances.map(::InstanceDescriptor), groupingMode).map { it.fix() }
 
     override fun createTime(timeStamp: TimeStamp, groupTypes: List<GroupType.TimeChild>) =
         TimeBridge(timeStamp, groupTypes.map { it.fix() })
@@ -27,10 +27,10 @@ object GroupTypeFactory : GroupType.Factory {
         projectDescriptor: GroupType.ProjectDescriptor,
         instanceDescriptors: List<GroupType.InstanceDescriptor>,
     ): GroupType.TimeProject {
-        val projectDetails = projectDescriptor.fix().projectDetails
-        val instanceDatas = instanceDescriptors.map { it.fix().instanceData.copy(projectInfo = null) }
+        val projectKey = projectDescriptor.fix().projectKey
+        val instances = instanceDescriptors.map { it.fix().instance } // todo group strip project data
 
-        return TimeProjectBridge(timeStamp, projectDetails, instanceDatas)
+        return TimeProjectBridge(timeStamp, projectKey, instances)
     }
 
     override fun createProject(
@@ -39,28 +39,31 @@ object GroupTypeFactory : GroupType.Factory {
         instanceDescriptors: List<GroupType.InstanceDescriptor>,
         nested: Boolean,
     ): GroupType.Project {
-        val projectDetails = projectDescriptor.fix().projectDetails
-        val instanceDatas = instanceDescriptors.map { it.fix().instanceData.copy(projectInfo = null) }
+        val projectKey = projectDescriptor.fix().projectKey
+        val instances = instanceDescriptors.map { it.fix().instance } // todo group strip project data
 
-        return ProjectBridge(timeStamp, projectDetails, instanceDatas, nested)
+        return ProjectBridge(timeStamp, projectKey, instances)
     }
 
     override fun createSingle(instanceDescriptor: GroupType.InstanceDescriptor): GroupType.Single {
-        val instanceData = instanceDescriptor.fix().instanceData
+        val instance = instanceDescriptor.fix().instance
 
-        return SingleBridge(instanceData)
+        return SingleBridge(instance)
     }
 
-    class InstanceDescriptor(val instanceData: GroupListDataWrapper.InstanceData) : GroupType.InstanceDescriptor {
+    class InstanceDescriptor(val instance: Instance) : GroupType.InstanceDescriptor {
 
-        override val timeStamp get() = instanceData.instanceTimeStamp
+        override val timeStamp get() = instance.instanceDateTime.timeStamp
 
-        override val projectDescriptor = instanceData.projectInfo
-            ?.projectDetails
+        override val projectDescriptor = instance.getProject()
+            .let { it as? SharedProject }
             ?.let(::ProjectDescriptor)
     }
 
-    data class ProjectDescriptor(val projectDetails: DetailsNode.ProjectDetails) : GroupType.ProjectDescriptor
+    data class ProjectDescriptor(val projectKey: ProjectKey.Shared) : GroupType.ProjectDescriptor {
+
+        constructor(sharedProject: SharedProject) : this(sharedProject.projectKey)
+    }
 
     sealed interface Bridge
 
@@ -75,25 +78,24 @@ object GroupTypeFactory : GroupType.Factory {
 
     class TimeProjectBridge(
         val timeStamp: TimeStamp,
-        val projectDetails: DetailsNode.ProjectDetails,
-        val instanceDatas: List<GroupListDataWrapper.InstanceData>,
+        val projectKey: ProjectKey.Shared,
+        val instances: List<Instance>,
     ) : GroupType.TimeProject, SingleParent {
 
-        val instanceKeys = instanceDatas.map { it.instanceKey }.toSet()
+        val instanceKeys = instances.map { it.instanceKey }.toSet()
     }
 
     class ProjectBridge(
         val timeStamp: TimeStamp,
-        val projectDetails: DetailsNode.ProjectDetails,
-        val instanceDatas: List<GroupListDataWrapper.InstanceData>,
-        private val nested: Boolean,
+        val projectKey: ProjectKey.Shared,
+        val instances: List<Instance>,
     ) : GroupType.Project, SingleParent, TimeChild {
 
-        override val instanceKeys = instanceDatas.map { it.instanceKey }.toSet()
+        override val instanceKeys = instances.map { it.instanceKey }.toSet()
     }
 
-    class SingleBridge(val instanceData: GroupListDataWrapper.InstanceData) : GroupType.Single, TimeChild {
+    class SingleBridge(val instance: Instance) : GroupType.Single, TimeChild {
 
-        override val instanceKeys = setOf(instanceData.instanceKey)
+        override val instanceKeys = setOf(instance.instanceKey)
     }
 }

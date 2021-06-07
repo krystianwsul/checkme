@@ -17,7 +17,7 @@ object GroupTypeFactory : GroupType.Factory {
 
     fun getGroupTypeTree(
         instanceDatas: List<GroupListDataWrapper.InstanceData>,
-        groupingMode: NodeCollection.GroupingMode,
+        groupingMode: GroupType.GroupingMode,
     ) = GroupType.getGroupTypeTree(this, instanceDatas.map(::InstanceDescriptor), groupingMode).map { it.fix() }
 
     override fun createTime(timeStamp: TimeStamp, groupTypes: List<GroupType.TimeChild>) =

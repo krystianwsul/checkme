@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.domainmodel
 
-import com.krystianwsul.checkme.gui.instances.tree.NodeCollection
 import com.krystianwsul.common.time.TimeStamp
 
 interface GroupType {
@@ -10,12 +9,12 @@ interface GroupType {
         fun getGroupTypeTree(
             factory: Factory,
             instanceDatas: List<InstanceDescriptor>,
-            groupingMode: NodeCollection.GroupingMode,
+            groupingMode: GroupingMode,
         ): List<GroupType> {
             if (instanceDatas.isEmpty()) return emptyList()
 
             return when (groupingMode) {
-                NodeCollection.GroupingMode.TIME -> {
+                GroupingMode.TIME -> {
                     val timeGroups = instanceDatas.groupBy { it.timeStamp }
 
                     timeGroups.map { (timeStamp, instanceDescriptors) ->
@@ -39,14 +38,14 @@ interface GroupType {
                         }
                     }
                 }
-                NodeCollection.GroupingMode.PROJECT -> {
+                GroupingMode.PROJECT -> {
                     val timeStamp = instanceDatas.map { it.timeStamp }
                         .distinct()
                         .single()
 
                     groupByProject(factory, timeStamp, instanceDatas, false)
                 }
-                NodeCollection.GroupingMode.NONE -> instanceDatas.map(factory::createSingle)
+                GroupingMode.NONE -> instanceDatas.map(factory::createSingle)
             }
         }
 
@@ -139,4 +138,9 @@ interface GroupType {
     }
 
     interface ProjectDescriptor
+
+    enum class GroupingMode {
+
+        NONE, PROJECT, TIME
+    }
 }

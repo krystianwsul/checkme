@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
+import com.krystianwsul.checkme.domainmodel.GroupType
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.instances.list.GroupListFragment
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
@@ -12,7 +13,7 @@ import com.krystianwsul.treeadapter.TreeNode
 class NodeCollection(
     private val indentation: Int,
     val groupAdapter: GroupListFragment.GroupAdapter,
-    val groupingMode: GroupingMode,
+    val groupingMode: GroupType.GroupingMode,
     val nodeContainer: NodeContainer<AbstractHolder>,
     private val note: String?,
     val parentNode: DetailsNode.Parent?,
@@ -95,8 +96,4 @@ class NodeCollection(
         get() =
             notDoneGroupCollection.contentDelegateStates + dividerNode.contentDelegateStates
 
-    enum class GroupingMode {
-
-        NONE, PROJECT, TIME
-    }
 }

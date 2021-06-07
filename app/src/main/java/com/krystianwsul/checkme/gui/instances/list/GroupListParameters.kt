@@ -1,7 +1,7 @@
 package com.krystianwsul.checkme.gui.instances.list
 
 import com.krystianwsul.checkme.Preferences
-import com.krystianwsul.checkme.gui.instances.tree.NodeCollection
+import com.krystianwsul.checkme.domainmodel.GroupType
 import com.krystianwsul.checkme.viewmodels.DataId
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.treeadapter.FilterCriteria
@@ -16,7 +16,7 @@ sealed class GroupListParameters(val draggable: Boolean = true) {
     open val useDoneNode = true
     open val fabActionMode = FabActionMode.SUBTASK
 
-    open val groupingMode = NodeCollection.GroupingMode.NONE
+    open val groupingMode = GroupType.GroupingMode.NONE
 
     open val unscheduledFirst = false
 
@@ -33,7 +33,7 @@ sealed class GroupListParameters(val draggable: Boolean = true) {
 
         override val fabActionMode = FabActionMode.BOTH
 
-        override val groupingMode = NodeCollection.GroupingMode.TIME
+        override val groupingMode = GroupType.GroupingMode.TIME
     }
 
     data class TimeStamp(
@@ -45,7 +45,7 @@ sealed class GroupListParameters(val draggable: Boolean = true) {
     ) : GroupListParameters() {
 
         override val groupingMode =
-            projectKey?.let { NodeCollection.GroupingMode.NONE } ?: NodeCollection.GroupingMode.PROJECT
+            projectKey?.let { GroupType.GroupingMode.NONE } ?: GroupType.GroupingMode.PROJECT
     }
 
     data class InstanceKey(

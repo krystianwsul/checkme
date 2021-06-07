@@ -15,9 +15,9 @@ object GroupTypeFactory : GroupType.Factory {
     private fun GroupType.ProjectDescriptor.fix() = this as ProjectDescriptor
 
     fun getGroupTypeTree(
-        instances: List<Instance>,
+        instanceDescriptors: List<InstanceDescriptor>,
         groupingMode: GroupType.GroupingMode,
-    ) = GroupType.getGroupTypeTree(this, instances.map(::InstanceDescriptor), groupingMode).map { it.fix() }
+    ) = GroupType.getGroupTypeTree(this, instanceDescriptors, groupingMode).map { it.fix() }
 
     override fun createTime(timeStamp: TimeStamp, groupTypes: List<GroupType.TimeChild>) =
         TimeBridge(timeStamp, groupTypes.map { it.fix() })
@@ -51,7 +51,7 @@ object GroupTypeFactory : GroupType.Factory {
         return SingleBridge(instance)
     }
 
-    class InstanceDescriptor(val instance: Instance) : GroupType.InstanceDescriptor {
+    class InstanceDescriptor(val instance: Instance, val silent: Boolean) : GroupType.InstanceDescriptor {
 
         override val timeStamp get() = instance.instanceDateTime.timeStamp
 
@@ -97,5 +97,16 @@ object GroupTypeFactory : GroupType.Factory {
     class SingleBridge(val instance: Instance) : GroupType.Single, TimeChild {
 
         override val instanceKeys = setOf(instance.instanceKey)
+    }
+
+    sealed class Notification {
+
+        class Instance(val instance: com.krystianwsul.common.firebase.models.Instance, val silent: Boolean) : Notification()
+
+        class Project(
+            val project: SharedProject,
+            val instances: List<com.krystianwsul.common.firebase.models.Instance>,
+            val silent: Boolean,
+        ) : Notification()
     }
 }

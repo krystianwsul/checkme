@@ -4,6 +4,7 @@ import android.os.Build
 import android.util.Log
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.GroupType
 import com.krystianwsul.checkme.ticks.Ticker
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.project.SharedProject
@@ -309,6 +310,11 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
         }
 
         val notifies = notificationDatas.filterIsInstance<NotificationData.Notify>()
+
+        val groupTypes = GroupTypeFactory.getGroupTypeTree(
+            notifies.map { GroupTypeFactory.InstanceDescriptor(it.instance, it.silent) },
+            GroupType.GroupingMode.TIME,
+        )
 
         val projectGroups = notifies.groupBy { it.instance.getProject().projectKey }
 

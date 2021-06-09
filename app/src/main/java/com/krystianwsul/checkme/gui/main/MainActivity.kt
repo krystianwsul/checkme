@@ -5,6 +5,7 @@ import android.app.Activity
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import android.os.Parcelable
 import android.view.View
@@ -13,13 +14,15 @@ import android.view.inputmethod.InputMethodManager
 import androidx.annotation.StringRes
 import androidx.appcompat.view.ActionMode
 import androidx.appcompat.widget.Toolbar
-import androidx.core.view.MenuCompat
-import androidx.core.view.ViewCompat
-import androidx.core.view.updateLayoutParams
+import androidx.core.view.*
+import androidx.interpolator.view.animation.FastOutSlowInInterpolator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
+import androidx.transition.TransitionManager
+import com.google.android.material.color.MaterialColors
 import com.google.android.material.tabs.TabLayout
+import com.google.android.material.transition.MaterialContainerTransform
 import com.jakewharton.rxrelay3.BehaviorRelay
 import com.jakewharton.rxrelay3.PublishRelay
 import com.krystianwsul.checkme.*
@@ -45,6 +48,7 @@ import com.krystianwsul.checkme.gui.utils.connectInstanceSearch
 import com.krystianwsul.checkme.gui.utils.measureVisibleHeight
 import com.krystianwsul.checkme.gui.widgets.MyBottomBar
 import com.krystianwsul.checkme.utils.*
+import com.krystianwsul.checkme.utils.children
 import com.krystianwsul.checkme.viewmodels.*
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.utils.TaskKey
@@ -65,12 +69,12 @@ import org.joda.time.LocalDate
 import java.io.Serializable
 
 class MainActivity :
-        AbstractActivity(),
-        ShowCustomTimesFragment.CustomTimesListListener,
-        TaskListFragment.Listener,
-        DayFragment.Host,
-        FriendListFragment.FriendListListener,
-        ProjectListFragment.ProjectListListener {
+    AbstractActivity(),
+    ShowCustomTimesFragment.CustomTimesListListener,
+    TaskListFragment.Listener,
+    DayFragment.Host,
+    FriendListFragment.FriendListListener,
+    ProjectListFragment.ProjectListListener {
 
     companion object {
 
@@ -136,8 +140,8 @@ class MainActivity :
 
     private val filterCriteriaObservable by lazy {
         binding.mainSearchInclude
-                .toolbar
-                .filterCriteriaObservable
+            .toolbar
+            .filterCriteriaObservable
     }
 
     override val taskSearch by lazy {
@@ -159,14 +163,14 @@ class MainActivity :
 
         @Suppress("UNCHECKED_CAST")
         AndroidDomainUpdater.setTaskEndTimeStamps(dataId.toFirst(), taskKeys, removeInstances)
-                .observeOn(AndroidSchedulers.mainThread())
-                .flatMapMaybe { showSnackbarRemovedMaybe(it.taskKeys.size).map { _ -> it } }
-                .flatMapCompletable {
-                    // todo get dataId from current screen
-                    AndroidDomainUpdater.clearTaskEndTimeStamps(DomainListenerManager.NotificationType.First(dataId), it)
-                }
-                .subscribe()
-                .addTo(createDisposable)
+            .observeOn(AndroidSchedulers.mainThread())
+            .flatMapMaybe { showSnackbarRemovedMaybe(it.taskKeys.size).map { _ -> it } }
+            .flatMapCompletable {
+                // todo get dataId from current screen
+                AndroidDomainUpdater.clearTaskEndTimeStamps(DomainListenerManager.NotificationType.First(dataId), it)
+            }
+            .subscribe()
+            .addTo(createDisposable)
     }
 
     private val dateReceiver = object : BroadcastReceiver() {
@@ -204,18 +208,18 @@ class MainActivity :
         override fun setToolbarExpanded(expanded: Boolean) = this@MainActivity.setToolbarExpanded(expanded)
 
         override fun onCreateGroupActionMode(
-                actionMode: ActionMode,
-                treeViewAdapter: TreeViewAdapter<AbstractHolder>,
-                initial: Boolean,
+            actionMode: ActionMode,
+            treeViewAdapter: TreeViewAdapter<AbstractHolder>,
+            initial: Boolean,
         ) {
             onCreateActionMode(actionMode)
 
             check(onPageChangeDisposable == null)
 
             onPageChangeDisposable = binding.mainDaysPager
-                    .pageSelections()
-                    .skip(1)
-                    .subscribe { actionMode.finish() }
+                .pageSelections()
+                .skip(1)
+                .subscribe { actionMode.finish() }
 
             tabLayoutVisibleRelay.accept(TabLayoutVisibility.Gone(initial))
         }
@@ -244,12 +248,53 @@ class MainActivity :
         override fun initBottomBar() = this@MainActivity.initBottomBar()
 
         override fun deleteTasks(dataId: DataId, taskKeys: Set<TaskKey>) =
-                this@MainActivity.deleteTasks(dataId, taskKeys)
+            this@MainActivity.deleteTasks(dataId, taskKeys)
+
+        private fun buildContainerTransformation() =
+            MaterialContainerTransform().apply {
+                containerColor = MaterialColors.getColor(binding.root, R.attr.colorSecondary)
+                scrimColor = Color.TRANSPARENT
+                duration = 300
+                interpolator = FastOutSlowInInterpolator()
+                fadeMode = MaterialContainerTransform.FADE_MODE_IN
+            }
 
         override fun showSubtaskDialog(resultData: SubtaskDialogFragment.ResultData) {
+            bottomBinding.apply {
+                val transition = buildContainerTransformation()
+
+                transition.startView = bottomFab
+                transition.endView = bottomFabMenu
+
+                transition.addTarget(bottomFabMenu)
+
+                TransitionManager.beginDelayedTransition(findViewById(android.R.id.content), transition)
+                bottomFabMenu.visibility = View.VISIBLE
+                bottomFabScrim.visibility = View.VISIBLE
+
+                bottomFab.visibility = View.INVISIBLE
+
+                bottomFabScrim.setOnClickListener {
+                    val transition = buildContainerTransformation()
+
+                    transition.startView = bottomFabMenu
+                    transition.endView = bottomFab
+
+                    transition.addTarget(bottomFab)
+
+                    TransitionManager.beginDelayedTransition(binding.mainCoordinator, transition)
+                    bottomFabMenu.visibility = View.INVISIBLE
+                    bottomFabScrim.visibility = View.INVISIBLE
+
+                    bottomFab.visibility = View.VISIBLE
+                }
+            }
+
+            /*
             SubtaskDialogFragment.newInstance(resultData)
                     .apply { listener = subtaskDialogResult::accept }
                     .show(supportFragmentManager, TAG_SUBTASK_DAYS)
+             */
         }
     }
 
@@ -282,23 +327,23 @@ class MainActivity :
         }
 
         bottomBinding.bottomAppBar
-                .menu
-                .findItem(R.id.action_select_all)
-                ?.isVisible = visible
+            .menu
+            .findItem(R.id.action_select_all)
+            ?.isVisible = visible
     }
 
     private fun closeSearch() {
         binding.mainSearchInclude
-                .toolbar
-                .apply {
-                    check(visibility == View.VISIBLE)
+            .toolbar
+            .apply {
+                check(visibility == View.VISIBLE)
 
-                    animateVisibility(listOf(), listOf(this), duration = MyBottomBar.duration)
+                animateVisibility(listOf(), listOf(this), duration = MyBottomBar.duration)
 
-                    binding.mainSearchGroupListFragment.clearExpansionStates()
+                binding.mainSearchGroupListFragment.clearExpansionStates()
 
-                    clearSearch()
-                }
+                clearSearch()
+            }
     }
 
     private fun fixedSmoothScroll(position: Int) {
@@ -329,9 +374,9 @@ class MainActivity :
             override fun setToolbarExpanded(expanded: Boolean) = this@MainActivity.setToolbarExpanded(expanded)
 
             override fun onCreateGroupActionMode(
-                    actionMode: ActionMode,
-                    treeViewAdapter: TreeViewAdapter<AbstractHolder>,
-                    initial: Boolean,
+                actionMode: ActionMode,
+                treeViewAdapter: TreeViewAdapter<AbstractHolder>,
+                initial: Boolean,
             ) {
                 onCreateActionMode(actionMode)
 
@@ -353,35 +398,35 @@ class MainActivity :
             override fun initBottomBar() = this@MainActivity.initBottomBar()
 
             override fun deleteTasks(dataId: DataId, taskKeys: Set<TaskKey>) =
-                    this@MainActivity.deleteTasks(dataId, taskKeys)
+                this@MainActivity.deleteTasks(dataId, taskKeys)
 
             override fun showSubtaskDialog(resultData: SubtaskDialogFragment.ResultData) {
                 SubtaskDialogFragment.newInstance(resultData)
-                        .apply { listener = subtaskDialogResultSearch::accept }
-                        .show(supportFragmentManager, TAG_SUBTASK_SEARCH)
+                    .apply { listener = subtaskDialogResultSearch::accept }
+                    .show(supportFragmentManager, TAG_SUBTASK_SEARCH)
             }
         }
 
         binding.mainDaysPager.layoutManager = LinearLayoutManager(
-                this,
-                LinearLayoutManager.HORIZONTAL,
-                false
+            this,
+            LinearLayoutManager.HORIZONTAL,
+            false
         )
 
         PagerSnapHelper().attachToRecyclerView(binding.mainDaysPager)
 
         hostEvents = Observable.combineLatest(
-                tabSearchStateRelay,
-                daysPosition
+            tabSearchStateRelay,
+            daysPosition
         ) { tabSearchState: TabSearchState, position: Int ->
             if ((tabSearchState as? TabSearchState.Instances)?.isSearching == false)
                 DayFragment.Event.PageVisible(position, bottomBinding.bottomFab)
             else
                 DayFragment.Event.Invisible
         }
-                .distinctUntilChanged()
-                .replay(1)
-                .apply { createDisposable += connect() }
+            .distinctUntilChanged()
+            .replay(1)
+            .apply { createDisposable += connect() }
 
         val overrideTabSearchState: TabSearchState?
 
@@ -395,8 +440,8 @@ class MainActivity :
 
                 if (getBoolean(KEY_SEARCHING)) {
                     binding.mainSearchInclude
-                            .toolbar
-                            .visibility = View.VISIBLE
+                        .toolbar
+                        .visibility = View.VISIBLE
                 }
 
                 calendarOpen = getBoolean(CALENDAR_KEY)
@@ -422,11 +467,11 @@ class MainActivity :
                         TabSearchState.Tasks(true)
 
                     binding.mainSearchInclude
-                            .toolbar
-                            .apply {
-                                visibility = View.VISIBLE
-                                requestSearchFocus()
-                            }
+                        .toolbar
+                        .apply {
+                            visibility = View.VISIBLE
+                            requestSearchFocus()
+                        }
                 }
                 else -> overrideTabSearchState = null
             }
@@ -438,23 +483,23 @@ class MainActivity :
         MenuCompat.setGroupDividerEnabled(binding.mainActivityToolbar.menu, true)
 
         val timeRangeTriples = listOf(
-                R.id.actionMainFilterDay to Preferences.TimeRange.DAY,
-                R.id.actionMainFilterWeek to Preferences.TimeRange.WEEK,
-                R.id.actionMainFilterMonth to Preferences.TimeRange.MONTH
+            R.id.actionMainFilterDay to Preferences.TimeRange.DAY,
+            R.id.actionMainFilterWeek to Preferences.TimeRange.WEEK,
+            R.id.actionMainFilterMonth to Preferences.TimeRange.MONTH
         ).map { Triple(it.first, it.second, binding.mainActivityToolbar.menu.findItem(it.first)) }
 
         binding.mainActivityToolbar.apply {
             Preferences.showDeletedObservable
-                    .subscribe { menu.findItem(R.id.actionMainShowDeleted).isChecked = it }
-                    .addTo(createDisposable)
+                .subscribe { menu.findItem(R.id.actionMainShowDeleted).isChecked = it }
+                .addTo(createDisposable)
 
             Preferences.showAssignedObservable
-                    .subscribe { menu.findItem(R.id.actionMainAssigned).isChecked = it }
-                    .addTo(createDisposable)
+                .subscribe { menu.findItem(R.id.actionMainAssigned).isChecked = it }
+                .addTo(createDisposable)
 
             Preferences.showProjectsObservable
-                    .subscribe { menu.findItem(R.id.actionMainShowProjects).isChecked = it }
-                    .addTo(createDisposable)
+                .subscribe { menu.findItem(R.id.actionMainShowProjects).isChecked = it }
+                .addTo(createDisposable)
 
             setOnMenuItemClickListener { item ->
                 val triple = timeRangeTriples.singleOrNull { it.first == item.itemId }
@@ -473,14 +518,14 @@ class MainActivity :
                             setTabSearchState(tabSearchStateRelay.value!!.startSearch())
 
                             animateVisibility(
-                                    listOf(binding.mainSearchInclude.toolbar),
-                                    listOf(),
-                                    duration = MyBottomBar.duration
+                                listOf(binding.mainSearchInclude.toolbar),
+                                listOf(),
+                                duration = MyBottomBar.duration
                             )
 
                             binding.mainSearchInclude
-                                    .toolbar
-                                    .requestSearchFocus()
+                                .toolbar
+                                .requestSearchFocus()
                         }
                         R.id.actionMainShowDeleted -> Preferences.showDeleted = !Preferences.showDeleted
                         R.id.actionMainAssigned -> Preferences.showAssigned = !Preferences.showAssigned
@@ -494,14 +539,15 @@ class MainActivity :
         }
 
         binding.mainSearchInclude
-                .toolbar
-                .setNavigationOnClickListener { setTabSearchState(tabSearchStateRelay.value!!.closeSearch()) }
+            .toolbar
+            .setNavigationOnClickListener { setTabSearchState(tabSearchStateRelay.value!!.closeSearch()) }
 
         var debugFragment = supportFragmentManager.findFragmentById(R.id.mainDebugFrame)
         if (debugFragment != null) {
             taskListFragment = supportFragmentManager.findFragmentById(R.id.mainTaskListFrame) as TaskListFragment
             projectListFragment = supportFragmentManager.findFragmentById(R.id.mainProjectListFrame) as ProjectListFragment
-            showCustomTimesFragment = supportFragmentManager.findFragmentById(R.id.mainCustomTimesFrame) as ShowCustomTimesFragment
+            showCustomTimesFragment =
+                supportFragmentManager.findFragmentById(R.id.mainCustomTimesFrame) as ShowCustomTimesFragment
             friendListFragment = supportFragmentManager.findFragmentById(R.id.mainFriendListFrame) as FriendListFragment
             aboutFragment = supportFragmentManager.findFragmentById(R.id.mainAboutFrame) as AboutFragment
         } else {
@@ -513,60 +559,60 @@ class MainActivity :
             aboutFragment = AboutFragment.newInstance()
 
             supportFragmentManager.beginTransaction()
-                    .add(R.id.mainDebugFrame, debugFragment)
-                    .add(R.id.mainTaskListFrame, taskListFragment)
-                    .add(R.id.mainProjectListFrame, projectListFragment)
-                    .add(R.id.mainFriendListFrame, friendListFragment)
-                    .add(R.id.mainCustomTimesFrame, showCustomTimesFragment)
-                    .add(R.id.mainAboutFrame, aboutFragment)
-                    .commit()
+                .add(R.id.mainDebugFrame, debugFragment)
+                .add(R.id.mainTaskListFrame, taskListFragment)
+                .add(R.id.mainProjectListFrame, projectListFragment)
+                .add(R.id.mainFriendListFrame, friendListFragment)
+                .add(R.id.mainCustomTimesFrame, showCustomTimesFragment)
+                .add(R.id.mainAboutFrame, aboutFragment)
+                .commit()
         }
 
         binding.mainDaysPager
-                .pageSelections()
-                .subscribe {
-                    Preferences.mainTabsLog.logLineHour("pageSelections $it")
+            .pageSelections()
+            .subscribe {
+                Preferences.mainTabsLog.logLineHour("pageSelections $it")
 
-                    daysPosition.accept(it)
+                daysPosition.accept(it)
 
-                    updateBottomMenu()
+                updateBottomMenu()
 
-                    updateCalendarDate()
-                }
-                .addTo(createDisposable)
+                updateCalendarDate()
+            }
+            .addTo(createDisposable)
 
         binding.mainFrame.addOneShotGlobalLayoutListener { updateCalendarHeight() }
 
         setTabSearchState(overrideTabSearchState ?: TabSearchState.fromTabSetting(Preferences.getTab()), true)
 
         Preferences.timeRangeObservable
-                .subscribe {
-                    binding.mainTabLayout.removeAllTabs()
-                    binding.mainDaysPager.adapter = MyFragmentStatePagerAdapter()
+            .subscribe {
+                binding.mainTabLayout.removeAllTabs()
+                binding.mainDaysPager.adapter = MyFragmentStatePagerAdapter()
 
-                    binding.mainTabLayout.selectTab(
-                            binding.mainTabLayout.getTabAt(binding.mainDaysPager.currentPosition)
-                    )
+                binding.mainTabLayout.selectTab(
+                    binding.mainTabLayout.getTabAt(binding.mainDaysPager.currentPosition)
+                )
 
-                    groupSelectAllVisible.clear()
+                groupSelectAllVisible.clear()
 
-                    updateBottomMenu()
+                updateBottomMenu()
 
-                    if (it != Preferences.TimeRange.DAY) calendarOpen = false
-                    updateCalendarDate()
-                    updateCalendarHeight()
+                if (it != Preferences.TimeRange.DAY) calendarOpen = false
+                updateCalendarDate()
+                updateCalendarHeight()
 
-                    timeRangeTriples.single { it.second == Preferences.timeRange }.third.isChecked = true
-                }
-                .addTo(createDisposable)
+                timeRangeTriples.single { it.second == Preferences.timeRange }.third.isChecked = true
+            }
+            .addTo(createDisposable)
 
         initBottomBar()
 
         tabSearchStateRelay.filter { it is TabSearchState.Tasks }
-                .subscribe {
-                    bottomBinding.bottomFab.apply { if (it.isSearching) show() else hide() }
-                }
-                .addTo(createDisposable)
+            .subscribe {
+                bottomBinding.bottomFab.apply { if (it.isSearching) show() else hide() }
+            }
+            .addTo(createDisposable)
 
         binding.mainCalendar.apply {
             minDate = DateTime.now().millis
@@ -586,23 +632,23 @@ class MainActivity :
         mainViewModel.apply {
             createDisposable += data.subscribe {
                 taskListFragment.parameters = TaskListFragment.Parameters.All(
-                        TaskListFragment.Data(dataId, it.immediate, it.taskData, true),
-                        true,
+                    TaskListFragment.Data(dataId, it.immediate, it.taskData, true),
+                    true,
                 )
 
                 fun showDrawerTooltip(type: TooltipManager.Type, @StringRes message: Int) {
                     TooltipManager.fiveSecondDelay()
-                            .subscribeShowBalloon(
-                                    this@MainActivity,
-                                    type,
-                                    {
-                                        setTextResource(message)
-                                        setArrowOrientation(ArrowOrientation.BOTTOM)
-                                        setArrowPosition(0.08f)
-                                    },
-                                    { showAlignTop((bottomBinding.bottomAppBar as Toolbar).getPrivateField("mNavButtonView")) }
-                            )
-                            .addTo(createDisposable)
+                        .subscribeShowBalloon(
+                            this@MainActivity,
+                            type,
+                            {
+                                setTextResource(message)
+                                setArrowOrientation(ArrowOrientation.BOTTOM)
+                                setArrowPosition(0.08f)
+                            },
+                            { showAlignTop((bottomBinding.bottomAppBar as Toolbar).getPrivateField("mNavButtonView")) }
+                        )
+                        .addTo(createDisposable)
                 }
 
                 if (it.taskData.entryDatas.isNotEmpty())
@@ -615,8 +661,8 @@ class MainActivity :
 
         searchInstancesViewModel.apply {
             val instanceSearch = Observable.combineLatest(
-                    tabSearchStateRelay,
-                    filterCriteriaObservable
+                tabSearchStateRelay,
+                filterCriteriaObservable
             ) { tabSearchState, searchData ->
                 if ((tabSearchState as? TabSearchState.Instances)?.isSearching == true) {
                     NullableWrapper(searchData)
@@ -627,13 +673,13 @@ class MainActivity :
             }
 
             connectInstanceSearch(
-                    instanceSearch.filterNotNull(),
-                    true,
-                    { searchPage },
-                    { searchPage = it },
-                    binding.mainSearchGroupListFragment.progressShown,
-                    createDisposable,
-                    searchInstancesViewModel,
+                instanceSearch.filterNotNull(),
+                true,
+                { searchPage },
+                { searchPage = it },
+                binding.mainSearchGroupListFragment.progressShown,
+                createDisposable,
+                searchInstancesViewModel,
                 {
                     binding.mainSearchGroupListFragment.setParameters(
                         GroupListParameters.Search(
@@ -654,18 +700,18 @@ class MainActivity :
             var state: PagerScrollState = PagerScrollState.Settled
 
             binding.mainDaysPager
-                    .pageSelections()
-                    .subscribe {
-                        val currState = state
-                        if (currState is PagerScrollState.TabTarget) {
-                            if (it == currState.position)
-                                state = PagerScrollState.Settled
-                        } else {
-                            state = PagerScrollState.PagerTarget
-                            binding.mainTabLayout.apply { selectTab(getTabAt(it)) }
-                        }
+                .pageSelections()
+                .subscribe {
+                    val currState = state
+                    if (currState is PagerScrollState.TabTarget) {
+                        if (it == currState.position)
+                            state = PagerScrollState.Settled
+                    } else {
+                        state = PagerScrollState.PagerTarget
+                        binding.mainTabLayout.apply { selectTab(getTabAt(it)) }
                     }
-                    .addTo(createDisposable)
+                }
+                .addTo(createDisposable)
 
             binding.mainTabLayout.select(binding.mainDaysPager.currentPosition)
 
@@ -700,31 +746,31 @@ class MainActivity :
         tryGetFragment<SubtaskDialogFragment>(TAG_SUBTASK_SEARCH)?.listener = subtaskDialogResultSearch::accept
 
         Observables.combineLatest(
-                tabLayoutVisibleRelay,
-                binding.mainFrame
-                        .onGlobalLayout()
-                        .map { binding.mainTabLayout.measureVisibleHeight(binding.mainFrame.height) }
-                        .toObservable()
+            tabLayoutVisibleRelay,
+            binding.mainFrame
+                .onGlobalLayout()
+                .map { binding.mainTabLayout.measureVisibleHeight(binding.mainFrame.height) }
+                .toObservable()
         )
-                .subscribe { (tabLayoutVisibility, tabHeight) ->
-                    check(tabHeight > 0)
+            .subscribe { (tabLayoutVisibility, tabHeight) ->
+                check(tabHeight > 0)
 
-                    binding.mainTabLayout.apply {
-                        when (tabLayoutVisibility) {
-                            is TabLayoutVisibility.Visible -> animateHeight(0, false)
-                            is TabLayoutVisibility.Gone -> animateHeight(-tabHeight, tabLayoutVisibility.initial)
-                        }
+                binding.mainTabLayout.apply {
+                    when (tabLayoutVisibility) {
+                        is TabLayoutVisibility.Visible -> animateHeight(0, false)
+                        is TabLayoutVisibility.Gone -> animateHeight(-tabHeight, tabLayoutVisibility.initial)
                     }
                 }
-                .addTo(createDisposable)
+            }
+            .addTo(createDisposable)
     }
 
     private data class DeleteTasksData(val dataId: DataId, val taskKeys: Set<TaskKey>) : Serializable
 
     private fun deleteTasks(dataId: DataId, taskKeys: Set<TaskKey>) {
         RemoveInstancesDialogFragment.newInstance(DeleteTasksData(dataId, taskKeys))
-                .also { it.listener = deleteInstancesListener }
-                .show(supportFragmentManager, TAG_DELETE_INSTANCES)
+            .also { it.listener = deleteInstancesListener }
+            .show(supportFragmentManager, TAG_DELETE_INSTANCES)
     }
 
     private sealed class PagerScrollState {
@@ -740,18 +786,18 @@ class MainActivity :
         if (tabSearchStateRelay.value!!.tab == Tab.TASKS) taskListFragment.checkCreatedTaskKey()
 
         TooltipManager.fiveSecondDelay()
-                .mapNotNull { findViewById(R.id.actionMainCalendar) }
-                .subscribeShowBalloon(
-                        this,
-                        TooltipManager.Type.PRESS_MENU_TOOLTIP,
-                        {
-                            setTextResource(R.string.tooltip_press_menu_tooltip)
-                            setArrowOrientation(ArrowOrientation.TOP)
-                            setArrowOrientationRules(ArrowOrientationRules.ALIGN_ANCHOR)
-                        },
-                        { showAlignBottom(it) }
-                )
-                .addTo(startDisposable)
+            .mapNotNull { findViewById(R.id.actionMainCalendar) }
+            .subscribeShowBalloon(
+                this,
+                TooltipManager.Type.PRESS_MENU_TOOLTIP,
+                {
+                    setTextResource(R.string.tooltip_press_menu_tooltip)
+                    setArrowOrientation(ArrowOrientation.TOP)
+                    setArrowOrientationRules(ArrowOrientationRules.ALIGN_ANCHOR)
+                },
+                { showAlignBottom(it) }
+            )
+            .addTo(startDisposable)
     }
 
     override fun initBottomBar() {
@@ -799,17 +845,17 @@ class MainActivity :
         val itemVisibilities = when (tabSearchState) {
             is TabSearchState.Instances -> {
                 listOf(
-                        R.id.actionMainCalendar to (Preferences.timeRange == Preferences.TimeRange.DAY),
-                        R.id.actionMainSearch to true
+                    R.id.actionMainCalendar to (Preferences.timeRange == Preferences.TimeRange.DAY),
+                    R.id.actionMainSearch to true
                 )
             }
             is TabSearchState.Tasks -> listOf(
-                    R.id.actionMainCalendar to false,
-                    R.id.actionMainSearch to true
+                R.id.actionMainCalendar to false,
+                R.id.actionMainSearch to true
             )
             else -> listOf(
-                    R.id.actionMainCalendar to false,
-                    R.id.actionMainSearch to false
+                R.id.actionMainCalendar to false,
+                R.id.actionMainSearch to false
             )
         }
 
@@ -835,12 +881,12 @@ class MainActivity :
             putBoolean(CALENDAR_KEY, calendarOpen)
 
             binding.mainDaysPager
-                    .children
-                    .forEach { (it as DayFragment).saveState() }
+                .children
+                .forEach { (it as DayFragment).saveState() }
 
             putParcelableArrayList(
-                    DAY_STATES_KEY,
-                    ArrayList(states.map { ParcelableState(it.key.first, it.key.second, it.value) })
+                DAY_STATES_KEY,
+                ArrayList(states.map { ParcelableState(it.key.first, it.key.second, it.value) })
             )
 
             putParcelable(KEY_DATE, date)
@@ -885,18 +931,18 @@ class MainActivity :
         showViews += currentTabLayout
 
         binding.mainSearchInclude
-                .toolbar
-                .setMenuOptions(tabSearchState.tab.showDeleted, true, tabSearchState.tab.showProjects)
+            .toolbar
+            .setMenuOptions(tabSearchState.tab.showDeleted, true, tabSearchState.tab.showProjects)
 
         hideViews += listOf(
-                binding.mainSearchGroupListFragment,
-                binding.mainDaysLayout,
-                binding.mainTaskListFrame,
-                binding.mainProjectListFrame,
-                binding.mainCustomTimesFrame,
-                binding.mainFriendListFrame,
-                binding.mainDebugFrame,
-                binding.mainAboutFrame
+            binding.mainSearchGroupListFragment,
+            binding.mainDaysLayout,
+            binding.mainTaskListFrame,
+            binding.mainProjectListFrame,
+            binding.mainCustomTimesFrame,
+            binding.mainFriendListFrame,
+            binding.mainDebugFrame,
+            binding.mainAboutFrame
         ) - currentTabLayout
 
         if (tab == Tab.INSTANCES) {
@@ -1036,8 +1082,8 @@ class MainActivity :
 
     private fun hideKeyboard() {
         (getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager).hideSoftInputFromWindow(
-                binding.mainCoordinator.windowToken,
-                0
+            binding.mainCoordinator.windowToken,
+            0
         )
     }
 
@@ -1068,9 +1114,9 @@ class MainActivity :
         if (Preferences.timeRange != Preferences.TimeRange.DAY) return
 
         binding.mainCalendar.date = LocalDate.now()
-                .plusDays(binding.mainDaysPager.currentPosition)
-                .toDateTimeAtStartOfDay()
-                .millis
+            .plusDays(binding.mainDaysPager.currentPosition)
+            .toDateTimeAtStartOfDay()
+            .millis
     }
 
     override fun onBackPressed() {
@@ -1090,8 +1136,8 @@ class MainActivity :
         date = today
 
         binding.mainDaysPager
-                .currentPosition
-                .let { if (it > 0) fixedSmoothScroll(it - 1) }
+            .currentPosition
+            .let { if (it > 0) fixedSmoothScroll(it - 1) }
 
         dayViewModel.refresh()
         mainViewModel.refresh()
@@ -1103,7 +1149,7 @@ class MainActivity :
         override fun getItemCount() = Integer.MAX_VALUE
 
         override fun onCreateViewHolder(parent: ViewGroup, position: Int) =
-                Holder(DayFragment(this@MainActivity))
+            Holder(DayFragment(this@MainActivity))
 
         override fun onBindViewHolder(holder: Holder, position: Int) {
             val maxPosition = position + 10
@@ -1248,5 +1294,5 @@ class MainActivity :
 
     @Parcelize
     private class ParcelableState(val timeRange: Preferences.TimeRange, val position: Int, val state: Bundle) :
-            Parcelable
+        Parcelable
 }

@@ -3,6 +3,17 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
+    <FrameLayout
+        android:id="@+id/bottomFabScrim"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clickable="true"
+        android:focusable="true"
+        android:background="#66434343"
+        android:animateLayoutChanges="true"
+        android:elevation="8dp"
+        android:visibility="invisible" />
+
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/bottomFab"
         android:layout_width="wrap_content"
@@ -11,6 +22,33 @@
         android:tint="@android:color/white"
         android:visibility="invisible"
         app:layout_anchor="@id/bottomAppBar" />
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/bottomFabMenu"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="16dp"
+        app:cardElevation="8dp"
+        android:visibility="invisible">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:layout_width="match_parent"
+            android:layout_height="180dp"
+            android:layout_marginBottom="52dp" />
+
+        <com.google.android.material.button.MaterialButton
+            style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:layout_gravity="bottom"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            android:text="asdfasdf"
+            android:backgroundTint="?attr/colorSecondary"
+            app:cornerRadius="0dp" />
+
+    </com.google.android.material.card.MaterialCardView>
 
     <com.krystianwsul.checkme.gui.widgets.MyBottomBar
         android:id="@+id/bottomAppBar"
@@ -21,6 +59,8 @@
         app:backgroundTint="@color/primaryColor"
         tools:ignore="BottomAppBar"
         android:theme="@style/AppTheme.AppBarOverlay"
-        app:popupTheme="@style/AppTheme.PopupOverlay" />
+        app:popupTheme="@style/AppTheme.PopupOverlay"
+        app:fabCradleMargin="0dp"
+        app:fabCradleRoundedCornerRadius="0dp" />
 
 </merge>

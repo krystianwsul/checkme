@@ -775,6 +775,8 @@ class GroupListFragment @JvmOverloads constructor(
 
                     when {
                         canAddToTime && canAddSubtask -> FabState.Visible {
+                            selectionCallback.actionMode!!.finish()
+
                             listener.showSubtaskDialog(instanceData!!.run {
                                 SubtaskDialogFragment.ResultData(
                                     taskKey,

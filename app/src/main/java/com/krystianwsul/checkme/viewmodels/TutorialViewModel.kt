@@ -48,9 +48,13 @@ class TutorialViewModel : ViewModel() {
                 accept(State.Initial)
             }
 
-            if (googleSignInResult.status.statusCode != GoogleSignInStatusCodes.CANCELED) {
+            /**
+             * 12501 is inexplicably undocumented, but happens if the account selection dialog shows, and the user clicks
+             * outside of it.
+             */
+            if (googleSignInResult.status.statusCode !in listOf(GoogleSignInStatusCodes.CANCELED, 12501)) {
                 MyCrashlytics.logException(GoogleSignInException(
-                        googleSignInResult.run { "isSuccess: $isSuccess, status: $status" }
+                    googleSignInResult.run { "isSuccess: $isSuccess, status: $status" }
                 ))
             }
         }

@@ -25,28 +25,56 @@
 
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/bottomFabMenu"
-        android:layout_width="200dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="16dp"
         app:cardElevation="8dp"
         android:visibility="invisible">
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:layout_width="match_parent"
-            android:layout_height="180dp"
-            android:layout_marginBottom="52dp" />
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
 
-        <com.google.android.material.button.MaterialButton
-            style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
-            android:layout_width="match_parent"
-            android:layout_height="52dp"
-            android:layout_gravity="bottom"
-            android:insetTop="0dp"
-            android:insetBottom="0dp"
-            android:text="asdfasdf"
-            android:backgroundTint="?attr/colorSecondary"
-            app:cornerRadius="0dp" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView xmlns:android="http://schemas.android.com/apk/res/android"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="16dp"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:textAppearance="?attr/textAppearanceSubtitle1"
+                    android:text="asdf1" />
+
+                <TextView xmlns:android="http://schemas.android.com/apk/res/android"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="16dp"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:textAppearance="?attr/textAppearanceSubtitle1"
+                    android:text="asdf2" />
+            </LinearLayout>
+
+            <com.google.android.material.button.MaterialButton
+                style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:layout_gravity="bottom"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:text="asdfasdf"
+                android:backgroundTint="?attr/colorSecondary"
+                app:cornerRadius="0dp"
+                android:gravity="start|center_vertical"
+                android:textAllCaps="false" />
+
+        </LinearLayout>
 
     </com.google.android.material.card.MaterialCardView>
 

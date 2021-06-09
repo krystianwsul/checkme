@@ -31,9 +31,9 @@ import com.krystianwsul.checkme.gui.base.AbstractActivity
 import com.krystianwsul.checkme.gui.edit.EditActivity
 import com.krystianwsul.checkme.gui.edit.EditParameters
 import com.krystianwsul.checkme.gui.instances.EditInstancesFragment
-import com.krystianwsul.checkme.gui.instances.SubtaskDialogFragment
 import com.krystianwsul.checkme.gui.instances.tree.*
 import com.krystianwsul.checkme.gui.main.FabUser
+import com.krystianwsul.checkme.gui.main.SubtaskMenuDelegate
 import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity
 import com.krystianwsul.checkme.gui.tree.*
 import com.krystianwsul.checkme.gui.utils.*
@@ -626,20 +626,6 @@ class GroupListFragment @JvmOverloads constructor(
             }
             .addTo(attachedToWindowDisposable)
 
-        floatingActionButtonRelay
-            .filter { it.value != null }
-            .switchMap { listener.subtaskDialogResult }
-            .subscribe {
-                val hint = when (it) {
-                    is SubtaskDialogFragment.Result.SameTime ->
-                        getHint(it.resultData.run { listOf(Triple(instanceDate, createTaskTimePair, null)) })
-                    is SubtaskDialogFragment.Result.Subtask -> EditActivity.Hint.Task(it.resultData.taskKey)
-                }
-
-                startEditActivity(hint, true)
-            }
-            .addTo(attachedToWindowDisposable)
-
         parametersRelay.switchMap { parameters -> TooltipManager.fiveSecondDelay().map { parameters } }
             .filter {
                 it.draggable &&
@@ -778,12 +764,8 @@ class GroupListFragment @JvmOverloads constructor(
                         canAddToTime && canAddSubtask -> FabState.Visible {
                             selectionCallback.actionMode!!.finish()
 
-                            listener.showSubtaskDialog(instanceData!!.run {
-                                SubtaskDialogFragment.ResultData(
-                                    taskKey,
-                                    instanceDateTime.date,
-                                    createTaskTimePair,
-                                )
+                            listener.showFabMenu(instanceData!!.run {
+                                SubtaskMenuDelegate(taskKey, instanceDateTime.date, createTaskTimePair)
                             })
                         }
                         canAddSubtask -> getStartEditActivityFabState(

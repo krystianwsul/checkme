@@ -33,7 +33,6 @@ import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimesFragment
 import com.krystianwsul.checkme.gui.dialogs.RemoveInstancesDialogFragment
 import com.krystianwsul.checkme.gui.friends.FriendListFragment
 import com.krystianwsul.checkme.gui.instances.DayFragment
-import com.krystianwsul.checkme.gui.instances.SubtaskDialogFragment
 import com.krystianwsul.checkme.gui.instances.list.GroupListListener
 import com.krystianwsul.checkme.gui.instances.list.GroupListParameters
 import com.krystianwsul.checkme.gui.projects.ProjectListFragment
@@ -89,8 +88,6 @@ class MainActivity :
         private const val ACTION_SEARCH = "com.krystianwsul.checkme.SEARCH"
 
         private const val TAG_DELETE_INSTANCES = "deleteInstances"
-        private const val TAG_SUBTASK_DAYS = "subtaskDays"
-        private const val TAG_SUBTASK_SEARCH = "subtaskSearch"
 
         fun newIntent() = Intent(MyApplication.instance, MainActivity::class.java)
 
@@ -179,9 +176,6 @@ class MainActivity :
     private val mainToolbarElevation by lazy { resources.getDimension(R.dimen.mainToolbarElevation) }
     private val shortAnimTime by lazy { resources.getInteger(android.R.integer.config_shortAnimTime) }
 
-    private val subtaskDialogResultDays = PublishRelay.create<SubtaskDialogFragment.Result>()
-    private val subtaskDialogResultSearch = PublishRelay.create<SubtaskDialogFragment.Result>()
-
     private sealed class TabLayoutVisibility {
 
         object Visible : TabLayoutVisibility()
@@ -198,8 +192,6 @@ class MainActivity :
         override val instanceSearch = Preferences.showAssignedObservable.map<FilterCriteria> {
             FilterCriteria.Full(showAssignedToOthers = it)
         }
-
-        override val subtaskDialogResult = subtaskDialogResultDays
 
         override fun setToolbarExpanded(expanded: Boolean) = this@MainActivity.setToolbarExpanded(expanded)
 
@@ -246,21 +238,8 @@ class MainActivity :
         override fun deleteTasks(dataId: DataId, taskKeys: Set<TaskKey>) =
             this@MainActivity.deleteTasks(dataId, taskKeys)
 
-        override fun showSubtaskDialog(resultData: SubtaskDialogFragment.ResultData) {
-            bottomFabMenuDelegate.showMenu(
-                SubtaskMenuDelegate(
-                    resultData.taskKey,
-                    resultData.instanceDate,
-                    resultData.createTaskTimePair,
-                )
-            )
-
-            /*
-            SubtaskDialogFragment.newInstance(resultData)
-                    .apply { listener = subtaskDialogResult::accept }
-                    .show(supportFragmentManager, TAG_SUBTASK_DAYS)
-             */
-        }
+        override fun showFabMenu(menuDelegate: BottomFabMenuDelegate.MenuDelegate) =
+            bottomFabMenuDelegate.showMenu(menuDelegate)
     }
 
     private var searchPage = 0
@@ -338,8 +317,6 @@ class MainActivity :
 
             override val instanceSearch = Observable.never<FilterCriteria>()
 
-            override val subtaskDialogResult = subtaskDialogResultSearch
-
             override fun setToolbarExpanded(expanded: Boolean) = this@MainActivity.setToolbarExpanded(expanded)
 
             override fun onCreateGroupActionMode(
@@ -369,11 +346,8 @@ class MainActivity :
             override fun deleteTasks(dataId: DataId, taskKeys: Set<TaskKey>) =
                 this@MainActivity.deleteTasks(dataId, taskKeys)
 
-            override fun showSubtaskDialog(resultData: SubtaskDialogFragment.ResultData) {
-                SubtaskDialogFragment.newInstance(resultData)
-                    .apply { listener = subtaskDialogResultSearch::accept }
-                    .show(supportFragmentManager, TAG_SUBTASK_SEARCH)
-            }
+            override fun showFabMenu(menuDelegate: BottomFabMenuDelegate.MenuDelegate) =
+                bottomFabMenuDelegate.showMenu(menuDelegate)
         }
 
         binding.mainDaysPager.layoutManager = LinearLayoutManager(
@@ -710,9 +684,6 @@ class MainActivity :
         tryGetFragment<RemoveInstancesDialogFragment>(TAG_DELETE_INSTANCES)?.listener = deleteInstancesListener
 
         startDate(dateReceiver)
-
-        tryGetFragment<SubtaskDialogFragment>(TAG_SUBTASK_DAYS)?.listener = subtaskDialogResultDays::accept
-        tryGetFragment<SubtaskDialogFragment>(TAG_SUBTASK_SEARCH)?.listener = subtaskDialogResultSearch::accept
 
         Observables.combineLatest(
             tabLayoutVisibleRelay,

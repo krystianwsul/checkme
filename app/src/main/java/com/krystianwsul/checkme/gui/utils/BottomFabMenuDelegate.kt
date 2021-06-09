@@ -19,24 +19,34 @@ class BottomFabMenuDelegate(
     private val bottomBinding: BottomBinding,
     private val coordinatorLayout: CoordinatorLayout,
     private val activity: Activity,
+    initialMenuDelegate: MenuDelegate?,
 ) {
 
+    private var menuDelegate: MenuDelegate? = null
+
     init {
+        bottomBinding.bottomFabScrim.setOnClickListener { closeMenu() }
+
+        initialMenuDelegate?.let { showMenu(it, false) }
+    }
+
+    private fun closeMenu() {
+        checkNotNull(menuDelegate)
+        menuDelegate = null
+
         bottomBinding.apply {
-            bottomFabScrim.setOnClickListener {
-                val transition = buildContainerTransformation()
+            val transition = buildContainerTransformation()
 
-                transition.startView = bottomFabMenu
-                transition.endView = bottomFab
+            transition.startView = bottomFabMenu
+            transition.endView = bottomFab
 
-                transition.addTarget(bottomFab)
+            transition.addTarget(bottomFab)
 
-                TransitionManager.beginDelayedTransition(coordinatorLayout, transition)
-                bottomFabMenu.visibility = View.INVISIBLE
-                bottomFabScrim.visibility = View.INVISIBLE
+            TransitionManager.beginDelayedTransition(coordinatorLayout, transition)
+            bottomFabMenu.visibility = View.INVISIBLE
+            bottomFabScrim.visibility = View.INVISIBLE
 
-                bottomFab.visibility = View.VISIBLE
-            }
+            bottomFab.visibility = View.VISIBLE
         }
     }
 
@@ -48,10 +58,11 @@ class BottomFabMenuDelegate(
         fadeMode = MaterialContainerTransform.FADE_MODE_IN
     }
 
-    fun showMenu(menuDelegate: MenuDelegate) {
-        bottomBinding.apply {
-            val transition = buildContainerTransformation()
+    fun showMenu(menuDelegate: MenuDelegate, animate: Boolean = true) {
+        check(this.menuDelegate == null)
+        this.menuDelegate = menuDelegate
 
+        bottomBinding.apply {
             bottomFabMenuList.removeAllViews()
 
             val items = menuDelegate.getItems()
@@ -78,18 +89,25 @@ class BottomFabMenuDelegate(
                 }
             }
 
-            transition.startView = bottomFab
-            transition.endView = bottomFabMenu
+            if (animate) {
+                val transition = buildContainerTransformation()
 
-            transition.addTarget(bottomFabMenu)
+                transition.startView = bottomFab
+                transition.endView = bottomFabMenu
 
-            TransitionManager.beginDelayedTransition(activity.findViewById(android.R.id.content), transition)
+                transition.addTarget(bottomFabMenu)
+
+                TransitionManager.beginDelayedTransition(activity.findViewById(android.R.id.content), transition)
+            }
+
             bottomFabMenu.visibility = View.VISIBLE
             bottomFabScrim.visibility = View.VISIBLE
 
             bottomFab.visibility = View.INVISIBLE
         }
     }
+
+    fun getState() = menuDelegate
 
     interface MenuDelegate : Parcelable {
 

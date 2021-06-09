@@ -80,6 +80,7 @@ class MainActivity :
         private const val KEY_DATE = "date"
         private const val KEY_SEARCH_PAGE = "searchPage"
         private const val KEY_SEARCHING = "searching"
+        private const val KEY_MENU_DELEGATE_STATE = "menuDelegateState"
 
         private const val DRAWER_TAG = "drawer"
 
@@ -309,7 +310,12 @@ class MainActivity :
         bottomBinding = BottomBinding.bind(binding.root)
         setContentView(binding.root)
 
-        bottomFabMenuDelegate = BottomFabMenuDelegate(bottomBinding, binding.mainCoordinator, this)
+        bottomFabMenuDelegate = BottomFabMenuDelegate(
+            bottomBinding,
+            binding.mainCoordinator,
+            this,
+            savedInstanceState?.getParcelable(KEY_MENU_DELEGATE_STATE),
+        )
 
         binding.mainSearchGroupListFragment.listener = object : GroupListListener {
 
@@ -832,6 +838,8 @@ class MainActivity :
             putParcelable(KEY_DATE, date)
 
             putInt(KEY_SEARCH_PAGE, searchPage)
+
+            putParcelable(KEY_MENU_DELEGATE_STATE, bottomFabMenuDelegate.getState())
         }
     }
 

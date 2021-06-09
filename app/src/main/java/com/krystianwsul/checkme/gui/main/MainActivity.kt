@@ -247,7 +247,13 @@ class MainActivity :
             this@MainActivity.deleteTasks(dataId, taskKeys)
 
         override fun showSubtaskDialog(resultData: SubtaskDialogFragment.ResultData) {
-            bottomFabMenuDelegate.showMenu()
+            bottomFabMenuDelegate.showMenu(
+                SubtaskMenuDelegate(
+                    resultData.taskKey,
+                    resultData.instanceDate,
+                    resultData.createTaskTimePair
+                )
+            )
 
             /*
             SubtaskDialogFragment.newInstance(resultData)

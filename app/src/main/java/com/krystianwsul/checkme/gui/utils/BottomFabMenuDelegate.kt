@@ -1,7 +1,10 @@
 package com.krystianwsul.checkme.gui.utils
 
 import android.app.Activity
+import android.content.Context
 import android.graphics.Color
+import android.os.Parcelable
+import android.view.LayoutInflater
 import android.view.View
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.interpolator.view.animation.FastOutSlowInInterpolator
@@ -10,6 +13,7 @@ import com.google.android.material.color.MaterialColors
 import com.google.android.material.transition.MaterialContainerTransform
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.BottomBinding
+import com.krystianwsul.checkme.databinding.ItemFabMenuBinding
 
 class BottomFabMenuDelegate(
     private val bottomBinding: BottomBinding,
@@ -44,9 +48,25 @@ class BottomFabMenuDelegate(
         fadeMode = MaterialContainerTransform.FADE_MODE_IN
     }
 
-    fun showMenu() {
+    fun showMenu(menuDelegate: MenuDelegate) {
         bottomBinding.apply {
             val transition = buildContainerTransformation()
+
+            bottomFabMenuList.removeAllViews()
+
+            val items = menuDelegate.getItems()
+
+            items.dropLast(1).forEach {
+                val itemFabMenuBinding = ItemFabMenuBinding.inflate(
+                    LayoutInflater.from(bottomFabMenu.context),
+                    bottomFabMenuList,
+                    true,
+                )
+
+                itemFabMenuBinding.root.text = it.getText(bottomFabMenu.context)
+            }
+
+            items.last().let { bottomBinding.bottomFabMenuButton.text = it.getText(bottomFabMenu.context) }
 
             transition.startView = bottomFab
             transition.endView = bottomFabMenu
@@ -58,6 +78,16 @@ class BottomFabMenuDelegate(
             bottomFabScrim.visibility = View.VISIBLE
 
             bottomFab.visibility = View.INVISIBLE
+        }
+    }
+
+    interface MenuDelegate : Parcelable {
+
+        fun getItems(): List<Item>
+
+        interface Item {
+
+            fun getText(context: Context): String
         }
     }
 }

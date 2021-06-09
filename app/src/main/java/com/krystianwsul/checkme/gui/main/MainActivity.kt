@@ -5,7 +5,6 @@ import android.app.Activity
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.graphics.Color
 import android.os.Bundle
 import android.os.Parcelable
 import android.view.View
@@ -15,14 +14,10 @@ import androidx.annotation.StringRes
 import androidx.appcompat.view.ActionMode
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.*
-import androidx.interpolator.view.animation.FastOutSlowInInterpolator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
-import androidx.transition.TransitionManager
-import com.google.android.material.color.MaterialColors
 import com.google.android.material.tabs.TabLayout
-import com.google.android.material.transition.MaterialContainerTransform
 import com.jakewharton.rxrelay3.BehaviorRelay
 import com.jakewharton.rxrelay3.PublishRelay
 import com.krystianwsul.checkme.*
@@ -44,6 +39,7 @@ import com.krystianwsul.checkme.gui.instances.list.GroupListParameters
 import com.krystianwsul.checkme.gui.projects.ProjectListFragment
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
+import com.krystianwsul.checkme.gui.utils.BottomFabMenuDelegate
 import com.krystianwsul.checkme.gui.utils.connectInstanceSearch
 import com.krystianwsul.checkme.gui.utils.measureVisibleHeight
 import com.krystianwsul.checkme.gui.widgets.MyBottomBar
@@ -250,45 +246,8 @@ class MainActivity :
         override fun deleteTasks(dataId: DataId, taskKeys: Set<TaskKey>) =
             this@MainActivity.deleteTasks(dataId, taskKeys)
 
-        private fun buildContainerTransformation() =
-            MaterialContainerTransform().apply {
-                containerColor = MaterialColors.getColor(binding.root, R.attr.colorSecondary)
-                scrimColor = Color.TRANSPARENT
-                duration = 300
-                interpolator = FastOutSlowInInterpolator()
-                fadeMode = MaterialContainerTransform.FADE_MODE_IN
-            }
-
         override fun showSubtaskDialog(resultData: SubtaskDialogFragment.ResultData) {
-            bottomBinding.apply {
-                val transition = buildContainerTransformation()
-
-                transition.startView = bottomFab
-                transition.endView = bottomFabMenu
-
-                transition.addTarget(bottomFabMenu)
-
-                TransitionManager.beginDelayedTransition(findViewById(android.R.id.content), transition)
-                bottomFabMenu.visibility = View.VISIBLE
-                bottomFabScrim.visibility = View.VISIBLE
-
-                bottomFab.visibility = View.INVISIBLE
-
-                bottomFabScrim.setOnClickListener {
-                    val transition = buildContainerTransformation()
-
-                    transition.startView = bottomFabMenu
-                    transition.endView = bottomFab
-
-                    transition.addTarget(bottomFab)
-
-                    TransitionManager.beginDelayedTransition(binding.mainCoordinator, transition)
-                    bottomFabMenu.visibility = View.INVISIBLE
-                    bottomFabScrim.visibility = View.INVISIBLE
-
-                    bottomFab.visibility = View.VISIBLE
-                }
-            }
+            bottomFabMenuDelegate.showMenu()
 
             /*
             SubtaskDialogFragment.newInstance(resultData)
@@ -302,6 +261,8 @@ class MainActivity :
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var bottomBinding: BottomBinding
+
+    private lateinit var bottomFabMenuDelegate: BottomFabMenuDelegate
 
     override fun getBottomBar() = bottomBinding.bottomAppBar
 
@@ -362,6 +323,8 @@ class MainActivity :
         binding = ActivityMainBinding.inflate(layoutInflater)
         bottomBinding = BottomBinding.bind(binding.root)
         setContentView(binding.root)
+
+        bottomFabMenuDelegate = BottomFabMenuDelegate(bottomBinding, binding.mainCoordinator, this)
 
         binding.mainSearchGroupListFragment.listener = object : GroupListListener {
 

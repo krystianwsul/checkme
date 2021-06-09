@@ -46,7 +46,7 @@
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/bottomFabMenuButton"
                 style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="52dp"
                 android:layout_gravity="bottom"
                 android:insetTop="0dp"

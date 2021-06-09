@@ -112,6 +112,16 @@ class GroupListFragment @JvmOverloads constructor(
 
             return instanceDatas.toSet()
         }
+
+        fun getHint(triples: List<Triple<Date, TimePair, ProjectKey.Shared?>>): EditActivity.Hint.Schedule {
+            val projectKey = triples.map { it.third }
+                .distinct()
+                .singleOrNull()
+
+            val (date, timePair) = triples.firstOrNull { it.second.customTimeKey != null } ?: triples.first()
+
+            return EditActivity.Hint.Schedule(date, timePair, projectKey)
+        }
     }
 
     val activity get() = context as AbstractActivity
@@ -621,9 +631,8 @@ class GroupListFragment @JvmOverloads constructor(
             .switchMap { listener.subtaskDialogResult }
             .subscribe {
                 val hint = when (it) {
-                    is SubtaskDialogFragment.Result.SameTime -> it.resultData
-                        .run { listOf(Triple(instanceDate, createTaskTimePair, null)) }
-                        .getHint()
+                    is SubtaskDialogFragment.Result.SameTime ->
+                        getHint(it.resultData.run { listOf(Triple(instanceDate, createTaskTimePair, null)) })
                     is SubtaskDialogFragment.Result.Subtask -> EditActivity.Hint.Task(it.resultData.taskKey)
                 }
 
@@ -744,19 +753,11 @@ class GroupListFragment @JvmOverloads constructor(
         activity.startActivity(EditActivity.getParametersIntent(EditParameters.Create(hint)))
     }
 
-    private fun List<Triple<Date, TimePair, ProjectKey.Shared?>>.getHint(): EditActivity.Hint.Schedule {
-        val projectKey = map { it.third }.distinct().singleOrNull()
-        val (date, timePair) = firstOrNull { it.second.customTimeKey != null } ?: first()
-
-        return EditActivity.Hint.Schedule(date, timePair, projectKey)
-    }
-
     private fun getFabState(): FabState {
         if (!parametersRelay.hasValue()) return FabState.Hidden
 
-        fun List<GroupListDataWrapper.InstanceData>.getHint() = map {
-            Triple(it.instanceDateTime.date, it.createTaskTimePair, it.projectKey)
-        }.getHint()
+        fun List<GroupListDataWrapper.InstanceData>.getHint() =
+            getHint(map { Triple(it.instanceDateTime.date, it.createTaskTimePair, it.projectKey) })
 
         return if (selectionCallback.hasActionMode) {
             if (parameters.fabActionMode != GroupListParameters.FabActionMode.NONE) {

@@ -251,7 +251,7 @@ class MainActivity :
                 SubtaskMenuDelegate(
                     resultData.taskKey,
                     resultData.instanceDate,
-                    resultData.createTaskTimePair
+                    resultData.createTaskTimePair,
                 )
             )
 

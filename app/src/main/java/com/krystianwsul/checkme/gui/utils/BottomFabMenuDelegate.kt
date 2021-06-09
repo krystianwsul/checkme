@@ -57,16 +57,26 @@ class BottomFabMenuDelegate(
             val items = menuDelegate.getItems()
 
             items.dropLast(1).forEach {
-                val itemFabMenuBinding = ItemFabMenuBinding.inflate(
+                ItemFabMenuBinding.inflate(
                     LayoutInflater.from(bottomFabMenu.context),
                     bottomFabMenuList,
                     true,
                 )
+                    .root
+                    .apply {
+                        text = it.getText(bottomFabMenu.context)
 
-                itemFabMenuBinding.root.text = it.getText(bottomFabMenu.context)
+                        setOnClickListener { _ -> it.onClick(activity) }
+                    }
             }
 
-            items.last().let { bottomBinding.bottomFabMenuButton.text = it.getText(bottomFabMenu.context) }
+            items.last().let {
+                bottomBinding.bottomFabMenuButton.apply {
+                    text = it.getText(bottomFabMenu.context)
+
+                    setOnClickListener { _ -> it.onClick(activity) }
+                }
+            }
 
             transition.startView = bottomFab
             transition.endView = bottomFabMenu
@@ -88,6 +98,8 @@ class BottomFabMenuDelegate(
         interface Item {
 
             fun getText(context: Context): String
+
+            fun onClick(activity: Activity)
         }
     }
 }

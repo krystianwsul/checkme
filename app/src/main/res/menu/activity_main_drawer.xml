@@ -12,6 +12,11 @@
             android:title="@string/instances" />
 
         <item
+            android:id="@+id/main_drawer_notes"
+            android:icon="@drawable/ic_baseline_notes_24_black"
+            android:title="@string/notes" />
+
+        <item
             android:id="@+id/main_drawer_tasks"
             android:icon="@drawable/ic_assignment_black_24dp"
             android:title="@string/tasks" />

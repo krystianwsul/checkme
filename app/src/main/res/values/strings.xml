@@ -5,6 +5,7 @@
     <string name="tomorrow">Tomorrow</string>
     <string name="daily">Daily</string>
     <string name="tasks">Tasks</string>
+    <string name="allTasks">All tasks</string>
     <string name="instances">Reminders</string>
     <string name="times">Times</string>
     <string name="other">Pick a time manually</string>

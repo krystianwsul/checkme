@@ -19,7 +19,7 @@
         <item
             android:id="@+id/main_drawer_tasks"
             android:icon="@drawable/ic_assignment_black_24dp"
-            android:title="@string/tasks" />
+            android:title="@string/allTasks" />
 
         <item
             android:id="@+id/main_drawer_projects"

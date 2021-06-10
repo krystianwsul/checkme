@@ -2,12 +2,12 @@
     <!-- Reply Preference -->
     <string-array name="start_screen_entries">
         <item>@string/instances</item>
-        <item>@string/tasks</item>
+        <item>@string/notes</item>
     </string-array>
 
     <string-array name="start_screen_values">
         <item>@string/instances</item>
-        <item>@string/tasks</item>
+        <item>@string/notes</item>
     </string-array>
 
     <string-array name="notification_entries">

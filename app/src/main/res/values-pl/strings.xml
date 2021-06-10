@@ -5,6 +5,7 @@
     <string name="tomorrow">Jutro</string>
     <string name="daily">Codziennie</string>
     <string name="tasks">Zadania</string>
+    <string name="allTasks">Wszystkie zadania</string>
     <string name="instances">Przypomnienia</string>
     <string name="times">Czasy</string>
     <string name="other">Wybierz czas ręcznie</string>

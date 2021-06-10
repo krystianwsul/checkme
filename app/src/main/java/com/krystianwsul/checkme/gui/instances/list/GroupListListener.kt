@@ -32,5 +32,5 @@ interface GroupListListener : SnackbarListener, ListItemAddedListener {
 
     fun deleteTasks(dataId: DataId, taskKeys: Set<TaskKey>)
 
-    fun showFabMenu(menuDelegate: BottomFabMenuDelegate.MenuDelegate): Unit = throw UnsupportedOperationException()
+    fun showFabMenu(menuDelegate: BottomFabMenuDelegate.MenuDelegate)
 }

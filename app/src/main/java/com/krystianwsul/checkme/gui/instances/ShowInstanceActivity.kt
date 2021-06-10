@@ -416,9 +416,11 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
 
     override fun deleteTasks(dataId: DataId, taskKeys: Set<TaskKey>) {
         RemoveInstancesDialogFragment.newInstance(taskKeys)
-                .also { it.listener = deleteInstancesListener }
-                .show(supportFragmentManager, TAG_DELETE_INSTANCES)
+            .also { it.listener = deleteInstancesListener }
+            .show(supportFragmentManager, TAG_DELETE_INSTANCES)
     }
+
+    override fun showFabMenu(menuDelegate: BottomFabMenuDelegate.MenuDelegate) = bottomFabMenuDelegate.showMenu(menuDelegate)
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)

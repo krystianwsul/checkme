@@ -454,9 +454,15 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                     projectData?.canAddSubtask == true -> {
                         show()
 
-                        val hint = (projectData.projectKey as? ProjectKey.Shared)?.let { EditActivity.Hint.Project(it) }
+                        val sharedProjectKey = projectData.projectKey as? ProjectKey.Shared
 
-                        edit(EditParameters.Create(hint))
+                        val hint = sharedProjectKey?.let(EditActivity.Hint::Project)
+
+                        setOnClickListener {
+                            selectionCallback.actionMode!!.finish()
+
+                            listener.showFabMenu(ReminderOrNoteMenuDelegate(hint, true, sharedProjectKey))
+                        }
                     }
                     else -> hide()
                 }
@@ -937,6 +943,8 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         fun initBottomBar()
 
         fun startCopy(taskKey: TaskKey): Unit = throw UnsupportedOperationException()
+
+        fun showFabMenu(menuDelegate: BottomFabMenuDelegate.MenuDelegate)
     }
 
     data class TopLevelTaskData(val taskKey: TaskKey, val imageState: ImageState?)

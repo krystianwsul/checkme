@@ -17,6 +17,7 @@ import com.krystianwsul.checkme.gui.dialogs.RemoveInstancesDialogFragment
 import com.krystianwsul.checkme.gui.instances.list.GroupListListener
 import com.krystianwsul.checkme.gui.instances.list.GroupListParameters
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
+import com.krystianwsul.checkme.gui.utils.BottomFabMenuDelegate
 import com.krystianwsul.checkme.utils.startDate
 import com.krystianwsul.checkme.utils.tryGetFragment
 import com.krystianwsul.checkme.viewmodels.DataId
@@ -40,6 +41,8 @@ class ShowNotificationGroupActivity : AbstractActivity(), GroupListListener {
         private const val KEY_PROJECT_KEY = "projectKey"
 
         private const val TAG_DELETE_INSTANCES = "deleteInstances"
+
+        private const val KEY_MENU_DELEGATE_STATE = "menuDelegateState"
 
         fun getIntent(context: Context, projectKey: ProjectKey.Shared? = null) =
             Intent(context, ShowNotificationGroupActivity::class.java).putExtra(KEY_PROJECT_KEY, projectKey as? Parcelable)
@@ -84,12 +87,21 @@ class ShowNotificationGroupActivity : AbstractActivity(), GroupListListener {
     private lateinit var binding: ActivityShowNotificationGroupBinding
     private lateinit var bottomBinding: BottomBinding
 
+    private lateinit var bottomFabMenuDelegate: BottomFabMenuDelegate
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         binding = ActivityShowNotificationGroupBinding.inflate(layoutInflater)
         bottomBinding = BottomBinding.bind(binding.root)
         setContentView(binding.root)
+
+        bottomFabMenuDelegate = BottomFabMenuDelegate(
+            bottomBinding,
+            binding.showNotificationGroupCoordinator,
+            this,
+            savedInstanceState?.getParcelable(KEY_MENU_DELEGATE_STATE),
+        )
 
         binding.groupListFragment.listener = this
 
@@ -200,6 +212,8 @@ class ShowNotificationGroupActivity : AbstractActivity(), GroupListListener {
             .show(supportFragmentManager, TAG_DELETE_INSTANCES)
     }
 
+    override fun showFabMenu(menuDelegate: BottomFabMenuDelegate.MenuDelegate) = bottomFabMenuDelegate.showMenu(menuDelegate)
+
     override fun setToolbarExpanded(expanded: Boolean) = binding.showNotificationGroupToolbarCollapseInclude
         .collapseAppBarLayout
         .setExpanded(expanded)
@@ -208,5 +222,11 @@ class ShowNotificationGroupActivity : AbstractActivity(), GroupListListener {
         binding.showNotificationGroupToolbarCollapseInclude
             .collapseAppBarLayout
             .apply { if (isSearching) closeSearch() else super.onBackPressed() }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+
+        outState.putParcelable(KEY_MENU_DELEGATE_STATE, bottomFabMenuDelegate.state)
     }
 }

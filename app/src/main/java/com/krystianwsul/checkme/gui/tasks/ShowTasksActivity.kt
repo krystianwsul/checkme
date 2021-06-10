@@ -179,6 +179,8 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
         }
     }
 
+    override fun showFabMenu(menuDelegate: BottomFabMenuDelegate.MenuDelegate) = bottomFabMenuDelegate.showMenu(menuDelegate)
+
     override fun setToolbarExpanded(expanded: Boolean) = binding.showTasksToolbarCollapseInclude
         .collapseAppBarLayout
         .setExpanded(expanded)

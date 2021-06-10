@@ -243,6 +243,8 @@ class ShowTaskInstancesActivity : AbstractActivity(), GroupListListener {
             .show(supportFragmentManager, TAG_DELETE_INSTANCES)
     }
 
+    override fun showFabMenu(menuDelegate: BottomFabMenuDelegate.MenuDelegate) = bottomFabMenuDelegate.showMenu(menuDelegate)
+
     private fun updateTopMenu() {
         val showProjectOptions = parameters is Parameters.Project &&
                 !data?.groupListDataWrapper

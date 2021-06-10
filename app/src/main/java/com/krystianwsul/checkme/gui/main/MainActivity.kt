@@ -785,6 +785,8 @@ class MainActivity :
         }
     }
 
+    override fun showFabMenu(menuDelegate: BottomFabMenuDelegate.MenuDelegate) = bottomFabMenuDelegate.showMenu(menuDelegate)
+
     private fun updateTopMenu() {
         val tabSearchState = tabSearchStateRelay.value!!
 

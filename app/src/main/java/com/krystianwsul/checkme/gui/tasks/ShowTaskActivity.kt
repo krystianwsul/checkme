@@ -260,13 +260,15 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.Listener {
         }
     }
 
+    override fun showFabMenu(menuDelegate: BottomFabMenuDelegate.MenuDelegate) = bottomFabMenuDelegate.showMenu(menuDelegate)
+
     override fun setToolbarExpanded(expanded: Boolean) = binding.showTaskToolbarCollapseInclude
-            .collapseAppBarLayout
-            .setExpanded(expanded)
+        .collapseAppBarLayout
+        .setExpanded(expanded)
 
     override fun onBackPressed() {
         binding.showTaskToolbarCollapseInclude
-                .collapseAppBarLayout
-                .apply { if (isSearching) closeSearch() else super.onBackPressed() }
+            .collapseAppBarLayout
+            .apply { if (isSearching) closeSearch() else super.onBackPressed() }
     }
 }

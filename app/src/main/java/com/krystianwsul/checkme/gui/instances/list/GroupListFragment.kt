@@ -1045,7 +1045,7 @@ class GroupListFragment @JvmOverloads constructor(
             return listOf(
                 object : BottomFabMenuDelegate.MenuDelegate.Item {
 
-                    override fun getText(context: Context) = "Add note"
+                    override fun getText(context: Context) = "Add note" // todo fab
 
                     override fun onClick(activity: Activity) {
                         activity.startActivity(
@@ -1055,7 +1055,7 @@ class GroupListFragment @JvmOverloads constructor(
                 },
                 object : BottomFabMenuDelegate.MenuDelegate.Item {
 
-                    override fun getText(context: Context) = "Add reminder"
+                    override fun getText(context: Context) = "Add reminder" // todo fab
 
                     override fun onClick(activity: Activity) {
                         activity.startActivity(EditActivity.getParametersIntent(EditParameters.Create(hint)))

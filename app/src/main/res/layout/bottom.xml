@@ -27,8 +27,8 @@
         android:id="@+id/bottomFabMenu"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="16dp"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginBottom="28dp"
         app:cardElevation="8dp"
         android:visibility="invisible">
 

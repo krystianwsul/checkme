@@ -724,13 +724,18 @@ class GroupListFragment @JvmOverloads constructor(
     }
 
     private fun getStartEditActivityFabState(hint: EditActivity.Hint, closeActionMode: Boolean = false) =
-        FabState.Visible { startEditActivity(hint, closeActionMode) }
+        FabState.Visible {
+            if (closeActionMode) selectionCallback.actionMode!!.finish()
 
-    private fun startEditActivity(hint: EditActivity.Hint, closeActionMode: Boolean) {
-        if (closeActionMode) selectionCallback.actionMode!!.finish()
+            activity.startActivity(EditActivity.getParametersIntent(EditParameters.Create(hint)))
+        }
 
-        activity.startActivity(EditActivity.getParametersIntent(EditParameters.Create(hint)))
-    }
+    private fun getFabMenuFabState(hint: EditActivity.Hint) =
+        FabState.Visible {
+            selectionCallback.actionMode?.finish()
+
+            listener.showFabMenu(ReminderOrNoteMenuDelegate(hint))
+        }
 
     private fun getFabState(): FabState {
         if (!parametersRelay.hasValue()) return FabState.Hidden
@@ -765,10 +770,7 @@ class GroupListFragment @JvmOverloads constructor(
                             EditActivity.Hint.Task(singleSelectedData.taskKey),
                             true,
                         )
-                        canAddToTime -> getStartEditActivityFabState(
-                            listOf(instanceData!!).getHint(),
-                            true,
-                        )
+                        canAddToTime -> getStartEditActivityFabState(listOf(instanceData!!).getHint(), true)
                         else -> FabState.Hidden
                     }
                 } else {
@@ -832,7 +834,7 @@ class GroupListFragment @JvmOverloads constructor(
                 else
                     FabState.Hidden
                 is GroupListParameters.Parent -> parameters.projectKey
-                    ?.let { getStartEditActivityFabState(EditActivity.Hint.Project(it)) }
+                    ?.let { getFabMenuFabState(EditActivity.Hint.Project(it)) }
                     ?: FabState.Hidden
                 else -> FabState.Hidden
             }

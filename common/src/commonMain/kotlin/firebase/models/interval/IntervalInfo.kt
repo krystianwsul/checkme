@@ -41,12 +41,6 @@ class IntervalInfo(val task: Task, val intervals: List<Interval>) {
         }
     }
 
-    fun getCurrentNoScheduleOrParent(now: ExactTimeStamp.Local) =
-        getInterval(now).let { (it.type as? Type.NoSchedule)?.getNoScheduleOrParentInterval(it) }?.also {
-            check(it.currentOffset(now))
-            check(it.noScheduleOrParent.currentOffset(now))
-        }
-
     fun getParentTaskHierarchy(exactTimeStamp: ExactTimeStamp): HierarchyInterval? {
         task.requireCurrentOffset(exactTimeStamp)
 

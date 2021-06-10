@@ -23,7 +23,7 @@
     <string name="copyTask">Copy</string>
     <string name="mark_done">Mark done</string>
     <string name="mark_not_done">Mark not done</string>
-    <string name="name_hint">Name</string>
+    <string name="title_hint">Title</string>
     <string name="edit_task">Edit task</string>
     <string name="delete_task">Remove task</string>
     <string name="error_date">Date is in the past</string>
@@ -39,13 +39,13 @@
     <string name="parentTask">Add to project or task</string>
     <string name="share">Share</string>
     <string name="sendTo">Send to:</string>
-    <string name="nameError">Enter a name</string>
+    <string name="titleError">Enter a title</string>
     <string name="add_task">Add task</string>
     <string name="noReminder">No reminders</string>
     <string name="addReminder">Add reminder</string>
     <string name="addNote">Add note</string>
     <string name="selectAll">Select all</string>
-    <string name="note">Note</string>
+    <string name="description">Description</string>
     <string name="monthDay">day</string>
     <string name="monthDayStart">from the</string>
     <string name="monthDayEnd">of the month</string>
@@ -63,7 +63,7 @@
     <string name="projects">Projects</string>
     <string name="projects_empty">Add a project by clicking the plus at the bottom.</string>
     <string name="showInstances">Show reminders</string>
-    <string name="tutorial1">Begin by creating a task.  A task can have a name, notes, and subtasks.</string>
+    <string name="tutorial1">Begin by creating a task.  A task can have a title, description, and subtasks.</string>
     <string name="tutorial2">You can also add reminders to a task, to get notified about it at a specific time. You can be notified once, on certain days of the week, or on a certain day of every month.</string>
     <string name="tutorial3">You can set a reminder for a specific hour.  Also, you can add a named time of day as a shortcut, if you often have things to do at a specific time.</string>
     <string name="tutorial4">Sign into your Google account to share tasks with other users.  Start out by searching for users by e-mail address to add them as friends.  Create a project, and add friends to it.  Finally, when creating or editing a task, set the project as its parent.</string>

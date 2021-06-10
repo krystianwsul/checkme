@@ -395,7 +395,7 @@ class ShowCustomTimeActivity : NavBarActivity() {
                 .toolbarLayout
                 .apply {
                     if (binding.showCustomTimeToolbarEditTextInclude.toolbarEditText.text.isNullOrEmpty()) {
-                        error = getString(R.string.nameError)
+                        error = getString(R.string.titleError)
                         setPadding(0, 0, 0, 0)
                     } else {
                         error = null

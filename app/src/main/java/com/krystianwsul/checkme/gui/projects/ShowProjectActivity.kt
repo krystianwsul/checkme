@@ -226,8 +226,8 @@ class ShowProjectActivity : AbstractActivity(), UserListFragment.UserListListene
 
         return if (binding.showProjectToolbarEditTextInclude.toolbarEditText.text.isNullOrEmpty()) {
             binding.showProjectToolbarEditTextInclude
-                    .toolbarLayout
-                    .error = getString(R.string.nameError)
+                .toolbarLayout
+                .error = getString(R.string.titleError)
 
             true
         } else {

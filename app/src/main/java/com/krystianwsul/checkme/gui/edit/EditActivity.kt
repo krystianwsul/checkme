@@ -458,11 +458,11 @@ class EditActivity : NavBarActivity() {
     }
 
     private fun updateNameError(): Boolean {
-        val error = getString(R.string.nameError).takeIf {
+        val error = getString(R.string.titleError).takeIf {
             binding.editToolbarEditTextInclude
-                    .toolbarEditText
-                    .text
-                    .isNullOrEmpty()
+                .toolbarEditText
+                .text
+                .isNullOrEmpty()
         }
 
         binding.editToolbarEditTextInclude

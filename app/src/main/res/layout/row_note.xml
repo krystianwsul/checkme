@@ -13,7 +13,7 @@
         android:id="@+id/noteLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="@string/note"
+        android:hint="@string/description"
         app:hintAnimationEnabled="false"
         app:errorEnabled="true"
         style="@style/NewTextInput">

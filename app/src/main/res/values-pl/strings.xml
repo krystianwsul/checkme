@@ -23,7 +23,7 @@
     <string name="copyTask">Kopiuj</string>
     <string name="mark_done">Oznacz jako zrobione</string>
     <string name="mark_not_done">Oznacz jako nie zrobione</string>
-    <string name="name_hint">Nazwa</string>
+    <string name="title_hint">Tytuł</string>
     <string name="edit_task">Edytuj zadanie</string>
     <string name="delete_task">Usuń zadanie</string>
     <string name="error_date">Data jest w przeszłości</string>
@@ -39,12 +39,12 @@
     <string name="parentTask">Dodaj do projektu lub zadania</string>
     <string name="share">Udostępnij</string>
     <string name="sendTo">Prześlij do:</string>
-    <string name="nameError">Wprowadź nazwę</string>
+    <string name="titleError">Wprowadź tytuł</string>
     <string name="noReminder">Bez przypomnień</string>
     <string name="addReminder">Dodaj przypomnienie</string>
     <string name="addNote">Dodaj notatkę</string>
     <string name="selectAll">Zaznacz wszystko</string>
-    <string name="note">Notatka</string>
+    <string name="description">Opis</string>
     <string name="monthDay">dzień</string>
     <string name="monthDayStart">od</string>
     <string name="monthDayEnd">miesiąca</string>
@@ -61,7 +61,7 @@
     <string name="projects">Projekty</string>
     <string name="projects_empty">Dodaj projekt klikając w plusa na dole.</string>
     <string name="showInstances">Pokaż przypomnienia</string>
-    <string name="tutorial1">Rozpocznij od utworzenia zadania. Zadanie może mieć nazwę, notatki i podzadania.</string>
+    <string name="tutorial1">Rozpocznij od utworzenia zadania. Zadanie może mieć tytuł, opis i podzadania.</string>
     <string name="tutorial2">Możesz również dodać przypomnienia do zadania, żeby otrzymać powiadomienie o nim o danej porze. Możesz otrzymać powiadomienie raz, w pewne dni tygodnia lub w pewien dzień każdego miesiąca.</string>
     <string name="tutorial3">Możesz ustawić powadomienie na konkretną godzinę. Możesz również utworzyć porę dnia jako skrót, jeśli często masz coś do zrobienia o pewnej porze dnia.</string>
     <string name="tutorial4">Zaloguj się do konta Google, żeby dzielić się zadaniami z innymi użytkownikami. Zacznij od wyszukania użytkowników po adresie e-mailowym, żeby dodać ich jako znajomych. Utwórz projekt, dodaj do niegogo znajomych. Tworząc zadanie, ustaw jego przynależność do danego projektu.</string>

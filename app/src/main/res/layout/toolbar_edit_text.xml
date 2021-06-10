@@ -40,7 +40,7 @@
                     android:layout_height="wrap_content"
                     android:inputType="textMultiLine"
                     android:textColor="@color/textPrimaryWhite"
-                    android:hint="@string/name_hint"
+                    android:hint="@string/title_hint"
                     android:textColorHint="@color/textDisabledWhite"
                     tools:ignore="Deprecated"
                     android:importantForAutofill="noExcludeDescendants"

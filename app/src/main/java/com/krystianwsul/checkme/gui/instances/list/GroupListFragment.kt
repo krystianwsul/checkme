@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.gui.instances.list
 
+import android.app.Activity
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -55,6 +56,7 @@ import io.reactivex.rxjava3.core.Maybe
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
+import kotlinx.parcelize.Parcelize
 import java.util.*
 
 class GroupListFragment @JvmOverloads constructor(
@@ -801,14 +803,13 @@ class GroupListFragment @JvmOverloads constructor(
             }
         } else {
             when (val parameters = parameters) {
-                is GroupListParameters.All -> getStartEditActivityFabState(
-                    EditActivity.Hint.Schedule(
-                        rangePositionToDate(
-                            parameters.timeRange,
-                            parameters.position
+                is GroupListParameters.All -> FabState.Visible {
+                    listener.showFabMenu(
+                        ReminderOrNoteMenuDelegate(
+                            EditActivity.Hint.Schedule(rangePositionToDate(parameters.timeRange, parameters.position))
                         )
                     )
-                )
+                }
                 is GroupListParameters.TimeStamp -> if (parameters.timeStamp > TimeStamp.now) {
                     val hint = parameters.groupListDataWrapper
                         .instanceDatas
@@ -1036,4 +1037,31 @@ class GroupListFragment @JvmOverloads constructor(
     }
 
     private class NoSelectionException(message: String) : Exception(message)
+
+    @Parcelize
+    private class ReminderOrNoteMenuDelegate(private val hint: EditActivity.Hint) : BottomFabMenuDelegate.MenuDelegate {
+
+        override fun getItems(): List<BottomFabMenuDelegate.MenuDelegate.Item> {
+            return listOf(
+                object : BottomFabMenuDelegate.MenuDelegate.Item {
+
+                    override fun getText(context: Context) = "Add note"
+
+                    override fun onClick(activity: Activity) {
+                        activity.startActivity(
+                            EditActivity.getParametersIntent(EditParameters.Create(showFirstSchedule = false))
+                        )
+                    }
+                },
+                object : BottomFabMenuDelegate.MenuDelegate.Item {
+
+                    override fun getText(context: Context) = "Add reminder"
+
+                    override fun onClick(activity: Activity) {
+                        activity.startActivity(EditActivity.getParametersIntent(EditParameters.Create(hint)))
+                    }
+                },
+            )
+        }
+    }
 }

@@ -116,7 +116,10 @@ class BottomFabMenuDelegate(
                     .apply {
                         text = it.getText(bottomFabMenu.context)
 
-                        setOnClickListener { _ -> it.onClick(activity) }
+                        setOnClickListener { _ ->
+                            it.onClick(activity)
+                            closeMenu()
+                        }
                     }
             }
 
@@ -124,7 +127,10 @@ class BottomFabMenuDelegate(
                 bottomBinding.bottomFabMenuButton.apply {
                     text = it.getText(bottomFabMenu.context)
 
-                    setOnClickListener { _ -> it.onClick(activity) }
+                    setOnClickListener { _ ->
+                        it.onClick(activity)
+                        closeMenu()
+                    }
                 }
             }
 

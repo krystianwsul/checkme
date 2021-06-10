@@ -61,7 +61,7 @@ sealed class GroupListParameters(val draggable: Boolean = true) {
         override val groupListDataWrapper: GroupListDataWrapper,
     ) : GroupListParameters(false) {
 
-        override val groupingMode = GroupType.GroupingMode.TIME
+        override val groupingMode = GroupType.GroupingMode.PROJECTS
     }
 
     data class Parent(

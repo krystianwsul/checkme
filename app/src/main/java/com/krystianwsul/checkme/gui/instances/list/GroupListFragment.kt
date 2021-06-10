@@ -683,12 +683,6 @@ class GroupListFragment @JvmOverloads constructor(
         groupListDataWrapper: GroupListDataWrapper,
     ) = setParameters(GroupListParameters.InstanceKey(dataId, immediate, groupListDataWrapper, instanceKey))
 
-    fun setInstanceKeys(
-        dataId: DataId,
-        immediate: Boolean,
-        groupListDataWrapper: GroupListDataWrapper,
-    ) = setParameters(GroupListParameters.InstanceKeys(dataId, immediate, groupListDataWrapper))
-
     fun setParameters(parameters: GroupListParameters) = parametersRelay.accept(parameters)
 
     public override fun onSaveInstanceState() = Bundle().apply {

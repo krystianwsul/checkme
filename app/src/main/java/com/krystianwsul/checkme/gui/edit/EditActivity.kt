@@ -589,7 +589,7 @@ class EditActivity : NavBarActivity() {
         }
 
         @Parcelize
-        class Project(private val projectKey: ProjectKey.Shared) : Hint() {
+        class Project(val projectKey: ProjectKey.Shared) : Hint() {
 
             override fun toCurrentParent() = projectKey.toCurrentParent()
 

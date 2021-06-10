@@ -454,14 +454,12 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                     projectData?.canAddSubtask == true -> {
                         show()
 
-                        val sharedProjectKey = projectData.projectKey as? ProjectKey.Shared
-
-                        val hint = sharedProjectKey?.let(EditActivity.Hint::Project)
+                        val hint = (projectData.projectKey as? ProjectKey.Shared)?.let(EditActivity.Hint::Project)
 
                         setOnClickListener {
                             selectionCallback.actionMode!!.finish()
 
-                            listener.showFabMenu(ReminderOrNoteMenuDelegate(hint, true, sharedProjectKey))
+                            listener.showFabMenu(ReminderOrNoteMenuDelegate(hint))
                         }
                     }
                     else -> hide()
@@ -470,7 +468,13 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                 if (data!!.taskData.showFab) {
                     show()
 
-                    edit(EditParameters.Create(parameters!!.hint, showFirstSchedule = data!!.showFirstSchedule))
+                    val hint = parameters!!.hint
+
+                    if (data!!.showFirstSchedule) {
+                        setOnClickListener { listener.showFabMenu(ReminderOrNoteMenuDelegate(hint)) }
+                    } else {
+                        edit(EditParameters.Create(hint, showFirstSchedule = data!!.showFirstSchedule))
+                    }
                 } else {
                     hide()
                 }

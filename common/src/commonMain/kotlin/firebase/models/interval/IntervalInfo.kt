@@ -53,7 +53,7 @@ class IntervalInfo(val task: Task, val intervals: List<Interval>) {
         return getInterval(exactTimeStamp).let { (it.type as? Type.Child)?.getHierarchyInterval(it) }
     }
 
-    fun isUnscheduled(now: ExactTimeStamp.Local) = getInterval(now).type is Type.NoSchedule
+    fun isUnscheduled() = intervals.last().type is Type.NoSchedule
 
     private class IntervalException(message: String, cause: Throwable) : Exception(message, cause)
 }

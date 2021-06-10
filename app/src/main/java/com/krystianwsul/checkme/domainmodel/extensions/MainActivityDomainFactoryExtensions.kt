@@ -27,7 +27,7 @@ fun DomainFactory.getMainNoteData(now: ExactTimeStamp.Local = ExactTimeStamp.Loc
 
     return MainNoteViewModel.Data(
         TaskListFragment.TaskData(
-            getMainData(now) { it.intervalInfo.isUnscheduled(now) },
+            getMainData(now) { it.intervalInfo.isUnscheduled() },
             null,
             true,
             null,
@@ -144,24 +144,6 @@ fun DomainFactory.getGroupListData(
         GroupListDataWrapper.CustomTimeData(it.name, it.hourMinutes.toSortedMap())
     }
 
-    val taskDatas = if (position == 0) {
-        getUnscheduledTasks(now).map {
-            GroupListDataWrapper.TaskData(
-                it.taskKey,
-                it.name,
-                getGroupListChildTaskDatas(it, now),
-                it.startExactTimeStamp,
-                it.note,
-                it.getImage(deviceDbInfo),
-                it.isAssignedToMe(now, myUserFactory.user),
-                it.getProjectInfo(now),
-                it.ordinal,
-            )
-        }.toList()
-    } else {
-        listOf()
-    }
-
     val instanceDatas = currentInstances.map { instance ->
         val task = instance.task
 
@@ -194,11 +176,11 @@ fun DomainFactory.getGroupListData(
     val dataWrapper = GroupListDataWrapper(
         customTimeDatas,
         null,
-        taskDatas,
+        listOf(),
         null,
         instanceDatas,
         null,
-        null
+        null,
     )
 
     return DayViewModel.DayData(dataWrapper)

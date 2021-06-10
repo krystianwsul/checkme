@@ -192,7 +192,7 @@ fun DomainFactory.getUnscheduledTasks(now: ExactTimeStamp.Local, projectKey: Pro
         ?.getAllTasks()
         ?: getAllTasks()
 
-    return tasks.filter { it.current(now) && it.intervalInfo.isUnscheduled(now) }
+    return tasks.filter { it.current(now) && it.intervalInfo.isUnscheduled() }
 }
 
 fun DomainFactory.getGroupListChildTaskDatas(

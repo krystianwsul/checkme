@@ -132,7 +132,7 @@ sealed class Task(
         val topLevelTask = getTopLevelTask(now)
 
         // if it's in the unscheduled tasks list, we can add a subtask
-        if (topLevelTask.intervalInfo.isUnscheduled(now)) return true
+        if (topLevelTask.intervalInfo.isUnscheduled()) return true
 
         // ... and if not, we can just use getInstances() and check all of them.
         return getInstances(null, null, now).any { it.canAddSubtask(now, hack24) }

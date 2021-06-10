@@ -112,14 +112,14 @@ class SettingsActivity : NavBarActivity() {
 
                 value = getString(when (initialTab) {
                     MainActivity.Tab.INSTANCES -> R.string.instances
-                    MainActivity.Tab.TASKS -> R.string.tasks
+                    MainActivity.Tab.NOTES -> R.string.notes
                     else -> throw IllegalArgumentException()
                 })
 
                 setOnPreferenceChangeListener { _, newValue ->
                     val newTab = when (newValue as String) {
                         getString(R.string.instances) -> MainActivity.Tab.INSTANCES
-                        getString(R.string.tasks) -> MainActivity.Tab.TASKS
+                        getString(R.string.notes) -> MainActivity.Tab.NOTES
                         else -> throw IllegalArgumentException()
                     }.ordinal
 

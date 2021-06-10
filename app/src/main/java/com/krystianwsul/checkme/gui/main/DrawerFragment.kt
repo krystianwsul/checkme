@@ -74,6 +74,7 @@ class DrawerFragment : NoCollapseBottomSheetDialogFragment() {
             mainActivity.apply {
                 setCheckedItem(when (tabSearchStateRelay.value!!.tab) {
                     Tab.INSTANCES -> R.id.main_drawer_instances
+                    Tab.NOTES -> R.id.main_drawer_notes
                     Tab.TASKS -> R.id.main_drawer_tasks
                     Tab.PROJECTS -> R.id.main_drawer_projects
                     Tab.CUSTOM_TIMES -> R.id.main_drawer_custom_times
@@ -85,6 +86,7 @@ class DrawerFragment : NoCollapseBottomSheetDialogFragment() {
                 setNavigationItemSelectedListener {
                     when (it.itemId) {
                         R.id.main_drawer_instances -> setTabSearchState(TabSearchState.Instances(false))
+                        R.id.main_drawer_notes -> setTabSearchState(TabSearchState.Notes(false))
                         R.id.main_drawer_tasks -> setTabSearchState(TabSearchState.Tasks(false))
                         R.id.main_drawer_projects -> setTabSearchState(TabSearchState.Projects)
                         R.id.main_drawer_custom_times -> setTabSearchState(TabSearchState.CustomTimes)

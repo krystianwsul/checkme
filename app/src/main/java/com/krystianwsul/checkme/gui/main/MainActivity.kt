@@ -94,6 +94,7 @@ class MainActivity :
         private fun Preferences.getTab() = Tab.values()[tab]
     }
 
+    private lateinit var noteListFragment: TaskListFragment
     private lateinit var taskListFragment: TaskListFragment
     private lateinit var projectListFragment: ProjectListFragment
     private lateinit var showCustomTimesFragment: ShowCustomTimesFragment
@@ -110,6 +111,7 @@ class MainActivity :
 
     private val groupSelectAllVisible = mutableMapOf<Int, Boolean>()
     private var searchSelectAllVisible = false
+    private var noteSelectAllVisible = false
     private var taskSelectAllVisible = false
     private var customTimesSelectAllVisible = false
     private var userSelectAllVisible = false
@@ -251,6 +253,7 @@ class MainActivity :
                 else
                     groupSelectAllVisible[binding.mainDaysPager.currentPosition] ?: false
             }
+            is TabSearchState.Notes -> noteSelectAllVisible
             is TabSearchState.Tasks -> taskSelectAllVisible
             TabSearchState.Projects -> projectSelectAllVisible
             TabSearchState.CustomTimes -> customTimesSelectAllVisible
@@ -398,7 +401,7 @@ class MainActivity :
                     overrideTabSearchState = if (Preferences.getTab() == Tab.INSTANCES)
                         TabSearchState.Instances(true)
                     else
-                        TabSearchState.Tasks(true)
+                        TabSearchState.Notes(true)
 
                     binding.mainSearchInclude
                         .toolbar
@@ -478,6 +481,7 @@ class MainActivity :
 
         var debugFragment = supportFragmentManager.findFragmentById(R.id.mainDebugFrame)
         if (debugFragment != null) {
+            noteListFragment = supportFragmentManager.findFragmentById(R.id.mainNoteListFrame) as TaskListFragment
             taskListFragment = supportFragmentManager.findFragmentById(R.id.mainTaskListFrame) as TaskListFragment
             projectListFragment = supportFragmentManager.findFragmentById(R.id.mainProjectListFrame) as ProjectListFragment
             showCustomTimesFragment =
@@ -486,6 +490,7 @@ class MainActivity :
             aboutFragment = supportFragmentManager.findFragmentById(R.id.mainAboutFrame) as AboutFragment
         } else {
             debugFragment = DebugFragment.newInstance()
+            noteListFragment = TaskListFragment.newInstance()
             taskListFragment = TaskListFragment.newInstance()
             projectListFragment = ProjectListFragment.newInstance()
             showCustomTimesFragment = ShowCustomTimesFragment.newInstance()
@@ -494,6 +499,7 @@ class MainActivity :
 
             supportFragmentManager.beginTransaction()
                 .add(R.id.mainDebugFrame, debugFragment)
+                .add(R.id.mainNoteListFrame, noteListFragment)
                 .add(R.id.mainTaskListFrame, taskListFragment)
                 .add(R.id.mainProjectListFrame, projectListFragment)
                 .add(R.id.mainFriendListFrame, friendListFragment)
@@ -502,43 +508,15 @@ class MainActivity :
                 .commit()
         }
 
-        taskListFragment.listener = object : TaskListFragment.Listener {
+        noteListFragment.listener = newTaskListListener(
+            { it is TabSearchState.Notes },
+            { noteSelectAllVisible = it },
+        )
 
-            override val snackbarParent get() = this@MainActivity.snackbarParent
-
-            override val taskSearch by lazy {
-                tabSearchStateRelay.switchMap {
-                    if (it is TabSearchState.Tasks) {
-                        if (it.isSearching) {
-                            filterCriteriaObservable
-                        } else {
-                            Preferences.filterParamsObservable.map { FilterCriteria.Full(filterParams = it) }
-                        }
-                    } else {
-                        Observable.never()
-                    }
-                }!!
-            }
-
-            override fun onCreateActionMode(actionMode: ActionMode) = this@MainActivity.onCreateActionMode(actionMode)
-
-            override fun onDestroyActionMode() = this@MainActivity.onDestroyActionMode()
-
-            override fun setTaskSelectAllVisibility(selectAllVisible: Boolean) {
-                taskSelectAllVisible = selectAllVisible
-
-                updateBottomMenu()
-            }
-
-            override fun getBottomBar() = this@MainActivity.getBottomBar()
-
-            override fun initBottomBar() = this@MainActivity.initBottomBar()
-
-            override fun setToolbarExpanded(expanded: Boolean) = this@MainActivity.setToolbarExpanded(expanded)
-
-            override fun showFabMenu(menuDelegate: BottomFabMenuDelegate.MenuDelegate) =
-                bottomFabMenuDelegate.showMenu(menuDelegate)
-        }
+        taskListFragment.listener = newTaskListListener(
+            { it is TabSearchState.Tasks },
+            { taskSelectAllVisible = it },
+        )
 
         binding.mainDaysPager
             .pageSelections()
@@ -580,7 +558,7 @@ class MainActivity :
 
         initBottomBar()
 
-        tabSearchStateRelay.filter { it is TabSearchState.Tasks }
+        tabSearchStateRelay.filter { it is TabSearchState.Notes || it is TabSearchState.Tasks }
             .subscribe {
                 bottomFabMenuDelegate.fabDelegate.apply { if (it.isSearching) show() else hide() }
             }
@@ -603,6 +581,12 @@ class MainActivity :
 
         mainViewModel.apply {
             createDisposable += data.subscribe {
+                noteListFragment.parameters = TaskListFragment.Parameters.All(
+                    // todo notes
+                    TaskListFragment.Data(dataId, it.immediate, it.taskData, true),
+                    true,
+                )
+
                 taskListFragment.parameters = TaskListFragment.Parameters.All(
                     TaskListFragment.Data(dataId, it.immediate, it.taskData, true),
                     true,
@@ -734,6 +718,47 @@ class MainActivity :
             .addTo(createDisposable)
     }
 
+    private fun newTaskListListener(
+        checkTabSearchState: (TabSearchState) -> Boolean,
+        storeSelectAllVisibility: (Boolean) -> Unit,
+    ) = object : TaskListFragment.Listener {
+
+        override val snackbarParent get() = this@MainActivity.snackbarParent
+
+        override val taskSearch by lazy {
+            tabSearchStateRelay.switchMap {
+                if (checkTabSearchState(it)) {
+                    if (it.isSearching) {
+                        filterCriteriaObservable
+                    } else {
+                        Preferences.filterParamsObservable.map { FilterCriteria.Full(filterParams = it) }
+                    }
+                } else {
+                    Observable.never()
+                }
+            }!!
+        }
+
+        override fun onCreateActionMode(actionMode: ActionMode) = this@MainActivity.onCreateActionMode(actionMode)
+
+        override fun onDestroyActionMode() = this@MainActivity.onDestroyActionMode()
+
+        override fun setTaskSelectAllVisibility(selectAllVisible: Boolean) {
+            storeSelectAllVisibility(selectAllVisible)
+
+            updateBottomMenu()
+        }
+
+        override fun getBottomBar() = this@MainActivity.getBottomBar()
+
+        override fun initBottomBar() = this@MainActivity.initBottomBar()
+
+        override fun setToolbarExpanded(expanded: Boolean) = this@MainActivity.setToolbarExpanded(expanded)
+
+        override fun showFabMenu(menuDelegate: BottomFabMenuDelegate.MenuDelegate) =
+            bottomFabMenuDelegate.showMenu(menuDelegate)
+    }
+
     private data class DeleteTasksData(val dataId: DataId, val taskKeys: Set<TaskKey>) : Serializable
 
     private fun deleteTasks(dataId: DataId, taskKeys: Set<TaskKey>) {
@@ -753,6 +778,7 @@ class MainActivity :
         super.onStart()
 
         if (tabSearchStateRelay.value!!.tab == Tab.TASKS) taskListFragment.checkCreatedTaskKey()
+        if (tabSearchStateRelay.value!!.tab == Tab.NOTES) noteListFragment.checkCreatedTaskKey()
 
         TooltipManager.fiveSecondDelay()
             .mapNotNull { findViewById(R.id.actionMainCalendar) }
@@ -790,6 +816,7 @@ class MainActivity :
                             else
                                 selectAllRelay.accept(Unit)
                         }
+                        is TabSearchState.Notes -> noteListFragment.treeViewAdapter.selectAll()
                         is TabSearchState.Tasks ->
                             forceGetFragment<TaskListFragment>(R.id.mainTaskListFrame).treeViewAdapter.selectAll()
                         TabSearchState.CustomTimes ->
@@ -818,9 +845,9 @@ class MainActivity :
                     R.id.actionMainSearch to true
                 )
             }
-            is TabSearchState.Tasks -> listOf(
+            is TabSearchState.Notes, is TabSearchState.Tasks -> listOf(
                 R.id.actionMainCalendar to false,
-                R.id.actionMainSearch to true
+                R.id.actionMainSearch to true,
             )
             else -> listOf(
                 R.id.actionMainCalendar to false,
@@ -891,6 +918,7 @@ class MainActivity :
         val currentTabLayout = when (tabSearchState) {
             is TabSearchState.Instances ->
                 if (tabSearchState.isSearching) binding.mainSearchGroupListFragment else binding.mainDaysLayout
+            is TabSearchState.Notes -> binding.mainNoteListFrame
             is TabSearchState.Tasks -> binding.mainTaskListFrame
             TabSearchState.Projects -> binding.mainProjectListFrame
             TabSearchState.CustomTimes -> binding.mainCustomTimesFrame
@@ -908,6 +936,7 @@ class MainActivity :
         hideViews += listOf(
             binding.mainSearchGroupListFragment,
             binding.mainDaysLayout,
+            binding.mainNoteListFrame,
             binding.mainTaskListFrame,
             binding.mainProjectListFrame,
             binding.mainCustomTimesFrame,
@@ -927,13 +956,14 @@ class MainActivity :
         if (tab == Tab.ABOUT) aboutFragment.onShown()
 
         mainViewModel.apply {
-            if (tab == Tab.TASKS) start() else stop()
+            if (tab in listOf(Tab.NOTES, Tab.TASKS)) start() else stop()
         }
 
         binding.mainActivityToolbar.title = getString(tabSearchState.title)
 
         fun hideFab() {
             binding.mainSearchGroupListFragment.clearFab()
+            noteListFragment.clearFab()
             taskListFragment.clearFab()
             projectListFragment.clearFab()
             showCustomTimesFragment.clearFab()
@@ -944,6 +974,7 @@ class MainActivity :
 
         when (tabSearchState) {
             is TabSearchState.Instances -> {
+                noteListFragment.clearFab()
                 taskListFragment.clearFab()
                 projectListFragment.clearFab()
                 showCustomTimesFragment.clearFab()
@@ -955,8 +986,18 @@ class MainActivity :
                     binding.mainSearchGroupListFragment.clearFab()
                 }
             }
+            is TabSearchState.Notes -> {
+                binding.mainSearchGroupListFragment.clearFab()
+                taskListFragment.clearFab()
+                projectListFragment.clearFab()
+                showCustomTimesFragment.clearFab()
+                friendListFragment.clearFab()
+
+                noteListFragment.setFab(bottomFabMenuDelegate.fabDelegate)
+            }
             is TabSearchState.Tasks -> {
                 binding.mainSearchGroupListFragment.clearFab()
+                noteListFragment.clearFab()
                 projectListFragment.clearFab()
                 showCustomTimesFragment.clearFab()
                 friendListFragment.clearFab()
@@ -965,6 +1006,7 @@ class MainActivity :
             }
             TabSearchState.Projects -> {
                 binding.mainSearchGroupListFragment.clearFab()
+                noteListFragment.clearFab()
                 taskListFragment.clearFab()
                 showCustomTimesFragment.clearFab()
                 friendListFragment.clearFab()
@@ -973,6 +1015,7 @@ class MainActivity :
             }
             TabSearchState.CustomTimes -> {
                 binding.mainSearchGroupListFragment.clearFab()
+                noteListFragment.clearFab()
                 taskListFragment.clearFab()
                 projectListFragment.clearFab()
                 friendListFragment.clearFab()
@@ -981,6 +1024,7 @@ class MainActivity :
             }
             TabSearchState.Friends -> {
                 binding.mainSearchGroupListFragment.clearFab()
+                noteListFragment.clearFab()
                 taskListFragment.clearFab()
                 projectListFragment.clearFab()
                 showCustomTimesFragment.clearFab()
@@ -1136,7 +1180,7 @@ class MainActivity :
 
             fun fromTabSetting(tab: Tab) = when (tab) {
                 Tab.INSTANCES -> Instances(false)
-                Tab.TASKS -> Tasks(false)
+                Tab.NOTES -> Notes(false)
                 else -> throw IllegalArgumentException()
             }
         }
@@ -1157,6 +1201,26 @@ class MainActivity :
             override val tab get() = Tab.INSTANCES
 
             override val title get() = R.string.instances
+
+            override fun startSearch(): TabSearchState {
+                check(!isSearching)
+
+                return copy(isSearching = true)
+            }
+
+            override fun closeSearch(): TabSearchState {
+                check(isSearching)
+
+                return copy(isSearching = false)
+            }
+        }
+
+        @Parcelize
+        data class Notes(override val isSearching: Boolean) : TabSearchState() {
+
+            override val tab get() = Tab.NOTES
+
+            override val title get() = R.string.notes
 
             override fun startSearch(): TabSearchState {
                 check(!isSearching)
@@ -1238,6 +1302,12 @@ class MainActivity :
             override val elevated = false
             override val showDeleted = false
             override val showAssignedTo = true
+        },
+        NOTES {
+
+            override val showDeleted = true
+            override val showAssignedTo = true
+            override val showProjects = true
         },
         TASKS {
 

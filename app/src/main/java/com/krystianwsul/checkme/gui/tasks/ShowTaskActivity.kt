@@ -119,7 +119,10 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.Listener {
 
         taskListFragment = getOrInitializeFragment(R.id.showTaskFragment) {
             TaskListFragment.newInstance()
-        }.also { it.setFab(bottomFabMenuDelegate.fabDelegate) }
+        }.also {
+            it.setFab(bottomFabMenuDelegate.fabDelegate)
+            it.listener = this
+        }
 
         showTaskViewModel.apply {
             start(taskKey)

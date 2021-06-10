@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.gui.tasks
 
-import android.content.Context
 import android.os.Bundle
 import android.os.Parcelable
 import android.view.LayoutInflater
@@ -234,7 +233,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
     private lateinit var adapterState: AdapterState
 
-    private val listener get() = activity as Listener
+    lateinit var listener: Listener
 
     private var showImage = false
     private var imageViewerData: Pair<ImageState, StfalconImageViewer<ImageState>>? = null
@@ -329,11 +328,6 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             .joinToString("\n")
     }
 
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        check(context is Listener)
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -393,7 +387,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
     private fun updateSelectAll() {
         val taskAdapter = treeViewAdapter.treeModelAdapter as TaskAdapter
 
-        (activity as Listener).setTaskSelectAllVisibility(taskAdapter.nodes.isNotEmpty())
+        listener.setTaskSelectAllVisibility(taskAdapter.nodes.isNotEmpty())
     }
 
     private fun getAdapterState() = treeViewAdapter.run {

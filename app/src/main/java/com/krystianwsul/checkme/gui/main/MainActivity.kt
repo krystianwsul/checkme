@@ -66,7 +66,6 @@ import java.io.Serializable
 class MainActivity :
     AbstractActivity(),
     ShowCustomTimesFragment.CustomTimesListListener,
-    TaskListFragment.Listener,
     DayFragment.Host,
     FriendListFragment.FriendListListener,
     ProjectListFragment.ProjectListListener {
@@ -136,20 +135,6 @@ class MainActivity :
         binding.mainSearchInclude
             .toolbar
             .filterCriteriaObservable
-    }
-
-    override val taskSearch by lazy {
-        tabSearchStateRelay.switchMap {
-            if (it is TabSearchState.Tasks) {
-                if (it.isSearching) {
-                    filterCriteriaObservable
-                } else {
-                    Preferences.filterParamsObservable.map { FilterCriteria.Full(filterParams = it) }
-                }
-            } else {
-                Observable.never()
-            }
-        }!!
     }
 
     private val deleteInstancesListener: (Serializable, Boolean) -> Unit = { deleteTasksData, removeInstances ->
@@ -517,6 +502,44 @@ class MainActivity :
                 .commit()
         }
 
+        taskListFragment.listener = object : TaskListFragment.Listener {
+
+            override val snackbarParent get() = this@MainActivity.snackbarParent
+
+            override val taskSearch by lazy {
+                tabSearchStateRelay.switchMap {
+                    if (it is TabSearchState.Tasks) {
+                        if (it.isSearching) {
+                            filterCriteriaObservable
+                        } else {
+                            Preferences.filterParamsObservable.map { FilterCriteria.Full(filterParams = it) }
+                        }
+                    } else {
+                        Observable.never()
+                    }
+                }!!
+            }
+
+            override fun onCreateActionMode(actionMode: ActionMode) = this@MainActivity.onCreateActionMode(actionMode)
+
+            override fun onDestroyActionMode() = this@MainActivity.onDestroyActionMode()
+
+            override fun setTaskSelectAllVisibility(selectAllVisible: Boolean) {
+                taskSelectAllVisible = selectAllVisible
+
+                updateBottomMenu()
+            }
+
+            override fun getBottomBar() = this@MainActivity.getBottomBar()
+
+            override fun initBottomBar() = this@MainActivity.initBottomBar()
+
+            override fun setToolbarExpanded(expanded: Boolean) = this@MainActivity.setToolbarExpanded(expanded)
+
+            override fun showFabMenu(menuDelegate: BottomFabMenuDelegate.MenuDelegate) =
+                bottomFabMenuDelegate.showMenu(menuDelegate)
+        }
+
         binding.mainDaysPager
             .pageSelections()
             .subscribe {
@@ -785,8 +808,6 @@ class MainActivity :
         }
     }
 
-    override fun showFabMenu(menuDelegate: BottomFabMenuDelegate.MenuDelegate) = bottomFabMenuDelegate.showMenu(menuDelegate)
-
     private fun updateTopMenu() {
         val tabSearchState = tabSearchStateRelay.value!!
 
@@ -990,13 +1011,7 @@ class MainActivity :
         super.onDestroy()
     }
 
-    override fun setTaskSelectAllVisibility(selectAllVisible: Boolean) {
-        taskSelectAllVisible = selectAllVisible
-
-        updateBottomMenu()
-    }
-
-    override fun setToolbarExpanded(expanded: Boolean) = binding.mainActivityAppBarLayout.setExpanded(expanded)
+    private fun setToolbarExpanded(expanded: Boolean) = binding.mainActivityAppBarLayout.setExpanded(expanded)
 
     override fun onCreateActionMode(actionMode: ActionMode) {
         check(this.actionMode == null)

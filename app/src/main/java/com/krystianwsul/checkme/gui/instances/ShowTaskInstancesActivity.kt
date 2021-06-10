@@ -20,6 +20,7 @@ import com.krystianwsul.checkme.gui.instances.list.GroupListParameters
 import com.krystianwsul.checkme.gui.projects.ShowProjectActivity
 import com.krystianwsul.checkme.gui.tasks.ShowTasksActivity
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
+import com.krystianwsul.checkme.gui.utils.BottomFabMenuDelegate
 import com.krystianwsul.checkme.gui.utils.connectInstanceSearch
 import com.krystianwsul.checkme.utils.startDate
 import com.krystianwsul.checkme.utils.tryGetFragment
@@ -45,6 +46,7 @@ class ShowTaskInstancesActivity : AbstractActivity(), GroupListListener {
         private const val TAG_DELETE_INSTANCES = "deleteInstances"
 
         private const val KEY_PAGE = "page"
+        private const val KEY_BOTTOM_FAB_MENU_DELEGATE_STATE = "bottomFabMenuDelegateState"
 
         fun newIntent(parameters: Parameters) = Intent(MyApplication.instance, ShowTaskInstancesActivity::class.java).apply {
             putExtra(KEY_PARAMETERS, parameters)
@@ -87,6 +89,8 @@ class ShowTaskInstancesActivity : AbstractActivity(), GroupListListener {
     private lateinit var binding: ActivityShowNotificationGroupBinding
     private lateinit var bottomBinding: BottomBinding
 
+    private lateinit var bottomFabMenuDelegate: BottomFabMenuDelegate
+
     private var data: ShowTaskInstancesViewModel.Data? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -96,13 +100,20 @@ class ShowTaskInstancesActivity : AbstractActivity(), GroupListListener {
         bottomBinding = BottomBinding.bind(binding.root)
         setContentView(binding.root)
 
+        bottomFabMenuDelegate = BottomFabMenuDelegate(
+            bottomBinding,
+            binding.showNotificationGroupCoordinator,
+            this,
+            savedInstanceState?.getParcelable(KEY_BOTTOM_FAB_MENU_DELEGATE_STATE),
+        )
+
         binding.groupListFragment.listener = this
 
         parameters = intent.getParcelableExtra(KEY_PARAMETERS)!!
 
         savedInstanceState?.apply { page = getInt(KEY_PAGE) }
 
-        binding.groupListFragment.setFab(bottomBinding.bottomFab)
+        binding.groupListFragment.setFab(bottomFabMenuDelegate.fabDelegate)
 
         binding.showNotificationGroupToolbarCollapseInclude
             .collapseAppBarLayout
@@ -174,6 +185,8 @@ class ShowTaskInstancesActivity : AbstractActivity(), GroupListListener {
         super.onSaveInstanceState(outState)
 
         outState.putInt(KEY_PAGE, page)
+
+        outState.putParcelable(KEY_BOTTOM_FAB_MENU_DELEGATE_STATE, bottomFabMenuDelegate.getState())
     }
 
     override fun onDestroy() {

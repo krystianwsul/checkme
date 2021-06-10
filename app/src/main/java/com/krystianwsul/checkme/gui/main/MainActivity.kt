@@ -369,7 +369,7 @@ class MainActivity :
             daysPosition
         ) { tabSearchState: TabSearchState, position: Int ->
             if ((tabSearchState as? TabSearchState.Instances)?.isSearching == false)
-                DayFragment.Event.PageVisible(position, bottomBinding.bottomFab)
+                DayFragment.Event.PageVisible(position, bottomFabMenuDelegate.fabDelegate)
             else
                 DayFragment.Event.Invisible
         }
@@ -559,7 +559,7 @@ class MainActivity :
 
         tabSearchStateRelay.filter { it is TabSearchState.Tasks }
             .subscribe {
-                bottomBinding.bottomFab.apply { if (it.isSearching) show() else hide() }
+                bottomFabMenuDelegate.fabDelegate.apply { if (it.isSearching) show() else hide() }
             }
             .addTo(createDisposable)
 
@@ -916,7 +916,7 @@ class MainActivity :
             showCustomTimesFragment.clearFab()
             friendListFragment.clearFab()
 
-            bottomBinding.bottomFab.hide()
+            bottomFabMenuDelegate.fabDelegate.hide()
         }
 
         when (tabSearchState) {
@@ -927,7 +927,7 @@ class MainActivity :
                 friendListFragment.clearFab()
 
                 if (tabSearchState.isSearching) {
-                    binding.mainSearchGroupListFragment.setFab(bottomBinding.bottomFab)
+                    binding.mainSearchGroupListFragment.setFab(bottomFabMenuDelegate.fabDelegate)
                 } else {
                     binding.mainSearchGroupListFragment.clearFab()
                 }
@@ -938,7 +938,7 @@ class MainActivity :
                 showCustomTimesFragment.clearFab()
                 friendListFragment.clearFab()
 
-                taskListFragment.setFab(bottomBinding.bottomFab)
+                taskListFragment.setFab(bottomFabMenuDelegate.fabDelegate)
             }
             TabSearchState.Projects -> {
                 binding.mainSearchGroupListFragment.clearFab()
@@ -946,7 +946,7 @@ class MainActivity :
                 showCustomTimesFragment.clearFab()
                 friendListFragment.clearFab()
 
-                projectListFragment.setFab(bottomBinding.bottomFab)
+                projectListFragment.setFab(bottomFabMenuDelegate.fabDelegate)
             }
             TabSearchState.CustomTimes -> {
                 binding.mainSearchGroupListFragment.clearFab()
@@ -954,7 +954,7 @@ class MainActivity :
                 projectListFragment.clearFab()
                 friendListFragment.clearFab()
 
-                showCustomTimesFragment.setFab(bottomBinding.bottomFab)
+                showCustomTimesFragment.setFab(bottomFabMenuDelegate.fabDelegate)
             }
             TabSearchState.Friends -> {
                 binding.mainSearchGroupListFragment.clearFab()
@@ -962,7 +962,7 @@ class MainActivity :
                 projectListFragment.clearFab()
                 showCustomTimesFragment.clearFab()
 
-                friendListFragment.setFab(bottomBinding.bottomFab)
+                friendListFragment.setFab(bottomFabMenuDelegate.fabDelegate)
             }
             TabSearchState.Debug, TabSearchState.About -> hideFab()
         }

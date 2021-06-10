@@ -1,10 +1,10 @@
 package com.krystianwsul.checkme.gui.main
 
-import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.krystianwsul.checkme.gui.utils.BottomFabMenuDelegate
 
 interface FabUser {
 
-    fun setFab(floatingActionButton: FloatingActionButton)
+    fun setFab(fabDelegate: BottomFabMenuDelegate.FabDelegate)
 
     fun clearFab()
 }

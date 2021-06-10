@@ -15,6 +15,7 @@ import com.krystianwsul.checkme.gui.base.AbstractActivity
 import com.krystianwsul.checkme.gui.dialogs.ConfirmDialogFragment
 import com.krystianwsul.checkme.gui.edit.EditActivity
 import com.krystianwsul.checkme.gui.edit.EditParameters
+import com.krystianwsul.checkme.gui.utils.BottomFabMenuDelegate
 import com.krystianwsul.checkme.utils.exhaustive
 import com.krystianwsul.checkme.utils.getOrInitializeFragment
 import com.krystianwsul.checkme.utils.startDate
@@ -36,6 +37,8 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
         private const val REQUEST_COPY = 347
 
         private const val TAG_CONFIRM = "confirm"
+
+        private const val KEY_BOTTOM_FAB_MENU_DELEGATE_STATE = "bottomFabMenuDelegateState"
 
         fun newIntent(parameters: Parameters) = Intent(MyApplication.instance, ShowTasksActivity::class.java).apply {
             putExtra(KEY_PARAMETERS, parameters)
@@ -67,12 +70,21 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
     private lateinit var binding: ActivityShowTasksBinding
     private lateinit var bottomBinding: BottomBinding
 
+    private lateinit var bottomFabMenuDelegate: BottomFabMenuDelegate
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         binding = ActivityShowTasksBinding.inflate(layoutInflater)
         bottomBinding = BottomBinding.bind(binding.root)
         setContentView(binding.root)
+
+        bottomFabMenuDelegate = BottomFabMenuDelegate(
+            bottomBinding,
+            binding.showTasksCoordinator,
+            this,
+            savedInstanceState?.getParcelable(KEY_BOTTOM_FAB_MENU_DELEGATE_STATE),
+        )
 
         parameters = (savedInstanceState ?: intent.extras!!).getParcelable(KEY_PARAMETERS)!!
         copiedTaskKey = savedInstanceState?.getParcelable(KEY_COPIED_TASK_KEY)
@@ -93,7 +105,7 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
 
         taskListFragment = getOrInitializeFragment(R.id.showTasksFragment) {
             TaskListFragment.newInstance()
-        }.also { it.setFab(bottomBinding.bottomFab) }
+        }.also { it.setFab(bottomFabMenuDelegate.fabDelegate) }
 
         showTasksViewModel = getViewModel<ShowTasksViewModel>().apply {
             start(parameters)
@@ -176,7 +188,7 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
 
         startActivityForResult(
             EditActivity.getParametersIntent(EditParameters.Copy(taskKey)),
-            REQUEST_COPY
+            REQUEST_COPY,
         )
     }
 
@@ -230,6 +242,8 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
 
         outState.putParcelable(KEY_PARAMETERS, parameters)
         copiedTaskKey?.let { outState.putParcelable(KEY_COPIED_TASK_KEY, it) }
+
+        outState.putParcelable(KEY_BOTTOM_FAB_MENU_DELEGATE_STATE, bottomFabMenuDelegate.getState())
     }
 
     private fun updateTopMenu() {

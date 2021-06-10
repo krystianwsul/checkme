@@ -8,7 +8,6 @@ import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.CustomItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.jakewharton.rxrelay3.BehaviorRelay
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.FragmentProjectListBinding
@@ -30,6 +29,7 @@ import com.krystianwsul.checkme.gui.tree.HolderType
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineDelegate
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineModelNode
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineRow
+import com.krystianwsul.checkme.gui.utils.BottomFabMenuDelegate
 import com.krystianwsul.checkme.gui.utils.ResettableProperty
 import com.krystianwsul.checkme.gui.utils.SelectionCallback
 import com.krystianwsul.checkme.gui.widgets.MyBottomBar
@@ -55,7 +55,7 @@ class ProjectListFragment : AbstractFragment(), FabUser {
         fun newInstance() = ProjectListFragment()
     }
 
-    private var projectListFab: FloatingActionButton? = null
+    private var projectListFabDelegate: BottomFabMenuDelegate.FabDelegate? = null
 
     lateinit var treeViewAdapter: TreeViewAdapter<AbstractHolder>
         private set
@@ -244,17 +244,17 @@ class ProjectListFragment : AbstractFragment(), FabUser {
 
         if (this::treeViewAdapter.isInitialized)
             selectedProjectIds = treeViewAdapter.selectedNodes
-                    .asSequence()
-                    .map { (it.modelNode as ProjectListAdapter.ProjectNode).projectData.id }
-                    .toSet()
+                .asSequence()
+                .map { (it.modelNode as ProjectListAdapter.ProjectNode).projectData.id }
+                .toSet()
 
         outState.putParcelableArrayList(SELECTED_PROJECT_IDS, ArrayList(selectedProjectIds))
     }
 
-    override fun setFab(floatingActionButton: FloatingActionButton) {
-        projectListFab = floatingActionButton
+    override fun setFab(fabDelegate: BottomFabMenuDelegate.FabDelegate) {
+        projectListFabDelegate = fabDelegate
 
-        projectListFab!!.setOnClickListener { startActivity(ShowProjectActivity.newIntent(requireActivity())) }
+        projectListFabDelegate!!.setOnClickListener { startActivity(ShowProjectActivity.newIntent(requireActivity())) }
 
         updateFabVisibility()
 
@@ -262,7 +262,7 @@ class ProjectListFragment : AbstractFragment(), FabUser {
     }
 
     private fun updateFabVisibility() {
-        projectListFab?.run {
+        projectListFabDelegate?.run {
             if (data != null && !selectionCallback.hasActionMode) {
                 show()
             } else {
@@ -276,7 +276,7 @@ class ProjectListFragment : AbstractFragment(), FabUser {
     override fun clearFab() {
         isVisible.accept(false)
 
-        projectListFab = null
+        projectListFabDelegate = null
     }
 
     override fun onDestroyView() {

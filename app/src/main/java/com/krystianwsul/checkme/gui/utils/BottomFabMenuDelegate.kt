@@ -24,6 +24,21 @@ class BottomFabMenuDelegate(
 
     private var menuDelegate: MenuDelegate? = null
 
+    val fabDelegate = object : FabDelegate {
+
+        override fun show() {
+            bottomBinding.bottomFab.show() // todo fab
+        }
+
+        override fun hide() {
+            bottomBinding.bottomFab.hide() // todo fab
+        }
+
+        override fun setOnClickListener(listener: () -> Unit) {
+            bottomBinding.bottomFab.setOnClickListener { listener() } // todo fab
+        }
+    }
+
     init {
         bottomBinding.bottomFabScrim.setOnClickListener { closeMenu() }
 
@@ -119,5 +134,14 @@ class BottomFabMenuDelegate(
 
             fun onClick(activity: Activity)
         }
+    }
+
+    interface FabDelegate {
+
+        fun show()
+
+        fun hide()
+
+        fun setOnClickListener(listener: () -> Unit)
     }
 }

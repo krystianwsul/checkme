@@ -17,6 +17,7 @@ import com.krystianwsul.checkme.gui.dialogs.RemoveInstancesDialogFragment
 import com.krystianwsul.checkme.gui.instances.list.GroupListListener
 import com.krystianwsul.checkme.gui.instances.list.GroupListParameters
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
+import com.krystianwsul.checkme.gui.utils.BottomFabMenuDelegate
 import com.krystianwsul.checkme.utils.startDate
 import com.krystianwsul.checkme.utils.tryGetFragment
 import com.krystianwsul.checkme.viewmodels.DataId
@@ -41,6 +42,8 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
         private const val KEY_PARAMETERS = "parameters"
 
         private const val TAG_DELETE_INSTANCES = "deleteInstances"
+
+        private const val KEY_BOTTOM_FAB_MENU_DELEGATE_STATE = "bottomFabMenuDelegateState"
 
         fun getIntent(context: Context, parameters: Parameters) = Intent(
             context,
@@ -79,15 +82,17 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
 
     override val instanceSearch by lazy {
         binding.showGroupToolbarCollapseInclude
-                .collapseAppBarLayout
-                .filterCriteria
-                .cast<FilterCriteria>()
+            .collapseAppBarLayout
+            .filterCriteria
+            .cast<FilterCriteria>()
     }
 
     private var data: ShowGroupViewModel.Data? = null
 
     private lateinit var binding: ActivityShowGroupBinding
     private lateinit var bottomBinding: BottomBinding
+
+    private lateinit var bottomFabMenuDelegate: BottomFabMenuDelegate
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -96,15 +101,22 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
         bottomBinding = BottomBinding.bind(binding.root)
         setContentView(binding.root)
 
+        bottomFabMenuDelegate = BottomFabMenuDelegate(
+            bottomBinding,
+            binding.showGroupCoordinator,
+            this,
+            savedInstanceState?.getParcelable(KEY_BOTTOM_FAB_MENU_DELEGATE_STATE),
+        )
+
         binding.groupListFragment.listener = this
 
         parameters = intent.getParcelableExtra(KEY_PARAMETERS)!!
 
-        binding.groupListFragment.setFab(bottomBinding.bottomFab)
+        binding.groupListFragment.setFab(bottomFabMenuDelegate.fabDelegate)
 
         binding.showGroupToolbarCollapseInclude
-                .collapseAppBarLayout
-                .apply {
+            .collapseAppBarLayout
+            .apply {
                     setSearchMenuOptions(false, true, false)
                     configureMenu(
                             R.menu.show_group_menu_top,
@@ -229,6 +241,12 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
     override fun setToolbarExpanded(expanded: Boolean) = binding.showGroupToolbarCollapseInclude
         .collapseAppBarLayout
         .setExpanded(expanded)
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+
+        outState.putParcelable(KEY_BOTTOM_FAB_MENU_DELEGATE_STATE, bottomFabMenuDelegate.getState())
+    }
 
     sealed class Parameters : Parcelable {
 

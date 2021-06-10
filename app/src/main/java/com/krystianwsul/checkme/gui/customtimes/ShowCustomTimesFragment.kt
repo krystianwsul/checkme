@@ -9,7 +9,6 @@ import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.CustomItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.jakewharton.rxrelay3.BehaviorRelay
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.FragmentShowCustomTimesBinding
@@ -26,6 +25,7 @@ import com.krystianwsul.checkme.gui.tree.HolderType
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineDelegate
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineModelNode
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineRow
+import com.krystianwsul.checkme.gui.utils.BottomFabMenuDelegate
 import com.krystianwsul.checkme.gui.utils.ResettableProperty
 import com.krystianwsul.checkme.gui.utils.SelectionCallback
 import com.krystianwsul.checkme.gui.widgets.MyBottomBar
@@ -111,7 +111,7 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
         }
     }
 
-    private var showTimesFab: FloatingActionButton? = null
+    private var showTimesFabDelegate: BottomFabMenuDelegate.FabDelegate? = null
 
     private lateinit var data: ShowCustomTimesViewModel.Data
 
@@ -210,12 +210,13 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
         }
     }
 
-    private fun updateSelectAll() = (activity as CustomTimesListListener).setCustomTimesSelectAllVisibility(treeViewAdapter.displayedNodes.isNotEmpty())
+    private fun updateSelectAll() =
+        (activity as CustomTimesListListener).setCustomTimesSelectAllVisibility(treeViewAdapter.displayedNodes.isNotEmpty())
 
-    override fun setFab(floatingActionButton: FloatingActionButton) {
-        showTimesFab = floatingActionButton
+    override fun setFab(fabDelegate: BottomFabMenuDelegate.FabDelegate) {
+        showTimesFabDelegate = fabDelegate
 
-        showTimesFab!!.setOnClickListener { startActivity(ShowCustomTimeActivity.getCreateIntent(requireActivity())) }
+        showTimesFabDelegate!!.setOnClickListener { startActivity(ShowCustomTimeActivity.getCreateIntent(requireActivity())) }
 
         updateFabVisibility()
 
@@ -223,7 +224,7 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
     }
 
     private fun updateFabVisibility() {
-        showTimesFab?.let {
+        showTimesFabDelegate?.let {
             if (this::data.isInitialized && !selectionCallback.hasActionMode) it.show() else it.hide()
         }
     }
@@ -231,7 +232,7 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
     override fun clearFab() {
         isVisible.accept(false)
 
-        showTimesFab = null
+        showTimesFabDelegate = null
     }
 
     override fun onDestroyView() {

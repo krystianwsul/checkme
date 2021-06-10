@@ -10,7 +10,6 @@ import androidx.annotation.CheckResult
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.CustomItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.FragmentFriendListBinding
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
@@ -29,6 +28,7 @@ import com.krystianwsul.checkme.gui.tree.delegates.avatar.AvatarModelNode
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineDelegate
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineModelNode
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineRow
+import com.krystianwsul.checkme.gui.utils.BottomFabMenuDelegate
 import com.krystianwsul.checkme.gui.utils.ResettableProperty
 import com.krystianwsul.checkme.gui.utils.SelectionCallback
 import com.krystianwsul.checkme.gui.widgets.MyBottomBar
@@ -94,7 +94,7 @@ class UserListFragment : AbstractFragment(), FabUser {
         override fun onLastRemoved(placeholder: TreeViewAdapter.Placeholder) = updateFabVisibility()
     }
 
-    private var friendListFab: FloatingActionButton? = null
+    private var friendListFabDelegate: BottomFabMenuDelegate.FabDelegate? = null
 
     private val listener get() = activity as UserListListener
 
@@ -253,22 +253,22 @@ class UserListFragment : AbstractFragment(), FabUser {
                 ).ignoreElement()
             } else {
                 updateProject(
-                        DomainListenerManager.NotificationType.All,
-                        projectId!!,
-                        name,
-                        saveState.addedIds,
-                        saveState.removedIds,
+                    DomainListenerManager.NotificationType.All,
+                    projectId!!,
+                    name,
+                    saveState.addedIds,
+                    saveState.removedIds,
                 )
             }
         }
     }
 
-    override fun setFab(floatingActionButton: FloatingActionButton) {
-        check(friendListFab == null)
+    override fun setFab(fabDelegate: BottomFabMenuDelegate.FabDelegate) {
+        check(friendListFabDelegate == null)
 
-        friendListFab = floatingActionButton
+        friendListFabDelegate = fabDelegate
 
-        floatingActionButton.setOnClickListener {
+        fabDelegate.setOnClickListener {
             FriendPickerFragment.newInstance().also {
                 initializeFriendPickerFragment(it)
                 it.show(childFragmentManager, FRIEND_PICKER_TAG)
@@ -279,15 +279,15 @@ class UserListFragment : AbstractFragment(), FabUser {
     }
 
     private fun updateFabVisibility() {
-        friendListFab?.let {
+        friendListFabDelegate?.let {
             if (data != null && !selectionCallback.hasActionMode) it.show() else it.hide()
         }
     }
 
     override fun clearFab() {
-        checkNotNull(friendListFab)
+        checkNotNull(friendListFabDelegate)
 
-        friendListFab = null
+        friendListFabDelegate = null
     }
 
     private fun getSelected() = treeViewAdapter.selectedNodes.map { (it.modelNode as UserNode) }

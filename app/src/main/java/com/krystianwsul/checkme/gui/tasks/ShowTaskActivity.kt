@@ -20,6 +20,7 @@ import com.krystianwsul.checkme.gui.dialogs.RemoveInstancesDialogFragment
 import com.krystianwsul.checkme.gui.edit.EditActivity
 import com.krystianwsul.checkme.gui.edit.EditParameters
 import com.krystianwsul.checkme.gui.instances.ShowTaskInstancesActivity
+import com.krystianwsul.checkme.gui.utils.BottomFabMenuDelegate
 import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.viewmodels.ShowTaskViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
@@ -38,7 +39,14 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.Listener {
 
         private const val TAG_REMOVE_INSTANCES = "removeInstances"
 
-        fun newIntent(taskKey: TaskKey) = Intent(MyApplication.instance, ShowTaskActivity::class.java).apply { putExtra(TASK_KEY_KEY, taskKey as Parcelable) }
+        private const val KEY_BOTTOM_FAB_MENU_DELEGATE_STATE = "bottomFabMenuDelegateState"
+
+        fun newIntent(taskKey: TaskKey) = Intent(MyApplication.instance, ShowTaskActivity::class.java).apply {
+            putExtra(
+                TASK_KEY_KEY,
+                taskKey as Parcelable
+            )
+        }
     }
 
     private lateinit var taskKey: TaskKey
@@ -76,12 +84,14 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.Listener {
 
     override val taskSearch by lazy {
         binding.showTaskToolbarCollapseInclude
-                .collapseAppBarLayout
-                .filterCriteria
+            .collapseAppBarLayout
+            .filterCriteria
     }
 
     private lateinit var binding: ActivityShowTaskBinding
     private lateinit var bottomBinding: BottomBinding
+
+    private lateinit var bottomFabMenuDelegate: BottomFabMenuDelegate
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -90,9 +100,16 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.Listener {
         bottomBinding = BottomBinding.bind(binding.root)
         setContentView(binding.root)
 
+        bottomFabMenuDelegate = BottomFabMenuDelegate(
+            bottomBinding,
+            binding.showTaskCoordinator,
+            this,
+            savedInstanceState?.getParcelable(KEY_BOTTOM_FAB_MENU_DELEGATE_STATE),
+        )
+
         binding.showTaskToolbarCollapseInclude
-                .collapseAppBarLayout
-                .configureMenu(R.menu.show_task_menu_top, R.id.actionShowTaskSearch, R.id.actionTaskShowDeleted)
+            .collapseAppBarLayout
+            .configureMenu(R.menu.show_task_menu_top, R.id.actionShowTaskSearch, R.id.actionTaskShowDeleted)
 
         updateTopMenu()
 
@@ -102,7 +119,7 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.Listener {
 
         taskListFragment = getOrInitializeFragment(R.id.showTaskFragment) {
             TaskListFragment.newInstance()
-        }.also { it.setFab(bottomBinding.bottomFab) }
+        }.also { it.setFab(bottomFabMenuDelegate.fabDelegate) }
 
         showTaskViewModel.apply {
             start(taskKey)
@@ -187,6 +204,8 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.Listener {
         super.onSaveInstanceState(outState)
 
         outState.putParcelable(TASK_KEY_KEY, taskKey)
+
+        outState.putParcelable(KEY_BOTTOM_FAB_MENU_DELEGATE_STATE, bottomFabMenuDelegate.getState())
     }
 
     private fun updateBottomMenu() {

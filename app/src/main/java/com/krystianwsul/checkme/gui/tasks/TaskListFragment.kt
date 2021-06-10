@@ -10,7 +10,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.CustomItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.jakewharton.rxrelay3.BehaviorRelay
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
@@ -227,7 +226,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         }
     }
 
-    private var taskListFragmentFab: FloatingActionButton? = null
+    private var taskListFragmentFabDelegate: BottomFabMenuDelegate.FabDelegate? = null
 
     val treeViewAdapter: TreeViewAdapter<AbstractHolder> get() = searchDataManager.treeViewAdapter
 
@@ -421,16 +420,16 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         }
     }
 
-    override fun setFab(floatingActionButton: FloatingActionButton) {
-        taskListFragmentFab = floatingActionButton
+    override fun setFab(fabDelegate: BottomFabMenuDelegate.FabDelegate) {
+        taskListFragmentFabDelegate = fabDelegate
 
         updateFabVisibility("setFab")
     }
 
     private fun updateFabVisibility(source: String) {
-        Preferences.tickLog.logLineHour("fab ${hashCode()} $source ${taskListFragmentFab != null}, ${data != null}, ${!selectionCallback.hasActionMode}")
+        Preferences.tickLog.logLineHour("fab ${hashCode()} $source ${taskListFragmentFabDelegate != null}, ${data != null}, ${!selectionCallback.hasActionMode}")
 
-        taskListFragmentFab?.run {
+        taskListFragmentFabDelegate?.run {
             fun edit(editParameters: EditParameters.Create, closeActionMode: Boolean = false) = setOnClickListener {
                 if (closeActionMode) selectionCallback.actionMode!!.finish()
 
@@ -474,7 +473,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
     }
 
     override fun clearFab() {
-        taskListFragmentFab = null
+        taskListFragmentFabDelegate = null
     }
 
     override fun onDestroyView() {

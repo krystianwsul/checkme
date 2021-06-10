@@ -14,7 +14,6 @@ import androidx.appcompat.view.ActionMode
 import androidx.recyclerview.widget.CustomItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.jakewharton.rxrelay3.BehaviorRelay
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
@@ -396,12 +395,12 @@ class GroupListFragment @JvmOverloads constructor(
         }
     }
 
-    private val floatingActionButtonRelay = BehaviorRelay.createDefault(NullableWrapper<FloatingActionButton>())
+    private val fabDelegateRelay = BehaviorRelay.createDefault(NullableWrapper<BottomFabMenuDelegate.FabDelegate>())
 
-    private var floatingActionButton: FloatingActionButton?
-        get() = floatingActionButtonRelay.value!!.value
+    private var fabDelegate: BottomFabMenuDelegate.FabDelegate?
+        get() = fabDelegateRelay.value!!.value
         set(value) {
-            floatingActionButtonRelay.accept(NullableWrapper(value))
+            fabDelegateRelay.accept(NullableWrapper(value))
         }
 
     val shareData: String
@@ -724,8 +723,8 @@ class GroupListFragment @JvmOverloads constructor(
         }
     }
 
-    override fun setFab(floatingActionButton: FloatingActionButton) {
-        this.floatingActionButton = floatingActionButton
+    override fun setFab(fabDelegate: BottomFabMenuDelegate.FabDelegate) {
+        this.fabDelegate = fabDelegate
 
         updateFabVisibility()
     }
@@ -855,7 +854,7 @@ class GroupListFragment @JvmOverloads constructor(
     }
 
     private fun updateFabVisibility() {
-        floatingActionButton?.apply {
+        fabDelegate?.apply {
             when (val fabState = getFabState()) {
                 is FabState.Visible -> {
                     show()
@@ -868,7 +867,7 @@ class GroupListFragment @JvmOverloads constructor(
     }
 
     override fun clearFab() {
-        floatingActionButton = null
+        fabDelegate = null
     }
 
     private fun getAllInstanceDatas(instanceData: GroupListDataWrapper.InstanceData): List<GroupListDataWrapper.InstanceData> {

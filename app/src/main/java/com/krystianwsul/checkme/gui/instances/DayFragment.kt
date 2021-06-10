@@ -7,13 +7,13 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.annotation.StringRes
 import androidx.appcompat.widget.LinearLayoutCompat
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.jakewharton.rxrelay3.BehaviorRelay
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.FragmentDayBinding
 import com.krystianwsul.checkme.gui.main.MainActivity
+import com.krystianwsul.checkme.gui.utils.BottomFabMenuDelegate
 import com.krystianwsul.checkme.utils.time.toDateTimeTz
 import com.krystianwsul.checkme.viewmodels.DayViewModel
 import com.krystianwsul.common.time.Date
@@ -89,7 +89,7 @@ class DayFragment @JvmOverloads constructor(
 
     private val key = BehaviorRelay.create<Pair<Preferences.TimeRange, Int>>()
 
-    private var floatingActionButton: FloatingActionButton? = null
+    private var fabDelegate: BottomFabMenuDelegate.FabDelegate? = null
 
     private val activity = context as MainActivity
 
@@ -128,7 +128,7 @@ class DayFragment @JvmOverloads constructor(
             binding.groupListFragment.onRestoreInstanceState(it)
         }
 
-        floatingActionButton?.let(binding.groupListFragment::setFab)
+        fabDelegate?.let(binding.groupListFragment::setFab)
 
         entry = dayViewModel.getEntry(timeRange, position).apply { start() }
     }
@@ -140,7 +140,7 @@ class DayFragment @JvmOverloads constructor(
 
         hostEvents.subscribe { (key, event) ->
             if (event is Event.PageVisible && event.position == key.second) {
-                setFab(event.floatingActionButton)
+                setFab(event.fabDelegate)
 
                 activity.selectAllRelay
                         .subscribe {
@@ -174,8 +174,8 @@ class DayFragment @JvmOverloads constructor(
                 Observable.never()
         }
                 .filter { it }
-                .subscribe { binding.groupListFragment.checkCreatedTaskKey() }
-                .addTo(compositeDisposable)
+            .subscribe { binding.groupListFragment.checkCreatedTaskKey() }
+            .addTo(compositeDisposable)
     }
 
     override fun onDetachedFromWindow() {
@@ -184,16 +184,16 @@ class DayFragment @JvmOverloads constructor(
         super.onDetachedFromWindow()
     }
 
-    private fun setFab(floatingActionButton: FloatingActionButton) {
-        if (this.floatingActionButton === floatingActionButton) return
+    private fun setFab(fabDelegate: BottomFabMenuDelegate.FabDelegate) {
+        if (this.fabDelegate === fabDelegate) return
 
-        this.floatingActionButton = floatingActionButton
+        this.fabDelegate = fabDelegate
 
-        binding.groupListFragment.setFab(floatingActionButton)
+        binding.groupListFragment.setFab(fabDelegate)
     }
 
     private fun clearFab() {
-        floatingActionButton = null
+        fabDelegate = null
 
         binding.groupListFragment.clearFab()
     }
@@ -205,7 +205,7 @@ class DayFragment @JvmOverloads constructor(
 
     sealed class Event {
 
-        data class PageVisible(val position: Int, val floatingActionButton: FloatingActionButton) : Event()
+        data class PageVisible(val position: Int, val fabDelegate: BottomFabMenuDelegate.FabDelegate) : Event()
 
         object Invisible : Event()
     }

@@ -8,7 +8,6 @@ import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.CustomItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.jakewharton.rxrelay3.BehaviorRelay
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.FragmentFriendListBinding
@@ -30,6 +29,7 @@ import com.krystianwsul.checkme.gui.tree.delegates.avatar.AvatarModelNode
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineDelegate
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineModelNode
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineRow
+import com.krystianwsul.checkme.gui.utils.BottomFabMenuDelegate
 import com.krystianwsul.checkme.gui.utils.ResettableProperty
 import com.krystianwsul.checkme.gui.utils.SelectionCallback
 import com.krystianwsul.checkme.gui.widgets.MyBottomBar
@@ -104,7 +104,7 @@ class FriendListFragment : AbstractFragment(), FabUser {
         }
     }
 
-    private var friendListFab: FloatingActionButton? = null
+    private var friendListFabDelegate: BottomFabMenuDelegate.FabDelegate? = null
 
     private val isVisible = BehaviorRelay.createDefault(false)
     private lateinit var friendListViewModel: FriendListViewModel
@@ -190,12 +190,12 @@ class FriendListFragment : AbstractFragment(), FabUser {
     }
 
     private fun updateSelectAll() =
-            (activity as MainActivity).setUserSelectAllVisibility(treeViewAdapter.displayedNodes.isNotEmpty())
+        (activity as MainActivity).setUserSelectAllVisibility(treeViewAdapter.displayedNodes.isNotEmpty())
 
-    override fun setFab(floatingActionButton: FloatingActionButton) {
-        friendListFab = floatingActionButton
+    override fun setFab(fabDelegate: BottomFabMenuDelegate.FabDelegate) {
+        friendListFabDelegate = fabDelegate
 
-        friendListFab!!.setOnClickListener { startActivity(FindFriendActivity.newIntent(requireActivity())) }
+        friendListFabDelegate!!.setOnClickListener { startActivity(FindFriendActivity.newIntent(requireActivity())) }
 
         updateFabVisibility()
 
@@ -203,7 +203,7 @@ class FriendListFragment : AbstractFragment(), FabUser {
     }
 
     private fun updateFabVisibility() {
-        friendListFab?.run {
+        friendListFabDelegate?.run {
             if (data != null && !selectionCallback.hasActionMode) {
                 show()
             } else {
@@ -215,7 +215,7 @@ class FriendListFragment : AbstractFragment(), FabUser {
     override fun clearFab() {
         isVisible.accept(false)
 
-        friendListFab = null
+        friendListFabDelegate = null
     }
 
     override fun onDestroyView() {

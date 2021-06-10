@@ -15,6 +15,7 @@ import com.krystianwsul.checkme.databinding.BottomBinding
 import com.krystianwsul.checkme.gui.base.AbstractActivity
 import com.krystianwsul.checkme.gui.dialogs.ConfirmDialogFragment
 import com.krystianwsul.checkme.gui.friends.UserListFragment
+import com.krystianwsul.checkme.gui.utils.BottomFabMenuDelegate
 import com.krystianwsul.checkme.utils.tryGetFragment
 import com.krystianwsul.checkme.viewmodels.ShowProjectViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
@@ -31,9 +32,11 @@ class ShowProjectActivity : AbstractActivity(), UserListFragment.UserListListene
 
         private const val DISCARD_TAG = "discard"
 
+        private const val KEY_BOTTOM_FAB_MENU_DELEGATE_STATE = "bottomFabMenuDelegateState"
+
         fun newIntent(
-                context: Context,
-                projectId: ProjectKey.Shared,
+            context: Context,
+            projectId: ProjectKey.Shared,
         ) = Intent(context, ShowProjectActivity::class.java).apply {
             putExtra(PROJECT_ID_KEY, projectId as Parcelable)
         }
@@ -57,6 +60,8 @@ class ShowProjectActivity : AbstractActivity(), UserListFragment.UserListListene
 
     private lateinit var binding: ActivityShowProjectBinding
     private lateinit var bottomBinding: BottomBinding
+
+    private lateinit var bottomFabMenuDelegate: BottomFabMenuDelegate
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_save, menu)
@@ -99,6 +104,13 @@ class ShowProjectActivity : AbstractActivity(), UserListFragment.UserListListene
         bottomBinding = BottomBinding.bind(binding.root)
         setContentView(binding.root)
 
+        bottomFabMenuDelegate = BottomFabMenuDelegate(
+            bottomBinding,
+            binding.showProjectCoordinator,
+            this,
+            savedInstanceState?.getParcelable(KEY_BOTTOM_FAB_MENU_DELEGATE_STATE),
+        )
+
         this.savedInstanceState = savedInstanceState
 
         setSupportActionBar(binding.showProjectToolbarEditTextInclude.toolbar)
@@ -135,7 +147,7 @@ class ShowProjectActivity : AbstractActivity(), UserListFragment.UserListListene
                             .commit()
                 }
 
-        userListFragment.setFab(bottomBinding.bottomFab)
+        userListFragment.setFab(bottomFabMenuDelegate.fabDelegate)
 
         tryGetFragment<ConfirmDialogFragment>(DISCARD_TAG)?.listener = discardDialogListener
 
@@ -246,14 +258,20 @@ class ShowProjectActivity : AbstractActivity(), UserListFragment.UserListListene
     private fun updateBottomMenu() {
         bottomBinding.bottomAppBar
                 .menu
-                .findItem(R.id.action_select_all)
-                ?.isVisible = selectAllVisible
+            .findItem(R.id.action_select_all)
+            ?.isVisible = selectAllVisible
     }
 
     override fun setUserSelectAllVisibility(selectAllVisible: Boolean) {
         this.selectAllVisible = selectAllVisible
 
         updateBottomMenu()
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+
+        outState.putParcelable(KEY_BOTTOM_FAB_MENU_DELEGATE_STATE, bottomFabMenuDelegate.getState())
     }
 
     override val snackbarParent get() = binding.showProjectCoordinator

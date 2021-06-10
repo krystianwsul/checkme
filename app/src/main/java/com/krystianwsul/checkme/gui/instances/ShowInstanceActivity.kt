@@ -20,6 +20,7 @@ import com.krystianwsul.checkme.gui.edit.EditParameters
 import com.krystianwsul.checkme.gui.instances.list.GroupListListener
 import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
+import com.krystianwsul.checkme.gui.utils.BottomFabMenuDelegate
 import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.viewmodels.DataId
 import com.krystianwsul.checkme.viewmodels.ShowInstanceViewModel
@@ -46,15 +47,17 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
 
         private const val TAG_DELETE_INSTANCES = "deleteInstances"
 
+        private const val KEY_BOTTOM_FAB_MENU_DELEGATE_STATE = "bottomFabMenuDelegateState"
+
         fun getIntent(context: Context, instanceKey: InstanceKey) =
-                Intent(context, ShowInstanceActivity::class.java).apply {
-                    putExtra(INSTANCE_KEY, instanceKey as Parcelable)
-                }
+            Intent(context, ShowInstanceActivity::class.java).apply {
+                putExtra(INSTANCE_KEY, instanceKey as Parcelable)
+            }
 
         fun getNotificationIntent(context: Context, instanceKey: InstanceKey, notificationId: Int) =
-                Intent(context, ShowInstanceActivity::class.java).apply {
-                    putExtra(INSTANCE_KEY, instanceKey as Parcelable)
-                    putExtra(NOTIFICATION_ID_KEY, notificationId)
+            Intent(context, ShowInstanceActivity::class.java).apply {
+                putExtra(INSTANCE_KEY, instanceKey as Parcelable)
+                putExtra(NOTIFICATION_ID_KEY, notificationId)
                     flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
                 }
 
@@ -119,13 +122,15 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
 
     override val instanceSearch by lazy {
         binding.showInstanceToolbarCollapseInclude
-                .collapseAppBarLayout
-                .filterCriteria
-                .cast<FilterCriteria>()
+            .collapseAppBarLayout
+            .filterCriteria
+            .cast<FilterCriteria>()
     }
 
     private lateinit var binding: ActivityShowInstanceBinding
     private lateinit var bottomBinding: BottomBinding
+
+    private lateinit var bottomFabMenuDelegate: BottomFabMenuDelegate
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -134,15 +139,22 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
         bottomBinding = BottomBinding.bind(binding.root)
         setContentView(binding.root)
 
+        bottomFabMenuDelegate = BottomFabMenuDelegate(
+            bottomBinding,
+            binding.showInstanceCoordinator,
+            this,
+            savedInstanceState?.getParcelable(KEY_BOTTOM_FAB_MENU_DELEGATE_STATE),
+        )
+
         binding.groupListFragment.listener = this
 
         binding.showInstanceToolbarCollapseInclude
-                .collapseAppBarLayout
-                .apply {
-                    setSearchMenuOptions(false, false, false)
+            .collapseAppBarLayout
+            .apply {
+                setSearchMenuOptions(false, false, false)
 
-                    configureMenu(R.menu.show_instance_menu_top, R.id.instanceMenuSearch) { itemId ->
-                        data!!.also {
+                configureMenu(R.menu.show_instance_menu_top, R.id.instanceMenuSearch) { itemId ->
+                    data!!.also {
                             when (itemId) {
                                 R.id.instanceMenuNotify -> {
                                     check(!it.done)
@@ -198,7 +210,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
 
         initBottomBar()
 
-        binding.groupListFragment.setFab(bottomBinding.bottomFab)
+        binding.groupListFragment.setFab(bottomFabMenuDelegate.fabDelegate)
 
         check(intent.hasExtra(INSTANCE_KEY))
         instanceKey = (savedInstanceState ?: intent.extras!!).getParcelable(INSTANCE_KEY)!!
@@ -412,6 +424,8 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
         super.onSaveInstanceState(outState)
 
         outState.putParcelable(INSTANCE_KEY, instanceKey)
+
+        outState.putParcelable(KEY_BOTTOM_FAB_MENU_DELEGATE_STATE, bottomFabMenuDelegate.getState())
     }
 
     override fun onDestroy() {

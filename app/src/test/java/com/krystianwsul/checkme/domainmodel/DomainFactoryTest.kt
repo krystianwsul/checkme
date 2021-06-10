@@ -34,7 +34,7 @@ class DomainFactoryTest {
 
         assertEquals(
                 "task",
-                domainFactory.getMainData()
+                domainFactory.getMainTaskData()
                         .taskData
                         .entryDatas
                         .single()
@@ -492,7 +492,7 @@ class DomainFactoryTest {
 
         assertEquals(
             taskName,
-            domainFactory.getMainData()
+            domainFactory.getMainTaskData()
                 .taskData
                 .entryDatas
                 .single()

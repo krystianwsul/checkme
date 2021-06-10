@@ -122,7 +122,8 @@ class MainActivity :
     private var calendarOpen = false
     private var calendarInitial: Boolean = true
 
-    private val mainViewModel by lazy { getViewModel<MainViewModel>() }
+    private val mainNoteViewModel by lazy { getViewModel<MainNoteViewModel>() }
+    private val mainTaskViewModel by lazy { getViewModel<MainTaskViewModel>() }
 
     val dayViewModel by lazy { getViewModel<DayViewModel>() }
     private val searchInstancesViewModel by lazy { getViewModel<SearchInstancesViewModel>() }
@@ -579,14 +580,17 @@ class MainActivity :
             }
         }
 
-        mainViewModel.apply {
-            createDisposable += data.subscribe {
-                noteListFragment.parameters = TaskListFragment.Parameters.All(
-                    // todo notes
-                    TaskListFragment.Data(dataId, it.immediate, it.taskData, true),
+        mainNoteViewModel.data
+            .subscribe {
+                noteListFragment.parameters = TaskListFragment.Parameters.Notes(
+                    TaskListFragment.Data(mainNoteViewModel.dataId, it.immediate, it.taskData, true),
                     true,
                 )
+            }
+            .addTo(createDisposable)
 
+        mainTaskViewModel.apply {
+            createDisposable += data.subscribe {
                 taskListFragment.parameters = TaskListFragment.Parameters.All(
                     TaskListFragment.Data(dataId, it.immediate, it.taskData, true),
                     true,
@@ -955,9 +959,8 @@ class MainActivity :
 
         if (tab == Tab.ABOUT) aboutFragment.onShown()
 
-        mainViewModel.apply {
-            if (tab in listOf(Tab.NOTES, Tab.TASKS)) start() else stop()
-        }
+        mainNoteViewModel.apply { if (tab == Tab.NOTES) start() else stop() }
+        mainTaskViewModel.apply { if (tab == Tab.TASKS) start() else stop() }
 
         binding.mainActivityToolbar.title = getString(tabSearchState.title)
 
@@ -1149,7 +1152,8 @@ class MainActivity :
             .let { if (it > 0) fixedSmoothScroll(it - 1) }
 
         dayViewModel.refresh()
-        mainViewModel.refresh()
+        mainNoteViewModel.refresh()
+        mainTaskViewModel.refresh()
         searchInstancesViewModel.refresh()
     }
 

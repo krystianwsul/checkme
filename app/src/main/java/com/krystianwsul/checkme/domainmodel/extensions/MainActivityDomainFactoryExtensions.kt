@@ -11,19 +11,32 @@ import com.krystianwsul.checkme.utils.time.calendar
 import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.checkme.utils.time.toDateTimeTz
 import com.krystianwsul.checkme.viewmodels.DayViewModel
-import com.krystianwsul.checkme.viewmodels.MainViewModel
+import com.krystianwsul.checkme.viewmodels.MainNoteViewModel
+import com.krystianwsul.checkme.viewmodels.MainTaskViewModel
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.ProjectKey
 import java.util.*
 
-fun DomainFactory.getMainData(now: ExactTimeStamp.Local = ExactTimeStamp.Local.now): MainViewModel.Data {
-    MyCrashlytics.log("DomainFactory.getMainData")
+fun DomainFactory.getMainNoteData(now: ExactTimeStamp.Local = ExactTimeStamp.Local.now): MainNoteViewModel.Data {
+    MyCrashlytics.log("DomainFactory.getMainNoteData")
 
     DomainThreadChecker.instance.requireDomainThread()
 
-    val projectDatas = projectsFactory.projects
+    return MainNoteViewModel.Data(TaskListFragment.TaskData(getMainData(now), null, true, null))
+}
+
+fun DomainFactory.getMainTaskData(now: ExactTimeStamp.Local = ExactTimeStamp.Local.now): MainTaskViewModel.Data {
+    MyCrashlytics.log("DomainFactory.getMainTaskData")
+
+    DomainThreadChecker.instance.requireDomainThread()
+
+    return MainTaskViewModel.Data(TaskListFragment.TaskData(getMainData(now), null, true, null))
+}
+
+private fun DomainFactory.getMainData(now: ExactTimeStamp.Local): List<TaskListFragment.ProjectData> {
+    return projectsFactory.projects
         .values
         .map {
             val childTaskDatas = it.getAllTasks()
@@ -55,10 +68,6 @@ fun DomainFactory.getMainData(now: ExactTimeStamp.Local = ExactTimeStamp.Local.n
             it.toProjectData(childTaskDatas)
         }
         .filter { it.children.isNotEmpty() }
-
-    return MainViewModel.Data(
-        TaskListFragment.TaskData(projectDatas, null, true, null),
-    )
 }
 
 fun DomainFactory.getGroupListData(

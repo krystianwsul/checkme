@@ -328,7 +328,7 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
             }
 
             override fun mapDataToTaskListFragmentParameters(dataId: DataId, data: ShowTasksViewModel.Data) =
-                TaskListFragment.Parameters.All(mapDataToTaskListFragmentData(dataId, data), true)
+                TaskListFragment.Parameters.Notes(mapDataToTaskListFragmentData(dataId, data), true)
         }
 
         @Parcelize

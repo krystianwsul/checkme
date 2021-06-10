@@ -972,6 +972,11 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             override val hint: EditActivity.Hint? = null
         }
 
+        data class Notes(override val data: Data, override val canDrag: Boolean) : Parameters() {
+
+            override val hint: EditActivity.Hint? = null
+        }
+
         data class Project(override val data: Data, val projectKey: ProjectKey<*>) : Parameters() {
 
             override val hint get() = (projectKey as? ProjectKey.Shared)?.let(EditActivity.Hint::Project)

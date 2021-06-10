@@ -7,6 +7,7 @@ import android.os.Parcelable
 import android.view.LayoutInflater
 import android.view.View
 import androidx.coordinatorlayout.widget.CoordinatorLayout
+import androidx.core.view.isVisible
 import androidx.interpolator.view.animation.FastOutSlowInInterpolator
 import androidx.transition.TransitionManager
 import com.google.android.material.color.MaterialColors
@@ -29,22 +30,30 @@ class BottomFabMenuDelegate(
     val fabDelegate = object : FabDelegate {
 
         override fun show() {
-            bottomBinding.bottomFab.show() // todo fab
+            state.fabVisibleWhenNoMenu = true
+
+            if (state.menuDelegate == null) bottomBinding.bottomFab.show()
         }
 
         override fun hide() {
-            bottomBinding.bottomFab.hide() // todo fab
+            state.fabVisibleWhenNoMenu = false
+
+            if (state.menuDelegate == null) bottomBinding.bottomFab.hide()
         }
 
         override fun setOnClickListener(listener: () -> Unit) {
-            bottomBinding.bottomFab.setOnClickListener { listener() } // todo fab
+            bottomBinding.bottomFab.setOnClickListener { listener() }
         }
     }
 
     init {
         bottomBinding.bottomFabScrim.setOnClickListener { closeMenu() }
 
-        state.menuDelegate?.let { showMenuInternal(false) }
+        if (state.menuDelegate != null) {
+            showMenuInternal(false)
+        } else if (state.fabVisibleWhenNoMenu) {
+            bottomBinding.bottomFab.isVisible = true
+        }
     }
 
     private fun closeMenu() {
@@ -52,18 +61,25 @@ class BottomFabMenuDelegate(
         state.menuDelegate = null
 
         bottomBinding.apply {
-            val transition = buildContainerTransformation()
+            if (state.fabVisibleWhenNoMenu) {
+                val transition = buildContainerTransformation()
 
-            transition.startView = bottomFabMenu
-            transition.endView = bottomFab
+                transition.startView = bottomFabMenu
+                transition.endView = bottomFab
 
-            transition.addTarget(bottomFab)
+                transition.addTarget(bottomFab)
 
-            TransitionManager.beginDelayedTransition(coordinatorLayout, transition)
-            bottomFabMenu.visibility = View.INVISIBLE
-            bottomFabScrim.visibility = View.INVISIBLE
+                TransitionManager.beginDelayedTransition(coordinatorLayout, transition)
+                bottomFabMenu.visibility = View.INVISIBLE
+                bottomFabScrim.visibility = View.INVISIBLE
 
-            bottomFab.visibility = View.VISIBLE
+                bottomFab.visibility = View.VISIBLE
+            } else {
+                TransitionManager.beginDelayedTransition(coordinatorLayout)
+
+                bottomFabMenu.visibility = View.INVISIBLE
+                bottomFabScrim.visibility = View.INVISIBLE
+            }
         }
     }
 

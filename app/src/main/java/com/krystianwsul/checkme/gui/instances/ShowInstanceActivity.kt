@@ -425,7 +425,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
 
         outState.putParcelable(INSTANCE_KEY, instanceKey)
 
-        outState.putParcelable(KEY_BOTTOM_FAB_MENU_DELEGATE_STATE, bottomFabMenuDelegate.getState())
+        outState.putParcelable(KEY_BOTTOM_FAB_MENU_DELEGATE_STATE, bottomFabMenuDelegate.state)
     }
 
     override fun onDestroy() {

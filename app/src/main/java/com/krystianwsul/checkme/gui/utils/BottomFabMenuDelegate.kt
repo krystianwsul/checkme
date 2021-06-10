@@ -14,15 +14,17 @@ import com.google.android.material.transition.MaterialContainerTransform
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.BottomBinding
 import com.krystianwsul.checkme.databinding.ItemFabMenuBinding
+import kotlinx.parcelize.Parcelize
 
 class BottomFabMenuDelegate(
     private val bottomBinding: BottomBinding,
     private val coordinatorLayout: CoordinatorLayout,
     private val activity: Activity,
-    initialMenuDelegate: MenuDelegate?,
+    initialState: State?,
 ) {
 
-    private var menuDelegate: MenuDelegate? = null
+    var state = initialState ?: State()
+        private set
 
     val fabDelegate = object : FabDelegate {
 
@@ -42,12 +44,12 @@ class BottomFabMenuDelegate(
     init {
         bottomBinding.bottomFabScrim.setOnClickListener { closeMenu() }
 
-        initialMenuDelegate?.let { showMenu(it, false) }
+        state.menuDelegate?.let { showMenuInternal(false) }
     }
 
     private fun closeMenu() {
-        checkNotNull(menuDelegate)
-        menuDelegate = null
+        checkNotNull(state.menuDelegate)
+        state.menuDelegate = null
 
         bottomBinding.apply {
             val transition = buildContainerTransformation()
@@ -73,14 +75,20 @@ class BottomFabMenuDelegate(
         fadeMode = MaterialContainerTransform.FADE_MODE_IN
     }
 
-    fun showMenu(menuDelegate: MenuDelegate, animate: Boolean = true) {
-        check(this.menuDelegate == null)
-        this.menuDelegate = menuDelegate
+    fun showMenu(menuDelegate: MenuDelegate) {
+        check(state.menuDelegate == null)
+        state.menuDelegate = menuDelegate
+
+        showMenuInternal(true)
+    }
+
+    private fun showMenuInternal(animate: Boolean) {
+        checkNotNull(state.menuDelegate)
 
         bottomBinding.apply {
             bottomFabMenuList.removeAllViews()
 
-            val items = menuDelegate.getItems()
+            val items = state.menuDelegate!!.getItems()
 
             items.dropLast(1).forEach {
                 ItemFabMenuBinding.inflate(
@@ -122,8 +130,6 @@ class BottomFabMenuDelegate(
         }
     }
 
-    fun getState() = menuDelegate
-
     interface MenuDelegate : Parcelable {
 
         fun getItems(): List<Item>
@@ -144,4 +150,10 @@ class BottomFabMenuDelegate(
 
         fun setOnClickListener(listener: () -> Unit)
     }
+
+    @Parcelize
+    data class State(
+        var fabVisibleWhenNoMenu: Boolean = false,
+        var menuDelegate: MenuDelegate? = null,
+    ) : Parcelable
 }

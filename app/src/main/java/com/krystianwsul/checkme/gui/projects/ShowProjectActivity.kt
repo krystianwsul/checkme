@@ -271,7 +271,7 @@ class ShowProjectActivity : AbstractActivity(), UserListFragment.UserListListene
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
 
-        outState.putParcelable(KEY_BOTTOM_FAB_MENU_DELEGATE_STATE, bottomFabMenuDelegate.getState())
+        outState.putParcelable(KEY_BOTTOM_FAB_MENU_DELEGATE_STATE, bottomFabMenuDelegate.state)
     }
 
     override val snackbarParent get() = binding.showProjectCoordinator

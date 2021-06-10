@@ -205,7 +205,7 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.Listener {
 
         outState.putParcelable(TASK_KEY_KEY, taskKey)
 
-        outState.putParcelable(KEY_BOTTOM_FAB_MENU_DELEGATE_STATE, bottomFabMenuDelegate.getState())
+        outState.putParcelable(KEY_BOTTOM_FAB_MENU_DELEGATE_STATE, bottomFabMenuDelegate.state)
     }
 
     private fun updateBottomMenu() {

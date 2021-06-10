@@ -186,7 +186,7 @@ class ShowTaskInstancesActivity : AbstractActivity(), GroupListListener {
 
         outState.putInt(KEY_PAGE, page)
 
-        outState.putParcelable(KEY_BOTTOM_FAB_MENU_DELEGATE_STATE, bottomFabMenuDelegate.getState())
+        outState.putParcelable(KEY_BOTTOM_FAB_MENU_DELEGATE_STATE, bottomFabMenuDelegate.state)
     }
 
     override fun onDestroy() {

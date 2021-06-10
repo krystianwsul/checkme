@@ -839,7 +839,7 @@ class MainActivity :
 
             putInt(KEY_SEARCH_PAGE, searchPage)
 
-            putParcelable(KEY_MENU_DELEGATE_STATE, bottomFabMenuDelegate.getState())
+            putParcelable(KEY_MENU_DELEGATE_STATE, bottomFabMenuDelegate.state)
         }
     }
 

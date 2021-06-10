@@ -101,7 +101,7 @@ class UnscheduledNode(
         }
     }
 
-    override val text by lazy { groupListFragment.activity.getString(R.string.noReminder) }
+    override val text by lazy { groupListFragment.activity.getString(R.string.notes) }
 
 
     override fun isVisible(actionMode: Boolean, hasVisibleChildren: Boolean): Boolean {

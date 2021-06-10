@@ -59,7 +59,7 @@ fun DomainFactory.getShowTasksData(parameters: ShowTasksActivity.Parameters): Sh
                 }
                 .filter { it.children.isNotEmpty() }
 
-            title = MyApplication.context.getString(R.string.noReminder)
+            title = MyApplication.context.getString(R.string.notes)
 
             isSharedProject = null
         }

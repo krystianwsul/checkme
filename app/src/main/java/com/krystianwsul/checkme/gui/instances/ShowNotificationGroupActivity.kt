@@ -15,6 +15,7 @@ import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
 import com.krystianwsul.checkme.gui.base.AbstractActivity
 import com.krystianwsul.checkme.gui.dialogs.RemoveInstancesDialogFragment
 import com.krystianwsul.checkme.gui.instances.list.GroupListListener
+import com.krystianwsul.checkme.gui.instances.list.GroupListParameters
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
 import com.krystianwsul.checkme.utils.startDate
 import com.krystianwsul.checkme.utils.tryGetFragment
@@ -112,10 +113,12 @@ class ShowNotificationGroupActivity : AbstractActivity(), GroupListListener {
 
                 val immediate = it.immediate
 
-                binding.groupListFragment.setInstanceKeys(
-                    showNotificationGroupViewModel.dataId,
-                    immediate,
-                    it.groupListDataWrapper,
+                binding.groupListFragment.setParameters(
+                    GroupListParameters.InstanceKeys(
+                        showNotificationGroupViewModel.dataId,
+                        immediate,
+                        it.groupListDataWrapper,
+                    )
                 )
 
                 updateTopMenu()

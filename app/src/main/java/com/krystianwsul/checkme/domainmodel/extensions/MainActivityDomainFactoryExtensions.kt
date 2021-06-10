@@ -14,6 +14,7 @@ import com.krystianwsul.checkme.viewmodels.DayViewModel
 import com.krystianwsul.checkme.viewmodels.MainNoteViewModel
 import com.krystianwsul.checkme.viewmodels.MainTaskViewModel
 import com.krystianwsul.common.firebase.DomainThreadChecker
+import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.ProjectKey
@@ -24,7 +25,14 @@ fun DomainFactory.getMainNoteData(now: ExactTimeStamp.Local = ExactTimeStamp.Loc
 
     DomainThreadChecker.instance.requireDomainThread()
 
-    return MainNoteViewModel.Data(TaskListFragment.TaskData(getMainData(now), null, true, null))
+    return MainNoteViewModel.Data(
+        TaskListFragment.TaskData(
+            getMainData(now) { it.intervalInfo.isUnscheduled(now) },
+            null,
+            true,
+            null,
+        )
+    )
 }
 
 fun DomainFactory.getMainTaskData(now: ExactTimeStamp.Local = ExactTimeStamp.Local.now): MainTaskViewModel.Data {
@@ -35,12 +43,16 @@ fun DomainFactory.getMainTaskData(now: ExactTimeStamp.Local = ExactTimeStamp.Loc
     return MainTaskViewModel.Data(TaskListFragment.TaskData(getMainData(now), null, true, null))
 }
 
-private fun DomainFactory.getMainData(now: ExactTimeStamp.Local): List<TaskListFragment.ProjectData> {
+private fun DomainFactory.getMainData(
+    now: ExactTimeStamp.Local,
+    filter: (Task) -> Boolean = { true },
+): List<TaskListFragment.ProjectData> {
     return projectsFactory.projects
         .values
         .map {
             val childTaskDatas = it.getAllTasks()
                 .asSequence()
+                .filter(filter)
                 .map { Pair(it, it.getHierarchyExactTimeStamp(now)) }
                 .filter { (task, hierarchyExactTimeStamp) -> task.isTopLevelTask(hierarchyExactTimeStamp) }
                 .map { (task, hierarchyExactTimeStamp) ->

@@ -9,7 +9,6 @@ import android.os.Bundle
 import android.os.Parcelable
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.view.*
 import androidx.activity.viewModels
 import androidx.core.view.isVisible
@@ -119,28 +118,44 @@ class EditActivity : NavBarActivity() {
     private val parentFragmentDelegate = object : ParentPickerFragment.Delegate {
 
         override val adapterDataObservable by lazy {
-            editViewModel.parentPickerData.map { ParentPickerFragment.AdapterData(it.parentTreeDatas) }
+            var first = true
+
+            editViewModel.parentPickerData.map {
+                val filterCriteria = if (first) {
+                    first = false
+
+                    editViewModel.delegate
+                        .parentScheduleManager
+                        .parent
+                        ?.parentKey
+                        ?.let { it as? EditViewModel.ParentKey.Task }
+                        ?.let { FilterCriteria.ExpandOnly(SearchCriteria.Search.TaskKey(it.taskKey)) }
+                } else {
+                    null
+                }
+
+                ParentPickerFragment.AdapterData(it.parentTreeDatas, filterCriteria)
+            }
         }
 
         private val queryRelay = BehaviorRelay.create<String>()
 
         override val filterCriteriaObservable by lazy {
-            queryRelay.distinctUntilChanged()
+            queryRelay.skip(1) // to allow initial FilterCriteria.ExpandOnly to pass through AdapterData
+                .distinctUntilChanged()
                 .map<FilterCriteria> { FilterCriteria.Full(it) }
-                .let { observable ->
-                    val taskKey = editViewModel.delegate
-                        .parentScheduleManager
-                        .parent
-                        ?.parentKey
-                        ?.let { it as? EditViewModel.ParentKey.Task }
-                        ?.taskKey
+        }
 
-                    taskKey?.let {
-                        observable.skip(1).startWithItem(FilterCriteria.ExpandOnly(SearchCriteria.Search.TaskKey(taskKey)))
-                    } ?: observable
-                }
-                .doOnNext {
-                    Log.e("asdf", "magic filterCriteria $it")
+        override val initialScrollMatcher by lazy {
+            editViewModel.delegate
+                .parentScheduleManager
+                .parent
+                ?.let { parent ->
+                    { entryData: ParentPickerFragment.EntryData ->
+                        val parentTreeData = entryData as EditViewModel.ParentTreeData
+
+                        entryData.entryKey == parent.parentKey
+                    }
                 }
         }
 

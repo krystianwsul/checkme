@@ -118,7 +118,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
         viewCreatedDisposable += Observables.combineLatest(
             delegateRelay,
-            searchChanges
+            searchChanges,
         ).subscribe { (delegate, query) -> delegate.onSearch(query) }
 
         delegateRelay.switchMap { delegate ->
@@ -140,7 +140,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
                 (treeViewAdapter!!.treeModelAdapter as TaskAdapter).initialize(
                     adapterData.entryDatas,
                     expansionStates,
-                    adapterData.showProgress
+                    adapterData.showProgress,
                 )
 
                 adapterData.filterCriteria?.let { treeViewAdapter!!.setFilterCriteria(it, placeholder) }
@@ -156,6 +156,20 @@ class ParentPickerFragment : AbstractDialogFragment() {
                 adapter = treeViewAdapter
                 itemAnimator = CustomItemAnimator()
             }
+
+            delegateRelay.value!!
+                .initialScrollMatcher
+                ?.let { matcher ->
+                    val position = treeViewAdapter!!.getTreeNodeCollection().getPosition(PositionMode.DISPLAYED) {
+                        it.modelNode
+                            .let { it as? TaskAdapter.TaskWrapper }
+                            ?.entryData
+                            ?.let(matcher)
+                            ?: false
+                    }
+
+                    binding.parentPickerRecycler.scrollToPosition(position)
+                }
         }
     }
 
@@ -204,16 +218,18 @@ class ParentPickerFragment : AbstractDialogFragment() {
         treeViewAdapter!!.setFilterCriteria(filterCriteria, placeholder)
     }
 
-    private inner class TaskAdapter :
-        BaseAdapter(),
-        TaskParent {
+    private inner class TaskAdapter : BaseAdapter(), TaskParent {
 
         private lateinit var taskWrappers: MutableList<TaskWrapper>
 
         val treeViewAdapter = TreeViewAdapter(
             this,
-            TreeViewAdapter.PaddingData(R.layout.row_parent_picker_dialog_padding, R.id.paddingProgress, true),
-            filterCriteria
+            TreeViewAdapter.PaddingData(
+                R.layout.row_parent_picker_dialog_padding,
+                R.id.paddingProgress,
+                true,
+            ),
+            filterCriteria,
         )
 
         override val taskAdapter = this
@@ -255,7 +271,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
         override fun decrementSelected(placeholder: TreeViewAdapter.Placeholder) = throw UnsupportedOperationException()
 
-        private inner class TaskWrapper(
+        inner class TaskWrapper(
             override val indentation: Int,
             private val taskParent: TaskParent,
             val entryData: EntryData,
@@ -385,6 +401,8 @@ class ParentPickerFragment : AbstractDialogFragment() {
         val adapterDataObservable: Observable<AdapterData>
 
         val filterCriteriaObservable: Observable<FilterCriteria>
+
+        val initialScrollMatcher: ((EntryData) -> Boolean)?
 
         fun onEntrySelected(entryData: EntryData)
 

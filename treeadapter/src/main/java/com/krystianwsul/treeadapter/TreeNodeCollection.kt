@@ -35,12 +35,12 @@ class TreeNodeCollection<T : TreeHolder>(val treeViewAdapter: TreeViewAdapter<T>
         return positionMode.getRecursiveNodes(this)[position]
     }
 
-    override fun getPosition(treeNode: TreeNode<T>, positionMode: PositionMode): Int {
+    override fun getPosition(positionMode: PositionMode, matcher: (TreeNode<T>) -> Boolean): Int {
         val treeNodes = positionMode.getDirectChildNodes(this)
 
         var offset = 0
         for (currTreeNode in treeNodes) {
-            val position = currTreeNode.getPosition(treeNode, positionMode)
+            val position = currTreeNode.getPosition(positionMode, matcher)
             if (position >= 0) return offset + position
 
             offset += positionMode.getRecursiveNodes(currTreeNode).size

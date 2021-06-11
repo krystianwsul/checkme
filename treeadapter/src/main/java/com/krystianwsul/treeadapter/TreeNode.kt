@@ -222,15 +222,15 @@ class TreeNode<T : TreeHolder>(
         throw IndexOutOfBoundsException()
     }
 
-    override fun getPosition(treeNode: TreeNode<T>, positionMode: PositionMode): Int {
+    override fun getPosition(positionMode: PositionMode, matcher: (TreeNode<T>) -> Boolean): Int {
         checkChildTreeNodesSet()
 
-        if (treeNode === this) return 0
+        if (matcher(this)) return 0
         if (!isExpanded) return -1
 
         var offset = 1
         for (childTreeNode in positionMode.getDirectChildNodes(this)) {
-            val position = childTreeNode.getPosition(treeNode, positionMode)
+            val position = childTreeNode.getPosition(positionMode, matcher)
 
             if (position >= 0) return offset + position
 

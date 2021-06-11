@@ -74,6 +74,10 @@ class TreeViewAdapter<T : TreeHolder>(
                         check(locker == null)
 
                         locker = AdapterLocker()
+
+                        filterCriteria.search?.let {
+                            if (it.expandMatches) treeNodeCollection.expandMatching(it, false)
+                        }
                     }
         } else {
             check(updating)

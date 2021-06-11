@@ -18,7 +18,10 @@ interface NodeContainer<T : TreeHolder> {
 
     val wantsSeparators: Boolean
 
-    fun getPosition(treeNode: TreeNode<T>, positionMode: PositionMode = PositionMode.COMPAT): Int
+    fun getPosition(treeNode: TreeNode<T>, positionMode: PositionMode = PositionMode.COMPAT) =
+        getPosition(positionMode) { it == treeNode }
+
+    fun getPosition(positionMode: PositionMode, matcher: (TreeNode<T>) -> Boolean): Int
 
     fun getNode(position: Int, positionMode: PositionMode = PositionMode.COMPAT): TreeNode<T>
 

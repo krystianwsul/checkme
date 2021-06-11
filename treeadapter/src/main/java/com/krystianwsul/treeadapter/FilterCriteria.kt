@@ -10,7 +10,7 @@ sealed interface FilterCriteria : Parcelable {
 
     val hasSearch get() = search?.hasSearch ?: false
     val expandMatches get() = search?.expandMatches ?: false
-    val needsNormalization get() = hasSearch
+    val needsNormalization get() = search?.needsNormalization ?: false
 
     fun canBeShown(treeNode: TreeNode<*>): Boolean = true
 

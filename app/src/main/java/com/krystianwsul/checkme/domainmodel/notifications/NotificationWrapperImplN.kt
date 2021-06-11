@@ -7,7 +7,6 @@ import android.os.Build
 import android.service.notification.StatusBarNotification
 import androidx.core.app.NotificationCompat
 import com.krystianwsul.checkme.MyCrashlytics
-import com.krystianwsul.checkme.Preferences
 
 
 @SuppressLint("NewApi")
@@ -68,7 +67,6 @@ open class NotificationWrapperImplN : NotificationWrapperImpl() {
             actions: List<NotificationCompat.Action>,
             time: Long?,
             style: (() -> NotificationCompat.Style)?,
-            autoCancel: Boolean,
             summary: Boolean,
             sortKey: String,
             largeIcon: (() -> Bitmap)?,
@@ -83,7 +81,6 @@ open class NotificationWrapperImplN : NotificationWrapperImpl() {
             actions,
             time,
             style,
-            autoCancel,
             summary,
             sortKey,
             largeIcon,
@@ -94,10 +91,6 @@ open class NotificationWrapperImplN : NotificationWrapperImpl() {
 
         if (summary) setGroupSummary(true)
     }
-
-    override fun logNotificationIds(source: String) = Preferences.tickLog.logLineHour(
-            "NotificationManager ids ($source): " + notificationManager.activeNotifications.map { it.id }
-    )
 
     private class NotificationException(
             lastNotificationId: Int,

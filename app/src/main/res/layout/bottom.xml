@@ -9,7 +9,7 @@
         android:layout_height="match_parent"
         android:clickable="true"
         android:focusable="true"
-        android:background="#66434343"
+        android:background="#46000000"
         android:animateLayoutChanges="true"
         android:elevation="8dp"
         android:visibility="invisible" />

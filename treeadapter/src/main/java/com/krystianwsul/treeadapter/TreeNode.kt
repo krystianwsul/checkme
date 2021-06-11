@@ -28,14 +28,19 @@ class TreeNode<T : TreeHolder>(
 
         if (!modelNode.isSelectable) return
 
-        if (modelNode.tryStartDrag(viewHolder))
+        if (modelNode.tryStartDrag(viewHolder)) {
             modelNode.onBindViewHolder(viewHolder, true)
-        else
+        } else {
+            if (!selected) modelNode.forceSelected(viewHolder)
+
             treeViewAdapter.updateDisplayedNodes(this::toggleSelected)
+        }
     }
 
     fun onClick(holder: T) {
         if (hasActionMode()) {
+            if (!selected) modelNode.forceSelected(holder)
+
             treeViewAdapter.updateDisplayedNodes(this::toggleSelected)
         } else {
             modelNode.onClick(holder)

@@ -8,7 +8,9 @@ sealed class FilterCriteria : Parcelable {
 
     abstract val query: String
 
-    val expandMatches get() = query.isNotEmpty()
+    val hasSearch get() = query.isNotEmpty()
+    val expandMatches get() = hasSearch
+    val needsNormalization get() = hasSearch
 
     open fun canBeShown(treeNode: TreeNode<*>): Boolean = true
 

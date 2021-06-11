@@ -336,12 +336,12 @@ class TreeViewAdapter<T : TreeHolder>(
     fun setFilterCriteria(filterCriteria: FilterCriteria, @Suppress("UNUSED_PARAMETER") placeholder: Placeholder) {
         updatingAfterNormalizationDisposable?.dispose()
 
-        if (normalizedObservable.getCurrentValue() || filterCriteria.query.isEmpty()) {
+        if (normalizedObservable.getCurrentValue() || !filterCriteria.needsNormalization) {
             this.filterCriteria = filterCriteria
         } else {
             updatingAfterNormalizationDisposable = normalizedObservable.filter { it }
-                    .subscribe { updateDisplayedNodes { this.filterCriteria = filterCriteria } }
-                    .addTo(recyclerAttachedToWindowDisposable)
+                .subscribe { updateDisplayedNodes { this.filterCriteria = filterCriteria } }
+                .addTo(recyclerAttachedToWindowDisposable)
         }
     }
 

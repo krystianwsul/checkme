@@ -1050,9 +1050,7 @@ class EditActivity : NavBarActivity() {
         private val queryRelay = BehaviorRelay.create<String>()
 
         override val filterCriteriaObservable by lazy {
-            queryRelay.skip(1) // to allow initial FilterCriteria.ExpandOnly to pass through AdapterData
-                .distinctUntilChanged()
-                .map<FilterCriteria> { FilterCriteria.Full(it) }!!
+            queryRelay.distinctUntilChanged().map<FilterCriteria> { FilterCriteria.Full(it) }!!
         }
 
         override val initialScrollMatcher by lazy {

@@ -43,6 +43,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
         private const val SHOW_DELETE_KEY = "showDelete"
         private const val KEY_SHOW_ADD = "showAdd"
+        private const val KEY_SEARCH = "search"
 
         fun newInstance(
             showDelete: Boolean,
@@ -55,7 +56,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
         }
     }
 
-    private lateinit var searchChanges: Observable<String>
+    private lateinit var searchChanges: BehaviorRelay<String>
 
     private val delegateRelay = BehaviorRelay.create<Delegate>()
 
@@ -66,6 +67,14 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
     private val bindingProperty = ResettableProperty<FragmentParentPickerBinding>()
     private var binding by bindingProperty
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        searchChanges = savedInstanceState?.getString(KEY_SEARCH)
+            ?.let { BehaviorRelay.createDefault(it) }
+            ?: BehaviorRelay.create()
+    }
 
     @SuppressLint("InflateParams")
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
@@ -80,9 +89,13 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
         binding = FragmentParentPickerBinding.inflate(layoutInflater)
 
-        searchChanges = binding.parentPickerSearch
+        binding.parentPickerSearch
             .textChanges()
+            .skipInitialValue()
             .map { it.toString().normalized() }
+            .distinctUntilChanged()
+            .subscribe(searchChanges)
+            .addTo(viewCreatedDisposable)
 
         return MaterialAlertDialogBuilder(requireContext()).setView(binding.root)
             .apply {
@@ -204,6 +217,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
         }
 
         outState.putParcelable(QUERY_KEY, filterCriteria)
+        outState.putString(KEY_SEARCH, searchChanges.value)
     }
 
     override fun onDestroyView() {

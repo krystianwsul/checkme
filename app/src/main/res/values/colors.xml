@@ -27,4 +27,6 @@
 
     <color name="navigationDivider">#DEDEDE</color>
     <color name="textInputIcon">#666666</color>
+
+    <color name="statusBarScrim">#223840</color>
 </resources>

@@ -6,7 +6,9 @@ import android.graphics.Color
 import android.os.Parcelable
 import android.view.LayoutInflater
 import android.view.View
+import androidx.annotation.ColorRes
 import androidx.coordinatorlayout.widget.CoordinatorLayout
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.interpolator.view.animation.FastOutSlowInInterpolator
 import androidx.transition.TransitionManager
@@ -70,16 +72,16 @@ class BottomFabMenuDelegate(
                 transition.addTarget(bottomFab)
 
                 TransitionManager.beginDelayedTransition(coordinatorLayout, transition)
-                bottomFabMenu.visibility = View.INVISIBLE
-                bottomFabScrim.visibility = View.INVISIBLE
 
                 bottomFab.visibility = View.VISIBLE
             } else {
                 TransitionManager.beginDelayedTransition(coordinatorLayout)
-
-                bottomFabMenu.visibility = View.INVISIBLE
-                bottomFabScrim.visibility = View.INVISIBLE
             }
+
+            bottomFabMenu.visibility = View.INVISIBLE
+            bottomFabScrim.visibility = View.INVISIBLE
+
+            setWindowColor(R.color.primaryDarkColor)
         }
     }
 
@@ -148,7 +150,18 @@ class BottomFabMenuDelegate(
             bottomFabMenu.visibility = View.VISIBLE
             bottomFabScrim.visibility = View.VISIBLE
 
+            setWindowColor(R.color.statusBarScrim)
+
             bottomFab.visibility = View.INVISIBLE
+        }
+    }
+
+    private fun setWindowColor(@ColorRes colorId: Int) {
+        val color = ContextCompat.getColor(activity, colorId)
+
+        activity.window.apply {
+            activity.window.statusBarColor = color
+            activity.window.navigationBarColor = color
         }
     }
 

@@ -143,7 +143,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         val pendingContentIntent = PendingIntent.getActivity(
             MyApplication.instance,
             notificationId,
-            ShowInstanceActivity.getNotificationIntent(MyApplication.instance, instanceKey, notificationId),
+            ShowInstanceActivity.getNotificationIntent(MyApplication.instance, instanceKey),
             PendingIntent.FLAG_UPDATE_CURRENT,
         )
 
@@ -236,7 +236,6 @@ open class NotificationWrapperImpl : NotificationWrapper() {
             actions,
             timeStampLong,
             style,
-            autoCancel = true,
             summary = false,
             sortKey = sortKey,
             largeIcon = largeIcon,
@@ -314,7 +313,6 @@ open class NotificationWrapperImpl : NotificationWrapper() {
             actions,
             timeStampLong,
             style,
-            autoCancel = false,
             summary = false,
             sortKey = sortKey,
             largeIcon = null,
@@ -393,7 +391,6 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         actions: List<NotificationCompat.Action>,
         time: Long?,
         style: (() -> NotificationCompat.Style)?,
-        autoCancel: Boolean,
         summary: Boolean,
         sortKey: String,
         largeIcon: (() -> Bitmap)?,
@@ -415,24 +412,17 @@ open class NotificationWrapperImpl : NotificationWrapper() {
 
         deleteIntent?.let { builder.setDeleteIntent(it) }
 
-        if (!text.isNullOrEmpty())
-            builder.setContentText(text)
+        if (!text.isNullOrEmpty()) builder.setContentText(text)
 
-        if (!silent)
-            builder.setSound(Settings.System.DEFAULT_NOTIFICATION_URI)
+        if (!silent) builder.setSound(Settings.System.DEFAULT_NOTIFICATION_URI)
 
         check(actions.size <= 3)
 
         actions.forEach { builder.addAction(it) }
 
-        if (time != null)
-            builder.setWhen(time).setShowWhen(true)
+        time?.let { builder.setWhen(it).setShowWhen(true) }
 
-        if (style != null)
-            builder.setStyle(style())
-
-        if (autoCancel)
-            builder.setAutoCancel(true)
+        style?.let { builder.setStyle(it()) }
 
         largeIcon?.let { builder.setLargeIcon(it()) }
 
@@ -449,7 +439,6 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         actions: List<NotificationCompat.Action>,
         time: Long?,
         style: (() -> NotificationCompat.Style)?,
-        autoCancel: Boolean,
         summary: Boolean,
         sortKey: String,
         largeIcon: (() -> Bitmap)?,
@@ -478,7 +467,6 @@ open class NotificationWrapperImpl : NotificationWrapper() {
             actions,
             time,
             style,
-            autoCancel,
             summary,
             sortKey,
             largeIcon,
@@ -570,7 +558,6 @@ open class NotificationWrapperImpl : NotificationWrapper() {
             listOf(),
             null,
             inboxStyle,
-            autoCancel = false,
             summary = groupData.summary,
             sortKey = notificationId.toString(),
             largeIcon = null,
@@ -599,8 +586,6 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         nextAlarm?.let { alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, it.long, pendingIntent) }
     }
 
-    override fun logNotificationIds(source: String) = Unit
-
     override fun notifyTemporary(notificationId: Int, source: String) {
         Preferences.temporaryNotificationLog.logLineDate("notifyTemporary $source")
 
@@ -625,7 +610,6 @@ open class NotificationWrapperImpl : NotificationWrapper() {
             listOf(),
             null,
             null,
-            autoCancel = true,
             summary = false,
             sortKey = notificationId.toString(),
             largeIcon = null,

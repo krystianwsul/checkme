@@ -6,12 +6,10 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
 import androidx.appcompat.view.ActionMode
-import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.ActivityShowInstanceBinding
 import com.krystianwsul.checkme.databinding.BottomBinding
 import com.krystianwsul.checkme.domainmodel.extensions.*
-import com.krystianwsul.checkme.domainmodel.notifications.NotificationWrapper
 import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
 import com.krystianwsul.checkme.gui.base.AbstractActivity
 import com.krystianwsul.checkme.gui.dialogs.RemoveInstancesDialogFragment
@@ -40,29 +38,24 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
     companion object {
 
         private const val INSTANCE_KEY = "instanceKey"
-        private const val NOTIFICATION_ID_KEY = "notificationId"
 
         private const val EDIT_INSTANCES_TAG = "editInstances"
 
         private const val TAG_DELETE_INSTANCES = "deleteInstances"
 
         fun getIntent(context: Context, instanceKey: InstanceKey) =
-                Intent(context, ShowInstanceActivity::class.java).apply {
-                    putExtra(INSTANCE_KEY, instanceKey as Parcelable)
-                }
+            Intent(context, ShowInstanceActivity::class.java).apply {
+                putExtra(INSTANCE_KEY, instanceKey as Parcelable)
+            }
 
-        fun getNotificationIntent(context: Context, instanceKey: InstanceKey, notificationId: Int) =
-                Intent(context, ShowInstanceActivity::class.java).apply {
-                    putExtra(INSTANCE_KEY, instanceKey as Parcelable)
-                    putExtra(NOTIFICATION_ID_KEY, notificationId)
-                    flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
-                }
+        fun getNotificationIntent(context: Context, instanceKey: InstanceKey) =
+            Intent(context, ShowInstanceActivity::class.java).apply {
+                putExtra(INSTANCE_KEY, instanceKey as Parcelable)
+                flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+            }
 
-        fun getForwardIntent(context: Context, instanceKey: InstanceKey, notificationId: Int) =
-                Intent(context, ShowInstanceActivity::class.java).apply {
-                    putExtra(INSTANCE_KEY, instanceKey as Parcelable)
-                    putExtra(NOTIFICATION_ID_KEY, notificationId)
-                }
+        fun getForwardIntent(context: Context, instanceKey: InstanceKey) =
+            Intent(context, ShowInstanceActivity::class.java).putExtra(INSTANCE_KEY, instanceKey as Parcelable)
     }
 
     private lateinit var instanceKey: InstanceKey
@@ -203,10 +196,6 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
         check(intent.hasExtra(INSTANCE_KEY))
         instanceKey = (savedInstanceState ?: intent.extras!!).getParcelable(INSTANCE_KEY)!!
 
-        cancelNotification()
-
-        if (savedInstanceState == null) setInstanceNotified()
-
         showInstanceViewModel.apply {
             start(instanceKey)
 
@@ -262,14 +251,8 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
         val instanceKey = intent.getParcelableExtra<InstanceKey>(INSTANCE_KEY)!!
         if (instanceKey == this.instanceKey) {
             setIntent(intent)
-            cancelNotification()
-            setInstanceNotified()
         } else {
-            startActivity(getForwardIntent(
-                    this,
-                    instanceKey,
-                    intent.getIntExtra(NOTIFICATION_ID_KEY, -1)
-            ))
+            startActivity(getForwardIntent(this, instanceKey))
         }
     }
 
@@ -285,26 +268,6 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
         unregisterReceiver(ticksReceiver)
 
         super.onStop()
-    }
-
-    private fun cancelNotification() = NotificationWrapper.instance.run {
-        intent.getIntExtra(NOTIFICATION_ID_KEY, -1)
-                .takeIf { it != -1 }
-                ?.let {
-                    logNotificationIds("ShowInstanceActivity.cancelNotification")
-
-                    cancelNotification(it)
-                }
-
-        cleanGroup(null)
-    }
-
-    private fun setInstanceNotified() {
-        Preferences.tickLog.logLineHour("ShowInstanceActivity: setting notified")
-
-        if (intent.hasExtra(NOTIFICATION_ID_KEY)) {
-            AndroidDomainUpdater.setInstanceNotified(showInstanceViewModel.dataId.toFirst(), instanceKey).subscribe()
-        }
     }
 
     private fun onLoadFinished(data: ShowInstanceViewModel.Data) {

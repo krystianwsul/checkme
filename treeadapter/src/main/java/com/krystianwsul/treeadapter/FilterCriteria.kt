@@ -30,7 +30,7 @@ sealed interface FilterCriteria : Parcelable {
         override fun canBeShown(treeNode: TreeNode<*>): Boolean {
             if (!treeNode.modelNode.matchesFilterParams(filterParams)) return false
 
-            return when (treeNode.modelNode.getMatchResult(search.query)) {
+            return when (treeNode.modelNode.getMatchResult(search)) {
                 ModelNode.MatchResult.ALWAYS_VISIBLE, ModelNode.MatchResult.MATCHES -> true
                 ModelNode.MatchResult.DOESNT_MATCH -> treeNode.parentHierarchyMatchesSearch(search) ||
                         treeNode.childHierarchyMatchesFilterCriteria(this)
@@ -47,8 +47,6 @@ sealed interface FilterCriteria : Parcelable {
 
     @Parcelize
     data class ExpandOnly(override val search: SearchCriteria.Search?) : FilterCriteria {
-
-        constructor(query: String) : this(SearchCriteria.Search(query))
 
         constructor(searchCriteria: SearchCriteria) : this(searchCriteria.search)
     }

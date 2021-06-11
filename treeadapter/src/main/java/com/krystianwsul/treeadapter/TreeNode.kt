@@ -316,7 +316,7 @@ class TreeNode<T : TreeHolder>(
     }
 
     private fun matchesSearch(search: SearchCriteria.Search) =
-        modelNode.getMatchResult(search.query) == ModelNode.MatchResult.MATCHES // todo expand
+        modelNode.getMatchResult(search) == ModelNode.MatchResult.MATCHES
 
     fun parentHierarchyMatchesSearch(search: SearchCriteria.Search) = parentHierarchyMatchesSearch(this, search)
 

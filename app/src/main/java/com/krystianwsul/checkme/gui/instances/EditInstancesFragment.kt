@@ -155,8 +155,8 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
                         {
                             adapterDataObservable.accept(ParentPickerFragment.AdapterData(
                                 it.instanceEntryDatas,
-                                FilterCriteria.ExpandOnly(it.searchCriteria.search?.query ?: ""), // todo expand
-                                it.showLoader
+                                FilterCriteria.ExpandOnly(it.searchCriteria.search),
+                                it.showLoader,
                             ))
                         },
                         { searchCriteria, page ->

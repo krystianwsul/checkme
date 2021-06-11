@@ -4,7 +4,9 @@ interface QueryMatchable {
 
     val normalizedFields: List<String>
 
-    fun matchesQuery(query: String): Boolean {
+    fun matchesSearch(search: SearchCriteria.Search?): Boolean {
+        val query = search?.query ?: "" // todo expand
+
         if (query.isEmpty()) return true
 
         return normalizedFields.any { it.contains(query) }

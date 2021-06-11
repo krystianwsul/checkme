@@ -19,7 +19,7 @@ import com.krystianwsul.common.domain.TaskUndoData
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.models.FilterResult
 import com.krystianwsul.common.firebase.models.Instance
-import com.krystianwsul.common.firebase.models.filterQuery
+import com.krystianwsul.common.firebase.models.filterSearch
 import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.task.ProjectRootTaskIdTracker
 import com.krystianwsul.common.firebase.models.task.RootTask
@@ -202,7 +202,7 @@ fun DomainFactory.getGroupListChildTaskDatas(
 ): List<GroupListDataWrapper.TaskData> = parentTask.getChildTaskHierarchies(now)
     .asSequence()
     .map { it.childTask }
-    .filterQuery(searchCriteria?.search?.query ?: "") // todo expand
+    .filterSearch(searchCriteria?.search)
     .map { (childTask, filterResult) ->
         val childQuery = if (filterResult == FilterResult.MATCHES) null else searchCriteria
 
@@ -248,10 +248,7 @@ fun <T : Comparable<T>> DomainFactory.searchInstances(
         can skip filtering child instances, since showAssignedToOthers is meaningless for child instances.
          */
         val childSearchCriteria =
-            if (task.matchesQuery(
-                    searchCriteria.search?.query ?: ""
-                )
-            ) searchCriteria.copy(search = null) else searchCriteria // todo expand
+            if (task.matchesSearch(searchCriteria.search)) searchCriteria.copy(search = null) else searchCriteria
 
         val children = getChildInstanceDatas(it, now, mapper, childSearchCriteria, !debugMode)
 

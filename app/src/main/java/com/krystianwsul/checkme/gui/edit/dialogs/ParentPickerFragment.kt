@@ -26,6 +26,7 @@ import com.krystianwsul.checkme.gui.utils.ResettableProperty
 import com.krystianwsul.checkme.utils.getMap
 import com.krystianwsul.checkme.utils.putMap
 import com.krystianwsul.common.criteria.QueryMatchable
+import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.utils.normalized
 import com.krystianwsul.treeadapter.*
 import io.reactivex.rxjava3.core.Observable
@@ -369,8 +370,8 @@ class ParentPickerFragment : AbstractDialogFragment() {
                 return true
             }
 
-            override fun getMatchResult(query: String) =
-                ModelNode.MatchResult.fromBoolean(entryData.matchesQuery(query))
+            override fun getMatchResult(search: SearchCriteria.Search) =
+                ModelNode.MatchResult.fromBoolean(entryData.matchesSearch(search))
         }
     }
 

@@ -435,7 +435,7 @@ class DomainFactory(
             .mapNotNull { childInstance ->
                 val childTask = childInstance.task
 
-                val childTaskMatches = childTask.matchesQuery(searchCriteria.search?.query ?: "") // todo expand
+                val childTaskMatches = childTask.matchesSearch(searchCriteria.search)
 
                 /*
                 We know this instance matches SearchCriteria.showAssignedToOthers.  If it also matches the query, we

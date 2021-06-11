@@ -194,7 +194,7 @@ abstract class Project<T : ProjectType>(
 
         val filteredTasks = getAllTasks().asSequence()
             .filter { it.mayHaveRootInstances() }
-            .filterQuery(searchData?.searchCriteria?.search?.query).map { it.first } // todo expand
+            .filterSearch(searchData?.searchCriteria?.search).map { it.first }
             .toList()
 
         val instanceSequences = filteredTasks.map {

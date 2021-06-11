@@ -908,8 +908,6 @@ class EditActivity : NavBarActivity() {
                 this.activity = activity
 
                 (holder as NoteHolder).rowNoteBinding.apply {
-                    noteLayout.isHintAnimationEnabled = true
-
                     noteText.run {
                         setText(activity.note)
 
@@ -921,6 +919,8 @@ class EditActivity : NavBarActivity() {
 
                         setOnFocusChangeListener { _, hasFocus -> activity.noteHasFocusRelay.accept(hasFocus) }
                     }
+
+                    noteLayout.isHintAnimationEnabled = true
                 }
             }
         }

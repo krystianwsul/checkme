@@ -15,10 +15,10 @@ sealed interface FilterCriteria : Parcelable {
     fun canBeShown(treeNode: TreeNode<*>): Boolean = true
 
     @Parcelize
-    data class Full(override val search: SearchCriteria.Search, val filterParams: FilterParams) : FilterCriteria {
+    data class Full(override val search: SearchCriteria.Search.Query, val filterParams: FilterParams) : FilterCriteria {
 
         constructor(query: String = "", filterParams: FilterParams = FilterParams()) :
-                this(SearchCriteria.Search(query), filterParams)
+                this(SearchCriteria.Search.Query(query), filterParams)
 
         constructor(
             query: String = "",

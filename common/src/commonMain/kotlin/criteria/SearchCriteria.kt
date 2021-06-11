@@ -18,10 +18,21 @@ data class SearchCriteria(
 
     val isEmpty by lazy { this == empty }
 
-    @Parcelize
-    data class Search(val query: String = "") : Parcelable {
+    sealed interface Search : Parcelable {
 
-        val hasSearch get() = query.isNotEmpty()
+        val hasSearch: Boolean
         val expandMatches get() = hasSearch
+
+        @Parcelize
+        data class Query(val query: String = "") : Search {
+
+            override val hasSearch get() = query.isNotEmpty()
+        }
+
+        @Parcelize
+        data class TaskKey(val taskKey: com.krystianwsul.common.utils.TaskKey) : Search {
+
+            override val hasSearch get() = true
+        }
     }
 }

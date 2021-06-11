@@ -211,19 +211,19 @@ class MyApplication : Application() {
                         "search",
                         R.string.search,
                         R.mipmap.launcher_search,
-                        MainActivity.newIntent().setAction("com.krystianwsul.checkme.SEARCH")
+                        MainActivity.newIntent().setAction(MainActivity.ACTION_INSTANCES)
                     ),
                     createShortcut(
                         "tasks",
-                        R.string.tasks,
-                        R.mipmap.launcher_tasks,
-                        MainActivity.newIntent().setAction("com.krystianwsul.checkme.TASKS")
+                        R.string.notes,
+                        R.mipmap.launcher_notes,
+                        MainActivity.newIntent().setAction(MainActivity.ACTION_NOTES)
                     ),
                     createShortcut(
                         "instances",
                         R.string.instances,
                         R.mipmap.launcher_instances,
-                        MainActivity.newIntent().setAction("com.krystianwsul.checkme.INSTANCES")
+                        MainActivity.newIntent().setAction(MainActivity.ACTION_INSTANCES)
                     ),
                 ),
             )

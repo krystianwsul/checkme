@@ -83,9 +83,9 @@ class MainActivity :
 
         private const val DRAWER_TAG = "drawer"
 
-        private const val ACTION_INSTANCES = "com.krystianwsul.checkme.INSTANCES"
-        private const val ACTION_TASKS = "com.krystianwsul.checkme.TASKS"
-        private const val ACTION_SEARCH = "com.krystianwsul.checkme.SEARCH"
+        const val ACTION_INSTANCES = "com.krystianwsul.checkme.INSTANCES"
+        const val ACTION_NOTES = "com.krystianwsul.checkme.NOTES"
+        const val ACTION_SEARCH = "com.krystianwsul.checkme.SEARCH"
 
         private const val TAG_DELETE_INSTANCES = "deleteInstances"
 
@@ -397,7 +397,7 @@ class MainActivity :
 
             when (intent.action) {
                 ACTION_INSTANCES -> overrideTabSearchState = TabSearchState.Instances(false)
-                ACTION_TASKS -> overrideTabSearchState = TabSearchState.Tasks(false)
+                ACTION_NOTES -> overrideTabSearchState = TabSearchState.Notes(false)
                 ACTION_SEARCH -> {
                     overrideTabSearchState = if (Preferences.getTab() == Tab.INSTANCES)
                         TabSearchState.Instances(true)

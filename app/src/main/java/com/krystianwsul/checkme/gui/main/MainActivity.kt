@@ -395,24 +395,7 @@ class MainActivity :
         } else {
             states = mutableMapOf()
 
-            when (intent.action) {
-                ACTION_INSTANCES -> overrideTabSearchState = TabSearchState.Instances(false)
-                ACTION_NOTES -> overrideTabSearchState = TabSearchState.Notes(false)
-                ACTION_SEARCH -> {
-                    overrideTabSearchState = if (Preferences.getTab() == Tab.INSTANCES)
-                        TabSearchState.Instances(true)
-                    else
-                        TabSearchState.Notes(true)
-
-                    binding.mainSearchInclude
-                        .toolbar
-                        .apply {
-                            visibility = View.VISIBLE
-                            requestSearchFocus()
-                        }
-                }
-                else -> overrideTabSearchState = null
-            }
+            overrideTabSearchState = getTabSearchStateFromIntent(intent)
 
             date = Date.today()
         }
@@ -720,6 +703,31 @@ class MainActivity :
                 }
             }
             .addTo(createDisposable)
+    }
+
+    private fun getTabSearchStateFromIntent(intent: Intent) = when (intent.action) {
+        ACTION_INSTANCES -> TabSearchState.Instances(false)
+        ACTION_NOTES -> TabSearchState.Notes(false)
+        ACTION_SEARCH -> {
+            binding.mainSearchInclude
+                .toolbar
+                .apply {
+                    visibility = View.VISIBLE
+                    requestSearchFocus()
+                }
+
+            if (Preferences.getTab() == Tab.INSTANCES)
+                TabSearchState.Instances(true)
+            else
+                TabSearchState.Notes(true)
+        }
+        else -> null
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+
+        getTabSearchStateFromIntent(intent)?.let(::setTabSearchState)
     }
 
     private fun newTaskListListener(

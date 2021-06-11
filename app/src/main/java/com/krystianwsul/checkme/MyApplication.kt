@@ -211,7 +211,7 @@ class MyApplication : Application() {
                         "search",
                         R.string.search,
                         R.mipmap.launcher_search,
-                        MainActivity.newIntent().setAction(MainActivity.ACTION_INSTANCES)
+                        MainActivity.newIntent().setAction(MainActivity.ACTION_SEARCH)
                     ),
                     createShortcut(
                         "tasks",

@@ -154,7 +154,7 @@ class EditActivity : NavBarActivity() {
                     { entryData: ParentPickerFragment.EntryData ->
                         val parentTreeData = entryData as EditViewModel.ParentTreeData
 
-                        entryData.entryKey == parent.parentKey
+                        parentTreeData.entryKey == parent.parentKey
                     }
                 }
         }

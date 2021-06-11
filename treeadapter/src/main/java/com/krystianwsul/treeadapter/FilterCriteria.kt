@@ -4,21 +4,21 @@ import android.os.Parcelable
 import com.krystianwsul.common.criteria.SearchCriteria
 import kotlinx.parcelize.Parcelize
 
-sealed class FilterCriteria : Parcelable {
+sealed interface FilterCriteria : Parcelable {
 
-    abstract val query: String
+    val query: String
 
     val hasSearch get() = query.isNotEmpty()
     val expandMatches get() = hasSearch
     val needsNormalization get() = hasSearch
 
-    open fun canBeShown(treeNode: TreeNode<*>): Boolean = true
+    fun canBeShown(treeNode: TreeNode<*>): Boolean = true
 
     @Parcelize
     data class Full(
         override val query: String = "",
         val filterParams: FilterParams = FilterParams(),
-    ) : FilterCriteria() {
+    ) : FilterCriteria {
 
         constructor(
             query: String = "",
@@ -46,13 +46,13 @@ sealed class FilterCriteria : Parcelable {
     }
 
     @Parcelize
-    data class ExpandOnly(override val query: String) : FilterCriteria() {
+    data class ExpandOnly(override val query: String) : FilterCriteria {
 
         constructor(searchCriteria: SearchCriteria) : this(searchCriteria.query)
     }
 
     @Parcelize
-    object None : FilterCriteria() {
+    object None : FilterCriteria {
 
         override val query get() = ""
     }

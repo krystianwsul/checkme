@@ -47,8 +47,12 @@ abstract class AbstractModelNode : ModelNode<AbstractHolder> {
         }
     }
 
+    override fun forceSelected(viewHolder: RecyclerView.ViewHolder) {
+        viewHolder.itemView.apply { setBackgroundColor(ContextCompat.getColor(context, R.color.selected)) }
+    }
+
     override fun onPayload(viewHolder: RecyclerView.ViewHolder, payloadSeparator: TreeNode.PayloadSeparator) {
         (viewHolder as AbstractHolder).rowSeparator.visibility =
-                if (treeNode.separatorVisible) View.VISIBLE else View.INVISIBLE
+            if (treeNode.separatorVisible) View.VISIBLE else View.INVISIBLE
     }
 }

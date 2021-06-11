@@ -306,13 +306,7 @@ class TreeNode<T : TreeHolder>(
     private fun matchesQuery(query: String) =
         modelNode.getMatchResult(query) == ModelNode.MatchResult.MATCHES
 
-    private fun matchesFilterParams(filterParams: FilterCriteria.Full.FilterParams) =
-        modelNode.matchesFilterParams(filterParams)
-
-    private fun matchesFilterCriteria(filterCriteria: FilterCriteria.Full) =
-        matchesFilterParams(filterCriteria.filterParams) && matchesQuery(filterCriteria.query)
-
-    fun parentHierarchyMatchesQuery(query: String): Boolean {
+    fun parentHierarchyMatchesQuery(query: String): Boolean { // todo expand tailrec?
         return if (parent is TreeNode<T>) {
             parent.matchesQuery(query) || parent.parentHierarchyMatchesQuery(query)
         } else {
@@ -321,7 +315,10 @@ class TreeNode<T : TreeHolder>(
     }
 
     fun childHierarchyMatchesFilterCriteria(filterCriteria: FilterCriteria.Full): Boolean = childTreeNodes.any {
-        it.matchesFilterCriteria(filterCriteria) || it.childHierarchyMatchesFilterCriteria(filterCriteria)
+        val matchesFilterCriteria = it.modelNode.matchesFilterParams(filterCriteria.filterParams) &&
+                it.matchesQuery(filterCriteria.query)
+
+        matchesFilterCriteria || it.childHierarchyMatchesFilterCriteria(filterCriteria)
     }
 
     private fun childHierarchyMatchesQuery(query: String): Boolean =

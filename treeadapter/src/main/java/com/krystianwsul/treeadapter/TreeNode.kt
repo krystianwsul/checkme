@@ -300,18 +300,7 @@ class TreeNode<T : TreeHolder>(
 
         if (!modelNodeVisible) return false
 
-        return when (val filterCriteria = treeViewAdapter.filterCriteria) {
-            is FilterCriteria.Full -> {
-                if (!matchesFilterParams(filterCriteria.filterParams)) return false
-
-                when (modelNode.getMatchResult(filterCriteria.query)) {
-                    ModelNode.MatchResult.ALWAYS_VISIBLE, ModelNode.MatchResult.MATCHES -> true
-                    ModelNode.MatchResult.DOESNT_MATCH ->
-                        parentHierarchyMatchesQuery() || childHierarchyMatchesFilterCriteria(filterCriteria)
-                }
-            }
-            is FilterCriteria.ExpandOnly, FilterCriteria.None -> true
-        }
+        return treeViewAdapter.filterCriteria.canBeShown(this)
     }
 
     private fun matchesQuery(query: String) =
@@ -323,15 +312,15 @@ class TreeNode<T : TreeHolder>(
     private fun matchesFilterCriteria(filterCriteria: FilterCriteria.Full) =
         matchesFilterParams(filterCriteria.filterParams) && matchesQuery(filterCriteria.query)
 
-    private fun parentHierarchyMatchesQuery(): Boolean {
+    fun parentHierarchyMatchesQuery(query: String): Boolean {
         return if (parent is TreeNode<T>) {
-            parent.matchesQuery(treeViewAdapter.filterCriteria.query) || parent.parentHierarchyMatchesQuery()
+            parent.matchesQuery(query) || parent.parentHierarchyMatchesQuery(query)
         } else {
             false
         }
     }
 
-    private fun childHierarchyMatchesFilterCriteria(filterCriteria: FilterCriteria.Full): Boolean = childTreeNodes.any {
+    fun childHierarchyMatchesFilterCriteria(filterCriteria: FilterCriteria.Full): Boolean = childTreeNodes.any {
         it.matchesFilterCriteria(filterCriteria) || it.childHierarchyMatchesFilterCriteria(filterCriteria)
     }
 

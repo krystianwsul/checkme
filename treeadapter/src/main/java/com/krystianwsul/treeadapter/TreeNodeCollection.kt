@@ -1,6 +1,7 @@
 package com.krystianwsul.treeadapter
 
 import com.jakewharton.rxrelay3.BehaviorRelay
+import com.krystianwsul.common.criteria.SearchCriteria
 import io.reactivex.rxjava3.core.Observable
 import kotlin.math.ceil
 import kotlin.math.min
@@ -34,12 +35,12 @@ class TreeNodeCollection<T : TreeHolder>(val treeViewAdapter: TreeViewAdapter<T>
         return positionMode.getRecursiveNodes(this)[position]
     }
 
-    override fun getPosition(treeNode: TreeNode<T>, positionMode: PositionMode): Int {
+    override fun getPosition(positionMode: PositionMode, matcher: (TreeNode<T>) -> Boolean): Int {
         val treeNodes = positionMode.getDirectChildNodes(this)
 
         var offset = 0
         for (currTreeNode in treeNodes) {
-            val position = currTreeNode.getPosition(treeNode, positionMode)
+            val position = currTreeNode.getPosition(positionMode, matcher)
             if (position >= 0) return offset + position
 
             offset += positionMode.getRecursiveNodes(currTreeNode).size
@@ -191,8 +192,8 @@ class TreeNodeCollection<T : TreeHolder>(val treeViewAdapter: TreeViewAdapter<T>
         treeNodesRelay.value!!.forEach { it.resetExpansion(onlyProgrammatic, placeholder) }
     }
 
-    fun expandMatching(query: String, force: Boolean) {
-        treeNodesRelay.value!!.forEach { it.expandMatching(query, force) }
+    fun expandMatching(search: SearchCriteria.Search, force: Boolean) {
+        treeNodesRelay.value!!.forEach { it.expandMatching(search, force) }
     }
 
     class SetTreeNodesNotCalledException : InitializationException("TreeNodeCollection.setTreeNodes() has not been called.")

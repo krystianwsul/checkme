@@ -74,6 +74,10 @@ class TreeViewAdapter<T : TreeHolder>(
                         check(locker == null)
 
                         locker = AdapterLocker()
+
+                        filterCriteria.search?.let {
+                            if (it.expandMatches) treeNodeCollection.expandMatching(it, false)
+                        }
                     }
         } else {
             check(updating)
@@ -115,10 +119,12 @@ class TreeViewAdapter<T : TreeHolder>(
             treeNodeCollection!!.apply {
                 resetExpansion(true, Placeholder.instance)
 
-                if (filterCriteria.expandMatches) {
+                val search = filterCriteria.search
+
+                if (search?.expandMatches == true) {
                     val visibleCount = nodes.count { it.visible() }
 
-                    expandMatching(filterCriteria.query, visibleCount == 1)
+                    expandMatching(search, visibleCount == 1)
                 }
             }
         }
@@ -336,12 +342,12 @@ class TreeViewAdapter<T : TreeHolder>(
     fun setFilterCriteria(filterCriteria: FilterCriteria, @Suppress("UNUSED_PARAMETER") placeholder: Placeholder) {
         updatingAfterNormalizationDisposable?.dispose()
 
-        if (normalizedObservable.getCurrentValue() || filterCriteria.query.isEmpty()) {
+        if (normalizedObservable.getCurrentValue() || !filterCriteria.needsNormalization) {
             this.filterCriteria = filterCriteria
         } else {
             updatingAfterNormalizationDisposable = normalizedObservable.filter { it }
-                    .subscribe { updateDisplayedNodes { this.filterCriteria = filterCriteria } }
-                    .addTo(recyclerAttachedToWindowDisposable)
+                .subscribe { updateDisplayedNodes { this.filterCriteria = filterCriteria } }
+                .addTo(recyclerAttachedToWindowDisposable)
         }
     }
 

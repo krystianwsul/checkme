@@ -26,6 +26,7 @@ import com.krystianwsul.checkme.gui.utils.ResettableProperty
 import com.krystianwsul.checkme.utils.getMap
 import com.krystianwsul.checkme.utils.putMap
 import com.krystianwsul.common.criteria.QueryMatchable
+import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.utils.normalized
 import com.krystianwsul.treeadapter.*
 import io.reactivex.rxjava3.core.Observable
@@ -42,6 +43,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
         private const val SHOW_DELETE_KEY = "showDelete"
         private const val KEY_SHOW_ADD = "showAdd"
+        private const val KEY_SEARCH = "search"
 
         fun newInstance(
             showDelete: Boolean,
@@ -54,7 +56,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
         }
     }
 
-    private lateinit var searchChanges: Observable<String>
+    private lateinit var searchChanges: BehaviorRelay<String>
 
     private val delegateRelay = BehaviorRelay.create<Delegate>()
 
@@ -65,6 +67,14 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
     private val bindingProperty = ResettableProperty<FragmentParentPickerBinding>()
     private var binding by bindingProperty
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        searchChanges = savedInstanceState?.getString(KEY_SEARCH)
+            ?.let { BehaviorRelay.createDefault(it) }
+            ?: BehaviorRelay.create()
+    }
 
     @SuppressLint("InflateParams")
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
@@ -79,9 +89,13 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
         binding = FragmentParentPickerBinding.inflate(layoutInflater)
 
-        searchChanges = binding.parentPickerSearch
+        binding.parentPickerSearch
             .textChanges()
+            .skipInitialValue()
             .map { it.toString().normalized() }
+            .distinctUntilChanged()
+            .subscribe(searchChanges)
+            .addTo(viewCreatedDisposable)
 
         return MaterialAlertDialogBuilder(requireContext()).setView(binding.root)
             .apply {
@@ -117,7 +131,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
         viewCreatedDisposable += Observables.combineLatest(
             delegateRelay,
-            searchChanges
+            searchChanges,
         ).subscribe { (delegate, query) -> delegate.onSearch(query) }
 
         delegateRelay.switchMap { delegate ->
@@ -139,7 +153,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
                 (treeViewAdapter!!.treeModelAdapter as TaskAdapter).initialize(
                     adapterData.entryDatas,
                     expansionStates,
-                    adapterData.showProgress
+                    adapterData.showProgress,
                 )
 
                 adapterData.filterCriteria?.let { treeViewAdapter!!.setFilterCriteria(it, placeholder) }
@@ -155,6 +169,20 @@ class ParentPickerFragment : AbstractDialogFragment() {
                 adapter = treeViewAdapter
                 itemAnimator = CustomItemAnimator()
             }
+
+            delegateRelay.value!!
+                .initialScrollMatcher
+                ?.let { matcher ->
+                    val position = treeViewAdapter!!.getTreeNodeCollection().getPosition(PositionMode.DISPLAYED) {
+                        it.modelNode
+                            .let { it as? TaskAdapter.TaskWrapper }
+                            ?.entryData
+                            ?.let(matcher)
+                            ?: false
+                    }
+
+                    binding.parentPickerRecycler.scrollToPosition(position)
+                }
         }
     }
 
@@ -189,6 +217,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
         }
 
         outState.putParcelable(QUERY_KEY, filterCriteria)
+        outState.putString(KEY_SEARCH, searchChanges.value)
     }
 
     override fun onDestroyView() {
@@ -197,22 +226,24 @@ class ParentPickerFragment : AbstractDialogFragment() {
         super.onDestroyView()
     }
 
-    private fun search(filterCriteria: FilterCriteria.Full, placeholder: TreeViewAdapter.Placeholder) {
+    private fun search(filterCriteria: FilterCriteria, placeholder: TreeViewAdapter.Placeholder) {
         this.filterCriteria = filterCriteria
 
         treeViewAdapter!!.setFilterCriteria(filterCriteria, placeholder)
     }
 
-    private inner class TaskAdapter :
-        BaseAdapter(),
-        TaskParent {
+    private inner class TaskAdapter : BaseAdapter(), TaskParent {
 
         private lateinit var taskWrappers: MutableList<TaskWrapper>
 
         val treeViewAdapter = TreeViewAdapter(
             this,
-            TreeViewAdapter.PaddingData(R.layout.row_parent_picker_dialog_padding, R.id.paddingProgress, true),
-            filterCriteria
+            TreeViewAdapter.PaddingData(
+                R.layout.row_parent_picker_dialog_padding,
+                R.id.paddingProgress,
+                true,
+            ),
+            filterCriteria,
         )
 
         override val taskAdapter = this
@@ -254,7 +285,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
         override fun decrementSelected(placeholder: TreeViewAdapter.Placeholder) = throw UnsupportedOperationException()
 
-        private inner class TaskWrapper(
+        inner class TaskWrapper(
             override val indentation: Int,
             private val taskParent: TaskParent,
             val entryData: EntryData,
@@ -369,8 +400,8 @@ class ParentPickerFragment : AbstractDialogFragment() {
                 return true
             }
 
-            override fun getMatchResult(query: String) =
-                ModelNode.MatchResult.fromBoolean(entryData.matchesQuery(query))
+            override fun getMatchResult(search: SearchCriteria.Search) =
+                ModelNode.MatchResult.fromBoolean(entryData.matchesSearch(search))
         }
     }
 
@@ -383,7 +414,9 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
         val adapterDataObservable: Observable<AdapterData>
 
-        val filterCriteriaObservable: Observable<FilterCriteria.Full>
+        val filterCriteriaObservable: Observable<FilterCriteria>
+
+        val initialScrollMatcher: ((EntryData) -> Boolean)?
 
         fun onEntrySelected(entryData: EntryData)
 

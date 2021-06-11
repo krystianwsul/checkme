@@ -5,13 +5,13 @@ import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.interrupt.InterruptionChecker
 import com.krystianwsul.common.time.ExactTimeStamp
 
-fun Sequence<Task>.filterQuery(query: String?) = if (query.isNullOrEmpty()) {
+fun Sequence<Task>.filterSearch(search: SearchCriteria.Search?) = if (search?.hasSearch != true) {
     map { it to FilterResult.MATCHES }
 } else {
     fun childHierarchyMatches(task: Task): FilterResult {
         InterruptionChecker.throwIfInterrupted()
 
-        if (task.matchesQuery(query)) return FilterResult.MATCHES
+        if (task.matchesSearch(search)) return FilterResult.MATCHES
 
         InterruptionChecker.throwIfInterrupted()
 
@@ -45,11 +45,11 @@ fun Sequence<Instance>.filterSearchCriteria(
 
         if (instance.instanceKey in searchCriteria.excludedInstanceKeys) return false
 
-        if (instance.task.matchesQuery(searchCriteria.query)) return true
+        if (instance.task.matchesSearch(searchCriteria.search)) return true
 
         return instance.getChildInstances()
-                .filter { it.isVisible(now, Instance.VisibilityOptions(assumeChildOfVisibleParent = true)) }
-                .any(::childHierarchyMatches)
+            .filter { it.isVisible(now, Instance.VisibilityOptions(assumeChildOfVisibleParent = true)) }
+            .any(::childHierarchyMatches)
     }
 
     filter(::childHierarchyMatches)

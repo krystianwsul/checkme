@@ -21,6 +21,7 @@ import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineRow
 import com.krystianwsul.checkme.gui.tree.delegates.thumbnail.ThumbnailDelegate
 import com.krystianwsul.checkme.gui.tree.delegates.thumbnail.ThumbnailModelNode
 import com.krystianwsul.checkme.gui.utils.flatten
+import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.treeadapter.*
 import io.reactivex.rxjava3.kotlin.addTo
@@ -173,7 +174,8 @@ class TaskNode(
     override fun matchesFilterParams(filterParams: FilterCriteria.Full.FilterParams) =
         taskData.matchesFilterParams(filterParams)
 
-    override fun getMatchResult(query: String) = ModelNode.MatchResult.fromBoolean(taskData.matchesQuery(query))
+    override fun getMatchResult(search: SearchCriteria.Search) =
+        ModelNode.MatchResult.fromBoolean(taskData.matchesSearch(search))
 
     override fun tryStartDrag(viewHolder: RecyclerView.ViewHolder): Boolean {
         return if (groupAdapter.treeNodeCollection.selectedChildren.isEmpty()

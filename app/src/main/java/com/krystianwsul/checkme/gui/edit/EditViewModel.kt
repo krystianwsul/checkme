@@ -432,6 +432,8 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
             normalizedFields
         }
 
+        override fun matchesTaskKey(taskKey: TaskKey) = (entryKey as? ParentKey.Task)?.taskKey == taskKey
+
         fun toParent() = ParentScheduleManager.Parent(name, entryKey, projectUsers, projectKey)
     }
 

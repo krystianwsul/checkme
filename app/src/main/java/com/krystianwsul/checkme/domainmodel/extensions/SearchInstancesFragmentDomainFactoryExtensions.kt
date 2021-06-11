@@ -10,7 +10,7 @@ import com.krystianwsul.checkme.viewmodels.SearchInstancesViewModel
 import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.models.FilterResult
-import com.krystianwsul.common.firebase.models.filterQuery
+import com.krystianwsul.common.firebase.models.filterSearch
 import com.krystianwsul.common.locker.LockerManager
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.ProjectKey
@@ -63,7 +63,7 @@ fun DomainFactory.getCappedInstanceAndTaskDatas(
 
     val taskDatas = getUnscheduledTasks(now, projectKey)
         .asSequence()
-        .filterQuery(searchCriteria.query)
+        .filterSearch(searchCriteria.search)
         .map { (task, filterResult) ->
             val childQuery = if (filterResult == FilterResult.MATCHES) null else searchCriteria
 

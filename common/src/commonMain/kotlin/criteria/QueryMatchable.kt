@@ -1,12 +1,24 @@
 package com.krystianwsul.common.criteria
 
+import com.krystianwsul.common.utils.TaskKey
+
 interface QueryMatchable {
 
     val normalizedFields: List<String>
 
-    fun matchesQuery(query: String): Boolean {
-        if (query.isEmpty()) return true
+    fun matchesTaskKey(taskKey: TaskKey): Boolean = throw UnsupportedOperationException()
 
-        return normalizedFields.any { it.contains(query) }
+    fun matchesSearch(search: SearchCriteria.Search?): Boolean {
+        return when (search) {
+            is SearchCriteria.Search.Query -> {
+                if (search.query.isEmpty()) {
+                    true
+                } else {
+                    normalizedFields.any { it.contains(search.query) }
+                }
+            }
+            is SearchCriteria.Search.TaskKey -> matchesTaskKey(search.taskKey)
+            null -> true
+        }
     }
 }

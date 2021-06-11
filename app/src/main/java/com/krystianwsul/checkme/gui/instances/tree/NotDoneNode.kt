@@ -27,6 +27,7 @@ import com.krystianwsul.checkme.gui.tree.delegates.thumbnail.ThumbnailDelegate
 import com.krystianwsul.checkme.gui.tree.delegates.thumbnail.ThumbnailModelNode
 import com.krystianwsul.checkme.gui.utils.flatten
 import com.krystianwsul.checkme.utils.time.getDisplayText
+import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.firebase.models.ImageState
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.HourMinute
@@ -255,7 +256,8 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
             override fun matchesFilterParams(filterParams: FilterCriteria.Full.FilterParams) =
                 instanceData.matchesFilterParams(filterParams)
 
-            override fun getMatchResult(query: String) = ModelNode.MatchResult.fromBoolean(instanceData.matchesQuery(query))
+            override fun getMatchResult(search: SearchCriteria.Search) =
+                ModelNode.MatchResult.fromBoolean(instanceData.matchesSearch(search))
 
             @Parcelize
             private data class Id(val instanceKey: InstanceKey) : ContentDelegate.Id
@@ -360,8 +362,8 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
             override fun matchesFilterParams(filterParams: FilterCriteria.Full.FilterParams) =
                 allInstanceDatas.any { it.matchesFilterParams(filterParams) }
 
-            override fun getMatchResult(query: String) =
-                ModelNode.MatchResult.fromBoolean(allInstanceDatas.any { it.matchesQuery(query) })
+            override fun getMatchResult(search: SearchCriteria.Search) =
+                ModelNode.MatchResult.fromBoolean(allInstanceDatas.any { it.matchesSearch(search) })
 
             sealed class GroupRowsDelegate : DetailsNode.ProjectRowsDelegate(null, R.color.textSecondary) {
 

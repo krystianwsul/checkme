@@ -40,7 +40,7 @@ fun observeEmptySearchState(
         if (emptyAfter) {
             hide += recyclerView
 
-            val (textId, drawableId) = if (searchData.query.isNotEmpty())
+            val (textId, drawableId) = if (searchData.hasSearch)
                 R.string.noResults to R.drawable.search
             else
                 emptyTextId() to R.drawable.empty

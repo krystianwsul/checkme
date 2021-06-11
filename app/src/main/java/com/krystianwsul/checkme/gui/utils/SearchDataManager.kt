@@ -166,7 +166,7 @@ abstract class SearchDataManager<DATA : Any, MODEL_ADAPTER : BaseAdapter>(
         if (emptyAfter) {
             hide += recyclerView
 
-            val (textId, drawableId) = if (filterCriteria.query.isNotEmpty())
+            val (textId, drawableId) = if (filterCriteria.hasSearch)
                 R.string.noResults to R.drawable.search
             else
                 emptyTextResId to R.drawable.empty

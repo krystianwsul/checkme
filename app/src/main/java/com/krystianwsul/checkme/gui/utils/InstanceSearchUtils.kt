@@ -30,7 +30,7 @@ fun <T : DomainData> connectInstanceSearch(
 
     val searchParameters = Observables.combineLatest(
             filterCriteriaObservable.distinctUntilChanged().map {
-                SearchCriteria(it.query, it.filterParams.showAssignedToOthers, showDone, excludedInstanceKeys)
+                SearchCriteria(it.search, it.filterParams.showAssignedToOthers, showDone, excludedInstanceKeys)
             },
             onProgressShownObservable.doOnNext { setPage(getPage() + 1) }.startWithItem(Unit)
     )

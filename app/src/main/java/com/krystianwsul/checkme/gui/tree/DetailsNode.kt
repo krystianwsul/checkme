@@ -13,6 +13,7 @@ import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineModelNode
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineRow
 import com.krystianwsul.checkme.utils.loadPhoto
 import com.krystianwsul.common.criteria.QueryMatchable
+import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.firebase.models.ProjectUser
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.normalized
@@ -140,7 +141,7 @@ class DetailsNode(
         normalizedFields
     }
 
-    override fun getMatchResult(query: String) = ModelNode.MatchResult.fromBoolean(matchesQuery(query))
+    override fun getMatchResult(search: SearchCriteria.Search) = ModelNode.MatchResult.fromBoolean(matchesSearch(search))
 
     data class State(val superState: ModelState, val projectInfo: ProjectInfo?, val note: String?) : ModelState {
 

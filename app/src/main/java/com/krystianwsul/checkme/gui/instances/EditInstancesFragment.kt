@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.gui.instances
 
 import android.animation.ValueAnimator
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -139,24 +140,26 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
 
             override val adapterDataObservable = BehaviorRelay.create<ParentPickerFragment.AdapterData>()
 
-            override val filterCriteriaObservable = Observable.never<FilterCriteria.Full>()
+            override val filterCriteriaObservable = Observable.never<FilterCriteria>()
+
+            override val initialScrollMatcher: ((ParentPickerFragment.EntryData) -> Boolean)? = null
 
             private val progressShownRelay = PublishRelay.create<Unit>()
 
             init {
                 connectInstanceSearch(
-                        queryRelay.map { FilterCriteria.Full(it, showAssignedToOthers = Preferences.showAssigned) },
-                        false,
-                        { state.page },
-                        { state.page = it },
-                        progressShownRelay,
+                    queryRelay.map { FilterCriteria.Full(it, showAssignedToOthers = Preferences.showAssigned) },
+                    false,
+                    { state.page },
+                    { state.page = it },
+                    progressShownRelay,
                         viewCreatedDisposable,
                         editInstancesSearchViewModel,
                         {
                             adapterDataObservable.accept(ParentPickerFragment.AdapterData(
-                                    it.instanceEntryDatas,
-                                    FilterCriteria.ExpandOnly(it.searchCriteria.query),
-                                    it.showLoader
+                                it.instanceEntryDatas,
+                                FilterCriteria.ExpandOnly(it.searchCriteria.search),
+                                it.showLoader,
                             ))
                         },
                         { searchCriteria, page ->
@@ -262,6 +265,7 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
                 .addTo(viewCreatedDisposable)
     }
 
+    @SuppressLint("MissingSuperCall")
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 

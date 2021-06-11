@@ -12,6 +12,17 @@ class TreeNode<T : TreeHolder>(
     private val initialExpansionState: ExpansionState? = null,
 ) : Comparable<TreeNode<T>>, NodeContainer<T> {
 
+    companion object {
+
+        private tailrec fun parentHierarchyMatchesQuery(treeNode: TreeNode<*>, query: String): Boolean {
+            if (treeNode.parent !is TreeNode<*>) return false
+
+            if (treeNode.parent.matchesQuery(query)) return true
+
+            return parentHierarchyMatchesQuery(treeNode.parent, query)
+        }
+    }
+
     override val treeNodeCollection by lazy { parent.treeNodeCollection }
 
     lateinit var expansionState: ExpansionState
@@ -306,13 +317,7 @@ class TreeNode<T : TreeHolder>(
     private fun matchesQuery(query: String) =
         modelNode.getMatchResult(query) == ModelNode.MatchResult.MATCHES
 
-    fun parentHierarchyMatchesQuery(query: String): Boolean { // todo expand tailrec?
-        return if (parent is TreeNode<T>) {
-            parent.matchesQuery(query) || parent.parentHierarchyMatchesQuery(query)
-        } else {
-            false
-        }
-    }
+    fun parentHierarchyMatchesQuery(query: String) = parentHierarchyMatchesQuery(this, query)
 
     fun childHierarchyMatchesFilterCriteria(filterCriteria: FilterCriteria.Full): Boolean = childTreeNodes.any {
         val matchesFilterCriteria = it.modelNode.matchesFilterParams(filterCriteria.filterParams) &&

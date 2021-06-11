@@ -285,7 +285,7 @@ class MainActivity :
     private fun fixedSmoothScroll(position: Int) {
         val width = binding.mainDaysPager.width
 
-        val positionDiff = position - binding.mainDaysPager.currentPosition
+        val positionDiff = position - binding.mainDaysPager.currentPosition.coerceAtLeast(0)
 
         binding.mainDaysPager.smoothScrollBy(positionDiff * width, 0)
     }

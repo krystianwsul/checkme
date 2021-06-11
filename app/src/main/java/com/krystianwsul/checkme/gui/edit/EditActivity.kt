@@ -115,92 +115,6 @@ class EditActivity : NavBarActivity() {
 
     private val discardDialogListener: (Parcelable?) -> Unit = { finish() }
 
-    private val parentFragmentDelegate = object : ParentPickerFragment.Delegate {
-
-        override val adapterDataObservable by lazy {
-            var first = true
-
-            editViewModel.parentPickerData.map {
-                val filterCriteria = if (first) {
-                    first = false
-
-                    editViewModel.delegate
-                        .parentScheduleManager
-                        .parent
-                        ?.parentKey
-                        ?.let { it as? EditViewModel.ParentKey.Task }
-                        ?.let { FilterCriteria.ExpandOnly(SearchCriteria.Search.TaskKey(it.taskKey)) }
-                } else {
-                    null
-                }
-
-                ParentPickerFragment.AdapterData(it.parentTreeDatas, filterCriteria)
-            }
-        }
-
-        private val queryRelay = BehaviorRelay.create<String>()
-
-        override val filterCriteriaObservable by lazy {
-            queryRelay.skip(1) // to allow initial FilterCriteria.ExpandOnly to pass through AdapterData
-                .distinctUntilChanged()
-                .map<FilterCriteria> { FilterCriteria.Full(it) }
-        }
-
-        override val initialScrollMatcher by lazy {
-            editViewModel.delegate
-                .parentScheduleManager
-                .parent
-                ?.let { parent ->
-                    { entryData: ParentPickerFragment.EntryData ->
-                        val parentTreeData = entryData as EditViewModel.ParentTreeData
-
-                        parentTreeData.entryKey == parent.parentKey
-                    }
-                }
-        }
-
-        override fun onEntrySelected(entryData: ParentPickerFragment.EntryData) {
-            editViewModel.delegate
-                .parentScheduleManager
-                .parent = (entryData as EditViewModel.ParentTreeData).toParent()
-        }
-
-        override fun onEntryDeleted() {
-            editViewModel.delegate
-                .parentScheduleManager
-                .parent = null
-        }
-
-        override fun onNewEntry(nameHint: String?) = startActivityForResult(
-            getParametersIntent(
-                editViewModel.delegate
-                    .parentScheduleManager
-                    .run {
-                        EditParameters.Create(
-                            parent?.parentKey?.let {
-                                when (it) { // there's probably a helper for this somewhere
-                                    is EditViewModel.ParentKey.Project -> Hint.Project(it.projectId)
-                                    is EditViewModel.ParentKey.Task -> Hint.Task(it.taskKey)
-                                }
-                            },
-                            ParentScheduleState(
-                                schedules.map {
-                                    ScheduleEntry(it.scheduleDataWrapper)
-                                }.toMutableList(),
-                                assignedTo,
-                            ),
-                            nameHint,
-                        )
-                    },
-            ),
-            REQUEST_CREATE_PARENT,
-        )
-
-        override fun onSearch(query: String) = queryRelay.accept(query)
-
-        override fun onPaddingShown() = throw IllegalStateException()
-    }
-
     private var note: String? = null
 
     private val noteHasFocusRelay = BehaviorRelay.createDefault(false) // keyboard hack
@@ -460,7 +374,7 @@ class EditActivity : NavBarActivity() {
             note = editViewModel.delegate.initialNote
         }
 
-        tryGetFragment<ParentPickerFragment>(PARENT_PICKER_FRAGMENT_TAG)?.initialize(parentFragmentDelegate)
+        tryGetFragment<ParentPickerFragment>(PARENT_PICKER_FRAGMENT_TAG)?.initialize(newParentPickerDelegate())
 
         invalidateOptionsMenu()
 
@@ -592,6 +506,8 @@ class EditActivity : NavBarActivity() {
             .parentScheduleManager
             .assignedTo = finalUserKeys
     }
+
+    private fun newParentPickerDelegate() = ParentPickerDelegate()
 
     sealed class Hint : Parcelable {
 
@@ -807,7 +723,7 @@ class EditActivity : NavBarActivity() {
                     scheduleLayout.apply {
                         fun clickListener() = ParentPickerFragment.newInstance(parent != null, true).let {
                             it.show(activity.supportFragmentManager, PARENT_PICKER_FRAGMENT_TAG)
-                            it.initialize(activity.parentFragmentDelegate)
+                            it.initialize(activity.newParentPickerDelegate())
                         }
 
                         if (parent != null) {
@@ -1106,5 +1022,91 @@ class EditActivity : NavBarActivity() {
                 }
             }
         }
+    }
+
+    private inner class ParentPickerDelegate : ParentPickerFragment.Delegate {
+
+        override val adapterDataObservable by lazy {
+            var first = true
+
+            editViewModel.parentPickerData.map {
+                val filterCriteria = if (first) {
+                    first = false
+
+                    editViewModel.delegate
+                        .parentScheduleManager
+                        .parent
+                        ?.parentKey
+                        ?.let { it as? EditViewModel.ParentKey.Task }
+                        ?.let { FilterCriteria.ExpandOnly(SearchCriteria.Search.TaskKey(it.taskKey)) }
+                } else {
+                    null
+                }
+
+                ParentPickerFragment.AdapterData(it.parentTreeDatas, filterCriteria)
+            }!!
+        }
+
+        private val queryRelay = BehaviorRelay.create<String>()
+
+        override val filterCriteriaObservable by lazy {
+            queryRelay.skip(1) // to allow initial FilterCriteria.ExpandOnly to pass through AdapterData
+                .distinctUntilChanged()
+                .map<FilterCriteria> { FilterCriteria.Full(it) }!!
+        }
+
+        override val initialScrollMatcher by lazy {
+            editViewModel.delegate
+                .parentScheduleManager
+                .parent
+                ?.let { parent ->
+                    { entryData: ParentPickerFragment.EntryData ->
+                        val parentTreeData = entryData as EditViewModel.ParentTreeData
+
+                        parentTreeData.entryKey == parent.parentKey
+                    }
+                }
+        }
+
+        override fun onEntrySelected(entryData: ParentPickerFragment.EntryData) {
+            editViewModel.delegate
+                .parentScheduleManager
+                .parent = (entryData as EditViewModel.ParentTreeData).toParent()
+        }
+
+        override fun onEntryDeleted() {
+            editViewModel.delegate
+                .parentScheduleManager
+                .parent = null
+        }
+
+        override fun onNewEntry(nameHint: String?) = startActivityForResult(
+            getParametersIntent(
+                editViewModel.delegate
+                    .parentScheduleManager
+                    .run {
+                        EditParameters.Create(
+                            parent?.parentKey?.let {
+                                when (it) { // there's probably a helper for this somewhere
+                                    is EditViewModel.ParentKey.Project -> Hint.Project(it.projectId)
+                                    is EditViewModel.ParentKey.Task -> Hint.Task(it.taskKey)
+                                }
+                            },
+                            ParentScheduleState(
+                                schedules.map {
+                                    ScheduleEntry(it.scheduleDataWrapper)
+                                }.toMutableList(),
+                                assignedTo,
+                            ),
+                            nameHint,
+                        )
+                    },
+            ),
+            REQUEST_CREATE_PARENT,
+        )
+
+        override fun onSearch(query: String) = queryRelay.accept(query)
+
+        override fun onPaddingShown() = throw IllegalStateException()
     }
 }

@@ -32,7 +32,7 @@ sealed class FilterCriteria : Parcelable {
     }
 
     @Parcelize
-    data class ExpandOnly(override val query: String = "") : FilterCriteria() {
+    data class ExpandOnly(override val query: String) : FilterCriteria() {
 
         constructor(searchCriteria: SearchCriteria) : this(searchCriteria.query)
     }

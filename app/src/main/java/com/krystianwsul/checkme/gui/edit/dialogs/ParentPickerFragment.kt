@@ -198,7 +198,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
         super.onDestroyView()
     }
 
-    private fun search(filterCriteria: FilterCriteria.Full, placeholder: TreeViewAdapter.Placeholder) {
+    private fun search(filterCriteria: FilterCriteria, placeholder: TreeViewAdapter.Placeholder) {
         this.filterCriteria = filterCriteria
 
         treeViewAdapter!!.setFilterCriteria(filterCriteria, placeholder)
@@ -384,7 +384,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
         val adapterDataObservable: Observable<AdapterData>
 
-        val filterCriteriaObservable: Observable<FilterCriteria.Full>
+        val filterCriteriaObservable: Observable<FilterCriteria>
 
         fun onEntrySelected(entryData: EntryData)
 

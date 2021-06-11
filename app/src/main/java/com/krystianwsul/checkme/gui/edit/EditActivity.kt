@@ -9,6 +9,7 @@ import android.os.Bundle
 import android.os.Parcelable
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.*
 import androidx.activity.viewModels
 import androidx.core.view.isVisible
@@ -36,6 +37,7 @@ import com.krystianwsul.checkme.gui.edit.dialogs.schedule.ScheduleDialogParamete
 import com.krystianwsul.checkme.gui.edit.dialogs.schedule.ScheduleDialogResult
 import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity
 import com.krystianwsul.checkme.utils.*
+import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.time.TimePair
@@ -83,9 +85,10 @@ class EditActivity : NavBarActivity() {
 
         private const val REQUEST_CREATE_PARENT = 982
 
-        fun getParametersIntent(editParameters: EditParameters) = Intent(MyApplication.instance, EditActivity::class.java).apply {
-            putExtra(KEY_PARAMETERS, editParameters)
-        }
+        fun getParametersIntent(editParameters: EditParameters) =
+            Intent(MyApplication.instance, EditActivity::class.java).apply {
+                putExtra(KEY_PARAMETERS, editParameters)
+            }
 
         fun getShortcutIntent(parentTaskKeyHint: TaskKey?) = Intent(MyApplication.instance, EditActivity::class.java).apply {
             action = Intent.ACTION_DEFAULT
@@ -121,43 +124,61 @@ class EditActivity : NavBarActivity() {
 
         private val queryRelay = BehaviorRelay.create<String>()
 
-        override val filterCriteriaObservable = queryRelay.distinctUntilChanged().map { FilterCriteria.Full(it) }
+        override val filterCriteriaObservable by lazy {
+            queryRelay.distinctUntilChanged()
+                .map<FilterCriteria> { FilterCriteria.Full(it) }
+                .let { observable ->
+                    val taskKey = editViewModel.delegate
+                        .parentScheduleManager
+                        .parent
+                        ?.parentKey
+                        ?.let { it as? EditViewModel.ParentKey.Task }
+                        ?.taskKey
+
+                    taskKey?.let {
+                        observable.skip(1).startWithItem(FilterCriteria.ExpandOnly(SearchCriteria.Search.TaskKey(taskKey)))
+                    } ?: observable
+                }
+                .doOnNext {
+                    Log.e("asdf", "magic filterCriteria $it")
+                }
+        }
 
         override fun onEntrySelected(entryData: ParentPickerFragment.EntryData) {
             editViewModel.delegate
-                    .parentScheduleManager
-                    .parent = (entryData as EditViewModel.ParentTreeData).toParent()
+                .parentScheduleManager
+                .parent = (entryData as EditViewModel.ParentTreeData).toParent()
         }
 
         override fun onEntryDeleted() {
             editViewModel.delegate
-                    .parentScheduleManager
-                    .parent = null
+                .parentScheduleManager
+                .parent = null
         }
 
         override fun onNewEntry(nameHint: String?) = startActivityForResult(
-                getParametersIntent(
-                        editViewModel.delegate
-                                .parentScheduleManager
-                                .run {
-                                    EditParameters.Create(
-                                            parent?.parentKey?.let {
-                                                when (it) { // there's probably a helper for this somewhere
-                                                    is EditViewModel.ParentKey.Project -> Hint.Project(it.projectId)
-                                                    is EditViewModel.ParentKey.Task -> Hint.Task(it.taskKey)
-                                                }
-                                            },
-                                            ParentScheduleState(
-                                                    schedules.map {
-                                                        ScheduleEntry(it.scheduleDataWrapper)
-                                                    }.toMutableList(),
-                                                    assignedTo,
-                                            ),
-                                            nameHint,
-                                    )
-                                },
-                ),
-                REQUEST_CREATE_PARENT,
+            getParametersIntent(
+                editViewModel.delegate
+                    .parentScheduleManager
+                    .run {
+                        EditParameters.Create(
+                            parent?.parentKey?.let {
+                                when (it) { // there's probably a helper for this somewhere
+                                    is EditViewModel.ParentKey.Project -> Hint.Project(it.projectId)
+                                    is EditViewModel.ParentKey.Task -> Hint.Task(it.taskKey)
+                                }
+                            },
+                            ParentScheduleState(
+                                schedules.map {
+                                    ScheduleEntry(it.scheduleDataWrapper)
+                                }.toMutableList(),
+                                assignedTo,
+                            ),
+                            nameHint,
+                        )
+                    },
+            ),
+            REQUEST_CREATE_PARENT,
         )
 
         override fun onSearch(query: String) = queryRelay.accept(query)
@@ -228,8 +249,8 @@ class EditActivity : NavBarActivity() {
                 check(!andOpen)
 
                 AllRemindersDialogFragment.newInstance(showAllRemindersPlural)
-                        .apply { listener = allRemindersListener }
-                        .show(supportFragmentManager, TAG_ALL_REMINDERS)
+                    .apply { listener = allRemindersListener }
+                    .show(supportFragmentManager, TAG_ALL_REMINDERS)
             } else {
                 save(andOpen, true)
             }
@@ -284,54 +305,58 @@ class EditActivity : NavBarActivity() {
         hideKeyboardOnClickOutside(binding.root)
 
         listOfNotNull(
-                parametersRelay.toFlowable(BackpressureStrategy.DROP).flatMapSingle(
-                        {
-                            ScheduleDialogFragment.newInstance(it).run {
-                                initialize(editViewModel.delegate.customTimeDatas)
-                                show(supportFragmentManager, SCHEDULE_DIALOG_TAG)
-                                result.firstOrError()
-                            }
-                        },
-                        false,
-                        1,
-                ).toObservable(),
-                (supportFragmentManager.findFragmentByTag(SCHEDULE_DIALOG_TAG) as? ScheduleDialogFragment)?.let { Observable.just(it) }?.flatMapSingle { it.result.firstOrError() }
+            parametersRelay.toFlowable(BackpressureStrategy.DROP).flatMapSingle(
+                {
+                    ScheduleDialogFragment.newInstance(it).run {
+                        initialize(editViewModel.delegate.customTimeDatas)
+                        show(supportFragmentManager, SCHEDULE_DIALOG_TAG)
+                        result.firstOrError()
+                    }
+                },
+                false,
+                1,
+            ).toObservable(),
+            (supportFragmentManager.findFragmentByTag(SCHEDULE_DIALOG_TAG) as? ScheduleDialogFragment)?.let {
+                Observable.just(
+                    it
+                )
+            }?.flatMapSingle { it.result.firstOrError() }
         ).merge()
-                .subscribe { result ->
-                    when (result) {
-                        is ScheduleDialogResult.Change -> {
-                            if (result.scheduleDialogData.scheduleType == ScheduleType.MONTHLY_DAY) {
-                                check(result.scheduleDialogData.monthlyDay)
-                            } else if (result.scheduleDialogData.scheduleType == ScheduleType.MONTHLY_WEEK) {
-                                check(!result.scheduleDialogData.monthlyDay)
-                            }
+            .subscribe { result ->
+                when (result) {
+                    is ScheduleDialogResult.Change -> {
+                        if (result.scheduleDialogData.scheduleType == ScheduleType.MONTHLY_DAY) {
+                            check(result.scheduleDialogData.monthlyDay)
+                        } else if (result.scheduleDialogData.scheduleType == ScheduleType.MONTHLY_WEEK) {
+                            check(!result.scheduleDialogData.monthlyDay)
+                        }
 
-                            editViewModel.delegate.run {
-                                if (result.position == null) {
-                                    parentScheduleManager.addSchedule(result.scheduleDialogData.toScheduleEntry())
-                                } else {
-                                    setSchedule(result.position, result.scheduleDialogData)
-                                }
+                        editViewModel.delegate.run {
+                            if (result.position == null) {
+                                parentScheduleManager.addSchedule(result.scheduleDialogData.toScheduleEntry())
+                            } else {
+                                setSchedule(result.position, result.scheduleDialogData)
                             }
                         }
-                        is ScheduleDialogResult.Delete -> removeSchedule(result.position)
-                        is ScheduleDialogResult.Cancel -> Unit
                     }
+                    is ScheduleDialogResult.Delete -> removeSchedule(result.position)
+                    is ScheduleDialogResult.Cancel -> Unit
                 }
-                .addTo(createDisposable)
+            }
+            .addTo(createDisposable)
 
         startTicks(timeReceiver)
 
         Observable.combineLatest(
-                keyboardInsetRelay,
-                noteHasFocusRelay,
-                noteChanges,
-                imageHeightRelay,
+            keyboardInsetRelay,
+            noteHasFocusRelay,
+            noteChanges,
+            imageHeightRelay,
         ) { keyboardInset, noteHasFocus, _, imageHeight ->
             if (noteHasFocus) {
                 binding.editToolbarEditTextInclude
-                        .editToolbarAppBar
-                        .setExpanded(false)
+                    .editToolbarAppBar
+                    .setExpanded(false)
 
                 val padding = (keyboardInset - imageHeight).coerceAtLeast(0)
 
@@ -343,8 +368,8 @@ class EditActivity : NavBarActivity() {
                 binding.editRecycler.updatePadding(bottom = 0)
             }
         }
-                .subscribe()
-                .addTo(createDisposable)
+            .subscribe()
+            .addTo(createDisposable)
 
         tryGetFragment<AssignToDialogFragment>(TAG_ASSIGN_TO)?.listener = ::assignTo
     }
@@ -360,8 +385,8 @@ class EditActivity : NavBarActivity() {
         single.observeOn(AndroidSchedulers.mainThread()).subscribe {
             if (it.resultCode() == Activity.RESULT_OK) {
                 it.targetUI()
-                        .editViewModel
-                        .setEditImageState(EditImageState.Selected(it.data().file))
+                    .editViewModel
+                    .setEditImageState(EditImageState.Selected(it.data().file))
             }
         }
     }
@@ -384,30 +409,30 @@ class EditActivity : NavBarActivity() {
         first = false
 
         binding.editToolbarEditTextInclude
-                .toolbarLayout
-                .run {
-                    visibility = View.VISIBLE
-                    isHintAnimationEnabled = true
-                }
+            .toolbarLayout
+            .run {
+                visibility = View.VISIBLE
+                isHintAnimationEnabled = true
+            }
 
         binding.editToolbarEditTextInclude
-                .toolbarEditText
-                .run {
-                    if (savedInstanceState == null) setText(editViewModel.delegate.initialName)
+            .toolbarEditText
+            .run {
+                if (savedInstanceState == null) setText(editViewModel.delegate.initialName)
 
-                    addTextChangedListener(object : TextWatcher {
+                addTextChangedListener(object : TextWatcher {
 
-                        private var skip = savedInstanceState != null
+                    private var skip = savedInstanceState != null
 
-                        override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) = Unit
+                    override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) = Unit
 
-                        override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) = Unit
+                    override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) = Unit
 
-                        override fun afterTextChanged(s: Editable) {
-                            if (skip) skip = false else updateNameError()
-                        }
-                    })
-                }
+                    override fun afterTextChanged(s: Editable) {
+                        if (skip) skip = false else updateNameError()
+                    }
+                })
+            }
 
         if (savedInstanceState?.containsKey(NOTE_HAS_FOCUS_KEY) == true) {
             savedInstanceState!!.run {
@@ -460,23 +485,23 @@ class EditActivity : NavBarActivity() {
     private fun updateNameError(): Boolean {
         val error = getString(R.string.nameError).takeIf {
             binding.editToolbarEditTextInclude
-                    .toolbarEditText
-                    .text
-                    .isNullOrEmpty()
+                .toolbarEditText
+                .text
+                .isNullOrEmpty()
         }
 
         binding.editToolbarEditTextInclude
-                .toolbarLayout
-                .error = error
+            .toolbarLayout
+            .error = error
 
         return error != null
     }
 
     private fun updateError() = updateNameError() || editViewModel.delegate
-            .parentScheduleManager
-            .schedules
-            .any { editViewModel.delegate.getError(it) != null }
-            .also { if (it) timeRelay.accept(Unit) }
+        .parentScheduleManager
+        .schedules
+        .any { editViewModel.delegate.getError(it) != null }
+        .also { if (it) timeRelay.accept(Unit) }
 
     override fun onDestroy() {
         unregisterReceiver(timeReceiver)
@@ -488,12 +513,12 @@ class EditActivity : NavBarActivity() {
         if (!editViewModel.hasDelegate) return false
 
         return editViewModel.delegate.checkDataChanged(
-                editViewModel.editImageState,
-                binding.editToolbarEditTextInclude
-                        .toolbarEditText
-                        .text
-                        .toString(),
-                note,
+            editViewModel.editImageState,
+            binding.editToolbarEditTextInclude
+                .toolbarEditText
+                .text
+                .toString(),
+            note,
         )
     }
 
@@ -511,10 +536,10 @@ class EditActivity : NavBarActivity() {
 
     private fun save(andOpen: Boolean, allReminders: Boolean) {
         val name = binding.editToolbarEditTextInclude
-                .toolbarEditText
-                .text
-                .toString()
-                .trim { it <= ' ' }
+            .toolbarEditText
+            .text
+            .toString()
+            .trim { it <= ' ' }
 
         check(name.isNotEmpty())
 
@@ -523,34 +548,34 @@ class EditActivity : NavBarActivity() {
         val createParameters = EditDelegate.CreateParameters(name, note, allReminders, editViewModel.editImageState)
 
         editViewModel.delegate
-                .createTask(createParameters)
-                .subscribeBy {
-                    if (andOpen) startActivity(it.intent)
+            .createTask(createParameters)
+            .subscribeBy {
+                if (andOpen) startActivity(it.intent)
 
-                    setResult(
-                            Activity.RESULT_OK,
-                            Intent().putExtra(ShowTaskActivity.TASK_KEY_KEY, it.taskKey as Parcelable)
-                    )
+                setResult(
+                    Activity.RESULT_OK,
+                    Intent().putExtra(ShowTaskActivity.TASK_KEY_KEY, it.taskKey as Parcelable)
+                )
 
-                    finish()
-                }
-                .addTo(createDisposable)
+                finish()
+            }
+            .addTo(createDisposable)
     }
 
     private fun assignTo(userKeys: Set<UserKey>) {
         val allUserKeys = editViewModel.delegate
-                .parentScheduleManager
-                .parent!!
-                .projectUsers
-                .values
-                .map { it.key }
-                .toSet()
+            .parentScheduleManager
+            .parent!!
+            .projectUsers
+            .values
+            .map { it.key }
+            .toSet()
 
         val finalUserKeys = userKeys.takeIf { it != allUserKeys } ?: setOf()
 
         editViewModel.delegate
-                .parentScheduleManager
-                .assignedTo = finalUserKeys
+            .parentScheduleManager
+            .assignedTo = finalUserKeys
     }
 
     sealed class Hint : Parcelable {
@@ -602,25 +627,25 @@ class EditActivity : NavBarActivity() {
         SCHEDULE {
 
             override fun newHolder(layoutInflater: LayoutInflater, parent: ViewGroup) =
-                    ScheduleHolder(RowScheduleBinding.inflate(layoutInflater, parent, false))
+                ScheduleHolder(RowScheduleBinding.inflate(layoutInflater, parent, false))
         },
 
         NOTE {
 
             override fun newHolder(layoutInflater: LayoutInflater, parent: ViewGroup) =
-                    NoteHolder(RowNoteBinding.inflate(layoutInflater, parent, false))
+                NoteHolder(RowNoteBinding.inflate(layoutInflater, parent, false))
         },
 
         ASSIGNED {
 
             override fun newHolder(layoutInflater: LayoutInflater, parent: ViewGroup) =
-                    AssignedHolder(RowAssignedBinding.inflate(layoutInflater, parent, false))
+                AssignedHolder(RowAssignedBinding.inflate(layoutInflater, parent, false))
         },
 
         IMAGE {
 
             override fun newHolder(layoutInflater: LayoutInflater, parent: ViewGroup) =
-                    ImageHolder(RowImageBinding.inflate(layoutInflater, parent, false))
+                ImageHolder(RowImageBinding.inflate(layoutInflater, parent, false))
         };
 
         abstract fun newHolder(layoutInflater: LayoutInflater, parent: ViewGroup): Holder
@@ -630,9 +655,9 @@ class EditActivity : NavBarActivity() {
     private inner class CreateTaskAdapter : RecyclerView.Adapter<Holder>() {
 
         private var items: List<Item> by observable(
-                editViewModel.delegate
-                        .adapterItemObservable
-                        .getCurrentValue()
+            editViewModel.delegate
+                .adapterItemObservable
+                .getCurrentValue()
         ) { _, oldItems, newItems ->
             DiffUtil.calculateDiff(object : DiffUtil.Callback() {
 
@@ -641,50 +666,50 @@ class EditActivity : NavBarActivity() {
                 override fun getNewListSize() = newItems.size
 
                 override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int) =
-                        oldItems[oldItemPosition].same(newItems[newItemPosition])
+                    oldItems[oldItemPosition].same(newItems[newItemPosition])
 
                 override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int) =
-                        oldItems[oldItemPosition] == newItems[newItemPosition]
+                    oldItems[oldItemPosition] == newItems[newItemPosition]
             }).dispatchUpdatesTo(this)
         }
 
         init {
             editViewModel.delegate
-                    .adapterItemObservable
-                    .subscribe { items = it }
-                    .addTo(createDisposable)
+                .adapterItemObservable
+                .subscribe { items = it }
+                .addTo(createDisposable)
         }
 
         val notePosition get() = items.indexOf(Item.Note)
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
-                HolderType.values()[viewType].run { newHolder(layoutInflater, parent) }
+            HolderType.values()[viewType].run { newHolder(layoutInflater, parent) }
 
         override fun onBindViewHolder(holder: Holder, position: Int) =
-                items[position].bind(this@EditActivity, holder)
+            items[position].bind(this@EditActivity, holder)
 
         override fun onViewAttachedToWindow(holder: Holder) {
             super.onViewAttachedToWindow(holder)
 
             fun getItem() = holder.adapterPosition
-                    .takeIf { it >= 0 }
-                    ?.let { items[it] }
+                .takeIf { it >= 0 }
+                ?.let { items[it] }
 
             editViewModel.editImageStateObservable
-                    .subscribe { getItem()?.onNewImageState(it, holder) }
-                    .addTo(holder.compositeDisposable)
+                .subscribe { getItem()?.onNewImageState(it, holder) }
+                .addTo(holder.compositeDisposable)
 
             editViewModel.delegate
-                    .parentScheduleManager
-                    .parentObservable
-                    .subscribe { getItem()?.onNewParent(this@EditActivity, holder) }
-                    .addTo(holder.compositeDisposable)
+                .parentScheduleManager
+                .parentObservable
+                .subscribe { getItem()?.onNewParent(this@EditActivity, holder) }
+                .addTo(holder.compositeDisposable)
 
             editViewModel.delegate
-                    .parentScheduleManager
-                    .assignedToObservable
-                    .subscribe { getItem()?.onNewAssignedTo(this@EditActivity, holder) }
-                    .addTo(holder.compositeDisposable)
+                .parentScheduleManager
+                .assignedToObservable
+                .subscribe { getItem()?.onNewAssignedTo(this@EditActivity, holder) }
+                .addTo(holder.compositeDisposable)
 
             holder.compositeDisposable += timeRelay.subscribe {
                 getItem()?.onTimeChanged(this@EditActivity, holder)
@@ -759,9 +784,9 @@ class EditActivity : NavBarActivity() {
 
             override fun onNewParent(activity: EditActivity, holder: Holder) {
                 val parent = activity.editViewModel
-                        .delegate
-                        .parentScheduleManager
-                        .parent
+                    .delegate
+                    .parentScheduleManager
+                    .parent
 
                 (holder as ScheduleHolder).rowScheduleBinding.apply {
                     scheduleLayout.apply {
@@ -773,9 +798,9 @@ class EditActivity : NavBarActivity() {
                         if (parent != null) {
                             setClose(::clickListener) {
                                 activity.editViewModel
-                                        .delegate
-                                        .parentScheduleManager
-                                        .parent = null
+                                    .delegate
+                                    .parentScheduleManager
+                                    .parent = null
                             }
                         } else {
                             setDropdown(::clickListener)
@@ -800,41 +825,43 @@ class EditActivity : NavBarActivity() {
                         isHintAnimationEnabled = false
 
                         setClose(
-                                {
-                                    val parameters = ScheduleDialogParameters(
-                                            holder.adapterPosition,
-                                            scheduleEntry.scheduleDataWrapper.getScheduleDialogData(
-                                                    activity.editViewModel
-                                                            .delegate
-                                                            .scheduleHint
-                                            ),
-                                            true,
-                                    )
+                            {
+                                val parameters = ScheduleDialogParameters(
+                                    holder.adapterPosition,
+                                    scheduleEntry.scheduleDataWrapper.getScheduleDialogData(
+                                        activity.editViewModel
+                                            .delegate
+                                            .scheduleHint
+                                    ),
+                                    true,
+                                )
 
-                                    activity.parametersRelay.accept(parameters)
-                                },
-                                { activity.removeSchedule(holder.adapterPosition) }
+                                activity.parametersRelay.accept(parameters)
+                            },
+                            { activity.removeSchedule(holder.adapterPosition) }
                         )
                     }
 
-                    scheduleText.setText(scheduleEntry.scheduleDataWrapper.getText(
+                    scheduleText.setText(
+                        scheduleEntry.scheduleDataWrapper.getText(
                             activity.editViewModel
-                                    .delegate
-                                    .customTimeDatas,
+                                .delegate
+                                .customTimeDatas,
                             activity,
-                    ))
+                        )
+                    )
                 }
             }
 
             override fun onTimeChanged(activity: EditActivity, holder: Holder) {
                 activity.editViewModel
-                        .delegate
-                        .getError(scheduleEntry)
-                        ?.let {
-                            (holder as ScheduleHolder).rowScheduleBinding
-                                    .scheduleLayout
-                                    .error = activity.getString(it.resource)
-                        }
+                    .delegate
+                    .getError(scheduleEntry)
+                    ?.let {
+                        (holder as ScheduleHolder).rowScheduleBinding
+                            .scheduleLayout
+                            .error = activity.getString(it.resource)
+                    }
             }
 
             private fun same(other: ScheduleEntry): Boolean {
@@ -865,13 +892,13 @@ class EditActivity : NavBarActivity() {
 
                         setDropdown {
                             val parameters = ScheduleDialogParameters(
-                                    null,
-                                    activity.editViewModel
-                                            .delegate
-                                            .firstScheduleEntry
-                                            .scheduleDataWrapper
-                                            .getScheduleDialogData(activity.editViewModel.delegate.scheduleHint),
-                                    false
+                                null,
+                                activity.editViewModel
+                                    .delegate
+                                    .firstScheduleEntry
+                                    .scheduleDataWrapper
+                                    .getScheduleDialogData(activity.editViewModel.delegate.scheduleHint),
+                                false
                             )
 
                             activity.parametersRelay.accept(parameters)
@@ -940,9 +967,9 @@ class EditActivity : NavBarActivity() {
 
                 (holder as ImageHolder).rowImageBinding.apply {
                     fun listener() = CameraGalleryFragment.newInstance(
-                            activity.editViewModel
-                                    .editImageState
-                                    .loader != null
+                        activity.editViewModel
+                            .editImageState
+                            .loader != null
                     ).show(activity.supportFragmentManager, TAG_CAMERA_GALLERY)
 
                     imageImage.setOnClickListener { listener() }
@@ -982,33 +1009,33 @@ class EditActivity : NavBarActivity() {
 
             private fun openDialog(editActivity: EditActivity) {
                 val projectUsers = editActivity.editViewModel
-                        .delegate
-                        .parentScheduleManager
-                        .parent!!
-                        .projectUsers
-                        .values
-                        .toList()
+                    .delegate
+                    .parentScheduleManager
+                    .parent!!
+                    .projectUsers
+                    .values
+                    .toList()
 
                 AssignToDialogFragment.newInstance(
-                        projectUsers,
-                        editActivity.editViewModel
-                                .delegate
-                                .parentScheduleManager
-                                .assignedTo
-                                .toList()
-                                .takeIf { it.isNotEmpty() }
-                                ?: projectUsers.map { it.key },
+                    projectUsers,
+                    editActivity.editViewModel
+                        .delegate
+                        .parentScheduleManager
+                        .assignedTo
+                        .toList()
+                        .takeIf { it.isNotEmpty() }
+                        ?: projectUsers.map { it.key },
                 )
-                        .apply { listener = editActivity::assignTo }
-                        .show(editActivity.supportFragmentManager, TAG_ASSIGN_TO)
+                    .apply { listener = editActivity::assignTo }
+                    .show(editActivity.supportFragmentManager, TAG_ASSIGN_TO)
             }
 
             override fun bind(activity: EditActivity, holder: Holder) {
                 viewsMap.clear()
 
                 (holder as AssignedHolder).rowAssignedBinding
-                        .assignedLayout
-                        .setDropdown { openDialog(activity) }
+                    .assignedLayout
+                    .setDropdown { openDialog(activity) }
 
                 onNewAssignedTo(activity, holder)
             }
@@ -1018,9 +1045,9 @@ class EditActivity : NavBarActivity() {
             override fun onNewAssignedTo(activity: EditActivity, holder: Holder) {
                 (holder as AssignedHolder).rowAssignedBinding.apply {
                     val users = activity.editViewModel
-                            .delegate
-                            .parentScheduleManager
-                            .assignedToUsers
+                        .delegate
+                        .parentScheduleManager
+                        .assignedToUsers
 
                     if (users.isEmpty()) {
                         assignedLayout.isVisible = true
@@ -1041,24 +1068,24 @@ class EditActivity : NavBarActivity() {
                             val user = users.getValue(userKey)
 
                             viewsMap[userKey] = RowAssignedChipBinding.inflate(
-                                    LayoutInflater.from(root.context),
-                                    assignedChipGroup,
-                                    true
+                                LayoutInflater.from(root.context),
+                                assignedChipGroup,
+                                true
                             )
-                                    .root
-                                    .apply {
-                                        text = user.name
-                                        loadPhoto(user.photoUrl)
+                                .root
+                                .apply {
+                                    text = user.name
+                                    loadPhoto(user.photoUrl)
 
-                                        setOnClickListener { openDialog(activity) }
+                                    setOnClickListener { openDialog(activity) }
 
-                                        setOnCloseIconClickListener {
-                                            activity.editViewModel
-                                                    .delegate
-                                                    .parentScheduleManager
-                                                    .removeAssignedTo(user.key)
-                                        }
+                                    setOnCloseIconClickListener {
+                                        activity.editViewModel
+                                            .delegate
+                                            .parentScheduleManager
+                                            .removeAssignedTo(user.key)
                                     }
+                                }
                         }
                     }
                 }

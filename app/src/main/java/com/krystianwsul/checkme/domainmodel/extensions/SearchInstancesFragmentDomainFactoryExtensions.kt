@@ -63,7 +63,7 @@ fun DomainFactory.getCappedInstanceAndTaskDatas(
 
     val taskDatas = getUnscheduledTasks(now, projectKey)
         .asSequence()
-        .filterQuery(searchCriteria.query)
+        .filterQuery(searchCriteria.search?.query ?: "") // todo expand
         .map { (task, filterResult) ->
             val childQuery = if (filterResult == FilterResult.MATCHES) null else searchCriteria
 

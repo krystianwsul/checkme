@@ -202,7 +202,7 @@ fun DomainFactory.getGroupListChildTaskDatas(
 ): List<GroupListDataWrapper.TaskData> = parentTask.getChildTaskHierarchies(now)
     .asSequence()
     .map { it.childTask }
-    .filterQuery(searchCriteria?.query)
+    .filterQuery(searchCriteria?.search?.query ?: "") // todo expand
     .map { (childTask, filterResult) ->
         val childQuery = if (filterResult == FilterResult.MATCHES) null else searchCriteria
 
@@ -248,7 +248,10 @@ fun <T : Comparable<T>> DomainFactory.searchInstances(
         can skip filtering child instances, since showAssignedToOthers is meaningless for child instances.
          */
         val childSearchCriteria =
-            if (task.matchesQuery(searchCriteria.query)) searchCriteria.copy(query = "") else searchCriteria
+            if (task.matchesQuery(
+                    searchCriteria.search?.query ?: ""
+                )
+            ) searchCriteria.copy(search = null) else searchCriteria // todo expand
 
         val children = getChildInstanceDatas(it, now, mapper, childSearchCriteria, !debugMode)
 

@@ -6,19 +6,19 @@ import kotlinx.parcelize.Parcelize
 
 sealed interface FilterCriteria : Parcelable {
 
-    val query: String
+    val search: SearchCriteria.Search?
 
-    val hasSearch get() = query.isNotEmpty()
-    val expandMatches get() = hasSearch
+    val hasSearch get() = search?.hasSearch ?: false
+    val expandMatches get() = search?.expandMatches ?: false
     val needsNormalization get() = hasSearch
 
     fun canBeShown(treeNode: TreeNode<*>): Boolean = true
 
     @Parcelize
-    data class Full(
-        override val query: String = "",
-        val filterParams: FilterParams = FilterParams(),
-    ) : FilterCriteria {
+    data class Full(override val search: SearchCriteria.Search, val filterParams: FilterParams) : FilterCriteria {
+
+        constructor(query: String = "", filterParams: FilterParams = FilterParams()) :
+                this(SearchCriteria.Search(query), filterParams)
 
         constructor(
             query: String = "",
@@ -30,9 +30,9 @@ sealed interface FilterCriteria : Parcelable {
         override fun canBeShown(treeNode: TreeNode<*>): Boolean {
             if (!treeNode.modelNode.matchesFilterParams(filterParams)) return false
 
-            return when (treeNode.modelNode.getMatchResult(query)) {
+            return when (treeNode.modelNode.getMatchResult(search.query)) {
                 ModelNode.MatchResult.ALWAYS_VISIBLE, ModelNode.MatchResult.MATCHES -> true
-                ModelNode.MatchResult.DOESNT_MATCH -> treeNode.parentHierarchyMatchesQuery(query) ||
+                ModelNode.MatchResult.DOESNT_MATCH -> treeNode.parentHierarchyMatchesSearch(search) ||
                         treeNode.childHierarchyMatchesFilterCriteria(this)
             }
         }
@@ -46,14 +46,16 @@ sealed interface FilterCriteria : Parcelable {
     }
 
     @Parcelize
-    data class ExpandOnly(override val query: String) : FilterCriteria {
+    data class ExpandOnly(override val search: SearchCriteria.Search?) : FilterCriteria {
 
-        constructor(searchCriteria: SearchCriteria) : this(searchCriteria.query)
+        constructor(query: String) : this(SearchCriteria.Search(query))
+
+        constructor(searchCriteria: SearchCriteria) : this(searchCriteria.search)
     }
 
     @Parcelize
     object None : FilterCriteria {
 
-        override val query get() = ""
+        override val search: SearchCriteria.Search? get() = null
     }
 }

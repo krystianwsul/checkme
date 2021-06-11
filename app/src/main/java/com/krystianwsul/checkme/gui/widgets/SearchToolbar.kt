@@ -102,8 +102,8 @@ class SearchToolbar @JvmOverloads constructor(context: Context, attrs: Attribute
             binding.searchToolbar.setNavigationOnClickListener { listener() }
 
     override fun onSaveInstanceState(): Parcelable = SavedState(
-            super.onSaveInstanceState(),
-            filterCriteriaObservable.getCurrentValue().query
+        super.onSaveInstanceState(),
+        filterCriteriaObservable.getCurrentValue().search.query,
     )
 
     override fun onRestoreInstanceState(state: Parcelable) {

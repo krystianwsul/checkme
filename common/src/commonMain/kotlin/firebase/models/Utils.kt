@@ -45,11 +45,11 @@ fun Sequence<Instance>.filterSearchCriteria(
 
         if (instance.instanceKey in searchCriteria.excludedInstanceKeys) return false
 
-        if (instance.task.matchesQuery(searchCriteria.query)) return true
+        if (instance.task.matchesQuery(searchCriteria.search?.query ?: "")) return true // todo expand
 
         return instance.getChildInstances()
-                .filter { it.isVisible(now, Instance.VisibilityOptions(assumeChildOfVisibleParent = true)) }
-                .any(::childHierarchyMatches)
+            .filter { it.isVisible(now, Instance.VisibilityOptions(assumeChildOfVisibleParent = true)) }
+            .any(::childHierarchyMatches)
     }
 
     filter(::childHierarchyMatches)

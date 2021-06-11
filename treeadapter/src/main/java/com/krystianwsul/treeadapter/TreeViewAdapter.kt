@@ -115,10 +115,12 @@ class TreeViewAdapter<T : TreeHolder>(
             treeNodeCollection!!.apply {
                 resetExpansion(true, Placeholder.instance)
 
-                if (filterCriteria.expandMatches) {
+                val search = filterCriteria.search
+
+                if (search?.expandMatches == true) {
                     val visibleCount = nodes.count { it.visible() }
 
-                    expandMatching(filterCriteria.query, visibleCount == 1)
+                    expandMatching(search, visibleCount == 1)
                 }
             }
         }

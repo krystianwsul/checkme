@@ -2,6 +2,7 @@ package com.krystianwsul.treeadapter
 
 import android.os.Parcelable
 import androidx.recyclerview.widget.RecyclerView
+import com.krystianwsul.common.criteria.SearchCriteria
 import kotlinx.parcelize.Parcelize
 import java.util.*
 
@@ -14,12 +15,12 @@ class TreeNode<T : TreeHolder>(
 
     companion object {
 
-        private tailrec fun parentHierarchyMatchesQuery(treeNode: TreeNode<*>, query: String): Boolean {
+        private tailrec fun parentHierarchyMatchesSearch(treeNode: TreeNode<*>, search: SearchCriteria.Search): Boolean {
             if (treeNode.parent !is TreeNode<*>) return false
 
-            if (treeNode.parent.matchesQuery(query)) return true
+            if (treeNode.parent.matchesSearch(search)) return true
 
-            return parentHierarchyMatchesQuery(treeNode.parent, query)
+            return parentHierarchyMatchesSearch(treeNode.parent, search)
         }
     }
 
@@ -314,20 +315,20 @@ class TreeNode<T : TreeHolder>(
         return treeViewAdapter.filterCriteria.canBeShown(this)
     }
 
-    private fun matchesQuery(query: String) =
-        modelNode.getMatchResult(query) == ModelNode.MatchResult.MATCHES
+    private fun matchesSearch(search: SearchCriteria.Search) =
+        modelNode.getMatchResult(search.query) == ModelNode.MatchResult.MATCHES // todo expand
 
-    fun parentHierarchyMatchesQuery(query: String) = parentHierarchyMatchesQuery(this, query)
+    fun parentHierarchyMatchesSearch(search: SearchCriteria.Search) = parentHierarchyMatchesSearch(this, search)
 
     fun childHierarchyMatchesFilterCriteria(filterCriteria: FilterCriteria.Full): Boolean = childTreeNodes.any {
         val matchesFilterCriteria = it.modelNode.matchesFilterParams(filterCriteria.filterParams) &&
-                it.matchesQuery(filterCriteria.query)
+                it.matchesSearch(filterCriteria.search)
 
         matchesFilterCriteria || it.childHierarchyMatchesFilterCriteria(filterCriteria)
     }
 
-    private fun childHierarchyMatchesQuery(query: String): Boolean =
-        childTreeNodes.any { it.matchesQuery(query) || it.childHierarchyMatchesQuery(query) }
+    private fun childHierarchyMatchesSearch(search: SearchCriteria.Search): Boolean =
+        childTreeNodes.any { it.matchesSearch(search) || it.childHierarchyMatchesSearch(search) }
 
     fun visible(): Boolean {
         checkChildTreeNodesSet()
@@ -389,7 +390,7 @@ class TreeNode<T : TreeHolder>(
             expansionState = ExpansionState()
     }
 
-    fun expandMatching(query: String, force: Boolean) {
+    fun expandMatching(search: SearchCriteria.Search, force: Boolean) {
         checkChildTreeNodesSet()
 
         /**
@@ -399,9 +400,9 @@ class TreeNode<T : TreeHolder>(
         if (!expandCanBeVisible) return
         if (childTreeNodes.none { canBeShown() }) return
 
-        if ((modelNode.expandOnMatch || force) && childHierarchyMatchesQuery(query)) expansionState.programmatic = true
+        if ((modelNode.expandOnMatch || force) && childHierarchyMatchesSearch(search)) expansionState.programmatic = true
 
-        childTreeNodes.forEach { it.expandMatching(query, false) }
+        childTreeNodes.forEach { it.expandMatching(search, false) }
     }
 
     private fun checkChildTreeNodesSet() {

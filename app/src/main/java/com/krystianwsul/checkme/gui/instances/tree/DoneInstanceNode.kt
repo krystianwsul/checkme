@@ -6,15 +6,11 @@ import com.krystianwsul.treeadapter.ModelNode
 
 class DoneInstanceNode(
     override val indentation: Int,
-    val instanceData: GroupListDataWrapper.InstanceData,
+    private val instanceData: GroupListDataWrapper.InstanceData,
     override val parentNode: DividerNode,
 ) : NotDoneNode(ContentDelegate.Instance(parentNode.nodeCollection.groupAdapter, instanceData, indentation)) {
 
     override val groupAdapter by lazy { parentNode.nodeCollection.groupAdapter }
-
-    override val id: Any = Id(super.id)
-
-    private data class Id(val innerId: Any)
 
     override fun compareTo(other: ModelNode<AbstractHolder>): Int {
         checkNotNull(instanceData.done)

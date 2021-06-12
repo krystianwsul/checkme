@@ -77,12 +77,7 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
             treeNode.expandVisible,
         )
 
-    /**
-     * Note: there is a difference between the node's ID and the contents' ID.  (So far.)  For example, this ID is used for
-     * animations, which is why DoneInstanceNode has a different implementation: we don't want toggling done/not done to
-     * animate as movement.
-     */
-    override val id: Any get() = contentDelegate.id
+    final override val id: Any get() = contentDelegate.id
 
     final override val propagateSelection = contentDelegate.propagateSelection
 

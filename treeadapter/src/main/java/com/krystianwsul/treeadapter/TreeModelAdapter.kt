@@ -6,5 +6,5 @@ interface TreeModelAdapter<T : TreeHolder> : ActionModeCallback {
 
     fun onCreateViewHolder(parent: ViewGroup, viewType: Int): T
 
-    fun scrollToTop() = Unit
+    fun scrollToTop()
 }

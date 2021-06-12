@@ -206,6 +206,8 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
                             done,
                         )
 
+                        treeNode.treeViewAdapter.ignoreNextScroll()
+
                         setDone(!done).observeOn(AndroidSchedulers.mainThread())
                             .andThen(Maybe.defer { groupListFragment.listener.showSnackbarDoneMaybe(1) })
                             .flatMapCompletable { setDone(done) }

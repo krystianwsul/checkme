@@ -93,6 +93,14 @@ class TreeViewAdapter<T : TreeHolder>(
 
     private fun getStates() = displayedNodes.map { it.state }
 
+    private var ignoreNextScroll: Boolean = false
+
+    fun ignoreNextScroll() {
+        check(!ignoreNextScroll)
+
+        ignoreNextScroll = true
+    }
+
     fun updateDisplayedNodes(action: (Placeholder) -> Unit) = updateDisplayedNodes(false, action)
 
     fun updateDisplayedNodes(useMove: Boolean, action: (Placeholder) -> Unit) {
@@ -182,10 +190,16 @@ class TreeViewAdapter<T : TreeHolder>(
             }
         }).dispatchUpdatesTo(object : ListUpdateCallback {
 
+            private val ignoreScroll = this@TreeViewAdapter.ignoreNextScroll
+
+            init {
+                this@TreeViewAdapter.ignoreNextScroll = false
+            }
+
             override fun onInserted(position: Int, count: Int) {
                 notifyItemRangeInserted(position, count)
 
-                if (position == 0) treeModelAdapter.scrollToTop()
+                checkScroll(position)
             }
 
             override fun onRemoved(position: Int, count: Int) = notifyItemRangeRemoved(position, count)
@@ -196,13 +210,17 @@ class TreeViewAdapter<T : TreeHolder>(
                 } else {
                     notifyItemRemoved(fromPosition)
                     notifyItemInserted(toPosition)
-                }
 
-                if (toPosition == 0) treeModelAdapter.scrollToTop()
+                    checkScroll(toPosition)
+                }
+            }
+
+            private fun checkScroll(position: Int) {
+                if (position == 0 && !ignoreScroll) treeModelAdapter.scrollToTop()
             }
 
             override fun onChanged(position: Int, count: Int, payload: Any?) =
-                    notifyItemRangeChanged(position, count, payload)
+                notifyItemRangeChanged(position, count, payload)
         })
 
         updates.accept(Unit)

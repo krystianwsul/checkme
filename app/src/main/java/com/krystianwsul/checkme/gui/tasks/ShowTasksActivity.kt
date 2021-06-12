@@ -317,9 +317,9 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
         ): TaskListFragment.Parameters
 
         @Parcelize
-        object Unscheduled : Parameters() {
+        data class Unscheduled(val projectKey: ProjectKey.Shared?) : Parameters() {
 
-            override val showProjects get() = true
+            override val showProjects get() = projectKey == null
 
             override fun getShowAssignedToOthers(data: ShowTasksViewModel.Data): Boolean {
                 check(data.isSharedProject == null)

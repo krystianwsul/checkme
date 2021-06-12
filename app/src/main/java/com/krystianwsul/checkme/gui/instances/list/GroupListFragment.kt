@@ -532,8 +532,11 @@ class GroupListFragment @JvmOverloads constructor(
             newFilterCriteria: FilterCriteria,
         ) = false
 
-        override fun instantiateAdapters(filterCriteria: FilterCriteria) =
-            GroupAdapter(this@GroupListFragment, filterCriteria).let { it to it.treeViewAdapter }
+        override fun instantiateAdapters(filterCriteria: FilterCriteria) = GroupAdapter(
+            this@GroupListFragment,
+            filterCriteria,
+            (parameters as? GroupListParameters.Parent)?.projectKey,
+        ).let { it to it.treeViewAdapter }
 
         override fun attachTreeViewAdapter(treeViewAdapter: TreeViewAdapter<AbstractHolder>) {
             binding.groupListRecycler.apply {
@@ -929,7 +932,11 @@ class GroupListFragment @JvmOverloads constructor(
 
     fun clearExpansionStates() = searchDataManager.treeViewAdapterNullable?.clearExpansionStates()
 
-    class GroupAdapter(val groupListFragment: GroupListFragment, filterCriteria: FilterCriteria) :
+    class GroupAdapter(
+        val groupListFragment: GroupListFragment,
+        filterCriteria: FilterCriteria,
+        private val unscheduledNodeProjectKey: ProjectKey.Shared?,
+    ) :
         BaseAdapter(),
         NodeCollectionParent,
         ActionModeCallback by groupListFragment.selectionCallback {
@@ -996,6 +1003,7 @@ class GroupListFragment @JvmOverloads constructor(
                 note,
                 null,
                 projectInfo,
+                unscheduledNodeProjectKey,
                 useDoneNode,
             )
 

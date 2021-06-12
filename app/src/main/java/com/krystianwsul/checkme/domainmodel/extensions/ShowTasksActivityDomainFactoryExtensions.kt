@@ -10,6 +10,7 @@ import com.krystianwsul.checkme.gui.tasks.ShowTasksActivity
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.viewmodels.ShowTasksViewModel
 import com.krystianwsul.common.firebase.DomainThreadChecker
+import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.project.SharedProject
 import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.time.ExactTimeStamp
@@ -47,17 +48,21 @@ fun DomainFactory.getShowTasksData(parameters: ShowTasksActivity.Parameters): Sh
     val isSharedProject: Boolean?
 
     when (parameters) {
-        ShowTasksActivity.Parameters.Unscheduled -> {
-            entryDatas = projectsFactory.projects
-                .values
-                .map {
-                    val childTaskDatas = it.getAllTasks()
-                        .filter { it.current(now) && it.intervalInfo.isUnscheduled() }
-                        .map { it.toChildTaskData(it.getHierarchyExactTimeStamp(now)) }
+        is ShowTasksActivity.Parameters.Unscheduled -> {
+            fun Project<*>.getUnscheduledTaskDatas() = getAllTasks().filter {
+                it.current(now) && it.intervalInfo.isUnscheduled()
+            }
+                .map { it.toChildTaskData(it.getHierarchyExactTimeStamp(now)) }
 
-                    it.toProjectData(childTaskDatas)
+            entryDatas = projectsFactory.run {
+                if (parameters.projectKey != null) {
+                    getProjectForce(parameters.projectKey).getUnscheduledTaskDatas()
+                } else {
+                    projects.values
+                        .map { it.toProjectData(it.getUnscheduledTaskDatas()) }
+                        .filter { it.children.isNotEmpty() }
                 }
-                .filter { it.children.isNotEmpty() }
+            }
 
             title = MyApplication.context.getString(R.string.notes)
 

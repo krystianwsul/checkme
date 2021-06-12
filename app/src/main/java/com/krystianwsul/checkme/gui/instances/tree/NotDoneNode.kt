@@ -171,6 +171,7 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
                     instanceData.note,
                     modelNode,
                     instanceData.projectInfo,
+                    null,
                 )
 
                 treeNode.setChildTreeNodes(

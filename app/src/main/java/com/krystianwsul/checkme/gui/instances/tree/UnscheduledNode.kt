@@ -13,6 +13,7 @@ import com.krystianwsul.checkme.gui.tree.delegates.indentation.IndentationModelN
 import com.krystianwsul.checkme.gui.tree.delegates.singleline.SingleLineDelegate
 import com.krystianwsul.checkme.gui.tree.delegates.singleline.SingleLineModelNode
 import com.krystianwsul.checkme.gui.utils.flatten
+import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.NodeContainer
@@ -21,6 +22,7 @@ import com.krystianwsul.treeadapter.TreeNode
 class UnscheduledNode(
     private val nodeCollection: NodeCollection,
     private val unscheduledFirst: Boolean,
+    private val projectKey: ProjectKey.Shared?,
 ) : AbstractModelNode(), TaskParent, SingleLineModelNode, IndentationModelNode {
 
     override val holderType = HolderType.EXPANDABLE_SINGLELINE
@@ -46,27 +48,27 @@ class UnscheduledNode(
 
     override val delegates by lazy {
         listOf(
-                ExpandableDelegate(treeNode),
-                SingleLineDelegate(this),
-                IndentationDelegate(this)
+            ExpandableDelegate(treeNode),
+            SingleLineDelegate(this),
+            IndentationDelegate(this)
         )
     }
 
     override val expandOnMatch = false
 
     fun initialize(
-            expansionState: TreeNode.ExpansionState?,
-            nodeContainer: NodeContainer<AbstractHolder>,
-            taskDatas: List<GroupListDataWrapper.TaskData>,
-            taskExpansionStates: Map<TaskKey, TreeNode.ExpansionState>,
-            selectedTaskKeys: List<TaskKey>,
+        expansionState: TreeNode.ExpansionState?,
+        nodeContainer: NodeContainer<AbstractHolder>,
+        taskDatas: List<GroupListDataWrapper.TaskData>,
+        taskExpansionStates: Map<TaskKey, TreeNode.ExpansionState>,
+        selectedTaskKeys: List<TaskKey>,
     ): TreeNode<AbstractHolder> {
         this.taskDatas = taskDatas
 
         treeNode = TreeNode(
-                this,
-                nodeContainer,
-                initialExpansionState = expansionState.takeIf { taskDatas.isNotEmpty() },
+            this,
+            nodeContainer,
+            initialExpansionState = expansionState.takeIf { taskDatas.isNotEmpty() },
         )
 
         treeNode.setChildTreeNodes(taskDatas.map { newChildTreeNode(it, taskExpansionStates, selectedTaskKeys) })
@@ -75,9 +77,9 @@ class UnscheduledNode(
     }
 
     private fun newChildTreeNode(
-            taskData: GroupListDataWrapper.TaskData,
-            taskExpansionStates: Map<TaskKey, TreeNode.ExpansionState>,
-            selectedTaskKeys: List<TaskKey>,
+        taskData: GroupListDataWrapper.TaskData,
+        taskExpansionStates: Map<TaskKey, TreeNode.ExpansionState>,
+        selectedTaskKeys: List<TaskKey>,
     ) = TaskNode(0, taskData, this, this).let {
         taskNodes.add(it)
 
@@ -88,7 +90,9 @@ class UnscheduledNode(
 
     override val groupAdapter by lazy { nodeCollection.groupAdapter }
 
-    override fun onClick(holder: AbstractHolder) = groupListFragment.activity.startActivity(ShowTasksActivity.newIntent(ShowTasksActivity.Parameters.Unscheduled))
+    override fun onClick(holder: AbstractHolder) = groupListFragment.activity.startActivity(
+        ShowTasksActivity.newIntent(ShowTasksActivity.Parameters.Unscheduled(projectKey))
+    )
 
     override fun compareTo(other: ModelNode<AbstractHolder>) = when {
         unscheduledFirst -> -1

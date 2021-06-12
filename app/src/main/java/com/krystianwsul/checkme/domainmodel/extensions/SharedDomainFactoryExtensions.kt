@@ -349,7 +349,7 @@ fun Project<*>.toProjectData(childTaskDatas: List<TaskListFragment.ChildTaskData
     childTaskDatas,
     projectKey,
     endExactTimeStamp == null,
-    startExactTimeStamp.long
+    startExactTimeStamp.long,
 )
 
 fun Project<*>.getDisplayName() = name.takeIf { it.isNotEmpty() } ?: MyApplication.context.getString(R.string.myTasks)

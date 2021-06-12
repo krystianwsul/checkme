@@ -6,6 +6,7 @@ import com.krystianwsul.checkme.gui.instances.list.GroupListFragment
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
 import com.krystianwsul.checkme.gui.tree.DetailsNode
 import com.krystianwsul.checkme.gui.tree.ImageNode
+import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.treeadapter.NodeContainer
 import com.krystianwsul.treeadapter.TreeNode
@@ -18,6 +19,7 @@ class NodeCollection(
     private val note: String?,
     val parentNode: DetailsNode.Parent?,
     private val projectInfo: DetailsNode.ProjectInfo?,
+    private val unscheduledProjectKey: ProjectKey.Shared?,
     private val useDoneNode: Boolean = true,
 ) {
 
@@ -69,7 +71,7 @@ class NodeCollection(
 
         check(indentation == 0 || taskDatas.isEmpty())
         if (taskDatas.isNotEmpty()) {
-            unscheduledNode = UnscheduledNode(this, unscheduledFirst)
+            unscheduledNode = UnscheduledNode(this, unscheduledFirst, unscheduledProjectKey)
 
             treeNodes += unscheduledNode!!.initialize(
                 unscheduledExpansionState,

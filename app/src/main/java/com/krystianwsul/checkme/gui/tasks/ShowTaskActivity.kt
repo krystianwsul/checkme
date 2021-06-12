@@ -41,12 +41,8 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.Listener {
 
         private const val KEY_BOTTOM_FAB_MENU_DELEGATE_STATE = "bottomFabMenuDelegateState"
 
-        fun newIntent(taskKey: TaskKey) = Intent(MyApplication.instance, ShowTaskActivity::class.java).apply {
-            putExtra(
-                TASK_KEY_KEY,
-                taskKey as Parcelable
-            )
-        }
+        fun newIntent(taskKey: TaskKey) =
+            Intent(MyApplication.instance, ShowTaskActivity::class.java).putExtra(TASK_KEY_KEY, taskKey as Parcelable)
     }
 
     private lateinit var taskKey: TaskKey
@@ -64,17 +60,17 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.Listener {
 
         @Suppress("UNCHECKED_CAST")
         AndroidDomainUpdater.setTaskEndTimeStamps(
-                DomainListenerManager.NotificationType.All,
-                taskKeys as Set<TaskKey>,
-                removeInstances,
+            DomainListenerManager.NotificationType.All,
+            taskKeys as Set<TaskKey>,
+            removeInstances,
         )
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeBy {
-                    finish()
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribeBy {
+                finish()
 
-                    setSnackbar(it)
-                }
-                .addTo(createDisposable)
+                setSnackbar(it)
+            }
+            .addTo(createDisposable)
     }
 
     private val receiver = object : BroadcastReceiver() {
@@ -155,45 +151,46 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.Listener {
 
         Handler(Looper.getMainLooper()).post { // apparently included layout isn't immediately available in onCreate
             binding.showTaskToolbarCollapseInclude
-                    .collapseAppBarLayout
-                    .setText(data.name, data.collapseText, taskListFragment.emptyTextLayout, immediate)
+                .collapseAppBarLayout
+                .setText(data.name, data.collapseText, taskListFragment.emptyTextLayout, immediate)
         }
 
         updateTopMenu()
         updateBottomMenu()
 
         taskListFragment.parameters = TaskListFragment.Parameters.Task(
-                TaskListFragment.Data(
-                        showTaskViewModel.dataId,
-                        immediate,
-                        data.taskData,
-                        false,
-                ),
-                TaskListFragment.TopLevelTaskData(taskKey, data.imageData),
+            TaskListFragment.Data(
+                showTaskViewModel.dataId,
+                immediate,
+                data.taskData,
+                false,
+                showFirstSchedule = false,
+            ),
+            TaskListFragment.TopLevelTaskData(taskKey, data.imageData),
         )
     }
 
     private fun updateTopMenu() {
         val hasChildren = !data?.taskData
-                ?.entryDatas
-                .isNullOrEmpty()
+            ?.entryDatas
+            .isNullOrEmpty()
 
         binding.showTaskToolbarCollapseInclude
-                .collapseAppBarLayout
-                .menu
-                .apply {
-                    findItem(R.id.actionShowTaskSearch).isVisible = hasChildren
-                    findItem(R.id.actionTaskShowDeleted).isVisible = hasChildren
-                }
+            .collapseAppBarLayout
+            .menu
+            .apply {
+                findItem(R.id.actionShowTaskSearch).isVisible = hasChildren
+                findItem(R.id.actionTaskShowDeleted).isVisible = hasChildren
+            }
     }
 
     override fun onCreateActionMode(actionMode: ActionMode) = binding.showTaskToolbarCollapseInclude
-            .collapseAppBarLayout
-            .collapse()
+        .collapseAppBarLayout
+        .collapse()
 
     override fun onDestroyActionMode() = binding.showTaskToolbarCollapseInclude
-            .collapseAppBarLayout
-            .expand()
+        .collapseAppBarLayout
+        .expand()
 
     override fun setTaskSelectAllVisibility(selectAllVisible: Boolean) {
         this.selectAllVisible = selectAllVisible
@@ -213,18 +210,18 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.Listener {
 
     private fun updateBottomMenu() {
         bottomBinding.bottomAppBar
-                .menu
-                .run {
-                    if (findItem(R.id.task_menu_edit) == null) return
+            .menu
+            .run {
+                if (findItem(R.id.task_menu_edit) == null) return
 
-                    findItem(R.id.task_menu_edit).isVisible = data?.current == true
-                    findItem(R.id.task_menu_share).isVisible = data != null
-                    findItem(R.id.task_menu_delete).isVisible = data?.current == true
-                    findItem(R.id.task_menu_select_all).isVisible = selectAllVisible
-                    findItem(R.id.task_menu_show_instances).isVisible = data != null
-                    findItem(R.id.taskMenuCopyTask).isVisible = data?.current == true
-                    findItem(R.id.taskMenuWebSearch).isVisible = data != null
-                }
+                findItem(R.id.task_menu_edit).isVisible = data?.current == true
+                findItem(R.id.task_menu_share).isVisible = data != null
+                findItem(R.id.task_menu_delete).isVisible = data?.current == true
+                findItem(R.id.task_menu_select_all).isVisible = selectAllVisible
+                findItem(R.id.task_menu_show_instances).isVisible = data != null
+                findItem(R.id.taskMenuCopyTask).isVisible = data?.current == true
+                findItem(R.id.taskMenuWebSearch).isVisible = data != null
+            }
     }
 
     override fun getBottomBar() = bottomBinding.bottomAppBar
@@ -243,8 +240,8 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.Listener {
                     }
                     R.id.task_menu_delete -> {
                         RemoveInstancesDialogFragment.newInstance(setOf(taskKey))
-                                .also { it.listener = deleteInstancesListener }
-                                .show(supportFragmentManager, TAG_REMOVE_INSTANCES)
+                            .also { it.listener = deleteInstancesListener }
+                            .show(supportFragmentManager, TAG_REMOVE_INSTANCES)
                     }
                     R.id.task_menu_select_all -> taskListFragment.treeViewAdapter.selectAll()
                     R.id.task_menu_show_instances -> startActivity(

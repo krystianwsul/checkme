@@ -181,7 +181,7 @@ class ChangeTypeSourceTest {
             every { onTasksRemoved(any()) } returns Unit
         }
 
-        val taskRecordLoader = TaskRecordsLoadedTracker.Impl(rootTasksLoader, domainDisposable)
+        val taskRecordLoader = TaskRecordsLoadedTracker.Impl(rootTasksLoader, mockk(), domainDisposable) // todo load
 
         val rootTaskToRootTaskCoordinator = RootTaskDependencyCoordinator.Impl(
                 rootTaskKeySource,

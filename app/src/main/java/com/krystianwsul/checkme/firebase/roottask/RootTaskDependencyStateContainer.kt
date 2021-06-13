@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.firebase.roottask
 
+import androidx.annotation.VisibleForTesting
 import com.krystianwsul.common.firebase.records.task.RootTaskRecord
 import com.krystianwsul.common.utils.TaskKey
 
@@ -13,7 +14,8 @@ interface RootTaskDependencyStateContainer {
 
     class Impl : RootTaskDependencyStateContainer {
 
-        private val stateHoldersByTaskKey = mutableMapOf<TaskKey.Root, StateHolder>()
+        @VisibleForTesting
+        val stateHoldersByTaskKey = mutableMapOf<TaskKey.Root, StateHolder>()
 
         private fun getStateHolder(taskKey: TaskKey.Root) =
             stateHoldersByTaskKey.getOrPut(taskKey) { StateHolder(taskKey, this) }
@@ -27,7 +29,8 @@ interface RootTaskDependencyStateContainer {
             return getStateHolder(taskKey).hasAllDependencies
         }
 
-        private class StateHolder(val taskKey: TaskKey.Root, private val impl: Impl) {
+        @VisibleForTesting
+        class StateHolder(val taskKey: TaskKey.Root, private val impl: Impl) {
 
             private var loadState: LoadState = LoadState.Absent
 
@@ -105,11 +108,12 @@ interface RootTaskDependencyStateContainer {
             }
         }
 
-        private class RecordState(val rootTaskRecord: RootTaskRecord, impl: Impl, private val stateHolder: StateHolder) {
+        @VisibleForTesting
+        class RecordState(val rootTaskRecord: RootTaskRecord, impl: Impl, private val stateHolder: StateHolder) {
 
-            val downTaskKeys = rootTaskRecord.getDependentTaskKeys()
+            private val downTaskKeys = rootTaskRecord.getDependentTaskKeys()
 
-            val downStateHolders = downTaskKeys.associateWith(impl::getStateHolder)
+            private val downStateHolders = downTaskKeys.associateWith(impl::getStateHolder)
 
             var hasAllDependencies = false
                 private set

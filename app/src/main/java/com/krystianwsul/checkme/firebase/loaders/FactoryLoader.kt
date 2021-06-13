@@ -111,8 +111,10 @@ class FactoryLoader(
                         loadDependencyTrackerManager,
                     )
 
+                    val rootTaskDependencyStateContainer = RootTaskDependencyStateContainer.Impl()
+
                     val taskRecordLoader =
-                        TaskRecordsLoadedTracker.Impl(rootTasksLoader, domainDisposable)
+                        TaskRecordsLoadedTracker.Impl(rootTasksLoader, rootTaskDependencyStateContainer, domainDisposable)
 
                     val rootTaskToRootTaskCoordinator = RootTaskDependencyCoordinator.Impl(
                         rootTaskKeySource,

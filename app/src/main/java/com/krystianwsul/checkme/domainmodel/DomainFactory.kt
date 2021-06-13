@@ -137,6 +137,8 @@ class DomainFactory(
             .flatMapCompletable { getDomainUpdater(this).fixOffsets(it) }
             .subscribe()
             .addTo(domainDisposable)
+
+        TimeLogger.print()
     }
 
     val defaultProjectId by lazy { projectsFactory.privateProject.projectKey }

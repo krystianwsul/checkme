@@ -32,11 +32,18 @@ interface RootTaskDependencyStateContainer {
 
             private val upStates = mutableMapOf<TaskKey.Root, RecordState>()
 
-            fun onLoaded(rootTaskRecord: RootTaskRecord) {
+            val hasAllDependencies get() = loadState.hasAllDependencies
 
+            fun onLoaded(rootTaskRecord: RootTaskRecord) {
+                // todo load
             }
 
             fun onRemoved() {
+                if (loadState.hasAllDependencies) {
+                    propagateClearHasAllDependencies()
+                }
+
+                loadState = LoadState.Absent
             }
 
             fun addUpState(recordState: RecordState) {
@@ -48,15 +55,27 @@ interface RootTaskDependencyStateContainer {
             fun removeUpState(recordState: RecordState) {
                 check(upStates.remove(recordState.rootTaskRecord.taskKey) == recordState)
             }
+
+            fun propagateClearHasAllDependencies() {
+                upStates.values.forEach { it.clearHasAllDependencies() }
+            }
         }
 
         private sealed class LoadState {
 
-            object Absent : LoadState()
+            abstract val hasAllDependencies: Boolean
+
+            object Absent : LoadState() {
+
+                override val hasAllDependencies = false
+            }
 
             class Loaded(initialRecordState: RecordState) : LoadState() {
 
-                private var recordState = initialRecordState
+                var recordState = initialRecordState
+                    private set
+
+                override val hasAllDependencies get() = recordState.hasAllDependencies
 
                 fun updateRecordState(newRecordState: RecordState) {
                     recordState.removeFromDownStateHolders()
@@ -66,7 +85,7 @@ interface RootTaskDependencyStateContainer {
             }
         }
 
-        private class RecordState(val rootTaskRecord: RootTaskRecord, impl: Impl) {
+        private class RecordState(val rootTaskRecord: RootTaskRecord, impl: Impl, private val stateHolder: StateHolder) {
 
             val downTaskKeys = rootTaskRecord.getDependentTaskKeys()
 
@@ -74,6 +93,25 @@ interface RootTaskDependencyStateContainer {
 
             init {
                 downStateHolders.values.forEach { it.addUpState(this) }
+            }
+
+            var hasAllDependencies = false
+                private set
+
+            fun updateHasAllDependencies() {
+                hasAllDependencies = downStateHolders.values.all { it.hasAllDependencies }
+            }
+
+            init {
+                updateHasAllDependencies()
+            }
+
+            fun clearHasAllDependencies() {
+                if (hasAllDependencies) {
+                    hasAllDependencies = false
+
+                    stateHolder.propagateClearHasAllDependencies()
+                }
             }
 
             fun removeFromDownStateHolders() = downStateHolders.values.forEach { it.removeUpState(this) }

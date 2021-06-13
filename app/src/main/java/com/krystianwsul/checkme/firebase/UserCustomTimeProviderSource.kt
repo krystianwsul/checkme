@@ -24,13 +24,8 @@ interface UserCustomTimeProviderSource {
 
         fun getUserCustomTimeKeys(taskRecord: TaskRecord, expectProjectKeys: Boolean): List<CustomTimeKey.User> {
             val instanceCustomTimeKeys: List<CustomTimeKey?> = taskRecord.instanceRecords
-                    .values
-                    .flatMap {
-                        listOf(
-                                it.scheduleKey.scheduleTimePair.customTimeKey,
-                                it.instanceJsonTime?.getCustomTimeKey(taskRecord.projectCustomTimeIdAndKeyProvider)
-                        )
-                    }
+                .values
+                .flatMap { listOf(it.scheduleKey.scheduleTimePair.customTimeKey, it.instanceCustomTimeKey) }
 
             val customTimeKeys = listOf(taskRecord.scheduleCustomTimeKeys, instanceCustomTimeKeys).flatten().filterNotNull()
 

@@ -8,6 +8,7 @@ import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.ScheduleKey
+import com.krystianwsul.common.utils.invalidatableLazy
 import kotlin.jvm.JvmStatic
 import kotlin.properties.Delegates.observable
 
@@ -97,30 +98,36 @@ class InstanceRecord(
     val scheduleDay by lazy { scheduleKey.scheduleDate.day }
 
     private fun getInitialInstanceDate() = createObject.instanceDate
-            .takeUnless { it.isNullOrEmpty() }
-            ?.let { Date.fromJson(it) }
+        .takeUnless { it.isNullOrEmpty() }
+        ?.let { Date.fromJson(it) }
 
     var instanceDate by observable(getInitialInstanceDate()) { _, _, value ->
         setProperty(createObject::instanceDate, value?.toJson())
     }
 
-    @Suppress("RemoveExplicitTypeArguments")
-    private fun getInitialInstanceJsonTime() = createObject.instanceTime
-            ?.let { JsonTime.fromJson(taskRecord.projectCustomTimeIdAndKeyProvider, it) }
+    private fun getInitialInstanceJsonTime() =
+        createObject.instanceTime?.let { JsonTime.fromJson(taskRecord.projectCustomTimeIdAndKeyProvider, it) }
 
-    var instanceJsonTime by observable(getInitialInstanceJsonTime()) { _, _, value ->
+    var instanceJsonTime: JsonTime? by observable(getInitialInstanceJsonTime()) { _, _, value ->
         setProperty(createObject::instanceTime, value?.toJson())
+
+        instanceCustomTimeKeyProperty.invalidate()
     }
+
+    private val instanceCustomTimeKeyProperty = invalidatableLazy {
+        instanceJsonTime?.getCustomTimeKey(taskRecord.projectCustomTimeIdAndKeyProvider)
+    }
+    val instanceCustomTimeKey by instanceCustomTimeKeyProperty
 
     var hidden by Committer(createObject::hidden)
 
     val instanceKey by lazy { InstanceKey(taskRecord.taskKey, scheduleKey) }
 
     var parentInstanceKey: InstanceKey? by observable(
-            createObject.parentJson?.let {
-                InstanceKey(
-                        taskRecord.taskKey,
-                        stringToScheduleKey(taskRecord.projectCustomTimeIdAndKeyProvider, it.scheduleKey),
+        createObject.parentJson?.let {
+            InstanceKey(
+                taskRecord.taskKey,
+                stringToScheduleKey(taskRecord.projectCustomTimeIdAndKeyProvider, it.scheduleKey),
                 )
             }
     ) { _, _, newValue ->

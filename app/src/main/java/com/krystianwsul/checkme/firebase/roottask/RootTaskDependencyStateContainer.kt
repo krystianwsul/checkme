@@ -15,7 +15,8 @@ interface RootTaskDependencyStateContainer {
 
         private val stateHoldersByTaskKey = mutableMapOf<TaskKey.Root, StateHolder>()
 
-        private fun getStateHolder(taskKey: TaskKey.Root) = stateHoldersByTaskKey.getOrPut(taskKey) { StateHolder(taskKey) }
+        private fun getStateHolder(taskKey: TaskKey.Root) =
+            stateHoldersByTaskKey.getOrPut(taskKey) { StateHolder(taskKey, this) }
 
         override fun onLoaded(rootTaskRecord: RootTaskRecord) =
             getStateHolder(rootTaskRecord.taskKey).onLoaded(rootTaskRecord)
@@ -23,10 +24,10 @@ interface RootTaskDependencyStateContainer {
         override fun onRemoved(taskKey: TaskKey.Root) = getStateHolder(taskKey).onRemoved()
 
         override fun hasDependentTasks(taskKey: TaskKey.Root): Boolean {
-            TODO("Not yet implemented")
+            return getStateHolder(taskKey).hasAllDependencies
         }
 
-        private class StateHolder(val taskKey: TaskKey.Root) {
+        private class StateHolder(val taskKey: TaskKey.Root, private val impl: Impl) {
 
             private var loadState: LoadState = LoadState.Absent
 
@@ -35,12 +36,25 @@ interface RootTaskDependencyStateContainer {
             val hasAllDependencies get() = loadState.hasAllDependencies
 
             fun onLoaded(rootTaskRecord: RootTaskRecord) {
-                // todo load
+                val newRecordState = RecordState(rootTaskRecord, impl, this)
+
+                when (val oldLoadState = loadState) {
+                    LoadState.Absent -> {
+                        loadState = LoadState.Loaded(newRecordState)
+                    }
+                    is LoadState.Loaded -> {
+                        oldLoadState.updateRecordState(newRecordState)
+                    }
+                }
             }
 
             fun onRemoved() {
-                if (loadState.hasAllDependencies) {
-                    propagateClearHasAllDependencies()
+                val oldLoadState = loadState
+
+                if (oldLoadState is LoadState.Loaded) {
+                    if (oldLoadState.hasAllDependencies) propagateClearHasAllDependencies()
+
+                    oldLoadState.recordState.removeFromDownStateHolders()
                 }
 
                 loadState = LoadState.Absent
@@ -75,12 +89,18 @@ interface RootTaskDependencyStateContainer {
                 var recordState = initialRecordState
                     private set
 
+                init {
+                    recordState.addToDownStateHolders()
+                }
+
                 override val hasAllDependencies get() = recordState.hasAllDependencies
 
                 fun updateRecordState(newRecordState: RecordState) {
                     recordState.removeFromDownStateHolders()
 
                     recordState = newRecordState
+
+                    recordState.addToDownStateHolders()
                 }
             }
         }
@@ -90,10 +110,6 @@ interface RootTaskDependencyStateContainer {
             val downTaskKeys = rootTaskRecord.getDependentTaskKeys()
 
             val downStateHolders = downTaskKeys.associateWith(impl::getStateHolder)
-
-            init {
-                downStateHolders.values.forEach { it.addUpState(this) }
-            }
 
             var hasAllDependencies = false
                 private set
@@ -114,6 +130,7 @@ interface RootTaskDependencyStateContainer {
                 }
             }
 
+            fun addToDownStateHolders() = downStateHolders.values.forEach { it.addUpState(this) }
             fun removeFromDownStateHolders() = downStateHolders.values.forEach { it.removeUpState(this) }
         }
     }

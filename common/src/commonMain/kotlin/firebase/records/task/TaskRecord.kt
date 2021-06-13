@@ -12,9 +12,7 @@ import com.krystianwsul.common.firebase.records.noscheduleorparent.NoScheduleOrP
 import com.krystianwsul.common.firebase.records.schedule.*
 import com.krystianwsul.common.firebase.records.taskhierarchy.NestedTaskHierarchyRecord
 import com.krystianwsul.common.time.JsonTime
-import com.krystianwsul.common.utils.ScheduleKey
-import com.krystianwsul.common.utils.TaskHierarchyId
-import com.krystianwsul.common.utils.TaskKey
+import com.krystianwsul.common.utils.*
 
 abstract class TaskRecord protected constructor(
     create: Boolean,
@@ -54,15 +52,11 @@ abstract class TaskRecord protected constructor(
             .toMutableMap()
     }
 
-    val singleScheduleRecords: MutableMap<String, SingleScheduleRecord> = mutableMapOf()
-
-    val weeklyScheduleRecords: MutableMap<String, WeeklyScheduleRecord> = mutableMapOf()
-
-    val monthlyDayScheduleRecords: MutableMap<String, MonthlyDayScheduleRecord> = mutableMapOf()
-
-    val monthlyWeekScheduleRecords: MutableMap<String, MonthlyWeekScheduleRecord> = mutableMapOf()
-
-    val yearlyScheduleRecords: MutableMap<String, YearlyScheduleRecord> = mutableMapOf()
+    val singleScheduleRecords: ObservableMap<String, SingleScheduleRecord>
+    val weeklyScheduleRecords: ObservableMap<String, WeeklyScheduleRecord>
+    val monthlyDayScheduleRecords: ObservableMap<String, MonthlyDayScheduleRecord>
+    val monthlyWeekScheduleRecords: ObservableMap<String, MonthlyWeekScheduleRecord>
+    val yearlyScheduleRecords: ObservableMap<String, YearlyScheduleRecord>
 
     abstract val noScheduleOrParentRecords: Map<String, NoScheduleOrParentRecord>
 
@@ -101,91 +95,112 @@ abstract class TaskRecord protected constructor(
                 taskHierarchyRecords.values
 
     init {
-        for ((id, scheduleWrapper) in taskJson.schedules) {
-            check(id.isNotEmpty())
+        val scheduleWrapperBridges =
+            taskJson.schedules.mapValues { it.value to ScheduleWrapperBridge.fromScheduleWrapper(it.value) }
 
-            val scheduleWrapperBridge = ScheduleWrapperBridge.fromScheduleWrapper(scheduleWrapper)
+        singleScheduleRecords = scheduleWrapperBridges.filter { it.value.second.singleScheduleJson != null }
+            .mapValues { (id, pair) ->
+                val (scheduleWrapper, scheduleWrapperBridge) = pair
 
-            when {
-                scheduleWrapperBridge.singleScheduleJson != null -> {
-                    check(scheduleWrapperBridge.weeklyScheduleJson == null)
-                    check(scheduleWrapperBridge.monthlyDayScheduleJson == null)
-                    check(scheduleWrapperBridge.monthlyWeekScheduleJson == null)
-                    check(scheduleWrapperBridge.yearlyScheduleJson == null)
-
-                    @Suppress("LeakingThis")
-                    singleScheduleRecords[id] = SingleScheduleRecord(
-                        this,
-                        scheduleWrapper,
-                        projectHelper,
-                        newProjectRootDelegate(this, scheduleWrapperBridge.singleScheduleJson!!),
-                        id,
-                        false,
-                        scheduleWrapperBridge,
-                    )
-                }
-                scheduleWrapperBridge.weeklyScheduleJson != null -> {
-                    check(scheduleWrapperBridge.monthlyDayScheduleJson == null)
-                    check(scheduleWrapperBridge.monthlyWeekScheduleJson == null)
-                    check(scheduleWrapperBridge.yearlyScheduleJson == null)
-
-                    @Suppress("LeakingThis")
-                    weeklyScheduleRecords[id] = WeeklyScheduleRecord(
-                        this,
-                        scheduleWrapper,
-                        projectHelper,
-                        newProjectRootDelegate(this, scheduleWrapperBridge.weeklyScheduleJson!!),
-                        id,
-                        false,
-                        scheduleWrapperBridge,
-                    )
-                }
-                scheduleWrapperBridge.monthlyDayScheduleJson != null -> {
-                    check(scheduleWrapperBridge.monthlyWeekScheduleJson == null)
-                    check(scheduleWrapperBridge.yearlyScheduleJson == null)
-
-                    @Suppress("LeakingThis")
-                    monthlyDayScheduleRecords[id] = MonthlyDayScheduleRecord(
-                        this,
-                        scheduleWrapper,
-                        projectHelper,
-                        newProjectRootDelegate(this, scheduleWrapperBridge.monthlyDayScheduleJson!!),
-                        id,
-                        false,
-                        scheduleWrapperBridge,
-                    )
-                }
-                scheduleWrapperBridge.monthlyWeekScheduleJson != null -> {
-                    check(scheduleWrapperBridge.yearlyScheduleJson == null)
-
-                    @Suppress("LeakingThis")
-                    monthlyWeekScheduleRecords[id] = MonthlyWeekScheduleRecord(
-                        this,
-                        scheduleWrapper,
-                        projectHelper,
-                        newProjectRootDelegate(this, scheduleWrapperBridge.monthlyWeekScheduleJson!!),
-                        id,
-                        false,
-                        scheduleWrapperBridge,
-                    )
-                }
-                else -> {
-                    check(scheduleWrapperBridge.yearlyScheduleJson != null)
-
-                    @Suppress("LeakingThis")
-                    yearlyScheduleRecords[id] = YearlyScheduleRecord(
-                        this,
-                        scheduleWrapper,
-                        projectHelper,
-                        newProjectRootDelegate(this, scheduleWrapperBridge.yearlyScheduleJson!!),
-                        id,
-                        false,
-                        scheduleWrapperBridge,
-                    )
-                }
+                @Suppress("LeakingThis")
+                SingleScheduleRecord(
+                    this,
+                    scheduleWrapper,
+                    projectHelper,
+                    newProjectRootDelegate(this, scheduleWrapperBridge.singleScheduleJson!!),
+                    id,
+                    false,
+                    scheduleWrapperBridge,
+                )
             }
-        }
+            .toObservableMap()
+
+        weeklyScheduleRecords = scheduleWrapperBridges.filter { it.value.second.weeklyScheduleJson != null }
+            .mapValues { (id, pair) ->
+                val (scheduleWrapper, scheduleWrapperBridge) = pair
+
+                @Suppress("LeakingThis")
+                WeeklyScheduleRecord(
+                    this,
+                    scheduleWrapper,
+                    projectHelper,
+                    newProjectRootDelegate(this, scheduleWrapperBridge.weeklyScheduleJson!!),
+                    id,
+                    false,
+                    scheduleWrapperBridge,
+                )
+            }
+            .toObservableMap()
+
+        monthlyDayScheduleRecords = scheduleWrapperBridges.filter { it.value.second.monthlyDayScheduleJson != null }
+            .mapValues { (id, pair) ->
+                val (scheduleWrapper, scheduleWrapperBridge) = pair
+
+                @Suppress("LeakingThis")
+                MonthlyDayScheduleRecord(
+                    this,
+                    scheduleWrapper,
+                    projectHelper,
+                    newProjectRootDelegate(this, scheduleWrapperBridge.monthlyDayScheduleJson!!),
+                    id,
+                    false,
+                    scheduleWrapperBridge,
+                )
+            }
+            .toObservableMap()
+
+        monthlyWeekScheduleRecords = scheduleWrapperBridges.filter { it.value.second.monthlyWeekScheduleJson != null }
+            .mapValues { (id, pair) ->
+                val (scheduleWrapper, scheduleWrapperBridge) = pair
+
+                @Suppress("LeakingThis")
+                MonthlyWeekScheduleRecord(
+                    this,
+                    scheduleWrapper,
+                    projectHelper,
+                    newProjectRootDelegate(this, scheduleWrapperBridge.monthlyWeekScheduleJson!!),
+                    id,
+                    false,
+                    scheduleWrapperBridge,
+                )
+            }
+            .toObservableMap()
+
+        yearlyScheduleRecords = scheduleWrapperBridges.filter { it.value.second.yearlyScheduleJson != null }
+            .mapValues { (id, pair) ->
+                val (scheduleWrapper, scheduleWrapperBridge) = pair
+
+                @Suppress("LeakingThis")
+                YearlyScheduleRecord(
+                    this,
+                    scheduleWrapper,
+                    projectHelper,
+                    newProjectRootDelegate(this, scheduleWrapperBridge.yearlyScheduleJson!!),
+                    id,
+                    false,
+                    scheduleWrapperBridge,
+                )
+            }
+            .toObservableMap()
     }
+
+    private val scheduleCustomTimeKeysProperty = invalidatableLazy {
+        listOf(
+            singleScheduleRecords,
+            weeklyScheduleRecords,
+            monthlyDayScheduleRecords,
+            monthlyWeekScheduleRecords,
+            yearlyScheduleRecords,
+        ).flatMap { it.values }.map { it.customTimeKey }
+    }.apply {
+        singleScheduleRecords.callback = ::invalidate
+        weeklyScheduleRecords.callback = ::invalidate
+        monthlyDayScheduleRecords.callback = ::invalidate
+        monthlyWeekScheduleRecords.callback = ::invalidate
+        yearlyScheduleRecords.callback = ::invalidate
+    }
+
+    val scheduleCustomTimeKeys by scheduleCustomTimeKeysProperty
 
     fun newInstanceRecord(instanceJson: InstanceJson, scheduleKey: ScheduleKey): InstanceRecord {
         val firebaseKey = InstanceRecord.scheduleKeyToString(scheduleKey)

@@ -23,14 +23,6 @@ interface UserCustomTimeProviderSource {
     companion object {
 
         fun getUserCustomTimeKeys(taskRecord: TaskRecord, expectProjectKeys: Boolean): List<CustomTimeKey.User> {
-            val scheduleCustomTimeKeys = listOf(
-                    taskRecord.singleScheduleRecords,
-                    taskRecord.weeklyScheduleRecords,
-                    taskRecord.monthlyDayScheduleRecords,
-                    taskRecord.monthlyWeekScheduleRecords,
-                    taskRecord.yearlyScheduleRecords,
-            ).flatMap { it.values }.map { it.customTimeKey }
-
             val instanceCustomTimeKeys: List<CustomTimeKey?> = taskRecord.instanceRecords
                     .values
                     .flatMap {
@@ -40,7 +32,7 @@ interface UserCustomTimeProviderSource {
                         )
                     }
 
-            val customTimeKeys = listOf(scheduleCustomTimeKeys, instanceCustomTimeKeys).flatten().filterNotNull()
+            val customTimeKeys = listOf(taskRecord.scheduleCustomTimeKeys, instanceCustomTimeKeys).flatten().filterNotNull()
 
             return if (expectProjectKeys)
                 customTimeKeys.filterIsInstance<CustomTimeKey.User>()

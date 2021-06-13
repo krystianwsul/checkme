@@ -43,7 +43,9 @@ interface RootTaskDependencyStateContainer {
 
                 when (val oldLoadState = loadState) {
                     LoadState.Absent -> {
-                        loadState = LoadState.Loaded(newRecordState)
+                        val loaded = LoadState.Loaded(newRecordState)
+                        loadState = loaded
+                        loaded.recordState.updateHasAllDependencies()
                     }
                     is LoadState.Loaded -> {
                         oldLoadState.updateRecordState(newRecordState)
@@ -76,6 +78,10 @@ interface RootTaskDependencyStateContainer {
             fun propagateClearHasAllDependencies() {
                 upStates.values.forEach { it.clearHasAllDependencies() }
             }
+
+            fun propagateUpdateHasAllDependencies() {
+                upStates.values.forEach { it.updateHasAllDependencies() }
+            }
         }
 
         private sealed class LoadState {
@@ -104,6 +110,7 @@ interface RootTaskDependencyStateContainer {
                     recordState = newRecordState
 
                     recordState.addToDownStateHolders()
+                    recordState.updateHasAllDependencies()
                 }
             }
         }
@@ -120,10 +127,8 @@ interface RootTaskDependencyStateContainer {
 
             fun updateHasAllDependencies() {
                 hasAllDependencies = downStateHolders.values.all { it.hasAllDependencies }
-            }
 
-            init {
-                updateHasAllDependencies()
+                stateHolder.propagateUpdateHasAllDependencies()
             }
 
             fun clearHasAllDependencies() {

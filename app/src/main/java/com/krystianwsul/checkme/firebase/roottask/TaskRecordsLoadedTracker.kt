@@ -9,17 +9,27 @@ interface TaskRecordsLoadedTracker {
 
     fun tryGetTaskRecord(taskKey: TaskKey.Root): RootTaskRecord?
 
-    class Impl(rootTasksLoader: RootTasksLoader, domainDisposable: CompositeDisposable) : TaskRecordsLoadedTracker {
+    class Impl(
+        rootTasksLoader: RootTasksLoader,
+        rootTaskDependencyStateContainer: RootTaskDependencyStateContainer,
+        domainDisposable: CompositeDisposable,
+    ) : TaskRecordsLoadedTracker {
 
         private val currentlyLoadedRecords = mutableMapOf<TaskKey.Root, RootTaskRecord>()
 
         init {
             rootTasksLoader.addChangeEvents
-                .subscribe { currentlyLoadedRecords[it.rootTaskRecord.taskKey] = it.rootTaskRecord }
+                .subscribe {
+                    currentlyLoadedRecords[it.rootTaskRecord.taskKey] = it.rootTaskRecord
+                    rootTaskDependencyStateContainer.onLoaded(it.rootTaskRecord)
+                }
                 .addTo(domainDisposable)
 
             rootTasksLoader.removeEvents
-                .subscribe { currentlyLoadedRecords -= it.taskKeys }
+                .subscribe {
+                    currentlyLoadedRecords -= it.taskKeys
+                    it.taskKeys.forEach(rootTaskDependencyStateContainer::onRemoved)
+                }
                 .addTo(domainDisposable)
         }
 

@@ -191,5 +191,7 @@ class RootTaskDependencyStateContainerTest {
         assertTrue(container.hasDependentTasks(taskKey1))
         assertTrue(container.hasDependentTasks(taskKey2))
         assertTrue(container.hasDependentTasks(taskKey3))
+
+        // todo load add checks for REMOVING one in chain
     }
 }

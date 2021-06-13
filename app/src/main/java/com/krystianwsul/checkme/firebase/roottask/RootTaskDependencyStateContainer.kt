@@ -45,7 +45,7 @@ interface RootTaskDependencyStateContainer {
                     LoadState.Absent -> {
                         val loaded = LoadState.Loaded(newRecordState)
                         loadState = loaded
-                        loaded.recordState.updateHasAllDependencies()
+                        loaded.recordState.initializeHasAllDependencies(false)
                     }
                     is LoadState.Loaded -> {
                         oldLoadState.updateRecordState(newRecordState)
@@ -79,8 +79,8 @@ interface RootTaskDependencyStateContainer {
                 upStates.values.forEach { it.clearHasAllDependencies() }
             }
 
-            fun propagateUpdateHasAllDependencies() {
-                upStates.values.forEach { it.updateHasAllDependencies() }
+            fun propagateOnDownLoaded() {
+                upStates.values.forEach { it.onDownLoaded() }
             }
         }
 
@@ -105,12 +105,13 @@ interface RootTaskDependencyStateContainer {
                 override val hasAllDependencies get() = recordState.hasAllDependencies
 
                 fun updateRecordState(newRecordState: RecordState) {
+                    val oldHasAllDependencies = recordState.hasAllDependencies
                     recordState.removeFromDownStateHolders()
 
                     recordState = newRecordState
 
                     recordState.addToDownStateHolders()
-                    recordState.updateHasAllDependencies()
+                    recordState.initializeHasAllDependencies(oldHasAllDependencies)
                 }
             }
         }
@@ -125,18 +126,34 @@ interface RootTaskDependencyStateContainer {
             var hasAllDependencies = false
                 private set
 
-            fun updateHasAllDependencies() {
+            private fun updateHasAllDependencies() {
                 hasAllDependencies = downStateHolders.values.all { it.hasAllDependencies }
+            }
 
-                stateHolder.propagateUpdateHasAllDependencies()
+            fun initializeHasAllDependencies(previousValue: Boolean) {
+                updateHasAllDependencies()
+
+                if (previousValue && !hasAllDependencies) {
+                    stateHolder.propagateClearHasAllDependencies()
+                } else if (!previousValue && hasAllDependencies) {
+                    stateHolder.propagateOnDownLoaded()
+                }
             }
 
             fun clearHasAllDependencies() {
-                if (hasAllDependencies) {
-                    hasAllDependencies = false
+                if (!hasAllDependencies) return
 
-                    stateHolder.propagateClearHasAllDependencies()
-                }
+                hasAllDependencies = false
+
+                stateHolder.propagateClearHasAllDependencies()
+            }
+
+            fun onDownLoaded() {
+                if (hasAllDependencies) return
+
+                updateHasAllDependencies()
+
+                if (hasAllDependencies) stateHolder.propagateOnDownLoaded()
             }
 
             fun addToDownStateHolders() = downStateHolders.values.forEach { it.addUpState(this) }

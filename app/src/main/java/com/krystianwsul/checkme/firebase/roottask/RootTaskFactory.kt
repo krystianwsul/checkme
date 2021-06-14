@@ -15,11 +15,12 @@ import io.reactivex.rxjava3.observables.ConnectableObservable
 import io.reactivex.rxjava3.observables.GroupedObservable
 
 class RootTaskFactory(
-        loadDependencyTrackerManager: LoadDependencyTrackerManager,
-        private val rootTaskDependencyCoordinator: RootTaskDependencyCoordinator,
-        private val rootTasksFactory: RootTasksFactory,
-        private val domainDisposable: CompositeDisposable,
-        addChangeEvents: GroupedObservable<TaskKey.Root, RootTasksLoader.AddChangeEvent>,
+    loadDependencyTrackerManager: LoadDependencyTrackerManager,
+    private val rootTaskDependencyCoordinator: RootTaskDependencyCoordinator,
+    private val rootTasksFactory: RootTasksFactory,
+    private val domainDisposable: CompositeDisposable,
+    addChangeEvents: GroupedObservable<TaskKey.Root, RootTasksLoader.AddChangeEvent>,
+    private val rootTaskDependencyStateContainer: RootTaskDependencyStateContainer,
 ) {
 
     private val taskKey = addChangeEvents.key
@@ -37,30 +38,47 @@ class RootTaskFactory(
 
     init {
         eventResults = listOf(
-                addChangeEvents.map { Event.AddChange(it.rootTaskRecord, it.skipChangeTypeEmission) },
-                removeRelay.map { Event.Remove },
+            addChangeEvents.map { Event.AddChange(it.rootTaskRecord, it.skipChangeTypeEmission) },
+            removeRelay.map { Event.Remove },
         ).merge()
-                .switchMapSingle { event ->
-                    when (event) {
-                        is Event.AddChange -> {
-                            val (taskRecord, skipChangeTypeEmission) = event
+            .switchMapSingle { event ->
+                when (event) {
+                    is Event.AddChange -> {
+                        val (taskRecord, skipChangeTypeEmission) = event
 
-                            val taskTracker = loadDependencyTrackerManager.startTrackingTaskLoad(taskRecord)
+                        val taskTracker = loadDependencyTrackerManager.startTrackingTaskLoad(taskRecord)
 
-                            rootTaskDependencyCoordinator.getDependencies(taskRecord)
-                                    .doOnSuccessOrDispose { taskTracker.stopTracking() } // in case a new event comes in before this completes
-                                    .map {
-                                        EventResult.SetTask(
-                                                RootTask(taskRecord, rootTasksFactory, it),
-                                                skipChangeTypeEmission,
-                                        )
-                                    }
-                        }
-                        is Event.Remove -> Single.just(EventResult.RemoveTask)
+                        rootTaskDependencyCoordinator.getDependencies(taskRecord)
+                            .doOnSuccessOrDispose { taskTracker.stopTracking() } // in case a new event comes in before this completes
+                            .map {
+                                EventResult.SetTask(
+                                    RootTask(taskRecord, rootTasksFactory, it),
+                                    skipChangeTypeEmission,
+                                )
+                            }
+                    }
+                    is Event.Remove -> Single.just(EventResult.RemoveTask)
+                }
+            }
+            .doOnNext {
+                task = it.task
+
+                rootTaskDependencyStateContainer.apply {
+                    if (it.task != null) {
+                        onLoaded(
+                            object : RootTaskDependencyStateContainer.TaskBridge {
+
+                                override val taskKey = it.task!!.taskKey
+
+                                override val downKeys = it.task!!.taskRecord.getDependentTaskKeys()
+                            }
+                        )
+                    } else {
+                        onRemoved(taskKey)
                     }
                 }
-                .doOnNext { task = it.task }
-                .publish()
+            }
+            .publish()
 
         val unfilteredSetTaskEventResults = eventResults.ofType<EventResult.SetTask>()
 

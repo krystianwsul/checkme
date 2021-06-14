@@ -32,6 +32,7 @@ class RootTasksFactoryInitialTest {
             mockk(),
             mockk(),
             mockk(),
+            mockk(), // todo load
         )
 
         assertTrue(rootTasksFactory.rootTasks.isEmpty())

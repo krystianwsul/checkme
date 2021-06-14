@@ -111,21 +111,27 @@ class FactoryLoader(
                         loadDependencyTrackerManager,
                     )
 
-                    val rootTaskDependencyStateContainer = RootTaskDependencyStateContainer.Impl()
+                    val recordRootTaskDependencyStateContainer = RootTaskDependencyStateContainer.Impl()
 
                     val taskRecordLoader =
-                        TaskRecordsLoadedTracker.Impl(rootTasksLoader, rootTaskDependencyStateContainer, domainDisposable)
+                        TaskRecordsLoadedTracker.Impl(
+                            rootTasksLoader,
+                            recordRootTaskDependencyStateContainer,
+                            domainDisposable
+                        )
 
                     val rootTaskToRootTaskCoordinator = RootTaskDependencyCoordinator.Impl(
                         rootTaskKeySource,
                         rootTasksLoader,
                         userCustomTimeProviderSource,
                         taskRecordLoader,
-                        rootTaskDependencyStateContainer,
+                        recordRootTaskDependencyStateContainer,
                     )
 
                     // this is hacky as fuck, but I'll take my chances
                     lateinit var projectsFactorySingle: Single<ProjectsFactory>
+
+                    val modelRootTaskDependencyStateContainer = RootTaskDependencyStateContainer.Impl()
 
                     val rootTasksFactory = RootTasksFactory(
                         rootTasksLoader,
@@ -134,11 +140,13 @@ class FactoryLoader(
                         domainDisposable,
                         rootTaskKeySource,
                         loadDependencyTrackerManager,
+                        modelRootTaskDependencyStateContainer,
                     ) { projectsFactorySingle.getCurrentValue() }
 
                     val projectToRootTaskCoordinator = ProjectToRootTaskCoordinator.Impl(
                         rootTaskKeySource,
                         rootTasksFactory,
+                        modelRootTaskDependencyStateContainer,
                     )
 
                     val privateProjectLoader = ProjectLoader.Impl(

@@ -27,6 +27,7 @@ class RootTasksFactory(
     domainDisposable: CompositeDisposable,
     private val rootTaskKeySource: RootTaskKeySource,
     loadDependencyTrackerManager: LoadDependencyTrackerManager,
+    private val rootTaskDependencyStateContainer: RootTaskDependencyStateContainer,
     private val getProjectsFactory: () -> ProjectsFactory,
 ) : RootTask.Parent {
 
@@ -50,6 +51,7 @@ class RootTasksFactory(
                         this,
                         domainDisposable,
                         group,
+                        rootTaskDependencyStateContainer,
                     )
                 }
             }

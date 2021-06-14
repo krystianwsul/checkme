@@ -131,6 +131,7 @@ class IrrelevantTest {
             compositeDisposable,
             rootTaskKeySource,
             loadDependencyTrackerManager,
+            mockk(), // todo load
         ) { projectsFactory }
 
         project = PrivateProject(projectRecord, mockk(), rootTasksFactory)

@@ -29,26 +29,27 @@ class RootTasksFactoryTest {
 
     @Before
     fun before() {
-        addChangeEventsRelay = PublishRelay.create<RootTasksLoader.AddChangeEvent>()
+        addChangeEventsRelay = PublishRelay.create()
         val removeEventsRelay = PublishRelay.create<RootTasksLoader.RemoveEvent>()
 
         val rootTasksFactory = RootTasksFactory(
-                mockk {
-                    every { addChangeEvents } returns addChangeEventsRelay
-                    every { removeEvents } returns removeEventsRelay
-                },
-                mockk(),
-                mockk {
-                    every { getDependencies(any()) } returns Single.just(mockk())
-                },
-                domainDisposable,
-                mockk(),
-                mockk(relaxed = true),
-                mockk(),
+            mockk {
+                every { addChangeEvents } returns addChangeEventsRelay
+                every { removeEvents } returns removeEventsRelay
+            },
+            mockk(),
+            mockk {
+                every { getDependencies(any()) } returns Single.just(mockk())
+            },
+            domainDisposable,
+            mockk(),
+            mockk(relaxed = true),
+            mockk(relaxed = true), // todo load
+            mockk(),
         )
 
         emissionChecker =
-                EmissionChecker("unfilteredChanges", domainDisposable, rootTasksFactory.unfilteredChanges)
+            EmissionChecker("unfilteredChanges", domainDisposable, rootTasksFactory.unfilteredChanges)
     }
 
     @After

@@ -197,6 +197,7 @@ class DomainFactoryRule : TestRule {
             compositeDisposable,
             rootTaskKeySource,
             mockk(relaxed = true), // todo task tests
+            mockk(relaxed = true), // todo load
         ) { projectsFactory }
 
         val sharedProjectsLoader = SharedProjectsLoader.Impl(

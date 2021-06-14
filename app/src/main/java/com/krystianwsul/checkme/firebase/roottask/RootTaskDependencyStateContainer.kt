@@ -11,7 +11,7 @@ interface RootTaskDependencyStateContainer {
 
     fun isComplete(taskKey: TaskKey.Root): Boolean
 
-    interface TaskBridge {
+    interface TaskBridge { // todo load revert to record
 
         val taskKey: TaskKey.Root
 

@@ -124,14 +124,14 @@ class IrrelevantTest {
 
         val rootTasksFactory = RootTasksFactory(
             rootTaskLoader,
-            mockk(), // todo task test
+            mockk(),
             mockk {
                 every { getDependencies(any()) } returns Single.just(mockk())
             },
             compositeDisposable,
             rootTaskKeySource,
             loadDependencyTrackerManager,
-            mockk(), // todo load
+            mockk(),
         ) { projectsFactory }
 
         project = PrivateProject(projectRecord, mockk(), rootTasksFactory)
@@ -252,7 +252,7 @@ class IrrelevantTest {
         )
 
         val projectRecord = PrivateProjectRecord(databaseWrapper, projectKey, projectJson)
-        val project = PrivateProject(projectRecord, mockk(), mockk(relaxed = true)) // todo task tests
+        val project = PrivateProject(projectRecord, mockk(), mockk(relaxed = true))
         val task = project.projectTasks.single()
 
         // 2. Mark single instance done
@@ -378,7 +378,7 @@ class IrrelevantTest {
         )
 
         val projectRecord = PrivateProjectRecord(databaseWrapper, projectKey, projectJson)
-        val project = PrivateProject(projectRecord, mockk(), mockk(relaxed = true)) // todo task tests
+        val project = PrivateProject(projectRecord, mockk(), mockk(relaxed = true))
 
         val parentTask = project.projectTasks.single { it.isTopLevelTask(now) }
         assertEquals(2, parentTask.getChildTaskHierarchies(now).size)
@@ -403,7 +403,7 @@ class IrrelevantTest {
 
         val child1Instance = parentInstance.getChildInstances().single {
             (it.instanceKey
-                .taskKey as TaskKey.Project) // todo task tests
+                .taskKey as TaskKey.Project)
                 .taskId == child1TaskId
         }
 
@@ -509,7 +509,7 @@ class IrrelevantTest {
         )
 
         val projectRecord = PrivateProjectRecord(databaseWrapper, projectKey, projectJson)
-        val project = PrivateProject(projectRecord, mockk(), mockk(relaxed = true)) // todo task tests
+        val project = PrivateProject(projectRecord, mockk(), mockk(relaxed = true))
 
         val parentTask = project.projectTasks.single { it.isTopLevelTask(now) }
         assertEquals(2, parentTask.getChildTaskHierarchies(now).size)
@@ -534,7 +534,7 @@ class IrrelevantTest {
 
         val child1Instance = parentInstance.getChildInstances().single {
             (it.instanceKey
-                .taskKey as TaskKey.Project) // todo task tests
+                .taskKey as TaskKey.Project)
                 .taskId == child1TaskId
         }
 

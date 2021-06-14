@@ -183,7 +183,7 @@ class DomainFactoryRule : TestRule {
             rootTasksLoaderProvider,
             compositeDisposable,
             rootTasksManager,
-            mockk(relaxed = true), // todo task tests
+            mockk(relaxed = true),
         )
 
         val rootTaskDependencyCoordinator = mockk<RootTaskDependencyCoordinator> {
@@ -192,12 +192,12 @@ class DomainFactoryRule : TestRule {
 
         val rootTaskFactory = RootTasksFactory(
             rootTasksLoader,
-            mockk(relaxed = true), // todo task tests
+            mockk(relaxed = true),
             rootTaskDependencyCoordinator,
             compositeDisposable,
             rootTaskKeySource,
-            mockk(relaxed = true), // todo task tests
-            mockk(relaxed = true), // todo load
+            mockk(relaxed = true),
+            mockk(relaxed = true),
         ) { projectsFactory }
 
         val sharedProjectsLoader = SharedProjectsLoader.Impl(
@@ -214,10 +214,10 @@ class DomainFactoryRule : TestRule {
             object : ProjectToRootTaskCoordinator {
 
                 override fun getRootTasks(projectTracker: LoadDependencyTrackerManager.ProjectTracker) =
-                    Completable.complete() // todo task tests
+                    Completable.complete()
             },
             rootTaskKeySource,
-            mockk(relaxed = true), // todo task tests
+            mockk(relaxed = true),
         )
 
         projectsFactory = ProjectsFactory(

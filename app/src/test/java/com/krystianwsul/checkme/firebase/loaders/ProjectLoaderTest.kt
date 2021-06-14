@@ -76,16 +76,17 @@ class ProjectLoaderTest {
         projectManager = AndroidPrivateProjectManager(UserInfo("email", "name", "uid"), projectProvider.database)
 
         projectLoader = ProjectLoader.Impl(
-                projectSnapshotRelay,
-                compositeDisposable,
-                projectManager,
-                null,
-                TestUserCustomTimeProviderSource(),
-                object : ProjectToRootTaskCoordinator {
+            projectSnapshotRelay,
+            compositeDisposable,
+            projectManager,
+            null,
+            TestUserCustomTimeProviderSource(),
+            object : ProjectToRootTaskCoordinator {
 
-                    override fun getRootTasks(projectTracker: LoadDependencyTrackerManager.ProjectTracker) = Completable.complete() // todo task tests
-                },
-                mockk(relaxed = true), // todo task tests
+                override fun getRootTasks(projectTracker: LoadDependencyTrackerManager.ProjectTracker) =
+                    Completable.complete()
+            },
+            mockk(relaxed = true),
         )
 
         initialProjectEmissionChecker =

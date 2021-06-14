@@ -153,11 +153,11 @@ class ProjectFactoryTest {
         projectLoader.initialProjectEvent
                 .subscribeBy {
                     projectFactory = PrivateProjectFactory(
-                            projectLoader,
-                            it.data,
-                            factoryProvider,
-                            compositeDisposable,
-                            mockk(relaxed = true), // todo task tests
+                        projectLoader,
+                        it.data,
+                        factoryProvider,
+                        compositeDisposable,
+                        mockk(relaxed = true),
                     ) { mockk() }
 
                     changeTypesEmissionChecker =

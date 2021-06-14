@@ -85,16 +85,17 @@ class ProjectsFactoryTest {
         privateProjectManager = AndroidPrivateProjectManager(userInfo, factoryProvider.database)
 
         privateProjectLoader = ProjectLoader.Impl(
-                privateProjectRelay,
-                compositeDisposable,
-                privateProjectManager,
-                null,
-                TestUserCustomTimeProviderSource(),
-                object : ProjectToRootTaskCoordinator {
+            privateProjectRelay,
+            compositeDisposable,
+            privateProjectManager,
+            null,
+            TestUserCustomTimeProviderSource(),
+            object : ProjectToRootTaskCoordinator {
 
-                    override fun getRootTasks(projectTracker: LoadDependencyTrackerManager.ProjectTracker) = Completable.complete() // todo task tests
-                },
-                mockk(relaxed = true), // todo task tests
+                override fun getRootTasks(projectTracker: LoadDependencyTrackerManager.ProjectTracker) =
+                    Completable.complete()
+            },
+            mockk(relaxed = true),
         )
 
         initialProjectEvent = null
@@ -107,17 +108,18 @@ class ProjectsFactoryTest {
 
         sharedProjectsLoader = SharedProjectsLoader.Impl(
                 projectKeysRelay,
-                sharedProjectManager,
-                compositeDisposable,
-                factoryProvider.sharedProjectsProvider,
-                TestUserCustomTimeProviderSource(),
-                mockk(relaxed = true),
-                object : ProjectToRootTaskCoordinator {
+            sharedProjectManager,
+            compositeDisposable,
+            factoryProvider.sharedProjectsProvider,
+            TestUserCustomTimeProviderSource(),
+            mockk(relaxed = true),
+            object : ProjectToRootTaskCoordinator {
 
-                    override fun getRootTasks(projectTracker: LoadDependencyTrackerManager.ProjectTracker) = Completable.complete() // todo task tests
-                },
-                mockk(relaxed = true), // todo task tests
-                mockk(relaxed = true), // todo task tests
+                override fun getRootTasks(projectTracker: LoadDependencyTrackerManager.ProjectTracker) =
+                    Completable.complete()
+            },
+            mockk(relaxed = true),
+            mockk(relaxed = true),
         )
 
         initialProjectsEvent = null
@@ -138,15 +140,15 @@ class ProjectsFactoryTest {
 
     private fun initProjectsFactory() {
         _projectsFactory = ProjectsFactory(
-                mockk(),
-                privateProjectLoader,
-                initialProjectEvent!!,
-                sharedProjectsLoader,
-                initialProjectsEvent!!,
-                ExactTimeStamp.Local.now,
-                factoryProvider,
-                compositeDisposable,
-                mockk(relaxed = true), // todo task test
+            mockk(),
+            privateProjectLoader,
+            initialProjectEvent!!,
+            sharedProjectsLoader,
+            initialProjectsEvent!!,
+            ExactTimeStamp.Local.now,
+            factoryProvider,
+            compositeDisposable,
+            mockk(relaxed = true),
         ) { deviceDbInfo }
 
         _emissionChecker = EmissionChecker("changeTypes", compositeDisposable, projectsFactory.changeTypes)
@@ -206,7 +208,7 @@ class ProjectsFactoryTest {
     @Test
     fun testRemotePrivateAddTaskNoInstances() {
         val privateProjectKey = ProjectKey.Private("key")
-        val taskKey = TaskKey.Project(privateProjectKey, "taskKey") // todo task tests
+        val taskKey = TaskKey.Project(privateProjectKey, "taskKey")
 
         privateProjectRelay.accept(Snapshot(privateProjectKey.key, PrivateProjectJson()))
 
@@ -226,7 +228,7 @@ class ProjectsFactoryTest {
     @Test
     fun testRemotePrivateAddTaskWithInstances() {
         val privateProjectKey = ProjectKey.Private("key")
-        val taskKey = TaskKey.Project(privateProjectKey, "taskKey") // todo task tests
+        val taskKey = TaskKey.Project(privateProjectKey, "taskKey")
 
         privateProjectRelay.accept(Snapshot(privateProjectKey.key, PrivateProjectJson()))
 
@@ -246,7 +248,7 @@ class ProjectsFactoryTest {
     @Test
     fun testRemotePrivateChangeTask() {
         val privateProjectKey = ProjectKey.Private("key")
-        val taskKey = TaskKey.Project(privateProjectKey, "taskKey") // todo task tests
+        val taskKey = TaskKey.Project(privateProjectKey, "taskKey")
 
         privateProjectRelay.accept(
                 Snapshot(
@@ -273,7 +275,7 @@ class ProjectsFactoryTest {
     @Test
     fun testPrivateRemoveTask() {
         val privateProjectKey = ProjectKey.Private("key")
-        val taskKey = TaskKey.Project(privateProjectKey, "taskKey") // todo task tests
+        val taskKey = TaskKey.Project(privateProjectKey, "taskKey")
 
         privateProjectRelay.accept(
                 Snapshot(
@@ -296,7 +298,7 @@ class ProjectsFactoryTest {
     fun testLocalPrivateInstanceChange() {
         val privateProjectKey = ProjectKey.Private("key")
 
-        val taskKey = TaskKey.Project(privateProjectKey, "taskKey") // todo task tests
+        val taskKey = TaskKey.Project(privateProjectKey, "taskKey")
 
         privateProjectRelay.accept(Snapshot(
                 privateProjectKey.key,
@@ -325,7 +327,7 @@ class ProjectsFactoryTest {
     fun testRemotePrivateInstanceChange() {
         val privateProjectKey = ProjectKey.Private("key")
 
-        val taskKey = TaskKey.Project(privateProjectKey, "taskKey") // todo task tests
+        val taskKey = TaskKey.Project(privateProjectKey, "taskKey")
 
         privateProjectRelay.accept(Snapshot(
                 privateProjectKey.key,

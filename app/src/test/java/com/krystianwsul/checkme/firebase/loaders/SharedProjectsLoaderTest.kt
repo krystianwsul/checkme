@@ -88,17 +88,18 @@ class SharedProjectsLoaderTest {
 
         sharedProjectsLoader = SharedProjectsLoader.Impl(
                 projectKeysRelay,
-                projectManager,
-                compositeDisposable,
-                sharedProjectsProvider,
-                TestUserCustomTimeProviderSource(),
-                mockk(relaxed = true),
-                object : ProjectToRootTaskCoordinator {
+            projectManager,
+            compositeDisposable,
+            sharedProjectsProvider,
+            TestUserCustomTimeProviderSource(),
+            mockk(relaxed = true),
+            object : ProjectToRootTaskCoordinator {
 
-                    override fun getRootTasks(projectTracker: LoadDependencyTrackerManager.ProjectTracker) = Completable.complete() // todo task tests
-                },
-                mockk(relaxed = true), // todo task tests
-                mockk(relaxed = true), // todo task tests
+                override fun getRootTasks(projectTracker: LoadDependencyTrackerManager.ProjectTracker) =
+                    Completable.complete()
+            },
+            mockk(relaxed = true),
+            mockk(relaxed = true),
         )
 
         initialProjectsEmissionChecker =

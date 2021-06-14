@@ -44,7 +44,7 @@ class RootTasksFactoryTest {
             domainDisposable,
             mockk(),
             mockk(relaxed = true),
-            mockk(relaxed = true), // todo load
+            mockk(relaxed = true),
             mockk(),
         )
 

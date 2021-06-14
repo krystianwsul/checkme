@@ -29,20 +29,16 @@ interface RootTaskDependencyCoordinator {
                 rootTasksLoader.allEvents,
                 userCustomTimeProviderSource.getTimeChangeObservable(),
             ).merge()
-                .filter { hasDependencies(rootTaskRecord) }
+                .filter { hasTasks(rootTaskRecord) && hasTimes(rootTaskRecord) }
                 .firstOrError()
                 .flatMap { userCustomTimeProviderSource.getUserCustomTimeProvider(rootTaskRecord) } // this will be instance
         }
 
-        private fun hasDependencies(
+        private fun hasTasks(
             rootTaskRecord: RootTaskRecord,
             checkedTaskKeys: MutableSet<TaskKey.Root> = mutableSetOf(),
         ): Boolean {
-            val tracker = TimeLogger.start("RootTaskDependencyCoordinator.hasDependencies")
-            if (!userCustomTimeProviderSource.hasCustomTimes(rootTaskRecord)) {
-                tracker.stop("branch 1")
-                return false
-            }
+            val tracker = TimeLogger.start("RootTaskDependencyCoordinator.hasTasks")
 
             val dependentTaskKeys = rootTaskRecord.getDependentTaskKeys()
             val uncheckedTaskKeys = dependentTaskKeys - checkedTaskKeys
@@ -61,7 +57,32 @@ interface RootTaskDependencyCoordinator {
                 .also {
                     tracker.stop("branch 3")
                 }
-                .map { hasDependencies(it.value, checkedTaskKeys) }
+                .map { hasTasks(it.value, checkedTaskKeys) }
+                .all { it }
+        }
+
+        private fun hasTimes(
+            rootTaskRecord: RootTaskRecord,
+            checkedTaskKeys: MutableSet<TaskKey.Root> = mutableSetOf(),
+        ): Boolean {
+            val tracker = TimeLogger.start("RootTaskDependencyCoordinator.hasTimes")
+            if (!userCustomTimeProviderSource.hasCustomTimes(rootTaskRecord)) {
+                tracker.stop("branch 1")
+                return false
+            }
+
+            val dependentTaskKeys = rootTaskRecord.getDependentTaskKeys()
+            val uncheckedTaskKeys = dependentTaskKeys - checkedTaskKeys
+
+            val uncheckedTasks = uncheckedTaskKeys.associateWith { taskRecordLoader.tryGetTaskRecord(it)!! }
+
+            checkedTaskKeys += uncheckedTaskKeys
+
+            return uncheckedTasks.asSequence()
+                .also {
+                    tracker.stop("branch 3")
+                }
+                .map { hasTimes(it.value, checkedTaskKeys) }
                 .all { it }
         }
     }

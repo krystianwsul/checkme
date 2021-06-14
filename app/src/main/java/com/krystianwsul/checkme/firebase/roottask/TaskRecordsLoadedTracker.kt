@@ -21,7 +21,14 @@ interface TaskRecordsLoadedTracker {
             rootTasksLoader.addChangeEvents
                 .subscribe {
                     currentlyLoadedRecords[it.rootTaskRecord.taskKey] = it.rootTaskRecord
-                    rootTaskDependencyStateContainer.onLoaded(it.rootTaskRecord)
+                    rootTaskDependencyStateContainer.onLoaded(
+                        object : RootTaskDependencyStateContainer.TaskBridge {
+
+                            override val taskKey = it.rootTaskRecord.taskKey
+
+                            override val downKeys = it.rootTaskRecord.getDependentTaskKeys()
+                        }
+                    )
                 }
                 .addTo(domainDisposable)
 

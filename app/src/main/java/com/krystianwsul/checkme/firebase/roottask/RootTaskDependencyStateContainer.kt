@@ -1,16 +1,22 @@
 package com.krystianwsul.checkme.firebase.roottask
 
 import androidx.annotation.VisibleForTesting
-import com.krystianwsul.common.firebase.records.task.RootTaskRecord
 import com.krystianwsul.common.utils.TaskKey
 
 interface RootTaskDependencyStateContainer {
 
-    fun onLoaded(rootTaskRecord: RootTaskRecord)
+    fun onLoaded(taskBridge: TaskBridge)
 
     fun onRemoved(taskKey: TaskKey.Root)
 
     fun isComplete(taskKey: TaskKey.Root): Boolean
+
+    interface TaskBridge {
+
+        val taskKey: TaskKey.Root
+
+        val downKeys: Set<TaskKey.Root>
+    }
 
     class Impl : RootTaskDependencyStateContainer {
 
@@ -20,8 +26,8 @@ interface RootTaskDependencyStateContainer {
         private fun getStateHolder(taskKey: TaskKey.Root) =
             stateHoldersByTaskKey.getOrPut(taskKey) { StateHolder(taskKey, this) }
 
-        override fun onLoaded(rootTaskRecord: RootTaskRecord) =
-            getStateHolder(rootTaskRecord.taskKey).onLoaded(rootTaskRecord)
+        override fun onLoaded(taskBridge: TaskBridge) =
+            getStateHolder(taskBridge.taskKey).onLoaded(taskBridge)
 
         override fun onRemoved(taskKey: TaskKey.Root) = getStateHolder(taskKey).onRemoved()
 
@@ -53,9 +59,9 @@ interface RootTaskDependencyStateContainer {
 
             recordState.isComplete?.let { return it }
 
-            recordStatesToUpdate += recordState // todo load later check that isComplete is null
+            recordStatesToUpdate += recordState
 
-            val downKeys = recordState.downTaskKeys
+            val downKeys = recordState.downKeys
 
             val newKeys = downKeys - checkedKeys
 
@@ -71,11 +77,11 @@ interface RootTaskDependencyStateContainer {
 
             val isComplete get() = loadState.isComplete
 
-            fun onLoaded(rootTaskRecord: RootTaskRecord) {
+            fun onLoaded(taskBridge: TaskBridge) {
                 val previousIsComplete = isComplete
                 val oldLoadState = loadState
 
-                val newRecordState = RecordState(rootTaskRecord, impl, this)
+                val newRecordState = RecordState(taskBridge, impl, this)
 
                 when (oldLoadState) {
                     LoadState.Absent -> {
@@ -108,13 +114,13 @@ interface RootTaskDependencyStateContainer {
             }
 
             fun addUpState(recordState: RecordState) {
-                check(!upStates.containsKey(recordState.rootTaskRecord.taskKey))
+                check(!upStates.containsKey(recordState.taskBridge.taskKey))
 
-                upStates[recordState.rootTaskRecord.taskKey] = recordState
+                upStates[recordState.taskBridge.taskKey] = recordState
             }
 
             fun removeUpState(recordState: RecordState) {
-                check(upStates.remove(recordState.rootTaskRecord.taskKey) == recordState)
+                check(upStates.remove(recordState.taskBridge.taskKey) == recordState)
             }
 
             fun getRecordState() = loadState.recordState
@@ -175,11 +181,11 @@ interface RootTaskDependencyStateContainer {
         }
 
         @VisibleForTesting
-        class RecordState(val rootTaskRecord: RootTaskRecord, impl: Impl, private val stateHolder: StateHolder) {
+        class RecordState(val taskBridge: TaskBridge, impl: Impl, private val stateHolder: StateHolder) {
 
-            val downTaskKeys = rootTaskRecord.getDependentTaskKeys()
+            val downKeys = taskBridge.downKeys
 
-            private val downStateHolders = downTaskKeys.associateWith(impl::getStateHolder)
+            private val downStateHolders = downKeys.associateWith(impl::getStateHolder)
 
             var isComplete: Boolean? = if (downStateHolders.isEmpty()) true else null
                 set(value) {

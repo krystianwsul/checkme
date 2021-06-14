@@ -16,7 +16,6 @@ class MySQLiteHelper private constructor() : SQLiteOpenHelper(MyApplication.inst
 
     override fun onCreate(sqLiteDatabase: SQLiteDatabase) {
         InstanceShownRecord.onCreate(sqLiteDatabase)
-        UuidRecord.onCreate(sqLiteDatabase)
     }
 
     override fun onUpgrade(sqLiteDatabase: SQLiteDatabase, oldVersion: Int, newVersion: Int) {

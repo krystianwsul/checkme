@@ -156,7 +156,7 @@ class DomainFactory(
 
     val instanceShownCount get() = localFactory.instanceShownRecords.size
 
-    val uuid get() = localFactory.uuid
+    val uuid get() = deviceDbInfo.uuid
 
     var debugMode by observable(false) { _, _, _ -> domainListenerManager.notify(NotificationType.All) }
 

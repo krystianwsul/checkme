@@ -11,7 +11,6 @@ import com.krystianwsul.common.utils.TaskKeyData
 class PersistenceManager(
         private val _instanceShownRecords: MutableList<InstanceShownRecord> = mutableListOf(),
         private var instanceShownMaxId: Int = 0,
-        private val uuidRecord: UuidRecord = UuidRecord(true, UuidRecord.newUuid())
 ) {
 
     companion object {
@@ -22,16 +21,12 @@ class PersistenceManager(
             val instanceShownRecords = InstanceShownRecord.getInstancesShownRecords(sqLiteDatabase)
             val instanceShownMaxId = InstanceShownRecord.getMaxId(sqLiteDatabase)
 
-            val uuidRecord = UuidRecord.getUuidRecord(sqLiteDatabase)
-
-            PersistenceManager(instanceShownRecords, instanceShownMaxId, uuidRecord)
+            PersistenceManager(instanceShownRecords, instanceShownMaxId)
         }
     }
 
     val instanceShownRecords: MutableCollection<InstanceShownRecord>
         get() = _instanceShownRecords
-
-    val uuid get() = uuidRecord.uuid
 
     fun save() = SaveService.Factory
             .instance

@@ -1,7 +1,6 @@
 package com.krystianwsul.checkme.domainmodel.local
 
 import android.annotation.SuppressLint
-import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.checkme.persistencemodel.InstanceShownRecord
 import com.krystianwsul.checkme.persistencemodel.PersistenceManager
 import com.krystianwsul.common.firebase.models.Instance
@@ -14,13 +13,11 @@ import com.krystianwsul.common.utils.singleOrEmpty
 
 @SuppressLint("UseSparseArrays")
 class LocalFactory(
-        private val persistenceManager: PersistenceManager = PersistenceManager.instance,
-) : Instance.ShownFactory, FactoryProvider.Local {
+    private val persistenceManager: PersistenceManager = PersistenceManager.instance,
+) : Instance.ShownFactory {
 
     val instanceShownRecords: Collection<InstanceShownRecord>
         get() = persistenceManager.instanceShownRecords
-
-    override val uuid get() = persistenceManager.uuid
 
     fun save(): Boolean = persistenceManager.save()
 

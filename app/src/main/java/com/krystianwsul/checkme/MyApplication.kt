@@ -20,6 +20,7 @@ import com.github.tamir7.contacts.Contacts
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.Logger
+import com.google.firebase.installations.FirebaseInstallations
 import com.google.firebase.messaging.FirebaseMessaging
 import com.jakewharton.rxrelay3.BehaviorRelay
 import com.krystianwsul.checkme.domainmodel.*
@@ -45,6 +46,7 @@ import com.miguelbcr.ui.rx_paparazzo2.RxPaparazzo
 import com.pacoworks.rxpaper2.RxPaperBook
 import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Maybe
+import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.schedulers.Schedulers
 import rxdogtag2.RxDogTag
 import java.io.File
@@ -123,28 +125,41 @@ class MyApplication : Application() {
         }
 
         FirebaseAuth.getInstance()
-                .authStateChanges()
-                .toV3()
-                .map { NullableWrapper(it.currentUser) }
-                .startWithItem(NullableWrapper(FirebaseAuth.getInstance().currentUser))
-                .map { NullableWrapper(it.value?.toUserInfo()) }
-                .distinctUntilChanged()
-                .subscribe { userInfoRelay.accept(it) }
+            .authStateChanges()
+            .toV3()
+            .map { NullableWrapper(it.currentUser) }
+            .startWithItem(NullableWrapper(FirebaseAuth.getInstance().currentUser))
+            .map { NullableWrapper(it.value?.toUserInfo()) }
+            .distinctUntilChanged()
+            .subscribe { userInfoRelay.accept(it) }
 
         userInfoRelay.firstOrError()
-                .filter { it.value != null }
-                .subscribe { DomainFactory.firstRun = true }
+            .filter { it.value != null }
+            .subscribe { DomainFactory.firstRun = true }
 
         val localFactory = LocalFactory(PersistenceManager.instance)
 
         RxPaperBook.init(this)
         VersionCodeManager.check(AndroidDatabaseWrapper::onUpgrade)
 
+        val uuidSingle = Single.create<String> { emitter ->
+            FirebaseInstallations.getInstance()
+                .id
+                .addOnCompleteListener {
+                    if (it.isSuccessful) {
+                        emitter.onSuccess(it.result!!)
+                    } else {
+                        MyCrashlytics.logException(it.exception ?: Exception("unknown error"))
+                    }
+                }
+        }
+
         FactoryLoader(
-                localFactory,
-                userInfoRelay,
-                FactoryProvider.Impl(localFactory),
-                Preferences.tokenRelay,
+            localFactory,
+            userInfoRelay,
+            FactoryProvider.Impl(localFactory),
+            Preferences.tokenRelay,
+            uuidSingle,
         ).domainFactoryObservable.subscribe {
             @Suppress("UNCHECKED_CAST")
             DomainFactory.instanceRelay.accept(it as NullableWrapper<DomainFactory>)
@@ -152,30 +167,30 @@ class MyApplication : Application() {
 
         if (Preferences.token == null)
             FirebaseMessaging.getInstance()
-                    .token
-                    .addOnSuccessListener { Preferences.token = it }
+                .token
+                .addOnSuccessListener { Preferences.token = it }
 
         //writeHashes()
 
         if (!BuildConfig.DEBUG)
             ANRWatchDog()//.setReportMainThreadOnly()
-                    .setANRListener { MyCrashlytics.logException(it) }
-                    .start()
+                .setANRListener { MyCrashlytics.logException(it) }
+                .start()
 
         userInfoRelay.switchMapMaybe {
             it.value
-                    ?.let {
-                        googleSignInClient.silentSignIn()
-                                .toSingle()
-                                .toMaybe()
-                    }
-                    ?: Maybe.empty()
-        }
-                .mapNotNull { it.value?.photoUrl }
-                .flatMapCompletable {
-                    AndroidDomainUpdater.updatePhotoUrl(DomainListenerManager.NotificationType.All, it.toString())
+                ?.let {
+                    googleSignInClient.silentSignIn()
+                        .toSingle()
+                        .toMaybe()
                 }
-                .subscribe()
+                ?: Maybe.empty()
+        }
+            .mapNotNull { it.value?.photoUrl }
+            .flatMapCompletable {
+                AndroidDomainUpdater.updatePhotoUrl(DomainListenerManager.NotificationType.All, it.toString())
+            }
+            .subscribe()
 
         RxPaparazzo.register(this)
 
@@ -238,14 +253,14 @@ class MyApplication : Application() {
         val queued = Queue.getEntries().map { it.path }
 
         (getRxPaparazzoDir().listFiles() ?: arrayOf())
-                .filterNot { it.absolutePath in queued }
-                .forEach {
-                    try {
-                        it.delete()
-                    } catch (e: Exception) {
-                        MyCrashlytics.logException(e)
-                    }
+            .filterNot { it.absolutePath in queued }
+            .forEach {
+                try {
+                    it.delete()
+                } catch (e: Exception) {
+                    MyCrashlytics.logException(e)
                 }
+            }
     }
 
     /*

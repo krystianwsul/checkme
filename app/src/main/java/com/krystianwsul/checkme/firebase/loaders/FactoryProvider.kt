@@ -55,7 +55,7 @@ interface FactoryProvider {
     val notificationStorageFactory: NotificationStorageFactory
 
     fun newDomain(
-        localFactory: Local,
+        localFactory: Instance.ShownFactory,
         myUserFactory: MyUserFactory,
         projectsFactory: ProjectsFactory,
         friendsFactory: FriendsFactory,
@@ -73,11 +73,6 @@ interface FactoryProvider {
 
         @CheckResult
         fun clearUserInfo(): Completable
-    }
-
-    interface Local : Instance.ShownFactory {
-
-        val uuid: String
     }
 
     interface NotificationStorageFactory {
@@ -116,7 +111,7 @@ interface FactoryProvider {
             com.krystianwsul.checkme.domainmodel.notifications.NotificationStorage.Companion
 
         override fun newDomain(
-            localFactory: Local,
+            localFactory: Instance.ShownFactory,
             myUserFactory: MyUserFactory,
             projectsFactory: ProjectsFactory,
             friendsFactory: FriendsFactory,

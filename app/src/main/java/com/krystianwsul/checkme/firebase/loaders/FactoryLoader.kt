@@ -17,19 +17,22 @@ import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.DeviceInfo
 import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.ChangeType
+import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.treeadapter.getCurrentValue
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.CompositeDisposable
+import io.reactivex.rxjava3.kotlin.Observables
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.plusAssign
 
 class FactoryLoader(
-    localFactory: FactoryProvider.Local,
+    localFactory: Instance.ShownFactory,
     userInfoObservable: Observable<NullableWrapper<UserInfo>>,
     factoryProvider: FactoryProvider,
     tokenObservable: Observable<NullableWrapper<String>>,
+    uuidSingle: Single<String>,
 ) {
 
     val domainFactoryObservable: Observable<NullableWrapper<FactoryProvider.Domain>>
@@ -45,21 +48,23 @@ class FactoryLoader(
             if (it.value != null) {
                 val userInfo = it.value
 
-                val deviceInfoObservable = tokenObservable.observeOnDomain()
-                    .map { DeviceInfo(userInfo, it.value) }
+                val deviceDbInfoObservable = Observables.combineLatest(
+                    uuidSingle.toObservable().observeOnDomain(),
+                    tokenObservable.observeOnDomain(),
+                )
+                    .map { (uuid, tokenWrapper) -> DeviceDbInfo(DeviceInfo(userInfo, tokenWrapper.value), uuid) }
                     .replay(1)
                     .apply { domainDisposable += connect() }
 
-                deviceInfoObservable.firstOrError().flatMap {
-                    fun getDeviceInfo() = deviceInfoObservable.getCurrentValue()
-                    fun getDeviceDbInfo() = DeviceDbInfo(getDeviceInfo(), localFactory.uuid)
+                deviceDbInfoObservable.firstOrError().flatMap {
+                    fun getDeviceDbInfo() = deviceDbInfoObservable.getCurrentValue()
 
                     val userDatabaseRx = DatabaseRx(
                         domainDisposable,
-                        factoryProvider.database.getUserObservable(getDeviceInfo().key),
+                        factoryProvider.database.getUserObservable(getDeviceDbInfo().key),
                     )
 
-                    val privateProjectKey = getDeviceInfo().key.toPrivateProjectKey()
+                    val privateProjectKey = getDeviceDbInfo().key.toPrivateProjectKey()
 
                     val privateProjectDatabaseRx = DatabaseRx(
                         domainDisposable,
@@ -236,9 +241,7 @@ class FactoryLoader(
                         .addTo(domainDisposable)
 
                     tokenObservable.flatMapCompletable {
-                        factoryProvider.domainUpdater.updateDeviceDbInfo(
-                            DeviceDbInfo(DeviceInfo(userInfo, it.value), localFactory.uuid)
-                        )
+                        factoryProvider.domainUpdater.updateDeviceDbInfo(getDeviceDbInfo())
                     }
                         .subscribe()
                         .addTo(domainDisposable)

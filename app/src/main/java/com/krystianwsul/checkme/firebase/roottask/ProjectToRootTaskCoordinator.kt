@@ -1,7 +1,5 @@
 package com.krystianwsul.checkme.firebase.roottask
 
-import com.krystianwsul.common.utils.TaskKey
-import com.krystianwsul.common.utils.TimeLogger
 import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Observable
 
@@ -20,19 +18,9 @@ interface ProjectToRootTaskCoordinator {
 
             return Observable.just(Unit)
                 .concatWith(rootTasksFactory.unfilteredChanges)
-                .filter { hasAllDependentTasks(projectTracker.dependentTaskKeys) }
+                .filter { projectTracker.dependentTaskKeys.all(rootTaskDependencyStateContainer::isComplete) }
                 .firstOrError()
                 .ignoreElement()
-        }
-
-        private fun hasAllDependentTasks(
-            checkTaskKeys: Set<TaskKey.Root>,
-        ): Boolean {
-            val tracker = TimeLogger.start("ProjectToRootTaskCoordinator.hasAllDependentTasks")
-            val isComplete = checkTaskKeys.all(rootTaskDependencyStateContainer::isComplete)
-            tracker.stop("branch")
-
-            return isComplete
         }
     }
 }

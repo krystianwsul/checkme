@@ -4,7 +4,6 @@ import com.krystianwsul.checkme.firebase.UserCustomTimeProviderSource
 import com.krystianwsul.common.firebase.records.task.RootTaskRecord
 import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.utils.TaskKey
-import com.krystianwsul.common.utils.TimeLogger
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.kotlin.merge
@@ -34,23 +33,14 @@ interface RootTaskDependencyCoordinator {
                 .flatMap { userCustomTimeProviderSource.getUserCustomTimeProvider(rootTaskRecord) } // this will be instance
         }
 
-        private fun hasTasks(rootTaskRecord: RootTaskRecord): Boolean {
-            val tracker = TimeLogger.start("RootTaskDependencyCoordinator.hasTasks")
-            val isComplete = rootTaskDependencyStateContainer.isComplete(rootTaskRecord.taskKey)
-            tracker.stop()
-
-            return isComplete
-        }
+        private fun hasTasks(rootTaskRecord: RootTaskRecord) =
+            rootTaskDependencyStateContainer.isComplete(rootTaskRecord.taskKey)
 
         private fun hasTimes(
             rootTaskRecord: RootTaskRecord,
             checkedTaskKeys: MutableSet<TaskKey.Root> = mutableSetOf(),
         ): Boolean {
-            val tracker = TimeLogger.start("RootTaskDependencyCoordinator.hasTimes")
-            if (!userCustomTimeProviderSource.hasCustomTimes(rootTaskRecord)) {
-                tracker.stop("branch 1")
-                return false
-            }
+            if (!userCustomTimeProviderSource.hasCustomTimes(rootTaskRecord)) return false
 
             val dependentTaskKeys = rootTaskRecord.getDependentTaskKeys()
             val uncheckedTaskKeys = dependentTaskKeys - checkedTaskKeys
@@ -60,9 +50,6 @@ interface RootTaskDependencyCoordinator {
             checkedTaskKeys += uncheckedTaskKeys
 
             return uncheckedTasks.asSequence()
-                .also {
-                    tracker.stop("branch 3")
-                }
                 .map { hasTimes(it.value, checkedTaskKeys) }
                 .all { it }
         }

@@ -65,14 +65,7 @@ class RootTaskFactory(
 
                 rootTaskDependencyStateContainer.apply {
                     if (it.task != null) {
-                        onLoaded(
-                            object : RootTaskDependencyStateContainer.TaskBridge {
-
-                                override val taskKey = it.task!!.taskKey
-
-                                override val downKeys = it.task!!.taskRecord.getDependentTaskKeys()
-                            }
-                        )
+                        onLoaded(it.task!!.taskRecord)
                     } else {
                         onRemoved(taskKey)
                     }

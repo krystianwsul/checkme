@@ -1,6 +1,9 @@
 package com.krystianwsul.checkme.firebase.roottask
 
+import com.krystianwsul.common.firebase.records.task.RootTaskRecord
 import com.krystianwsul.common.utils.TaskKey
+import io.mockk.every
+import io.mockk.mockk
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -11,11 +14,9 @@ class RootTaskDependencyStateContainerTest {
     private fun makeRecordMock(
         taskKey: TaskKey.Root,
         childTaskKeys: Set<TaskKey.Root> = emptySet(),
-    ) = object : RootTaskDependencyStateContainer.TaskBridge {
-
-        override val taskKey = taskKey
-
-        override val downKeys = childTaskKeys
+    ) = mockk<RootTaskRecord> {
+        every { this@mockk.taskKey } returns taskKey
+        every { getDependentTaskKeys() } returns childTaskKeys
     }
 
     lateinit var container: RootTaskDependencyStateContainer.Impl

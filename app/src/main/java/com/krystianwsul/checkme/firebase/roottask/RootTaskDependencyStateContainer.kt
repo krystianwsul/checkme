@@ -10,7 +10,7 @@ interface RootTaskDependencyStateContainer {
 
     fun onRemoved(taskKey: TaskKey.Root)
 
-    fun hasDependentTasks(taskKey: TaskKey.Root): Boolean
+    fun isComplete(taskKey: TaskKey.Root): Boolean
 
     class Impl : RootTaskDependencyStateContainer {
 
@@ -25,8 +25,41 @@ interface RootTaskDependencyStateContainer {
 
         override fun onRemoved(taskKey: TaskKey.Root) = getStateHolder(taskKey).onRemoved()
 
-        override fun hasDependentTasks(taskKey: TaskKey.Root): Boolean {
-            return getStateHolder(taskKey).hasAllDependencies
+        override fun isComplete(taskKey: TaskKey.Root): Boolean {
+            val checkedKeys = mutableSetOf<TaskKey.Root>()
+            val recordStatesToUpdate = mutableSetOf<RecordState>()
+
+            val result = tryAccumulateKeys(taskKey, checkedKeys, recordStatesToUpdate)
+
+            recordStatesToUpdate.forEach {
+                check(it.isComplete == null)
+
+                it.isComplete = result
+            }
+
+            return result
+        }
+
+        private fun tryAccumulateKeys(
+            taskKey: TaskKey.Root,
+            checkedKeys: MutableSet<TaskKey.Root>,
+            recordStatesToUpdate: MutableSet<RecordState>,
+        ): Boolean {
+            checkedKeys += taskKey
+
+            val stateHolder = getStateHolder(taskKey)
+
+            val recordState = stateHolder.getRecordState() ?: return false
+
+            recordState.isComplete?.let { return it }
+
+            recordStatesToUpdate += recordState // todo load later check that isComplete is null
+
+            val downKeys = recordState.downTaskKeys
+
+            val newKeys = downKeys - checkedKeys
+
+            return newKeys.all { tryAccumulateKeys(it, checkedKeys, recordStatesToUpdate) }
         }
 
         @VisibleForTesting
@@ -36,33 +69,42 @@ interface RootTaskDependencyStateContainer {
 
             private val upStates = mutableMapOf<TaskKey.Root, RecordState>()
 
-            val hasAllDependencies get() = loadState.hasAllDependencies
+            val isComplete get() = loadState.isComplete
 
             fun onLoaded(rootTaskRecord: RootTaskRecord) {
+                val previousIsComplete = isComplete
+                val oldLoadState = loadState
+
                 val newRecordState = RecordState(rootTaskRecord, impl, this)
 
-                when (val oldLoadState = loadState) {
+                when (oldLoadState) {
                     LoadState.Absent -> {
                         val loaded = LoadState.Loaded(newRecordState)
                         loadState = loaded
-                        loaded.recordState.initializeHasAllDependencies(false)
                     }
                     is LoadState.Loaded -> {
                         oldLoadState.updateRecordState(newRecordState)
                     }
                 }
+
+                check(isComplete != false)
+
+                if (previousIsComplete != null) invalidateUpStates()
             }
 
             fun onRemoved() {
+                val previousIsComplete = isComplete
                 val oldLoadState = loadState
 
                 if (oldLoadState is LoadState.Loaded) {
-                    if (oldLoadState.hasAllDependencies) propagateClearHasAllDependencies()
-
                     oldLoadState.recordState.removeFromDownStateHolders()
                 }
 
                 loadState = LoadState.Absent
+
+                check(isComplete == false)
+
+                if (previousIsComplete == true) invalidateUpStates()
             }
 
             fun addUpState(recordState: RecordState) {
@@ -75,43 +117,59 @@ interface RootTaskDependencyStateContainer {
                 check(upStates.remove(recordState.rootTaskRecord.taskKey) == recordState)
             }
 
-            fun propagateClearHasAllDependencies() {
-                upStates.values.forEach { it.clearHasAllDependencies() }
+            fun getRecordState() = loadState.recordState
+
+            private fun invalidateUpStates() {
+                upStates.values.forEach { it.propagateInvalidation() }
             }
 
-            fun propagateOnDownLoaded() {
-                upStates.values.forEach { it.onDownLoaded() }
+            fun propagateInvalidation() {
+                if (isComplete == null) return
+
+                loadState.invalidateIsComplete()
+
+                invalidateUpStates()
             }
         }
 
         private sealed class LoadState {
 
-            abstract val hasAllDependencies: Boolean
+            abstract val isComplete: Boolean?
+
+            abstract val recordState: RecordState?
+
+            abstract fun invalidateIsComplete()
 
             object Absent : LoadState() {
 
-                override val hasAllDependencies = false
+                override val isComplete = false
+
+                override val recordState: RecordState? = null
+
+                override fun invalidateIsComplete() {}
             }
 
             class Loaded(initialRecordState: RecordState) : LoadState() {
 
-                var recordState = initialRecordState
+                override var recordState = initialRecordState
                     private set
+
+                override val isComplete get() = recordState.isComplete
 
                 init {
                     recordState.addToDownStateHolders()
                 }
 
-                override val hasAllDependencies get() = recordState.hasAllDependencies
-
                 fun updateRecordState(newRecordState: RecordState) {
-                    val oldHasAllDependencies = recordState.hasAllDependencies
                     recordState.removeFromDownStateHolders()
 
                     recordState = newRecordState
 
                     recordState.addToDownStateHolders()
-                    recordState.initializeHasAllDependencies(oldHasAllDependencies)
+                }
+
+                override fun invalidateIsComplete() {
+                    recordState.isComplete = null
                 }
             }
         }
@@ -119,45 +177,23 @@ interface RootTaskDependencyStateContainer {
         @VisibleForTesting
         class RecordState(val rootTaskRecord: RootTaskRecord, impl: Impl, private val stateHolder: StateHolder) {
 
-            private val downTaskKeys = rootTaskRecord.getDependentTaskKeys()
+            val downTaskKeys = rootTaskRecord.getDependentTaskKeys()
 
             private val downStateHolders = downTaskKeys.associateWith(impl::getStateHolder)
 
-            var hasAllDependencies = false
-                private set
-
-            private fun updateHasAllDependencies() {
-                hasAllDependencies = downStateHolders.values.all { it.hasAllDependencies }
-            }
-
-            fun initializeHasAllDependencies(previousValue: Boolean) {
-                updateHasAllDependencies()
-
-                if (previousValue && !hasAllDependencies) {
-                    stateHolder.propagateClearHasAllDependencies()
-                } else if (!previousValue && hasAllDependencies) {
-                    stateHolder.propagateOnDownLoaded()
+            var isComplete: Boolean? = if (downStateHolders.isEmpty()) true else null
+                set(value) {
+                    if (downStateHolders.isEmpty()) {
+                        check(field == true)
+                    } else {
+                        field = value
+                    }
                 }
-            }
-
-            fun clearHasAllDependencies() {
-                if (!hasAllDependencies) return
-
-                hasAllDependencies = false
-
-                stateHolder.propagateClearHasAllDependencies()
-            }
-
-            fun onDownLoaded() {
-                if (hasAllDependencies) return
-
-                updateHasAllDependencies()
-
-                if (hasAllDependencies) stateHolder.propagateOnDownLoaded()
-            }
 
             fun addToDownStateHolders() = downStateHolders.values.forEach { it.addUpState(this) }
             fun removeFromDownStateHolders() = downStateHolders.values.forEach { it.removeUpState(this) }
+
+            fun propagateInvalidation() = stateHolder.propagateInvalidation()
         }
     }
 }

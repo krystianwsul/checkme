@@ -36,7 +36,7 @@ class RootTaskDependencyStateContainerTest {
 
         container.onLoaded(makeRecordMock(taskKey))
 
-        assertTrue(container.hasDependentTasks(taskKey))
+        assertTrue(container.isComplete(taskKey))
     }
 
     @Test
@@ -45,7 +45,7 @@ class RootTaskDependencyStateContainerTest {
         val taskKey2 = TaskKey.Root("taskKey2")
 
         container.onLoaded(makeRecordMock(taskKey1, setOf(taskKey2)))
-        assertFalse(container.hasDependentTasks(taskKey1))
+        assertFalse(container.isComplete(taskKey1))
     }
 
     @Test
@@ -54,10 +54,10 @@ class RootTaskDependencyStateContainerTest {
         val taskKey2 = TaskKey.Root("taskKey2")
 
         container.onLoaded(makeRecordMock(taskKey1, setOf(taskKey2)))
-        assertFalse(container.hasDependentTasks(taskKey1))
+        assertFalse(container.isComplete(taskKey1))
 
         container.onLoaded(makeRecordMock(taskKey2))
-        assertTrue(container.hasDependentTasks(taskKey1))
+        assertTrue(container.isComplete(taskKey1))
     }
 
     @Test
@@ -67,13 +67,13 @@ class RootTaskDependencyStateContainerTest {
         val taskKey3 = TaskKey.Root("taskKey3")
 
         container.onLoaded(makeRecordMock(taskKey1, setOf(taskKey2, taskKey3)))
-        assertFalse(container.hasDependentTasks(taskKey1))
+        assertFalse(container.isComplete(taskKey1))
 
         container.onLoaded(makeRecordMock(taskKey2))
-        assertFalse(container.hasDependentTasks(taskKey1))
+        assertFalse(container.isComplete(taskKey1))
 
         container.onLoaded(makeRecordMock(taskKey3))
-        assertTrue(container.hasDependentTasks(taskKey1))
+        assertTrue(container.isComplete(taskKey1))
     }
 
     @Test
@@ -83,13 +83,13 @@ class RootTaskDependencyStateContainerTest {
         val taskKey3 = TaskKey.Root("taskKey3")
 
         container.onLoaded(makeRecordMock(taskKey1, setOf(taskKey2, taskKey3)))
-        assertFalse(container.hasDependentTasks(taskKey1))
+        assertFalse(container.isComplete(taskKey1))
 
         container.onLoaded(makeRecordMock(taskKey2))
-        assertFalse(container.hasDependentTasks(taskKey1))
+        assertFalse(container.isComplete(taskKey1))
 
         container.onLoaded(makeRecordMock(taskKey1, setOf(taskKey2)))
-        assertTrue(container.hasDependentTasks(taskKey1))
+        assertTrue(container.isComplete(taskKey1))
     }
 
     @Test
@@ -102,18 +102,18 @@ class RootTaskDependencyStateContainerTest {
         val taskKey4 = TaskKey.Root("taskKey4")
 
         container.onLoaded(makeRecordMock(taskKey1, setOf(taskKey2, taskKey3)))
-        assertFalse(container.hasDependentTasks(taskKey1))
+        assertFalse(container.isComplete(taskKey1))
 
         container.onLoaded(makeRecordMock(taskKey2))
-        assertFalse(container.hasDependentTasks(taskKey1))
+        assertFalse(container.isComplete(taskKey1))
 
         container.onLoaded(makeRecordMock(taskKey3, setOf(taskKey4)))
-        assertFalse(container.hasDependentTasks(taskKey1))
-        assertFalse(container.hasDependentTasks(taskKey3))
+        assertFalse(container.isComplete(taskKey1))
+        assertFalse(container.isComplete(taskKey3))
 
         container.onLoaded(makeRecordMock(taskKey4))
-        assertTrue(container.hasDependentTasks(taskKey1))
-        assertTrue(container.hasDependentTasks(taskKey3))
+        assertTrue(container.isComplete(taskKey1))
+        assertTrue(container.isComplete(taskKey3))
     }
 
     @Test
@@ -126,22 +126,22 @@ class RootTaskDependencyStateContainerTest {
         val taskKey4 = TaskKey.Root("taskKey4")
 
         container.onLoaded(makeRecordMock(taskKey1, setOf(taskKey2, taskKey3)))
-        assertFalse(container.hasDependentTasks(taskKey1))
+        assertFalse(container.isComplete(taskKey1))
 
         container.onLoaded(makeRecordMock(taskKey2))
-        assertFalse(container.hasDependentTasks(taskKey1))
+        assertFalse(container.isComplete(taskKey1))
 
         container.onLoaded(makeRecordMock(taskKey3, setOf(taskKey4)))
-        assertFalse(container.hasDependentTasks(taskKey1))
-        assertFalse(container.hasDependentTasks(taskKey3))
+        assertFalse(container.isComplete(taskKey1))
+        assertFalse(container.isComplete(taskKey3))
 
         container.onLoaded(makeRecordMock(taskKey4))
-        assertTrue(container.hasDependentTasks(taskKey1))
-        assertTrue(container.hasDependentTasks(taskKey3))
+        assertTrue(container.isComplete(taskKey1))
+        assertTrue(container.isComplete(taskKey3))
 
         container.onRemoved(taskKey4)
-        assertFalse(container.hasDependentTasks(taskKey1))
-        assertFalse(container.hasDependentTasks(taskKey3))
+        assertFalse(container.isComplete(taskKey1))
+        assertFalse(container.isComplete(taskKey3))
     }
 
     @Test
@@ -154,24 +154,24 @@ class RootTaskDependencyStateContainerTest {
         val taskKey4 = TaskKey.Root("taskKey4")
 
         container.onLoaded(makeRecordMock(taskKey1, setOf(taskKey2, taskKey3)))
-        assertFalse(container.hasDependentTasks(taskKey1))
+        assertFalse(container.isComplete(taskKey1))
 
         container.onLoaded(makeRecordMock(taskKey2))
-        assertFalse(container.hasDependentTasks(taskKey1))
+        assertFalse(container.isComplete(taskKey1))
 
         container.onLoaded(makeRecordMock(taskKey3, setOf(taskKey4)))
-        assertFalse(container.hasDependentTasks(taskKey1))
-        assertFalse(container.hasDependentTasks(taskKey3))
+        assertFalse(container.isComplete(taskKey1))
+        assertFalse(container.isComplete(taskKey3))
 
         container.onLoaded(makeRecordMock(taskKey4))
-        assertTrue(container.hasDependentTasks(taskKey1))
-        assertTrue(container.hasDependentTasks(taskKey3))
+        assertTrue(container.isComplete(taskKey1))
+        assertTrue(container.isComplete(taskKey3))
 
         container.onLoaded(makeRecordMock(taskKey1, setOf(taskKey2)))
 
         container.onRemoved(taskKey4)
-        assertTrue(container.hasDependentTasks(taskKey1))
-        assertFalse(container.hasDependentTasks(taskKey3))
+        assertTrue(container.isComplete(taskKey1))
+        assertFalse(container.isComplete(taskKey3))
     }
 
     @Test
@@ -181,16 +181,16 @@ class RootTaskDependencyStateContainerTest {
         val taskKey3 = TaskKey.Root("taskKey3")
 
         container.onLoaded(makeRecordMock(taskKey1, setOf(taskKey2)))
-        assertFalse(container.hasDependentTasks(taskKey1))
+        assertFalse(container.isComplete(taskKey1))
 
         container.onLoaded(makeRecordMock(taskKey2, setOf(taskKey3)))
-        assertFalse(container.hasDependentTasks(taskKey1))
-        assertFalse(container.hasDependentTasks(taskKey2))
+        assertFalse(container.isComplete(taskKey1))
+        assertFalse(container.isComplete(taskKey2))
 
         container.onLoaded(makeRecordMock(taskKey3, setOf(taskKey1)))
-        assertTrue(container.hasDependentTasks(taskKey1))
-        assertTrue(container.hasDependentTasks(taskKey2))
-        assertTrue(container.hasDependentTasks(taskKey3))
+        assertTrue(container.isComplete(taskKey1))
+        assertTrue(container.isComplete(taskKey2))
+        assertTrue(container.isComplete(taskKey3))
 
         // todo load add checks for REMOVING one in chain
     }

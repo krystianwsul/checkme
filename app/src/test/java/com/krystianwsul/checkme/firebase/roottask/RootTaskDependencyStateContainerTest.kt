@@ -192,6 +192,64 @@ class RootTaskDependencyStateContainerTest {
         assertTrue(container.isComplete(taskKey2))
         assertTrue(container.isComplete(taskKey3))
 
-        // todo load add checks for REMOVING one in chain
+        container.onRemoved(taskKey2)
+        assertFalse(container.isComplete(taskKey1))
+        assertFalse(container.isComplete(taskKey2))
+        assertFalse(container.isComplete(taskKey3))
+
+        container.onLoaded(makeRecordMock(taskKey2, setOf(taskKey3)))
+        assertTrue(container.isComplete(taskKey1))
+        assertTrue(container.isComplete(taskKey2))
+        assertTrue(container.isComplete(taskKey3))
+    }
+
+    @Test
+    fun testCyclicalWithBranch() {
+        val taskKey1 = TaskKey.Root("taskKey1")
+        val taskKey2 = TaskKey.Root("taskKey2")
+        val taskKey3 = TaskKey.Root("taskKey3")
+        val taskKey4 = TaskKey.Root("taskKey4")
+
+        container.onLoaded(makeRecordMock(taskKey1, setOf(taskKey2, taskKey4)))
+        assertFalse(container.isComplete(taskKey1))
+
+        container.onLoaded(makeRecordMock(taskKey2, setOf(taskKey3)))
+        assertFalse(container.isComplete(taskKey1))
+        assertFalse(container.isComplete(taskKey2))
+
+        container.onLoaded(makeRecordMock(taskKey3, setOf(taskKey1)))
+        assertFalse(container.isComplete(taskKey1))
+        assertFalse(container.isComplete(taskKey2))
+        assertFalse(container.isComplete(taskKey3))
+
+        container.onLoaded(makeRecordMock(taskKey4))
+        assertTrue(container.isComplete(taskKey1))
+        assertTrue(container.isComplete(taskKey2))
+        assertTrue(container.isComplete(taskKey3))
+        assertTrue(container.isComplete(taskKey4))
+
+        container.onRemoved(taskKey1)
+        assertFalse(container.isComplete(taskKey1))
+        assertFalse(container.isComplete(taskKey2))
+        assertFalse(container.isComplete(taskKey3))
+        assertTrue(container.isComplete(taskKey4))
+
+        container.onLoaded(makeRecordMock(taskKey3))
+        assertFalse(container.isComplete(taskKey1))
+        assertTrue(container.isComplete(taskKey2))
+        assertTrue(container.isComplete(taskKey3))
+        assertTrue(container.isComplete(taskKey4))
+
+        container.onLoaded(makeRecordMock(taskKey1))
+        assertTrue(container.isComplete(taskKey1))
+        assertTrue(container.isComplete(taskKey2))
+        assertTrue(container.isComplete(taskKey3))
+        assertTrue(container.isComplete(taskKey4))
+
+        container.onLoaded(makeRecordMock(taskKey1, setOf(taskKey2, taskKey4)))
+        assertTrue(container.isComplete(taskKey1))
+        assertTrue(container.isComplete(taskKey2))
+        assertTrue(container.isComplete(taskKey3))
+        assertTrue(container.isComplete(taskKey4))
     }
 }

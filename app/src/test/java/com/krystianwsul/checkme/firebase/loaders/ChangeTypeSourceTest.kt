@@ -199,6 +199,7 @@ class ChangeTypeSourceTest {
             rootTasksLoader,
             userCustomTimeProviderSource,
             taskRecordLoader,
+            rootTaskDependencyStateContainer,
         )
 
         rootTasksFactory = RootTasksFactory(

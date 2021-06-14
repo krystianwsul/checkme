@@ -5,7 +5,6 @@ import com.krystianwsul.common.firebase.records.task.RootTaskRecord
 import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.common.utils.TimeLogger
-import com.krystianwsul.common.utils.filterValuesNotNull
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.kotlin.merge
@@ -19,6 +18,7 @@ interface RootTaskDependencyCoordinator {
         private val rootTasksLoader: RootTasksLoader,
         private val userCustomTimeProviderSource: UserCustomTimeProviderSource,
         private val taskRecordLoader: TaskRecordsLoadedTracker,
+        private val rootTaskDependencyStateContainer: RootTaskDependencyStateContainer,
     ) : RootTaskDependencyCoordinator {
 
         override fun getDependencies(rootTaskRecord: RootTaskRecord): Single<JsonTime.UserCustomTimeProvider> {
@@ -34,31 +34,12 @@ interface RootTaskDependencyCoordinator {
                 .flatMap { userCustomTimeProviderSource.getUserCustomTimeProvider(rootTaskRecord) } // this will be instance
         }
 
-        private fun hasTasks(
-            rootTaskRecord: RootTaskRecord,
-            checkedTaskKeys: MutableSet<TaskKey.Root> = mutableSetOf(),
-        ): Boolean {
+        private fun hasTasks(rootTaskRecord: RootTaskRecord): Boolean {
             val tracker = TimeLogger.start("RootTaskDependencyCoordinator.hasTasks")
+            val isComplete = rootTaskDependencyStateContainer.isComplete(rootTaskRecord.taskKey)
+            tracker.stop()
 
-            val dependentTaskKeys = rootTaskRecord.getDependentTaskKeys()
-            val uncheckedTaskKeys = dependentTaskKeys - checkedTaskKeys
-
-            val uncheckedTasks =
-                uncheckedTaskKeys.associateWith { taskRecordLoader.tryGetTaskRecord(it) }.filterValuesNotNull()
-
-            if (!uncheckedTasks.keys.containsAll(uncheckedTaskKeys)) {
-                tracker.stop("branch 2")
-                return false
-            }
-
-            checkedTaskKeys += uncheckedTaskKeys
-
-            return uncheckedTasks.asSequence()
-                .also {
-                    tracker.stop("branch 3")
-                }
-                .map { hasTasks(it.value, checkedTaskKeys) }
-                .all { it }
+            return isComplete
         }
 
         private fun hasTimes(

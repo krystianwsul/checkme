@@ -121,6 +121,7 @@ class FactoryLoader(
                         rootTasksLoader,
                         userCustomTimeProviderSource,
                         taskRecordLoader,
+                        rootTaskDependencyStateContainer,
                     )
 
                     // this is hacky as fuck, but I'll take my chances

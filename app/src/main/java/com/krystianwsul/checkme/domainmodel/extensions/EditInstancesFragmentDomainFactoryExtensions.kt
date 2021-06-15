@@ -93,26 +93,23 @@ private class SetInstancesDateTimeUndoData(val data: List<Pair<InstanceKey, Date
 
 @CheckResult
 fun DomainUpdater.setInstancesDateTime(
-        notificationType: DomainListenerManager.NotificationType,
-        instanceKeys: Set<InstanceKey>,
-        instanceDate: Date,
-        instanceTimePair: TimePair,
-): Single<UndoData> = SingleDomainUpdate.create("setInstancesDateTime") { now ->
+    notificationType: DomainListenerManager.NotificationType,
+    instanceKeys: Set<InstanceKey>,
+    instanceDate: Date,
+    instanceTimePair: TimePair,
+): Single<EditInstancesResult> = SingleDomainUpdate.create("setInstancesDateTime") { now ->
     check(instanceKeys.isNotEmpty())
 
     val instances = instanceKeys.map(this::getInstance)
 
     val editInstancesUndoData = SetInstancesDateTimeUndoData(
-            instances.map { it.instanceKey to it.recordInstanceDateTime?.toDateTimePair() }
+        instances.map { it.instanceKey to it.recordInstanceDateTime?.toDateTimePair() }
     )
 
+    val time = getTime(instanceTimePair)
+
     instances.forEach {
-        it.setInstanceDateTime(
-                localFactory,
-                DateTime(instanceDate, getTime(instanceTimePair)),
-                this,
-                now,
-        )
+        it.setInstanceDateTime(localFactory, DateTime(instanceDate, time), this, now)
 
         if (it.parentInstance != null) {
             when (it.parentState) {
@@ -134,23 +131,27 @@ fun DomainUpdater.setInstancesDateTime(
 
     val projects = instances.map { it.task.project }.toSet()
 
+    val timeStamp = DateTime(instanceDate, time).timeStamp
+
     DomainUpdater.Result(
-            editInstancesUndoData as UndoData,
-            true,
-            notificationType,
-            DomainFactory.CloudParams(projects),
+        EditInstancesResult(editInstancesUndoData, timeStamp),
+        true,
+        notificationType,
+        DomainFactory.CloudParams(projects),
     )
 }.perform(this)
+
+data class EditInstancesResult(val undoData: UndoData, val newTimeStamp: TimeStamp?)
 
 private class ListUndoData(private val undoDatas: List<UndoData>) : UndoData {
 
     override fun undo(domainFactory: DomainFactory, now: ExactTimeStamp.Local) =
-            undoDatas.flatMap { it.undo(domainFactory, now) }.toSet()
+        undoDatas.flatMap { it.undo(domainFactory, now) }.toSet()
 }
 
 private class SetInstanceParentUndoData(
-        private val instanceKey: InstanceKey,
-        private val parentState: Instance.ParentState,
+    private val instanceKey: InstanceKey,
+    private val parentState: Instance.ParentState,
 ) : UndoData {
 
     override fun undo(
@@ -169,10 +170,10 @@ private class SetInstanceParentUndoData(
 
 @CheckResult
 fun DomainUpdater.setInstancesParent(
-        notificationType: DomainListenerManager.NotificationType,
-        instanceKeys: Set<InstanceKey>,
-        parentInstanceKey: InstanceKey,
-): Single<UndoData> = SingleDomainUpdate.create("setInstancesParent") { now ->
+    notificationType: DomainListenerManager.NotificationType,
+    instanceKeys: Set<InstanceKey>,
+    parentInstanceKey: InstanceKey,
+): Single<EditInstancesResult> = SingleDomainUpdate.create("setInstancesParent") { now ->
     check(instanceKeys.isNotEmpty())
 
     val instances = instanceKeys.map(this::getInstance)
@@ -204,7 +205,7 @@ fun DomainUpdater.setInstancesParent(
     val finalProjects = instances.map { it.task.project }.toSet()
 
     DomainUpdater.Result(
-        ListUndoData(undoDatas) as UndoData,
+        EditInstancesResult(ListUndoData(undoDatas), null),
         true,
         notificationType,
         DomainFactory.CloudParams(originalProjects + finalProjects),

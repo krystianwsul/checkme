@@ -235,23 +235,25 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
 
             editInstancesViewModel.stop()
 
-            listener?.beforeEditInstances()
+            listener?.beforeEditInstances(instanceKeys)
 
             AndroidDomainUpdater.run {
-                state.parentInstanceData
-                    ?.let { setInstancesParent(dataId.toFirst(), instanceKeys, it.instanceKey) }
-                    ?: setInstancesDateTime(
+                if (state.parentInstanceData != null) {
+                    setInstancesParent(dataId.toFirst(), instanceKeys, state.parentInstanceData!!.instanceKey)
+                } else {
+                    setInstancesDateTime(
                         dataId.toFirst(),
                         instanceKeys,
                         state.date,
                         state.timePairPersist.timePair,
                     )
+                }
             }
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribeBy {
                         dismiss()
 
-                        listener?.afterEditInstances(it, instanceKeys.size)
+                        listener?.afterEditInstances(it.undoData, instanceKeys.size, it.newTimeStamp)
                     }
                     .addTo(viewCreatedDisposable)
         }
@@ -469,9 +471,9 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
 
     interface Listener {
 
-        fun beforeEditInstances() {}
+        fun beforeEditInstances(instanceKeys: Set<InstanceKey>) {}
 
-        fun afterEditInstances(undoData: UndoData, count: Int)
+        fun afterEditInstances(undoData: UndoData, count: Int, newTimeStamp: TimeStamp?)
     }
 
     abstract class HostDelegate(
@@ -499,7 +501,7 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
             )
         }
 
-        override fun afterEditInstances(undoData: UndoData, count: Int) {
+        override fun afterEditInstances(undoData: UndoData, count: Int, newTimeStamp: TimeStamp?) {
             snackbarListener.showSnackbarHourMaybe(count)
                 .flatMapCompletable { AndroidDomainUpdater.undo(dataId.toFirst(), undoData) }
                 .subscribe()

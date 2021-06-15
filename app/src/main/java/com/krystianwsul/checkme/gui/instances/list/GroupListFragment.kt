@@ -833,7 +833,7 @@ class GroupListFragment @JvmOverloads constructor(
 
         override val activity get() = this@GroupListFragment.activity
 
-        override fun beforeEditInstances() = selectionCallback.actionMode!!.finish()
+        override fun beforeEditInstances(instanceKeys: Set<InstanceKey>) = selectionCallback.actionMode!!.finish()
     }
 
     private val editInstancesHostDelegate by lazy { EditInstancesHostDelegate() }

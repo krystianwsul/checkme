@@ -11,6 +11,7 @@ import com.krystianwsul.checkme.databinding.ActivityShowGroupBinding
 import com.krystianwsul.checkme.databinding.BottomBinding
 import com.krystianwsul.checkme.domainmodel.extensions.clearTaskEndTimeStamps
 import com.krystianwsul.checkme.domainmodel.extensions.setTaskEndTimeStamps
+import com.krystianwsul.checkme.domainmodel.undo.UndoData
 import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
 import com.krystianwsul.checkme.gui.base.AbstractActivity
 import com.krystianwsul.checkme.gui.dialogs.RemoveInstancesDialogFragment
@@ -25,6 +26,7 @@ import com.krystianwsul.checkme.viewmodels.DataId
 import com.krystianwsul.checkme.viewmodels.ShowGroupViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.common.time.TimeStamp
+import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.Parcelize
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
@@ -165,6 +167,45 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
         override val dataId get() = showGroupViewModel.dataId
 
         override val activity = this@ShowGroupActivity
+
+        private var possiblyClosing = false
+
+        override fun beforeEditInstances(instanceKeys: Set<InstanceKey>) {
+            if (parameters is Parameters.Project &&
+                instanceKeys == data!!.groupListDataWrapper!!
+                    .instanceDatas
+                    .map { it.instanceKey }
+                    .toSet()
+            ) {
+                showGroupViewModel.stop()
+                possiblyClosing = true
+            }
+        }
+
+        /**
+         * This is awful, but I didn't feel like organizing it better.  So, if all instances are being edited on the screen,
+         * then it would normally be empty afterwards.  So if that flag gets set, then if a timestamp is returned (meaning
+         * we edited times, not parent) then we change the time for the screen.  Otherwise (parent set), we give up and close
+         * it.
+         */
+
+        override fun afterEditInstances(undoData: UndoData, count: Int, newTimeStamp: TimeStamp?) {
+            if (possiblyClosing) {
+                check(parameters is Parameters.Project)
+
+                if (newTimeStamp == null) {
+                    finish()
+                } else {
+                    possiblyClosing = false
+
+                    parameters = (parameters as Parameters.Project).copy(timeStamp = newTimeStamp)
+
+                    showGroupViewModel.start(parameters)
+                }
+            } else {
+                super.afterEditInstances(undoData, count, newTimeStamp)
+            }
+        }
     }
 
     private fun updateTopMenu() {

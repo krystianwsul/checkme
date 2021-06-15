@@ -231,15 +231,17 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
 
             editInstancesViewModel.stop()
 
+            listener?.beforeEditInstances()
+
             AndroidDomainUpdater.run {
                 state.parentInstanceData
-                        ?.let { setInstancesParent(dataId.toFirst(), instanceKeys, it.instanceKey) }
-                        ?: setInstancesDateTime(
-                                dataId.toFirst(),
-                                instanceKeys,
-                                state.date,
-                                state.timePairPersist.timePair,
-                        )
+                    ?.let { setInstancesParent(dataId.toFirst(), instanceKeys, it.instanceKey) }
+                    ?: setInstancesDateTime(
+                        dataId.toFirst(),
+                        instanceKeys,
+                        state.date,
+                        state.timePairPersist.timePair,
+                    )
             }
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribeBy {
@@ -462,6 +464,8 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
     ) : Parcelable
 
     interface Listener {
+
+        fun beforeEditInstances() {}
 
         fun afterEditInstances(undoData: UndoData, count: Int)
     }

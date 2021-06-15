@@ -837,9 +837,9 @@ class GroupListFragment @JvmOverloads constructor(
 
     private inner class EditInstancesListener : EditInstancesFragment.Listener {
 
-        override fun afterEditInstances(undoData: UndoData, count: Int) {
-            selectionCallback.actionMode!!.finish()
+        override fun beforeEditInstances() = selectionCallback.actionMode!!.finish()
 
+        override fun afterEditInstances(undoData: UndoData, count: Int) {
             listener.showSnackbarHourMaybe(count)
                 .flatMapCompletable {
                     AndroidDomainUpdater.undo(DomainListenerManager.NotificationType.First(parameters.dataId), undoData)

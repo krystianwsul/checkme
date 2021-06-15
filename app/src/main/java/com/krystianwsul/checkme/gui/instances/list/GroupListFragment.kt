@@ -847,6 +847,10 @@ class GroupListFragment @JvmOverloads constructor(
             }
     }
 
+    /**
+     * todo group this really should be in the listener, since I can have more than one GroupListFragment in an activity.
+     * Maybe add a host delegate or something, to reuse code?
+     */
     private fun onEditInstances(undoData: UndoData, count: Int) {
         selectionCallback.actionMode!!.finish()
 

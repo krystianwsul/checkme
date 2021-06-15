@@ -166,7 +166,7 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
 
         binding.showGroupToolbarCollapseInclude
             .collapseAppBarLayout
-            .setText(data.title, data.subTitle, binding.groupListFragment.emptyTextLayout, immediate)
+            .setText(data.title, data.subtitle, binding.groupListFragment.emptyTextLayout, immediate)
 
         if (data.groupListDataWrapper == null) {
             finish()

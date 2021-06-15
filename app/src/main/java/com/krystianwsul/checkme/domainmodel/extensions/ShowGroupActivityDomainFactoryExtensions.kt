@@ -35,11 +35,14 @@ fun DomainFactory.getShowGroupData(parameters: ShowGroupActivity.Parameters): Sh
 
     val displayText = DateTime(date, time).getDisplayText()
 
-    val subtitle = parameters.projectKey
-        ?.let(projectsFactory::getProjectForce)
-        ?.name
+    val (title, subtitle) = when (parameters) {
+        is ShowGroupActivity.Parameters.Time -> displayText to null
+        is ShowGroupActivity.Parameters.Project -> parameters.projectKey
+            .let(projectsFactory::getProjectForce)
+            .name to displayText
+    }
 
-    return ShowGroupViewModel.Data(displayText, subtitle, getGroupListData(timeStamp, now, parameters.projectKey))
+    return ShowGroupViewModel.Data(title, subtitle, getGroupListData(timeStamp, now, parameters.projectKey))
 }
 
 private fun DomainFactory.getGroupListData(

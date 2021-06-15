@@ -22,7 +22,7 @@ class ShowGroupViewModel : DomainViewModel<ShowGroupViewModel.Data>() {
 
     data class Data(
         val title: String,
-        val subTitle: String?,
+        val subtitle: String?,
         val groupListDataWrapper: GroupListDataWrapper?,
     ) : DomainData() {
 

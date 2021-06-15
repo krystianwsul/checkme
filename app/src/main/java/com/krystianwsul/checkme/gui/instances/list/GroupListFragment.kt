@@ -168,15 +168,6 @@ class GroupListFragment @JvmOverloads constructor(
                 return true
             }
 
-            fun setInstancesDone(
-                instanceKeys: List<InstanceKey>,
-                done: Boolean,
-            ) = AndroidDomainUpdater.setInstancesDone(
-                DomainListenerManager.NotificationType.First(parameters.dataId),
-                instanceKeys,
-                done,
-            )
-
             when (itemId) {
                 R.id.actionGroupHour ->
                     GroupMenuUtils.onHour(selectedDatas, parameters.dataId, listener).addTo(attachedToWindowDisposable)
@@ -260,14 +251,6 @@ class GroupListFragment @JvmOverloads constructor(
         }
 
         override fun onLastRemoved(placeholder: TreeViewAdapter.Placeholder) = listener.onDestroyGroupActionMode()
-
-        fun GroupListDataWrapper.SelectedData.canShowNotification(): Boolean {
-            return this is GroupListDataWrapper.InstanceData
-                    && isRootInstance
-                    && done == null
-                    && instanceTimeStamp <= TimeStamp.now
-                    && !notificationShown
-        }
 
         override fun getItemVisibilities(): List<Pair<Int, Boolean>> {
             checkNotNull(actionMode)

@@ -10,6 +10,7 @@ import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.ActivityShowInstanceBinding
 import com.krystianwsul.checkme.databinding.BottomBinding
 import com.krystianwsul.checkme.domainmodel.extensions.*
+import com.krystianwsul.checkme.domainmodel.undo.UndoData
 import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
 import com.krystianwsul.checkme.gui.base.AbstractActivity
 import com.krystianwsul.checkme.gui.dialogs.RemoveInstancesDialogFragment
@@ -39,8 +40,6 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
     companion object {
 
         private const val INSTANCE_KEY = "instanceKey"
-
-        private const val EDIT_INSTANCES_TAG = "editInstances"
 
         private const val TAG_DELETE_INSTANCES = "deleteInstances"
 
@@ -125,6 +124,15 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
 
     private lateinit var bottomFabMenuDelegate: BottomFabMenuDelegate
 
+    private val editInstancesHostDelegate = object : EditInstancesFragment.HostDelegate() {
+
+        override val dataId get() = showInstanceViewModel.dataId
+
+        override val activity = this@ShowInstanceActivity
+
+        override fun afterEditInstances(undoData: UndoData, count: Int, newTimeStamp: TimeStamp?) {}
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -187,17 +195,16 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
                                 R.id.instanceMenuEditInstance -> {
                                     check(!it.done)
 
-                                    EditInstancesFragment.newInstance(
-                                            listOf(instanceKey),
-                                            showInstanceViewModel.dataId,
-                                    ).show(supportFragmentManager, EDIT_INSTANCES_TAG)
+                                    editInstancesHostDelegate.show(listOf(instanceKey))
                                 }
                                 R.id.instanceMenuCheck -> if (!it.done) setDone(true) // todo flowable
                                 R.id.instanceMenuUncheck -> if (it.done) setDone(false)
                             }
-                        }
                     }
                 }
+            }
+
+        editInstancesHostDelegate.onCreate()
 
         updateTopMenu()
 

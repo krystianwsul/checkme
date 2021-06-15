@@ -74,10 +74,10 @@ object GroupMenuUtils {
             .subscribe()
     }
 
-    fun onEdit(selectedDatas: SelectedDatas, hostDelegate: EditInstancesFragment.HostDelegate) {
+    fun onEdit(selectedDatas: SelectedDatas, snackbarHostDelegate: EditInstancesFragment.SnackbarHostDelegate) {
         check(selectedDatas.isNotEmpty())
 
-        hostDelegate.show(selectedDatas.map { (it as GroupListDataWrapper.InstanceData).instanceKey })
+        snackbarHostDelegate.show(selectedDatas.map { (it as GroupListDataWrapper.InstanceData).instanceKey })
     }
 
     private fun setInstancesDone(instanceKeys: List<InstanceKey>, done: Boolean, dataId: DataId) =

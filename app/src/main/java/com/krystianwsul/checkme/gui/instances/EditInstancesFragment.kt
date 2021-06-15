@@ -22,6 +22,7 @@ import com.jakewharton.rxrelay3.PublishRelay
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.FragmentEditInstancesBinding
+import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.extensions.setInstancesDateTime
 import com.krystianwsul.checkme.domainmodel.extensions.setInstancesParent
 import com.krystianwsul.checkme.domainmodel.extensions.undo
@@ -38,10 +39,7 @@ import com.krystianwsul.checkme.gui.utils.connectInstanceSearch
 import com.krystianwsul.checkme.gui.utils.measureVisibleHeight
 import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.utils.time.getDisplayText
-import com.krystianwsul.checkme.viewmodels.DataId
-import com.krystianwsul.checkme.viewmodels.EditInstancesSearchViewModel
-import com.krystianwsul.checkme.viewmodels.EditInstancesViewModel
-import com.krystianwsul.checkme.viewmodels.getViewModel
+import com.krystianwsul.checkme.viewmodels.*
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.time.TimePairPersist
@@ -62,7 +60,6 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
     companion object {
 
         private const val INSTANCE_KEYS = "instanceKeys"
-        private const val KEY_DATA_ID = "dataId"
 
         private const val KEY_STATE = "state"
 
@@ -71,13 +68,10 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
         private const val TIME_DIALOG_FRAGMENT_TAG = "timeDialogFragment"
         private const val TAG_PARENT_PICKER = "parentPicker"
 
-        fun newInstance(instanceKeys: List<InstanceKey>, dataId: DataId) = EditInstancesFragment().apply {
+        fun newInstance(instanceKeys: List<InstanceKey>) = EditInstancesFragment().apply {
             check(instanceKeys.isNotEmpty())
 
-            arguments = Bundle().apply {
-                putParcelableArrayList(INSTANCE_KEYS, ArrayList(instanceKeys))
-                putParcelable(KEY_DATA_ID, dataId)
-            }
+            arguments = Bundle().apply { putParcelableArrayList(INSTANCE_KEYS, ArrayList(instanceKeys)) }
         }
     }
 
@@ -130,7 +124,7 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
     private val editInstancesViewModel by lazy { getViewModel<EditInstancesViewModel>() }
     private val editInstancesSearchViewModel by lazy { getViewModel<EditInstancesSearchViewModel>() }
 
-    var listener: Listener? = null
+    lateinit var listener: Listener
 
     private val bindingProperty = ResettableProperty<FragmentEditInstancesBinding>()
     private var binding by bindingProperty
@@ -194,18 +188,13 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
         }
     }
 
-    private lateinit var dataId: DataId
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        dataId = requireArguments().getParcelable(KEY_DATA_ID)!!
-
         childFragmentManager.getMaterialDatePicker(DATE_FRAGMENT_TAG)?.addListener(materialDatePickerListener)
 
-        if (savedInstanceState?.containsKey(KEY_STATE) == true) {
+        if (savedInstanceState?.containsKey(KEY_STATE) == true)
             state = savedInstanceState.getParcelable(KEY_STATE)!!
-        }
 
         check(instanceKeys.isNotEmpty())
 
@@ -235,14 +224,14 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
 
             editInstancesViewModel.stop()
 
-            listener?.beforeEditInstances(instanceKeys)
+            listener.beforeEditInstances(instanceKeys)
 
             AndroidDomainUpdater.run {
                 if (state.parentInstanceData != null) {
-                    setInstancesParent(dataId.toFirst(), instanceKeys, state.parentInstanceData!!.instanceKey)
+                    setInstancesParent(listener.notificationType, instanceKeys, state.parentInstanceData!!.instanceKey)
                 } else {
                     setInstancesDateTime(
-                        dataId.toFirst(),
+                        listener.notificationType,
                         instanceKeys,
                         state.date,
                         state.timePairPersist.timePair,
@@ -253,7 +242,7 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
                     .subscribeBy {
                         dismiss()
 
-                        listener?.afterEditInstances(it.undoData, instanceKeys.size, it.newTimeStamp)
+                        listener.afterEditInstances(it.undoData, instanceKeys.size, it.newTimeStamp)
                     }
                     .addTo(viewCreatedDisposable)
         }
@@ -471,22 +460,21 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
 
     interface Listener {
 
+        val dataId: DataId?
+
+        val notificationType get() = dataId?.toFirst() ?: DomainListenerManager.NotificationType.All
+
         fun beforeEditInstances(instanceKeys: Set<InstanceKey>) {}
 
         fun afterEditInstances(undoData: UndoData, count: Int, newTimeStamp: TimeStamp?)
     }
 
-    abstract class HostDelegate(
-        private val snackbarListener: SnackbarListener,
-        private val compositeDisposable: CompositeDisposable,
-    ) : Listener {
+    abstract class HostDelegate : Listener {
 
         companion object {
 
             private const val TAG_EDIT_INSTANCES = "editInstances"
         }
-
-        protected abstract val dataId: DataId
 
         protected abstract val activity: AbstractActivity
 
@@ -495,15 +483,21 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
         }
 
         fun show(instanceKeys: List<InstanceKey>) {
-            newInstance(instanceKeys, dataId).also { it.listener = this }.show(
+            newInstance(instanceKeys).also { it.listener = this }.show(
                 activity.supportFragmentManager,
                 TAG_EDIT_INSTANCES,
             )
         }
+    }
+
+    abstract class SnackbarHostDelegate(
+        private val snackbarListener: SnackbarListener,
+        private val compositeDisposable: CompositeDisposable,
+    ) : HostDelegate() {
 
         override fun afterEditInstances(undoData: UndoData, count: Int, newTimeStamp: TimeStamp?) {
             snackbarListener.showSnackbarHourMaybe(count)
-                .flatMapCompletable { AndroidDomainUpdater.undo(dataId.toFirst(), undoData) }
+                .flatMapCompletable { AndroidDomainUpdater.undo(notificationType, undoData) }
                 .subscribe()
                 .addTo(compositeDisposable)
         }

@@ -824,7 +824,7 @@ class GroupListFragment @JvmOverloads constructor(
             }
     }
 
-    private inner class EditInstancesHostDelegate : EditInstancesFragment.HostDelegate(
+    private inner class EditInstancesSnackbarHostDelegate : EditInstancesFragment.SnackbarHostDelegate(
         listener,
         attachedToWindowDisposable,
     ) {
@@ -836,7 +836,7 @@ class GroupListFragment @JvmOverloads constructor(
         override fun beforeEditInstances(instanceKeys: Set<InstanceKey>) = selectionCallback.actionMode!!.finish()
     }
 
-    private val editInstancesHostDelegate by lazy { EditInstancesHostDelegate() }
+    private val editInstancesHostDelegate by lazy { EditInstancesSnackbarHostDelegate() }
 
     fun clearExpansionStates() = searchDataManager.treeViewAdapterNullable?.clearExpansionStates()
 

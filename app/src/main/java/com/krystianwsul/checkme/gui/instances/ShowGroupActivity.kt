@@ -159,7 +159,7 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
         startDate(receiver)
     }
 
-    private val editInstancesHostDelegate = object : EditInstancesFragment.HostDelegate(
+    private val editInstancesHostDelegate = object : EditInstancesFragment.SnackbarHostDelegate(
         this@ShowGroupActivity,
         createDisposable,
     ) {

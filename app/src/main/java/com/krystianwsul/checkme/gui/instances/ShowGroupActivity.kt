@@ -43,7 +43,6 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
         private const val KEY_PARAMETERS = "parameters"
 
         private const val TAG_DELETE_INSTANCES = "deleteInstances"
-        private const val EDIT_INSTANCES_TAG = "editInstances"
 
         private const val KEY_BOTTOM_FAB_MENU_DELEGATE_STATE = "bottomFabMenuDelegateState"
 
@@ -133,9 +132,7 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
                         R.id.actionShowGroupNotify -> GroupMenuUtils.onNotify(instanceDatas, dataId).addTo(createDisposable)
                         R.id.actionShowGroupHour ->
                             GroupMenuUtils.onHour(instanceDatas, dataId, listener).addTo(createDisposable)
-                        R.id.actionShowGroupEditInstance -> GroupMenuUtils.onEdit(instanceDatas, dataId)
-                            .also { it.listener = editInstancesHostDelegate }
-                            .show(supportFragmentManager, EDIT_INSTANCES_TAG)
+                        R.id.actionShowGroupEditInstance -> GroupMenuUtils.onEdit(instanceDatas, editInstancesHostDelegate)
                         R.id.actionShowGroupCheck ->
                             GroupMenuUtils.onCheck(instanceDatas, dataId, listener).addTo(createDisposable)
                         R.id.actionShowGroupUncheck ->
@@ -154,17 +151,20 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
         }
 
         tryGetFragment<RemoveInstancesDialogFragment>(TAG_DELETE_INSTANCES)?.listener = deleteInstancesListener
-        tryGetFragment<EditInstancesFragment>(EDIT_INSTANCES_TAG)?.listener = editInstancesHostDelegate
+
+        editInstancesHostDelegate.onCreate()
 
         startDate(receiver)
     }
 
     private val editInstancesHostDelegate = object : EditInstancesFragment.HostDelegate(
-        this,
+        this@ShowGroupActivity,
         createDisposable,
     ) {
 
         override val dataId get() = showGroupViewModel.dataId
+
+        override val activity = this@ShowGroupActivity
     }
 
     private fun updateTopMenu() {

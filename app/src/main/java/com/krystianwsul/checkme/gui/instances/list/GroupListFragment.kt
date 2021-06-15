@@ -67,7 +67,6 @@ class GroupListFragment @JvmOverloads constructor(
         private const val SUPER_STATE_KEY = "superState"
         const val EXPANSION_STATE_KEY = "expansionState"
         private const val LAYOUT_MANAGER_STATE = "layoutManagerState"
-        private const val EDIT_INSTANCES_TAG = "editInstances"
         private const val KEY_SHOW_IMAGE = "showImage"
         private const val KEY_SEARCH_DATA = "searchData"
 
@@ -169,9 +168,7 @@ class GroupListFragment @JvmOverloads constructor(
                 R.id.actionGroupHour ->
                     GroupMenuUtils.onHour(selectedDatas, parameters.dataId, listener).addTo(attachedToWindowDisposable)
                 R.id.action_group_edit_instance -> {
-                    GroupMenuUtils.onEdit(selectedDatas, parameters.dataId)
-                        .also { it.listener = editInstancesHostDelegate }
-                        .show(activity.supportFragmentManager, EDIT_INSTANCES_TAG)
+                    GroupMenuUtils.onEdit(selectedDatas, editInstancesHostDelegate)
 
                     return false
                 }
@@ -526,7 +523,7 @@ class GroupListFragment @JvmOverloads constructor(
 
         activity.startTicks(receiver)
 
-        activity.tryGetFragment<EditInstancesFragment>(EDIT_INSTANCES_TAG)?.listener = editInstancesHostDelegate
+        editInstancesHostDelegate.onCreate()
 
         searchDataManager.treeViewAdapterSingle
             .flatMapObservable { it.updates }
@@ -834,10 +831,12 @@ class GroupListFragment @JvmOverloads constructor(
 
         override val dataId get() = parameters.dataId
 
+        override val activity get() = this@GroupListFragment.activity
+
         override fun beforeEditInstances() = selectionCallback.actionMode!!.finish()
     }
 
-    private val editInstancesHostDelegate = EditInstancesHostDelegate()
+    private val editInstancesHostDelegate by lazy { EditInstancesHostDelegate() }
 
     fun clearExpansionStates() = searchDataManager.treeViewAdapterNullable?.clearExpansionStates()
 

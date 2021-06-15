@@ -22,12 +22,12 @@ import com.jakewharton.rxrelay3.PublishRelay
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.FragmentEditInstancesBinding
-import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.extensions.setInstancesDateTime
 import com.krystianwsul.checkme.domainmodel.extensions.setInstancesParent
 import com.krystianwsul.checkme.domainmodel.extensions.undo
 import com.krystianwsul.checkme.domainmodel.undo.UndoData
 import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
+import com.krystianwsul.checkme.gui.base.AbstractActivity
 import com.krystianwsul.checkme.gui.base.NoCollapseBottomSheetDialogFragment
 import com.krystianwsul.checkme.gui.base.SnackbarListener
 import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimeActivity
@@ -479,13 +479,29 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
         private val compositeDisposable: CompositeDisposable,
     ) : Listener {
 
+        companion object {
+
+            private const val TAG_EDIT_INSTANCES = "editInstances"
+        }
+
         protected abstract val dataId: DataId
+
+        protected abstract val activity: AbstractActivity
+
+        fun onCreate() {
+            activity.tryGetFragment<EditInstancesFragment>(TAG_EDIT_INSTANCES)?.listener = this
+        }
+
+        fun show(instanceKeys: List<InstanceKey>) {
+            newInstance(instanceKeys, dataId).also { it.listener = this }.show(
+                activity.supportFragmentManager,
+                TAG_EDIT_INSTANCES,
+            )
+        }
 
         override fun afterEditInstances(undoData: UndoData, count: Int) {
             snackbarListener.showSnackbarHourMaybe(count)
-                .flatMapCompletable {
-                    AndroidDomainUpdater.undo(DomainListenerManager.NotificationType.First(dataId), undoData)
-                }
+                .flatMapCompletable { AndroidDomainUpdater.undo(dataId.toFirst(), undoData) }
                 .subscribe()
                 .addTo(compositeDisposable)
         }

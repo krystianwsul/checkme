@@ -21,11 +21,8 @@ import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.TooltipManager
 import com.krystianwsul.checkme.TooltipManager.subscribeShowBalloon
 import com.krystianwsul.checkme.databinding.FragmentGroupListBinding
-import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.GroupType
 import com.krystianwsul.checkme.domainmodel.extensions.*
-import com.krystianwsul.checkme.domainmodel.undo.UndoData
-import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
 import com.krystianwsul.checkme.gui.base.AbstractActivity
 import com.krystianwsul.checkme.gui.edit.EditActivity
 import com.krystianwsul.checkme.gui.edit.EditParameters
@@ -173,7 +170,7 @@ class GroupListFragment @JvmOverloads constructor(
                     GroupMenuUtils.onHour(selectedDatas, parameters.dataId, listener).addTo(attachedToWindowDisposable)
                 R.id.action_group_edit_instance -> {
                     GroupMenuUtils.onEdit(selectedDatas, parameters.dataId)
-                        .also { it.listener = editInstancesListener }
+                        .also { it.listener = editInstancesHostDelegate }
                         .show(activity.supportFragmentManager, EDIT_INSTANCES_TAG)
 
                     return false
@@ -529,7 +526,7 @@ class GroupListFragment @JvmOverloads constructor(
 
         activity.startTicks(receiver)
 
-        activity.tryGetFragment<EditInstancesFragment>(EDIT_INSTANCES_TAG)?.listener = editInstancesListener
+        activity.tryGetFragment<EditInstancesFragment>(EDIT_INSTANCES_TAG)?.listener = editInstancesHostDelegate
 
         searchDataManager.treeViewAdapterSingle
             .flatMapObservable { it.updates }
@@ -830,26 +827,17 @@ class GroupListFragment @JvmOverloads constructor(
             }
     }
 
-    /**
-     * todo group this really should be in the listener, since I can have more than one GroupListFragment in an activity.
-     * Maybe add a host delegate or something, to reuse code?
-     */
+    private inner class EditInstancesHostDelegate : EditInstancesFragment.HostDelegate(
+        listener,
+        attachedToWindowDisposable,
+    ) {
 
-    private inner class EditInstancesListener : EditInstancesFragment.Listener {
+        override val dataId get() = parameters.dataId
 
         override fun beforeEditInstances() = selectionCallback.actionMode!!.finish()
-
-        override fun afterEditInstances(undoData: UndoData, count: Int) {
-            listener.showSnackbarHourMaybe(count)
-                .flatMapCompletable {
-                    AndroidDomainUpdater.undo(DomainListenerManager.NotificationType.First(parameters.dataId), undoData)
-                }
-                .subscribe()
-                .addTo(attachedToWindowDisposable)
-        }
     }
 
-    private val editInstancesListener = EditInstancesListener()
+    private val editInstancesHostDelegate = EditInstancesHostDelegate()
 
     fun clearExpansionStates() = searchDataManager.treeViewAdapterNullable?.clearExpansionStates()
 

@@ -9,11 +9,8 @@ import androidx.appcompat.view.ActionMode
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.ActivityShowGroupBinding
 import com.krystianwsul.checkme.databinding.BottomBinding
-import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.extensions.clearTaskEndTimeStamps
 import com.krystianwsul.checkme.domainmodel.extensions.setTaskEndTimeStamps
-import com.krystianwsul.checkme.domainmodel.extensions.undo
-import com.krystianwsul.checkme.domainmodel.undo.UndoData
 import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
 import com.krystianwsul.checkme.gui.base.AbstractActivity
 import com.krystianwsul.checkme.gui.dialogs.RemoveInstancesDialogFragment
@@ -137,7 +134,7 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
                         R.id.actionShowGroupHour ->
                             GroupMenuUtils.onHour(instanceDatas, dataId, listener).addTo(createDisposable)
                         R.id.actionShowGroupEditInstance -> GroupMenuUtils.onEdit(instanceDatas, dataId)
-                            .also { it.listener = editInstancesListener }
+                            .also { it.listener = editInstancesHostDelegate }
                             .show(supportFragmentManager, EDIT_INSTANCES_TAG)
                         R.id.actionShowGroupCheck ->
                             GroupMenuUtils.onCheck(instanceDatas, dataId, listener).addTo(createDisposable)
@@ -157,24 +154,17 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
         }
 
         tryGetFragment<RemoveInstancesDialogFragment>(TAG_DELETE_INSTANCES)?.listener = deleteInstancesListener
-        tryGetFragment<EditInstancesFragment>(EDIT_INSTANCES_TAG)?.listener = editInstancesListener
+        tryGetFragment<EditInstancesFragment>(EDIT_INSTANCES_TAG)?.listener = editInstancesHostDelegate
 
         startDate(receiver)
     }
 
-    private val editInstancesListener = object : EditInstancesFragment.Listener {
+    private val editInstancesHostDelegate = object : EditInstancesFragment.HostDelegate(
+        this,
+        createDisposable,
+    ) {
 
-        override fun afterEditInstances(undoData: UndoData, count: Int) {
-            showSnackbarHourMaybe(count)
-                .flatMapCompletable {
-                    AndroidDomainUpdater.undo(
-                        DomainListenerManager.NotificationType.First(showGroupViewModel.dataId),
-                        undoData,
-                    )
-                }
-                .subscribe()
-                .addTo(createDisposable)
-        }
+        override val dataId get() = showGroupViewModel.dataId
     }
 
     private fun updateTopMenu() {

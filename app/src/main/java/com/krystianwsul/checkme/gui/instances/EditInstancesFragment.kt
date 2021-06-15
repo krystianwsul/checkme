@@ -22,11 +22,14 @@ import com.jakewharton.rxrelay3.PublishRelay
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.FragmentEditInstancesBinding
+import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.extensions.setInstancesDateTime
 import com.krystianwsul.checkme.domainmodel.extensions.setInstancesParent
+import com.krystianwsul.checkme.domainmodel.extensions.undo
 import com.krystianwsul.checkme.domainmodel.undo.UndoData
 import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
 import com.krystianwsul.checkme.gui.base.NoCollapseBottomSheetDialogFragment
+import com.krystianwsul.checkme.gui.base.SnackbarListener
 import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimeActivity
 import com.krystianwsul.checkme.gui.dialogs.*
 import com.krystianwsul.checkme.gui.edit.dialogs.ParentPickerFragment
@@ -48,6 +51,7 @@ import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.treeadapter.FilterCriteria
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.subscribeBy
 import kotlinx.parcelize.Parcelize
@@ -468,5 +472,22 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
         fun beforeEditInstances() {}
 
         fun afterEditInstances(undoData: UndoData, count: Int)
+    }
+
+    abstract class HostDelegate(
+        private val snackbarListener: SnackbarListener,
+        private val compositeDisposable: CompositeDisposable,
+    ) : Listener {
+
+        protected abstract val dataId: DataId
+
+        override fun afterEditInstances(undoData: UndoData, count: Int) {
+            snackbarListener.showSnackbarHourMaybe(count)
+                .flatMapCompletable {
+                    AndroidDomainUpdater.undo(DomainListenerManager.NotificationType.First(dataId), undoData)
+                }
+                .subscribe()
+                .addTo(compositeDisposable)
+        }
     }
 }

@@ -28,8 +28,8 @@ object ShortcutQueue {
                 val shortcuts = it.map {
                     val icon = it.uuid
                         ?.let { ImageManager.getLargeIcon(it) }
-                                ?.invoke()
-                                ?.let { IconCompat.createWithAdaptiveBitmap(it) }
+                        ?.invoke()
+                        ?.let { IconCompat.createWithAdaptiveBitmap(it) }
                         ?: IconCompat.createWithResource(MyApplication.instance, R.mipmap.launcher_add)
 
                     ShortcutInfoCompat.Builder(MyApplication.instance, it.taskKey.toShortcut())
@@ -37,6 +37,7 @@ object ShortcutQueue {
                         .setIcon(icon)
                         .setCategories(setOf(CATEGORY))
                         .setIntent(EditActivity.getShortcutIntent(it.taskKey))
+                        .setRank(10)
                         .build()
                 }
 
@@ -53,7 +54,7 @@ object ShortcutQueue {
                 ShortcutManagerCompat.removeDynamicShortcuts(MyApplication.context, removeShortcuts)
                 ShortcutManagerCompat.addDynamicShortcuts(MyApplication.context, addShortcuts)
                 ShortcutManagerCompat.updateShortcuts(MyApplication.context, updateShortcuts)
-                }
+            }
     }
 
     fun updateShortcuts(shortcutDatas: List<ShortcutData>) = relay.accept(shortcutDatas)

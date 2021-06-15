@@ -173,7 +173,7 @@ class GroupListFragment @JvmOverloads constructor(
                     GroupMenuUtils.onHour(selectedDatas, parameters.dataId, listener).addTo(attachedToWindowDisposable)
                 R.id.action_group_edit_instance -> {
                     GroupMenuUtils.onEdit(selectedDatas, parameters.dataId)
-                        .also { it.listener = this@GroupListFragment::onEditInstances }
+                        .also { it.listener = editInstancesListener }
                         .show(activity.supportFragmentManager, EDIT_INSTANCES_TAG)
 
                     return false
@@ -529,7 +529,7 @@ class GroupListFragment @JvmOverloads constructor(
 
         activity.startTicks(receiver)
 
-        activity.tryGetFragment<EditInstancesFragment>(EDIT_INSTANCES_TAG)?.listener = this::onEditInstances
+        activity.tryGetFragment<EditInstancesFragment>(EDIT_INSTANCES_TAG)?.listener = editInstancesListener
 
         searchDataManager.treeViewAdapterSingle
             .flatMapObservable { it.updates }
@@ -834,16 +834,22 @@ class GroupListFragment @JvmOverloads constructor(
      * todo group this really should be in the listener, since I can have more than one GroupListFragment in an activity.
      * Maybe add a host delegate or something, to reuse code?
      */
-    private fun onEditInstances(undoData: UndoData, count: Int) {
-        selectionCallback.actionMode!!.finish()
 
-        listener.showSnackbarHourMaybe(count)
-            .flatMapCompletable {
-                AndroidDomainUpdater.undo(DomainListenerManager.NotificationType.First(parameters.dataId), undoData)
-            }
-            .subscribe()
-            .addTo(attachedToWindowDisposable)
+    private inner class EditInstancesListener : EditInstancesFragment.Listener {
+
+        override fun afterEditInstances(undoData: UndoData, count: Int) {
+            selectionCallback.actionMode!!.finish()
+
+            listener.showSnackbarHourMaybe(count)
+                .flatMapCompletable {
+                    AndroidDomainUpdater.undo(DomainListenerManager.NotificationType.First(parameters.dataId), undoData)
+                }
+                .subscribe()
+                .addTo(attachedToWindowDisposable)
+        }
     }
+
+    private val editInstancesListener = EditInstancesListener()
 
     fun clearExpansionStates() = searchDataManager.treeViewAdapterNullable?.clearExpansionStates()
 

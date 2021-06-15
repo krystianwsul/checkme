@@ -137,7 +137,7 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
                         R.id.actionShowGroupHour ->
                             GroupMenuUtils.onHour(instanceDatas, dataId, listener).addTo(createDisposable)
                         R.id.actionShowGroupEditInstance -> GroupMenuUtils.onEdit(instanceDatas, dataId)
-                            .also { it.listener = ::onEditInstances }
+                            .also { it.listener = editInstancesListener }
                             .show(supportFragmentManager, EDIT_INSTANCES_TAG)
                         R.id.actionShowGroupCheck ->
                             GroupMenuUtils.onCheck(instanceDatas, dataId, listener).addTo(createDisposable)
@@ -157,18 +157,24 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
         }
 
         tryGetFragment<RemoveInstancesDialogFragment>(TAG_DELETE_INSTANCES)?.listener = deleteInstancesListener
-        tryGetFragment<EditInstancesFragment>(EDIT_INSTANCES_TAG)?.listener = ::onEditInstances
+        tryGetFragment<EditInstancesFragment>(EDIT_INSTANCES_TAG)?.listener = editInstancesListener
 
         startDate(receiver)
     }
 
-    private fun onEditInstances(undoData: UndoData, count: Int) {
-        showSnackbarHourMaybe(count)
-            .flatMapCompletable {
-                AndroidDomainUpdater.undo(DomainListenerManager.NotificationType.First(showGroupViewModel.dataId), undoData)
-            }
-            .subscribe()
-            .addTo(createDisposable)
+    private val editInstancesListener = object : EditInstancesFragment.Listener {
+
+        override fun afterEditInstances(undoData: UndoData, count: Int) {
+            showSnackbarHourMaybe(count)
+                .flatMapCompletable {
+                    AndroidDomainUpdater.undo(
+                        DomainListenerManager.NotificationType.First(showGroupViewModel.dataId),
+                        undoData,
+                    )
+                }
+                .subscribe()
+                .addTo(createDisposable)
+        }
     }
 
     private fun updateTopMenu() {

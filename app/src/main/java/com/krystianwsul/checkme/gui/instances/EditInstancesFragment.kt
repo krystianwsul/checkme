@@ -126,7 +126,7 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
     private val editInstancesViewModel by lazy { getViewModel<EditInstancesViewModel>() }
     private val editInstancesSearchViewModel by lazy { getViewModel<EditInstancesSearchViewModel>() }
 
-    var listener: ((UndoData, Int) -> Unit)? = null
+    var listener: Listener? = null
 
     private val bindingProperty = ResettableProperty<FragmentEditInstancesBinding>()
     private var binding by bindingProperty
@@ -245,7 +245,7 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
                     .subscribeBy {
                         dismiss()
 
-                        listener?.invoke(it, instanceKeys.size)
+                        listener?.afterEditInstances(it, instanceKeys.size)
                     }
                     .addTo(viewCreatedDisposable)
         }
@@ -455,9 +455,14 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
 
     @Parcelize
     private data class State(
-            var parentInstanceData: EditInstancesViewModel.ParentInstanceData?,
-            var date: Date,
-            var timePairPersist: TimePairPersist,
-            var page: Int = 0,
+        var parentInstanceData: EditInstancesViewModel.ParentInstanceData?,
+        var date: Date,
+        var timePairPersist: TimePairPersist,
+        var page: Int = 0,
     ) : Parcelable
+
+    interface Listener {
+
+        fun afterEditInstances(undoData: UndoData, count: Int)
+    }
 }

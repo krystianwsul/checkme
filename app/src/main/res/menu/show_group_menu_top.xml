@@ -5,64 +5,60 @@
 
     <item
         android:id="@+id/actionShowGroupSearch"
-        android:title="@string/search"
-        android:orderInCategory="100"
         android:icon="@drawable/ic_search_white_24dp"
-        app:showAsAction="always"
+        android:orderInCategory="100"
+        android:title="@string/search"
         android:visible="false"
+        app:showAsAction="always"
         tools:ignore="AlwaysShowAction" />
 
     <item
         android:id="@+id/actionShowGroupNotify"
-        android:title="@string/notify"
-        android:orderInCategory="100"
-        app:showAsAction="ifRoom"
         android:icon="@drawable/ic_notifications_active_white_24dp"
-        android:visible="false" />
+        android:orderInCategory="100"
+        android:title="@string/notify"
+        android:visible="false"
+        app:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/actionShowGroupHour"
-        android:title="@string/hour"
-        android:orderInCategory="150"
         android:icon="@drawable/ic_plus_one_white_24dp"
-        app:showAsAction="ifRoom"
-        android:visible="false" />
+        android:orderInCategory="150"
+        android:title="@string/hour"
+        android:visible="false"
+        app:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/actionShowGroupEditInstance"
-        android:title="@string/edit_instance"
-        android:orderInCategory="200"
-        app:showAsAction="always"
         android:icon="@drawable/ic_alarm_white_24dp"
-        android:visible="false" />
+        android:orderInCategory="200"
+        android:title="@string/edit_instance"
+        android:visible="false"
+        app:showAsAction="always" />
 
     <item
         android:id="@+id/actionShowGroupCheck"
-        android:title="@string/mark_done"
-        android:orderInCategory="1000"
-        app:showAsAction="always"
         android:icon="@drawable/ic_check_box_outline_blank_white_24dp"
+        android:orderInCategory="1000"
+        android:title="@string/mark_done"
         android:visible="false"
+        app:showAsAction="always"
         tools:ignore="AlwaysShowAction" />
 
     <item
         android:id="@+id/actionShowGroupUncheck"
-        android:title="@string/mark_not_done"
-        android:orderInCategory="1000"
-        app:showAsAction="always"
         android:icon="@drawable/ic_check_box_white_24dp"
-        android:visible="false" />
+        android:orderInCategory="1000"
+        android:title="@string/mark_not_done"
+        android:visible="false"
+        app:showAsAction="always" />
 
-    <group android:id="@+id/actionShowGroupAssignedGroup">
-
-        <item
-            android:id="@+id/actionShowGroupAssigned"
-            android:title="@string/showAssignedTo"
-            android:orderInCategory="1200"
-            app:showAsAction="never"
-            android:checkable="true"
-            android:visible="false" />
-
-    </group>
+    <item
+        android:id="@+id/actionShowGroupAssigned"
+        android:checkable="true"
+        android:orderInCategory="1200"
+        android:title="@string/showAssignedTo"
+        android:visible="false"
+        app:showAsAction="never" />
 
 </menu>

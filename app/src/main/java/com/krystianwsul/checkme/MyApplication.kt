@@ -204,11 +204,18 @@ class MyApplication : Application() {
 
         Contacts.initialize(this)
 
-        fun createShortcut(id: String, @StringRes label: Int, @DrawableRes icon: Int, intent: Intent): ShortcutInfoCompat {
+        fun createShortcut(
+            id: String,
+            @StringRes label: Int,
+            @DrawableRes icon: Int,
+            intent: Intent,
+            rank: Int,
+        ): ShortcutInfoCompat {
             return ShortcutInfoCompat.Builder(this, id)
                 .setShortLabel(getString(label))
                 .setIcon(IconCompat.createWithResource(this, icon))
                 .setIntent(intent)
+                .setRank(rank)
                 .build()
         }
 
@@ -220,25 +227,29 @@ class MyApplication : Application() {
                         "add",
                         R.string.add_task,
                         R.mipmap.launcher_add,
-                        EditActivity.getShortcutIntent(null).addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT)
+                        EditActivity.getShortcutIntent(null).addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT),
+                        0,
                     ),
                     createShortcut(
                         "search",
                         R.string.search,
                         R.mipmap.launcher_search,
-                        MainActivity.newIntent().setAction(MainActivity.ACTION_SEARCH)
+                        MainActivity.newIntent().setAction(MainActivity.ACTION_SEARCH),
+                        1,
                     ),
                     createShortcut(
-                        "tasks",
+                        "notes",
                         R.string.notes,
                         R.mipmap.launcher_notes,
-                        MainActivity.newIntent().setAction(MainActivity.ACTION_NOTES)
+                        MainActivity.newIntent().setAction(MainActivity.ACTION_NOTES),
+                        2,
                     ),
                     createShortcut(
                         "instances",
                         R.string.instances,
                         R.mipmap.launcher_instances,
-                        MainActivity.newIntent().setAction(MainActivity.ACTION_INSTANCES)
+                        MainActivity.newIntent().setAction(MainActivity.ACTION_INSTANCES),
+                        3,
                     ),
                 ),
             )

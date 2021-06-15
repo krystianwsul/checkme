@@ -111,9 +111,6 @@ class DebugFragment : AbstractFragment() {
                         append("\ninstance shown: ")
                         append(domainFactory.instanceShownCount)
 
-                        append("\n\nroot task log:\n")
-                        append(Preferences.rootTaskLog.log)
-
                         append("\n\nsaved state log:\n")
                         append(Preferences.savedStateLog.log)
 

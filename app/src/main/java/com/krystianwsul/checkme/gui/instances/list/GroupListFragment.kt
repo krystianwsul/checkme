@@ -50,8 +50,6 @@ import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.treeadapter.*
 import com.skydoves.balloon.ArrowOrientation
 import com.stfalcon.imageviewer.StfalconImageViewer
-import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
-import io.reactivex.rxjava3.core.Maybe
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
@@ -180,32 +178,10 @@ class GroupListFragment @JvmOverloads constructor(
             )
 
             when (itemId) {
-                R.id.actionGroupHour -> {
-                    check(showHour(selectedDatas))
-                    val instanceKeys = selectedDatas.map { (it as GroupListDataWrapper.InstanceData).instanceKey }
-
-                    AndroidDomainUpdater.setInstancesAddHourActivity(
-                        DomainListenerManager.NotificationType.First(parameters.dataId),
-                        instanceKeys,
-                    )
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .flatMapMaybe { listener.showSnackbarHourMaybe(it.instanceDateTimes.size).map { _ -> it } }
-                        .flatMapCompletable {
-                            AndroidDomainUpdater.undoInstancesAddHour(
-                                DomainListenerManager.NotificationType.First(parameters.dataId),
-                                it,
-                            )
-                        }
-                        .subscribe()
-                        .addTo(attachedToWindowDisposable)
-                }
+                R.id.actionGroupHour ->
+                    GroupMenuUtils.onHour(selectedDatas, parameters.dataId, listener).addTo(attachedToWindowDisposable)
                 R.id.action_group_edit_instance -> {
-                    check(selectedDatas.isNotEmpty())
-
-                    EditInstancesFragment.newInstance(
-                        selectedDatas.map { (it as GroupListDataWrapper.InstanceData).instanceKey },
-                        parameters.dataId,
-                    )
+                    GroupMenuUtils.onEdit(selectedDatas, parameters.dataId)
                         .also { it.listener = this@GroupListFragment::onEditInstances }
                         .show(activity.supportFragmentManager, EDIT_INSTANCES_TAG)
 
@@ -259,47 +235,12 @@ class GroupListFragment @JvmOverloads constructor(
 
                     activity.startActivity(EditActivity.getParametersIntent(EditParameters.Join(joinables, hint)))
                 }
-                R.id.action_group_mark_done -> {
-                    val instanceDatas = selectedDatas.map { it as GroupListDataWrapper.InstanceData }
-
-                    check(instanceDatas.all { it.done == null })
-
-                    val instanceKeys = instanceDatas.map { it.instanceKey }
-
-                    setInstancesDone(instanceKeys, true).observeOn(AndroidSchedulers.mainThread())
-                        .andThen(Maybe.defer { listener.showSnackbarDoneMaybe(instanceKeys.size) })
-                        .flatMapCompletable { setInstancesDone(instanceKeys, false) }
-                        .subscribe()
-                        .addTo(attachedToWindowDisposable)
-                }
-                R.id.action_group_mark_not_done -> {
-                    val instanceDatas = selectedDatas.map { it as GroupListDataWrapper.InstanceData }
-
-                    check(instanceDatas.all { it.done != null })
-
-                    val instanceKeys = instanceDatas.map { it.instanceKey }
-
-                    setInstancesDone(instanceKeys, false).observeOn(AndroidSchedulers.mainThread())
-                        .andThen(Maybe.defer { listener.showSnackbarDoneMaybe(instanceKeys.size) })
-                        .flatMapCompletable { setInstancesDone(instanceKeys, true) }
-                        .subscribe()
-                        .addTo(attachedToWindowDisposable)
-                }
-                R.id.action_group_notify -> {
-                    val instanceDatas =
-                        selectedDatas.filter { it.canShowNotification() }.map { it as GroupListDataWrapper.InstanceData }
-
-                    check(instanceDatas.isNotEmpty())
-
-                    val instanceKeys = instanceDatas.map { it.instanceKey }
-
-                    AndroidDomainUpdater.setInstancesNotNotified(
-                        DomainListenerManager.NotificationType.First(parameters.dataId),
-                        instanceKeys,
-                    )
-                        .subscribe()
-                        .addTo(attachedToWindowDisposable)
-                }
+                R.id.action_group_mark_done ->
+                    GroupMenuUtils.onCheck(selectedDatas, parameters.dataId, listener).addTo(attachedToWindowDisposable)
+                R.id.action_group_mark_not_done ->
+                    GroupMenuUtils.onUncheck(selectedDatas, parameters.dataId, listener).addTo(attachedToWindowDisposable)
+                R.id.action_group_notify ->
+                    GroupMenuUtils.onNotify(selectedDatas, parameters.dataId).addTo(attachedToWindowDisposable)
                 R.id.actionGroupCopyTask -> activity.startActivity(getCopyTasksIntent(selectedDatas.map { it.taskKey }))
                 R.id.actionGroupWebSearch -> activity.startActivity(webSearchIntent(selectedDatas.single().name))
                 else -> throw UnsupportedOperationException()

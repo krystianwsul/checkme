@@ -63,17 +63,17 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
     private val deleteInstancesListener: (Serializable, Boolean) -> Unit = { taskKeys, removeInstances ->
         @Suppress("UNCHECKED_CAST")
         AndroidDomainUpdater.setTaskEndTimeStamps(
-                showGroupViewModel.dataId.toFirst(),
-                taskKeys as Set<TaskKey>,
-                removeInstances,
+            showGroupViewModel.dataId.toFirst(),
+            taskKeys as Set<TaskKey>,
+            removeInstances,
         )
-                .observeOn(AndroidSchedulers.mainThread())
-                .flatMapMaybe { showSnackbarRemovedMaybe(it.taskKeys.size).map { _ -> it } }
-                .flatMapCompletable {
-                    AndroidDomainUpdater.clearTaskEndTimeStamps(showGroupViewModel.dataId.toFirst(), it)
-                }
-                .subscribe()
-                .addTo(createDisposable)
+            .observeOn(AndroidSchedulers.mainThread())
+            .flatMapMaybe { showSnackbarRemovedMaybe(it.taskKeys.size).map { _ -> it } }
+            .flatMapCompletable {
+                AndroidDomainUpdater.clearTaskEndTimeStamps(showGroupViewModel.dataId.toFirst(), it)
+            }
+            .subscribe()
+            .addTo(createDisposable)
     }
 
     private val receiver = object : BroadcastReceiver() {
@@ -118,13 +118,30 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
         binding.showGroupToolbarCollapseInclude
             .collapseAppBarLayout
             .apply {
-                    setSearchMenuOptions(false, true, false)
-                    configureMenu(
-                            R.menu.show_group_menu_top,
-                            R.id.actionShowGroupSearch,
-                            showAssignedToOthersId = R.id.actionShowGroupAssigned
-                    )
+                setSearchMenuOptions(false, true, false)
+                configureMenu(
+                    R.menu.show_group_menu_top,
+                    R.id.actionShowGroupSearch,
+                    showAssignedToOthersId = R.id.actionShowGroupAssigned
+                ) { itemId ->
+                    val instanceDatas = data!!.groupListDataWrapper!!.instanceDatas
+                    val dataId = showGroupViewModel.dataId
+                    val listener = this@ShowGroupActivity
+
+                    when (itemId) {
+                        R.id.actionShowGroupNotify -> GroupMenuUtils.onNotify(instanceDatas, dataId).addTo(createDisposable)
+                        R.id.actionShowGroupHour ->
+                            GroupMenuUtils.onHour(instanceDatas, dataId, listener).addTo(createDisposable)
+                        R.id.actionShowGroupEditInstance -> {
+                            // todo group
+                        }
+                        R.id.actionShowGroupCheck ->
+                            GroupMenuUtils.onCheck(instanceDatas, dataId, listener).addTo(createDisposable)
+                        R.id.actionShowGroupUncheck ->
+                            GroupMenuUtils.onUncheck(instanceDatas, dataId, listener).addTo(createDisposable)
+                    }
                 }
+            }
 
         updateTopMenu()
         initBottomBar()
@@ -177,7 +194,7 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
                 findItem(R.id.actionShowGroupUncheck).isVisible = uncheck
 
                 findItem(R.id.actionShowGroupAssigned).isVisible = hasItems
-                }
+            }
     }
 
     override fun onStart() {
@@ -221,9 +238,9 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
     }
 
     override fun onCreateGroupActionMode(
-            actionMode: ActionMode,
-            treeViewAdapter: TreeViewAdapter<AbstractHolder>,
-            initial: Boolean,
+        actionMode: ActionMode,
+        treeViewAdapter: TreeViewAdapter<AbstractHolder>,
+        initial: Boolean,
     ) = Unit
 
     override fun onDestroyGroupActionMode() = Unit
@@ -242,8 +259,8 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
                 check(item.itemId == R.id.action_select_all)
 
                 binding.groupListFragment
-                        .treeViewAdapter
-                        .selectAll()
+                    .treeViewAdapter
+                    .selectAll()
 
                 true
             }

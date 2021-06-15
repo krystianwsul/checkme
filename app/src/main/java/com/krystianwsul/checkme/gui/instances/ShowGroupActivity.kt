@@ -9,8 +9,11 @@ import androidx.appcompat.view.ActionMode
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.ActivityShowGroupBinding
 import com.krystianwsul.checkme.databinding.BottomBinding
+import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.extensions.clearTaskEndTimeStamps
 import com.krystianwsul.checkme.domainmodel.extensions.setTaskEndTimeStamps
+import com.krystianwsul.checkme.domainmodel.extensions.undo
+import com.krystianwsul.checkme.domainmodel.undo.UndoData
 import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
 import com.krystianwsul.checkme.gui.base.AbstractActivity
 import com.krystianwsul.checkme.gui.dialogs.RemoveInstancesDialogFragment
@@ -43,6 +46,7 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
         private const val KEY_PARAMETERS = "parameters"
 
         private const val TAG_DELETE_INSTANCES = "deleteInstances"
+        private const val EDIT_INSTANCES_TAG = "editInstances"
 
         private const val KEY_BOTTOM_FAB_MENU_DELEGATE_STATE = "bottomFabMenuDelegateState"
 
@@ -132,9 +136,9 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
                         R.id.actionShowGroupNotify -> GroupMenuUtils.onNotify(instanceDatas, dataId).addTo(createDisposable)
                         R.id.actionShowGroupHour ->
                             GroupMenuUtils.onHour(instanceDatas, dataId, listener).addTo(createDisposable)
-                        R.id.actionShowGroupEditInstance -> {
-                            // todo group
-                        }
+                        R.id.actionShowGroupEditInstance -> GroupMenuUtils.onEdit(instanceDatas, dataId)
+                            .also { it.listener = ::onEditInstances }
+                            .show(supportFragmentManager, EDIT_INSTANCES_TAG)
                         R.id.actionShowGroupCheck ->
                             GroupMenuUtils.onCheck(instanceDatas, dataId, listener).addTo(createDisposable)
                         R.id.actionShowGroupUncheck ->
@@ -153,8 +157,18 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
         }
 
         tryGetFragment<RemoveInstancesDialogFragment>(TAG_DELETE_INSTANCES)?.listener = deleteInstancesListener
+        tryGetFragment<EditInstancesFragment>(EDIT_INSTANCES_TAG)?.listener = ::onEditInstances
 
         startDate(receiver)
+    }
+
+    private fun onEditInstances(undoData: UndoData, count: Int) {
+        showSnackbarHourMaybe(count)
+            .flatMapCompletable {
+                AndroidDomainUpdater.undo(DomainListenerManager.NotificationType.First(showGroupViewModel.dataId), undoData)
+            }
+            .subscribe()
+            .addTo(createDisposable)
     }
 
     private fun updateTopMenu() {

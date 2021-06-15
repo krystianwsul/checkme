@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.firebase.roottask
 
-import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.firebase.LoadStatus
 import com.krystianwsul.common.firebase.records.project.PrivateProjectRecord
 import com.krystianwsul.common.firebase.records.project.ProjectRecord
@@ -52,20 +51,6 @@ class LoadDependencyTrackerManager {
 
     fun isTaskKeyTracked(taskKey: TaskKey.Root) = allTrackers.any { taskKey in it.dependentTaskKeys }
 
-    private fun logCurrentlyTracked() {
-        val projects = projectTrackers.values.map { "${it.projectName} (${it.projectKey})" }
-        val tasks = taskTrackers.values.map { "${it.taskName} (${it.taskKey})" }
-        val all = projects + tasks
-
-        Preferences.rootTaskLog.logLineHour(
-            if (all.isEmpty()) {
-                ": done\n"
-            } else {
-                "\n" + all.joinToString("\n") + "\n"
-            }
-        )
-    }
-
     interface Tracker {
 
         val dependentTaskKeys: Set<TaskKey.Root>
@@ -80,13 +65,11 @@ class LoadDependencyTrackerManager {
 
         init {
             LoadStatus.incrementCounter()
-            loadDependencyTrackerManager.logCurrentlyTracked()
         }
 
         fun stopTracking() {
             LoadStatus.decrementCounter()
             loadDependencyTrackerManager.stopTrackingProjectLoad(this)
-            loadDependencyTrackerManager.logCurrentlyTracked()
         }
     }
 
@@ -99,13 +82,11 @@ class LoadDependencyTrackerManager {
 
         init {
             LoadStatus.incrementCounter()
-            loadDependencyTrackerManager.logCurrentlyTracked()
         }
 
         fun stopTracking() {
             LoadStatus.decrementCounter()
             loadDependencyTrackerManager.stopTrackingTaskLoad(this)
-            loadDependencyTrackerManager.logCurrentlyTracked()
         }
     }
 }

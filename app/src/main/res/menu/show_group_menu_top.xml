@@ -13,11 +13,56 @@
         tools:ignore="AlwaysShowAction" />
 
     <item
-        android:id="@+id/actionShowGroupAssigned"
-        android:title="@string/showAssignedTo"
-        android:orderInCategory="700"
-        app:showAsAction="never"
-        android:checkable="true"
+        android:id="@+id/actionShowGroupNotify"
+        android:title="@string/notify"
+        android:orderInCategory="100"
+        app:showAsAction="ifRoom"
+        android:icon="@drawable/ic_notifications_active_white_24dp"
         android:visible="false" />
+
+    <item
+        android:id="@+id/actionShowGroupHour"
+        android:title="@string/hour"
+        android:orderInCategory="150"
+        android:icon="@drawable/ic_plus_one_white_24dp"
+        app:showAsAction="ifRoom"
+        android:visible="false" />
+
+    <item
+        android:id="@+id/actionShowGroupEditInstance"
+        android:title="@string/edit_instance"
+        android:orderInCategory="200"
+        app:showAsAction="always"
+        android:icon="@drawable/ic_alarm_white_24dp"
+        android:visible="false" />
+
+    <item
+        android:id="@+id/actionShowGroupCheck"
+        android:title="@string/mark_done"
+        android:orderInCategory="1000"
+        app:showAsAction="always"
+        android:icon="@drawable/ic_check_box_outline_blank_white_24dp"
+        android:visible="false"
+        tools:ignore="AlwaysShowAction" />
+
+    <item
+        android:id="@+id/actionShowGroupUncheck"
+        android:title="@string/mark_not_done"
+        android:orderInCategory="1000"
+        app:showAsAction="always"
+        android:icon="@drawable/ic_check_box_white_24dp"
+        android:visible="false" />
+
+    <group android:id="@+id/actionShowGroupAssignedGroup">
+
+        <item
+            android:id="@+id/actionShowGroupAssigned"
+            android:title="@string/showAssignedTo"
+            android:orderInCategory="1200"
+            app:showAsAction="never"
+            android:checkable="true"
+            android:visible="false" />
+
+    </group>
 
 </menu>

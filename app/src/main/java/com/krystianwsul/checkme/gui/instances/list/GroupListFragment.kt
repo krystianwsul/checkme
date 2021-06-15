@@ -320,13 +320,6 @@ class GroupListFragment @JvmOverloads constructor(
 
         override fun onLastRemoved(placeholder: TreeViewAdapter.Placeholder) = listener.onDestroyGroupActionMode()
 
-        private fun showHour(selectedDatas: Collection<GroupListDataWrapper.SelectedData>) = selectedDatas.all {
-            it is GroupListDataWrapper.InstanceData
-                    && it.isRootInstance
-                    && it.done == null
-                    && it.instanceTimeStamp <= TimeStamp.now
-        }
-
         fun GroupListDataWrapper.SelectedData.canShowNotification(): Boolean {
             return this is GroupListDataWrapper.InstanceData
                     && isRootInstance
@@ -342,17 +335,11 @@ class GroupListFragment @JvmOverloads constructor(
             check(selectedDatas.isNotEmpty())
 
             val itemVisibilities = mutableListOf(
-                R.id.action_group_notify to selectedDatas.any { it.canShowNotification() },
-                R.id.actionGroupHour to showHour(selectedDatas),
-                R.id.action_group_edit_instance to selectedDatas.all {
-                    it is GroupListDataWrapper.InstanceData && it.done == null
-                },
-                R.id.action_group_mark_done to selectedDatas.all {
-                    it is GroupListDataWrapper.InstanceData && it.done == null
-                },
-                R.id.action_group_mark_not_done to selectedDatas.all {
-                    it is GroupListDataWrapper.InstanceData && it.done != null
-                },
+                R.id.action_group_notify to GroupMenuUtils.showNotification(selectedDatas),
+                R.id.actionGroupHour to GroupMenuUtils.showHour(selectedDatas),
+                R.id.action_group_edit_instance to GroupMenuUtils.showEdit(selectedDatas),
+                R.id.action_group_mark_done to GroupMenuUtils.showCheck(selectedDatas),
+                R.id.action_group_mark_not_done to GroupMenuUtils.showUncheck(selectedDatas),
                 R.id.actionGroupCopyTask to selectedDatas.all { it.taskCurrent },
             )
 

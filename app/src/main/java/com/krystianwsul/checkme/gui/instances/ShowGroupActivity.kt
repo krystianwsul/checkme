@@ -16,6 +16,7 @@ import com.krystianwsul.checkme.gui.base.AbstractActivity
 import com.krystianwsul.checkme.gui.dialogs.RemoveInstancesDialogFragment
 import com.krystianwsul.checkme.gui.instances.list.GroupListListener
 import com.krystianwsul.checkme.gui.instances.list.GroupListParameters
+import com.krystianwsul.checkme.gui.instances.list.GroupMenuUtils
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
 import com.krystianwsul.checkme.gui.utils.BottomFabMenuDelegate
 import com.krystianwsul.checkme.utils.startDate
@@ -140,16 +141,42 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
     }
 
     private fun updateTopMenu() {
-        val hasItems = !data?.groupListDataWrapper
-                ?.instanceDatas
-                .isNullOrEmpty()
+        val instanceDatas = data?.groupListDataWrapper?.instanceDatas
+
+        var hasItems = false
+        var notify = false
+        var hour = false
+        var edit = false
+        var check = false
+        var uncheck = false
+        if (!instanceDatas.isNullOrEmpty()) {
+            hasItems = true
+
+            if (parameters is Parameters.Project && hasItems) {
+                // yes, there's a reason for any/all here.  It may not be good, but it exists.
+
+                notify = GroupMenuUtils.showNotification(instanceDatas)
+                hour = GroupMenuUtils.showHour(instanceDatas)
+                edit = GroupMenuUtils.showEdit(instanceDatas)
+                check = GroupMenuUtils.showCheck(instanceDatas)
+                uncheck = GroupMenuUtils.showUncheck(instanceDatas)
+            }
+        }
 
         binding.showGroupToolbarCollapseInclude
-                .collapseAppBarLayout
-                .menu
-                .apply {
-                    findItem(R.id.actionShowGroupSearch).isVisible = hasItems
-                    findItem(R.id.actionShowGroupAssigned).isVisible = hasItems
+            .collapseAppBarLayout
+            .menu
+            .apply {
+                findItem(R.id.actionShowGroupSearch).isVisible = hasItems
+
+                // project section
+                findItem(R.id.actionShowGroupNotify).isVisible = notify
+                findItem(R.id.actionShowGroupHour).isVisible = hour
+                findItem(R.id.actionShowGroupEditInstance).isVisible = edit
+                findItem(R.id.actionShowGroupCheck).isVisible = check
+                findItem(R.id.actionShowGroupUncheck).isVisible = uncheck
+
+                findItem(R.id.actionShowGroupAssigned).isVisible = hasItems
                 }
     }
 

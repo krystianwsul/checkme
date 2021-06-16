@@ -32,7 +32,7 @@ class NotificationStorage(
 
             val instancesSingle = rxPaperBook.read<Map<InstanceKey, InstanceShownData>>(KEY_INSTANCES)
                 .toV3()
-                //.onErrorReturnItem(emptyMap()) todo local
+                .onErrorReturnItem(emptyMap())
                 .subscribeOn(Schedulers.io())
 
             return Singles.zip(projectsSingle, instancesSingle)

@@ -22,6 +22,7 @@ import com.krystianwsul.common.firebase.json.projects.PrivateProjectJson
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.ProjectKey
+import com.krystianwsul.common.utils.TaskKey
 import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Single
@@ -88,6 +89,8 @@ interface FactoryProvider {
         val instanceShownMap: MutableMap<InstanceShownKey, InstanceShownData>
 
         fun save(): Boolean
+
+        fun deleteInstanceShown(taskKeys: Set<TaskKey>)
     }
 
     abstract class Database : FriendsProvider.Database(), RootTasksLoader.Provider {

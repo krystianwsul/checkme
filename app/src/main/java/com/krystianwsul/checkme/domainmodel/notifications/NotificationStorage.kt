@@ -3,6 +3,8 @@ package com.krystianwsul.checkme.domainmodel.notifications
 import com.krystianwsul.checkme.domainmodel.observeOnDomain
 import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.checkme.utils.toV3
+import com.krystianwsul.common.utils.TaskKey
+import com.krystianwsul.common.utils.TaskKeyData
 import com.pacoworks.rxpaper2.RxPaperBook
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.kotlin.Singles
@@ -63,5 +65,17 @@ class NotificationStorage(
             .subscribe()
 
         return true
+    }
+
+    override fun deleteInstanceShown(taskKeys: Set<TaskKey>) {
+        val taskKeyDatas = taskKeys.map(::TaskKeyData)
+
+        instanceShownMap.keys
+            .filterNot { instanceShownKey ->
+                taskKeyDatas.any { taskKeyData ->
+                    instanceShownKey.projectId == taskKeyData.projectId && instanceShownKey.taskId == taskKeyData.taskId
+                }
+            }
+            .forEach(instanceShownMap::remove)
     }
 }

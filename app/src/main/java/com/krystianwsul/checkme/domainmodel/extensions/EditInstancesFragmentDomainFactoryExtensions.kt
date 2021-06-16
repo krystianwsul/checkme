@@ -35,12 +35,9 @@ fun DomainFactory.getEditInstancesData(instanceKeys: Set<InstanceKey>): EditInst
     val customTimes = getCurrentRemoteCustomTimes(now).associate { it.key to it as Time.Custom }.toMutableMap()
 
     val instances = instanceKeys.map(::getInstance)
-    check(instances.all { it.done == null })
 
     instances.forEach { instance ->
-        (instance.instanceTime as? Time.Custom)?.let {
-            customTimes[it.key] = it
-        }
+        (instance.instanceTime as? Time.Custom)?.let { customTimes[it.key] = it }
     }
 
     fun Instance.hierarchyContainsKeys(): Boolean {

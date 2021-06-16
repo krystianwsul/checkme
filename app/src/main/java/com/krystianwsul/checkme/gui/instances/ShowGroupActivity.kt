@@ -224,9 +224,9 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
                 // yes, there's a reason for any/all here.  It may not be good, but it exists.
 
                 notify = GroupMenuUtils.showNotification(instanceDatas)
-                hour = GroupMenuUtils.showHour(instanceDatas)
-                edit = GroupMenuUtils.showEdit(instanceDatas)
-                check = GroupMenuUtils.showCheck(instanceDatas)
+                hour = instanceDatas.any(GroupMenuUtils::showHour)
+                edit = instanceDatas.any(GroupMenuUtils::showEdit)
+                check = instanceDatas.any(GroupMenuUtils::showCheck)
                 uncheck = GroupMenuUtils.showUncheck(instanceDatas)
             }
         }

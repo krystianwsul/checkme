@@ -20,21 +20,27 @@ typealias SelectedDatas = Collection<GroupListDataWrapper.SelectedData>
 
 object GroupMenuUtils {
 
-    private fun GroupListDataWrapper.SelectedData.showHour() =
+    fun showHour(selectedData: GroupListDataWrapper.SelectedData) = selectedData.run {
         this is GroupListDataWrapper.InstanceData && isRootInstance && done == null && instanceTimeStamp <= TimeStamp.now
+    }
 
     private fun GroupListDataWrapper.SelectedData.showNotification() =
-        this is GroupListDataWrapper.InstanceData && showHour() && !notificationShown
+        this is GroupListDataWrapper.InstanceData && showHour(this) && !notificationShown
 
     fun showNotification(selectedDatas: SelectedDatas) =
         selectedDatas.any { it.showNotification() }
 
-    fun showHour(selectedDatas: SelectedDatas) = selectedDatas.all { it.showHour() }
+    fun showHour(selectedDatas: SelectedDatas) = selectedDatas.all { showHour(it) }
+
+    fun showEdit(selectedData: GroupListDataWrapper.SelectedData) =
+        selectedData.run { this is GroupListDataWrapper.InstanceData && done == null }
 
     fun showEdit(selectedDatas: SelectedDatas) =
-        selectedDatas.all { it is GroupListDataWrapper.InstanceData && it.done == null }
+        selectedDatas.all { showEdit(it) }
 
     fun showCheck(selectedDatas: SelectedDatas) = showEdit(selectedDatas)
+
+    fun showCheck(selectedData: GroupListDataWrapper.SelectedData) = showEdit(selectedData)
 
     fun showUncheck(selectedDatas: SelectedDatas) =
         selectedDatas.all { it is GroupListDataWrapper.InstanceData && it.done != null }
@@ -85,11 +91,9 @@ object GroupMenuUtils {
 
     @CheckResult
     fun onCheck(selectedDatas: SelectedDatas, dataId: DataId, listener: SnackbarListener): Disposable {
-        val instanceDatas = selectedDatas.map { it as GroupListDataWrapper.InstanceData }
-
-        check(instanceDatas.all { it.done == null })
-
-        val instanceKeys = instanceDatas.map { it.instanceKey }
+        val instanceKeys = selectedDatas.map { it as GroupListDataWrapper.InstanceData }
+            .filter { it.done == null }
+            .map { it.instanceKey }
 
         return setInstancesDone(instanceKeys, true, dataId).observeOn(AndroidSchedulers.mainThread())
             .andThen(Maybe.defer { listener.showSnackbarDoneMaybe(instanceKeys.size) })

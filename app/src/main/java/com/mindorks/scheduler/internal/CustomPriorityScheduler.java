@@ -11,7 +11,7 @@ import io.reactivex.rxjava3.core.Scheduler;
 
 public final class CustomPriorityScheduler {
 
-    private static final int DEFAULT_MAX_NUM_THREADS = 2 * Runtime.getRuntime().availableProcessors() + 1;
+    private static final int DEFAULT_MAX_NUM_THREADS = 1;
     private final AtomicInteger sequenceGenerator;
     private final AtomicInteger workerCount;
     private final ExecutorService executorService;

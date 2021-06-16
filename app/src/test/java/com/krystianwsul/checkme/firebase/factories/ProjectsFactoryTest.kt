@@ -146,7 +146,7 @@ class ProjectsFactoryTest {
             sharedProjectsLoader,
             initialProjectsEvent!!,
             ExactTimeStamp.Local.now,
-            factoryProvider,
+            factoryProvider.shownFactory,
             compositeDisposable,
             mockk(relaxed = true),
         ) { deviceDbInfo }

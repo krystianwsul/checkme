@@ -25,6 +25,7 @@ import com.krystianwsul.common.firebase.json.projects.PrivateProjectJson
 import com.krystianwsul.common.firebase.json.projects.SharedProjectJson
 import com.krystianwsul.common.firebase.json.taskhierarchies.NestedTaskHierarchyJson
 import com.krystianwsul.common.firebase.json.tasks.RootTaskJson
+import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.task.ProjectRootTaskIdTracker
 import com.krystianwsul.common.firebase.records.project.ProjectRecord
 import com.krystianwsul.common.firebase.records.task.RootTaskRecord
@@ -251,9 +252,7 @@ class ChangeTypeSourceTest {
 
         val localFactory = mockk<LocalFactory>()
 
-        val factoryProvider = mockk<FactoryProvider> {
-            every { shownFactory } returns mockk()
-        }
+        val shownFactory = mockk<Instance.ShownFactory>()
 
         val projectsFactorySingle = Single.zip(
             privateProjectLoader.initialProjectEvent.map {
@@ -270,7 +269,7 @@ class ChangeTypeSourceTest {
                 sharedProjectsLoader,
                 initialSharedProjectsEvent,
                 ExactTimeStamp.Local.now,
-                factoryProvider,
+                shownFactory,
                 domainDisposable,
                 rootTasksFactory,
             ) { DomainFactoryRule.deviceDbInfo }.also { projectsFactory = it }

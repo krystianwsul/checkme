@@ -130,7 +130,9 @@ class FactoryLoaderTest {
 
         val domain = ExpectTestDomain()
 
-        override val shownFactory = mockk<Instance.ShownFactory>()
+        val shownFactory = mockk<Instance.ShownFactory>()
+
+        override val shownFactorySingle = Single.just(shownFactory)!!
 
         override val domainUpdater = mockk<DomainUpdater>(relaxed = true)
 

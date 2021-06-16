@@ -118,12 +118,11 @@ class FactoryLoader(
 
                     val recordRootTaskDependencyStateContainer = RootTaskDependencyStateContainer.Impl()
 
-                    val taskRecordLoader =
-                        TaskRecordsLoadedTracker.Impl(
-                            rootTasksLoader,
-                            recordRootTaskDependencyStateContainer,
-                            domainDisposable
-                        )
+                    val taskRecordLoader = TaskRecordsLoadedTracker.Impl(
+                        rootTasksLoader,
+                        recordRootTaskDependencyStateContainer,
+                        domainDisposable,
+                    )
 
                     val rootTaskToRootTaskCoordinator = RootTaskDependencyCoordinator.Impl(
                         rootTaskKeySource,
@@ -187,7 +186,8 @@ class FactoryLoader(
                             it.data
                         },
                         sharedProjectsLoader.initialProjectsEvent,
-                    ) { initialPrivateProjectEvent, initialSharedProjectsEvent ->
+                        factoryProvider.shownFactorySingle,
+                    ) { initialPrivateProjectEvent, initialSharedProjectsEvent, shownFactory ->
                         ProjectsFactory(
                             localFactory,
                             privateProjectLoader,
@@ -195,7 +195,7 @@ class FactoryLoader(
                             sharedProjectsLoader,
                             initialSharedProjectsEvent,
                             ExactTimeStamp.Local.now,
-                            factoryProvider,
+                            shownFactory,
                             domainDisposable,
                             rootTasksFactory,
                             ::getDeviceDbInfo,

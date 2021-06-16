@@ -36,7 +36,7 @@ interface FactoryProvider {
 
     val projectProvider: ProjectProvider
 
-    val shownFactory: Instance.ShownFactory
+    val shownFactorySingle: Single<Instance.ShownFactory>
 
     val sharedProjectsProvider
         get() = object : SharedProjectsProvider {
@@ -100,7 +100,7 @@ interface FactoryProvider {
         abstract fun getSharedProjectObservable(projectKey: ProjectKey.Shared): Observable<Snapshot<JsonWrapper>>
     }
 
-    class Impl(override val shownFactory: Instance.ShownFactory) : FactoryProvider {
+    class Impl(private val shownFactory: Instance.ShownFactory) : FactoryProvider {
 
         override val nullableInstance get() = DomainFactory.nullableInstance
 
@@ -110,6 +110,9 @@ interface FactoryProvider {
 
             override val database = this@Impl.database
         }
+
+        override val shownFactorySingle: Single<Instance.ShownFactory>
+            get() = Single.just(shownFactory)
 
         override val domainUpdater = AndroidDomainUpdater
 

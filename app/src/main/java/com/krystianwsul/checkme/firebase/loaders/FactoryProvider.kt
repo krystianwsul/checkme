@@ -3,7 +3,7 @@ package com.krystianwsul.checkme.firebase.loaders
 import androidx.annotation.CheckResult
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.local.LocalFactory
-import com.krystianwsul.checkme.domainmodel.notifications.InstanceShownKey
+import com.krystianwsul.checkme.domainmodel.notifications.InstanceShownRecord
 import com.krystianwsul.checkme.domainmodel.notifications.ProjectNotificationKey
 import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
 import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
@@ -84,7 +84,7 @@ interface FactoryProvider {
     interface NotificationStorage {
 
         var projectNotificationKeys: List<ProjectNotificationKey>
-        var instanceShownKeys: List<InstanceShownKey>
+        var instanceShownRecords: List<InstanceShownRecord>
 
         fun save(): Boolean
     }

@@ -2,7 +2,7 @@ package com.krystianwsul.checkme.domainmodel.notifications
 
 import com.krystianwsul.common.time.TimeDescriptor
 
-data class InstanceShownKey(
+data class InstanceShownRecord(
     val id: Int,
     val taskId: String,
     val scheduleYear: Int,

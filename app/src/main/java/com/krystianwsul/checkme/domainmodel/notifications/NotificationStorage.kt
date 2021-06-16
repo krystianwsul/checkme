@@ -12,7 +12,7 @@ import io.reactivex.rxjava3.schedulers.Schedulers
 class NotificationStorage(
     private val rxPaperBook: RxPaperBook,
     private var savedProjectNotificationKeys: List<ProjectNotificationKey>,
-    private var savedInstanceShownKeys: List<InstanceShownKey>,
+    private var savedInstanceShownRecords: List<InstanceShownRecord>,
 ) : FactoryProvider.NotificationStorage {
 
     companion object : FactoryProvider.NotificationStorageFactory {
@@ -28,7 +28,7 @@ class NotificationStorage(
                 .onErrorReturnItem(emptyList())
                 .subscribeOn(Schedulers.io())
 
-            val instancesSingle = rxPaperBook.read<List<InstanceShownKey>>(KEY_INSTANCES)
+            val instancesSingle = rxPaperBook.read<List<InstanceShownRecord>>(KEY_INSTANCES)
                 .toV3()
                 .onErrorReturnItem(emptyList())
                 .subscribeOn(Schedulers.io())
@@ -41,21 +41,21 @@ class NotificationStorage(
     }
 
     override var projectNotificationKeys = savedProjectNotificationKeys
-    override var instanceShownKeys = savedInstanceShownKeys
+    override var instanceShownRecords = savedInstanceShownRecords
 
     override fun save(): Boolean {
-        if (projectNotificationKeys == savedProjectNotificationKeys && instanceShownKeys == savedInstanceShownKeys)
+        if (projectNotificationKeys == savedProjectNotificationKeys && instanceShownRecords == savedInstanceShownRecords)
             return false
 
         savedProjectNotificationKeys = projectNotificationKeys
-        savedInstanceShownKeys = instanceShownKeys
+        savedInstanceShownRecords = instanceShownRecords
 
         rxPaperBook.write(KEY_PROJECTS, projectNotificationKeys)
             .toV3()
             .subscribeOn(Schedulers.io())
             .subscribe()
 
-        rxPaperBook.write(KEY_INSTANCES, instanceShownKeys)
+        rxPaperBook.write(KEY_INSTANCES, instanceShownRecords)
             .toV3()
             .subscribeOn(Schedulers.io())
             .subscribe()

@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.viewmodels
 
-import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.extensions.getShowTaskInstancesData
 import com.krystianwsul.checkme.gui.instances.ShowTaskInstancesActivity
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
@@ -12,11 +11,9 @@ class ShowTaskInstancesViewModel : DomainViewModel<ShowTaskInstancesViewModel.Da
 
     override val domainListener = object : DomainListener<Data>() {
 
-        override fun getDataResult(domainFactory: DomainFactory) = domainFactory.getShowTaskInstancesData(
-            parameters.parameters,
-            parameters.page,
-            parameters.searchCriteria,
-        )
+        override val domainResultFetcher = DomainResultFetcher.DomainFactoryDomainResult {
+            it.getShowTaskInstancesData(parameters.parameters, parameters.page, parameters.searchCriteria)
+        }
     }
 
     fun start(parameters: ShowTaskInstancesActivity.Parameters, page: Int, searchCriteria: SearchCriteria) {

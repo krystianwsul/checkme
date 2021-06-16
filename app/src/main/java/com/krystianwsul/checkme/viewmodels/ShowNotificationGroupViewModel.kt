@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.viewmodels
 
-import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.extensions.getShowNotificationGroupData
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.common.utils.InstanceKey
@@ -15,7 +14,8 @@ class ShowNotificationGroupViewModel : DomainViewModel<ShowNotificationGroupView
 
     override val domainListener = object : DomainListener<Data>() {
 
-        override fun getData(domainFactory: DomainFactory) = domainFactory.getShowNotificationGroupData(cachedInstanceKeys)
+        override val domainResultFetcher =
+            DomainResultFetcher.DomainFactoryData { it.getShowNotificationGroupData(cachedInstanceKeys) }
     }
 
     init {

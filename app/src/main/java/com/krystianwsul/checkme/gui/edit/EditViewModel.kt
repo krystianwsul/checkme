@@ -6,7 +6,6 @@ import android.os.Parcelable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import com.jakewharton.rxrelay3.BehaviorRelay
-import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.ScheduleText
 import com.krystianwsul.checkme.domainmodel.extensions.getCreateTaskData
 import com.krystianwsul.checkme.domainmodel.extensions.getCreateTaskParentPickerData
@@ -42,10 +41,9 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
 
     private val mainDomainListener = object : DomainListener<MainData>() {
 
-        override fun getData(domainFactory: DomainFactory) = domainFactory.getCreateTaskData(
-                editParameters.startParameters,
-                currentParentSource!!,
-        )
+        override val domainResultFetcher = DomainResultFetcher.DomainFactoryData {
+            it.getCreateTaskData(editParameters.startParameters, currentParentSource!!)
+        }
     }
 
     /**
@@ -58,8 +56,9 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
      */
     private val parentPickerDomainListener = object : DomainListener<ParentPickerData>() {
 
-        override fun getData(domainFactory: DomainFactory) =
-                domainFactory.getCreateTaskParentPickerData(editParameters.startParameters)
+        override val domainResultFetcher = DomainResultFetcher.DomainFactoryData {
+            it.getCreateTaskParentPickerData(editParameters.startParameters)
+        }
     }
 
     val mainData get() = mainDomainListener.data

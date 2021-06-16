@@ -1,13 +1,12 @@
 package com.krystianwsul.checkme.viewmodels
 
-import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.extensions.getDrawerData
 
 class DrawerViewModel : DomainViewModel<DrawerViewModel.Data>() {
 
     override val domainListener = object : DomainListener<Data>() {
 
-        override fun getData(domainFactory: DomainFactory) = domainFactory.getDrawerData()
+        override val domainResultFetcher = DomainResultFetcher.DomainFactoryData { it.getDrawerData() }
     }
 
     fun start() = internalStart()

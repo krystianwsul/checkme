@@ -7,9 +7,10 @@ import com.krystianwsul.checkme.domainmodel.observeOnDomain
 import com.krystianwsul.checkme.utils.filterNotNull
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.BackpressureStrategy
+import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.Disposable
 
-abstract class DomainListener<D : DomainData> {
+abstract class DomainListener<DOMAIN_DATA : DomainData> {
 
     companion object {
 
@@ -19,9 +20,11 @@ abstract class DomainListener<D : DomainData> {
     }
 
     val dataId = DataId(nextId)
-    val data = BehaviorRelay.create<D>()!!
+    val data = BehaviorRelay.create<DOMAIN_DATA>()!!
 
     private var disposable: Disposable? = null
+
+    protected abstract val domainResultFetcher: DomainResultFetcher<DOMAIN_DATA>
 
     fun start(forced: Boolean = false) {
         if (disposable != null) {
@@ -51,11 +54,13 @@ abstract class DomainListener<D : DomainData> {
                     .addListener(this)
                     .map { userScope }
             }
-            .switchMapSingle { it.domainFactorySingle }
-            .map { it as DomainFactory }
             .toFlowable(BackpressureStrategy.LATEST)
             .observeOnDomain()
-            .map { getDataResult(it).data!! }
+            .flatMapSingle(
+                { domainResultFetcher.getDomainResult(it).map { it.data!! } },
+                false,
+                1,
+            )
             .filter { data.value != it }
             .doFinally {
                 if (listenerAdded) {
@@ -73,8 +78,25 @@ abstract class DomainListener<D : DomainData> {
         disposable = null
     }
 
-    protected open fun getDataResult(domainFactory: DomainFactory): DomainResult<D> =
-        DomainResult.Completed(getData(domainFactory))
+    interface DomainResultFetcher<DOMAIN_DATA : DomainData> {
 
-    open fun getData(domainFactory: DomainFactory): D = throw NotImplementedError()
+        fun getDomainResult(userScope: UserScope): Single<DomainResult<DOMAIN_DATA>>
+
+        open class DomainFactoryDomainResult<DOMAIN_DATA : DomainData>(
+            private val getDomainResult: (domainFactory: DomainFactory) -> DomainResult<DOMAIN_DATA>
+        ) : DomainResultFetcher<DOMAIN_DATA> {
+
+            override fun getDomainResult(userScope: UserScope): Single<DomainResult<DOMAIN_DATA>> {
+                return userScope.domainFactorySingle
+                    .map { it as DomainFactory }
+                    .map(getDomainResult)
+            }
+        }
+
+        class DomainFactoryData<DOMAIN_DATA : DomainData>(
+            private val getDomainData: (domainFactory: DomainFactory) -> DOMAIN_DATA
+        ) : DomainFactoryDomainResult<DOMAIN_DATA>(
+            { DomainResult.Completed(getDomainData(it)) }
+        )
+    }
 }

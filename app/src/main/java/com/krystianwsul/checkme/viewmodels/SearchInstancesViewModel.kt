@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.viewmodels
 
-import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.extensions.getSearchInstancesData
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.common.criteria.SearchCriteria
@@ -11,10 +10,9 @@ class SearchInstancesViewModel : DomainViewModel<SearchInstancesViewModel.Data>(
 
     override val domainListener = object : DomainListener<Data>() {
 
-        override fun getDataResult(domainFactory: DomainFactory) = domainFactory.getSearchInstancesData(
-                parameters.searchCriteria,
-                parameters.page,
-        )
+        override val domainResultFetcher = DomainResultFetcher.DomainFactoryDomainResult {
+            it.getSearchInstancesData(parameters.searchCriteria, parameters.page)
+        }
     }
 
     fun start(searchCriteria: SearchCriteria, page: Int) {

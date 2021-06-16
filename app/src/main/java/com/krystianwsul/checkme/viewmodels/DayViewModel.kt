@@ -2,7 +2,6 @@ package com.krystianwsul.checkme.viewmodels
 
 import androidx.lifecycle.ViewModel
 import com.krystianwsul.checkme.Preferences
-import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.extensions.getGroupListData
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.common.time.ExactTimeStamp
@@ -25,11 +24,9 @@ class DayViewModel : ViewModel() {
 
     class Entry(private val timeRange: Preferences.TimeRange, private val position: Int) : DomainListener<DayData>() {
 
-        override fun getData(domainFactory: DomainFactory) = domainFactory.getGroupListData(
-                ExactTimeStamp.Local.now,
-                position,
-                timeRange
-        )
+        override val domainResultFetcher = DomainResultFetcher.DomainFactoryData {
+            it.getGroupListData(ExactTimeStamp.Local.now, position, timeRange)
+        }
     }
 
     data class DayData(val groupListDataWrapper: GroupListDataWrapper) : DomainData()

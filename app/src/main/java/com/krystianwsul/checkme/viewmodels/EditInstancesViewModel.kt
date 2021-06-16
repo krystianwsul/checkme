@@ -1,7 +1,6 @@
 package com.krystianwsul.checkme.viewmodels
 
 import android.os.Parcelable
-import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.extensions.getEditInstancesData
 import com.krystianwsul.common.time.DateTime
 import com.krystianwsul.common.time.DayOfWeek
@@ -18,7 +17,7 @@ class EditInstancesViewModel : DomainViewModel<EditInstancesViewModel.Data>() {
 
     override val domainListener = object : DomainListener<Data>() {
 
-        override fun getData(domainFactory: DomainFactory) = domainFactory.getEditInstancesData(instanceKeys)
+        override val domainResultFetcher = DomainResultFetcher.DomainFactoryData { it.getEditInstancesData(instanceKeys) }
     }
 
     fun start(instanceKeys: Set<InstanceKey>) {

@@ -84,7 +84,7 @@ class ProjectFactoryTest {
         }
 
         override fun newDomain(
-            localFactory: FactoryProvider.Local,
+            localFactory: Instance.ShownFactory,
             myUserFactory: MyUserFactory,
             projectsFactory: ProjectsFactory,
             friendsFactory: FriendsFactory,

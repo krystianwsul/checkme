@@ -43,9 +43,7 @@ class FactoryLoaderTest {
     @get:Rule
     val domainFactoryRule = DomainFactoryRule()
 
-    private val local = object : FactoryProvider.Local {
-
-        override val uuid = "uuid"
+    private val local = object : Instance.ShownFactory {
 
         override fun getShown(taskKey: TaskKey, scheduleDateTime: DateTime): Instance.Shown? = null
 
@@ -141,7 +139,7 @@ class FactoryLoaderTest {
         }
 
         override fun newDomain(
-            localFactory: FactoryProvider.Local,
+            localFactory: Instance.ShownFactory,
             myUserFactory: MyUserFactory,
             projectsFactory: ProjectsFactory,
             friendsFactory: FriendsFactory,
@@ -187,7 +185,15 @@ class FactoryLoaderTest {
         userInfoObservable = PublishRelay.create()
         tokenObservable = BehaviorRelay.createDefault(tokenWrapper)
         testFactoryProvider = TestFactoryProvider()
-        factoryLoader = FactoryLoader(local, userInfoObservable, testFactoryProvider, tokenObservable)
+
+        factoryLoader = FactoryLoader(
+            local,
+            userInfoObservable,
+            testFactoryProvider,
+            tokenObservable,
+            Single.just("uuid"),
+        )
+
         domainFactoryRelay = BehaviorRelay.create()
 
         factoryLoader.domainFactoryObservable

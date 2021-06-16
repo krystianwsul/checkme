@@ -3,8 +3,6 @@ package com.krystianwsul.checkme.firebase.loaders
 import com.jakewharton.rxrelay3.BehaviorRelay
 import com.jakewharton.rxrelay3.PublishRelay
 import com.jakewharton.rxrelay3.Relay
-import com.krystianwsul.checkme.MyApplication
-import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.DomainFactoryRule
 import com.krystianwsul.checkme.domainmodel.local.LocalFactory
 import com.krystianwsul.checkme.firebase.UserCustomTimeProviderSource
@@ -36,7 +34,6 @@ import com.krystianwsul.common.utils.ScheduleData
 import com.krystianwsul.common.utils.TaskKey
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.mockkObject
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.CompositeDisposable
@@ -63,11 +60,6 @@ class ChangeTypeSourceTest {
             ProjectRootTaskIdTracker.instance = object : ProjectRootTaskIdTracker {}
 
             mockBase64()
-
-            MyApplication._sharedPreferences = mockk(relaxed = true)
-
-            mockkObject(Preferences)
-            every { Preferences.rootTaskLog } returns mockk(relaxed = true)
         }
 
         @JvmStatic

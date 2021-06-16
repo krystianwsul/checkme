@@ -1,6 +1,6 @@
 package com.krystianwsul.checkme.firebase.loaders
 
-import com.krystianwsul.checkme.domainmodel.extensions.updateDeviceDbInfo
+import com.krystianwsul.checkme.domainmodel.UserScope
 import com.krystianwsul.checkme.domainmodel.observeOnDomain
 import com.krystianwsul.checkme.firebase.UserCustomTimeProviderSource
 import com.krystianwsul.checkme.firebase.UserKeyStore
@@ -17,14 +17,12 @@ import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.DeviceInfo
 import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.ChangeType
-import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.treeadapter.getCurrentValue
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.Observables
-import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.plusAssign
 
 class FactoryLoader(
@@ -256,58 +254,5 @@ class FactoryLoader(
             ?.domainFactorySingle
             ?.map(::NullableWrapper)
             ?: Single.just(NullableWrapper())
-    }
-
-    class UserScope(
-        factoryProvider: FactoryProvider,
-        rootTasksFactory: RootTasksFactory,
-        changeTypeSource: ChangeTypeSource,
-        val userFactory: MyUserFactory,
-        projectsFactorySingle: Single<ProjectsFactory>,
-        friendsFactorySingle: Single<FriendsFactory>,
-        notificationStorageSingle: Single<FactoryProvider.NotificationStorage>,
-        shownFactorySingle: Single<Instance.ShownFactory>,
-        tokenObservable: Observable<NullableWrapper<String>>,
-        startTime: ExactTimeStamp.Local,
-        domainDisposable: CompositeDisposable,
-        getDeviceDbInfo: () -> DeviceDbInfo,
-    ) {
-
-        val domainFactorySingle = Single.zip(
-            projectsFactorySingle,
-            friendsFactorySingle,
-            notificationStorageSingle,
-            shownFactorySingle,
-        ) { projectsFactory, friendsFactory, notificationStorage, shownFactory ->
-            factoryProvider.newDomain(
-                shownFactory,
-                userFactory,
-                projectsFactory,
-                friendsFactory,
-                getDeviceDbInfo(),
-                startTime,
-                ExactTimeStamp.Local.now,
-                domainDisposable,
-                rootTasksFactory,
-                notificationStorage,
-            )
-        }.cacheImmediate(domainDisposable)
-
-        init {
-            // ignore all change events that come in before the DomainFactory is initialized
-            domainFactorySingle.flatMapObservable { domainFactory ->
-                changeTypeSource.changeTypes.map { domainFactory to it }
-            }
-                .subscribe { (domainFactory, changeType) ->
-                    domainFactory.onChangeTypeEvent(changeType, ExactTimeStamp.Local.now)
-                }
-                .addTo(domainDisposable)
-
-            tokenObservable.flatMapCompletable {
-                factoryProvider.domainUpdater.updateDeviceDbInfo(getDeviceDbInfo())
-            }
-                .subscribe()
-                .addTo(domainDisposable)
-        }
     }
 }

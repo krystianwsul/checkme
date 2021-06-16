@@ -2,9 +2,7 @@ package com.krystianwsul.checkme.firebase.loaders
 
 import androidx.annotation.CheckResult
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.domainmodel.local.LocalFactory
 import com.krystianwsul.checkme.domainmodel.notifications.InstanceShownData
-import com.krystianwsul.checkme.domainmodel.notifications.InstanceShownKey
 import com.krystianwsul.checkme.domainmodel.notifications.ProjectNotificationKey
 import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
 import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
@@ -21,6 +19,7 @@ import com.krystianwsul.common.firebase.json.JsonWrapper
 import com.krystianwsul.common.firebase.json.projects.PrivateProjectJson
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.time.ExactTimeStamp
+import com.krystianwsul.common.utils.InstanceShownKey
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
 import io.reactivex.rxjava3.core.Completable
@@ -58,7 +57,7 @@ interface FactoryProvider {
     val notificationStorageFactory: NotificationStorageFactory
 
     fun newDomain(
-        localFactory: Instance.ShownFactory,
+        shownFactory: Instance.ShownFactory,
         myUserFactory: MyUserFactory,
         projectsFactory: ProjectsFactory,
         friendsFactory: FriendsFactory,
@@ -120,7 +119,7 @@ interface FactoryProvider {
             com.krystianwsul.checkme.domainmodel.notifications.NotificationStorage.Companion
 
         override fun newDomain(
-            localFactory: Instance.ShownFactory,
+            shownFactory: Instance.ShownFactory,
             myUserFactory: MyUserFactory,
             projectsFactory: ProjectsFactory,
             friendsFactory: FriendsFactory,
@@ -131,7 +130,7 @@ interface FactoryProvider {
             rootTasksFactory: RootTasksFactory,
             notificationStorage: NotificationStorage,
         ) = DomainFactory(
-            localFactory as LocalFactory,
+            shownFactory,
             myUserFactory,
             projectsFactory,
             friendsFactory,

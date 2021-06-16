@@ -331,7 +331,7 @@ fun DomainUpdater.updateScheduleTask(
             endAllCurrentNoScheduleOrParents(now)
 
             updateSchedules(
-                localFactory,
+                shownFactory,
                 scheduleDatas.map { it to getTime(it.timePair) },
                 now,
                 sharedProjectParameters.nonNullAssignedTo,

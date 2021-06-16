@@ -683,11 +683,17 @@ class Instance private constructor(val task: Task, private var data: Data) : Ass
 
     interface Shown {
 
+        val instanceShownKey: InstanceShownKey
+
         var notified: Boolean
         var notificationShown: Boolean
+
+        fun delete()
     }
 
     interface ShownFactory {
+
+        val instanceShownMap: Map<InstanceShownKey, Shown>
 
         fun createShown(taskKeyData: TaskKeyData, scheduleDateTime: DateTime): Shown
 

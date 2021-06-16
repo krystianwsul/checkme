@@ -33,7 +33,7 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
         private fun Sequence<Instance>.filterNotifications(domainFactory: DomainFactory, now: ExactTimeStamp.Local) =
             filter {
                 it.done == null &&
-                        !it.getNotified(domainFactory.localFactory) &&
+                        !it.getNotified(domainFactory.shownFactory) &&
                         it.isAssignedToMe(now, domainFactory.myUserFactory.user)
             }.toList()
 
@@ -91,29 +91,33 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
             "notification instances: " + notificationInstances.values.joinToString(", ") { it.name }
         )
 
-        val instanceShownPairs = domainFactory.localFactory.instanceShownRecords
-            .filter { it.notificationShown }
-            .map { it to domainFactory.tryGetTask(it.taskKeyData) }
+        val instanceShownPairs = domainFactory.shownFactory
+            .instanceShownMap
+            .entries
+            .filter { it.value.notificationShown }
+            .map { it to domainFactory.tryGetTask(it.key.taskKeyData) }
 
-        instanceShownPairs.filter { it.second == null }.forEach { (instanceShownRecord, _) ->
-            val scheduleDate = instanceShownRecord.run { Date(scheduleYear, scheduleMonth, scheduleDay) }
+        instanceShownPairs.filter { it.second == null }.forEach { (instanceShownEntry, _) ->
+            val scheduleDate = instanceShownEntry.key.run { Date(scheduleYear, scheduleMonth, scheduleDay) }
 
             cancelInstance(
                 Instance.getNotificationId(
                     scheduleDate,
-                    instanceShownRecord.scheduleTimeDescriptor,
-                    instanceShownRecord.taskKeyData,
+                    instanceShownEntry.key.scheduleTimeDescriptor,
+                    instanceShownEntry.key.taskKeyData,
                 )
             )
-            instanceShownRecord.notificationShown = false
+            instanceShownEntry.value.notificationShown = false
         }
 
         val shownInstanceKeys = instanceShownPairs.filter { it.second != null }
-            .map { (instanceShownRecord, task) ->
+            .map { (instanceShownEntry, task) ->
                 val scheduleJsonTime =
-                    instanceShownRecord.scheduleTimeDescriptor.toJsonTime(task!!.projectCustomTimeIdProvider)
+                    instanceShownEntry.key
+                        .scheduleTimeDescriptor
+                        .toJsonTime(task!!.projectCustomTimeIdProvider)
 
-                val scheduleDate = instanceShownRecord.run { Date(scheduleYear, scheduleMonth, scheduleDay) }
+                val scheduleDate = instanceShownEntry.key.run { Date(scheduleYear, scheduleMonth, scheduleDay) }
 
                 InstanceKey(task.taskKey, scheduleDate, scheduleJsonTime.toTimePair(task.project))
             }
@@ -130,17 +134,11 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
         val hideInstanceKeys = shownInstanceKeys - notificationInstances.keys
 
         for (showInstanceKey in showInstanceKeys) {
-            domainFactory.getInstance(showInstanceKey).setNotificationShown(
-                domainFactory.localFactory,
-                true,
-            )
+            domainFactory.apply { getInstance(showInstanceKey).setNotificationShown(shownFactory, true) }
         }
 
         for (hideInstanceKey in hideInstanceKeys) {
-            domainFactory.getInstance(hideInstanceKey).setNotificationShown(
-                domainFactory.localFactory,
-                false,
-            )
+            domainFactory.apply { getInstance(hideInstanceKey).setNotificationShown(shownFactory, false) }
         }
 
         Preferences.tickLog.logLineHour("silent? $silent")
@@ -304,7 +302,7 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
         if (params.tick) {
             setIrrelevant(now)
 
-            domainFactory.run { localFactory.deleteInstanceShownRecords(getAllTasks().map { it.taskKey }.toSet()) }
+            domainFactory.run { notificationStorage.deleteInstanceShown(getAllTasks().map { it.taskKey }.toSet()) }
         }
     }
 
@@ -393,14 +391,13 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
             throw Exception("Irrelevant.setIrrelevant write prevented")
         }
 
-        val instances = domainFactory.getRootInstances(null, now.toOffset().plusOne(), now).toList()
+        val relevantInstanceShownKeys = domainFactory.getRootInstances(null, now.toOffset().plusOne(), now)
+            .mapNotNull { it.getShown(domainFactory.shownFactory)?.instanceShownKey }
+            .toSet()
 
-        val irrelevantInstanceShownRecords = domainFactory.localFactory
-            .instanceShownRecords
-            .toMutableList()
-            .apply { removeAll(instances.map { it.getShown(domainFactory.localFactory) }) }
+        val irrelevantInstanceShownEntries = domainFactory.shownFactory.instanceShownMap - relevantInstanceShownKeys
 
-        irrelevantInstanceShownRecords.forEach { it.delete() }
+        irrelevantInstanceShownEntries.forEach { it.value.delete() }
     }
 
     data class Params(

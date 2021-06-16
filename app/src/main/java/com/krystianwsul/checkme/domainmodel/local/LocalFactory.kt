@@ -7,6 +7,7 @@ import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.time.DateTime
 import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.time.TimeDescriptor
+import com.krystianwsul.common.utils.InstanceShownKey
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.common.utils.TaskKeyData
 import com.krystianwsul.common.utils.singleOrEmpty
@@ -19,6 +20,9 @@ class LocalFactory(
     val instanceShownRecords: Collection<InstanceShownRecord>
         get() = persistenceManager.instanceShownRecords
 
+    override val instanceShownMap: Map<InstanceShownKey, Instance.Shown>
+        get() = instanceShownRecords.associateBy { it.instanceShownKey }
+
     fun save(): Boolean = persistenceManager.save()
 
     override fun getShown(taskKey: TaskKey, scheduleDateTime: DateTime): InstanceShownRecord? {
@@ -27,7 +31,7 @@ class LocalFactory(
         val scheduleTimeDescriptor = TimeDescriptor.fromJsonTime(JsonTime.fromTime(scheduleDateTime.time))
 
         return persistenceManager.instanceShownRecords
-                .asSequence()
+            .asSequence()
                 .filter { it.taskKeyData == taskKeyData }
                 .filter { it.scheduleYear == scheduleDate.year }
                 .filter { it.scheduleMonth == scheduleDate.month }

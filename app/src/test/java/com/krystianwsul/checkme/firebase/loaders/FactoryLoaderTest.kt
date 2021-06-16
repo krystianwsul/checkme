@@ -127,7 +127,7 @@ class FactoryLoaderTest {
         }
 
         override fun newDomain(
-            localFactory: Instance.ShownFactory,
+            shownFactory: Instance.ShownFactory,
             myUserFactory: MyUserFactory,
             projectsFactory: ProjectsFactory,
             friendsFactory: FriendsFactory,

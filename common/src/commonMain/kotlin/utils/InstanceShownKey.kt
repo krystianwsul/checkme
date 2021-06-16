@@ -1,9 +1,8 @@
-package com.krystianwsul.checkme.domainmodel.notifications
+package com.krystianwsul.common.utils
 
 import com.krystianwsul.common.time.DateTime
 import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.time.TimeDescriptor
-import com.krystianwsul.common.utils.TaskKeyData
 
 data class InstanceShownKey(
     val taskId: String,
@@ -27,4 +26,6 @@ data class InstanceShownKey(
         scheduleDateTime.getDescriptor(),
         taskKeyData.projectId,
     )
+
+    val taskKeyData by lazy { TaskKeyData(projectId, taskId) }
 }

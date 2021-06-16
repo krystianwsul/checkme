@@ -2,10 +2,14 @@ package com.krystianwsul.checkme.domainmodel.notifications
 
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.time.DateTime
+import com.krystianwsul.common.utils.InstanceShownKey
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.common.utils.TaskKeyData
 
 class AndroidShownFactory(private val notificationStorage: NotificationStorage) : Instance.ShownFactory {
+
+    override val instanceShownMap: Map<InstanceShownKey, Instance.Shown>
+        get() = notificationStorage.instanceShownMap.mapValues { Shown(it.key) }
 
     override fun createShown(taskKeyData: TaskKeyData, scheduleDateTime: DateTime): Instance.Shown {
         val instanceShownKey = InstanceShownKey(taskKeyData, scheduleDateTime)
@@ -26,7 +30,7 @@ class AndroidShownFactory(private val notificationStorage: NotificationStorage) 
             null
     }
 
-    inner class Shown(private val instanceShownKey: InstanceShownKey) : Instance.Shown {
+    inner class Shown(override val instanceShownKey: InstanceShownKey) : Instance.Shown {
 
         private var instanceShownData
             get() = notificationStorage.instanceShownMap.getValue(instanceShownKey)
@@ -45,5 +49,9 @@ class AndroidShownFactory(private val notificationStorage: NotificationStorage) 
             set(value) {
                 instanceShownData = instanceShownData.copy(notificationShown = value)
             }
+
+        override fun delete() {
+            notificationStorage.instanceShownMap.remove(instanceShownKey)
+        }
     }
 }

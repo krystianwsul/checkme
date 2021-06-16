@@ -86,11 +86,11 @@ fun DomainUpdater.setInstancesNotNotified(
         val instance = getInstance(it)
         check(instance.done == null)
         check(instance.instanceDateTime.timeStamp.toLocalExactTimeStamp() <= now)
-        check(!instance.getNotificationShown(localFactory))
+        check(!instance.getNotificationShown(shownFactory))
         check(instance.isRootInstance())
 
-        instance.setNotified(localFactory, false)
-        instance.setNotificationShown(localFactory, false)
+        instance.setNotified(shownFactory, false)
+        instance.setNotificationShown(shownFactory, false)
     }
 
     DomainUpdater.Params(true, notificationType)
@@ -114,7 +114,7 @@ fun DomainUpdater.setInstancesAddHourActivity(
 
     instances.forEach {
         it.setInstanceDateTime(
-            localFactory,
+            shownFactory,
             DateTime(date, Time.Normal(hourMinute)),
             this,
             now,
@@ -140,7 +140,7 @@ fun DomainUpdater.undoInstancesAddHour(
 
     val instances = hourUndoData.instanceDateTimes.map { (instanceKey, instanceDateTime) ->
         getInstance(instanceKey).also {
-            it.setInstanceDateTime(localFactory, instanceDateTime, this, now)
+            it.setInstanceDateTime(shownFactory, instanceDateTime, this, now)
         }
     }
 
@@ -157,7 +157,7 @@ fun DomainUpdater.setInstanceDone(
 ): Completable = CompletableDomainUpdate.create("setInstanceDone") { now ->
     val instance = getInstance(instanceKey)
 
-    instance.setDone(localFactory, done, now)
+    instance.setDone(shownFactory, done, now)
 
     DomainUpdater.Params(true, notificationType, DomainFactory.CloudParams(instance.task.project))
 }.perform(this)

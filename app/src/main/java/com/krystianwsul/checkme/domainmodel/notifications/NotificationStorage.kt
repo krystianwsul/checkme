@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.domainmodel.notifications
 import com.krystianwsul.checkme.domainmodel.observeOnDomain
 import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.checkme.utils.toV3
+import com.krystianwsul.common.utils.InstanceShownKey
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.common.utils.TaskKeyData
 import com.pacoworks.rxpaper2.RxPaperBook

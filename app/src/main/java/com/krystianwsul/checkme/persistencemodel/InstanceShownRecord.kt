@@ -5,6 +5,7 @@ import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.time.TimeDescriptor
+import com.krystianwsul.common.utils.InstanceShownKey
 import com.krystianwsul.common.utils.TaskKeyData
 import kotlin.properties.Delegates.observable
 import kotlin.reflect.KProperty
@@ -125,6 +126,9 @@ class InstanceShownRecord(
     var projectId by observable(mProjectId, ::setChanged)
 
     val taskKeyData get() = TaskKeyData(projectId, taskId)
+
+    override val instanceShownKey =
+        InstanceShownKey(taskId, scheduleYear, scheduleMonth, scheduleDay, scheduleTimeDescriptor, projectId)
 
     override val contentValues
         get() = ContentValues().apply {

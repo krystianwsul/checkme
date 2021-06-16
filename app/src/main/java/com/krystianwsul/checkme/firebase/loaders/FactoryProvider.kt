@@ -20,7 +20,7 @@ import com.krystianwsul.common.firebase.json.JsonWrapper
 import com.krystianwsul.common.firebase.json.projects.PrivateProjectJson
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.time.ExactTimeStamp
-import com.krystianwsul.common.utils.InstanceShownKey
+import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
 import io.reactivex.rxjava3.core.Completable
@@ -86,7 +86,7 @@ interface FactoryProvider {
     interface NotificationStorage {
 
         var projectNotificationKeys: List<ProjectNotificationKey>
-        val instanceShownMap: MutableMap<InstanceShownKey, InstanceShownData>
+        val instanceShownMap: MutableMap<InstanceKey, InstanceShownData>
 
         fun save(): Boolean
 

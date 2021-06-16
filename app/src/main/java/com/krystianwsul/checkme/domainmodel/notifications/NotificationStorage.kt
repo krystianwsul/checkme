@@ -3,7 +3,7 @@ package com.krystianwsul.checkme.domainmodel.notifications
 import com.krystianwsul.checkme.domainmodel.observeOnDomain
 import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.checkme.utils.toV3
-import com.krystianwsul.common.utils.InstanceShownKey
+import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.common.utils.TaskKeyData
 import com.pacoworks.rxpaper2.RxPaperBook
@@ -15,7 +15,7 @@ import io.reactivex.rxjava3.schedulers.Schedulers
 class NotificationStorage(
     private val rxPaperBook: RxPaperBook,
     private var savedProjectNotificationKeys: List<ProjectNotificationKey>,
-    private var savedInstanceShownMap: Map<InstanceShownKey, InstanceShownData>,
+    private var savedInstanceShownMap: Map<InstanceKey, InstanceShownData>,
 ) : FactoryProvider.NotificationStorage {
 
     companion object : FactoryProvider.NotificationStorageFactory {
@@ -31,7 +31,7 @@ class NotificationStorage(
                 .onErrorReturnItem(emptyList())
                 .subscribeOn(Schedulers.io())
 
-            val instancesSingle = rxPaperBook.read<Map<InstanceShownKey, InstanceShownData>>(KEY_INSTANCES)
+            val instancesSingle = rxPaperBook.read<Map<InstanceKey, InstanceShownData>>(KEY_INSTANCES)
                 .toV3()
                 //.onErrorReturnItem(emptyMap()) todo local
                 .subscribeOn(Schedulers.io())
@@ -72,11 +72,7 @@ class NotificationStorage(
         val taskKeyDatas = taskKeys.map(::TaskKeyData)
 
         instanceShownMap.keys
-            .filterNot { instanceShownKey ->
-                taskKeyDatas.any { taskKeyData ->
-                    instanceShownKey.projectId == taskKeyData.projectId && instanceShownKey.taskId == taskKeyData.taskId
-                }
-            }
+            .filterNot { it.taskKey in taskKeys }
             .forEach(instanceShownMap::remove)
     }
 }

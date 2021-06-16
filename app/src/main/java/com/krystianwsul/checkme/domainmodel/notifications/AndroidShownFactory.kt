@@ -2,41 +2,34 @@ package com.krystianwsul.checkme.domainmodel.notifications
 
 import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.common.firebase.models.Instance
-import com.krystianwsul.common.time.DateTime
-import com.krystianwsul.common.utils.InstanceShownKey
-import com.krystianwsul.common.utils.TaskKey
-import com.krystianwsul.common.utils.TaskKeyData
+import com.krystianwsul.common.utils.InstanceKey
 
 class AndroidShownFactory(private val notificationStorage: FactoryProvider.NotificationStorage) : Instance.ShownFactory {
 
-    override val instanceShownMap: Map<InstanceShownKey, Instance.Shown>
+    override val instanceShownMap: Map<InstanceKey, Instance.Shown>
         get() = notificationStorage.instanceShownMap.mapValues { Shown(it.key) }
 
-    override fun createShown(taskKeyData: TaskKeyData, scheduleDateTime: DateTime): Instance.Shown {
-        val instanceShownKey = InstanceShownKey(taskKeyData, scheduleDateTime)
+    override fun createShown(instanceKey: InstanceKey): Instance.Shown {
+        check(!notificationStorage.instanceShownMap.containsKey(instanceKey))
 
-        check(!notificationStorage.instanceShownMap.containsKey(instanceShownKey))
+        notificationStorage.instanceShownMap[instanceKey] = InstanceShownData()
 
-        notificationStorage.instanceShownMap[instanceShownKey] = InstanceShownData()
-
-        return Shown(instanceShownKey)
+        return Shown(instanceKey)
     }
 
-    override fun getShown(taskKey: TaskKey, scheduleDateTime: DateTime): Instance.Shown? {
-        val instanceShownKey = InstanceShownKey(TaskKeyData(taskKey), scheduleDateTime)
-
-        return if (notificationStorage.instanceShownMap.containsKey(instanceShownKey))
-            Shown(instanceShownKey)
+    override fun getShown(instanceKey: InstanceKey): Instance.Shown? {
+        return if (notificationStorage.instanceShownMap.containsKey(instanceKey))
+            Shown(instanceKey)
         else
             null
     }
 
-    inner class Shown(override val instanceShownKey: InstanceShownKey) : Instance.Shown {
+    inner class Shown(override val instanceKey: InstanceKey) : Instance.Shown {
 
         private var instanceShownData
-            get() = notificationStorage.instanceShownMap.getValue(instanceShownKey)
+            get() = notificationStorage.instanceShownMap.getValue(instanceKey)
             set(value) {
-                notificationStorage.instanceShownMap[instanceShownKey] = value
+                notificationStorage.instanceShownMap[instanceKey] = value
             }
 
         override var notified: Boolean
@@ -52,7 +45,7 @@ class AndroidShownFactory(private val notificationStorage: FactoryProvider.Notif
             }
 
         override fun delete() {
-            notificationStorage.instanceShownMap.remove(instanceShownKey)
+            notificationStorage.instanceShownMap.remove(instanceKey)
         }
     }
 }

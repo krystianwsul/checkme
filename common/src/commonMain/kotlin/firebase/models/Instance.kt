@@ -20,45 +20,7 @@ class Instance private constructor(val task: Task, private var data: Data) : Ass
 
     companion object {
 
-        fun getNotificationId(
-                scheduleDate: Date,
-                scheduleJsonTime: JsonTime,
-                taskKey: TaskKey,
-        ): Int {
-            return getNotificationId(
-                    scheduleDate,
-                    TimeDescriptor.fromJsonTime(scheduleJsonTime),
-                    TaskKeyData(taskKey),
-            )
-        }
-
-        /*
-        I'm going to make some assumptions here:
-            1. I won't live past a hundred years
-            2. scheduleYear is between 2016 and 2088 (that way the algorithm should be fine during my lifetime)
-            3. scheduleCustomTimeId is between 1 and 10,000
-            4. hash looping past Integer.MAX_VALUE isn't likely to cause collisions
-         */
-
-        /**
-         * todo: The whole scheduleCustomTimeId isn't guaranteed to be unique, but I don't feel like migrating
-         * InstanceShownRecord right now.  Move it to Paper later, and make all this strongly typed
-         */
-
-        // todo just hash a data object
-        fun getNotificationId(
-                scheduleDate: Date,
-                scheduleTimeDescriptor: TimeDescriptor,
-                taskKeyData: TaskKeyData,
-        ): Int {
-            var hash = scheduleDate.month
-            hash += 12 * scheduleDate.day
-            hash += 12 * 31 * (scheduleDate.year - 2015)
-            hash += 12 * 31 * 73 * scheduleTimeDescriptor.hashCode()
-            hash += 12 * 31 * 73 * 13 * taskKeyData.hashCode()
-
-            return hash
-        }
+        fun getNotificationId(instanceKey: InstanceKey) = instanceKey.hashCode()
     }
 
     private val shownHolder = ShownHolder()
@@ -88,7 +50,7 @@ class Instance private constructor(val task: Task, private var data: Data) : Ass
 
     val name get() = task.name
 
-    val notificationId get() = getNotificationId(scheduleDate, JsonTime.fromTimePair(data.scheduleTimePair), taskKey)
+    val notificationId get() = getNotificationId(instanceKey)
 
     val hidden get() = data.hidden
 
@@ -98,10 +60,10 @@ class Instance private constructor(val task: Task, private var data: Data) : Ass
         val exactTimeStamp = scheduleDateTime.toLocalExactTimeStamp().toOffset()
 
         task.getScheduleDateTimes(
-                exactTimeStamp,
-                exactTimeStamp.plusOne(),
-                originalDateTime = true,
-                checkOldestVisible = false
+            exactTimeStamp,
+            exactTimeStamp.plusOne(),
+            originalDateTime = true,
+            checkOldestVisible = false,
         ).toList()
     }
     private val matchingScheduleIntervals by matchingScheduleIntervalsProperty
@@ -668,14 +630,13 @@ class Instance private constructor(val task: Task, private var data: Data) : Ass
         private var shown: Shown? = null
 
         fun getShown(shownFactory: ShownFactory): Shown? {
-            if (first)
-                shown = shownFactory.getShown(taskKey, scheduleDateTime)
+            if (first) shown = shownFactory.getShown(instanceKey)
+
             return shown
         }
 
         fun forceShown(shownFactory: ShownFactory): Shown {
-            if (getShown(shownFactory) == null)
-                shown = shownFactory.createShown(TaskKeyData(taskKey), scheduleDateTime)
+            if (getShown(shownFactory) == null) shown = shownFactory.createShown(instanceKey)
 
             return shown!!
         }
@@ -683,7 +644,7 @@ class Instance private constructor(val task: Task, private var data: Data) : Ass
 
     interface Shown {
 
-        val instanceShownKey: InstanceShownKey
+        val instanceKey: InstanceKey
 
         var notified: Boolean
         var notificationShown: Boolean
@@ -693,11 +654,11 @@ class Instance private constructor(val task: Task, private var data: Data) : Ass
 
     interface ShownFactory {
 
-        val instanceShownMap: Map<InstanceShownKey, Shown>
+        val instanceShownMap: Map<InstanceKey, Shown>
 
-        fun createShown(taskKeyData: TaskKeyData, scheduleDateTime: DateTime): Shown
+        fun createShown(instanceKey: InstanceKey): Shown
 
-        fun getShown(taskKey: TaskKey, scheduleDateTime: DateTime): Shown?
+        fun getShown(instanceKey: InstanceKey): Shown?
     }
 
     sealed class ParentState {

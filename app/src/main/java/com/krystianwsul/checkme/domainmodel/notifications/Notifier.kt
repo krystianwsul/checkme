@@ -9,7 +9,6 @@ import com.krystianwsul.checkme.ticks.Ticker
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.relevance.CustomTimeRelevance
 import com.krystianwsul.common.relevance.Irrelevant
-import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.DateTimeSoy
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.TimeStamp
@@ -95,32 +94,16 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
             .instanceShownMap
             .entries
             .filter { it.value.notificationShown }
-            .map { it to domainFactory.tryGetTask(it.key.taskKeyData) }
+            .map { it to domainFactory.tryGetTask(it.key.taskKey) }
 
         instanceShownPairs.filter { it.second == null }.forEach { (instanceShownEntry, _) ->
-            val scheduleDate = instanceShownEntry.key.run { Date(scheduleYear, scheduleMonth, scheduleDay) }
+            cancelInstance(Instance.getNotificationId(instanceShownEntry.key))
 
-            cancelInstance(
-                Instance.getNotificationId(
-                    scheduleDate,
-                    instanceShownEntry.key.scheduleTimeDescriptor,
-                    instanceShownEntry.key.taskKeyData,
-                )
-            )
             instanceShownEntry.value.notificationShown = false
         }
 
         val shownInstanceKeys = instanceShownPairs.filter { it.second != null }
-            .map { (instanceShownEntry, task) ->
-                val scheduleJsonTime =
-                    instanceShownEntry.key
-                        .scheduleTimeDescriptor
-                        .toJsonTime(task!!.projectCustomTimeIdProvider)
-
-                val scheduleDate = instanceShownEntry.key.run { Date(scheduleYear, scheduleMonth, scheduleDay) }
-
-                InstanceKey(task.taskKey, scheduleDate, scheduleJsonTime.toTimePair(task.project))
-            }
+            .map { (instanceShownEntry, _) -> instanceShownEntry.key }
             .toSet()
 
         val showInstanceKeys = notificationInstances.keys - shownInstanceKeys
@@ -392,7 +375,7 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
         }
 
         val relevantInstanceShownKeys = domainFactory.getRootInstances(null, now.toOffset().plusOne(), now)
-            .mapNotNull { it.getShown(domainFactory.shownFactory)?.instanceShownKey }
+            .mapNotNull { it.getShown(domainFactory.shownFactory)?.instanceKey }
             .toSet()
 
         val irrelevantInstanceShownEntries = domainFactory.shownFactory.instanceShownMap - relevantInstanceShownKeys

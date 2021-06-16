@@ -53,7 +53,7 @@ class IrrelevantTest {
         }
 
         private val shownFactory = mockk<Instance.ShownFactory> {
-            every { getShown(any(), any()) } returns mockk(relaxed = true)
+            every { getShown(any()) } returns mockk(relaxed = true)
         }
 
         @JvmStatic

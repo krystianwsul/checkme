@@ -563,11 +563,10 @@ class DomainFactory(
         }
     }
 
-    fun tryGetTask(taskKeyData: TaskKeyData): Task? {
-        return if (taskKeyData.root) {
-            rootTasksFactory.getRootTaskIfPresent(TaskKey.Root(taskKeyData.taskId))
-        } else {
-            projectsFactory.getProjectIfPresent(taskKeyData.projectId)?.getTaskIfPresent(taskKeyData.taskId)
+    fun tryGetTask(taskKey: TaskKey): Task? {
+        return when (taskKey) {
+            is TaskKey.Root -> rootTasksFactory.getRootTaskIfPresent(taskKey)
+            is TaskKey.Project -> projectsFactory.getTaskIfPresent(taskKey)
         }
     }
 

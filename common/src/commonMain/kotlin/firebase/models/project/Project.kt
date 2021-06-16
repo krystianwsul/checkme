@@ -96,11 +96,11 @@ abstract class Project<T : ProjectType>(
         taskHierarchy.invalidateTasks()
     }
 
-    fun getTaskIfPresent(taskId: String) = _tasks[taskId]
+    fun getTaskIfPresent(taskId: String) = _tasks[taskId] // todo local
 
     fun getTaskIfPresent(taskKey: TaskKey.Project) = getTaskIfPresent(taskKey.taskId)
 
-    fun getProjectTaskForce(taskId: String) = _tasks[taskId] ?: throw MissingTaskException(projectKey, taskId)
+    fun getProjectTaskForce(taskId: String) = _tasks[taskId] ?: throw MissingTaskException(projectKey, taskId) // todo local
 
     fun getProjectTaskForce(taskKey: TaskKey.Project) = getProjectTaskForce(taskKey.taskId)
 

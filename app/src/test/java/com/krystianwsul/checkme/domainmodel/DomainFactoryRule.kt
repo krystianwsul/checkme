@@ -221,7 +221,6 @@ class DomainFactoryRule : TestRule {
         )
 
         projectsFactory = ProjectsFactory(
-            mockk(),
             mockk(relaxed = true),
             ProjectLoader.InitialProjectEvent(
                 mockk(relaxed = true),

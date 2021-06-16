@@ -4,7 +4,6 @@ import com.jakewharton.rxrelay3.BehaviorRelay
 import com.jakewharton.rxrelay3.PublishRelay
 import com.jakewharton.rxrelay3.Relay
 import com.krystianwsul.checkme.domainmodel.DomainFactoryRule
-import com.krystianwsul.checkme.domainmodel.local.LocalFactory
 import com.krystianwsul.checkme.firebase.UserCustomTimeProviderSource
 import com.krystianwsul.checkme.firebase.UserKeyStore
 import com.krystianwsul.checkme.firebase.checkRemote
@@ -250,8 +249,6 @@ class ChangeTypeSourceTest {
             loadDependencyTrackerManager,
         )
 
-        val localFactory = mockk<LocalFactory>()
-
         val shownFactory = mockk<Instance.ShownFactory>()
 
         val projectsFactorySingle = Single.zip(
@@ -263,7 +260,6 @@ class ChangeTypeSourceTest {
             sharedProjectsLoader.initialProjectsEvent,
         ) { initialPrivateProjectEvent, initialSharedProjectsEvent ->
             ProjectsFactory(
-                localFactory,
                 privateProjectLoader,
                 initialPrivateProjectEvent,
                 sharedProjectsLoader,

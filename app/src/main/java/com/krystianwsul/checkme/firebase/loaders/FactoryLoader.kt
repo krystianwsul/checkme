@@ -17,7 +17,6 @@ import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.DeviceInfo
 import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.ChangeType
-import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.treeadapter.getCurrentValue
 import io.reactivex.rxjava3.core.Observable
@@ -28,7 +27,6 @@ import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.plusAssign
 
 class FactoryLoader(
-    localFactory: Instance.ShownFactory,
     userInfoObservable: Observable<NullableWrapper<UserInfo>>,
     factoryProvider: FactoryProvider,
     tokenObservable: Observable<NullableWrapper<String>>,
@@ -179,6 +177,8 @@ class FactoryLoader(
                         loadDependencyTrackerManager,
                     )
 
+                    val shownFactorySingle = factoryProvider.shownFactorySingle.cacheImmediate(domainDisposable)
+
                     projectsFactorySingle = Single.zip(
                         privateProjectLoader.initialProjectEvent.map {
                             check(it.changeType == ChangeType.REMOTE)
@@ -186,10 +186,9 @@ class FactoryLoader(
                             it.data
                         },
                         sharedProjectsLoader.initialProjectsEvent,
-                        factoryProvider.shownFactorySingle,
+                        shownFactorySingle,
                     ) { initialPrivateProjectEvent, initialSharedProjectsEvent, shownFactory ->
                         ProjectsFactory(
-                            localFactory,
                             privateProjectLoader,
                             initialPrivateProjectEvent,
                             sharedProjectsLoader,
@@ -207,9 +206,10 @@ class FactoryLoader(
                         projectsFactorySingle,
                         friendsFactorySingle,
                         factoryProvider.notificationStorageFactory.getNotificationStorage(),
-                    ) { remoteUserFactory, projectsFactory, friendsFactory, notificationStorage ->
+                        shownFactorySingle,
+                    ) { remoteUserFactory, projectsFactory, friendsFactory, notificationStorage, shownFactory ->
                         factoryProvider.newDomain(
-                            localFactory,
+                            shownFactory,
                             remoteUserFactory,
                             projectsFactory,
                             friendsFactory,

@@ -140,7 +140,6 @@ class ProjectsFactoryTest {
 
     private fun initProjectsFactory() {
         _projectsFactory = ProjectsFactory(
-            mockk(),
             privateProjectLoader,
             initialProjectEvent!!,
             sharedProjectsLoader,

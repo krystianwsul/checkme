@@ -155,7 +155,6 @@ class MyApplication : Application() {
         }
 
         FactoryLoader(
-            localFactory,
             userInfoRelay,
             FactoryProvider.Impl(localFactory),
             Preferences.tokenRelay,

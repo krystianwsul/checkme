@@ -21,11 +21,9 @@ import com.krystianwsul.common.firebase.json.tasks.PrivateTaskJson
 import com.krystianwsul.common.firebase.json.tasks.RootTaskJson
 import com.krystianwsul.common.firebase.json.tasks.SharedTaskJson
 import com.krystianwsul.common.firebase.models.Instance
-import com.krystianwsul.common.time.DateTime
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
-import com.krystianwsul.common.utils.TaskKeyData
 import com.krystianwsul.common.utils.UserKey
 import io.mockk.every
 import io.mockk.mockk
@@ -42,18 +40,6 @@ class FactoryLoaderTest {
 
     @get:Rule
     val domainFactoryRule = DomainFactoryRule()
-
-    private val local = object : Instance.ShownFactory {
-
-        override fun getShown(taskKey: TaskKey, scheduleDateTime: DateTime): Instance.Shown? = null
-
-        override fun createShown(taskKeyData: TaskKeyData, scheduleDateTime: DateTime) = object : Instance.Shown {
-
-            override var notified = false
-
-            override var notificationShown = false
-        }
-    }
 
     private open class TestDomain : FactoryProvider.Domain {
 
@@ -189,7 +175,6 @@ class FactoryLoaderTest {
         testFactoryProvider = TestFactoryProvider()
 
         factoryLoader = FactoryLoader(
-            local,
             userInfoObservable,
             testFactoryProvider,
             tokenObservable,

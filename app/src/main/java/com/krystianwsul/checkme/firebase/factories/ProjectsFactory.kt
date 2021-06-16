@@ -24,7 +24,6 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.merge
 
 class ProjectsFactory(
-    localFactory: Instance.ShownFactory,
     private val privateProjectLoader: ProjectLoader<ProjectType.Private, PrivateProjectJson>,
     privateInitialProjectEvent: ProjectLoader.InitialProjectEvent<ProjectType.Private, PrivateProjectJson>,
     private val sharedProjectsLoader: SharedProjectsLoader,
@@ -69,7 +68,7 @@ class ProjectsFactory(
     val changeTypes: Observable<ChangeType>
 
     init {
-        privateProject.fixNotificationShown(localFactory, now)
+        privateProject.fixNotificationShown(shownFactory, now)
 
         val addProjectChangeTypes = sharedProjectsLoader.addProjectEvents.mapNotNull { (changeType, addProjectEvent) ->
             val projectKey = addProjectEvent.initialProjectEvent

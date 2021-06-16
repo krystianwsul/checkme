@@ -98,6 +98,7 @@ class DomainFactory(
     val converter = Converter()
 
     init {
+        MyApplication.logDelay("DomainFactory.init")
         Preferences.tickLog.logLineHour("DomainFactory.init")
 
         val now = ExactTimeStamp.Local.now

@@ -197,6 +197,7 @@ class EditActivity : NavBarActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        MyApplication.logDelay("EditActivity.onCreate")
 
         binding = ActivityEditBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -334,6 +335,7 @@ class EditActivity : NavBarActivity() {
     private var first = true
 
     private fun onLoadFinished() {
+        MyApplication.logDelay("EditActivity.onLoadFinished")
         if (!first) return
         first = false
 

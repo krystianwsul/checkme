@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.firebase.factories
 
+import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.firebase.loaders.ProjectLoader
 import com.krystianwsul.checkme.utils.publishImmediate
 import com.krystianwsul.common.domain.DeviceDbInfo
@@ -24,6 +25,9 @@ abstract class ProjectFactory<T : ProjectType, U : Parsable>(
     private val rootTaskProvider: Project.RootTaskProvider,
     protected val deviceDbInfo: () -> DeviceDbInfo,
 ) {
+    init {
+        MyApplication.logDelay("ProjectFactory.init")
+    }
 
     private val projectManager = initialProjectEvent.projectManager
 
@@ -31,9 +35,9 @@ abstract class ProjectFactory<T : ProjectType, U : Parsable>(
         private set
 
     protected abstract fun newProject(
-            projectRecord: ProjectRecord<T>,
-            userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
-            rootTaskProvider: Project.RootTaskProvider,
+        projectRecord: ProjectRecord<T>,
+        userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
+        rootTaskProvider: Project.RootTaskProvider,
     ): Project<T>
 
     val changeTypes: Observable<ChangeType>

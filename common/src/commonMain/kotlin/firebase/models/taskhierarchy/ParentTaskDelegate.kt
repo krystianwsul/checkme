@@ -16,9 +16,9 @@ sealed class ParentTaskDelegate {
             private val project: com.krystianwsul.common.firebase.models.project.Project<*>,
     ) : ParentTaskDelegate() {
 
-        override fun getTaskKey(parentTaskId: String): TaskKey = TaskKey.Project(project.projectKey, parentTaskId)
+        override fun getTaskKey(parentTaskId: String) = TaskKey.Project(project.projectKey, parentTaskId)
 
-        override fun getTask(parentTaskId: String): Task = project.getProjectTaskForce(parentTaskId)
+        override fun getTask(parentTaskId: String): Task = project.getProjectTaskForce(getTaskKey(parentTaskId))
 
         override fun removeRootChildTaskFromParent(parentTask: Task, childTask: Task) {}
     }

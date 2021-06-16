@@ -5,7 +5,6 @@ import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.checkme.utils.toV3
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.TaskKey
-import com.krystianwsul.common.utils.TaskKeyData
 import com.pacoworks.rxpaper2.RxPaperBook
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.kotlin.Singles
@@ -69,8 +68,6 @@ class NotificationStorage(
     }
 
     override fun deleteInstanceShown(taskKeys: Set<TaskKey>) {
-        val taskKeyDatas = taskKeys.map(::TaskKeyData)
-
         instanceShownMap.keys
             .filterNot { it.taskKey in taskKeys }
             .forEach(instanceShownMap::remove)

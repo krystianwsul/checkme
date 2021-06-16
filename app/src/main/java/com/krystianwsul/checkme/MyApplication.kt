@@ -150,12 +150,16 @@ class MyApplication : Application() {
                 }
         }
 
-        FactoryLoader(
+        val factoryLoader = FactoryLoader(
             userInfoRelay,
             FactoryProvider.Impl(),
             Preferences.tokenRelay,
             uuidSingle,
-        ).domainFactoryObservable.subscribe {
+        )
+
+        factoryLoader.userScopeObservable.subscribe(UserScope.instanceRelay)
+
+        factoryLoader.domainFactoryObservable.subscribe {
             @Suppress("UNCHECKED_CAST")
             DomainFactory.instanceRelay.accept(it as NullableWrapper<DomainFactory>)
         }

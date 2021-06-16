@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.domainmodel
 
+import com.jakewharton.rxrelay3.BehaviorRelay
 import com.krystianwsul.checkme.domainmodel.extensions.updateDeviceDbInfo
 import com.krystianwsul.checkme.firebase.factories.FriendsFactory
 import com.krystianwsul.checkme.firebase.factories.MyUserFactory
@@ -31,6 +32,15 @@ class UserScope(
     domainDisposable: CompositeDisposable,
     getDeviceDbInfo: () -> DeviceDbInfo,
 ) {
+
+    companion object {
+
+        val instanceRelay = BehaviorRelay.createDefault(NullableWrapper<UserScope>())!!
+
+        val nullableInstance get() = instanceRelay.value!!.value
+
+        val instance get() = nullableInstance!!
+    }
 
     val domainListenerManager = DomainListenerManager()
 

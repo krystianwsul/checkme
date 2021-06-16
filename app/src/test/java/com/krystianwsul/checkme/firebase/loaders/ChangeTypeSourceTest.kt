@@ -4,7 +4,6 @@ import com.jakewharton.rxrelay3.BehaviorRelay
 import com.jakewharton.rxrelay3.PublishRelay
 import com.jakewharton.rxrelay3.Relay
 import com.krystianwsul.checkme.domainmodel.DomainFactoryRule
-import com.krystianwsul.checkme.domainmodel.local.LocalFactory
 import com.krystianwsul.checkme.firebase.UserCustomTimeProviderSource
 import com.krystianwsul.checkme.firebase.UserKeyStore
 import com.krystianwsul.checkme.firebase.checkRemote
@@ -25,6 +24,7 @@ import com.krystianwsul.common.firebase.json.projects.PrivateProjectJson
 import com.krystianwsul.common.firebase.json.projects.SharedProjectJson
 import com.krystianwsul.common.firebase.json.taskhierarchies.NestedTaskHierarchyJson
 import com.krystianwsul.common.firebase.json.tasks.RootTaskJson
+import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.task.ProjectRootTaskIdTracker
 import com.krystianwsul.common.firebase.records.project.ProjectRecord
 import com.krystianwsul.common.firebase.records.task.RootTaskRecord
@@ -249,11 +249,7 @@ class ChangeTypeSourceTest {
             loadDependencyTrackerManager,
         )
 
-        val localFactory = mockk<LocalFactory>()
-
-        val factoryProvider = mockk<FactoryProvider> {
-            every { shownFactory } returns mockk()
-        }
+        val shownFactory = mockk<Instance.ShownFactory>()
 
         val projectsFactorySingle = Single.zip(
             privateProjectLoader.initialProjectEvent.map {
@@ -264,13 +260,12 @@ class ChangeTypeSourceTest {
             sharedProjectsLoader.initialProjectsEvent,
         ) { initialPrivateProjectEvent, initialSharedProjectsEvent ->
             ProjectsFactory(
-                localFactory,
                 privateProjectLoader,
                 initialPrivateProjectEvent,
                 sharedProjectsLoader,
                 initialSharedProjectsEvent,
                 ExactTimeStamp.Local.now,
-                factoryProvider,
+                shownFactory,
                 domainDisposable,
                 rootTasksFactory,
             ) { DomainFactoryRule.deviceDbInfo }.also { projectsFactory = it }

@@ -37,8 +37,8 @@ private fun getDateTimeHour(now: ExactTimeStamp.Local) = now.calendar
 
 private fun DomainFactory.addInstanceHour(instance: Instance, dateTime: DateTime, now: ExactTimeStamp.Local) {
     instance.apply {
-        setInstanceDateTime(localFactory, dateTime, this@addInstanceHour, now)
-        setNotificationShown(localFactory, false)
+        setInstanceDateTime(shownFactory, dateTime, this@addInstanceHour, now)
+        setNotificationShown(shownFactory, false)
     }
 }
 
@@ -78,8 +78,8 @@ private fun DomainFactory.setNotificationDone(instance: Instance, now: ExactTime
     instance.apply {
         Preferences.tickLog.logLineHour("DomainFactory: setting $name done")
 
-        setDone(localFactory, true, now)
-        setNotificationShown(localFactory, false)
+        setDone(shownFactory, true, now)
+        setNotificationShown(shownFactory, false)
     }
 }
 

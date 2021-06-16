@@ -2,7 +2,8 @@ package com.krystianwsul.checkme.firebase.loaders
 
 import androidx.annotation.CheckResult
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.domainmodel.local.LocalFactory
+import com.krystianwsul.checkme.domainmodel.notifications.AndroidShownFactory
+import com.krystianwsul.checkme.domainmodel.notifications.InstanceShownData
 import com.krystianwsul.checkme.domainmodel.notifications.ProjectNotificationKey
 import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
 import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
@@ -19,7 +20,9 @@ import com.krystianwsul.common.firebase.json.JsonWrapper
 import com.krystianwsul.common.firebase.json.projects.PrivateProjectJson
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.time.ExactTimeStamp
+import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.ProjectKey
+import com.krystianwsul.common.utils.TaskKey
 import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Single
@@ -32,8 +35,6 @@ interface FactoryProvider {
     val database: Database
 
     val projectProvider: ProjectProvider
-
-    val shownFactory: Instance.ShownFactory
 
     val sharedProjectsProvider
         get() = object : SharedProjectsProvider {
@@ -54,8 +55,10 @@ interface FactoryProvider {
 
     val notificationStorageFactory: NotificationStorageFactory
 
+    fun newShownFactory(notificationStorage: NotificationStorage): Instance.ShownFactory
+
     fun newDomain(
-        localFactory: Instance.ShownFactory,
+        shownFactory: Instance.ShownFactory,
         myUserFactory: MyUserFactory,
         projectsFactory: ProjectsFactory,
         friendsFactory: FriendsFactory,
@@ -82,9 +85,12 @@ interface FactoryProvider {
 
     interface NotificationStorage {
 
-        fun getKeys(): List<ProjectNotificationKey>
+        var projectNotificationKeys: List<ProjectNotificationKey>
+        val instanceShownMap: MutableMap<InstanceKey, InstanceShownData>
 
-        fun writeKeys(projectNotificationKeys: List<ProjectNotificationKey>)
+        fun save(): Boolean
+
+        fun deleteInstanceShown(taskKeys: Set<TaskKey>)
     }
 
     abstract class Database : FriendsProvider.Database(), RootTasksLoader.Provider {
@@ -94,7 +100,7 @@ interface FactoryProvider {
         abstract fun getSharedProjectObservable(projectKey: ProjectKey.Shared): Observable<Snapshot<JsonWrapper>>
     }
 
-    class Impl(override val shownFactory: Instance.ShownFactory) : FactoryProvider {
+    class Impl : FactoryProvider {
 
         override val nullableInstance get() = DomainFactory.nullableInstance
 
@@ -110,8 +116,10 @@ interface FactoryProvider {
         override val notificationStorageFactory =
             com.krystianwsul.checkme.domainmodel.notifications.NotificationStorage.Companion
 
+        override fun newShownFactory(notificationStorage: NotificationStorage) = AndroidShownFactory(notificationStorage)
+
         override fun newDomain(
-            localFactory: Instance.ShownFactory,
+            shownFactory: Instance.ShownFactory,
             myUserFactory: MyUserFactory,
             projectsFactory: ProjectsFactory,
             friendsFactory: FriendsFactory,
@@ -122,7 +130,7 @@ interface FactoryProvider {
             rootTasksFactory: RootTasksFactory,
             notificationStorage: NotificationStorage,
         ) = DomainFactory(
-            localFactory as LocalFactory,
+            shownFactory,
             myUserFactory,
             projectsFactory,
             friendsFactory,

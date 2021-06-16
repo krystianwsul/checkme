@@ -17,7 +17,6 @@ import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.DeviceInfo
 import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.ChangeType
-import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.treeadapter.getCurrentValue
 import io.reactivex.rxjava3.core.Observable
@@ -28,7 +27,6 @@ import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.plusAssign
 
 class FactoryLoader(
-    localFactory: Instance.ShownFactory,
     userInfoObservable: Observable<NullableWrapper<UserInfo>>,
     factoryProvider: FactoryProvider,
     tokenObservable: Observable<NullableWrapper<String>>,
@@ -118,12 +116,11 @@ class FactoryLoader(
 
                     val recordRootTaskDependencyStateContainer = RootTaskDependencyStateContainer.Impl()
 
-                    val taskRecordLoader =
-                        TaskRecordsLoadedTracker.Impl(
-                            rootTasksLoader,
-                            recordRootTaskDependencyStateContainer,
-                            domainDisposable
-                        )
+                    val taskRecordLoader = TaskRecordsLoadedTracker.Impl(
+                        rootTasksLoader,
+                        recordRootTaskDependencyStateContainer,
+                        domainDisposable,
+                    )
 
                     val rootTaskToRootTaskCoordinator = RootTaskDependencyCoordinator.Impl(
                         rootTaskKeySource,
@@ -180,6 +177,13 @@ class FactoryLoader(
                         loadDependencyTrackerManager,
                     )
 
+                    val notificationStorageSingle = factoryProvider.notificationStorageFactory
+                        .getNotificationStorage()
+                        .cacheImmediate(domainDisposable)
+
+                    val shownFactorySingle =
+                        notificationStorageSingle.map(factoryProvider::newShownFactory).cacheImmediate(domainDisposable)
+
                     projectsFactorySingle = Single.zip(
                         privateProjectLoader.initialProjectEvent.map {
                             check(it.changeType == ChangeType.REMOTE)
@@ -187,15 +191,15 @@ class FactoryLoader(
                             it.data
                         },
                         sharedProjectsLoader.initialProjectsEvent,
-                    ) { initialPrivateProjectEvent, initialSharedProjectsEvent ->
+                        shownFactorySingle,
+                    ) { initialPrivateProjectEvent, initialSharedProjectsEvent, shownFactory ->
                         ProjectsFactory(
-                            localFactory,
                             privateProjectLoader,
                             initialPrivateProjectEvent,
                             sharedProjectsLoader,
                             initialSharedProjectsEvent,
                             ExactTimeStamp.Local.now,
-                            factoryProvider,
+                            shownFactory,
                             domainDisposable,
                             rootTasksFactory,
                             ::getDeviceDbInfo,
@@ -206,10 +210,11 @@ class FactoryLoader(
                         userFactorySingle,
                         projectsFactorySingle,
                         friendsFactorySingle,
-                        factoryProvider.notificationStorageFactory.getNotificationStorage(),
-                    ) { remoteUserFactory, projectsFactory, friendsFactory, notificationStorage ->
+                        notificationStorageSingle,
+                        shownFactorySingle,
+                    ) { remoteUserFactory, projectsFactory, friendsFactory, notificationStorage, shownFactory ->
                         factoryProvider.newDomain(
-                            localFactory,
+                            shownFactory,
                             remoteUserFactory,
                             projectsFactory,
                             friendsFactory,

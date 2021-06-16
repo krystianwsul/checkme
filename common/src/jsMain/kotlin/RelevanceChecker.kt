@@ -123,7 +123,7 @@ object RelevanceChecker {
                     override fun getTask(taskKey: TaskKey): Task {
                         return when (taskKey) {
                             is TaskKey.Root -> getRootTask(taskKey)
-                            is TaskKey.Project -> projectMap.getValue(taskKey.projectKey).getProjectTaskForce(taskKey.taskId)
+                            is TaskKey.Project -> projectMap.getValue(taskKey.projectKey).getProjectTaskForce(taskKey)
                         }
                     }
 

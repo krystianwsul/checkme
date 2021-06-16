@@ -1,9 +1,9 @@
 package com.krystianwsul.checkme.firebase.factories
 
-import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.checkme.firebase.loaders.ProjectLoader
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.firebase.json.projects.PrivateProjectJson
+import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.project.PrivateProject
 import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.records.project.PrivateProjectRecord
@@ -15,14 +15,14 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable
 class PrivateProjectFactory(
         projectLoader: ProjectLoader<ProjectType.Private, PrivateProjectJson>,
         initialProjectEvent: ProjectLoader.InitialProjectEvent<ProjectType.Private, PrivateProjectJson>,
-        factoryProvider: FactoryProvider,
+        shownFactory: Instance.ShownFactory,
         domainDisposable: CompositeDisposable,
         rootTaskProvider: Project.RootTaskProvider,
         deviceDbInfo: () -> DeviceDbInfo,
 ) : ProjectFactory<ProjectType.Private, PrivateProjectJson>(
         projectLoader,
         initialProjectEvent,
-        factoryProvider,
+        shownFactory,
         domainDisposable,
         rootTaskProvider,
         deviceDbInfo,

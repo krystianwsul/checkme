@@ -3,10 +3,7 @@ package com.krystianwsul.checkme.domainmodel.extensions
 import android.net.Uri
 import androidx.annotation.CheckResult
 import com.krystianwsul.checkme.MyCrashlytics
-import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.domainmodel.DomainListenerManager
-import com.krystianwsul.checkme.domainmodel.ScheduleText
-import com.krystianwsul.checkme.domainmodel.takeAndHasMore
+import com.krystianwsul.checkme.domainmodel.*
 import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
 import com.krystianwsul.checkme.domainmodel.update.SingleDomainUpdate
 import com.krystianwsul.checkme.gui.edit.EditParameters
@@ -15,6 +12,7 @@ import com.krystianwsul.checkme.gui.edit.ParentScheduleManager
 import com.krystianwsul.checkme.gui.edit.delegates.EditDelegate
 import com.krystianwsul.checkme.upload.Uploader
 import com.krystianwsul.checkme.utils.newUuid
+import com.krystianwsul.checkme.viewmodels.DomainResult
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.domain.ScheduleGroup
 import com.krystianwsul.common.firebase.DomainThreadChecker
@@ -31,135 +29,134 @@ import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.*
 import io.reactivex.rxjava3.core.Single
 
-fun DomainFactory.getCreateTaskData(
+fun UserScope.getCreateTaskData(
     startParameters: EditViewModel.StartParameters,
     currentParentSource: EditViewModel.CurrentParentSource,
-): EditViewModel.MainData {
+): Single<DomainResult<EditViewModel.MainData>> {
     MyCrashlytics.logMethod(this)
 
-    DomainThreadChecker.instance.requireDomainThread()
+    return domainFactorySingle.map {
+        (it as DomainFactory).run {
+            DomainThreadChecker.instance.requireDomainThread()
 
-    val now = ExactTimeStamp.Local.now
+            val now = ExactTimeStamp.Local.now
 
-    val customTimes = getCurrentRemoteCustomTimes(now).associate { it.key to it as Time.Custom }.toMutableMap()
+            val customTimes = getCurrentRemoteCustomTimes(now).associate { it.key to it as Time.Custom }.toMutableMap()
 
-    val taskData = (startParameters as? EditViewModel.StartParameters.Task)?.let {
-        val task = getTaskForce(it.taskKey)
+            val taskData = (startParameters as? EditViewModel.StartParameters.Task)?.let {
+                val task = getTaskForce(it.taskKey)
 
-        val parentKey: EditViewModel.ParentKey?
-        var scheduleDataWrappers: List<EditViewModel.ScheduleDataWrapper>? = null
-        var assignedTo: Set<UserKey> = setOf()
+                val parentKey: EditViewModel.ParentKey?
+                var scheduleDataWrappers: List<EditViewModel.ScheduleDataWrapper>? = null
+                var assignedTo: Set<UserKey> = setOf()
 
-        if (task.isTopLevelTask(now)) {
-            val schedules = task.intervalInfo.getCurrentScheduleIntervals(now)
+                if (task.isTopLevelTask(now)) {
+                    val schedules = task.intervalInfo.getCurrentScheduleIntervals(now)
 
-            customTimes += schedules.mapNotNull { it.schedule.customTimeKey }.map { it to getCustomTime(it) }
+                    customTimes += schedules.mapNotNull { it.schedule.customTimeKey }.map { it to getCustomTime(it) }
 
-            parentKey = task.project
-                .projectKey
-                .let {
-                    (it as? ProjectKey.Shared)?.let { EditViewModel.ParentKey.Project(it) }
+                    parentKey = task.project
+                        .projectKey
+                        .let {
+                            (it as? ProjectKey.Shared)?.let { EditViewModel.ParentKey.Project(it) }
+                        }
+
+                    if (schedules.isNotEmpty()) {
+                        scheduleDataWrappers = ScheduleGroup.getGroups(schedules.map { it.schedule }).map {
+                            EditViewModel.ScheduleDataWrapper.fromScheduleData(it.scheduleData)
+                        }
+
+                        assignedTo = schedules.map { it.schedule.assignedTo }
+                            .distinct()
+                            .single()
+                    }
+                } else {
+                    val parentTask = task.getParentTask(now)!!
+                    parentKey = EditViewModel.ParentKey.Task(parentTask.taskKey)
                 }
 
-            if (schedules.isNotEmpty()) {
-                scheduleDataWrappers = ScheduleGroup.getGroups(schedules.map { it.schedule }).map {
-                    EditViewModel.ScheduleDataWrapper.fromScheduleData(it.scheduleData)
-                }
-
-                assignedTo = schedules.map { it.schedule.assignedTo }
-                    .distinct()
-                    .single()
+                EditViewModel.TaskData(
+                    task.name,
+                    parentKey,
+                    scheduleDataWrappers,
+                    task.note,
+                    task.getImage(deviceDbInfo),
+                    task.project
+                        .getAssignedTo(assignedTo)
+                        .map { it.key }
+                        .toSet(),
+                    task.project.projectKey,
+                )
             }
-        } else {
-            val parentTask = task.getParentTask(now)!!
-            parentKey = EditViewModel.ParentKey.Task(parentTask.taskKey)
-        }
 
-        EditViewModel.TaskData(
-            task.name,
-            parentKey,
-            scheduleDataWrappers,
-            task.note,
-            task.getImage(deviceDbInfo),
-            task.project
-                .getAssignedTo(assignedTo)
-                .map { it.key }
-                .toSet(),
-            task.project.projectKey,
-        )
-    }
+            val customTimeDatas = customTimes.values.associate {
+                it.key to EditViewModel.CustomTimeData(it.key, it.name, it.hourMinutes.toSortedMap(), it is MyCustomTime)
+            }
 
-    val customTimeDatas = customTimes.values.associate {
-        it.key to EditViewModel.CustomTimeData(it.key, it.name, it.hourMinutes.toSortedMap(), it is MyCustomTime)
-    }
+            val showAllInstancesDialog = when (startParameters) {
+                is EditViewModel.StartParameters.Join -> startParameters.joinables
+                    .map { it to getTaskForce(it.taskKey) }
+                    .run {
+                        map { it.second.project }.distinct().size == 1 && any { (joinable, task) ->
+                            if (joinable.instanceKey != null) {
+                                task.hasOtherVisibleInstances(now, joinable.instanceKey)
+                            } else {
+                                task.getInstances(null, null, now)
+                                    .filter { it.isVisible(now, Instance.VisibilityOptions()) }
+                                    .takeAndHasMore(1)
+                                    .second
+                            }
+                        }
+                    }
+                is EditViewModel.StartParameters.Task -> null
+                is EditViewModel.StartParameters.Create -> null
+            }
 
-    val showAllInstancesDialog = when (startParameters) {
-        is EditViewModel.StartParameters.Join -> startParameters.joinables
-            .map { it to getTaskForce(it.taskKey) }
-            .run {
-                map { it.second.project }.distinct().size == 1 && any { (joinable, task) ->
-                    if (joinable.instanceKey != null) {
-                        task.hasOtherVisibleInstances(now, joinable.instanceKey)
+            val currentParentKey: EditViewModel.ParentKey? = when (currentParentSource) {
+                is EditViewModel.CurrentParentSource.None -> null
+                is EditViewModel.CurrentParentSource.Set -> currentParentSource.parentKey
+                is EditViewModel.CurrentParentSource.FromTask -> {
+                    val task = getTaskForce(currentParentSource.taskKey)
+
+                    if (task.isTopLevelTask(now)) {
+                        when (val projectKey = task.project.projectKey) {
+                            is ProjectKey.Private -> null
+                            is ProjectKey.Shared -> EditViewModel.ParentKey.Project(projectKey)
+                            else -> throw UnsupportedOperationException()
+                        }
                     } else {
-                        task.getInstances(null, null, now)
-                            .filter { it.isVisible(now, Instance.VisibilityOptions()) }
-                            .takeAndHasMore(1)
-                            .second
+                        task.getParentTask(now)?.let { EditViewModel.ParentKey.Task(it.taskKey) }
                     }
                 }
             }
-        is EditViewModel.StartParameters.Task -> null
-        is EditViewModel.StartParameters.Create -> null
-    }
 
-    val currentParentKey: EditViewModel.ParentKey? = when (currentParentSource) {
-        is EditViewModel.CurrentParentSource.None -> null
-        is EditViewModel.CurrentParentSource.Set -> currentParentSource.parentKey
-        is EditViewModel.CurrentParentSource.FromTask -> {
-            val task = getTaskForce(currentParentSource.taskKey)
+            val currentParent: ParentScheduleManager.Parent? = when (currentParentKey) {
+                is EditViewModel.ParentKey.Task -> {
+                    val task = getTaskForce(currentParentKey.taskKey)
 
-            if (task.isTopLevelTask(now)) {
-                when (val projectKey = task.project.projectKey) {
-                    is ProjectKey.Private -> null
-                    is ProjectKey.Shared -> EditViewModel.ParentKey.Project(projectKey)
-                    else -> throw UnsupportedOperationException()
+                    ParentScheduleManager.Parent(
+                        task.name,
+                        EditViewModel.ParentKey.Task(task.taskKey),
+                        mapOf(),
+                        task.project.projectKey,
+                    )
                 }
-            } else {
-                task.getParentTask(now)?.let { EditViewModel.ParentKey.Task(it.taskKey) }
+                is EditViewModel.ParentKey.Project -> {
+                    val project = projectsFactory.sharedProjects.getValue(currentParentKey.projectId)
+
+                    ParentScheduleManager.Parent(
+                        project.name,
+                        EditViewModel.ParentKey.Project(project.projectKey),
+                        project.users.toUserDatas(),
+                        project.projectKey,
+                    )
+                }
+                null -> null
             }
+
+            DomainResult.Completed(EditViewModel.MainData(taskData, customTimeDatas, showAllInstancesDialog, currentParent))
         }
     }
-
-    val currentParent: ParentScheduleManager.Parent? = when (currentParentKey) {
-        is EditViewModel.ParentKey.Task -> {
-            val task = getTaskForce(currentParentKey.taskKey)
-
-            ParentScheduleManager.Parent(
-                task.name,
-                EditViewModel.ParentKey.Task(task.taskKey),
-                mapOf(),
-                task.project.projectKey,
-            )
-        }
-        is EditViewModel.ParentKey.Project -> {
-            val project = projectsFactory.sharedProjects.getValue(currentParentKey.projectId)
-
-            ParentScheduleManager.Parent(
-                project.name,
-                EditViewModel.ParentKey.Project(project.projectKey),
-                project.users.toUserDatas(),
-                project.projectKey,
-            )
-        }
-        null -> null
-    }
-
-    return EditViewModel.MainData(
-        taskData,
-        customTimeDatas,
-        showAllInstancesDialog,
-        currentParent,
-    )
 }
 
 fun DomainFactory.getCreateTaskParentPickerData(

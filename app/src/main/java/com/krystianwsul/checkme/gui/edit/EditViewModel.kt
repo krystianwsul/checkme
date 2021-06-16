@@ -7,6 +7,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import com.jakewharton.rxrelay3.BehaviorRelay
 import com.krystianwsul.checkme.domainmodel.ScheduleText
+import com.krystianwsul.checkme.domainmodel.UserScope
 import com.krystianwsul.checkme.domainmodel.extensions.getCreateTaskData
 import com.krystianwsul.checkme.domainmodel.extensions.getCreateTaskParentPickerData
 import com.krystianwsul.checkme.gui.edit.delegates.EditDelegate
@@ -41,8 +42,10 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
 
     private val mainDomainListener = object : DomainListener<MainData>() {
 
-        override val domainResultFetcher = DomainResultFetcher.DomainFactoryData {
-            it.getCreateTaskData(editParameters.startParameters, currentParentSource!!)
+        override val domainResultFetcher = object : DomainResultFetcher<MainData> {
+
+            override fun getDomainResult(userScope: UserScope) =
+                userScope.getCreateTaskData(editParameters.startParameters, currentParentSource!!)
         }
     }
 

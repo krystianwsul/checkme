@@ -5,6 +5,7 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.UserScope
 import com.krystianwsul.checkme.domainmodel.observeOnDomain
 import com.krystianwsul.checkme.utils.filterNotNull
+import com.krystianwsul.checkme.utils.mapNotNull
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.BackpressureStrategy
 import io.reactivex.rxjava3.core.Single
@@ -56,8 +57,8 @@ abstract class DomainListener<DOMAIN_DATA : DomainData> {
             }
             .toFlowable(BackpressureStrategy.LATEST)
             .observeOnDomain()
-            .flatMapSingle(
-                { domainResultFetcher.getDomainResult(it).map { it.data!! } },
+            .flatMapMaybe(
+                { domainResultFetcher.getDomainResult(it).mapNotNull { it.data } },
                 false,
                 1,
             )

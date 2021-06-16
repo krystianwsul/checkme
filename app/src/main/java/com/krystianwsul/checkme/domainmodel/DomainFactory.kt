@@ -7,7 +7,7 @@ import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager.NotificationType
-import com.krystianwsul.checkme.domainmodel.extensions.fixOffsets
+import com.krystianwsul.checkme.domainmodel.extensions.fixOffsetsAndCustomTimes
 import com.krystianwsul.checkme.domainmodel.extensions.migratePrivateCustomTime
 import com.krystianwsul.checkme.domainmodel.extensions.updateNotifications
 import com.krystianwsul.checkme.domainmodel.local.LocalFactory
@@ -134,7 +134,7 @@ class DomainFactory(
         ).map { it.toObservable() }
             .merge()
             .firstOrError()
-            .flatMapCompletable { getDomainUpdater(this).fixOffsets(it) }
+            .flatMapCompletable { getDomainUpdater(this).fixOffsetsAndCustomTimes(it) }
             .subscribe()
             .addTo(domainDisposable)
 

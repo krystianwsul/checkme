@@ -5,11 +5,16 @@ import com.krystianwsul.checkme.domainmodel.update.CompletableDomainUpdate
 import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
 import io.reactivex.rxjava3.core.Completable
 
-fun DomainUpdater.fixOffsets(source: String): Completable =
-        CompletableDomainUpdate.create("fixOffsets, source: $source") {
-            projectsFactory.projects
-                    .values
-                    .forEach { it.fixOffsets() }
+fun DomainUpdater.fixOffsetsAndCustomTimes(source: String): Completable =
+    CompletableDomainUpdate.create("fixOffsetsAndCustomTimes, source: $source") { now ->
+        projectsFactory.projects
+            .values
+            .forEach { it.fixOffsets() }
 
-            DomainUpdater.Params(false, DomainListenerManager.NotificationType.All)
+        projectsFactory.privateProject
+            .customTimes
+            .filter { it.notDeleted(now) }
+            .forEach { migratePrivateCustomTime(it, now) }
+
+        DomainUpdater.Params(false, DomainListenerManager.NotificationType.All)
         }.perform(this)

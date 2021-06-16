@@ -12,7 +12,7 @@ import io.reactivex.rxjava3.schedulers.Schedulers
 class NotificationStorage(
     private val rxPaperBook: RxPaperBook,
     private var savedProjectNotificationKeys: List<ProjectNotificationKey>,
-    private var savedInstanceShownRecords: List<InstanceShownRecord>,
+    private var savedInstanceShownMap: Map<InstanceShownKey, InstanceShownData>,
 ) : FactoryProvider.NotificationStorage {
 
     companion object : FactoryProvider.NotificationStorageFactory {
@@ -28,9 +28,9 @@ class NotificationStorage(
                 .onErrorReturnItem(emptyList())
                 .subscribeOn(Schedulers.io())
 
-            val instancesSingle = rxPaperBook.read<List<InstanceShownRecord>>(KEY_INSTANCES)
+            val instancesSingle = rxPaperBook.read<Map<InstanceShownKey, InstanceShownData>>(KEY_INSTANCES)
                 .toV3()
-                .onErrorReturnItem(emptyList())
+                .onErrorReturnItem(emptyMap())
                 .subscribeOn(Schedulers.io())
 
             return Singles.zip(projectsSingle, instancesSingle)
@@ -41,21 +41,23 @@ class NotificationStorage(
     }
 
     override var projectNotificationKeys = savedProjectNotificationKeys
-    override var instanceShownRecords = savedInstanceShownRecords
+
+    override var instanceShownMap = savedInstanceShownMap.toMutableMap()
+        private set
 
     override fun save(): Boolean {
-        if (projectNotificationKeys == savedProjectNotificationKeys && instanceShownRecords == savedInstanceShownRecords)
+        if (projectNotificationKeys == savedProjectNotificationKeys && instanceShownMap == savedInstanceShownMap)
             return false
 
         savedProjectNotificationKeys = projectNotificationKeys
-        savedInstanceShownRecords = instanceShownRecords
+        savedInstanceShownMap = instanceShownMap
 
         rxPaperBook.write(KEY_PROJECTS, projectNotificationKeys)
             .toV3()
             .subscribeOn(Schedulers.io())
             .subscribe()
 
-        rxPaperBook.write(KEY_INSTANCES, instanceShownRecords)
+        rxPaperBook.write(KEY_INSTANCES, instanceShownMap)
             .toV3()
             .subscribeOn(Schedulers.io())
             .subscribe()

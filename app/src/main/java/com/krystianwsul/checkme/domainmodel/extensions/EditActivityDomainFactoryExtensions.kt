@@ -93,24 +93,7 @@ fun UserScope.getCreateTaskData(
                 it.key to EditViewModel.CustomTimeData(it.key, it.name, it.hourMinutes.toSortedMap(), it is MyCustomTime)
             }
 
-            val showAllInstancesDialog = when (startParameters) {
-                is EditViewModel.StartParameters.Join -> startParameters.joinables
-                    .map { it to getTaskForce(it.taskKey) }
-                    .run {
-                        map { it.second.project }.distinct().size == 1 && any { (joinable, task) ->
-                            if (joinable.instanceKey != null) {
-                                task.hasOtherVisibleInstances(now, joinable.instanceKey)
-                            } else {
-                                task.getInstances(null, null, now)
-                                    .filter { it.isVisible(now, Instance.VisibilityOptions()) }
-                                    .takeAndHasMore(1)
-                                    .second
-                            }
-                        }
-                    }
-                is EditViewModel.StartParameters.Task -> null
-                is EditViewModel.StartParameters.Create -> null
-            }
+            val showAllInstancesDialog = startParameters.showAllInstancesDialog(it, now)
 
             val currentParentKey: EditViewModel.ParentKey? = when (currentParentSource) {
                 is EditViewModel.CurrentParentSource.None -> null

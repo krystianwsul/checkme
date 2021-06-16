@@ -6,10 +6,12 @@ import android.os.Parcelable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import com.jakewharton.rxrelay3.BehaviorRelay
+import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.ScheduleText
 import com.krystianwsul.checkme.domainmodel.UserScope
 import com.krystianwsul.checkme.domainmodel.extensions.getCreateTaskData
 import com.krystianwsul.checkme.domainmodel.extensions.getCreateTaskParentPickerData
+import com.krystianwsul.checkme.domainmodel.takeAndHasMore
 import com.krystianwsul.checkme.gui.edit.delegates.EditDelegate
 import com.krystianwsul.checkme.gui.edit.dialogs.ParentPickerFragment
 import com.krystianwsul.checkme.gui.edit.dialogs.schedule.ScheduleDialogData
@@ -18,6 +20,7 @@ import com.krystianwsul.checkme.viewmodels.DomainData
 import com.krystianwsul.checkme.viewmodels.DomainListener
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.firebase.models.ImageState
+import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.utils.*
@@ -91,25 +94,25 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
         }
 
         mainData.firstOrError()
-                .subscribeBy {
-                    check(!this::delegate.isInitialized)
+            .subscribeBy {
+                check(!this::delegate.isInitialized)
 
-                    delegate = EditDelegate.fromParameters(
-                            editParameters,
-                            it,
-                            savedStateHandle.get(KEY_DELEGATE_STATE),
-                            clearedDisposable,
-                    ) { parentKey, refresh ->
-                        currentParentSource = CurrentParentSource.Set(parentKey)
+                delegate = EditDelegate.fromParameters(
+                    editParameters,
+                    it,
+                    savedStateHandle.get(KEY_DELEGATE_STATE),
+                    clearedDisposable,
+                ) { parentKey, refresh ->
+                    currentParentSource = CurrentParentSource.Set(parentKey)
 
-                        if (refresh) mainDomainListener.start(true)
-                    }
+                    if (refresh) mainDomainListener.start(true)
                 }
-                .addTo(clearedDisposable)
+            }
+            .addTo(clearedDisposable)
 
         mainData.skip(1)
-                .subscribe { delegate.newData(it) }
-                .addTo(clearedDisposable)
+            .subscribe { delegate.newData(it) }
+            .addTo(clearedDisposable)
     }
 
     fun start(editParameters: EditParameters, editActivity: EditActivity) {
@@ -123,16 +126,16 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
         if (editImageStateRelay.value != null) return
 
         val savedEditImageState = savedStateHandle.get<Bundle>(KEY_EDIT_IMAGE_STATE)
-                ?.getSerializable(KEY_EDIT_IMAGE_STATE) as? EditImageState
+            ?.getSerializable(KEY_EDIT_IMAGE_STATE) as? EditImageState
 
         editParameters.getInitialEditImageStateSingle(
-                savedEditImageState,
-                mainData.firstOrError().map { NullableWrapper(it.taskData) },
-                editActivity,
+            savedEditImageState,
+            mainData.firstOrError().map { NullableWrapper(it.taskData) },
+            editActivity,
         )
-                .doOnSuccess { check(editImageStateRelay.value == null) }
-                .subscribe(editImageStateRelay)
-                .addTo(clearedDisposable)
+            .doOnSuccess { check(editImageStateRelay.value == null) }
+            .subscribe(editImageStateRelay)
+            .addTo(clearedDisposable)
     }
 
     fun setEditImageState(editImageState: EditImageState) {
@@ -166,17 +169,17 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
             }
 
             private fun timePairCallback(
-                    timePair: TimePair,
-                    customTimeDatas: Map<CustomTimeKey, CustomTimeData>,
-                    dayOfWeek: DayOfWeek? = null,
+                timePair: TimePair,
+                customTimeDatas: Map<CustomTimeKey, CustomTimeData>,
+                dayOfWeek: DayOfWeek? = null,
             ): String {
                 return timePair.customTimeKey
-                        ?.let {
-                            customTimeDatas.getValue(it).let {
-                                it.name + (dayOfWeek?.let { _ -> " (" + it.hourMinutes[dayOfWeek] + ")" } ?: "")
-                            }
+                    ?.let {
+                        customTimeDatas.getValue(it).let {
+                            it.name + (dayOfWeek?.let { _ -> " (" + it.hourMinutes[dayOfWeek] + ")" } ?: "")
                         }
-                        ?: timePair.hourMinute!!.toString()
+                    }
+                    ?: timePair.hourMinute!!.toString()
             }
 
             fun dayFromEndOfMonth(date: Date) = Month(date.month).days(date.year) - date.day + 1
@@ -199,7 +202,7 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
         abstract fun getText(customTimeDatas: Map<CustomTimeKey, CustomTimeData>, context: Context): String
 
         fun getScheduleDialogData(scheduleHint: EditActivity.Hint.Schedule?) =
-                getScheduleDialogDataHelper(scheduleHint?.date ?: Date.today())
+            getScheduleDialogDataHelper(scheduleHint?.date ?: Date.today())
 
         protected abstract fun getScheduleDialogDataHelper(suggestedDate: Date): ScheduleDialogData
 
@@ -392,40 +395,40 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
     }
 
     data class MainData(
-            val taskData: TaskData?,
-            val customTimeDatas: Map<CustomTimeKey, CustomTimeData>,
-            val showAllInstancesDialog: Boolean?,
-            val currentParent: ParentScheduleManager.Parent?,
+        val taskData: TaskData?,
+        val customTimeDatas: Map<CustomTimeKey, CustomTimeData>,
+        val showAllInstancesDialog: Boolean?,
+        val currentParent: ParentScheduleManager.Parent?,
     ) : DomainData()
 
     data class ParentPickerData(val parentTreeDatas: List<ParentTreeData>) : DomainData()
 
     data class CustomTimeData(
-            val customTimeKey: CustomTimeKey,
-            val name: String,
-            val hourMinutes: SortedMap<DayOfWeek, HourMinute>,
-            val isMine: Boolean,
+        val customTimeKey: CustomTimeKey,
+        val name: String,
+        val hourMinutes: SortedMap<DayOfWeek, HourMinute>,
+        val isMine: Boolean,
     )
 
     data class TaskData(
-            val name: String,
-            val parentKey: ParentKey?,
-            val scheduleDataWrappers: List<ScheduleDataWrapper>?,
-            val note: String?,
-            val imageState: ImageState?,
-            val assignedTo: Set<UserKey>,
-            val projectKey: ProjectKey<*>,
+        val name: String,
+        val parentKey: ParentKey?,
+        val scheduleDataWrappers: List<ScheduleDataWrapper>?,
+        val note: String?,
+        val imageState: ImageState?,
+        val assignedTo: Set<UserKey>,
+        val projectKey: ProjectKey<*>,
     )
 
     data class ParentTreeData(
-            override val name: String,
-            override val childEntryDatas: List<ParentTreeData>,
-            override val entryKey: ParentKey,
-            override val details: String?,
-            override val note: String?,
-            override val sortKey: SortKey,
-            val projectUsers: Map<UserKey, UserData>,
-            private val projectKey: ProjectKey<*>,
+        override val name: String,
+        override val childEntryDatas: List<ParentTreeData>,
+        override val entryKey: ParentKey,
+        override val details: String?,
+        override val note: String?,
+        override val sortKey: SortKey,
+        val projectUsers: Map<UserKey, UserData>,
+        private val projectKey: ProjectKey<*>,
     ) : ParentPickerFragment.EntryData {
 
         override val normalizedFields by lazy { listOfNotNull(name, note).map { it.normalized() } }
@@ -473,23 +476,40 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
         }
     }
 
-    sealed class StartParameters {
+    sealed interface StartParameters {
 
-        abstract val excludedTaskKeys: Set<TaskKey>
+        val excludedTaskKeys: Set<TaskKey>
 
-        object Create : StartParameters() {
+        fun showAllInstancesDialog(domainFactory: DomainFactory, now: ExactTimeStamp.Local): Boolean? = null
+
+        object Create : StartParameters {
 
             override val excludedTaskKeys = setOf<TaskKey>()
         }
 
-        class Task(val taskKey: TaskKey) : StartParameters() {
+        class Task(val taskKey: TaskKey) : StartParameters {
 
             override val excludedTaskKeys = setOf(taskKey)
         }
 
-        class Join(val joinables: List<EditParameters.Join.Joinable>) : StartParameters() {
+        class Join(private val joinables: List<EditParameters.Join.Joinable>) : StartParameters {
 
             override val excludedTaskKeys = joinables.map { it.taskKey }.toSet()
+
+            override fun showAllInstancesDialog(domainFactory: DomainFactory, now: ExactTimeStamp.Local): Boolean {
+                return joinables.map { it to domainFactory.getTaskForce(it.taskKey) }.run {
+                    map { it.second.project }.distinct().size == 1 && any { (joinable, task) ->
+                        if (joinable.instanceKey != null) {
+                            task.hasOtherVisibleInstances(now, joinable.instanceKey)
+                        } else {
+                            task.getInstances(null, null, now)
+                                .filter { it.isVisible(now, Instance.VisibilityOptions()) }
+                                .takeAndHasMore(1)
+                                .second
+                        }
+                    }
+                }
+            }
         }
     }
 

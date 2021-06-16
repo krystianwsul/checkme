@@ -182,7 +182,9 @@ class DomainFactory(
 
         Preferences.tickLog.logLineHour("DomainFactory.save")
 
-        val localChanges = localFactory.save()
+        val localFactoryChanges = localFactory.save()
+        val notificationChanges = notificationStorage.save()
+        val localChanges = localFactoryChanges || notificationChanges
 
         val values = mutableMapOf<String, Any?>()
         projectsFactory.save(values)

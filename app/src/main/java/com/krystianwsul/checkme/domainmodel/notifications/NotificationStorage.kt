@@ -10,7 +10,7 @@ import io.reactivex.rxjava3.schedulers.Schedulers
 
 class NotificationStorage(
     private val rxPaperBook: RxPaperBook,
-    private var projectNotificationKeys: List<ProjectNotificationKey>,
+    private var savedProjectNotificationKeys: List<ProjectNotificationKey>,
 ) : FactoryProvider.NotificationStorage {
 
     companion object : FactoryProvider.NotificationStorageFactory {
@@ -30,15 +30,18 @@ class NotificationStorage(
         }
     }
 
-    override fun getKeys() = projectNotificationKeys
+    override var projectNotificationKeys = savedProjectNotificationKeys
 
-    override fun writeKeys(projectNotificationKeys: List<ProjectNotificationKey>) {
-        this.projectNotificationKeys = projectNotificationKeys
+    override fun save(): Boolean {
+        if (projectNotificationKeys == savedProjectNotificationKeys) return false
+
+        savedProjectNotificationKeys = projectNotificationKeys
 
         rxPaperBook.write(KEY_PROJECTS, projectNotificationKeys)
             .toV3()
             .subscribeOn(Schedulers.io())
             .subscribe()
-    }
 
+        return true
+    }
 }

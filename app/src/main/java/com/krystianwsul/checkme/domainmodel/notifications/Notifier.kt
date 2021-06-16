@@ -342,7 +342,7 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
         val currentKeys = notifications.filterIsInstance<GroupTypeFactory.Notification.Project>()
             .map { ProjectNotificationKey(it.project.projectKey, it.timeStamp) }
 
-        val oldKeys = domainFactory.notificationStorage.getKeys()
+        val oldKeys = domainFactory.notificationStorage.projectNotificationKeys
 
         (oldKeys - currentKeys).forEach {
             val notificationId = NotificationWrapperImpl.getProjectNotificationId(it.projectKey, it.timeStamp)
@@ -350,7 +350,7 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
             NotificationWrapper.instance.cancelNotification(notificationId)
         }
 
-        domainFactory.notificationStorage.writeKeys(currentKeys)
+        domainFactory.notificationStorage.projectNotificationKeys = currentKeys
     }
 
     private fun setIrrelevant(now: ExactTimeStamp.Local) {

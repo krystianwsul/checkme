@@ -82,9 +82,9 @@ interface FactoryProvider {
 
     interface NotificationStorage {
 
-        fun getKeys(): List<ProjectNotificationKey>
+        var projectNotificationKeys: List<ProjectNotificationKey>
 
-        fun writeKeys(projectNotificationKeys: List<ProjectNotificationKey>)
+        fun save(): Boolean
     }
 
     abstract class Database : FriendsProvider.Database(), RootTasksLoader.Provider {

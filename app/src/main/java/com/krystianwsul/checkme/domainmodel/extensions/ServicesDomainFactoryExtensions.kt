@@ -108,9 +108,8 @@ fun DomainUpdater.setInstancesNotifiedService(): Completable =
 
 fun DomainUpdater.setInstancesNotifiedService(projectKey: ProjectKey.Shared, timeStamp: TimeStamp): Completable =
     CompletableDomainUpdate.create("setInstancesNotified") { now ->
-        Notifier.getNotificationInstances(this, now, projectKey, timeStamp)
-            .also { check(it.isNotEmpty()) }
-            .forEach(::setInstanceNotified)
+        // This may be empty if the notifications got dismissed as part of the group call
+        Notifier.getNotificationInstances(this, now, projectKey, timeStamp).forEach(::setInstanceNotified)
 
         DomainUpdater.Params(false, DomainListenerManager.NotificationType.All)
     }.perform(this)

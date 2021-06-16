@@ -27,5 +27,5 @@ data class InstanceShownKey(
         taskKeyData.projectId,
     )
 
-    val taskKeyData by lazy { TaskKeyData(projectId, taskId) }
+    val taskKeyData get() = TaskKeyData(projectId, taskId) // todo local
 }

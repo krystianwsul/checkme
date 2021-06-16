@@ -76,7 +76,7 @@ class ProjectFactoryTest {
 
         val shownFactory = mockk<Instance.ShownFactory>(relaxed = true)
 
-        override val shownFactorySingle = Single.just(shownFactory)!!
+        override fun newShownFactory(notificationStorage: FactoryProvider.NotificationStorage) = shownFactory
 
         override val domainUpdater: DomainUpdater
             get() = TODO("Not yet implemented")

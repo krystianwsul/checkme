@@ -118,7 +118,7 @@ class FactoryLoaderTest {
 
         val shownFactory = mockk<Instance.ShownFactory>()
 
-        override val shownFactorySingle = Single.just(shownFactory)!!
+        override fun newShownFactory(notificationStorage: FactoryProvider.NotificationStorage) = shownFactory
 
         override val domainUpdater = mockk<DomainUpdater>(relaxed = true)
 

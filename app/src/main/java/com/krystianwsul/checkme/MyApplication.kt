@@ -25,7 +25,6 @@ import com.google.firebase.messaging.FirebaseMessaging
 import com.jakewharton.rxrelay3.BehaviorRelay
 import com.krystianwsul.checkme.domainmodel.*
 import com.krystianwsul.checkme.domainmodel.extensions.updatePhotoUrl
-import com.krystianwsul.checkme.domainmodel.local.LocalFactory
 import com.krystianwsul.checkme.domainmodel.notifications.ImageManager
 import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
 import com.krystianwsul.checkme.firebase.AndroidDatabaseWrapper
@@ -33,7 +32,6 @@ import com.krystianwsul.checkme.firebase.loaders.FactoryLoader
 import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.checkme.gui.edit.EditActivity
 import com.krystianwsul.checkme.gui.main.MainActivity
-import com.krystianwsul.checkme.persistencemodel.PersistenceManager
 import com.krystianwsul.checkme.upload.Queue
 import com.krystianwsul.checkme.upload.Uploader
 import com.krystianwsul.checkme.utils.mapNotNull
@@ -137,8 +135,6 @@ class MyApplication : Application() {
             .filter { it.value != null }
             .subscribe { DomainFactory.firstRun = true }
 
-        val localFactory = LocalFactory(PersistenceManager.instance)
-
         RxPaperBook.init(this)
         VersionCodeManager.check(AndroidDatabaseWrapper::onUpgrade)
 
@@ -156,7 +152,7 @@ class MyApplication : Application() {
 
         FactoryLoader(
             userInfoRelay,
-            FactoryProvider.Impl(localFactory),
+            FactoryProvider.Impl(),
             Preferences.tokenRelay,
             uuidSingle,
         ).domainFactoryObservable.subscribe {

@@ -177,7 +177,12 @@ class FactoryLoader(
                         loadDependencyTrackerManager,
                     )
 
-                    val shownFactorySingle = factoryProvider.shownFactorySingle.cacheImmediate(domainDisposable)
+                    val notificationStorageSingle = factoryProvider.notificationStorageFactory
+                        .getNotificationStorage()
+                        .cacheImmediate(domainDisposable)
+
+                    val shownFactorySingle =
+                        notificationStorageSingle.map(factoryProvider::newShownFactory).cacheImmediate(domainDisposable)
 
                     projectsFactorySingle = Single.zip(
                         privateProjectLoader.initialProjectEvent.map {
@@ -205,7 +210,7 @@ class FactoryLoader(
                         userFactorySingle,
                         projectsFactorySingle,
                         friendsFactorySingle,
-                        factoryProvider.notificationStorageFactory.getNotificationStorage(),
+                        notificationStorageSingle,
                         shownFactorySingle,
                     ) { remoteUserFactory, projectsFactory, friendsFactory, notificationStorage, shownFactory ->
                         factoryProvider.newDomain(

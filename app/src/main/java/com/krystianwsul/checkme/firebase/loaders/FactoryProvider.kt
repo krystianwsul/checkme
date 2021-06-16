@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.firebase.loaders
 
 import androidx.annotation.CheckResult
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.notifications.AndroidShownFactory
 import com.krystianwsul.checkme.domainmodel.notifications.InstanceShownData
 import com.krystianwsul.checkme.domainmodel.notifications.ProjectNotificationKey
 import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
@@ -35,8 +36,6 @@ interface FactoryProvider {
 
     val projectProvider: ProjectProvider
 
-    val shownFactorySingle: Single<Instance.ShownFactory>
-
     val sharedProjectsProvider
         get() = object : SharedProjectsProvider {
 
@@ -55,6 +54,8 @@ interface FactoryProvider {
     val domainUpdater: DomainUpdater
 
     val notificationStorageFactory: NotificationStorageFactory
+
+    fun newShownFactory(notificationStorage: NotificationStorage): Instance.ShownFactory
 
     fun newDomain(
         shownFactory: Instance.ShownFactory,
@@ -99,7 +100,7 @@ interface FactoryProvider {
         abstract fun getSharedProjectObservable(projectKey: ProjectKey.Shared): Observable<Snapshot<JsonWrapper>>
     }
 
-    class Impl(private val shownFactory: Instance.ShownFactory) : FactoryProvider {
+    class Impl : FactoryProvider {
 
         override val nullableInstance get() = DomainFactory.nullableInstance
 
@@ -110,13 +111,12 @@ interface FactoryProvider {
             override val database = this@Impl.database
         }
 
-        override val shownFactorySingle: Single<Instance.ShownFactory>
-            get() = Single.just(shownFactory)
-
         override val domainUpdater = AndroidDomainUpdater
 
         override val notificationStorageFactory =
             com.krystianwsul.checkme.domainmodel.notifications.NotificationStorage.Companion
+
+        override fun newShownFactory(notificationStorage: NotificationStorage) = AndroidShownFactory(notificationStorage)
 
         override fun newDomain(
             shownFactory: Instance.ShownFactory,

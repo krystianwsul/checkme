@@ -1,12 +1,13 @@
 package com.krystianwsul.checkme.domainmodel.notifications
 
+import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.time.DateTime
 import com.krystianwsul.common.utils.InstanceShownKey
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.common.utils.TaskKeyData
 
-class AndroidShownFactory(private val notificationStorage: NotificationStorage) : Instance.ShownFactory {
+class AndroidShownFactory(private val notificationStorage: FactoryProvider.NotificationStorage) : Instance.ShownFactory {
 
     override val instanceShownMap: Map<InstanceShownKey, Instance.Shown>
         get() = notificationStorage.instanceShownMap.mapValues { Shown(it.key) }

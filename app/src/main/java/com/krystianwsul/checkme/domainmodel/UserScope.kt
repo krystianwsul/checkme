@@ -22,7 +22,7 @@ class UserScope(
     factoryProvider: FactoryProvider,
     rootTasksFactory: RootTasksFactory,
     changeTypeSource: ChangeTypeSource,
-    val userFactory: MyUserFactory,
+    val myUserFactory: MyUserFactory,
     projectsFactorySingle: Single<ProjectsFactory>,
     friendsFactorySingle: Single<FriendsFactory>,
     notificationStorageSingle: Single<FactoryProvider.NotificationStorage>,
@@ -52,7 +52,7 @@ class UserScope(
     ) { projectsFactory, friendsFactory, notificationStorage, shownFactory ->
         factoryProvider.newDomain(
             shownFactory,
-            userFactory,
+            myUserFactory,
             projectsFactory,
             friendsFactory,
             getDeviceDbInfo(),

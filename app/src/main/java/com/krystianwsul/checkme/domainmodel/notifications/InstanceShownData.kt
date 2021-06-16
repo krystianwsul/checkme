@@ -1,3 +1,3 @@
 package com.krystianwsul.checkme.domainmodel.notifications
 
-data class InstanceShownData(val notified: Boolean, val notificationShown: Boolean)
+data class InstanceShownData(val notified: Boolean = false, val notificationShown: Boolean = false)

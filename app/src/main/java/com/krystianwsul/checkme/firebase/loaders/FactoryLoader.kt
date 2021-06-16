@@ -17,6 +17,7 @@ import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.DeviceInfo
 import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.ChangeType
+import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.treeadapter.getCurrentValue
 import io.reactivex.rxjava3.core.Observable
@@ -70,6 +71,7 @@ class FactoryLoader(
                     )
 
                     val privateProjectManager = AndroidPrivateProjectManager(userInfo, factoryProvider.database)
+
 
                     val userFactorySingle = userDatabaseRx.first
                         .map { MyUserFactory(it, getDeviceDbInfo(), factoryProvider.database) }
@@ -206,27 +208,6 @@ class FactoryLoader(
                         )
                     }.cacheImmediate()
 
-                    val domainFactorySingle = Single.zip(
-                        userFactorySingle,
-                        projectsFactorySingle,
-                        friendsFactorySingle,
-                        notificationStorageSingle,
-                        shownFactorySingle,
-                    ) { remoteUserFactory, projectsFactory, friendsFactory, notificationStorage, shownFactory ->
-                        factoryProvider.newDomain(
-                            shownFactory,
-                            remoteUserFactory,
-                            projectsFactory,
-                            friendsFactory,
-                            getDeviceDbInfo(),
-                            startTime,
-                            ExactTimeStamp.Local.now,
-                            domainDisposable,
-                            rootTasksFactory,
-                            notificationStorage,
-                        )
-                    }.cacheImmediate()
-
                     val changeTypeSource = ChangeTypeSource(
                         projectsFactorySingle,
                         friendsFactorySingle,
@@ -236,22 +217,26 @@ class FactoryLoader(
                         domainDisposable,
                     )
 
-                    // ignore all change events that come in before the DomainFactory is initialized
-                    domainFactorySingle.flatMapObservable { domainFactory ->
-                        changeTypeSource.changeTypes.map { domainFactory to it }
-                    }
-                        .subscribe { (domainFactory, changeType) ->
-                            domainFactory.onChangeTypeEvent(changeType, ExactTimeStamp.Local.now)
+                    val userScopeSingle = userFactorySingle
+                        .map {
+                            UserScope(
+                                factoryProvider,
+                                rootTasksFactory,
+                                changeTypeSource,
+                                it,
+                                projectsFactorySingle,
+                                friendsFactorySingle,
+                                notificationStorageSingle,
+                                shownFactorySingle,
+                                tokenObservable,
+                                startTime,
+                                domainDisposable,
+                                ::getDeviceDbInfo,
+                            )
                         }
-                        .addTo(domainDisposable)
+                        .cacheImmediate()
 
-                    tokenObservable.flatMapCompletable {
-                        factoryProvider.domainUpdater.updateDeviceDbInfo(getDeviceDbInfo())
-                    }
-                        .subscribe()
-                        .addTo(domainDisposable)
-
-                    domainFactorySingle.map(::NullableWrapper)
+                    userScopeSingle.flatMap { it.domainFactorySingle }.map(::NullableWrapper)
                 }
             } else {
                 factoryProvider.nullableInstance
@@ -260,6 +245,61 @@ class FactoryLoader(
 
                 Single.just(NullableWrapper())
             }
+        }
+    }
+
+    class UserScope(
+        factoryProvider: FactoryProvider,
+        rootTasksFactory: RootTasksFactory,
+        changeTypeSource: ChangeTypeSource,
+        val userFactory: MyUserFactory,
+        projectsFactorySingle: Single<ProjectsFactory>,
+        friendsFactorySingle: Single<FriendsFactory>,
+        notificationStorageSingle: Single<FactoryProvider.NotificationStorage>,
+        shownFactorySingle: Single<Instance.ShownFactory>,
+        tokenObservable: Observable<NullableWrapper<String>>,
+        startTime: ExactTimeStamp.Local,
+        domainDisposable: CompositeDisposable,
+        getDeviceDbInfo: () -> DeviceDbInfo,
+    ) {
+
+        val domainFactorySingle: Single<FactoryProvider.Domain>
+
+        init {
+            domainFactorySingle = Single.zip(
+                projectsFactorySingle,
+                friendsFactorySingle,
+                notificationStorageSingle,
+                shownFactorySingle,
+            ) { projectsFactory, friendsFactory, notificationStorage, shownFactory ->
+                factoryProvider.newDomain(
+                    shownFactory,
+                    userFactory,
+                    projectsFactory,
+                    friendsFactory,
+                    getDeviceDbInfo(),
+                    startTime,
+                    ExactTimeStamp.Local.now,
+                    domainDisposable,
+                    rootTasksFactory,
+                    notificationStorage,
+                )
+            }.cacheImmediate(domainDisposable)
+
+            // ignore all change events that come in before the DomainFactory is initialized
+            domainFactorySingle.flatMapObservable { domainFactory ->
+                changeTypeSource.changeTypes.map { domainFactory to it }
+            }
+                .subscribe { (domainFactory, changeType) ->
+                    domainFactory.onChangeTypeEvent(changeType, ExactTimeStamp.Local.now)
+                }
+                .addTo(domainDisposable)
+
+            tokenObservable.flatMapCompletable {
+                factoryProvider.domainUpdater.updateDeviceDbInfo(getDeviceDbInfo())
+            }
+                .subscribe()
+                .addTo(domainDisposable)
         }
     }
 }

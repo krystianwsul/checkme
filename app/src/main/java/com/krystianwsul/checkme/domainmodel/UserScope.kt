@@ -32,6 +32,8 @@ class UserScope(
     getDeviceDbInfo: () -> DeviceDbInfo,
 ) {
 
+    val domainListenerManager = DomainListenerManager()
+
     val domainFactorySingle = Single.zip(
         projectsFactorySingle,
         friendsFactorySingle,
@@ -49,6 +51,7 @@ class UserScope(
             domainDisposable,
             rootTasksFactory,
             notificationStorage,
+            domainListenerManager,
         )
     }.cacheImmediate(domainDisposable)
 

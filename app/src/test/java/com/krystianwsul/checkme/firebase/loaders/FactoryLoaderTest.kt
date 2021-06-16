@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.firebase.loaders
 import com.jakewharton.rxrelay3.BehaviorRelay
 import com.jakewharton.rxrelay3.PublishRelay
 import com.krystianwsul.checkme.domainmodel.DomainFactoryRule
+import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
 import com.krystianwsul.checkme.firebase.factories.FriendsFactory
 import com.krystianwsul.checkme.firebase.factories.MyUserFactory
@@ -137,6 +138,7 @@ class FactoryLoaderTest {
             domainDisposable: CompositeDisposable,
             rootTasksFactory: RootTasksFactory,
             notificationStorage: FactoryProvider.NotificationStorage,
+            domainListenerManager: DomainListenerManager,
         ) = domain
     }
 

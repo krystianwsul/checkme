@@ -260,6 +260,7 @@ class DomainFactoryRule : TestRule {
             databaseWrapper,
             rootTaskFactory,
             mockk(relaxed = true),
+            mockk(relaxed = true),
         ) { TestDomainUpdater(it, ExactTimeStamp.Local.now) }
     }
 

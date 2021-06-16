@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.firebase.factories
 
 import com.jakewharton.rxrelay3.PublishRelay
 import com.krystianwsul.checkme.domainmodel.DomainFactoryRule
+import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
 import com.krystianwsul.checkme.firebase.loaders.*
 import com.krystianwsul.checkme.firebase.managers.AndroidPrivateProjectManager
@@ -96,6 +97,7 @@ class ProjectFactoryTest {
             domainDisposable: CompositeDisposable,
             rootTasksFactory: RootTasksFactory,
             notificationStorage: FactoryProvider.NotificationStorage,
+            domainListenerManager: DomainListenerManager,
         ): FactoryProvider.Domain {
             TODO("Not yet implemented")
         }

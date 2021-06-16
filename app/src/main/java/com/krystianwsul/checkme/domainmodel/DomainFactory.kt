@@ -66,6 +66,7 @@ class DomainFactory(
     private val databaseWrapper: DatabaseWrapper,
     val rootTasksFactory: RootTasksFactory,
     val notificationStorage: FactoryProvider.NotificationStorage,
+    val domainListenerManager: DomainListenerManager,
     private val getDomainUpdater: (DomainFactory) -> DomainUpdater,
 ) :
     FactoryProvider.Domain,
@@ -87,8 +88,6 @@ class DomainFactory(
 
     var remoteReadTimes: ReadTimes
         private set
-
-    val domainListenerManager = DomainListenerManager()
 
     var deviceDbInfo = _deviceDbInfo
 

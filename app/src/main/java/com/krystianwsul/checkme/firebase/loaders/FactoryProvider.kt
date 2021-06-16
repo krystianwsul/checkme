@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.firebase.loaders
 
 import androidx.annotation.CheckResult
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.notifications.AndroidShownFactory
 import com.krystianwsul.checkme.domainmodel.notifications.InstanceShownData
 import com.krystianwsul.checkme.domainmodel.notifications.ProjectNotificationKey
@@ -68,6 +69,7 @@ interface FactoryProvider {
         domainDisposable: CompositeDisposable,
         rootTasksFactory: RootTasksFactory,
         notificationStorage: NotificationStorage,
+        domainListenerManager: DomainListenerManager,
     ): Domain
 
     interface Domain {
@@ -129,6 +131,7 @@ interface FactoryProvider {
             domainDisposable: CompositeDisposable,
             rootTasksFactory: RootTasksFactory,
             notificationStorage: NotificationStorage,
+            domainListenerManager: DomainListenerManager,
         ) = DomainFactory(
             shownFactory,
             myUserFactory,
@@ -141,6 +144,7 @@ interface FactoryProvider {
             database,
             rootTasksFactory,
             notificationStorage,
+            domainListenerManager,
         ) { AndroidDomainUpdater }
     }
 }

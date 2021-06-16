@@ -61,8 +61,8 @@ abstract class DomainListener<D : DomainData> {
                                 ?.removeListener(this)
                     }
                 }
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(data)
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(data)
     }
 
     fun stop() {
@@ -70,7 +70,8 @@ abstract class DomainListener<D : DomainData> {
         disposable = null
     }
 
-    protected open fun getDataResult(domainFactory: DomainFactory): DomainResult<D> = DomainResult.Completed(getData(domainFactory))
+    protected open fun getDataResult(domainFactory: DomainFactory): DomainResult<D> =
+        DomainResult.Completed(getData(domainFactory))
 
     open fun getData(domainFactory: DomainFactory): D = throw NotImplementedError()
 }

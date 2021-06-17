@@ -24,6 +24,7 @@ import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.utils.*
+import com.mindorks.scheduler.Priority
 import com.soywiz.klock.Month
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
@@ -44,6 +45,8 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
     private lateinit var editParameters: EditParameters
 
     private val mainDomainListener = object : DomainListener<MainData>() {
+
+        override val priority = Priority.HIGH
 
         override val domainResultFetcher = object : DomainResultFetcher<MainData> {
 

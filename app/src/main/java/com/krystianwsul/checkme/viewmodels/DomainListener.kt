@@ -6,6 +6,7 @@ import com.krystianwsul.checkme.domainmodel.UserScope
 import com.krystianwsul.checkme.domainmodel.observeOnDomain
 import com.krystianwsul.checkme.utils.filterNotNull
 import com.krystianwsul.checkme.utils.mapNotNull
+import com.mindorks.scheduler.Priority
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.BackpressureStrategy
 import io.reactivex.rxjava3.core.Single
@@ -27,6 +28,8 @@ abstract class DomainListener<DOMAIN_DATA : DomainData> {
 
     protected abstract val domainResultFetcher: DomainResultFetcher<DOMAIN_DATA>
 
+    protected open val priority: Priority? = null
+
     fun start(forced: Boolean = false) {
         if (disposable != null) {
             if (forced)
@@ -38,7 +41,7 @@ abstract class DomainListener<DOMAIN_DATA : DomainData> {
         var listenerAdded = false
 
         disposable = UserScope.instanceRelay
-            .observeOnDomain()
+            .observeOnDomain(priority)
             .filterNotNull()
             .switchMap { userScope ->
                 /**
@@ -56,7 +59,7 @@ abstract class DomainListener<DOMAIN_DATA : DomainData> {
                     .map { userScope }
             }
             .toFlowable(BackpressureStrategy.LATEST)
-            .observeOnDomain()
+            .observeOnDomain(priority)
             .flatMapMaybe(
                 { domainResultFetcher.getDomainResult(it).mapNotNull { it.data } },
                 false,

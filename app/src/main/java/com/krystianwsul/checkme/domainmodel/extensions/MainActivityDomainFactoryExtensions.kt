@@ -47,39 +47,41 @@ private fun DomainFactory.getMainData(
     now: ExactTimeStamp.Local,
     filter: (Task) -> Boolean = { true },
 ): List<TaskListFragment.ProjectData> {
-    return projectsFactory.projects
-        .values
-        .map {
-            val childTaskDatas = it.getAllTasks()
-                .asSequence()
-                .filter(filter)
-                .map { Pair(it, it.getHierarchyExactTimeStamp(now)) }
-                .filter { (task, hierarchyExactTimeStamp) -> task.isTopLevelTask(hierarchyExactTimeStamp) }
-                .map { (task, hierarchyExactTimeStamp) ->
-                    TaskListFragment.ChildTaskData(
-                        task.name,
-                        task.getScheduleText(ScheduleText, hierarchyExactTimeStamp),
-                        getTaskListChildTaskDatas(
-                            task,
-                            now,
-                            hierarchyExactTimeStamp,
-                        ),
-                        task.note,
-                        task.taskKey,
-                        task.getImage(deviceDbInfo),
-                        task.current(now),
-                        task.isVisible(now),
-                        task.ordinal,
-                        task.getProjectInfo(now),
-                        task.isAssignedToMe(now, myUserFactory.user),
-                    )
-                }
-                .sortedDescending()
-                .toList()
-
-            it.toProjectData(childTaskDatas)
+    fun Collection<Task>.toChildTaskDatas() = asSequence().filter(filter)
+        .map { Pair(it, it.getHierarchyExactTimeStamp(now)) }
+        .filter { (task, hierarchyExactTimeStamp) -> task.isTopLevelTask(hierarchyExactTimeStamp) }
+        .map { (task, hierarchyExactTimeStamp) ->
+            TaskListFragment.ChildTaskData(
+                task.name,
+                task.getScheduleText(ScheduleText, hierarchyExactTimeStamp),
+                getTaskListChildTaskDatas(
+                    task,
+                    now,
+                    hierarchyExactTimeStamp,
+                ),
+                task.note,
+                task.taskKey,
+                task.getImage(deviceDbInfo),
+                task.current(now),
+                task.isVisible(now),
+                task.ordinal,
+                task.getProjectInfo(now),
+                task.isAssignedToMe(now, myUserFactory.user),
+            )
         }
-        .filter { it.children.isNotEmpty() }
+        .sortedDescending()
+        .toList()
+
+    return if (debugMode) {
+        rootTasksFactory.rootTasks
+            .values
+            .groupBy { it.projectId }
+            .map { (projectId, tasks) -> projectsFactory.getProjectForce(projectId).toProjectData(tasks.toChildTaskDatas()) }
+    } else {
+        projectsFactory.projects
+            .values
+            .map { it.toProjectData(it.getAllTasks().toChildTaskDatas()) }
+    }.filter { it.children.isNotEmpty() }
 }
 
 fun DomainFactory.getGroupListData(

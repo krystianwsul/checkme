@@ -1,7 +1,6 @@
 package com.krystianwsul.checkme.domainmodel
 
 import com.jakewharton.rxrelay3.BehaviorRelay
-import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.domainmodel.extensions.updateDeviceDbInfo
 import com.krystianwsul.checkme.firebase.factories.FriendsFactory
 import com.krystianwsul.checkme.firebase.factories.MyUserFactory
@@ -67,7 +66,6 @@ class UserScope(
     }.cacheImmediate(domainDisposable)
 
     init {
-        MyApplication.logDelay("UserScope.init")
         // ignore all change events that come in before the DomainFactory is initialized
         domainFactorySingle.flatMapObservable { domainFactory ->
             changeTypeSource.changeTypes.map { domainFactory to it }

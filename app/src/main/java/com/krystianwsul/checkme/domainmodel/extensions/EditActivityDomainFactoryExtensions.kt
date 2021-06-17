@@ -2,7 +2,6 @@ package com.krystianwsul.checkme.domainmodel.extensions
 
 import android.net.Uri
 import androidx.annotation.CheckResult
-import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.*
 import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
@@ -35,18 +34,13 @@ fun UserScope.getCreateTaskData(
     currentParentSource: EditViewModel.CurrentParentSource,
 ): Single<DomainResult<EditViewModel.MainData>> {
     MyCrashlytics.logMethod(this)
-    MyApplication.logDelay("getCreateTaskData")
 
     val mainDataSingle = if (startParameters is EditViewModel.StartParameters.Create &&
         currentParentSource is EditViewModel.CurrentParentSource.None
     ) {
-        MyApplication.logDelay("getCreateTaskData fast")
         Single.just(getCreateTaskDataFast())
     } else {
-        domainFactorySingle.map {
-            MyApplication.logDelay("getCreateTaskData slow")
-            (it as DomainFactory).getCreateTaskDataSlow(startParameters, currentParentSource)
-        }
+        domainFactorySingle.map { (it as DomainFactory).getCreateTaskDataSlow(startParameters, currentParentSource) }
     }
 
     return mainDataSingle.map { DomainResult.Completed(it) }

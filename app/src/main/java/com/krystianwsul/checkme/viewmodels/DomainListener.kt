@@ -99,8 +99,6 @@ abstract class DomainListener<DOMAIN_DATA : DomainData> {
 
         class DomainFactoryData<DOMAIN_DATA : DomainData>(
             private val getDomainData: (domainFactory: DomainFactory) -> DOMAIN_DATA
-        ) : DomainFactoryDomainResult<DOMAIN_DATA>(
-            { DomainResult.Completed(getDomainData(it)) }
-        )
+        ) : DomainFactoryDomainResult<DOMAIN_DATA>({ DomainResult.Completed(getDomainData(it)) })
     }
 }

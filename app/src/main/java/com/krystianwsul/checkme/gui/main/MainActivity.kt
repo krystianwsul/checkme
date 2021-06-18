@@ -10,6 +10,7 @@ import android.os.Parcelable
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
+import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.appcompat.view.ActionMode
 import androidx.appcompat.widget.Toolbar
@@ -24,9 +25,11 @@ import com.krystianwsul.checkme.*
 import com.krystianwsul.checkme.TooltipManager.subscribeShowBalloon
 import com.krystianwsul.checkme.databinding.ActivityMainBinding
 import com.krystianwsul.checkme.databinding.BottomBinding
+import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.extensions.clearTaskEndTimeStamps
 import com.krystianwsul.checkme.domainmodel.extensions.setTaskEndTimeStamps
+import com.krystianwsul.checkme.domainmodel.subscribeOnDomain
 import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
 import com.krystianwsul.checkme.gui.base.AbstractActivity
 import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimesFragment
@@ -46,11 +49,15 @@ import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.utils.children
 import com.krystianwsul.checkme.viewmodels.*
 import com.krystianwsul.common.time.Date
+import com.krystianwsul.common.time.DateTimeSoy
+import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.treeadapter.FilterCriteria
 import com.krystianwsul.treeadapter.TreeViewAdapter
+import com.mindorks.scheduler.Priority
 import com.skydoves.balloon.ArrowOrientation
 import com.skydoves.balloon.ArrowOrientationRules
+import com.soywiz.klock.days
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.Disposable
@@ -805,6 +812,32 @@ class MainActivity :
                 { showAlignBottom(it) }
             )
             .addTo(startDisposable)
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        if (BuildConfig.DEBUG) {
+            DomainFactory.instanceRelay
+                .subscribeOnDomain(Priority.LOW)
+                .filterNotNull()
+                .firstOrError()
+                .mapNotNull {
+                    val now = ExactTimeStamp.Local.now
+
+                    it.getRootInstances(null, now.plusOne().toOffset(), now, filterVisible = false)
+                        .mapNotNull { it.done }
+                        .minOrNull()
+                }
+                .filter {
+                    val twoDaysAgo = DateTimeSoy.now() - 2.days
+
+                    it?.let { it.toDateTimeSoy() <= twoDaysAgo } == true
+                }
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe { Toast.makeText(this, "Oldest instance: $it", Toast.LENGTH_LONG).show() }
+                .addTo(resumeDisposable)
+        }
     }
 
     override fun initBottomBar() {

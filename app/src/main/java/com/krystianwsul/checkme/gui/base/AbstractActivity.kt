@@ -37,7 +37,7 @@ abstract class AbstractActivity : AppCompatActivity(), OnLocaleChangedListener {
 
     protected val createDisposable = CompositeDisposable()
     protected val startDisposable = CompositeDisposable()
-    private val resumeDisposable = CompositeDisposable()
+    protected val resumeDisposable = CompositeDisposable()
 
     val started = BehaviorRelay.createDefault(false)!!
 

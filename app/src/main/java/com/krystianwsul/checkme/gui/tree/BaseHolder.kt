@@ -7,6 +7,7 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable
 interface BaseHolder {
 
     val compositeDisposable: CompositeDisposable
+    val bindDisposable: CompositeDisposable
 
     val baseAdapter: BaseAdapter
     val holderPosition: Int

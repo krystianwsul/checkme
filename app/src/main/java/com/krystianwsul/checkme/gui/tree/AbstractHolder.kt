@@ -8,9 +8,13 @@ import com.krystianwsul.checkme.TooltipManager
 import com.krystianwsul.checkme.TooltipManager.subscribeShowBalloon
 import com.krystianwsul.treeadapter.TreeHolder
 import com.skydoves.balloon.ArrowOrientation
+import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
+import io.reactivex.rxjava3.kotlin.plusAssign
 
 abstract class AbstractHolder(view: View) : TreeHolder(view), BaseHolder {
+
+    final override val bindDisposable = CompositeDisposable().also { compositeDisposable += it }
 
     abstract val rowSeparator: View
 
@@ -18,9 +22,9 @@ abstract class AbstractHolder(view: View) : TreeHolder(view), BaseHolder {
 
     override fun startRx() {
         itemView.clicks()
-                .mapTreeNode()
-                .subscribe { it.onClick(this) }
-                .addTo(compositeDisposable)
+            .mapTreeNode()
+            .subscribe { it.onClick(this) }
+            .addTo(compositeDisposable)
 
         itemView.longClicks { true }
                 .mapTreeNode()

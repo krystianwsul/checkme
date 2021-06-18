@@ -26,16 +26,19 @@ abstract class AbstractModelNode : ModelNode<AbstractHolder> {
 
     override fun onBindViewHolder(viewHolder: RecyclerView.ViewHolder, startingDrag: Boolean) {
         (viewHolder as AbstractHolder).apply {
+            bindDisposable.clear()
+
             delegates.forEach { it.onBindViewHolder(viewHolder) }
 
             itemView.apply {
-                setBackgroundColor(ContextCompat.getColor(
+                setBackgroundColor(
+                    ContextCompat.getColor(
                         context,
                         if (treeNode.isSelected && !(isPressed && startingDrag))
                             R.color.selected
                         else
                             R.color.materialBackground
-                ))
+                    ))
 
                 foreground = if (!disableRipple && !isPressed)
                     ContextCompat.getDrawable(context, R.drawable.item_background_material)

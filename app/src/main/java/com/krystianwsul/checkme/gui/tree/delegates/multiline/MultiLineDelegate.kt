@@ -7,6 +7,7 @@ import android.view.View
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
+import com.jakewharton.rxbinding4.view.globalLayouts
 import com.jakewharton.rxrelay3.BehaviorRelay
 import com.krystianwsul.checkme.gui.tree.NodeDelegate
 import io.reactivex.rxjava3.kotlin.addTo
@@ -115,9 +116,9 @@ class MultiLineDelegate(private val modelNode: MultiLineModelNode) : NodeDelegat
             }
 
             rowTextLayout.apply {
-                viewTreeObserver.addOnGlobalLayoutListener {
-                    textWidths[widthKey].accept(measuredWidth)
-                }
+                globalLayouts().firstOrError()
+                    .subscribe { _ -> textWidths[widthKey].accept(measuredWidth) }
+                    .addTo(bindDisposable)
             }
         }
     }

@@ -99,16 +99,13 @@ fun DomainUpdater.setProjectNotificationDoneService(projectKey: ProjectKey.Share
 
 fun DomainUpdater.setInstancesNotifiedService(): Completable =
     CompletableDomainUpdate.create("setInstancesNotified") { now ->
-        Notifier.getNotificationInstances(this, now)
-            .also { check(it.isNotEmpty()) }
-            .forEach(::setInstanceNotified)
+        Notifier.getNotificationInstances(this, now).forEach(::setInstanceNotified)
 
         DomainUpdater.Params(false, DomainListenerManager.NotificationType.All)
     }.perform(this)
 
 fun DomainUpdater.setInstancesNotifiedService(projectKey: ProjectKey.Shared, timeStamp: TimeStamp): Completable =
     CompletableDomainUpdate.create("setInstancesNotified") { now ->
-        // This may be empty if the notifications got dismissed as part of the group call
         Notifier.getNotificationInstances(this, now, projectKey, timeStamp).forEach(::setInstanceNotified)
 
         DomainUpdater.Params(false, DomainListenerManager.NotificationType.All)

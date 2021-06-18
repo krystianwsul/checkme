@@ -46,6 +46,18 @@ class RootTask(
 
     val projectId: String by projectIdProperty
 
+    private fun invalidateProjectIdRecursive(invalidatedTaskKeys: MutableSet<TaskKey.Root> = mutableSetOf()) {
+        if (taskKey in invalidatedTaskKeys) return
+
+        invalidatedTaskKeys += taskKey
+
+        projectIdProperty.invalidate()
+
+        childHierarchyIntervals.forEach {
+            (it.taskHierarchy.childTask as RootTask).invalidateProjectIdRecursive(invalidatedTaskKeys)
+        }
+    }
+
     override val project get() = parent.getProject(projectId)
 
     val noScheduleOrParentsMap = taskRecord.noScheduleOrParentRecords
@@ -155,7 +167,7 @@ class RootTask(
         }?.let {
             it.updateProject(projectKey)
 
-            projectIdProperty.invalidate()
+            invalidateProjectIdRecursive()
         }
 
         return this

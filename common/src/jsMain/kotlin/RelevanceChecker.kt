@@ -29,10 +29,10 @@ import com.krystianwsul.common.utils.TaskKey
 object RelevanceChecker {
 
     fun checkRelevance(
-            admin: dynamic,
-            response: MutableList<String>,
-            updateDatabase: Boolean,
-            onComplete: () -> Unit,
+        admin: dynamic,
+        response: MutableList<String>,
+        updateDatabase: Boolean,
+        onComplete: () -> Unit,
     ) {
         ProjectRootTaskIdTracker.instance = object : ProjectRootTaskIdTracker {}
 
@@ -76,8 +76,8 @@ object RelevanceChecker {
                 val userCustomTimeRelevances = userCustomTimes.associate { it.key to CustomTimeRelevance(it) }
 
                 userCustomTimeRelevances.values
-                        .filter { (it.customTime as Time.Custom.User).notDeleted(ExactTimeStamp.Local.now) }
-                        .forEach { it.setRelevant() }
+                    .filter { (it.customTime as Time.Custom.User).notDeleted(ExactTimeStamp.Local.now) }
+                    .forEach { it.setRelevant() }
 
                 val userCustomTimeProvider = object : JsonTime.UserCustomTimeProvider {
 
@@ -114,8 +114,8 @@ object RelevanceChecker {
 
                     override fun getProject(projectId: String): Project<*> {
                         return projectMap.entries
-                                .single { it.key.key == projectId }
-                                .value
+                            .single { it.key.key == projectId }
+                            .value
                     }
 
                     override fun getRootTask(rootTaskKey: TaskKey.Root) = rootTasksByTaskKey.getValue(rootTaskKey)
@@ -169,13 +169,25 @@ object RelevanceChecker {
 
                 projectMap = privateProjects + sharedProjects
 
-                rootTasksByTaskKey.values
-                    .filter { !it.project.projectRecord.rootTaskParentDelegate.rootTaskKeys.contains(it.taskKey) }
-                    .sortedBy { it.projectId }
-                    .takeIf { it.isNotEmpty() }
-                    ?.let {
-                        throw InconsistentRootTaskIdsException(it.map { it.taskKey to it.project.projectKey })
+                val rootTaskProjectKeys = rootTasksByTaskKey.mapValues { it.value.project.projectKey }
+
+                val rootTasksInProjectKeys = projectMap.flatMap { (projectKey, project) ->
+                    project.projectRecord
+                        .rootTaskParentDelegate
+                        .rootTaskKeys
+                        .map { it to projectKey }
+                }.groupBy { it.first }
+                    .mapValues { it.value.map { it.second }.toSet() }
+
+                rootTaskProjectKeys.entries
+                    .map { (taskKey, projectKey) ->
+                        Triple(taskKey, projectKey, rootTasksInProjectKeys[taskKey] ?: setOf())
                     }
+                    .filter { (_, correctProjectKey, allFeaturingProjectKeys) ->
+                        correctProjectKey != allFeaturingProjectKeys.singleOrNull()
+                    }
+                    .takeIf { it.isNotEmpty() }
+                    ?.let { throw InconsistentRootTaskIdsException(it) }
 
                 privateProjects.values.forEach { privateProject ->
                     response += "checking relevance for private project ${privateProject.projectKey}"
@@ -200,7 +212,7 @@ object RelevanceChecker {
                 }
 
                 userCustomTimeRelevances.values
-                        .filter { !it.relevant }
+                    .filter { !it.relevant }
                     .forEach { (it.customTime as Time.Custom.User).delete() }
 
                 val removedSharedProjectKeys = removedSharedProjects.map { it.projectKey }
@@ -242,11 +254,11 @@ object RelevanceChecker {
 
                 ErrorLogger.instance.log("updateDatabase: $updateDatabase")
                 ErrorLogger.instance.log(
-                        "all database values: ${
-                            values.entries.joinToString(
-                                    "<br>\n"
-                            )
-                        }"
+                    "all database values: ${
+                        values.entries.joinToString(
+                            "<br>\n"
+                        )
+                    }"
                 )
                 if (updateDatabase) {
                     databaseWrapper.update(values) { message, _, exception ->
@@ -288,10 +300,11 @@ object RelevanceChecker {
         }
     }
 
-    private class InconsistentRootTaskIdsException(pairs: List<Pair<TaskKey.Root, ProjectKey<*>>>) : Exception(
-        "rootTaskIds missing from projects:\n" +
-                pairs.joinToString(";\n") { "${it.first} missing from ${it.second}" }
-    )
+    private class InconsistentRootTaskIdsException(pairs: List<Triple<TaskKey.Root, ProjectKey<*>, Set<ProjectKey<*>>>>) :
+        Exception(
+            "rootTaskIds in wrong projects:\n" +
+                    pairs.joinToString(";\n") { "${it.first} says it belongs in project ${it.second}, but was found in ${it.third}" }
+        )
 
     private class MissingTaskException(taskKey: TaskKey.Root, projectKey: ProjectKey<*>) :
         Exception("rootTaskId $taskKey from $projectKey is missing from map")

@@ -1,5 +1,7 @@
 package com.mindorks.scheduler;
 
+import androidx.annotation.NonNull;
+
 import com.mindorks.scheduler.internal.CustomPriorityScheduler;
 
 import io.reactivex.rxjava3.core.Scheduler;
@@ -7,6 +9,8 @@ import io.reactivex.rxjava3.core.Scheduler;
 public final class RxPS {
 
     private static RxPS instance;
+    private static Scheduler mockScheduler;
+
     private CustomPriorityScheduler priorityScheduler;
 
     private RxPS() {
@@ -29,6 +33,8 @@ public final class RxPS {
     }
 
     public static Scheduler get(Priority priority) {
+        if (mockScheduler != null) return mockScheduler;
+
         return getInstance().getPriorityScheduler().get(priority);
     }
 
@@ -46,5 +52,9 @@ public final class RxPS {
 
     public static Scheduler immediate() {
         return get(Priority.IMMEDIATE);
+    }
+
+    public static void setScheduler(@NonNull Scheduler scheduler) {
+        mockScheduler = scheduler;
     }
 }

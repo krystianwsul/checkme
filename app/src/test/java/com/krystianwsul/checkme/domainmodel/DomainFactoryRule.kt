@@ -32,6 +32,7 @@ import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskHierarchyId
 import com.krystianwsul.common.utils.UserKey
+import com.mindorks.scheduler.RxPS
 import io.mockk.*
 import io.reactivex.rxjava3.android.plugins.RxAndroidPlugins
 import io.reactivex.rxjava3.core.Completable
@@ -118,6 +119,8 @@ class DomainFactoryRule : TestRule {
         RxJavaPlugins.setErrorHandler { it.printStackTrace() }
 
         RxAndroidPlugins.setInitMainThreadSchedulerHandler { Schedulers.trampoline() }
+
+        RxPS.setScheduler(Schedulers.trampoline())
 
         mockBase64()
 
@@ -221,7 +224,6 @@ class DomainFactoryRule : TestRule {
         )
 
         projectsFactory = ProjectsFactory(
-            mockk(),
             mockk(relaxed = true),
             ProjectLoader.InitialProjectEvent(
                 mockk(relaxed = true),
@@ -260,6 +262,7 @@ class DomainFactoryRule : TestRule {
             compositeDisposable,
             databaseWrapper,
             rootTaskFactory,
+            mockk(relaxed = true),
             mockk(relaxed = true),
         ) { TestDomainUpdater(it, ExactTimeStamp.Local.now) }
     }

@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.viewmodels
 
-import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.extensions.getShowProjectData
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.UserKey
@@ -11,7 +10,7 @@ class ShowProjectViewModel : DomainViewModel<ShowProjectViewModel.Data>() {
 
     override val domainListener = object : DomainListener<Data>() {
 
-        override fun getData(domainFactory: DomainFactory) = domainFactory.getShowProjectData(projectId)
+        override val domainResultFetcher = DomainResultFetcher.DomainFactoryData { it.getShowProjectData(projectId) }
     }
 
     fun start(projectId: ProjectKey.Shared?) {

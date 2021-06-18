@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.viewmodels
 
-import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.extensions.getShowTaskData
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.common.firebase.models.ImageState
@@ -12,7 +11,7 @@ class ShowTaskViewModel : DomainViewModel<ShowTaskViewModel.Data>() {
 
     override val domainListener = object : DomainListener<Data>() {
 
-        override fun getData(domainFactory: DomainFactory) = domainFactory.getShowTaskData(taskKey)
+        override val domainResultFetcher = DomainResultFetcher.DomainFactoryData { it.getShowTaskData(taskKey) }
     }
 
     fun start(taskKey: TaskKey) {

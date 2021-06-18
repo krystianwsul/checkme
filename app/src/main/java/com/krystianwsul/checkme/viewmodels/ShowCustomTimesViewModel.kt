@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.viewmodels
 
-import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.extensions.getShowCustomTimesData
 import com.krystianwsul.common.utils.CustomTimeKey
 
@@ -9,7 +8,7 @@ class ShowCustomTimesViewModel : DomainViewModel<ShowCustomTimesViewModel.Data>(
 
     override val domainListener = object : DomainListener<Data>() {
 
-        override fun getData(domainFactory: DomainFactory) = domainFactory.getShowCustomTimesData()
+        override val domainResultFetcher = DomainResultFetcher.DomainFactoryData { it.getShowCustomTimesData() }
     }
 
     fun start() = internalStart()

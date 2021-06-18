@@ -81,7 +81,7 @@ private class SetInstancesDateTimeUndoData(val data: List<Pair<InstanceKey, Date
         val pairs = data.map { getInstance(it.first) to it.second?.let(::getDateTime) }
 
         pairs.forEach { (instance, dateTime) ->
-            instance.setInstanceDateTime(localFactory, dateTime, this, now)
+            instance.setInstanceDateTime(shownFactory, dateTime, this, now)
         }
 
         pairs.map { it.first.task.project }.toSet()
@@ -106,7 +106,7 @@ fun DomainUpdater.setInstancesDateTime(
     val time = getTime(instanceTimePair)
 
     instances.forEach {
-        it.setInstanceDateTime(localFactory, DateTime(instanceDate, time), this, now)
+        it.setInstanceDateTime(shownFactory, DateTime(instanceDate, time), this, now)
 
         if (it.parentInstance != null) {
             when (it.parentState) {

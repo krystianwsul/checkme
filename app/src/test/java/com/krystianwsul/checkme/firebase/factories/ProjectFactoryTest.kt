@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.firebase.factories
 
 import com.jakewharton.rxrelay3.PublishRelay
 import com.krystianwsul.checkme.domainmodel.DomainFactoryRule
+import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
 import com.krystianwsul.checkme.firebase.loaders.*
 import com.krystianwsul.checkme.firebase.managers.AndroidPrivateProjectManager
@@ -74,7 +75,9 @@ class ProjectFactoryTest {
         override val nullableInstance: FactoryProvider.Domain
             get() = TODO("Not yet implemented")
 
-        override val shownFactory = mockk<Instance.ShownFactory>(relaxed = true)
+        val shownFactory = mockk<Instance.ShownFactory>(relaxed = true)
+
+        override fun newShownFactory(notificationStorage: FactoryProvider.NotificationStorage) = shownFactory
 
         override val domainUpdater: DomainUpdater
             get() = TODO("Not yet implemented")
@@ -84,7 +87,7 @@ class ProjectFactoryTest {
         }
 
         override fun newDomain(
-            localFactory: Instance.ShownFactory,
+            shownFactory: Instance.ShownFactory,
             myUserFactory: MyUserFactory,
             projectsFactory: ProjectsFactory,
             friendsFactory: FriendsFactory,
@@ -94,6 +97,7 @@ class ProjectFactoryTest {
             domainDisposable: CompositeDisposable,
             rootTasksFactory: RootTasksFactory,
             notificationStorage: FactoryProvider.NotificationStorage,
+            domainListenerManager: DomainListenerManager,
         ): FactoryProvider.Domain {
             TODO("Not yet implemented")
         }
@@ -132,7 +136,7 @@ class ProjectFactoryTest {
 
     private lateinit var rxErrorChecker: RxErrorChecker
 
-    private lateinit var factoryProvider: FactoryProvider
+    private lateinit var factoryProvider: TestFactoryProvider
     private lateinit var projectLoader: TestProjectLoader
 
     private lateinit var projectFactory: PrivateProjectFactory
@@ -155,7 +159,7 @@ class ProjectFactoryTest {
                     projectFactory = PrivateProjectFactory(
                         projectLoader,
                         it.data,
-                        factoryProvider,
+                        factoryProvider.shownFactory,
                         compositeDisposable,
                         mockk(relaxed = true),
                     ) { mockk() }

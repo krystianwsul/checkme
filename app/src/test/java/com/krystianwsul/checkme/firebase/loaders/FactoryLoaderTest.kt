@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.firebase.loaders
 import com.jakewharton.rxrelay3.BehaviorRelay
 import com.jakewharton.rxrelay3.PublishRelay
 import com.krystianwsul.checkme.domainmodel.DomainFactoryRule
+import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
 import com.krystianwsul.checkme.firebase.factories.FriendsFactory
 import com.krystianwsul.checkme.firebase.factories.MyUserFactory
@@ -21,11 +22,9 @@ import com.krystianwsul.common.firebase.json.tasks.PrivateTaskJson
 import com.krystianwsul.common.firebase.json.tasks.RootTaskJson
 import com.krystianwsul.common.firebase.json.tasks.SharedTaskJson
 import com.krystianwsul.common.firebase.models.Instance
-import com.krystianwsul.common.time.DateTime
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
-import com.krystianwsul.common.utils.TaskKeyData
 import com.krystianwsul.common.utils.UserKey
 import io.mockk.every
 import io.mockk.mockk
@@ -42,18 +41,6 @@ class FactoryLoaderTest {
 
     @get:Rule
     val domainFactoryRule = DomainFactoryRule()
-
-    private val local = object : Instance.ShownFactory {
-
-        override fun getShown(taskKey: TaskKey, scheduleDateTime: DateTime): Instance.Shown? = null
-
-        override fun createShown(taskKeyData: TaskKeyData, scheduleDateTime: DateTime) = object : Instance.Shown {
-
-            override var notified = false
-
-            override var notificationShown = false
-        }
-    }
 
     private open class TestDomain : FactoryProvider.Domain {
 
@@ -130,7 +117,9 @@ class FactoryLoaderTest {
 
         val domain = ExpectTestDomain()
 
-        override val shownFactory = mockk<Instance.ShownFactory>()
+        val shownFactory = mockk<Instance.ShownFactory>()
+
+        override fun newShownFactory(notificationStorage: FactoryProvider.NotificationStorage) = shownFactory
 
         override val domainUpdater = mockk<DomainUpdater>(relaxed = true)
 
@@ -139,7 +128,7 @@ class FactoryLoaderTest {
         }
 
         override fun newDomain(
-            localFactory: Instance.ShownFactory,
+            shownFactory: Instance.ShownFactory,
             myUserFactory: MyUserFactory,
             projectsFactory: ProjectsFactory,
             friendsFactory: FriendsFactory,
@@ -149,6 +138,7 @@ class FactoryLoaderTest {
             domainDisposable: CompositeDisposable,
             rootTasksFactory: RootTasksFactory,
             notificationStorage: FactoryProvider.NotificationStorage,
+            domainListenerManager: DomainListenerManager,
         ) = domain
     }
 
@@ -187,7 +177,6 @@ class FactoryLoaderTest {
         testFactoryProvider = TestFactoryProvider()
 
         factoryLoader = FactoryLoader(
-            local,
             userInfoObservable,
             testFactoryProvider,
             tokenObservable,

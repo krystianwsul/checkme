@@ -17,7 +17,7 @@ fun DomainUpdater.setInstancesDone(
 
     val instances = instanceKeys.map(this::getInstance)
 
-    instances.forEach { it.setDone(localFactory, done, now) }
+    instances.forEach { it.setDone(shownFactory, done, now) }
 
     val remoteProjects = instances.map { it.task.project }.toSet()
 

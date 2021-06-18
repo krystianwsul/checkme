@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.viewmodels
 
-import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.extensions.getShowGroupData
 import com.krystianwsul.checkme.gui.instances.ShowGroupActivity
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
@@ -9,7 +8,7 @@ class ShowGroupViewModel : DomainViewModel<ShowGroupViewModel.Data>() {
 
     override val domainListener = object : DomainListener<Data>() {
 
-        override fun getData(domainFactory: DomainFactory) = domainFactory.getShowGroupData(parameters)
+        override val domainResultFetcher = DomainResultFetcher.DomainFactoryData { it.getShowGroupData(parameters) }
     }
 
     private lateinit var parameters: ShowGroupActivity.Parameters

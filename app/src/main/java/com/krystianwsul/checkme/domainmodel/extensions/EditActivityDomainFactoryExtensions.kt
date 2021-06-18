@@ -3,10 +3,7 @@ package com.krystianwsul.checkme.domainmodel.extensions
 import android.net.Uri
 import androidx.annotation.CheckResult
 import com.krystianwsul.checkme.MyCrashlytics
-import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.domainmodel.DomainListenerManager
-import com.krystianwsul.checkme.domainmodel.ScheduleText
-import com.krystianwsul.checkme.domainmodel.takeAndHasMore
+import com.krystianwsul.checkme.domainmodel.*
 import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
 import com.krystianwsul.checkme.domainmodel.update.SingleDomainUpdate
 import com.krystianwsul.checkme.gui.edit.EditParameters
@@ -15,6 +12,7 @@ import com.krystianwsul.checkme.gui.edit.ParentScheduleManager
 import com.krystianwsul.checkme.gui.edit.delegates.EditDelegate
 import com.krystianwsul.checkme.upload.Uploader
 import com.krystianwsul.checkme.utils.newUuid
+import com.krystianwsul.checkme.viewmodels.DomainResult
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.domain.ScheduleGroup
 import com.krystianwsul.common.firebase.DomainThreadChecker
@@ -31,12 +29,52 @@ import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.*
 import io.reactivex.rxjava3.core.Single
 
-fun DomainFactory.getCreateTaskData(
+fun UserScope.getCreateTaskData(
+    startParameters: EditViewModel.StartParameters,
+    currentParentSource: EditViewModel.CurrentParentSource,
+): Single<DomainResult<EditViewModel.MainData>> {
+    MyCrashlytics.logMethod(this)
+
+    val mainDataSingle = if (startParameters is EditViewModel.StartParameters.Create &&
+        currentParentSource is EditViewModel.CurrentParentSource.None
+    ) {
+        Single.just(getCreateTaskDataFast())
+    } else {
+        domainFactorySingle.map { (it as DomainFactory).getCreateTaskDataSlow(startParameters, currentParentSource) }
+    }
+
+    return mainDataSingle.map { DomainResult.Completed(it) }
+}
+
+private fun Map<CustomTimeKey, Time.Custom>.toCustomTimeDatas() = mapValues { (customTimeKey, customTime) ->
+    EditViewModel.CustomTimeData(
+        customTimeKey,
+        customTime.name,
+        customTime.hourMinutes.toSortedMap(),
+        customTime is MyCustomTime,
+    )
+}
+
+private fun UserScope.getCreateTaskDataFast(): EditViewModel.MainData {
+    DomainThreadChecker.instance.requireDomainThread()
+
+    val now = ExactTimeStamp.Local.now
+
+    val customTimeDatas = myUserFactory.user
+        .customTimes
+        .values
+        .filter { it.notDeleted(now) }
+        .associateBy { it.key }
+        .toMutableMap<CustomTimeKey, Time.Custom>()
+        .toCustomTimeDatas()
+
+    return EditViewModel.MainData(null, customTimeDatas, null, null)
+}
+
+private fun DomainFactory.getCreateTaskDataSlow(
     startParameters: EditViewModel.StartParameters,
     currentParentSource: EditViewModel.CurrentParentSource,
 ): EditViewModel.MainData {
-    MyCrashlytics.logMethod(this)
-
     DomainThreadChecker.instance.requireDomainThread()
 
     val now = ExactTimeStamp.Local.now
@@ -89,28 +127,9 @@ fun DomainFactory.getCreateTaskData(
         )
     }
 
-    val customTimeDatas = customTimes.values.associate {
-        it.key to EditViewModel.CustomTimeData(it.key, it.name, it.hourMinutes.toSortedMap(), it is MyCustomTime)
-    }
+    val customTimeDatas = customTimes.toCustomTimeDatas()
 
-    val showAllInstancesDialog = when (startParameters) {
-        is EditViewModel.StartParameters.Join -> startParameters.joinables
-            .map { it to getTaskForce(it.taskKey) }
-            .run {
-                map { it.second.project }.distinct().size == 1 && any { (joinable, task) ->
-                    if (joinable.instanceKey != null) {
-                        task.hasOtherVisibleInstances(now, joinable.instanceKey)
-                    } else {
-                        task.getInstances(null, null, now)
-                            .filter { it.isVisible(now, Instance.VisibilityOptions()) }
-                            .takeAndHasMore(1)
-                            .second
-                    }
-                }
-            }
-        is EditViewModel.StartParameters.Task -> null
-        is EditViewModel.StartParameters.Create -> null
-    }
+    val showAllInstancesDialog = startParameters.showAllInstancesDialog(this, now)
 
     val currentParentKey: EditViewModel.ParentKey? = when (currentParentSource) {
         is EditViewModel.CurrentParentSource.None -> null
@@ -154,12 +173,7 @@ fun DomainFactory.getCreateTaskData(
         null -> null
     }
 
-    return EditViewModel.MainData(
-        taskData,
-        customTimeDatas,
-        showAllInstancesDialog,
-        currentParent,
-    )
+    return EditViewModel.MainData(taskData, customTimeDatas, showAllInstancesDialog, currentParent)
 }
 
 fun DomainFactory.getCreateTaskParentPickerData(
@@ -331,7 +345,7 @@ fun DomainUpdater.updateScheduleTask(
             endAllCurrentNoScheduleOrParents(now)
 
             updateSchedules(
-                localFactory,
+                shownFactory,
                 scheduleDatas.map { it to getTime(it.timePair) },
                 now,
                 sharedProjectParameters.nonNullAssignedTo,

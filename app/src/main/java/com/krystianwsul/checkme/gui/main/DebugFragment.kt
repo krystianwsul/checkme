@@ -90,6 +90,12 @@ class DebugFragment : AbstractFragment() {
 
                         val domainFactory = DomainFactory.instance
 
+                        val deviceDbInfo = domainFactory.deviceDbInfo
+
+                        append("\ndevice info:")
+                        append("\nuuid: " + deviceDbInfo.uuid)
+                        append("\ntoken: " + deviceDbInfo.token + "\n")
+
                         append("\nload time: ")
                         append(domainFactory.remoteReadTimes.run { readMillis + instantiateMillis })
                         append("ms (")

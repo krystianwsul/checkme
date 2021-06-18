@@ -1,7 +1,6 @@
 package com.krystianwsul.checkme.viewmodels
 
 import android.os.Parcelable
-import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.extensions.getEditInstancesSearchData
 import com.krystianwsul.checkme.gui.edit.dialogs.ParentPickerFragment
 import com.krystianwsul.common.criteria.SearchCriteria
@@ -16,11 +15,9 @@ class EditInstancesSearchViewModel : DomainViewModel<EditInstancesSearchViewMode
 
     override val domainListener = object : DomainListener<Data>() {
 
-        override fun getDataResult(domainFactory: DomainFactory) = domainFactory.getEditInstancesSearchData(
-                parameters.searchCriteria,
-                parameters.page,
-                parameters.projectKey,
-        )
+        override val domainResultFetcher = DomainResultFetcher.DomainFactoryDomainResult {
+            it.getEditInstancesSearchData(parameters.searchCriteria, parameters.page, parameters.projectKey)
+        }
     }
 
     fun start(projectKey: ProjectKey<*>, searchCriteria: SearchCriteria, page: Int) {

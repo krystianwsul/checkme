@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.firebase.factories
 
-import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.checkme.firebase.loaders.ProjectLoader
 import com.krystianwsul.checkme.firebase.loaders.SharedProjectsLoader
 import com.krystianwsul.checkme.utils.MapRelayProperty
@@ -25,13 +24,12 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.merge
 
 class ProjectsFactory(
-    localFactory: Instance.ShownFactory,
     private val privateProjectLoader: ProjectLoader<ProjectType.Private, PrivateProjectJson>,
     privateInitialProjectEvent: ProjectLoader.InitialProjectEvent<ProjectType.Private, PrivateProjectJson>,
     private val sharedProjectsLoader: SharedProjectsLoader,
     sharedInitialProjectsEvent: SharedProjectsLoader.InitialProjectsEvent,
     now: ExactTimeStamp.Local,
-    private val factoryProvider: FactoryProvider,
+    private val shownFactory: Instance.ShownFactory,
     private val domainDisposable: CompositeDisposable,
     rootTaskProvider: Project.RootTaskProvider,
     deviceDbInfo: () -> DeviceDbInfo,
@@ -40,7 +38,7 @@ class ProjectsFactory(
     private val privateProjectFactory = PrivateProjectFactory(
         privateProjectLoader,
         privateInitialProjectEvent,
-        factoryProvider,
+        shownFactory,
         domainDisposable,
         rootTaskProvider,
         deviceDbInfo,
@@ -52,7 +50,7 @@ class ProjectsFactory(
                 sharedInitialProjectEvent.projectRecord.projectKey to SharedProjectFactory(
                     sharedProjectLoader,
                     sharedInitialProjectEvent,
-                    factoryProvider,
+                    shownFactory,
                     domainDisposable,
                     rootTaskProvider,
                     deviceDbInfo,
@@ -70,7 +68,7 @@ class ProjectsFactory(
     val changeTypes: Observable<ChangeType>
 
     init {
-        privateProject.fixNotificationShown(localFactory, now)
+        privateProject.fixNotificationShown(shownFactory, now)
 
         val addProjectChangeTypes = sharedProjectsLoader.addProjectEvents.mapNotNull { (changeType, addProjectEvent) ->
             val projectKey = addProjectEvent.initialProjectEvent
@@ -82,7 +80,7 @@ class ProjectsFactory(
             val sharedProjectFactory = SharedProjectFactory(
                 addProjectEvent.projectLoader,
                 addProjectEvent.initialProjectEvent,
-                factoryProvider,
+                shownFactory,
                 domainDisposable,
                 rootTaskProvider,
                 deviceDbInfo,
@@ -93,16 +91,15 @@ class ProjectsFactory(
             changeType.takeIf { it == ChangeType.REMOTE } // filtering out internal events for adding project
         }
 
-        val removeProjectChangeTypes =
-            sharedProjectsLoader.removeProjectEvents.map {
-                it.projectKeys.forEach {
-                    check(sharedProjectFactories.containsKey(it))
+        val removeProjectChangeTypes = sharedProjectsLoader.removeProjectEvents.map {
+            it.projectKeys.forEach {
+                check(sharedProjectFactories.containsKey(it))
 
-                    sharedProjectFactoriesProperty.remove(it)
-                }
-
-                ChangeType.REMOTE
+                sharedProjectFactoriesProperty.remove(it)
             }
+
+            ChangeType.REMOTE
+        }
 
         val sharedProjectFactoryChangeTypes = sharedProjectFactoriesProperty.observable.switchMap {
             it.values

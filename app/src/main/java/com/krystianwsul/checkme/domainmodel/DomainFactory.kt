@@ -7,10 +7,9 @@ import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager.NotificationType
-import com.krystianwsul.checkme.domainmodel.extensions.fixOffsets
+import com.krystianwsul.checkme.domainmodel.extensions.fixOffsetsAndCustomTimes
 import com.krystianwsul.checkme.domainmodel.extensions.migratePrivateCustomTime
 import com.krystianwsul.checkme.domainmodel.extensions.updateNotifications
-import com.krystianwsul.checkme.domainmodel.local.LocalFactory
 import com.krystianwsul.checkme.domainmodel.notifications.ImageManager
 import com.krystianwsul.checkme.domainmodel.notifications.NotificationWrapper
 import com.krystianwsul.checkme.domainmodel.notifications.Notifier
@@ -56,7 +55,7 @@ import kotlin.properties.Delegates.observable
 
 @Suppress("LeakingThis")
 class DomainFactory(
-    val localFactory: LocalFactory,
+    val shownFactory: Instance.ShownFactory,
     val myUserFactory: MyUserFactory,
     val projectsFactory: ProjectsFactory,
     val friendsFactory: FriendsFactory,
@@ -67,6 +66,7 @@ class DomainFactory(
     private val databaseWrapper: DatabaseWrapper,
     val rootTasksFactory: RootTasksFactory,
     val notificationStorage: FactoryProvider.NotificationStorage,
+    val domainListenerManager: DomainListenerManager,
     private val getDomainUpdater: (DomainFactory) -> DomainUpdater,
 ) :
     FactoryProvider.Domain,
@@ -88,8 +88,6 @@ class DomainFactory(
 
     var remoteReadTimes: ReadTimes
         private set
-
-    val domainListenerManager = DomainListenerManager()
 
     var deviceDbInfo = _deviceDbInfo
 
@@ -134,7 +132,7 @@ class DomainFactory(
         ).map { it.toObservable() }
             .merge()
             .firstOrError()
-            .flatMapCompletable { getDomainUpdater(this).fixOffsets(it) }
+            .flatMapCompletable { getDomainUpdater(this).fixOffsetsAndCustomTimes(it) }
             .subscribe()
             .addTo(domainDisposable)
 
@@ -154,7 +152,7 @@ class DomainFactory(
 
     val customTimeCount get() = projectsFactory.privateProject.customTimes.size + myUserFactory.user.customTimes.size
 
-    val instanceShownCount get() = localFactory.instanceShownRecords.size
+    val instanceShownCount get() = notificationStorage.instanceShownMap.size
 
     val uuid get() = deviceDbInfo.uuid
 
@@ -182,7 +180,7 @@ class DomainFactory(
 
         Preferences.tickLog.logLineHour("DomainFactory.save")
 
-        val localChanges = localFactory.save()
+        val notificationChanges = notificationStorage.save()
 
         val values = mutableMapOf<String, Any?>()
         projectsFactory.save(values)
@@ -193,7 +191,7 @@ class DomainFactory(
         if (values.isNotEmpty())
             databaseWrapper.update(values, checkError(this, "DomainFactory.save", values))
 
-        val changes = localChanges || values.isNotEmpty()
+        val changes = notificationChanges || values.isNotEmpty()
 
         if (changes || saveParams.forceDomainChanged) {
             domainListenerManager.notify(saveParams.notificationType)
@@ -411,7 +409,7 @@ class DomainFactory(
             instance.task.note,
             children,
             instance.task.ordinal,
-            instance.getNotificationShown(localFactory),
+            instance.getNotificationShown(shownFactory),
             instance.task.getImage(deviceDbInfo),
             instance.isAssignedToMe(now, myUserFactory.user),
             instance.getProjectInfo(now, includeProjectInfo),
@@ -540,8 +538,8 @@ class DomainFactory(
     }
 
     fun setInstanceNotified(instance: Instance) {
-        instance.setNotified(localFactory, true)
-        instance.setNotificationShown(localFactory, false)
+        instance.setNotified(shownFactory, true)
+        instance.setNotificationShown(shownFactory, false)
     }
 
     fun getTime(timePair: TimePair) = timePair.customTimeKey
@@ -564,11 +562,10 @@ class DomainFactory(
         }
     }
 
-    fun tryGetTask(taskKeyData: TaskKeyData): Task? {
-        return if (taskKeyData.root) {
-            rootTasksFactory.getRootTaskIfPresent(TaskKey.Root(taskKeyData.taskId))
-        } else {
-            projectsFactory.getProjectIfPresent(taskKeyData.projectId)?.getTaskIfPresent(taskKeyData.taskId)
+    fun tryGetTask(taskKey: TaskKey): Task? {
+        return when (taskKey) {
+            is TaskKey.Root -> rootTasksFactory.getRootTaskIfPresent(taskKey)
+            is TaskKey.Project -> projectsFactory.getTaskIfPresent(taskKey)
         }
     }
 

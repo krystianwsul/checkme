@@ -140,13 +140,12 @@ class ProjectsFactoryTest {
 
     private fun initProjectsFactory() {
         _projectsFactory = ProjectsFactory(
-            mockk(),
             privateProjectLoader,
             initialProjectEvent!!,
             sharedProjectsLoader,
             initialProjectsEvent!!,
             ExactTimeStamp.Local.now,
-            factoryProvider,
+            factoryProvider.shownFactory,
             compositeDisposable,
             mockk(relaxed = true),
         ) { deviceDbInfo }

@@ -46,8 +46,13 @@ fun UserScope.getCreateTaskData(
     return mainDataSingle.map { DomainResult.Completed(it) }
 }
 
-private fun Map<CustomTimeKey, Time.Custom>.toCustomTimeDatas() = mapValues {
-    EditViewModel.CustomTimeData(it.key, it.value.name, it.value.hourMinutes.toSortedMap(), it is MyCustomTime)
+private fun Map<CustomTimeKey, Time.Custom>.toCustomTimeDatas() = mapValues { (customTimeKey, customTime) ->
+    EditViewModel.CustomTimeData(
+        customTimeKey,
+        customTime.name,
+        customTime.hourMinutes.toSortedMap(),
+        customTime is MyCustomTime,
+    )
 }
 
 private fun UserScope.getCreateTaskDataFast(): EditViewModel.MainData {

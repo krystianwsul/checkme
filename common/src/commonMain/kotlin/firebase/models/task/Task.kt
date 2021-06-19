@@ -138,6 +138,23 @@ sealed class Task(
         return getInstances(null, null, now).any { it.canAddSubtask(now, hack24) }
     }
 
+    // hack24 = false -> basically, is it possible to add a subtask
+    fun isVisibleHelper(now: ExactTimeStamp.Local, hack24: Boolean = false): Pair<Boolean, String> {
+        // can't add to deleted tasks
+        if (!current(now)) return false to "not current"
+
+        // in general, we can add a subtask to any task that is either unscheduled, or has not done instances.  Checking
+        // for that will be difficult, though.
+
+        val topLevelTask = getTopLevelTask(now)
+
+        // if it's in the unscheduled tasks list, we can add a subtask
+        if (topLevelTask.intervalInfo.isUnscheduled()) return true to "is unscheduled"
+
+        // ... and if not, we can just use getInstances() and check all of them.
+        return getInstances(null, null, now).any { it.canAddSubtask(now, hack24) } to "based off instances"
+    }
+
     private fun getTopLevelTask(exactTimeStamp: ExactTimeStamp): Task =
         getParentTask(exactTimeStamp)?.getTopLevelTask(exactTimeStamp) ?: this
 

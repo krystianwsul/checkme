@@ -53,6 +53,8 @@ fun DomainFactory.getShowTaskData(requestTaskKey: TaskKey): ShowTaskViewModel.Da
     if (debugMode) {
         collapseText += "\n\ntaskKey: $taskKey"
         collapseText += "\nstartTime: " + task.startExactTimeStampOffset
+        collapseText += "\nendTime:" + task.endData?.exactTimeStampOffset
+        collapseText += "\nisVisible: " + task.isVisibleHelper(now).let { it.first.toString() + ", " + it.second }
     }
 
     return ShowTaskViewModel.Data(

@@ -254,8 +254,8 @@ class Instance private constructor(val task: Task, private var data: Data) : Ass
         val instanceLocker = getInstanceLocker()?.also { check(it.now == now) }
 
         instanceLocker?.isVisible
-                ?.get(visibilityOptions)
-                ?.let { return it }
+            ?.get(visibilityOptions)
+            ?.let { return it }
 
         val isVisible = isVisibleHelper(now, visibilityOptions)
 
@@ -264,15 +264,18 @@ class Instance private constructor(val task: Task, private var data: Data) : Ass
         return isVisible
     }
 
+    fun isVisibleDebug(now: ExactTimeStamp.Local, visibilityOptions: VisibilityOptions) =
+        isVisibleHelperDebug(now, visibilityOptions)
+
     private fun matchesSchedule() = getMatchingScheduleIntervals(true).isNotEmpty()
 
     private fun isInvisibleBecauseOfEndData(now: ExactTimeStamp.Local) =
-            task.run { !notDeleted(now) && endData!!.deleteInstances && done == null }
+        task.run { !notDeleted(now) && endData!!.deleteInstances && done == null }
 
     data class VisibilityOptions(
-            val hack24: Boolean = false, // show done roots for 24 hours. Ignored for children
-            val ignoreHidden: Boolean = false,
-            val assumeChildOfVisibleParent: Boolean = false,
+        val hack24: Boolean = false, // show done roots for 24 hours. Ignored for children
+        val ignoreHidden: Boolean = false,
+        val assumeChildOfVisibleParent: Boolean = false,
             val assumeRoot: Boolean = false,
     ) {
 
@@ -317,9 +320,48 @@ class Instance private constructor(val task: Task, private var data: Data) : Ass
         }
     }
 
+    private fun isVisibleHelperDebug(
+        now: ExactTimeStamp.Local,
+        visibilityOptions: VisibilityOptions
+    ): Pair<Boolean, String> {
+        if (!visibilityOptions.ignoreHidden && data.hidden) return false to "hidden"
+
+        if (isInvisibleBecauseOfEndData(now)) return false to "endData"
+
+        fun checkVisibilityForRoot(): Pair<Boolean, String> {
+            if (!isValidlyCreated()) return false to "isValidlyCreated"
+            val done = done ?: return true to "done"
+
+            val cutoff = if (visibilityOptions.hack24)
+                ExactTimeStamp.Local(now.toDateTimeSoy() - 1.days)
+            else
+                now
+
+            return Pair(done > cutoff, "cutoff")
+        }
+
+        val parentInstance = parentInstance
+
+        return when {
+            visibilityOptions.assumeChildOfVisibleParent -> {
+                checkNotNull(parentInstance)
+
+                true to "childOfParent"
+            }
+            visibilityOptions.assumeRoot -> {
+                check(parentInstance == null)
+
+                checkVisibilityForRoot()
+            }
+            parentInstance != null -> parentInstance.isVisible(now, visibilityOptions) to "parentInstance"
+            else -> checkVisibilityForRoot()
+        }
+    }
+
     private fun isValidlyCreated() = exists() || matchesSchedule()
 
-    override fun toString() = "${super.toString()} name: $name, schedule time: $scheduleDateTime, instance time: $instanceDateTime, done: $done"
+    override fun toString() =
+        "${super.toString()} name: $name, schedule time: $scheduleDateTime, instance time: $instanceDateTime, done: $done"
 
     fun hide() {
         check(!data.hidden)

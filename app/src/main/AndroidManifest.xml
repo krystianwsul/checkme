@@ -22,7 +22,8 @@
         android:theme="@style/AppTheme"
         tools:ignore="AllowBackup,GoogleAppIndexingWarning"
         android:requestLegacyExternalStorage="true"
-        tools:targetApi="q">
+        tools:targetApi="q"
+        android:fullBackupContent="@xml/backup_descriptor">
 
         <activity
             android:name=".gui.main.SettingsActivity"

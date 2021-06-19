@@ -33,113 +33,115 @@ class DebugFragment : AbstractFragment() {
     private val bindingProperty = ResettableProperty<FragmentDebugBinding>()
     private var binding by bindingProperty
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?) = FragmentDebugBinding.inflate(inflater, container, false).also { binding = it }.root
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?) =
+        FragmentDebugBinding.inflate(inflater, container, false).also { binding = it }.root
 
     @SuppressLint("SetTextI18n")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         DomainFactory.instanceRelay
-                .filterNotNull()
-                .subscribe {
-                    binding.debugViewSwitch.apply {
-                        isChecked = it.debugMode
+            .filterNotNull()
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe {
+                binding.debugViewSwitch.apply {
+                    isChecked = it.debugMode
 
-                        setOnCheckedChangeListener { _, isChecked ->
-                            it.debugMode = isChecked
-                        }
+                    setOnCheckedChangeListener { _, isChecked ->
+                        it.debugMode = isChecked
                     }
                 }
-                .addTo(viewCreatedDisposable)
+            }
+            .addTo(viewCreatedDisposable)
 
         binding.debugTick
-                .clicks()
-                .switchMapCompletable { Ticker.tick("DebugFragment") }
-                .subscribe()
-                .addTo(viewCreatedDisposable)
+            .clicks()
+            .switchMapCompletable { Ticker.tick("DebugFragment") }
+            .subscribe()
+            .addTo(viewCreatedDisposable)
 
         binding.debugLoad
-                .clicks()
-                .toFlowable(BackpressureStrategy.DROP)
-                .observeOnDomain()
-                .flatMapSingle(
-                        {
-                            Single.fromCallable {
-                                val t1 = ExactTimeStamp.Local.now
-                                DomainFactory.instance.getGroupListData(
-                                        ExactTimeStamp.Local.now,
-                                        0,
-                                        Preferences.TimeRange.DAY,
-                                )
+            .clicks()
+            .toFlowable(BackpressureStrategy.DROP)
+            .observeOnDomain()
+            .flatMapSingle(
+                {
+                    Single.fromCallable {
+                        val t1 = ExactTimeStamp.Local.now
+                        DomainFactory.instance.getGroupListData(
+                            ExactTimeStamp.Local.now,
+                            0,
+                            Preferences.TimeRange.DAY,
+                        )
 
-                                val t2 = ExactTimeStamp.Local.now
+                        val t2 = ExactTimeStamp.Local.now
 
-                                t2.long - t1.long
-                            }
-                        },
-                        false,
-                        1,
-                )
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe { loadTime ->
-                    binding.debugData.text = StringBuilder().apply {
-                        val lastTick = Preferences.lastTick
-                        val tickLog = Preferences.tickLog.log
-
-                        val lastTickExactTimeStamp = ExactTimeStamp.Local(lastTick)
-
-                        val domainFactory = DomainFactory.instance
-
-                        val deviceDbInfo = domainFactory.deviceDbInfo
-
-                        append("\ndevice info:")
-                        append("\nuuid: " + deviceDbInfo.uuid)
-                        append("\ntoken: " + deviceDbInfo.token + "\n")
-
-                        append("\nload time: ")
-                        append(domainFactory.remoteReadTimes.run { readMillis + instantiateMillis })
-                        append("ms (")
-                        append(domainFactory.remoteReadTimes.readMillis)
-                        append(" + ")
-                        append(domainFactory.remoteReadTimes.instantiateMillis)
-                        append(")")
-
-                        append("\n\ntasks: ")
-                        append(domainFactory.taskCount)
-                        append("\nall existing instances: ")
-                        append(domainFactory.instanceCount)
-                        append("\nfirst page root instances: existing ")
-                        append(domainFactory.instanceInfo.first)
-                        append(", virtual ")
-                        append(domainFactory.instanceInfo.second)
-                        append("\ncustom times: ")
-                        append(domainFactory.customTimeCount)
-                        append("\ninstance shown: ")
-                        append(domainFactory.instanceShownCount)
-
-                        append("\n\nsaved state log:\n")
-                        append(Preferences.savedStateLog.log)
-
-                        append("\n\ntab log:\n")
-                        append(Preferences.mainTabsLog.log)
-
-                        append("\n\ntoday: ")
-                        append(loadTime)
-                        append(" ms")
-
-                        append("\ncrashlytics enabled: ")
-                        append(MyCrashlytics.enabled)
-
-                        append("\n\ntemporary notification log:\n\n")
-                        append(Preferences.temporaryNotificationLog.log)
-
-                        append("\n\nlast beeping tick: ")
-                        append(lastTickExactTimeStamp.toString())
-                        append("\n\ntick log:\n\n")
-                        append(tickLog)
+                        t2.long - t1.long
                     }
+                },
+                false,
+                1,
+            )
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe { loadTime ->
+                binding.debugData.text = StringBuilder().apply {
+                    val lastTick = Preferences.lastTick
+                    val tickLog = Preferences.tickLog.log
+
+                    val lastTickExactTimeStamp = ExactTimeStamp.Local(lastTick)
+
+                    val domainFactory = DomainFactory.instance
+
+                    val deviceDbInfo = domainFactory.deviceDbInfo
+
+                    append("\ndevice info:")
+                    append("\nuuid: " + deviceDbInfo.uuid)
+                    append("\ntoken: " + deviceDbInfo.token + "\n")
+
+                    append("\nload time: ")
+                    append(domainFactory.remoteReadTimes.run { readMillis + instantiateMillis })
+                    append("ms (")
+                    append(domainFactory.remoteReadTimes.readMillis)
+                    append(" + ")
+                    append(domainFactory.remoteReadTimes.instantiateMillis)
+                    append(")")
+
+                    append("\n\ntasks: ")
+                    append(domainFactory.taskCount)
+                    append("\nall existing instances: ")
+                    append(domainFactory.instanceCount)
+                    append("\nfirst page root instances: existing ")
+                    append(domainFactory.instanceInfo.first)
+                    append(", virtual ")
+                    append(domainFactory.instanceInfo.second)
+                    append("\ncustom times: ")
+                    append(domainFactory.customTimeCount)
+                    append("\ninstance shown: ")
+                    append(domainFactory.instanceShownCount)
+
+                    append("\n\nsaved state log:\n")
+                    append(Preferences.savedStateLog.log)
+
+                    append("\n\ntab log:\n")
+                    append(Preferences.mainTabsLog.log)
+
+                    append("\n\ntoday: ")
+                    append(loadTime)
+                    append(" ms")
+
+                    append("\ncrashlytics enabled: ")
+                    append(MyCrashlytics.enabled)
+
+                    append("\n\ntemporary notification log:\n\n")
+                    append(Preferences.temporaryNotificationLog.log)
+
+                    append("\n\nlast beeping tick: ")
+                    append(lastTickExactTimeStamp.toString())
+                    append("\n\ntick log:\n\n")
+                    append(tickLog)
                 }
-                .addTo(viewCreatedDisposable)
+            }
+            .addTo(viewCreatedDisposable)
     }
 
     override fun onDestroyView() {

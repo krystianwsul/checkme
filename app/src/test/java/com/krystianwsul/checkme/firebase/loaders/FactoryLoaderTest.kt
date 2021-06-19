@@ -127,6 +127,8 @@ class FactoryLoaderTest {
             every { getNotificationStorage() } returns Single.just(mockk(relaxed = true))
         }
 
+        override val uuid = "uuid"
+
         override fun newDomain(
             shownFactory: Instance.ShownFactory,
             myUserFactory: MyUserFactory,
@@ -176,12 +178,7 @@ class FactoryLoaderTest {
         tokenObservable = BehaviorRelay.createDefault(tokenWrapper)
         testFactoryProvider = TestFactoryProvider()
 
-        factoryLoader = FactoryLoader(
-            userInfoObservable,
-            testFactoryProvider,
-            tokenObservable,
-            Single.just("uuid"),
-        )
+        factoryLoader = FactoryLoader(userInfoObservable, testFactoryProvider, tokenObservable)
 
         domainFactoryRelay = BehaviorRelay.create()
 

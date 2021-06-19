@@ -22,14 +22,12 @@ import com.krystianwsul.treeadapter.getCurrentValue
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.CompositeDisposable
-import io.reactivex.rxjava3.kotlin.Observables
 import io.reactivex.rxjava3.kotlin.plusAssign
 
 class FactoryLoader(
     userInfoObservable: Observable<NullableWrapper<UserInfo>>,
     factoryProvider: FactoryProvider,
     tokenObservable: Observable<NullableWrapper<String>>,
-    uuidSingle: Single<String>,
 ) {
 
     val userScopeObservable: Observable<NullableWrapper<UserScope>>
@@ -46,11 +44,8 @@ class FactoryLoader(
                 if (it.value != null) {
                     val userInfo = it.value
 
-                    val deviceDbInfoObservable = Observables.combineLatest(
-                        uuidSingle.toObservable().observeOnDomain(),
-                        tokenObservable.observeOnDomain(),
-                    )
-                        .map { (uuid, tokenWrapper) -> DeviceDbInfo(DeviceInfo(userInfo, tokenWrapper.value), uuid) }
+                    val deviceDbInfoObservable = tokenObservable.observeOnDomain()
+                        .map { DeviceDbInfo(DeviceInfo(userInfo, it.value), factoryProvider.uuid) }
                         .replay(1)
                         .apply { domainDisposable += connect() }
 

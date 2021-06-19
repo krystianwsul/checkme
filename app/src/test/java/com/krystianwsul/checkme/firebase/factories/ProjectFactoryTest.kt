@@ -86,6 +86,8 @@ class ProjectFactoryTest {
             every { getNotificationStorage() } returns Single.just(mockk(relaxed = true))
         }
 
+        override val uuid = "uuid"
+
         override fun newDomain(
             shownFactory: Instance.ShownFactory,
             myUserFactory: MyUserFactory,

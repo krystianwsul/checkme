@@ -20,7 +20,6 @@ import com.github.tamir7.contacts.Contacts
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.Logger
-import com.google.firebase.installations.FirebaseInstallations
 import com.google.firebase.messaging.FirebaseMessaging
 import com.jakewharton.rxrelay3.BehaviorRelay
 import com.krystianwsul.checkme.domainmodel.*
@@ -44,7 +43,6 @@ import com.miguelbcr.ui.rx_paparazzo2.RxPaparazzo
 import com.pacoworks.rxpaper2.RxPaperBook
 import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Maybe
-import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.schedulers.Schedulers
 import rxdogtag2.RxDogTag
 import java.io.File
@@ -138,24 +136,7 @@ class MyApplication : Application() {
         RxPaperBook.init(this)
         VersionCodeManager.check(AndroidDatabaseWrapper::onUpgrade)
 
-        val uuidSingle = Single.create<String> { emitter ->
-            FirebaseInstallations.getInstance()
-                .id
-                .addOnCompleteListener {
-                    if (it.isSuccessful) {
-                        emitter.onSuccess(it.result!!)
-                    } else {
-                        MyCrashlytics.logException(it.exception ?: Exception("unknown error"))
-                    }
-                }
-        }
-
-        val factoryLoader = FactoryLoader(
-            userInfoRelay,
-            FactoryProvider.Impl(),
-            Preferences.tokenRelay,
-            uuidSingle,
-        )
+        val factoryLoader = FactoryLoader(userInfoRelay, FactoryProvider.Impl(NoBackup.uuid), Preferences.tokenRelay)
 
         factoryLoader.userScopeObservable.subscribe(UserScope.instanceRelay)
 

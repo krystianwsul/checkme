@@ -56,6 +56,8 @@ interface FactoryProvider {
 
     val notificationStorageFactory: NotificationStorageFactory
 
+    val uuid: String
+
     fun newShownFactory(notificationStorage: NotificationStorage): Instance.ShownFactory
 
     fun newDomain(
@@ -102,7 +104,7 @@ interface FactoryProvider {
         abstract fun getSharedProjectObservable(projectKey: ProjectKey.Shared): Observable<Snapshot<JsonWrapper>>
     }
 
-    class Impl : FactoryProvider {
+    class Impl(override val uuid: String) : FactoryProvider {
 
         override val nullableInstance get() = DomainFactory.nullableInstance
 

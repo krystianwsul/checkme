@@ -10,7 +10,6 @@ import androidx.recyclerview.widget.ListUpdateCallback
 import androidx.recyclerview.widget.RecyclerView
 import com.jakewharton.rxrelay3.BehaviorRelay
 import com.jakewharton.rxrelay3.PublishRelay
-import com.krystianwsul.common.utils.singleOrEmpty
 import com.krystianwsul.treeadapter.locker.AdapterLocker
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Observable
@@ -266,13 +265,14 @@ class TreeViewAdapter<T : TreeHolder>(
 
             super.onBindViewHolder(holder, position, payloads)
         } else {
-            val payloadSeparator = payloads.singleOrEmpty()?.let { it as TreeNode.PayloadSeparator }
-
             treeNodeCollection!!.getNode(position, PositionMode.DISPLAYED).apply {
-                if (payloadSeparator != null)
-                    onPayload(holder, payloadSeparator)
-                else
+                if (payloads.isNotEmpty()) {
+                    check(payloads.all { it is TreeNode.PayloadSeparator })
+
+                    onPayload(holder)
+                } else {
                     super.onBindViewHolder(holder, position, payloads)
+                }
             }
         }
     }

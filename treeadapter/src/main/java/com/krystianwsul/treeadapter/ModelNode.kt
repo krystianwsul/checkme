@@ -27,8 +27,7 @@ interface ModelNode<T : TreeHolder> : Comparable<ModelNode<T>>, Matchable {
     fun forceSelected(viewHolder: RecyclerView.ViewHolder): Unit =
         throw UnsupportedOperationException()
 
-    fun onPayload(viewHolder: RecyclerView.ViewHolder, payloadSeparator: TreeNode.PayloadSeparator): Unit =
-        throw UnsupportedOperationException()
+    fun onPayload(viewHolder: RecyclerView.ViewHolder): Unit = throw UnsupportedOperationException()
 
     fun onClick(holder: T) = Unit
 

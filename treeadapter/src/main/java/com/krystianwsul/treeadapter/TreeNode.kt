@@ -162,8 +162,7 @@ class TreeNode<T : TreeHolder>(
 
     fun onBindViewHolder(viewHolder: RecyclerView.ViewHolder) = modelNode.onBindViewHolder(viewHolder)
 
-    fun onPayload(viewHolder: RecyclerView.ViewHolder, payloadSeparator: PayloadSeparator) =
-        modelNode.onPayload(viewHolder, payloadSeparator)
+    fun onPayload(viewHolder: RecyclerView.ViewHolder) = modelNode.onPayload(viewHolder)
 
     override fun compareTo(other: TreeNode<T>) = modelNode.compareTo(other.modelNode)
 

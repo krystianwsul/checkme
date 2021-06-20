@@ -37,22 +37,24 @@
             android:permission="com.krystianwsul.ACTIVITY_LAUNCH_PERMISSION" />
 
         <activity android:name=".gui.main.TutorialActivity">
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
             <meta-data
                 android:name="android.app.shortcuts"
                 android:resource="@xml/shortcuts" />
+
         </activity>
 
         <activity
             android:name=".gui.main.MainActivity"
             android:launchMode="singleTask"
             android:theme="@style/AppTheme.Toolbar"
-            android:windowSoftInputMode="adjustNothing" /><!-- TODO CHECK THIS -->
+            android:windowSoftInputMode="adjustNothing"
+            android:permission="com.krystianwsul.ACTIVITY_LAUNCH_PERMISSION" />
 
         <activity
             android:name=".gui.tasks.ShowTaskActivity"
@@ -102,11 +104,12 @@
             android:name=".gui.edit.EditActivity"
             android:theme="@style/AppTheme"
             android:windowSoftInputMode="stateHidden|adjustResize"
-            android:autoRemoveFromRecents="true"> <!-- keyboard hack -->
+            android:autoRemoveFromRecents="true">
 
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
                 <category android:name="android.intent.category.DEFAULT" />
+
                 <data android:mimeType="text/plain" />
                 <data android:mimeType="image/*" />
             </intent-filter>

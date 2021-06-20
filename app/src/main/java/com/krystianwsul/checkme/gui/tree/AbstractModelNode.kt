@@ -1,7 +1,7 @@
 package com.krystianwsul.checkme.gui.tree
 
-import android.view.View
 import androidx.core.content.ContextCompat
+import androidx.core.view.isInvisible
 import androidx.recyclerview.widget.RecyclerView
 import com.krystianwsul.checkme.R
 import com.krystianwsul.treeadapter.ModelNode
@@ -46,7 +46,7 @@ abstract class AbstractModelNode : ModelNode<AbstractHolder> {
                     null
             }
 
-            onPayload(viewHolder, TreeNode.PayloadSeparator)
+            onPayload(viewHolder)
         }
     }
 
@@ -54,8 +54,7 @@ abstract class AbstractModelNode : ModelNode<AbstractHolder> {
         viewHolder.itemView.apply { setBackgroundColor(ContextCompat.getColor(context, R.color.selected)) }
     }
 
-    override fun onPayload(viewHolder: RecyclerView.ViewHolder, payloadSeparator: TreeNode.PayloadSeparator) {
-        (viewHolder as AbstractHolder).rowSeparator.visibility =
-            if (treeNode.separatorVisible) View.VISIBLE else View.INVISIBLE
+    override fun onPayload(viewHolder: RecyclerView.ViewHolder) {
+        (viewHolder as AbstractHolder).rowSeparator.isInvisible = !treeNode.separatorVisible
     }
 }

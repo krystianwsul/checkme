@@ -13,6 +13,12 @@
         android:name="android.permission.READ_PHONE_STATE"
         tools:node="remove" />
 
+    <permission
+        android:protectionLevel="signature"
+        android:name="com.krystianwsul.ACTIVITY_LAUNCH_PERMISSION" />
+
+    <uses-permission android:name="com.krystianwsul.ACTIVITY_LAUNCH_PERMISSION" />
+
     <application
         android:name=".MyApplication"
         android:allowBackup="true"
@@ -27,7 +33,9 @@
 
         <activity
             android:name=".gui.main.SettingsActivity"
-            android:theme="@style/AppTheme" />
+            android:theme="@style/AppTheme"
+            android:permission="com.krystianwsul.ACTIVITY_LAUNCH_PERMISSION" />
+
         <activity android:name=".gui.main.TutorialActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -39,41 +47,57 @@
                 android:name="android.app.shortcuts"
                 android:resource="@xml/shortcuts" />
         </activity>
+
         <activity
             android:name=".gui.main.MainActivity"
             android:launchMode="singleTask"
             android:theme="@style/AppTheme.Toolbar"
-            android:windowSoftInputMode="adjustNothing" />
+            android:windowSoftInputMode="adjustNothing" /><!-- TODO CHECK THIS -->
+
         <activity
             android:name=".gui.tasks.ShowTaskActivity"
             android:theme="@style/AppTheme.Toolbar"
-            android:windowSoftInputMode="adjustNothing" />
+            android:windowSoftInputMode="adjustNothing"
+            android:permission="com.krystianwsul.ACTIVITY_LAUNCH_PERMISSION" />
+
         <activity
             android:name=".gui.tasks.ShowTasksActivity"
             android:theme="@style/AppTheme.Toolbar"
-            android:windowSoftInputMode="adjustNothing" />
+            android:windowSoftInputMode="adjustNothing"
+            android:permission="com.krystianwsul.ACTIVITY_LAUNCH_PERMISSION" />
+
         <activity
             android:name=".gui.instances.ShowGroupActivity"
             android:theme="@style/AppTheme.Toolbar"
-            android:windowSoftInputMode="adjustNothing" />
+            android:windowSoftInputMode="adjustNothing"
+            android:permission="com.krystianwsul.ACTIVITY_LAUNCH_PERMISSION" />
+
         <activity
             android:name=".gui.instances.ShowNotificationGroupActivity"
             android:launchMode="singleTask"
             android:theme="@style/AppTheme.Toolbar"
             android:windowSoftInputMode="adjustNothing"
-            android:autoRemoveFromRecents="true" />
+            android:autoRemoveFromRecents="true"
+            android:permission="com.krystianwsul.ACTIVITY_LAUNCH_PERMISSION" />
+
         <activity
             android:name=".gui.instances.ShowInstanceActivity"
             android:theme="@style/AppTheme.Toolbar"
             android:windowSoftInputMode="adjustNothing"
-            android:autoRemoveFromRecents="true" />
+            android:autoRemoveFromRecents="true"
+            android:permission="com.krystianwsul.ACTIVITY_LAUNCH_PERMISSION" />
+
         <activity
             android:name=".gui.instances.ShowTaskInstancesActivity"
             android:theme="@style/AppTheme.Toolbar"
-            android:windowSoftInputMode="adjustNothing" />
+            android:windowSoftInputMode="adjustNothing"
+            android:permission="com.krystianwsul.ACTIVITY_LAUNCH_PERMISSION" />
+
         <activity
             android:name=".gui.customtimes.ShowCustomTimeActivity"
-            android:theme="@style/AppTheme" />
+            android:theme="@style/AppTheme"
+            android:permission="com.krystianwsul.ACTIVITY_LAUNCH_PERMISSION" />
+
         <activity
             android:name=".gui.edit.EditActivity"
             android:theme="@style/AppTheme"
@@ -92,14 +116,18 @@
                 android:value="androidx.sharetarget.ChooserTargetServiceCompat" />
 
         </activity>
+
         <activity
             android:name=".gui.projects.ShowProjectActivity"
             android:theme="@style/AppTheme.Toolbar"
-            android:windowSoftInputMode="adjustNothing" />
+            android:windowSoftInputMode="adjustNothing"
+            android:permission="com.krystianwsul.ACTIVITY_LAUNCH_PERMISSION" />
+
         <activity
             android:name=".gui.friends.findfriend.FindFriendActivity"
             android:windowSoftInputMode="stateVisible"
-            android:theme="@style/AppTheme" />
+            android:theme="@style/AppTheme"
+            android:permission="com.krystianwsul.ACTIVITY_LAUNCH_PERMISSION" />
 
         <receiver
             android:name=".ticks.BootReceiver"
@@ -109,6 +137,7 @@
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
+
         <receiver
             android:name=".ticks.TimeChangeReceiver"
             android:enabled="true"
@@ -118,6 +147,7 @@
                 <action android:name="android.intent.action.TIMEZONE_CHANGED" />
             </intent-filter>
         </receiver>
+
         <receiver
             android:name=".ticks.AlarmReceiver"
             android:enabled="true" />
@@ -144,10 +174,13 @@
             android:authorities="${applicationId}.file_provider"
             android:exported="false"
             android:grantUriPermissions="true">
-            <meta-data
+
+        <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_provider_paths" />
+
         </provider>
+
     </application>
 
 </manifest>

@@ -563,10 +563,6 @@ class DomainFactoryTest {
 
         val task = domainFactory.rootTasksFactory.getTask(taskKey)
 
-        assertTrue(
-            task.intervalInfo
-                .getCurrentScheduleIntervals(now)
-                .all { it.schedule.projectId == projectKey.key }
-        )
+        assertEquals(projectKey, task.project.projectKey)
     }
 }

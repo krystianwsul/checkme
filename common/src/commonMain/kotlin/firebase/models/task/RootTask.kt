@@ -25,7 +25,9 @@ class RootTask(
     ParentTaskDelegate.Root(parent),
 ) {
 
-    private fun Type.Schedule.getParentProjectSchedule() = taskParentEntries.maxByOrNull { it.startExactTimeStamp }!!
+    private fun Type.Schedule.getParentProjectSchedule() = taskParentEntries.sortedWith(
+        compareByDescending<Schedule> { it.startExactTimeStamp }.thenByDescending { it.id }
+    ).first()
 
     private val projectIdProperty = invalidatableLazyCallbacks {
         val interval = intervalInfo.intervals.last()

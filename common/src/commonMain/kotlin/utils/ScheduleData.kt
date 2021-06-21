@@ -20,7 +20,7 @@ sealed class ScheduleData : Parcelable {
         override val timePair: TimePair,
         val from: Date?,
         val until: Date?,
-        val interval: Int
+        val interval: Int,
     ) : ScheduleData()
 
     @Parcelize

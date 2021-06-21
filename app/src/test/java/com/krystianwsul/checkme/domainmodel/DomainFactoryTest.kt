@@ -517,4 +517,56 @@ class DomainFactoryTest {
 
         assertEquals(projectKey, task.project.projectKey)
     }
+
+    @Test
+    fun testChangingProjectForDailyTask() {
+        val today = Date(2021, 6, 21)
+        val hour1 = HourMinute(11, 0)
+        val hour2 = HourMinute(14, 0)
+
+        var now = ExactTimeStamp.Local(today, hour1)
+
+        val projectKey = domainUpdater(now).createProject(
+            DomainListenerManager.NotificationType.All,
+            "project",
+            emptySet(),
+        ).blockingGet()
+
+        now += 1.hours
+
+        val taskName = "taskName"
+        val scheduleDatas = listOf(ScheduleData.Weekly(DayOfWeek.set, TimePair(hour2), null, null, 1))
+
+        val taskKey = domainUpdater(now).createScheduleTopLevelTask(
+            DomainListenerManager.NotificationType.All,
+            taskName,
+            listOf(ScheduleData.Weekly(DayOfWeek.set, TimePair(hour2), null, null, 1)),
+            null,
+            null,
+            null,
+            null,
+        )
+            .blockingGet()
+            .taskKey
+
+        now += 1.hours
+
+        domainUpdater(now).updateScheduleTask(
+            DomainListenerManager.NotificationType.All,
+            taskKey,
+            taskName,
+            scheduleDatas,
+            null,
+            EditDelegate.SharedProjectParameters(projectKey, emptySet()),
+            null,
+        ).blockingGet()
+
+        val task = domainFactory.rootTasksFactory.getTask(taskKey)
+
+        assertTrue(
+            task.intervalInfo
+                .getCurrentScheduleIntervals(now)
+                .all { it.schedule.projectId == projectKey.key }
+        )
+    }
 }

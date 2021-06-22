@@ -10,11 +10,10 @@ import com.krystianwsul.treeadapter.TreeHolder
 import com.skydoves.balloon.ArrowOrientation
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
-import io.reactivex.rxjava3.kotlin.plusAssign
 
 abstract class AbstractHolder(view: View) : TreeHolder(view), BaseHolder {
 
-    final override val bindDisposable = CompositeDisposable().also { compositeDisposable += it }
+    final override val bindDisposable = CompositeDisposable()
 
     abstract val rowSeparator: View
 
@@ -35,14 +34,20 @@ abstract class AbstractHolder(view: View) : TreeHolder(view), BaseHolder {
                 .filter { getTreeNode()?.modelNode?.isSelectable == true }
                 .subscribeShowBalloon(
                         rowSeparator.context,
-                        TooltipManager.Type.PRESS_TO_SELECT,
-                        {
-                            setTextResource(R.string.tooltip_press_to_select)
-                            setArrowOrientation(ArrowOrientation.TOP)
-                            setArrowPosition(0.1f)
-                        },
-                        { showAlignBottom(itemView) }
+                    TooltipManager.Type.PRESS_TO_SELECT,
+                    {
+                        setTextResource(R.string.tooltip_press_to_select)
+                        setArrowOrientation(ArrowOrientation.TOP)
+                        setArrowPosition(0.1f)
+                    },
+                    { showAlignBottom(itemView) }
                 )
-                .addTo(compositeDisposable)
+            .addTo(compositeDisposable)
+    }
+
+    override fun stopRx() {
+        super.stopRx()
+
+        bindDisposable.clear()
     }
 }

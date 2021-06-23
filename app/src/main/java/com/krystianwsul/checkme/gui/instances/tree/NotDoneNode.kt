@@ -340,16 +340,17 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
             override val checkBoxState
                 get() = when {
                     showCheckbox -> CheckBoxState.Visible(false) {
+                        check(allInstanceDatas.all { it.done == null })
+
+                        val instanceKeys = allInstanceDatas.map { it.instanceKey }
+
                         fun setDone(done: Boolean): Single<Int> {
-                            val markInstanceKeys =
-                                // todo project this doesn't make sense, just use all of them.  mabe add a check
-                                allInstanceDatas.filter { (it.done != null) != done }.map { it.instanceKey }
 
                             return AndroidDomainUpdater.setInstancesDone(
                                 groupAdapter.dataId.toFirst(),
-                                markInstanceKeys,
+                                instanceKeys,
                                 done,
-                            ).toSingleDefault(markInstanceKeys.size)
+                            ).toSingleDefault(instanceKeys.size)
                         }
 
                         treeNode.treeViewAdapter.ignoreNextScroll()

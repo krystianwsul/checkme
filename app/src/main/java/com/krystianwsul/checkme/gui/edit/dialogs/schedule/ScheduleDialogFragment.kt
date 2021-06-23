@@ -451,6 +451,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
                 binding.scheduleDialogMonthLayout.isVisible = month
                 binding.scheduleDialogFromLayout.isVisible = from
                 binding.scheduleDialogUntilLayout.isVisible = until
+                binding.scheduleDialogTimePadding.isVisible = timePadding
             }
         }
 
@@ -718,7 +719,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
         override val type = ScheduleDialogData.Type.DAILY
 
-        override val visibilities = repeatingVisibilities
+        override val visibilities = repeatingVisibilities.copy(timePadding = true)
     }
 
     private inner class WeeklyDelegate : Repeating() {
@@ -844,6 +845,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         val month: Boolean = false,
         val from: Boolean = false,
         val until: Boolean = false,
+        val timePadding: Boolean = false,
     )
 
     private interface DateListener {

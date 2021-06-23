@@ -85,7 +85,7 @@ class RootTask(
     ): RootTask {
         val childTask = parent.createTask(now, image, name, note, ordinal)
 
-        childTask.performIntervalUpdate { createParentNestedTaskHierarchy(this@RootTask, now) }
+        childTask.performRootIntervalUpdate { createParentNestedTaskHierarchy(this@RootTask, now) }
 
         addRootTask(childTask)
 

@@ -4,6 +4,7 @@ import android.os.Parcelable
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.GroupType
 import com.krystianwsul.checkme.domainmodel.extensions.setInstanceDone
+import com.krystianwsul.checkme.domainmodel.extensions.setInstancesDone
 import com.krystianwsul.checkme.domainmodel.extensions.setOrdinal
 import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
 import com.krystianwsul.checkme.gui.instances.ShowGroupActivity
@@ -37,6 +38,7 @@ import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.treeadapter.*
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Maybe
+import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.kotlin.addTo
 import kotlinx.parcelize.Parcelize
 
@@ -281,6 +283,7 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
             override val rowsDelegate: GroupRowsDelegate,
             private val indentCheckBox: Boolean,
             private val showGroupActivityParameters: ShowGroupActivity.Parameters,
+            private val showCheckbox: Boolean,
         ) : ContentDelegate() {
 
             override val allInstanceDatas get() = notDoneNodes.flatMap { it.contentDelegate.directInstanceDatas }
@@ -303,7 +306,7 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
                 )
 
                 val nodePairs = timeChildren.map {
-                    val contentDelegate = it.toContentDelegate(groupAdapter, indentation, nodeCollection)
+                    val contentDelegate = it.toContentDelegate(groupAdapter, indentation + 1, nodeCollection)
 
                     val notDoneNode = if (contentDelegate is Instance) {
                         NotDoneInstanceNode(
@@ -331,8 +334,36 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
             override val thumbnail: ImageState? = null
 
             override val checkBoxState
-                get() =
-                    if (treeNode.isExpanded || !indentCheckBox) CheckBoxState.Gone else CheckBoxState.Invisible
+                get() = when {
+                    showCheckbox -> CheckBoxState.Visible(false) {
+                        fun setDone(done: Boolean): Single<Int> {
+                            val markInstanceKeys =
+                                // todo project this doesn't make sense, just use all of them.  mabe add a check
+                                allInstanceDatas.filter { (it.done != null) != done }.map { it.instanceKey }
+
+                            return AndroidDomainUpdater.setInstancesDone(
+                                groupAdapter.dataId.toFirst(),
+                                markInstanceKeys,
+                                done,
+                            ).toSingleDefault(markInstanceKeys.size)
+                        }
+
+                        treeNode.treeViewAdapter.ignoreNextScroll()
+
+                        setDone(true).observeOn(AndroidSchedulers.mainThread())
+                            .flatMapMaybe { groupListFragment.listener.showSnackbarDoneMaybe(it) }
+                            .flatMapSingle { setDone(false) }
+                            .subscribe()
+                            .addTo(groupListFragment.attachedToWindowDisposable)
+
+                        /**
+                         * todo it would be better to move all of this out of the node, and both handle the snackbar and
+                         * the subscription there
+                         */
+                    }
+                    (treeNode.isExpanded || !indentCheckBox) -> CheckBoxState.Gone
+                    else -> CheckBoxState.Invisible
+                }
 
             override val propagateSelection = true
 

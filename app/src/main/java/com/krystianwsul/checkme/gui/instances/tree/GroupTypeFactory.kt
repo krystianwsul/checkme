@@ -99,6 +99,7 @@ object GroupTypeFactory : GroupType.Factory {
             NotDoneNode.ContentDelegate.Group.GroupRowsDelegate.Time(groupAdapter, timeStamp),
             true,
             ShowGroupActivity.Parameters.Time(timeStamp),
+            false,
         )
 
         override fun compareTo(other: Bridge): Int {
@@ -136,6 +137,7 @@ object GroupTypeFactory : GroupType.Factory {
             NotDoneNode.ContentDelegate.Group.GroupRowsDelegate.Project(groupAdapter, timeStamp, projectDetails.name),
             true,
             ShowGroupActivity.Parameters.Project(timeStamp, projectDetails.projectKey),
+            true,
         )
 
         override fun compareTo(other: Bridge): Int {
@@ -174,6 +176,7 @@ object GroupTypeFactory : GroupType.Factory {
             NotDoneNode.ContentDelegate.Group.GroupRowsDelegate.Project(groupAdapter, null, projectDetails.name),
             !nested,
             ShowGroupActivity.Parameters.Project(timeStamp, projectDetails.projectKey),
+            true,
         )
 
         override fun compareTo(other: Bridge): Int {

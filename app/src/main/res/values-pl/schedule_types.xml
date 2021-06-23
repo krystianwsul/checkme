@@ -2,6 +2,7 @@
 <resources>
     <string-array name="schedule_types">
         <item>Pokaż raz</item>
+        <item>Powtarzaj codziennie</item>
         <item>Powtarzaj tygodniowo</item>
         <item>Powtarzaj miesięcznie</item>
         <item>Powtarzaj rocznie</item>

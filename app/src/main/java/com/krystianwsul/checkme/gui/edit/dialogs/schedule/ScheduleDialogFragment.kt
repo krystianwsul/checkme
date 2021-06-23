@@ -242,7 +242,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         binding.scheduleType.run {
             setItems(resources.getStringArray(R.array.schedule_types).toList())
 
-            setSelection(delegate.selection)
+            setSelection(delegate.type.ordinal)
 
             addListener {
                 scheduleDialogData.scheduleType = ScheduleDialogData.Type.values()[it]
@@ -410,6 +410,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
     private fun updateDelegate() {
         delegate = when (scheduleDialogData.scheduleType) {
             ScheduleDialogData.Type.SINGLE -> SingleDelegate()
+            ScheduleDialogData.Type.DAILY -> DailyDelegate()
             ScheduleDialogData.Type.WEEKLY -> WeeklyDelegate()
             ScheduleDialogData.Type.MONTHLY ->
                 if (scheduleDialogData.monthlyDay) MonthlyDayDelegate() else MonthlyWeekDelegate()
@@ -566,7 +567,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
     private abstract inner class Delegate : DateListener {
 
-        abstract val selection: Int
+        abstract val type: ScheduleDialogData.Type
 
         open val isMonthly = false
 
@@ -593,7 +594,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
     private inner class SingleDelegate : Delegate(), DateListener by DateDelegate({ it }) {
 
-        override val selection = 0
+        override val type = ScheduleDialogData.Type.SINGLE
 
         override val visibilities = Visibilities(date = true)
 
@@ -713,9 +714,16 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         }
     }
 
+    private inner class DailyDelegate : Repeating() {
+
+        override val type = ScheduleDialogData.Type.DAILY
+
+        override val visibilities = repeatingVisibilities
+    }
+
     private inner class WeeklyDelegate : Repeating() {
 
-        override val selection = 1
+        override val type = ScheduleDialogData.Type.WEEKLY
 
         override val visibilities = repeatingVisibilities.copy(day = true)
 
@@ -728,11 +736,9 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         }
 
         private fun getIntervalFromError(): String? {
-            if (scheduleDialogData.interval == 1)
-                return null
+            if (scheduleDialogData.interval == 1) return null
 
-            if (scheduleDialogData.from != null)
-                return null
+            if (scheduleDialogData.from != null) return null
 
             return getString(R.string.dateCannotBeEmpty)
         }
@@ -750,7 +756,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
     private abstract inner class Monthly : Repeating() {
 
-        override val selection = 2
+        override val type = ScheduleDialogData.Type.MONTHLY
 
         override val isMonthly = true
 
@@ -814,7 +820,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         if (it.month == 2 && it.day == 29) Date(it.year, 2, 28) else it
     }) {
 
-        override val selection = 3
+        override val type = ScheduleDialogData.Type.YEARLY
 
         override val visibilities = repeatingVisibilities.copy(date = true)
 

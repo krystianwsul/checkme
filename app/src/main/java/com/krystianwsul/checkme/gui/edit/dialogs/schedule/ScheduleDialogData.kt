@@ -42,6 +42,9 @@ data class ScheduleDialogData(
         ScheduleEntry(
             when (scheduleType) {
                 Type.SINGLE -> EditViewModel.ScheduleDataWrapper.Single(ScheduleData.Single(date, timePairPersist.timePair))
+                Type.DAILY -> EditViewModel.ScheduleDataWrapper.Weekly(
+                    ScheduleData.Weekly(DayOfWeek.set, timePairPersist.timePair, from, until, 1)
+                )
                 Type.WEEKLY -> EditViewModel.ScheduleDataWrapper.Weekly(
                     ScheduleData.Weekly(daysOfWeek, timePairPersist.timePair, from, until, interval)
                 )
@@ -76,6 +79,6 @@ data class ScheduleDialogData(
 
     enum class Type {
 
-        SINGLE, WEEKLY, MONTHLY, YEARLY
+        SINGLE, DAILY, WEEKLY, MONTHLY, YEARLY
     }
 }

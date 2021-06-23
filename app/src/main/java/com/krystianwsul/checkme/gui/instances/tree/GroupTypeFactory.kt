@@ -38,12 +38,11 @@ object GroupTypeFactory : GroupType.Factory {
         timeStamp: TimeStamp,
         projectDescriptor: GroupType.ProjectDescriptor,
         instanceDescriptors: List<GroupType.InstanceDescriptor>,
-        nested: Boolean,
     ): GroupType.Project {
         val projectDetails = projectDescriptor.fix().projectDetails
         val instanceDatas = instanceDescriptors.map { it.fix().instanceData.copy(projectInfo = null) }
 
-        return ProjectBridge(timeStamp, projectDetails, instanceDatas, nested)
+        return ProjectBridge(timeStamp, projectDetails, instanceDatas)
     }
 
     override fun createSingle(instanceDescriptor: GroupType.InstanceDescriptor): GroupType.Single {
@@ -97,9 +96,8 @@ object GroupTypeFactory : GroupType.Factory {
             timeChildren,
             NotDoneNode.ContentDelegate.Group.Id.Time(timeStamp, timeChildren.flatMap { it.instanceKeys }.toSet()),
             NotDoneNode.ContentDelegate.Group.GroupRowsDelegate.Time(groupAdapter, timeStamp),
-            true,
             ShowGroupActivity.Parameters.Time(timeStamp),
-            false,
+            NotDoneNode.ContentDelegate.Group.CheckboxMode.INDENT,
         )
 
         override fun compareTo(other: Bridge): Int {
@@ -135,9 +133,8 @@ object GroupTypeFactory : GroupType.Factory {
             instanceDatas.map(::SingleBridge),
             NotDoneNode.ContentDelegate.Group.Id.Project(timeStamp, instanceKeys, projectDetails.projectKey),
             NotDoneNode.ContentDelegate.Group.GroupRowsDelegate.Project(groupAdapter, timeStamp, projectDetails.name),
-            true,
             ShowGroupActivity.Parameters.Project(timeStamp, projectDetails.projectKey),
-            true,
+            NotDoneNode.ContentDelegate.Group.CheckboxMode.CHECKBOX,
         )
 
         override fun compareTo(other: Bridge): Int {
@@ -154,7 +151,6 @@ object GroupTypeFactory : GroupType.Factory {
         val timeStamp: TimeStamp,
         val projectDetails: DetailsNode.ProjectDetails,
         val instanceDatas: List<GroupListDataWrapper.InstanceData>,
-        private val nested: Boolean,
     ) : GroupType.Project, SingleParent, TimeChild {
 
         override val name get() = projectDetails.name
@@ -174,9 +170,8 @@ object GroupTypeFactory : GroupType.Factory {
             instanceDatas.map(::SingleBridge),
             NotDoneNode.ContentDelegate.Group.Id.Project(timeStamp, instanceKeys, projectDetails.projectKey),
             NotDoneNode.ContentDelegate.Group.GroupRowsDelegate.Project(groupAdapter, null, projectDetails.name),
-            !nested,
             ShowGroupActivity.Parameters.Project(timeStamp, projectDetails.projectKey),
-            true,
+            NotDoneNode.ContentDelegate.Group.CheckboxMode.CHECKBOX,
         )
 
         override fun compareTo(other: Bridge): Int {

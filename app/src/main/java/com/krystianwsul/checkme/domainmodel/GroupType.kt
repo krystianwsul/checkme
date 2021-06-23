@@ -30,7 +30,7 @@ interface GroupType {
                                 factory.createTimeProject(timeStamp, projectDescriptor, instanceDescriptors)
                             } ?: factory.createTime(
                                 timeStamp,
-                                groupByProject(factory, timeStamp, instanceDescriptors, true)
+                                groupByProject(factory, timeStamp, instanceDescriptors)
                             )
                         } else {
                             // if there's just one, there's our node
@@ -65,7 +65,7 @@ interface GroupType {
                         .distinct()
                         .single()
 
-                    groupByProject(factory, timeStamp, instanceDescriptors, false)
+                    groupByProject(factory, timeStamp, instanceDescriptors)
                 }
                 GroupingMode.NONE -> instanceDescriptors.map(factory::createSingle)
             }
@@ -75,7 +75,6 @@ interface GroupType {
             factory: Factory,
             timeStamp: TimeStamp,
             instanceDescriptor: List<InstanceDescriptor>,
-            nested: Boolean,
         ): List<TimeChild> {
             if (instanceDescriptor.isEmpty()) return emptyList()
 
@@ -87,7 +86,7 @@ interface GroupType {
                     check(instanceDescriptors.isNotEmpty())
 
                     if (instanceDescriptors.size > 1) {
-                        factory.createProject(timeStamp, projectDescriptor!!, instanceDescriptors, nested)
+                        factory.createProject(timeStamp, projectDescriptor!!, instanceDescriptors)
                     } else {
                         factory.createSingle(instanceDescriptors.single())
                     }
@@ -146,7 +145,6 @@ interface GroupType {
             timeStamp: TimeStamp,
             projectDescriptor: ProjectDescriptor,
             instanceDescriptors: List<InstanceDescriptor>,
-            nested: Boolean,
         ): Project
 
         fun createSingle(instanceDescriptor: InstanceDescriptor): Single

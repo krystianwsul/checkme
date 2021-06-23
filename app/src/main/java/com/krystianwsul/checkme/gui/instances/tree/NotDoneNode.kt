@@ -281,9 +281,8 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
             private val timeChildren: List<GroupTypeFactory.TimeChild>,
             override val id: Id,
             override val rowsDelegate: GroupRowsDelegate,
-            private val indentCheckBox: Boolean,
             private val showGroupActivityParameters: ShowGroupActivity.Parameters,
-            private val showCheckbox: Boolean,
+            private val checkboxMode: CheckboxMode,
         ) : ContentDelegate() {
 
             override val allInstanceDatas get() = notDoneNodes.flatMap { it.contentDelegate.directInstanceDatas }
@@ -308,7 +307,7 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
                 val nodePairs = timeChildren.map {
                     val contentDelegate = it.toContentDelegate(
                         groupAdapter,
-                        indentation + if (showCheckbox) 1 else 0,
+                        indentation + if (checkboxMode.indentChildren) 1 else 0,
                         nodeCollection,
                     )
 
@@ -339,7 +338,7 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
 
             override val checkBoxState
                 get() = when {
-                    showCheckbox -> CheckBoxState.Visible(false) {
+                    checkboxMode == CheckboxMode.CHECKBOX -> CheckBoxState.Visible(false) {
                         check(allInstanceDatas.all { it.done == null })
 
                         val instanceKeys = allInstanceDatas.map { it.instanceKey }
@@ -366,7 +365,7 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
                          * the subscription there
                          */
                     }
-                    (treeNode.isExpanded || !indentCheckBox) -> CheckBoxState.Gone
+                    (treeNode.isExpanded || checkboxMode != CheckboxMode.INDENT) -> CheckBoxState.Gone // todo project cleanup
                     else -> CheckBoxState.Invisible
                 }
 
@@ -513,6 +512,11 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
             ) : ContentDelegate.State {
 
                 constructor() : this(false, TreeNode.ExpansionState())
+            }
+
+            enum class CheckboxMode(val indentChildren: Boolean = false) {
+
+                NONE, INDENT, CHECKBOX(true)
             }
         }
 

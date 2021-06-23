@@ -8,6 +8,7 @@ import com.krystianwsul.common.firebase.models.*
 import com.krystianwsul.common.firebase.models.task.ProjectTask
 import com.krystianwsul.common.firebase.models.task.RootTask
 import com.krystianwsul.common.firebase.models.task.Task
+import com.krystianwsul.common.firebase.models.task.performIntervalUpdate
 import com.krystianwsul.common.firebase.models.taskhierarchy.ProjectTaskHierarchy
 import com.krystianwsul.common.firebase.models.taskhierarchy.TaskHierarchy
 import com.krystianwsul.common.firebase.records.AssignedToHelper
@@ -126,7 +127,7 @@ abstract class Project<T : ProjectType>(
         requireCurrent(now)
 
         getAllTasks().filter { it.current(now) }.forEach {
-            it.setEndData(Task.EndData(now, removeInstances), projectUndoData.taskUndoData)
+            it.performIntervalUpdate { setEndData(Task.EndData(now, removeInstances), projectUndoData.taskUndoData) }
         }
 
         projectUndoData.projectIds.add(projectKey)

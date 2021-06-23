@@ -4,7 +4,6 @@ private val intervalUpdates = mutableMapOf<Task, IntervalUpdate>()
 
 fun Task.performIntervalUpdate(action: IntervalUpdate.() -> Unit) {
     checkNoIntervalUpdate()
-    ProjectRootTaskIdTracker.checkTracking()
 
     val intervalUpdate = IntervalUpdate(this, intervalInfo)
     intervalUpdates[this] = intervalUpdate

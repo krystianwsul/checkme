@@ -4,7 +4,6 @@ import com.krystianwsul.common.criteria.Assignable
 import com.krystianwsul.common.criteria.QueryMatchable
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.ScheduleGroup
-import com.krystianwsul.common.domain.TaskUndoData
 import com.krystianwsul.common.firebase.json.*
 import com.krystianwsul.common.firebase.json.tasks.RootTaskJson
 import com.krystianwsul.common.firebase.models.*
@@ -164,55 +163,7 @@ sealed class Task(
         return getParentTask(exactTimeStamp) == null
     }
 
-    fun setEndData(
-        // this is not recursive on children.  Get the whole tree beforehand.
-        endData: EndData,
-        taskUndoData: TaskUndoData? = null,
-        recursive: Boolean = false,
-    ) {
-        val now = endData.exactTimeStampLocal
-
-        requireCurrent(now)
-
-        /**
-         * Need cached value, since Schedule.setEndExactTimeStamp will invalidate it.  It would be better to do this in
-         * IntervalUpdate, but that's supposed to apply only to RootTasks.
-         */
-        val intervalInfo = intervalInfo
-
-        val scheduleIds = intervalInfo.getCurrentScheduleIntervals(now)
-            .map {
-                it.requireCurrentOffset(now)
-
-                it.schedule.setEndExactTimeStamp(now.toOffset())
-
-                it.schedule.id
-            }
-            .toSet()
-
-        taskUndoData?.taskKeys?.put(taskKey, scheduleIds)
-
-        if (!recursive) {
-            intervalInfo.getParentTaskHierarchy(now)?.let {
-                it.requireCurrentOffset(now)
-                it.taskHierarchy.requireCurrent(now)
-
-                taskUndoData?.taskHierarchyKeys?.add(it.taskHierarchy.taskHierarchyKey)
-
-                it.taskHierarchy.setEndExactTimeStamp(now)
-            }
-        }
-
-        setMyEndExactTimeStamp(endData)
-    }
-
     fun getNestedTaskHierarchy(taskHierarchyId: TaskHierarchyId) = nestedParentTaskHierarchies.getValue(taskHierarchyId)
-
-    fun clearEndExactTimeStamp(now: ExactTimeStamp.Local) {
-        requireNotCurrent(now)
-
-        setMyEndExactTimeStamp(null)
-    }
 
     fun getParentTask(exactTimeStamp: ExactTimeStamp): Task? {
         requireNotDeletedOffset(exactTimeStamp)
@@ -413,7 +364,7 @@ sealed class Task(
             .map { YearlySchedule(this, it) }
     }
 
-    protected fun setMyEndExactTimeStamp(endData: EndData?) {
+    fun setMyEndExactTimeStamp(endData: EndData?) {
         taskRecord.setEndData(
             endData?.let {
                 RootTaskJson.EndData(it.exactTimeStampLocal.long, it.exactTimeStampLocal.offset, it.deleteInstances)

@@ -19,6 +19,7 @@ import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.project.PrivateProject
 import com.krystianwsul.common.firebase.models.task.ProjectRootTaskIdTracker
 import com.krystianwsul.common.firebase.models.task.Task
+import com.krystianwsul.common.firebase.models.task.performIntervalUpdate
 import com.krystianwsul.common.firebase.models.task.performRootIntervalUpdate
 import com.krystianwsul.common.firebase.records.project.PrivateProjectRecord
 import com.krystianwsul.common.time.*
@@ -411,8 +412,8 @@ class IrrelevantTest {
 
         now = ExactTimeStamp.Local(day1, hour3)
 
-        child1Task.setEndData(Task.EndData(now, true))
-        child2Task.setEndData(Task.EndData(now, true))
+        child1Task.performIntervalUpdate { setEndData(Task.EndData(now, true)) }
+        child2Task.performIntervalUpdate { setEndData(Task.EndData(now, true)) }
 
         now = ExactTimeStamp.Local(day1, hour4)
 
@@ -542,8 +543,8 @@ class IrrelevantTest {
 
         now = ExactTimeStamp.Local(day1, hour3)
 
-        child1Task.setEndData(Task.EndData(now, true))
-        child2Task.setEndData(Task.EndData(now, true))
+        child1Task.performIntervalUpdate { setEndData(Task.EndData(now, true)) }
+        child2Task.performIntervalUpdate { setEndData(Task.EndData(now, true)) }
 
         now = ExactTimeStamp.Local(day1, hour4)
 

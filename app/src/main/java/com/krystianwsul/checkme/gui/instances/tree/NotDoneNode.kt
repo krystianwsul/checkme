@@ -337,8 +337,8 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
             override val thumbnail: ImageState? = null
 
             override val checkBoxState
-                get() = when {
-                    checkboxMode == CheckboxMode.CHECKBOX -> CheckBoxState.Visible(false) {
+                get() = when (checkboxMode) {
+                    CheckboxMode.CHECKBOX -> CheckBoxState.Visible(false) {
                         check(allInstanceDatas.all { it.done == null })
 
                         val instanceKeys = allInstanceDatas.map { it.instanceKey }
@@ -365,8 +365,7 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
                          * the subscription there
                          */
                     }
-                    (treeNode.isExpanded || checkboxMode != CheckboxMode.INDENT) -> CheckBoxState.Gone // todo project cleanup
-                    else -> CheckBoxState.Invisible
+                    CheckboxMode.INDENT -> if (treeNode.isExpanded) CheckBoxState.Gone else CheckBoxState.Invisible
                 }
 
             override val propagateSelection = true
@@ -516,7 +515,7 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
 
             enum class CheckboxMode(val indentChildren: Boolean = false) {
 
-                NONE, INDENT, CHECKBOX(true)
+                INDENT, CHECKBOX(true)
             }
         }
 

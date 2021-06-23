@@ -226,6 +226,12 @@
 
                 </RadioGroup>
 
+                <View
+                    android:id="@+id/scheduleDialogTimePadding"
+                    android:layout_width="match_parent"
+                    android:layout_height="26dp"
+                    android:visibility="gone" />
+
                 <com.krystianwsul.checkme.gui.widgets.MyTextInputLayout
                     android:id="@+id/scheduleDialogTimeLayout"
                     style="@style/MySpinner"

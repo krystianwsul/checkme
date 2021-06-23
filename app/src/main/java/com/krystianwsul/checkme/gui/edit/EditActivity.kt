@@ -41,7 +41,6 @@ import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.time.TimePair
 import com.krystianwsul.common.utils.ProjectKey
-import com.krystianwsul.common.utils.ScheduleType
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.common.utils.UserKey
 import com.krystianwsul.treeadapter.FilterCriteria
@@ -254,12 +253,6 @@ class EditActivity : NavBarActivity() {
             .subscribe { result ->
                 when (result) {
                     is ScheduleDialogResult.Change -> {
-                        if (result.scheduleDialogData.scheduleType == ScheduleType.MONTHLY_DAY) {
-                            check(result.scheduleDialogData.monthlyDay)
-                        } else if (result.scheduleDialogData.scheduleType == ScheduleType.MONTHLY_WEEK) {
-                            check(!result.scheduleDialogData.monthlyDay)
-                        }
-
                         editViewModel.delegate.run {
                             if (result.position == null) {
                                 parentScheduleManager.addSchedule(result.scheduleDialogData.toScheduleEntry())

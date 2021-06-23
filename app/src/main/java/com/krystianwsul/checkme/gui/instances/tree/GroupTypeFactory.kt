@@ -169,7 +169,7 @@ object GroupTypeFactory : GroupType.Factory {
             groupAdapter,
             this,
             instanceDatas,
-            indentation + (if (nested) 1 else 0),
+            indentation,
             nodeCollection,
             instanceDatas.map(::SingleBridge),
             NotDoneNode.ContentDelegate.Group.Id.Project(timeStamp, instanceKeys, projectDetails.projectKey),

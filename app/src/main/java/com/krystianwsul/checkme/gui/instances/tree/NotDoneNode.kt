@@ -306,7 +306,11 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
                 )
 
                 val nodePairs = timeChildren.map {
-                    val contentDelegate = it.toContentDelegate(groupAdapter, indentation + 1, nodeCollection)
+                    val contentDelegate = it.toContentDelegate(
+                        groupAdapter,
+                        indentation + if (showCheckbox) 1 else 0,
+                        nodeCollection,
+                    )
 
                     val notDoneNode = if (contentDelegate is Instance) {
                         NotDoneInstanceNode(

@@ -131,9 +131,9 @@ class RootTask(
         is Time.Normal -> time
     }
 
-    fun addChild(childTaskIntervalUpdate: IntervalUpdate, now: ExactTimeStamp.Local): TaskHierarchyKey {
-        val taskHierarchyKey = childTaskIntervalUpdate.createParentNestedTaskHierarchy(this, now)
-        addRootTask(childTaskIntervalUpdate.task)
+    fun addChild(childTaskRootIntervalUpdate: RootIntervalUpdate, now: ExactTimeStamp.Local): TaskHierarchyKey {
+        val taskHierarchyKey = childTaskRootIntervalUpdate.createParentNestedTaskHierarchy(this, now)
+        addRootTask(childTaskRootIntervalUpdate.rootTask)
 
         return taskHierarchyKey
     }

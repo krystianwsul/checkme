@@ -1,12 +1,12 @@
 package com.krystianwsul.common.firebase.models.task
 
-private val intervalUpdates = mutableMapOf<Task, IntervalUpdate>()
+private val intervalUpdates = mutableMapOf<Task, RootIntervalUpdate>()
 
-fun RootTask.performIntervalUpdate(action: IntervalUpdate.() -> Unit) {
+fun RootTask.performIntervalUpdate(action: RootIntervalUpdate.() -> Unit) {
     checkNoIntervalUpdate()
     ProjectRootTaskIdTracker.checkTracking()
 
-    val intervalUpdate = IntervalUpdate(this, intervalInfo)
+    val intervalUpdate = RootIntervalUpdate(this, intervalInfo)
     intervalUpdates[this] = intervalUpdate
 
     try {

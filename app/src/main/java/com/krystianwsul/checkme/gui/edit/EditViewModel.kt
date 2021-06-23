@@ -257,6 +257,11 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
             override fun getScheduleDialogDataHelper(suggestedDate: Date): ScheduleDialogData {
                 val (monthDayNumber, beginningOfMonth) = dateToDayFromBeginningOrEnd(suggestedDate)
 
+                val type = if (scheduleData.daysOfWeek == DayOfWeek.set && scheduleData.interval == 1)
+                    ScheduleDialogData.Type.DAILY
+                else
+                    ScheduleDialogData.Type.WEEKLY
+
                 return ScheduleDialogData(
                     suggestedDate,
                     scheduleData.daysOfWeek,
@@ -266,7 +271,7 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
                     suggestedDate.dayOfWeek,
                     beginningOfMonth,
                     TimePairPersist(timePair),
-                    ScheduleDialogData.Type.WEEKLY,
+                    type,
                     scheduleData.from,
                     scheduleData.until,
                     scheduleData.interval,

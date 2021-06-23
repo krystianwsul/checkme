@@ -524,7 +524,10 @@ class MainActivity :
 
         binding.mainFrame.addOneShotGlobalLayoutListener { updateCalendarHeight() }
 
-        setTabSearchState(overrideTabSearchState ?: TabSearchState.fromTabSetting(Preferences.getTab()), true)
+        setTabSearchState(
+            overrideTabSearchState ?: TabSearchState.fromTabSetting(Preferences.getTab(), false),
+            true,
+        )
 
         Preferences.timeRangeObservable
             .subscribe {
@@ -723,10 +726,7 @@ class MainActivity :
                     requestSearchFocus()
                 }
 
-            if (Preferences.getTab() == Tab.INSTANCES)
-                TabSearchState.Instances(true)
-            else
-                TabSearchState.Notes(true)
+            TabSearchState.fromTabSetting(Preferences.getTab(), true)
         }
         else -> null
     }
@@ -1173,12 +1173,22 @@ class MainActivity :
     }
 
     override fun onBackPressed() {
-        if (binding.mainSearchInclude.toolbar.visibility == View.VISIBLE) {
-            check(tabSearchStateRelay.value!!.isSearching)
+        val tabSearchState = tabSearchStateRelay.value!!
 
-            setTabSearchState(tabSearchStateRelay.value!!.closeSearch())
+        if (binding.mainSearchInclude.toolbar.visibility == View.VISIBLE) {
+            check(tabSearchState.isSearching)
+
+            setTabSearchState(tabSearchState.closeSearch())
         } else {
-            super.onBackPressed()
+            check(!tabSearchState.isSearching)
+
+            val defaultTab = Preferences.getTab()
+
+            if (tabSearchState.tab != defaultTab) {
+                setTabSearchState(TabSearchState.fromTabSetting(defaultTab, false))
+            } else {
+                super.onBackPressed()
+            }
         }
     }
 
@@ -1223,9 +1233,9 @@ class MainActivity :
 
         companion object {
 
-            fun fromTabSetting(tab: Tab) = when (tab) {
-                Tab.INSTANCES -> Instances(false)
-                Tab.NOTES -> Notes(false)
+            fun fromTabSetting(tab: Tab, isSearching: Boolean) = when (tab) {
+                Tab.INSTANCES -> Instances(isSearching)
+                Tab.NOTES -> Notes(isSearching)
                 else -> throw IllegalArgumentException()
             }
         }

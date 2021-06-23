@@ -245,13 +245,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
             setSelection(delegate.selection)
 
             addListener {
-                scheduleDialogData.scheduleType = when (it) { // todo daily getValues()[]
-                    0 -> ScheduleDialogData.Type.SINGLE
-                    1 -> ScheduleDialogData.Type.WEEKLY
-                    2 -> ScheduleDialogData.Type.MONTHLY
-                    3 -> ScheduleDialogData.Type.YEARLY
-                    else -> throw UnsupportedOperationException()
-                }
+                scheduleDialogData.scheduleType = ScheduleDialogData.Type.values()[it]
                 updateDelegate()
 
                 if (activity != null && customTimeDatas != null) updateScheduleTypeFields(true)

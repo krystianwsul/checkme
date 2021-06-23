@@ -234,7 +234,7 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
                     scheduleData.date.dayOfWeek,
                     beginningOfMonth,
                     TimePairPersist(timePair),
-                    ScheduleType.SINGLE,
+                    ScheduleDialogData.Type.SINGLE,
                     null,
                     null,
                     1,
@@ -266,10 +266,10 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
                     suggestedDate.dayOfWeek,
                     beginningOfMonth,
                     TimePairPersist(timePair),
-                    ScheduleType.WEEKLY,
+                    ScheduleDialogData.Type.WEEKLY,
                     scheduleData.from,
                     scheduleData.until,
-                    scheduleData.interval
+                    scheduleData.interval,
                 )
             }
         }
@@ -304,7 +304,7 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
                     date.dayOfWeek,
                     scheduleData.beginningOfMonth,
                     TimePairPersist(timePair),
-                    ScheduleType.MONTHLY_DAY,
+                    ScheduleDialogData.Type.MONTHLY_DAY,
                     scheduleData.from,
                     scheduleData.until,
                     1,
@@ -348,10 +348,10 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
                     scheduleData.dayOfWeek,
                     scheduleData.beginningOfMonth,
                     TimePairPersist(timePair),
-                    ScheduleType.MONTHLY_WEEK,
+                    ScheduleDialogData.Type.MONTHLY_WEEK,
                     scheduleData.from,
                     scheduleData.until,
-                    1
+                    1,
                 )
             }
         }
@@ -388,7 +388,7 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
                     date.dayOfWeek,
                     beginningOfMonth,
                     TimePairPersist(timePair),
-                    ScheduleType.YEARLY,
+                    ScheduleDialogData.Type.YEARLY,
                     scheduleData.from,
                     scheduleData.until,
                     1,

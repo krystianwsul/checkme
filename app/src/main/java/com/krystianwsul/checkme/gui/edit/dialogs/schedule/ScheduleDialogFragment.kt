@@ -36,7 +36,6 @@ import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.utils.CustomTimeKey
-import com.krystianwsul.common.utils.ScheduleType
 import com.krystianwsul.common.utils.getDateInMonth
 import java.util.*
 import kotlin.reflect.KMutableProperty0
@@ -56,13 +55,13 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         private const val TAG_TIME_PICKER = "timePicker"
 
         private val daysOfWeekMap = mapOf(
-                DayOfWeek.SUNDAY to MaterialDayPicker.Weekday.SUNDAY,
-                DayOfWeek.MONDAY to MaterialDayPicker.Weekday.MONDAY,
-                DayOfWeek.TUESDAY to MaterialDayPicker.Weekday.TUESDAY,
-                DayOfWeek.WEDNESDAY to MaterialDayPicker.Weekday.WEDNESDAY,
-                DayOfWeek.THURSDAY to MaterialDayPicker.Weekday.THURSDAY,
-                DayOfWeek.FRIDAY to MaterialDayPicker.Weekday.FRIDAY,
-                DayOfWeek.SATURDAY to MaterialDayPicker.Weekday.SATURDAY
+            DayOfWeek.SUNDAY to MaterialDayPicker.Weekday.SUNDAY,
+            DayOfWeek.MONDAY to MaterialDayPicker.Weekday.MONDAY,
+            DayOfWeek.TUESDAY to MaterialDayPicker.Weekday.TUESDAY,
+            DayOfWeek.WEDNESDAY to MaterialDayPicker.Weekday.WEDNESDAY,
+            DayOfWeek.THURSDAY to MaterialDayPicker.Weekday.THURSDAY,
+            DayOfWeek.FRIDAY to MaterialDayPicker.Weekday.FRIDAY,
+            DayOfWeek.SATURDAY to MaterialDayPicker.Weekday.SATURDAY
         )
 
         fun newInstance(parameters: ScheduleDialogParameters) = ScheduleDialogFragment().apply {
@@ -103,17 +102,17 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
             checkNotNull(customTimeDatas)
 
             newMaterialTimePicker(
-                    requireContext(),
-                    childFragmentManager,
-                    TAG_TIME_PICKER,
-                    scheduleDialogData.timePairPersist.hourMinute,
+                requireContext(),
+                childFragmentManager,
+                TAG_TIME_PICKER,
+                scheduleDialogData.timePairPersist.hourMinute,
             ).setListener(timePickerDialogFragmentListener)
         }
 
         override fun onAddSelected() {
             startActivityForResult(
-                    ShowCustomTimeActivity.getCreateIntent(activity!!),
-                    ShowCustomTimeActivity.CREATE_CUSTOM_TIME_REQUEST_CODE
+                ShowCustomTimeActivity.getCreateIntent(activity!!),
+                ShowCustomTimeActivity.CREATE_CUSTOM_TIME_REQUEST_CODE
             )
         }
     }
@@ -132,11 +131,11 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
     //cached data doesn't contain new custom time
     private fun isValid(): Boolean {
         scheduleDialogData.timePairPersist
-                .customTimeKey
-                ?.let {
-                    if (customTimeDatas?.containsKey(it) == false)
-                        return false
-                }
+            .customTimeKey
+            ?.let {
+                if (customTimeDatas?.containsKey(it) == false)
+                    return false
+            }
 
         val errorData = delegate.isValid()
 
@@ -158,19 +157,19 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
     private val dateFieldDatas by lazy {
         listOf(
-                DateFieldData(
-                        binding.scheduleDialogFrom,
-                        binding.scheduleDialogFromLayout,
-                        scheduleDialogData::from,
-                        TAG_FROM_FRAGMENT
-                ),
-                DateFieldData(
-                        binding.scheduleDialogUntil,
-                        binding.scheduleDialogUntilLayout,
-                        scheduleDialogData::until,
-                        TAG_UNTIL_FRAGMENT,
-                        { listOfNotNull(scheduleDialogData.from, Date.today()).maxOrNull()!! }
-                )
+            DateFieldData(
+                binding.scheduleDialogFrom,
+                binding.scheduleDialogFromLayout,
+                scheduleDialogData::from,
+                TAG_FROM_FRAGMENT
+            ),
+            DateFieldData(
+                binding.scheduleDialogUntil,
+                binding.scheduleDialogUntilLayout,
+                scheduleDialogData::until,
+                TAG_UNTIL_FRAGMENT,
+                { listOfNotNull(scheduleDialogData.from, Date.today()).maxOrNull()!! }
+            )
         )
     }
 
@@ -183,7 +182,8 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         position = requireArguments().getInt(KEY_POSITION, -1).takeUnless { it == -1 }
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?) = FragmentScheduleDialogBinding.inflate(inflater, container, false).also { binding = it }.root
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?) =
+        FragmentScheduleDialogBinding.inflate(inflater, container, false).also { binding = it }.root
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -206,9 +206,9 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
                 setOnClickListener {
                     result.accept(
-                            ScheduleDialogResult.Delete(
-                                    position!!
-                            )
+                        ScheduleDialogResult.Delete(
+                            position!!
+                        )
                     )
 
                     dismiss()
@@ -230,7 +230,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         }
     }
 
-    @SuppressLint("SetTextI18n")
+    @SuppressLint("SetTextI18n", "MissingSuperCall")
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
@@ -246,10 +246,10 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
             addListener {
                 scheduleDialogData.scheduleType = when (it) {
-                    0 -> ScheduleType.SINGLE
-                    1 -> ScheduleType.WEEKLY
-                    2 -> if (scheduleDialogData.monthlyDay) ScheduleType.MONTHLY_DAY else ScheduleType.MONTHLY_WEEK
-                    3 -> ScheduleType.YEARLY
+                    0 -> ScheduleDialogData.Type.SINGLE
+                    1 -> ScheduleDialogData.Type.WEEKLY
+                    2 -> if (scheduleDialogData.monthlyDay) ScheduleDialogData.Type.MONTHLY_DAY else ScheduleDialogData.Type.MONTHLY_WEEK
+                    3 -> ScheduleDialogData.Type.YEARLY
                     else -> throw UnsupportedOperationException()
                 }
                 updateDelegate()
@@ -268,8 +268,8 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
             TimeDialogFragment.newInstance(ArrayList(customTimeDatas)).let {
                 it.timeDialogListener = timeDialogListener
                 it.show(
-                        childFragmentManager,
-                        TIME_LIST_FRAGMENT_TAG
+                    childFragmentManager,
+                    TIME_LIST_FRAGMENT_TAG
                 )
             }
         }
@@ -290,20 +290,22 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
         dateFieldDatas.forEach { data ->
             childFragmentManager.getMaterialDatePicker(data.tag)?.let {
-                check(scheduleDialogData.scheduleType != ScheduleType.SINGLE)
+                check(scheduleDialogData.scheduleType != ScheduleDialogData.Type.SINGLE)
 
                 it.addListener(data.listener)
             }
         }
 
         val weekdaysMap = daysOfWeekMap.entries
-                .map { it.value to it.key }
-                .toMap()
+            .map { it.value to it.key }
+            .toMap()
 
-        binding.scheduleDialogDayPicker.daySelectionChangedListener = object : MaterialDayPicker.DaySelectionChangedListener {
+        binding.scheduleDialogDayPicker.daySelectionChangedListener =
+            object : MaterialDayPicker.DaySelectionChangedListener {
 
-            override fun onDaySelectionChanged(selectedDays: List<MaterialDayPicker.Weekday>) = delegate.onDaysOfWeekChanged(selectedDays.map(weekdaysMap::getValue).toSet())
-        }
+                override fun onDaySelectionChanged(selectedDays: List<MaterialDayPicker.Weekday>) =
+                    delegate.onDaysOfWeekChanged(selectedDays.map(weekdaysMap::getValue).toSet())
+            }
 
         val textPrimary = ContextCompat.getColor(requireContext(), R.color.textPrimary)
         val textDisabledSpinner = ContextCompat.getColor(requireContext(), R.color.textDisabledSpinner)
@@ -313,7 +315,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
                 if (!isChecked) return@setOnCheckedChangeListener
 
                 if (delegate.isMonthly) {
-                    scheduleDialogData.scheduleType = ScheduleType.MONTHLY_DAY
+                    scheduleDialogData.scheduleType = ScheduleDialogData.Type.MONTHLY_DAY
                     updateDelegate()
                 }
 
@@ -342,7 +344,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
                 if (!isChecked) return@setOnCheckedChangeListener
 
                 if (delegate.isMonthly) {
-                    scheduleDialogData.scheduleType = ScheduleType.MONTHLY_WEEK
+                    scheduleDialogData.scheduleType = ScheduleDialogData.Type.MONTHLY_WEEK
                     updateDelegate()
                 }
 
@@ -413,11 +415,11 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
     private fun updateDelegate() {
         delegate = when (scheduleDialogData.scheduleType) {
-            ScheduleType.SINGLE -> SingleDelegate()
-            ScheduleType.WEEKLY -> WeeklyDelegate()
-            ScheduleType.MONTHLY_DAY -> MonthlyDayDelegate()
-            ScheduleType.MONTHLY_WEEK -> MonthlyWeekDelegate()
-            ScheduleType.YEARLY -> YearlyDelegate()
+            ScheduleDialogData.Type.SINGLE -> SingleDelegate()
+            ScheduleDialogData.Type.WEEKLY -> WeeklyDelegate()
+            ScheduleDialogData.Type.MONTHLY_DAY -> MonthlyDayDelegate()
+            ScheduleDialogData.Type.MONTHLY_WEEK -> MonthlyWeekDelegate()
+            ScheduleDialogData.Type.YEARLY -> YearlyDelegate()
         }
     }
 
@@ -436,9 +438,10 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
             initialize()
     }
 
-    private fun initialize() = binding.scheduleDialogRoot.addOneShotGlobalLayoutListener { // needed so animations run correctly
-        updateScheduleTypeFields()
-    }
+    private fun initialize() =
+        binding.scheduleDialogRoot.addOneShotGlobalLayoutListener { // needed so animations run correctly
+            updateScheduleTypeFields()
+        }
 
     private fun updateScheduleTypeFields(animate: Boolean = false) {
         check(customTimeDatas != null)
@@ -476,7 +479,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
         if (resultCode == Activity.RESULT_OK)
             scheduleDialogData.timePairPersist.customTimeKey =
-                    data!!.getParcelableExtra(ShowCustomTimeActivity.CUSTOM_TIME_KEY)!!
+                data!!.getParcelableExtra(ShowCustomTimeActivity.CUSTOM_TIME_KEY)!!
     }
 
     @SuppressLint("SetTextI18n")
@@ -484,13 +487,13 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         checkNotNull(customTimeDatas)
 
         val customTimeData = scheduleDialogData.timePairPersist
-                .customTimeKey
-                ?.let { customTimeDatas!!.getValue(it) }
+            .customTimeKey
+            ?.let { customTimeDatas!!.getValue(it) }
 
         val hourMinuteString by lazy {
             scheduleDialogData.timePairPersist
-                    .hourMinute
-                    .toString()
+                .hourMinute
+                .toString()
         }
 
         delegate.updateFields(customTimeData, hourMinuteString)
@@ -528,11 +531,11 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
     private fun recalculateMonthlyWeekFields() {
         val date = getDateInMonth(
-                scheduleDialogData.date.year,
-                scheduleDialogData.date.month,
-                scheduleDialogData.monthWeekNumber,
-                scheduleDialogData.monthWeekDay,
-                scheduleDialogData.beginningOfMonth
+            scheduleDialogData.date.year,
+            scheduleDialogData.date.month,
+            scheduleDialogData.monthWeekNumber,
+            scheduleDialogData.monthWeekDay,
+            scheduleDialogData.beginningOfMonth
         )
 
         val dayNumber = if (scheduleDialogData.beginningOfMonth)
@@ -552,15 +555,15 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
     }
 
     private inner class DateFieldData(
-            val field: AutoCompleteTextView,
-            val layout: MyTextInputLayout,
-            val property: KMutableProperty0<Date?>,
-            val tag: String,
-            val min: (() -> Date)? = null,
+        val field: AutoCompleteTextView,
+        val layout: MyTextInputLayout,
+        val property: KMutableProperty0<Date?>,
+        val tag: String,
+        val min: (() -> Date)? = null,
     ) {
 
         val listener = { date: Date ->
-            check(scheduleDialogData.scheduleType != ScheduleType.SINGLE)
+            check(scheduleDialogData.scheduleType != ScheduleDialogData.Type.SINGLE)
 
             property.set(date)
             updateFields()
@@ -610,8 +613,8 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
                 val hourMinute = if (customTimeKey != null) {
                     customTimeDatas!!.getValue(customTimeKey)
-                            .hourMinutes
-                            .getValue(scheduleDialogData.date.dayOfWeek)
+                        .hourMinutes
+                        .getValue(scheduleDialogData.date.dayOfWeek)
                 } else {
                     scheduleDialogData.timePairPersist.hourMinute
                 }
@@ -628,8 +631,8 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
             return list.sortedBy { it.hourMinutes[dayOfWeek] }.map {
                 TimeDialogFragment.CustomTimeData(
-                        it.customTimeKey,
-                        it.name + " (" + it.hourMinutes[dayOfWeek] + ")"
+                    it.customTimeKey,
+                    it.name + " (" + it.hourMinutes[dayOfWeek] + ")"
                 )
             }
         }
@@ -640,9 +643,9 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
             binding.scheduleDialogDate.setText(scheduleDialogData.date.getDisplayText())
 
             binding.scheduleDialogTime.setText(
-                    customTimeData?.let {
-                        it.name + " (" + customTimeData.hourMinutes.getValue(scheduleDialogData.date.dayOfWeek) + ")"
-                    } ?: hourMinuteString
+                customTimeData?.let {
+                    it.name + " (" + customTimeData.hourMinutes.getValue(scheduleDialogData.date.dayOfWeek) + ")"
+                } ?: hourMinuteString
             )
         }
     }
@@ -697,8 +700,8 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
                 data.field.setText(date?.getDisplayText())
 
                 fun showDialog() = newMaterialDatePicker(
-                        data.property.get() ?: Date.today(),
-                        data.min?.invoke()
+                    data.property.get() ?: Date.today(),
+                    data.min?.invoke()
                 ).let {
                     it.addListener(data.listener)
                     it.show(childFragmentManager, data.tag)
@@ -741,13 +744,13 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         }
 
         override fun onDaysOfWeekChanged(daysOfWeek: Set<DayOfWeek>) = diffScheduleDialogData(
-                { scheduleDialogData.daysOfWeek = daysOfWeek },
-                {
-                    daysOfWeek.singleOrNull()?.let {
-                        scheduleDialogData.monthWeekDay = it
-                        recalculateMonthlyWeekFields()
-                    }
+            { scheduleDialogData.daysOfWeek = daysOfWeek },
+            {
+                daysOfWeek.singleOrNull()?.let {
+                    scheduleDialogData.monthWeekDay = it
+                    recalculateMonthlyWeekFields()
                 }
+            }
         )
     }
 
@@ -760,8 +763,8 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         override val visibilities = repeatingVisibilities.copy(month = true)
 
         override fun onBeginningOfMonthChanged(beginningOfMonth: Boolean) = diffScheduleDialogData(
-                { scheduleDialogData.beginningOfMonth = beginningOfMonth },
-                ::recalculateFields
+            { scheduleDialogData.beginningOfMonth = beginningOfMonth },
+            ::recalculateFields
         )
 
         protected abstract fun recalculateFields()
@@ -770,26 +773,26 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
     private inner class MonthlyDayDelegate : Monthly() {
 
         override fun onMonthDayNumberChanged(monthDayNumber: Int) = diffScheduleDialogData(
-                {
-                    check(monthDayNumber in 1..28)
+            {
+                check(monthDayNumber in 1..28)
 
-                    scheduleDialogData.monthDayNumber = monthDayNumber
-                },
-                ::recalculateFields
+                scheduleDialogData.monthDayNumber = monthDayNumber
+            },
+            ::recalculateFields
         )
 
         override fun recalculateFields() {
             val date = getDateInMonth(
-                    scheduleDialogData.date.year,
-                    scheduleDialogData.date.month,
-                    scheduleDialogData.monthDayNumber,
-                    scheduleDialogData.beginningOfMonth
+                scheduleDialogData.date.year,
+                scheduleDialogData.date.month,
+                scheduleDialogData.monthDayNumber,
+                scheduleDialogData.beginningOfMonth
             )
 
             scheduleDialogData.date = date
             scheduleDialogData.daysOfWeek = setOf(date.dayOfWeek)
             scheduleDialogData.monthWeekNumber =
-                    EditViewModel.ScheduleDataWrapper.dayOfMonthToWeekOfMonth(scheduleDialogData.monthDayNumber)
+                EditViewModel.ScheduleDataWrapper.dayOfMonthToWeekOfMonth(scheduleDialogData.monthDayNumber)
             scheduleDialogData.monthWeekDay = date.dayOfWeek
         }
     }
@@ -797,17 +800,17 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
     private inner class MonthlyWeekDelegate : Monthly() {
 
         override fun onMonthWeekNumberChanged(monthWeekNumber: Int) = diffScheduleDialogData(
-                {
-                    check(monthWeekNumber in 1..4)
+            {
+                check(monthWeekNumber in 1..4)
 
-                    scheduleDialogData.monthWeekNumber = monthWeekNumber
-                },
-                ::recalculateFields
+                scheduleDialogData.monthWeekNumber = monthWeekNumber
+            },
+            ::recalculateFields
         )
 
         override fun onMonthWeekDayChanged(dayOfWeek: DayOfWeek) = diffScheduleDialogData(
-                { scheduleDialogData.monthWeekDay = dayOfWeek },
-                ::recalculateFields
+            { scheduleDialogData.monthWeekDay = dayOfWeek },
+            ::recalculateFields
         )
 
         override fun recalculateFields() = recalculateMonthlyWeekFields()
@@ -825,22 +828,22 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
     }
 
     private data class ErrorData(
-            val date: String? = null,
-            val time: String? = null,
-            val from: String? = null,
-            val until: String? = null,
-            val noDaysChosen: Boolean = false,
+        val date: String? = null,
+        val time: String? = null,
+        val from: String? = null,
+        val until: String? = null,
+        val noDaysChosen: Boolean = false,
     ) {
 
         fun isValid() = listOf(date, time, from, until).all { it.isNullOrEmpty() } && !noDaysChosen
     }
 
     private data class Visibilities(
-            val date: Boolean = false,
-            val day: Boolean = false,
-            val month: Boolean = false,
-            val from: Boolean = false,
-            val until: Boolean = false,
+        val date: Boolean = false,
+        val day: Boolean = false,
+        val month: Boolean = false,
+        val from: Boolean = false,
+        val until: Boolean = false,
     )
 
     private interface DateListener {
@@ -854,19 +857,19 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
             val fixedDate = fixDate(date)
 
             diffScheduleDialogData(
-                    { scheduleDialogData.date = fixedDate },
-                    {
-                        val (monthDayNumber, beginningOfMonth)
-                                = EditViewModel.ScheduleDataWrapper.dateToDayFromBeginningOrEnd(fixedDate)
+                { scheduleDialogData.date = fixedDate },
+                {
+                    val (monthDayNumber, beginningOfMonth)
+                            = EditViewModel.ScheduleDataWrapper.dateToDayFromBeginningOrEnd(fixedDate)
 
-                        val monthWeekNumber = EditViewModel.ScheduleDataWrapper.dayOfMonthToWeekOfMonth(monthDayNumber)
+                    val monthWeekNumber = EditViewModel.ScheduleDataWrapper.dayOfMonthToWeekOfMonth(monthDayNumber)
 
-                        scheduleDialogData.daysOfWeek = setOf(fixedDate.dayOfWeek)
-                        scheduleDialogData.monthDayNumber = monthDayNumber
-                        scheduleDialogData.monthWeekNumber = monthWeekNumber
-                        scheduleDialogData.monthWeekDay = fixedDate.dayOfWeek
-                        scheduleDialogData.beginningOfMonth = beginningOfMonth
-                    }
+                    scheduleDialogData.daysOfWeek = setOf(fixedDate.dayOfWeek)
+                    scheduleDialogData.monthDayNumber = monthDayNumber
+                    scheduleDialogData.monthWeekNumber = monthWeekNumber
+                    scheduleDialogData.monthWeekDay = fixedDate.dayOfWeek
+                    scheduleDialogData.beginningOfMonth = beginningOfMonth
+                }
             )
         }
     }

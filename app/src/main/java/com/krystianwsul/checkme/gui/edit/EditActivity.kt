@@ -31,6 +31,7 @@ import com.krystianwsul.checkme.gui.edit.dialogs.AllRemindersDialogFragment
 import com.krystianwsul.checkme.gui.edit.dialogs.AssignToDialogFragment
 import com.krystianwsul.checkme.gui.edit.dialogs.CameraGalleryFragment
 import com.krystianwsul.checkme.gui.edit.dialogs.ParentPickerFragment
+import com.krystianwsul.checkme.gui.edit.dialogs.schedule.ScheduleDialogData
 import com.krystianwsul.checkme.gui.edit.dialogs.schedule.ScheduleDialogFragment
 import com.krystianwsul.checkme.gui.edit.dialogs.schedule.ScheduleDialogParameters
 import com.krystianwsul.checkme.gui.edit.dialogs.schedule.ScheduleDialogResult
@@ -41,7 +42,6 @@ import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.time.TimePair
 import com.krystianwsul.common.utils.ProjectKey
-import com.krystianwsul.common.utils.ScheduleType
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.common.utils.UserKey
 import com.krystianwsul.treeadapter.FilterCriteria
@@ -254,9 +254,9 @@ class EditActivity : NavBarActivity() {
             .subscribe { result ->
                 when (result) {
                     is ScheduleDialogResult.Change -> {
-                        if (result.scheduleDialogData.scheduleType == ScheduleType.MONTHLY_DAY) {
+                        if (result.scheduleDialogData.scheduleType == ScheduleDialogData.Type.MONTHLY_DAY) {
                             check(result.scheduleDialogData.monthlyDay)
-                        } else if (result.scheduleDialogData.scheduleType == ScheduleType.MONTHLY_WEEK) {
+                        } else if (result.scheduleDialogData.scheduleType == ScheduleDialogData.Type.MONTHLY_WEEK) {
                             check(!result.scheduleDialogData.monthlyDay)
                         }
 

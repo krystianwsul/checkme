@@ -45,19 +45,28 @@ data class ScheduleDialogData(
                 Type.WEEKLY -> EditViewModel.ScheduleDataWrapper.Weekly(
                     ScheduleData.Weekly(daysOfWeek, timePairPersist.timePair, from, until, interval)
                 )
-                Type.MONTHLY_DAY -> EditViewModel.ScheduleDataWrapper.MonthlyDay(
-                    ScheduleData.MonthlyDay(monthDayNumber, beginningOfMonth, timePairPersist.timePair, from, until)
-                )
-                Type.MONTHLY_WEEK -> EditViewModel.ScheduleDataWrapper.MonthlyWeek(
-                    ScheduleData.MonthlyWeek(
-                        monthWeekNumber,
-                        monthWeekDay,
-                        beginningOfMonth,
-                        timePairPersist.timePair,
-                        from,
-                        until,
+                Type.MONTHLY -> if (monthlyDay) {
+                    EditViewModel.ScheduleDataWrapper.MonthlyDay(
+                        ScheduleData.MonthlyDay(
+                            monthDayNumber,
+                            beginningOfMonth,
+                            timePairPersist.timePair,
+                            from,
+                            until,
+                        )
                     )
-                )
+                } else {
+                    EditViewModel.ScheduleDataWrapper.MonthlyWeek(
+                        ScheduleData.MonthlyWeek(
+                            monthWeekNumber,
+                            monthWeekDay,
+                            beginningOfMonth,
+                            timePairPersist.timePair,
+                            from,
+                            until,
+                        )
+                    )
+                }
                 Type.YEARLY -> EditViewModel.ScheduleDataWrapper.Yearly(
                     ScheduleData.Yearly(date.month, date.day, timePairPersist.timePair, from, until)
                 )
@@ -67,6 +76,6 @@ data class ScheduleDialogData(
 
     enum class Type {
 
-        SINGLE, WEEKLY, MONTHLY_DAY, MONTHLY_WEEK, YEARLY // todo daily remove monthly distinction
+        SINGLE, WEEKLY, MONTHLY, YEARLY
     }
 }

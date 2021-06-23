@@ -31,7 +31,6 @@ import com.krystianwsul.checkme.gui.edit.dialogs.AllRemindersDialogFragment
 import com.krystianwsul.checkme.gui.edit.dialogs.AssignToDialogFragment
 import com.krystianwsul.checkme.gui.edit.dialogs.CameraGalleryFragment
 import com.krystianwsul.checkme.gui.edit.dialogs.ParentPickerFragment
-import com.krystianwsul.checkme.gui.edit.dialogs.schedule.ScheduleDialogData
 import com.krystianwsul.checkme.gui.edit.dialogs.schedule.ScheduleDialogFragment
 import com.krystianwsul.checkme.gui.edit.dialogs.schedule.ScheduleDialogParameters
 import com.krystianwsul.checkme.gui.edit.dialogs.schedule.ScheduleDialogResult
@@ -254,12 +253,6 @@ class EditActivity : NavBarActivity() {
             .subscribe { result ->
                 when (result) {
                     is ScheduleDialogResult.Change -> {
-                        if (result.scheduleDialogData.scheduleType == ScheduleDialogData.Type.MONTHLY_DAY) {
-                            check(result.scheduleDialogData.monthlyDay)
-                        } else if (result.scheduleDialogData.scheduleType == ScheduleDialogData.Type.MONTHLY_WEEK) {
-                            check(!result.scheduleDialogData.monthlyDay)
-                        }
-
                         editViewModel.delegate.run {
                             if (result.position == null) {
                                 parentScheduleManager.addSchedule(result.scheduleDialogData.toScheduleEntry())

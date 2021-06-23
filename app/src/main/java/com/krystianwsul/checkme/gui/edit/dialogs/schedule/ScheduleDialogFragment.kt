@@ -245,10 +245,10 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
             setSelection(delegate.selection)
 
             addListener {
-                scheduleDialogData.scheduleType = when (it) {
+                scheduleDialogData.scheduleType = when (it) { // todo daily getValues()[]
                     0 -> ScheduleDialogData.Type.SINGLE
                     1 -> ScheduleDialogData.Type.WEEKLY
-                    2 -> if (scheduleDialogData.monthlyDay) ScheduleDialogData.Type.MONTHLY_DAY else ScheduleDialogData.Type.MONTHLY_WEEK
+                    2 -> ScheduleDialogData.Type.MONTHLY
                     3 -> ScheduleDialogData.Type.YEARLY
                     else -> throw UnsupportedOperationException()
                 }
@@ -315,7 +315,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
                 if (!isChecked) return@setOnCheckedChangeListener
 
                 if (delegate.isMonthly) {
-                    scheduleDialogData.scheduleType = ScheduleDialogData.Type.MONTHLY_DAY
+                    scheduleDialogData.scheduleType = ScheduleDialogData.Type.MONTHLY
                     updateDelegate()
                 }
 
@@ -344,7 +344,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
                 if (!isChecked) return@setOnCheckedChangeListener
 
                 if (delegate.isMonthly) {
-                    scheduleDialogData.scheduleType = ScheduleDialogData.Type.MONTHLY_WEEK
+                    scheduleDialogData.scheduleType = ScheduleDialogData.Type.MONTHLY
                     updateDelegate()
                 }
 
@@ -417,8 +417,8 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         delegate = when (scheduleDialogData.scheduleType) {
             ScheduleDialogData.Type.SINGLE -> SingleDelegate()
             ScheduleDialogData.Type.WEEKLY -> WeeklyDelegate()
-            ScheduleDialogData.Type.MONTHLY_DAY -> MonthlyDayDelegate()
-            ScheduleDialogData.Type.MONTHLY_WEEK -> MonthlyWeekDelegate()
+            ScheduleDialogData.Type.MONTHLY ->
+                if (scheduleDialogData.monthlyDay) MonthlyDayDelegate() else MonthlyWeekDelegate()
             ScheduleDialogData.Type.YEARLY -> YearlyDelegate()
         }
     }

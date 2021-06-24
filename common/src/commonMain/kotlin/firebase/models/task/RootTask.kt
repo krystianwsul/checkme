@@ -34,17 +34,18 @@ class RootTask(
 
         when (val type = interval.type) {
             is Type.Schedule -> type.getParentProjectSchedule().projectId
-            is Type.NoSchedule -> (type.noScheduleOrParent as RootNoScheduleOrParent).projectId
-            is Type.Child -> {
-                val parentTask = type.parentTaskHierarchy.parentTask as RootTask
-
-                parentTask.projectId
-            }
+            is Type.NoSchedule -> type.noScheduleOrParent
+                ?.let { it as? RootNoScheduleOrParent }
+                ?.projectId
+                ?: throw NoScheduleOrParentException()
+            is Type.Child -> (type.parentTaskHierarchy.parentTask as RootTask).projectId
         }
     }.apply {
         addTo(intervalInfoProperty)
         addCallback { normalizedFieldsDelegate.invalidate() }
     }
+
+    private inner class NoScheduleOrParentException : Exception("task $name, $taskKey")
 
     val projectId: String by projectIdProperty
 

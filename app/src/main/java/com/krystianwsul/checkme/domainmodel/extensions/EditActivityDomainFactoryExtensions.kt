@@ -23,7 +23,7 @@ import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.task.ProjectTask
 import com.krystianwsul.common.firebase.models.task.RootTask
 import com.krystianwsul.common.firebase.models.task.Task
-import com.krystianwsul.common.firebase.models.task.performIntervalUpdate
+import com.krystianwsul.common.firebase.models.task.performRootIntervalUpdate
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.*
@@ -340,7 +340,7 @@ fun DomainUpdater.updateScheduleTask(
     trackProjectRootTaskIds {
         finalTask = convertAndUpdateProject(originalTask, now, projectKey)
 
-        finalTask.performIntervalUpdate {
+        finalTask.performRootIntervalUpdate {
             endAllCurrentTaskHierarchies(now)
             endAllCurrentNoScheduleOrParents(now)
 
@@ -406,7 +406,7 @@ fun DomainUpdater.updateChildTask(
 
         check(!parentTask.hasAncestor(taskKey))
 
-        task.performIntervalUpdate {
+        task.performRootIntervalUpdate {
             if (task.getParentTask(now) != parentTask) {
                 if (allReminders) endAllCurrentTaskHierarchies(now)
 
@@ -468,7 +468,7 @@ fun DomainUpdater.updateTopLevelTask(
     trackProjectRootTaskIds {
         finalTask = convertAndUpdateProject(originalTask, now, projectKey)
 
-        finalTask.performIntervalUpdate {
+        finalTask.performRootIntervalUpdate {
             endAllCurrentTaskHierarchies(now)
             endAllCurrentSchedules(now)
             endAllCurrentNoScheduleOrParents(now)
@@ -884,7 +884,7 @@ private fun DomainFactory.createNoScheduleOrParentTask(
     imageUuid: String?,
     ordinal: Double? = null,
 ) = createRootTask(now, imageUuid, name, note, ordinal).apply {
-    performIntervalUpdate { setNoScheduleOrParent(now, projectKey) }
+    performRootIntervalUpdate { setNoScheduleOrParent(now, projectKey) }
 }
 
 private fun DomainFactory.createRootTask(

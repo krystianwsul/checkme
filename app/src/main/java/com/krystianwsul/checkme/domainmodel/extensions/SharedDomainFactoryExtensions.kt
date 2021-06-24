@@ -24,7 +24,7 @@ import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.task.ProjectRootTaskIdTracker
 import com.krystianwsul.common.firebase.models.task.RootTask
 import com.krystianwsul.common.firebase.models.task.Task
-import com.krystianwsul.common.firebase.models.task.performIntervalUpdate
+import com.krystianwsul.common.firebase.models.task.performRootIntervalUpdate
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.utils.InstanceKey
@@ -307,7 +307,7 @@ fun addChildToParent(
     lateinit var noScheduleOrParentsIds: List<String>
     lateinit var deleteTaskHierarchyKey: TaskHierarchyKey
 
-    childTask.performIntervalUpdate {
+    childTask.performRootIntervalUpdate {
         taskHierarchyKeys = endAllCurrentTaskHierarchies(now)
         scheduleIds = endAllCurrentSchedules(now)
         noScheduleOrParentsIds = endAllCurrentNoScheduleOrParents(now)

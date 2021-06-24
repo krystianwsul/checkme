@@ -7,24 +7,23 @@ import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.TimePairPersist
 import com.krystianwsul.common.utils.ScheduleData
-import com.krystianwsul.common.utils.ScheduleType
 import kotlinx.parcelize.Parcelize
 import kotlin.random.Random
 
 @Parcelize
 data class ScheduleDialogData(
-        var date: Date,
-        var daysOfWeek: Set<DayOfWeek>,
-        var monthlyDay: Boolean,
-        var monthDayNumber: Int,
-        var monthWeekNumber: Int,
-        var monthWeekDay: DayOfWeek,
-        var beginningOfMonth: Boolean,
-        val timePairPersist: TimePairPersist,
-        var scheduleType: ScheduleType,
-        var from: Date?,
-        var until: Date?,
-        var interval: Int,
+    var date: Date,
+    var daysOfWeek: Set<DayOfWeek>,
+    var monthlyDay: Boolean,
+    var monthDayNumber: Int,
+    var monthWeekNumber: Int,
+    var monthWeekDay: DayOfWeek,
+    var beginningOfMonth: Boolean,
+    val timePairPersist: TimePairPersist,
+    var scheduleType: Type,
+    var from: Date?,
+    var until: Date?,
+    var interval: Int,
 ) : Parcelable {
 
     companion object {
@@ -40,52 +39,46 @@ data class ScheduleDialogData(
     }
 
     fun toScheduleEntry(id: Int? = null) =
-            ScheduleEntry(
-                    when (scheduleType) {
-                        ScheduleType.SINGLE -> EditViewModel.ScheduleDataWrapper.Single(
-                                ScheduleData.Single(
-                                        date,
-                                        timePairPersist.timePair
-                                )
+        ScheduleEntry(
+            when (scheduleType) {
+                Type.SINGLE -> EditViewModel.ScheduleDataWrapper.Single(ScheduleData.Single(date, timePairPersist.timePair))
+                Type.DAILY -> EditViewModel.ScheduleDataWrapper.Weekly(
+                    ScheduleData.Weekly(DayOfWeek.set, timePairPersist.timePair, from, until, 1)
+                )
+                Type.WEEKLY -> EditViewModel.ScheduleDataWrapper.Weekly(
+                    ScheduleData.Weekly(daysOfWeek, timePairPersist.timePair, from, until, interval)
+                )
+                Type.MONTHLY -> if (monthlyDay) {
+                    EditViewModel.ScheduleDataWrapper.MonthlyDay(
+                        ScheduleData.MonthlyDay(
+                            monthDayNumber,
+                            beginningOfMonth,
+                            timePairPersist.timePair,
+                            from,
+                            until,
                         )
-                        ScheduleType.WEEKLY -> EditViewModel.ScheduleDataWrapper.Weekly(
-                                ScheduleData.Weekly(
-                                        daysOfWeek,
-                                        timePairPersist.timePair,
-                                        from,
-                                        until,
-                                        interval
-                                )
+                    )
+                } else {
+                    EditViewModel.ScheduleDataWrapper.MonthlyWeek(
+                        ScheduleData.MonthlyWeek(
+                            monthWeekNumber,
+                            monthWeekDay,
+                            beginningOfMonth,
+                            timePairPersist.timePair,
+                            from,
+                            until,
                         )
-                        ScheduleType.MONTHLY_DAY -> EditViewModel.ScheduleDataWrapper.MonthlyDay(
-                                ScheduleData.MonthlyDay(
-                                        monthDayNumber,
-                                        beginningOfMonth,
-                                        timePairPersist.timePair,
-                                        from,
-                                        until
-                                )
-                        )
-                        ScheduleType.MONTHLY_WEEK -> EditViewModel.ScheduleDataWrapper.MonthlyWeek(
-                                ScheduleData.MonthlyWeek(
-                                        monthWeekNumber,
-                                        monthWeekDay,
-                                        beginningOfMonth,
-                                        timePairPersist.timePair,
-                                        from,
-                                        until
-                                )
-                        )
-                        ScheduleType.YEARLY -> EditViewModel.ScheduleDataWrapper.Yearly(
-                                ScheduleData.Yearly(
-                                        date.month,
-                                        date.day,
-                                        timePairPersist.timePair,
-                                        from,
-                                        until
-                                )
-                        )
-                    },
-                    id ?: Random.nextInt()
-            )
+                    )
+                }
+                Type.YEARLY -> EditViewModel.ScheduleDataWrapper.Yearly(
+                    ScheduleData.Yearly(date.month, date.day, timePairPersist.timePair, from, until)
+                )
+            },
+            id ?: Random.nextInt(),
+        )
+
+    enum class Type {
+
+        SINGLE, DAILY, WEEKLY, MONTHLY, YEARLY
+    }
 }

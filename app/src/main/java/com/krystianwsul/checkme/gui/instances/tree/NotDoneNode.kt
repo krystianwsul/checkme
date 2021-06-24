@@ -4,6 +4,7 @@ import android.os.Parcelable
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.GroupType
 import com.krystianwsul.checkme.domainmodel.extensions.setInstanceDone
+import com.krystianwsul.checkme.domainmodel.extensions.setInstancesDone
 import com.krystianwsul.checkme.domainmodel.extensions.setOrdinal
 import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
 import com.krystianwsul.checkme.gui.instances.ShowGroupActivity
@@ -37,6 +38,7 @@ import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.treeadapter.*
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Maybe
+import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.kotlin.addTo
 import kotlinx.parcelize.Parcelize
 
@@ -279,8 +281,8 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
             private val timeChildren: List<GroupTypeFactory.TimeChild>,
             override val id: Id,
             override val rowsDelegate: GroupRowsDelegate,
-            private val indentCheckBox: Boolean,
             private val showGroupActivityParameters: ShowGroupActivity.Parameters,
+            private val checkboxMode: CheckboxMode,
         ) : ContentDelegate() {
 
             override val allInstanceDatas get() = notDoneNodes.flatMap { it.contentDelegate.directInstanceDatas }
@@ -303,7 +305,11 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
                 )
 
                 val nodePairs = timeChildren.map {
-                    val contentDelegate = it.toContentDelegate(groupAdapter, indentation, nodeCollection)
+                    val contentDelegate = it.toContentDelegate(
+                        groupAdapter,
+                        indentation + if (checkboxMode.indentChildren) 1 else 0,
+                        nodeCollection,
+                    )
 
                     val notDoneNode = if (contentDelegate is Instance) {
                         NotDoneInstanceNode(
@@ -331,8 +337,36 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
             override val thumbnail: ImageState? = null
 
             override val checkBoxState
-                get() =
-                    if (treeNode.isExpanded || !indentCheckBox) CheckBoxState.Gone else CheckBoxState.Invisible
+                get() = when (checkboxMode) {
+                    CheckboxMode.CHECKBOX -> CheckBoxState.Visible(false) {
+                        check(allInstanceDatas.all { it.done == null })
+
+                        val instanceKeys = allInstanceDatas.map { it.instanceKey }
+
+                        fun setDone(done: Boolean): Single<Int> {
+
+                            return AndroidDomainUpdater.setInstancesDone(
+                                groupAdapter.dataId.toFirst(),
+                                instanceKeys,
+                                done,
+                            ).toSingleDefault(instanceKeys.size)
+                        }
+
+                        treeNode.treeViewAdapter.ignoreNextScroll()
+
+                        setDone(true).observeOn(AndroidSchedulers.mainThread())
+                            .flatMapMaybe { groupListFragment.listener.showSnackbarDoneMaybe(it) }
+                            .flatMapSingle { setDone(false) }
+                            .subscribe()
+                            .addTo(groupListFragment.attachedToWindowDisposable)
+
+                        /**
+                         * todo it would be better to move all of this out of the node, and both handle the snackbar and
+                         * the subscription there
+                         */
+                    }
+                    CheckboxMode.INDENT -> if (treeNode.isExpanded) CheckBoxState.Gone else CheckBoxState.Invisible
+                }
 
             override val propagateSelection = true
 
@@ -477,6 +511,11 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
             ) : ContentDelegate.State {
 
                 constructor() : this(false, TreeNode.ExpansionState())
+            }
+
+            enum class CheckboxMode(val indentChildren: Boolean = false) {
+
+                INDENT, CHECKBOX(true)
             }
         }
 

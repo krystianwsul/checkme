@@ -39,10 +39,7 @@ import com.krystianwsul.common.firebase.models.customtime.SharedCustomTime
 import com.krystianwsul.common.firebase.models.filterSearchCriteria
 import com.krystianwsul.common.firebase.models.project.PrivateProject
 import com.krystianwsul.common.firebase.models.project.Project
-import com.krystianwsul.common.firebase.models.task.ProjectTask
-import com.krystianwsul.common.firebase.models.task.RootTask
-import com.krystianwsul.common.firebase.models.task.Task
-import com.krystianwsul.common.firebase.models.task.performIntervalUpdate
+import com.krystianwsul.common.firebase.models.task.*
 import com.krystianwsul.common.firebase.models.taskhierarchy.TaskHierarchy
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.*
@@ -322,7 +319,9 @@ class DomainFactory(
 
         val taskUndoData = TaskUndoData()
 
-        tasks.forEach { it.setEndData(Task.EndData(now, deleteInstances), taskUndoData) }
+        tasks.forEach {
+            it.performIntervalUpdate { setEndData(Task.EndData(now, deleteInstances), taskUndoData) }
+        }
 
         return taskUndoData to DomainUpdater.Params(true, notificationType, CloudParams(projects))
     }
@@ -331,12 +330,14 @@ class DomainFactory(
         taskUndoData.taskKeys
             .forEach { (taskKey, scheduleIds) ->
                 val task = getTaskForce(taskKey)
-
                 task.requireNotCurrent(now)
-                task.clearEndExactTimeStamp(now)
 
-                scheduleIds.forEach { scheduleId ->
-                    task.schedules.single { it.id == scheduleId }.clearEndExactTimeStamp(now)
+                task.performIntervalUpdate {
+                    clearEndExactTimeStamp(now)
+
+                    scheduleIds.forEach { scheduleId ->
+                        task.schedules.single { it.id == scheduleId }.clearEndExactTimeStamp(now)
+                    }
                 }
             }
 
@@ -638,7 +639,7 @@ class DomainFactory(
 
                 val childTask = projectToRootConversion.endTasks.getValue(startTaskHierarchy.childTaskId)
 
-                childTask.performIntervalUpdate { copyParentNestedTaskHierarchy(now, startTaskHierarchy, parentTask.id) }
+                childTask.performRootIntervalUpdate { copyParentNestedTaskHierarchy(now, startTaskHierarchy, parentTask.id) }
 
                 parentTask.addRootTask(childTask)
             }
@@ -649,10 +650,11 @@ class DomainFactory(
                 pair.second.forEach { if (!it.hidden) it.hide() }
 
                 // I think this might no longer be necessary, since setEndData doesn't recurse on children
-                if (pair.first.endData != null)
+                if (pair.first.endData != null) {
                     check(pair.first.endData == endData)
-                else
-                    pair.first.setEndData(endData)
+                } else {
+                    pair.first.performIntervalUpdate { setEndData(endData) }
+                }
             }
 
             projectToRootConversion.endTasks.forEach {
@@ -721,7 +723,7 @@ class DomainFactory(
 
             val currentSchedules = oldTask.intervalInfo.getCurrentScheduleIntervals(now).map { it.schedule }
 
-            newTask.performIntervalUpdate {
+            newTask.performRootIntervalUpdate {
                 if (currentSchedules.isNotEmpty()) {
                     newTask.copySchedules(
                         now,

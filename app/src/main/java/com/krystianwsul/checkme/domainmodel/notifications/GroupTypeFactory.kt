@@ -31,7 +31,6 @@ object GroupTypeFactory : GroupType.Factory {
         timeStamp: TimeStamp,
         projectDescriptor: GroupType.ProjectDescriptor,
         instanceDescriptors: List<GroupType.InstanceDescriptor>,
-        nested: Boolean,
     ) = ProjectBridge(timeStamp, projectDescriptor.fix().project, instanceDescriptors.map { it.fix() })
 
     override fun createSingle(instanceDescriptor: GroupType.InstanceDescriptor) = SingleBridge(instanceDescriptor.fix())

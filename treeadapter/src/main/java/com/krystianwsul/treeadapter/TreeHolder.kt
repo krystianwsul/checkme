@@ -10,5 +10,5 @@ abstract class TreeHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
     open fun startRx() = Unit
 
-    fun stopRx() = compositeDisposable.clear()
+    open fun stopRx() = compositeDisposable.clear()
 }

@@ -98,19 +98,19 @@ class Instance private constructor(val task: Task, private var data: Data) : Ass
                         val parentTask = parentTaskHierarchy.parentTask
                         val parentInstance = parentTask.getInstance(scheduleDateTime)
 
-                            parentInstance.doneOffset?.let {
-                                interval.startExactTimeStampOffset < it
-                            } != false
-                        }
-                        is Type.Schedule -> true
-                        /**
-                         * if this interval was created by removing a schedule (noScheduleOrParent == null), we should
-                         * keep looking
-                         */
-                        is Type.NoSchedule -> type.noScheduleOrParent == null // unexpected
+                        parentInstance.doneOffset?.let {
+                            interval.startExactTimeStampOffset < it
+                        } != false
                     }
+                    is Type.Schedule -> true
+                    /**
+                     * if this interval was created by removing a schedule (noScheduleOrParent == null), we should
+                     * keep looking
+                     */
+                    is Type.NoSchedule -> type.noScheduleOrParent == null // unexpected
                 }
-                .first()
+            }
+            .first()
 
         return when (val type = interval.type) {
             is Type.Child -> {
@@ -149,8 +149,8 @@ class Instance private constructor(val task: Task, private var data: Data) : Ass
     constructor(task: Task, instanceRecord: InstanceRecord) : this(task, Data.Real(task, instanceRecord))
 
     constructor(task: Task, scheduleDateTime: DateTime) : this(
-            task,
-            Data.Virtual(scheduleDateTime.date, JsonTime.fromTime(scheduleDateTime.time), task.customTimeProvider),
+        task,
+        Data.Virtual(scheduleDateTime.date, JsonTime.fromTime(scheduleDateTime.time), task.customTimeProvider),
     )
 
     init {
@@ -201,21 +201,21 @@ class Instance private constructor(val task: Task, private var data: Data) : Ass
         val scheduleDateTime = scheduleDateTime
 
         val taskHierarchyChildInstances = task.childHierarchyIntervals
-                .asSequence()
-                /**
-                 * todo it seems to me that this `filter` should be redundant with the check in getParentInstance, but a
-                 * test fails if I remove it.
-                 */
-                .filter { interval -> // once an instance is done, we don't want subsequently added task hierarchies contributing to it
-                    doneOffset?.let { it > interval.taskHierarchy.startExactTimeStampOffset } != false
-                }
-                .map {
-                    it.taskHierarchy
-                            .childTask
-                            .getInstance(scheduleDateTime)
-                }
-                .filter { it.parentInstance?.instanceKey == instanceKey }
-                .toList()
+            .asSequence()
+            /**
+             * todo it seems to me that this `filter` should be redundant with the check in getParentInstance, but a
+             * test fails if I remove it.
+             */
+            .filter { interval -> // once an instance is done, we don't want subsequently added task hierarchies contributing to it
+                doneOffset?.let { it > interval.taskHierarchy.startExactTimeStampOffset } != false
+            }
+            .map {
+                it.taskHierarchy
+                    .childTask
+                    .getInstance(scheduleDateTime)
+            }
+            .filter { it.parentInstance?.instanceKey == instanceKey }
+            .toList()
 
         val instanceHierarchyChildInstances = task.instanceHierarchyContainer.getChildInstances(instanceKey)
 
@@ -241,9 +241,9 @@ class Instance private constructor(val task: Task, private var data: Data) : Ass
         }
 
         return filtered.singleOrEmpty()
-                .orEmpty()
-                .filter { it.first == scheduleDateTime }
-                .map { it.second }
+            .orEmpty()
+            .filter { it.first == scheduleDateTime }
+            .map { it.second }
     }
 
     fun getOldestVisibles() = getMatchingScheduleIntervals(false).map { it.schedule.oldestVisible }
@@ -276,7 +276,7 @@ class Instance private constructor(val task: Task, private var data: Data) : Ass
         val hack24: Boolean = false, // show done roots for 24 hours. Ignored for children
         val ignoreHidden: Boolean = false,
         val assumeChildOfVisibleParent: Boolean = false,
-            val assumeRoot: Boolean = false,
+        val assumeRoot: Boolean = false,
     ) {
 
         init {
@@ -403,10 +403,10 @@ class Instance private constructor(val task: Task, private var data: Data) : Ass
     }
 
     fun setInstanceDateTime(
-            shownFactory: ShownFactory,
-            dateTime: DateTime?,
-            customTimeMigrationHelper: Project.CustomTimeMigrationHelper,
-            now: ExactTimeStamp.Local,
+        shownFactory: ShownFactory,
+        dateTime: DateTime?,
+        customTimeMigrationHelper: Project.CustomTimeMigrationHelper,
+        now: ExactTimeStamp.Local,
     ) {
         if (dateTime == recordInstanceDateTime) return
 
@@ -415,7 +415,7 @@ class Instance private constructor(val task: Task, private var data: Data) : Ass
 
             it.instanceJsonTime = dateTime?.time
                 ?.let { task.getOrCopyTime(dateTime.date.dayOfWeek, it, customTimeMigrationHelper, now) }
-                    ?.let(JsonTime::fromTime)
+                ?.let(JsonTime::fromTime)
         }
 
         shownHolder.forceShown(shownFactory).notified = false
@@ -424,8 +424,8 @@ class Instance private constructor(val task: Task, private var data: Data) : Ass
     private fun createInstanceRecord(): Data.Real {
         if (data !is Data.Real) {
             data = Data.Real(
-                    task,
-                    task.createRemoteInstanceRecord(this),
+                task,
+                task.createRemoteInstanceRecord(this),
             )
 
             addToParentInstanceHierarchyContainer()
@@ -476,8 +476,8 @@ class Instance private constructor(val task: Task, private var data: Data) : Ass
 
                     if (customTime.ownerKey == ownerKey) {
                         val privateCustomTimeKey = CustomTimeKey.Project.Private(
-                                ownerKey.toPrivateProjectKey(),
-                                customTime.privateKey!!,
+                            ownerKey.toPrivateProjectKey(),
+                            customTime.privateKey!!,
                         )
 
                         privateProject.getProjectCustomTime(privateCustomTimeKey)
@@ -489,8 +489,8 @@ class Instance private constructor(val task: Task, private var data: Data) : Ass
             } as? MyCustomTime
 
             privateCustomTime?.takeIf { it.notDeleted(now) }
-                    ?.let { TimePair(it.key) }
-                    ?: TimePair(customTime.getHourMinute(instanceDate.dayOfWeek))
+                ?.let { TimePair(it.key) }
+                ?: TimePair(customTime.getHourMinute(instanceDate.dayOfWeek))
         } else {
             instanceTimePair
         }
@@ -512,11 +512,11 @@ class Instance private constructor(val task: Task, private var data: Data) : Ass
         if (!isRootInstance()) return listOf()
 
         return getMatchingScheduleIntervals(false).map { it.schedule.assignedTo }
-                .distinct()
-                .singleOrEmpty()
-                .orEmpty()
-                .let(task.project::getAssignedTo)
-                .map { it.value }
+            .distinct()
+            .singleOrEmpty()
+            .orEmpty()
+            .let(task.project::getAssignedTo)
+            .map { it.value }
     }
 
     fun setParentState(newParentState: ParentState) {
@@ -643,9 +643,9 @@ class Instance private constructor(val task: Task, private var data: Data) : Ass
         }
 
         class Virtual(
-                override val scheduleDate: Date,
-                private val scheduleJsonTime: JsonTime,
-                private val customTimeProvider: JsonTime.CustomTimeProvider,
+            override val scheduleDate: Date,
+            private val scheduleJsonTime: JsonTime,
+            private val customTimeProvider: JsonTime.CustomTimeProvider,
         ) : Data() {
 
             override val instanceDate = scheduleDate

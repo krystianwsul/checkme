@@ -20,28 +20,10 @@ import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
 import io.reactivex.rxjava3.core.Single
 
-fun DomainFactory.getShowInstanceData(requestInstanceKey: InstanceKey): ShowInstanceViewModel.Data {
+fun DomainFactory.getShowInstanceData(instanceKey: InstanceKey): ShowInstanceViewModel.Data {
     MyCrashlytics.log("DomainFactory.getShowInstanceData")
 
     DomainThreadChecker.instance.requireDomainThread()
-
-    /*
-    val instanceKey = copiedTaskKeys[requestInstanceKey.taskKey]
-            ?.let {
-                val newScheduleKey = projectsFactory.getProjectForce(it.projectKey).convertScheduleKey(
-                        deviceDbInfo.userInfo,
-                        getTaskForce(requestInstanceKey.taskKey),
-                        requestInstanceKey.scheduleKey,
-                        false,
-                )
-
-                requestInstanceKey.copy(taskKey = it)
-            }
-            ?: requestInstanceKey
-            */
-
-    // todo migrate tasks
-    val instanceKey = requestInstanceKey
 
     val task = getTaskForce(instanceKey.taskKey)
 

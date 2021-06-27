@@ -124,8 +124,12 @@ class MyTextInputLayout : TextInputLayout {
         disallowSettingListener = false
 
         editText!!.setOnClickListener { listener() }
+
         @Suppress("DEPRECATION")
         setEndIconOnClickListener { iconListener() }
+
+        @Suppress("DEPRECATION")
+        setErrorIconOnClickListener { iconListener() }
 
         disallowSettingListener = true
     }
@@ -135,6 +139,13 @@ class MyTextInputLayout : TextInputLayout {
         if (disallowSettingListener) throw UnsupportedOperationException()
 
         super.setEndIconOnClickListener(endIconOnClickListener)
+    }
+
+    @Deprecated("")
+    override fun setErrorIconOnClickListener(errorIconOnClickListener: OnClickListener?) {
+        if (disallowSettingListener) throw UnsupportedOperationException()
+
+        super.setErrorIconOnClickListener(errorIconOnClickListener)
     }
 
     fun setText(text: String) = editText!!.setText(text)

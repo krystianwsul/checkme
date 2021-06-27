@@ -38,7 +38,7 @@ dependencies {
 
     implementation "com.jakewharton.rxrelay3:rxrelay:$rxRelayVersion"
 
-    implementation project(':common')
+    implementation project(':common2')
 }
 repositories {
     mavenCentral()

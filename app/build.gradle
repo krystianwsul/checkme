@@ -145,7 +145,7 @@ dependencies {
     implementation 'com.github.stfalcon:stfalcon-imageviewer:1.0.1'
 
     implementation project(path: ':treeadapter')
-    implementation project(':common')
+    implementation project(':common2')
 
     implementation "com.soywiz.korlibs.klock:klock:$klockVersion"
 

@@ -1,3 +1,5 @@
 enableFeaturePreview('GRADLE_METADATA')
 
-include ':app', ':treeadapter', ':common'
+include ':app', ':treeadapter'
+include ':common2'
+project(':common2').projectDir = new File(rootDir, 'common/')

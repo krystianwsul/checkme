@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module external.linked.project.id=":common2:androidAndroidTestRelease" external.linked.project.path="$MODULE_DIR$/../../../common" external.root.project.path="$MODULE_DIR$/../../.." external.system.id="GRADLE" external.system.module.group="Check.me" external.system.module.type="sourceSet" external.system.module.version="unspecified" type="JAVA_MODULE" version="4">
+  <component name="FacetManager">
+    <facet type="kotlin-language" name="Kotlin">
+      <configuration version="4" platform="Common (experimental) " allPlatforms="JS []/JVM [1.8]" useProjectSettings="false" isTestModule="false" externalProjectId=":common2" pureKotlinSourceFolders="C:\Users\kryst\StudioProjects\Check.me\common\src\androidDebug\kotlin;C:\Users\kryst\StudioProjects\Check.me\common\src\debug\kotlin;C:\Users\kryst\StudioProjects\Check.me\common\src\debug\java;C:\Users\kryst\StudioProjects\Check.me\common\src\androidDebugAndroidTest\kotlin;C:\Users\kryst\StudioProjects\Check.me\common\src\androidDebugUnitTest\kotlin;C:\Users\kryst\StudioProjects\Check.me\common\src\androidProto\kotlin;C:\Users\kryst\StudioProjects\Check.me\common\src\proto\kotlin;C:\Users\kryst\StudioProjects\Check.me\common\src\proto\java;C:\Users\kryst\StudioProjects\Check.me\common\src\androidProtoUnitTest\kotlin;C:\Users\kryst\StudioProjects\Check.me\common\src\androidRelease\kotlin;C:\Users\kryst\StudioProjects\Check.me\common\src\release\kotlin;C:\Users\kryst\StudioProjects\Check.me\common\src\release\java;C:\Users\kryst\StudioProjects\Check.me\common\src\androidReleaseUnitTest\kotlin;C:\Users\kryst\StudioProjects\Check.me\common\src\jsMain\kotlin;C:\Users\kryst\StudioProjects\Check.me\common\src\jsTest\kotlin">
+        <newMppModelJpsModuleKind>SOURCE_SET_HOLDER</newMppModelJpsModuleKind>
+        <compilerSettings />
+        <compilerArguments>
+          <option name="languageVersion" value="1.5" />
+          <option name="apiVersion" value="1.5" />
+          <option name="pluginOptions">
+            <array />
+          </option>
+          <option name="pluginClasspaths">
+            <array>
+              <option value="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-scripting-jvm/1.5.20/2fc370670110e51e13dc9795c69ba82632b2fffe/kotlin-scripting-jvm-1.5.20.jar" />
+              <option value="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-scripting-common/1.5.20/5cb42f6dffcaa05963f604bf733c90ca8c766084/kotlin-scripting-common-1.5.20.jar" />
+              <option value="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlinx/kotlinx-coroutines-core/1.3.8/f62be6d4cbf27781c2969867b4ed952f38378492/kotlinx-coroutines-core-1.3.8.jar" />
+              <option value="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib/1.5.20/9de35cc611bcecec8edce1d56d8e659953806751/kotlin-stdlib-1.5.20.jar" />
+              <option value="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-gradle-plugin-api/1.5.20/d64b1d77781bb8d9cd42bef02dff4c706b70fb7f/kotlin-gradle-plugin-api-1.5.20.jar" />
+              <option value="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains/annotations/13.0/919f0dfe192fb4e063e7dacadee7f8bb9a2672a9/annotations-13.0.jar" />
+              <option value="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib-common/1.5.20/3d79dbd48bf605f4aac1e7028981a1953e245cbb/kotlin-stdlib-common-1.5.20.jar" />
+              <option value="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-native-utils/1.5.20/6747a7f3f7077b61e73b1e0c2becb0413df10522/kotlin-native-utils-1.5.20.jar" />
+              <option value="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-project-model/1.5.20/e62d5b151b94b0c28cc7cb937acd146401d59bad/kotlin-project-model-1.5.20.jar" />
+              <option value="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-script-runtime/1.5.20/4381bb58d37b84d4d1afe55ec35542dd9b77e101/kotlin-script-runtime-1.5.20.jar" />
+              <option value="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-util-io/1.5.20/f4f6519fc2fc89c7ae7e6b6eb6f53d9e290c05db/kotlin-util-io-1.5.20.jar" />
+              <option value="$KOTLIN_BUNDLED$/lib/kotlinx-serialization-compiler-plugin.jar" />
+            </array>
+          </option>
+          <option name="multiPlatform" value="true" />
+        </compilerArguments>
+      </configuration>
+    </facet>
+  </component>
+  <component name="NewModuleRootManager" inherit-compiler-output="true">
+    <exclude-output />
+    <content url="file://$MODULE_DIR$/../../../common/src/androidAndroidTestRelease/kotlin" />
+    <content url="file://$MODULE_DIR$/../../../common/src/androidAndroidTestRelease/resources" />
+    <content url="file://$MODULE_DIR$/../../../common/src/androidTestRelease/java" />
+    <content url="file://$MODULE_DIR$/../../../common/src/androidTestRelease/resources" />
+    <orderEntry type="jdk" jdkName="Kotlin SDK" jdkType="KotlinSDK" />
+    <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="module" module-name="Check.me.common2.commonMain" />
+    <orderEntry type="library" name="Gradle: org.jetbrains.kotlinx:kotlinx-serialization-json:1.2.0" level="project" />
+    <orderEntry type="library" name="Gradle: org.jetbrains.kotlinx:kotlinx-serialization-core:1.2.0" level="project" />
+    <orderEntry type="module-library">
+      <library name="Gradle: org.jetbrains.kotlin:kotlin-stdlib-common:1.5.20">
+        <CLASSES>
+          <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib-common/1.5.20/3d79dbd48bf605f4aac1e7028981a1953e245cbb/kotlin-stdlib-common-1.5.20.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib-common/1.5.20/a074c913bd80f1f3b5a21789a609580e76208831/kotlin-stdlib-common-1.5.20-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="library" name="Gradle: com.soywiz.korlibs.klock:klock:2.1.0" level="project" />
+    <orderEntry type="library" name="Gradle: com.badoo.reaktive:reaktive:1.1.22" level="project" />
+  </component>
+</module>

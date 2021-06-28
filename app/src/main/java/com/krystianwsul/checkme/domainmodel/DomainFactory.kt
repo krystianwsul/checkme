@@ -657,13 +657,6 @@ class DomainFactory(
                 }
             }
 
-            projectToRootConversion.endTasks.forEach {
-                it.value
-                    .existingInstances
-                    .values
-                    .forEach { it.addToParentInstanceHierarchyContainer() }
-            }
-
             copiedTaskKeys.putAll(projectToRootConversion.copiedTaskKeys)
 
             return projectToRootConversion.endTasks.getValue(startTask.id)

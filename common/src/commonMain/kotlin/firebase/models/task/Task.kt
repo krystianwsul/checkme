@@ -114,8 +114,6 @@ sealed class Task(
     }
     final override val normalizedFields by normalizedFieldsDelegate
 
-    val instanceHierarchyContainer by lazy { InstanceHierarchyContainer(this) }
-
     abstract val projectCustomTimeIdProvider: JsonTime.ProjectCustomTimeIdProvider
 
     fun getParentName(exactTimeStamp: ExactTimeStamp) = getParentTask(exactTimeStamp)?.name ?: project.name

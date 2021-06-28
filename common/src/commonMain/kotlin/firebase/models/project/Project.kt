@@ -55,14 +55,6 @@ abstract class Project<T : ProjectType>(
 
     val existingInstances get() = getAllTasks().flatMap { it.existingInstances.values }
 
-    protected fun initializeInstanceHierarchyContainers() {
-        getAllTasks().forEach {
-            it.existingInstances
-                .values
-                .forEach { it.addToParentInstanceHierarchyContainer() }
-        }
-    }
-
     private fun getOrCreateCustomTime(
         dayOfWeek: DayOfWeek,
         customTime: Time.Custom.Project<*>,

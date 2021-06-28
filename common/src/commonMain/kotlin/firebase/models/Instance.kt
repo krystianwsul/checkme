@@ -150,7 +150,7 @@ class Instance private constructor(val task: Task, private var data: Data) : Ass
         }
 
         parentInstance?.let {
-            ParentInstanceData(it, it.doneOffsetProperty.addCallback(::invalidateParentInstanceData))
+            ParentInstanceData(it, it.doneOffsetProperty.addCallback(::tearDownParentInstanceData))
         }
     }
 
@@ -167,7 +167,7 @@ class Instance private constructor(val task: Task, private var data: Data) : Ass
     init {
         addLazyCallbacks()
 
-        doneOffsetProperty.addCallback(::invalidateParentInstanceData)
+        doneOffsetProperty.addCallback(::tearDownParentInstanceData)
     }
 
     private lateinit var intervalsCallback: () -> Unit // this is because of how JS handles method references
@@ -175,7 +175,7 @@ class Instance private constructor(val task: Task, private var data: Data) : Ass
     private fun addLazyCallbacks() {
         intervalsCallback = task.intervalInfoProperty.addCallback {
             matchingScheduleIntervalsProperty.invalidate()
-            invalidateParentInstanceData()
+            tearDownParentInstanceData()
         }
     }
 
@@ -187,20 +187,12 @@ class Instance private constructor(val task: Task, private var data: Data) : Ass
 
     private fun tearDownParentInstanceData() {
         if (parentInstanceProperty.isInitialized()) {
-            removeFromParentInstanceHierarchyContainer()
-
             parentInstanceData?.apply {
                 instance.doneOffsetProperty.removeCallback(doneCallback)
             }
 
             parentInstanceProperty.invalidate()
         }
-    }
-
-    private fun invalidateParentInstanceData() {
-        tearDownParentInstanceData()
-
-        addToParentInstanceHierarchyContainer()
     }
 
     fun exists() = (data is Data.Real)
@@ -482,8 +474,6 @@ class Instance private constructor(val task: Task, private var data: Data) : Ass
                 task,
                 task.createRemoteInstanceRecord(this),
             )
-
-            addToParentInstanceHierarchyContainer()
         }
 
         return data as Data.Real
@@ -581,23 +571,7 @@ class Instance private constructor(val task: Task, private var data: Data) : Ass
 
         createInstanceRecord().parentState = newParentState
 
-        invalidateParentInstanceData()
-    }
-
-    fun addToParentInstanceHierarchyContainer() {
-        if (exists()) {
-            parentInstance?.task
-                ?.instanceHierarchyContainer
-                ?.addChildInstance(this)
-        }
-    }
-
-    private fun removeFromParentInstanceHierarchyContainer() {
-        if (parentInstanceProperty.isInitialized() && exists()) {
-            parentInstance?.task
-                ?.instanceHierarchyContainer
-                ?.removeChildInstance(this)
-        }
+        tearDownParentInstanceData()
     }
 
     fun canAddSubtask(now: ExactTimeStamp.Local, hack24: Boolean = false): Boolean {

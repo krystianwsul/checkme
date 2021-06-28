@@ -52,8 +52,6 @@ class PrivateProject(
             .values
             .map { ProjectTaskHierarchy(this, it) }
             .forEach { taskHierarchyContainer.add(it.id, it) }
-
-        initializeInstanceHierarchyContainers()
     }
 
     override fun deleteCustomTime(remoteCustomTime: Time.Custom.Project<ProjectType.Private>) {

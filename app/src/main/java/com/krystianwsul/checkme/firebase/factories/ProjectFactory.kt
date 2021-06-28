@@ -46,6 +46,8 @@ abstract class ProjectFactory<T : ProjectType, U : Parsable>(
         )
 
         val changeProjectChangeTypes = projectLoader.changeProjectEvents.map {
+            project.rootCacheCoordinator.invalidate()
+
             project = newProject(it.projectRecord, it.userCustomTimeProvider, rootTaskProvider)
 
             ChangeType.REMOTE

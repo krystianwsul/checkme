@@ -86,6 +86,10 @@ class ProjectsFactory(
                 deviceDbInfo,
             )
 
+            sharedProjectFactories[projectKey]?.project
+                ?.rootCacheCoordinator
+                ?.invalidate()
+
             sharedProjectFactoriesProperty[projectKey] = sharedProjectFactory
 
             changeType.takeIf { it == ChangeType.REMOTE } // filtering out internal events for adding project
@@ -94,6 +98,11 @@ class ProjectsFactory(
         val removeProjectChangeTypes = sharedProjectsLoader.removeProjectEvents.map {
             it.projectKeys.forEach {
                 check(sharedProjectFactories.containsKey(it))
+
+                sharedProjectFactories.getValue(it)
+                    .project
+                    .rootCacheCoordinator
+                    .invalidate()
 
                 sharedProjectFactoriesProperty.remove(it)
             }

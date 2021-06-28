@@ -26,7 +26,7 @@ class AndroidRootTasksManager(databaseWrapper: DatabaseWrapper) : RootTasksManag
              *
              * There is, however, an edge case where it does make a difference: if the backend mistakenly garbage
              * collects the task, but doesn't remove its reference in Project.rootTaskIds, the app will keep hobbling
-                 * along with the old data, without knowing that it's technically in an inconsistent state.
+             * along with the old data, without knowing that it's technically in an inconsistent state.
              */
             snapshot.takeIf { it.exists }?.let {
                 RootTaskRecord(

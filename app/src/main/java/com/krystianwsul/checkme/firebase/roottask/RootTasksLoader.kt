@@ -18,11 +18,11 @@ import io.reactivex.rxjava3.kotlin.ofType
 import io.reactivex.rxjava3.kotlin.plusAssign
 
 class RootTasksLoader(
-        rootTaskKeySource: RootTaskKeySource,
-        private val provider: Provider,
-        private val domainDisposable: CompositeDisposable,
-        val rootTasksManager: AndroidRootTasksManager,
-        private val loadDependencyTrackerManager: LoadDependencyTrackerManager,
+    rootTaskKeySource: RootTaskKeySource,
+    private val provider: Provider,
+    private val domainDisposable: CompositeDisposable,
+    val rootTasksManager: AndroidRootTasksManager,
+    private val loadDependencyTrackerManager: LoadDependencyTrackerManager,
 ) {
 
     private val taskKeyRelay = ReplayRelay.create<Map<TaskKey.Root, RootTaskRecord?>>()
@@ -31,28 +31,29 @@ class RootTasksLoader(
 
     init {
         rootTaskKeySource.rootTaskKeysObservable
-                .filter { !ignoreKeyUpdates }
-                .map { it.associateWith<TaskKey.Root, RootTaskRecord?> { null } }
-                .subscribe(taskKeyRelay)
-                .addTo(domainDisposable)
+            .filter { !ignoreKeyUpdates }
+            .map { it.associateWith<TaskKey.Root, RootTaskRecord?> { null } }
+            .subscribe(taskKeyRelay)
+            .addTo(domainDisposable)
     }
 
     private fun <T> Observable<T>.replayImmediate() = replay().apply { domainDisposable += connect() }!!
 
     private data class TaskData(val databaseRx: DatabaseRx<Snapshot<RootTaskJson>>, var initialRecord: RootTaskRecord?)
 
-    private val databaseRxObservable: Observable<MapChanges<Map<TaskKey.Root, RootTaskRecord?>, TaskKey.Root, TaskData>> = taskKeyRelay.processChanges(
+    private val databaseRxObservable: Observable<MapChanges<Map<TaskKey.Root, RootTaskRecord?>, TaskKey.Root, TaskData>> =
+        taskKeyRelay.processChanges(
             { it.keys },
             { map, taskKey ->
                 val initialRecord = map.getValue(taskKey)
 
                 TaskData(
-                        DatabaseRx(domainDisposable, provider.getRootTaskObservable(taskKey)),
-                        initialRecord,
+                    DatabaseRx(domainDisposable, provider.getRootTaskObservable(taskKey)),
+                    initialRecord,
                 )
             },
             { it.databaseRx.disposable.dispose() },
-    ).replayImmediate()
+        ).replayImmediate()
 
     private data class RecordData(val record: RootTaskRecord?, val isAddedLocally: Boolean)
 
@@ -68,24 +69,37 @@ class RootTasksLoader(
                         if (initialRecord != null) {
                             taskData.initialRecord = null
 
-                            it.startWithItem(RecordData(initialRecord, true))
-                                } else {
-                                    it
-                                }
-                            }
+                            var first = true
 
-                    recordObservable.map { (taskRecord, isAddedLocally) ->
-                        if (taskRecord != null) {
-                            val isTaskKeyTracked = loadDependencyTrackerManager.isTaskKeyTracked(taskRecord.taskKey)
+                            it.filter {
+                                /**
+                                 * This is awful, but I don't feel like building it more robustly for now.  When we add a
+                                 * task, the initial firebase event may return null.  But we don't want to skip other null
+                                 * events, since they'd indicate that the task was indeed removed from the DB.
+                                 */
+                                val skip = first && it.record == null
 
-                            // there's no reason why we'd be tracking a change for a locally added record
-                            check(!isTaskKeyTracked || !isAddedLocally)
+                                first = false
 
-                            AddChangeEvent(taskRecord, isTaskKeyTracked || isAddedLocally)
+                                !skip
+                            }.startWithItem(RecordData(initialRecord, true))
                         } else {
-                            RemoveEvent(setOf(taskKey))
+                            it
                         }
                     }
+
+                recordObservable.map { (taskRecord, isAddedLocally) ->
+                    if (taskRecord != null) {
+                        val isTaskKeyTracked = loadDependencyTrackerManager.isTaskKeyTracked(taskRecord.taskKey)
+
+                        // there's no reason why we'd be tracking a change for a locally added record
+                        check(!isTaskKeyTracked || !isAddedLocally)
+
+                        AddChangeEvent(taskRecord, isTaskKeyTracked || isAddedLocally)
+                    } else {
+                        RemoveEvent(setOf(taskKey))
+                    }
+                }
             }.merge()
     }.replayImmediate()
 

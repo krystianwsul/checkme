@@ -228,7 +228,9 @@ class Instance private constructor(val task: Task, private var data: Data) : Ass
             .filter { it.parentInstance?.instanceKey == instanceKey }
             .toList()
 
-        val instanceHierarchyChildInstances = task.instanceHierarchyContainer.getChildInstances(instanceKey)
+        val instanceHierarchyChildInstances = task.parent
+            .getAllExistingInstances()
+            .filter { it.parentInstance == this }
 
         val childInstances = (taskHierarchyChildInstances + instanceHierarchyChildInstances).distinct()
 

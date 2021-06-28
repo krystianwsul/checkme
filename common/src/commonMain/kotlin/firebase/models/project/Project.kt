@@ -244,6 +244,8 @@ abstract class Project<T : ProjectType>(
         is TaskKey.Root -> rootTaskProvider.getRootTask(taskKey)
     }
 
+    override fun getAllExistingInstances() = rootTaskProvider.getAllExistingInstances()
+
     fun updateRootTaskKeys() {
         val rootTaskKeys = getAllTasks().mapNotNull { it.taskKey as? TaskKey.Root }.toSet()
 
@@ -279,5 +281,7 @@ abstract class Project<T : ProjectType>(
             note: String?,
             ordinal: Double?,
         ): Task
+
+        fun getAllExistingInstances(): Sequence<Instance>
     }
 }

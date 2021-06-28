@@ -104,6 +104,12 @@ class RootTasksFactory(
         }
     }
 
+    override fun getAllExistingInstances() = getProjectsFactory().projects
+        .values
+        .asSequence()
+        .flatMap { it.getAllTasks() }
+        .flatMap { it.existingInstances.values }
+
     override fun getRootTasksForProject(projectKey: ProjectKey<*>) =
         rootTasks.values.filter { it.projectId == projectKey.key }
 

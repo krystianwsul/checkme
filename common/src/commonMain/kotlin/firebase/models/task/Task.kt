@@ -568,5 +568,7 @@ sealed class Task(
         fun getTask(taskKey: TaskKey): Task
 
         fun getInstance(instanceKey: InstanceKey) = getTask(instanceKey.taskKey).getInstance(instanceKey.scheduleKey)
+
+        fun getAllExistingInstances(): Sequence<Instance>
     }
 }

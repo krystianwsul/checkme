@@ -61,6 +61,8 @@ class RootTaskFactory(
                 }
             }
             .doOnNext {
+                task?.rootCacheCoordinator?.invalidate()
+
                 task = it.task
 
                 rootTaskDependencyStateContainer.apply {

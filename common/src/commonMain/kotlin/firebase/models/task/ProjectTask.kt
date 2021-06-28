@@ -13,7 +13,7 @@ import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.common.utils.invalidatableLazy
 
 class ProjectTask(override val project: Project<*>, private val taskRecord: ProjectTaskRecord) :
-    Task(project, taskRecord, ParentTaskDelegate.Project(project)) {
+    Task(project, taskRecord, ParentTaskDelegate.Project(project), project.rootCacheCoordinator) {
 
     override val parent = project
 

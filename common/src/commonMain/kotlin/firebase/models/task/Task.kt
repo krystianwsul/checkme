@@ -7,6 +7,7 @@ import com.krystianwsul.common.domain.ScheduleGroup
 import com.krystianwsul.common.firebase.json.*
 import com.krystianwsul.common.firebase.json.tasks.RootTaskJson
 import com.krystianwsul.common.firebase.models.*
+import com.krystianwsul.common.firebase.models.cache.RootCacheCoordinator
 import com.krystianwsul.common.firebase.models.interval.*
 import com.krystianwsul.common.firebase.models.noscheduleorparent.NoScheduleOrParent
 import com.krystianwsul.common.firebase.models.project.Project
@@ -25,6 +26,7 @@ sealed class Task(
     val customTimeProvider: JsonTime.CustomTimeProvider,
     private val taskRecord: TaskRecord,
     val parentTaskDelegate: ParentTaskDelegate,
+    val rootCacheCoordinator: RootCacheCoordinator,
 ) : Current, CurrentOffset, QueryMatchable, Assignable {
 
     abstract val parent: Parent

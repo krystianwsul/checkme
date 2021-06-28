@@ -4,6 +4,7 @@ import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.firebase.json.schedule.*
 import com.krystianwsul.common.firebase.json.tasks.TaskJson
 import com.krystianwsul.common.firebase.models.ImageState
+import com.krystianwsul.common.firebase.models.cache.RootCacheCoordinator
 import com.krystianwsul.common.firebase.models.interval.Type
 import com.krystianwsul.common.firebase.models.noscheduleorparent.NoScheduleOrParent
 import com.krystianwsul.common.firebase.models.noscheduleorparent.RootNoScheduleOrParent
@@ -15,15 +16,23 @@ import com.krystianwsul.common.firebase.records.task.RootTaskRecord
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.*
 
-class RootTask(
+class RootTask private constructor(
     val taskRecord: RootTaskRecord,
     override val parent: Parent,
     private val userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
+    rootCacheCoordinator: RootCacheCoordinator,
 ) : Task(
     JsonTime.CustomTimeProvider.getForRootTask(userCustomTimeProvider),
     taskRecord,
     ParentTaskDelegate.Root(parent),
+    rootCacheCoordinator,
 ) {
+
+    constructor(
+        taskRecord: RootTaskRecord,
+        parent: Parent,
+        userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
+    ) : this(taskRecord, parent, userCustomTimeProvider, RootCacheCoordinator())
 
     private fun Type.Schedule.getParentProjectSchedule() = taskParentEntries.sortedWith(
         compareByDescending<Schedule> { it.startExactTimeStamp }.thenByDescending { it.id }

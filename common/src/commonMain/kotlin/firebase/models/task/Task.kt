@@ -260,7 +260,7 @@ sealed class Task(
                 startExactTimeStamp,
                 endExactTimeStamp,
                 originalDateTime,
-                checkOldestVisible
+                checkOldestVisible,
             ).map { it to scheduleInterval }
         }
 

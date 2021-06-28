@@ -1,7 +1,6 @@
 package com.krystianwsul.common.firebase.models
 
 
-import com.krystianwsul.common.ErrorLogger
 import com.krystianwsul.common.criteria.Assignable
 import com.krystianwsul.common.firebase.MyCustomTime
 import com.krystianwsul.common.firebase.models.customtime.SharedCustomTime
@@ -258,6 +257,35 @@ class Instance private constructor(val task: Task, private var data: Data) : Ass
             .map { it.second }
     }
 
+    // this does not account for whether or not this is a rootInstance
+    private fun getMatchingScheduleIntervalsDebug(checkOldestVisible: Boolean): Pair<List<ScheduleInterval>, String> {
+        val stringBuilder = StringBuilder()
+
+        stringBuilder.appendLine("size before filter: " + matchingScheduleIntervals.size)
+
+        val filtered = if (checkOldestVisible) {
+            matchingScheduleIntervals.map {
+                it.filter { it.second.schedule.isAfterOldestVisible(scheduleDateTime.toLocalExactTimeStamp()) }
+            }
+        } else {
+            matchingScheduleIntervals
+        }
+
+        stringBuilder.appendLine("size after filter 1: " + filtered.size)
+
+        val x = filtered.singleOrEmpty()
+            .orEmpty()
+            .filter {
+                stringBuilder.appendLine("schedule " + it.second.schedule.id + " dateTime: " + it.first)
+                stringBuilder.appendLine("instance scheduleDateTime: " + scheduleDateTime)
+                it.first == scheduleDateTime
+            }
+
+        stringBuilder.appendLine("size after filter 2: " + x.size)
+
+        return x.map { it.second } to stringBuilder.toString()
+    }
+
     fun getOldestVisibles() = getMatchingScheduleIntervals(false).map { it.schedule.oldestVisible }
 
     private fun getInstanceLocker() = LockerManager.getInstanceLocker(instanceKey)
@@ -280,6 +308,11 @@ class Instance private constructor(val task: Task, private var data: Data) : Ass
         isVisibleHelperDebug(now, visibilityOptions)
 
     private fun matchesSchedule() = getMatchingScheduleIntervals(true).isNotEmpty()
+
+    private fun matchesScheduleDebug(): Pair<Boolean, String> {
+        val x = getMatchingScheduleIntervalsDebug(true)
+        return x.first.isNotEmpty() to x.second
+    }
 
     private fun isInvisibleBecauseOfEndData(now: ExactTimeStamp.Local) =
         task.run { !notDeleted(now) && endData!!.deleteInstances && done == null }
@@ -341,8 +374,10 @@ class Instance private constructor(val task: Task, private var data: Data) : Ass
         if (isInvisibleBecauseOfEndData(now)) return false to "endData"
 
         fun checkVisibilityForRoot(): Pair<Boolean, String> {
-            if (!isValidlyCreated()) return false to "isValidlyCreated"
-            val done = done ?: return true to "done"
+            val isValidlyCreatedDebug = isValidlyCreatedDebug()
+
+            if (!isValidlyCreatedDebug.first) return false to "isValidlyCreated:\n${isValidlyCreatedDebug.second}"
+            val done = done ?: return true to "done, valid info:\n${isValidlyCreatedDebug.second}"
 
             val cutoff = if (visibilityOptions.hack24)
                 ExactTimeStamp.Local(now.toDateTimeSoy() - 1.days)
@@ -371,6 +406,12 @@ class Instance private constructor(val task: Task, private var data: Data) : Ass
     }
 
     private fun isValidlyCreated() = exists() || matchesSchedule()
+
+    private fun isValidlyCreatedDebug(): Pair<Boolean, String> {
+        if (exists()) return true to "exists"
+
+        return matchesScheduleDebug()
+    }
 
     override fun toString() =
         "${super.toString()} name: $name, schedule time: $scheduleDateTime, instance time: $instanceDateTime, done: $done"

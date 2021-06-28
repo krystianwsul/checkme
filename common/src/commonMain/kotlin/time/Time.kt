@@ -17,6 +17,10 @@ sealed class Time {
 
     abstract override fun toString(): String
 
+    abstract override fun hashCode(): Int
+
+    abstract override fun equals(other: Any?): Boolean
+
     data class Normal(val hourMinute: HourMinute) : Time() {
 
         override val timePair get() = TimePair(null, hourMinute)
@@ -53,6 +57,14 @@ sealed class Time {
         override fun toString() = name
 
         abstract fun delete()
+
+        override fun hashCode() = id.hashCode()
+
+        override fun equals(other: Any?): Boolean {
+            if (other !is Custom) return false
+
+            return id == other.id
+        }
 
         abstract class Project<T : ProjectType> : Custom() {
 

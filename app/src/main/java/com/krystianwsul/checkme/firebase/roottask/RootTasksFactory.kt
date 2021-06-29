@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.firebase.roottask
 
 import com.jakewharton.rxrelay3.BehaviorRelay
+import com.krystianwsul.checkme.domainmodel.notifications.Notifier
 import com.krystianwsul.checkme.firebase.UserKeyStore
 import com.krystianwsul.checkme.firebase.factories.ProjectsFactory
 import com.krystianwsul.checkme.utils.publishImmediate
@@ -31,9 +32,18 @@ class RootTasksFactory(
     private val getProjectsFactory: () -> ProjectsFactory,
 ) : RootTask.Parent {
 
+    private val deletedKeys = mutableSetOf<TaskKey.Root>()
+
     private val rootTaskFactoriesRelay = BehaviorRelay.create<Map<TaskKey.Root, RootTaskFactory>>()
     private val rootTaskFactories get() = rootTaskFactoriesRelay.value!!
-    val rootTasks get() = rootTaskFactories.mapValuesNotNull { it.value.task }
+
+    val rootTasks: Map<TaskKey.Root, RootTask>
+        get() {
+            return if (Notifier.TEST_IRRELEVANT)
+                rootTaskFactories.filterKeys { it !in deletedKeys }.mapValuesNotNull { it.value.task }
+            else
+                rootTaskFactories.mapValuesNotNull { it.value.task }
+        }
 
     val unfilteredChanges: Observable<Unit>
     val changeTypes: Observable<ChangeType>
@@ -96,7 +106,12 @@ class RootTasksFactory(
             .toSet()
     }
 
-    override fun deleteRootTask(task: RootTask) = throw UnsupportedOperationException()
+    override fun deleteRootTask(task: RootTask) {
+        if (Notifier.TEST_IRRELEVANT)
+            deletedKeys += task.taskKey
+        else
+            throw UnsupportedOperationException()
+    }
 
     fun getRootTaskIfPresent(taskKey: TaskKey.Root) = rootTasks[taskKey]
 

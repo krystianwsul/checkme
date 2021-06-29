@@ -29,6 +29,8 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
         // To prevent spam if there's a huge backlog
         private const val MAX_NOTIFICATIONS_Q = 10
 
+        const val TEST_IRRELEVANT = false
+
         private fun Sequence<Instance>.filterNotifications(domainFactory: DomainFactory, now: ExactTimeStamp.Local) =
             filter {
                 it.done == null &&
@@ -282,7 +284,7 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
             }
         }
 
-        if (params.tick) {
+        if (params.tick || TEST_IRRELEVANT) {
             setIrrelevant(now)
 
             domainFactory.run { notificationStorage.deleteInstanceShown(getAllTasks().map { it.taskKey }.toSet()) }
@@ -336,7 +338,7 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
 
     private fun setIrrelevant(now: ExactTimeStamp.Local) {
         @Suppress("ConstantConditionIf")
-        if (false) {
+        if (TEST_IRRELEVANT) {
             val tomorrow = (DateTimeSoy.now() + 1.days).date
             val dateTimeSoy = DateTime(tomorrow, Time(2.hours))
             val exactTimeStamp = ExactTimeStamp.Local(dateTimeSoy)
@@ -353,12 +355,7 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
                 .projects
                 .values
                 .forEach {
-                    val results = Irrelevant.setIrrelevant(
-                        userCustomTimeRelevances,
-                        it,
-                        exactTimeStamp,
-                        false,
-                    )
+                    val results = Irrelevant.setIrrelevant(userCustomTimeRelevances, it, exactTimeStamp)
 
                     results.irrelevantExistingInstances
                         .sortedBy { it.scheduleDateTime }

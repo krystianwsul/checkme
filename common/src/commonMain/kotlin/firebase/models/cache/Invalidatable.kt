@@ -1,6 +1,6 @@
 package com.krystianwsul.common.firebase.models.cache
 
-interface Invalidatable {
+fun interface Invalidatable {
 
     fun invalidate()
 }

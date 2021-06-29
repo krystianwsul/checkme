@@ -74,7 +74,7 @@ class RootTasksFactory(
                     rootTaskFactories[it]?.let {
                         it.task
                             ?.rootCacheCoordinator
-                            ?.invalidate()
+                            ?.clear()
 
                         it.onRemove()
                     }

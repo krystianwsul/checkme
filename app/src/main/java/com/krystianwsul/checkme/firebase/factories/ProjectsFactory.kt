@@ -88,7 +88,7 @@ class ProjectsFactory(
 
             sharedProjectFactories[projectKey]?.project
                 ?.rootCacheCoordinator
-                ?.invalidate()
+                ?.clear()
 
             sharedProjectFactoriesProperty[projectKey] = sharedProjectFactory
 
@@ -102,7 +102,7 @@ class ProjectsFactory(
                 sharedProjectFactories.getValue(it)
                     .project
                     .rootCacheCoordinator
-                    .invalidate()
+                    .clear()
 
                 sharedProjectFactoriesProperty.remove(it)
             }

@@ -46,7 +46,7 @@ abstract class ProjectFactory<T : ProjectType, U : Parsable>(
         )
 
         val changeProjectChangeTypes = projectLoader.changeProjectEvents.map {
-            project.rootCacheCoordinator.invalidate()
+            project.rootCacheCoordinator.clear()
 
             project = newProject(it.projectRecord, it.userCustomTimeProvider, rootTaskProvider)
 

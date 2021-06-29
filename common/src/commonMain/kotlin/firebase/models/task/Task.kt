@@ -112,7 +112,10 @@ sealed class Task(
 
         val hierarchyIntervals = hierarchyIntervalPairs.map { it.second }
 
-        val childTaskRemovables = childTasks.map {
+        val childTaskModelRemovables =
+            childTasks.map { it.clearableInvalidatableManager.addInvalidatable(invalidatableCache) }
+
+        val childTaskIntervalInfoRemovables = childTasks.map {
             it.intervalInfoCache
                 .invalidatableManager
                 .addInvalidatable(invalidatableCache)
@@ -122,7 +125,9 @@ sealed class Task(
             rootModelChangeManager.rootModelInvalidatableManager.addInvalidatable(invalidatableCache)
 
         InvalidatableCache.ValueHolder(hierarchyIntervals) {
-            childTaskRemovables.forEach { it.remove() }
+            childTaskModelRemovables.forEach { it.remove() }
+
+            childTaskIntervalInfoRemovables.forEach { it.remove() }
 
             changeManagerRemovable.remove()
         }

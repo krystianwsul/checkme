@@ -18,6 +18,7 @@ import com.krystianwsul.common.domain.DeviceInfo
 import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.time.ExactTimeStamp
+import com.krystianwsul.common.utils.RootModelChangeManager
 import com.krystianwsul.treeadapter.getCurrentValue
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Single
@@ -131,6 +132,8 @@ class FactoryLoader(
 
                         val modelRootTaskDependencyStateContainer = RootTaskDependencyStateContainer.Impl()
 
+                        val existingInstanceChangeManager = RootModelChangeManager()
+
                         val rootTasksFactory = RootTasksFactory(
                             rootTasksLoader,
                             userKeyStore,
@@ -139,6 +142,7 @@ class FactoryLoader(
                             rootTaskKeySource,
                             loadDependencyTrackerManager,
                             modelRootTaskDependencyStateContainer,
+                            existingInstanceChangeManager,
                         ) { projectsFactorySingle.getCurrentValue() }
 
                         val projectToRootTaskCoordinator = ProjectToRootTaskCoordinator.Impl(
@@ -198,6 +202,7 @@ class FactoryLoader(
                                 shownFactory,
                                 domainDisposable,
                                 rootTasksFactory,
+                                existingInstanceChangeManager,
                                 ::getDeviceDbInfo,
                             )
                         }.cacheImmediate()

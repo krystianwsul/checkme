@@ -13,6 +13,7 @@ import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.firebase.models.taskhierarchy.TaskHierarchy
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.ProjectKey
+import com.krystianwsul.common.utils.RootModelChangeManager
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.common.utils.mapValuesNotNull
 import io.reactivex.rxjava3.core.Observable
@@ -29,6 +30,7 @@ class RootTasksFactory(
     private val rootTaskKeySource: RootTaskKeySource,
     loadDependencyTrackerManager: LoadDependencyTrackerManager,
     private val rootTaskDependencyStateContainer: RootTaskDependencyStateContainer,
+    override val rootModelChangeManager: RootModelChangeManager,
     private val getProjectsFactory: () -> ProjectsFactory,
 ) : RootTask.Parent {
 
@@ -62,6 +64,7 @@ class RootTasksFactory(
                         domainDisposable,
                         group,
                         rootTaskDependencyStateContainer,
+                        rootModelChangeManager,
                     )
                 }
             }

@@ -10,6 +10,7 @@ import com.krystianwsul.common.firebase.records.project.PrivateProjectRecord
 import com.krystianwsul.common.firebase.records.project.ProjectRecord
 import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.utils.ProjectType
+import com.krystianwsul.common.utils.RootModelChangeManager
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 
 class PrivateProjectFactory(
@@ -18,6 +19,7 @@ class PrivateProjectFactory(
         shownFactory: Instance.ShownFactory,
         domainDisposable: CompositeDisposable,
         rootTaskProvider: Project.RootTaskProvider,
+        rootModelChangeManager: RootModelChangeManager,
         deviceDbInfo: () -> DeviceDbInfo,
 ) : ProjectFactory<ProjectType.Private, PrivateProjectJson>(
         projectLoader,
@@ -25,12 +27,19 @@ class PrivateProjectFactory(
         shownFactory,
         domainDisposable,
         rootTaskProvider,
+        rootModelChangeManager,
         deviceDbInfo,
 ) {
 
-    override fun newProject(
-            projectRecord: ProjectRecord<ProjectType.Private>,
-            userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
-            rootTaskProvider: Project.RootTaskProvider,
-    ) = PrivateProject(projectRecord as PrivateProjectRecord, userCustomTimeProvider, rootTaskProvider)
+        override fun newProject(
+                projectRecord: ProjectRecord<ProjectType.Private>,
+                userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
+                rootTaskProvider: Project.RootTaskProvider,
+                rootModelChangeManager: RootModelChangeManager,
+        ) = PrivateProject(
+                projectRecord as PrivateProjectRecord,
+                userCustomTimeProvider,
+                rootTaskProvider,
+                rootModelChangeManager,
+        )
 }

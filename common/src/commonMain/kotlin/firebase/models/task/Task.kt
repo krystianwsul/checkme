@@ -27,6 +27,7 @@ sealed class Task(
     private val taskRecord: TaskRecord,
     val parentTaskDelegate: ParentTaskDelegate,
     val clearableInvalidatableManager: ClearableInvalidatableManager,
+    val rootModelChangeManager: RootModelChangeManager,
 ) : Current, CurrentOffset, QueryMatchable, Assignable {
 
     abstract val parent: Parent
@@ -408,6 +409,8 @@ sealed class Task(
 
         _existingInstances[instance.scheduleKey] = instance
 
+        rootModelChangeManager.invalidateExistingInstances()
+
         return instanceRecord
     }
 
@@ -418,6 +421,8 @@ sealed class Task(
         check(instance == _existingInstances[scheduleKey])
 
         _existingInstances.remove(scheduleKey)
+
+        rootModelChangeManager.invalidateExistingInstances()
     }
 
     private fun getExistingInstanceIfPresent(scheduleKey: ScheduleKey) = _existingInstances[scheduleKey]

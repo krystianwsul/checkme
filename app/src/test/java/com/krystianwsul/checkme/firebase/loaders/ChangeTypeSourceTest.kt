@@ -30,6 +30,7 @@ import com.krystianwsul.common.firebase.records.project.ProjectRecord
 import com.krystianwsul.common.firebase.records.task.RootTaskRecord
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.ProjectKey
+import com.krystianwsul.common.utils.RootModelChangeManager
 import com.krystianwsul.common.utils.ScheduleData
 import com.krystianwsul.common.utils.TaskKey
 import io.mockk.every
@@ -196,6 +197,8 @@ class ChangeTypeSourceTest {
 
         val modelRootTaskDependencyStateContainer = RootTaskDependencyStateContainer.Impl()
 
+        val existingInstanceChangeManager = RootModelChangeManager()
+
         rootTasksFactory = RootTasksFactory(
             rootTasksLoader,
             userKeyStore,
@@ -204,6 +207,7 @@ class ChangeTypeSourceTest {
             rootTaskKeySource,
             loadDependencyTrackerManager,
             modelRootTaskDependencyStateContainer,
+            existingInstanceChangeManager,
         ) { projectsFactory }
 
         val privateProjectManager = AndroidPrivateProjectManager(
@@ -268,6 +272,7 @@ class ChangeTypeSourceTest {
                 shownFactory,
                 domainDisposable,
                 rootTasksFactory,
+                existingInstanceChangeManager,
             ) { DomainFactoryRule.deviceDbInfo }.also { projectsFactory = it }
         }.cache()
 

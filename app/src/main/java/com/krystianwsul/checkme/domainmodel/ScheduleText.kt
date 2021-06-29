@@ -34,8 +34,8 @@ sealed class ScheduleText {
 
         fun fromUntil(from: Date?, until: Date?, intervalText: String? = null): String {
             fun getString(@StringRes id: Int) = MyApplication.instance
-                    .getString(id)
-                    .toLowerCase(Locale.getDefault())
+                .getString(id)
+                .lowercase(Locale.getDefault())
 
             val fromStr by lazy { from!!.getDisplayText() }
             val untilStr by lazy { until!!.getDisplayText() }

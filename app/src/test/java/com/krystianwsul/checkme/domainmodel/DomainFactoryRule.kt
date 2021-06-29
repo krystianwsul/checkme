@@ -30,6 +30,7 @@ import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.utils.ProjectKey
+import com.krystianwsul.common.utils.RootModelChangeManager
 import com.krystianwsul.common.utils.TaskHierarchyId
 import com.krystianwsul.common.utils.UserKey
 import com.mindorks.scheduler.RxPS
@@ -193,6 +194,8 @@ class DomainFactoryRule : TestRule {
             every { getDependencies(any()) } returns Single.just(myUserFactory.user)
         }
 
+        val existingInstanceChangeManager = RootModelChangeManager()
+
         val rootTaskFactory = RootTasksFactory(
             rootTasksLoader,
             mockk(relaxed = true),
@@ -201,6 +204,7 @@ class DomainFactoryRule : TestRule {
             rootTaskKeySource,
             mockk(relaxed = true),
             mockk(relaxed = true),
+            existingInstanceChangeManager,
         ) { projectsFactory }
 
         val sharedProjectsLoader = SharedProjectsLoader.Impl(
@@ -243,6 +247,7 @@ class DomainFactoryRule : TestRule {
             mockk(relaxed = true),
             compositeDisposable,
             rootTaskFactory,
+            existingInstanceChangeManager,
         ) { deviceDbInfo }
 
         val friendsFactory = mockk<FriendsFactory> {

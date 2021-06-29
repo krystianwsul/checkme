@@ -22,6 +22,7 @@ import com.krystianwsul.common.firebase.json.tasks.PrivateTaskJson
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ProjectType
+import com.krystianwsul.common.utils.RootModelChangeManager
 import com.krystianwsul.common.utils.TaskKey
 import io.mockk.every
 import io.mockk.mockk
@@ -139,6 +140,8 @@ class ProjectsFactoryTest {
     }
 
     private fun initProjectsFactory() {
+        val existingInstanceChangeManager = RootModelChangeManager()
+
         _projectsFactory = ProjectsFactory(
             privateProjectLoader,
             initialProjectEvent!!,
@@ -148,6 +151,7 @@ class ProjectsFactoryTest {
             factoryProvider.shownFactory,
             compositeDisposable,
             mockk(relaxed = true),
+            existingInstanceChangeManager,
         ) { deviceDbInfo }
 
         _emissionChecker = EmissionChecker("changeTypes", compositeDisposable, projectsFactory.changeTypes)

@@ -12,8 +12,13 @@ import com.krystianwsul.common.utils.ScheduleKey
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.common.utils.invalidatableLazy
 
-class ProjectTask(override val project: Project<*>, private val taskRecord: ProjectTaskRecord) :
-    Task(project, taskRecord, ParentTaskDelegate.Project(project), project.rootCacheCoordinator) {
+class ProjectTask(override val project: Project<*>, private val taskRecord: ProjectTaskRecord) : Task(
+    project,
+    taskRecord,
+    ParentTaskDelegate.Project(project),
+    project.rootCacheCoordinator,
+    project.rootModelChangeManager,
+) {
 
     override val parent = project
 

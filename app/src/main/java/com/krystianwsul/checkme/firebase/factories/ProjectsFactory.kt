@@ -32,6 +32,7 @@ class ProjectsFactory(
     private val shownFactory: Instance.ShownFactory,
     private val domainDisposable: CompositeDisposable,
     rootTaskProvider: Project.RootTaskProvider,
+    rootModelChangeManager: RootModelChangeManager,
     deviceDbInfo: () -> DeviceDbInfo,
 ) {
 
@@ -41,6 +42,7 @@ class ProjectsFactory(
         shownFactory,
         domainDisposable,
         rootTaskProvider,
+        rootModelChangeManager,
         deviceDbInfo,
     )
 
@@ -53,6 +55,7 @@ class ProjectsFactory(
                     shownFactory,
                     domainDisposable,
                     rootTaskProvider,
+                    rootModelChangeManager,
                     deviceDbInfo,
                 )
             }
@@ -83,12 +86,15 @@ class ProjectsFactory(
                 shownFactory,
                 domainDisposable,
                 rootTaskProvider,
+                rootModelChangeManager,
                 deviceDbInfo,
             )
 
             sharedProjectFactories[projectKey]?.project
                 ?.rootCacheCoordinator
                 ?.clear()
+
+            rootModelChangeManager.invalidateRootModels()
 
             sharedProjectFactoriesProperty[projectKey] = sharedProjectFactory
 
@@ -103,6 +109,8 @@ class ProjectsFactory(
                     .project
                     .rootCacheCoordinator
                     .clear()
+
+                rootModelChangeManager.invalidateRootModels()
 
                 sharedProjectFactoriesProperty.remove(it)
             }

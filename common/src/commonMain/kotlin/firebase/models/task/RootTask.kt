@@ -26,6 +26,7 @@ class RootTask private constructor(
     taskRecord,
     ParentTaskDelegate.Root(parent),
     clearableInvalidatableManager,
+    parent.rootModelChangeManager,
 ) {
 
     constructor(
@@ -482,6 +483,8 @@ class RootTask private constructor(
     }
 
     interface Parent : Task.Parent, Project.RootTaskProvider {
+
+        val rootModelChangeManager: RootModelChangeManager
 
         fun deleteRootTask(task: RootTask)
 

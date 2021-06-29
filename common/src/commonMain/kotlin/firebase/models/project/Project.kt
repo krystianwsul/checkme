@@ -22,6 +22,7 @@ abstract class Project<T : ProjectType>(
     val assignedToHelper: AssignedToHelper,
     val userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
     val rootTaskProvider: RootTaskProvider,
+    val rootModelChangeManager: RootModelChangeManager,
 ) : Current, JsonTime.CustomTimeProvider, JsonTime.ProjectCustomTimeKeyProvider, Task.Parent {
 
     val rootCacheCoordinator = ClearableInvalidatableManager()

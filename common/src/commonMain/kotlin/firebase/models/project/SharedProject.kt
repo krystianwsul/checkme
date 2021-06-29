@@ -12,16 +12,19 @@ import com.krystianwsul.common.firebase.records.AssignedToHelper
 import com.krystianwsul.common.firebase.records.project.SharedProjectRecord
 import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.time.Time
-import com.krystianwsul.common.utils.CustomTimeId
-import com.krystianwsul.common.utils.CustomTimeKey
-import com.krystianwsul.common.utils.ProjectType
-import com.krystianwsul.common.utils.UserKey
+import com.krystianwsul.common.utils.*
 
 class SharedProject(
     override val projectRecord: SharedProjectRecord,
     userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
     rootTaskProvider: RootTaskProvider,
-) : Project<ProjectType.Shared>(AssignedToHelper.Shared, userCustomTimeProvider, rootTaskProvider) {
+    rootModelChangeManager: RootModelChangeManager,
+) : Project<ProjectType.Shared>(
+    AssignedToHelper.Shared,
+    userCustomTimeProvider,
+    rootTaskProvider,
+    rootModelChangeManager,
+) {
 
     override val projectKey = projectRecord.projectKey
 

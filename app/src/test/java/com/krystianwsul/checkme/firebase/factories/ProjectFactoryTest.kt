@@ -21,10 +21,7 @@ import com.krystianwsul.common.firebase.json.tasks.RootTaskJson
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.records.project.PrivateProjectRecord
 import com.krystianwsul.common.time.ExactTimeStamp
-import com.krystianwsul.common.utils.ProjectKey
-import com.krystianwsul.common.utils.ProjectType
-import com.krystianwsul.common.utils.TaskKey
-import com.krystianwsul.common.utils.UserKey
+import com.krystianwsul.common.utils.*
 import io.mockk.every
 import io.mockk.mockk
 import io.reactivex.rxjava3.core.Observable
@@ -156,15 +153,18 @@ class ProjectFactoryTest {
         factoryProvider = TestFactoryProvider()
         projectLoader = TestProjectLoader(projectKey)
 
+        val existingInstanceChangeManager = RootModelChangeManager()
+
         projectLoader.initialProjectEvent
-                .subscribeBy {
-                    projectFactory = PrivateProjectFactory(
-                        projectLoader,
-                        it.data,
-                        factoryProvider.shownFactory,
-                        compositeDisposable,
-                        mockk(relaxed = true),
-                    ) { mockk() }
+            .subscribeBy {
+                projectFactory = PrivateProjectFactory(
+                    projectLoader,
+                    it.data,
+                    factoryProvider.shownFactory,
+                    compositeDisposable,
+                    mockk(relaxed = true),
+                    existingInstanceChangeManager,
+                ) { mockk() }
 
                     changeTypesEmissionChecker =
                             EmissionChecker("changeTypes", compositeDisposable, projectFactory.changeTypes)

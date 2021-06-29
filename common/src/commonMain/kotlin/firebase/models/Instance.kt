@@ -17,7 +17,10 @@ import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.*
 import com.soywiz.klock.days
 
-class Instance private constructor(val task: Task, private var data: Data) : Assignable {
+class Instance private constructor(
+    val task: Task,
+    private var data: Data,
+) : Assignable {
 
     companion object {
 
@@ -256,6 +259,10 @@ class Instance private constructor(val task: Task, private var data: Data) : Ass
         val childHierarchyIntervalsCallback =
             task.childHierarchyIntervalsProperty.addCallback { invalidatableCache.invalidate() }
 
+        val existingInstanceRemovable = task.rootModelChangeManager
+            .invalidatableManager
+            .addInvalidatable(invalidatableCache)
+
         InvalidatableCache.ValueHolder(childInstances) {
             doneOffsetProperty.removeCallback(doneOffsetCallback)
 
@@ -263,6 +270,8 @@ class Instance private constructor(val task: Task, private var data: Data) : Ass
             parentInstanceRemovables.forEach { it.remove() }
 
             task.childHierarchyIntervalsProperty.removeCallback(childHierarchyIntervalsCallback)
+
+            existingInstanceRemovable.remove()
         }
     }
 

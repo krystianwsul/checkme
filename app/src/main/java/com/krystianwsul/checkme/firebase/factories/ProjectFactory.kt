@@ -10,6 +10,7 @@ import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.records.project.ProjectRecord
 import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.utils.ProjectType
+import com.krystianwsul.common.utils.RootModelChangeManager
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.merge
@@ -22,6 +23,7 @@ abstract class ProjectFactory<T : ProjectType, U : Parsable>(
     protected val shownFactory: Instance.ShownFactory,
     domainDisposable: CompositeDisposable,
     private val rootTaskProvider: Project.RootTaskProvider,
+    private val rootModelChangeManager: RootModelChangeManager,
     protected val deviceDbInfo: () -> DeviceDbInfo,
 ) {
 
@@ -34,21 +36,28 @@ abstract class ProjectFactory<T : ProjectType, U : Parsable>(
         projectRecord: ProjectRecord<T>,
         userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
         rootTaskProvider: Project.RootTaskProvider,
+        rootModelChangeManager: RootModelChangeManager,
     ): Project<T>
 
     val changeTypes: Observable<ChangeType>
 
     init {
         project = newProject(
-                initialProjectEvent.projectRecord,
-                initialProjectEvent.userCustomTimeProvider,
-                rootTaskProvider,
+            initialProjectEvent.projectRecord,
+            initialProjectEvent.userCustomTimeProvider,
+            rootTaskProvider,
+            rootModelChangeManager,
         )
+
+        rootModelChangeManager.invalidateRootModels()
 
         val changeProjectChangeTypes = projectLoader.changeProjectEvents.map {
             project.rootCacheCoordinator.clear()
 
-            project = newProject(it.projectRecord, it.userCustomTimeProvider, rootTaskProvider)
+            rootModelChangeManager.invalidateRootModels()
+
+            project =
+                newProject(it.projectRecord, it.userCustomTimeProvider, rootTaskProvider, rootModelChangeManager)
 
             ChangeType.REMOTE
         }

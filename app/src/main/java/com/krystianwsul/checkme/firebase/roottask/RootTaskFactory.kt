@@ -61,7 +61,7 @@ class RootTaskFactory(
                 }
             }
             .doOnNext {
-                task?.rootCacheCoordinator?.clear()
+                task?.clearableInvalidatableManager?.clear()
 
                 task = it.task
 

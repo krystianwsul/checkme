@@ -149,12 +149,12 @@ class Instance private constructor(val task: Task, private var data: Data) : Ass
                 val parentInstance = task.parent.getInstance(parentState.parentInstanceKey)
 
                 val invalidatable = parentInstance.task
-                    .rootCacheCoordinator
+                    .clearableInvalidatableManager
                     .addInvalidatable { invalidatableCache.invalidate() }
 
                 InvalidatableCache.ValueHolder(parentInstance) {
                     parentInstance.task
-                        .rootCacheCoordinator
+                        .clearableInvalidatableManager
                         .removeInvalidatable(invalidatable)
                 }
             }
@@ -166,7 +166,7 @@ class Instance private constructor(val task: Task, private var data: Data) : Ass
                     val parentCcallback = parentInstance.doneOffsetProperty.addCallback(invalidatableCache::invalidate)
 
                     val invalidatable = parentInstance.task
-                        .rootCacheCoordinator
+                        .clearableInvalidatableManager
                         .addInvalidatable { invalidatableCache.invalidate() }
 
                     InvalidatableCache.ValueHolder(parentInstance) {
@@ -175,7 +175,7 @@ class Instance private constructor(val task: Task, private var data: Data) : Ass
                         parentInstance.doneOffsetProperty.removeCallback(parentCcallback)
 
                         parentInstance.task
-                            .rootCacheCoordinator
+                            .clearableInvalidatableManager
                             .removeInvalidatable(invalidatable)
                     }
                 } else {

@@ -5,7 +5,7 @@ import com.krystianwsul.common.domain.ProjectUndoData
 import com.krystianwsul.common.domain.TaskHierarchyContainer
 import com.krystianwsul.common.firebase.json.tasks.TaskJson
 import com.krystianwsul.common.firebase.models.*
-import com.krystianwsul.common.firebase.models.cache.RootCacheCoordinator
+import com.krystianwsul.common.firebase.models.cache.ClearableInvalidatableManager
 import com.krystianwsul.common.firebase.models.task.ProjectTask
 import com.krystianwsul.common.firebase.models.task.RootTask
 import com.krystianwsul.common.firebase.models.task.Task
@@ -24,7 +24,7 @@ abstract class Project<T : ProjectType>(
     val rootTaskProvider: RootTaskProvider,
 ) : Current, JsonTime.CustomTimeProvider, JsonTime.ProjectCustomTimeKeyProvider, Task.Parent {
 
-    val rootCacheCoordinator = RootCacheCoordinator()
+    val rootCacheCoordinator = ClearableInvalidatableManager()
 
     abstract val projectRecord: ProjectRecord<T>
 

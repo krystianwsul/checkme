@@ -70,15 +70,7 @@ class RootTasksFactory(
 
         val removeEvents = rootTasksLoader.removeEvents
             .doOnNext {
-                it.taskKeys.forEach {
-                    rootTaskFactories[it]?.let {
-                        it.task
-                            ?.rootCacheCoordinator
-                            ?.clear()
-
-                        it.onRemove()
-                    }
-                }
+                it.taskKeys.forEach { rootTaskFactories[it]?.onRemove() }
 
                 userKeyStore.onTasksRemoved(it.taskKeys)
                 rootTaskKeySource.onRootTasksRemoved(it.taskKeys)

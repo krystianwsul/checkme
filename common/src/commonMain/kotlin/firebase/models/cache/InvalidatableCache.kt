@@ -1,11 +1,11 @@
 package com.krystianwsul.common.firebase.models.cache
 
-import kotlin.reflect.KProperty
-
 private object UNINITIALIZED_VALUE
 
-class InvalidatableCacheProperty<T>(
+class InvalidatableCache<T>(
     private val initializer: () -> T,
+    private val setup: (property: InvalidatableCache<T>, value: T) -> Unit,
+    private val teardown: (property: InvalidatableCache<T>, value: T) -> Unit,
 ) : Lazy<T>, Invalidatable {
 
     private var _value: Any? = UNINITIALIZED_VALUE
@@ -16,8 +16,7 @@ class InvalidatableCacheProperty<T>(
         get() {
             val v1 = _value
 
-            @Suppress("UNCHECKED_CAST")
-            if (v1 !== UNINITIALIZED_VALUE) return v1 as T
+            if (v1 !== UNINITIALIZED_VALUE) return getTypedValue()
 
             if (initializing) throw IllegalStateException()
             initializing = true
@@ -25,23 +24,36 @@ class InvalidatableCacheProperty<T>(
             return try {
                 val typedValue = initializer()
                 _value = typedValue
+
+                setup(this, typedValue)
+
                 typedValue
             } finally {
                 initializing = false
             }
         }
 
+    @Suppress("UNCHECKED_CAST")
+    private fun getTypedValue() = _value as T
+
     override fun isInitialized(): Boolean = _value !== UNINITIALIZED_VALUE
 
     override fun invalidate() {
+        if (!isInitialized()) return
+
+        teardown(this, getTypedValue())
+
         _value = UNINITIALIZED_VALUE
     }
 
     override fun toString(): String = if (isInitialized()) value.toString() else "Lazy value not initialized yet."
-
-    operator fun setValue(any: Any, property: KProperty<*>, t: T) {
-        _value = t
-    }
 }
 
-fun <T> invalidatableCacheProperty(initializer: () -> T) = InvalidatableCacheProperty(initializer)
+fun <T> invalidatableCache(
+    initializer: () -> T,
+    setup: (property: InvalidatableCache<T>, value: T) -> Unit = { _, _ -> },
+    teardown: (property: InvalidatableCache<T>, value: T) -> Unit = { _, _ -> },
+    rootCacheCoordinator: RootCacheCoordinator? = null,
+) = InvalidatableCache(initializer, setup, teardown).also { property ->
+    rootCacheCoordinator?.let { it.invalidatables += property }
+}

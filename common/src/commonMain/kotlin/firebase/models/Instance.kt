@@ -164,14 +164,17 @@ class Instance private constructor(val task: Task, private var data: Data) : Ass
                 val parentInstance = getTaskHierarchyParentInstance()
 
                 if (parentInstance != null) {
-                    val callback = parentInstance.doneOffsetProperty.addCallback(invalidatableCache::invalidate)
+                    val callback = doneOffsetProperty.addCallback(invalidatableCache::invalidate)
+                    val parentCcallback = parentInstance.doneOffsetProperty.addCallback(invalidatableCache::invalidate)
 
                     val invalidatable = parentInstance.task
                         .rootCacheCoordinator
                         .addInvalidatable { invalidatableCache.invalidate() }
 
                     InvalidatableCache.ValueHolder(parentInstance) {
-                        parentInstance.doneOffsetProperty.removeCallback(callback)
+                        doneOffsetProperty.removeCallback(callback)
+
+                        parentInstance.doneOffsetProperty.removeCallback(parentCcallback)
 
                         parentInstance.task
                             .rootCacheCoordinator
@@ -195,8 +198,6 @@ class Instance private constructor(val task: Task, private var data: Data) : Ass
 
     init {
         addLazyCallbacks()
-
-        doneOffsetProperty.addCallback(::tearDownParentInstanceData)
     }
 
     private lateinit var intervalsCallback: () -> Unit // this is because of how JS handles method references

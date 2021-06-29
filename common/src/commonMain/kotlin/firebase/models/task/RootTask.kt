@@ -51,7 +51,7 @@ class RootTask private constructor(
             is Type.Child -> (type.parentTaskHierarchy.parentTask as RootTask).projectId
         }
     }.apply {
-        addTo(intervalInfoProperty)
+        intervalInfoCache.invalidatableManager.addInvalidatable { invalidate() }
         addCallback { normalizedFieldsDelegate.invalidate() }
     }
 

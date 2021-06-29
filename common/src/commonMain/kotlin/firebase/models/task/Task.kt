@@ -8,6 +8,8 @@ import com.krystianwsul.common.firebase.json.*
 import com.krystianwsul.common.firebase.json.tasks.RootTaskJson
 import com.krystianwsul.common.firebase.models.*
 import com.krystianwsul.common.firebase.models.cache.ClearableInvalidatableManager
+import com.krystianwsul.common.firebase.models.cache.InvalidatableCache
+import com.krystianwsul.common.firebase.models.cache.invalidatableCache
 import com.krystianwsul.common.firebase.models.interval.*
 import com.krystianwsul.common.firebase.models.noscheduleorparent.NoScheduleOrParent
 import com.krystianwsul.common.firebase.models.project.Project
@@ -82,12 +84,12 @@ sealed class Task(
 
     protected abstract val allowPlaceholderCurrentNoSchedule: Boolean
 
-    val intervalInfoProperty = invalidatableLazyCallbacks {
+    val intervalInfoCache = invalidatableCache<IntervalInfo> {
         checkNoIntervalUpdate()
 
-        IntervalBuilder.build(this, allowPlaceholderCurrentNoSchedule)
+        InvalidatableCache.ValueHolder(IntervalBuilder.build(this, allowPlaceholderCurrentNoSchedule)) { }
     }
-    val intervalInfo by intervalInfoProperty
+    val intervalInfo by intervalInfoCache
 
     val childHierarchyIntervalsProperty = invalidatableLazyCallbacks {
         parent.getTaskHierarchiesByParentTaskKey(taskKey)
@@ -456,7 +458,7 @@ sealed class Task(
         if (intervalUpdate != null) {
             intervalUpdate.invalidateIntervals()
         } else {
-            intervalInfoProperty.invalidate()
+            intervalInfoCache.invalidate()
         }
     }
 

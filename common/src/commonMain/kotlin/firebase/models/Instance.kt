@@ -4,6 +4,7 @@ package com.krystianwsul.common.firebase.models
 import com.krystianwsul.common.criteria.Assignable
 import com.krystianwsul.common.firebase.MyCustomTime
 import com.krystianwsul.common.firebase.models.cache.InvalidatableCache
+import com.krystianwsul.common.firebase.models.cache.Removable
 import com.krystianwsul.common.firebase.models.cache.invalidatableCache
 import com.krystianwsul.common.firebase.models.customtime.SharedCustomTime
 import com.krystianwsul.common.firebase.models.interval.ScheduleInterval
@@ -195,17 +196,17 @@ class Instance private constructor(
         addLazyCallbacks()
     }
 
-    private lateinit var intervalsCallback: () -> Unit // this is because of how JS handles method references
+    private lateinit var intervalsRemovable: Removable // this is because of how JS handles method references
 
     private fun addLazyCallbacks() {
-        intervalsCallback = task.intervalInfoProperty.addCallback {
+        intervalsRemovable = task.intervalInfoCache.invalidatableManager.addInvalidatable {
             matchingScheduleIntervalsProperty.invalidate()
             tearDownParentInstanceData()
         }
     }
 
     private fun removeLazyCallbacks() {
-        task.intervalInfoProperty.removeCallback(intervalsCallback)
+        intervalsRemovable.remove()
 
         tearDownParentInstanceData()
     }

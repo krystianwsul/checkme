@@ -257,8 +257,9 @@ class Instance private constructor(
                 .addInvalidatable(invalidatableCache)
         }
 
-        val childHierarchyIntervalsCallback =
-            task.childHierarchyIntervalsProperty.addCallback { invalidatableCache.invalidate() }
+        val childHierarchyIntervalsRemovable = task.childHierarchyIntervalsCache
+            .invalidatableManager
+            .addInvalidatable(invalidatableCache)
 
         val existingInstanceRemovable = task.rootModelChangeManager
             .existingInstancesInvalidatableManager
@@ -272,7 +273,7 @@ class Instance private constructor(
             childTaskRemovables.forEach { it.remove() }
             parentInstanceRemovables.forEach { it.remove() }
 
-            task.childHierarchyIntervalsProperty.removeCallback(childHierarchyIntervalsCallback)
+            childHierarchyIntervalsRemovable.remove()
 
             existingInstanceRemovable.remove()
 

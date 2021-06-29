@@ -6,7 +6,12 @@ class RootModelChangeManager {
 
     val existingInstancesInvalidatableManager = InvalidatableManager()
 
+    val rootModelInvalidatableManager = InvalidatableManager()
+
     fun invalidateExistingInstances() = existingInstancesInvalidatableManager.invalidate()
 
-    fun invalidateRootModels() = invalidateExistingInstances()
+    fun invalidateRootModels() {
+        invalidateExistingInstances()
+        rootModelInvalidatableManager.invalidate()
+    }
 }

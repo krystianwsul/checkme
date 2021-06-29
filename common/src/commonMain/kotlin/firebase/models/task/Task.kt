@@ -88,7 +88,7 @@ sealed class Task(
     }
     val intervalInfo by intervalInfoProperty
 
-    private val childHierarchyIntervalsProperty = invalidatableLazy {
+    val childHierarchyIntervalsProperty = invalidatableLazyCallbacks {
         parent.getTaskHierarchiesByParentTaskKey(taskKey)
             .asSequence()
             .map { it.childTask }

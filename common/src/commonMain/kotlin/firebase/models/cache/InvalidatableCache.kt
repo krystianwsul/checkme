@@ -25,9 +25,13 @@ class InvalidatableCache<T>(private val initializer: (invalidatableCache: Invali
             }
         }
 
+    val invalidatableManager = InvalidatableManager()
+
     override fun isInitialized(): Boolean = valueHolder != null
 
     override fun invalidate() {
+        invalidatableManager.invalidate()
+
         val currentValueHolder = valueHolder ?: return
 
         currentValueHolder.teardown()

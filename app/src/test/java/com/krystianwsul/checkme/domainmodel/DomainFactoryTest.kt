@@ -565,4 +565,58 @@ class DomainFactoryTest {
 
         assertEquals(projectKey, task.project.projectKey)
     }
+
+    @Test
+    fun testEditInstanceParent() {
+        val date = Date(2021, 6, 29)
+        var now = ExactTimeStamp.Local(date, HourMinute(1, 0))
+
+        val scheduleData = listOf(ScheduleData.Single(date, TimePair(HourMinute(2, 0))))
+
+        val parentTask = domainUpdater(now).createScheduleTopLevelTask(
+            DomainListenerManager.NotificationType.All,
+            "parent task",
+            scheduleData,
+            null,
+            null,
+            null,
+        ).blockingGet()
+
+        val childTask = domainUpdater(now).createScheduleTopLevelTask(
+            DomainListenerManager.NotificationType.All,
+            "child task",
+            scheduleData,
+            null,
+            null,
+            null,
+        ).blockingGet()
+
+        val instanceDatasBefore = domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
+            .groupListDataWrapper
+            .instanceDatas
+
+        assertEquals(2, instanceDatasBefore.size)
+
+        now += 1.hours
+
+        val childInstanceKey = instanceDatasBefore.map { it.instanceKey }.single { it.taskKey == childTask.taskKey }
+        val parentInstanceKey = instanceDatasBefore.map { it.instanceKey }.single { it.taskKey == parentTask.taskKey }
+
+        domainUpdater(now).setInstancesParent(
+            DomainListenerManager.NotificationType.All,
+            setOf(childInstanceKey),
+            parentInstanceKey,
+        ).blockingGet()
+
+        val instanceDatasAfter = domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
+            .groupListDataWrapper
+            .instanceDatas
+
+        assertEquals(1, instanceDatasAfter.size)
+
+        val singleInstanceData = instanceDatasAfter.single()
+        assertEquals(parentInstanceKey, singleInstanceData.instanceKey)
+
+        assertEquals(childInstanceKey, singleInstanceData.children.values.single().instanceKey)
+    }
 }

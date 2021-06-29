@@ -3,6 +3,8 @@ package com.krystianwsul.common.firebase.models
 
 import com.krystianwsul.common.criteria.Assignable
 import com.krystianwsul.common.firebase.MyCustomTime
+import com.krystianwsul.common.firebase.models.cache.InvalidatableCache
+import com.krystianwsul.common.firebase.models.cache.invalidatableCache
 import com.krystianwsul.common.firebase.models.customtime.SharedCustomTime
 import com.krystianwsul.common.firebase.models.interval.ScheduleInterval
 import com.krystianwsul.common.firebase.models.interval.Type
@@ -142,20 +144,47 @@ class Instance private constructor(val task: Task, private var data: Data) : Ass
         }
     }
 
-    private val parentInstanceProperty = invalidatableLazy {
-        val parentInstance = when (val parentState = data.parentState) {
-            ParentState.NoParent -> null
-            is ParentState.Parent -> task.parent.getInstance(parentState.parentInstanceKey)
-            ParentState.Unset -> getTaskHierarchyParentInstance()
-        }
+    private val parentInstanceCache = invalidatableCache<Instance?> { invalidatableCache ->
+        when (val parentState = data.parentState) {
+            ParentState.NoParent -> InvalidatableCache.ValueHolder(null) { }
+            is ParentState.Parent -> {
+                val parentInstance = task.parent.getInstance(parentState.parentInstanceKey)
 
-        parentInstance?.let {
-            ParentInstanceData(it, it.doneOffsetProperty.addCallback(::tearDownParentInstanceData))
+                val invalidatable = parentInstance.task
+                    .rootCacheCoordinator
+                    .addInvalidatable { invalidatableCache.invalidate() }
+
+                InvalidatableCache.ValueHolder(parentInstance) {
+                    parentInstance.task
+                        .rootCacheCoordinator
+                        .removeInvalidatable(invalidatable)
+                }
+            }
+            ParentState.Unset -> {
+                val parentInstance = getTaskHierarchyParentInstance()
+
+                if (parentInstance != null) {
+                    val callback = parentInstance.doneOffsetProperty.addCallback(invalidatableCache::invalidate)
+
+                    val invalidatable = parentInstance.task
+                        .rootCacheCoordinator
+                        .addInvalidatable { invalidatableCache.invalidate() }
+
+                    InvalidatableCache.ValueHolder(parentInstance) {
+                        parentInstance.doneOffsetProperty.removeCallback(callback)
+
+                        parentInstance.task
+                            .rootCacheCoordinator
+                            .removeInvalidatable(invalidatable)
+                    }
+                } else {
+                    InvalidatableCache.ValueHolder(null) { }
+                }
+            }
         }
     }
 
-    private val parentInstanceData by parentInstanceProperty
-    val parentInstance get() = parentInstanceData?.instance
+    val parentInstance get() = parentInstanceCache.value
 
     constructor(task: Task, instanceRecord: InstanceRecord) : this(task, Data.Real(task, instanceRecord))
 
@@ -186,13 +215,7 @@ class Instance private constructor(val task: Task, private var data: Data) : Ass
     }
 
     private fun tearDownParentInstanceData() {
-        if (parentInstanceProperty.isInitialized()) {
-            parentInstanceData?.apply {
-                instance.doneOffsetProperty.removeCallback(doneCallback)
-            }
-
-            parentInstanceProperty.invalidate()
-        }
+        parentInstanceCache.invalidate()
     }
 
     fun exists() = (data is Data.Real)

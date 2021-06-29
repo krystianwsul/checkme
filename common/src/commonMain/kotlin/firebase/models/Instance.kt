@@ -244,7 +244,7 @@ class Instance private constructor(
 
         val doneOffsetCallback = doneOffsetProperty.addCallback { invalidatableCache.invalidate() }
 
-        val taskRemovables = childInstances.map {
+        val childTaskRemovables = childInstances.map {
             it.task
                 .clearableInvalidatableManager
                 .addInvalidatable(invalidatableCache)
@@ -260,18 +260,22 @@ class Instance private constructor(
             task.childHierarchyIntervalsProperty.addCallback { invalidatableCache.invalidate() }
 
         val existingInstanceRemovable = task.rootModelChangeManager
-            .invalidatableManager
+            .existingInstancesInvalidatableManager
             .addInvalidatable(invalidatableCache)
+
+        val taskRemovable = task.clearableInvalidatableManager.addInvalidatable(invalidatableCache)
 
         InvalidatableCache.ValueHolder(childInstances) {
             doneOffsetProperty.removeCallback(doneOffsetCallback)
 
-            taskRemovables.forEach { it.remove() }
+            childTaskRemovables.forEach { it.remove() }
             parentInstanceRemovables.forEach { it.remove() }
 
             task.childHierarchyIntervalsProperty.removeCallback(childHierarchyIntervalsCallback)
 
             existingInstanceRemovable.remove()
+
+            taskRemovable.remove()
         }
     }
 

@@ -4,9 +4,9 @@ import com.krystianwsul.common.firebase.models.cache.InvalidatableManager
 
 class RootModelChangeManager {
 
-    val invalidatableManager = InvalidatableManager()
+    val existingInstancesInvalidatableManager = InvalidatableManager()
 
-    fun invalidateExistingInstances() = invalidatableManager.invalidate()
+    fun invalidateExistingInstances() = existingInstancesInvalidatableManager.invalidate()
 
     fun invalidateRootModels() = invalidateExistingInstances()
 }

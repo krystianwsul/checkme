@@ -47,7 +47,7 @@ class Instance private constructor(val task: Task, private var data: Data) : Ass
     private val doneOffsetProperty = invalidatableLazyCallbacks {
         data.done?.let { ExactTimeStamp.Offset.fromOffset(it, data.doneOffset) }
     }
-    val doneOffset by doneOffsetProperty
+    private val doneOffset by doneOffsetProperty
 
     val name get() = task.name
 
@@ -68,8 +68,6 @@ class Instance private constructor(val task: Task, private var data: Data) : Ass
         ).toList()
     }
     private val matchingScheduleIntervals by matchingScheduleIntervalsProperty
-
-    private class ParentInstanceData(val instance: Instance, val doneCallback: () -> Unit)
 
     fun getTaskHierarchyParentInstance(): Instance? {
         /**
@@ -295,7 +293,7 @@ class Instance private constructor(val task: Task, private var data: Data) : Ass
             .orEmpty()
             .filter {
                 stringBuilder.appendLine("schedule " + it.second.schedule.id + " dateTime: " + it.first)
-                stringBuilder.appendLine("instance scheduleDateTime: " + scheduleDateTime)
+                stringBuilder.appendLine("instance scheduleDateTime: $scheduleDateTime")
                 it.first == scheduleDateTime
             }
 

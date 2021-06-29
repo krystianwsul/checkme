@@ -353,12 +353,7 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
                 .projects
                 .values
                 .forEach {
-                    val results = Irrelevant.setIrrelevant(
-                        userCustomTimeRelevances,
-                        it,
-                        exactTimeStamp,
-                        false,
-                    )
+                    val results = Irrelevant.setIrrelevant(userCustomTimeRelevances, it, exactTimeStamp)
 
                     results.irrelevantExistingInstances
                         .sortedBy { it.scheduleDateTime }

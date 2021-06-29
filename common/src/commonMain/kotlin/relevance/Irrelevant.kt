@@ -25,7 +25,6 @@ object Irrelevant {
         userCustomTimeRelevances: Map<CustomTimeKey.User, CustomTimeRelevance>,
         project: Project<*>,
         now: ExactTimeStamp.Local,
-        delete: Boolean = true,
     ): Result {
         val tasks = project.getAllTasks()
 
@@ -70,16 +69,13 @@ object Irrelevant {
             .map { taskRelevances.getValue(it.taskKey) }
             .forEach { it.setRelevant(taskRelevances, taskHierarchyRelevances, instanceRelevances, now) }
 
-        rootInstances.map { instanceRelevances[it.instanceKey]!! }
-            .forEach { it.setRelevant(taskRelevances, taskHierarchyRelevances, instanceRelevances, now) }
+        rootInstances.map { instanceRelevances.getValue(it.instanceKey) }.forEach {
+            it.setRelevant(taskRelevances, taskHierarchyRelevances, instanceRelevances, now)
+        }
 
         existingInstances.asSequence()
-            .filter {
-                it.isVisible(
-                    now,
-                    Instance.VisibilityOptions(hack24 = true)
-                )
-            } // this probably makes the recursive set in tasks redundant
+            // this probably makes the recursive set in tasks redundant
+            .filter { it.isVisible(now, Instance.VisibilityOptions(hack24 = true)) }
             .map { instanceRelevances.getValue(it.instanceKey) }
             .forEach { it.setRelevant(taskRelevances, taskHierarchyRelevances, instanceRelevances, now) }
 
@@ -102,17 +98,13 @@ object Irrelevant {
          * The first is removed normally.  The second is for nested task hierarchies, inside tasks that will also be deleted.
          * We don't want to, uh, double-delete them, but we do need to remove Project.rootTaskIds entries.
          */
-        val (irrelevantTaskHierarchies, irrelevantNestedTaskHierarchies) = (taskHierarchies - relevantTaskHierarchies).partition {
-            when (it) {
-                is ProjectTaskHierarchy -> true
-                is NestedTaskHierarchy -> {
-                    val childTaskRelevance = taskRelevances.getValue(it.childTaskKey)
-
-                    childTaskRelevance.relevant
+        val (irrelevantTaskHierarchies, irrelevantNestedTaskHierarchies) =
+            (taskHierarchies - relevantTaskHierarchies).partition {
+                when (it) {
+                    is ProjectTaskHierarchy -> true
+                    is NestedTaskHierarchy -> taskRelevances.getValue(it.childTaskKey).relevant
                 }
-                else -> throw UnsupportedOperationException() // compilation in unit tests
             }
-        }
 
         val relevantInstances = instanceRelevances.values
             .filter { it.relevant }
@@ -137,10 +129,7 @@ object Irrelevant {
                      * Can't assume the instance is root; it could be joined.  But (I think) the schedule is still
                      * relevant, since removing it would make the task unscheduled.
                      */
-                    !schedule.getInstance(it).isVisible(
-                        now,
-                        Instance.VisibilityOptions(hack24 = true)
-                    )
+                    !schedule.getInstance(it).isVisible(now, Instance.VisibilityOptions(hack24 = true))
                 } else {
                     if (scheduleInterval.currentOffset(now) && schedule.current(now)) {
                         false
@@ -169,15 +158,12 @@ object Irrelevant {
             irrelevantNoScheduleOrParents += it.noScheduleOrParents - relevantNoScheduleOrParents
         }
 
-        if (delete) {
-            irrelevantExistingInstances.forEach { it.delete() }
-            irrelevantSchedules.forEach { it.delete() }
-            irrelevantNoScheduleOrParents.forEach { it.delete() }
-            irrelevantTaskHierarchies.forEach { it.delete() }
-            irrelevantNestedTaskHierarchies.forEach { (it as NestedTaskHierarchy).deleteFromParentTask() }
-
-            irrelevantTasks.forEach { it.delete() }
-        }
+        irrelevantExistingInstances.forEach { it.delete() }
+        irrelevantSchedules.forEach { it.delete() }
+        irrelevantNoScheduleOrParents.forEach { it.delete() }
+        irrelevantTaskHierarchies.forEach { it.delete() }
+        irrelevantNestedTaskHierarchies.forEach { (it as NestedTaskHierarchy).deleteFromParentTask() }
+        irrelevantTasks.forEach { it.delete() }
 
         val remoteCustomTimes = project.customTimes
 
@@ -194,8 +180,7 @@ object Irrelevant {
 
         val remoteProjectRelevance = RemoteProjectRelevance(project)
 
-        if (project.current(getIrrelevantNow(project.endExactTimeStamp)))
-            remoteProjectRelevance.setRelevant()
+        if (project.current(getIrrelevantNow(project.endExactTimeStamp))) remoteProjectRelevance.setRelevant()
 
         taskRelevances.values
             .filter { it.relevant }
@@ -212,7 +197,7 @@ object Irrelevant {
 
         val irrelevantRemoteCustomTimes = remoteCustomTimes - relevantRemoteCustomTimes
 
-        if (delete) irrelevantRemoteCustomTimes.forEach { it.delete() }
+        irrelevantRemoteCustomTimes.forEach { it.delete() }
 
         if (remoteProjectRelevance.relevant) {
             project.updateRootTaskKeys()
@@ -231,7 +216,7 @@ object Irrelevant {
                 }
         }
 
-        if (delete && !remoteProjectRelevance.relevant) project.delete()
+        if (!remoteProjectRelevance.relevant) project.delete()
 
         return Result(
             irrelevantExistingInstances,

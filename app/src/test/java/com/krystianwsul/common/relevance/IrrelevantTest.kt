@@ -426,7 +426,7 @@ class IrrelevantTest {
 
         now = ExactTimeStamp.Local(day2, hour5)
 
-        Irrelevant.setIrrelevant(mapOf(), project, now, false)
+        Irrelevant.setIrrelevant(mapOf(), project, now)
     }
 
     @Test
@@ -557,6 +557,6 @@ class IrrelevantTest {
 
         now = ExactTimeStamp.Local(day2, hour5)
 
-        Irrelevant.setIrrelevant(mapOf(), project, now, false)
+        Irrelevant.setIrrelevant(mapOf(), project, now)
     }
 }

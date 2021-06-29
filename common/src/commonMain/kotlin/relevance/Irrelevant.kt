@@ -17,7 +17,6 @@ import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
-import com.soywiz.klock.days
 
 object Irrelevant {
 
@@ -51,20 +50,11 @@ object Irrelevant {
             .associate { it.instanceKey to InstanceRelevance(it) }
             .toMutableMap()
 
-        val yesterday = ExactTimeStamp.Local(now.toDateTimeSoy() - 1.days)
-
-        // delay deleting removed tasks by a day
-        fun getIrrelevantNow(endExactTimeStamp: ExactTimeStamp.Local?) = endExactTimeStamp?.takeIf { it > yesterday }
-            ?.minusOne()
-            ?: now
-
         tasks.asSequence()
             .filter {
-                val exactTimeStamp = getIrrelevantNow(it.endExactTimeStamp)
-
-                it.current(exactTimeStamp)
-                        && it.isTopLevelTask(exactTimeStamp)
-                        && it.isVisible(exactTimeStamp, true)
+                it.current(now)
+                        && it.isTopLevelTask(now)
+                        && it.isVisible(now, true)
             }
             .map { taskRelevances.getValue(it.taskKey) }
             .forEach { it.setRelevant(taskRelevances, taskHierarchyRelevances, instanceRelevances, now) }
@@ -174,13 +164,13 @@ object Irrelevant {
 
         if (project is PrivateProject) {
             project.customTimes
-                .filter { it.notDeleted(getIrrelevantNow(it.endExactTimeStamp)) }
+                .filter { it.notDeleted(now) }
                 .forEach { customTimeRelevanceCollection.getRelevance(it.key).setRelevant() }
         }
 
         val remoteProjectRelevance = RemoteProjectRelevance(project)
 
-        if (project.current(getIrrelevantNow(project.endExactTimeStamp))) remoteProjectRelevance.setRelevant()
+        if (project.current(now)) remoteProjectRelevance.setRelevant()
 
         taskRelevances.values
             .filter { it.relevant }

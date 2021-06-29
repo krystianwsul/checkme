@@ -10,6 +10,20 @@ class RootCacheCoordinator : Invalidatable {
         invalidatables.forEach { it.invalidate() }
     }
 
+    fun addInvalidatable(invalidatable: Invalidatable) {
+        check(!cleared)
+        check(invalidatable !in invalidatables)
+
+        invalidatables += invalidatable
+    }
+
+    fun removeInvalidatable(invalidatable: Invalidatable) {
+        check(!cleared)
+        check(invalidatable in invalidatables)
+
+        invalidatables -= invalidatable
+    }
+
     fun clear() {
         check(!cleared)
 

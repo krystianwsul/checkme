@@ -2,58 +2,43 @@ package com.krystianwsul.common.firebase.models.cache
 
 private object UNINITIALIZED_VALUE
 
-class InvalidatableCache<T>(
-    private val initializer: () -> T,
-    private val setup: (property: InvalidatableCache<T>, value: T) -> Unit,
-    private val teardown: (property: InvalidatableCache<T>, value: T) -> Unit,
-) : Lazy<T>, Invalidatable {
+class InvalidatableCache<T>(private val initializer: (property: InvalidatableCache<T>) -> ValueHolder<T>) :
+    Lazy<T>, Invalidatable {
 
-    private var _value: Any? = UNINITIALIZED_VALUE
+    private var valueHolder: ValueHolder<T>? = null
 
     private var initializing = false
 
     override val value: T
         get() {
-            val v1 = _value
-
-            if (v1 !== UNINITIALIZED_VALUE) return getTypedValue()
+            valueHolder?.let { return it.value }
 
             if (initializing) throw IllegalStateException()
             initializing = true
 
             return try {
-                val typedValue = initializer()
-                _value = typedValue
+                valueHolder = initializer(this)
 
-                setup(this, typedValue)
-
-                typedValue
+                valueHolder!!.value
             } finally {
                 initializing = false
             }
         }
 
-    @Suppress("UNCHECKED_CAST")
-    private fun getTypedValue() = _value as T
-
-    override fun isInitialized(): Boolean = _value !== UNINITIALIZED_VALUE
+    override fun isInitialized(): Boolean = valueHolder != null
 
     override fun invalidate() {
-        if (!isInitialized()) return
+        val currentValueHolder = valueHolder ?: return
 
-        teardown(this, getTypedValue())
+        currentValueHolder.teardown()
 
-        _value = UNINITIALIZED_VALUE
+        valueHolder = null
     }
 
     override fun toString(): String = if (isInitialized()) value.toString() else "Lazy value not initialized yet."
+
+    class ValueHolder<T>(val value: T, val teardown: () -> Unit)
 }
 
-fun <T> invalidatableCache(
-    initializer: () -> T,
-    setup: (property: InvalidatableCache<T>, value: T) -> Unit = { _, _ -> },
-    teardown: (property: InvalidatableCache<T>, value: T) -> Unit = { _, _ -> },
-    rootCacheCoordinator: RootCacheCoordinator? = null,
-) = InvalidatableCache(initializer, setup, teardown).also { property ->
-    rootCacheCoordinator?.let { it.invalidatables += property }
-}
+fun <T> invalidatableCache(initializer: (property: InvalidatableCache<T>) -> InvalidatableCache.ValueHolder<T>) =
+    InvalidatableCache(initializer)

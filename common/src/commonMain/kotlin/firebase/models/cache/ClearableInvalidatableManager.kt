@@ -4,7 +4,7 @@ class ClearableInvalidatableManager : InvalidatableManager() {
 
     private var cleared = false
 
-    override fun addInvalidatable(invalidatable: Invalidatable): Invalidatable {
+    override fun addInvalidatable(invalidatable: Invalidatable): Removable {
         check(!cleared)
 
         return super.addInvalidatable(invalidatable)

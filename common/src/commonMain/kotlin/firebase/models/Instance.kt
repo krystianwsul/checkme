@@ -148,35 +148,29 @@ class Instance private constructor(val task: Task, private var data: Data) : Ass
             is ParentState.Parent -> {
                 val parentInstance = task.parent.getInstance(parentState.parentInstanceKey)
 
-                val invalidatable = parentInstance.task
+                val removable = parentInstance.task
                     .clearableInvalidatableManager
-                    .addInvalidatable { invalidatableCache.invalidate() }
+                    .addInvalidatable(invalidatableCache)
 
-                InvalidatableCache.ValueHolder(parentInstance) {
-                    parentInstance.task
-                        .clearableInvalidatableManager
-                        .removeInvalidatable(invalidatable)
-                }
+                InvalidatableCache.ValueHolder(parentInstance) { removable.remove() }
             }
             ParentState.Unset -> {
                 val parentInstance = getTaskHierarchyParentInstance()
 
                 if (parentInstance != null) {
                     val callback = doneOffsetProperty.addCallback(invalidatableCache::invalidate)
-                    val parentCcallback = parentInstance.doneOffsetProperty.addCallback(invalidatableCache::invalidate)
+                    val parentCallback = parentInstance.doneOffsetProperty.addCallback(invalidatableCache::invalidate)
 
-                    val invalidatable = parentInstance.task
+                    val removable = parentInstance.task
                         .clearableInvalidatableManager
-                        .addInvalidatable { invalidatableCache.invalidate() }
+                        .addInvalidatable(invalidatableCache)
 
                     InvalidatableCache.ValueHolder(parentInstance) {
                         doneOffsetProperty.removeCallback(callback)
 
-                        parentInstance.doneOffsetProperty.removeCallback(parentCcallback)
+                        parentInstance.doneOffsetProperty.removeCallback(parentCallback)
 
-                        parentInstance.task
-                            .clearableInvalidatableManager
-                            .removeInvalidatable(invalidatable)
+                        removable.remove()
                     }
                 } else {
                     InvalidatableCache.ValueHolder(null) { }

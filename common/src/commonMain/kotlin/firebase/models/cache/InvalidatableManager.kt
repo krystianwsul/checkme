@@ -8,12 +8,12 @@ open class InvalidatableManager : Invalidatable {
         invalidatables.forEach { it.invalidate() }
     }
 
-    open fun addInvalidatable(invalidatable: Invalidatable): Invalidatable {
+    open fun addInvalidatable(invalidatable: Invalidatable): Removable {
         check(invalidatable !in invalidatables)
 
         invalidatables += invalidatable
 
-        return invalidatable
+        return Removable { removeInvalidatable(invalidatable) }
     }
 
     open fun removeInvalidatable(invalidatable: Invalidatable) {

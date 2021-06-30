@@ -49,12 +49,12 @@ abstract class ProjectFactory<T : ProjectType, U : Parsable>(
             rootModelChangeManager,
         )
 
-        rootModelChangeManager.invalidateRootModels()
+        rootModelChangeManager.invalidateProjects()
 
         val changeProjectChangeTypes = projectLoader.changeProjectEvents.map {
             project.rootCacheCoordinator.clear()
 
-            rootModelChangeManager.invalidateRootModels()
+            rootModelChangeManager.invalidateProjects()
 
             project =
                 newProject(it.projectRecord, it.userCustomTimeProvider, rootTaskProvider, rootModelChangeManager)

@@ -65,7 +65,7 @@ class RootTaskFactory(
             .doOnNext {
                 task?.clearableInvalidatableManager?.clear()
 
-                rootModelChangeManager.invalidateRootModels()
+                rootModelChangeManager.invalidateRootTasks()
 
                 task = it.task
 

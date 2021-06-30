@@ -95,7 +95,7 @@ class ProjectsFactory(
                 ?.rootCacheCoordinator
                 ?.clear()
 
-            rootModelChangeManager.invalidateRootModels()
+            rootModelChangeManager.invalidateProjects()
 
             sharedProjectFactoriesProperty[projectKey] = sharedProjectFactory
 
@@ -111,7 +111,7 @@ class ProjectsFactory(
                     .rootCacheCoordinator
                     .clear()
 
-                rootModelChangeManager.invalidateRootModels()
+                rootModelChangeManager.invalidateProjects()
 
                 sharedProjectFactoriesProperty.remove(it)
             }

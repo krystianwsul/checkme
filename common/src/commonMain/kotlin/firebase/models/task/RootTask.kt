@@ -83,7 +83,13 @@ class RootTask private constructor(
 
     val projectId: String by projectIdCache
 
-    override val project get() = parent.getProject(projectId)
+    private val projectCache = invalidatableCache<Project<*>>(clearableInvalidatableManager) { invalidatableCache ->
+        val removable = projectIdCache.invalidatableManager.addInvalidatable(invalidatableCache)
+
+        InvalidatableCache.ValueHolder(parent.getProject(projectId)) { removable.remove() }
+    }
+
+    override val project by projectCache
 
     val noScheduleOrParentsMap = taskRecord.noScheduleOrParentRecords
         .mapValues { RootNoScheduleOrParent(this, it.value) }

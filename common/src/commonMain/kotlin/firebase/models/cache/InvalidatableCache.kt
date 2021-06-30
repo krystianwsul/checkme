@@ -1,10 +1,8 @@
 package com.krystianwsul.common.firebase.models.cache
 
-private object UNINITIALIZED_VALUE
-
 class InvalidatableCache<T>(
     invalidatableManager: ClearableInvalidatableManager,
-    private val initializer: (invalidatableCache: InvalidatableCache<T>) -> ValueHolder<T>
+    private val initializer: (invalidatableCache: InvalidatableCache<T>) -> ValueHolder<T>,
 ) :
     Lazy<T>, Invalidatable {
 

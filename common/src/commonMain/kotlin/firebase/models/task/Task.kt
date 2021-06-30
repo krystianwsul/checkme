@@ -87,11 +87,7 @@ sealed class Task(
     val intervalInfoCache = invalidatableCache<IntervalInfo>(clearableInvalidatableManager) { invalidatableCache ->
         checkNoIntervalUpdate()
 
-        val removable = clearableInvalidatableManager.addInvalidatable(invalidatableCache)
-
-        InvalidatableCache.ValueHolder(IntervalBuilder.build(this, allowPlaceholderCurrentNoSchedule)) {
-            removable.remove()
-        }
+        InvalidatableCache.ValueHolder(IntervalBuilder.build(this, allowPlaceholderCurrentNoSchedule)) { }
     }
     val intervalInfo by intervalInfoCache
 
@@ -113,9 +109,6 @@ sealed class Task(
 
             val hierarchyIntervals = hierarchyIntervalPairs.map { it.second }
 
-            val childTaskModelRemovables =
-                childTasks.map { it.clearableInvalidatableManager.addInvalidatable(invalidatableCache) }
-
             val childTaskIntervalInfoRemovables = childTasks.map {
                 it.intervalInfoCache
                     .invalidatableManager
@@ -126,8 +119,6 @@ sealed class Task(
                 rootModelChangeManager.rootModelInvalidatableManager.addInvalidatable(invalidatableCache)
 
             InvalidatableCache.ValueHolder(hierarchyIntervals) {
-                childTaskModelRemovables.forEach { it.remove() }
-
                 childTaskIntervalInfoRemovables.forEach { it.remove() }
 
                 changeManagerRemovable.remove()

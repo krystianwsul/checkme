@@ -132,11 +132,9 @@ class DomainFactory(
             .flatMapCompletable { getDomainUpdater(this).fixOffsetsAndCustomTimes(it) }
             .subscribe()
             .addTo(domainDisposable)
-
-        TimeLogger.print()
     }
 
-    val defaultProjectId by lazy { projectsFactory.privateProject.projectKey }
+    val defaultProjectKey by lazy { projectsFactory.privateProject.projectKey }
 
     // misc
 

@@ -285,50 +285,7 @@ class Instance private constructor(
             }
         }
 
-    fun getChildInstances() = (taskHierarchyChildInstancesCache.value + existingChildInstancesCache.value).distinct().also {
-        val nd = getChildInstances2()
-
-        if (nd != it) {
-            println("cached child instances: $it") // todo cache
-            println("correct child instance $nd")
-        }
-
-        check(it == getChildInstances2()) // todo cache
-    }
-
-    fun getChildInstances2(): List<Instance> { // todo cache remove
-        val instanceLocker = getInstanceLocker()
-        instanceLocker?.childInstances?.let { return it }
-
-        val scheduleDateTime = scheduleDateTime
-
-        val taskHierarchyChildInstances = task.childHierarchyIntervals
-            .asSequence()
-            /**
-             * todo it seems to me that this `filter` should be redundant with the check in getParentInstance, but a
-             * test fails if I remove it.
-             */
-            .filter { interval -> // once an instance is done, we don't want subsequently added task hierarchies contributing to it
-                doneOffset?.let { it > interval.taskHierarchy.startExactTimeStampOffset } != false
-            }
-            .map {
-                it.taskHierarchy
-                    .childTask
-                    .getInstance(scheduleDateTime)
-            }
-            .filter { it.parentInstance?.instanceKey == instanceKey }
-            .toList()
-
-        val instanceHierarchyChildInstances = task.parent
-            .getAllExistingInstances()
-            .filter { it.parentInstance == this }
-
-        val childInstances = (taskHierarchyChildInstances + instanceHierarchyChildInstances).distinct()
-
-        instanceLocker?.childInstances = childInstances
-
-        return childInstances
-    }
+    fun getChildInstances() = (taskHierarchyChildInstancesCache.value + existingChildInstancesCache.value).distinct()
 
     fun isRootInstance() = parentInstance == null
 

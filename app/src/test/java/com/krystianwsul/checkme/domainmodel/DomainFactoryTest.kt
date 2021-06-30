@@ -713,7 +713,7 @@ class DomainFactoryTest {
             .blockingGet()
             .taskKey
 
-        val privateProjectKey = domainFactory.defaultProjectId // todo cache rename
+        val privateProjectKey = domainFactory.defaultProjectKey
 
         val parentTask = domainFactory.getTaskForce(parentTaskKey) as RootTask
         assertEquals(privateProjectKey, parentTask.project.projectKey)

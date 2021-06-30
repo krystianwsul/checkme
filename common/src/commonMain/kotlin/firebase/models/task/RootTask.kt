@@ -48,7 +48,6 @@ class RootTask private constructor(
 
             val intervalInfoRemovable = intervalInfoCache.invalidatableManager.addInvalidatable(invalidatableCache)
 
-            // todo cache intervalInfo for all
             when (val type = interval.type) {
                 is Type.Schedule -> InvalidatableCache.ValueHolder(type.getParentProjectSchedule().projectId) {
                     intervalInfoRemovable.remove()

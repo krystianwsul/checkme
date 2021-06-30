@@ -218,11 +218,11 @@ class Instance private constructor(
 
     fun exists() = (data is Data.Real)
 
-    private val childInstancesCache =
+    private val taskHierarchyChildInstancesCache =
         invalidatableCache<List<Instance>>(task.clearableInvalidatableManager) { invalidatableCache ->
             val scheduleDateTime = scheduleDateTime
 
-            val taskHierarchyChildInstances = task.childHierarchyIntervals
+            val childInstances = task.childHierarchyIntervals
                 .asSequence()
                 /**
                  * todo it seems to me that this `filter` should be redundant with the check in getParentInstance, but a
@@ -237,13 +237,8 @@ class Instance private constructor(
                         .getInstance(scheduleDateTime)
                 }
                 .filter { it.parentInstance == this }
+                .distinct()
                 .toList()
-
-            val instanceHierarchyChildInstances = task.parent
-                .getAllExistingInstances()
-                .filter { it.parentInstance == this }
-
-            val childInstances = (taskHierarchyChildInstances + instanceHierarchyChildInstances).distinct()
 
             val doneOffsetCallback = doneOffsetProperty.addCallback { invalidatableCache.invalidate() }
 
@@ -257,22 +252,40 @@ class Instance private constructor(
                 .invalidatableManager
                 .addInvalidatable(invalidatableCache)
 
-            val existingInstanceRemovable = task.rootModelChangeManager
-                .existingInstancesInvalidatableManager
-                .addInvalidatable(invalidatableCache)
-
             InvalidatableCache.ValueHolder(childInstances) {
                 doneOffsetProperty.removeCallback(doneOffsetCallback)
 
                 parentInstanceRemovables.forEach { it.remove() }
 
                 childHierarchyIntervalsRemovable.remove()
+            }
+        }
+
+    private val existingChildInstancesCache =
+        invalidatableCache<List<Instance>>(task.clearableInvalidatableManager) { invalidatableCache ->
+            val childInstances = task.parent
+                .getAllExistingInstances()
+                .filter { it.parentInstance == this }
+                .toList()
+
+            val parentInstanceRemovables = childInstances.map {
+                it.parentInstanceCache
+                    .invalidatableManager
+                    .addInvalidatable(invalidatableCache)
+            }
+
+            val existingInstanceRemovable = task.rootModelChangeManager
+                .existingInstancesInvalidatableManager
+                .addInvalidatable(invalidatableCache)
+
+            InvalidatableCache.ValueHolder(childInstances) {
+                parentInstanceRemovables.forEach { it.remove() }
 
                 existingInstanceRemovable.remove()
             }
         }
 
-    fun getChildInstances() = childInstancesCache.value.also {
+    fun getChildInstances() = (taskHierarchyChildInstancesCache.value + existingChildInstancesCache.value).distinct().also {
         val nd = getChildInstances2()
 
         if (nd != it) {

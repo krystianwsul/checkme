@@ -3,8 +3,8 @@ package com.krystianwsul.checkme.firebase.roottask
 import com.jakewharton.rxrelay3.PublishRelay
 import com.krystianwsul.checkme.firebase.loaders.EmissionChecker
 import com.krystianwsul.checkme.firebase.loaders.checkOne
+import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
 import com.krystianwsul.common.firebase.records.task.RootTaskRecord
-import com.krystianwsul.common.utils.RootModelChangeManager
 import com.krystianwsul.common.utils.TaskKey
 import io.mockk.every
 import io.mockk.mockk

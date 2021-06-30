@@ -16,6 +16,7 @@ import com.krystianwsul.common.firebase.json.taskhierarchies.ProjectTaskHierarch
 import com.krystianwsul.common.firebase.json.tasks.PrivateTaskJson
 import com.krystianwsul.common.firebase.json.tasks.RootTaskJson
 import com.krystianwsul.common.firebase.models.Instance
+import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
 import com.krystianwsul.common.firebase.models.project.PrivateProject
 import com.krystianwsul.common.firebase.models.task.ProjectRootTaskIdTracker
 import com.krystianwsul.common.firebase.models.task.Task
@@ -24,7 +25,6 @@ import com.krystianwsul.common.firebase.models.task.performRootIntervalUpdate
 import com.krystianwsul.common.firebase.records.project.PrivateProjectRecord
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.ProjectKey
-import com.krystianwsul.common.utils.RootModelChangeManager
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.common.utils.UserKey
 import io.mockk.every

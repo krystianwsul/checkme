@@ -17,8 +17,8 @@ import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.DeviceInfo
 import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.ChangeType
+import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
 import com.krystianwsul.common.time.ExactTimeStamp
-import com.krystianwsul.common.utils.RootModelChangeManager
 import com.krystianwsul.treeadapter.getCurrentValue
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Single

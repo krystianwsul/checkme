@@ -24,13 +24,13 @@ import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.json.projects.PrivateProjectJson
 import com.krystianwsul.common.firebase.models.MyUser
+import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
 import com.krystianwsul.common.firebase.records.MyUserRecord
 import com.krystianwsul.common.firebase.records.project.PrivateProjectRecord
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.utils.ProjectKey
-import com.krystianwsul.common.utils.RootModelChangeManager
 import com.krystianwsul.common.utils.TaskHierarchyId
 import com.krystianwsul.common.utils.UserKey
 import com.mindorks.scheduler.RxPS

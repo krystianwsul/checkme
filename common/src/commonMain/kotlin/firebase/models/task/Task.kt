@@ -9,6 +9,7 @@ import com.krystianwsul.common.firebase.json.tasks.RootTaskJson
 import com.krystianwsul.common.firebase.models.*
 import com.krystianwsul.common.firebase.models.cache.ClearableInvalidatableManager
 import com.krystianwsul.common.firebase.models.cache.InvalidatableCache
+import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
 import com.krystianwsul.common.firebase.models.cache.invalidatableCache
 import com.krystianwsul.common.firebase.models.interval.*
 import com.krystianwsul.common.firebase.models.noscheduleorparent.NoScheduleOrParent

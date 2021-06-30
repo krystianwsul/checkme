@@ -5,6 +5,7 @@ import com.krystianwsul.common.domain.DeviceInfo
 import com.krystianwsul.common.domain.TaskHierarchyContainer
 import com.krystianwsul.common.firebase.models.ProjectUser
 import com.krystianwsul.common.firebase.models.RootUser
+import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
 import com.krystianwsul.common.firebase.models.customtime.SharedCustomTime
 import com.krystianwsul.common.firebase.models.task.ProjectTask
 import com.krystianwsul.common.firebase.models.taskhierarchy.ProjectTaskHierarchy
@@ -12,7 +13,10 @@ import com.krystianwsul.common.firebase.records.AssignedToHelper
 import com.krystianwsul.common.firebase.records.project.SharedProjectRecord
 import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.time.Time
-import com.krystianwsul.common.utils.*
+import com.krystianwsul.common.utils.CustomTimeId
+import com.krystianwsul.common.utils.CustomTimeKey
+import com.krystianwsul.common.utils.ProjectType
+import com.krystianwsul.common.utils.UserKey
 
 class SharedProject(
     override val projectRecord: SharedProjectRecord,

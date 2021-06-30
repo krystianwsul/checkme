@@ -6,6 +6,7 @@ import com.krystianwsul.common.domain.TaskHierarchyContainer
 import com.krystianwsul.common.firebase.json.tasks.TaskJson
 import com.krystianwsul.common.firebase.models.*
 import com.krystianwsul.common.firebase.models.cache.ClearableInvalidatableManager
+import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
 import com.krystianwsul.common.firebase.models.task.ProjectTask
 import com.krystianwsul.common.firebase.models.task.RootTask
 import com.krystianwsul.common.firebase.models.task.Task

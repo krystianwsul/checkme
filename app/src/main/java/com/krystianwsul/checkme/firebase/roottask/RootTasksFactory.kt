@@ -8,12 +8,12 @@ import com.krystianwsul.checkme.utils.publishImmediate
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.json.tasks.RootTaskJson
 import com.krystianwsul.common.firebase.json.tasks.TaskJson
+import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
 import com.krystianwsul.common.firebase.models.task.RootTask
 import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.firebase.models.taskhierarchy.TaskHierarchy
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.ProjectKey
-import com.krystianwsul.common.utils.RootModelChangeManager
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.common.utils.mapValuesNotNull
 import io.reactivex.rxjava3.core.Observable

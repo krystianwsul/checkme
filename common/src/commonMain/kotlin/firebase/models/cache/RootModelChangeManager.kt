@@ -1,6 +1,4 @@
-package com.krystianwsul.common.utils
-
-import com.krystianwsul.common.firebase.models.cache.InvalidatableManager
+package com.krystianwsul.common.firebase.models.cache
 
 class RootModelChangeManager {
 

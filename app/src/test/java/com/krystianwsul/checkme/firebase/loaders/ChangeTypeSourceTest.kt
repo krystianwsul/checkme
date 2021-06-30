@@ -25,12 +25,12 @@ import com.krystianwsul.common.firebase.json.projects.SharedProjectJson
 import com.krystianwsul.common.firebase.json.taskhierarchies.NestedTaskHierarchyJson
 import com.krystianwsul.common.firebase.json.tasks.RootTaskJson
 import com.krystianwsul.common.firebase.models.Instance
+import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
 import com.krystianwsul.common.firebase.models.task.ProjectRootTaskIdTracker
 import com.krystianwsul.common.firebase.records.project.ProjectRecord
 import com.krystianwsul.common.firebase.records.task.RootTaskRecord
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.ProjectKey
-import com.krystianwsul.common.utils.RootModelChangeManager
 import com.krystianwsul.common.utils.ScheduleData
 import com.krystianwsul.common.utils.TaskKey
 import io.mockk.every

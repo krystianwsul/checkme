@@ -1,6 +1,6 @@
 package com.krystianwsul.checkme.firebase.roottask
 
-import com.krystianwsul.common.utils.RootModelChangeManager
+import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
 import io.mockk.every
 import io.mockk.mockk
 import io.reactivex.rxjava3.core.Observable

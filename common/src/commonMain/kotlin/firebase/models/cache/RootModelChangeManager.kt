@@ -4,6 +4,8 @@ class RootModelChangeManager {
 
     val existingInstancesInvalidatableManager = InvalidatableManager()
 
+    val rootTaskProjectIdInvalidatableManager = InvalidatableManager()
+
     val rootModelInvalidatableManager = InvalidatableManager()
 
     val rootTaskInvalidatableManager = InvalidatableManager()
@@ -12,8 +14,11 @@ class RootModelChangeManager {
 
     fun invalidateExistingInstances() = existingInstancesInvalidatableManager.invalidate()
 
+    fun invalidateRootTaskProjectIds() = rootTaskProjectIdInvalidatableManager.invalidate()
+
     fun invalidateRootTasks() {
         invalidateExistingInstances()
+        invalidateRootTaskProjectIds()
         rootTaskInvalidatableManager.invalidate()
         rootModelInvalidatableManager.invalidate()
     }

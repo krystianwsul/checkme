@@ -42,7 +42,7 @@ class RootTask private constructor(
         compareByDescending<Schedule> { it.startExactTimeStamp }.thenByDescending { it.id }
     ).first()
 
-    private val projectIdCache: InvalidatableCache<String> =
+    val projectIdCache: InvalidatableCache<String> =
         invalidatableCache<String>(clearableInvalidatableManager) { invalidatableCache ->
             val interval = intervalInfo.intervals.last()
 
@@ -196,6 +196,12 @@ class RootTask private constructor(
             is Type.NoSchedule -> type.noScheduleOrParent!!
             is Type.Child -> null // called redundantly
         }?.updateProject(projectKey)
+
+        /**
+         * Since the projectId depends on external factors, this call isn't 100% complete.  But the current purpose is just
+         * covering an edge case to invalidate Project.rootTasksCache, and that goal is met.
+         */
+        rootModelChangeManager.invalidateRootTaskProjectIds()
 
         return this
     }

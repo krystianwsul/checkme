@@ -92,7 +92,7 @@ class ProjectsFactory(
             )
 
             sharedProjectFactories[projectKey]?.project
-                ?.rootCacheCoordinator
+                ?.clearableInvalidatableManager
                 ?.clear()
 
             rootModelChangeManager.invalidateProjects()
@@ -108,7 +108,7 @@ class ProjectsFactory(
 
                 sharedProjectFactories.getValue(it)
                     .project
-                    .rootCacheCoordinator
+                    .clearableInvalidatableManager
                     .clear()
 
                 rootModelChangeManager.invalidateProjects()

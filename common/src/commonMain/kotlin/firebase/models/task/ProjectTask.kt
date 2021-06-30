@@ -16,7 +16,7 @@ class ProjectTask(override val project: Project<*>, private val taskRecord: Proj
     project,
     taskRecord,
     ParentTaskDelegate.Project(project),
-    project.rootCacheCoordinator,
+    project.clearableInvalidatableManager,
     project.rootModelChangeManager,
 ) {
 

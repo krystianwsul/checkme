@@ -6,7 +6,9 @@ import com.krystianwsul.common.domain.TaskHierarchyContainer
 import com.krystianwsul.common.firebase.json.tasks.TaskJson
 import com.krystianwsul.common.firebase.models.*
 import com.krystianwsul.common.firebase.models.cache.ClearableInvalidatableManager
+import com.krystianwsul.common.firebase.models.cache.InvalidatableCache
 import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
+import com.krystianwsul.common.firebase.models.cache.invalidatableCache
 import com.krystianwsul.common.firebase.models.task.ProjectTask
 import com.krystianwsul.common.firebase.models.task.RootTask
 import com.krystianwsul.common.firebase.models.task.Task
@@ -26,7 +28,7 @@ abstract class Project<T : ProjectType>(
     val rootModelChangeManager: RootModelChangeManager,
 ) : Current, JsonTime.CustomTimeProvider, JsonTime.ProjectCustomTimeKeyProvider, Task.Parent {
 
-    val rootCacheCoordinator = ClearableInvalidatableManager()
+    val clearableInvalidatableManager = ClearableInvalidatableManager()
 
     abstract val projectRecord: ProjectRecord<T>
 
@@ -114,7 +116,27 @@ abstract class Project<T : ProjectType>(
 
     fun delete() = projectRecord.delete()
 
-    fun getAllTasks(): Collection<Task> = _tasks.values + rootTaskProvider.getRootTasksForProject(projectKey)
+    private val rootTasksCache =
+        invalidatableCache<Collection<RootTask>>(clearableInvalidatableManager) { invalidatableCache ->
+            val managerRemovable =
+                rootModelChangeManager.rootTaskProjectIdInvalidatableManager.addInvalidatable(invalidatableCache)
+
+            val rootTasks = rootTaskProvider.getRootTasksForProject(projectKey)
+
+            val rootTaskRemovables = rootTasks.map {
+                it.projectIdCache
+                    .invalidatableManager
+                    .addInvalidatable(invalidatableCache)
+            }
+
+            InvalidatableCache.ValueHolder(rootTasks) {
+                managerRemovable.remove()
+
+                rootTaskRemovables.forEach { it.remove() }
+            }
+        }
+
+    fun getAllTasks(): Collection<Task> = _tasks.values + rootTasksCache.value
 
     fun setEndExactTimeStamp(
         now: ExactTimeStamp.Local,

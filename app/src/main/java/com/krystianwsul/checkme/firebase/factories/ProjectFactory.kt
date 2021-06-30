@@ -52,7 +52,7 @@ abstract class ProjectFactory<T : ProjectType, U : Parsable>(
         rootModelChangeManager.invalidateProjects()
 
         val changeProjectChangeTypes = projectLoader.changeProjectEvents.map {
-            project.rootCacheCoordinator.clear()
+            project.clearableInvalidatableManager.clear()
 
             rootModelChangeManager.invalidateProjects()
 

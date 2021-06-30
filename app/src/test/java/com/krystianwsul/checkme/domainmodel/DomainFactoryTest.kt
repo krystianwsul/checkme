@@ -4,6 +4,7 @@ import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.extensions.*
 import com.krystianwsul.checkme.gui.edit.EditParameters
 import com.krystianwsul.checkme.gui.edit.delegates.EditDelegate
+import com.krystianwsul.common.firebase.models.task.RootTask
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.ScheduleData
 import com.soywiz.klock.hours
@@ -680,5 +681,69 @@ class DomainFactoryTest {
         assertEquals(parentInstanceKey, singleInstanceData.instanceKey)
 
         assertEquals(childInstanceKey, singleInstanceData.children.values.single().instanceKey)
+    }
+
+    @Test
+    fun testChangingProjectForChildTask() {
+        val today = Date(2021, 6, 30)
+
+        var now = ExactTimeStamp.Local(today, HourMinute(1, 0))
+
+        val sharedProjectKey = domainUpdater(now).createProject(
+            DomainListenerManager.NotificationType.All,
+            "project",
+            emptySet(),
+        ).blockingGet()
+
+        now += 1.hours
+
+        val scheduleDatas = listOf(ScheduleData.Single(today, TimePair(HourMinute(4, 0))))
+
+        val parentTaskName = "parentTask"
+
+        val parentTaskKey = domainUpdater(now).createScheduleTopLevelTask(
+            DomainListenerManager.NotificationType.All,
+            parentTaskName,
+            scheduleDatas,
+            null,
+            null,
+            null,
+            null,
+        )
+            .blockingGet()
+            .taskKey
+
+        val privateProjectKey = domainFactory.defaultProjectId // todo cache rename
+
+        val parentTask = domainFactory.getTaskForce(parentTaskKey) as RootTask
+        assertEquals(privateProjectKey, parentTask.project.projectKey)
+
+        val childTaskKey = domainUpdater(now).createChildTask(
+            DomainListenerManager.NotificationType.All,
+            parentTaskKey,
+            "child task",
+            null,
+            null,
+        )
+            .blockingGet()
+            .taskKey
+
+        val childTask = domainFactory.getTaskForce(childTaskKey) as RootTask
+        assertEquals(privateProjectKey, childTask.project.projectKey)
+
+        now += 1.hours
+
+        domainUpdater(now).updateScheduleTask(
+            DomainListenerManager.NotificationType.All,
+            parentTaskKey,
+            parentTaskName,
+            scheduleDatas,
+            null,
+            EditDelegate.SharedProjectParameters(sharedProjectKey, emptySet()),
+            null,
+        ).blockingGet()
+
+        assertEquals(sharedProjectKey, parentTask.project.projectKey)
+        assertEquals(sharedProjectKey, childTask.project.projectKey)
     }
 }

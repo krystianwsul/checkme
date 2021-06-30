@@ -5,6 +5,8 @@ import com.krystianwsul.common.firebase.json.schedule.*
 import com.krystianwsul.common.firebase.json.tasks.TaskJson
 import com.krystianwsul.common.firebase.models.ImageState
 import com.krystianwsul.common.firebase.models.cache.ClearableInvalidatableManager
+import com.krystianwsul.common.firebase.models.cache.InvalidatableCache
+import com.krystianwsul.common.firebase.models.cache.invalidatableCache
 import com.krystianwsul.common.firebase.models.interval.Type
 import com.krystianwsul.common.firebase.models.noscheduleorparent.NoScheduleOrParent
 import com.krystianwsul.common.firebase.models.noscheduleorparent.RootNoScheduleOrParent
@@ -39,37 +41,46 @@ class RootTask private constructor(
         compareByDescending<Schedule> { it.startExactTimeStamp }.thenByDescending { it.id }
     ).first()
 
-    private val projectIdProperty = invalidatableLazyCallbacks {
-        val interval = intervalInfo.intervals.last()
+    private val projectIdCache: InvalidatableCache<String> =
+        invalidatableCache<String>(clearableInvalidatableManager) { invalidatableCache ->
+            val interval = intervalInfo.intervals.last()
 
-        when (val type = interval.type) {
-            is Type.Schedule -> type.getParentProjectSchedule().projectId
-            is Type.NoSchedule -> type.noScheduleOrParent
-                ?.let { it as? RootNoScheduleOrParent }
-                ?.projectId
-                ?: throw NoScheduleOrParentException()
-            is Type.Child -> (type.parentTaskHierarchy.parentTask as RootTask).projectId
+            val intervalInfoRemovable = intervalInfoCache.invalidatableManager.addInvalidatable(invalidatableCache)
+
+            // todo cache intervalInfo for all
+            when (val type = interval.type) {
+                is Type.Schedule -> InvalidatableCache.ValueHolder(type.getParentProjectSchedule().projectId) {
+                    intervalInfoRemovable.remove()
+                }
+                is Type.NoSchedule -> {
+                    val projectId = type.noScheduleOrParent
+                        ?.let { it as? RootNoScheduleOrParent }
+                        ?.projectId
+                        ?: throw NoScheduleOrParentException()
+
+                    InvalidatableCache.ValueHolder(projectId) { intervalInfoRemovable.remove() }
+                }
+                is Type.Child -> {
+                    val parentTask = type.parentTaskHierarchy.parentTask as RootTask
+                    val projectId = parentTask.projectId
+
+                    val parentTaskRemovable = parentTask.projectIdCache
+                        .invalidatableManager
+                        .addInvalidatable(invalidatableCache)
+
+                    InvalidatableCache.ValueHolder(projectId) {
+                        intervalInfoRemovable.remove()
+                        parentTaskRemovable.remove()
+                    }
+                }
+            }
+        }.apply {
+            invalidatableManager.addInvalidatable { normalizedFieldsDelegate.invalidate() }
         }
-    }.apply {
-        intervalInfoCache.invalidatableManager.addInvalidatable { invalidate() }
-        addCallback { normalizedFieldsDelegate.invalidate() }
-    }
 
     private inner class NoScheduleOrParentException : Exception("task $name, $taskKey")
 
-    val projectId: String by projectIdProperty
-
-    private fun invalidateProjectIdRecursive(invalidatedTaskKeys: MutableSet<TaskKey.Root> = mutableSetOf()) {
-        if (taskKey in invalidatedTaskKeys) return
-
-        invalidatedTaskKeys += taskKey
-
-        projectIdProperty.invalidate()
-
-        childHierarchyIntervals.forEach {
-            (it.taskHierarchy.childTask as RootTask).invalidateProjectIdRecursive(invalidatedTaskKeys)
-        }
-    }
+    val projectId: String by projectIdCache
 
     override val project get() = parent.getProject(projectId)
 
@@ -177,11 +188,7 @@ class RootTask private constructor(
             is Type.Schedule -> type.getParentProjectSchedule()
             is Type.NoSchedule -> type.noScheduleOrParent!!
             is Type.Child -> null // called redundantly
-        }?.let {
-            it.updateProject(projectKey)
-
-            invalidateProjectIdRecursive()
-        }
+        }?.updateProject(projectKey)
 
         return this
     }

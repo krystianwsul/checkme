@@ -84,7 +84,7 @@ sealed class Task(
 
     protected abstract val allowPlaceholderCurrentNoSchedule: Boolean
 
-    val intervalInfoCache = invalidatableCache<IntervalInfo> { invalidatableCache ->
+    val intervalInfoCache = invalidatableCache<IntervalInfo>(clearableInvalidatableManager) { invalidatableCache ->
         checkNoIntervalUpdate()
 
         val removable = clearableInvalidatableManager.addInvalidatable(invalidatableCache)
@@ -95,43 +95,44 @@ sealed class Task(
     }
     val intervalInfo by intervalInfoCache
 
-    val childHierarchyIntervalsCache = invalidatableCache<List<HierarchyInterval>> { invalidatableCache ->
-        val hierarchyIntervalPairs = parent.getTaskHierarchiesByParentTaskKey(taskKey)
-            .asSequence()
-            .map { it.childTask }
-            .distinct()
-            .flatMap { childTask ->
-                childTask.intervalInfo
-                    .parentHierarchyIntervals
-                    .map { childTask to it }
+    val childHierarchyIntervalsCache =
+        invalidatableCache<List<HierarchyInterval>>(clearableInvalidatableManager) { invalidatableCache ->
+            val hierarchyIntervalPairs = parent.getTaskHierarchiesByParentTaskKey(taskKey)
+                .asSequence()
+                .map { it.childTask }
+                .distinct()
+                .flatMap { childTask ->
+                    childTask.intervalInfo
+                        .parentHierarchyIntervals
+                        .map { childTask to it }
+                }
+                .filter { it.second.taskHierarchy.parentTaskKey == taskKey }
+                .toList()
+
+            val childTasks = hierarchyIntervalPairs.map { it.first }.distinct()
+
+            val hierarchyIntervals = hierarchyIntervalPairs.map { it.second }
+
+            val childTaskModelRemovables =
+                childTasks.map { it.clearableInvalidatableManager.addInvalidatable(invalidatableCache) }
+
+            val childTaskIntervalInfoRemovables = childTasks.map {
+                it.intervalInfoCache
+                    .invalidatableManager
+                    .addInvalidatable(invalidatableCache)
             }
-            .filter { it.second.taskHierarchy.parentTaskKey == taskKey }
-            .toList()
 
-        val childTasks = hierarchyIntervalPairs.map { it.first }.distinct()
+            val changeManagerRemovable =
+                rootModelChangeManager.rootModelInvalidatableManager.addInvalidatable(invalidatableCache)
 
-        val hierarchyIntervals = hierarchyIntervalPairs.map { it.second }
+            InvalidatableCache.ValueHolder(hierarchyIntervals) {
+                childTaskModelRemovables.forEach { it.remove() }
 
-        val childTaskModelRemovables =
-            childTasks.map { it.clearableInvalidatableManager.addInvalidatable(invalidatableCache) }
+                childTaskIntervalInfoRemovables.forEach { it.remove() }
 
-        val childTaskIntervalInfoRemovables = childTasks.map {
-            it.intervalInfoCache
-                .invalidatableManager
-                .addInvalidatable(invalidatableCache)
+                changeManagerRemovable.remove()
+            }
         }
-
-        val changeManagerRemovable =
-            rootModelChangeManager.rootModelInvalidatableManager.addInvalidatable(invalidatableCache)
-
-        InvalidatableCache.ValueHolder(hierarchyIntervals) {
-            childTaskModelRemovables.forEach { it.remove() }
-
-            childTaskIntervalInfoRemovables.forEach { it.remove() }
-
-            changeManagerRemovable.remove()
-        }
-    }
 
     val childHierarchyIntervals by childHierarchyIntervalsCache
 

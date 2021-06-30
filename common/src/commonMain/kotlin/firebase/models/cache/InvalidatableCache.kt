@@ -2,7 +2,10 @@ package com.krystianwsul.common.firebase.models.cache
 
 private object UNINITIALIZED_VALUE
 
-class InvalidatableCache<T>(private val initializer: (invalidatableCache: InvalidatableCache<T>) -> ValueHolder<T>) :
+class InvalidatableCache<T>(
+    invalidatableManager: ClearableInvalidatableManager,
+    private val initializer: (invalidatableCache: InvalidatableCache<T>) -> ValueHolder<T>
+) :
     Lazy<T>, Invalidatable {
 
     private var valueHolder: ValueHolder<T>? = null
@@ -27,6 +30,10 @@ class InvalidatableCache<T>(private val initializer: (invalidatableCache: Invali
 
     val invalidatableManager = InvalidatableManager()
 
+    init {
+        invalidatableManager.addInvalidatable(this)
+    }
+
     override fun isInitialized(): Boolean = valueHolder != null
 
     override fun invalidate() {
@@ -44,5 +51,7 @@ class InvalidatableCache<T>(private val initializer: (invalidatableCache: Invali
     class ValueHolder<T>(val value: T, val teardown: () -> Unit)
 }
 
-fun <T> invalidatableCache(initializer: (invalidatableCache: InvalidatableCache<T>) -> InvalidatableCache.ValueHolder<T>) =
-    InvalidatableCache(initializer)
+fun <T> invalidatableCache(
+    clearableInvalidatableManager: ClearableInvalidatableManager,
+    initializer: (invalidatableCache: InvalidatableCache<T>) -> InvalidatableCache.ValueHolder<T>,
+) = InvalidatableCache(clearableInvalidatableManager, initializer)

@@ -146,42 +146,43 @@ class Instance private constructor(
         }
     }
 
-    private val parentInstanceCache = invalidatableCache<Instance?> { invalidatableCache ->
-        when (val parentState = data.parentState) {
-            ParentState.NoParent -> InvalidatableCache.ValueHolder(null) { }
-            is ParentState.Parent -> {
-                val parentInstance = task.parent.getInstance(parentState.parentInstanceKey)
-
-                val removable = parentInstance.task
-                    .clearableInvalidatableManager
-                    .addInvalidatable(invalidatableCache)
-
-                InvalidatableCache.ValueHolder(parentInstance) { removable.remove() }
-            }
-            ParentState.Unset -> {
-                val parentInstance = getTaskHierarchyParentInstance()
-
-                if (parentInstance != null) {
-                    val callback = doneOffsetProperty.addCallback(invalidatableCache::invalidate)
-                    val parentCallback = parentInstance.doneOffsetProperty.addCallback(invalidatableCache::invalidate)
+    private val parentInstanceCache =
+        invalidatableCache<Instance?>(task.clearableInvalidatableManager) { invalidatableCache ->
+            when (val parentState = data.parentState) {
+                ParentState.NoParent -> InvalidatableCache.ValueHolder(null) { }
+                is ParentState.Parent -> {
+                    val parentInstance = task.parent.getInstance(parentState.parentInstanceKey)
 
                     val removable = parentInstance.task
                         .clearableInvalidatableManager
                         .addInvalidatable(invalidatableCache)
 
-                    InvalidatableCache.ValueHolder(parentInstance) {
-                        doneOffsetProperty.removeCallback(callback)
+                    InvalidatableCache.ValueHolder(parentInstance) { removable.remove() }
+                }
+                ParentState.Unset -> {
+                    val parentInstance = getTaskHierarchyParentInstance()
 
-                        parentInstance.doneOffsetProperty.removeCallback(parentCallback)
+                    if (parentInstance != null) {
+                        val callback = doneOffsetProperty.addCallback(invalidatableCache::invalidate)
+                        val parentCallback = parentInstance.doneOffsetProperty.addCallback(invalidatableCache::invalidate)
 
-                        removable.remove()
+                        val removable = parentInstance.task
+                            .clearableInvalidatableManager
+                            .addInvalidatable(invalidatableCache)
+
+                        InvalidatableCache.ValueHolder(parentInstance) {
+                            doneOffsetProperty.removeCallback(callback)
+
+                            parentInstance.doneOffsetProperty.removeCallback(parentCallback)
+
+                            removable.remove()
+                        }
+                    } else {
+                        InvalidatableCache.ValueHolder(null) { }
                     }
-                } else {
-                    InvalidatableCache.ValueHolder(null) { }
                 }
             }
         }
-    }
 
     val parentInstance get() = parentInstanceCache.value
 
@@ -217,69 +218,70 @@ class Instance private constructor(
 
     fun exists() = (data is Data.Real)
 
-    private val childInstancesCache = invalidatableCache<List<Instance>> { invalidatableCache ->
-        val scheduleDateTime = scheduleDateTime
+    private val childInstancesCache =
+        invalidatableCache<List<Instance>>(task.clearableInvalidatableManager) { invalidatableCache ->
+            val scheduleDateTime = scheduleDateTime
 
-        val taskHierarchyChildInstances = task.childHierarchyIntervals
-            .asSequence()
-            /**
-             * todo it seems to me that this `filter` should be redundant with the check in getParentInstance, but a
-             * test fails if I remove it.
-             */
-            .filter { interval -> // once an instance is done, we don't want subsequently added task hierarchies contributing to it
-                doneOffset?.let { it > interval.taskHierarchy.startExactTimeStampOffset } != false
+            val taskHierarchyChildInstances = task.childHierarchyIntervals
+                .asSequence()
+                /**
+                 * todo it seems to me that this `filter` should be redundant with the check in getParentInstance, but a
+                 * test fails if I remove it.
+                 */
+                .filter { interval -> // once an instance is done, we don't want subsequently added task hierarchies contributing to it
+                    doneOffset?.let { it > interval.taskHierarchy.startExactTimeStampOffset } != false
+                }
+                .map {
+                    it.taskHierarchy
+                        .childTask
+                        .getInstance(scheduleDateTime)
+                }
+                .filter { it.parentInstance == this }
+                .toList()
+
+            val instanceHierarchyChildInstances = task.parent
+                .getAllExistingInstances()
+                .filter { it.parentInstance == this }
+
+            val childInstances = (taskHierarchyChildInstances + instanceHierarchyChildInstances).distinct()
+
+            val doneOffsetCallback = doneOffsetProperty.addCallback { invalidatableCache.invalidate() }
+
+            val childTaskRemovables = childInstances.map {
+                it.task
+                    .clearableInvalidatableManager
+                    .addInvalidatable(invalidatableCache)
             }
-            .map {
-                it.taskHierarchy
-                    .childTask
-                    .getInstance(scheduleDateTime)
+
+            val parentInstanceRemovables = childInstances.map {
+                it.parentInstanceCache
+                    .invalidatableManager
+                    .addInvalidatable(invalidatableCache)
             }
-            .filter { it.parentInstance == this }
-            .toList()
 
-        val instanceHierarchyChildInstances = task.parent
-            .getAllExistingInstances()
-            .filter { it.parentInstance == this }
-
-        val childInstances = (taskHierarchyChildInstances + instanceHierarchyChildInstances).distinct()
-
-        val doneOffsetCallback = doneOffsetProperty.addCallback { invalidatableCache.invalidate() }
-
-        val childTaskRemovables = childInstances.map {
-            it.task
-                .clearableInvalidatableManager
-                .addInvalidatable(invalidatableCache)
-        }
-
-        val parentInstanceRemovables = childInstances.map {
-            it.parentInstanceCache
+            val childHierarchyIntervalsRemovable = task.childHierarchyIntervalsCache
                 .invalidatableManager
                 .addInvalidatable(invalidatableCache)
+
+            val existingInstanceRemovable = task.rootModelChangeManager
+                .existingInstancesInvalidatableManager
+                .addInvalidatable(invalidatableCache)
+
+            val taskRemovable = task.clearableInvalidatableManager.addInvalidatable(invalidatableCache)
+
+            InvalidatableCache.ValueHolder(childInstances) {
+                doneOffsetProperty.removeCallback(doneOffsetCallback)
+
+                childTaskRemovables.forEach { it.remove() }
+                parentInstanceRemovables.forEach { it.remove() }
+
+                childHierarchyIntervalsRemovable.remove()
+
+                existingInstanceRemovable.remove()
+
+                taskRemovable.remove()
+            }
         }
-
-        val childHierarchyIntervalsRemovable = task.childHierarchyIntervalsCache
-            .invalidatableManager
-            .addInvalidatable(invalidatableCache)
-
-        val existingInstanceRemovable = task.rootModelChangeManager
-            .existingInstancesInvalidatableManager
-            .addInvalidatable(invalidatableCache)
-
-        val taskRemovable = task.clearableInvalidatableManager.addInvalidatable(invalidatableCache)
-
-        InvalidatableCache.ValueHolder(childInstances) {
-            doneOffsetProperty.removeCallback(doneOffsetCallback)
-
-            childTaskRemovables.forEach { it.remove() }
-            parentInstanceRemovables.forEach { it.remove() }
-
-            childHierarchyIntervalsRemovable.remove()
-
-            existingInstanceRemovable.remove()
-
-            taskRemovable.remove()
-        }
-    }
 
     fun getChildInstances() = childInstancesCache.value.also {
         val nd = getChildInstances2()

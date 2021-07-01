@@ -825,14 +825,14 @@ class MainActivity :
                 .mapNotNull {
                     val now = ExactTimeStamp.Local.now
 
-                    it.getRootInstances(null, now.plusOne().toOffset(), now, filterVisible = false)
-                        .mapNotNull { it.done }
-                        .minOrNull()
-                }
-                .filter {
                     val twoDaysAgo = DateTimeSoy.now() - 2.days
 
-                    it?.let { it.toDateTimeSoy() <= twoDaysAgo } == true
+                    fun ExactTimeStamp.old() = toDateTimeSoy() <= twoDaysAgo
+
+                    it.getRootInstances(null, now.plusOne().toOffset(), now, filterVisible = false)
+                        .filter { it.done?.old() == true && it.instanceDateTime.toLocalExactTimeStamp().old() }
+                        .map { listOf(it.done!!, it.instanceDateTime.toLocalExactTimeStamp()).minOrNull()!! }
+                        .minOrNull()
                 }
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe { Toast.makeText(this, "Oldest instance: $it", Toast.LENGTH_LONG).show() }

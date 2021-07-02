@@ -10,20 +10,15 @@ fun <T : Any, U : Any> mergePaperAndRx(
     firebaseObservable: Observable<U>,
     converter: Converter<T, U>,
 ): Observable<U> {
-
-    /**
-     * Order is significant in this operation.  FirebaseObservable has to be first, because of a weird race condition
-     * that was happening.
-     */
     return Observables.combineLatest(
-        firebaseObservable.map<AndroidDatabaseWrapper.LoadState<U>> { AndroidDatabaseWrapper.LoadState.Loaded(it) }
-            .take(1)
-            .startWithItem(AndroidDatabaseWrapper.LoadState.Initial()),
         paperMaybe.toObservable()
             .map<AndroidDatabaseWrapper.LoadState<T>> { AndroidDatabaseWrapper.LoadState.Loaded(it) }
             .startWithItem(AndroidDatabaseWrapper.LoadState.Initial()),
+        firebaseObservable.map<AndroidDatabaseWrapper.LoadState<U>> { AndroidDatabaseWrapper.LoadState.Loaded(it) }
+            .take(1)
+            .startWithItem(AndroidDatabaseWrapper.LoadState.Initial()),
     )
-        .scan<PairState<T, U>>(PairState.Initial(converter)) { oldPairState, (newFirebaseState, newPaperState) ->
+        .scan<PairState<T, U>>(PairState.SkippingFirst(converter)) { oldPairState, (newPaperState, newFirebaseState) ->
             oldPairState.processNextPair(newPaperState, newFirebaseState)
         }
         .mapNotNull { it.emission }
@@ -41,21 +36,6 @@ private sealed class PairState<T : Any, U : Any> {
         newFirebaseState: AndroidDatabaseWrapper.LoadState<U>,
     ): PairState<T, U>
 
-    class Initial<T : Any, U : Any>(private val converter: Converter<T, U>) : PairState<T, U>() {
-
-        override val emission: U? get() = null
-
-        override fun processNextPair(
-            newPaperState: AndroidDatabaseWrapper.LoadState<T>,
-            newFirebaseState: AndroidDatabaseWrapper.LoadState<U>,
-        ): PairState<T, U> {
-            check(newPaperState is AndroidDatabaseWrapper.LoadState.Initial)
-            check(newFirebaseState is AndroidDatabaseWrapper.LoadState.Initial)
-
-            return SkippingFirst(converter)
-        }
-    }
-
     class SkippingFirst<T : Any, U : Any>(private val converter: Converter<T, U>) : PairState<T, U>() {
 
         override val emission: U? = null
@@ -64,15 +44,20 @@ private sealed class PairState<T : Any, U : Any> {
             newPaperState: AndroidDatabaseWrapper.LoadState<T>,
             newFirebaseState: AndroidDatabaseWrapper.LoadState<U>,
         ): PairState<T, U> {
-            return if (newPaperState is AndroidDatabaseWrapper.LoadState.Initial) {
-                check(newFirebaseState is AndroidDatabaseWrapper.LoadState.Loaded)
+            return when {
+                newPaperState is AndroidDatabaseWrapper.LoadState.Initial &&
+                        newFirebaseState is AndroidDatabaseWrapper.LoadState.Initial -> SkippingFirst(converter)
+                newPaperState is AndroidDatabaseWrapper.LoadState.Initial -> {
+                    check(newFirebaseState is AndroidDatabaseWrapper.LoadState.Loaded)
 
-                FirebaseCameFirst(newFirebaseState.value)
-            } else {
-                check(newPaperState is AndroidDatabaseWrapper.LoadState.Loaded)
-                check(newFirebaseState is AndroidDatabaseWrapper.LoadState.Initial)
+                    FirebaseCameFirst(newFirebaseState.value)
+                }
+                else -> {
+                    check(newPaperState is AndroidDatabaseWrapper.LoadState.Loaded)
+                    check(newFirebaseState is AndroidDatabaseWrapper.LoadState.Initial)
 
-                PaperCameFirst(newPaperState.value, converter)
+                    PaperCameFirst(newPaperState.value, converter)
+                }
             }
         }
     }

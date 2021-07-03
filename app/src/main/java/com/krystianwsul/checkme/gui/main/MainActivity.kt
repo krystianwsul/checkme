@@ -830,8 +830,16 @@ class MainActivity :
                     fun ExactTimeStamp.old() = toDateTimeSoy() <= twoDaysAgo
 
                     it.getRootInstances(null, now.plusOne().toOffset(), now, filterVisible = false)
-                        .filter { it.done?.old() == true && it.instanceDateTime.toLocalExactTimeStamp().old() }
-                        .map { listOf(it.done!!, it.instanceDateTime.toLocalExactTimeStamp()).minOrNull()!! }
+                        .filter { it.done != null }
+                        .map {
+                            listOf(it.instanceDateTime, it.scheduleDateTime).map {
+                                it.toLocalExactTimeStamp()
+                            }.let { list -> list + it.done!! }
+                        }
+                        .filter {
+                            it.all { it.old() }
+                        }
+                        .map { it.minOrNull()!! }
                         .minOrNull()
                 }
                 .observeOn(AndroidSchedulers.mainThread())

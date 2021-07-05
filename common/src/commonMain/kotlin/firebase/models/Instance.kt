@@ -45,7 +45,7 @@ class Instance private constructor(val task: Task, private var data: Data) : Ass
     private val doneOffsetProperty = invalidatableLazyCallbacks {
         data.done?.let { ExactTimeStamp.Offset.fromOffset(it, data.doneOffset) }
     }
-    val doneOffset by doneOffsetProperty
+    private val doneOffset by doneOffsetProperty
 
     val name get() = task.name
 
@@ -314,8 +314,7 @@ class Instance private constructor(val task: Task, private var data: Data) : Ass
         return x.first.isNotEmpty() to x.second
     }
 
-    private fun isInvisibleBecauseOfEndData(now: ExactTimeStamp.Local) =
-        task.run { !notDeleted(now) && endData!!.deleteInstances && done == null }
+    private fun isInvisibleBecauseOfEndData() = task.run { endData?.deleteInstances == true && done == null }
 
     data class VisibilityOptions(
         val hack24: Boolean = false, // show done roots for 24 hours. Ignored for children
@@ -333,7 +332,7 @@ class Instance private constructor(val task: Task, private var data: Data) : Ass
     private fun isVisibleHelper(now: ExactTimeStamp.Local, visibilityOptions: VisibilityOptions): Boolean {
         if (!visibilityOptions.ignoreHidden && data.hidden) return false
 
-        if (isInvisibleBecauseOfEndData(now)) return false
+        if (isInvisibleBecauseOfEndData()) return false
 
         fun checkVisibilityForRoot(): Boolean {
             if (!isValidlyCreated()) return false
@@ -371,7 +370,7 @@ class Instance private constructor(val task: Task, private var data: Data) : Ass
     ): Pair<Boolean, String> {
         if (!visibilityOptions.ignoreHidden && data.hidden) return false to "hidden"
 
-        if (isInvisibleBecauseOfEndData(now)) return false to "endData"
+        if (isInvisibleBecauseOfEndData()) return false to "endData"
 
         fun checkVisibilityForRoot(): Pair<Boolean, String> {
             val isValidlyCreatedDebug = isValidlyCreatedDebug()

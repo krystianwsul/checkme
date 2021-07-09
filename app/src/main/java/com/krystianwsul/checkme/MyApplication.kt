@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.res.Configuration
+import android.os.Build
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.core.content.pm.ShortcutInfoCompat
@@ -13,7 +14,6 @@ import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.graphics.drawable.IconCompat
 import androidx.preference.PreferenceManager
 import com.akexorcist.localizationactivity.core.LocalizationApplicationDelegate
-import com.akexorcist.localizationactivity.core.LocalizationUtility
 import com.androidhuman.rxfirebase2.auth.authStateChanges
 import com.github.anrwatchdog.ANRWatchDog
 import com.github.tamir7.contacts.Contacts
@@ -82,7 +82,11 @@ class MyApplication : Application() {
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
-        defaultLocale = LocalizationUtility.getLocaleFromConfiguration(newConfig)
+        defaultLocale = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            newConfig.locales.get(0) ?: Locale.getDefault()
+        } else {
+            newConfig.locale
+        }
 
         Preferences.language.applySettingStartup()
 

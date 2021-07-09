@@ -57,7 +57,7 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="Check.me.common2.commonMain" />
     <orderEntry type="library" name="Gradle: org.jetbrains.kotlin:kotlin-stdlib-js:1.5.20" level="project" />
-    <orderEntry type="library" name="Gradle: com.soywiz.korlibs.klock:klock:2.1.0" level="project" />
+    <orderEntry type="library" name="Gradle: com.soywiz.korlibs.klock:klock:2.2.0" level="project" />
     <orderEntry type="module-library">
       <library name="Gradle: org.jetbrains.kotlin:kotlin-stdlib-common:1.5.20">
         <CLASSES>
@@ -69,13 +69,11 @@
         </SOURCES>
       </library>
     </orderEntry>
-    <orderEntry type="library" name="Gradle: com.badoo.reaktive:reaktive-js:1.1.22" level="project" />
-    <orderEntry type="library" name="Gradle: com.badoo.reaktive:reaktive-metadata:1.1.22" level="project" />
-    <orderEntry type="library" name="Gradle: com.badoo.reaktive:utils-js:1.1.22" level="project" />
-    <orderEntry type="library" name="Gradle: com.badoo.reaktive:utils-metadata:1.1.22" level="project" />
-    <orderEntry type="library" name="Gradle: org.jetbrains.kotlinx:kotlinx-serialization-json-js:1.2.0" level="project" />
-    <orderEntry type="library" name="Gradle: org.jetbrains.kotlinx:kotlinx-serialization-core-js:1.2.0" level="project" />
-    <orderEntry type="library" name="Gradle: com.soywiz.korlibs.klock:klock-js:2.1.0" level="project" />
-    <orderEntry type="library" scope="RUNTIME" name="Gradle: com.badoo.reaktive:reaktive-annotations-js:1.1.22" level="project" />
+    <orderEntry type="library" name="Gradle: com.badoo.reaktive:reaktive-js:1.2.0" level="project" />
+    <orderEntry type="library" name="Gradle: com.badoo.reaktive:utils-js:1.2.0" level="project" />
+    <orderEntry type="library" name="Gradle: org.jetbrains.kotlinx:kotlinx-serialization-json-js:1.2.2" level="project" />
+    <orderEntry type="library" name="Gradle: org.jetbrains.kotlinx:kotlinx-serialization-core-js:1.2.2" level="project" />
+    <orderEntry type="library" name="Gradle: com.soywiz.korlibs.klock:klock-js:2.2.0" level="project" />
+    <orderEntry type="library" scope="RUNTIME" name="Gradle: com.badoo.reaktive:reaktive-annotations-js:1.2.0" level="project" />
   </component>
 </module>

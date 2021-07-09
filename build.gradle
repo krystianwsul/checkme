@@ -8,13 +8,13 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:4.2.1'
+        classpath 'com.android.tools.build:gradle:4.2.2'
 
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
         classpath "org.jetbrains.kotlin:kotlin-serialization:$kotlinVersion"
 
-        classpath 'com.google.gms:google-services:4.3.5'
-        classpath 'com.google.firebase:firebase-crashlytics-gradle:2.6.1'
+        classpath 'com.google.gms:google-services:4.3.8'
+        classpath 'com.google.firebase:firebase-crashlytics-gradle:2.7.1'
         classpath 'com.google.firebase:perf-plugin:1.4.0'
 
         // NOTE: Do not place your application dependencies here; they belong
@@ -39,16 +39,16 @@ task clean(type: Delete) {
 }
 
 ext {
-    appCompatVersion = '1.2.0'
-    materialVersion = '1.3.0'
+    appCompatVersion = '1.3.0'
+    materialVersion = '1.4.0'
     jodaVersion = '2.10.9.1'
-    rxJavaVersion = '3.0.11'
+    rxJavaVersion = '3.0.13'
     rxAndroidVersion = '3.0.0'
     rxKotlinVersion = '3.0.1'
     rxRelayVersion = '3.0.0'
-    serializationVersion = '1.2.0'
-    klockVersion = '2.1.0'
-    reaktiveVersion = '1.1.22'
+    serializationVersion = '1.2.2'
+    klockVersion = '2.2.0'
+    reaktiveVersion = '1.2.0'
     rxBindingVersion = '4.0.0'
     arrowVersion = "0.13.2"
 }

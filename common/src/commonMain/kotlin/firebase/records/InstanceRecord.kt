@@ -8,16 +8,17 @@ import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.ScheduleKey
+import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.common.utils.invalidatableLazy
 import kotlin.jvm.JvmStatic
 import kotlin.properties.Delegates.observable
 
 class InstanceRecord(
-        create: Boolean,
-        private val taskRecord: TaskRecord,
-        override val createObject: InstanceJson,
-        val scheduleKey: ScheduleKey,
-        firebaseKey: String,
+    create: Boolean,
+    private val taskRecord: TaskRecord,
+    override val createObject: InstanceJson,
+    val scheduleKey: ScheduleKey,
+    firebaseKey: String,
 ) : RemoteRecord(create) {
 
     companion object {
@@ -45,8 +46,8 @@ class InstanceRecord(
         }
 
         fun stringToScheduleKey(
-                projectCustomTimeIdAndKeyProvider: JsonTime.ProjectCustomTimeIdAndKeyProvider,
-                key: String,
+            projectCustomTimeIdAndKeyProvider: JsonTime.ProjectCustomTimeIdAndKeyProvider,
+            key: String,
         ): ScheduleKey {
             val matchResult = scheduleKeyRegex.find(key)!!
 
@@ -72,9 +73,9 @@ class InstanceRecord(
         }
 
         private fun dateTimeStringsToScheduleKey(
-                projectCustomTimeIdAndKeyProvider: JsonTime.ProjectCustomTimeIdAndKeyProvider,
-                dateString: String,
-                timeString: String,
+            projectCustomTimeIdAndKeyProvider: JsonTime.ProjectCustomTimeIdAndKeyProvider,
+            dateString: String,
+            timeString: String,
         ): ScheduleKey {
             val date = dateStringToDate(dateString)
 
@@ -126,14 +127,16 @@ class InstanceRecord(
     var parentInstanceKey: InstanceKey? by observable(
         createObject.parentJson?.let {
             InstanceKey(
-                taskRecord.taskKey,
+                TaskKey.Root(it.taskId),
                 stringToScheduleKey(taskRecord.projectCustomTimeIdAndKeyProvider, it.scheduleKey),
-                )
-            }
+            )
+        }
     ) { _, _, newValue ->
+        newValue?.let { check(it.taskKey is TaskKey.Root) }
+
         setProperty(
-                createObject::parentJson,
-                newValue?.let(InstanceJson::ParentJson)
+            createObject::parentJson,
+            newValue?.let(InstanceJson::ParentJson)
         )
     }
 

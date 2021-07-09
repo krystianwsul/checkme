@@ -568,7 +568,6 @@ fun DomainUpdater.createJoinChildTask(
 ): Single<TaskKey.Root> = SingleDomainUpdate.create("createJoinChildTask") { now ->
     check(name.isNotEmpty())
     check(joinTaskKeys.size > 1)
-    check(joinTaskKeys.map { (it as TaskKey.Project).projectKey }.distinct().size == 1)
 
     val imageUuid = imagePath?.let { newUuid() }
 

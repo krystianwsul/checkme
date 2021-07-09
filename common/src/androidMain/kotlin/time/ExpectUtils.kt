@@ -18,5 +18,5 @@ actual fun TimeSoy.formatTime() = timeFormat.print(LocalTime(hour, minute))!!
 actual fun DateSoy.formatDate() = dateFormat.print(LocalDate(year, month1, day))!!
 
 actual fun DayOfWeek.format() = JavaDay.valueOf(name)
-        .getDisplayName(TextStyle.FULL_STANDALONE, Locale.getDefault())
+        .getDisplayName(TextStyle.FULL, Locale.getDefault())
         .capitalize(Locale.getDefault())

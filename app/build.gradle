@@ -26,7 +26,6 @@ android {
     buildTypes {
         release {
             minifyEnabled true
-            useProguard true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
         debug {
@@ -40,7 +39,6 @@ android {
             initWith debug
             versionNameSuffix "-proto"
             minifyEnabled true
-            useProguard true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
@@ -167,7 +165,7 @@ dependencies {
 
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.1.5'
 
-    implementation 'com.akexorcist:localization:1.2.10' // 1.2.9 causes a crash in firebase auth on login after install
+    implementation 'com.akexorcist:localization:1.2.6' // 1.2.9 causes a crash in firebase auth on login after install
 
     implementation "io.arrow-kt:arrow-core:$arrowVersion"
     kapt "io.arrow-kt:arrow-meta:$arrowVersion"

@@ -3,7 +3,6 @@ package com.krystianwsul.checkme.gui.edit
 import android.content.Intent
 import android.net.Uri
 import android.os.Parcelable
-import android.util.Log
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.utils.InstanceKey
@@ -226,8 +225,6 @@ sealed class EditParameters : Parcelable {
                         null,
                         MyApplication.instance.getRxPaparazzoDir(),
                 )
-
-                Log.e("asdf", "magic copying from $uri to " + outputFile.toURI())
 
                 editActivity.contentResolver
                         .openInputStream(uri!!)

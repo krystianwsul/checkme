@@ -7,6 +7,7 @@ import com.krystianwsul.checkme.gui.edit.delegates.EditDelegate
 import com.krystianwsul.common.firebase.models.task.RootTask
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.ScheduleData
+import com.krystianwsul.common.utils.TaskKey
 import com.soywiz.klock.hours
 import org.junit.Assert.*
 import org.junit.Rule
@@ -745,5 +746,56 @@ class DomainFactoryTest {
 
         assertEquals(sharedProjectKey, parentTask.project.projectKey)
         assertEquals(sharedProjectKey, childTask.project.projectKey)
+    }
+
+    @Test
+    fun testInstancesInvalidate() {
+        val date = Date(2021, 7, 10)
+        val hourMinute1 = HourMinute(1, 0)
+        val hourMinute5 = HourMinute(5, 0)
+
+        var now = ExactTimeStamp.Local(date, hourMinute1)
+
+        val parentTaskNameBefore = "parent task"
+
+        val parentTaskKey = domainUpdater(now).createScheduleTopLevelTask(
+            DomainListenerManager.NotificationType.All,
+            parentTaskNameBefore,
+            listOf(ScheduleData.Single(date, TimePair(hourMinute5))),
+            null,
+            null,
+            null,
+        )
+            .blockingGet()
+            .taskKey
+
+        fun getGroupListData() = domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
+            .groupListDataWrapper
+            .instanceDatas
+
+        assertEquals(parentTaskNameBefore, getGroupListData().single().name)
+
+        now += 1.hours
+
+        val childTaskKey = domainUpdater(now).createChildTask(
+            DomainListenerManager.NotificationType.All,
+            parentTaskKey,
+            "child task",
+            null,
+            null,
+        )
+            .blockingGet()
+            .taskKey
+
+        assertEquals(parentTaskNameBefore, getGroupListData().single().name)
+
+        fun getJson(taskKey: TaskKey.Root) = (domainFactory.getTaskForce(taskKey) as RootTask).taskRecord.createObject
+
+        val parentTaskNameAfter = "parent task renamed"
+
+        val parentTaskJson = getJson(parentTaskKey).copy(name = parentTaskNameAfter)
+
+        domainFactoryRule.acceptRootTaskJson(parentTaskKey, parentTaskJson)
+        assertEquals(parentTaskNameAfter, getGroupListData().single().name)
     }
 }

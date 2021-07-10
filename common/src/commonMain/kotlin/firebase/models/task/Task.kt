@@ -7,6 +7,10 @@ import com.krystianwsul.common.domain.ScheduleGroup
 import com.krystianwsul.common.firebase.json.*
 import com.krystianwsul.common.firebase.json.tasks.RootTaskJson
 import com.krystianwsul.common.firebase.models.*
+import com.krystianwsul.common.firebase.models.cache.ClearableInvalidatableManager
+import com.krystianwsul.common.firebase.models.cache.InvalidatableCache
+import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
+import com.krystianwsul.common.firebase.models.cache.invalidatableCache
 import com.krystianwsul.common.firebase.models.interval.*
 import com.krystianwsul.common.firebase.models.noscheduleorparent.NoScheduleOrParent
 import com.krystianwsul.common.firebase.models.project.Project
@@ -25,6 +29,8 @@ sealed class Task(
     val customTimeProvider: JsonTime.CustomTimeProvider,
     private val taskRecord: TaskRecord,
     val parentTaskDelegate: ParentTaskDelegate,
+    val clearableInvalidatableManager: ClearableInvalidatableManager,
+    val rootModelChangeManager: RootModelChangeManager,
 ) : Current, CurrentOffset, QueryMatchable, Assignable {
 
     abstract val parent: Parent
@@ -79,23 +85,48 @@ sealed class Task(
 
     protected abstract val allowPlaceholderCurrentNoSchedule: Boolean
 
-    val intervalInfoProperty = invalidatableLazyCallbacks {
+    val intervalInfoCache = invalidatableCache<IntervalInfo>(clearableInvalidatableManager) { invalidatableCache ->
         checkNoIntervalUpdate()
 
-        IntervalBuilder.build(this, allowPlaceholderCurrentNoSchedule)
+        InvalidatableCache.ValueHolder(IntervalBuilder.build(this, allowPlaceholderCurrentNoSchedule)) { }
     }
-    val intervalInfo by intervalInfoProperty
+    val intervalInfo by intervalInfoCache
 
-    private val childHierarchyIntervalsProperty = invalidatableLazy {
-        parent.getTaskHierarchiesByParentTaskKey(taskKey)
-            .asSequence()
-            .map { it.childTask }
-            .distinct()
-            .flatMap { it.intervalInfo.parentHierarchyIntervals }
-            .filter { it.taskHierarchy.parentTaskKey == taskKey }
-            .toList()
-    }
-    val childHierarchyIntervals by childHierarchyIntervalsProperty
+    val childHierarchyIntervalsCache =
+        invalidatableCache<List<HierarchyInterval>>(clearableInvalidatableManager) { invalidatableCache ->
+            val hierarchyIntervalPairs = parent.getTaskHierarchiesByParentTaskKey(taskKey)
+                .asSequence()
+                .map { it.childTask }
+                .distinct()
+                .flatMap { childTask ->
+                    childTask.intervalInfo
+                        .parentHierarchyIntervals
+                        .map { childTask to it }
+                }
+                .filter { it.second.taskHierarchy.parentTaskKey == taskKey }
+                .toList()
+
+            val childTasks = hierarchyIntervalPairs.map { it.first }.distinct()
+
+            val hierarchyIntervals = hierarchyIntervalPairs.map { it.second }
+
+            val childTaskIntervalInfoRemovables = childTasks.map {
+                it.intervalInfoCache
+                    .invalidatableManager
+                    .addInvalidatable(invalidatableCache)
+            }
+
+            val changeManagerRemovable =
+                rootModelChangeManager.rootModelInvalidatableManager.addInvalidatable(invalidatableCache)
+
+            InvalidatableCache.ValueHolder(hierarchyIntervals) {
+                childTaskIntervalInfoRemovables.forEach { it.remove() }
+
+                changeManagerRemovable.remove()
+            }
+        }
+
+    val childHierarchyIntervals by childHierarchyIntervalsCache
 
     private val _existingInstances = taskRecord.instanceRecords
         .values
@@ -113,8 +144,6 @@ sealed class Task(
         listOfNotNull(name, note, project.name).map { it.normalized() }
     }
     final override val normalizedFields by normalizedFieldsDelegate
-
-    val instanceHierarchyContainer by lazy { InstanceHierarchyContainer(this) }
 
     abstract val projectCustomTimeIdProvider: JsonTime.ProjectCustomTimeIdProvider
 
@@ -408,6 +437,8 @@ sealed class Task(
 
         _existingInstances[instance.scheduleKey] = instance
 
+        rootModelChangeManager.invalidateExistingInstances()
+
         return instanceRecord
     }
 
@@ -418,6 +449,8 @@ sealed class Task(
         check(instance == _existingInstances[scheduleKey])
 
         _existingInstances.remove(scheduleKey)
+
+        rootModelChangeManager.invalidateExistingInstances()
     }
 
     private fun getExistingInstanceIfPresent(scheduleKey: ScheduleKey) = _existingInstances[scheduleKey]
@@ -443,7 +476,7 @@ sealed class Task(
 
     abstract fun invalidateProjectParentTaskHierarchies()
 
-    fun invalidateChildTaskHierarchies() = childHierarchyIntervalsProperty.invalidate()
+    fun invalidateChildTaskHierarchies() = childHierarchyIntervalsCache.invalidate()
 
     fun invalidateIntervals() {
         val intervalUpdate = getIntervalUpdate()
@@ -451,7 +484,7 @@ sealed class Task(
         if (intervalUpdate != null) {
             intervalUpdate.invalidateIntervals()
         } else {
-            intervalInfoProperty.invalidate()
+            intervalInfoCache.invalidate()
         }
     }
 
@@ -568,5 +601,7 @@ sealed class Task(
         fun getTask(taskKey: TaskKey): Task
 
         fun getInstance(instanceKey: InstanceKey) = getTask(instanceKey.taskKey).getInstance(instanceKey.scheduleKey)
+
+        fun getAllExistingInstances(): Sequence<Instance>
     }
 }

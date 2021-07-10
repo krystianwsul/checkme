@@ -203,7 +203,7 @@ fun DomainUpdater.createScheduleTopLevelTask(
     check(name.isNotEmpty())
     check(scheduleDatas.isNotEmpty())
 
-    val finalProjectId = sharedProjectParameters?.key ?: defaultProjectId
+    val finalProjectId = sharedProjectParameters?.key ?: defaultProjectKey
 
     val imageUuid = imagePath?.let { newUuid() }
 
@@ -287,7 +287,7 @@ fun DomainUpdater.createTopLevelTask(
 ): Single<EditDelegate.CreateResult> = SingleDomainUpdate.create("createTopLevelTask") { now ->
     check(name.isNotEmpty())
 
-    val finalProjectId = sharedProjectKey ?: defaultProjectId
+    val finalProjectId = sharedProjectKey ?: defaultProjectKey
 
     val imageUuid = imagePath?.let { newUuid() }
 
@@ -329,7 +329,7 @@ fun DomainUpdater.updateScheduleTask(
 
     val imageUuid = imagePath?.value?.let { newUuid() }
 
-    val projectKey = sharedProjectParameters?.key ?: defaultProjectId
+    val projectKey = sharedProjectParameters?.key ?: defaultProjectKey
 
     val originalTask = getTaskForce(taskKey)
     originalTask.requireCurrent(now)
@@ -457,7 +457,7 @@ fun DomainUpdater.updateTopLevelTask(
 ): Single<TaskKey.Root> = SingleDomainUpdate.create("updateTopLevelTask") { now ->
     check(name.isNotEmpty())
 
-    val projectKey = sharedProjectKey ?: defaultProjectId
+    val projectKey = sharedProjectKey ?: defaultProjectKey
 
     val originalTask = getTaskForce(taskKey)
     originalTask.requireCurrent(now)
@@ -508,7 +508,7 @@ fun DomainUpdater.createScheduleJoinTopLevelTask(
     check(scheduleDatas.isNotEmpty())
     check(joinables.size > 1)
 
-    val finalProjectKey = sharedProjectParameters?.key ?: defaultProjectId
+    val finalProjectKey = sharedProjectParameters?.key ?: defaultProjectKey
 
     val imageUuid = imagePath?.let { newUuid() }
 

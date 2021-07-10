@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.firebase.roottask
 import com.jakewharton.rxrelay3.PublishRelay
 import com.krystianwsul.checkme.utils.doOnSuccessOrDispose
 import com.krystianwsul.common.firebase.ChangeType
+import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
 import com.krystianwsul.common.firebase.models.task.RootTask
 import com.krystianwsul.common.firebase.records.task.RootTaskRecord
 import com.krystianwsul.common.utils.TaskKey
@@ -21,6 +22,7 @@ class RootTaskFactory(
     private val domainDisposable: CompositeDisposable,
     addChangeEvents: GroupedObservable<TaskKey.Root, RootTasksLoader.AddChangeEvent>,
     private val rootTaskDependencyStateContainer: RootTaskDependencyStateContainer,
+    private val rootModelChangeManager: RootModelChangeManager,
 ) {
 
     private val taskKey = addChangeEvents.key
@@ -61,6 +63,10 @@ class RootTaskFactory(
                 }
             }
             .doOnNext {
+                task?.clearableInvalidatableManager?.clear()
+
+                rootModelChangeManager.invalidateRootTasks()
+
                 task = it.task
 
                 rootTaskDependencyStateContainer.apply {

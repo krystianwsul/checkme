@@ -16,7 +16,7 @@ fun Task.performIntervalUpdate(action: IntervalUpdate.() -> Unit) {
         intervalUpdates.remove(this)
     }
 
-    if (intervalUpdate.intervalsInvalid) intervalInfoProperty.invalidate()
+    if (intervalUpdate.intervalsInvalid) intervalInfoCache.invalidate()
 }
 
 fun RootTask.performRootIntervalUpdate(action: RootIntervalUpdate.() -> Unit) {
@@ -34,7 +34,7 @@ fun RootTask.performRootIntervalUpdate(action: RootIntervalUpdate.() -> Unit) {
         intervalUpdates.remove(this)
     }
 
-    if (intervalUpdate.intervalsInvalid) intervalInfoProperty.invalidate()
+    if (intervalUpdate.intervalsInvalid) intervalInfoCache.invalidate()
 }
 
 fun Task.checkNoIntervalUpdate() = check(!intervalUpdates.containsKey(this))

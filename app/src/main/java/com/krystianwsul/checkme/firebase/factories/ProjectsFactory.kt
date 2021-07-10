@@ -14,6 +14,7 @@ import com.krystianwsul.common.firebase.json.projects.PrivateProjectJson
 import com.krystianwsul.common.firebase.json.projects.SharedProjectJson
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.RootUser
+import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
 import com.krystianwsul.common.firebase.models.project.PrivateProject
 import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.project.SharedProject
@@ -32,6 +33,7 @@ class ProjectsFactory(
     private val shownFactory: Instance.ShownFactory,
     private val domainDisposable: CompositeDisposable,
     rootTaskProvider: Project.RootTaskProvider,
+    rootModelChangeManager: RootModelChangeManager,
     deviceDbInfo: () -> DeviceDbInfo,
 ) {
 
@@ -41,6 +43,7 @@ class ProjectsFactory(
         shownFactory,
         domainDisposable,
         rootTaskProvider,
+        rootModelChangeManager,
         deviceDbInfo,
     )
 
@@ -53,6 +56,7 @@ class ProjectsFactory(
                     shownFactory,
                     domainDisposable,
                     rootTaskProvider,
+                    rootModelChangeManager,
                     deviceDbInfo,
                 )
             }
@@ -83,8 +87,15 @@ class ProjectsFactory(
                 shownFactory,
                 domainDisposable,
                 rootTaskProvider,
+                rootModelChangeManager,
                 deviceDbInfo,
             )
+
+            sharedProjectFactories[projectKey]?.project
+                ?.clearableInvalidatableManager
+                ?.clear()
+
+            rootModelChangeManager.invalidateProjects()
 
             sharedProjectFactoriesProperty[projectKey] = sharedProjectFactory
 
@@ -94,6 +105,13 @@ class ProjectsFactory(
         val removeProjectChangeTypes = sharedProjectsLoader.removeProjectEvents.map {
             it.projectKeys.forEach {
                 check(sharedProjectFactories.containsKey(it))
+
+                sharedProjectFactories.getValue(it)
+                    .project
+                    .clearableInvalidatableManager
+                    .clear()
+
+                rootModelChangeManager.invalidateProjects()
 
                 sharedProjectFactoriesProperty.remove(it)
             }

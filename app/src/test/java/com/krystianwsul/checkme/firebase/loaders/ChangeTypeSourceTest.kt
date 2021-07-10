@@ -25,6 +25,7 @@ import com.krystianwsul.common.firebase.json.projects.SharedProjectJson
 import com.krystianwsul.common.firebase.json.taskhierarchies.NestedTaskHierarchyJson
 import com.krystianwsul.common.firebase.json.tasks.RootTaskJson
 import com.krystianwsul.common.firebase.models.Instance
+import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
 import com.krystianwsul.common.firebase.models.task.ProjectRootTaskIdTracker
 import com.krystianwsul.common.firebase.records.project.ProjectRecord
 import com.krystianwsul.common.firebase.records.task.RootTaskRecord
@@ -196,6 +197,8 @@ class ChangeTypeSourceTest {
 
         val modelRootTaskDependencyStateContainer = RootTaskDependencyStateContainer.Impl()
 
+        val existingInstanceChangeManager = RootModelChangeManager()
+
         rootTasksFactory = RootTasksFactory(
             rootTasksLoader,
             userKeyStore,
@@ -204,6 +207,7 @@ class ChangeTypeSourceTest {
             rootTaskKeySource,
             loadDependencyTrackerManager,
             modelRootTaskDependencyStateContainer,
+            existingInstanceChangeManager,
         ) { projectsFactory }
 
         val privateProjectManager = AndroidPrivateProjectManager(
@@ -268,6 +272,7 @@ class ChangeTypeSourceTest {
                 shownFactory,
                 domainDisposable,
                 rootTasksFactory,
+                existingInstanceChangeManager,
             ) { DomainFactoryRule.deviceDbInfo }.also { projectsFactory = it }
         }.cache()
 

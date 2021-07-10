@@ -24,6 +24,7 @@ import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.json.projects.PrivateProjectJson
 import com.krystianwsul.common.firebase.models.MyUser
+import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
 import com.krystianwsul.common.firebase.records.MyUserRecord
 import com.krystianwsul.common.firebase.records.project.PrivateProjectRecord
 import com.krystianwsul.common.time.Date
@@ -193,6 +194,8 @@ class DomainFactoryRule : TestRule {
             every { getDependencies(any()) } returns Single.just(myUserFactory.user)
         }
 
+        val existingInstanceChangeManager = RootModelChangeManager()
+
         val rootTaskFactory = RootTasksFactory(
             rootTasksLoader,
             mockk(relaxed = true),
@@ -201,6 +204,7 @@ class DomainFactoryRule : TestRule {
             rootTaskKeySource,
             mockk(relaxed = true),
             mockk(relaxed = true),
+            existingInstanceChangeManager,
         ) { projectsFactory }
 
         val sharedProjectsLoader = SharedProjectsLoader.Impl(
@@ -243,6 +247,7 @@ class DomainFactoryRule : TestRule {
             mockk(relaxed = true),
             compositeDisposable,
             rootTaskFactory,
+            existingInstanceChangeManager,
         ) { deviceDbInfo }
 
         val friendsFactory = mockk<FriendsFactory> {

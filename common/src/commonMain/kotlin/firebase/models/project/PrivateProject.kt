@@ -2,6 +2,7 @@ package com.krystianwsul.common.firebase.models.project
 
 import com.krystianwsul.common.domain.TaskHierarchyContainer
 import com.krystianwsul.common.firebase.models.ProjectUser
+import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
 import com.krystianwsul.common.firebase.models.customtime.PrivateCustomTime
 import com.krystianwsul.common.firebase.models.task.ProjectTask
 import com.krystianwsul.common.firebase.models.taskhierarchy.ProjectTaskHierarchy
@@ -18,7 +19,13 @@ class PrivateProject(
     override val projectRecord: PrivateProjectRecord,
     userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
     rootTaskProvider: RootTaskProvider,
-) : Project<ProjectType.Private>(AssignedToHelper.Private, userCustomTimeProvider, rootTaskProvider) {
+    rootModelChangeManager: RootModelChangeManager,
+) : Project<ProjectType.Private>(
+    AssignedToHelper.Private,
+    userCustomTimeProvider,
+    rootTaskProvider,
+    rootModelChangeManager,
+) {
 
     override val projectKey = projectRecord.projectKey
 
@@ -52,8 +59,6 @@ class PrivateProject(
             .values
             .map { ProjectTaskHierarchy(this, it) }
             .forEach { taskHierarchyContainer.add(it.id, it) }
-
-        initializeInstanceHierarchyContainers()
     }
 
     override fun deleteCustomTime(remoteCustomTime: Time.Custom.Project<ProjectType.Private>) {

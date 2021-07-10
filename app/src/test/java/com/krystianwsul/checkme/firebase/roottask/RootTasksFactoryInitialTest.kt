@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.firebase.roottask
 
+import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
 import io.mockk.every
 import io.mockk.mockk
 import io.reactivex.rxjava3.core.Observable
@@ -24,6 +25,8 @@ class RootTasksFactoryInitialTest {
             every { removeEvents } returns Observable.never()
         }
 
+        val existingInstanceChangeManager = RootModelChangeManager()
+
         val rootTasksFactory = RootTasksFactory(
             rootTasksLoader,
             mockk(),
@@ -32,6 +35,7 @@ class RootTasksFactoryInitialTest {
             mockk(),
             mockk(),
             mockk(),
+            existingInstanceChangeManager,
             mockk(),
         )
 

@@ -4,6 +4,7 @@ import com.krystianwsul.checkme.firebase.loaders.ProjectLoader
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.firebase.json.JsonWrapper
 import com.krystianwsul.common.firebase.models.Instance
+import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
 import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.project.SharedProject
 import com.krystianwsul.common.firebase.records.project.ProjectRecord
@@ -19,6 +20,7 @@ class SharedProjectFactory(
     shownFactory: Instance.ShownFactory,
     domainDisposable: CompositeDisposable,
     rootTaskProvider: Project.RootTaskProvider,
+    rootModelChangeManager: RootModelChangeManager,
     deviceDbInfo: () -> DeviceDbInfo,
 ) : ProjectFactory<ProjectType.Shared, JsonWrapper>(
     projectLoader,
@@ -26,14 +28,21 @@ class SharedProjectFactory(
     shownFactory,
     domainDisposable,
     rootTaskProvider,
+    rootModelChangeManager,
     deviceDbInfo,
 ) {
 
     override fun newProject(
-            projectRecord: ProjectRecord<ProjectType.Shared>,
-            userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
-            rootTaskProvider: Project.RootTaskProvider,
-    ) = SharedProject(projectRecord as SharedProjectRecord, userCustomTimeProvider, rootTaskProvider).apply {
+        projectRecord: ProjectRecord<ProjectType.Shared>,
+        userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
+        rootTaskProvider: Project.RootTaskProvider,
+        rootModelChangeManager: RootModelChangeManager,
+    ) = SharedProject(
+        projectRecord as SharedProjectRecord,
+        userCustomTimeProvider,
+        rootTaskProvider,
+        rootModelChangeManager,
+    ).apply {
         fixNotificationShown(shownFactory, ExactTimeStamp.Local.now)
         updateDeviceDbInfo(deviceDbInfo())
     }

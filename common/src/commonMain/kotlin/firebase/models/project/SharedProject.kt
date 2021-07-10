@@ -5,6 +5,7 @@ import com.krystianwsul.common.domain.DeviceInfo
 import com.krystianwsul.common.domain.TaskHierarchyContainer
 import com.krystianwsul.common.firebase.models.ProjectUser
 import com.krystianwsul.common.firebase.models.RootUser
+import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
 import com.krystianwsul.common.firebase.models.customtime.SharedCustomTime
 import com.krystianwsul.common.firebase.models.task.ProjectTask
 import com.krystianwsul.common.firebase.models.taskhierarchy.ProjectTaskHierarchy
@@ -21,7 +22,13 @@ class SharedProject(
     override val projectRecord: SharedProjectRecord,
     userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
     rootTaskProvider: RootTaskProvider,
-) : Project<ProjectType.Shared>(AssignedToHelper.Shared, userCustomTimeProvider, rootTaskProvider) {
+    rootModelChangeManager: RootModelChangeManager,
+) : Project<ProjectType.Shared>(
+    AssignedToHelper.Shared,
+    userCustomTimeProvider,
+    rootTaskProvider,
+    rootModelChangeManager,
+) {
 
     override val projectKey = projectRecord.projectKey
 
@@ -57,8 +64,6 @@ class SharedProject(
             .values
             .map { ProjectTaskHierarchy(this, it) }
             .forEach { taskHierarchyContainer.add(it.id, it) }
-
-        initializeInstanceHierarchyContainers()
     }
 
     private fun addUser(rootUser: RootUser) {

@@ -6,6 +6,7 @@ import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.json.Parsable
 import com.krystianwsul.common.firebase.models.Instance
+import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
 import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.records.project.ProjectRecord
 import com.krystianwsul.common.time.JsonTime
@@ -22,6 +23,7 @@ abstract class ProjectFactory<T : ProjectType, U : Parsable>(
     protected val shownFactory: Instance.ShownFactory,
     domainDisposable: CompositeDisposable,
     private val rootTaskProvider: Project.RootTaskProvider,
+    private val rootModelChangeManager: RootModelChangeManager,
     protected val deviceDbInfo: () -> DeviceDbInfo,
 ) {
 
@@ -34,19 +36,28 @@ abstract class ProjectFactory<T : ProjectType, U : Parsable>(
         projectRecord: ProjectRecord<T>,
         userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
         rootTaskProvider: Project.RootTaskProvider,
+        rootModelChangeManager: RootModelChangeManager,
     ): Project<T>
 
     val changeTypes: Observable<ChangeType>
 
     init {
         project = newProject(
-                initialProjectEvent.projectRecord,
-                initialProjectEvent.userCustomTimeProvider,
-                rootTaskProvider,
+            initialProjectEvent.projectRecord,
+            initialProjectEvent.userCustomTimeProvider,
+            rootTaskProvider,
+            rootModelChangeManager,
         )
 
+        rootModelChangeManager.invalidateProjects()
+
         val changeProjectChangeTypes = projectLoader.changeProjectEvents.map {
-            project = newProject(it.projectRecord, it.userCustomTimeProvider, rootTaskProvider)
+            project.clearableInvalidatableManager.clear()
+
+            rootModelChangeManager.invalidateProjects()
+
+            project =
+                newProject(it.projectRecord, it.userCustomTimeProvider, rootTaskProvider, rootModelChangeManager)
 
             ChangeType.REMOTE
         }

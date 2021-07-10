@@ -132,11 +132,9 @@ class DomainFactory(
             .flatMapCompletable { getDomainUpdater(this).fixOffsetsAndCustomTimes(it) }
             .subscribe()
             .addTo(domainDisposable)
-
-        TimeLogger.print()
     }
 
-    val defaultProjectId by lazy { projectsFactory.privateProject.projectKey }
+    val defaultProjectKey by lazy { projectsFactory.privateProject.projectKey }
 
     // misc
 
@@ -655,13 +653,6 @@ class DomainFactory(
                 } else {
                     pair.first.performIntervalUpdate { setEndData(endData) }
                 }
-            }
-
-            projectToRootConversion.endTasks.forEach {
-                it.value
-                    .existingInstances
-                    .values
-                    .forEach { it.addToParentInstanceHierarchyContainer() }
             }
 
             copiedTaskKeys.putAll(projectToRootConversion.copiedTaskKeys)

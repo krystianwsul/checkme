@@ -3,6 +3,9 @@ package com.krystianwsul.common.firebase.models
 
 import com.krystianwsul.common.criteria.Assignable
 import com.krystianwsul.common.firebase.MyCustomTime
+import com.krystianwsul.common.firebase.models.cache.InvalidatableCache
+import com.krystianwsul.common.firebase.models.cache.Removable
+import com.krystianwsul.common.firebase.models.cache.invalidatableCache
 import com.krystianwsul.common.firebase.models.customtime.SharedCustomTime
 import com.krystianwsul.common.firebase.models.interval.ScheduleInterval
 import com.krystianwsul.common.firebase.models.interval.Type
@@ -15,7 +18,10 @@ import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.*
 import com.soywiz.klock.days
 
-class Instance private constructor(val task: Task, private var data: Data) : Assignable {
+class Instance private constructor(
+    val task: Task,
+    private var data: Data,
+) : Assignable {
 
     companion object {
 
@@ -66,8 +72,6 @@ class Instance private constructor(val task: Task, private var data: Data) : Ass
         ).toList()
     }
     private val matchingScheduleIntervals by matchingScheduleIntervalsProperty
-
-    private class ParentInstanceData(val instance: Instance, val doneCallback: () -> Unit)
 
     fun getTaskHierarchyParentInstance(): Instance? {
         /**
@@ -142,20 +146,45 @@ class Instance private constructor(val task: Task, private var data: Data) : Ass
         }
     }
 
-    private val parentInstanceProperty = invalidatableLazy {
-        val parentInstance = when (val parentState = data.parentState) {
-            ParentState.NoParent -> null
-            is ParentState.Parent -> task.parent.getInstance(parentState.parentInstanceKey)
-            ParentState.Unset -> getTaskHierarchyParentInstance()
+    private val parentInstanceCache =
+        invalidatableCache<Instance?>(task.clearableInvalidatableManager) { invalidatableCache ->
+            when (val parentState = data.parentState) {
+                ParentState.NoParent -> InvalidatableCache.ValueHolder(null) { }
+                is ParentState.Parent -> {
+                    val parentInstance = task.parent.getInstance(parentState.parentInstanceKey)
+
+                    val removable = parentInstance.task
+                        .clearableInvalidatableManager
+                        .addInvalidatable(invalidatableCache)
+
+                    InvalidatableCache.ValueHolder(parentInstance) { removable.remove() }
+                }
+                ParentState.Unset -> {
+                    val parentInstance = getTaskHierarchyParentInstance()
+
+                    if (parentInstance != null) {
+                        val callback = doneOffsetProperty.addCallback(invalidatableCache::invalidate)
+                        val parentCallback = parentInstance.doneOffsetProperty.addCallback(invalidatableCache::invalidate)
+
+                        val removable = parentInstance.task
+                            .clearableInvalidatableManager
+                            .addInvalidatable(invalidatableCache)
+
+                        InvalidatableCache.ValueHolder(parentInstance) {
+                            doneOffsetProperty.removeCallback(callback)
+
+                            parentInstance.doneOffsetProperty.removeCallback(parentCallback)
+
+                            removable.remove()
+                        }
+                    } else {
+                        InvalidatableCache.ValueHolder(null) { }
+                    }
+                }
+            }
         }
 
-        parentInstance?.let {
-            ParentInstanceData(it, it.doneOffsetProperty.addCallback(::invalidateParentInstanceData))
-        }
-    }
-
-    private val parentInstanceData by parentInstanceProperty
-    val parentInstance get() = parentInstanceData?.instance
+    val parentInstance get() = parentInstanceCache.value
 
     constructor(task: Task, instanceRecord: InstanceRecord) : this(task, Data.Real(task, instanceRecord))
 
@@ -166,76 +195,97 @@ class Instance private constructor(val task: Task, private var data: Data) : Ass
 
     init {
         addLazyCallbacks()
-
-        doneOffsetProperty.addCallback(::invalidateParentInstanceData)
     }
 
-    private lateinit var intervalsCallback: () -> Unit // this is because of how JS handles method references
+    private lateinit var intervalsRemovable: Removable // this is because of how JS handles method references
 
     private fun addLazyCallbacks() {
-        intervalsCallback = task.intervalInfoProperty.addCallback {
+        intervalsRemovable = task.intervalInfoCache.invalidatableManager.addInvalidatable {
             matchingScheduleIntervalsProperty.invalidate()
-            invalidateParentInstanceData()
+            tearDownParentInstanceData()
         }
     }
 
     private fun removeLazyCallbacks() {
-        task.intervalInfoProperty.removeCallback(intervalsCallback)
+        intervalsRemovable.remove()
 
         tearDownParentInstanceData()
     }
 
     private fun tearDownParentInstanceData() {
-        if (parentInstanceProperty.isInitialized()) {
-            removeFromParentInstanceHierarchyContainer()
-
-            parentInstanceData?.apply {
-                instance.doneOffsetProperty.removeCallback(doneCallback)
-            }
-
-            parentInstanceProperty.invalidate()
-        }
-    }
-
-    private fun invalidateParentInstanceData() {
-        tearDownParentInstanceData()
-
-        addToParentInstanceHierarchyContainer()
+        parentInstanceCache.invalidate()
     }
 
     fun exists() = (data is Data.Real)
 
-    fun getChildInstances(): List<Instance> {
-        val instanceLocker = getInstanceLocker()
-        instanceLocker?.childInstances?.let { return it }
+    private val taskHierarchyChildInstancesCache =
+        invalidatableCache<List<Instance>>(task.clearableInvalidatableManager) { invalidatableCache ->
+            val scheduleDateTime = scheduleDateTime
 
-        val scheduleDateTime = scheduleDateTime
+            val childInstances = task.childHierarchyIntervals
+                .asSequence()
+                /**
+                 * todo it seems to me that this `filter` should be redundant with the check in getParentInstance, but a
+                 * test fails if I remove it.
+                 */
+                .filter { interval -> // once an instance is done, we don't want subsequently added task hierarchies contributing to it
+                    doneOffset?.let { it > interval.taskHierarchy.startExactTimeStampOffset } != false
+                }
+                .map {
+                    it.taskHierarchy
+                        .childTask
+                        .getInstance(scheduleDateTime)
+                }
+                .filter { it.parentInstance == this }
+                .distinct()
+                .toList()
 
-        val taskHierarchyChildInstances = task.childHierarchyIntervals
-            .asSequence()
-            /**
-             * todo it seems to me that this `filter` should be redundant with the check in getParentInstance, but a
-             * test fails if I remove it.
-             */
-            .filter { interval -> // once an instance is done, we don't want subsequently added task hierarchies contributing to it
-                doneOffset?.let { it > interval.taskHierarchy.startExactTimeStampOffset } != false
+            val doneOffsetCallback = doneOffsetProperty.addCallback { invalidatableCache.invalidate() }
+
+            val parentInstanceRemovables = childInstances.map {
+                it.parentInstanceCache
+                    .invalidatableManager
+                    .addInvalidatable(invalidatableCache)
             }
-            .map {
-                it.taskHierarchy
-                    .childTask
-                    .getInstance(scheduleDateTime)
+
+            val childHierarchyIntervalsRemovable = task.childHierarchyIntervalsCache
+                .invalidatableManager
+                .addInvalidatable(invalidatableCache)
+
+            InvalidatableCache.ValueHolder(childInstances) {
+                doneOffsetProperty.removeCallback(doneOffsetCallback)
+
+                parentInstanceRemovables.forEach { it.remove() }
+
+                childHierarchyIntervalsRemovable.remove()
             }
-            .filter { it.parentInstance?.instanceKey == instanceKey }
-            .toList()
+        }
 
-        val instanceHierarchyChildInstances = task.instanceHierarchyContainer.getChildInstances(instanceKey)
+    private val existingChildInstancesCache =
+        invalidatableCache<List<Instance>>(task.clearableInvalidatableManager) { invalidatableCache ->
+            val childInstances = task.parent
+                .getAllExistingInstances()
+                .filter { it.parentInstance == this }
+                .toList()
 
-        val childInstances = (taskHierarchyChildInstances + instanceHierarchyChildInstances).distinct()
+            val parentInstanceRemovables = childInstances.map {
+                it.parentInstanceCache
+                    .invalidatableManager
+                    .addInvalidatable(invalidatableCache)
+            }
 
-        instanceLocker?.childInstances = childInstances
+            val existingInstanceRemovable = task.rootModelChangeManager
+                .existingInstancesInvalidatableManager
+                .addInvalidatable(invalidatableCache)
 
-        return childInstances
-    }
+            InvalidatableCache.ValueHolder(childInstances) {
+                parentInstanceRemovables.forEach { it.remove() }
+
+                existingInstanceRemovable.remove()
+            }
+        }
+
+    fun getChildInstances() = (taskHierarchyChildInstancesCache.value + existingChildInstancesCache.value).distinct()
 
     fun isRootInstance() = parentInstance == null
 
@@ -277,7 +327,7 @@ class Instance private constructor(val task: Task, private var data: Data) : Ass
             .orEmpty()
             .filter {
                 stringBuilder.appendLine("schedule " + it.second.schedule.id + " dateTime: " + it.first)
-                stringBuilder.appendLine("instance scheduleDateTime: " + scheduleDateTime)
+                stringBuilder.appendLine("instance scheduleDateTime: $scheduleDateTime")
                 it.first == scheduleDateTime
             }
 
@@ -479,8 +529,6 @@ class Instance private constructor(val task: Task, private var data: Data) : Ass
                 task,
                 task.createRemoteInstanceRecord(this),
             )
-
-            addToParentInstanceHierarchyContainer()
         }
 
         return data as Data.Real
@@ -578,23 +626,7 @@ class Instance private constructor(val task: Task, private var data: Data) : Ass
 
         createInstanceRecord().parentState = newParentState
 
-        invalidateParentInstanceData()
-    }
-
-    fun addToParentInstanceHierarchyContainer() {
-        if (exists()) {
-            parentInstance?.task
-                ?.instanceHierarchyContainer
-                ?.addChildInstance(this)
-        }
-    }
-
-    private fun removeFromParentInstanceHierarchyContainer() {
-        if (parentInstanceProperty.isInitialized() && exists()) {
-            parentInstance?.task
-                ?.instanceHierarchyContainer
-                ?.removeChildInstance(this)
-        }
+        tearDownParentInstanceData()
     }
 
     fun canAddSubtask(now: ExactTimeStamp.Local, hack24: Boolean = false): Boolean {

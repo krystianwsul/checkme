@@ -4,6 +4,10 @@ import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.firebase.json.schedule.*
 import com.krystianwsul.common.firebase.json.tasks.TaskJson
 import com.krystianwsul.common.firebase.models.ImageState
+import com.krystianwsul.common.firebase.models.cache.ClearableInvalidatableManager
+import com.krystianwsul.common.firebase.models.cache.InvalidatableCache
+import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
+import com.krystianwsul.common.firebase.models.cache.invalidatableCache
 import com.krystianwsul.common.firebase.models.interval.Type
 import com.krystianwsul.common.firebase.models.noscheduleorparent.NoScheduleOrParent
 import com.krystianwsul.common.firebase.models.noscheduleorparent.RootNoScheduleOrParent
@@ -15,53 +19,76 @@ import com.krystianwsul.common.firebase.records.task.RootTaskRecord
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.*
 
-class RootTask(
+class RootTask private constructor(
     val taskRecord: RootTaskRecord,
     override val parent: Parent,
     private val userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
+    clearableInvalidatableManager: ClearableInvalidatableManager,
 ) : Task(
     JsonTime.CustomTimeProvider.getForRootTask(userCustomTimeProvider),
     taskRecord,
     ParentTaskDelegate.Root(parent),
+    clearableInvalidatableManager,
+    parent.rootModelChangeManager,
 ) {
+
+    constructor(
+        taskRecord: RootTaskRecord,
+        parent: Parent,
+        userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
+    ) : this(taskRecord, parent, userCustomTimeProvider, ClearableInvalidatableManager())
 
     private fun Type.Schedule.getParentProjectSchedule() = taskParentEntries.sortedWith(
         compareByDescending<Schedule> { it.startExactTimeStamp }.thenByDescending { it.id }
     ).first()
 
-    private val projectIdProperty = invalidatableLazyCallbacks {
-        val interval = intervalInfo.intervals.last()
+    val projectIdCache: InvalidatableCache<String> =
+        invalidatableCache<String>(clearableInvalidatableManager) { invalidatableCache ->
+            val interval = intervalInfo.intervals.last()
 
-        when (val type = interval.type) {
-            is Type.Schedule -> type.getParentProjectSchedule().projectId
-            is Type.NoSchedule -> type.noScheduleOrParent
-                ?.let { it as? RootNoScheduleOrParent }
-                ?.projectId
-                ?: throw NoScheduleOrParentException()
-            is Type.Child -> (type.parentTaskHierarchy.parentTask as RootTask).projectId
+            val intervalInfoRemovable = intervalInfoCache.invalidatableManager.addInvalidatable(invalidatableCache)
+
+            when (val type = interval.type) {
+                is Type.Schedule -> InvalidatableCache.ValueHolder(type.getParentProjectSchedule().projectId) {
+                    intervalInfoRemovable.remove()
+                }
+                is Type.NoSchedule -> {
+                    val projectId = type.noScheduleOrParent
+                        ?.let { it as? RootNoScheduleOrParent }
+                        ?.projectId
+                        ?: throw NoScheduleOrParentException()
+
+                    InvalidatableCache.ValueHolder(projectId) { intervalInfoRemovable.remove() }
+                }
+                is Type.Child -> {
+                    val parentTask = type.parentTaskHierarchy.parentTask as RootTask
+                    val projectId = parentTask.projectId
+
+                    val parentTaskRemovable = parentTask.projectIdCache
+                        .invalidatableManager
+                        .addInvalidatable(invalidatableCache)
+
+                    InvalidatableCache.ValueHolder(projectId) {
+                        intervalInfoRemovable.remove()
+                        parentTaskRemovable.remove()
+                    }
+                }
+            }
+        }.apply {
+            invalidatableManager.addInvalidatable { normalizedFieldsDelegate.invalidate() }
         }
-    }.apply {
-        addTo(intervalInfoProperty)
-        addCallback { normalizedFieldsDelegate.invalidate() }
-    }
 
     private inner class NoScheduleOrParentException : Exception("task $name, $taskKey")
 
-    val projectId: String by projectIdProperty
+    val projectId: String by projectIdCache
 
-    private fun invalidateProjectIdRecursive(invalidatedTaskKeys: MutableSet<TaskKey.Root> = mutableSetOf()) {
-        if (taskKey in invalidatedTaskKeys) return
+    private val projectCache = invalidatableCache<Project<*>>(clearableInvalidatableManager) { invalidatableCache ->
+        val removable = projectIdCache.invalidatableManager.addInvalidatable(invalidatableCache)
 
-        invalidatedTaskKeys += taskKey
-
-        projectIdProperty.invalidate()
-
-        childHierarchyIntervals.forEach {
-            (it.taskHierarchy.childTask as RootTask).invalidateProjectIdRecursive(invalidatedTaskKeys)
-        }
+        InvalidatableCache.ValueHolder(parent.getProject(projectId)) { removable.remove() }
     }
 
-    override val project get() = parent.getProject(projectId)
+    override val project by projectCache
 
     val noScheduleOrParentsMap = taskRecord.noScheduleOrParentRecords
         .mapValues { RootNoScheduleOrParent(this, it.value) }
@@ -167,11 +194,13 @@ class RootTask(
             is Type.Schedule -> type.getParentProjectSchedule()
             is Type.NoSchedule -> type.noScheduleOrParent!!
             is Type.Child -> null // called redundantly
-        }?.let {
-            it.updateProject(projectKey)
+        }?.updateProject(projectKey)
 
-            invalidateProjectIdRecursive()
-        }
+        /**
+         * Since the projectId depends on external factors, this call isn't 100% complete.  But the current purpose is just
+         * covering an edge case to invalidate Project.rootTasksCache, and that goal is met.
+         */
+        rootModelChangeManager.invalidateRootTaskProjectIds()
 
         return this
     }
@@ -473,6 +502,8 @@ class RootTask(
     }
 
     interface Parent : Task.Parent, Project.RootTaskProvider {
+
+        val rootModelChangeManager: RootModelChangeManager
 
         fun deleteRootTask(task: RootTask)
 

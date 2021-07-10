@@ -5,6 +5,10 @@ import com.krystianwsul.common.domain.ProjectUndoData
 import com.krystianwsul.common.domain.TaskHierarchyContainer
 import com.krystianwsul.common.firebase.json.tasks.TaskJson
 import com.krystianwsul.common.firebase.models.*
+import com.krystianwsul.common.firebase.models.cache.ClearableInvalidatableManager
+import com.krystianwsul.common.firebase.models.cache.InvalidatableCache
+import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
+import com.krystianwsul.common.firebase.models.cache.invalidatableCache
 import com.krystianwsul.common.firebase.models.task.ProjectTask
 import com.krystianwsul.common.firebase.models.task.RootTask
 import com.krystianwsul.common.firebase.models.task.Task
@@ -21,7 +25,10 @@ abstract class Project<T : ProjectType>(
     val assignedToHelper: AssignedToHelper,
     val userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
     val rootTaskProvider: RootTaskProvider,
+    val rootModelChangeManager: RootModelChangeManager,
 ) : Current, JsonTime.CustomTimeProvider, JsonTime.ProjectCustomTimeKeyProvider, Task.Parent {
+
+    val clearableInvalidatableManager = ClearableInvalidatableManager()
 
     abstract val projectRecord: ProjectRecord<T>
 
@@ -54,14 +61,6 @@ abstract class Project<T : ProjectType>(
         get() = taskHierarchyContainer.all + getAllTasks().flatMap { it.nestedParentTaskHierarchies.values }
 
     val existingInstances get() = getAllTasks().flatMap { it.existingInstances.values }
-
-    protected fun initializeInstanceHierarchyContainers() {
-        getAllTasks().forEach {
-            it.existingInstances
-                .values
-                .forEach { it.addToParentInstanceHierarchyContainer() }
-        }
-    }
 
     private fun getOrCreateCustomTime(
         dayOfWeek: DayOfWeek,
@@ -117,7 +116,27 @@ abstract class Project<T : ProjectType>(
 
     fun delete() = projectRecord.delete()
 
-    fun getAllTasks(): Collection<Task> = _tasks.values + rootTaskProvider.getRootTasksForProject(projectKey)
+    private val rootTasksCache =
+        invalidatableCache<Collection<RootTask>>(clearableInvalidatableManager) { invalidatableCache ->
+            val managerRemovable =
+                rootModelChangeManager.rootTaskProjectIdInvalidatableManager.addInvalidatable(invalidatableCache)
+
+            val rootTasks = rootTaskProvider.getRootTasksForProject(projectKey)
+
+            val rootTaskRemovables = rootTasks.map {
+                it.projectIdCache
+                    .invalidatableManager
+                    .addInvalidatable(invalidatableCache)
+            }
+
+            InvalidatableCache.ValueHolder(rootTasks) {
+                managerRemovable.remove()
+
+                rootTaskRemovables.forEach { it.remove() }
+            }
+        }
+
+    fun getAllTasks(): Collection<Task> = _tasks.values + rootTasksCache.value
 
     fun setEndExactTimeStamp(
         now: ExactTimeStamp.Local,
@@ -244,6 +263,8 @@ abstract class Project<T : ProjectType>(
         is TaskKey.Root -> rootTaskProvider.getRootTask(taskKey)
     }
 
+    override fun getAllExistingInstances() = rootTaskProvider.getAllExistingInstances()
+
     fun updateRootTaskKeys() {
         val rootTaskKeys = getAllTasks().mapNotNull { it.taskKey as? TaskKey.Root }.toSet()
 
@@ -279,5 +300,7 @@ abstract class Project<T : ProjectType>(
             note: String?,
             ordinal: Double?,
         ): Task
+
+        fun getAllExistingInstances(): Sequence<Instance>
     }
 }

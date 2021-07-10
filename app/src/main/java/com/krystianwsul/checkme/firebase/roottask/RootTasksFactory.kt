@@ -8,6 +8,7 @@ import com.krystianwsul.checkme.utils.publishImmediate
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.json.tasks.RootTaskJson
 import com.krystianwsul.common.firebase.json.tasks.TaskJson
+import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
 import com.krystianwsul.common.firebase.models.task.RootTask
 import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.firebase.models.taskhierarchy.TaskHierarchy
@@ -29,6 +30,7 @@ class RootTasksFactory(
     private val rootTaskKeySource: RootTaskKeySource,
     loadDependencyTrackerManager: LoadDependencyTrackerManager,
     private val rootTaskDependencyStateContainer: RootTaskDependencyStateContainer,
+    override val rootModelChangeManager: RootModelChangeManager,
     private val getProjectsFactory: () -> ProjectsFactory,
 ) : RootTask.Parent {
 
@@ -62,6 +64,7 @@ class RootTasksFactory(
                         domainDisposable,
                         group,
                         rootTaskDependencyStateContainer,
+                        rootModelChangeManager,
                     )
                 }
             }
@@ -118,6 +121,12 @@ class RootTasksFactory(
             else -> throw UnsupportedOperationException()
         }
     }
+
+    override fun getAllExistingInstances() = getProjectsFactory().projects
+        .values
+        .asSequence()
+        .flatMap { it.getAllTasks() }
+        .flatMap { it.existingInstances.values }
 
     override fun getRootTasksForProject(projectKey: ProjectKey<*>) =
         rootTasks.values.filter { it.projectId == projectKey.key }

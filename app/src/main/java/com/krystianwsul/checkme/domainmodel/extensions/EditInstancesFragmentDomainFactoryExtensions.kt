@@ -110,7 +110,7 @@ fun DomainUpdater.setInstancesDateTime(
 
         if (it.parentInstance != null) {
             when (it.parentState) {
-                is Instance.ParentState.Unset -> it.setParentState(Instance.ParentState.NoParent) // todo consider removing taskHierarchy
+                is Instance.ParentState.Unset -> it.setParentState(Instance.ParentState.NoParent)
                 is Instance.ParentState.NoParent -> throw IllegalStateException()
                 is Instance.ParentState.Parent -> {
                     val newParentState = if (it.getTaskHierarchyParentInstance() != null)

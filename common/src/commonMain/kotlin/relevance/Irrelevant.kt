@@ -93,6 +93,7 @@ object Irrelevant {
                 when (it) {
                     is ProjectTaskHierarchy -> true
                     is NestedTaskHierarchy -> taskRelevances.getValue(it.childTaskKey).relevant
+                    else -> throw UnsupportedOperationException() // compilation
                 }
             }
 

@@ -1,6 +1,9 @@
 package com.krystianwsul.common.firebase.models.taskhierarchy
 
 import com.krystianwsul.common.firebase.models.TaskParentEntry
+import com.krystianwsul.common.firebase.models.cache.ClearableInvalidatableManager
+import com.krystianwsul.common.firebase.models.cache.InvalidatableCache
+import com.krystianwsul.common.firebase.models.cache.invalidatableCache
 import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.firebase.records.taskhierarchy.TaskHierarchyRecord
 import com.krystianwsul.common.time.ExactTimeStamp
@@ -8,7 +11,10 @@ import com.krystianwsul.common.utils.TaskHierarchyKey
 import com.krystianwsul.common.utils.TaskKey
 
 
-sealed class TaskHierarchy(private val parentTaskDelegate: ParentTaskDelegate) : TaskParentEntry {
+sealed class TaskHierarchy(
+    clearableInvalidatableManager: ClearableInvalidatableManager,
+    private val parentTaskDelegate: ParentTaskDelegate,
+) : TaskParentEntry {
 
     protected abstract val taskHierarchyRecord: TaskHierarchyRecord<*>
 
@@ -30,7 +36,15 @@ sealed class TaskHierarchy(private val parentTaskDelegate: ParentTaskDelegate) :
 
     val id by lazy { taskHierarchyRecord.id }
 
-    val parentTask by lazy { parentTaskDelegate.getTask(parentTaskId) }
+    private val parentTaskCache = invalidatableCache<Task>(clearableInvalidatableManager) { invalidatableCache ->
+        val parentTask = parentTaskDelegate.getTask(parentTaskId)
+
+        val removable = parentTask.clearableInvalidatableManager.addInvalidatable(invalidatableCache)
+
+        InvalidatableCache.ValueHolder(parentTask) { removable.remove() }
+    }
+
+    val parentTask by parentTaskCache
     abstract val childTask: Task
 
     val parentTaskId by lazy { taskHierarchyRecord.parentTaskId }

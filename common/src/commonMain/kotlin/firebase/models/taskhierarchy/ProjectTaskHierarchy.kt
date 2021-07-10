@@ -7,9 +7,9 @@ import com.krystianwsul.common.utils.TaskKey
 
 
 class ProjectTaskHierarchy(
-        private val project: Project<*>,
-        override val taskHierarchyRecord: ProjectTaskHierarchyRecord,
-) : TaskHierarchy(ParentTaskDelegate.Project(project)) {
+    private val project: Project<*>,
+    override val taskHierarchyRecord: ProjectTaskHierarchyRecord,
+) : TaskHierarchy(project.clearableInvalidatableManager, ParentTaskDelegate.Project(project)) {
 
     override val childTaskKey by lazy { TaskKey.Project(project.projectKey, taskHierarchyRecord.childTaskId) }
     override val childTask by lazy { project.getProjectTaskForce(childTaskKey) }

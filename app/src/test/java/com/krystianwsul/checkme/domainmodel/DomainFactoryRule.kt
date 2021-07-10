@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.domainmodel
 
 import android.util.Log
+import com.jakewharton.rxrelay3.PublishRelay
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
@@ -16,6 +17,7 @@ import com.krystianwsul.checkme.firebase.loaders.mockBase64
 import com.krystianwsul.checkme.firebase.managers.AndroidRootTasksManager
 import com.krystianwsul.checkme.firebase.managers.AndroidSharedProjectManager
 import com.krystianwsul.checkme.firebase.roottask.*
+import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.common.ErrorLogger
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.DeviceInfo
@@ -23,6 +25,7 @@ import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.json.projects.PrivateProjectJson
+import com.krystianwsul.common.firebase.json.tasks.RootTaskJson
 import com.krystianwsul.common.firebase.models.MyUser
 import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
 import com.krystianwsul.common.firebase.records.MyUserRecord
@@ -32,6 +35,7 @@ import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskHierarchyId
+import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.common.utils.UserKey
 import com.mindorks.scheduler.RxPS
 import io.mockk.*
@@ -73,6 +77,12 @@ class DomainFactoryRule : TestRule {
 
     lateinit var domainFactory: DomainFactory
         private set
+
+    private val rootTaskRelays = mutableMapOf<TaskKey.Root, PublishRelay<RootTaskJson>>()
+
+    fun acceptRootTaskJson(taskKey: TaskKey.Root, rootTaskJson: RootTaskJson) {
+        rootTaskRelays.getValue(taskKey).accept(rootTaskJson)
+    }
 
     override fun apply(base: Statement, description: Description): Statement {
         return object : Statement() {
@@ -179,7 +189,13 @@ class DomainFactoryRule : TestRule {
         val rootTasksManager = AndroidRootTasksManager(databaseWrapper)
 
         val rootTasksLoaderProvider = mockk<RootTasksLoader.Provider> {
-            every { getRootTaskObservable(any()) } returns Observable.never()
+            val slot = slot<TaskKey.Root>()
+
+            every { getRootTaskObservable(capture(slot)) } answers {
+                val taskKey = slot.captured
+
+                rootTaskRelays.getOrPut(taskKey) { PublishRelay.create() }.map { Snapshot(taskKey.taskId, it) }
+            }
         }
 
         val rootTasksLoader = RootTasksLoader(
@@ -273,6 +289,8 @@ class DomainFactoryRule : TestRule {
     }
 
     private fun after() {
+        rootTaskRelays.clear()
+
         compositeDisposable.clear()
     }
 

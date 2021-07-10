@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.res.Configuration
+import android.content.res.Resources
 import android.os.Build
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
@@ -85,6 +86,7 @@ class MyApplication : Application() {
         defaultLocale = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             newConfig.locales.get(0) ?: Locale.getDefault()
         } else {
+            @Suppress("DEPRECATION")
             newConfig.locale
         }
 
@@ -96,6 +98,10 @@ class MyApplication : Application() {
 
     override fun getApplicationContext(): Context {
         return localizationDelegate.getApplicationContext(super.getApplicationContext())
+    }
+
+    override fun getResources(): Resources {
+        return localizationDelegate.getResources(baseContext, super.getResources())
     }
 
     @SuppressLint("CheckResult")

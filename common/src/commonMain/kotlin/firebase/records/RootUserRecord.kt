@@ -98,17 +98,13 @@ open class RootUserRecord(
         }
     }
 
-    override fun removeProject(projectKey: ProjectKey.Shared): Boolean {
+    override fun removeProject(projectKey: ProjectKey.Shared) {
         val projectId = projectKey.key
 
-        return if (userWrapper.projects.containsKey(projectId)) {
+        if (userWrapper.projects.containsKey(projectId)) {
             userWrapper.projects.remove(projectId)
 
             addValue("$key/$PROJECTS/$projectId", null)
-
-            true
-        } else {
-            false
         }
     }
 

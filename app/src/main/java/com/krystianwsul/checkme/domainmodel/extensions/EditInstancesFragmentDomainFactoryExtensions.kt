@@ -189,7 +189,7 @@ fun DomainUpdater.setInstancesParent(
 
             undoData
         } else {
-            trackProjectRootTaskIds {
+            trackRootTaskIds {
                 addChildToParent(
                     it.task as RootTask,
                     parentTask as RootTask,

@@ -27,10 +27,7 @@ import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.firebase.models.task.performRootIntervalUpdate
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.time.Date
-import com.krystianwsul.common.utils.InstanceKey
-import com.krystianwsul.common.utils.ProjectKey
-import com.krystianwsul.common.utils.TaskHierarchyKey
-import com.krystianwsul.common.utils.TaskKey
+import com.krystianwsul.common.utils.*
 import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Single
 import java.util.*
@@ -389,48 +386,100 @@ fun DomainUpdater.setFirebaseTickListener(newTickData: TickData): Completable {
     }.perform(this)
 }
 
-fun <T> DomainFactory.trackProjectRootTaskIds(action: () -> T): T {
+private fun DomainFactory.getProjectTaskMap() = rootTasksFactory.rootTasks
+    .values
+    .groupBy { it.project.projectKey }
+
+private fun DomainFactory.createRootTaskIdGraphs(): List<Set<TaskKey.Root>> {
+    val graphs = mutableListOf<MutableSet<TaskKey.Root>>()
+
+    rootTasksFactory.rootTasks
+        .values
+        .forEach { addTaskToGraphs(it, graphs) }
+
+    return graphs
+}
+
+private fun DomainFactory.addTaskToGraphs(task: RootTask, graphs: MutableList<MutableSet<TaskKey.Root>>) {
+    if (graphs.any { task.taskKey in it }) return
+
+    val graph = mutableSetOf(task.taskKey)
+    graphs += graph
+
+    task.nestedParentTaskHierarchies
+        .values
+        .forEach { addTaskToGraphs(it.parentTask as RootTask, graphs) }
+
+    task.existingInstances
+        .values
+        .forEach {
+            it.parentState
+                .let { it as? Instance.ParentState.Parent }
+                ?.parentInstanceKey
+                ?.taskKey
+                ?.let { it as? TaskKey.Root }
+                ?.let { addTaskToGraphs(rootTasksFactory.getRootTask(it), graphs) }
+        }
+}
+
+fun <T> DomainFactory.trackRootTaskIds(action: () -> T): T {
     check(ProjectRootTaskIdTracker.instance == null)
 
     ProjectRootTaskIdTracker.instance = object : ProjectRootTaskIdTracker {}
 
-    fun getMap() = rootTasksFactory.rootTasks.mapValues { (_, task) -> task.project.projectKey }
+    val mapBefore = getProjectTaskMap()
+    val graphsBefore = createRootTaskIdGraphs()
 
-    val oldMap = getMap()
     val result = action()
-    val newMap = getMap()
 
-    check(oldMap.keys.all { newMap.containsKey(it) })
+    val mapAfter = getProjectTaskMap()
+    val graphsAfter = createRootTaskIdGraphs()
 
-    val (otherEntries, addedEntries) = newMap.entries.partition { oldMap.containsKey(it.key) }
+    fun getGraphBefore(taskKey: TaskKey.Root) = graphsBefore.filter { taskKey in it }
+        .singleOrEmpty()
+        ?: emptySet()
 
-    val changedTriples = otherEntries.map { (taskKey, newProjectKey) ->
-        val oldProjectKey = oldMap.getValue(taskKey)
+    fun getGraphAfter(taskKey: TaskKey.Root) = graphsAfter.single { taskKey in it }
 
-        Triple(taskKey, oldProjectKey, newProjectKey)
-    }.filter { (_, oldProjectKey, newProjectKey) -> oldProjectKey != newProjectKey }
+    rootTasksFactory.rootTasks.forEach { (taskKey, task) ->
+        val taskKeysBefore = getGraphBefore(taskKey)
+        val taskKeysAfter = getGraphAfter(taskKey)
 
-    val addPairs = addedEntries.map { it.key to it.value } +
-            changedTriples.map { (taskKey, _, newProjectKey) -> taskKey to newProjectKey }
+        if (taskKeysBefore == taskKeysAfter) return@forEach
 
-    val removePairs = changedTriples.map { (taskKey, oldProjectKey, _) -> taskKey to oldProjectKey }
+        val addedTaskKeys = taskKeysAfter - taskKeysBefore
+        val removedTaskKeys = taskKeysBefore - taskKeysAfter
 
-    fun getDelegate(projectKey: ProjectKey<*>) = projectsFactory.getProjectForce(projectKey)
-        .projectRecord
-        .rootTaskParentDelegate
+        val delegate = task.taskRecord.rootTaskParentDelegate
 
-    addPairs.forEach { (taskKey, projectKey) -> getDelegate(projectKey).addRootTaskKey(taskKey) }
-    removePairs.forEach { (taskKey, projectKey) -> getDelegate(projectKey).removeRootTaskKey(taskKey) }
+        addedTaskKeys.forEach(delegate::addRootTaskKey)
+        removedTaskKeys.forEach(delegate::removeRootTaskKey)
 
-    val allProjectKeys = addPairs.map { it.second } + removePairs.map { it.second }
+        rootTasksFactory.updateTaskRecord(taskKey, taskKeysAfter)
+    }
 
-    allProjectKeys.distinct().forEach {
-        val rootTaskKeys = projectsFactory.getProjectForce(it)
-            .getAllTasks()
-            .mapNotNull { it.taskKey as? TaskKey.Root }
+    projectsFactory.projects.forEach { (projectKey, project) ->
+        val taskKeysBefore = mapBefore.getOrDefault(projectKey, emptyList())
+            .map { task -> getGraphBefore(task.taskKey) }
+            .flatten()
             .toSet()
 
-        rootTasksFactory.updateProjectRecord(it, rootTaskKeys)
+        val taskKeysAfter = mapAfter.getOrDefault(projectKey, emptyList())
+            .map { task -> getGraphAfter(task.taskKey) }
+            .flatten()
+            .toSet()
+
+        if (taskKeysBefore == taskKeysAfter) return@forEach
+
+        val addedTaskKeys = taskKeysAfter - taskKeysBefore
+        val removedTaskKeys = taskKeysBefore - taskKeysAfter
+
+        val delegate = project.projectRecord.rootTaskParentDelegate
+
+        addedTaskKeys.forEach(delegate::addRootTaskKey)
+        removedTaskKeys.forEach(delegate::removeRootTaskKey)
+
+        rootTasksFactory.updateProjectRecord(projectKey, taskKeysAfter)
     }
 
     checkNotNull(ProjectRootTaskIdTracker.instance)

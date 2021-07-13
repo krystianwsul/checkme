@@ -208,7 +208,7 @@ fun DomainUpdater.createScheduleTopLevelTask(
     val imageUuid = imagePath?.let { newUuid() }
 
     lateinit var task: RootTask
-    trackProjectRootTaskIds {
+    trackRootTaskIds {
         task = createScheduleTopLevelTask(
             now,
             name,
@@ -252,7 +252,7 @@ fun DomainUpdater.createChildTask(
     val imageUuid = imagePath?.let { newUuid() }
 
     lateinit var childTask: RootTask
-    trackProjectRootTaskIds {
+    trackRootTaskIds {
         val parentTask = convertToRoot(getTaskForce(parentTaskKey), now)
         parentTask.requireCurrent(now)
 
@@ -292,7 +292,7 @@ fun DomainUpdater.createTopLevelTask(
     val imageUuid = imagePath?.let { newUuid() }
 
     lateinit var task: RootTask
-    trackProjectRootTaskIds {
+    trackRootTaskIds {
         task = createNoScheduleOrParentTask(
             now,
             name,
@@ -337,7 +337,7 @@ fun DomainUpdater.updateScheduleTask(
     val originalProject = originalTask.project
 
     lateinit var finalTask: RootTask
-    trackProjectRootTaskIds {
+    trackRootTaskIds {
         finalTask = convertAndUpdateProject(originalTask, now, projectKey)
 
         finalTask.performRootIntervalUpdate {
@@ -387,7 +387,7 @@ fun DomainUpdater.updateChildTask(
     lateinit var task: RootTask
     lateinit var originalProject: Project<*>
     lateinit var parentTask: RootTask
-    trackProjectRootTaskIds {
+    trackRootTaskIds {
         task = convertToRoot(getTaskForce(taskKey), now)
         task.requireCurrent(now)
 
@@ -465,7 +465,7 @@ fun DomainUpdater.updateTopLevelTask(
     val originalProject = originalTask.project
 
     lateinit var finalTask: RootTask
-    trackProjectRootTaskIds {
+    trackRootTaskIds {
         finalTask = convertAndUpdateProject(originalTask, now, projectKey)
 
         finalTask.performRootIntervalUpdate {
@@ -513,7 +513,7 @@ fun DomainUpdater.createScheduleJoinTopLevelTask(
     val imageUuid = imagePath?.let { newUuid() }
 
     lateinit var newParentTask: RootTask
-    trackProjectRootTaskIds {
+    trackRootTaskIds {
         val joinableMap = if (allReminders) {
             /**
              * I don't think the project updated is needed anymore, since that will happen with the new taskHierarchy records
@@ -570,7 +570,7 @@ fun DomainUpdater.createJoinChildTask(
     val imageUuid = imagePath?.let { newUuid() }
 
     lateinit var childTask: RootTask
-    trackProjectRootTaskIds {
+    trackRootTaskIds {
         val parentTask = convertToRoot(getTaskForce(parentTaskKey), now)
         parentTask.requireCurrent(now)
 
@@ -625,7 +625,7 @@ fun DomainUpdater.createJoinTopLevelTask(
     val imageUuid = imagePath?.let { newUuid() }
 
     lateinit var newParentTask: RootTask
-    trackProjectRootTaskIds {
+    trackRootTaskIds {
         val joinTasks = joinTaskKeys.map { convertAndUpdateProject(getTaskForce(it), now, finalProjectId) }
 
         val ordinal = joinTasks.map { it.ordinal }.minOrNull()

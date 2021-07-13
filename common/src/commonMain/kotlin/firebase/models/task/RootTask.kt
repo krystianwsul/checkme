@@ -174,10 +174,14 @@ class RootTask private constructor(
     }
 
     fun addRootTask(childTask: RootTask) {
+        ProjectRootTaskIdTracker.checkTracking()
+
         taskRecord.rootTaskParentDelegate.addRootTaskKey(childTask.taskKey) { parent.updateTaskRecord(taskKey, it) }
     }
 
     fun removeRootTask(childTask: RootTask) {
+        ProjectRootTaskIdTracker.checkTracking()
+
         taskRecord.rootTaskParentDelegate.removeRootTaskKey(childTask.taskKey) { parent.updateTaskRecord(taskKey, it) }
     }
 

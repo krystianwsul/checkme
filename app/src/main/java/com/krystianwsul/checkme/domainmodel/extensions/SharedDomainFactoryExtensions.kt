@@ -475,8 +475,10 @@ fun <T> DomainFactory.trackRootTaskIds(action: () -> T): T {
     fun getGraphAfter(taskKey: TaskKey.Root) = graphsAfter.single { taskKey in it }
 
     rootTasksFactory.rootTasks.forEach { (taskKey, task) ->
-        val taskKeysBefore = getGraphBefore(taskKey) - taskKey
-        val taskKeysAfter = getGraphAfter(taskKey) - taskKey
+        val keysToOmit = task.taskRecord.getDirectDependencyTaskKeys() + task.taskKey
+
+        val taskKeysBefore = getGraphBefore(taskKey) - keysToOmit
+        val taskKeysAfter = getGraphAfter(taskKey) - keysToOmit
 
         if (taskKeysBefore == taskKeysAfter) return@forEach
 

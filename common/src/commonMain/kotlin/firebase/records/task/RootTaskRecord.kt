@@ -224,6 +224,14 @@ class RootTaskRecord private constructor(
         return taskHierarchyRecord
     }
 
-    fun getDependentTaskKeys(): Set<TaskKey.Root> =
+    fun getDependentTaskKeys(): Set<TaskKey.Root> = // todo rootId
         rootTaskParentDelegate.rootTaskKeys + taskHierarchyRecords.map { TaskKey.Root(it.value.parentTaskId) }
+
+    fun getDirectDependencyTaskKeys(): Set<TaskKey.Root> {
+        val hierarchyKeys = taskHierarchyRecords.map { TaskKey.Root(it.value.parentTaskId) }
+
+        val instanceKeys = instanceRecords.values.mapNotNull { it.parentInstanceKey?.taskKey as? TaskKey.Root }
+
+        return (hierarchyKeys + instanceKeys).toSet()
+    }
 }

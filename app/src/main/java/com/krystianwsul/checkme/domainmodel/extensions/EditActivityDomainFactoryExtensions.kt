@@ -515,16 +515,14 @@ fun DomainUpdater.createScheduleJoinTopLevelTask(
     lateinit var newParentTask: RootTask
     trackProjectRootTaskIds {
         val joinableMap = if (allReminders) {
+            /**
+             * I don't think the project updated is needed anymore, since that will happen with the new taskHierarchy records
+             * anyway
+             */
             joinables.map { it to convertAndUpdateProject(getTaskForce(it.taskKey), now, finalProjectKey) }
         } else {
             joinables.map { it to convertToRoot(getTaskForce(it.taskKey), now) }
         }
-
-        check(
-            joinableMap.map { it.second.project.projectKey }
-                .distinct()
-                .single() == finalProjectKey
-        )
 
         val ordinal = joinableMap.map { it.second.ordinal }.minOrNull()
 
@@ -734,8 +732,6 @@ private fun DomainFactory.joinJoinables(
     joinableMap: List<Pair<EditParameters.Join.Joinable, RootTask>>,
     now: ExactTimeStamp.Local,
 ) {
-    check(joinableMap.map { it.second.project }.distinct().size == 1)
-
     val parentInstanceKey = newParentTask.getInstances(null, null, now)
         .single()
         .instanceKey

@@ -75,9 +75,7 @@ fun DomainFactory.getShowTaskInstancesData(
                             it.task.getImage(deviceDbInfo),
                             it.isAssignedToMe(now, myUserFactory.user),
                             it.getProjectInfo(now, parameters.projectKey == null),
-                            it.task
-                                .project
-                                .projectKey as? ProjectKey.Shared,
+                            it.getProject().projectKey as? ProjectKey.Shared,
                         )
                     }
                 }

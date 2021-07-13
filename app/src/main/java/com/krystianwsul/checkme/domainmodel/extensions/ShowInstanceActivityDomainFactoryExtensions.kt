@@ -117,9 +117,7 @@ private fun DomainFactory.getGroupListData(
                 childTask.getImage(deviceDbInfo),
                 childInstance.isAssignedToMe(now, myUserFactory.user),
                 childInstance.getProjectInfo(now),
-                childInstance.task
-                    .project
-                    .projectKey as? ProjectKey.Shared,
+                childInstance.getProject().projectKey as? ProjectKey.Shared,
             )
         }
 

@@ -846,17 +846,23 @@ class DomainFactoryTest {
         assertEquals(null, instanceDatas[0].projectKey)
         assertEquals(sharedProjectKey, instanceDatas[1].projectKey)
 
+        val privateInstanceKey = instanceDatas[0].instanceKey
+        val sharedInstanceKey = instanceDatas[1].instanceKey
+
         now += 1.hours
 
         val joinTaskKey = domainUpdater(now).createScheduleJoinTopLevelTask(
             DomainListenerManager.NotificationType.All,
             "join task",
             scheduleDatas,
-            listOf(EditParameters.Join.Joinable.Task(privateTaskKey), EditParameters.Join.Joinable.Task(sharedTaskKey)),
+            listOf(
+                EditParameters.Join.Joinable.Instance(privateInstanceKey),
+                EditParameters.Join.Joinable.Instance(sharedInstanceKey),
+            ),
             null,
             null,
             null,
-            false,
+            true,
         ).blockingGet()
 
         fun getProjectKey(taskKey: TaskKey) = domainFactory.getTaskForce(taskKey)
@@ -875,5 +881,221 @@ class DomainFactoryTest {
         assertEquals(null, instanceData.projectKey)
         assertEquals(2, instanceData.children.size)
         assertTrue(instanceData.children.values.all { it.projectKey == null })
+    }
+
+    @Test
+    fun testJoinSingleAndWeeklyScheduleDifferentProjectsJustTheseReminders() {
+        val date = Date(2021, 7, 13)
+        var now = ExactTimeStamp.Local(date, HourMinute(1, 0))
+
+        val privateProjectKey = domainFactory.projectsFactory
+            .privateProject
+            .projectKey
+
+        val sharedProjectKey1 = domainUpdater(now).createProject(
+            DomainListenerManager.NotificationType.All,
+            "project 1",
+            setOf(),
+        ).blockingGet()
+
+        val sharedProjectKey2 = domainUpdater(now).createProject(
+            DomainListenerManager.NotificationType.All,
+            "project 2",
+            setOf(),
+        ).blockingGet()
+
+        val scheduleTimePair = TimePair(HourMinute(5, 0))
+
+        val singleScheduleDatas = listOf(ScheduleData.Single(date, scheduleTimePair))
+
+        val taskKey1 = domainUpdater(now).createScheduleTopLevelTask(
+            DomainListenerManager.NotificationType.All,
+            "task 1 single",
+            singleScheduleDatas,
+            null,
+            EditDelegate.SharedProjectParameters(sharedProjectKey1, setOf()),
+            null,
+        )
+            .blockingGet()
+            .taskKey
+
+        now += 1.hours
+
+        val taskKey2 = domainUpdater(now).createScheduleTopLevelTask(
+            DomainListenerManager.NotificationType.All,
+            "task 2 weekly",
+            listOf(ScheduleData.Weekly(setOf(DayOfWeek.TUESDAY), scheduleTimePair, null, null, 1)),
+            null,
+            EditDelegate.SharedProjectParameters(sharedProjectKey2, setOf()),
+            null,
+        )
+            .blockingGet()
+            .taskKey
+
+        val instanceDatas = domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
+            .groupListDataWrapper
+            .instanceDatas
+
+        assertEquals(2, instanceDatas.size)
+        assertEquals(sharedProjectKey1, instanceDatas[0].projectKey)
+        assertEquals(sharedProjectKey2, instanceDatas[1].projectKey)
+
+        val instanceKey1 = instanceDatas[0].instanceKey
+        val instanceKey2 = instanceDatas[1].instanceKey
+
+        assertEquals(
+            sharedProjectKey2,
+            domainFactory.getGroupListData(now, 7, Preferences.TimeRange.DAY)
+                .groupListDataWrapper
+                .instanceDatas
+                .single()
+                .projectKey,
+        )
+
+        now += 1.hours
+
+        val joinTaskKey = domainUpdater(now).createScheduleJoinTopLevelTask(
+            DomainListenerManager.NotificationType.All,
+            "join task",
+            singleScheduleDatas,
+            listOf(EditParameters.Join.Joinable.Instance(instanceKey1), EditParameters.Join.Joinable.Instance(instanceKey2)),
+            null,
+            null,
+            null,
+            false,
+        ).blockingGet()
+
+        fun getProjectKey(taskKey: TaskKey) = domainFactory.getTaskForce(taskKey)
+            .project
+            .projectKey
+
+        assertEquals(privateProjectKey, getProjectKey(joinTaskKey))
+        assertEquals(privateProjectKey, getProjectKey(taskKey1))
+        assertEquals(sharedProjectKey2, getProjectKey(taskKey2))
+
+        val instanceData = domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
+            .groupListDataWrapper
+            .instanceDatas
+            .single()
+
+        assertEquals(null, instanceData.projectKey)
+        assertEquals(2, instanceData.children.size)
+        assertTrue(instanceData.children.values.all { it.projectKey == null })
+
+        assertEquals(
+            sharedProjectKey2,
+            domainFactory.getGroupListData(now, 7, Preferences.TimeRange.DAY)
+                .groupListDataWrapper
+                .instanceDatas
+                .single()
+                .projectKey
+        )
+    }
+
+    @Test
+    fun testJoinSingleAndWeeklyScheduleDifferentProjectsAllReminders() {
+        val date = Date(2021, 7, 13)
+        var now = ExactTimeStamp.Local(date, HourMinute(1, 0))
+
+        val privateProjectKey = domainFactory.projectsFactory
+            .privateProject
+            .projectKey
+
+        val sharedProjectKey1 = domainUpdater(now).createProject(
+            DomainListenerManager.NotificationType.All,
+            "project 1",
+            setOf(),
+        ).blockingGet()
+
+        val sharedProjectKey2 = domainUpdater(now).createProject(
+            DomainListenerManager.NotificationType.All,
+            "project 2",
+            setOf(),
+        ).blockingGet()
+
+        val scheduleTimePair = TimePair(HourMinute(5, 0))
+
+        val singleScheduleDatas = listOf(ScheduleData.Single(date, scheduleTimePair))
+
+        val taskKey1 = domainUpdater(now).createScheduleTopLevelTask(
+            DomainListenerManager.NotificationType.All,
+            "task 1 single",
+            singleScheduleDatas,
+            null,
+            EditDelegate.SharedProjectParameters(sharedProjectKey1, setOf()),
+            null,
+        )
+            .blockingGet()
+            .taskKey
+
+        now += 1.hours
+
+        val taskKey2 = domainUpdater(now).createScheduleTopLevelTask(
+            DomainListenerManager.NotificationType.All,
+            "task 2 weekly",
+            listOf(ScheduleData.Weekly(setOf(DayOfWeek.TUESDAY), scheduleTimePair, null, null, 1)),
+            null,
+            EditDelegate.SharedProjectParameters(sharedProjectKey2, setOf()),
+            null,
+        )
+            .blockingGet()
+            .taskKey
+
+        val instanceDatas = domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
+            .groupListDataWrapper
+            .instanceDatas
+
+        assertEquals(2, instanceDatas.size)
+        assertEquals(sharedProjectKey1, instanceDatas[0].projectKey)
+        assertEquals(sharedProjectKey2, instanceDatas[1].projectKey)
+
+        val instanceKey1 = instanceDatas[0].instanceKey
+        val instanceKey2 = instanceDatas[1].instanceKey
+
+        assertEquals(
+            sharedProjectKey2,
+            domainFactory.getGroupListData(now, 7, Preferences.TimeRange.DAY)
+                .groupListDataWrapper
+                .instanceDatas
+                .single()
+                .projectKey,
+        )
+
+        now += 1.hours
+
+        val joinTaskKey = domainUpdater(now).createScheduleJoinTopLevelTask(
+            DomainListenerManager.NotificationType.All,
+            "join task",
+            singleScheduleDatas,
+            listOf(EditParameters.Join.Joinable.Instance(instanceKey1), EditParameters.Join.Joinable.Instance(instanceKey2)),
+            null,
+            null,
+            null,
+            true,
+        ).blockingGet()
+
+        fun getProjectKey(taskKey: TaskKey) = domainFactory.getTaskForce(taskKey)
+            .project
+            .projectKey
+
+        assertEquals(privateProjectKey, getProjectKey(joinTaskKey))
+        assertEquals(privateProjectKey, getProjectKey(taskKey1))
+        assertEquals(privateProjectKey, getProjectKey(taskKey2))
+
+        val instanceData = domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
+            .groupListDataWrapper
+            .instanceDatas
+            .single()
+
+        assertEquals(null, instanceData.projectKey)
+        assertEquals(2, instanceData.children.size)
+        assertTrue(instanceData.children.values.all { it.projectKey == null })
+
+        assertTrue(
+            domainFactory.getGroupListData(now, 7, Preferences.TimeRange.DAY)
+                .groupListDataWrapper
+                .instanceDatas
+                .isEmpty()
+        )
     }
 }

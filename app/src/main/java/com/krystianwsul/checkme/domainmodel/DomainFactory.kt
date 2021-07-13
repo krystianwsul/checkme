@@ -412,9 +412,7 @@ class DomainFactory(
             instance.task.getImage(deviceDbInfo),
             instance.isAssignedToMe(now, myUserFactory.user),
             instance.getProjectInfo(now, includeProjectInfo),
-            instance.task
-                .project
-                .projectKey as? ProjectKey.Shared,
+            instance.getProject().projectKey as? ProjectKey.Shared,
         )
     }
 

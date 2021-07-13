@@ -400,15 +400,48 @@ private fun DomainFactory.createRootTaskIdGraphs(): List<Set<TaskKey.Root>> {
     return graphs
 }
 
-private fun DomainFactory.addTaskToGraphs(task: RootTask, graphs: MutableList<MutableSet<TaskKey.Root>>) {
-    if (graphs.any { task.taskKey in it }) return
+private fun DomainFactory.addTaskToGraphs(
+    task: RootTask,
+    graphs: MutableList<MutableSet<TaskKey.Root>>,
+) {
+    if (graphs.filter { task.taskKey in it }.singleOrEmpty() != null) return
 
     val graph = mutableSetOf(task.taskKey)
-    graphs += graph
 
+    addDependentTasksToGraph(task, graphs, graph)
+
+    graphs += graph
+}
+
+private fun DomainFactory.addTaskToGraph(
+    task: RootTask,
+    graphs: MutableList<MutableSet<TaskKey.Root>>,
+    currentGraph: MutableSet<TaskKey.Root>,
+) {
+    if (task.taskKey in currentGraph) return
+
+    val previousGraph = graphs.filter { task.taskKey in it }.singleOrEmpty()
+    if (previousGraph != null) {
+        graphs -= previousGraph
+
+        // this task is already in a different graph, so we have to merge them
+        currentGraph += previousGraph
+        return
+    }
+
+    currentGraph += task.taskKey
+
+    addDependentTasksToGraph(task, graphs, currentGraph)
+}
+
+fun DomainFactory.addDependentTasksToGraph(
+    task: RootTask,
+    graphs: MutableList<MutableSet<TaskKey.Root>>,
+    graph: MutableSet<TaskKey.Root>,
+) {
     task.nestedParentTaskHierarchies
         .values
-        .forEach { addTaskToGraphs(it.parentTask as RootTask, graphs) }
+        .forEach { addTaskToGraph(it.parentTask as RootTask, graphs, graph) }
 
     task.existingInstances
         .values
@@ -418,7 +451,7 @@ private fun DomainFactory.addTaskToGraphs(task: RootTask, graphs: MutableList<Mu
                 ?.parentInstanceKey
                 ?.taskKey
                 ?.let { it as? TaskKey.Root }
-                ?.let { addTaskToGraphs(rootTasksFactory.getRootTask(it), graphs) }
+                ?.let { addTaskToGraph(rootTasksFactory.getRootTask(it), graphs, graph) }
         }
 }
 
@@ -442,8 +475,8 @@ fun <T> DomainFactory.trackRootTaskIds(action: () -> T): T {
     fun getGraphAfter(taskKey: TaskKey.Root) = graphsAfter.single { taskKey in it }
 
     rootTasksFactory.rootTasks.forEach { (taskKey, task) ->
-        val taskKeysBefore = getGraphBefore(taskKey)
-        val taskKeysAfter = getGraphAfter(taskKey)
+        val taskKeysBefore = getGraphBefore(taskKey) - taskKey
+        val taskKeysAfter = getGraphAfter(taskKey) - taskKey
 
         if (taskKeysBefore == taskKeysAfter) return@forEach
 

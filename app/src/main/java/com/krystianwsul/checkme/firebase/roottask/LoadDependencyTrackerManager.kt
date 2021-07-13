@@ -36,7 +36,7 @@ class LoadDependencyTrackerManager {
         val taskKey = taskRecord.taskKey
         check(!taskTrackers.containsKey(taskKey))
 
-        return TaskTracker(this, taskKey, taskRecord.name, taskRecord.getDependentTaskKeys()).also {
+        return TaskTracker(this, taskKey, taskRecord.name, taskRecord.getAllDependencyTaskKeys()).also {
             taskTrackers[taskKey] = it
         }
     }

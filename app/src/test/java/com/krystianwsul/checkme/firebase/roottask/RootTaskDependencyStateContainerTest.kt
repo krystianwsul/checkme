@@ -16,7 +16,7 @@ class RootTaskDependencyStateContainerTest {
         childTaskKeys: Set<TaskKey.Root> = emptySet(),
     ) = mockk<RootTaskRecord> {
         every { this@mockk.taskKey } returns taskKey
-        every { getDependentTaskKeys() } returns childTaskKeys
+        every { getAllDependencyTaskKeys() } returns childTaskKeys
     }
 
     lateinit var container: RootTaskDependencyStateContainer.Impl

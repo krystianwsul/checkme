@@ -177,7 +177,7 @@ interface RootTaskDependencyStateContainer {
         @VisibleForTesting
         class RecordState(val rootTaskRecord: RootTaskRecord, impl: Impl, private val stateHolder: StateHolder) {
 
-            val downKeys = rootTaskRecord.getDependentTaskKeys()
+            val downKeys = rootTaskRecord.getAllDependencyTaskKeys()
 
             private val downStateHolders = downKeys.associateWith(impl::getStateHolder)
 

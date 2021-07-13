@@ -21,7 +21,7 @@ interface RootTaskDependencyCoordinator {
     ) : RootTaskDependencyCoordinator {
 
         override fun getDependencies(rootTaskRecord: RootTaskRecord): Single<JsonTime.UserCustomTimeProvider> {
-            rootTaskKeySource.onRootTaskAddedOrUpdated(rootTaskRecord.taskKey, rootTaskRecord.getDependentTaskKeys())
+            rootTaskKeySource.onRootTaskAddedOrUpdated(rootTaskRecord.taskKey, rootTaskRecord.getAllDependencyTaskKeys())
 
             return listOf(
                 Observable.just(Unit),
@@ -42,7 +42,7 @@ interface RootTaskDependencyCoordinator {
         ): Boolean {
             if (!userCustomTimeProviderSource.hasCustomTimes(rootTaskRecord)) return false
 
-            val dependentTaskKeys = rootTaskRecord.getDependentTaskKeys()
+            val dependentTaskKeys = rootTaskRecord.getAllDependencyTaskKeys()
             val uncheckedTaskKeys = dependentTaskKeys - checkedTaskKeys
 
             val uncheckedTasks = uncheckedTaskKeys.associateWith { taskRecordLoader.tryGetTaskRecord(it)!! }

@@ -505,16 +505,14 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
             override val excludedTaskKeys = joinables.map { it.taskKey }.toSet()
 
             override fun showAllInstancesDialog(domainFactory: DomainFactory, now: ExactTimeStamp.Local): Boolean {
-                return joinables.map { it to domainFactory.getTaskForce(it.taskKey) }.run {
-                    map { it.second.project }.distinct().size == 1 && any { (joinable, task) ->
-                        if (joinable.instanceKey != null) {
-                            task.hasOtherVisibleInstances(now, joinable.instanceKey)
-                        } else {
-                            task.getInstances(null, null, now)
-                                .filter { it.isVisible(now, Instance.VisibilityOptions()) }
-                                .takeAndHasMore(1)
-                                .second
-                        }
+                return joinables.map { it to domainFactory.getTaskForce(it.taskKey) }.any { (joinable, task) ->
+                    if (joinable.instanceKey != null) {
+                        task.hasOtherVisibleInstances(now, joinable.instanceKey)
+                    } else {
+                        task.getInstances(null, null, now)
+                            .filter { it.isVisible(now, Instance.VisibilityOptions()) }
+                            .takeAndHasMore(1)
+                            .second
                     }
                 }
             }

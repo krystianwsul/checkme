@@ -1189,12 +1189,18 @@ class DomainFactoryTest {
 
         assertEquals(taskKey3, instanceKey3.taskKey)
 
-        assertEquals(
-            1,
-            domainFactory.getShowInstanceData(instanceKey3, now)
-                .groupListDataWrapper
-                .instanceDatas
-                .size,
-        )
+        val showInstanceData = domainFactory.getShowInstanceData(instanceKey3, now)
+
+        val instanceData1 = showInstanceData.groupListDataWrapper
+            .instanceDatas.single()
+
+        assertEquals(taskKey1, instanceData1.instanceKey.taskKey)
+
+        val instanceData2 = instanceData1.children
+            .values
+            .single()
+
+        assertEquals(taskKey2, instanceData2.instanceKey.taskKey)
+        assertTrue(instanceData2.children.isEmpty())
     }
 }

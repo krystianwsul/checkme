@@ -237,18 +237,26 @@ sealed class Task(
         givenStartExactTimeStamp: ExactTimeStamp.Offset?,
         givenEndExactTimeStamp: ExactTimeStamp.Offset?,
         now: ExactTimeStamp.Local,
+        excludedParentTasks: Set<TaskKey>,
     ): Sequence<Instance> {
-        val instanceSequences = intervalInfo.parentHierarchyIntervals.map {
-            it.taskHierarchy
-                .parentTask
-                .getInstances(givenStartExactTimeStamp, givenEndExactTimeStamp, now)
-                .filter { it.isVisible(now, Instance.VisibilityOptions(hack24 = true)) }
-                .mapNotNull {
-                    it.getChildInstances()
-                        .singleOrNull { it.taskKey == taskKey }
-                        ?.takeIf { !it.exists() }
-                }
-        }
+        val instanceSequences = intervalInfo.parentHierarchyIntervals
+            .map { it.taskHierarchy }
+            .filter { it.parentTaskKey !in excludedParentTasks }
+            .map {
+                it.parentTask
+                    .getInstances(
+                        givenStartExactTimeStamp,
+                        givenEndExactTimeStamp,
+                        now,
+                        excludedParentTasks = excludedParentTasks + taskKey,
+                    )
+                    .filter { it.isVisible(now, Instance.VisibilityOptions(hack24 = true)) }
+                    .mapNotNull {
+                        it.getChildInstances()
+                            .singleOrNull { it.taskKey == taskKey }
+                            ?.takeIf { !it.exists() }
+                    }
+            }
 
         return combineInstanceSequences(instanceSequences)
     }
@@ -316,6 +324,7 @@ sealed class Task(
         now: ExactTimeStamp.Local,
         onlyRoot: Boolean = false,
         filterVisible: Boolean = true,
+        excludedParentTasks: Set<TaskKey> = emptySet(),
     ): Sequence<Instance> {
         check(!gettingInstances)
         gettingInstances = true
@@ -329,7 +338,8 @@ sealed class Task(
 
             instanceSequences += getExistingInstances(startExactTimeStamp, endExactTimeStamp, onlyRoot)
 
-            if (!onlyRoot) instanceSequences += getParentInstances(startExactTimeStamp, endExactTimeStamp, now)
+            if (!onlyRoot)
+                instanceSequences += getParentInstances(startExactTimeStamp, endExactTimeStamp, now, excludedParentTasks)
 
             instanceSequences += getScheduleInstances(startExactTimeStamp, endExactTimeStamp)
 

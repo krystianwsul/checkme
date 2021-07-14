@@ -153,7 +153,7 @@ private class SetInstanceParentUndoData(
     ) = domainFactory.getInstance(instanceKey).let {
         val initialProject = it.task.project
 
-        it.setParentState(parentState) // todo root wrap
+        domainFactory.trackRootTaskIds { it.setParentState(parentState) }
 
         val finalProject = it.task.project
 

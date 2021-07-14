@@ -32,7 +32,11 @@ object Irrelevant {
         val projects = getProjects()
         val tasks = projects.values.flatMap { it.getAllTasks() }
 
-        return ProjectRootTaskIdTracker.trackRootTaskIds(
+        lateinit var taskRelevances: Map<TaskKey, TaskRelevance>
+        lateinit var remoteProjectRelevances: Map<ProjectKey<*>, RemoteProjectRelevance>
+        lateinit var irrelevantTasks: List<Task>
+
+        val result = ProjectRootTaskIdTracker.trackRootTaskIds(
             getRootTasks,
             getProjects,
             rootTaskProvider,
@@ -46,7 +50,7 @@ object Irrelevant {
             }
 
             // relevant hack
-            val taskRelevances = tasks.associate { it.taskKey to TaskRelevance(it) }
+            taskRelevances = tasks.associate { it.taskKey to TaskRelevance(it) }
 
             val taskHierarchies = projects.values.flatMap { it.taskHierarchies }
             val taskHierarchyRelevances = taskHierarchies.associate { it.taskHierarchyKey to TaskHierarchyRelevance(it) }
@@ -81,7 +85,7 @@ object Irrelevant {
             val relevantTaskRelevances = taskRelevances.values.filter { it.relevant }
             val relevantTasks = relevantTaskRelevances.map { it.task }
 
-            val irrelevantTasks = tasks - relevantTasks
+            irrelevantTasks = tasks - relevantTasks
 
             val visibleIrrelevantTasks = irrelevantTasks.filter { it.isVisible(now, true) }
             if (visibleIrrelevantTasks.isNotEmpty()) {
@@ -182,7 +186,7 @@ object Irrelevant {
                         .forEach { customTimeRelevanceCollection.getRelevance(it.key).setRelevant() }
                 }
 
-            val remoteProjectRelevances = projects.mapValues { RemoteProjectRelevance(it.value) }
+            remoteProjectRelevances = projects.mapValues { RemoteProjectRelevance(it.value) }
 
             projects.values
                 .filter { it.current(now) }
@@ -208,22 +212,7 @@ object Irrelevant {
             remoteProjectRelevances.values.forEach { remoteProjectRelevance ->
                 val project = remoteProjectRelevance.project
 
-                if (remoteProjectRelevance.relevant) {
-                    project.projectRecord
-                        .rootTaskParentDelegate
-                        .rootTaskKeys
-                        .forEach { taskKey ->
-                            if (irrelevantTasks.any { it.taskKey == taskKey })
-                                throw TaskInIrrelevantException(taskKey, project.projectKey)
-
-                            val taskRelevance =
-                                taskRelevances[taskKey] ?: throw MissingRelevanceException(taskKey, project.projectKey)
-
-                            if (!taskRelevance.relevant) throw TaskIrrelevantException(taskKey, project.projectKey)
-                        }
-                } else {
-                    project.delete()
-                }
+                if (!remoteProjectRelevance.relevant) project.delete()
             }
 
             Result(
@@ -238,6 +227,27 @@ object Irrelevant {
                     .map { it.project as SharedProject },
             )
         }
+
+        remoteProjectRelevances.values.forEach { remoteProjectRelevance ->
+            val project = remoteProjectRelevance.project
+
+            if (remoteProjectRelevance.relevant) {
+                project.projectRecord
+                    .rootTaskParentDelegate
+                    .rootTaskKeys
+                    .forEach { taskKey ->
+                        if (irrelevantTasks.any { it.taskKey == taskKey })
+                            throw TaskInIrrelevantException(taskKey, project.projectKey)
+
+                        val taskRelevance =
+                            taskRelevances[taskKey] ?: throw MissingRelevanceException(taskKey, project.projectKey)
+
+                        if (!taskRelevance.relevant) throw TaskIrrelevantException(taskKey, project.projectKey)
+                    }
+            }
+        }
+
+        return result
     }
 
     private class VisibleIrrelevantTasksException(message: String) : Exception(message)

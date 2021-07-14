@@ -99,24 +99,26 @@ fun DomainUpdater.setInstancesDateTime(
 
     val time = getTime(instanceTimePair)
 
-    instances.forEach {
-        it.setInstanceDateTime(shownFactory, DateTime(instanceDate, time), this, now)
+    trackRootTaskIds {
+        instances.forEach {
+            it.setInstanceDateTime(shownFactory, DateTime(instanceDate, time), this, now)
 
-        if (it.parentInstance != null) {
-            when (it.parentState) {
-                is Instance.ParentState.Unset -> it.setParentState(Instance.ParentState.NoParent) // todo root wrap
-                is Instance.ParentState.NoParent -> throw IllegalStateException()
-                is Instance.ParentState.Parent -> {
-                    val newParentState = if (it.getTaskHierarchyParentInstance() != null)
-                        Instance.ParentState.NoParent
-                    else
-                        Instance.ParentState.Unset
+            if (it.parentInstance != null) {
+                when (it.parentState) {
+                    is Instance.ParentState.Unset -> it.setParentState(Instance.ParentState.NoParent)
+                    is Instance.ParentState.NoParent -> throw IllegalStateException()
+                    is Instance.ParentState.Parent -> {
+                        val newParentState = if (it.getTaskHierarchyParentInstance() != null)
+                            Instance.ParentState.NoParent
+                        else
+                            Instance.ParentState.Unset
 
-                    it.setParentState(newParentState) // todo root wrap
+                        it.setParentState(newParentState)
+                    }
                 }
-            }
 
-            check(it.parentInstance == null)
+                check(it.parentInstance == null)
+            }
         }
     }
 

@@ -173,16 +173,12 @@ class RootTask private constructor(
         invalidateIntervals()
     }
 
-    fun addRootTask(childTask: RootTask) {
+    fun addRootTask(childTask: RootTask) { // todo check
         ProjectRootTaskIdTracker.checkTracking()
-
-        taskRecord.rootTaskParentDelegate.addRootTaskKey(childTask.taskKey) { parent.updateTaskRecord(taskKey, it) }
     }
 
-    fun removeRootTask(childTask: RootTask) {
+    fun removeRootTask(childTask: RootTask) { // todo check
         ProjectRootTaskIdTracker.checkTracking()
-
-        taskRecord.rootTaskParentDelegate.removeRootTaskKey(childTask.taskKey) { parent.updateTaskRecord(taskKey, it) }
     }
 
     override fun invalidateProjectParentTaskHierarchies() = invalidateIntervals()

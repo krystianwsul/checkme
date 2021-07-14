@@ -14,6 +14,8 @@ class ProjectRootTaskIdTracker {
 
         fun checkTracking() = checkNotNull(instance)
 
+        private data class TaskData(val task: RootTask, val keysToOmit: Set<TaskKey.Root>)
+
         fun <T> trackRootTaskIds(
             getRootTasks: () -> Map<TaskKey.Root, RootTask>,
             getProjects: () -> Map<ProjectKey<*>, Project<*>>,
@@ -24,13 +26,19 @@ class ProjectRootTaskIdTracker {
 
             instance = ProjectRootTaskIdTracker()
 
+            fun Map<TaskKey.Root, RootTask>.getRootTaskDatas() = mapValues { (_, task) ->
+                TaskData(task, task.taskRecord.getDirectDependencyTaskKeys() + task.taskKey)
+            }
+
             val rootTasksBefore = getRootTasks()
+            val rootTaskDatasBefore = rootTasksBefore.getRootTaskDatas()
             val mapBefore = getProjectTaskMap(rootTasksBefore)
             val graphsBefore = createRootTaskIdGraphs(rootTasksBefore)
 
             val result = action()
 
             val rootTasksAfter = getRootTasks()
+            val rootTaskDatasAfter = rootTasksAfter.getRootTaskDatas()
             val mapAfter = getProjectTaskMap(rootTasksAfter)
             val graphsAfter = createRootTaskIdGraphs(rootTasksAfter)
 
@@ -40,11 +48,11 @@ class ProjectRootTaskIdTracker {
 
             fun getGraphAfter(taskKey: TaskKey.Root) = graphsAfter.single { taskKey in it }
 
-            rootTasksAfter.forEach { (taskKey, task) ->
-                val keysToOmit = task.taskRecord.getDirectDependencyTaskKeys() + task.taskKey
+            rootTaskDatasAfter.forEach { (taskKey, taskData) ->
+                val (task, keysToOmitAfter) = taskData
 
-                val taskKeysBefore = getGraphBefore(taskKey) - keysToOmit
-                val taskKeysAfter = getGraphAfter(taskKey) - keysToOmit
+                val taskKeysBefore = getGraphBefore(taskKey) - rootTaskDatasBefore[taskKey]?.keysToOmit.orEmpty()
+                val taskKeysAfter = getGraphAfter(taskKey) - keysToOmitAfter
 
                 if (taskKeysBefore == taskKeysAfter) return@forEach
 

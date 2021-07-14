@@ -257,7 +257,6 @@ fun DomainUpdater.createChildTask(
         parentTask.requireCurrent(now)
 
         childTask = createChildTask(
-            // todo root check wrapped
             now,
             parentTask,
             name,
@@ -580,7 +579,6 @@ fun DomainUpdater.createJoinChildTask(
         val ordinal = joinTasks.map { it.ordinal }.minOrNull()
 
         childTask = createChildTask(
-            // todo root check wrapped
             now,
             parentTask,
             name,
@@ -821,13 +819,13 @@ private fun DomainFactory.copyTask(now: ExactTimeStamp.Local, task: RootTask, co
         val copiedChildTask = it.childTask
         copiedChildTask.getImage(deviceDbInfo)?.let { check(it is ImageState.Remote) }
 
-        createChildTask( // todo root check wrapped
+        createChildTask(
             now,
             task,
             copiedChildTask.name,
             copiedChildTask.note,
             copiedChildTask.imageJson,
-            copiedChildTask.taskKey
+            copiedChildTask.taskKey,
         )
     }
 }

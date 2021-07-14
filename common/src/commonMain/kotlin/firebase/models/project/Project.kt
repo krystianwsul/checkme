@@ -265,13 +265,6 @@ abstract class Project<T : ProjectType>(
 
     override fun getAllExistingInstances() = rootTaskProvider.getAllExistingInstances()
 
-    fun updateRootTaskKeys() {
-        val rootTaskKeys = getAllTasks().mapNotNull { it.taskKey as? TaskKey.Root }.toSet()
-
-        projectRecord.rootTaskParentDelegate.setRootTaskKeys(rootTaskKeys)
-        rootTaskProvider.updateProjectRecord(projectKey, rootTaskKeys)
-    }
-
     private class MissingTaskException(projectId: ProjectKey<*>, taskId: String) :
         Exception("projectId: $projectId, taskId: $taskId")
 

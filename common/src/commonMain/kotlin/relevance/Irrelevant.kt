@@ -197,7 +197,7 @@ object Irrelevant {
             val project = remoteProjectRelevance.project
 
             if (remoteProjectRelevance.relevant) {
-                project.updateRootTaskKeys()
+                // todo check wrapped
 
                 project.projectRecord
                     .rootTaskParentDelegate

@@ -630,14 +630,14 @@ class DomainFactory(
                 projectToRootConversion.copiedTaskKeys[pair.first.taskKey] = task.taskKey
             }
 
-            for (startTaskHierarchy in projectToRootConversion.startTaskHierarchies.values) {
+            for (startTaskHierarchy in projectToRootConversion.startTaskHierarchies.values) { // todo root check wrapped
                 val parentTask = projectToRootConversion.endTasks.getValue(startTaskHierarchy.parentTaskId)
 
                 val childTask = projectToRootConversion.endTasks.getValue(startTaskHierarchy.childTaskId)
 
                 childTask.performRootIntervalUpdate { copyParentNestedTaskHierarchy(now, startTaskHierarchy, parentTask.id) }
 
-                parentTask.addRootTask(childTask) // todo root wrap
+                ProjectRootTaskIdTracker.checkTracking()
             }
 
             val endData = Task.EndData(now, true)

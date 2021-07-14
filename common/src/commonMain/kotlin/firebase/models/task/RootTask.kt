@@ -110,12 +110,12 @@ class RootTask private constructor(
         note: String?,
         image: TaskJson.Image?,
         ordinal: Double?,
-    ): RootTask {
+    ): RootTask { // todo root check wrapped
         val childTask = parent.createTask(now, image, name, note, ordinal)
 
         childTask.performRootIntervalUpdate { createParentNestedTaskHierarchy(this@RootTask, now) }
 
-        addRootTask(childTask) // todo root wrap
+        ProjectRootTaskIdTracker.checkTracking()
 
         return childTask
     }
@@ -159,9 +159,13 @@ class RootTask private constructor(
         is Time.Normal -> time
     }
 
-    fun addChild(childTaskRootIntervalUpdate: RootIntervalUpdate, now: ExactTimeStamp.Local): TaskHierarchyKey {
+    fun addChild(
+        childTaskRootIntervalUpdate: RootIntervalUpdate,
+        now: ExactTimeStamp.Local
+    ): TaskHierarchyKey {  // todo root check wrapped
         val taskHierarchyKey = childTaskRootIntervalUpdate.createParentNestedTaskHierarchy(this, now)
-        addRootTask(childTaskRootIntervalUpdate.rootTask) // todo root wrap
+
+        ProjectRootTaskIdTracker.checkTracking()
 
         return taskHierarchyKey
     }
@@ -171,10 +175,6 @@ class RootTask private constructor(
 
         noScheduleOrParentsMap.remove(noScheduleOrParent.id)
         invalidateIntervals()
-    }
-
-    fun addRootTask(childTask: RootTask) { // todo root wrap
-        ProjectRootTaskIdTracker.checkTracking()
     }
 
     fun removeRootTask(childTask: RootTask) { // todo root wrap

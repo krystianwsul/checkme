@@ -18,6 +18,7 @@ import com.krystianwsul.common.firebase.json.tasks.RootTaskJson
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
 import com.krystianwsul.common.firebase.models.project.PrivateProject
+import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.task.ProjectRootTaskIdTracker
 import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.firebase.models.task.performIntervalUpdate
@@ -34,7 +35,6 @@ import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import org.junit.After
-import org.junit.AfterClass
 import org.junit.Assert.*
 import org.junit.BeforeClass
 import org.junit.Test
@@ -62,14 +62,6 @@ class IrrelevantTest {
         @BeforeClass
         fun beforeClass() {
             DomainThreadChecker.instance = mockk(relaxed = true)
-
-            ProjectRootTaskIdTracker.instance = object : ProjectRootTaskIdTracker {}
-        }
-
-        @JvmStatic
-        @AfterClass
-        fun afterClass() {
-            ProjectRootTaskIdTracker.instance = null
         }
     }
 
@@ -78,6 +70,18 @@ class IrrelevantTest {
     @After
     fun after() {
         compositeDisposable.clear()
+    }
+
+    private fun <T> mockProjectRootTaskIdTracker(action: () -> T): T {
+        check(ProjectRootTaskIdTracker.instance == null)
+        ProjectRootTaskIdTracker.instance = mockk()
+
+        val result = action()
+
+        checkNotNull(ProjectRootTaskIdTracker.instance)
+        ProjectRootTaskIdTracker.instance = null
+
+        return result
     }
 
     @Test
@@ -162,7 +166,7 @@ class IrrelevantTest {
             schedules = mutableMapOf("scheduleKey" to scheduleWrapper),
         )
 
-        val task = rootTasksFactory.newTask(taskJson)
+        val task = mockProjectRootTaskIdTracker { rootTasksFactory.newTask(taskJson) }
 
         // 2: once reminded, add one hour
 
@@ -181,12 +185,14 @@ class IrrelevantTest {
 
         now = ExactTimeStamp.Local(day1, hour4.toHourMilli())
 
-        task.performRootIntervalUpdate {
-            endAllCurrentTaskHierarchies(now)
-            endAllCurrentSchedules(now)
-            endAllCurrentNoScheduleOrParents(now)
+        mockProjectRootTaskIdTracker {
+            task.performRootIntervalUpdate {
+                endAllCurrentTaskHierarchies(now)
+                endAllCurrentSchedules(now)
+                endAllCurrentNoScheduleOrParents(now)
 
-            setNoScheduleOrParent(now, project.projectKey)
+                setNoScheduleOrParent(now, project.projectKey)
+            }
         }
 
         instance.setDone(shownFactory, true, now)
@@ -202,7 +208,13 @@ class IrrelevantTest {
 
         now = ExactTimeStamp.Local(day2, hour1)
 
-        Irrelevant.setIrrelevant(mapOf(), listOf(project), now)
+        Irrelevant.setIrrelevant(
+            rootTasksFactory.rootTasks,
+            mapOf(),
+            mapOf(project.projectKey to project),
+            rootTasksFactory,
+            now,
+        )
 
         assertTrue(task.isReminderless())
     }
@@ -295,7 +307,7 @@ class IrrelevantTest {
         )
         assertTrue(task.intervalInfo.getCurrentScheduleIntervals(now).size == 2)
 
-        Irrelevant.setIrrelevant(mapOf(), listOf(project), now)
+        Irrelevant.setIrrelevant(mapOf(), mapOf(), mapOf(project.projectKey to project), newMockRootTaskProvider(), now)
 
         assertTrue(task.intervalInfo.getCurrentScheduleIntervals(now).size == 1)
         assertTrue(
@@ -435,7 +447,7 @@ class IrrelevantTest {
 
         now = ExactTimeStamp.Local(day2, hour5)
 
-        Irrelevant.setIrrelevant(mapOf(), listOf(project), now)
+        Irrelevant.setIrrelevant(mapOf(), mapOf(), mapOf(project.projectKey to project), newMockRootTaskProvider(), now)
     }
 
     @Test
@@ -568,6 +580,8 @@ class IrrelevantTest {
 
         now = ExactTimeStamp.Local(day2, hour5)
 
-        Irrelevant.setIrrelevant(mapOf(), listOf(project), now)
+        Irrelevant.setIrrelevant(mapOf(), mapOf(), mapOf(project.projectKey to project), newMockRootTaskProvider(), now)
     }
+
+    private fun newMockRootTaskProvider() = mockk<Project.RootTaskProvider>()
 }

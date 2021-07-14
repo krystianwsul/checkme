@@ -58,7 +58,7 @@ class ChangeTypeSourceTest {
         fun beforeClass() {
             DomainThreadChecker.instance = mockk(relaxed = true)
 
-            ProjectRootTaskIdTracker.instance = object : ProjectRootTaskIdTracker {}
+            ProjectRootTaskIdTracker.instance = ProjectRootTaskIdTracker()
 
             mockBase64()
         }

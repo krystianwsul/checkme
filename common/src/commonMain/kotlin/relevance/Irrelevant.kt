@@ -9,6 +9,7 @@ import com.krystianwsul.common.firebase.models.project.SharedProject
 import com.krystianwsul.common.firebase.models.schedule.Schedule
 import com.krystianwsul.common.firebase.models.schedule.SingleSchedule
 import com.krystianwsul.common.firebase.models.task.ProjectRootTaskIdTracker
+import com.krystianwsul.common.firebase.models.task.RootTask
 import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.firebase.models.taskhierarchy.NestedTaskHierarchy
 import com.krystianwsul.common.firebase.models.taskhierarchy.ProjectTaskHierarchy
@@ -22,211 +23,220 @@ import com.krystianwsul.common.utils.TaskKey
 object Irrelevant {
 
     fun setIrrelevant(
+        rootTasks: Map<TaskKey.Root, RootTask>,
         userCustomTimeRelevances: Map<CustomTimeKey.User, CustomTimeRelevance>,
-        projects: Collection<Project<*>>,
+        projects: Map<ProjectKey<*>, Project<*>>,
+        rootTaskProvider: Project.RootTaskProvider,
         now: ExactTimeStamp.Local,
     ): Result {
-        val tasks = projects.flatMap { it.getAllTasks() }
+        val tasks = projects.values.flatMap { it.getAllTasks() }
 
-        tasks.forEach {
-            it.correctIntervalEndExactTimeStamps()
+        return ProjectRootTaskIdTracker.trackRootTaskIds(
+            rootTasks,
+            projects,
+            rootTaskProvider,
+        ) {
+            tasks.forEach {
+                it.correctIntervalEndExactTimeStamps()
 
-            it.intervalInfo
-                .scheduleIntervals
-                .forEach { it.updateOldestVisible(now) }
-        }
-
-        // relevant hack
-        val taskRelevances = tasks.associate { it.taskKey to TaskRelevance(it) }
-
-        val taskHierarchies = projects.flatMap { it.taskHierarchies }
-        val taskHierarchyRelevances = taskHierarchies.associate { it.taskHierarchyKey to TaskHierarchyRelevance(it) }
-
-        val existingInstances = projects.flatMap { it.existingInstances }
-
-        val rootInstances = projects.flatMap {
-            it.getRootInstances(null, now.toOffset().plusOne(), now)
-        }.toList()
-
-        val instanceRelevances = (existingInstances + rootInstances)
-            .asSequence()
-            .distinct()
-            .associate { it.instanceKey to InstanceRelevance(it) }
-            .toMutableMap()
-
-        tasks.asSequence()
-            .filter { it.current(now) && it.isTopLevelTask(now) && it.isVisible(now, true) }
-            .map { taskRelevances.getValue(it.taskKey) }
-            .forEach { it.setRelevant(taskRelevances, taskHierarchyRelevances, instanceRelevances, now) }
-
-        rootInstances.map { instanceRelevances.getValue(it.instanceKey) }.forEach {
-            it.setRelevant(taskRelevances, taskHierarchyRelevances, instanceRelevances, now)
-        }
-
-        existingInstances.asSequence()
-            // this probably makes the recursive set in tasks redundant
-            .filter { it.isVisible(now, Instance.VisibilityOptions(hack24 = true)) }
-            .map { instanceRelevances.getValue(it.instanceKey) }
-            .forEach { it.setRelevant(taskRelevances, taskHierarchyRelevances, instanceRelevances, now) }
-
-        val relevantTaskRelevances = taskRelevances.values.filter { it.relevant }
-        val relevantTasks = relevantTaskRelevances.map { it.task }
-
-        val irrelevantTasks = tasks - relevantTasks
-
-        val visibleIrrelevantTasks = irrelevantTasks.filter { it.isVisible(now, true) }
-        if (visibleIrrelevantTasks.isNotEmpty()) {
-            throw VisibleIrrelevantTasksException(
-                visibleIrrelevantTasks.joinToString(", ") { it.taskKey.toString() }
-            )
-        }
-
-        val relevantTaskHierarchyRelevances = taskHierarchyRelevances.values.filter { it.relevant }
-        val relevantTaskHierarchies = relevantTaskHierarchyRelevances.map { it.taskHierarchy }
-
-        /**
-         * The first is removed normally.  The second is for nested task hierarchies, inside tasks that will also be deleted.
-         * We don't want to, uh, double-delete them, but we do need to remove Project.rootTaskIds entries.
-         *
-         * Update: no longer doing that second part
-         */
-        val irrelevantTaskHierarchies = (taskHierarchies - relevantTaskHierarchies).filter {
-            when (it) {
-                is ProjectTaskHierarchy -> true
-                is NestedTaskHierarchy -> taskRelevances.getValue(it.childTaskKey).relevant
-                else -> throw UnsupportedOperationException() // compilation
+                it.intervalInfo
+                    .scheduleIntervals
+                    .forEach { it.updateOldestVisible(now) }
             }
-        }
 
-        val relevantInstances = instanceRelevances.values
-            .filter { it.relevant }
-            .map { it.instance }
+            // relevant hack
+            val taskRelevances = tasks.associate { it.taskKey to TaskRelevance(it) }
 
-        val relevantExistingInstances = relevantInstances.filter { it.exists() }
-        val irrelevantExistingInstances = existingInstances - relevantExistingInstances
+            val taskHierarchies = projects.values.flatMap { it.taskHierarchies }
+            val taskHierarchyRelevances = taskHierarchies.associate { it.taskHierarchyKey to TaskHierarchyRelevance(it) }
 
-        val irrelevantSchedules = mutableListOf<Schedule>()
-        val irrelevantNoScheduleOrParents = mutableListOf<NoScheduleOrParent>()
+            val existingInstances = projects.values.flatMap { it.existingInstances }
 
-        relevantTasks.forEach {
-            val scheduleIntervals = it.intervalInfo.scheduleIntervals
+            val rootInstances = projects.values
+                .flatMap { it.getRootInstances(null, now.toOffset().plusOne(), now) }
+                .toList()
 
-            irrelevantSchedules += it.schedules - scheduleIntervals.map { it.schedule }
+            val instanceRelevances = (existingInstances + rootInstances)
+                .asSequence()
+                .distinct()
+                .associate { it.instanceKey to InstanceRelevance(it) }
+                .toMutableMap()
 
-            irrelevantSchedules += scheduleIntervals.filter { scheduleInterval ->
-                val schedule = scheduleInterval.schedule
+            tasks.asSequence()
+                .filter { it.current(now) && it.isTopLevelTask(now) && it.isVisible(now, true) }
+                .map { taskRelevances.getValue(it.taskKey) }
+                .forEach { it.setRelevant(taskRelevances, taskHierarchyRelevances, instanceRelevances, now) }
 
-                val result = if (schedule is SingleSchedule) {
-                    /**
-                     * Can't assume the instance is root; it could be joined.  But (I think) the schedule is still
-                     * relevant, since removing it would make the task unscheduled.
-                     */
-                    !schedule.getInstance(it).isVisible(now, Instance.VisibilityOptions(hack24 = true))
-                } else {
-                    if (scheduleInterval.currentOffset(now) && schedule.current(now)) {
-                        false
+            rootInstances.map { instanceRelevances.getValue(it.instanceKey) }.forEach {
+                it.setRelevant(taskRelevances, taskHierarchyRelevances, instanceRelevances, now)
+            }
+
+            existingInstances.asSequence()
+                // this probably makes the recursive set in tasks redundant
+                .filter { it.isVisible(now, Instance.VisibilityOptions(hack24 = true)) }
+                .map { instanceRelevances.getValue(it.instanceKey) }
+                .forEach { it.setRelevant(taskRelevances, taskHierarchyRelevances, instanceRelevances, now) }
+
+            val relevantTaskRelevances = taskRelevances.values.filter { it.relevant }
+            val relevantTasks = relevantTaskRelevances.map { it.task }
+
+            val irrelevantTasks = tasks - relevantTasks
+
+            val visibleIrrelevantTasks = irrelevantTasks.filter { it.isVisible(now, true) }
+            if (visibleIrrelevantTasks.isNotEmpty()) {
+                throw VisibleIrrelevantTasksException(
+                    visibleIrrelevantTasks.joinToString(", ") { it.taskKey.toString() }
+                )
+            }
+
+            val relevantTaskHierarchyRelevances = taskHierarchyRelevances.values.filter { it.relevant }
+            val relevantTaskHierarchies = relevantTaskHierarchyRelevances.map { it.taskHierarchy }
+
+            /**
+             * The first is removed normally.  The second is for nested task hierarchies, inside tasks that will also be deleted.
+             * We don't want to, uh, double-delete them, but we do need to remove Project.rootTaskIds entries.
+             *
+             * Update: no longer doing that second part
+             */
+            val irrelevantTaskHierarchies = (taskHierarchies - relevantTaskHierarchies).filter {
+                when (it) {
+                    is ProjectTaskHierarchy -> true
+                    is NestedTaskHierarchy -> taskRelevances.getValue(it.childTaskKey).relevant
+                    else -> throw UnsupportedOperationException() // compilation
+                }
+            }
+
+            val relevantInstances = instanceRelevances.values
+                .filter { it.relevant }
+                .map { it.instance }
+
+            val relevantExistingInstances = relevantInstances.filter { it.exists() }
+            val irrelevantExistingInstances = existingInstances - relevantExistingInstances
+
+            val irrelevantSchedules = mutableListOf<Schedule>()
+            val irrelevantNoScheduleOrParents = mutableListOf<NoScheduleOrParent>()
+
+            relevantTasks.forEach {
+                val scheduleIntervals = it.intervalInfo.scheduleIntervals
+
+                irrelevantSchedules += it.schedules - scheduleIntervals.map { it.schedule }
+
+                irrelevantSchedules += scheduleIntervals.filter { scheduleInterval ->
+                    val schedule = scheduleInterval.schedule
+
+                    val result = if (schedule is SingleSchedule) {
+                        /**
+                         * Can't assume the instance is root; it could be joined.  But (I think) the schedule is still
+                         * relevant, since removing it would make the task unscheduled.
+                         */
+                        !schedule.getInstance(it).isVisible(now, Instance.VisibilityOptions(hack24 = true))
                     } else {
-                        val oldestVisibleExactTimeStamp = schedule.oldestVisible
-                            .date
-                            ?.toMidnightExactTimeStamp()
-
-                        val scheduleEndExactTimeStamp = schedule.endExactTimeStampOffset
-
-                        if (oldestVisibleExactTimeStamp != null && scheduleEndExactTimeStamp != null)
-                            oldestVisibleExactTimeStamp > scheduleEndExactTimeStamp
-                        else
+                        if (scheduleInterval.currentOffset(now) && schedule.current(now)) {
                             false
+                        } else {
+                            val oldestVisibleExactTimeStamp = schedule.oldestVisible
+                                .date
+                                ?.toMidnightExactTimeStamp()
+
+                            val scheduleEndExactTimeStamp = schedule.endExactTimeStampOffset
+
+                            if (oldestVisibleExactTimeStamp != null && scheduleEndExactTimeStamp != null)
+                                oldestVisibleExactTimeStamp > scheduleEndExactTimeStamp
+                            else
+                                false
+                        }
                     }
+
+                    result
+                }.map { it.schedule }
+
+                val relevantNoScheduleOrParents = it.intervalInfo
+                    .noScheduleOrParentIntervals
+                    .filter { it.currentOffset(now) }
+                    .map { it.noScheduleOrParent }
+
+                irrelevantNoScheduleOrParents += it.noScheduleOrParents - relevantNoScheduleOrParents
+            }
+
+            ProjectRootTaskIdTracker.checkTracking()
+
+            irrelevantExistingInstances.forEach { it.delete() }
+            irrelevantSchedules.forEach { it.delete() }
+            irrelevantNoScheduleOrParents.forEach { it.delete() }
+            irrelevantTaskHierarchies.forEach { it.delete() }
+            irrelevantTasks.forEach { it.delete() }
+
+            val remoteCustomTimes = projects.values.flatMap { it.customTimes }
+
+            val customTimeRelevanceCollection = CustomTimeRelevanceCollection(
+                userCustomTimeRelevances,
+                remoteCustomTimes.associate { it.key to CustomTimeRelevance(it) },
+            )
+
+            projects.values
+                .filterIsInstance<PrivateProject>()
+                .forEach {
+                    it.customTimes
+                        .filter { it.notDeleted(now) }
+                        .forEach { customTimeRelevanceCollection.getRelevance(it.key).setRelevant() }
                 }
 
-                result
-            }.map { it.schedule }
+            val remoteProjectRelevances = projects.mapValues { RemoteProjectRelevance(it.value) }
 
-            val relevantNoScheduleOrParents = it.intervalInfo
-                .noScheduleOrParentIntervals
-                .filter { it.currentOffset(now) }
-                .map { it.noScheduleOrParent }
+            projects.values
+                .filter { it.current(now) }
+                .forEach { remoteProjectRelevances.getValue(it.projectKey).setRelevant() }
 
-            irrelevantNoScheduleOrParents += it.noScheduleOrParents - relevantNoScheduleOrParents
-        }
+            taskRelevances.values
+                .filter { it.relevant }
+                .forEach { it.setRemoteRelevant(customTimeRelevanceCollection, remoteProjectRelevances) }
 
-        // todo root check wrapped
-        ProjectRootTaskIdTracker.checkTracking()
+            instanceRelevances.values
+                .filter { it.relevant }
+                .forEach { it.setRemoteRelevant(customTimeRelevanceCollection, remoteProjectRelevances) }
 
-        irrelevantExistingInstances.forEach { it.delete() }
-        irrelevantSchedules.forEach { it.delete() }
-        irrelevantNoScheduleOrParents.forEach { it.delete() }
-        irrelevantTaskHierarchies.forEach { it.delete() }
-        irrelevantTasks.forEach { it.delete() }
+            val relevantRemoteCustomTimes = customTimeRelevanceCollection.projectCustomTimeRelevances
+                .values
+                .filter { it.relevant }
+                .map { it.customTime as Time.Custom.Project<*> }
 
-        val remoteCustomTimes = projects.flatMap { it.customTimes }
+            val irrelevantRemoteCustomTimes = remoteCustomTimes - relevantRemoteCustomTimes
 
-        val customTimeRelevanceCollection = CustomTimeRelevanceCollection(
-            userCustomTimeRelevances,
-            remoteCustomTimes.associate { it.key to CustomTimeRelevance(it) },
-        )
+            irrelevantRemoteCustomTimes.forEach { it.delete() }
 
-        projects.filterIsInstance<PrivateProject>().forEach {
-            it.customTimes
-                .filter { it.notDeleted(now) }
-                .forEach { customTimeRelevanceCollection.getRelevance(it.key).setRelevant() }
-        }
+            remoteProjectRelevances.values.forEach { remoteProjectRelevance ->
+                val project = remoteProjectRelevance.project
 
-        val remoteProjectRelevances = projects.associate { it.projectKey to RemoteProjectRelevance(it) }
+                if (remoteProjectRelevance.relevant) {
+                    project.projectRecord
+                        .rootTaskParentDelegate
+                        .rootTaskKeys
+                        .forEach { taskKey ->
+                            if (irrelevantTasks.any { it.taskKey == taskKey })
+                                throw TaskInIrrelevantException(taskKey, project.projectKey)
 
-        projects.filter { it.current(now) }.forEach { remoteProjectRelevances.getValue(it.projectKey).setRelevant() }
+                            val taskRelevance =
+                                taskRelevances[taskKey] ?: throw MissingRelevanceException(taskKey, project.projectKey)
 
-        taskRelevances.values
-            .filter { it.relevant }
-            .forEach { it.setRemoteRelevant(customTimeRelevanceCollection, remoteProjectRelevances) }
-
-        instanceRelevances.values
-            .filter { it.relevant }
-            .forEach { it.setRemoteRelevant(customTimeRelevanceCollection, remoteProjectRelevances) }
-
-        val relevantRemoteCustomTimes = customTimeRelevanceCollection.projectCustomTimeRelevances
-            .values
-            .filter { it.relevant }
-            .map { it.customTime as Time.Custom.Project<*> }
-
-        val irrelevantRemoteCustomTimes = remoteCustomTimes - relevantRemoteCustomTimes
-
-        irrelevantRemoteCustomTimes.forEach { it.delete() }
-
-        remoteProjectRelevances.values.forEach { remoteProjectRelevance ->
-            val project = remoteProjectRelevance.project
-
-            if (remoteProjectRelevance.relevant) {
-                // todo check wrapped
-
-                project.projectRecord
-                    .rootTaskParentDelegate
-                    .rootTaskKeys
-                    .forEach { taskKey ->
-                        if (irrelevantTasks.any { it.taskKey == taskKey })
-                            throw TaskInIrrelevantException(taskKey, project.projectKey)
-
-                        val taskRelevance =
-                            taskRelevances[taskKey] ?: throw MissingRelevanceException(taskKey, project.projectKey)
-
-                        if (!taskRelevance.relevant) throw TaskIrrelevantException(taskKey, project.projectKey)
-                    }
-            } else {
-                project.delete()
+                            if (!taskRelevance.relevant) throw TaskIrrelevantException(taskKey, project.projectKey)
+                        }
+                } else {
+                    project.delete()
+                }
             }
-        }
 
-        return Result(
-            irrelevantExistingInstances,
-            irrelevantTaskHierarchies,
-            irrelevantSchedules,
-            irrelevantNoScheduleOrParents,
-            irrelevantTasks,
-            irrelevantRemoteCustomTimes,
-            remoteProjectRelevances.values
-                .filter { !it.relevant }
-                .map { it.project as SharedProject },
-        )
+            Result(
+                irrelevantExistingInstances,
+                irrelevantTaskHierarchies,
+                irrelevantSchedules,
+                irrelevantNoScheduleOrParents,
+                irrelevantTasks,
+                irrelevantRemoteCustomTimes,
+                remoteProjectRelevances.values
+                    .filter { !it.relevant }
+                    .map { it.project as SharedProject },
+            )
+        }
     }
 
     private class VisibleIrrelevantTasksException(message: String) : Exception(message)

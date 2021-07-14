@@ -198,8 +198,10 @@ object RelevanceChecker {
                     ?.let { throw InconsistentRootTaskIdsException(it) }
 
                 val removedSharedProjects = Irrelevant.setIrrelevant(
+                    rootTasksByTaskKey,
                     userCustomTimeRelevances,
-                    privateProjects.values + sharedProjects.values,
+                    projectMap,
+                    rootTaskParent,
                     ExactTimeStamp.Local.now,
                 ).removedSharedProjects
 

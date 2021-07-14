@@ -739,8 +739,7 @@ private fun DomainFactory.joinJoinables(
     val parentTaskHasOtherInstances = newParentTask.hasOtherVisibleInstances(now, parentInstanceKey)
 
     joinableMap.forEach { (joinable, task) ->
-        fun addChildToParent(instance: Instance? = null) =
-            addChildToParent(task, newParentTask, now, instance)  // todo root check wrapped
+        fun addChildToParent(instance: Instance? = null) = addChildToParent(task, newParentTask, now, instance)
 
         when (joinable) {
             is EditParameters.Join.Joinable.Task -> addChildToParent()
@@ -749,6 +748,7 @@ private fun DomainFactory.joinJoinables(
                     .scheduleKey
                     .run {
                         val originalTime = getTime(scheduleTimePair)
+
                         val migratedTime = task.getOrCopyTime(
                             scheduleDate.dayOfWeek,
                             originalTime,
@@ -780,12 +780,12 @@ private fun DomainFactory.joinTasks(
     newParentTask.requireCurrent(now)
     check(joinTasks.size > 1)
 
-    joinTasks.forEach { addChildToParent(it, newParentTask, now) }  // todo root check wrapped
+    joinTasks.forEach { addChildToParent(it, newParentTask, now) }
 
     removeInstanceKeys.map(::getInstance)
         .filter {
-            it.parentInstance?.task != newParentTask
-                    && it.isVisible(now, Instance.VisibilityOptions(hack24 = true))
+            it.parentInstance?.task != newParentTask &&
+                    it.isVisible(now, Instance.VisibilityOptions(hack24 = true))
         }
         .forEach { it.hide() }
 }
@@ -906,7 +906,7 @@ private fun DomainFactory.convertAndUpdateProject(
 ): RootTask {
     return when (task) {
         is RootTask -> task.updateProject(projectKey)
-        is ProjectTask -> converter.convertToRoot(now, task, projectKey) // todo root check wrapped
+        is ProjectTask -> converter.convertToRoot(now, task, projectKey)
     }
 }
 

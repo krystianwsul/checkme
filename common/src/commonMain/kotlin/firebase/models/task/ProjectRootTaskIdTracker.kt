@@ -15,8 +15,8 @@ class ProjectRootTaskIdTracker {
         fun checkTracking() = checkNotNull(instance)
 
         fun <T> trackRootTaskIds(
-            rootTasks: Map<TaskKey.Root, RootTask>,
-            projects: Map<ProjectKey<*>, Project<*>>,
+            getRootTasks: () -> Map<TaskKey.Root, RootTask>,
+            getProjects: () -> Map<ProjectKey<*>, Project<*>>,
             rootTaskProvider: Project.RootTaskProvider,
             action: () -> T,
         ): T {
@@ -24,13 +24,15 @@ class ProjectRootTaskIdTracker {
 
             instance = ProjectRootTaskIdTracker()
 
-            val mapBefore = getProjectTaskMap(rootTasks)
-            val graphsBefore = createRootTaskIdGraphs(rootTasks)
+            val rootTasksBefore = getRootTasks()
+            val mapBefore = getProjectTaskMap(rootTasksBefore)
+            val graphsBefore = createRootTaskIdGraphs(rootTasksBefore)
 
             val result = action()
 
-            val mapAfter = getProjectTaskMap(rootTasks)
-            val graphsAfter = createRootTaskIdGraphs(rootTasks)
+            val rootTasksAfter = getRootTasks()
+            val mapAfter = getProjectTaskMap(rootTasksAfter)
+            val graphsAfter = createRootTaskIdGraphs(rootTasksAfter)
 
             fun getGraphBefore(taskKey: TaskKey.Root) = graphsBefore.filter { taskKey in it }
                 .singleOrEmpty()
@@ -38,7 +40,7 @@ class ProjectRootTaskIdTracker {
 
             fun getGraphAfter(taskKey: TaskKey.Root) = graphsAfter.single { taskKey in it }
 
-            rootTasks.forEach { (taskKey, task) ->
+            rootTasksAfter.forEach { (taskKey, task) ->
                 val keysToOmit = task.taskRecord.getDirectDependencyTaskKeys() + task.taskKey
 
                 val taskKeysBefore = getGraphBefore(taskKey) - keysToOmit
@@ -57,7 +59,7 @@ class ProjectRootTaskIdTracker {
                 rootTaskProvider.updateTaskRecord(taskKey, taskKeysAfter)
             }
 
-            projects.forEach { (projectKey, project) ->
+            getProjects().forEach { (projectKey, project) ->
                 val taskKeysBefore = mapBefore.getOrElse(projectKey) { emptyList() }
                     .map { task -> getGraphBefore(task.taskKey) }
                     .flatten()

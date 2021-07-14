@@ -23,17 +23,18 @@ import com.krystianwsul.common.utils.TaskKey
 object Irrelevant {
 
     fun setIrrelevant(
-        rootTasks: Map<TaskKey.Root, RootTask>,
+        getRootTasks: () -> Map<TaskKey.Root, RootTask>,
         userCustomTimeRelevances: Map<CustomTimeKey.User, CustomTimeRelevance>,
-        projects: Map<ProjectKey<*>, Project<*>>,
+        getProjects: () -> Map<ProjectKey<*>, Project<*>>,
         rootTaskProvider: Project.RootTaskProvider,
         now: ExactTimeStamp.Local,
     ): Result {
+        val projects = getProjects()
         val tasks = projects.values.flatMap { it.getAllTasks() }
 
         return ProjectRootTaskIdTracker.trackRootTaskIds(
-            rootTasks,
-            projects,
+            getRootTasks,
+            getProjects,
             rootTaskProvider,
         ) {
             tasks.forEach {

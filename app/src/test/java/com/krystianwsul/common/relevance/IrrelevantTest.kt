@@ -209,9 +209,9 @@ class IrrelevantTest {
         now = ExactTimeStamp.Local(day2, hour1)
 
         Irrelevant.setIrrelevant(
-            rootTasksFactory.rootTasks,
+            { rootTasksFactory.rootTasks },
             mapOf(),
-            mapOf(project.projectKey to project),
+            { mapOf(project.projectKey to project) },
             rootTasksFactory,
             now,
         )
@@ -307,7 +307,13 @@ class IrrelevantTest {
         )
         assertTrue(task.intervalInfo.getCurrentScheduleIntervals(now).size == 2)
 
-        Irrelevant.setIrrelevant(mapOf(), mapOf(), mapOf(project.projectKey to project), newMockRootTaskProvider(), now)
+        Irrelevant.setIrrelevant(
+            { mapOf() },
+            mapOf(),
+            { mapOf(project.projectKey to project) },
+            newMockRootTaskProvider(),
+            now,
+        )
 
         assertTrue(task.intervalInfo.getCurrentScheduleIntervals(now).size == 1)
         assertTrue(
@@ -447,7 +453,13 @@ class IrrelevantTest {
 
         now = ExactTimeStamp.Local(day2, hour5)
 
-        Irrelevant.setIrrelevant(mapOf(), mapOf(), mapOf(project.projectKey to project), newMockRootTaskProvider(), now)
+        Irrelevant.setIrrelevant(
+            { mapOf() },
+            mapOf(),
+            { mapOf(project.projectKey to project) },
+            newMockRootTaskProvider(),
+            now,
+        )
     }
 
     @Test
@@ -580,7 +592,13 @@ class IrrelevantTest {
 
         now = ExactTimeStamp.Local(day2, hour5)
 
-        Irrelevant.setIrrelevant(mapOf(), mapOf(), mapOf(project.projectKey to project), newMockRootTaskProvider(), now)
+        Irrelevant.setIrrelevant(
+            { mapOf() },
+            mapOf(),
+            { mapOf(project.projectKey to project) },
+            newMockRootTaskProvider(),
+            now,
+        )
     }
 
     private fun newMockRootTaskProvider() = mockk<Project.RootTaskProvider>()

@@ -352,9 +352,9 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
                 .associate { it.key to CustomTimeRelevance(it) }
 
             val results = Irrelevant.setIrrelevant(
-                domainFactory.rootTasksFactory.rootTasks,
+                { domainFactory.rootTasksFactory.rootTasks },
                 userCustomTimeRelevances,
-                domainFactory.projectsFactory.projects,
+                { domainFactory.projectsFactory.projects },
                 domainFactory.rootTasksFactory,
                 exactTimeStamp,
             )

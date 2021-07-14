@@ -620,7 +620,7 @@ class Instance private constructor(
             .map { it.value }
     }
 
-    fun setParentState(newParentState: ParentState) { // todo root wrap
+    fun setParentState(newParentState: ParentState) {
         check(newParentState.parentInstanceKey != instanceKey)
 
         ProjectRootTaskIdTracker.checkTracking()

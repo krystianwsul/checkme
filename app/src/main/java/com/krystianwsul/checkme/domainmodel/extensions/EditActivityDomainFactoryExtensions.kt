@@ -762,7 +762,7 @@ private fun DomainFactory.joinJoinables(
                 val instance = task.getInstance(migratedScheduleKey)
 
                 if (parentTaskHasOtherInstances || task.hasOtherVisibleInstances(now, joinable.instanceKey)) {
-                    instance.setParentState(Instance.ParentState.Parent(parentInstanceKey))
+                    instance.setParentState(Instance.ParentState.Parent(parentInstanceKey)) // todo root wrap
                 } else {
                     addChildToParent(instance)
                 }

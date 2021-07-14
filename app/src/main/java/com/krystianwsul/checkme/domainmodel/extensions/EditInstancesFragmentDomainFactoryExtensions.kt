@@ -104,7 +104,7 @@ fun DomainUpdater.setInstancesDateTime(
 
         if (it.parentInstance != null) {
             when (it.parentState) {
-                is Instance.ParentState.Unset -> it.setParentState(Instance.ParentState.NoParent)
+                is Instance.ParentState.Unset -> it.setParentState(Instance.ParentState.NoParent) // todo root wrap
                 is Instance.ParentState.NoParent -> throw IllegalStateException()
                 is Instance.ParentState.Parent -> {
                     val newParentState = if (it.getTaskHierarchyParentInstance() != null)
@@ -112,7 +112,7 @@ fun DomainUpdater.setInstancesDateTime(
                     else
                         Instance.ParentState.Unset
 
-                    it.setParentState(newParentState)
+                    it.setParentState(newParentState) // todo root wrap
                 }
             }
 
@@ -151,7 +151,7 @@ private class SetInstanceParentUndoData(
     ) = domainFactory.getInstance(instanceKey).let {
         val initialProject = it.task.project
 
-        it.setParentState(parentState)
+        it.setParentState(parentState) // todo root wrap
 
         val finalProject = it.task.project
 
@@ -179,7 +179,7 @@ fun DomainUpdater.setInstancesParent(
         if (parentTaskHasOtherInstances || it.task.hasOtherVisibleInstances(now, it.instanceKey)) {
             val undoData = SetInstanceParentUndoData(it.instanceKey, it.parentState)
 
-            it.setParentState(Instance.ParentState.Parent(parentInstanceKey))
+            it.setParentState(Instance.ParentState.Parent(parentInstanceKey)) // todo root wrap
 
             undoData
         } else {

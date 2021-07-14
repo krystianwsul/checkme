@@ -22,7 +22,7 @@ abstract class RootTaskParentDelegate(private val rootTaskParentJson: RootTaskPa
 
     protected abstract fun addValue(subKey: String, value: Boolean?)
 
-    fun addRootTaskKey(rootTaskKey: TaskKey.Root, onKeysChangedCallback: (Set<TaskKey.Root>) -> Unit = {}) { // todo check
+    fun addRootTaskKey(rootTaskKey: TaskKey.Root, onKeysChangedCallback: (Set<TaskKey.Root>) -> Unit = {}) {
         val rootTaskId = rootTaskKey.taskId
 
         if (!rootTaskIds.containsKey(rootTaskId)) {
@@ -33,14 +33,14 @@ abstract class RootTaskParentDelegate(private val rootTaskParentJson: RootTaskPa
         }
     }
 
-    private fun addRootTaskId(rootTaskId: String) { // todo check
+    private fun addRootTaskId(rootTaskId: String) {
         check(!rootTaskIds.containsKey(rootTaskId))
 
         rootTaskIds[rootTaskId] = true
         addValue("$ROOT_TASK_IDS_KEY/$rootTaskId", true)
     }
 
-    fun removeRootTaskKey(rootTaskKey: TaskKey.Root, onKeysChangedCallback: (Set<TaskKey.Root>) -> Unit = {}) { // todo check
+    fun removeRootTaskKey(rootTaskKey: TaskKey.Root, onKeysChangedCallback: (Set<TaskKey.Root>) -> Unit = {}) {
         val rootTaskId = rootTaskKey.taskId
 
         if (rootTaskIds.containsKey(rootTaskId)) {
@@ -51,14 +51,14 @@ abstract class RootTaskParentDelegate(private val rootTaskParentJson: RootTaskPa
         }
     }
 
-    private fun removeRootTaskId(rootTaskId: String) { // todo check
+    private fun removeRootTaskId(rootTaskId: String) {
         check(rootTaskIds.containsKey(rootTaskId))
 
         rootTaskIds.remove(rootTaskId)
         addValue("$ROOT_TASK_IDS_KEY/$rootTaskId", null)
     }
 
-    fun setRootTaskKeys(rootTaskKeys: Set<TaskKey.Root>) { // todo check
+    fun setRootTaskKeys(rootTaskKeys: Set<TaskKey.Root>) { // todo root investigate
         val newRootTaskIds = rootTaskKeys.map { it.taskId }
 
         val addedRootTaskIds = newRootTaskIds - rootTaskIds.keys

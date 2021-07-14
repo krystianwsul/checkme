@@ -173,11 +173,11 @@ class RootTask private constructor(
         invalidateIntervals()
     }
 
-    fun addRootTask(childTask: RootTask) { // todo check
+    fun addRootTask(childTask: RootTask) { // todo root wrap
         ProjectRootTaskIdTracker.checkTracking()
     }
 
-    fun removeRootTask(childTask: RootTask) { // todo check
+    fun removeRootTask(childTask: RootTask) { // todo root wrap
         ProjectRootTaskIdTracker.checkTracking()
     }
 

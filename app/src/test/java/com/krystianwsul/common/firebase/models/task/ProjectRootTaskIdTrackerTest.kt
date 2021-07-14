@@ -4,10 +4,7 @@ import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.DomainFactoryRule
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.TestDomainUpdater
-import com.krystianwsul.checkme.domainmodel.extensions.createProject
-import com.krystianwsul.checkme.domainmodel.extensions.createScheduleTopLevelTask
-import com.krystianwsul.checkme.domainmodel.extensions.getGroupListData
-import com.krystianwsul.checkme.domainmodel.extensions.setInstancesParent
+import com.krystianwsul.checkme.domainmodel.extensions.*
 import com.krystianwsul.checkme.gui.edit.delegates.EditDelegate
 import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.time.*
@@ -110,5 +107,18 @@ class ProjectRootTaskIdTrackerTest {
 
         assertEquals(emptySet<TaskKey.Root>(), privateTask.rootTaskKeys())
         assertEquals(setOf(privateWeeklyTaskKey), sharedTask.rootTaskKeys())
+
+        domainUpdater(now).setInstancesDateTime(
+            DomainListenerManager.NotificationType.All,
+            setOf(privateInstanceKey),
+            date,
+            scheduleTimePair,
+        ).blockingGet()
+
+        assertEquals(setOf(privateWeeklyTaskKey), privateProject.rootTaskKeys())
+        assertEquals(setOf(sharedSingleTaskKey), sharedProject.rootTaskKeys())
+
+        assertEquals(emptySet<TaskKey.Root>(), privateTask.rootTaskKeys())
+        assertEquals(emptySet<TaskKey.Root>(), sharedTask.rootTaskKeys())
     }
 }

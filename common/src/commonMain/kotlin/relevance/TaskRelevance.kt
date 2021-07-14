@@ -6,6 +6,7 @@ import com.krystianwsul.common.firebase.models.schedule.Schedule
 import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.InstanceKey
+import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskHierarchyKey
 import com.krystianwsul.common.utils.TaskKey
 
@@ -74,10 +75,9 @@ class TaskRelevance(val task: Task) {
 
     fun setRemoteRelevant(
         customTimeRelevanceCollection: CustomTimeRelevanceCollection,
-        remoteProjectRelevance: RemoteProjectRelevance,
+        remoteProjectRelevances: Map<ProjectKey<*>, RemoteProjectRelevance>,
     ) {
         check(relevant)
-        check(task.project == remoteProjectRelevance.project)
 
         task.intervalInfo
             .scheduleIntervals
@@ -85,6 +85,6 @@ class TaskRelevance(val task: Task) {
             .map { customTimeRelevanceCollection.getRelevance(it) }
             .forEach { it.setRelevant() }
 
-        remoteProjectRelevance.setRelevant()
+        remoteProjectRelevances.getValue(task.project.projectKey).setRelevant()
     }
 }

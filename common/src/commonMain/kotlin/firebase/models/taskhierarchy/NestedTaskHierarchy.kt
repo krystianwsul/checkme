@@ -22,7 +22,7 @@ class NestedTaskHierarchy(
         childTask.invalidateIntervals()
     }
 
-    override fun deleteFromParent() { // todo root check wrapped
+    override fun deleteFromParent() {
         ProjectRootTaskIdTracker.checkTracking()
 
         childTask.deleteNestedTaskHierarchy(this)

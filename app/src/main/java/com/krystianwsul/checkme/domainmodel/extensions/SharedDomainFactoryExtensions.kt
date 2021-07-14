@@ -271,7 +271,9 @@ private class AddChildToParentUndoData(
 
         unhideInstanceKey?.let(::getInstance)?.unhide()
 
-        task.parentTaskHierarchies.single { it.taskHierarchyKey == deleteTaskHierarchyKey }.delete()
+        trackRootTaskIds {
+            task.parentTaskHierarchies.single { it.taskHierarchyKey == deleteTaskHierarchyKey }.delete()
+        }
 
         noScheduleOrParentsIds.map { noScheduleOrParentsId ->
             task.noScheduleOrParents.single { it.id == noScheduleOrParentsId }

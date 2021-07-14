@@ -6,7 +6,6 @@ import com.krystianwsul.checkme.gui.edit.dialogs.ParentPickerFragment
 import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.InstanceKey
-import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.normalized
 
 class EditInstancesSearchViewModel : DomainViewModel<EditInstancesSearchViewModel.Data>() {
@@ -16,12 +15,12 @@ class EditInstancesSearchViewModel : DomainViewModel<EditInstancesSearchViewMode
     override val domainListener = object : DomainListener<Data>() {
 
         override val domainResultFetcher = DomainResultFetcher.DomainFactoryDomainResult {
-            it.getEditInstancesSearchData(parameters.searchCriteria, parameters.page, parameters.projectKey)
+            it.getEditInstancesSearchData(parameters.searchCriteria, parameters.page)
         }
     }
 
-    fun start(projectKey: ProjectKey<*>, searchCriteria: SearchCriteria, page: Int) {
-        val newParameters = Parameters(projectKey, searchCriteria, page)
+    fun start(searchCriteria: SearchCriteria, page: Int) {
+        val newParameters = Parameters(searchCriteria, page)
 
         if (!this::parameters.isInitialized || parameters == newParameters) {
             parameters = newParameters
@@ -64,11 +63,7 @@ class EditInstancesSearchViewModel : DomainViewModel<EditInstancesSearchViewMode
         }
     }
 
-    private data class Parameters(
-            val projectKey: ProjectKey<*>,
-            val searchCriteria: SearchCriteria = SearchCriteria.empty,
-            val page: Int = 0,
-    )
+    private data class Parameters(val searchCriteria: SearchCriteria = SearchCriteria.empty, val page: Int = 0)
 
     data class SortKey(
             val instanceTimeStamp: TimeStamp,

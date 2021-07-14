@@ -20,7 +20,6 @@ import com.krystianwsul.common.firebase.models.task.RootTask
 import com.krystianwsul.common.locker.LockerManager
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.InstanceKey
-import com.krystianwsul.common.utils.ProjectKey
 import io.reactivex.rxjava3.core.Single
 
 fun DomainFactory.getEditInstancesData(instanceKeys: Set<InstanceKey>): EditInstancesViewModel.Data {
@@ -49,30 +48,25 @@ fun DomainFactory.getEditInstancesData(instanceKeys: Set<InstanceKey>): EditInst
     val parentInstanceData = instances.mapNotNull {
         it.parentInstance?.takeUnless { it.hierarchyContainsKeys() }
     }
-            .groupBy { it }
-            .map { it.key to it.value.size }
-            .maxByOrNull { it.second }
-            ?.let { (instance, _) -> EditInstancesViewModel.ParentInstanceData(instance.instanceKey, instance.name) }
+        .groupBy { it }
+        .map { it.key to it.value.size }
+        .maxByOrNull { it.second }
+        ?.let { (instance, _) -> EditInstancesViewModel.ParentInstanceData(instance.instanceKey, instance.name) }
 
     val dateTime = instances.map { it.instanceDateTime }.minOrNull()!!
 
     val customTimeDatas = customTimes.mapValues {
         it.value.let {
             EditInstancesViewModel.CustomTimeData(
-                    it.key,
-                    it.name,
-                    it.hourMinutes.toSortedMap(),
-                    it is MyCustomTime,
+                it.key,
+                it.name,
+                it.hourMinutes.toSortedMap(),
+                it is MyCustomTime,
             )
         }
     }
 
-    val singleProjectKey = instances.map { it.getProject() }
-            .distinct()
-            .singleOrNull()
-            ?.projectKey
-
-    return EditInstancesViewModel.Data(parentInstanceData, dateTime, customTimeDatas, singleProjectKey)
+    return EditInstancesViewModel.Data(parentInstanceData, dateTime, customTimeDatas)
 }
 
 private class SetInstancesDateTimeUndoData(val data: List<Pair<InstanceKey, DateTimePair?>>) : UndoData {
@@ -152,8 +146,8 @@ private class SetInstanceParentUndoData(
 ) : UndoData {
 
     override fun undo(
-            domainFactory: DomainFactory,
-            now: ExactTimeStamp.Local,
+        domainFactory: DomainFactory,
+        now: ExactTimeStamp.Local,
     ) = domainFactory.getInstance(instanceKey).let {
         val initialProject = it.task.project
 
@@ -207,9 +201,8 @@ fun DomainUpdater.setInstancesParent(
 }.perform(this)
 
 fun DomainFactory.getEditInstancesSearchData(
-        searchCriteria: SearchCriteria,
-        page: Int,
-        projectKey: ProjectKey<*>?,
+    searchCriteria: SearchCriteria,
+    page: Int,
 ): DomainResult<EditInstancesSearchViewModel.Data> {
     MyCrashlytics.log("DomainFactory.getEditInstancesSearchData")
 
@@ -221,7 +214,7 @@ fun DomainFactory.getEditInstancesSearchData(
                 now,
                 searchCriteria,
                 page,
-                projectKey,
+                null,
             ) { instance, children ->
                 EditInstancesSearchViewModel.InstanceEntryData(
                     instance.name,

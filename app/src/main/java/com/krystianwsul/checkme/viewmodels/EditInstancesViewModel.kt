@@ -7,7 +7,6 @@ import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.InstanceKey
-import com.krystianwsul.common.utils.ProjectKey
 import kotlinx.parcelize.Parcelize
 import java.util.*
 
@@ -32,7 +31,6 @@ class EditInstancesViewModel : DomainViewModel<EditInstancesViewModel.Data>() {
             val parentInstanceData: ParentInstanceData?,
             val dateTime: DateTime,
             val customTimeDatas: Map<CustomTimeKey, CustomTimeData>,
-            val singleProjectKey: ProjectKey<*>?,
     ) : DomainData()
 
     data class CustomTimeData(

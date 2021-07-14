@@ -13,7 +13,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
-import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import com.google.android.material.timepicker.MaterialTimePicker
 import com.jakewharton.rxbinding4.view.clicks
@@ -151,19 +150,19 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
                     { state.page },
                     { state.page = it },
                     progressShownRelay,
-                        viewCreatedDisposable,
-                        editInstancesSearchViewModel,
-                        {
-                            adapterDataObservable.accept(ParentPickerFragment.AdapterData(
+                    viewCreatedDisposable,
+                    editInstancesSearchViewModel,
+                    {
+                        adapterDataObservable.accept(
+                            ParentPickerFragment.AdapterData(
                                 it.instanceEntryDatas,
                                 FilterCriteria.ExpandOnly(it.searchCriteria.search),
                                 it.showLoader,
-                            ))
-                        },
-                        { searchCriteria, page ->
-                            editInstancesSearchViewModel.start(data.singleProjectKey!!, searchCriteria, page)
-                        },
-                        instanceKeys.toSet(),
+                            )
+                        )
+                    },
+                    editInstancesSearchViewModel::start,
+                    instanceKeys.toSet(),
                 )
             }
 
@@ -215,9 +214,7 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
         }
 
         binding.editInstanceSave.setOnClickListener {
-            if (state.parentInstanceData != null) {
-                checkNotNull(data.singleProjectKey)
-            } else {
+            if (state.parentInstanceData == null) {
                 check(isValidDate)
                 check(isValidDateTime)
             }
@@ -266,8 +263,6 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        childFragmentManager.fragments
-
         tryGetFragment<ParentPickerFragment>(TAG_PARENT_PICKER)?.initialize(parentPickerDelegate)
     }
 
@@ -309,8 +304,6 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
         updateFields()
 
         binding.editInstanceParentLayout.apply {
-            isVisible = data.singleProjectKey != null
-
             addOneShotGlobalLayoutListener { isHintAnimationEnabled = true }
         }
 

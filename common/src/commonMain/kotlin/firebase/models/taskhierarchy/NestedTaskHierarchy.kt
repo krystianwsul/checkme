@@ -1,5 +1,6 @@
 package com.krystianwsul.common.firebase.models.taskhierarchy
 
+import com.krystianwsul.common.firebase.models.task.ProjectRootTaskIdTracker
 import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.firebase.records.taskhierarchy.NestedTaskHierarchyRecord
 import com.krystianwsul.common.utils.TaskHierarchyKey
@@ -8,7 +9,7 @@ import com.krystianwsul.common.utils.TaskHierarchyKey
 class NestedTaskHierarchy(
     override val childTask: Task,
     override val taskHierarchyRecord: NestedTaskHierarchyRecord,
-    private val parentTaskDelegate: ParentTaskDelegate,
+    parentTaskDelegate: ParentTaskDelegate,
 ) : TaskHierarchy(childTask.clearableInvalidatableManager, parentTaskDelegate) {
 
     override val childTaskKey get() = childTask.taskKey
@@ -21,12 +22,8 @@ class NestedTaskHierarchy(
         childTask.invalidateIntervals()
     }
 
-    fun deleteFromParentTask() {
-        parentTaskDelegate.removeRootChildTaskFromParent(parentTask, childTask)
-    }
-
-    override fun deleteFromParent() {
-        deleteFromParentTask()
+    override fun deleteFromParent() { // todo root check wrapped
+        ProjectRootTaskIdTracker.checkTracking()
 
         childTask.deleteNestedTaskHierarchy(this)
     }

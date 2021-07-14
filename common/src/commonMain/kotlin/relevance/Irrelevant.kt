@@ -8,6 +8,7 @@ import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.project.SharedProject
 import com.krystianwsul.common.firebase.models.schedule.Schedule
 import com.krystianwsul.common.firebase.models.schedule.SingleSchedule
+import com.krystianwsul.common.firebase.models.task.ProjectRootTaskIdTracker
 import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.firebase.models.taskhierarchy.NestedTaskHierarchy
 import com.krystianwsul.common.firebase.models.taskhierarchy.ProjectTaskHierarchy
@@ -86,15 +87,16 @@ object Irrelevant {
         /**
          * The first is removed normally.  The second is for nested task hierarchies, inside tasks that will also be deleted.
          * We don't want to, uh, double-delete them, but we do need to remove Project.rootTaskIds entries.
+         *
+         * Update: no longer doing that second part
          */
-        val (irrelevantTaskHierarchies, irrelevantNestedTaskHierarchies) =
-            (taskHierarchies - relevantTaskHierarchies).partition {
-                when (it) {
-                    is ProjectTaskHierarchy -> true
-                    is NestedTaskHierarchy -> taskRelevances.getValue(it.childTaskKey).relevant
-                    else -> throw UnsupportedOperationException() // compilation
-                }
+        val irrelevantTaskHierarchies = (taskHierarchies - relevantTaskHierarchies).filter {
+            when (it) {
+                is ProjectTaskHierarchy -> true
+                is NestedTaskHierarchy -> taskRelevances.getValue(it.childTaskKey).relevant
+                else -> throw UnsupportedOperationException() // compilation
             }
+        }
 
         val relevantInstances = instanceRelevances.values
             .filter { it.relevant }
@@ -148,11 +150,13 @@ object Irrelevant {
             irrelevantNoScheduleOrParents += it.noScheduleOrParents - relevantNoScheduleOrParents
         }
 
+        // todo root check wrapped
+        ProjectRootTaskIdTracker.checkTracking()
+
         irrelevantExistingInstances.forEach { it.delete() }
         irrelevantSchedules.forEach { it.delete() }
         irrelevantNoScheduleOrParents.forEach { it.delete() }
         irrelevantTaskHierarchies.forEach { it.delete() }
-        irrelevantNestedTaskHierarchies.forEach { (it as NestedTaskHierarchy).deleteFromParentTask() }
         irrelevantTasks.forEach { it.delete() }
 
         val remoteCustomTimes = projects.flatMap { it.customTimes }

@@ -177,10 +177,6 @@ class RootTask private constructor(
         invalidateIntervals()
     }
 
-    fun removeRootTask(childTask: RootTask) { // todo root wrap
-        ProjectRootTaskIdTracker.checkTracking()
-    }
-
     override fun invalidateProjectParentTaskHierarchies() = invalidateIntervals()
 
     fun updateProject(projectKey: ProjectKey<*>): RootTask {

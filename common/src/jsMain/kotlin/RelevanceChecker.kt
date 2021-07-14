@@ -10,6 +10,7 @@ import com.krystianwsul.common.firebase.managers.JsRootTasksManager
 import com.krystianwsul.common.firebase.managers.JsRootUserManager
 import com.krystianwsul.common.firebase.managers.JsSharedProjectManager
 import com.krystianwsul.common.firebase.models.RootUser
+import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
 import com.krystianwsul.common.firebase.models.project.PrivateProject
 import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.project.SharedProject
@@ -94,6 +95,8 @@ object RelevanceChecker {
 
                 val rootTaskParent = object : RootTask.Parent {
 
+                    override val rootModelChangeManager = RootModelChangeManager()
+
                     override fun createTask(
                         now: ExactTimeStamp.Local,
                         image: TaskJson.Image?,
@@ -142,6 +145,11 @@ object RelevanceChecker {
 
                         rootTasksByProjectId.values.forEach { it.remove(task) }
                     }
+
+                    override fun getAllExistingInstances() = projectMap.values
+                        .asSequence()
+                        .flatMap { it.getAllTasks() }
+                        .flatMap { it.existingInstances.values }
                 }
 
                 rootTasksByTaskKey = rootTaskManager.records
@@ -159,12 +167,14 @@ object RelevanceChecker {
                 val sharedProjectManager = JsSharedProjectManager(databaseWrapper, sharedProjectMap)
 
                 val privateProjects = privateProjectManager.value
-                    .map { PrivateProject(it, userCustomTimeProvider, rootTaskParent) }
+                    .map {
+                        PrivateProject(it, userCustomTimeProvider, rootTaskParent, rootTaskParent.rootModelChangeManager)
+                    }
                     .associateBy { it.projectKey }
 
                 val sharedProjects = sharedProjectManager.records
                     .values
-                    .map { SharedProject(it, userCustomTimeProvider, rootTaskParent) }
+                    .map { SharedProject(it, userCustomTimeProvider, rootTaskParent, rootTaskParent.rootModelChangeManager) }
                     .associateBy { it.projectKey }
 
                 projectMap = privateProjects + sharedProjects
@@ -176,7 +186,8 @@ object RelevanceChecker {
                         .rootTaskParentDelegate
                         .rootTaskKeys
                         .map { it to projectKey }
-                }.groupBy { it.first }
+                }
+                    .groupBy { it.first }
                     .mapValues { it.value.map { it.second }.toSet() }
 
                 rootTaskProjectKeys.entries
@@ -189,27 +200,11 @@ object RelevanceChecker {
                     .takeIf { it.isNotEmpty() }
                     ?.let { throw InconsistentRootTaskIdsException(it) }
 
-                privateProjects.values.forEach { privateProject ->
-                    response += "checking relevance for private project ${privateProject.projectKey}"
-
-                    Irrelevant.setIrrelevant(
-                        userCustomTimeRelevances,
-                        privateProject,
-                        ExactTimeStamp.Local.now,
-                    )
-                }
-
-                val removedSharedProjects = sharedProjects.values.mapNotNull { sharedProject ->
-                    response += "checking relevance for shared project ${sharedProject.projectKey}: ${sharedProject.name}"
-
-                    val removedSharedProject = Irrelevant.setIrrelevant(
-                        userCustomTimeRelevances,
-                        sharedProject,
-                        ExactTimeStamp.Local.now,
-                    ).removedSharedProject
-
-                    removedSharedProject
-                }
+                val removedSharedProjects = Irrelevant.setIrrelevant(
+                    userCustomTimeRelevances,
+                    privateProjects.values + sharedProjects.values,
+                    ExactTimeStamp.Local.now,
+                ).removedSharedProjects
 
                 userCustomTimeRelevances.values
                     .filter { !it.relevant }
@@ -217,11 +212,7 @@ object RelevanceChecker {
 
                 val removedSharedProjectKeys = removedSharedProjects.map { it.projectKey }
 
-                rootUsers.values.forEach { remoteUser ->
-                    removedSharedProjectKeys.forEach {
-                        remoteUser.removeProject(it)
-                    }
-                }
+                rootUsers.values.forEach { removedSharedProjectKeys.forEach(it::removeProject) }
 
                 projectMap.values.forEach { project ->
                     project.projectRecord

@@ -308,6 +308,8 @@ sealed class Task(
 
     fun mayHaveRootInstances() = _schedules.isNotEmpty() || _existingInstances.isNotEmpty()
 
+    private var gettingInstances = false
+
     fun getInstances(
         startExactTimeStamp: ExactTimeStamp.Offset?,
         endExactTimeStamp: ExactTimeStamp.Offset?,
@@ -315,6 +317,9 @@ sealed class Task(
         onlyRoot: Boolean = false,
         filterVisible: Boolean = true,
     ): Sequence<Instance> {
+        check(!gettingInstances)
+        gettingInstances = true
+
         InterruptionChecker.throwIfInterrupted()
 
         return if (filterVisible && !notDeleted(now) && endData!!.deleteInstances) {
@@ -328,7 +333,10 @@ sealed class Task(
 
             instanceSequences += getScheduleInstances(startExactTimeStamp, endExactTimeStamp)
 
-            return combineInstanceSequences(instanceSequences)
+            combineInstanceSequences(instanceSequences)
+        }.also {
+            check(gettingInstances)
+            gettingInstances = false
         }
     }
 

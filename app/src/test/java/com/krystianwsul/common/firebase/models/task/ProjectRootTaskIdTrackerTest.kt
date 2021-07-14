@@ -1,15 +1,19 @@
 package com.krystianwsul.common.firebase.models.task
 
+import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.DomainFactoryRule
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.TestDomainUpdater
 import com.krystianwsul.checkme.domainmodel.extensions.createProject
 import com.krystianwsul.checkme.domainmodel.extensions.createScheduleTopLevelTask
+import com.krystianwsul.checkme.domainmodel.extensions.getGroupListData
+import com.krystianwsul.checkme.domainmodel.extensions.setInstancesParent
 import com.krystianwsul.checkme.gui.edit.delegates.EditDelegate
 import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.ScheduleData
 import com.krystianwsul.common.utils.TaskKey
+import com.soywiz.klock.hours
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
@@ -74,5 +78,37 @@ class ProjectRootTaskIdTrackerTest {
 
         assertEquals(emptySet<TaskKey.Root>(), privateTask.rootTaskKeys())
         assertEquals(emptySet<TaskKey.Root>(), sharedTask.rootTaskKeys())
+
+        val instanceKeys = domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
+            .groupListDataWrapper
+            .instanceDatas
+            .map { it.instanceKey }
+
+        assertEquals(2, instanceKeys.size)
+
+        val privateInstanceKey = instanceKeys.single { it.taskKey == privateWeeklyTaskKey }
+        val sharedInstanceKey = instanceKeys.single { it.taskKey == sharedSingleTaskKey }
+
+        now += 1.hours
+
+        domainUpdater(now).setInstancesParent(
+            DomainListenerManager.NotificationType.All,
+            setOf(privateInstanceKey),
+            sharedInstanceKey,
+        ).blockingGet()
+
+        assertEquals(
+            1,
+            domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
+                .groupListDataWrapper
+                .instanceDatas
+                .size,
+        )
+
+        assertEquals(setOf(privateWeeklyTaskKey, sharedSingleTaskKey), privateProject.rootTaskKeys())
+        assertEquals(setOf(privateWeeklyTaskKey, sharedSingleTaskKey), sharedProject.rootTaskKeys())
+
+        assertEquals(setOf(sharedSingleTaskKey), privateTask.rootTaskKeys())
+        assertEquals(setOf(privateWeeklyTaskKey), sharedTask.rootTaskKeys())
     }
 }

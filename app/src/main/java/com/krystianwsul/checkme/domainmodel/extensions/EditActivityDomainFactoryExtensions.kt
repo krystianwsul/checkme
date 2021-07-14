@@ -20,10 +20,7 @@ import com.krystianwsul.common.firebase.MyCustomTime
 import com.krystianwsul.common.firebase.json.tasks.TaskJson
 import com.krystianwsul.common.firebase.models.*
 import com.krystianwsul.common.firebase.models.project.Project
-import com.krystianwsul.common.firebase.models.task.ProjectTask
-import com.krystianwsul.common.firebase.models.task.RootTask
-import com.krystianwsul.common.firebase.models.task.Task
-import com.krystianwsul.common.firebase.models.task.performRootIntervalUpdate
+import com.krystianwsul.common.firebase.models.task.*
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.*
@@ -732,6 +729,8 @@ private fun DomainFactory.joinJoinables(
     joinableMap: List<Pair<EditParameters.Join.Joinable, RootTask>>,
     now: ExactTimeStamp.Local,
 ) {
+    ProjectRootTaskIdTracker.checkTracking()
+
     val parentInstanceKey = newParentTask.getInstances(null, null, now)
         .single()
         .instanceKey
@@ -762,7 +761,7 @@ private fun DomainFactory.joinJoinables(
                 val instance = task.getInstance(migratedScheduleKey)
 
                 if (parentTaskHasOtherInstances || task.hasOtherVisibleInstances(now, joinable.instanceKey)) {
-                    instance.setParentState(Instance.ParentState.Parent(parentInstanceKey)) // todo root wrap
+                    instance.setParentState(Instance.ParentState.Parent(parentInstanceKey))
                 } else {
                     addChildToParent(instance)
                 }

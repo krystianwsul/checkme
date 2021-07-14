@@ -1098,4 +1098,103 @@ class DomainFactoryTest {
                 .isEmpty()
         )
     }
+
+    @Test
+    fun testTaskHierarchyCycle() {
+        val date = Date(2021, 7, 14)
+
+        var now = ExactTimeStamp.Local(date, HourMinute(1, 0))
+
+        val scheduleDatas = listOf(ScheduleData.Single(date, TimePair(HourMinute(5, 0))))
+
+        val taskKey1 = domainUpdater(now).createScheduleTopLevelTask(
+            DomainListenerManager.NotificationType.All,
+            "task1",
+            scheduleDatas,
+            null,
+            null,
+            null,
+        )
+            .blockingGet()
+            .taskKey
+
+        val taskKey2 = domainUpdater(now).createChildTask(
+            DomainListenerManager.NotificationType.All,
+            taskKey1,
+            "task2",
+            null,
+            null,
+        )
+            .blockingGet()
+            .taskKey
+
+        val taskKey3 = domainUpdater(now).createChildTask(
+            DomainListenerManager.NotificationType.All,
+            taskKey2,
+            "task3",
+            null,
+            null,
+        )
+            .blockingGet()
+            .taskKey
+
+        assertEquals(
+            taskKey1,
+            domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
+                .groupListDataWrapper
+                .instanceDatas
+                .single()
+                .instanceKey
+                .taskKey,
+        )
+
+        now += 1.hours
+
+        domainUpdater(now).updateScheduleTask(
+            DomainListenerManager.NotificationType.All,
+            taskKey3,
+            "task3",
+            scheduleDatas,
+            null,
+            null,
+            null,
+        )
+
+        assertEquals(
+            2,
+            domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
+                .groupListDataWrapper
+                .instanceDatas
+                .size,
+        )
+
+        now += 1.hours
+
+        domainUpdater(now).updateChildTask(
+            DomainListenerManager.NotificationType.All,
+            taskKey1,
+            "task1",
+            taskKey3,
+            null,
+            null,
+            null,
+            true,
+        )
+
+        val instanceKey3 = domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
+            .groupListDataWrapper
+            .instanceDatas
+            .single()
+            .instanceKey
+
+        assertEquals(taskKey3, instanceKey3.taskKey)
+
+        assertEquals(
+            1,
+            domainFactory.getShowInstanceData(instanceKey3)
+                .groupListDataWrapper
+                .instanceDatas
+                .size,
+        )
+    }
 }

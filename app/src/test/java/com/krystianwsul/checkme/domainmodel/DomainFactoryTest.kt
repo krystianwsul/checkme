@@ -1191,7 +1191,7 @@ class DomainFactoryTest {
 
         assertEquals(
             1,
-            domainFactory.getShowInstanceData(instanceKey3)
+            domainFactory.getShowInstanceData(instanceKey3, now)
                 .groupListDataWrapper
                 .instanceDatas
                 .size,

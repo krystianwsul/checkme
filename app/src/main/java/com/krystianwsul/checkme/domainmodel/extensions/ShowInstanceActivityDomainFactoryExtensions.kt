@@ -20,14 +20,15 @@ import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
 import io.reactivex.rxjava3.core.Single
 
-fun DomainFactory.getShowInstanceData(instanceKey: InstanceKey): ShowInstanceViewModel.Data {
+fun DomainFactory.getShowInstanceData(
+    instanceKey: InstanceKey,
+    now: ExactTimeStamp.Local = ExactTimeStamp.Local.now,
+): ShowInstanceViewModel.Data {
     MyCrashlytics.log("DomainFactory.getShowInstanceData")
 
     DomainThreadChecker.instance.requireDomainThread()
 
     val task = getTaskForce(instanceKey.taskKey)
-
-    val now = ExactTimeStamp.Local.now
 
     val instance = getInstance(instanceKey)
     val instanceDateTime = instance.instanceDateTime

@@ -115,7 +115,7 @@ class RootTask private constructor(
 
         childTask.performRootIntervalUpdate { createParentNestedTaskHierarchy(this@RootTask, now) }
 
-        addRootTask(childTask)
+        addRootTask(childTask) // todo root wrap
 
         return childTask
     }
@@ -161,7 +161,7 @@ class RootTask private constructor(
 
     fun addChild(childTaskRootIntervalUpdate: RootIntervalUpdate, now: ExactTimeStamp.Local): TaskHierarchyKey {
         val taskHierarchyKey = childTaskRootIntervalUpdate.createParentNestedTaskHierarchy(this, now)
-        addRootTask(childTaskRootIntervalUpdate.rootTask)
+        addRootTask(childTaskRootIntervalUpdate.rootTask) // todo root wrap
 
         return taskHierarchyKey
     }

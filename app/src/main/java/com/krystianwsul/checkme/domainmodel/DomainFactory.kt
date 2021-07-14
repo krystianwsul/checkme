@@ -637,7 +637,7 @@ class DomainFactory(
 
                 childTask.performRootIntervalUpdate { copyParentNestedTaskHierarchy(now, startTaskHierarchy, parentTask.id) }
 
-                parentTask.addRootTask(childTask)
+                parentTask.addRootTask(childTask) // todo root wrap
             }
 
             val endData = Task.EndData(now, true)

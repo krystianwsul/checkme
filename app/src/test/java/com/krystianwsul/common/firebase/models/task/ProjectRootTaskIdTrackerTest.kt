@@ -108,7 +108,7 @@ class ProjectRootTaskIdTrackerTest {
         assertEquals(setOf(privateWeeklyTaskKey, sharedSingleTaskKey), privateProject.rootTaskKeys())
         assertEquals(setOf(privateWeeklyTaskKey, sharedSingleTaskKey), sharedProject.rootTaskKeys())
 
-        assertEquals(setOf(sharedSingleTaskKey), privateTask.rootTaskKeys())
+        assertEquals(emptySet<TaskKey.Root>(), privateTask.rootTaskKeys())
         assertEquals(setOf(privateWeeklyTaskKey), sharedTask.rootTaskKeys())
     }
 }

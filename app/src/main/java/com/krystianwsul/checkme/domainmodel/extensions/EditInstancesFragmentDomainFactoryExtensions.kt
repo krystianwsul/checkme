@@ -177,15 +177,15 @@ fun DomainUpdater.setInstancesParent(
 
     val parentTaskHasOtherInstances = parentTask.hasOtherVisibleInstances(now, parentInstanceKey)
 
-    val undoDatas = instances.map {
-        if (parentTaskHasOtherInstances || it.task.hasOtherVisibleInstances(now, it.instanceKey)) {
-            val undoData = SetInstanceParentUndoData(it.instanceKey, it.parentState)
+    val undoDatas = trackRootTaskIds {
+        instances.map {
+            if (parentTaskHasOtherInstances || it.task.hasOtherVisibleInstances(now, it.instanceKey)) {
+                val undoData = SetInstanceParentUndoData(it.instanceKey, it.parentState)
 
-            it.setParentState(Instance.ParentState.Parent(parentInstanceKey)) // todo root wrap
+                it.setParentState(Instance.ParentState.Parent(parentInstanceKey))
 
-            undoData
-        } else {
-            trackRootTaskIds {
+                undoData
+            } else {
                 // this is very rare, so I'll just hope for the best with casting
                 addChildToParent(it.task as RootTask, parentTask as RootTask, now)
             }

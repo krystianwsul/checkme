@@ -739,7 +739,8 @@ private fun DomainFactory.joinJoinables(
     val parentTaskHasOtherInstances = newParentTask.hasOtherVisibleInstances(now, parentInstanceKey)
 
     joinableMap.forEach { (joinable, task) ->
-        fun addChildToParent(instance: Instance? = null) = addChildToParent(task, newParentTask, now, instance)
+        fun addChildToParent(instance: Instance? = null) =
+            addChildToParent(task, newParentTask, now, instance)  // todo root check wrapped
 
         when (joinable) {
             is EditParameters.Join.Joinable.Task -> addChildToParent()
@@ -779,7 +780,7 @@ private fun DomainFactory.joinTasks(
     newParentTask.requireCurrent(now)
     check(joinTasks.size > 1)
 
-    joinTasks.forEach { addChildToParent(it, newParentTask, now) }
+    joinTasks.forEach { addChildToParent(it, newParentTask, now) }  // todo root check wrapped
 
     removeInstanceKeys.map(::getInstance)
         .filter {
@@ -905,12 +906,12 @@ private fun DomainFactory.convertAndUpdateProject(
 ): RootTask {
     return when (task) {
         is RootTask -> task.updateProject(projectKey)
-        is ProjectTask -> converter.convertToRoot(now, task, projectKey)
+        is ProjectTask -> converter.convertToRoot(now, task, projectKey) // todo root check wrapped
     }
 }
 
 private fun DomainFactory.convertToRoot(task: Task, now: ExactTimeStamp.Local): RootTask {
     if (task is RootTask) return task
 
-    return converter.convertToRoot(now, task as ProjectTask, task.project.projectKey)
+    return converter.convertToRoot(now, task as ProjectTask, task.project.projectKey) // todo root check wrapped
 }

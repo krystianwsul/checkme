@@ -191,6 +191,7 @@ fun DomainUpdater.setInstancesParent(
         } else {
             trackRootTaskIds {
                 addChildToParent(
+                    // todo root check wrapped
                     it.task as RootTask,
                     parentTask as RootTask,
                     now,

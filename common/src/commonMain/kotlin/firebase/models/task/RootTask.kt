@@ -160,12 +160,10 @@ class RootTask private constructor(
     fun addChild(
         childTaskRootIntervalUpdate: RootIntervalUpdate,
         now: ExactTimeStamp.Local
-    ): TaskHierarchyKey {  // todo root check wrapped
-        val taskHierarchyKey = childTaskRootIntervalUpdate.createParentNestedTaskHierarchy(this, now)
-
+    ): TaskHierarchyKey {
         ProjectRootTaskIdTracker.checkTracking()
 
-        return taskHierarchyKey
+        return childTaskRootIntervalUpdate.createParentNestedTaskHierarchy(this, now)
     }
 
     fun deleteNoScheduleOrParent(noScheduleOrParent: NoScheduleOrParent) {

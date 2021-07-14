@@ -110,14 +110,12 @@ class RootTask private constructor(
         note: String?,
         image: TaskJson.Image?,
         ordinal: Double?,
-    ): RootTask { // todo root check wrapped
-        val childTask = parent.createTask(now, image, name, note, ordinal)
-
-        childTask.performRootIntervalUpdate { createParentNestedTaskHierarchy(this@RootTask, now) }
-
+    ): RootTask {
         ProjectRootTaskIdTracker.checkTracking()
 
-        return childTask
+        return parent.createTask(now, image, name, note, ordinal).apply {
+            performRootIntervalUpdate { createParentNestedTaskHierarchy(this@RootTask, now) }
+        }
     }
 
     override fun deleteFromParent() = parent.deleteRootTask(this)

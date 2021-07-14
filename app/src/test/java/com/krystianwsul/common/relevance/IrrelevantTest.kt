@@ -202,7 +202,7 @@ class IrrelevantTest {
 
         now = ExactTimeStamp.Local(day2, hour1)
 
-        Irrelevant.setIrrelevant(mapOf(), project, now)
+        Irrelevant.setIrrelevant(mapOf(), listOf(project), now)
 
         assertTrue(task.isReminderless())
     }
@@ -295,7 +295,7 @@ class IrrelevantTest {
         )
         assertTrue(task.intervalInfo.getCurrentScheduleIntervals(now).size == 2)
 
-        Irrelevant.setIrrelevant(mapOf(), project, now)
+        Irrelevant.setIrrelevant(mapOf(), listOf(project), now)
 
         assertTrue(task.intervalInfo.getCurrentScheduleIntervals(now).size == 1)
         assertTrue(
@@ -435,7 +435,7 @@ class IrrelevantTest {
 
         now = ExactTimeStamp.Local(day2, hour5)
 
-        Irrelevant.setIrrelevant(mapOf(), project, now)
+        Irrelevant.setIrrelevant(mapOf(), listOf(project), now)
     }
 
     @Test
@@ -568,6 +568,6 @@ class IrrelevantTest {
 
         now = ExactTimeStamp.Local(day2, hour5)
 
-        Irrelevant.setIrrelevant(mapOf(), project, now)
+        Irrelevant.setIrrelevant(mapOf(), listOf(project), now)
     }
 }

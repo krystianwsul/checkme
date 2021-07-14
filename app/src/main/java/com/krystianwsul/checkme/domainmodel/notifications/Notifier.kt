@@ -351,22 +351,21 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
                 .flatMap { it.customTimes.values }
                 .associate { it.key to CustomTimeRelevance(it) }
 
-            domainFactory.projectsFactory
-                .projects
-                .values
-                .forEach {
-                    val results = Irrelevant.setIrrelevant(userCustomTimeRelevances, it, exactTimeStamp)
+            val results = Irrelevant.setIrrelevant(
+                userCustomTimeRelevances,
+                domainFactory.projectsFactory
+                    .projects
+                    .values,
+                exactTimeStamp,
+            )
 
-                    results.irrelevantExistingInstances
-                        .sortedBy { it.scheduleDateTime }
-                        .forEach { Log.e("asdf", "magic irrelevant instance: $it") }
+            results.irrelevantExistingInstances
+                .sortedBy { it.scheduleDateTime }
+                .forEach { Log.e("asdf", "magic irrelevant instance: $it") }
 
-                    results.irrelevantSchedules
-                        .sortedBy { it.startExactTimeStamp }
-                        .forEach {
-                            Log.e("asdf", "magic irrelevant schedule, schedule: $it, task: ${it.topLevelTask}")
-                        }
-                }
+            results.irrelevantSchedules
+                .sortedBy { it.startExactTimeStamp }
+                .forEach { Log.e("asdf", "magic irrelevant schedule, schedule: $it, task: ${it.topLevelTask}") }
 
             throw Exception("Irrelevant.setIrrelevant write prevented")
         }

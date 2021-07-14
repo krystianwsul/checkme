@@ -190,12 +190,8 @@ fun DomainUpdater.setInstancesParent(
             undoData
         } else {
             trackRootTaskIds {
-                addChildToParent(
-                    // todo root check wrapped
-                    it.task as RootTask,
-                    parentTask as RootTask,
-                    now,
-                ) // this is very rare, so I'll just hope for the best
+                // this is very rare, so I'll just hope for the best with casting
+                addChildToParent(it.task as RootTask, parentTask as RootTask, now)
             }
         }
     }

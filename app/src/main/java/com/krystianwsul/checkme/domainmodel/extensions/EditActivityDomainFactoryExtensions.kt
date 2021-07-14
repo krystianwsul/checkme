@@ -913,5 +913,5 @@ private fun DomainFactory.convertAndUpdateProject(
 private fun DomainFactory.convertToRoot(task: Task, now: ExactTimeStamp.Local): RootTask {
     if (task is RootTask) return task
 
-    return converter.convertToRoot(now, task as ProjectTask, task.project.projectKey) // todo root check wrapped
+    return converter.convertToRoot(now, task as ProjectTask, task.project.projectKey)
 }

@@ -6,6 +6,7 @@ import com.krystianwsul.checkme.domainmodel.TestDomainUpdater
 import com.krystianwsul.checkme.domainmodel.extensions.createProject
 import com.krystianwsul.checkme.domainmodel.extensions.createScheduleTopLevelTask
 import com.krystianwsul.checkme.gui.edit.delegates.EditDelegate
+import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.ScheduleData
 import com.krystianwsul.common.utils.TaskKey
@@ -65,32 +66,13 @@ class ProjectRootTaskIdTrackerTest {
         val privateTask = domainFactory.rootTasksFactory.getRootTask(privateWeeklyTaskKey)
         val sharedTask = domainFactory.rootTasksFactory.getRootTask(sharedSingleTaskKey)
 
-        assertEquals(
-            setOf(privateWeeklyTaskKey),
-            privateProject.projectRecord
-                .rootTaskParentDelegate
-                .rootTaskKeys,
-        )
+        fun Project<*>.rootTaskKeys() = projectRecord.rootTaskParentDelegate.rootTaskKeys
+        fun RootTask.rootTaskKeys() = taskRecord.rootTaskParentDelegate.rootTaskKeys
 
-        assertEquals(
-            setOf(sharedSingleTaskKey),
-            sharedProject.projectRecord
-                .rootTaskParentDelegate
-                .rootTaskKeys,
-        )
+        assertEquals(setOf(privateWeeklyTaskKey), privateProject.rootTaskKeys())
+        assertEquals(setOf(sharedSingleTaskKey), sharedProject.rootTaskKeys())
 
-        assertEquals(
-            emptySet<TaskKey.Root>(),
-            privateTask.taskRecord
-                .rootTaskParentDelegate
-                .rootTaskKeys,
-        )
-
-        assertEquals(
-            emptySet<TaskKey.Root>(),
-            sharedTask.taskRecord
-                .rootTaskParentDelegate
-                .rootTaskKeys,
-        )
+        assertEquals(emptySet<TaskKey.Root>(), privateTask.rootTaskKeys())
+        assertEquals(emptySet<TaskKey.Root>(), sharedTask.rootTaskKeys())
     }
 }

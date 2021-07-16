@@ -172,7 +172,9 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
 
             cancelNotificationDatas()
 
-            notifyInstances(getNotifications(), now)
+            val notifications = getNotifications()
+            notifyInstances(notifications, now)
+            cancelProjectNotifications(notifications)
         } else if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
             if (notificationInstances.isEmpty()) {
                 Preferences.tickLog.logLineHour("hiding group")
@@ -203,7 +205,9 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
 
             cancelNotificationDatas()
 
-            notifyInstances(getNotifications(), now)
+            val notifications = getNotifications()
+            notifyInstances(notifications, now)
+            cancelProjectNotifications(notifications)
         } else {
             /**
              * in this section, "summary" is Android's summary notification thingy, whereas "group" is my own
@@ -279,7 +283,9 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
 
             cancelNotificationDatas()
 
-            notifyInstances(getNotifications(), now)
+            val notifications = getNotifications()
+            notifyInstances(notifications, now)
+            cancelProjectNotifications(notifications)
         }
 
         if (!silent) Preferences.lastTick = now.long
@@ -333,7 +339,9 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
                 }
             }
         }
+    }
 
+    private fun cancelProjectNotifications(notifications: List<GroupTypeFactory.Notification>) {
         val currentKeys = notifications.filterIsInstance<GroupTypeFactory.Notification.Project>()
             .map { ProjectNotificationKey(it.project.projectKey, it.timeStamp) }
 

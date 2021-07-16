@@ -257,23 +257,23 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
                     //show
                     showSummary()
 
-                    for (showInstanceKey in showInstanceKeys) {
-                        val instance = notificationInstances.getValue(showInstanceKey)
-                        Preferences.tickLog.logLineHour("showing '" + instance.name + "'")
-                        notifyInstance(instance, silent)
-                    }
+                    showInstanceKeys.forEach { notifyInstance(notificationInstances.getValue(it), silent) }
 
                     // instances to be updated
                     notificationInstances.values
                         .filter { !showInstanceKeys.contains(it.instanceKey) }
-                        .forEach {
-                            Preferences.tickLog.logLineHour("updating '${it.name}' ${it.instanceDateTime}")
-                            updateInstance(it)
-                        }
+                        .forEach(::updateInstance)
 
                     cancelNotificationDatas()
 
-                    val notifications = getNotifications()
+                    val notifies = notificationDatas.filterIsInstance<NotificationData.Notify>()
+
+                    notifies.forEach {
+                        Preferences.tickLog.logLineHour("showing/updating '" + it.instance.name + "'")
+                    }
+
+                    val notifications = getNotifications(notifies)
+
                     notifyInstances(notifications, now)
                     cancelProjectNotifications(notifications)
                 }

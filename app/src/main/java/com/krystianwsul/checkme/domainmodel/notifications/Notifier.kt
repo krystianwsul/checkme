@@ -71,6 +71,14 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
 
         val notificationDatas = mutableListOf<NotificationData>()
 
+        fun cancelNotificationDatas() {
+            notificationDatas.filterIsInstance<NotificationData.Cancel>().forEach {
+                notificationWrapper.cancelNotification(it.instanceId)
+            }
+        }
+
+        fun getNotifications() = getNotifications(notificationDatas.filterIsInstance<NotificationData.Notify>())
+
         fun notifyInstance(instance: Instance, silent: Boolean) {
             notificationDatas += NotificationData.Notify(instance, silent)
         }
@@ -161,6 +169,10 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
                         .forEach(::updateInstance)
                 }
             }
+
+            cancelNotificationDatas()
+
+            notifyInstances(getNotifications(), now)
         } else if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
             if (notificationInstances.isEmpty()) {
                 Preferences.tickLog.logLineHour("hiding group")
@@ -188,6 +200,10 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
                 Preferences.tickLog.logLineHour("updating '" + it.name + "' " + it.instanceDateTime)
                 updateInstance(it)
             }
+
+            cancelNotificationDatas()
+
+            notifyInstances(getNotifications(), now)
         } else {
             /**
              * in this section, "summary" is Android's summary notification thingy, whereas "group" is my own
@@ -260,9 +276,11 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
                     NotificationWrapper.instance.cancelNotification(NotificationWrapperImpl.NOTIFICATION_ID_GROUP)
                 }
             }
-        }
 
-        notifyInstances(notificationDatas, now)
+            cancelNotificationDatas()
+
+            notifyInstances(getNotifications(), now)
+        }
 
         if (!silent) Preferences.lastTick = now.long
 
@@ -298,18 +316,12 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
         data class Notify(val instance: Instance, val silent: Boolean = true) : NotificationData()
     }
 
-    private fun notifyInstances(notificationDatas: List<NotificationData>, now: ExactTimeStamp.Local) {
-        notificationDatas.filterIsInstance<NotificationData.Cancel>().forEach {
-            notificationWrapper.cancelNotification(it.instanceId)
-        }
+    private fun getNotifications(notifies: List<NotificationData.Notify>) = GroupTypeFactory.getGroupTypeTree(
+        notifies.map { GroupTypeFactory.InstanceDescriptor(it.instance, it.silent) },
+        GroupType.GroupingMode.TIME,
+    ).flatMap { it.getNotifications() }
 
-        val notifies = notificationDatas.filterIsInstance<NotificationData.Notify>()
-
-        val notifications = GroupTypeFactory.getGroupTypeTree(
-            notifies.map { GroupTypeFactory.InstanceDescriptor(it.instance, it.silent) },
-            GroupType.GroupingMode.TIME,
-        ).flatMap { it.getNotifications() }
-
+    private fun notifyInstances(notifications: List<GroupTypeFactory.Notification>, now: ExactTimeStamp.Local) {
         notifications.forEach {
             when (it) {
                 is GroupTypeFactory.Notification.Instance ->

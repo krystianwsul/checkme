@@ -20,6 +20,7 @@ import com.krystianwsul.common.firebase.MyCustomTime
 import com.krystianwsul.common.firebase.json.tasks.TaskJson
 import com.krystianwsul.common.firebase.models.*
 import com.krystianwsul.common.firebase.models.project.Project
+import com.krystianwsul.common.firebase.models.project.SharedProject
 import com.krystianwsul.common.firebase.models.task.*
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.Time
@@ -657,7 +658,7 @@ private fun DomainFactory.getParentTreeDatas(
 
     parentTreeDatas += getAllTasks().asSequence()
         .filter { it.showAsParent(now, excludedTaskKeys) }
-        .filter { it.isTopLevelTask(now) }
+        .filter { it.isTopLevelTask(now) && (it.project as? SharedProject)?.current(now) != true }
         .map {
             EditViewModel.ParentTreeData(
                 it.name,

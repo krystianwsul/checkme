@@ -246,6 +246,9 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
 
                     Preferences.tickLog.logLineHour("showing group")
                     NotificationWrapper.instance.notifyGroup(notificationInstances.values, silent, now, false)
+
+                    cancelNotificationDatas()
+                    cancelProjectNotifications(emptyList())
                 }
                 notificationInstances.isNotEmpty() -> {
                     //hide
@@ -267,6 +270,12 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
                             Preferences.tickLog.logLineHour("updating '${it.name}' ${it.instanceDateTime}")
                             updateInstance(it)
                         }
+
+                    cancelNotificationDatas()
+
+                    val notifications = getNotifications()
+                    notifyInstances(notifications, now)
+                    cancelProjectNotifications(notifications)
                 }
                 else -> {
                     check(notificationInstances.isEmpty())
@@ -278,14 +287,11 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
 
                     Preferences.tickLog.logLineHour("hiding summary")
                     NotificationWrapper.instance.cancelNotification(NotificationWrapperImpl.NOTIFICATION_ID_GROUP)
+
+                    cancelNotificationDatas()
+                    cancelProjectNotifications(emptyList())
                 }
             }
-
-            cancelNotificationDatas()
-
-            val notifications = getNotifications()
-            notifyInstances(notifications, now)
-            cancelProjectNotifications(notifications)
         }
 
         if (!silent) Preferences.lastTick = now.long

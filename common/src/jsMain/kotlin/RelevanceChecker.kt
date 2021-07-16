@@ -192,7 +192,7 @@ object RelevanceChecker {
                         Triple(taskKey, projectKey, rootTasksInProjectKeys[taskKey] ?: setOf())
                     }
                     .filter { (_, correctProjectKey, allFeaturingProjectKeys) ->
-                        correctProjectKey != allFeaturingProjectKeys.singleOrNull()
+                        correctProjectKey !in allFeaturingProjectKeys
                     }
                     .takeIf { it.isNotEmpty() }
                     ?.let { throw InconsistentRootTaskIdsException(it) }

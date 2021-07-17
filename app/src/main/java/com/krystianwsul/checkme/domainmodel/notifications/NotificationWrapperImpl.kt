@@ -516,18 +516,23 @@ open class NotificationWrapperImpl : NotificationWrapper() {
 
             val name: String
             val text: String
+            val timeStamp: TimeStamp
 
             class Instance(instance: com.krystianwsul.common.firebase.models.Instance, now: ExactTimeStamp.Local) : Item {
 
                 override val name = instance.name
                 override val text = getInstanceText(instance, now)
+                override val timeStamp = instance.instanceDateTime.timeStamp
 
-                private val timeStamp = instance.instanceDateTime.timeStamp
-                private val startExactTimeStamp = instance.task.startExactTimeStamp
+                private val ordinal = instance.task.ordinal
 
                 override fun compareTo(other: Item): Int {
+                    timeStamp.compareTo(other.timeStamp)
+                        .takeIf { it != 0 }
+                        ?.let { return it }
+
                     return when (other) {
-                        is Instance -> compareValuesBy(this, other, { it.timeStamp }, { it.startExactTimeStamp })
+                        is Instance -> ordinal.compareTo(other.ordinal)
                         is Project -> 1
                     }
                 }
@@ -537,10 +542,15 @@ open class NotificationWrapperImpl : NotificationWrapper() {
 
                 override val name = project.project.name
                 override val text = getInstanceText(project.instances.map { it.name }, null)
+                override val timeStamp = project.timeStamp
 
                 private val ordinal = project.instances.map { it.task.ordinal }.minOrNull()!!
 
                 override fun compareTo(other: Item): Int {
+                    timeStamp.compareTo(other.timeStamp)
+                        .takeIf { it != 0 }
+                        ?.let { return it }
+
                     return when (other) {
                         is Instance -> -1
                         is Project -> return ordinal.compareTo(other.ordinal)

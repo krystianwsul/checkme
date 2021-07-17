@@ -503,14 +503,19 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         val highPriority: Boolean,
         val summary: Boolean,
     ) {
-        val instances = instances.map(::Instance)
 
-        inner class Instance(instance: com.krystianwsul.common.firebase.models.Instance) {
+        val instances = instances.map(::Instance).sorted()
+
+        inner class Instance(instance: com.krystianwsul.common.firebase.models.Instance) : Comparable<Instance> {
 
             val name = instance.name
             val timeStamp = instance.instanceDateTime.timeStamp
             val startExactTimeStamp = instance.task.startExactTimeStamp
             val text = getInstanceText(instance, now)
+
+            override fun compareTo(other: Instance): Int {
+                return compareValuesBy(this, other, { it.timeStamp }, { it.startExactTimeStamp })
+            }
         }
     }
 
@@ -526,12 +531,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
             PendingIntent.FLAG_UPDATE_CURRENT,
         )
 
-        val (inboxStyle, styleHash) = getInboxStyle(
-            groupData.instances
-                .sortedWith(compareBy({ it.timeStamp }, { it.startExactTimeStamp }))
-                .map { it.name + it.text },
-            groupData.summary,
-        )
+        val (inboxStyle, styleHash) = getInboxStyle(groupData.instances.map { it.name + it.text }, groupData.summary)
 
         val title =
             if (groupData.summary) groupData.instances.size.toString() + " " + MyApplication.instance.getString(R.string.multiple_reminders) else null

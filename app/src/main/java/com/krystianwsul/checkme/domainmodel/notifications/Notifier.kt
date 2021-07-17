@@ -244,6 +244,8 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
 
             cancelNotificationDatas()
 
+            val notifies = notificationDatas.filterIsInstance<NotificationData.Notify>()
+
             // hide everything first, then show.  If applicable, FILO summary
             when {
                 notificationInstances.size > MAX_NOTIFICATIONS_Q -> {
@@ -264,8 +266,6 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
 
                     //show
                     showSummary()
-
-                    val notifies = notificationDatas.filterIsInstance<NotificationData.Notify>()
 
                     notifies.forEach { Preferences.tickLog.logLineHour("showing/updating '" + it.instance.name + "'") }
 

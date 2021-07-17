@@ -504,18 +504,27 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         val summary: Boolean,
     ) {
 
-        val instances = instances.map { Item(it, now) }.sorted()
+        val items = instances.map { Item.Instance(it, now) }.sorted()
 
-        class Item(instance: com.krystianwsul.common.firebase.models.Instance, now: ExactTimeStamp.Local) :
-            Comparable<Item> {
+        sealed interface Item : Comparable<Item> {
 
-            val name = instance.name
-            val timeStamp = instance.instanceDateTime.timeStamp
-            val startExactTimeStamp = instance.task.startExactTimeStamp
-            val text = getInstanceText(instance, now)
+            val name: String
+            val text: String
 
-            override fun compareTo(other: Item): Int {
-                return compareValuesBy(this, other, { it.timeStamp }, { it.startExactTimeStamp })
+            class Instance(instance: com.krystianwsul.common.firebase.models.Instance, now: ExactTimeStamp.Local) : Item {
+
+                override val name = instance.name
+                override val text = getInstanceText(instance, now)
+
+                private val timeStamp = instance.instanceDateTime.timeStamp
+                private val startExactTimeStamp = instance.task.startExactTimeStamp
+
+                override fun compareTo(other: Item): Int {
+                    TODO("Not yet implemented")
+
+                    if (other is Instance)
+                        return compareValuesBy(this, other, { it.timeStamp }, { it.startExactTimeStamp })
+                }
             }
         }
     }
@@ -532,11 +541,11 @@ open class NotificationWrapperImpl : NotificationWrapper() {
             PendingIntent.FLAG_UPDATE_CURRENT,
         )
 
-        val (inboxStyle, styleHash) = getInboxStyle(groupData.instances.map { it.name + it.text }, groupData.summary)
+        val (inboxStyle, styleHash) = getInboxStyle(groupData.items.map { it.name + it.text }, groupData.summary)
 
         val title =
-            if (groupData.summary) groupData.instances.size.toString() + " " + MyApplication.instance.getString(R.string.multiple_reminders) else null
-        val text = groupData.instances.joinToString(", ") { it.name }
+            if (groupData.summary) groupData.items.size.toString() + " " + MyApplication.instance.getString(R.string.multiple_reminders) else null
+        val text = groupData.items.joinToString(", ") { it.name }
 
         val notificationHash = NotificationHash(
             title,

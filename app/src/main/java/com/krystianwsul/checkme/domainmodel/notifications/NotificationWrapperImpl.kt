@@ -58,6 +58,29 @@ open class NotificationWrapperImpl : NotificationWrapper() {
 
         fun getProjectNotificationId(projectKey: ProjectKey.Shared, timeStamp: TimeStamp) =
             (projectKey.hashCode() + timeStamp.long).toInt()
+
+        private fun getInstanceText(instance: Instance, now: ExactTimeStamp.Local): String {
+            val childNames = getInstanceNames(instance.getChildInstances(), now, true)
+
+            return if (childNames.isNotEmpty()) {
+                " (" + childNames.joinToString(", ") + ")"
+            } else {
+                val note = instance.task.note
+
+                if (!note.isNullOrEmpty()) " ($note)" else ""
+            }
+        }
+
+        private fun getInstanceNames(
+            instances: List<Instance>,
+            now: ExactTimeStamp.Local,
+            assumeChild: Boolean,
+        ) = instances.asSequence()
+            .filter { it.done == null }
+            .filter { it.isVisible(now, Instance.VisibilityOptions(assumeChildOfVisibleParent = assumeChild)) }
+            .sortedBy { it.task.ordinal }
+            .map { it.name }
+            .toList()
     }
 
     protected open val maxInboxLines = 5
@@ -328,29 +351,6 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         return (if (bits < 0) "--------------------" else "00000000000000000000").substring(s.length) + s
     }
 
-    private fun getInstanceText(instance: Instance, now: ExactTimeStamp.Local): String {
-        val childNames = getInstanceNames(instance.getChildInstances(), now, true)
-
-        return if (childNames.isNotEmpty()) {
-            " (" + childNames.joinToString(", ") + ")"
-        } else {
-            val note = instance.task.note
-
-            if (!note.isNullOrEmpty()) " ($note)" else ""
-        }
-    }
-
-    private fun getInstanceNames(
-        instances: List<Instance>,
-        now: ExactTimeStamp.Local,
-        assumeChild: Boolean,
-    ) = instances.asSequence()
-        .filter { it.done == null }
-        .filter { it.isVisible(now, Instance.VisibilityOptions(assumeChildOfVisibleParent = assumeChild)) }
-        .sortedBy { it.task.ordinal }
-        .map { it.name }
-        .toList()
-
     protected open fun getExtraCount(lines: List<String>, summary: Boolean) = lines.size - maxInboxLines
 
     private fun getInboxStyle(
@@ -496,24 +496,25 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         notificationRelay.accept { notifyGroupHelper(groupData) }
     }
 
-    private inner class GroupData(
+    private class GroupData(
         instances: Collection<com.krystianwsul.common.firebase.models.Instance>,
-        private val now: ExactTimeStamp.Local,
+        val now: ExactTimeStamp.Local,
         val silent: Boolean,
         val highPriority: Boolean,
         val summary: Boolean,
     ) {
 
-        val instances = instances.map(::Instance).sorted()
+        val instances = instances.map { Item(it, now) }.sorted()
 
-        inner class Instance(instance: com.krystianwsul.common.firebase.models.Instance) : Comparable<Instance> {
+        class Item(instance: com.krystianwsul.common.firebase.models.Instance, now: ExactTimeStamp.Local) :
+            Comparable<Item> {
 
             val name = instance.name
             val timeStamp = instance.instanceDateTime.timeStamp
             val startExactTimeStamp = instance.task.startExactTimeStamp
             val text = getInstanceText(instance, now)
 
-            override fun compareTo(other: Instance): Int {
+            override fun compareTo(other: Item): Int {
                 return compareValuesBy(this, other, { it.timeStamp }, { it.startExactTimeStamp })
             }
         }

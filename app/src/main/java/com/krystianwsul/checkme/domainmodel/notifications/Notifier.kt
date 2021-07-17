@@ -250,6 +250,8 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
                     .filter { !showInstanceKeys.contains(it.instanceKey) }
                     .forEach(::updateInstance)
 
+                hideGroupOrOld()
+
                 cancelNotificationDatas()
 
                 val notifies = notificationDatas.filterIsInstance<NotificationData.Notify>()
@@ -278,10 +280,6 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
                         cancelProjectNotifications(emptyList())
                     }
                     notificationInstances.isNotEmpty() -> {
-                        //hide
-                        hideGroupOrOld()
-
-                        //show
                         showSummary()
 
                         notifies.forEach { Preferences.tickLog.logLineHour("showing/updating '" + it.instance.name + "'") }
@@ -293,9 +291,6 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
                         check(notificationInstances.isEmpty())
                         check(showInstanceKeys.isEmpty())
                         check(shownInstanceKeys == hideInstanceKeys)
-
-                        // hide
-                        hideGroupOrOld()
 
                         Preferences.tickLog.logLineHour("hiding summary")
                         NotificationWrapper.instance.cancelNotification(NotificationWrapperImpl.NOTIFICATION_ID_GROUP)

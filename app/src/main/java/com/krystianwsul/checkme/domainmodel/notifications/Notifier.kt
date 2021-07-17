@@ -136,163 +136,172 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
 
         Preferences.tickLog.logLineHour("silent? $silent")
 
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
-            if (notificationInstances.size > MAX_NOTIFICATIONS_OLD) { // show group
-                if (shownInstanceKeys.size > MAX_NOTIFICATIONS_OLD) { // group shown
-                    val silentParam =
-                        if (showInstanceKeys.isNotEmpty() || hideInstanceKeys.isNotEmpty()) silent else true
+        when {
+            Build.VERSION.SDK_INT < Build.VERSION_CODES.N -> {
+                if (notificationInstances.size > MAX_NOTIFICATIONS_OLD) { // show group
+                    if (shownInstanceKeys.size > MAX_NOTIFICATIONS_OLD) { // group shown
+                        val silentParam =
+                            if (showInstanceKeys.isNotEmpty() || hideInstanceKeys.isNotEmpty()) silent else true
 
-                    NotificationWrapper.instance.notifyGroup(notificationInstances.values, silentParam, now)
-                } else { // instances shown
-                    for (shownInstanceKey in shownInstanceKeys) {
-                        cancelInstance(domainFactory.getInstance(shownInstanceKey).notificationId)
+                        NotificationWrapper.instance.notifyGroup(notificationInstances.values, silentParam, now)
+                    } else { // instances shown
+                        for (shownInstanceKey in shownInstanceKeys) {
+                            cancelInstance(domainFactory.getInstance(shownInstanceKey).notificationId)
+                        }
+
+                        notificationWrapper.notifyGroup(notificationInstances.values, silent, now)
                     }
+                } else { // show instances
+                    if (shownInstanceKeys.size > MAX_NOTIFICATIONS_OLD) { // group shown
+                        NotificationWrapper.instance.cancelNotification(0)
 
-                    notificationWrapper.notifyGroup(notificationInstances.values, silent, now)
-                }
-            } else { // show instances
-                if (shownInstanceKeys.size > MAX_NOTIFICATIONS_OLD) { // group shown
-                    NotificationWrapper.instance.cancelNotification(0)
+                        for (instance in notificationInstances.values)
+                            notifyInstance(instance, silent)
+                    } else { // instances shown
+                        for (hideInstanceKey in hideInstanceKeys) {
+                            cancelInstance(domainFactory.getInstance(hideInstanceKey).notificationId)
+                        }
 
-                    for (instance in notificationInstances.values)
-                        notifyInstance(instance, silent)
-                } else { // instances shown
-                    for (hideInstanceKey in hideInstanceKeys) {
-                        cancelInstance(domainFactory.getInstance(hideInstanceKey).notificationId)
+                        for (showInstanceKey in showInstanceKeys)
+                            notifyInstance(notificationInstances.getValue(showInstanceKey), silent)
+
+                        notificationInstances.values
+                            .filter { !showInstanceKeys.contains(it.instanceKey) }
+                            .forEach(::updateInstance)
                     }
-
-                    for (showInstanceKey in showInstanceKeys)
-                        notifyInstance(notificationInstances.getValue(showInstanceKey), silent)
-
-                    notificationInstances.values
-                        .filter { !showInstanceKeys.contains(it.instanceKey) }
-                        .forEach(::updateInstance)
                 }
+
+                cancelNotificationDatas()
+
+                val notifications = getNotifications()
+                notifyInstances(notifications, now)
+                cancelProjectNotifications(notifications)
             }
-
-            cancelNotificationDatas()
-
-            val notifications = getNotifications()
-            notifyInstances(notifications, now)
-            cancelProjectNotifications(notifications)
-        } else if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-            if (notificationInstances.isEmpty()) {
-                Preferences.tickLog.logLineHour("hiding group")
-                NotificationWrapper.instance.cancelNotification(0)
-            } else {
-                Preferences.tickLog.logLineHour("showing group")
-                NotificationWrapper.instance.notifyGroup(notificationInstances.values, true, now)
-            }
-
-            for (hideInstanceKey in hideInstanceKeys) {
-                val instance = domainFactory.getInstance(hideInstanceKey)
-                Preferences.tickLog.logLineHour("hiding '" + instance.name + "'")
-                cancelInstance(instance.notificationId)
-            }
-
-            for (showInstanceKey in showInstanceKeys) {
-                val instance = notificationInstances.getValue(showInstanceKey)
-                Preferences.tickLog.logLineHour("showing '" + instance.name + "'")
-                notifyInstance(instance, silent)
-            }
-
-            val updateInstances = notificationInstances.values.filter { !showInstanceKeys.contains(it.instanceKey) }
-
-            updateInstances.forEach {
-                Preferences.tickLog.logLineHour("updating '" + it.name + "' " + it.instanceDateTime)
-                updateInstance(it)
-            }
-
-            cancelNotificationDatas()
-
-            val notifications = getNotifications()
-            notifyInstances(notifications, now)
-            cancelProjectNotifications(notifications)
-        } else {
-            /**
-             * in this section, "summary" is Android's summary notification thingy, whereas "group" is my own
-             * inbox-style notification
-             */
-
-            fun Collection<InstanceKey>.cancelNotifications() = map(domainFactory::getInstance).forEach {
-                Preferences.tickLog.logLineHour("hiding '" + it.name + "'")
-                cancelInstance(it.notificationId)
-            }
-
-            fun showSummary() { // Android notification group thingy
-                Preferences.tickLog.logLineHour("showing summary")
-                NotificationWrapper.instance.notifyGroup(notificationInstances.values, true, now)
-            }
-
-            val wereMaxShown = shownInstanceKeys.size > MAX_NOTIFICATIONS_Q
-
-            fun hideGroupOrOld() {
-                if (wereMaxShown) {
+            Build.VERSION.SDK_INT < Build.VERSION_CODES.Q -> {
+                if (notificationInstances.isEmpty()) {
                     Preferences.tickLog.logLineHour("hiding group")
-                    NotificationWrapper.instance.cancelNotification(NotificationWrapperImpl.NOTIFICATION_ID_GROUP_NOT_SUMMARY)
+                    NotificationWrapper.instance.cancelNotification(0)
                 } else {
-                    hideInstanceKeys.cancelNotifications()
-                }
-            }
-
-            showInstanceKeys.forEach { notifyInstance(notificationInstances.getValue(it), silent) }
-
-            // instances to be updated
-            notificationInstances.values
-                .filter { !showInstanceKeys.contains(it.instanceKey) }
-                .forEach(::updateInstance)
-
-            cancelNotificationDatas()
-
-            val notifies = notificationDatas.filterIsInstance<NotificationData.Notify>()
-
-            val notifications = getNotifications(notifies)
-
-            // hide everything first, then show.  If applicable, FILO summary
-            when {
-                notifications.size > MAX_NOTIFICATIONS_Q -> {
-                    //hide
-                    if (!wereMaxShown) shownInstanceKeys.cancelNotifications() // else group was already shown
-
-                    //show
-                    showSummary()
-
                     Preferences.tickLog.logLineHour("showing group")
-
-                    NotificationWrapper.instance.notifyGroup(
-                        notifications.filterIsInstance<GroupTypeFactory.Notification.Instance>().map { it.instance },
-                        silent,
-                        now,
-                        false,
-                        notifications.filterIsInstance<GroupTypeFactory.Notification.Project>(),
-                    )
-
-                    cancelProjectNotifications(emptyList())
+                    NotificationWrapper.instance.notifyGroup(notificationInstances.values, true, now)
                 }
-                notificationInstances.isNotEmpty() -> {
-                    //hide
-                    hideGroupOrOld()
 
-                    //show
-                    showSummary()
-
-                    notifies.forEach { Preferences.tickLog.logLineHour("showing/updating '" + it.instance.name + "'") }
-
-                    notifyInstances(notifications, now)
-                    cancelProjectNotifications(notifications)
+                for (hideInstanceKey in hideInstanceKeys) {
+                    val instance = domainFactory.getInstance(hideInstanceKey)
+                    Preferences.tickLog.logLineHour("hiding '" + instance.name + "'")
+                    cancelInstance(instance.notificationId)
                 }
-                else -> {
-                    check(notificationInstances.isEmpty())
-                    check(showInstanceKeys.isEmpty())
-                    check(shownInstanceKeys == hideInstanceKeys)
 
-                    // hide
-                    hideGroupOrOld()
+                for (showInstanceKey in showInstanceKeys) {
+                    val instance = notificationInstances.getValue(showInstanceKey)
+                    Preferences.tickLog.logLineHour("showing '" + instance.name + "'")
+                    notifyInstance(instance, silent)
+                }
 
-                    Preferences.tickLog.logLineHour("hiding summary")
-                    NotificationWrapper.instance.cancelNotification(NotificationWrapperImpl.NOTIFICATION_ID_GROUP)
+                val updateInstances = notificationInstances.values.filter { !showInstanceKeys.contains(it.instanceKey) }
 
-                    cancelProjectNotifications(emptyList())
+                updateInstances.forEach {
+                    Preferences.tickLog.logLineHour("updating '" + it.name + "' " + it.instanceDateTime)
+                    updateInstance(it)
+                }
+
+                cancelNotificationDatas()
+
+                val notifications = getNotifications()
+                notifyInstances(notifications, now)
+                cancelProjectNotifications(notifications)
+            }
+            else -> {
+                /**
+                 * in this section, "summary" is Android's summary notification thingy, whereas "group" is my own
+                 * inbox-style notification
+                 */
+
+                /**
+                 * in this section, "summary" is Android's summary notification thingy, whereas "group" is my own
+                 * inbox-style notification
+                 */
+
+                fun Collection<InstanceKey>.cancelNotifications() = map(domainFactory::getInstance).forEach {
+                    Preferences.tickLog.logLineHour("hiding '" + it.name + "'")
+                    cancelInstance(it.notificationId)
+                }
+
+                fun showSummary() { // Android notification group thingy
+                    Preferences.tickLog.logLineHour("showing summary")
+                    NotificationWrapper.instance.notifyGroup(notificationInstances.values, true, now)
+                }
+
+                val wereMaxShown = shownInstanceKeys.size > MAX_NOTIFICATIONS_Q
+
+                fun hideGroupOrOld() {
+                    if (wereMaxShown) {
+                        Preferences.tickLog.logLineHour("hiding group")
+                        NotificationWrapper.instance.cancelNotification(NotificationWrapperImpl.NOTIFICATION_ID_GROUP_NOT_SUMMARY)
+                    } else {
+                        hideInstanceKeys.cancelNotifications()
+                    }
+                }
+
+                showInstanceKeys.forEach { notifyInstance(notificationInstances.getValue(it), silent) }
+
+                // instances to be updated
+                notificationInstances.values
+                    .filter { !showInstanceKeys.contains(it.instanceKey) }
+                    .forEach(::updateInstance)
+
+                cancelNotificationDatas()
+
+                val notifies = notificationDatas.filterIsInstance<NotificationData.Notify>()
+
+                val notifications = getNotifications(notifies)
+
+                // hide everything first, then show.  If applicable, FILO summary
+                when {
+                    notifications.size > MAX_NOTIFICATIONS_Q -> {
+                        //hide
+                        if (!wereMaxShown) shownInstanceKeys.cancelNotifications() // else group was already shown
+
+                        //show
+                        showSummary()
+
+                        Preferences.tickLog.logLineHour("showing group")
+
+                        NotificationWrapper.instance.notifyGroup(
+                            notifications.filterIsInstance<GroupTypeFactory.Notification.Instance>().map { it.instance },
+                            silent,
+                            now,
+                            false,
+                            notifications.filterIsInstance<GroupTypeFactory.Notification.Project>(),
+                        )
+
+                        cancelProjectNotifications(emptyList())
+                    }
+                    notificationInstances.isNotEmpty() -> {
+                        //hide
+                        hideGroupOrOld()
+
+                        //show
+                        showSummary()
+
+                        notifies.forEach { Preferences.tickLog.logLineHour("showing/updating '" + it.instance.name + "'") }
+
+                        notifyInstances(notifications, now)
+                        cancelProjectNotifications(notifications)
+                    }
+                    else -> {
+                        check(notificationInstances.isEmpty())
+                        check(showInstanceKeys.isEmpty())
+                        check(shownInstanceKeys == hideInstanceKeys)
+
+                        // hide
+                        hideGroupOrOld()
+
+                        Preferences.tickLog.logLineHour("hiding summary")
+                        NotificationWrapper.instance.cancelNotification(NotificationWrapperImpl.NOTIFICATION_ID_GROUP)
+
+                        cancelProjectNotifications(emptyList())
+                    }
                 }
             }
         }

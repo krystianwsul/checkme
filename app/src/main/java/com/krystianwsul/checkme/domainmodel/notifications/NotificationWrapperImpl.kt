@@ -62,12 +62,16 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         private fun getInstanceText(instance: Instance, now: ExactTimeStamp.Local): String {
             val childNames = getInstanceNames(instance.getChildInstances(), now, true)
 
+            return getInstanceText(childNames, instance.task.note)
+        }
+
+        private fun getInstanceText(childNames: List<String>, note: String?): String {
             return if (childNames.isNotEmpty()) {
                 " (" + childNames.joinToString(", ") + ")"
+            } else if (!note.isNullOrEmpty()) {
+                " ($note)"
             } else {
-                val note = instance.task.note
-
-                if (!note.isNullOrEmpty()) " ($note)" else ""
+                ""
             }
         }
 
@@ -489,22 +493,24 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         silent: Boolean, // not needed >= 24
         now: ExactTimeStamp.Local,
         summary: Boolean,
+        projects: Collection<GroupTypeFactory.Notification.Project>,
     ) {
         val highPriority = getHighPriority() ?: return
 
-        val groupData = GroupData(instances, now, silent, highPriority, summary)
+        val groupData = GroupData(instances, projects, now, silent, highPriority, summary)
         notificationRelay.accept { notifyGroupHelper(groupData) }
     }
 
     private class GroupData(
-        instances: Collection<com.krystianwsul.common.firebase.models.Instance>,
+        instances: Collection<Instance>,
+        projects: Collection<GroupTypeFactory.Notification.Project>,
         val now: ExactTimeStamp.Local,
         val silent: Boolean,
         val highPriority: Boolean,
         val summary: Boolean,
     ) {
 
-        val items = instances.map { Item.Instance(it, now) }.sorted()
+        val items = (instances.map { Item.Instance(it, now) } + projects.map(Item::Project)).sorted()
 
         sealed interface Item : Comparable<Item> {
 
@@ -520,10 +526,25 @@ open class NotificationWrapperImpl : NotificationWrapper() {
                 private val startExactTimeStamp = instance.task.startExactTimeStamp
 
                 override fun compareTo(other: Item): Int {
-                    TODO("Not yet implemented")
+                    return when (other) {
+                        is Instance -> compareValuesBy(this, other, { it.timeStamp }, { it.startExactTimeStamp })
+                        is Project -> 1
+                    }
+                }
+            }
 
-                    if (other is Instance)
-                        return compareValuesBy(this, other, { it.timeStamp }, { it.startExactTimeStamp })
+            class Project(project: GroupTypeFactory.Notification.Project) : Item {
+
+                override val name = project.project.name
+                override val text = getInstanceText(project.instances.map { it.name }, null)
+
+                private val ordinal = project.instances.map { it.task.ordinal }.minOrNull()!!
+
+                override fun compareTo(other: Item): Int {
+                    return when (other) {
+                        is Instance -> -1
+                        is Project -> return ordinal.compareTo(other.ordinal)
+                    }
                 }
             }
         }

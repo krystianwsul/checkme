@@ -42,6 +42,7 @@ abstract class NotificationWrapper {
         silent: Boolean,
         now: ExactTimeStamp.Local,
         summary: Boolean = true,
+        projects: Collection<GroupTypeFactory.Notification.Project> = emptyList(),
     )
 
     abstract fun cleanGroup(lastNotificationId: Int?)

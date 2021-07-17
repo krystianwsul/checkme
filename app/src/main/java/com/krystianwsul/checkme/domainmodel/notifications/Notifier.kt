@@ -246,6 +246,8 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
 
             val notifies = notificationDatas.filterIsInstance<NotificationData.Notify>()
 
+            val notifications = getNotifications(notifies)
+
             // hide everything first, then show.  If applicable, FILO summary
             when {
                 notificationInstances.size > MAX_NOTIFICATIONS_Q -> {
@@ -256,7 +258,14 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
                     showSummary()
 
                     Preferences.tickLog.logLineHour("showing group")
-                    NotificationWrapper.instance.notifyGroup(notificationInstances.values, silent, now, false)
+
+                    NotificationWrapper.instance.notifyGroup(
+                        notifications.filterIsInstance<GroupTypeFactory.Notification.Instance>().map { it.instance },
+                        silent,
+                        now,
+                        false,
+                        notifications.filterIsInstance<GroupTypeFactory.Notification.Project>(),
+                    )
 
                     cancelProjectNotifications(emptyList())
                 }
@@ -268,8 +277,6 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
                     showSummary()
 
                     notifies.forEach { Preferences.tickLog.logLineHour("showing/updating '" + it.instance.name + "'") }
-
-                    val notifications = getNotifications(notifies)
 
                     notifyInstances(notifications, now)
                     cancelProjectNotifications(notifications)

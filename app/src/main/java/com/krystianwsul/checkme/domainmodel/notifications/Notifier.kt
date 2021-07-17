@@ -235,6 +235,15 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
                 }
             }
 
+            showInstanceKeys.forEach { notifyInstance(notificationInstances.getValue(it), silent) }
+
+            // instances to be updated
+            notificationInstances.values
+                .filter { !showInstanceKeys.contains(it.instanceKey) }
+                .forEach(::updateInstance)
+
+            cancelNotificationDatas()
+
             // hide everything first, then show.  If applicable, FILO summary
             when {
                 notificationInstances.size > MAX_NOTIFICATIONS_Q -> {
@@ -247,7 +256,6 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
                     Preferences.tickLog.logLineHour("showing group")
                     NotificationWrapper.instance.notifyGroup(notificationInstances.values, silent, now, false)
 
-                    cancelNotificationDatas()
                     cancelProjectNotifications(emptyList())
                 }
                 notificationInstances.isNotEmpty() -> {
@@ -257,20 +265,9 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
                     //show
                     showSummary()
 
-                    showInstanceKeys.forEach { notifyInstance(notificationInstances.getValue(it), silent) }
-
-                    // instances to be updated
-                    notificationInstances.values
-                        .filter { !showInstanceKeys.contains(it.instanceKey) }
-                        .forEach(::updateInstance)
-
-                    cancelNotificationDatas()
-
                     val notifies = notificationDatas.filterIsInstance<NotificationData.Notify>()
 
-                    notifies.forEach {
-                        Preferences.tickLog.logLineHour("showing/updating '" + it.instance.name + "'")
-                    }
+                    notifies.forEach { Preferences.tickLog.logLineHour("showing/updating '" + it.instance.name + "'") }
 
                     val notifications = getNotifications(notifies)
 
@@ -288,7 +285,6 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
                     Preferences.tickLog.logLineHour("hiding summary")
                     NotificationWrapper.instance.cancelNotification(NotificationWrapperImpl.NOTIFICATION_ID_GROUP)
 
-                    cancelNotificationDatas()
                     cancelProjectNotifications(emptyList())
                 }
             }

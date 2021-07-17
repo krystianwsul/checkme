@@ -250,7 +250,7 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
 
             // hide everything first, then show.  If applicable, FILO summary
             when {
-                notificationInstances.size > MAX_NOTIFICATIONS_Q -> {
+                notifications.size > MAX_NOTIFICATIONS_Q -> {
                     //hide
                     if (!wereMaxShown) shownInstanceKeys.cancelNotifications() // else group was already shown
 

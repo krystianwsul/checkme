@@ -957,8 +957,6 @@ class GroupListFragment @JvmOverloads constructor(
 
             listOf(
                 ::matchGroupsByInstanceKeys,
-                ::matchTimesByTimeStamps,
-                ::matchGroupsByTimeStamps,
                 ::matchGroupsByInstanceKeyIntersect,
                 ::matchInstances,
             ).forEach {
@@ -980,30 +978,6 @@ class GroupListFragment @JvmOverloads constructor(
                 .forEach { currId ->
                     mutableList.filterGroupId()
                         .singleOrNull { it.instanceKeys == currId.instanceKeys }
-                        ?.takeIf { it !in referenceList }
-                        ?.let { mutableList[mutableList.indexOf(it)] = currId }
-                }
-        }
-
-        // this covers a group's members changing
-        private fun matchTimesByTimeStamps(referenceList: List<Any>, mutableList: MutableList<Any>) {
-            referenceList.filterTimeId()
-                .filter { it !in mutableList }
-                .forEach { currId ->
-                    mutableList.filterTimeId()
-                        .singleOrNull { it.timeStamp == currId.timeStamp }
-                        ?.takeIf { it !in referenceList }
-                        ?.let { mutableList[mutableList.indexOf(it)] = currId }
-                }
-        }
-
-        // this covers a group's members changing
-        private fun matchGroupsByTimeStamps(referenceList: List<Any>, mutableList: MutableList<Any>) {
-            referenceList.filterProjectId()
-                .filter { it !in mutableList }
-                .forEach { currId ->
-                    mutableList.filterProjectId()
-                        .singleOrNull { it.timeStamp == currId.timeStamp && it.projectKey == currId.projectKey }
                         ?.takeIf { it !in referenceList }
                         ?.let { mutableList[mutableList.indexOf(it)] = currId }
                 }

@@ -955,23 +955,79 @@ class GroupListFragment @JvmOverloads constructor(
             val mutatedOldIds = oldIds.toMutableList()
             val mutatedNewIds = newIds.toMutableList()
 
-            replaceIds(mutatedOldIds, mutatedNewIds)
-            replaceIds(mutatedNewIds, mutatedOldIds)
+            listOf(
+                ::matchGroupsByInstanceKeys,
+                ::matchTimesByTimeStamps,
+                ::matchGroupsByTimeStamps,
+                ::matchGroupsByInstanceKeyIntersect,
+                ::matchInstances,
+            ).forEach {
+                it(mutatedOldIds, mutatedNewIds)
+                it(mutatedNewIds, mutatedOldIds)
+            }
 
             return mutatedOldIds to mutatedNewIds
         }
 
-        private fun replaceIds(referenceList: List<Any>, mutableList: MutableList<Any>) {
-            fun List<Any>.filterGroupId() = filterIsInstance<NotDoneNode.ContentDelegate.Group.Id>()
+        private fun List<Any>.filterGroupId() = filterIsInstance<NotDoneNode.ContentDelegate.Group.Id>()
+        private fun List<Any>.filterTimeId() = filterIsInstance<NotDoneNode.ContentDelegate.Group.Id.Time>()
+        private fun List<Any>.filterProjectId() = filterIsInstance<NotDoneNode.ContentDelegate.Group.Id.Project>()
 
+        // this covers rescheduling a whole group of instances
+        private fun matchGroupsByInstanceKeys(referenceList: List<Any>, mutableList: MutableList<Any>) {
+            referenceList.filterGroupId()
+                .filter { it !in mutableList }
+                .forEach { currId ->
+                    mutableList.filterGroupId()
+                        .singleOrNull { it.instanceKeys == currId.instanceKeys }
+                        ?.takeIf { it !in referenceList }
+                        ?.let { mutableList[mutableList.indexOf(it)] = currId }
+                }
+        }
+
+        // this covers a group's members changing
+        private fun matchTimesByTimeStamps(referenceList: List<Any>, mutableList: MutableList<Any>) {
+            referenceList.filterTimeId()
+                .filter { it !in mutableList }
+                .forEach { currId ->
+                    mutableList.filterTimeId()
+                        .singleOrNull { it.timeStamp == currId.timeStamp }
+                        ?.takeIf { it !in referenceList }
+                        ?.let { mutableList[mutableList.indexOf(it)] = currId }
+                }
+        }
+
+        // this covers a group's members changing
+        private fun matchGroupsByTimeStamps(referenceList: List<Any>, mutableList: MutableList<Any>) {
+            referenceList.filterProjectId()
+                .filter { it !in mutableList }
+                .forEach { currId ->
+                    mutableList.filterProjectId()
+                        .singleOrNull { it.timeStamp == currId.timeStamp && it.projectKey == currId.projectKey }
+                        ?.takeIf { it !in referenceList }
+                        ?.let { mutableList[mutableList.indexOf(it)] = currId }
+                }
+        }
+
+        private fun matchGroupsByInstanceKeyIntersect(referenceList: List<Any>, mutableList: MutableList<Any>) {
+            referenceList.filterGroupId()
+                .filter { it !in mutableList }
+                .forEach { currId ->
+                    mutableList.filterGroupId()
+                        .singleOrNull { it.instanceKeys.intersect(currId.instanceKeys).isNotEmpty() }
+                        ?.takeIf { it !in referenceList }
+                        ?.let { mutableList[mutableList.indexOf(it)] = currId }
+                }
+        }
+
+        // this covers a instance <-> group transformation
+        private fun matchInstances(referenceList: List<Any>, mutableList: MutableList<Any>) {
             referenceList.filterIsInstance<NotDoneNode.ContentDelegate.Instance.Id>()
                 .filter { it !in mutableList }
-                .filter { instanceId ->
-                    referenceList.filterGroupId().none { it.instanceKeys.contains(instanceId.instanceKey) }
-                }
                 .forEach { instanceId ->
                     mutableList.filterGroupId()
                         .singleOrNull { it.instanceKeys.contains(instanceId.instanceKey) }
+                        ?.takeIf { it !in referenceList }
                         ?.let { mutableList[mutableList.indexOf(it)] = instanceId }
                 }
         }

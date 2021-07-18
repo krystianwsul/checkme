@@ -471,40 +471,14 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
                 val instanceKeys: Set<InstanceKey>
 
                 @Parcelize
-                class Time(override val timeStamp: TimeStamp, override val instanceKeys: Set<InstanceKey>) : Id {
-
-                    override fun hashCode() = 1
-
-                    override fun equals(other: Any?): Boolean {
-                        if (other === this) return true
-
-                        if (other !is Time) return false
-
-                        // instanceKeys covers the scenario where all the instances' times are changes via "select all"
-                        return instanceKeys == other.instanceKeys || timeStamp == other.timeStamp
-                    }
-                }
+                data class Time(override val timeStamp: TimeStamp, override val instanceKeys: Set<InstanceKey>) : Id
 
                 @Parcelize
-                class Project(
+                data class Project(
                     override val timeStamp: TimeStamp,
                     override val instanceKeys: Set<InstanceKey>,
-                    private val projectKey: ProjectKey.Shared,
-                ) : Id {
-
-                    override fun hashCode() = 1
-
-                    override fun equals(other: Any?): Boolean {
-                        if (other === this) return true
-
-                        if (other !is Project) return false
-
-                        if (projectKey != other.projectKey) return false
-
-                        // instanceKeys covers the scenario where all the instances' times are changes via "select all"
-                        return instanceKeys == other.instanceKeys || timeStamp == other.timeStamp
-                    }
-                }
+                    val projectKey: ProjectKey.Shared,
+                ) : Id
             }
 
             @Parcelize

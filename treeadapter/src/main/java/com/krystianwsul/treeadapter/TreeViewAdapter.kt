@@ -142,6 +142,9 @@ class TreeViewAdapter<T : TreeHolder>(
         val newShowProgress = showProgress
         val newShowPadding = showPadding
 
+        val (oldIds, newIds) =
+            treeModelAdapter.mutateIds(oldStates.map { it.modelState.id }, newStates.map { it.modelState.id })
+
         DiffUtil.calculateDiff(object : DiffUtil.Callback() {
 
             private fun paddingComparison(oldItemPosition: Int, newItemPosition: Int): Boolean? {
@@ -164,7 +167,7 @@ class TreeViewAdapter<T : TreeHolder>(
             override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
                 paddingComparison(oldItemPosition, newItemPosition)?.let { return it }
 
-                return oldStates[oldItemPosition].modelState.id == newStates[newItemPosition].modelState.id
+                return oldIds[oldItemPosition] == newIds[newItemPosition]
             }
 
             override fun getOldListSize() = oldStates.size + (if (oldShowPadding) 1 else 0)

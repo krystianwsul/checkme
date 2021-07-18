@@ -467,8 +467,11 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
 
             sealed interface Id : ContentDelegate.Id {
 
+                val timeStamp: TimeStamp
+                val instanceKeys: Set<InstanceKey>
+
                 @Parcelize
-                class Time(private val timeStamp: TimeStamp, val instanceKeys: Set<InstanceKey>) : Id {
+                class Time(override val timeStamp: TimeStamp, override val instanceKeys: Set<InstanceKey>) : Id {
 
                     override fun hashCode() = 1
 
@@ -484,8 +487,8 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
 
                 @Parcelize
                 class Project(
-                    private val timeStamp: TimeStamp,
-                    private val instanceKeys: Set<InstanceKey>,
+                    override val timeStamp: TimeStamp,
+                    override val instanceKeys: Set<InstanceKey>,
                     private val projectKey: ProjectKey.Shared,
                 ) : Id {
 

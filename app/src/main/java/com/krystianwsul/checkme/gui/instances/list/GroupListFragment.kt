@@ -955,22 +955,25 @@ class GroupListFragment @JvmOverloads constructor(
             val mutatedOldIds = oldIds.toMutableList()
             val mutatedNewIds = newIds.toMutableList()
 
-            val instanceId = mutatedOldIds.filterIsInstance<NotDoneNode.ContentDelegate.Instance.Id>().singleOrNull()
-
-            if (instanceId != null) {
-                if (instanceId !in mutatedNewIds) {
-                    val matchingTimeId = mutatedNewIds.singleOrNull {
-                        it is NotDoneNode.ContentDelegate.Group.Id.Time &&
-                                it.instanceKeys.contains(instanceId.instanceKey)
-                    }
-
-                    if (matchingTimeId != null) {
-                        mutatedNewIds[mutatedNewIds.indexOf(matchingTimeId)] = instanceId
-                    }
-                }
-            }
+            replaceIds(mutatedOldIds, mutatedNewIds)
+            replaceIds(mutatedNewIds, mutatedOldIds)
 
             return mutatedOldIds to mutatedNewIds
+        }
+
+        private fun replaceIds(referenceList: List<Any>, mutableList: MutableList<Any>) {
+            fun List<Any>.filterGroupId() = filterIsInstance<NotDoneNode.ContentDelegate.Group.Id>()
+
+            referenceList.filterIsInstance<NotDoneNode.ContentDelegate.Instance.Id>()
+                .filter { it !in mutableList }
+                .filter { instanceId ->
+                    referenceList.filterGroupId().none { it.instanceKeys.contains(instanceId.instanceKey) }
+                }
+                .forEach { instanceId ->
+                    mutableList.filterGroupId()
+                        .singleOrNull { it.instanceKeys.contains(instanceId.instanceKey) }
+                        ?.let { mutableList[mutableList.indexOf(it)] = instanceId }
+                }
         }
     }
 

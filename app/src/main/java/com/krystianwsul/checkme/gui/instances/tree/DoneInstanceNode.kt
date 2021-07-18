@@ -12,6 +12,10 @@ class DoneInstanceNode(
 
     override val groupAdapter by lazy { parentNode.nodeCollection.groupAdapter }
 
+    override val id = Id(super.id)
+
+    data class Id(val superId: Any)
+
     override fun compareTo(other: ModelNode<AbstractHolder>): Int {
         checkNotNull(instanceData.done)
 

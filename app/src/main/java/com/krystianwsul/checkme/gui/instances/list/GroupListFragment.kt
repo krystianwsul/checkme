@@ -950,6 +950,28 @@ class GroupListFragment @JvmOverloads constructor(
         override val groupAdapter = this
 
         override fun scrollToTop() = groupListFragment.scrollToTop()
+
+        override fun mutateIds(oldIds: List<Any>, newIds: List<Any>): Pair<List<Any>, List<Any>> {
+            val mutatedOldIds = oldIds.toMutableList()
+            val mutatedNewIds = newIds.toMutableList()
+
+            val instanceId = mutatedOldIds.filterIsInstance<NotDoneNode.ContentDelegate.Instance.Id>().singleOrNull()
+
+            if (instanceId != null) {
+                if (instanceId !in mutatedNewIds) {
+                    val matchingTimeId = mutatedNewIds.singleOrNull {
+                        it is NotDoneNode.ContentDelegate.Group.Id.Time &&
+                                it.instanceKeys.contains(instanceId.instanceKey)
+                    }
+
+                    if (matchingTimeId != null) {
+                        mutatedNewIds[mutatedNewIds.indexOf(matchingTimeId)] = instanceId
+                    }
+                }
+            }
+
+            return mutatedOldIds to mutatedNewIds
+        }
     }
 
     private class NoSelectionException(message: String) : Exception(message)

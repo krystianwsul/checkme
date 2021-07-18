@@ -79,7 +79,7 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
             treeNode.expandVisible,
         )
 
-    final override val id: Any get() = contentDelegate.id
+    override val id: Any get() = contentDelegate.id
 
     final override val propagateSelection = contentDelegate.propagateSelection
 
@@ -260,7 +260,7 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
                 ModelNode.MatchResult.fromBoolean(instanceData.matchesSearch(search))
 
             @Parcelize
-            private data class Id(val instanceKey: InstanceKey) : ContentDelegate.Id
+            data class Id(val instanceKey: InstanceKey) : ContentDelegate.Id
 
             @Parcelize
             private data class State(
@@ -468,7 +468,7 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
             sealed interface Id : ContentDelegate.Id {
 
                 @Parcelize
-                class Time(private val timeStamp: TimeStamp, private val instanceKeys: Set<InstanceKey>) : Id {
+                class Time(private val timeStamp: TimeStamp, val instanceKeys: Set<InstanceKey>) : Id {
 
                     override fun hashCode() = 1
 

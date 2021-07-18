@@ -145,6 +145,9 @@ class TreeViewAdapter<T : TreeHolder>(
         val (oldIds, newIds) =
             treeModelAdapter.mutateIds(oldStates.map { it.modelState.id }, newStates.map { it.modelState.id })
 
+        check(oldIds.size == oldStates.size)
+        check(newIds.size == newStates.size)
+
         DiffUtil.calculateDiff(object : DiffUtil.Callback() {
 
             private fun paddingComparison(oldItemPosition: Int, newItemPosition: Int): Boolean? {

@@ -34,6 +34,7 @@ import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import org.junit.After
 import org.junit.Assert.*
+import org.junit.Before
 import org.junit.BeforeClass
 import org.junit.Test
 
@@ -64,6 +65,11 @@ class IrrelevantTest {
     }
 
     private val compositeDisposable = CompositeDisposable()
+
+    @Before
+    fun before() {
+        ProjectRootTaskIdTracker.instance = null
+    }
 
     @After
     fun after() {

@@ -162,13 +162,14 @@ object Irrelevant {
 
                 irrelevantNoScheduleOrParents += it.noScheduleOrParents - relevantNoScheduleOrParents
 
-                (it as? RootTask)?.let {
+                (it as? RootTask)?.let { rootTask ->
                     when (val taskParentEntry = it.getProjectIdTaskParentEntry()) {
                         is Schedule -> {
                             irrelevantSchedules -= taskParentEntry
 
-                            if (taskParentEntry is SingleSchedule)
-                                check(instanceRelevances.getValue(taskParentEntry.getInstance(it).instanceKey).relevant)
+                            (taskParentEntry as? SingleSchedule)?.getInstance(rootTask)
+                                ?.takeIf { it.exists() }
+                                ?.let { check(instanceRelevances.getValue(it.instanceKey).relevant) }
                         }
                         is NoScheduleOrParent -> check(taskParentEntry in relevantNoScheduleOrParents)
                         is NestedTaskHierarchy ->

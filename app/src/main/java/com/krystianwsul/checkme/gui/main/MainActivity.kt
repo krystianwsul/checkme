@@ -817,7 +817,7 @@ class MainActivity :
     override fun onResume() {
         super.onResume()
 
-        if (BuildConfig.DEBUG) {
+        if (BuildConfig.DEBUG && !Preferences.instanceWarningSnoozeSet) {
             DomainFactory.instanceRelay
                 .subscribeOnDomain(Priority.LOW)
                 .filterNotNull()

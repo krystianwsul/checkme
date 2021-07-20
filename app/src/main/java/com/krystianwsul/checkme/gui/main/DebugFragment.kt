@@ -54,6 +54,12 @@ class DebugFragment : AbstractFragment() {
             }
             .addTo(viewCreatedDisposable)
 
+        binding.debugInstanceWarningSnooze.apply {
+            isChecked = Preferences.instanceWarningSnoozeSet
+
+            setOnCheckedChangeListener { _, isChecked -> Preferences.instanceWarningSnoozeSet = isChecked }
+        }
+
         binding.debugTick
             .clicks()
             .switchMapCompletable { Ticker.tick("DebugFragment") }

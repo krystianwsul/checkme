@@ -21,6 +21,13 @@
             android:text="Debug mode"
             tools:ignore="HardcodedText" />
 
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/debugInstanceWarningSnooze"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Instance warning snooze"
+            tools:ignore="HardcodedText" />
+
         <Button
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

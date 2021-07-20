@@ -13,6 +13,8 @@ import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.treeadapter.FilterCriteria
+import com.soywiz.klock.DateTimeTz
+import com.soywiz.klock.days
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.schedulers.Schedulers
@@ -55,20 +57,20 @@ object Preferences {
     val tickLog = Logger(TICK_LOG)
 
     private fun <T> preferenceObservable(
-            initial: SharedPreferences.() -> T,
-            write: SharedPreferences.Editor.(T) -> Unit,
+        initial: SharedPreferences.() -> T,
+        write: SharedPreferences.Editor.(T) -> Unit,
     ) = observable(sharedPreferences.initial()) { _, _, newValue -> sharedPreferences.edit { write(newValue) } }
 
     var tab by preferenceObservable({ getInt(TAB_KEY, 0) }, { putInt(TAB_KEY, it) })
 
     private fun booleanObservable(key: String, defValue: Boolean) = preferenceObservable(
-            { getBoolean(key, defValue) },
-            { putBoolean(key, it) }
+        { getBoolean(key, defValue) },
+        { putBoolean(key, it) }
     )
 
     private fun intObservable(key: String, defValue: Int) = preferenceObservable(
-            { getInt(key, defValue) },
-            { putInt(key, it) }
+        { getInt(key, defValue) },
+        { putInt(key, it) }
     )
 
     var addDefaultReminder by booleanObservable(KEY_ADD_DEFAULT_REMINDER, true)
@@ -78,7 +80,7 @@ object Preferences {
     }
 
     var shortcuts: Map<TaskKey, LocalDateTime> by observable(
-            deserialize<HashMap<TaskKey, LocalDateTime>>(shortcutString) ?: mapOf()
+        deserialize<HashMap<TaskKey, LocalDateTime>>(shortcutString) ?: mapOf()
     ) { _, _, newValue -> shortcutString = serialize(HashMap(newValue)) }
 
     val temporaryNotificationLog = Logger(KEY_TEMPORARY_NOTIFICATION_LOG)
@@ -114,18 +116,18 @@ object Preferences {
     }
 
     var notificationLevel by observable(
-            sharedPreferences.getInt(KEY_NOTIFICATION_LEVEL, 1).let { NotificationLevel.values()[it] }
+        sharedPreferences.getInt(KEY_NOTIFICATION_LEVEL, 1).let { NotificationLevel.values()[it] }
     ) { _, _, newValue -> putNotificationLevel(newValue) }
 
     private val timeRangeProperty =
-            NonNullRelayProperty(TimeRange.values()[sharedPreferences.getInt(KEY_TIME_RANGE, 0)])
+        NonNullRelayProperty(TimeRange.values()[sharedPreferences.getInt(KEY_TIME_RANGE, 0)])
     var timeRange by timeRangeProperty
     val timeRangeObservable = timeRangeProperty.observable.distinctUntilChanged()!!
 
     init {
         timeRangeObservable.skip(0)
-                .subscribe { sharedPreferences.edit { putInt(KEY_TIME_RANGE, it.ordinal) } }
-                .ignore()
+            .subscribe { sharedPreferences.edit { putInt(KEY_TIME_RANGE, it.ordinal) } }
+            .ignore()
     }
 
     private var languageInt by intObservable(KEY_LANGUAGE, Language.DEFAULT.ordinal)
@@ -165,6 +167,16 @@ object Preferences {
             }
         }
 
+    var instanceWarningSnoozeSet: Boolean
+        get() = instanceWarningSnooze?.let {
+            val oneDayAgo = DateTimeTz.nowLocal() - 1.days
+
+            it.toDateTimeTz() > oneDayAgo
+        } == true
+        set(value) {
+            instanceWarningSnooze = if (value) ExactTimeStamp.Local.now else null
+        }
+
     init {
         showDeletedObservable.skip(1)
             .subscribe { sharedPreferences.edit { putBoolean(KEY_SHOW_DELETED, it) } }
@@ -175,29 +187,29 @@ object Preferences {
             .ignore()
 
         showProjectsObservable.skip(1)
-                .subscribe { sharedPreferences.edit { putBoolean(KEY_SHOW_PROJECTS, it) } }
-                .ignore()
+            .subscribe { sharedPreferences.edit { putBoolean(KEY_SHOW_PROJECTS, it) } }
+            .ignore()
     }
 
     fun getTooltipShown(type: TooltipManager.Type) =
-            sharedPreferences.getBoolean(KEY_TOOLTIP_SHOWN + type, false)
+        sharedPreferences.getBoolean(KEY_TOOLTIP_SHOWN + type, false)
 
     fun setTooltipShown(type: TooltipManager.Type, shown: Boolean = true) =
-            sharedPreferences.edit { putBoolean(KEY_TOOLTIP_SHOWN + type, shown) }
+        sharedPreferences.edit { putBoolean(KEY_TOOLTIP_SHOWN + type, shown) }
 
     private open class ReadOnlyStrPref(protected val key: String) : ReadOnlyProperty<Any, String> {
 
         final override fun getValue(
-                thisRef: Any,
-                property: KProperty<*>,
+            thisRef: Any,
+            property: KProperty<*>,
         ) = sharedPreferences.getString(key, "")!!
     }
 
     private class ReadWriteStrPref(key: String) : ReadOnlyStrPref(key), ReadWriteProperty<Any, String> {
 
         override fun setValue(thisRef: Any, property: KProperty<*>, value: String) = sharedPreferences.edit()
-                .putString(key, value)
-                .apply()
+            .putString(key, value)
+            .apply()
     }
 
     class Logger(key: String, private val length: Int = 100) {
@@ -210,8 +222,8 @@ object Preferences {
 
         private fun runOnIo(action: () -> Unit) {
             Single.fromCallable(action)
-                    .subscribeOn(Schedulers.io())
-                    .subscribe()
+                .subscribeOn(Schedulers.io())
+                .subscribe()
         }
 
         fun logLineDate(line: String) {
@@ -237,8 +249,8 @@ object Preferences {
             if (!this::lineList.isInitialized) lineList = logString.split('\n')
 
             lineList = lineList.take(length)
-                    .toMutableList()
-                    .apply { add(0, line) }
+                .toMutableList()
+                .apply { add(0, line) }
 
             logString = lineList.joinToString("\n")
         }

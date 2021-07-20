@@ -4,6 +4,7 @@ import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.firebase.json.schedule.*
 import com.krystianwsul.common.firebase.json.tasks.TaskJson
 import com.krystianwsul.common.firebase.models.ImageState
+import com.krystianwsul.common.firebase.models.TaskParentEntry
 import com.krystianwsul.common.firebase.models.cache.ClearableInvalidatableManager
 import com.krystianwsul.common.firebase.models.cache.InvalidatableCache
 import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
@@ -13,6 +14,7 @@ import com.krystianwsul.common.firebase.models.noscheduleorparent.NoScheduleOrPa
 import com.krystianwsul.common.firebase.models.noscheduleorparent.RootNoScheduleOrParent
 import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.schedule.*
+import com.krystianwsul.common.firebase.models.taskhierarchy.NestedTaskHierarchy
 import com.krystianwsul.common.firebase.models.taskhierarchy.ParentTaskDelegate
 import com.krystianwsul.common.firebase.models.taskhierarchy.ProjectTaskHierarchy
 import com.krystianwsul.common.firebase.records.task.RootTaskRecord
@@ -42,26 +44,29 @@ class RootTask private constructor(
         compareByDescending<Schedule> { it.startExactTimeStamp }.thenByDescending { it.id }
     ).first()
 
+    fun getProjectIdTaskParentEntry(): TaskParentEntry {
+        val interval = intervalInfo.intervals.last()
+
+        return when (val type = interval.type) {
+            is Type.Schedule -> type.getParentProjectSchedule()
+            is Type.NoSchedule -> type.noScheduleOrParent
+                ?.let { it as? RootNoScheduleOrParent }
+                ?: throw NoScheduleOrParentException()
+            is Type.Child -> type.parentTaskHierarchy
+        }
+    }
+
     val projectIdCache: InvalidatableCache<String> =
         invalidatableCache<String>(clearableInvalidatableManager) { invalidatableCache ->
-            val interval = intervalInfo.intervals.last()
-
             val intervalInfoRemovable = intervalInfoCache.invalidatableManager.addInvalidatable(invalidatableCache)
 
-            when (val type = interval.type) {
-                is Type.Schedule -> InvalidatableCache.ValueHolder(type.getParentProjectSchedule().projectId) {
-                    intervalInfoRemovable.remove()
-                }
-                is Type.NoSchedule -> {
-                    val projectId = type.noScheduleOrParent
-                        ?.let { it as? RootNoScheduleOrParent }
-                        ?.projectId
-                        ?: throw NoScheduleOrParentException()
-
-                    InvalidatableCache.ValueHolder(projectId) { intervalInfoRemovable.remove() }
-                }
-                is Type.Child -> {
-                    val parentTask = type.parentTaskHierarchy.parentTask as RootTask
+            when (val taskParentEntry = getProjectIdTaskParentEntry()) {
+                is Schedule ->
+                    InvalidatableCache.ValueHolder(taskParentEntry.projectId) { intervalInfoRemovable.remove() }
+                is RootNoScheduleOrParent ->
+                    InvalidatableCache.ValueHolder(taskParentEntry.projectId) { intervalInfoRemovable.remove() }
+                is NestedTaskHierarchy -> {
+                    val parentTask = taskParentEntry.parentTask as RootTask
                     val projectId = parentTask.projectId
 
                     val parentTaskRemovable = parentTask.projectIdCache
@@ -73,6 +78,7 @@ class RootTask private constructor(
                         parentTaskRemovable.remove()
                     }
                 }
+                else -> throw IllegalStateException()
             }
         }.apply {
             invalidatableManager.addInvalidatable { normalizedFieldsDelegate.invalidate() }

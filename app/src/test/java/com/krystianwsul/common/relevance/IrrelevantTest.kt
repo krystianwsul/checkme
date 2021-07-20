@@ -19,11 +19,9 @@ import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
 import com.krystianwsul.common.firebase.models.project.PrivateProject
 import com.krystianwsul.common.firebase.models.project.Project
-import com.krystianwsul.common.firebase.models.task.ProjectRootTaskIdTracker
-import com.krystianwsul.common.firebase.models.task.Task
-import com.krystianwsul.common.firebase.models.task.performIntervalUpdate
-import com.krystianwsul.common.firebase.models.task.performRootIntervalUpdate
+import com.krystianwsul.common.firebase.models.task.*
 import com.krystianwsul.common.firebase.records.project.PrivateProjectRecord
+import com.krystianwsul.common.firebase.records.task.RootTaskRecord
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
@@ -36,6 +34,7 @@ import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import org.junit.After
 import org.junit.Assert.*
+import org.junit.Before
 import org.junit.BeforeClass
 import org.junit.Test
 
@@ -66,6 +65,11 @@ class IrrelevantTest {
     }
 
     private val compositeDisposable = CompositeDisposable()
+
+    @Before
+    fun before() {
+        ProjectRootTaskIdTracker.instance = null
+    }
 
     @After
     fun after() {
@@ -602,4 +606,156 @@ class IrrelevantTest {
     }
 
     private fun newMockRootTaskProvider() = mockk<Project.RootTaskProvider>()
+
+    @Test
+    fun testRepeatingScheduleDelete() {
+        // 1. Create task with repeating schedule
+
+        val day1 = Date(2021, 7, 20) // tuesday
+        val day2 = Date(2021, 7, 21) // wednesday
+        val hour1 = HourMinute(1, 0).toHourMilli()
+        val hour2 = HourMinute(2, 0)
+        val hour3 = HourMinute(3, 0).toHourMilli()
+        val hour4 = HourMinute(4, 0).toHourMilli()
+
+        // day1, hour1
+        var now = ExactTimeStamp.Local(day1, hour1)
+
+        val weeklyScheduleWrapper = RootScheduleWrapper(
+            weeklyScheduleJson = RootWeeklyScheduleJson(
+                startTime = now.long,
+                dayOfWeek = DayOfWeek.TUESDAY.ordinal,
+                time = JsonTime.Normal(hour2).toJson(),
+                projectId = userKey.key,
+            )
+        )
+
+        val taskJson = RootTaskJson(
+            name = "task",
+            startTime = now.long,
+            schedules = mutableMapOf("weeklyScheduleKey" to weeklyScheduleWrapper),
+        )
+
+        val taskId = "taskKey"
+        val taskRecord = RootTaskRecord(taskId, taskJson, mockk(), mockk())
+
+        lateinit var task: RootTask
+        lateinit var project: PrivateProject
+
+        var taskDeleted = false
+
+        val existingInstanceChangeManager = RootModelChangeManager()
+
+        val taskParent = mockk<RootTask.Parent> {
+            every { rootModelChangeManager } returns existingInstanceChangeManager
+
+            every { getRootTasksForProject(any()) } answers {
+                if (taskDeleted)
+                    emptyList()
+                else
+                    listOf(task)
+            }
+
+            every { getProject(any()) } answers { project }
+
+            every { getTaskHierarchiesByParentTaskKey(any()) } returns setOf()
+
+            every { getAllExistingInstances() } answers {
+                if (taskDeleted)
+                    emptySequence()
+                else
+                    task.existingInstances.values.asSequence()
+            }
+
+            every { deleteRootTask(any()) } answers {
+                check(!taskDeleted)
+
+                taskDeleted = true
+            }
+
+            every { updateProjectRecord(any(), any()) } returns Unit
+        }
+
+        task = RootTask(taskRecord, taskParent, mockk())
+
+        val projectKey = ProjectKey.Private(userKey.key)
+        val projectJson = PrivateProjectJson(startTime = now.long)
+
+        val projectRecord = PrivateProjectRecord(databaseWrapper, projectKey, projectJson)
+        project = PrivateProject(projectRecord, mockk(), taskParent, existingInstanceChangeManager)
+
+        // 2. Mark today's instance done
+
+        assertTrue(task.intervalInfo.getCurrentScheduleIntervals(now).size == 1)
+
+        // day1, hour2
+        now = ExactTimeStamp.Local(day1, hour2)
+
+        val instance = task.getInstances(
+            null,
+            now.toOffset().plusOne(),
+            now,
+            onlyRoot = true,
+        ).single()
+
+        instance.setDone(shownFactory, true, now)
+        projectRecord.getValues(mutableMapOf())
+
+        // 3. Delete the task
+
+        // day1, hour3
+        now = ExactTimeStamp.Local(day1, hour3)
+
+        task.performIntervalUpdate { setEndData(Task.EndData(now, true)) }
+
+        fun setIrrelevant(now: ExactTimeStamp.Local) = Irrelevant.setIrrelevant(
+            {
+                if (taskDeleted)
+                    emptyMap()
+                else
+                    mapOf(taskRecord.taskKey to task)
+            },
+            mapOf(),
+            { mapOf(project.projectKey to project) },
+            taskParent,
+            now,
+        )
+
+        val result1 = setIrrelevant(now)
+
+        assertTrue(result1.irrelevantExistingInstances.isEmpty())
+        assertTrue(result1.irrelevantTasks.isEmpty())
+
+        // 4. Check everything works after 23 hours
+
+        now = ExactTimeStamp.Local(day2, hour1)
+
+        assertTrue(
+            task.getInstances(
+                null,
+                now.toOffset().plusOne(),
+                now,
+                onlyRoot = true,
+            )
+                .toList()
+                .isNotEmpty()
+        )
+
+        taskRecord.getValues(mutableMapOf()) // to clear update flags in records
+
+        setIrrelevant(now).let {
+            assertTrue(it.irrelevantExistingInstances.isEmpty())
+            assertTrue(it.irrelevantTasks.isEmpty())
+        }
+
+        assertEquals(projectKey, task.project.projectKey)
+
+        assertTrue(task.intervalInfo.scheduleIntervals.size == 1)
+
+        // 5. Check task removed 25 hours later
+
+        now = ExactTimeStamp.Local(day2, hour4)
+
+        assertTrue(setIrrelevant(now).irrelevantTasks.isNotEmpty())
+    }
 }

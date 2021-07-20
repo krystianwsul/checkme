@@ -642,24 +642,44 @@ class IrrelevantTest {
         lateinit var task: RootTask
         lateinit var project: PrivateProject
 
-        val taskParent = mockk<RootTask.Parent> {
-            every { rootModelChangeManager } returns mockk(relaxed = true)
+        var taskDeleted = false
 
-            every { getRootTasksForProject(any()) } answers { listOf(task) }
+        val existingInstanceChangeManager = RootModelChangeManager()
+
+        val taskParent = mockk<RootTask.Parent> {
+            every { rootModelChangeManager } returns existingInstanceChangeManager
+
+            every { getRootTasksForProject(any()) } answers {
+                if (taskDeleted)
+                    emptyList()
+                else
+                    listOf(task)
+            }
 
             every { getProject(any()) } answers { project }
 
             every { getTaskHierarchiesByParentTaskKey(any()) } returns setOf()
 
-            every { getAllExistingInstances() } answers { task.existingInstances.values.asSequence() }
+            every { getAllExistingInstances() } answers {
+                if (taskDeleted)
+                    emptySequence()
+                else
+                    task.existingInstances.values.asSequence()
+            }
+
+            every { deleteRootTask(any()) } answers {
+                check(!taskDeleted)
+
+                taskDeleted = true
+            }
+
+            every { updateProjectRecord(any(), any()) } returns Unit
         }
 
         task = RootTask(taskRecord, taskParent, mockk())
 
         val projectKey = ProjectKey.Private(userKey.key)
         val projectJson = PrivateProjectJson(startTime = now.long)
-
-        val existingInstanceChangeManager = RootModelChangeManager()
 
         val projectRecord = PrivateProjectRecord(databaseWrapper, projectKey, projectJson)
         project = PrivateProject(projectRecord, mockk(), taskParent, existingInstanceChangeManager)
@@ -689,10 +709,15 @@ class IrrelevantTest {
         task.performIntervalUpdate { setEndData(Task.EndData(now, true)) }
 
         fun setIrrelevant(now: ExactTimeStamp.Local) = Irrelevant.setIrrelevant(
-            { mapOf(taskRecord.taskKey to task) },
+            {
+                if (taskDeleted)
+                    emptyMap()
+                else
+                    mapOf(taskRecord.taskKey to task)
+            },
             mapOf(),
             { mapOf(project.projectKey to project) },
-            newMockRootTaskProvider(),
+            taskParent,
             now,
         )
 
@@ -715,6 +740,8 @@ class IrrelevantTest {
                 .toList()
                 .isNotEmpty()
         )
+
+        taskRecord.getValues(mutableMapOf()) // to clear update flags in records
 
         setIrrelevant(now).let {
             assertTrue(it.irrelevantExistingInstances.isEmpty())

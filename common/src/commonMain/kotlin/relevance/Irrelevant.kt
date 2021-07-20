@@ -161,6 +161,10 @@ object Irrelevant {
                     .map { it.noScheduleOrParent }
 
                 irrelevantNoScheduleOrParents += it.noScheduleOrParents - relevantNoScheduleOrParents
+
+                (it as? RootTask)?.let { it.getProjectIdTaskParentEntry() as? Schedule }?.let {
+                    irrelevantSchedules -= it
+                }
             }
 
             ProjectRootTaskIdTracker.checkTracking()

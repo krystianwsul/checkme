@@ -44,6 +44,7 @@ object Preferences {
     private const val KEY_LANGUAGE = "language"
     private const val KEY_VERSION_CODE = "versionCode"
     private const val KEY_SAVED_STATE_LOG = "savedStateLog"
+    private const val KEY_INSTANCE_WARNING_SNOOZE = "instanceWarningSnooze"
 
     private val sharedPreferences by lazy { MyApplication.sharedPreferences }
 
@@ -147,21 +148,31 @@ object Preferences {
     val showProjectsObservable = showProjectsProperty.observable.distinctUntilChanged()!!
 
     val filterParamsObservable = Observable.combineLatest(
-            showDeletedObservable,
-            showAssignedObservable,
-            showProjectsObservable,
+        showDeletedObservable,
+        showAssignedObservable,
+        showProjectsObservable,
     ) { showDeleted, showAssignedToOthers, showProjects ->
         FilterCriteria.Full.FilterParams(showDeleted, showAssignedToOthers, showProjects)
     }.distinctUntilChanged()!!
 
+    var instanceWarningSnooze: ExactTimeStamp.Local?
+        get() = sharedPreferences.getLong(KEY_INSTANCE_WARNING_SNOOZE, -1)
+            .takeIf { it != -1L }
+            ?.let { ExactTimeStamp.Local(it) }
+        set(value) {
+            sharedPreferences.edit {
+                putLong(KEY_INSTANCE_WARNING_SNOOZE, value?.long ?: -1)
+            }
+        }
+
     init {
         showDeletedObservable.skip(1)
-                .subscribe { sharedPreferences.edit { putBoolean(KEY_SHOW_DELETED, it) } }
-                .ignore()
+            .subscribe { sharedPreferences.edit { putBoolean(KEY_SHOW_DELETED, it) } }
+            .ignore()
 
         showAssignedObservable.skip(1)
-                .subscribe { sharedPreferences.edit { putBoolean(KEY_SHOW_ASSIGNED_TO, it) } }
-                .ignore()
+            .subscribe { sharedPreferences.edit { putBoolean(KEY_SHOW_ASSIGNED_TO, it) } }
+            .ignore()
 
         showProjectsObservable.skip(1)
                 .subscribe { sharedPreferences.edit { putBoolean(KEY_SHOW_PROJECTS, it) } }

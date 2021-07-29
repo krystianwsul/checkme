@@ -426,6 +426,7 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
         val imageState: ImageState?,
         val assignedTo: Set<UserKey>,
         val projectKey: ProjectKey<*>,
+        val isRootTask: Boolean,
     )
 
     data class ParentTreeData(

@@ -122,6 +122,7 @@ private fun DomainFactory.getCreateTaskDataSlow(
                 .map { it.key }
                 .toSet(),
             task.project.projectKey,
+            task is RootTask,
         )
     }
 

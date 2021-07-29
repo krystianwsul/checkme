@@ -63,8 +63,8 @@ sealed class EditParameters : Parcelable {
                         check(intent.hasExtra(EditActivity.KEY_PARENT_PROJECT_TYPE))
 
                         val projectKey = ProjectKey.Type
-                                .values()[intent.getIntExtra(EditActivity.KEY_PARENT_PROJECT_TYPE, -1)]
-                                .newKey(intent.getStringExtra(EditActivity.KEY_PARENT_PROJECT_KEY)!!)
+                            .values()[intent.getIntExtra(EditActivity.KEY_PARENT_PROJECT_TYPE, -1)]
+                            .newKey(intent.getStringExtra(EditActivity.KEY_PARENT_PROJECT_KEY)!!)
 
                         TaskKey.Project(projectKey, taskId)
                     } else {
@@ -83,20 +83,20 @@ sealed class EditParameters : Parcelable {
     abstract val currentParentSource: EditViewModel.CurrentParentSource
 
     protected fun getInitialEditImageState(savedEditImageState: EditImageState?) =
-            savedEditImageState ?: EditImageState.None
+        savedEditImageState ?: EditImageState.None
 
     open fun getInitialEditImageStateSingle(
-            savedEditImageState: EditImageState?,
-            taskDataSingle: Single<NullableWrapper<EditViewModel.TaskData>>,
-            editActivity: EditActivity,
+        savedEditImageState: EditImageState?,
+        taskDataSingle: Single<NullableWrapper<EditViewModel.TaskData>>,
+        editActivity: EditActivity,
     ) = Single.just(getInitialEditImageState(savedEditImageState))!!
 
     @Parcelize
     class Create(
-            val hint: EditActivity.Hint? = null,
-            val parentScheduleState: ParentScheduleState? = null,
-            val nameHint: String? = null,
-            val showFirstSchedule: Boolean = true,
+        val hint: EditActivity.Hint? = null,
+        val parentScheduleState: ParentScheduleState? = null,
+        val nameHint: String? = null,
+        val showFirstSchedule: Boolean = true,
     ) : EditParameters() {
 
         override val currentParentSource get() = hint?.toCurrentParent() ?: EditViewModel.CurrentParentSource.None
@@ -107,7 +107,10 @@ sealed class EditParameters : Parcelable {
 
         override val startParameters get() = EditViewModel.StartParameters.Join(joinables)
 
-        override val currentParentSource get() = hint?.toCurrentParent() ?: EditViewModel.CurrentParentSource.None
+        override val currentParentSource
+            get() = hint?.toCurrentParent()
+                .takeIf { it !is EditViewModel.CurrentParentSource.None }
+                ?: EditViewModel.CurrentParentSource.FromTasks(joinables.map { it.taskKey }.toSet())
 
         init {
             check(joinables.size > 1)
@@ -151,18 +154,18 @@ sealed class EditParameters : Parcelable {
         override val currentParentSource get() = EditViewModel.CurrentParentSource.FromTask(taskKey)
 
         override fun getInitialEditImageStateSingle(
-                savedEditImageState: EditImageState?,
-                taskDataSingle: Single<NullableWrapper<EditViewModel.TaskData>>,
-                editActivity: EditActivity,
+            savedEditImageState: EditImageState?,
+            taskDataSingle: Single<NullableWrapper<EditViewModel.TaskData>>,
+            editActivity: EditActivity,
         ): Single<EditImageState> {
             return if (savedEditImageState?.dontOverwrite == true) {
                 Single.just(savedEditImageState)
             } else {
                 taskDataSingle.map {
                     it.value!!
-                            .imageState
-                            ?.let(EditImageState::Existing)
-                            ?: getInitialEditImageState(savedEditImageState)
+                        .imageState
+                        ?.let(EditImageState::Existing)
+                        ?: getInitialEditImageState(savedEditImageState)
                 }
             }
         }
@@ -177,9 +180,9 @@ sealed class EditParameters : Parcelable {
 
     @Parcelize
     class Share private constructor(
-            val nameHint: String? = null,
-            val parentTaskKeyHint: TaskKey? = null,
-            val uri: Uri? = null,
+        val nameHint: String? = null,
+        val parentTaskKeyHint: TaskKey? = null,
+        val uri: Uri? = null,
     ) : EditParameters() {
 
         companion object {
@@ -195,9 +198,9 @@ sealed class EditParameters : Parcelable {
             } ?: EditViewModel.CurrentParentSource.None
 
         override fun getInitialEditImageStateSingle(
-                savedEditImageState: EditImageState?,
-                taskDataSingle: Single<NullableWrapper<EditViewModel.TaskData>>,
-                editActivity: EditActivity,
+            savedEditImageState: EditImageState?,
+            taskDataSingle: Single<NullableWrapper<EditViewModel.TaskData>>,
+            editActivity: EditActivity,
         ): Single<EditImageState> {
             return when {
                 savedEditImageState?.dontOverwrite == true -> Single.just(savedEditImageState)
@@ -217,27 +220,27 @@ sealed class EditParameters : Parcelable {
         private fun copyFile(editActivity: EditActivity): Single<EditImageState> {
             return Single.fromCallable<EditImageState> {
                 MyApplication.instance
-                        .getRxPaparazzoDir()
-                        .mkdirs()
+                    .getRxPaparazzoDir()
+                    .mkdirs()
 
                 val outputFile = File.createTempFile(
-                        "copiedImage",
-                        null,
-                        MyApplication.instance.getRxPaparazzoDir(),
+                    "copiedImage",
+                    null,
+                    MyApplication.instance.getRxPaparazzoDir(),
                 )
 
                 editActivity.contentResolver
-                        .openInputStream(uri!!)
-                        .use { inputStream ->
-                            FileOutputStream(outputFile).use { outputStream ->
-                                IOUtils.copy(inputStream, outputStream)
-                            }
+                    .openInputStream(uri!!)
+                    .use { inputStream ->
+                        FileOutputStream(outputFile).use { outputStream ->
+                            IOUtils.copy(inputStream, outputStream)
                         }
+                    }
 
                 EditImageState.Selected(outputFile)
             }
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
         }
     }
 

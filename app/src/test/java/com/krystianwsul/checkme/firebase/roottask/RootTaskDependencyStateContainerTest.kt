@@ -31,6 +31,9 @@ class RootTaskDependencyStateContainerTest {
         assertTrue(container.stateHoldersByTaskKey.isEmpty())
     }
 
+    private fun assertTrue(pair: Pair<Boolean, Set<TaskKey.Root>>) = assertTrue(pair.first)
+    private fun assertFalse(pair: Pair<Boolean, Set<TaskKey.Root>>) = assertFalse(pair.first)
+
     @Test
     fun testLoadNoChildren() {
         val taskKey = TaskKey.Root("taskKey")

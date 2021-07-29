@@ -138,7 +138,7 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
 
         binding.showTasksToolbarCollapseInclude
             .collapseAppBarLayout
-            .setText(data.title, null, null, true)
+            .setText(data.title, data.subtitle, null, true)
 
         updateTopMenu()
         updateBottomMenu()

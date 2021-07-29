@@ -124,7 +124,7 @@ fun DomainUpdater.setInstancesAddHourActivity(
     val remoteProjects = instances.map { it.task.project }.toSet()
 
     DomainUpdater.Result(
-        DomainFactory.HourUndoData(instanceDateTimes),
+        DomainFactory.HourUndoData(instanceDateTimes, TimeStamp(date, hourMinute)),
         true,
         notificationType,
         DomainFactory.CloudParams(remoteProjects),

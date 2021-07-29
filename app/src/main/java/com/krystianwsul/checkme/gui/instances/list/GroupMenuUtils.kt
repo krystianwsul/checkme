@@ -61,8 +61,16 @@ object GroupMenuUtils {
     }
 
     @CheckResult
-    fun onHour(selectedDatas: SelectedDatas, dataId: DataId, listener: SnackbarListener): Disposable {
-        check(showHour(selectedDatas))
+    fun onHour(
+        selectedDatas: SelectedDatas,
+        dataId: DataId,
+        listener: SnackbarListener,
+        beforeChangeHour: (() -> Unit)? = null,
+        afterAddHour: ((newTimeStamp: TimeStamp) -> Unit)? = null,
+        afterUndo: (() -> Unit)? = null,
+    ): Disposable {
+        beforeChangeHour?.invoke()
+
         val instanceKeys = selectedDatas.map { (it as GroupListDataWrapper.InstanceData).instanceKey }
 
         return AndroidDomainUpdater.setInstancesAddHourActivity(
@@ -70,13 +78,13 @@ object GroupMenuUtils {
             instanceKeys,
         )
             .observeOn(AndroidSchedulers.mainThread())
+            .doOnSuccess { afterAddHour?.invoke(it.newTimeStamp) }
             .flatMapMaybe { listener.showSnackbarHourMaybe(it.instanceDateTimes.size).map { _ -> it } }
+            .doOnSuccess { beforeChangeHour?.invoke() }
             .flatMapCompletable {
-                AndroidDomainUpdater.undoInstancesAddHour(
-                    DomainListenerManager.NotificationType.First(dataId),
-                    it,
-                )
+                AndroidDomainUpdater.undoInstancesAddHour(DomainListenerManager.NotificationType.First(dataId), it)
             }
+            .doOnComplete { afterUndo?.invoke() }
             .subscribe()
     }
 

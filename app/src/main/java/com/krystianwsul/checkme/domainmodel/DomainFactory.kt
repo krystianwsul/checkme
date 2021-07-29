@@ -598,7 +598,7 @@ class DomainFactory(
     }
 
     // this shouldn't use DateTime, since that leaks Time.Custom which is a model object
-    class HourUndoData(val instanceDateTimes: Map<InstanceKey, DateTime>)
+    class HourUndoData(val instanceDateTimes: Map<InstanceKey, DateTime>, val newTimeStamp: TimeStamp)
 
     class ReadTimes(start: ExactTimeStamp.Local, read: ExactTimeStamp.Local, stop: ExactTimeStamp.Local) {
 

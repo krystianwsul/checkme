@@ -132,8 +132,24 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
 
                     when (itemId) {
                         R.id.actionShowGroupNotify -> GroupMenuUtils.onNotify(instanceDatas, dataId).addTo(createDisposable)
-                        R.id.actionShowGroupHour ->
-                            GroupMenuUtils.onHour(instanceDatas, dataId, listener).addTo(createDisposable)
+                        R.id.actionShowGroupHour -> {
+                            val oldParameters = parameters as Parameters.Project
+
+                            fun changeParameters(newParameters: Parameters.Project) {
+                                parameters = newParameters
+
+                                showGroupViewModel.start(parameters)
+                            }
+
+                            GroupMenuUtils.onHour(
+                                instanceDatas,
+                                dataId,
+                                listener,
+                                { showGroupViewModel.stop() },
+                                { changeParameters(oldParameters.copy(timeStamp = it)) },
+                                { changeParameters(oldParameters) },
+                            ).addTo(createDisposable)
+                        }
                         R.id.actionShowGroupEditInstance -> GroupMenuUtils.onEdit(instanceDatas, editInstancesHostDelegate)
                         R.id.actionShowGroupCheck ->
                             GroupMenuUtils.onCheck(instanceDatas, dataId, listener).addTo(createDisposable)

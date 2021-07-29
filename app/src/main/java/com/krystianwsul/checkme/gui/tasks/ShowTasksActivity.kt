@@ -317,7 +317,7 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
         ): TaskListFragment.Parameters
 
         @Parcelize
-        data class Unscheduled(val projectKey: ProjectKey.Shared?) : Parameters() {
+        data class Unscheduled(val projectKey: ProjectKey<*>?) : Parameters() {
 
             override val showProjects get() = projectKey == null
 

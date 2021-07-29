@@ -126,6 +126,7 @@
     <string name="noNotifications">Don\'t show</string>
     <string name="notifications">Notifications</string>
     <string name="addTaskList">Add to list</string>
+    <string name="addToProject">Add to project</string>
     <string name="subtaskDialogMessage">Add a new task at this time?</string>
     <string name="assignTask">Assign task</string>
     <string name="assignedToAll">Assigned to all members</string>

@@ -9,24 +9,26 @@ import com.krystianwsul.checkme.gui.instances.list.GroupListFragment
 import com.krystianwsul.checkme.gui.utils.BottomFabMenuDelegate
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.TimePair
+import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
 class SubtaskMenuDelegate(
-    val taskKey: TaskKey,
-    val instanceDate: Date,
-    val createTaskTimePair: TimePair,
+    val taskKey: TaskKey?,
+    private val instanceDate: Date,
+    private val createTaskTimePair: TimePair,
+    private val projectKey: ProjectKey.Shared?,
 ) : BottomFabMenuDelegate.MenuDelegate {
 
-    override fun getItems() = listOf(
-        AddTaskList(taskKey),
-        AddTaskThisTime(taskKey, instanceDate, createTaskTimePair),
+    override fun getItems() = listOfNotNull(
+        taskKey?.let(::AddTaskList),
+        projectKey?.let { AddToProject(instanceDate, createTaskTimePair, projectKey) },
+        AddTaskThisTime(instanceDate, createTaskTimePair),
     )
 }
 
 private class AddTaskThisTime(
-    val taskKey: TaskKey,
     val instanceDate: Date,
     val createTaskTimePair: TimePair,
 ) : BottomFabMenuDelegate.MenuDelegate.Item {
@@ -43,6 +45,19 @@ private class AddTaskList(val taskKey: TaskKey) : BottomFabMenuDelegate.MenuDele
     override fun getText(context: Context) = context.getString(R.string.addTaskList)
 
     override fun onClick(activity: Activity) = activity.launchEditActivity(EditActivity.Hint.Task(taskKey))
+}
+
+private class AddToProject(
+    val instanceDate: Date,
+    val createTaskTimePair: TimePair,
+    val projectKey: ProjectKey.Shared,
+) : BottomFabMenuDelegate.MenuDelegate.Item {
+
+    override fun getText(context: Context) = context.getString(R.string.addToProject)
+
+    override fun onClick(activity: Activity) {
+        activity.launchEditActivity(GroupListFragment.getHint(listOf(Triple(instanceDate, createTaskTimePair, projectKey))))
+    }
 }
 
 private fun Activity.launchEditActivity(hint: EditActivity.Hint) =

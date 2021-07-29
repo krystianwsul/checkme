@@ -32,14 +32,18 @@
         app:cardElevation="8dp"
         android:visibility="invisible">
 
-        <LinearLayout
+        <com.google.android.flexbox.FlexboxLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            app:flexDirection="column"
+            app:flexWrap="nowrap"
+            app:justifyContent="flex_start"
+            app:alignItems="stretch">
 
             <LinearLayout
                 android:id="@+id/bottomFabMenuList"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="vertical" />
 
@@ -54,9 +58,10 @@
                 android:backgroundTint="?attr/colorSecondary"
                 app:cornerRadius="0dp"
                 android:gravity="start|center_vertical"
-                android:textAllCaps="false" />
+                android:textAllCaps="false"
+                android:singleLine="true" />
 
-        </LinearLayout>
+        </com.google.android.flexbox.FlexboxLayout>
 
     </com.google.android.material.card.MaterialCardView>
 

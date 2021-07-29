@@ -666,12 +666,21 @@ class GroupListFragment @JvmOverloads constructor(
                     val canAddToTime = parameters.fabActionMode.showTime
                             && instanceData?.run { isRootInstance && instanceTimeStamp > TimeStamp.now } == true
 
+                    val canAddToProject = canAddToTime && instanceData?.projectKey != null
+
+                    val multipleValid = listOf(canAddToTime, canAddSubtask, canAddToProject).filter { it }.size > 1
+
                     when {
-                        canAddToTime && canAddSubtask -> FabState.Visible {
+                        multipleValid -> FabState.Visible {
                             selectionCallback.actionMode!!.finish()
 
                             listener.showFabMenu(instanceData!!.run {
-                                SubtaskMenuDelegate(taskKey, instanceDateTime.date, createTaskTimePair)
+                                SubtaskMenuDelegate(
+                                    taskKey.takeIf { canAddSubtask },
+                                    instanceDateTime.date,
+                                    createTaskTimePair,
+                                    instanceData.projectKey,
+                                )
                             })
                         }
                         canAddSubtask -> getStartEditActivityFabState(

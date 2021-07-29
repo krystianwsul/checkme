@@ -46,6 +46,7 @@ fun DomainFactory.getShowTasksData(parameters: ShowTasksActivity.Parameters): Sh
     val entryDatas: List<TaskListFragment.EntryData>
     val title: String
     val isSharedProject: Boolean?
+    val subtitle: String?
 
     when (parameters) {
         is ShowTasksActivity.Parameters.Unscheduled -> {
@@ -66,6 +67,10 @@ fun DomainFactory.getShowTasksData(parameters: ShowTasksActivity.Parameters): Sh
 
             title = MyApplication.context.getString(R.string.notes)
 
+            subtitle = parameters.projectKey?.let {
+                projectsFactory.getProjectForce(it).getDisplayName()
+            }
+
             isSharedProject = null
         }
         is ShowTasksActivity.Parameters.Copy -> {
@@ -75,6 +80,7 @@ fun DomainFactory.getShowTasksData(parameters: ShowTasksActivity.Parameters): Sh
                 .sorted()
 
             title = MyApplication.context.getString(R.string.copyingTasksTitle)
+            subtitle = null
 
             isSharedProject = null
         }
@@ -89,6 +95,7 @@ fun DomainFactory.getShowTasksData(parameters: ShowTasksActivity.Parameters): Sh
                 .toList()
 
             title = project.getDisplayName()
+            subtitle = null
 
             isSharedProject = project is SharedProject
         }
@@ -97,6 +104,7 @@ fun DomainFactory.getShowTasksData(parameters: ShowTasksActivity.Parameters): Sh
     return ShowTasksViewModel.Data(
         TaskListFragment.TaskData(entryDatas, null, !parameters.copying, null),
         title,
+        subtitle,
         isSharedProject,
     )
 }

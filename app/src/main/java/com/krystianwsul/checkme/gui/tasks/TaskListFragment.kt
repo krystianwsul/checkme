@@ -713,7 +713,15 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         }
 
         override fun onClick(holder: AbstractHolder) {
-            startActivity(ShowTasksActivity.newIntent(ShowTasksActivity.Parameters.Project(projectData.projectKey)))
+            startActivity(
+                ShowTasksActivity.newIntent(
+                    if (parameters is Parameters.Notes) {
+                        ShowTasksActivity.Parameters.Unscheduled(projectData.projectKey)
+                    } else {
+                        ShowTasksActivity.Parameters.Project(projectData.projectKey)
+                    }
+                )
+            )
         }
     }
 

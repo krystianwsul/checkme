@@ -5,7 +5,7 @@
       <configuration>
         <option name="GRADLE_PROJECT_PATH" value=":common2" />
         <option name="LAST_SUCCESSFUL_SYNC_AGP_VERSION" value="4.2.2" />
-        <option name="LAST_KNOWN_AGP_VERSION" value="4.2.2" />
+        <option name="LAST_KNOWN_AGP_VERSION" value="7.0.0" />
       </configuration>
     </facet>
     <facet type="android" name="Android">
@@ -37,7 +37,7 @@
         </compilerSettings>
         <compilerArguments>
           <option name="destination" value="$MODULE_DIR$/../../../common/build/tmp/kotlin-classes/debug" />
-          <option name="classpath" value="$MODULE_DIR$/../../../common/build/intermediates/compile_r_class_jar/debug/R.jar;C:/Users/kryst/.gradle/caches/transforms-2/files-2.1/6021469910ef85f54f143db3c840b291/jetified-kotlin-parcelize-runtime-1.5.21.jar;C:/Users/kryst/.gradle/caches/transforms-2/files-2.1/c6fa9cce316749bc10f3561df29b3b5f/jetified-kotlinx-serialization-json-jvm-1.2.2.jar;C:/Users/kryst/.gradle/caches/transforms-2/files-2.1/7085a702921a97100e04fc215b483caa/jetified-kotlinx-serialization-core-jvm-1.2.2.jar;C:/Users/kryst/.gradle/caches/transforms-2/files-2.1/b9b226e112891c2cf44d092de36d97a3/jetified-kotlin-android-extensions-runtime-1.5.21.jar;C:/Users/kryst/.gradle/caches/transforms-2/files-2.1/b873d6c00fa77c41ed8f67816fdaf65f/jetified-klock-debug-api.jar;C:/Users/kryst/.gradle/caches/transforms-2/files-2.1/8d4ae03996ff24fd1a7bf4c018e253ee/jetified-reaktive-debug-api.jar;C:/Users/kryst/.gradle/caches/transforms-2/files-2.1/f1863a18285ae4d2e24da9802ab35e41/jetified-kotlin-stdlib-jdk8-1.5.20.jar;C:/Users/kryst/.gradle/caches/transforms-2/files-2.1/743e7a914659a65d5297797f8b6def57/jetified-kotlin-stdlib-jdk7-1.5.20.jar;C:/Users/kryst/.gradle/caches/transforms-2/files-2.1/3c782a876fc72a351eb17b3a56dd86f8/jetified-kotlin-stdlib-1.5.21.jar;C:/Users/kryst/.gradle/caches/transforms-2/files-2.1/2fb4d0f17150a4dbc8bd010661bae245/jetified-android.joda-2.10.9.1-api.jar;C:/Users/kryst/.gradle/caches/transforms-2/files-2.1/46f07d47f765d8868e52485fe068d111/jetified-kotlin-stdlib-common-1.5.21.jar;C:/Users/kryst/.gradle/caches/transforms-2/files-2.1/db030e2cda21d1dc2fff9c27bf00b552/jetified-annotations-13.0.jar;C:/Users/kryst/.gradle/caches/transforms-2/files-2.1/4b159fe19e2e09d154ea02ad98883bda/jetified-joda-time-2.10.9-no-tzdb.jar;C:/Users/kryst/.gradle/caches/transforms-2/files-2.1/173dcef78fd7a5acf1e9d04d99e0cc72/jetified-startup-runtime-1.0.0-api.jar;C:/Users/kryst/.gradle/caches/modules-2/files-2.1/androidx.annotation/annotation/1.1.0/e3a6fb2f40e3a3842e6b7472628ba4ce416ea4c8/annotation-1.1.0.jar;C:/Users/kryst/AppData/Local/Android/Sdk/platforms/android-30/android.jar;C:/Users/kryst/AppData/Local/Android/Sdk/build-tools/30.0.2/core-lambda-stubs.jar" />
+          <option name="classpath" value="$MODULE_DIR$/../../../common/build/intermediates/compile_r_class_jar/debug/R.jar;C:/Users/kryst/.gradle/caches/transforms-3/cdd03f16a7c99d4f188869c543e9e4c8/transformed/jetified-kotlin-parcelize-runtime-1.5.21.jar;C:/Users/kryst/.gradle/caches/transforms-3/732cd9fbc21857c30522326beb62bd4c/transformed/jetified-kotlinx-serialization-json-jvm-1.2.2.jar;C:/Users/kryst/.gradle/caches/transforms-3/248bc1899db88e3723d80b34cffcd810/transformed/jetified-kotlinx-serialization-core-jvm-1.2.2.jar;C:/Users/kryst/.gradle/caches/transforms-3/cbfcecf2675a78e473f993a013c6f289/transformed/jetified-kotlin-android-extensions-runtime-1.5.21.jar;C:/Users/kryst/.gradle/caches/transforms-3/be8bc69ce07a92b2c96979244c23a05b/transformed/jetified-klock-debug-api.jar;C:/Users/kryst/.gradle/caches/transforms-3/72c1eb760da92a7acc259aed9f00f255/transformed/jetified-reaktive-debug-api.jar;C:/Users/kryst/.gradle/caches/transforms-3/c04a6e2207364a44b4ce62fe1bcc9b4f/transformed/jetified-kotlin-stdlib-jdk8-1.5.20.jar;C:/Users/kryst/.gradle/caches/transforms-3/7ac7caadb25500f99437ab407b1fe596/transformed/jetified-kotlin-stdlib-jdk7-1.5.20.jar;C:/Users/kryst/.gradle/caches/transforms-3/e4a25607bbe624ee442cea652e3db62f/transformed/jetified-kotlin-stdlib-1.5.21.jar;C:/Users/kryst/.gradle/caches/transforms-3/d6d07b8b86513601cdc90b06ddb757d5/transformed/jetified-android.joda-2.10.9.1-api.jar;C:/Users/kryst/.gradle/caches/transforms-3/0919faa7b1b49198c3ee942dae0bf346/transformed/jetified-kotlin-stdlib-common-1.5.21.jar;C:/Users/kryst/.gradle/caches/transforms-3/20fdd8748594146543ac5e5bb9bebec5/transformed/jetified-annotations-13.0.jar;C:/Users/kryst/.gradle/caches/transforms-3/67031807f142577d5011cdd511d95c0a/transformed/jetified-joda-time-2.10.9-no-tzdb.jar;C:/Users/kryst/.gradle/caches/transforms-3/1b2c9c0b3469eae88d6d80be0daf3b4d/transformed/jetified-startup-runtime-1.0.0-api.jar;C:/Users/kryst/.gradle/caches/modules-2/files-2.1/androidx.annotation/annotation/1.1.0/e3a6fb2f40e3a3842e6b7472628ba4ce416ea4c8/annotation-1.1.0.jar;C:/Users/kryst/AppData/Local/Android/Sdk/platforms/android-30/android.jar;C:/Users/kryst/AppData/Local/Android/Sdk/build-tools/30.0.2/core-lambda-stubs.jar" />
           <option name="noStdlib" value="true" />
           <option name="noReflect" value="true" />
           <option name="moduleName" value="common2_debug" />
@@ -76,8 +76,6 @@
     </facet>
   </component>
   <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_8">
-    <output url="file://$MODULE_DIR$/../../../common/build/intermediates/javac/debug/classes" />
-    <output-test url="file://$MODULE_DIR$/../../../common/build/intermediates/javac/debugUnitTest/classes" />
     <exclude-output />
     <content url="file://$MODULE_DIR$/../../../common">
       <sourceFolder url="file://$MODULE_DIR$/../../../common/src/main/java" isTestSource="false" />
@@ -157,7 +155,9 @@
     <orderEntry type="library" name="Gradle: com.badoo.reaktive:reaktive-android-debug:1.2.0@aar" level="project" />
     <orderEntry type="library" name="Gradle: net.danlew:android.joda:2.10.9.1@aar" level="project" />
     <orderEntry type="library" name="Gradle: androidx.startup:startup-runtime:1.0.0@aar" level="project" />
-    <orderEntry type="module" module-name="Check.me.common2.commonTest" scope="TEST" production-on-test="" />
+    <orderEntry type="module" module-name="Check.me.common2.androidAndroidTestProto" scope="TEST" />
+    <orderEntry type="module" module-name="Check.me.common2.androidAndroidTestRelease" scope="TEST" />
     <orderEntry type="module" module-name="Check.me.common2.commonMain" />
+    <orderEntry type="module" module-name="Check.me.common2.commonTest" scope="TEST" production-on-test="" />
   </component>
 </module>

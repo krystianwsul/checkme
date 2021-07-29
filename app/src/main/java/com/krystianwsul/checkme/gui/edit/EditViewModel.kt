@@ -82,8 +82,7 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
 
     val hasDelegate get() = this::delegate.isInitialized
 
-    private var currentParentSource by
-    SavedStateProperty<CurrentParentSource>(savedStateHandle, "currentParentSource")
+    private var currentParentSource by SavedStateProperty<CurrentParentSource>(savedStateHandle, "currentParentSource")
 
     init {
         savedStateHandle.setSavedStateProvider(KEY_EDIT_IMAGE_STATE) {
@@ -529,6 +528,9 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
 
         @Parcelize
         data class FromTask(val taskKey: TaskKey) : CurrentParentSource()
+
+        @Parcelize
+        data class FromTasks(val taskKeys: kotlin.collections.Set<TaskKey>) : CurrentParentSource()
     }
 
     @Parcelize

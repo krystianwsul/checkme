@@ -145,6 +145,14 @@ private fun DomainFactory.getCreateTaskDataSlow(
                 task.getParentTask(now)?.let { EditViewModel.ParentKey.Task(it.taskKey) }
             }
         }
+        is EditViewModel.CurrentParentSource.FromTasks -> {
+            currentParentSource.taskKeys
+                .map { getTaskForce(it).project }
+                .distinct()
+                .singleOrNull()
+                ?.let { it as? SharedProject }
+                ?.let { EditViewModel.ParentKey.Project(it.projectKey) }
+        }
     }
 
     val currentParent: ParentScheduleManager.Parent? = when (currentParentKey) {

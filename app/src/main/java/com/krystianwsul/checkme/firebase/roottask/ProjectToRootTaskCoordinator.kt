@@ -18,7 +18,7 @@ interface ProjectToRootTaskCoordinator {
 
             return Observable.just(Unit)
                 .concatWith(rootTasksFactory.unfilteredChanges)
-                .filter { projectTracker.dependentTaskKeys.all(rootTaskDependencyStateContainer::isComplete) }
+                .filter { projectTracker.dependentTaskKeys.all { rootTaskDependencyStateContainer.isComplete(it).first } }
                 .firstOrError()
                 .ignoreElement()
         }

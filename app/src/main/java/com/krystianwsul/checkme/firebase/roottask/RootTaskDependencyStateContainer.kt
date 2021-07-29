@@ -10,7 +10,7 @@ interface RootTaskDependencyStateContainer {
 
     fun onRemoved(taskKey: TaskKey.Root)
 
-    fun isComplete(taskKey: TaskKey.Root): Boolean
+    fun isComplete(taskKey: TaskKey.Root): Pair<Boolean, Set<TaskKey.Root>>
 
     class Impl : RootTaskDependencyStateContainer {
 
@@ -25,7 +25,7 @@ interface RootTaskDependencyStateContainer {
 
         override fun onRemoved(taskKey: TaskKey.Root) = getStateHolder(taskKey).onRemoved()
 
-        override fun isComplete(taskKey: TaskKey.Root): Boolean {
+        override fun isComplete(taskKey: TaskKey.Root): Pair<Boolean, Set<TaskKey.Root>> {
             val checkedKeys = mutableSetOf<TaskKey.Root>()
             val recordStatesToUpdate = mutableSetOf<RecordState>()
 
@@ -37,7 +37,7 @@ interface RootTaskDependencyStateContainer {
                 it.isComplete = result
             }
 
-            return result
+            return result to checkedKeys
         }
 
         private fun tryAccumulateKeys(
@@ -69,7 +69,7 @@ interface RootTaskDependencyStateContainer {
 
             private val upStates = mutableMapOf<TaskKey.Root, RecordState>()
 
-            val isComplete get() = loadState.isComplete
+            private val isComplete get() = loadState.isComplete
 
             fun onLoaded(rootTaskRecord: RootTaskRecord) {
                 val previousIsComplete = isComplete

@@ -20,8 +20,6 @@ interface ModelNode<T : TreeHolder> : Comparable<ModelNode<T>>, Matchable {
 
     val parentNode: ModelNode<T>?
 
-    val expandOnMatch get() = true
-
     fun onBindViewHolder(viewHolder: RecyclerView.ViewHolder, startingDrag: Boolean = false)
 
     fun forceSelected(viewHolder: RecyclerView.ViewHolder): Unit =

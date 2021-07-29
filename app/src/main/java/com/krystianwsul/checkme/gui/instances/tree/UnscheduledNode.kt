@@ -54,8 +54,6 @@ class UnscheduledNode(
         )
     }
 
-    override val expandOnMatch = false
-
     fun initialize(
         expansionState: TreeNode.ExpansionState?,
         nodeContainer: NodeContainer<AbstractHolder>,

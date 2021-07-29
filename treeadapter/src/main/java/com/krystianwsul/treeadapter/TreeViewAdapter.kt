@@ -74,9 +74,9 @@ class TreeViewAdapter<T : TreeHolder>(
 
                         locker = AdapterLocker()
 
-                        filterCriteria.search?.let {
-                            if (it.expandMatches) treeNodeCollection.expandMatching(it, false)
-                        }
+                        filterCriteria.search
+                            ?.takeIf { it.expandMatches }
+                            ?.let(treeNodeCollection::expandMatching)
                     }
         } else {
             check(updating)
@@ -128,11 +128,7 @@ class TreeViewAdapter<T : TreeHolder>(
 
                 val search = filterCriteria.search
 
-                if (search?.expandMatches == true) {
-                    val visibleCount = nodes.count { it.visible() }
-
-                    expandMatching(search, visibleCount == 1)
-                }
+                if (search?.expandMatches == true) expandMatching(search)
             }
         }
 

@@ -13,7 +13,7 @@ interface Endable {
             endExactTimeStamp == null
     }
 
-    fun requireNotDeleted(exactTimeStamp: ExactTimeStamp.Local?) {
+    fun requireNotDeleted(exactTimeStamp: ExactTimeStamp.Local? = null) {
         if (!notDeleted(exactTimeStamp)) throwTime(exactTimeStamp)
     }
 

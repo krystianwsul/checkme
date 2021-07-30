@@ -46,7 +46,7 @@ fun DomainUpdater.setProjectEndTimeStamps(
     val remoteProjects = projectIds.map { projectsFactory.getProjectForce(it) }.toSet()
 
     remoteProjects.forEach {
-        it.requireCurrent(now)
+        it.requireNotDeleted()
         it.setEndExactTimeStamp(now, projectUndoData, removeInstances)
     }
 

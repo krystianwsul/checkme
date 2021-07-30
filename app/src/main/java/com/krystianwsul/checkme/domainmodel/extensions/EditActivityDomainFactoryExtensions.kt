@@ -259,7 +259,7 @@ fun DomainUpdater.createChildTask(
     lateinit var childTask: RootTask
     trackRootTaskIds {
         val parentTask = convertToRoot(getTaskForce(parentTaskKey), now)
-        parentTask.requireCurrent(now)
+        parentTask.requireNotDeleted()
 
         childTask = createChildTask(
             now,
@@ -337,7 +337,7 @@ fun DomainUpdater.updateScheduleTask(
     val projectKey = sharedProjectParameters?.key ?: defaultProjectKey
 
     val originalTask = getTaskForce(taskKey)
-    originalTask.requireCurrent(now)
+    originalTask.requireNotDeleted()
 
     val originalProject = originalTask.project
 
@@ -394,12 +394,12 @@ fun DomainUpdater.updateChildTask(
     lateinit var parentTask: RootTask
     trackRootTaskIds {
         task = convertToRoot(getTaskForce(taskKey), now)
-        task.requireCurrent(now)
+        task.requireNotDeleted()
 
         originalProject = task.project
 
         parentTask = convertToRoot(getTaskForce(parentTaskKey), now)
-        parentTask.requireCurrent(now)
+        parentTask.requireNotDeleted()
 
         tailrec fun Task.hasAncestor(taskKey: TaskKey): Boolean {
             val currParentTask = getParentTask(now) ?: return false
@@ -465,7 +465,7 @@ fun DomainUpdater.updateTopLevelTask(
     val projectKey = sharedProjectKey ?: defaultProjectKey
 
     val originalTask = getTaskForce(taskKey)
-    originalTask.requireCurrent(now)
+    originalTask.requireNotDeleted()
 
     val originalProject = originalTask.project
 
@@ -577,7 +577,7 @@ fun DomainUpdater.createJoinChildTask(
     lateinit var childTask: RootTask
     trackRootTaskIds {
         val parentTask = convertToRoot(getTaskForce(parentTaskKey), now)
-        parentTask.requireCurrent(now)
+        parentTask.requireNotDeleted()
 
         val joinTasks = joinTaskKeys.map { convertToRoot(getTaskForce(it), now) }
 
@@ -784,7 +784,7 @@ private fun DomainFactory.joinTasks(
     now: ExactTimeStamp.Local,
     removeInstanceKeys: List<InstanceKey>,
 ) {
-    newParentTask.requireCurrent(now)
+    newParentTask.requireNotDeleted()
     check(joinTasks.size > 1)
 
     joinTasks.forEach { addChildToParent(it, newParentTask, now) }
@@ -848,7 +848,7 @@ private fun DomainFactory.createChildTask(
     ordinal: Double? = null,
 ): RootTask {
     check(name.isNotEmpty())
-    parentTask.requireCurrent(now)
+    parentTask.requireNotDeleted()
 
     val childTask = parentTask.createChildTask(now, name, note, imageJson, ordinal)
 

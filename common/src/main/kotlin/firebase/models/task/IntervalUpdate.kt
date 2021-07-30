@@ -36,7 +36,7 @@ open class IntervalUpdate(private val task: Task, protected val intervalInfo: In
     ) {
         val now = endData.exactTimeStampLocal
 
-        task.requireCurrent(now)
+        task.requireNotDeleted()
 
         /**
          * Need cached value, since Schedule.setEndExactTimeStamp will invalidate it.  It would be better to do this in
@@ -59,7 +59,7 @@ open class IntervalUpdate(private val task: Task, protected val intervalInfo: In
         if (!recursive) {
             intervalInfo.getParentTaskHierarchy(now)?.let {
                 it.requireCurrentOffset(now)
-                it.taskHierarchy.requireCurrent(now)
+                it.taskHierarchy.requireNotDeleted()
 
                 taskUndoData?.taskHierarchyKeys?.add(it.taskHierarchy.taskHierarchyKey)
 

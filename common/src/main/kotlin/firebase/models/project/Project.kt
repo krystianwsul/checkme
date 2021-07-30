@@ -143,7 +143,7 @@ abstract class Project<T : ProjectType>(
         projectUndoData: ProjectUndoData,
         removeInstances: Boolean,
     ) {
-        requireCurrent(now)
+        requireNotDeleted()
 
         getAllTasks().filter { it.notDeleted() }.forEach {
             it.performIntervalUpdate { setEndData(Task.EndData(now, removeInstances), projectUndoData.taskUndoData) }

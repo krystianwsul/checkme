@@ -8,10 +8,8 @@ interface Current : Endable {
 
     fun afterStart(exactTimeStamp: ExactTimeStamp.Local) = startExactTimeStamp <= exactTimeStamp
 
-    // todo now
     fun current(exactTimeStamp: ExactTimeStamp.Local) = afterStart(exactTimeStamp) && notDeleted(exactTimeStamp)
 
-    // todo now
     fun requireCurrent(exactTimeStamp: ExactTimeStamp.Local) {
         if (!current(exactTimeStamp)) throwTime(exactTimeStamp)
     }

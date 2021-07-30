@@ -302,7 +302,7 @@ fun addChildToParent(
     now: ExactTimeStamp.Local,
     hideInstance: Instance? = null,
 ): UndoData {
-    childTask.requireCurrent(now)
+    childTask.requireNotDeleted()
 
     lateinit var taskHierarchyKeys: List<TaskHierarchyKey>
     lateinit var scheduleIds: List<String>

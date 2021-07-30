@@ -311,7 +311,7 @@ class DomainFactory(
             .flatten()
             .toSet()
 
-        tasks.forEach { it.requireCurrent(now) }
+        tasks.forEach { it.requireNotDeleted() }
 
         val projects = tasks.map { it.project }.toSet()
 
@@ -688,7 +688,7 @@ class DomainFactory(
             newTaskHierarchyMap.values
                 .flatMap { listOf(it.parentTask, it.childTask) }
                 .forEach {
-                    it.requireCurrent(now)
+                    it.requireNotDeleted()
 
                     convertProjectToRootHelper(now, projectToRootConversion, it as ProjectTask)
                 }

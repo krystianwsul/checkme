@@ -52,10 +52,10 @@ fun DomainUpdater.setTaskEndTimeStamps(
 fun DomainUpdater.clearTaskEndTimeStamps(
     notificationType: DomainListenerManager.NotificationType,
     taskUndoData: TaskUndoData,
-): Completable = CompletableDomainUpdate.create("clearTaskEndTimeStamps") { now ->
+): Completable = CompletableDomainUpdate.create("clearTaskEndTimeStamps") {
     check(taskUndoData.taskKeys.isNotEmpty())
 
-    processTaskUndoData(taskUndoData, now)
+    processTaskUndoData(taskUndoData)
 
     val remoteProjects = taskUndoData.taskKeys
         .map { getTaskForce(it.key).project }
@@ -280,15 +280,15 @@ private class AddChildToParentUndoData(
 
         noScheduleOrParentsIds.map { noScheduleOrParentsId ->
             task.noScheduleOrParents.single { it.id == noScheduleOrParentsId }
-        }.forEach { it.clearEndExactTimeStamp(now) }
+        }.forEach { it.clearEndExactTimeStamp() }
 
         scheduleIds.map { scheduleId ->
             task.schedules.single { it.id == scheduleId }
-        }.forEach { it.clearEndExactTimeStamp(now) }
+        }.forEach { it.clearEndExactTimeStamp() }
 
         taskHierarchyKeys.map { taskHierarchyKey ->
             task.parentTaskHierarchies.single { it.taskHierarchyKey == taskHierarchyKey }
-        }.forEach { it.clearEndExactTimeStamp(now) }
+        }.forEach { it.clearEndExactTimeStamp() }
 
         val finalProject = task.project
 

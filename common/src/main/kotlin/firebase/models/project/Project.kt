@@ -26,7 +26,7 @@ abstract class Project<T : ProjectType>(
     val userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
     val rootTaskProvider: RootTaskProvider,
     val rootModelChangeManager: RootModelChangeManager,
-) : Current, JsonTime.CustomTimeProvider, JsonTime.ProjectCustomTimeKeyProvider, Task.Parent {
+) : Endable, JsonTime.CustomTimeProvider, JsonTime.ProjectCustomTimeKeyProvider, Task.Parent {
 
     val clearableInvalidatableManager = ClearableInvalidatableManager()
 
@@ -47,7 +47,7 @@ abstract class Project<T : ProjectType>(
             projectRecord.name = name
         }
 
-    override val startExactTimeStamp by lazy { ExactTimeStamp.Local(projectRecord.startTime) }
+    val startExactTimeStamp by lazy { ExactTimeStamp.Local(projectRecord.startTime) }
 
     override val endExactTimeStamp get() = projectRecord.endTime?.let { ExactTimeStamp.Local(it) }
 
@@ -155,8 +155,8 @@ abstract class Project<T : ProjectType>(
         projectRecord.endTimeOffset = now.offset
     }
 
-    fun clearEndExactTimeStamp(now: ExactTimeStamp.Local) {
-        requireNotCurrent(now)
+    fun clearEndExactTimeStamp() {
+        requireDeleted()
 
         projectRecord.endTime = null
         projectRecord.endTimeOffset = null

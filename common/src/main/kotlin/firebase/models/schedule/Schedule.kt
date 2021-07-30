@@ -15,7 +15,7 @@ abstract class Schedule(val topLevelTask: Task) : TaskParentEntry, ProjectIdOwne
 
     val id get() = scheduleRecord.id
 
-    override val startExactTimeStamp by lazy { ExactTimeStamp.Local(scheduleRecord.startTime) }
+    val startExactTimeStamp by lazy { ExactTimeStamp.Local(scheduleRecord.startTime) }
 
     protected val startExactTimeStampOffsetProperty = invalidatableLazyCallbacks {
         scheduleRecord.run { ExactTimeStamp.Offset.fromOffset(startTime, startTimeOffset) }
@@ -62,8 +62,8 @@ abstract class Schedule(val topLevelTask: Task) : TaskParentEntry, ProjectIdOwne
         topLevelTask.invalidateIntervals()
     }
 
-    override fun clearEndExactTimeStamp(now: ExactTimeStamp.Local) {
-        requireNotCurrent(now)
+    override fun clearEndExactTimeStamp() {
+        requireDeleted()
 
         scheduleRecord.endTime = null
         scheduleRecord.endTimeOffset = null
@@ -73,7 +73,7 @@ abstract class Schedule(val topLevelTask: Task) : TaskParentEntry, ProjectIdOwne
     }
 
     abstract fun getDateTimesInRange(
-            scheduleInterval: ScheduleInterval,
+        scheduleInterval: ScheduleInterval,
             givenStartExactTimeStamp: ExactTimeStamp.Offset?,
             givenEndExactTimeStamp: ExactTimeStamp.Offset?,
             originalDateTime: Boolean = false,

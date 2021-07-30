@@ -17,6 +17,10 @@ interface Endable {
         if (!notDeleted(exactTimeStamp)) throwTime(exactTimeStamp)
     }
 
+    fun requireDeleted(exactTimeStamp: ExactTimeStamp.Local? = null) {
+        if (notDeleted(exactTimeStamp)) throwTime(exactTimeStamp)
+    }
+
     fun throwTime(exactTimeStamp: ExactTimeStamp.Local?): Nothing = throw TimeException(
         "$this exactTimeStamps start: end: $endExactTimeStamp, time: $exactTimeStamp"
     )

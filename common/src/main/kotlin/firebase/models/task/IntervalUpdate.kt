@@ -70,8 +70,8 @@ open class IntervalUpdate(private val task: Task, protected val intervalInfo: In
         task.setMyEndExactTimeStamp(endData)
     }
 
-    fun clearEndExactTimeStamp(now: ExactTimeStamp.Local) {
-        task.requireNotCurrent(now)
+    fun clearEndExactTimeStamp() {
+        task.requireDeleted()
 
         task.setMyEndExactTimeStamp(null)
     }

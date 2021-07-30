@@ -55,21 +55,21 @@ fun DomainUpdater.setProjectEndTimeStamps(
 
 @CheckResult
 fun DomainUpdater.clearProjectEndTimeStamps(
-        notificationType: DomainListenerManager.NotificationType,
-        projectUndoData: ProjectUndoData,
-): Completable = CompletableDomainUpdate.create("clearProjectEndTimeStamps") { now ->
+    notificationType: DomainListenerManager.NotificationType,
+    projectUndoData: ProjectUndoData,
+): Completable = CompletableDomainUpdate.create("clearProjectEndTimeStamps") {
     check(projectUndoData.projectIds.isNotEmpty())
 
     val remoteProjects = projectUndoData.projectIds
-            .map { projectsFactory.getProjectForce(it) }
-            .toSet()
+        .map { projectsFactory.getProjectForce(it) }
+        .toSet()
 
     remoteProjects.forEach {
-        it.requireNotCurrent(now)
-        it.clearEndExactTimeStamp(now)
+        it.requireDeleted()
+        it.clearEndExactTimeStamp()
     }
 
-    processTaskUndoData(projectUndoData.taskUndoData, now)
+    processTaskUndoData(projectUndoData.taskUndoData)
 
     DomainUpdater.Params(true, notificationType, DomainFactory.CloudParams(remoteProjects))
 }.perform(this)

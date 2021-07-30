@@ -14,7 +14,7 @@ import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.locker.LockerManager
-import com.krystianwsul.common.utils.Current
+import com.krystianwsul.common.utils.Endable
 import com.krystianwsul.common.utils.ProjectKey
 
 fun DomainFactory.getShowTaskInstancesData(
@@ -34,7 +34,7 @@ fun DomainFactory.getShowTaskInstancesData(
 
             val desiredCount = (page + 1) * SEARCH_PAGE_SIZE
 
-            val parent: Current
+            val parent: Endable
             val taskDatas: List<GroupListDataWrapper.TaskData>
             val instanceDatas: List<GroupListDataWrapper.InstanceData>
             val hasMore: Boolean

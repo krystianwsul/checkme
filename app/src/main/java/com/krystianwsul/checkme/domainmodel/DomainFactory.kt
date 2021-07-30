@@ -324,17 +324,17 @@ class DomainFactory(
         return taskUndoData to DomainUpdater.Params(true, notificationType, CloudParams(projects))
     }
 
-    fun processTaskUndoData(taskUndoData: TaskUndoData, now: ExactTimeStamp.Local) {
+    fun processTaskUndoData(taskUndoData: TaskUndoData) {
         taskUndoData.taskKeys
             .forEach { (taskKey, scheduleIds) ->
                 val task = getTaskForce(taskKey)
-                task.requireNotCurrent(now)
+                task.requireDeleted()
 
                 task.performIntervalUpdate {
-                    clearEndExactTimeStamp(now)
+                    clearEndExactTimeStamp()
 
                     scheduleIds.forEach { scheduleId ->
-                        task.schedules.single { it.id == scheduleId }.clearEndExactTimeStamp(now)
+                        task.schedules.single { it.id == scheduleId }.clearEndExactTimeStamp()
                     }
                 }
             }
@@ -342,7 +342,7 @@ class DomainFactory(
         taskUndoData.taskHierarchyKeys
             .asSequence()
             .map(::getTaskHierarchy)
-            .forEach { it.clearEndExactTimeStamp(now) }
+            .forEach { it.clearEndExactTimeStamp() }
     }
 
     private fun getTaskHierarchy(taskHierarchyKey: TaskHierarchyKey): TaskHierarchy {

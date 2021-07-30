@@ -31,7 +31,7 @@ sealed class Task(
     val parentTaskDelegate: ParentTaskDelegate,
     val clearableInvalidatableManager: ClearableInvalidatableManager,
     val rootModelChangeManager: RootModelChangeManager,
-) : Current, CurrentOffset, QueryMatchable, Assignable {
+) : Endable, CurrentOffset, QueryMatchable, Assignable {
 
     abstract val parent: Parent
     abstract val project: Project<*>
@@ -56,7 +56,7 @@ sealed class Task(
 
     val schedules: List<Schedule> get() = _schedules
 
-    final override val startExactTimeStamp = ExactTimeStamp.Local(taskRecord.startTime)
+    val startExactTimeStamp = ExactTimeStamp.Local(taskRecord.startTime)
 
     final override val startExactTimeStampOffset by lazy {
         taskRecord.run { ExactTimeStamp.Offset.fromOffset(startTime, startTimeOffset) }

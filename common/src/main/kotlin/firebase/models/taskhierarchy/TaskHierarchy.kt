@@ -18,7 +18,7 @@ sealed class TaskHierarchy(
 
     protected abstract val taskHierarchyRecord: TaskHierarchyRecord<*>
 
-    final override val startExactTimeStamp by lazy { ExactTimeStamp.Local(taskHierarchyRecord.startTime) }
+    val startExactTimeStamp by lazy { ExactTimeStamp.Local(taskHierarchyRecord.startTime) }
 
     final override val startExactTimeStampOffset by lazy {
         taskHierarchyRecord.run { ExactTimeStamp.Offset.fromOffset(startTime, startTimeOffset) }
@@ -61,8 +61,8 @@ sealed class TaskHierarchy(
         invalidateTasks()
     }
 
-    final override fun clearEndExactTimeStamp(now: ExactTimeStamp.Local) {
-        requireNotCurrent(now)
+    final override fun clearEndExactTimeStamp() {
+        requireDeleted()
 
         taskHierarchyRecord.endTime = null
         taskHierarchyRecord.endTimeOffset = null

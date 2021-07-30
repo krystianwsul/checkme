@@ -51,9 +51,7 @@
   </component>
   <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_8" inherit-compiler-output="true">
     <exclude-output />
-    <content url="file://$MODULE_DIR$/../../../common/src/commonMain/kotlin">
-      <sourceFolder url="file://$MODULE_DIR$/../../../common/src/commonMain/kotlin" type="kotlin-source" />
-    </content>
+    <content url="file://$MODULE_DIR$/../../../common/src/commonMain/kotlin" />
     <content url="file://$MODULE_DIR$/../../../common/src/commonMain/resources" />
     <orderEntry type="jdk" jdkName="Android API 30 Platform" jdkType="Android SDK" />
     <orderEntry type="sourceFolder" forTests="false" />

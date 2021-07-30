@@ -4,7 +4,7 @@ import com.krystianwsul.common.time.ExactTimeStamp
 
 interface Current : Endable {
 
-    val startExactTimeStamp: ExactTimeStamp.Local // todo now
+    val startExactTimeStamp: ExactTimeStamp.Local
 
     fun afterStart(exactTimeStamp: ExactTimeStamp.Local) = startExactTimeStamp <= exactTimeStamp
 

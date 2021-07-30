@@ -8,28 +8,20 @@ import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.ProjectType
 
 class PrivateCustomTime(
-        override val project: PrivateProject,
-        override val customTimeRecord: PrivateCustomTimeRecord,
+    override val project: PrivateProject,
+    override val customTimeRecord: PrivateCustomTimeRecord,
 ) : Time.Custom.Project<ProjectType.Private>(), MyCustomTime {
 
     override val key = customTimeRecord.customTimeKey
     override val id = key.customTimeId
 
-    override fun notDeleted(exactTimeStamp: ExactTimeStamp.Local?): Boolean {
-        return if (exactTimeStamp != null) {
-            val current = customTimeRecord.current
-            val endExactTimeStamp = endExactTimeStamp
-
-            check(endExactTimeStamp == null || !current)
-
-            endExactTimeStamp?.let { it > exactTimeStamp } ?: current
-        } else {
+    override val notDeleted: Boolean
+        get() {
             val current = customTimeRecord.current
             check(endExactTimeStamp == null || !current)
 
-            endExactTimeStamp == null || current
+            return endExactTimeStamp == null || current
         }
-    }
 
     override var endExactTimeStamp
         get() = customTimeRecord.endTime?.let { ExactTimeStamp.Local(it) }

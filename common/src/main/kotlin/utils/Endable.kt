@@ -6,24 +6,17 @@ interface Endable {
 
     val endExactTimeStamp: ExactTimeStamp.Local?
 
-    fun notDeleted(exactTimeStamp: ExactTimeStamp.Local? = null): Boolean {
-        return if (exactTimeStamp != null)
-            endExactTimeStamp?.let { it > exactTimeStamp } != false
-        else
-            endExactTimeStamp == null
+    val notDeleted get() = endExactTimeStamp == null
+
+    fun requireNotDeleted() {
+        if (!notDeleted) throwTime()
     }
 
-    fun requireNotDeleted(exactTimeStamp: ExactTimeStamp.Local? = null) {
-        if (!notDeleted(exactTimeStamp)) throwTime(exactTimeStamp)
+    fun requireDeleted() {
+        if (notDeleted) throwTime()
     }
 
-    fun requireDeleted(exactTimeStamp: ExactTimeStamp.Local? = null) {
-        if (notDeleted(exactTimeStamp)) throwTime(exactTimeStamp)
-    }
-
-    fun throwTime(exactTimeStamp: ExactTimeStamp.Local?): Nothing = throw TimeException(
-        "$this exactTimeStamps start: end: $endExactTimeStamp, time: $exactTimeStamp"
-    )
+    fun throwTime(): Nothing = throw TimeException("$this exactTimeStamps start: end: $endExactTimeStamp")
 
     class TimeException(message: String) : Exception(message)
 }

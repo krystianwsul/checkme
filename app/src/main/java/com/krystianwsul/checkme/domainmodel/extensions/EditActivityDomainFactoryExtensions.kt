@@ -59,7 +59,7 @@ private fun UserScope.getCreateTaskDataFast(): EditViewModel.MainData {
     val customTimeDatas = myUserFactory.user
         .customTimes
         .values
-        .filter { it.notDeleted() }
+        .filter { it.notDeleted }
         .associateBy { it.key }
         .toMutableMap<CustomTimeKey, Time.Custom>()
         .toCustomTimeDatas()
@@ -665,7 +665,7 @@ private fun DomainFactory.getParentTreeDatas(
 
     parentTreeDatas += getAllTasks().asSequence()
         .filter { it.showAsParent(now, excludedTaskKeys) }
-        .filter { it.isTopLevelTask(now) && (it.project as? SharedProject)?.notDeleted() != true }
+        .filter { it.isTopLevelTask(now) && (it.project as? SharedProject)?.notDeleted != true }
         .map {
             EditViewModel.ParentTreeData(
                 it.name,
@@ -682,7 +682,7 @@ private fun DomainFactory.getParentTreeDatas(
     parentTreeDatas += projectsFactory.sharedProjects
         .values
         .asSequence()
-        .filter { it.notDeleted() }
+        .filter { it.notDeleted }
         .map {
             EditViewModel.ParentTreeData(
                 it.name,
@@ -723,7 +723,7 @@ private fun DomainFactory.getProjectTaskTreeDatas(
 }
 
 private fun Task.showAsParent(now: ExactTimeStamp.Local, excludedTaskKeys: Set<TaskKey>): Boolean {
-    if (!notDeleted()) return false
+    if (!notDeleted) return false
 
     if (excludedTaskKeys.contains(taskKey)) return false
 

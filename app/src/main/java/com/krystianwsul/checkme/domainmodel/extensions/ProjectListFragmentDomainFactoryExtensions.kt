@@ -22,7 +22,7 @@ fun DomainFactory.getProjectListData(): ProjectListViewModel.Data {
     val remoteProjects = projectsFactory.sharedProjects
 
     val projectDatas = remoteProjects.values
-        .filter { it.notDeleted() }
+        .filter { it.notDeleted }
             .associate {
                 val users = it.users.joinToString(", ") { it.name }
 

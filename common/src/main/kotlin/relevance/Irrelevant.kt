@@ -68,7 +68,7 @@ object Irrelevant {
                 .toMutableMap()
 
             tasks.asSequence()
-                .filter { it.notDeleted() && it.isTopLevelTask(now) && it.isVisible(now, true) }
+                .filter { it.notDeleted && it.isTopLevelTask(now) && it.isVisible(now, true) }
                 .map { taskRelevances.getValue(it.taskKey) }
                 .forEach { it.setRelevant(taskRelevances, taskHierarchyRelevances, instanceRelevances, now) }
 
@@ -136,7 +136,7 @@ object Irrelevant {
                          */
                         !schedule.getInstance(it).isVisible(now, Instance.VisibilityOptions(hack24 = true))
                     } else {
-                        if (scheduleInterval.notDeletedOffset() && schedule.notDeleted()) {
+                        if (scheduleInterval.notDeletedOffset() && schedule.notDeleted) {
                             false
                         } else {
                             val oldestVisibleExactTimeStamp = schedule.oldestVisible
@@ -198,14 +198,14 @@ object Irrelevant {
                 .filterIsInstance<PrivateProject>()
                 .forEach {
                     it.customTimes
-                        .filter { it.notDeleted() }
+                        .filter { it.notDeleted }
                         .forEach { customTimeRelevanceCollection.getRelevance(it.key).setRelevant() }
                 }
 
             remoteProjectRelevances = projects.mapValues { RemoteProjectRelevance(it.value) }
 
             projects.values
-                .filter { it.notDeleted() }
+                .filter { it.notDeleted }
                 .forEach { remoteProjectRelevances.getValue(it.projectKey).setRelevant() }
 
             taskRelevances.values

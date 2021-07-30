@@ -64,7 +64,7 @@ fun DomainFactory.getShowTaskInstancesData(
                             it.name,
                             it.instanceDateTime.timeStamp,
                             it.instanceDateTime,
-                            it.task.notDeleted(),
+                            it.task.notDeleted,
                             it.canAddSubtask(now),
                             it.isRootInstance(),
                             it.getCreateTaskTimePair(projectsFactory.privateProject),
@@ -94,7 +94,7 @@ fun DomainFactory.getShowTaskInstancesData(
 
             val dataWrapper = GroupListDataWrapper(
                 customTimeDatas,
-                parent.notDeleted(),
+                parent.notDeleted,
                 taskDatas,
                 null,
                 instanceDatas,

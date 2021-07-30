@@ -192,7 +192,7 @@ fun DomainFactory.getUnscheduledTasks(projectKey: ProjectKey.Shared? = null): Li
         ?.getAllTasks()
         ?: getAllTasks()
 
-    return tasks.filter { it.notDeleted() && it.intervalInfo.isUnscheduled() }
+    return tasks.filter { it.notDeleted && it.intervalInfo.isUnscheduled() }
 }
 
 fun DomainFactory.getGroupListChildTaskDatas(

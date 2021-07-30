@@ -383,7 +383,7 @@ class DomainFactory(
         val projectCustomTimes = projectsFactory.privateProject.customTimes
         val userCustomTimes = myUserFactory.user.customTimes.values
 
-        return (projectCustomTimes + userCustomTimes).filter { it.notDeleted() }
+        return (projectCustomTimes + userCustomTimes).filter { it.notDeleted }
     }
 
     fun instanceToGroupListData(
@@ -401,7 +401,7 @@ class DomainFactory(
             instance.name,
             instance.instanceDateTime.timeStamp,
             instance.instanceDateTime,
-            instance.task.notDeleted(),
+            instance.task.notDeleted,
             instance.canAddSubtask(now),
             instance.isRootInstance(),
             instance.getCreateTaskTimePair(projectsFactory.privateProject),
@@ -503,7 +503,7 @@ class DomainFactory(
                     childTask.note,
                     childTask.taskKey,
                     childTask.getImage(deviceDbInfo),
-                    childTask.notDeleted(),
+                    childTask.notDeleted,
                     childTask.isVisible(now),
                     childTask.ordinal,
                     childTask.getProjectInfo(now, includeProjectInfo),

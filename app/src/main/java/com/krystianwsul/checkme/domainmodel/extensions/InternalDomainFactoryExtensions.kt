@@ -13,7 +13,7 @@ fun DomainUpdater.fixOffsetsAndCustomTimes(source: String): Completable =
 
         projectsFactory.privateProject
             .customTimes
-            .filter { it.notDeleted() }
+            .filter { it.notDeleted }
             .forEach { migratePrivateCustomTime(it, now) }
 
         DomainUpdater.Params(false, DomainListenerManager.NotificationType.All)

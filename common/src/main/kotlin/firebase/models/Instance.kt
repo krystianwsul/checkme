@@ -589,7 +589,7 @@ class Instance private constructor(
                 else -> customTime
             } as? MyCustomTime
 
-            privateCustomTime?.takeIf { it.notDeleted() }
+            privateCustomTime?.takeIf { it.notDeleted }
                 ?.let { TimePair(it.key) }
                 ?: TimePair(customTime.getHourMinute(instanceDate.dayOfWeek))
         } else {
@@ -634,7 +634,7 @@ class Instance private constructor(
 
     fun canAddSubtask(now: ExactTimeStamp.Local, hack24: Boolean = false): Boolean {
         // can't add to deleted tasks
-        if (!task.notDeleted()) return false
+        if (!task.notDeleted) return false
 
         // obviously we can't add instances to an invisible instance.
         if (!isVisible(now, VisibilityOptions(hack24 = hack24))) return false

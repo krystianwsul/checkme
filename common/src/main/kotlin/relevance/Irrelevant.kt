@@ -136,7 +136,7 @@ object Irrelevant {
                          */
                         !schedule.getInstance(it).isVisible(now, Instance.VisibilityOptions(hack24 = true))
                     } else {
-                        if (scheduleInterval.currentOffset(now) && schedule.notDeleted()) {
+                        if (scheduleInterval.notDeletedOffset() && schedule.notDeleted()) {
                             false
                         } else {
                             val oldestVisibleExactTimeStamp = schedule.oldestVisible
@@ -157,7 +157,7 @@ object Irrelevant {
 
                 val relevantNoScheduleOrParents = it.intervalInfo
                     .noScheduleOrParentIntervals
-                    .filter { it.currentOffset(now) }
+                    .filter { it.notDeletedOffset() }
                     .map { it.noScheduleOrParent }
 
                 irrelevantNoScheduleOrParents += it.noScheduleOrParents - relevantNoScheduleOrParents

@@ -14,17 +14,17 @@ open class IntervalUpdate(private val task: Task, protected val intervalInfo: In
     }
 
     fun endAllCurrentTaskHierarchies(now: ExactTimeStamp.Local) = task.parentTaskHierarchies
-        .filter { it.currentOffset(now) }
+        .filter { it.notDeletedOffset() }
         .onEach { it.setEndExactTimeStamp(now) }
         .map { it.taskHierarchyKey }
 
     fun endAllCurrentSchedules(now: ExactTimeStamp.Local) = task.schedules
-        .filter { it.currentOffset(now) }
+        .filter { it.notDeletedOffset() }
         .onEach { it.setEndExactTimeStamp(now.toOffset()) }
         .map { it.id }
 
     fun endAllCurrentNoScheduleOrParents(now: ExactTimeStamp.Local) = task.noScheduleOrParents
-        .filter { it.currentOffset(now) }
+        .filter { it.notDeletedOffset() }
         .onEach { it.setEndExactTimeStamp(now.toOffset()) }
         .map { it.id }
 
@@ -46,7 +46,7 @@ open class IntervalUpdate(private val task: Task, protected val intervalInfo: In
 
         val scheduleIds = intervalInfo.getCurrentScheduleIntervals(now)
             .map {
-                it.requireCurrentOffset(now)
+                it.requireNotDeletedOffset()
 
                 it.schedule.setEndExactTimeStamp(now.toOffset())
 
@@ -58,7 +58,7 @@ open class IntervalUpdate(private val task: Task, protected val intervalInfo: In
 
         if (!recursive) {
             intervalInfo.getParentTaskHierarchy(now)?.let {
-                it.requireCurrentOffset(now)
+                it.requireNotDeletedOffset()
                 it.taskHierarchy.requireNotDeleted()
 
                 taskUndoData?.taskHierarchyKeys?.add(it.taskHierarchy.taskHierarchyKey)

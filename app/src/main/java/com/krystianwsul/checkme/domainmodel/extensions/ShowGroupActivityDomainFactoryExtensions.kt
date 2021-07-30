@@ -29,7 +29,7 @@ fun DomainFactory.getShowGroupData(parameters: ShowGroupActivity.Parameters): Sh
     val dayOfWeek = date.dayOfWeek
     val hourMinute = timeStamp.hourMinute
 
-    val time = getCurrentRemoteCustomTimes(now).map { it as Time.Custom }
+    val time = getCurrentRemoteCustomTimes().map { it as Time.Custom }
         .firstOrNull { it.getHourMinute(dayOfWeek) == hourMinute }
         ?: Time.Normal(hourMinute)
 
@@ -62,7 +62,7 @@ private fun DomainFactory.getGroupListData(
 
     val currentInstances = rootInstances.filter { it.instanceDateTime.timeStamp.compareTo(timeStamp) == 0 }
 
-    val customTimeDatas = getCurrentRemoteCustomTimes(now).map {
+    val customTimeDatas = getCurrentRemoteCustomTimes().map {
         GroupListDataWrapper.CustomTimeData(
             it.name,
             it.hourMinutes.toSortedMap()
@@ -86,7 +86,7 @@ private fun DomainFactory.getGroupListData(
             task.current(now),
             instance.canAddSubtask(now),
             instance.isRootInstance(),
-            instance.getCreateTaskTimePair(now, projectsFactory.privateProject),
+            instance.getCreateTaskTimePair(projectsFactory.privateProject),
             task.note,
             children,
             task.ordinal,

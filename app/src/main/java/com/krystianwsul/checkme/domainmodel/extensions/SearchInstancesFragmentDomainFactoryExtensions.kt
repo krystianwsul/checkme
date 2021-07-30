@@ -25,7 +25,7 @@ fun DomainFactory.getSearchInstancesData(
 
     return LockerManager.setLocker { now ->
         getDomainResultInterrupting {
-            val customTimeDatas = getCurrentRemoteCustomTimes(now).map {
+            val customTimeDatas = getCurrentRemoteCustomTimes().map {
                 GroupListDataWrapper.CustomTimeData(it.name, it.hourMinutes.toSortedMap())
             }
 

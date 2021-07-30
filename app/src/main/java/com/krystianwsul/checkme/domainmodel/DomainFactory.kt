@@ -379,11 +379,11 @@ class DomainFactory(
         return combineInstanceSequences(instanceSequences)
     }
 
-    fun getCurrentRemoteCustomTimes(now: ExactTimeStamp.Local): List<MyCustomTime> {
+    fun getCurrentRemoteCustomTimes(): List<MyCustomTime> {
         val projectCustomTimes = projectsFactory.privateProject.customTimes
         val userCustomTimes = myUserFactory.user.customTimes.values
 
-        return (projectCustomTimes + userCustomTimes).filter { it.notDeleted(now) }
+        return (projectCustomTimes + userCustomTimes).filter { it.notDeleted() }
     }
 
     fun instanceToGroupListData(
@@ -404,7 +404,7 @@ class DomainFactory(
             instance.task.current(now),
             instance.canAddSubtask(now),
             instance.isRootInstance(),
-            instance.getCreateTaskTimePair(now, projectsFactory.privateProject),
+            instance.getCreateTaskTimePair(projectsFactory.privateProject),
             instance.task.note,
             children,
             instance.task.ordinal,

@@ -24,7 +24,7 @@ fun DomainFactory.getShowNotificationGroupData(instanceKeys: Set<InstanceKey>): 
 
     val instances = (queriedInstances + notificationInstances).distinct().sortedBy { it.instanceDateTime }
 
-    val customTimeDatas = getCurrentRemoteCustomTimes(now).map {
+    val customTimeDatas = getCurrentRemoteCustomTimes().map {
         GroupListDataWrapper.CustomTimeData(it.name, it.hourMinutes.toSortedMap())
     }
 
@@ -43,7 +43,7 @@ fun DomainFactory.getShowNotificationGroupData(instanceKeys: Set<InstanceKey>): 
             task.current(now),
             instance.canAddSubtask(now),
             instance.isRootInstance(),
-            instance.getCreateTaskTimePair(now, projectsFactory.privateProject),
+            instance.getCreateTaskTimePair(projectsFactory.privateProject),
             task.note,
             children,
             instance.task.ordinal,

@@ -54,6 +54,8 @@ sealed class ExactTimeStamp : Comparable<ExactTimeStamp> {
 
         operator fun plus(timeSpan: TimeSpan) = Local(long + timeSpan.millisecondsLong)
 
+        operator fun minus(timeSpan: TimeSpan) = Local(long - timeSpan.millisecondsLong)
+
         override fun details() = "Local(long = $long, offset = $offset)" + ", " + toString()
     }
 

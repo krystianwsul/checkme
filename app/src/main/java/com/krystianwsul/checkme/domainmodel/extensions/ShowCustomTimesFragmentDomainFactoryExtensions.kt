@@ -10,7 +10,6 @@ import com.krystianwsul.checkme.utils.prettyPrint
 import com.krystianwsul.checkme.viewmodels.ShowCustomTimesViewModel
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.MyCustomTime
-import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.CustomTimeKey
 import io.reactivex.rxjava3.core.Completable
 
@@ -19,15 +18,15 @@ fun DomainFactory.getShowCustomTimesData(): ShowCustomTimesViewModel.Data {
 
     DomainThreadChecker.instance.requireDomainThread()
 
-    val now = ExactTimeStamp.Local.now
-
-    val entries = getCurrentRemoteCustomTimes(now).map {
+    val entries = getCurrentRemoteCustomTimes().map {
         val days = it.hourMinutes
-                .entries
-                .groupBy { it.value }
-                .mapValues { it.value.map { it.key } }
-                .entries
-                .sortedBy { it.key }
+            .entries
+            .groupBy { it.value }
+            .mapValues {
+                it.value.map { it.key }
+            }
+            .entries
+            .sortedBy { it.key }
 
         val details = days.joinToString("; ") {
             it.value

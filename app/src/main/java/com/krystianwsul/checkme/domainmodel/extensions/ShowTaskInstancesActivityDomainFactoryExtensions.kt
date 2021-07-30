@@ -28,7 +28,7 @@ fun DomainFactory.getShowTaskInstancesData(
 
     return LockerManager.setLocker { now ->
         getDomainResultInterrupting {
-            val customTimeDatas = getCurrentRemoteCustomTimes(now).map {
+            val customTimeDatas = getCurrentRemoteCustomTimes().map {
                 GroupListDataWrapper.CustomTimeData(it.name, it.hourMinutes.toSortedMap())
             }
 
@@ -67,7 +67,7 @@ fun DomainFactory.getShowTaskInstancesData(
                             it.task.current(now),
                             it.canAddSubtask(now),
                             it.isRootInstance(),
-                            it.getCreateTaskTimePair(now, projectsFactory.privateProject),
+                            it.getCreateTaskTimePair(projectsFactory.privateProject),
                             it.task.note,
                             children,
                             it.task.ordinal,

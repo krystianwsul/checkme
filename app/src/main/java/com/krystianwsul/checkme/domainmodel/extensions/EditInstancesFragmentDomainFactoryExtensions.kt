@@ -29,9 +29,7 @@ fun DomainFactory.getEditInstancesData(instanceKeys: Set<InstanceKey>): EditInst
 
     check(instanceKeys.isNotEmpty())
 
-    val now = ExactTimeStamp.Local.now
-
-    val customTimes = getCurrentRemoteCustomTimes(now).associate { it.key to it as Time.Custom }.toMutableMap()
+    val customTimes = getCurrentRemoteCustomTimes().associate { it.key to it as Time.Custom }.toMutableMap()
 
     val instances = instanceKeys.map(::getInstance)
 

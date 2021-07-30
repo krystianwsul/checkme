@@ -565,7 +565,7 @@ class Instance private constructor(
     }
 
     // todo use for all CreateTaskActivity schedule hints.  Either filter by current, or add non-current to create task data
-    fun getCreateTaskTimePair(now: ExactTimeStamp.Local, privateProject: PrivateProject): TimePair {
+    fun getCreateTaskTimePair(privateProject: PrivateProject): TimePair {
         val instanceTimePair = instanceTime.timePair
 
         return if (instanceTimePair.customTimeKey != null) {
@@ -589,7 +589,7 @@ class Instance private constructor(
                 else -> customTime
             } as? MyCustomTime
 
-            privateCustomTime?.takeIf { it.notDeleted(now) }
+            privateCustomTime?.takeIf { it.notDeleted() }
                 ?.let { TimePair(it.key) }
                 ?: TimePair(customTime.getHourMinute(instanceDate.dayOfWeek))
         } else {

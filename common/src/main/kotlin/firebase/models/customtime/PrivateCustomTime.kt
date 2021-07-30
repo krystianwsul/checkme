@@ -15,13 +15,20 @@ class PrivateCustomTime(
     override val key = customTimeRecord.customTimeKey
     override val id = key.customTimeId
 
-    override fun notDeleted(exactTimeStamp: ExactTimeStamp.Local): Boolean {
-        val current = customTimeRecord.current
-        val endExactTimeStamp = endExactTimeStamp
+    override fun notDeleted(exactTimeStamp: ExactTimeStamp.Local?): Boolean {
+        return if (exactTimeStamp != null) {
+            val current = customTimeRecord.current
+            val endExactTimeStamp = endExactTimeStamp
 
-        check(endExactTimeStamp == null || !current)
+            check(endExactTimeStamp == null || !current)
 
-        return endExactTimeStamp?.let { it > exactTimeStamp } ?: current
+            endExactTimeStamp?.let { it > exactTimeStamp } ?: current
+        } else {
+            val current = customTimeRecord.current
+            check(endExactTimeStamp == null || !current)
+
+            endExactTimeStamp == null || current
+        }
     }
 
     override var endExactTimeStamp

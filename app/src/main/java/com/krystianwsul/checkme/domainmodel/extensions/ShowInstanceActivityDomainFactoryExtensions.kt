@@ -89,7 +89,7 @@ private fun DomainFactory.getGroupListData(
     task: Task,
     now: ExactTimeStamp.Local,
 ): GroupListDataWrapper {
-    val customTimeDatas = getCurrentRemoteCustomTimes(now).map {
+    val customTimeDatas = getCurrentRemoteCustomTimes().map {
         GroupListDataWrapper.CustomTimeData(it.name, it.hourMinutes.toSortedMap())
     }
 
@@ -110,7 +110,7 @@ private fun DomainFactory.getGroupListData(
                 childTask.current(now),
                 childTask.isVisible(now),
                 childInstance.isRootInstance(),
-                childInstance.getCreateTaskTimePair(now, projectsFactory.privateProject),
+                childInstance.getCreateTaskTimePair(projectsFactory.privateProject),
                 childTask.note,
                 children,
                 childTask.ordinal,

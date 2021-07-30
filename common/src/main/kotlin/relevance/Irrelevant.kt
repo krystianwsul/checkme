@@ -198,7 +198,7 @@ object Irrelevant {
                 .filterIsInstance<PrivateProject>()
                 .forEach {
                     it.customTimes
-                        .filter { it.notDeleted(now) }
+                        .filter { it.notDeleted() }
                         .forEach { customTimeRelevanceCollection.getRelevance(it.key).setRelevant() }
                 }
 

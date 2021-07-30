@@ -85,7 +85,7 @@ sealed class Task(
 
     protected abstract val allowPlaceholderCurrentNoSchedule: Boolean
 
-    val intervalInfoCache = invalidatableCache<IntervalInfo>(clearableInvalidatableManager) { invalidatableCache ->
+    val intervalInfoCache = invalidatableCache<IntervalInfo>(clearableInvalidatableManager) {
         checkNoIntervalUpdate()
 
         InvalidatableCache.ValueHolder(IntervalBuilder.build(this, allowPlaceholderCurrentNoSchedule)) { }
@@ -331,7 +331,7 @@ sealed class Task(
 
         InterruptionChecker.throwIfInterrupted()
 
-        return if (filterVisible && !notDeleted(now) && endData!!.deleteInstances) {
+        return if (filterVisible && !notDeleted() && endData!!.deleteInstances) {
             getExistingInstances(startExactTimeStamp, endExactTimeStamp, onlyRoot).filter { it.done != null }
         } else {
             val instanceSequences = mutableListOf<Sequence<Instance>>()

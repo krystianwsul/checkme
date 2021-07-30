@@ -56,12 +56,10 @@ private fun Map<CustomTimeKey, Time.Custom>.toCustomTimeDatas() = mapValues { (c
 private fun UserScope.getCreateTaskDataFast(): EditViewModel.MainData {
     DomainThreadChecker.instance.requireDomainThread()
 
-    val now = ExactTimeStamp.Local.now
-
     val customTimeDatas = myUserFactory.user
         .customTimes
         .values
-        .filter { it.notDeleted(now) }
+        .filter { it.notDeleted() }
         .associateBy { it.key }
         .toMutableMap<CustomTimeKey, Time.Custom>()
         .toCustomTimeDatas()
@@ -77,7 +75,7 @@ private fun DomainFactory.getCreateTaskDataSlow(
 
     val now = ExactTimeStamp.Local.now
 
-    val customTimes = getCurrentRemoteCustomTimes(now).associate { it.key to it as Time.Custom }.toMutableMap()
+    val customTimes = getCurrentRemoteCustomTimes().associate { it.key to it as Time.Custom }.toMutableMap()
 
     val taskData = (startParameters as? EditViewModel.StartParameters.Task)?.let {
         val task = getTaskForce(it.taskKey)

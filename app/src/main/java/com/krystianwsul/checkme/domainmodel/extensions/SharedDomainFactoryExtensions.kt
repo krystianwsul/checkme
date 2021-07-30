@@ -187,12 +187,12 @@ fun DomainUpdater.updatePhotoUrl(
     DomainUpdater.Params(false, notificationType)
 }.perform(this)
 
-fun DomainFactory.getUnscheduledTasks(now: ExactTimeStamp.Local, projectKey: ProjectKey.Shared? = null): List<Task> {
+fun DomainFactory.getUnscheduledTasks(projectKey: ProjectKey.Shared? = null): List<Task> {
     val tasks = projectKey?.let(projectsFactory::getProjectForce)
         ?.getAllTasks()
         ?: getAllTasks()
 
-    return tasks.filter { it.current(now) && it.intervalInfo.isUnscheduled() }
+    return tasks.filter { it.notDeleted() && it.intervalInfo.isUnscheduled() }
 }
 
 fun DomainFactory.getGroupListChildTaskDatas(

@@ -201,10 +201,10 @@ class IrrelevantTest {
 
         instance.setDone(shownFactory, true, now)
 
-        fun Task.isReminderless() = current(now)
-                && this.isVisible(now, true)
-                && isTopLevelTask(now)
-                && intervalInfo.getCurrentScheduleIntervals(now).isEmpty()
+        fun Task.isReminderless() = notDeleted() &&
+                this.isVisible(now, true) &&
+                isTopLevelTask(now) &&
+                intervalInfo.getCurrentScheduleIntervals(now).isEmpty()
 
         assertTrue(task.isReminderless())
 

@@ -10,7 +10,6 @@ import com.krystianwsul.checkme.domainmodel.update.SingleDomainUpdate
 import com.krystianwsul.checkme.viewmodels.ProjectListViewModel
 import com.krystianwsul.common.domain.ProjectUndoData
 import com.krystianwsul.common.firebase.DomainThreadChecker
-import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.ProjectKey
 import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Single
@@ -22,10 +21,8 @@ fun DomainFactory.getProjectListData(): ProjectListViewModel.Data {
 
     val remoteProjects = projectsFactory.sharedProjects
 
-    val now = ExactTimeStamp.Local.now
-
     val projectDatas = remoteProjects.values
-            .filter { it.current(now) }
+        .filter { it.notDeleted() }
             .associate {
                 val users = it.users.joinToString(", ") { it.name }
 

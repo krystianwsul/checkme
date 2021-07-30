@@ -11,10 +11,12 @@ interface Current : Endable {
     // todo now
     fun current(exactTimeStamp: ExactTimeStamp.Local) = afterStart(exactTimeStamp) && notDeleted(exactTimeStamp)
 
+    // todo now
     fun requireCurrent(exactTimeStamp: ExactTimeStamp.Local) {
         if (!current(exactTimeStamp)) throwTime(exactTimeStamp)
     }
 
+    // todo now
     fun requireNotCurrent(exactTimeStamp: ExactTimeStamp.Local) {
         if (current(exactTimeStamp)) throwTime(exactTimeStamp)
     }

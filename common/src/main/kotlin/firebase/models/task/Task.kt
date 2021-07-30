@@ -152,7 +152,7 @@ sealed class Task(
     // hack24 = false -> basically, is it possible to add a subtask
     fun isVisible(now: ExactTimeStamp.Local, hack24: Boolean = false): Boolean {
         // can't add to deleted tasks
-        if (!current(now)) return false
+        if (!notDeleted()) return false
 
         // in general, we can add a subtask to any task that is either unscheduled, or has not done instances.  Checking
         // for that will be difficult, though.
@@ -169,7 +169,7 @@ sealed class Task(
     // hack24 = false -> basically, is it possible to add a subtask
     fun isVisibleHelper(now: ExactTimeStamp.Local, hack24: Boolean = false): Pair<Boolean, String> {
         // can't add to deleted tasks
-        if (!current(now)) return false to "not current"
+        if (!notDeleted()) return false to "deleted"
 
         // in general, we can add a subtask to any task that is either unscheduled, or has not done instances.  Checking
         // for that will be difficult, though.

@@ -634,7 +634,7 @@ class Instance private constructor(
 
     fun canAddSubtask(now: ExactTimeStamp.Local, hack24: Boolean = false): Boolean {
         // can't add to deleted tasks
-        if (!task.current(now)) return false
+        if (!task.notDeleted()) return false
 
         // obviously we can't add instances to an invisible instance.
         if (!isVisible(now, VisibilityOptions(hack24 = hack24))) return false

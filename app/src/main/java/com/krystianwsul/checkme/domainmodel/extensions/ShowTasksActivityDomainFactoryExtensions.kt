@@ -35,7 +35,7 @@ fun DomainFactory.getShowTasksData(parameters: ShowTasksActivity.Parameters): Sh
             note,
             taskKey,
             getImage(deviceDbInfo),
-            current(now),
+            notDeleted(),
             isVisible(now),
             ordinal,
             getProjectInfo(now, parameters.showProjects),
@@ -51,7 +51,7 @@ fun DomainFactory.getShowTasksData(parameters: ShowTasksActivity.Parameters): Sh
     when (parameters) {
         is ShowTasksActivity.Parameters.Unscheduled -> {
             fun Project<*>.getUnscheduledTaskDatas() = getAllTasks().filter {
-                it.current(now) && it.intervalInfo.isUnscheduled()
+                it.notDeleted() && it.intervalInfo.isUnscheduled()
             }
                 .map { it.toChildTaskData(it.getHierarchyExactTimeStamp(now)) }
 

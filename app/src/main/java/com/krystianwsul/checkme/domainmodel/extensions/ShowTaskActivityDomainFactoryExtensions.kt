@@ -29,17 +29,17 @@ fun DomainFactory.getShowTaskData(requestTaskKey: TaskKey): ShowTaskViewModel.Da
                 val childHierarchyExactTimeStamp = childTask.getHierarchyExactTimeStamp(parentHierarchyExactTimeStamp)
 
                 TaskListFragment.ChildTaskData(
-                        childTask.name,
-                        childTask.getScheduleText(ScheduleText, childHierarchyExactTimeStamp),
-                        getTaskListChildTaskDatas(childTask, now, childHierarchyExactTimeStamp),
-                        childTask.note,
-                        childTask.taskKey,
-                        childTask.getImage(deviceDbInfo),
-                        childTask.current(now),
-                        childTask.isVisible(now),
-                        childTask.ordinal,
-                        childTask.getProjectInfo(now),
-                        childTask.isAssignedToMe(now, myUserFactory.user),
+                    childTask.name,
+                    childTask.getScheduleText(ScheduleText, childHierarchyExactTimeStamp),
+                    getTaskListChildTaskDatas(childTask, now, childHierarchyExactTimeStamp),
+                    childTask.note,
+                    childTask.taskKey,
+                    childTask.getImage(deviceDbInfo),
+                    childTask.notDeleted(),
+                    childTask.isVisible(now),
+                    childTask.ordinal,
+                    childTask.getProjectInfo(now),
+                    childTask.isAssignedToMe(now, myUserFactory.user),
                 )
             }
             .sorted()
@@ -58,16 +58,16 @@ fun DomainFactory.getShowTaskData(requestTaskKey: TaskKey): ShowTaskViewModel.Da
     }
 
     return ShowTaskViewModel.Data(
-            task.name,
-            collapseText,
-            TaskListFragment.TaskData(
-                    childTaskDatas.toMutableList(),
-                    task.note,
-                    task.isVisible(now),
-                    task.getProjectInfo(now),
-            ),
-            task.getImage(deviceDbInfo),
-            task.current(now),
-            taskKey,
+        task.name,
+        collapseText,
+        TaskListFragment.TaskData(
+            childTaskDatas.toMutableList(),
+            task.note,
+            task.isVisible(now),
+            task.getProjectInfo(now),
+        ),
+        task.getImage(deviceDbInfo),
+        task.notDeleted(),
+        taskKey,
     )
 }

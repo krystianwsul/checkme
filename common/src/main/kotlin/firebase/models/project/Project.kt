@@ -23,10 +23,14 @@ import com.krystianwsul.common.utils.*
 
 abstract class Project<T : ProjectType>(
     val assignedToHelper: AssignedToHelper,
-    val userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
+    userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
     val rootTaskProvider: RootTaskProvider,
     val rootModelChangeManager: RootModelChangeManager,
-) : Endable, JsonTime.CustomTimeProvider, JsonTime.ProjectCustomTimeKeyProvider, Task.Parent {
+) : Endable,
+    JsonTime.CustomTimeProvider,
+    JsonTime.ProjectCustomTimeKeyProvider,
+    Task.Parent,
+    JsonTime.UserCustomTimeProvider by userCustomTimeProvider {
 
     val clearableInvalidatableManager = ClearableInvalidatableManager()
 
@@ -174,9 +178,6 @@ abstract class Project<T : ProjectType>(
     fun getUntypedProjectCustomTime(projectCustomTimeId: String) =
         getProjectCustomTime(projectRecord.getProjectCustomTimeId(projectCustomTimeId))
 
-    override fun getUserCustomTime(userCustomTimeKey: CustomTimeKey.User) =
-        userCustomTimeProvider.getUserCustomTime(userCustomTimeKey)
-
     override fun getProjectCustomTimeKey(projectCustomTimeId: CustomTimeId.Project) =
         projectRecord.getProjectCustomTimeKey(projectCustomTimeId)
 
@@ -278,7 +279,9 @@ abstract class Project<T : ProjectType>(
 
     interface RootTaskProvider {
 
-        fun getRootTask(rootTaskKey: TaskKey.Root): RootTask
+        fun tryGetRootTask(rootTaskKey: TaskKey.Root): RootTask?
+
+        fun getRootTask(rootTaskKey: TaskKey.Root) = tryGetRootTask(rootTaskKey)!!
 
         fun getRootTasksForProject(projectKey: ProjectKey<*>): Collection<RootTask>
 

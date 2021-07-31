@@ -134,9 +134,9 @@ class FriendsFactory(
         check(userMap.containsKey(rootUserRecord.userKey))
     }
 
-    override fun getUserCustomTime(userCustomTimeKey: CustomTimeKey.User): Time.Custom.User {
-        return userMap.getValue(userCustomTimeKey.userKey)
-                .value
-                .getUserCustomTime(userCustomTimeKey)
+    override fun tryGetUserCustomTime(userCustomTimeKey: CustomTimeKey.User): Time.Custom.User? {
+        return userMap[userCustomTimeKey.userKey]
+            ?.value
+            ?.tryGetUserCustomTime(userCustomTimeKey)
     }
 }

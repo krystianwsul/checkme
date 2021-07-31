@@ -54,10 +54,10 @@ interface UserCustomTimeProviderSource {
                     myUserFactorySingle.map { myUserFactory ->
                         object : JsonTime.UserCustomTimeProvider {
 
-                            override fun getUserCustomTime(userCustomTimeKey: CustomTimeKey.User): Time.Custom.User {
+                            override fun tryGetUserCustomTime(userCustomTimeKey: CustomTimeKey.User): Time.Custom.User? {
                                 check(userCustomTimeKey.userKey == myUserKey)
 
-                                return myUserFactory.user.getUserCustomTime(userCustomTimeKey)
+                                return myUserFactory.user.tryGetUserCustomTime(userCustomTimeKey)
                             }
                         }
                     }
@@ -77,7 +77,7 @@ interface UserCustomTimeProviderSource {
         }
 
         private fun getForeignUserKeysFromRecord(rootTaskRecord: RootTaskRecord) =
-            getForeignUserKeys(getUserCustomTimeKeysFromRecord(rootTaskRecord))
+            getForeignUserKeys(rootTaskRecord.getUserCustomTimeKeys())
 
         override fun getUserCustomTimeProvider(
             rootTaskRecord: RootTaskRecord,
@@ -88,8 +88,6 @@ interface UserCustomTimeProviderSource {
                 friendsLoader.userKeyStore.requestCustomTimeUsers(rootTaskRecord.taskKey, foreignUserKeys)
             }
         }
-
-        private fun getUserCustomTimeKeysFromRecord(taskRecord: RootTaskRecord) = taskRecord.getUserCustomTimeKeys()
 
         private fun getUserCustomTimeProvider(
                 foreignUserKeys: Set<UserKey>,
@@ -103,13 +101,13 @@ interface UserCustomTimeProviderSource {
             ).map { (myUserFactory, friendsFactory) ->
                 object : JsonTime.UserCustomTimeProvider {
 
-                    override fun getUserCustomTime(userCustomTimeKey: CustomTimeKey.User): Time.Custom.User {
+                    override fun tryGetUserCustomTime(userCustomTimeKey: CustomTimeKey.User): Time.Custom.User? {
                         val provider = if (userCustomTimeKey.userKey == myUserFactory.user.userKey)
                             myUserFactory.user
                         else
                             friendsFactory
 
-                        return provider.getUserCustomTime(userCustomTimeKey)
+                        return provider.tryGetUserCustomTime(userCustomTimeKey)
                     }
                 }
             }

@@ -110,6 +110,28 @@ class RootTask private constructor(
 
     override val projectCustomTimeIdProvider = JsonTime.ProjectCustomTimeIdProvider.rootTask
 
+    val dependenciesLoadedCache = invalidatableCache<Boolean>(clearableInvalidatableManager) { invalidatableCache ->
+        val taskKeys = taskRecord.getDirectDependencyTaskKeys()
+
+        val tasks = taskKeys.mapNotNull(parent::tryGetRootTask)
+        val taskRemovables = tasks.map { it.clearableInvalidatableManager.addInvalidatable(invalidatableCache) }
+
+        val customTimeKeys = taskRecord.getUserCustomTimeKeys()
+        val customTimes = customTimeKeys.mapNotNull(userCustomTimeProvider::tryGetUserCustomTime)
+
+        if (tasks.size < taskKeys.size) {
+            return@invalidatableCache InvalidatableCache.ValueHolder(false) {
+
+            }
+        }
+
+        InvalidatableCache.ValueHolder(false) {
+
+        }
+    }
+
+    val dependenciesLoaded get() = false // todo dependencies
+
     fun createChildTask(
         now: ExactTimeStamp.Local,
         name: String,

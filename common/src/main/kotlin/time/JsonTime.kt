@@ -150,7 +150,9 @@ sealed class JsonTime {
 
     interface UserCustomTimeProvider {
 
-        fun getUserCustomTime(userCustomTimeKey: CustomTimeKey.User): Time.Custom.User
+        fun tryGetUserCustomTime(userCustomTimeKey: CustomTimeKey.User): Time.Custom.User?
+
+        fun getUserCustomTime(userCustomTimeKey: CustomTimeKey.User) = tryGetUserCustomTime(userCustomTimeKey)!!
     }
 
     interface CustomTimeProvider : ProjectCustomTimeProvider, UserCustomTimeProvider {

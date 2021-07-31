@@ -545,10 +545,10 @@ class DomainFactory(
 
     fun getDateTime(dateTimePair: DateTimePair) = dateTimePair.run { DateTime(date, getTime(timePair)) }
 
-    override fun getUserCustomTime(userCustomTimeKey: CustomTimeKey.User): Time.Custom.User {
+    override fun tryGetUserCustomTime(userCustomTimeKey: CustomTimeKey.User): Time.Custom.User? {
         val provider = if (userCustomTimeKey.userKey == deviceDbInfo.key) myUserFactory.user else friendsFactory
 
-        return provider.getUserCustomTime(userCustomTimeKey)
+        return provider.tryGetUserCustomTime(userCustomTimeKey)
     }
 
     fun getCustomTime(customTimeKey: CustomTimeKey): Time.Custom {

@@ -29,8 +29,7 @@ open class RootUser(private val remoteRootUserRecord: RootUserRecord) :
         _customTimes.remove(customTime.id)
     }
 
-    override fun getUserCustomTime(userCustomTimeKey: CustomTimeKey.User) =
-        customTimes[userCustomTimeKey.customTimeId] ?: throw MissingCustomTimeException(userKey, userCustomTimeKey)
+    override fun tryGetUserCustomTime(userCustomTimeKey: CustomTimeKey.User) = customTimes[userCustomTimeKey.customTimeId]
 
     class MissingCustomTimeException(userKey: UserKey, userCustomTimeKey: CustomTimeKey.User) :
         Exception("customTime $userCustomTimeKey missing from user $userKey")

@@ -123,7 +123,7 @@ abstract class Project<T : ProjectType>(
     private val rootTasksCache =
         invalidatableCache<Collection<RootTask>>(clearableInvalidatableManager) { invalidatableCache ->
             val managerRemovable =
-                rootModelChangeManager.rootTaskProjectIdInvalidatableManager.addInvalidatable(invalidatableCache)
+                rootModelChangeManager.rootTaskInvalidatableManager.addInvalidatable(invalidatableCache)
 
             val rootTasks = rootTaskProvider.getRootTasksForProject(projectKey)
 

@@ -23,6 +23,8 @@ interface RootTaskDependencyCoordinator {
         override fun getDependencies(rootTaskRecord: RootTaskRecord): Single<JsonTime.UserCustomTimeProvider> {
             rootTaskKeySource.onRootTaskAddedOrUpdated(rootTaskRecord.taskKey, rootTaskRecord.getAllDependencyTaskKeys())
 
+            return userCustomTimeProviderSource.getUserCustomTimeProvider(rootTaskRecord) // todo dependencies
+
             return listOf(
                 Observable.just(Unit),
                 rootTasksLoader.allEvents,

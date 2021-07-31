@@ -62,7 +62,7 @@ interface UserCustomTimeProviderSource {
                         }
                     }
                 }
-                is SharedProjectRecord -> getUserCustomTimeProvider(foreignUserKeys) {
+                is SharedProjectRecord -> getUserCustomTimeProvider(foreignUserKeys, false) {
                     friendsLoader.userKeyStore.requestCustomTimeUsers(projectRecord.projectKey, foreignUserKeys)
                 }
                 else -> throw IllegalArgumentException()
@@ -84,20 +84,40 @@ interface UserCustomTimeProviderSource {
         ): Single<JsonTime.UserCustomTimeProvider> {
             val foreignUserKeys = getForeignUserKeysFromRecord(rootTaskRecord)
 
-            return getUserCustomTimeProvider(foreignUserKeys) {
+            return getUserCustomTimeProvider(foreignUserKeys, true) {
                 friendsLoader.userKeyStore.requestCustomTimeUsers(rootTaskRecord.taskKey, foreignUserKeys)
             }
         }
 
         private fun getUserCustomTimeProvider(
-                foreignUserKeys: Set<UserKey>,
-                notEmptyCallback: () -> Unit,
+            foreignUserKeys: Set<UserKey>,
+            skipLoad: Boolean, // todo dependencies
+            notEmptyCallback: () -> Unit,
         ): Single<JsonTime.UserCustomTimeProvider> {
             if (foreignUserKeys.isNotEmpty()) notEmptyCallback()
 
-            return Singles.zip(
+            if (skipLoad) { // todo dependencies
+                return Singles.zip(
                     myUserFactorySingle,
-                    getCustomTimes(foreignUserKeys),
+                    friendsFactorySingle,
+                ).map { (myUserFactory, friendsFactory) ->
+                    object : JsonTime.UserCustomTimeProvider {
+
+                        override fun tryGetUserCustomTime(userCustomTimeKey: CustomTimeKey.User): Time.Custom.User? {
+                            val provider = if (userCustomTimeKey.userKey == myUserFactory.user.userKey)
+                                myUserFactory.user
+                            else
+                                friendsFactory
+
+                            return provider.tryGetUserCustomTime(userCustomTimeKey)
+                        }
+                    }
+                }
+            }
+
+            return Singles.zip(
+                myUserFactorySingle,
+                getCustomTimes(foreignUserKeys),
             ).map { (myUserFactory, friendsFactory) ->
                 object : JsonTime.UserCustomTimeProvider {
 

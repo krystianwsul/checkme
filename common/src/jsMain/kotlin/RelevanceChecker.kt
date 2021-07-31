@@ -74,7 +74,7 @@ object RelevanceChecker {
                 val userCustomTimeRelevances = userCustomTimes.associate { it.key to CustomTimeRelevance(it) }
 
                 userCustomTimeRelevances.values
-                    .filter { (it.customTime as Time.Custom.User).notDeleted(ExactTimeStamp.Local.now) }
+                    .filter { (it.customTime as Time.Custom.User).notDeleted }
                     .forEach { it.setRelevant() }
 
                 val userCustomTimeProvider = object : JsonTime.UserCustomTimeProvider {

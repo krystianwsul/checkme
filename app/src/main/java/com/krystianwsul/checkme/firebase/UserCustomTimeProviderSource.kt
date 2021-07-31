@@ -9,7 +9,6 @@ import com.krystianwsul.common.firebase.records.project.PrivateProjectRecord
 import com.krystianwsul.common.firebase.records.project.ProjectRecord
 import com.krystianwsul.common.firebase.records.project.SharedProjectRecord
 import com.krystianwsul.common.firebase.records.task.RootTaskRecord
-import com.krystianwsul.common.firebase.records.task.TaskRecord
 import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.CustomTimeKey
@@ -19,22 +18,6 @@ import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.kotlin.Singles
 
 interface UserCustomTimeProviderSource {
-
-    companion object {
-
-        fun getUserCustomTimeKeys(taskRecord: TaskRecord, expectProjectKeys: Boolean): List<CustomTimeKey.User> {
-            val instanceCustomTimeKeys: List<CustomTimeKey?> = taskRecord.instanceRecords
-                .values
-                .flatMap { listOf(it.scheduleKey.scheduleTimePair.customTimeKey, it.instanceCustomTimeKey) }
-
-            val customTimeKeys = listOf(taskRecord.scheduleCustomTimeKeys, instanceCustomTimeKeys).flatten().filterNotNull()
-
-            return if (expectProjectKeys)
-                customTimeKeys.filterIsInstance<CustomTimeKey.User>()
-            else
-                customTimeKeys.map { it as CustomTimeKey.User }
-        }
-    }
 
     // emit only remote changes
     fun getUserCustomTimeProvider(projectRecord: ProjectRecord<*>): Single<JsonTime.UserCustomTimeProvider>
@@ -88,26 +71,25 @@ interface UserCustomTimeProviderSource {
 
         private fun getUserCustomTimeKeys(projectRecord: ProjectRecord<*>): Set<CustomTimeKey.User> {
             return projectRecord.taskRecords
-                    .values
-                    .flatMap { getUserCustomTimeKeys(it, true) }
-                    .toSet()
+                .values
+                .flatMap { it.getUserCustomTimeKeys() }
+                .toSet()
         }
 
-        private fun getForeignUserKeys(rootTaskRecord: RootTaskRecord) =
-                getForeignUserKeys(getUserCustomTimeKeys(rootTaskRecord))
+        private fun getForeignUserKeysFromRecord(rootTaskRecord: RootTaskRecord) =
+            getForeignUserKeys(getUserCustomTimeKeysFromRecord(rootTaskRecord))
 
         override fun getUserCustomTimeProvider(
-                rootTaskRecord: RootTaskRecord,
+            rootTaskRecord: RootTaskRecord,
         ): Single<JsonTime.UserCustomTimeProvider> {
-            val foreignUserKeys = getForeignUserKeys(rootTaskRecord)
+            val foreignUserKeys = getForeignUserKeysFromRecord(rootTaskRecord)
 
             return getUserCustomTimeProvider(foreignUserKeys) {
                 friendsLoader.userKeyStore.requestCustomTimeUsers(rootTaskRecord.taskKey, foreignUserKeys)
             }
         }
 
-        private fun getUserCustomTimeKeys(taskRecord: RootTaskRecord) =
-                getUserCustomTimeKeys(taskRecord, false).toSet()
+        private fun getUserCustomTimeKeysFromRecord(taskRecord: RootTaskRecord) = taskRecord.getUserCustomTimeKeys()
 
         private fun getUserCustomTimeProvider(
                 foreignUserKeys: Set<UserKey>,
@@ -148,7 +130,7 @@ interface UserCustomTimeProviderSource {
         }
 
         override fun hasCustomTimes(rootTaskRecord: RootTaskRecord): Boolean {
-            val foreignUserKeys = getForeignUserKeys(rootTaskRecord)
+            val foreignUserKeys = getForeignUserKeysFromRecord(rootTaskRecord)
             if (foreignUserKeys.isEmpty()) return true
 
             val friendsFactory = friendsFactorySingle.tryGetCurrentValue() ?: return false

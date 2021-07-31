@@ -8,6 +8,7 @@ import com.krystianwsul.common.firebase.records.noscheduleorparent.ProjectNoSche
 import com.krystianwsul.common.firebase.records.project.ProjectRecord
 import com.krystianwsul.common.firebase.records.schedule.ProjectHelper
 import com.krystianwsul.common.firebase.records.schedule.ProjectRootDelegate
+import com.krystianwsul.common.utils.CustomTimeKey
 
 abstract class ProjectTaskRecord protected constructor(
     create: Boolean,
@@ -54,4 +55,6 @@ abstract class ProjectTaskRecord protected constructor(
         setProperty(projectTaskJson::endData, compatEndData)
         setProperty(projectTaskJson::endTime, compatEndData?.time)
     }
+
+    override fun getUserCustomTimeKeys() = getCustomTimeKeys().filterIsInstance<CustomTimeKey.User>().toSet()
 }

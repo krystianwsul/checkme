@@ -221,6 +221,16 @@ abstract class TaskRecord protected constructor(
 
     final override fun deleteFromParent() = parent.deleteTaskRecord(this)
 
+    protected fun getCustomTimeKeys(): List<CustomTimeKey> {
+        val instanceCustomTimeKeys = instanceRecords.values.flatMap {
+            listOf(it.scheduleKey.scheduleTimePair.customTimeKey, it.instanceCustomTimeKey)
+        }
+
+        return listOf(scheduleCustomTimeKeys, instanceCustomTimeKeys).flatten().filterNotNull()
+    }
+
+    abstract fun getUserCustomTimeKeys(): Set<CustomTimeKey.User>
+
     interface Parent {
 
         fun deleteTaskRecord(taskRecord: TaskRecord)

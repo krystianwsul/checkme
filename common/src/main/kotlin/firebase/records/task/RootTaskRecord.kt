@@ -13,6 +13,7 @@ import com.krystianwsul.common.firebase.records.noscheduleorparent.RootNoSchedul
 import com.krystianwsul.common.firebase.records.schedule.*
 import com.krystianwsul.common.firebase.records.taskhierarchy.NestedTaskHierarchyRecord
 import com.krystianwsul.common.time.JsonTime
+import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.TaskKey
 
 class RootTaskRecord private constructor(
@@ -233,4 +234,6 @@ class RootTaskRecord private constructor(
 
         return (hierarchyKeys + instanceKeys).toSet()
     }
+
+    override fun getUserCustomTimeKeys() = getCustomTimeKeys().map { it as CustomTimeKey.User }.toSet()
 }

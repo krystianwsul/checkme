@@ -86,8 +86,8 @@ sealed class Time {
         }
 
         open class User(
-                private val user: RootUser,
-                final override val customTimeRecord: UserCustomTimeRecord,
+            val user: RootUser,
+            final override val customTimeRecord: UserCustomTimeRecord,
         ) : Custom(), Endable {
 
             override val id = customTimeRecord.id

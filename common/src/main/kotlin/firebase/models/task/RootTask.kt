@@ -110,27 +110,47 @@ class RootTask private constructor(
 
     override val projectCustomTimeIdProvider = JsonTime.ProjectCustomTimeIdProvider.rootTask
 
-    val dependenciesLoadedCache = invalidatableCache<Boolean>(clearableInvalidatableManager) { invalidatableCache ->
-        val taskKeys = taskRecord.getDirectDependencyTaskKeys()
+    private val dependenciesLoadedCache: InvalidatableCache<Boolean> =
+        invalidatableCache(clearableInvalidatableManager) { invalidatableCache ->
+            val taskKeys = taskRecord.getDirectDependencyTaskKeys()
+            val tasks = taskKeys.mapNotNull(parent::tryGetRootTask)
 
-        val tasks = taskKeys.mapNotNull(parent::tryGetRootTask)
-        val taskRemovables = tasks.map { it.clearableInvalidatableManager.addInvalidatable(invalidatableCache) }
+            val taskRemovables = tasks.map {
+                it.dependenciesLoadedCache
+                    .invalidatableManager
+                    .addInvalidatable(invalidatableCache)
+            }
 
-        val customTimeKeys = taskRecord.getUserCustomTimeKeys()
-        val customTimes = customTimeKeys.mapNotNull(userCustomTimeProvider::tryGetUserCustomTime)
+            val customTimeKeys = taskRecord.getUserCustomTimeKeys()
+            val customTimes = customTimeKeys.mapNotNull(userCustomTimeProvider::tryGetUserCustomTime)
 
-        if (tasks.size < taskKeys.size) {
-            return@invalidatableCache InvalidatableCache.ValueHolder(false) {
+            val customTimeRemovables = customTimes.map {
+                it.user
+                    .clearableInvalidatableManager
+                    .addInvalidatable(invalidatableCache)
+            }
 
+            val removables = (taskRemovables + customTimeRemovables).toMutableList()
+            var directDependenciesLoaded = true
+
+            if (tasks.size < taskKeys.size) {
+                removables += rootModelChangeManager.rootTaskInvalidatableManager.addInvalidatable(invalidatableCache)
+                directDependenciesLoaded = false
+            }
+
+            if (customTimes.size < customTimeKeys.size) {
+                removables += rootModelChangeManager.userInvalidatableManager.addInvalidatable(invalidatableCache)
+                directDependenciesLoaded = false
+            }
+
+            val allDependenciesLoaded = directDependenciesLoaded && tasks.all { it.dependenciesLoaded }
+
+            InvalidatableCache.ValueHolder(allDependenciesLoaded) {
+                removables.forEach { it.remove() }
             }
         }
 
-        InvalidatableCache.ValueHolder(false) {
-
-        }
-    }
-
-    val dependenciesLoaded get() = false // todo dependencies
+    val dependenciesLoaded get() = dependenciesLoadedCache.value
 
     fun createChildTask(
         now: ExactTimeStamp.Local,

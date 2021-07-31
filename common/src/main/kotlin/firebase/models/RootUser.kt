@@ -1,6 +1,7 @@
 package com.krystianwsul.common.firebase.models
 
 import com.krystianwsul.common.firebase.RootUserProperties
+import com.krystianwsul.common.firebase.models.cache.ClearableInvalidatableManager
 import com.krystianwsul.common.firebase.records.RootUserRecord
 import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.time.Time
@@ -14,11 +15,13 @@ open class RootUser(private val remoteRootUserRecord: RootUserRecord) :
         JsonTime.UserCustomTimeProvider {
 
     protected open val _customTimes: MutableMap<CustomTimeId.User, out Time.Custom.User> =
-            remoteRootUserRecord.customTimeRecords
-                    .mapValues { Time.Custom.User(this, it.value) }
-                    .toMutableMap()
+        remoteRootUserRecord.customTimeRecords
+            .mapValues { Time.Custom.User(this, it.value) }
+            .toMutableMap()
 
     open val customTimes: Map<CustomTimeId.User, Time.Custom.User> get() = _customTimes
+
+    val clearableInvalidatableManager = ClearableInvalidatableManager()
 
     fun deleteCustomTime(customTime: Time.Custom.User) {
         check(_customTimes.containsKey(customTime.id))

@@ -47,7 +47,13 @@ class FriendsFactory(
         val addChangeFriendChangeTypes = friendsLoader.addChangeFriendEvents
                 .mapNotNull { rootUserManager.set(it.userWrapperData) }
                 .map { (changeType, reasonWrapper) ->
-                    userMap[reasonWrapper.value.userKey] = reasonWrapper.newValue(RootUser(reasonWrapper.value))
+                    val userKey = reasonWrapper.value.userKey
+
+                    userMap[userKey]?.value
+                        ?.clearableInvalidatableManager
+                        ?.clear()
+
+                    userMap[userKey] = reasonWrapper.newValue(RootUser(reasonWrapper.value))
 
                     changeType
                 }
@@ -55,6 +61,11 @@ class FriendsFactory(
         val removeFriendsChangeTypes = friendsLoader.removeFriendEvents.map {
             it.userKeys.forEach {
                 rootUserManager.remove(it)
+
+                userMap[it]?.value
+                    ?.clearableInvalidatableManager
+                    ?.clear()
+
                 userMap.remove(it)
             }
 

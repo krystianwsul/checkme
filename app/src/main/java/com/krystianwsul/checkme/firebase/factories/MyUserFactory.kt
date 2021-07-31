@@ -38,6 +38,8 @@ class MyUserFactory(userSnapshot: Snapshot<UserWrapper>, deviceDbInfo: DeviceDbI
 
     fun onNewSnapshot(snapshot: Snapshot<UserWrapper>): ChangeType? {
         return myUserManager.set(snapshot)?.let {
+            user.clearableInvalidatableManager.clear()
+
             user = MyUser(it.data)
 
             it.changeType

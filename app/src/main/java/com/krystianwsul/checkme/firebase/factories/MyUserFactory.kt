@@ -10,12 +10,22 @@ import com.krystianwsul.common.firebase.ChangeWrapper
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.json.UserWrapper
 import com.krystianwsul.common.firebase.models.MyUser
+import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
 
-class MyUserFactory(userSnapshot: Snapshot<UserWrapper>, deviceDbInfo: DeviceDbInfo, databaseWrapper: DatabaseWrapper) {
+class MyUserFactory(
+    userSnapshot: Snapshot<UserWrapper>,
+    deviceDbInfo: DeviceDbInfo,
+    databaseWrapper: DatabaseWrapper,
+    private val rootModelChangeManager: RootModelChangeManager,
+) {
 
     private val myUserManager = MyUserManager(deviceDbInfo, userSnapshot, databaseWrapper)
 
     private val userRelay = BehaviorRelay.createDefault(MyUser(myUserManager.value))
+
+    init {
+        rootModelChangeManager.invalidateUsers()
+    }
 
     var user
         get() = userRelay.value!!
@@ -25,7 +35,7 @@ class MyUserFactory(userSnapshot: Snapshot<UserWrapper>, deviceDbInfo: DeviceDbI
 
     val friendKeysObservable = userRelay.switchMap { myUser ->
         myUser.friendChanges
-                .asRxJava3Observable()
+            .asRxJava3Observable()
                 .map { ChangeType.LOCAL }
                 .startWithItem(ChangeType.REMOTE)
                 .map { ChangeWrapper(it, myUser.friends) }
@@ -39,6 +49,7 @@ class MyUserFactory(userSnapshot: Snapshot<UserWrapper>, deviceDbInfo: DeviceDbI
     fun onNewSnapshot(snapshot: Snapshot<UserWrapper>): ChangeType? {
         return myUserManager.set(snapshot)?.let {
             user.clearableInvalidatableManager.clear()
+            rootModelChangeManager.invalidateUsers()
 
             user = MyUser(it.data)
 

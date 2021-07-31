@@ -12,6 +12,7 @@ import com.krystianwsul.common.firebase.UserLoadReason
 import com.krystianwsul.common.firebase.json.UserJson
 import com.krystianwsul.common.firebase.json.UserWrapper
 import com.krystianwsul.common.firebase.models.RootUser
+import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
 import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.CustomTimeKey
@@ -22,10 +23,11 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.merge
 
 class FriendsFactory(
-        private val friendsLoader: FriendsLoader,
-        initialFriendsEvent: FriendsLoader.InitialFriendsEvent,
-        domainDisposable: CompositeDisposable,
-        databaseWrapper: DatabaseWrapper,
+    private val friendsLoader: FriendsLoader,
+    initialFriendsEvent: FriendsLoader.InitialFriendsEvent,
+    domainDisposable: CompositeDisposable,
+    databaseWrapper: DatabaseWrapper,
+    private val rootModelChangeManager: RootModelChangeManager,
 ) : JsonTime.UserCustomTimeProvider {
 
     private val rootUserManager = AndroidRootUserManager(initialFriendsEvent.userWrapperDatas, databaseWrapper)
@@ -53,6 +55,8 @@ class FriendsFactory(
                         ?.clearableInvalidatableManager
                         ?.clear()
 
+                    rootModelChangeManager.invalidateUsers()
+
                     userMap[userKey] = reasonWrapper.newValue(RootUser(reasonWrapper.value))
 
                     changeType
@@ -65,6 +69,8 @@ class FriendsFactory(
                 userMap[it]?.value
                     ?.clearableInvalidatableManager
                     ?.clear()
+
+                rootModelChangeManager.invalidateUsers()
 
                 userMap.remove(it)
             }

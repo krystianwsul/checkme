@@ -56,20 +56,21 @@ class UserCustomTimeProviderSourceTest {
         // This is copied from FactoryLoader.  Probably should be in a class or something.
         val friendsFactorySingle = friendsLoader.initialFriendsEvent.map {
             FriendsFactory(
-                    friendsLoader,
-                    it,
-                    domainDisposable,
-                    mockk(),
+                friendsLoader,
+                it,
+                domainDisposable,
+                mockk(),
+                mockk(relaxed = true), // todo dependencies
             )
         }
-                .cache()
-                .apply { domainDisposable += subscribe() }
+            .cache()
+            .apply { domainDisposable += subscribe() }
 
         userCustomTimeProviderSource = UserCustomTimeProviderSource.Impl(
-                myUserKey,
-                mockk(),
-                mockk(),
-                friendsFactorySingle,
+            myUserKey,
+            mockk(),
+            mockk(),
+            friendsFactorySingle,
         )
     }
 

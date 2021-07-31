@@ -67,9 +67,10 @@ class FactoryLoader(
 
                         val privateProjectManager = AndroidPrivateProjectManager(userInfo, factoryProvider.database)
 
+                        val rootModelChangeManager = RootModelChangeManager()
 
                         val userFactorySingle = userDatabaseRx.first
-                            .map { MyUserFactory(it, getDeviceDbInfo(), factoryProvider.database) }
+                            .map { MyUserFactory(it, getDeviceDbInfo(), factoryProvider.database, rootModelChangeManager) }
                             .cacheImmediate()
 
                         val userKeyStore = UserKeyStore(
@@ -86,6 +87,7 @@ class FactoryLoader(
                                     it,
                                     domainDisposable,
                                     factoryProvider.database,
+                                    rootModelChangeManager,
                                 )
                             }
                             .cacheImmediate()
@@ -132,8 +134,6 @@ class FactoryLoader(
 
                         val modelRootTaskDependencyStateContainer = RootTaskDependencyStateContainer.Impl()
 
-                        val existingInstanceChangeManager = RootModelChangeManager()
-
                         val rootTasksFactory = RootTasksFactory(
                             rootTasksLoader,
                             userKeyStore,
@@ -142,7 +142,7 @@ class FactoryLoader(
                             rootTaskKeySource,
                             loadDependencyTrackerManager,
                             modelRootTaskDependencyStateContainer,
-                            existingInstanceChangeManager,
+                            rootModelChangeManager,
                         ) { projectsFactorySingle.getCurrentValue() }
 
                         val projectToRootTaskCoordinator = ProjectToRootTaskCoordinator.Impl(
@@ -202,7 +202,7 @@ class FactoryLoader(
                                 shownFactory,
                                 domainDisposable,
                                 rootTasksFactory,
-                                existingInstanceChangeManager,
+                                rootModelChangeManager,
                                 ::getDeviceDbInfo,
                             )
                         }.cacheImmediate()

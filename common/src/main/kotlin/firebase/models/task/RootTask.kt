@@ -133,6 +133,14 @@ class RootTask private constructor(
             val removables = (taskRemovables + customTimeRemovables).toMutableList()
             var directDependenciesLoaded = true
 
+            /**
+             * todo dependencies: I think that for both of these, if the extra removable is added, then the original
+             * ones are redundant - and horribly inefficient.  I think I can start with returning just a removable
+             * for custom times all, then for root tasks all, then for individual ones
+             *
+             * Also, consider mechanism to trigger invalidation for a specific key, so that I don't invalidate on EVERY
+             * user/task key change
+             */
             if (tasks.size < taskKeys.size) {
                 removables += rootModelChangeManager.rootTaskInvalidatableManager.addInvalidatable(invalidatableCache)
                 directDependenciesLoaded = false

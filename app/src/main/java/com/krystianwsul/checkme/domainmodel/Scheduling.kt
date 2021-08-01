@@ -48,13 +48,23 @@ private fun Completable.logR(): Completable {
     return doOnComplete { log(callSite) }
 }
 
-fun <T : Any> Observable<T>.observeOnDomain(priority: Priority? = null) = observeOn(getScheduler(priority)).logR()!!
-fun <T : Any> Single<T>.observeOnDomain(priority: Priority? = null) = observeOn(getScheduler(priority)).logR()!!
-fun <T : Any> Flowable<T>.observeOnDomain(priority: Priority? = null) = observeOn(getScheduler(priority)).logR()!!
+fun <T : Any> Observable<T>.observeOnDomain(priority: Priority? = null) =
+    observeOn(getScheduler(priority))!!//.logR() todo dependencies
 
-fun <T : Any> Observable<T>.subscribeOnDomain(priority: Priority? = null) = subscribeOn(getScheduler(priority)).logR()!!
-fun <T : Any> Single<T>.subscribeOnDomain(priority: Priority? = null) = subscribeOn(getScheduler(priority)).logR()!!
-fun Completable.subscribeOnDomain(priority: Priority? = null) = subscribeOn(getScheduler(priority)).logR()!!
+fun <T : Any> Single<T>.observeOnDomain(priority: Priority? = null) =
+    observeOn(getScheduler(priority))!!//.logR() todo dependencies
+
+fun <T : Any> Flowable<T>.observeOnDomain(priority: Priority? = null) =
+    observeOn(getScheduler(priority))!!//.logR() todo dependencies
+
+fun <T : Any> Observable<T>.subscribeOnDomain(priority: Priority? = null) =
+    subscribeOn(getScheduler(priority))!!//.logR() todo dependencies
+
+fun <T : Any> Single<T>.subscribeOnDomain(priority: Priority? = null) =
+    subscribeOn(getScheduler(priority))!!//.logR() todo dependencies
+
+fun Completable.subscribeOnDomain(priority: Priority? = null) =
+    subscribeOn(getScheduler(priority))!!//.logR() todo dependencies
 
 @CheckResult
 fun completeOnDomain(action: () -> Unit) = Completable.fromAction(action).subscribeOnDomain()

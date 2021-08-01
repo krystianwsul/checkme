@@ -19,7 +19,6 @@ import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.ProjectKey
-import com.krystianwsul.common.utils.TimeLogger
 import java.util.*
 
 fun DomainFactory.getMainNoteData(now: ExactTimeStamp.Local = ExactTimeStamp.Local.now): MainNoteViewModel.Data {
@@ -189,7 +188,7 @@ fun DomainFactory.getGroupListData(
     return DayViewModel.DayData(dataWrapper).also {
         MyApplication.logTime("DomainFactory.getGroupListData end")
 
-        TimeLogger.print()
-        TimeLogger.clear()
+        // TimeLogger.print() todo dependencies
+        // TimeLogger.clear() todo dependencies
     }
 }

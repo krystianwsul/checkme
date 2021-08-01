@@ -15,7 +15,6 @@ import com.krystianwsul.checkme.domainmodel.notifications.NotificationWrapper
 import com.krystianwsul.checkme.domainmodel.notifications.Notifier
 import com.krystianwsul.checkme.domainmodel.update.CompletableDomainUpdate
 import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
-import com.krystianwsul.checkme.firebase.LoadStatus
 import com.krystianwsul.checkme.firebase.factories.FriendsFactory
 import com.krystianwsul.checkme.firebase.factories.MyUserFactory
 import com.krystianwsul.checkme.firebase.factories.ProjectsFactory
@@ -43,6 +42,7 @@ import com.krystianwsul.common.firebase.models.task.*
 import com.krystianwsul.common.firebase.models.taskhierarchy.TaskHierarchy
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.*
+import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
@@ -80,7 +80,11 @@ class DomainFactory(
 
         var firstRun = false
 
-        val isSaved = LoadStatus.isLoadingObservable
+        val isSaved = instanceRelay.switchMap {
+            it.value
+                ?.isWaitingForTasks
+                ?: Observable.just(true)
+        }!!
     }
 
     var remoteReadTimes: ReadTimes
@@ -93,6 +97,8 @@ class DomainFactory(
     val notifier = Notifier(this, NotificationWrapper.instance)
 
     val converter = Converter()
+
+    private val isWaitingForTasks = BehaviorRelay.create<Boolean>()
 
     init {
         Preferences.tickLog.logLineHour("DomainFactory.init")
@@ -288,6 +294,27 @@ class DomainFactory(
                     notifyParams,
                     SaveParams(NotificationType.All, runType == RunType.REMOTE),
                 )
+            }
+        )
+
+        isWaitingForTasks.accept(
+            run {
+                val projectsWaiting = projectsFactory.projects
+                    .values
+                    .any {
+                        it.projectRecord
+                            .rootTaskParentDelegate
+                            .rootTaskKeys
+                            .size > it.getAllTasks().size
+                    }
+
+                val tasksWaiting by lazy {
+                    rootTasksFactory.rootTasks
+                        .values
+                        .any { !it.dependenciesLoaded }
+                }
+
+                projectsWaiting || tasksWaiting
             }
         )
     }

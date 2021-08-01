@@ -31,7 +31,7 @@ abstract class MapRecordManager<T, U : Any> : RecordManager {
         }
     }
 
-    fun remove(key: T) { // todo dependencies implement for shared projects
+    fun remove(key: T) {
         recordMap.remove(key)
     }
 

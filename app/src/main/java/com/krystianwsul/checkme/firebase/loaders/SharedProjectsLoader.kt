@@ -170,6 +170,8 @@ interface SharedProjectsLoader {
                     RemoveProjectsEvent(it.removedProjectKeys)
                 }
                 .doOnNext {
+                    it.projectKeys.forEach(projectManager::remove)
+
                     rootTaskKeySource.onProjectsRemoved(it.projectKeys)
                     userKeyStore.onProjectsRemoved(it.projectKeys)
                 }

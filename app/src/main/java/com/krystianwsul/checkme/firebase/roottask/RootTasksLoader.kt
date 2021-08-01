@@ -90,7 +90,8 @@ class RootTasksLoader(
 
                 recordObservable.map { (taskRecord, isAddedLocally) ->
                     if (taskRecord != null) {
-                        val isTaskKeyTracked = loadDependencyTrackerManager.isTaskKeyTracked(taskRecord.taskKey)
+                        val isTaskKeyTracked =
+                            false // loadDependencyTrackerManager.isTaskKeyTracked(taskRecord.taskKey) todo dependencies
 
                         // there's no reason why we'd be tracking a change for a locally added record
                         check(!isTaskKeyTracked || !isAddedLocally)

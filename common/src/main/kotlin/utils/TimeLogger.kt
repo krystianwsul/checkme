@@ -10,7 +10,7 @@ object TimeLogger {
 
     fun print() {
         times.entries
-                .sortedBy { it.key }
+            .sortedByDescending { it.value.first }
                 .forEach { log("magic called ${it.value.first} times: ${it.key}, ${it.value.second} ms") }
     }
 

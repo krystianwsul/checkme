@@ -8,6 +8,7 @@ import android.content.SharedPreferences
 import android.content.res.Configuration
 import android.content.res.Resources
 import android.os.Build
+import android.util.Log
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.core.content.pm.ShortcutInfoCompat
@@ -40,6 +41,7 @@ import com.krystianwsul.checkme.utils.toV3
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.DomainThreadChecker
+import com.krystianwsul.common.time.ExactTimeStamp
 import com.miguelbcr.ui.rx_paparazzo2.RxPaparazzo
 import com.pacoworks.rxpaper2.RxPaperBook
 import io.reactivex.rxjava3.core.Completable
@@ -64,6 +66,13 @@ class MyApplication : Application() {
 
         var _sharedPreferences: SharedPreferences? = null
         val sharedPreferences get() = _sharedPreferences!!
+
+        val start = ExactTimeStamp.Local.now // todo dependencies
+
+        fun logTime(message: String) {
+            val ms = ExactTimeStamp.Local.now.long - start.long
+            Log.e("asdf", "magic $ms " + message)
+        }
     }
 
     val googleSignInClient by lazy { getClient() }

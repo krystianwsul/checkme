@@ -1,25 +1,9 @@
-package com.mindorks.scheduler;
+package com.mindorks.scheduler
 
-public enum Priority {
+enum class Priority {
 
-    /**
-     * Lowest priority level.
-     */
     LOW,
-
-    /**
-     * Medium priority level.
-     */
     MEDIUM,
-
-    /**
-     * Highest priority level.
-     */
     HIGH,
-
-    /**
-     * Immediate priority level.
-     */
     IMMEDIATE
-
 }

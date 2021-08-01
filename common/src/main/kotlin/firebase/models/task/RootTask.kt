@@ -112,17 +112,25 @@ class RootTask private constructor(
 
     private val dependenciesLoadedCache: InvalidatableCache<Boolean> =
         invalidatableCache(clearableInvalidatableManager) { invalidatableCache ->
+            val customTimeKeys = taskRecord.getUserCustomTimeKeys()
+            val customTimes = customTimeKeys.mapNotNull(userCustomTimeProvider::tryGetUserCustomTime)
+
+            if (customTimes.size < customTimeKeys.size) {
+                // todo dependencies how hard would it be to make this per-key?
+                val removable = rootModelChangeManager.userInvalidatableManager.addInvalidatable(invalidatableCache)
+
+                return@invalidatableCache InvalidatableCache.ValueHolder(false) { removable.remove() }
+            }
+
             val taskKeys = taskRecord.getDirectDependencyTaskKeys()
             val tasks = taskKeys.mapNotNull(parent::tryGetRootTask)
 
-            val taskRemovables = tasks.map {
-                it.dependenciesLoadedCache
-                    .invalidatableManager
-                    .addInvalidatable(invalidatableCache)
-            }
+            if (tasks.size < taskKeys.size) {
+                // todo dependencies how hard would it be to make this per-key?
+                val removable = rootModelChangeManager.rootTaskInvalidatableManager.addInvalidatable(invalidatableCache)
 
-            val customTimeKeys = taskRecord.getUserCustomTimeKeys()
-            val customTimes = customTimeKeys.mapNotNull(userCustomTimeProvider::tryGetUserCustomTime)
+                return@invalidatableCache InvalidatableCache.ValueHolder(false) { removable.remove() }
+            }
 
             val customTimeRemovables = customTimes.map {
                 it.user
@@ -130,31 +138,15 @@ class RootTask private constructor(
                     .addInvalidatable(invalidatableCache)
             }
 
-            val removables = (taskRemovables + customTimeRemovables).toMutableList()
-            var directDependenciesLoaded = true
-
-            /**
-             * todo dependencies: I think that for both of these, if the extra removable is added, then the original
-             * ones are redundant - and horribly inefficient.  I think I can start with returning just a removable
-             * for custom times all, then for root tasks all, then for individual ones
-             *
-             * Also, consider mechanism to trigger invalidation for a specific key, so that I don't invalidate on EVERY
-             * user/task key change
-             */
-            if (tasks.size < taskKeys.size) {
-                removables += rootModelChangeManager.rootTaskInvalidatableManager.addInvalidatable(invalidatableCache)
-                directDependenciesLoaded = false
+            val taskRemovables = tasks.map {
+                it.dependenciesLoadedCache
+                    .invalidatableManager
+                    .addInvalidatable(invalidatableCache)
             }
 
-            if (customTimes.size < customTimeKeys.size) {
-                removables += rootModelChangeManager.userInvalidatableManager.addInvalidatable(invalidatableCache)
-                directDependenciesLoaded = false
-            }
-
-            val allDependenciesLoaded = directDependenciesLoaded && tasks.all { it.dependenciesLoaded }
-
-            InvalidatableCache.ValueHolder(allDependenciesLoaded) {
-                removables.forEach { it.remove() }
+            InvalidatableCache.ValueHolder(tasks.all { it.dependenciesLoaded }) {
+                taskRemovables.forEach { it.remove() }
+                customTimeRemovables.forEach { it.remove() }
             }
         }
 

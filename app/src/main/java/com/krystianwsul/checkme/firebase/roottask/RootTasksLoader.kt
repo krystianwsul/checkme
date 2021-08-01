@@ -112,7 +112,10 @@ class RootTasksLoader(
     val allEvents = listOf(databaseEvents, removeEntryEvents).merge()
 
     val addChangeEvents = allEvents.ofType<AddChangeEvent>()
+
     val removeEvents = allEvents.ofType<RemoveEvent>()
+        .doOnNext { it.taskKeys.forEach(rootTasksManager::remove) }
+        .replayImmediate()
 
     fun addTask(taskJson: RootTaskJson): TaskKey.Root {
         val taskRecord = rootTasksManager.newTaskRecord(taskJson)

@@ -46,7 +46,7 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
 
     private val mainDomainListener = object : DomainListener<MainData>() {
 
-        override val priority = Priority.HIGH
+        override val priority = Priority.EDIT_SCREEN
 
         override val domainResultFetcher = object : DomainResultFetcher<MainData> {
 

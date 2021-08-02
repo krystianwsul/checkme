@@ -27,15 +27,15 @@ interface ProjectLoader<T : ProjectType, U : Parsable> { // U: Project JSON type
     val changeProjectEvents: Observable<ChangeProjectEvent<T>>
 
     class InitialProjectEvent<T : ProjectType, U : Parsable>(
-            // U: Project JSON type
-            val projectManager: ProjectProvider.ProjectManager<T, U>,
-            val projectRecord: ProjectRecord<T>,
-            val userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
+        // U: Project JSON type
+        val projectManager: ProjectProvider.ProjectManager<T, U>,
+        val projectRecord: ProjectRecord<T>,
+        val userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
     )
 
     class ChangeProjectEvent<T : ProjectType>(
-            val projectRecord: ProjectRecord<T>,
-            val userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
+        val projectRecord: ProjectRecord<T>,
+        val userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
     )
 
     class Impl<T : ProjectType, U : Parsable>(
@@ -51,51 +51,50 @@ interface ProjectLoader<T : ProjectType, U : Parsable> { // U: Project JSON type
         private fun <T> Observable<T>.replayImmediate() = replay().apply { domainDisposable += connect() }!!
 
         private data class ProjectRecordData<T : ProjectType>(
-                val changeType: ChangeType,
-                val projectRecord: ProjectRecord<T>,
-                val userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
+            val changeType: ChangeType,
+            val projectRecord: ProjectRecord<T>,
+            val userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
         )
 
         private val projectRecordObservable: Observable<ProjectRecordData<T>> =
-                snapshotObservable.mapNotNull { projectManager.set(it) }
-                        .let {
-                            if (initialProjectRecord != null) {
-                                it.startWithItem(ChangeWrapper(ChangeType.LOCAL, initialProjectRecord))
-                            } else {
-                                it
-                            }
-                        }
-                        .switchMapSingle { (projectChangeType, projectRecord) ->
-                            rootTaskKeySource.onProjectAddedOrUpdated(
-                                projectRecord.projectKey,
-                                projectRecord.rootTaskParentDelegate.rootTaskKeys
-                            )
+            snapshotObservable.mapNotNull { projectManager.set(it) }
+                .let {
+                    if (initialProjectRecord != null) {
+                        it.startWithItem(ChangeWrapper(ChangeType.LOCAL, initialProjectRecord))
+                    } else {
+                        it
+                    }
+                }
+                .switchMapSingle { (projectChangeType, projectRecord) ->
+                    rootTaskKeySource.onProjectAddedOrUpdated(
+                        projectRecord.projectKey,
+                        projectRecord.rootTaskParentDelegate.rootTaskKeys
+                    )
 
-                            // todo dependencies middle cleanup
-                            userCustomTimeProviderSource.getUserCustomTimeProvider(projectRecord)
-                                .map { userCustomTimeProvider ->
-                                    ProjectRecordData(projectChangeType, projectRecord, userCustomTimeProvider)
-                                }
-                        }
+                    // todo dependencies middle cleanup
+                    userCustomTimeProviderSource.getUserCustomTimeProvider(projectRecord).map {
+                        ProjectRecordData(projectChangeType, projectRecord, it)
+                    }
+                }
                 .replayImmediate()
 
         // first snapshot of everything
         override val initialProjectEvent = projectRecordObservable.firstOrError()
-                .map {
-                    ChangeWrapper(
-                            it.changeType,
-                            InitialProjectEvent(projectManager, it.projectRecord, it.userCustomTimeProvider),
-                    )
-                }
-                .cacheImmediate(domainDisposable)
+            .map {
+                ChangeWrapper(
+                    it.changeType,
+                    InitialProjectEvent(projectManager, it.projectRecord, it.userCustomTimeProvider),
+                )
+            }
+            .cacheImmediate(domainDisposable)
 
         // Here we observe remaining changes to the project or tasks, which don't affect the instance observables
         override val changeProjectEvents = projectRecordObservable.skip(1)
-                .map {
-                    check(it.changeType == ChangeType.REMOTE)
+            .map {
+                check(it.changeType == ChangeType.REMOTE)
 
-                    ChangeProjectEvent(it.projectRecord, it.userCustomTimeProvider)
-                }
-                .replayImmediate()
+                ChangeProjectEvent(it.projectRecord, it.userCustomTimeProvider)
+            }
+            .replayImmediate()
     }
 }

@@ -17,7 +17,7 @@ import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.kotlin.Singles
 
-interface UserCustomTimeProviderSource {
+interface UserCustomTimeProviderSource { // todo dependencies final cleanup
 
     // emit only remote changes
     fun getUserCustomTimeProvider(projectRecord: ProjectRecord<*>): Single<JsonTime.UserCustomTimeProvider>
@@ -30,10 +30,10 @@ interface UserCustomTimeProviderSource {
     fun getTimeChangeObservable(): Observable<Unit>
 
     class Impl(
-            private val myUserKey: UserKey,
-            private val myUserFactorySingle: Single<MyUserFactory>,
-            private val friendsLoader: FriendsLoader,
-            private val friendsFactorySingle: Single<FriendsFactory>,
+        private val myUserKey: UserKey,
+        private val myUserFactorySingle: Single<MyUserFactory>,
+        private val friendsLoader: FriendsLoader,
+        private val friendsFactorySingle: Single<FriendsFactory>,
     ) : UserCustomTimeProviderSource {
 
         private fun getForeignUserKeys(customTimeKeys: Set<CustomTimeKey.User>): Set<UserKey> {
@@ -42,7 +42,7 @@ interface UserCustomTimeProviderSource {
         }
 
         override fun getUserCustomTimeProvider(
-                projectRecord: ProjectRecord<*>,
+            projectRecord: ProjectRecord<*>,
         ): Single<JsonTime.UserCustomTimeProvider> {
             val customTimeKeys = getUserCustomTimeKeys(projectRecord)
             val foreignUserKeys = getForeignUserKeys(customTimeKeys)
@@ -62,7 +62,7 @@ interface UserCustomTimeProviderSource {
                         }
                     }
                 }
-                is SharedProjectRecord -> getUserCustomTimeProvider(foreignUserKeys, false) {
+                is SharedProjectRecord -> getUserCustomTimeProvider(foreignUserKeys) {
                     friendsLoader.userKeyStore.requestCustomTimeUsers(projectRecord.projectKey, foreignUserKeys)
                 }
                 else -> throw IllegalArgumentException()
@@ -79,57 +79,38 @@ interface UserCustomTimeProviderSource {
         private fun getForeignUserKeysFromRecord(rootTaskRecord: RootTaskRecord) =
             getForeignUserKeys(rootTaskRecord.getUserCustomTimeKeys())
 
-        override fun getUserCustomTimeProvider(
-            rootTaskRecord: RootTaskRecord,
-        ): Single<JsonTime.UserCustomTimeProvider> {
+        override fun getUserCustomTimeProvider(rootTaskRecord: RootTaskRecord): Single<JsonTime.UserCustomTimeProvider> {
             val foreignUserKeys = getForeignUserKeysFromRecord(rootTaskRecord)
 
-            return getUserCustomTimeProvider(foreignUserKeys, true) {
+            return getUserCustomTimeProvider(foreignUserKeys) {
                 friendsLoader.userKeyStore.requestCustomTimeUsers(rootTaskRecord.taskKey, foreignUserKeys)
             }
         }
 
         private fun getUserCustomTimeProvider(
             foreignUserKeys: Set<UserKey>,
-            skipLoad: Boolean, // todo dependencies middle cleanup
             notEmptyCallback: () -> Unit,
         ): Single<JsonTime.UserCustomTimeProvider> {
             if (foreignUserKeys.isNotEmpty()) notEmptyCallback()
 
-            if (skipLoad) { // todo dependencies middle cleanup
-                return Singles.zip(
-                    myUserFactorySingle,
-                    friendsFactorySingle,
-                ).map { (myUserFactory, friendsFactory) ->
-                    object : JsonTime.UserCustomTimeProvider {
-
-                        override fun tryGetUserCustomTime(userCustomTimeKey: CustomTimeKey.User): Time.Custom.User? {
-                            val provider = if (userCustomTimeKey.userKey == myUserFactory.user.userKey)
-                                myUserFactory.user
-                            else
-                                friendsFactory
-
-                            return provider.tryGetUserCustomTime(userCustomTimeKey)
-                        }
-                    }
-                }
-            }
-
             return Singles.zip(
                 myUserFactorySingle,
-                getCustomTimes(foreignUserKeys),
-            ).map { (myUserFactory, friendsFactory) ->
-                object : JsonTime.UserCustomTimeProvider {
+                friendsFactorySingle,
+            ).map { (myUserFactory, friendsFactory) -> UserCustomTimeProvider(myUserFactory, friendsFactory) }
+        }
 
-                    override fun tryGetUserCustomTime(userCustomTimeKey: CustomTimeKey.User): Time.Custom.User? {
-                        val provider = if (userCustomTimeKey.userKey == myUserFactory.user.userKey)
-                            myUserFactory.user
-                        else
-                            friendsFactory
+        private class UserCustomTimeProvider(
+            private val myUserFactory: MyUserFactory,
+            private val friendsFactory: FriendsFactory,
+        ) : JsonTime.UserCustomTimeProvider {
 
-                        return provider.tryGetUserCustomTime(userCustomTimeKey)
-                    }
-                }
+            override fun tryGetUserCustomTime(userCustomTimeKey: CustomTimeKey.User): Time.Custom.User? {
+                val provider = if (userCustomTimeKey.userKey == myUserFactory.user.userKey)
+                    myUserFactory.user
+                else
+                    friendsFactory
+
+                return provider.tryGetUserCustomTime(userCustomTimeKey)
             }
         }
 
@@ -140,10 +121,10 @@ interface UserCustomTimeProviderSource {
 
             return friendsFactorySingle.flatMap { friendsFactory ->
                 Observable.just(Unit)
-                        .concatWith(friendsFactory.changeTypes.map { })
-                        .filter { friendsFactory.hasUserKeys(foreignUserKeys) }
-                        .firstOrError()
-                        .map { friendsFactory }
+                    .concatWith(friendsFactory.changeTypes.map { })
+                    .filter { friendsFactory.hasUserKeys(foreignUserKeys) }
+                    .firstOrError()
+                    .map { friendsFactory }
             }
         }
 

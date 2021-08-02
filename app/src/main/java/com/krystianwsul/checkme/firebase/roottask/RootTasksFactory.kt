@@ -28,7 +28,6 @@ class RootTasksFactory(
     private val rootTaskDependencyCoordinator: RootTaskDependencyCoordinator,
     domainDisposable: CompositeDisposable,
     private val rootTaskKeySource: RootTaskKeySource,
-    loadDependencyTrackerManager: LoadDependencyTrackerManager,
     private val rootTaskDependencyStateContainer: RootTaskDependencyStateContainer,
     override val rootModelChangeManager: RootModelChangeManager,
     private val getProjectsFactory: () -> ProjectsFactory,
@@ -58,7 +57,6 @@ class RootTasksFactory(
 
                 oldMap.toMutableMap().also {
                     it[group.key] = RootTaskFactory(
-                        loadDependencyTrackerManager,
                         rootTaskDependencyCoordinator,
                         this,
                         domainDisposable,

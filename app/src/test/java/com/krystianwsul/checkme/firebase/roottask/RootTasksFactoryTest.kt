@@ -8,7 +8,6 @@ import com.krystianwsul.common.firebase.records.task.RootTaskRecord
 import com.krystianwsul.common.utils.TaskKey
 import io.mockk.every
 import io.mockk.mockk
-import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import org.junit.After
 import org.junit.Before
@@ -33,7 +32,7 @@ class RootTasksFactoryTest {
         addChangeEventsRelay = PublishRelay.create()
         val removeEventsRelay = PublishRelay.create<RootTasksLoader.RemoveEvent>()
 
-        val existingInstanceChangeManager = RootModelChangeManager()
+        val rootModelChangeManager = RootModelChangeManager()
 
         val rootTasksFactory = RootTasksFactory(
             mockk {
@@ -42,13 +41,12 @@ class RootTasksFactoryTest {
             },
             mockk(),
             mockk {
-                every { getDependencies(any()) } returns Single.just(mockk())
+                every { getDependencies(any()) } returns mockk()
             },
             domainDisposable,
             mockk(),
             mockk(relaxed = true),
-            mockk(relaxed = true),
-            existingInstanceChangeManager,
+            rootModelChangeManager,
             mockk(),
         )
 

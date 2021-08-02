@@ -111,19 +111,15 @@ class ChangeTypeSourceTest {
 
         override fun getTimeChangeObservable() = Observable.just(Unit)
 
-        override fun getUserCustomTimeProvider(projectRecord: ProjectRecord<*>) =
-            Single.just(mockk<JsonTime.UserCustomTimeProvider>())
-
-        override fun getUserCustomTimeProvider(rootTaskRecord: RootTaskRecord) =
-            Single.just(mockk<JsonTime.UserCustomTimeProvider>())
+        override fun getUserCustomTimeProvider(projectRecord: ProjectRecord<*>) = mockk<JsonTime.UserCustomTimeProvider>()
+        override fun getUserCustomTimeProvider(rootTaskRecord: RootTaskRecord) = mockk<JsonTime.UserCustomTimeProvider>()
 
         override fun hasCustomTimes(rootTaskRecord: RootTaskRecord) = true
     }
 
-    private fun setup(
-        userCustomTimeProviderSource: UserCustomTimeProviderSource = immediateUserCustomTimeProviderSource(),
-    ) {
+    private fun setup() {
         val rootTaskKeySource = RootTaskKeySource()
+        val userCustomTimeProviderSource = immediateUserCustomTimeProviderSource()
 
         rootTasksLoaderProvider = TestRootTasksLoaderProvider()
 
@@ -136,8 +132,6 @@ class ChangeTypeSourceTest {
         }
 
         val rootTasksManager = AndroidRootTasksManager(databaseWrapper)
-
-        val loadDependencyTrackerManager = LoadDependencyTrackerManager()
 
         rootTasksLoader = RootTasksLoader(
             rootTaskKeySource,
@@ -165,7 +159,6 @@ class ChangeTypeSourceTest {
             rootTaskToRootTaskCoordinator,
             domainDisposable,
             rootTaskKeySource,
-            loadDependencyTrackerManager,
             modelRootTaskDependencyStateContainer,
             existingInstanceChangeManager,
         ) { projectsFactory }
@@ -656,58 +649,6 @@ class ChangeTypeSourceTest {
                 ),
             )
         }
-    }
-
-    @Test
-    fun testSingleProjectSingleTaskWithTaskChangeBeforeTimes() {
-        val timeRelay = PublishRelay.create<JsonTime.UserCustomTimeProvider>()
-
-        setup(
-            object : UserCustomTimeProviderSource {
-
-                override fun getUserCustomTimeProvider(projectRecord: ProjectRecord<*>) = timeRelay.firstOrError()
-
-                override fun getUserCustomTimeProvider(rootTaskRecord: RootTaskRecord) =
-                    Single.just<JsonTime.UserCustomTimeProvider>(mockk())
-
-                override fun hasCustomTimes(rootTaskRecord: RootTaskRecord) = true
-
-                override fun getTimeChangeObservable() = Observable.just(Unit)
-            }
-        )
-
-        acceptPrivateProject(PrivateProjectJson())
-        timeRelay.accept(mockk())
-        checkEmpty()
-
-        acceptPrivateProject(PrivateProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true)))
-
-        rootTasksLoaderProvider.accept(
-            taskKey1,
-            RootTaskJson(
-                noScheduleOrParent = mapOf(
-                    "noScheduleOrParentId" to RootNoScheduleOrParentJson(
-                        startTimeOffset = 0.0,
-                        projectId = privateProjectId,
-                    ),
-                ),
-            ),
-        )
-
-        rootTasksLoaderProvider.accept(
-            taskKey1,
-            RootTaskJson(
-                name = "changedName",
-                noScheduleOrParent = mapOf(
-                    "noScheduleOrParentId" to RootNoScheduleOrParentJson(
-                        startTimeOffset = 0.0,
-                        projectId = privateProjectId,
-                    ),
-                ),
-            ),
-        )
-
-        projectEmissionChecker.checkRemote { timeRelay.accept(mockk()) }
     }
 
     @Test

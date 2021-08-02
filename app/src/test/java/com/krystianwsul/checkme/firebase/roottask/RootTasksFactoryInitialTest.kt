@@ -25,7 +25,7 @@ class RootTasksFactoryInitialTest {
             every { removeEvents } returns Observable.never()
         }
 
-        val existingInstanceChangeManager = RootModelChangeManager()
+        val rootModelChangeManager = RootModelChangeManager()
 
         val rootTasksFactory = RootTasksFactory(
             rootTasksLoader,
@@ -34,8 +34,7 @@ class RootTasksFactoryInitialTest {
             compositeDisposable,
             mockk(),
             mockk(),
-            mockk(),
-            existingInstanceChangeManager,
+            rootModelChangeManager,
             mockk(),
         )
 

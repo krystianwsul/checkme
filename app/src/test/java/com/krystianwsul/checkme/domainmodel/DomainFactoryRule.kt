@@ -44,7 +44,6 @@ import com.mindorks.scheduler.RxPS
 import io.mockk.*
 import io.reactivex.rxjava3.android.plugins.RxAndroidPlugins
 import io.reactivex.rxjava3.core.Observable
-import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.plugins.RxJavaPlugins
 import io.reactivex.rxjava3.schedulers.Schedulers
@@ -208,10 +207,10 @@ class DomainFactoryRule : TestRule {
         )
 
         val rootTaskDependencyCoordinator = mockk<RootTaskDependencyCoordinator> {
-            every { getDependencies(any()) } returns Single.just(myUserFactory.user)
+            every { getDependencies(any()) } returns myUserFactory.user
         }
 
-        val existingInstanceChangeManager = RootModelChangeManager()
+        val rootModelChangeManager = RootModelChangeManager()
 
         val rootTaskFactory = RootTasksFactory(
             rootTasksLoader,
@@ -220,8 +219,7 @@ class DomainFactoryRule : TestRule {
             compositeDisposable,
             rootTaskKeySource,
             mockk(relaxed = true),
-            mockk(relaxed = true),
-            existingInstanceChangeManager,
+            rootModelChangeManager,
         ) { projectsFactory }
 
         val sharedProjectsLoader = SharedProjectsLoader.Impl(
@@ -258,7 +256,7 @@ class DomainFactoryRule : TestRule {
             mockk(relaxed = true),
             compositeDisposable,
             rootTaskFactory,
-            existingInstanceChangeManager,
+            rootModelChangeManager,
         ) { deviceDbInfo }
 
         val friendsFactory = mockk<FriendsFactory> {

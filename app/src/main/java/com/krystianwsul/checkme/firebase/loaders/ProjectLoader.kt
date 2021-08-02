@@ -65,16 +65,15 @@ interface ProjectLoader<T : ProjectType, U : Parsable> { // U: Project JSON type
                         it
                     }
                 }
-                .switchMapSingle { (projectChangeType, projectRecord) ->
+                .map { (projectChangeType, projectRecord) ->
                     rootTaskKeySource.onProjectAddedOrUpdated(
                         projectRecord.projectKey,
                         projectRecord.rootTaskParentDelegate.rootTaskKeys
                     )
 
-                    // todo dependencies middle cleanup
-                    userCustomTimeProviderSource.getUserCustomTimeProvider(projectRecord).map {
-                        ProjectRecordData(projectChangeType, projectRecord, it)
-                    }
+                    val userCustomTimeProvider = userCustomTimeProviderSource.getUserCustomTimeProvider(projectRecord)
+
+                    ProjectRecordData(projectChangeType, projectRecord, userCustomTimeProvider)
                 }
                 .replayImmediate()
 

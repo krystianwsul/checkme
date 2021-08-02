@@ -103,8 +103,6 @@ class FactoryLoader(
 
                         val rootTaskManager = AndroidRootTasksManager(factoryProvider.database)
 
-                        val loadDependencyTrackerManager = LoadDependencyTrackerManager()
-
                         val rootTasksLoader = RootTasksLoader(
                             rootTaskKeySource,
                             factoryProvider.database,
@@ -128,7 +126,6 @@ class FactoryLoader(
                             rootTaskToRootTaskCoordinator,
                             domainDisposable,
                             rootTaskKeySource,
-                            loadDependencyTrackerManager,
                             modelRootTaskDependencyStateContainer,
                             rootModelChangeManager,
                         ) { projectsFactorySingle.getCurrentValue() }

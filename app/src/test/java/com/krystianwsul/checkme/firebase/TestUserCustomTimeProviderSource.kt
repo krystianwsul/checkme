@@ -6,22 +6,19 @@ import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.CustomTimeKey
 import io.reactivex.rxjava3.core.Observable
-import io.reactivex.rxjava3.core.Single
 
 class TestUserCustomTimeProviderSource : UserCustomTimeProviderSource {
 
-    override fun getUserCustomTimeProvider(projectRecord: ProjectRecord<*>): Single<JsonTime.UserCustomTimeProvider> {
-        return Single.just(
-                object : JsonTime.UserCustomTimeProvider {
+    override fun getUserCustomTimeProvider(projectRecord: ProjectRecord<*>): JsonTime.UserCustomTimeProvider {
+        return object : JsonTime.UserCustomTimeProvider {
 
-                    override fun tryGetUserCustomTime(userCustomTimeKey: CustomTimeKey.User): Time.Custom.User? {
-                        TODO("Not yet implemented")
-                    }
-                }
-        )
+            override fun tryGetUserCustomTime(userCustomTimeKey: CustomTimeKey.User): Time.Custom.User? {
+                TODO("Not yet implemented")
+            }
+        }
     }
 
-    override fun getUserCustomTimeProvider(rootTaskRecord: RootTaskRecord): Single<JsonTime.UserCustomTimeProvider> {
+    override fun getUserCustomTimeProvider(rootTaskRecord: RootTaskRecord): JsonTime.UserCustomTimeProvider {
         TODO("Not yet implemented")
     }
 

@@ -2,7 +2,6 @@ package com.krystianwsul.common.relevance
 
 import com.krystianwsul.checkme.firebase.factories.ProjectsFactory
 import com.krystianwsul.checkme.firebase.managers.AndroidRootTasksManager
-import com.krystianwsul.checkme.firebase.roottask.LoadDependencyTrackerManager
 import com.krystianwsul.checkme.firebase.roottask.RootTaskKeySource
 import com.krystianwsul.checkme.firebase.roottask.RootTasksFactory
 import com.krystianwsul.checkme.firebase.roottask.RootTasksLoader
@@ -30,7 +29,6 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.spyk
 import io.reactivex.rxjava3.core.Observable
-import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import org.junit.After
 import org.junit.Assert.*
@@ -106,11 +104,6 @@ class IrrelevantTest {
 
         val rootTasksManager = AndroidRootTasksManager(databaseWrapper)
 
-        val loadDependencyTrackerManager = mockk<LoadDependencyTrackerManager> {
-            every { isTaskKeyTracked(any()) } returns false
-            every { startTrackingTaskLoad(any()) } returns mockk(relaxed = true)
-        }
-
         val rootTaskKeySource = mockk<RootTaskKeySource> {
             every { rootTaskKeysObservable } returns Observable.just(setOf())
             every { onProjectAddedOrUpdated(any(), any()) } returns Unit
@@ -132,22 +125,21 @@ class IrrelevantTest {
             every { projects } answers { mapOf(project.projectKey to project) }
         }
 
-        val existingInstanceChangeManager = RootModelChangeManager()
+        val rootModelChangeManager = RootModelChangeManager()
 
         val rootTasksFactory = RootTasksFactory(
             rootTaskLoader,
             mockk(),
             mockk {
-                every { getDependencies(any()) } returns Single.just(mockk())
+                every { getDependencies(any()) } returns mockk()
             },
             compositeDisposable,
             rootTaskKeySource,
-            loadDependencyTrackerManager,
             mockk(),
-            existingInstanceChangeManager,
+            rootModelChangeManager,
         ) { projectsFactory }
 
-        project = PrivateProject(projectRecord, mockk(), rootTasksFactory, existingInstanceChangeManager)
+        project = PrivateProject(projectRecord, mockk(), rootTasksFactory, rootModelChangeManager)
 
         now = ExactTimeStamp.Local(day1, hour2)
 

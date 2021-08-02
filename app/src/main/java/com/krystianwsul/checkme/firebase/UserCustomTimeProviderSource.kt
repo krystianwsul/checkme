@@ -17,17 +17,14 @@ import com.krystianwsul.common.utils.UserKey
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Single
 
-interface UserCustomTimeProviderSource { // todo dependencies final cleanup
+interface UserCustomTimeProviderSource {
 
-    // emit only remote changes
-    fun getUserCustomTimeProvider(projectRecord: ProjectRecord<*>): Single<JsonTime.UserCustomTimeProvider>
+    fun getUserCustomTimeProvider(projectRecord: ProjectRecord<*>): JsonTime.UserCustomTimeProvider
+    fun getUserCustomTimeProvider(rootTaskRecord: RootTaskRecord): JsonTime.UserCustomTimeProvider
 
-    // emit only remote changes
-    fun getUserCustomTimeProvider(rootTaskRecord: RootTaskRecord): Single<JsonTime.UserCustomTimeProvider>
+    fun hasCustomTimes(rootTaskRecord: RootTaskRecord): Boolean // todo dependencies final cleanup
 
-    fun hasCustomTimes(rootTaskRecord: RootTaskRecord): Boolean
-
-    fun getTimeChangeObservable(): Observable<Unit>
+    fun getTimeChangeObservable(): Observable<Unit> // todo dependencies final cleanup
 
     class Impl(
         private val myUserKey: UserKey,
@@ -36,6 +33,8 @@ interface UserCustomTimeProviderSource { // todo dependencies final cleanup
         private val friendsFactorySingle: Single<FriendsFactory>,
     ) : UserCustomTimeProviderSource {
 
+        private val userCustomTimeProvider = UserCustomTimeProvider(myUserFactorySingle, friendsFactorySingle)
+
         private fun getForeignUserKeys(customTimeKeys: Set<CustomTimeKey.User>): Set<UserKey> {
             val userKeys = customTimeKeys.map { it.userKey }.toSet()
             return userKeys - myUserKey
@@ -43,7 +42,7 @@ interface UserCustomTimeProviderSource { // todo dependencies final cleanup
 
         override fun getUserCustomTimeProvider(
             projectRecord: ProjectRecord<*>,
-        ): Single<JsonTime.UserCustomTimeProvider> {
+        ): JsonTime.UserCustomTimeProvider {
             val customTimeKeys = getUserCustomTimeKeys(projectRecord)
             val foreignUserKeys = getForeignUserKeys(customTimeKeys)
 
@@ -51,16 +50,7 @@ interface UserCustomTimeProviderSource { // todo dependencies final cleanup
                 is PrivateProjectRecord -> {
                     check(foreignUserKeys.isEmpty())
 
-                    myUserFactorySingle.map { myUserFactory ->
-                        object : JsonTime.UserCustomTimeProvider {
-
-                            override fun tryGetUserCustomTime(userCustomTimeKey: CustomTimeKey.User): Time.Custom.User? {
-                                check(userCustomTimeKey.userKey == myUserKey)
-
-                                return myUserFactory.user.tryGetUserCustomTime(userCustomTimeKey)
-                            }
-                        }
-                    }
+                    userCustomTimeProvider
                 }
                 is SharedProjectRecord -> getUserCustomTimeProvider(foreignUserKeys) {
                     friendsLoader.userKeyStore.requestCustomTimeUsers(projectRecord.projectKey, foreignUserKeys)
@@ -79,7 +69,7 @@ interface UserCustomTimeProviderSource { // todo dependencies final cleanup
         private fun getForeignUserKeysFromRecord(rootTaskRecord: RootTaskRecord) =
             getForeignUserKeys(rootTaskRecord.getUserCustomTimeKeys())
 
-        override fun getUserCustomTimeProvider(rootTaskRecord: RootTaskRecord): Single<JsonTime.UserCustomTimeProvider> {
+        override fun getUserCustomTimeProvider(rootTaskRecord: RootTaskRecord): JsonTime.UserCustomTimeProvider {
             val foreignUserKeys = getForeignUserKeysFromRecord(rootTaskRecord)
 
             return getUserCustomTimeProvider(foreignUserKeys) {
@@ -90,10 +80,10 @@ interface UserCustomTimeProviderSource { // todo dependencies final cleanup
         private fun getUserCustomTimeProvider(
             foreignUserKeys: Set<UserKey>,
             notEmptyCallback: () -> Unit,
-        ): Single<JsonTime.UserCustomTimeProvider> { // todo dependencies middle cleanup just provide the UserCustomTimeProvider globally
+        ): JsonTime.UserCustomTimeProvider {
             if (foreignUserKeys.isNotEmpty()) notEmptyCallback()
 
-            return Single.just(UserCustomTimeProvider(myUserFactorySingle, friendsFactorySingle))
+            return UserCustomTimeProvider(myUserFactorySingle, friendsFactorySingle)
         }
 
         private class UserCustomTimeProvider(
@@ -101,10 +91,10 @@ interface UserCustomTimeProviderSource { // todo dependencies final cleanup
             private val friendsFactorySingle: Single<FriendsFactory>,
         ) : JsonTime.UserCustomTimeProvider {
 
-            override fun tryGetUserCustomTime(userCustomTimeKey: CustomTimeKey.User): Time.Custom.User? {
-                val myUserFactory = myUserFactorySingle.getCurrentValue()
-                val friendsFactory = friendsFactorySingle.getCurrentValue()
+            private val myUserFactory by lazy { myUserFactorySingle.getCurrentValue() }
+            private val friendsFactory by lazy { friendsFactorySingle.getCurrentValue() }
 
+            override fun tryGetUserCustomTime(userCustomTimeKey: CustomTimeKey.User): Time.Custom.User? {
                 val provider = if (userCustomTimeKey.userKey == myUserFactory.user.userKey)
                     myUserFactory.user
                 else

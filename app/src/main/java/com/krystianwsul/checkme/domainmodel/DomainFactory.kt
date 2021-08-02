@@ -299,22 +299,30 @@ class DomainFactory(
 
         isWaitingForTasks.accept(
             run {
-                val projectsWaiting = projectsFactory.projects
+                val projectTasksWaiting = projectsFactory.projects
                     .values
                     .any {
-                        it.projectRecord
-                            .rootTaskParentDelegate
-                            .rootTaskKeys
-                            .size > it.getAllTasks().size
+                        it.projectTasks.any { !it.dependenciesLoaded }
                     }
 
-                val tasksWaiting by lazy {
+                val projectsWaiting by lazy {
+                    projectsFactory.projects
+                        .values
+                        .any {
+                            it.projectRecord
+                                .rootTaskParentDelegate
+                                .rootTaskKeys
+                                .size > it.getAllTasks().size
+                        }
+                }
+
+                val rootTasksWaiting by lazy {
                     rootTasksFactory.rootTasks
                         .values
                         .any { !it.dependenciesLoaded }
                 }
 
-                projectsWaiting || tasksWaiting
+                projectTasksWaiting || projectsWaiting || rootTasksWaiting
             }
         )
     }

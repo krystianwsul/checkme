@@ -140,7 +140,7 @@ abstract class Project<T : ProjectType>(
             }
         }
 
-    fun getAllTasks(): Collection<Task> = _tasks.values + rootTasksCache.value
+    fun getAllTasks(): Collection<Task> = _tasks.values.filter { it.dependenciesLoaded } + rootTasksCache.value
 
     fun setEndExactTimeStamp(
         now: ExactTimeStamp.Local,

@@ -148,7 +148,7 @@ class RootTask private constructor(
             }
         }
 
-    val dependenciesLoaded get() = dependenciesLoadedCache.value
+    override val dependenciesLoaded get() = dependenciesLoadedCache.value
 
     fun createChildTask(
         now: ExactTimeStamp.Local,

@@ -1,5 +1,7 @@
 package com.krystianwsul.common.firebase.models.task
 
+import com.krystianwsul.common.firebase.models.cache.InvalidatableCache
+import com.krystianwsul.common.firebase.models.cache.invalidatableCache
 import com.krystianwsul.common.firebase.models.noscheduleorparent.NoScheduleOrParent
 import com.krystianwsul.common.firebase.models.noscheduleorparent.ProjectNoScheduleOrParent
 import com.krystianwsul.common.firebase.models.project.Project
@@ -40,6 +42,30 @@ class ProjectTask(override val project: Project<*>, private val taskRecord: Proj
     override val allowPlaceholderCurrentNoSchedule = true
 
     override val projectCustomTimeIdProvider = project.projectRecord
+
+    private val dependenciesLoadedCache: InvalidatableCache<Boolean> =
+        invalidatableCache(clearableInvalidatableManager) { invalidatableCache ->
+            val customTimeKeys = taskRecord.getUserCustomTimeKeys()
+            val customTimes = customTimeKeys.mapNotNull(project::tryGetUserCustomTime)
+
+            if (customTimes.size < customTimeKeys.size) {
+                val removable = rootModelChangeManager.userInvalidatableManager.addInvalidatable(invalidatableCache)
+
+                return@invalidatableCache InvalidatableCache.ValueHolder(false) { removable.remove() }
+            }
+
+            val customTimeRemovables = customTimes.map {
+                it.user
+                    .clearableInvalidatableManager
+                    .addInvalidatable(invalidatableCache)
+            }
+
+            InvalidatableCache.ValueHolder(true) {
+                customTimeRemovables.forEach { it.remove() }
+            }
+        }
+
+    override val dependenciesLoaded get() = dependenciesLoadedCache.value
 
     override fun deleteFromParent() = project.deleteTask(this)
 

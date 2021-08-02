@@ -3,6 +3,7 @@ package com.krystianwsul.common.firebase.models.task
 import com.krystianwsul.common.firebase.models.cache.Invalidatable
 import com.krystianwsul.common.firebase.models.cache.InvalidatableCache
 import com.krystianwsul.common.firebase.models.cache.invalidatableCache
+import com.krystianwsul.common.utils.TaskKey
 
 class RootTaskDependencyResolver(private val rootTask: RootTask) : Invalidatable {
 
@@ -70,7 +71,9 @@ class RootTaskDependencyResolver(private val rootTask: RootTask) : Invalidatable
                             .addInvalidatable(invalidatableCache)
                     }
 
-                    InvalidatableCache.ValueHolder(tasks.all { it.dependenciesLoaded }) {
+                    val checkedTaskKeys = mutableSetOf<TaskKey.Root>()
+
+                    InvalidatableCache.ValueHolder(tasks.all { checkDirectDependenciesRecursive(it, checkedTaskKeys) }) {
                         directDependencyStateRemovable.remove()
 
                         taskRemovables.forEach { it.remove() }
@@ -82,4 +85,21 @@ class RootTaskDependencyResolver(private val rootTask: RootTask) : Invalidatable
     val dependenciesLoaded get() = dependenciesLoadedCache.value
 
     override fun invalidate() = directDependenciesStateCache.invalidate()
+
+    private fun checkDirectDependenciesRecursive(task: RootTask, checkedTaskKeys: MutableSet<TaskKey.Root>): Boolean {
+        if (task.taskKey in checkedTaskKeys) return true
+
+        checkedTaskKeys += task.taskKey
+
+        task.rootTaskDependencyResolver
+            .dependenciesLoadedCache
+            .takeIf { it.isInitialized() }
+            ?.let { return it.value }
+
+        return when (val directDependenciesState = task.rootTaskDependencyResolver.directDependenciesStateCache.value) {
+            DirectDependencyState.Absent -> false
+            is DirectDependencyState.Present ->
+                directDependenciesState.tasks.all { checkDirectDependenciesRecursive(it, checkedTaskKeys) }
+        }
+    }
 }

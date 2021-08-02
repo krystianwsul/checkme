@@ -142,11 +142,7 @@ abstract class Project<T : ProjectType>(
 
     fun getAllTasks(): Collection<Task> = _tasks.values.filter { it.dependenciesLoaded } + rootTasksCache.value
 
-    fun setEndExactTimeStamp(
-        now: ExactTimeStamp.Local,
-        projectUndoData: ProjectUndoData,
-        removeInstances: Boolean,
-    ) {
+    fun setEndExactTimeStamp(now: ExactTimeStamp.Local, projectUndoData: ProjectUndoData, removeInstances: Boolean) {
         requireNotDeleted()
 
         getAllTasks().filter { it.notDeleted }.forEach {

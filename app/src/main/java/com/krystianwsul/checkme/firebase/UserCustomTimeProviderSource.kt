@@ -4,6 +4,7 @@ import androidx.annotation.VisibleForTesting
 import com.krystianwsul.checkme.firebase.factories.FriendsFactory
 import com.krystianwsul.checkme.firebase.factories.MyUserFactory
 import com.krystianwsul.checkme.firebase.loaders.FriendsLoader
+import com.krystianwsul.checkme.utils.getCurrentValue
 import com.krystianwsul.checkme.utils.tryGetCurrentValue
 import com.krystianwsul.common.firebase.records.project.PrivateProjectRecord
 import com.krystianwsul.common.firebase.records.project.ProjectRecord
@@ -15,7 +16,6 @@ import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.UserKey
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Single
-import io.reactivex.rxjava3.kotlin.Singles
 
 interface UserCustomTimeProviderSource { // todo dependencies final cleanup
 
@@ -90,21 +90,21 @@ interface UserCustomTimeProviderSource { // todo dependencies final cleanup
         private fun getUserCustomTimeProvider(
             foreignUserKeys: Set<UserKey>,
             notEmptyCallback: () -> Unit,
-        ): Single<JsonTime.UserCustomTimeProvider> {
+        ): Single<JsonTime.UserCustomTimeProvider> { // todo dependencies middle cleanup just provide the UserCustomTimeProvider globally
             if (foreignUserKeys.isNotEmpty()) notEmptyCallback()
 
-            return Singles.zip(
-                myUserFactorySingle,
-                friendsFactorySingle,
-            ).map { (myUserFactory, friendsFactory) -> UserCustomTimeProvider(myUserFactory, friendsFactory) }
+            return Single.just(UserCustomTimeProvider(myUserFactorySingle, friendsFactorySingle))
         }
 
         private class UserCustomTimeProvider(
-            private val myUserFactory: MyUserFactory,
-            private val friendsFactory: FriendsFactory,
+            private val myUserFactorySingle: Single<MyUserFactory>,
+            private val friendsFactorySingle: Single<FriendsFactory>,
         ) : JsonTime.UserCustomTimeProvider {
 
             override fun tryGetUserCustomTime(userCustomTimeKey: CustomTimeKey.User): Time.Custom.User? {
+                val myUserFactory = myUserFactorySingle.getCurrentValue()
+                val friendsFactory = friendsFactorySingle.getCurrentValue()
+
                 val provider = if (userCustomTimeKey.userKey == myUserFactory.user.userKey)
                     myUserFactory.user
                 else

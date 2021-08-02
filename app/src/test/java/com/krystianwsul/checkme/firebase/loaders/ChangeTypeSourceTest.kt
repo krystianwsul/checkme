@@ -1,8 +1,6 @@
 package com.krystianwsul.checkme.firebase.loaders
 
-import com.jakewharton.rxrelay3.BehaviorRelay
 import com.jakewharton.rxrelay3.PublishRelay
-import com.jakewharton.rxrelay3.Relay
 import com.krystianwsul.checkme.domainmodel.DomainFactoryRule
 import com.krystianwsul.checkme.firebase.UserCustomTimeProviderSource
 import com.krystianwsul.checkme.firebase.UserKeyStore
@@ -98,35 +96,6 @@ class ChangeTypeSourceTest {
 
     private lateinit var projectEmissionChecker: EmissionChecker<ChangeType>
     private lateinit var taskEmissionChecker: EmissionChecker<ChangeType>
-
-    private class TestUserCustomTimeProviderSource : UserCustomTimeProviderSource {
-
-        private val relayMap = mutableMapOf<TaskKey.Root, Relay<JsonTime.UserCustomTimeProvider>>()
-        private val providerMap = mutableMapOf<TaskKey.Root, JsonTime.UserCustomTimeProvider>()
-
-        private val trigger = PublishRelay.create<Unit>()!!
-
-        override fun getUserCustomTimeProvider(projectRecord: ProjectRecord<*>) =
-            Single.just<JsonTime.UserCustomTimeProvider>(mockk())!!
-
-        private fun getRelay(taskKey: TaskKey.Root) = relayMap.getOrPut(taskKey) { BehaviorRelay.create() }
-
-        override fun getUserCustomTimeProvider(rootTaskRecord: RootTaskRecord) =
-            getRelay(rootTaskRecord.taskKey).firstOrError()!!
-
-        override fun hasCustomTimes(rootTaskRecord: RootTaskRecord) = providerMap.containsKey(rootTaskRecord.taskKey)
-
-        override fun getTimeChangeObservable() = trigger
-
-        fun accept(taskKey: TaskKey.Root, provider: JsonTime.UserCustomTimeProvider) {
-            check((relayMap[taskKey] as? BehaviorRelay<*>)?.hasValue() != true)
-
-            getRelay(taskKey).accept(provider)
-
-            providerMap[taskKey] = provider
-            trigger.accept(Unit)
-        }
-    }
 
     @Before
     fun before() {
@@ -327,9 +296,11 @@ class ChangeTypeSourceTest {
         acceptPrivateProject(PrivateProjectJson())
         checkEmpty()
 
-        acceptPrivateProject(PrivateProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true)))
-
         projectEmissionChecker.checkRemote {
+            acceptPrivateProject(PrivateProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true)))
+        }
+
+        taskEmissionChecker.checkRemote {
             rootTasksLoaderProvider.accept(
                 taskKey1,
                 RootTaskJson(
@@ -351,13 +322,17 @@ class ChangeTypeSourceTest {
         acceptPrivateProject(PrivateProjectJson())
         checkEmpty()
 
-        acceptPrivateProject(PrivateProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true)))
-
-        acceptPrivateProject(
-            PrivateProjectJson(name = "nameChanged", rootTaskIds = mutableMapOf(taskKey1.taskId to true))
-        )
+        projectEmissionChecker.checkRemote {
+            acceptPrivateProject(PrivateProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true)))
+        }
 
         projectEmissionChecker.checkRemote {
+            acceptPrivateProject(
+                PrivateProjectJson(name = "nameChanged", rootTaskIds = mutableMapOf(taskKey1.taskId to true))
+            )
+        }
+
+        taskEmissionChecker.checkRemote {
             rootTasksLoaderProvider.accept(
                 taskKey1,
                 RootTaskJson(
@@ -379,13 +354,17 @@ class ChangeTypeSourceTest {
         acceptPrivateProject(PrivateProjectJson())
         checkEmpty()
 
-        acceptPrivateProject(
-            PrivateProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true, taskKey2.taskId to true))
-        )
-
-        acceptPrivateProject(PrivateProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true)))
+        projectEmissionChecker.checkRemote {
+            acceptPrivateProject(
+                PrivateProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true, taskKey2.taskId to true))
+            )
+        }
 
         projectEmissionChecker.checkRemote {
+            acceptPrivateProject(PrivateProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true)))
+        }
+
+        taskEmissionChecker.checkRemote {
             rootTasksLoaderProvider.accept(
                 taskKey1,
                 RootTaskJson(
@@ -407,20 +386,25 @@ class ChangeTypeSourceTest {
         acceptPrivateProject(PrivateProjectJson())
         checkEmpty()
 
-        acceptPrivateProject(
-            PrivateProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true, taskKey2.taskId to true))
-        )
-        rootTasksLoaderProvider.accept(
-            taskKey1,
-            RootTaskJson(
-                noScheduleOrParent = mapOf(
-                    "noScheduleOrParentId" to RootNoScheduleOrParentJson(
-                        startTimeOffset = 0.0,
-                        projectId = privateProjectId,
+        projectEmissionChecker.checkRemote {
+            acceptPrivateProject(
+                PrivateProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true, taskKey2.taskId to true))
+            )
+        }
+
+        taskEmissionChecker.checkRemote {
+            rootTasksLoaderProvider.accept(
+                taskKey1,
+                RootTaskJson(
+                    noScheduleOrParent = mapOf(
+                        "noScheduleOrParentId" to RootNoScheduleOrParentJson(
+                            startTimeOffset = 0.0,
+                            projectId = privateProjectId,
+                        ),
                     ),
                 ),
-            ),
-        )
+            )
+        }
 
         projectEmissionChecker.checkRemote {
             acceptPrivateProject(PrivateProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true)))
@@ -434,22 +418,26 @@ class ChangeTypeSourceTest {
         acceptPrivateProject(PrivateProjectJson())
         checkEmpty()
 
-        acceptPrivateProject(PrivateProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true)))
-
-        rootTasksLoaderProvider.accept(
-            taskKey1,
-            RootTaskJson(
-                noScheduleOrParent = mapOf(
-                    "noScheduleOrParentId" to RootNoScheduleOrParentJson(
-                        startTimeOffset = 0.0,
-                        projectId = privateProjectId,
-                    ),
-                ),
-                rootTaskIds = mutableMapOf(taskKey2.taskId to true),
-            ),
-        )
-
         projectEmissionChecker.checkRemote {
+            acceptPrivateProject(PrivateProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true)))
+        }
+
+        taskEmissionChecker.checkRemote {
+            rootTasksLoaderProvider.accept(
+                taskKey1,
+                RootTaskJson(
+                    noScheduleOrParent = mapOf(
+                        "noScheduleOrParentId" to RootNoScheduleOrParentJson(
+                            startTimeOffset = 0.0,
+                            projectId = privateProjectId,
+                        ),
+                    ),
+                    rootTaskIds = mutableMapOf(taskKey2.taskId to true),
+                ),
+            )
+        }
+
+        taskEmissionChecker.checkRemote {
             rootTasksLoaderProvider.accept(
                 taskKey2,
                 RootTaskJson(
@@ -472,35 +460,41 @@ class ChangeTypeSourceTest {
         acceptPrivateProject(PrivateProjectJson())
         checkEmpty()
 
-        acceptPrivateProject(PrivateProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true)))
-
-        rootTasksLoaderProvider.accept(
-            taskKey1,
-            RootTaskJson(
-                noScheduleOrParent = mapOf(
-                    "noScheduleOrParentId" to RootNoScheduleOrParentJson(
-                        startTimeOffset = 0.0,
-                        projectId = privateProjectId,
-                    ),
-                ),
-                rootTaskIds = mutableMapOf(taskKey2.taskId to true, taskKey3.taskId to true),
-            ),
-        )
-
-        rootTasksLoaderProvider.accept(
-            taskKey2,
-            RootTaskJson(
-                startTimeOffset = 0.0,
-                taskHierarchies = mapOf(
-                    "taskHierarchyId" to NestedTaskHierarchyJson(
-                        startTimeOffset = 0.0,
-                        parentTaskId = taskKey1.taskId,
-                    ),
-                ),
-            ),
-        )
-
         projectEmissionChecker.checkRemote {
+            acceptPrivateProject(PrivateProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true)))
+        }
+
+        taskEmissionChecker.checkRemote {
+            rootTasksLoaderProvider.accept(
+                taskKey1,
+                RootTaskJson(
+                    noScheduleOrParent = mapOf(
+                        "noScheduleOrParentId" to RootNoScheduleOrParentJson(
+                            startTimeOffset = 0.0,
+                            projectId = privateProjectId,
+                        ),
+                    ),
+                    rootTaskIds = mutableMapOf(taskKey2.taskId to true, taskKey3.taskId to true),
+                ),
+            )
+        }
+
+        taskEmissionChecker.checkRemote {
+            rootTasksLoaderProvider.accept(
+                taskKey2,
+                RootTaskJson(
+                    startTimeOffset = 0.0,
+                    taskHierarchies = mapOf(
+                        "taskHierarchyId" to NestedTaskHierarchyJson(
+                            startTimeOffset = 0.0,
+                            parentTaskId = taskKey1.taskId,
+                        ),
+                    ),
+                ),
+            )
+        }
+
+        taskEmissionChecker.checkRemote {
             rootTasksLoaderProvider.accept(
                 taskKey1,
                 RootTaskJson(
@@ -522,18 +516,19 @@ class ChangeTypeSourceTest {
 
         acceptPrivateProject(PrivateProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true)))
 
-        // initial event ignored for project
-        rootTasksLoaderProvider.accept(
-            taskKey1,
-            RootTaskJson(
-                noScheduleOrParent = mapOf(
-                    "noScheduleOrParentId" to RootNoScheduleOrParentJson(
-                        startTimeOffset = 0.0,
-                        projectId = privateProjectId,
+        taskEmissionChecker.checkRemote {
+            rootTasksLoaderProvider.accept(
+                taskKey1,
+                RootTaskJson(
+                    noScheduleOrParent = mapOf(
+                        "noScheduleOrParentId" to RootNoScheduleOrParentJson(
+                            startTimeOffset = 0.0,
+                            projectId = privateProjectId,
+                        ),
                     ),
                 ),
-            ),
-        )
+            )
+        }
 
         checkEmpty()
 
@@ -580,31 +575,36 @@ class ChangeTypeSourceTest {
         setup()
         acceptPrivateProject(PrivateProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true)))
 
-        rootTasksLoaderProvider.accept(
-            taskKey1,
-            RootTaskJson(
-                noScheduleOrParent = mapOf(
-                    "noScheduleOrParentId" to RootNoScheduleOrParentJson(
-                        startTimeOffset = 0.0,
-                        projectId = privateProjectId,
+        taskEmissionChecker.checkRemote {
+            rootTasksLoaderProvider.accept(
+                taskKey1,
+                RootTaskJson(
+                    noScheduleOrParent = mapOf(
+                        "noScheduleOrParentId" to RootNoScheduleOrParentJson(
+                            startTimeOffset = 0.0,
+                            projectId = privateProjectId,
+                        ),
+                    ),
+                    rootTaskIds = mutableMapOf(taskKey2.taskId to true)
+                ),
+            )
+        }
+
+        taskEmissionChecker.checkRemote {
+            rootTasksLoaderProvider.accept(
+                taskKey2,
+                RootTaskJson(
+                    startTimeOffset = 0.0,
+                    taskHierarchies = mapOf(
+                        "taskHierarchyId" to NestedTaskHierarchyJson(
+                            startTimeOffset = 0.0,
+                            parentTaskId = taskKey1.taskId,
+                        )
                     ),
                 ),
-                rootTaskIds = mutableMapOf(taskKey2.taskId to true)
-            ),
-        )
+            )
+        }
 
-        rootTasksLoaderProvider.accept(
-            taskKey2,
-            RootTaskJson(
-                startTimeOffset = 0.0,
-                taskHierarchies = mapOf(
-                    "taskHierarchyId" to NestedTaskHierarchyJson(
-                        startTimeOffset = 0.0,
-                        parentTaskId = taskKey1.taskId,
-                    )
-                ),
-            ),
-        )
         checkEmpty()
 
         taskEmissionChecker.checkRemote {
@@ -627,31 +627,36 @@ class ChangeTypeSourceTest {
         setup()
         acceptPrivateProject(PrivateProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true)))
 
-        rootTasksLoaderProvider.accept(
-            taskKey1,
-            RootTaskJson(
-                noScheduleOrParent = mapOf(
-                    "noScheduleOrParentId" to RootNoScheduleOrParentJson(
-                        startTimeOffset = 0.0,
-                        projectId = privateProjectId,
+        taskEmissionChecker.checkRemote {
+            rootTasksLoaderProvider.accept(
+                taskKey1,
+                RootTaskJson(
+                    noScheduleOrParent = mapOf(
+                        "noScheduleOrParentId" to RootNoScheduleOrParentJson(
+                            startTimeOffset = 0.0,
+                            projectId = privateProjectId,
+                        ),
+                    ),
+                    rootTaskIds = mutableMapOf(taskKey2.taskId to true)
+                ),
+            )
+        }
+
+        taskEmissionChecker.checkRemote {
+            rootTasksLoaderProvider.accept(
+                taskKey2,
+                RootTaskJson(
+                    startTimeOffset = 0.0,
+                    taskHierarchies = mapOf(
+                        "taskHierarchyId" to NestedTaskHierarchyJson(
+                            startTimeOffset = 0.0,
+                            parentTaskId = taskKey1.taskId,
+                        )
                     ),
                 ),
-                rootTaskIds = mutableMapOf(taskKey2.taskId to true)
-            ),
-        )
+            )
+        }
 
-        rootTasksLoaderProvider.accept(
-            taskKey2,
-            RootTaskJson(
-                startTimeOffset = 0.0,
-                taskHierarchies = mapOf(
-                    "taskHierarchyId" to NestedTaskHierarchyJson(
-                        startTimeOffset = 0.0,
-                        parentTaskId = taskKey1.taskId,
-                    )
-                ),
-            ),
-        )
         checkEmpty()
 
         taskEmissionChecker.checkRemote {
@@ -724,235 +729,6 @@ class ChangeTypeSourceTest {
     }
 
     @Test
-    fun testTaskTimesSingleProjectChildTaskImmediate() {
-        val timeSource = TestUserCustomTimeProviderSource()
-        setup(userCustomTimeProviderSource = timeSource)
-
-        // to get the initial event out of the way
-        acceptPrivateProject(PrivateProjectJson())
-
-        acceptPrivateProject(PrivateProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true)))
-
-        rootTasksLoaderProvider.accept(
-            taskKey1,
-            RootTaskJson(
-                noScheduleOrParent = mapOf(
-                    "noScheduleOrParentId" to RootNoScheduleOrParentJson(
-                        startTimeOffset = 0.0,
-                        projectId = privateProjectId,
-                    ),
-                ),
-                rootTaskIds = mutableMapOf(taskKey2.taskId to true)
-            ),
-        )
-        timeSource.accept(taskKey1, mockk())
-
-        rootTasksLoaderProvider.accept(
-            taskKey2,
-            RootTaskJson(
-                startTimeOffset = 0.0,
-                taskHierarchies = mapOf(
-                    "taskHierarchyId" to NestedTaskHierarchyJson(
-                        startTimeOffset = 0.0,
-                        parentTaskId = taskKey1.taskId,
-                    )
-                ),
-            ),
-        )
-
-        projectEmissionChecker.checkRemote { timeSource.accept(taskKey2, mockk()) }
-    }
-
-    @Test
-    fun testTaskTimesSingleProjectChildTaskUpdateParentBeforeTime() {
-        val timeSource = TestUserCustomTimeProviderSource()
-        setup(userCustomTimeProviderSource = timeSource)
-
-        // to get the initial event out of the way
-        acceptPrivateProject(PrivateProjectJson())
-
-        acceptPrivateProject(PrivateProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true)))
-
-        rootTasksLoaderProvider.accept(
-            taskKey1,
-            RootTaskJson(
-                noScheduleOrParent = mapOf(
-                    "noScheduleOrParentId" to RootNoScheduleOrParentJson(
-                        startTimeOffset = 0.0,
-                        projectId = privateProjectId,
-                    ),
-                ),
-                rootTaskIds = mutableMapOf(taskKey2.taskId to true)
-            ),
-        )
-
-        rootTasksLoaderProvider.accept(
-            taskKey1,
-            RootTaskJson(
-                "task1Changed",
-                noScheduleOrParent = mapOf(
-                    "noScheduleOrParentId" to RootNoScheduleOrParentJson(
-                        startTimeOffset = 0.0,
-                        projectId = privateProjectId,
-                    ),
-                ),
-                rootTaskIds = mutableMapOf(taskKey2.taskId to true)
-            ),
-        )
-
-        timeSource.accept(taskKey1, mockk())
-
-        rootTasksLoaderProvider.accept(
-            taskKey2,
-            RootTaskJson(
-                startTimeOffset = 0.0,
-                taskHierarchies = mapOf(
-                    "taskHierarchyId" to NestedTaskHierarchyJson(
-                        startTimeOffset = 0.0,
-                        parentTaskId = taskKey1.taskId,
-                    )
-                ),
-            ),
-        )
-
-        projectEmissionChecker.checkRemote { timeSource.accept(taskKey2, mockk()) }
-    }
-
-    @Test
-    fun testTaskTimesSingleProjectChildTaskUpdateChildBeforeTime() {
-        val timeSource = TestUserCustomTimeProviderSource()
-        setup(userCustomTimeProviderSource = timeSource)
-
-        // to get the initial event out of the way
-        acceptPrivateProject(PrivateProjectJson())
-
-        acceptPrivateProject(PrivateProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true)))
-
-        rootTasksLoaderProvider.accept(
-            taskKey1,
-            RootTaskJson(
-                noScheduleOrParent = mapOf(
-                    "noScheduleOrParentId" to RootNoScheduleOrParentJson(
-                        startTimeOffset = 0.0,
-                        projectId = privateProjectId,
-                    ),
-                ),
-                rootTaskIds = mutableMapOf(taskKey2.taskId to true)
-            ),
-        )
-        timeSource.accept(taskKey1, mockk())
-
-        rootTasksLoaderProvider.accept(
-            taskKey2,
-            RootTaskJson(
-                startTimeOffset = 0.0,
-                taskHierarchies = mapOf(
-                    "taskHierarchyId" to NestedTaskHierarchyJson(
-                        startTimeOffset = 0.0,
-                        parentTaskId = taskKey1.taskId,
-                    )
-                ),
-            ),
-        )
-
-        rootTasksLoaderProvider.accept(
-            taskKey2,
-            RootTaskJson(
-                name = "changedName",
-                startTimeOffset = 0.0,
-                taskHierarchies = mapOf(
-                    "taskHierarchyId" to NestedTaskHierarchyJson(
-                        startTimeOffset = 0.0,
-                        parentTaskId = taskKey1.taskId,
-                    )
-                ),
-            ),
-        )
-
-        projectEmissionChecker.checkRemote { timeSource.accept(taskKey2, mockk()) }
-    }
-
-    @Test
-    fun testTaskTimesSingleProjectChildTaskTimesDelayed() {
-        val timeSource = TestUserCustomTimeProviderSource()
-        setup(userCustomTimeProviderSource = timeSource)
-
-        // to get the initial event out of the way
-        acceptPrivateProject(PrivateProjectJson())
-
-        acceptPrivateProject(PrivateProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true)))
-
-        rootTasksLoaderProvider.accept(
-            taskKey1,
-            RootTaskJson(
-                noScheduleOrParent = mapOf(
-                    "noScheduleOrParentId" to RootNoScheduleOrParentJson(
-                        startTimeOffset = 0.0,
-                        projectId = privateProjectId,
-                    ),
-                ),
-                rootTaskIds = mutableMapOf(taskKey2.taskId to true)
-            ),
-        )
-
-        rootTasksLoaderProvider.accept(
-            taskKey2,
-            RootTaskJson(
-                startTimeOffset = 0.0,
-                taskHierarchies = mapOf(
-                    "taskHierarchyId" to NestedTaskHierarchyJson(
-                        startTimeOffset = 0.0,
-                        parentTaskId = taskKey1.taskId,
-                    )
-                ),
-            ),
-        )
-
-        timeSource.accept(taskKey1, mockk())
-        projectEmissionChecker.checkRemote { timeSource.accept(taskKey2, mockk()) }
-    }
-
-    @Test
-    fun testTaskTimesSingleProjectChildTaskTimesDelayedSwapped() {
-        val timeSource = TestUserCustomTimeProviderSource()
-        setup(userCustomTimeProviderSource = timeSource)
-
-        // to get the initial event out of the way
-        acceptPrivateProject(PrivateProjectJson())
-
-        acceptPrivateProject(PrivateProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true)))
-
-        rootTasksLoaderProvider.accept(
-            taskKey1,
-            RootTaskJson(
-                noScheduleOrParent = mapOf(
-                    "noScheduleOrParentId" to RootNoScheduleOrParentJson(
-                        startTimeOffset = 0.0,
-                        projectId = privateProjectId,
-                    ),
-                ),
-                rootTaskIds = mutableMapOf(taskKey2.taskId to true)
-            ),
-        )
-
-        rootTasksLoaderProvider.accept(
-            taskKey2,
-            RootTaskJson(
-                startTimeOffset = 0.0,
-                taskHierarchies = mapOf(
-                    "taskHierarchyId" to NestedTaskHierarchyJson(
-                        startTimeOffset = 0.0,
-                        parentTaskId = taskKey1.taskId,
-                    )
-                ),
-            ),
-        )
-
-        timeSource.accept(taskKey2, mockk())
-        projectEmissionChecker.checkRemote { timeSource.accept(taskKey1, mockk()) }
-    }
-
-    @Test
     fun testSingleSharedProjectEmission() {
         setup()
 
@@ -982,19 +758,21 @@ class ChangeTypeSourceTest {
 
         sharedProjectKeysRelay.accept(setOf(sharedProjectKey))
 
-        sharedProjectSnapshotRelay.accept(
-            Snapshot(
-                sharedProjectKey.key,
-                JsonWrapper(
-                    SharedProjectJson(
-                        users = mutableMapOf("key" to UserJson()),
-                        rootTaskIds = mutableMapOf(taskKey1.taskId to true),
-                    )
-                ),
-            )
-        )
-
         projectEmissionChecker.checkRemote {
+            sharedProjectSnapshotRelay.accept(
+                Snapshot(
+                    sharedProjectKey.key,
+                    JsonWrapper(
+                        SharedProjectJson(
+                            users = mutableMapOf("key" to UserJson()),
+                            rootTaskIds = mutableMapOf(taskKey1.taskId to true),
+                        )
+                    ),
+                )
+            )
+        }
+
+        taskEmissionChecker.checkRemote {
             rootTasksLoaderProvider.accept(
                 taskKey1,
                 RootTaskJson(
@@ -1056,7 +834,7 @@ class ChangeTypeSourceTest {
             )
         )
 
-        projectEmissionChecker.checkRemote {
+        taskEmissionChecker.checkRemote {
             rootTasksLoaderProvider.accept(
                 taskKey1,
                 RootTaskJson(

@@ -1,5 +1,6 @@
 package com.krystianwsul.common.firebase.models.project
 
+import androidx.annotation.VisibleForTesting
 import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.domain.ProjectUndoData
 import com.krystianwsul.common.domain.TaskHierarchyContainer
@@ -120,7 +121,8 @@ abstract class Project<T : ProjectType>(
 
     fun delete() = projectRecord.delete()
 
-    private val rootTasksCache =
+    @VisibleForTesting
+    val rootTasksCache =
         invalidatableCache<Collection<RootTask>>(clearableInvalidatableManager) { invalidatableCache ->
             val managerRemovable =
                 rootModelChangeManager.rootTaskProjectIdInvalidatableManager.addInvalidatable(invalidatableCache)

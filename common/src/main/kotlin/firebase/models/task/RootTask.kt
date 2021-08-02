@@ -1,5 +1,6 @@
 package com.krystianwsul.common.firebase.models.task
 
+import androidx.annotation.VisibleForTesting
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.firebase.json.schedule.*
 import com.krystianwsul.common.firebase.json.tasks.TaskJson
@@ -110,7 +111,8 @@ class RootTask private constructor(
 
     override val projectCustomTimeIdProvider = JsonTime.ProjectCustomTimeIdProvider.rootTask
 
-    private val dependenciesLoadedCache: InvalidatableCache<Boolean> =
+    @VisibleForTesting
+    val dependenciesLoadedCache: InvalidatableCache<Boolean> =
         invalidatableCache(clearableInvalidatableManager) { invalidatableCache ->
             val customTimeKeys = taskRecord.getUserCustomTimeKeys()
             val customTimes = customTimeKeys.mapNotNull(userCustomTimeProvider::tryGetUserCustomTime)

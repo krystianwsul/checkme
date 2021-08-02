@@ -1192,7 +1192,8 @@ class DomainFactoryTest {
         val showInstanceData = domainFactory.getShowInstanceData(instanceKey3, now)
 
         val instanceData1 = showInstanceData.groupListDataWrapper
-            .instanceDatas.single()
+            .instanceDatas
+            .single()
 
         assertEquals(taskKey1, instanceData1.instanceKey.taskKey)
 
@@ -1202,5 +1203,27 @@ class DomainFactoryTest {
 
         assertEquals(taskKey2, instanceData2.instanceKey.taskKey)
         assertTrue(instanceData2.children.isEmpty())
+
+        listOf(taskKey1, taskKey2, taskKey3).forEach {
+            domainFactory.rootTasksFactory
+                .getRootTask(it)
+                .dependenciesLoadedCache
+                .invalidate()
+        }
+
+        domainFactory.projectsFactory
+            .privateProject
+            .rootTasksCache
+            .invalidate()
+
+        assertEquals(
+            taskKey3,
+            domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
+                .groupListDataWrapper
+                .instanceDatas
+                .single()
+                .instanceKey
+                .taskKey
+        )
     }
 }

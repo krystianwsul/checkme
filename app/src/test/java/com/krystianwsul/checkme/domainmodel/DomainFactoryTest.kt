@@ -1207,6 +1207,7 @@ class DomainFactoryTest {
         listOf(taskKey1, taskKey2, taskKey3).forEach {
             domainFactory.rootTasksFactory
                 .getRootTask(it)
+                .rootTaskDependencyResolver
                 .dependenciesLoadedCache
                 .invalidate()
         }

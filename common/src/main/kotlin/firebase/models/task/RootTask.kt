@@ -25,7 +25,7 @@ import com.krystianwsul.common.utils.*
 class RootTask private constructor(
     val taskRecord: RootTaskRecord,
     override val parent: Parent,
-    private val userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
+    val userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
     clearableInvalidatableManager: ClearableInvalidatableManager,
 ) : Task(
     JsonTime.CustomTimeProvider.getForRootTask(userCustomTimeProvider),
@@ -112,45 +112,9 @@ class RootTask private constructor(
     override val projectCustomTimeIdProvider = JsonTime.ProjectCustomTimeIdProvider.rootTask
 
     @VisibleForTesting
-    val dependenciesLoadedCache: InvalidatableCache<Boolean> =
-        invalidatableCache(clearableInvalidatableManager) { invalidatableCache ->
-            val customTimeKeys = taskRecord.getUserCustomTimeKeys()
-            val customTimes = customTimeKeys.mapNotNull(userCustomTimeProvider::tryGetUserCustomTime)
+    val rootTaskDependencyResolver = RootTaskDependencyResolver(this)
 
-            if (customTimes.size < customTimeKeys.size) {
-                val removable = rootModelChangeManager.userInvalidatableManager.addInvalidatable(invalidatableCache)
-
-                return@invalidatableCache InvalidatableCache.ValueHolder(false) { removable.remove() }
-            }
-
-            val taskKeys = taskRecord.getDirectDependencyTaskKeys()
-            val tasks = taskKeys.mapNotNull(parent::tryGetRootTask)
-
-            if (tasks.size < taskKeys.size) {
-                val removable = rootModelChangeManager.rootTaskInvalidatableManager.addInvalidatable(invalidatableCache)
-
-                return@invalidatableCache InvalidatableCache.ValueHolder(false) { removable.remove() }
-            }
-
-            val customTimeRemovables = customTimes.map {
-                it.user
-                    .clearableInvalidatableManager
-                    .addInvalidatable(invalidatableCache)
-            }
-
-            val taskRemovables = tasks.map {
-                it.dependenciesLoadedCache
-                    .invalidatableManager
-                    .addInvalidatable(invalidatableCache)
-            }
-
-            InvalidatableCache.ValueHolder(tasks.all { it.dependenciesLoaded }) {
-                taskRemovables.forEach { it.remove() }
-                customTimeRemovables.forEach { it.remove() }
-            }
-        }
-
-    override val dependenciesLoaded get() = dependenciesLoadedCache.value
+    override val dependenciesLoaded get() = rootTaskDependencyResolver.dependenciesLoadedCache.value
 
     fun createChildTask(
         now: ExactTimeStamp.Local,

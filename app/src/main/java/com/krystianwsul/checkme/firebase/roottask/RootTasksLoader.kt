@@ -113,7 +113,7 @@ class RootTasksLoader(
 
     val addChangeEvents = allEvents.ofType<AddChangeEvent>()
 
-    val removeEvents = allEvents.ofType<RemoveEvent>()
+    val removeEvents: Observable<RemoveEvent> = allEvents.ofType<RemoveEvent>()
         .doOnNext { it.taskKeys.forEach(rootTasksManager::remove) }
         .replayImmediate()
 

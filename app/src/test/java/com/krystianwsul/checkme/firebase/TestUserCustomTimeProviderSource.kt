@@ -14,7 +14,7 @@ class TestUserCustomTimeProviderSource : UserCustomTimeProviderSource {
         return Single.just(
                 object : JsonTime.UserCustomTimeProvider {
 
-                    override fun getUserCustomTime(userCustomTimeKey: CustomTimeKey.User): Time.Custom.User {
+                    override fun tryGetUserCustomTime(userCustomTimeKey: CustomTimeKey.User): Time.Custom.User? {
                         TODO("Not yet implemented")
                     }
                 }

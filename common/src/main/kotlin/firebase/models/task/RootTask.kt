@@ -116,7 +116,6 @@ class RootTask private constructor(
             val customTimes = customTimeKeys.mapNotNull(userCustomTimeProvider::tryGetUserCustomTime)
 
             if (customTimes.size < customTimeKeys.size) {
-                // todo dependencies how hard would it be to make this per-key?
                 val removable = rootModelChangeManager.userInvalidatableManager.addInvalidatable(invalidatableCache)
 
                 return@invalidatableCache InvalidatableCache.ValueHolder(false) { removable.remove() }
@@ -126,7 +125,6 @@ class RootTask private constructor(
             val tasks = taskKeys.mapNotNull(parent::tryGetRootTask)
 
             if (tasks.size < taskKeys.size) {
-                // todo dependencies how hard would it be to make this per-key?
                 val removable = rootModelChangeManager.rootTaskInvalidatableManager.addInvalidatable(invalidatableCache)
 
                 return@invalidatableCache InvalidatableCache.ValueHolder(false) { removable.remove() }

@@ -141,7 +141,7 @@ class DomainFactory(
             .addTo(domainDisposable)
 
         MyApplication.logTime("DomainFactory.init end")
-        //TimeLogger.clear() // todo dependencies
+        //TimeLogger.clear() // todo dependencies final cleanup
     }
 
     val defaultProjectKey by lazy { projectsFactory.privateProject.projectKey }

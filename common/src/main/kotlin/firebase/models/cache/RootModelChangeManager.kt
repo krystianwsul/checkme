@@ -6,7 +6,7 @@ class RootModelChangeManager {
 
     val rootTaskProjectIdInvalidatableManager = InvalidatableManager()
 
-    val rootModelInvalidatableManager = InvalidatableManager() // todo dependencies
+    val rootModelInvalidatableManager = InvalidatableManager()
 
     val rootTaskInvalidatableManager = InvalidatableManager()
 

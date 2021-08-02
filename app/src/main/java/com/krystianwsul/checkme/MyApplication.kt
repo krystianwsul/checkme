@@ -67,7 +67,7 @@ class MyApplication : Application() {
         var _sharedPreferences: SharedPreferences? = null
         val sharedPreferences get() = _sharedPreferences!!
 
-        val start = ExactTimeStamp.Local.now // todo dependencies
+        val start = ExactTimeStamp.Local.now // todo dependencies final cleanup
 
         fun logTime(message: String) {
             val ms = ExactTimeStamp.Local.now.long - start.long

@@ -11,7 +11,7 @@ import io.reactivex.rxjava3.core.Single
 
 private fun getScheduler(priority: Priority? = null) = RxPS.get(priority ?: Priority.MEDIUM)
 
-private fun log(callSite: String) { // todo dependencies
+private fun log(callSite: String) { // todo dependencies final cleanup
     TimeLogger.start("getScheduler").stop(callSite)
 }
 
@@ -49,22 +49,22 @@ private fun Completable.logR(): Completable {
 }
 
 fun <T : Any> Observable<T>.observeOnDomain(priority: Priority? = null) =
-    observeOn(getScheduler(priority))!!//.logR() todo dependencies
+    observeOn(getScheduler(priority))!!//.logR() todo dependencies final cleanup
 
 fun <T : Any> Single<T>.observeOnDomain(priority: Priority? = null) =
-    observeOn(getScheduler(priority))!!//.logR() todo dependencies
+    observeOn(getScheduler(priority))!!//.logR() todo dependencies final cleanup
 
 fun <T : Any> Flowable<T>.observeOnDomain(priority: Priority? = null) =
-    observeOn(getScheduler(priority))!!//.logR() todo dependencies
+    observeOn(getScheduler(priority))!!//.logR() todo dependencies final cleanup
 
 fun <T : Any> Observable<T>.subscribeOnDomain(priority: Priority? = null) =
-    subscribeOn(getScheduler(priority))!!//.logR() todo dependencies
+    subscribeOn(getScheduler(priority))!!//.logR() todo dependencies final cleanup
 
 fun <T : Any> Single<T>.subscribeOnDomain(priority: Priority? = null) =
-    subscribeOn(getScheduler(priority))!!//.logR() todo dependencies
+    subscribeOn(getScheduler(priority))!!//.logR() todo dependencies final cleanup
 
 fun Completable.subscribeOnDomain(priority: Priority? = null) =
-    subscribeOn(getScheduler(priority))!!//.logR() todo dependencies
+    subscribeOn(getScheduler(priority))!!//.logR() todo dependencies final cleanup
 
 @CheckResult
 fun completeOnDomain(action: () -> Unit) = Completable.fromAction(action).subscribeOnDomain()

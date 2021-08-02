@@ -188,7 +188,7 @@ fun DomainFactory.getGroupListData(
     return DayViewModel.DayData(dataWrapper).also {
         MyApplication.logTime("DomainFactory.getGroupListData end")
 
-        // TimeLogger.print() todo dependencies
-        // TimeLogger.clear() todo dependencies
+        // TimeLogger.print() todo dependencies final cleanup
+        // TimeLogger.clear() todo dependencies final cleanup
     }
 }

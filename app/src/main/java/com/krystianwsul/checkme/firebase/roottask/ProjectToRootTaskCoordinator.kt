@@ -16,7 +16,7 @@ interface ProjectToRootTaskCoordinator {
         override fun getRootTasks(projectTracker: LoadDependencyTrackerManager.ProjectTracker): Completable {
             rootTaskKeySource.onProjectAddedOrUpdated(projectTracker.projectKey, projectTracker.dependentTaskKeys)
 
-            return Completable.complete() // todo dependencies
+            return Completable.complete() // todo dependencies current cleanup
 
             return Observable.just(Unit)
                 .concatWith(rootTasksFactory.unfilteredChanges)

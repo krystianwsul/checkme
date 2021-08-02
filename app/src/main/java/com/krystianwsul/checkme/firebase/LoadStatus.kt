@@ -2,7 +2,7 @@ package com.krystianwsul.checkme.firebase
 
 import com.jakewharton.rxrelay3.BehaviorRelay
 
-object LoadStatus { // todo dependencies
+object LoadStatus { // todo dependencies final cleanup
 
     private val counterRelay = BehaviorRelay.createDefault(0)
     val isLoadingObservable get() = counterRelay.map { it > 0 }!!

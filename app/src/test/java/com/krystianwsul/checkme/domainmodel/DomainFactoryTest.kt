@@ -1208,7 +1208,6 @@ class DomainFactoryTest {
             domainFactory.rootTasksFactory
                 .getRootTask(it)
                 .rootTaskDependencyResolver
-                .dependenciesLoadedCache
                 .invalidate()
         }
 

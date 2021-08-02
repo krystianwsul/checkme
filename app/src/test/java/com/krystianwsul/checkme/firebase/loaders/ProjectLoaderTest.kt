@@ -5,8 +5,6 @@ import com.jakewharton.rxrelay3.BehaviorRelay
 import com.krystianwsul.checkme.domainmodel.DomainFactoryRule
 import com.krystianwsul.checkme.firebase.TestUserCustomTimeProviderSource
 import com.krystianwsul.checkme.firebase.managers.AndroidPrivateProjectManager
-import com.krystianwsul.checkme.firebase.roottask.LoadDependencyTrackerManager
-import com.krystianwsul.checkme.firebase.roottask.ProjectToRootTaskCoordinator
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.checkme.utils.tryGetCurrentValue
 import com.krystianwsul.common.ErrorLogger
@@ -21,7 +19,6 @@ import com.krystianwsul.common.utils.ProjectType
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
-import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import org.junit.After
 import org.junit.Assert.assertNull
@@ -81,11 +78,6 @@ class ProjectLoaderTest {
             projectManager,
             null,
             TestUserCustomTimeProviderSource(),
-            object : ProjectToRootTaskCoordinator {
-
-                override fun getRootTasks(projectTracker: LoadDependencyTrackerManager.ProjectTracker) =
-                    Completable.complete()
-            },
             mockk(relaxed = true),
         )
 

@@ -7,8 +7,6 @@ import com.krystianwsul.checkme.firebase.checkRemote
 import com.krystianwsul.checkme.firebase.loaders.*
 import com.krystianwsul.checkme.firebase.managers.AndroidPrivateProjectManager
 import com.krystianwsul.checkme.firebase.managers.AndroidSharedProjectManager
-import com.krystianwsul.checkme.firebase.roottask.LoadDependencyTrackerManager
-import com.krystianwsul.checkme.firebase.roottask.ProjectToRootTaskCoordinator
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.common.ErrorLogger
 import com.krystianwsul.common.domain.DeviceDbInfo
@@ -26,7 +24,6 @@ import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.TaskKey
 import io.mockk.every
 import io.mockk.mockk
-import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.subscribeBy
@@ -91,11 +88,6 @@ class ProjectsFactoryTest {
             privateProjectManager,
             null,
             TestUserCustomTimeProviderSource(),
-            object : ProjectToRootTaskCoordinator {
-
-                override fun getRootTasks(projectTracker: LoadDependencyTrackerManager.ProjectTracker) =
-                    Completable.complete()
-            },
             mockk(relaxed = true),
         )
 
@@ -113,12 +105,6 @@ class ProjectsFactoryTest {
             compositeDisposable,
             factoryProvider.sharedProjectsProvider,
             TestUserCustomTimeProviderSource(),
-            mockk(relaxed = true),
-            object : ProjectToRootTaskCoordinator {
-
-                override fun getRootTasks(projectTracker: LoadDependencyTrackerManager.ProjectTracker) =
-                    Completable.complete()
-            },
             mockk(relaxed = true),
             mockk(relaxed = true),
         )

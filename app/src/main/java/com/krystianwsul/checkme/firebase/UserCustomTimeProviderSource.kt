@@ -91,12 +91,12 @@ interface UserCustomTimeProviderSource {
 
         private fun getUserCustomTimeProvider(
             foreignUserKeys: Set<UserKey>,
-            skipLoad: Boolean, // todo dependencies current cleanup
+            skipLoad: Boolean, // todo dependencies middle cleanup
             notEmptyCallback: () -> Unit,
         ): Single<JsonTime.UserCustomTimeProvider> {
             if (foreignUserKeys.isNotEmpty()) notEmptyCallback()
 
-            if (skipLoad) { // todo dependencies current cleanup
+            if (skipLoad) { // todo dependencies middle cleanup
                 return Singles.zip(
                     myUserFactorySingle,
                     friendsFactorySingle,

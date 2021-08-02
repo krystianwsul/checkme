@@ -5,7 +5,7 @@ import com.krystianwsul.common.utils.TaskKey
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
 
-interface TaskRecordsLoadedTracker {
+interface TaskRecordsLoadedTracker { // todo dependencies final cleanup
 
     fun tryGetTaskRecord(taskKey: TaskKey.Root): RootTaskRecord?
 

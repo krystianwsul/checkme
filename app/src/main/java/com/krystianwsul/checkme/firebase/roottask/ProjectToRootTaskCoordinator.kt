@@ -3,7 +3,7 @@ package com.krystianwsul.checkme.firebase.roottask
 import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Observable
 
-interface ProjectToRootTaskCoordinator {
+interface ProjectToRootTaskCoordinator { // todo dependencies final cleanup
 
     fun getRootTasks(projectTracker: LoadDependencyTrackerManager.ProjectTracker): Completable
 
@@ -16,7 +16,7 @@ interface ProjectToRootTaskCoordinator {
         override fun getRootTasks(projectTracker: LoadDependencyTrackerManager.ProjectTracker): Completable {
             rootTaskKeySource.onProjectAddedOrUpdated(projectTracker.projectKey, projectTracker.dependentTaskKeys)
 
-            return Completable.complete() // todo dependencies current cleanup
+            return Completable.complete()
 
             return Observable.just(Unit)
                 .concatWith(rootTasksFactory.unfilteredChanges)

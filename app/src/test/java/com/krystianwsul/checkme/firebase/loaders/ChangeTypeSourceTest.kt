@@ -144,24 +144,15 @@ class ChangeTypeSourceTest {
             rootTasksLoaderProvider,
             domainDisposable,
             rootTasksManager,
-            loadDependencyTrackerManager,
         )
 
         val userKeyStore = mockk<UserKeyStore> {
             every { onTasksRemoved(any()) } returns Unit
         }
 
-        val recordRootTaskDependencyStateContainer = RootTaskDependencyStateContainer.Impl()
-
-        val taskRecordLoader =
-            TaskRecordsLoadedTracker.Impl(rootTasksLoader, recordRootTaskDependencyStateContainer, domainDisposable)
-
         val rootTaskToRootTaskCoordinator = RootTaskDependencyCoordinator.Impl(
             rootTaskKeySource,
-            rootTasksLoader,
             userCustomTimeProviderSource,
-            taskRecordLoader,
-            recordRootTaskDependencyStateContainer,
         )
 
         val modelRootTaskDependencyStateContainer = RootTaskDependencyStateContainer.Impl()
@@ -184,20 +175,13 @@ class ChangeTypeSourceTest {
             databaseWrapper,
         )
 
-        val projectToRootTaskCoordinator = ProjectToRootTaskCoordinator.Impl(
-            rootTaskKeySource,
-            rootTasksFactory,
-            modelRootTaskDependencyStateContainer,
-        )
-
         val privateProjectLoader = ProjectLoader.Impl(
             privateProjectSnapshotObservable,
             domainDisposable,
             privateProjectManager,
             null,
             userCustomTimeProviderSource,
-            projectToRootTaskCoordinator,
-            loadDependencyTrackerManager,
+            rootTaskKeySource,
         )
 
         val sharedProjectManager = AndroidSharedProjectManager(databaseWrapper)
@@ -217,9 +201,7 @@ class ChangeTypeSourceTest {
             sharedProjectsProvider,
             userCustomTimeProviderSource,
             userKeyStore,
-            projectToRootTaskCoordinator,
             rootTaskKeySource,
-            loadDependencyTrackerManager,
         )
 
         val shownFactory = mockk<Instance.ShownFactory>()

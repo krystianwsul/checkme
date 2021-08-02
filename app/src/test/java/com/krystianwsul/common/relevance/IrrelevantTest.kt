@@ -123,7 +123,6 @@ class IrrelevantTest {
             },
             compositeDisposable,
             rootTasksManager,
-            loadDependencyTrackerManager,
         )
 
         lateinit var project: PrivateProject

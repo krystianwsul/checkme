@@ -1,11 +1,9 @@
 package com.krystianwsul.checkme.firebase.loaders
 
 import com.krystianwsul.checkme.firebase.UserCustomTimeProviderSource
-import com.krystianwsul.checkme.firebase.roottask.LoadDependencyTrackerManager
-import com.krystianwsul.checkme.firebase.roottask.ProjectToRootTaskCoordinator
+import com.krystianwsul.checkme.firebase.roottask.RootTaskKeySource
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.checkme.utils.cacheImmediate
-import com.krystianwsul.checkme.utils.doOnSuccessOrDispose
 import com.krystianwsul.checkme.utils.mapNotNull
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.ChangeWrapper
@@ -16,7 +14,6 @@ import com.krystianwsul.common.utils.ProjectType
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.CompositeDisposable
-import io.reactivex.rxjava3.kotlin.Singles
 import io.reactivex.rxjava3.kotlin.plusAssign
 
 interface ProjectLoader<T : ProjectType, U : Parsable> { // U: Project JSON type
@@ -42,14 +39,13 @@ interface ProjectLoader<T : ProjectType, U : Parsable> { // U: Project JSON type
     )
 
     class Impl<T : ProjectType, U : Parsable>(
-            // U: Project JSON type
-            snapshotObservable: Observable<Snapshot<U>>,
-            private val domainDisposable: CompositeDisposable,
-            override val projectManager: ProjectProvider.ProjectManager<T, U>,
-            initialProjectRecord: ProjectRecord<T>?,
-            private val userCustomTimeProviderSource: UserCustomTimeProviderSource,
-            private val projectToRootTaskCoordinator: ProjectToRootTaskCoordinator,
-            private val loadDependencyTrackerManager: LoadDependencyTrackerManager,
+        // U: Project JSON type
+        snapshotObservable: Observable<Snapshot<U>>,
+        private val domainDisposable: CompositeDisposable,
+        override val projectManager: ProjectProvider.ProjectManager<T, U>,
+        initialProjectRecord: ProjectRecord<T>?,
+        private val userCustomTimeProviderSource: UserCustomTimeProviderSource,
+        private val rootTaskKeySource: RootTaskKeySource,
     ) : ProjectLoader<T, U> {
 
         private fun <T> Observable<T>.replayImmediate() = replay().apply { domainDisposable += connect() }!!
@@ -70,19 +66,16 @@ interface ProjectLoader<T : ProjectType, U : Parsable> { // U: Project JSON type
                             }
                         }
                         .switchMapSingle { (projectChangeType, projectRecord) ->
-                            /**
-                             * I'm assuming here that 1. a new project doesn't have any custom times, and 2. all other
-                             * project events are remote.
-                             */
+                            rootTaskKeySource.onProjectAddedOrUpdated(
+                                projectRecord.projectKey,
+                                projectRecord.rootTaskParentDelegate.rootTaskKeys
+                            )
 
-                            val tracker = loadDependencyTrackerManager.startTrackingProjectLoad(projectRecord)
-
-                            Singles.zip(
-                                    projectToRootTaskCoordinator.getRootTasks(tracker).toSingleDefault(Unit),
-                                    userCustomTimeProviderSource.getUserCustomTimeProvider(projectRecord),
-                            ).doOnSuccessOrDispose { tracker.stopTracking() }.map { (_, userCustomTimeProvider) ->
-                                ProjectRecordData(projectChangeType, projectRecord, userCustomTimeProvider)
-                            }
+                            // todo dependencies middle cleanup
+                            userCustomTimeProviderSource.getUserCustomTimeProvider(projectRecord)
+                                .map { userCustomTimeProvider ->
+                                    ProjectRecordData(projectChangeType, projectRecord, userCustomTimeProvider)
+                                }
                         }
                 .replayImmediate()
 

@@ -110,23 +110,11 @@ class FactoryLoader(
                             factoryProvider.database,
                             domainDisposable,
                             rootTaskManager,
-                            loadDependencyTrackerManager,
-                        )
-
-                        val recordRootTaskDependencyStateContainer = RootTaskDependencyStateContainer.Impl()
-
-                        val taskRecordLoader = TaskRecordsLoadedTracker.Impl(
-                            rootTasksLoader,
-                            recordRootTaskDependencyStateContainer,
-                            domainDisposable,
                         )
 
                         val rootTaskToRootTaskCoordinator = RootTaskDependencyCoordinator.Impl(
                             rootTaskKeySource,
-                            rootTasksLoader,
                             userCustomTimeProviderSource,
-                            taskRecordLoader,
-                            recordRootTaskDependencyStateContainer,
                         )
 
                         // this is hacky as fuck, but I'll take my chances
@@ -145,20 +133,13 @@ class FactoryLoader(
                             rootModelChangeManager,
                         ) { projectsFactorySingle.getCurrentValue() }
 
-                        val projectToRootTaskCoordinator = ProjectToRootTaskCoordinator.Impl(
-                            rootTaskKeySource,
-                            rootTasksFactory,
-                            modelRootTaskDependencyStateContainer,
-                        )
-
                         val privateProjectLoader = ProjectLoader.Impl(
                             privateProjectDatabaseRx.observable,
                             domainDisposable,
                             privateProjectManager,
                             null,
                             userCustomTimeProviderSource,
-                            projectToRootTaskCoordinator,
-                            loadDependencyTrackerManager,
+                            rootTaskKeySource,
                         )
 
                         val startTime = ExactTimeStamp.Local.now
@@ -172,9 +153,7 @@ class FactoryLoader(
                             factoryProvider.sharedProjectsProvider,
                             userCustomTimeProviderSource,
                             userKeyStore,
-                            projectToRootTaskCoordinator,
                             rootTaskKeySource,
-                            loadDependencyTrackerManager,
                         )
 
                         val notificationStorageSingle = factoryProvider.notificationStorageFactory

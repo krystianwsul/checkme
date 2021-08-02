@@ -16,7 +16,10 @@ import com.krystianwsul.checkme.firebase.loaders.SharedProjectsLoader
 import com.krystianwsul.checkme.firebase.loaders.mockBase64
 import com.krystianwsul.checkme.firebase.managers.AndroidRootTasksManager
 import com.krystianwsul.checkme.firebase.managers.AndroidSharedProjectManager
-import com.krystianwsul.checkme.firebase.roottask.*
+import com.krystianwsul.checkme.firebase.roottask.RootTaskDependencyCoordinator
+import com.krystianwsul.checkme.firebase.roottask.RootTaskKeySource
+import com.krystianwsul.checkme.firebase.roottask.RootTasksFactory
+import com.krystianwsul.checkme.firebase.roottask.RootTasksLoader
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.common.ErrorLogger
 import com.krystianwsul.common.domain.DeviceDbInfo
@@ -40,7 +43,6 @@ import com.krystianwsul.common.utils.UserKey
 import com.mindorks.scheduler.RxPS
 import io.mockk.*
 import io.reactivex.rxjava3.android.plugins.RxAndroidPlugins
-import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.CompositeDisposable
@@ -203,7 +205,6 @@ class DomainFactoryRule : TestRule {
             rootTasksLoaderProvider,
             compositeDisposable,
             rootTasksManager,
-            mockk(relaxed = true),
         )
 
         val rootTaskDependencyCoordinator = mockk<RootTaskDependencyCoordinator> {
@@ -234,13 +235,7 @@ class DomainFactoryRule : TestRule {
             },
             TestUserCustomTimeProviderSource(),
             mockk(relaxed = true),
-            object : ProjectToRootTaskCoordinator {
-
-                override fun getRootTasks(projectTracker: LoadDependencyTrackerManager.ProjectTracker) =
-                    Completable.complete()
-            },
             rootTaskKeySource,
-            mockk(relaxed = true),
         )
 
         projectsFactory = ProjectsFactory(

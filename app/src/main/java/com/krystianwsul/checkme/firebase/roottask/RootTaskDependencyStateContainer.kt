@@ -4,7 +4,7 @@ import androidx.annotation.VisibleForTesting
 import com.krystianwsul.common.firebase.records.task.RootTaskRecord
 import com.krystianwsul.common.utils.TaskKey
 
-interface RootTaskDependencyStateContainer {
+interface RootTaskDependencyStateContainer { // todo dependencies final cleanup
 
     fun onLoaded(rootTaskRecord: RootTaskRecord)
 

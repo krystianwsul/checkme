@@ -47,7 +47,7 @@ class RootTasksFactory(
                 rootTaskFactories.mapValuesNotNull { it.value.task }
         }
 
-    val unfilteredChanges: Observable<Unit>
+    val unfilteredChanges: Observable<Unit> // todo dependencies middle cleanup
     val changeTypes: Observable<ChangeType>
 
     init {

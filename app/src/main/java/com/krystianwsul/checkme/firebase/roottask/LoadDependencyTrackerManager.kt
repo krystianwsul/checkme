@@ -8,7 +8,7 @@ import com.krystianwsul.common.firebase.records.task.RootTaskRecord
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
 
-class LoadDependencyTrackerManager {
+class LoadDependencyTrackerManager { // todo dependencies final cleanup
 
     private val projectTrackers = mutableMapOf<ProjectKey<*>, ProjectTracker>()
     private val taskTrackers = mutableMapOf<TaskKey.Root, TaskTracker>()

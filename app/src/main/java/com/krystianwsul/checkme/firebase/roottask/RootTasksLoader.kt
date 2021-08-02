@@ -22,7 +22,6 @@ class RootTasksLoader(
     private val provider: Provider,
     private val domainDisposable: CompositeDisposable,
     val rootTasksManager: AndroidRootTasksManager,
-    private val loadDependencyTrackerManager: LoadDependencyTrackerManager,
 ) {
 
     private val taskKeyRelay = ReplayRelay.create<Map<TaskKey.Root, RootTaskRecord?>>()
@@ -89,17 +88,7 @@ class RootTasksLoader(
                     }
 
                 recordObservable.map { (taskRecord, isAddedLocally) ->
-                    if (taskRecord != null) {
-                        val isTaskKeyTracked =
-                            false // loadDependencyTrackerManager.isTaskKeyTracked(taskRecord.taskKey) todo dependencies current cleanup
-
-                        // there's no reason why we'd be tracking a change for a locally added record
-                        check(!isTaskKeyTracked || !isAddedLocally)
-
-                        AddChangeEvent(taskRecord, isTaskKeyTracked || isAddedLocally)
-                    } else {
-                        RemoveEvent(setOf(taskKey))
-                    }
+                    taskRecord?.let { AddChangeEvent(it, isAddedLocally) } ?: RemoveEvent(setOf(taskKey))
                 }
             }.merge()
     }.replayImmediate()
@@ -109,7 +98,7 @@ class RootTasksLoader(
         .map { RemoveEvent(it.keys) }
         .replayImmediate()
 
-    val allEvents = listOf(databaseEvents, removeEntryEvents).merge()
+    private val allEvents = listOf(databaseEvents, removeEntryEvents).merge()
 
     val addChangeEvents = allEvents.ofType<AddChangeEvent>()
 

@@ -29,7 +29,7 @@ class RootTaskFactory(
     private val eventResults: ConnectableObservable<EventResult>
 
     val changeTypes: ConnectableObservable<ChangeType>
-    val unfilteredChanges: ConnectableObservable<Unit>
+    val unfilteredChanges: ConnectableObservable<Unit> // todo dependencies
 
     var task: RootTask? = null
         private set

@@ -217,11 +217,6 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
                  * inbox-style notification
                  */
 
-                /**
-                 * in this section, "summary" is Android's summary notification thingy, whereas "group" is my own
-                 * inbox-style notification
-                 */
-
                 fun Collection<InstanceKey>.cancelNotifications() = map(domainFactory::getInstance).forEach {
                     Preferences.tickLog.logLineHour("hiding '" + it.name + "'")
                     cancelInstance(it.notificationId)
@@ -235,12 +230,10 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
                 val wereMaxShown = shownInstanceKeys.size > MAX_NOTIFICATIONS_Q
 
                 fun hideGroupOrOld() {
-                    if (wereMaxShown) {
-                        Preferences.tickLog.logLineHour("hiding group")
-                        NotificationWrapper.instance.cancelNotification(NotificationWrapperImpl.NOTIFICATION_ID_GROUP_NOT_SUMMARY)
-                    } else {
-                        hideInstanceKeys.cancelNotifications()
-                    }
+                    Preferences.tickLog.logLineHour("hiding group")
+                    NotificationWrapper.instance.cancelNotification(NotificationWrapperImpl.NOTIFICATION_ID_GROUP_NOT_SUMMARY)
+
+                    hideInstanceKeys.cancelNotifications()
                 }
 
                 showInstanceKeys.forEach { notifyInstance(notificationInstances.getValue(it), silent) }

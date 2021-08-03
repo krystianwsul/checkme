@@ -29,7 +29,6 @@ class RootTaskFactory(
     private val eventResults: ConnectableObservable<EventResult>
 
     val changeTypes: ConnectableObservable<ChangeType>
-    val unfilteredChanges: ConnectableObservable<Unit> // todo dependencies
 
     var task: RootTask? = null
         private set
@@ -76,7 +75,6 @@ class RootTaskFactory(
          */
 
         changeTypes = addChangeEventChangeTypes.map { ChangeType.REMOTE }.publish()
-        unfilteredChanges = unfilteredSetTaskEventResults.map { }.publish()
     }
 
     private var connected = false
@@ -86,7 +84,6 @@ class RootTaskFactory(
         connected = true
 
         domainDisposable += changeTypes.connect()
-        domainDisposable += unfilteredChanges.connect()
 
         domainDisposable += eventResults.connect()
     }

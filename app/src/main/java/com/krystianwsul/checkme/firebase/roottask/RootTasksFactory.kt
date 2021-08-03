@@ -45,7 +45,6 @@ class RootTasksFactory(
                 rootTaskFactories.mapValuesNotNull { it.value.task }
         }
 
-    val unfilteredChanges: Observable<Unit> // todo dependencies final cleanup
     val changeTypes: Observable<ChangeType>
 
     init {
@@ -67,24 +66,18 @@ class RootTasksFactory(
             .subscribe(rootTaskFactoriesRelay)
             .addTo(domainDisposable)
 
-        val removeEvents = rootTasksLoader.removeEvents
-            .doOnNext {
+        rootTasksLoader.removeEvents
+            .subscribe {
                 it.taskKeys.forEach { rootTaskFactories[it]?.onRemove() }
 
                 userKeyStore.onTasksRemoved(it.taskKeys)
                 rootTaskKeySource.onRootTasksRemoved(it.taskKeys)
             }
+            .addTo(domainDisposable)
 
         changeTypes = rootTaskFactoriesRelay.switchMap {
             it.map { it.value.changeTypes }.merge()
         }.publishImmediate(domainDisposable)
-
-        val factoryUnfilteredChanges = rootTaskFactoriesRelay.switchMap {
-            it.map { it.value.unfilteredChanges }.merge()
-        }
-
-        unfilteredChanges =
-            listOf(factoryUnfilteredChanges, removeEvents.map { }).merge().publishImmediate(domainDisposable)
 
         domainDisposable += rootTaskFactoriesRelay.subscribe {
             it.forEach { it.value.connect() }

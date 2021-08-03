@@ -112,12 +112,8 @@ class ChangeTypeSourceTest {
 
     private fun immediateUserCustomTimeProviderSource() = object : UserCustomTimeProviderSource {
 
-        override fun getTimeChangeObservable() = Observable.just(Unit)
-
         override fun getUserCustomTimeProvider(projectRecord: ProjectRecord<*>) = mockk<JsonTime.UserCustomTimeProvider>()
         override fun getUserCustomTimeProvider(rootTaskRecord: RootTaskRecord) = mockk<JsonTime.UserCustomTimeProvider>()
-
-        override fun hasCustomTimes(rootTaskRecord: RootTaskRecord) = true
     }
 
     private fun setup() {

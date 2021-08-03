@@ -1,11 +1,9 @@
 package com.krystianwsul.checkme.firebase
 
-import androidx.annotation.VisibleForTesting
 import com.krystianwsul.checkme.firebase.factories.FriendsFactory
 import com.krystianwsul.checkme.firebase.factories.MyUserFactory
 import com.krystianwsul.checkme.firebase.loaders.FriendsLoader
 import com.krystianwsul.checkme.utils.getCurrentValue
-import com.krystianwsul.checkme.utils.tryGetCurrentValue
 import com.krystianwsul.common.firebase.records.project.PrivateProjectRecord
 import com.krystianwsul.common.firebase.records.project.ProjectRecord
 import com.krystianwsul.common.firebase.records.project.SharedProjectRecord
@@ -14,17 +12,12 @@ import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.UserKey
-import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Single
 
 interface UserCustomTimeProviderSource {
 
     fun getUserCustomTimeProvider(projectRecord: ProjectRecord<*>): JsonTime.UserCustomTimeProvider
     fun getUserCustomTimeProvider(rootTaskRecord: RootTaskRecord): JsonTime.UserCustomTimeProvider
-
-    fun hasCustomTimes(rootTaskRecord: RootTaskRecord): Boolean // todo dependencies final cleanup
-
-    fun getTimeChangeObservable(): Observable<Unit> // todo dependencies final cleanup
 
     class Impl(
         private val myUserKey: UserKey,
@@ -102,32 +95,6 @@ interface UserCustomTimeProviderSource {
 
                 return provider.tryGetUserCustomTime(userCustomTimeKey)
             }
-        }
-
-
-        @VisibleForTesting
-        fun getCustomTimes(foreignUserKeys: Set<UserKey>): Single<FriendsFactory> {
-            check(myUserKey !in foreignUserKeys)
-
-            return friendsFactorySingle.flatMap { friendsFactory ->
-                Observable.just(Unit)
-                    .concatWith(friendsFactory.changeTypes.map { })
-                    .filter { friendsFactory.hasUserKeys(foreignUserKeys) }
-                    .firstOrError()
-                    .map { friendsFactory }
-            }
-        }
-
-        override fun hasCustomTimes(rootTaskRecord: RootTaskRecord): Boolean {
-            val foreignUserKeys = getForeignUserKeysFromRecord(rootTaskRecord)
-            if (foreignUserKeys.isEmpty()) return true
-
-            val friendsFactory = friendsFactorySingle.tryGetCurrentValue() ?: return false
-            return friendsFactory.hasUserKeys(foreignUserKeys)
-        }
-
-        override fun getTimeChangeObservable(): Observable<Unit> {
-            return friendsFactorySingle.flatMapObservable { it.changeTypes }.map { }
         }
     }
 }

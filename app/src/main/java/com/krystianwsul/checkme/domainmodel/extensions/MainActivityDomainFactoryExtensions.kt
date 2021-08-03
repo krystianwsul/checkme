@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.domainmodel.extensions
 
-import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.DomainFactory
@@ -91,7 +90,6 @@ fun DomainFactory.getGroupListData(
     timeRange: Preferences.TimeRange,
 ): DayViewModel.DayData {
     MyCrashlytics.log("DomainFactory.getGroupListData")
-    MyApplication.logTime("DomainFactory.getGroupListData start")
 
     DomainThreadChecker.instance.requireDomainThread()
 
@@ -185,10 +183,5 @@ fun DomainFactory.getGroupListData(
         null,
     )
 
-    return DayViewModel.DayData(dataWrapper).also {
-        MyApplication.logTime("DomainFactory.getGroupListData end")
-
-        // TimeLogger.print() todo dependencies final cleanup
-        // TimeLogger.clear() todo dependencies final cleanup
-    }
+    return DayViewModel.DayData(dataWrapper)
 }

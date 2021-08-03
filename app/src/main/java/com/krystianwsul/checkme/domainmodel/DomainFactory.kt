@@ -102,7 +102,6 @@ class DomainFactory(
 
     init {
         Preferences.tickLog.logLineHour("DomainFactory.init")
-        MyApplication.logTime("DomainFactory.init begin")
 
         val now = ExactTimeStamp.Local.now
 
@@ -139,9 +138,6 @@ class DomainFactory(
             .flatMapCompletable { getDomainUpdater(this).fixOffsetsAndCustomTimes(it) }
             .subscribe()
             .addTo(domainDisposable)
-
-        MyApplication.logTime("DomainFactory.init end")
-        //TimeLogger.clear() // todo dependencies final cleanup
     }
 
     val defaultProjectKey by lazy { projectsFactory.privateProject.projectKey }

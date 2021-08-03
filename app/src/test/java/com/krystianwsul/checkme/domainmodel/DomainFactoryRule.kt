@@ -218,7 +218,6 @@ class DomainFactoryRule : TestRule {
             rootTaskDependencyCoordinator,
             compositeDisposable,
             rootTaskKeySource,
-            mockk(relaxed = true),
             rootModelChangeManager,
         ) { projectsFactory }
 

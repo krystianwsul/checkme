@@ -28,7 +28,6 @@ class RootTasksFactory(
     private val rootTaskDependencyCoordinator: RootTaskDependencyCoordinator,
     domainDisposable: CompositeDisposable,
     private val rootTaskKeySource: RootTaskKeySource,
-    private val rootTaskDependencyStateContainer: RootTaskDependencyStateContainer,
     override val rootModelChangeManager: RootModelChangeManager,
     private val getProjectsFactory: () -> ProjectsFactory,
 ) : RootTask.Parent {
@@ -61,7 +60,6 @@ class RootTasksFactory(
                         this,
                         domainDisposable,
                         group,
-                        rootTaskDependencyStateContainer,
                         rootModelChangeManager,
                     )
                 }

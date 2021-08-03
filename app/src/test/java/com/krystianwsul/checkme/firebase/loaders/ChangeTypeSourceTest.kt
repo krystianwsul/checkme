@@ -9,7 +9,10 @@ import com.krystianwsul.checkme.firebase.factories.ProjectsFactory
 import com.krystianwsul.checkme.firebase.managers.AndroidPrivateProjectManager
 import com.krystianwsul.checkme.firebase.managers.AndroidRootTasksManager
 import com.krystianwsul.checkme.firebase.managers.AndroidSharedProjectManager
-import com.krystianwsul.checkme.firebase.roottask.*
+import com.krystianwsul.checkme.firebase.roottask.RootTaskDependencyCoordinator
+import com.krystianwsul.checkme.firebase.roottask.RootTaskKeySource
+import com.krystianwsul.checkme.firebase.roottask.RootTasksFactory
+import com.krystianwsul.checkme.firebase.roottask.RootTasksLoader
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.checkme.utils.SingleParamObservableSource
 import com.krystianwsul.common.firebase.ChangeType
@@ -149,8 +152,6 @@ class ChangeTypeSourceTest {
             userCustomTimeProviderSource,
         )
 
-        val modelRootTaskDependencyStateContainer = RootTaskDependencyStateContainer.Impl()
-
         val existingInstanceChangeManager = RootModelChangeManager()
 
         rootTasksFactory = RootTasksFactory(
@@ -159,7 +160,6 @@ class ChangeTypeSourceTest {
             rootTaskToRootTaskCoordinator,
             domainDisposable,
             rootTaskKeySource,
-            modelRootTaskDependencyStateContainer,
             existingInstanceChangeManager,
         ) { projectsFactory }
 

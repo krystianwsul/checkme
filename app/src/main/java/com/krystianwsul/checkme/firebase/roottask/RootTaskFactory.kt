@@ -18,7 +18,6 @@ class RootTaskFactory(
     private val rootTasksFactory: RootTasksFactory,
     private val domainDisposable: CompositeDisposable,
     addChangeEvents: GroupedObservable<TaskKey.Root, RootTasksLoader.AddChangeEvent>,
-    private val rootTaskDependencyStateContainer: RootTaskDependencyStateContainer,
     private val rootModelChangeManager: RootModelChangeManager,
 ) {
 
@@ -61,14 +60,6 @@ class RootTaskFactory(
                 rootModelChangeManager.invalidateRootTasks()
 
                 task = it.task
-
-                rootTaskDependencyStateContainer.apply {
-                    if (it.task != null) {
-                        onLoaded(it.task!!.taskRecord)
-                    } else {
-                        onRemoved(taskKey)
-                    }
-                }
             }
             .publish()
 

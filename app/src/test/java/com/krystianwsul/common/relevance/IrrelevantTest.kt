@@ -135,7 +135,6 @@ class IrrelevantTest {
             },
             compositeDisposable,
             rootTaskKeySource,
-            mockk(),
             rootModelChangeManager,
         ) { projectsFactory }
 

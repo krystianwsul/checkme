@@ -45,7 +45,6 @@ class RootTasksFactoryTest {
             },
             domainDisposable,
             mockk(),
-            mockk(relaxed = true),
             rootModelChangeManager,
             mockk(),
         )

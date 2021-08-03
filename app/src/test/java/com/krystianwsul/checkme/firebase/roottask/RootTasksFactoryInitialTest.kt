@@ -33,7 +33,6 @@ class RootTasksFactoryInitialTest {
             mockk(),
             compositeDisposable,
             mockk(),
-            mockk(),
             rootModelChangeManager,
             mockk(),
         )

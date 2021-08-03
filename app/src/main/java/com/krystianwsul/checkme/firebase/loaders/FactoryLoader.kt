@@ -10,7 +10,10 @@ import com.krystianwsul.checkme.firebase.factories.ProjectsFactory
 import com.krystianwsul.checkme.firebase.managers.AndroidPrivateProjectManager
 import com.krystianwsul.checkme.firebase.managers.AndroidRootTasksManager
 import com.krystianwsul.checkme.firebase.managers.AndroidSharedProjectManager
-import com.krystianwsul.checkme.firebase.roottask.*
+import com.krystianwsul.checkme.firebase.roottask.RootTaskDependencyCoordinator
+import com.krystianwsul.checkme.firebase.roottask.RootTaskKeySource
+import com.krystianwsul.checkme.firebase.roottask.RootTasksFactory
+import com.krystianwsul.checkme.firebase.roottask.RootTasksLoader
 import com.krystianwsul.checkme.utils.cacheImmediate
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.domain.DeviceDbInfo
@@ -118,15 +121,12 @@ class FactoryLoader(
                         // this is hacky as fuck, but I'll take my chances
                         lateinit var projectsFactorySingle: Single<ProjectsFactory>
 
-                        val modelRootTaskDependencyStateContainer = RootTaskDependencyStateContainer.Impl()
-
                         val rootTasksFactory = RootTasksFactory(
                             rootTasksLoader,
                             userKeyStore,
                             rootTaskToRootTaskCoordinator,
                             domainDisposable,
                             rootTaskKeySource,
-                            modelRootTaskDependencyStateContainer,
                             rootModelChangeManager,
                         ) { projectsFactorySingle.getCurrentValue() }
 

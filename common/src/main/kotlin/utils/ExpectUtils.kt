@@ -3,6 +3,7 @@ package com.krystianwsul.common.utils
 expect interface Serializable
 expect annotation class Parcelize()
 expect interface Parcelable
+expect annotation class VisibleForTesting()
 
 expect fun String.toBase64(): String
 

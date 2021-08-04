@@ -82,6 +82,9 @@ object RelevanceChecker {
                     override fun getUserCustomTime(userCustomTimeKey: CustomTimeKey.User): Time.Custom.User {
                         return rootUsers.getValue(userCustomTimeKey.userKey).getUserCustomTime(userCustomTimeKey)
                     }
+
+                    override fun tryGetUserCustomTime(userCustomTimeKey: CustomTimeKey.User) =
+                        getUserCustomTime(userCustomTimeKey)
                 }
 
                 val rootTaskManager = JsRootTasksManager(databaseWrapper, rootTaskMap)
@@ -119,6 +122,8 @@ object RelevanceChecker {
                     }
 
                     override fun getRootTask(rootTaskKey: TaskKey.Root) = rootTasksByTaskKey.getValue(rootTaskKey)
+
+                    override fun tryGetRootTask(rootTaskKey: TaskKey.Root) = getRootTask(rootTaskKey)
 
                     override fun getTask(taskKey: TaskKey): Task {
                         return when (taskKey) {

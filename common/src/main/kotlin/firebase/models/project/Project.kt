@@ -1,6 +1,5 @@
 package com.krystianwsul.common.firebase.models.project
 
-import androidx.annotation.VisibleForTesting
 import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.domain.ProjectUndoData
 import com.krystianwsul.common.domain.TaskHierarchyContainer

@@ -1,6 +1,5 @@
 package com.krystianwsul.common.firebase.models.task
 
-import androidx.annotation.VisibleForTesting
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.firebase.json.schedule.*
 import com.krystianwsul.common.firebase.json.tasks.TaskJson

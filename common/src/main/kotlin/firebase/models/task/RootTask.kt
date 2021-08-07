@@ -89,9 +89,15 @@ class RootTask private constructor(
     val projectId: String by projectIdCache
 
     private val projectCache = invalidatableCache<Project<*>>(clearableInvalidatableManager) { invalidatableCache ->
-        val removable = projectIdCache.invalidatableManager.addInvalidatable(invalidatableCache)
+        val projectIdRemovable = projectIdCache.invalidatableManager.addInvalidatable(invalidatableCache)
 
-        InvalidatableCache.ValueHolder(parent.getProject(projectId)) { removable.remove() }
+        val project = parent.getProject(projectId)
+        val projectRemovable = project.clearableInvalidatableManager.addInvalidatable(invalidatableCache)
+
+        InvalidatableCache.ValueHolder(project) {
+            projectIdRemovable.remove()
+            projectRemovable.remove()
+        }
     }
 
     override val project by projectCache

@@ -752,7 +752,7 @@ private fun DomainFactory.joinJoinables(
             is EditParameters.Join.Joinable.Task -> addChildToParent()
             is EditParameters.Join.Joinable.Instance -> {
                 val migratedScheduleKey = joinable.instanceKey
-                    .scheduleKey
+                    .instanceScheduleKey
                     .run {
                         val originalTime = getTime(scheduleTimePair)
 
@@ -763,7 +763,7 @@ private fun DomainFactory.joinJoinables(
                             now,
                         )
 
-                        ScheduleKey(scheduleDate, migratedTime.timePair)
+                        InstanceScheduleKey(scheduleDate, migratedTime.timePair)
                     }
 
                 val instance = task.getInstance(migratedScheduleKey)

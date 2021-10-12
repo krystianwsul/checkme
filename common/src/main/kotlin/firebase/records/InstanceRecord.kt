@@ -7,17 +7,16 @@ import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.utils.InstanceKey
-import com.krystianwsul.common.utils.ScheduleKey
+import com.krystianwsul.common.utils.InstanceScheduleKey
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.common.utils.invalidatableLazy
-import kotlin.jvm.JvmStatic
 import kotlin.properties.Delegates.observable
 
 class InstanceRecord(
     create: Boolean,
     private val taskRecord: TaskRecord,
     override val createObject: InstanceJson,
-    val scheduleKey: ScheduleKey,
+    val instanceScheduleKey: InstanceScheduleKey,
     firebaseKey: String,
 ) : RemoteRecord(create) {
 
@@ -28,27 +27,29 @@ class InstanceRecord(
         private fun Int.pad(padding: Boolean) = toString().run { if (padding) padStart(2, '0') else this }
 
         @JvmStatic
-        fun scheduleKeyToDateString(scheduleKey: ScheduleKey, padding: Boolean) = scheduleKey.scheduleDate.run {
-            fun Int.pad() = pad(padding)
+        fun scheduleKeyToDateString(instanceScheduleKey: InstanceScheduleKey, padding: Boolean) =
+            instanceScheduleKey.scheduleDate.run {
+                fun Int.pad() = pad(padding)
 
-            "$year-${month.pad()}-${day.pad()}"
-        }
+                "$year-${month.pad()}-${day.pad()}"
+            }
 
         @JvmStatic
-        fun scheduleKeyToTimeString(scheduleKey: ScheduleKey, padding: Boolean) = scheduleKey.scheduleTimePair.run {
-            fun Int.pad() = pad(padding)
+        fun scheduleKeyToTimeString(instanceScheduleKey: InstanceScheduleKey, padding: Boolean) =
+            instanceScheduleKey.scheduleTimePair.run {
+                fun Int.pad() = pad(padding)
 
-            customTimeKey?.toJson() ?: hourMinute!!.run { "${hour.pad()}-${minute.pad()}" }
-        }
+                customTimeKey?.toJson() ?: hourMinute!!.run { "${hour.pad()}-${minute.pad()}" }
+            }
 
-        fun scheduleKeyToString(scheduleKey: ScheduleKey) = scheduleKey.let {
+        fun scheduleKeyToString(instanceScheduleKey: InstanceScheduleKey) = instanceScheduleKey.let {
             scheduleKeyToDateString(it, false) + "-" + scheduleKeyToTimeString(it, false)
         }
 
         fun stringToScheduleKey(
             projectCustomTimeIdAndKeyProvider: JsonTime.ProjectCustomTimeIdAndKeyProvider,
             key: String,
-        ): ScheduleKey {
+        ): InstanceScheduleKey {
             val matchResult = scheduleKeyRegex.find(key)!!
 
             val dateString = matchResult.groupValues[1]
@@ -76,7 +77,7 @@ class InstanceRecord(
             projectCustomTimeIdAndKeyProvider: JsonTime.ProjectCustomTimeIdAndKeyProvider,
             dateString: String,
             timeString: String,
-        ): ScheduleKey {
+        ): InstanceScheduleKey {
             val date = dateStringToDate(dateString)
 
             val jsonTime = hourMinuteRegex.find(timeString)?.let { matchResult ->
@@ -85,7 +86,7 @@ class InstanceRecord(
                 JsonTime.Normal(HourMinute(hour, minute))
             } ?: JsonTime.fromJson(projectCustomTimeIdAndKeyProvider, timeString)
 
-            return ScheduleKey(date, jsonTime.toTimePair(projectCustomTimeIdAndKeyProvider))
+            return InstanceScheduleKey(date, jsonTime.toTimePair(projectCustomTimeIdAndKeyProvider))
         }
     }
 
@@ -94,9 +95,9 @@ class InstanceRecord(
     var done by Committer(createObject::done)
     var doneOffset by Committer(createObject::doneOffset)
 
-    val scheduleYear by lazy { scheduleKey.scheduleDate.year }
-    val scheduleMonth by lazy { scheduleKey.scheduleDate.month }
-    val scheduleDay by lazy { scheduleKey.scheduleDate.day }
+    val scheduleYear by lazy { instanceScheduleKey.scheduleDate.year }
+    val scheduleMonth by lazy { instanceScheduleKey.scheduleDate.month }
+    val scheduleDay by lazy { instanceScheduleKey.scheduleDate.day }
 
     private fun getInitialInstanceDate() = createObject.instanceDate
         .takeUnless { it.isNullOrEmpty() }
@@ -122,7 +123,7 @@ class InstanceRecord(
 
     var hidden by Committer(createObject::hidden)
 
-    val instanceKey by lazy { InstanceKey(taskRecord.taskKey, scheduleKey) }
+    val instanceKey by lazy { InstanceKey(taskRecord.taskKey, instanceScheduleKey) }
 
     var parentInstanceKey: InstanceKey? by observable(
         createObject.parentJson?.let {
@@ -142,5 +143,5 @@ class InstanceRecord(
 
     var noParent by Committer(createObject::noParent)
 
-    override fun deleteFromParent() = check(taskRecord.instanceRecords.remove(scheduleKey) == this)
+    override fun deleteFromParent() = check(taskRecord.instanceRecords.remove(instanceScheduleKey) == this)
 }

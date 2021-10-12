@@ -41,9 +41,9 @@ fun DomainFactory.getShowInstanceData(
 
     if (debugMode) {
         displayText += "\n\ntask key: " + instanceKey.taskKey
-        displayText += "\ndate: " + instanceKey.scheduleKey.scheduleDate
-        displayText += "\ncustom time: " + instanceKey.scheduleKey.scheduleTimePair.customTimeKey
-        displayText += "\nnormal time: " + instanceKey.scheduleKey.scheduleTimePair.hourMinute
+        displayText += "\ndate: " + instanceKey.instanceScheduleKey.scheduleDate
+        displayText += "\ncustom time: " + instanceKey.instanceScheduleKey.scheduleTimePair.customTimeKey
+        displayText += "\nnormal time: " + instanceKey.instanceScheduleKey.scheduleTimePair.hourMinute
         displayText += "\nexists? " + instance.exists()
         displayText += "\nisVisible? " + instance.isVisibleDebug(
             now,

@@ -155,8 +155,8 @@ class RootTask private constructor(
         }
     }
 
-    override fun getDateTime(scheduleKey: ScheduleKey) =
-        DateTime(scheduleKey.scheduleDate, getTime(scheduleKey.scheduleTimePair))
+    override fun getDateTime(instanceScheduleKey: InstanceScheduleKey) =
+        DateTime(instanceScheduleKey.scheduleDate, getTime(instanceScheduleKey.scheduleTimePair))
 
     private fun getTime(timePair: TimePair) = timePair.customTimeKey
         ?.let { userCustomTimeProvider.getUserCustomTime(it as CustomTimeKey.User) }

@@ -3,7 +3,6 @@ package com.krystianwsul.common.firebase.json
 import com.krystianwsul.common.firebase.records.InstanceRecord
 import com.krystianwsul.common.utils.InstanceKey
 import kotlinx.serialization.Serializable
-import kotlin.jvm.JvmOverloads
 
 @Serializable
 data class InstanceJson @JvmOverloads constructor(
@@ -23,8 +22,8 @@ data class InstanceJson @JvmOverloads constructor(
     ) {
 
         constructor(instanceKey: InstanceKey) : this(
-                instanceKey.taskKey.taskId,
-                InstanceRecord.scheduleKeyToString(instanceKey.scheduleKey),
+            instanceKey.taskKey.taskId,
+            InstanceRecord.scheduleKeyToString(instanceKey.instanceScheduleKey),
         )
     }
 }

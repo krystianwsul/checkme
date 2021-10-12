@@ -392,7 +392,8 @@ class DomainFactory(
 
     // internal
 
-    fun getInstance(instanceKey: InstanceKey) = getTaskForce(instanceKey.taskKey).getInstance(instanceKey.scheduleKey)
+    fun getInstance(instanceKey: InstanceKey) =
+        getTaskForce(instanceKey.taskKey).getInstance(instanceKey.instanceScheduleKey)
 
     fun getRootInstances(
         startExactTimeStamp: ExactTimeStamp.Offset?,

@@ -6,8 +6,8 @@ import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.time.TimePair
 import com.krystianwsul.common.utils.CustomTimeId
 import com.krystianwsul.common.utils.CustomTimeKey
+import com.krystianwsul.common.utils.InstanceScheduleKey
 import com.krystianwsul.common.utils.ProjectKey
-import com.krystianwsul.common.utils.ScheduleKey
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -27,7 +27,7 @@ class InstanceRecordTest {
     fun testParsingScheduleKey() {
         // 2021-4-12-17-0
 
-        val inputScheduleKey = ScheduleKey(Date(2021, 4, 12), TimePair(HourMinute(17, 0)))
+        val inputScheduleKey = InstanceScheduleKey(Date(2021, 4, 12), TimePair(HourMinute(17, 0)))
 
         val scheduleKeyString = InstanceRecord.scheduleKeyToString(inputScheduleKey)
         assertEquals("2021-4-12-17-0", scheduleKeyString)

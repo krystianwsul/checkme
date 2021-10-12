@@ -10,7 +10,7 @@ import com.krystianwsul.common.firebase.records.task.ProjectTaskRecord
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.Time
-import com.krystianwsul.common.utils.ScheduleKey
+import com.krystianwsul.common.utils.InstanceScheduleKey
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.common.utils.invalidatableLazy
 
@@ -69,7 +69,7 @@ class ProjectTask(override val project: Project<*>, private val taskRecord: Proj
 
     override fun deleteFromParent() = project.deleteTask(this)
 
-    override fun getDateTime(scheduleKey: ScheduleKey) = project.getDateTime(scheduleKey)
+    override fun getDateTime(instanceScheduleKey: InstanceScheduleKey) = project.getDateTime(instanceScheduleKey)
 
     override fun getOrCopyTime(
         dayOfWeek: DayOfWeek,

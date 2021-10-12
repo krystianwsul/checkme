@@ -71,7 +71,7 @@ sealed class Task(
 
     val id get() = taskRecord.id
 
-    val existingInstances: Map<ScheduleKey, Instance> get() = _existingInstances
+    val existingInstances: Map<InstanceScheduleKey, Instance> get() = _existingInstances
 
     val imageJson get() = taskRecord.image
 
@@ -473,19 +473,20 @@ sealed class Task(
         rootModelChangeManager.invalidateExistingInstances()
     }
 
-    private fun getExistingInstanceIfPresent(scheduleKey: ScheduleKey) = _existingInstances[scheduleKey]
+    private fun getExistingInstanceIfPresent(instanceScheduleKey: InstanceScheduleKey) =
+        _existingInstances[instanceScheduleKey]
 
     fun getInstance(scheduleDateTime: DateTime): Instance {
-        val scheduleKey = ScheduleKey(scheduleDateTime.date, scheduleDateTime.time.timePair)
+        val scheduleKey = InstanceScheduleKey(scheduleDateTime.date, scheduleDateTime.time.timePair)
 
         val existingInstance = getExistingInstanceIfPresent(scheduleKey)
 
         return (existingInstance ?: generateInstance(scheduleDateTime))
     }
 
-    protected abstract fun getDateTime(scheduleKey: ScheduleKey): DateTime
+    protected abstract fun getDateTime(instanceScheduleKey: InstanceScheduleKey): DateTime
 
-    fun getInstance(scheduleKey: ScheduleKey) = getInstance(getDateTime(scheduleKey))
+    fun getInstance(instanceScheduleKey: InstanceScheduleKey) = getInstance(getDateTime(instanceScheduleKey))
 
     abstract fun getOrCopyTime(
         dayOfWeek: DayOfWeek,
@@ -620,7 +621,7 @@ sealed class Task(
 
         fun getTask(taskKey: TaskKey): Task
 
-        fun getInstance(instanceKey: InstanceKey) = getTask(instanceKey.taskKey).getInstance(instanceKey.scheduleKey)
+        fun getInstance(instanceKey: InstanceKey) = getTask(instanceKey.taskKey).getInstance(instanceKey.instanceScheduleKey)
 
         fun getAllExistingInstances(): Sequence<Instance>
     }

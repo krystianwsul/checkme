@@ -202,20 +202,20 @@ abstract class TaskRecord protected constructor(
 
     val scheduleCustomTimeKeys by scheduleCustomTimeKeysProperty
 
-    fun newInstanceRecord(instanceJson: InstanceJson, scheduleKey: ScheduleKey): InstanceRecord {
-        val firebaseKey = InstanceRecord.scheduleKeyToString(scheduleKey)
+    fun newInstanceRecord(instanceJson: InstanceJson, instanceScheduleKey: InstanceScheduleKey): InstanceRecord {
+        val firebaseKey = InstanceRecord.scheduleKeyToString(instanceScheduleKey)
 
         val projectInstanceRecord = InstanceRecord(
             true,
             this,
             instanceJson,
-            scheduleKey,
+            instanceScheduleKey,
             firebaseKey,
         )
 
-        check(!instanceRecords.containsKey(projectInstanceRecord.scheduleKey))
+        check(!instanceRecords.containsKey(projectInstanceRecord.instanceScheduleKey))
 
-        instanceRecords[projectInstanceRecord.scheduleKey] = projectInstanceRecord
+        instanceRecords[projectInstanceRecord.instanceScheduleKey] = projectInstanceRecord
         return projectInstanceRecord
     }
 
@@ -223,7 +223,7 @@ abstract class TaskRecord protected constructor(
 
     protected fun getCustomTimeKeys(): List<CustomTimeKey> {
         val instanceCustomTimeKeys = instanceRecords.values.flatMap {
-            listOf(it.scheduleKey.scheduleTimePair.customTimeKey, it.instanceCustomTimeKey)
+            listOf(it.instanceScheduleKey.scheduleTimePair.customTimeKey, it.instanceCustomTimeKey)
         }
 
         return listOf(scheduleCustomTimeKeys, instanceCustomTimeKeys).flatten().filterNotNull()

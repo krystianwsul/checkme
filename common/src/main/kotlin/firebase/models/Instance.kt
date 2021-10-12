@@ -33,7 +33,7 @@ class Instance private constructor(
 
     val instanceKey by lazy { InstanceKey(taskKey, scheduleKey) }
 
-    val scheduleKey by lazy { ScheduleKey(scheduleDate, data.scheduleTimePair) }
+    val scheduleKey by lazy { InstanceScheduleKey(scheduleDate, data.scheduleTimePair) }
 
     val scheduleDate get() = data.scheduleDate
     val scheduleDateTime get() = DateTime(scheduleDate, data.scheduleTime)
@@ -670,7 +670,7 @@ class Instance private constructor(
 
             override val instanceDate get() = instanceRecord.instanceDate ?: scheduleDate
 
-            val scheduleJsonTime get() = JsonTime.fromTimePair(instanceRecord.scheduleKey.scheduleTimePair)
+            val scheduleJsonTime get() = JsonTime.fromTimePair(instanceRecord.instanceScheduleKey.scheduleTimePair)
 
             override val scheduleTime get() = scheduleJsonTime.toTime(task.customTimeProvider)
 
@@ -699,7 +699,7 @@ class Instance private constructor(
 
             override val hidden get() = instanceRecord.hidden
 
-            override val scheduleTimePair get() = instanceRecord.scheduleKey.scheduleTimePair
+            override val scheduleTimePair get() = instanceRecord.instanceScheduleKey.scheduleTimePair
 
             override var parentState: ParentState
                 get() {

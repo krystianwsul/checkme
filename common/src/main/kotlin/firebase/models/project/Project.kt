@@ -182,8 +182,8 @@ abstract class Project<T : ProjectType>(
         ?.let(::getCustomTime)
         ?: Time.Normal(timePair.hourMinute!!)
 
-    fun getDateTime(scheduleKey: ScheduleKey) =
-        DateTime(scheduleKey.scheduleDate, getTime(scheduleKey.scheduleTimePair))
+    fun getDateTime(instanceScheduleKey: InstanceScheduleKey) =
+        DateTime(instanceScheduleKey.scheduleDate, getTime(instanceScheduleKey.scheduleTimePair))
 
     fun fixNotificationShown(
         shownFactory: Instance.ShownFactory,

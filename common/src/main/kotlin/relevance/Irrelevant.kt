@@ -18,6 +18,7 @@ import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.ProjectKey
+import com.krystianwsul.common.utils.ScheduleKey
 import com.krystianwsul.common.utils.TaskKey
 
 object Irrelevant {
@@ -158,10 +159,12 @@ object Irrelevant {
                 }.map { it.schedule }
             }
 
+            val scheduleRelevances = mutableMapOf<ScheduleKey, ScheduleRelevance>()
+
             relevantTasks.mapNotNull { it as? RootTask }.forEach {
                 when (val taskParentEntry = it.getProjectIdTaskParentEntry()) {
                     is Schedule -> {
-                        irrelevantSchedules -= taskParentEntry
+                        scheduleRelevances.getOrPut(taskParentEntry).setRelevant()
 
                         /**
                          * My concern here is that,
@@ -170,6 +173,7 @@ object Irrelevant {
                          * 3. Therefore, it should be relevant?
                          */
 
+                        // todo schedule move into ScheduleRelevance.setRelevant
                         (taskParentEntry as? SingleSchedule)?.getInstance(it)
                             ?.takeIf { it.exists() }
                             ?.takeIf { !instanceRelevances.getValue(it.instanceKey).relevant }
@@ -198,6 +202,12 @@ object Irrelevant {
             }
 
             ProjectRootTaskIdTracker.checkTracking()
+
+            val relevantSchedules = scheduleRelevances.values // todo schedule
+                .filter { it.relevant }
+                .map { it.schedule }
+
+            irrelevantSchedules -= relevantSchedules
 
             irrelevantExistingInstances.forEach { it.delete() }
             irrelevantSchedules.forEach { it.delete() }

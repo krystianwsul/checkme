@@ -2,13 +2,12 @@ package com.krystianwsul.common.relevance
 
 
 import com.krystianwsul.common.firebase.models.Instance
+import com.krystianwsul.common.firebase.models.schedule.RepeatingSchedule
 import com.krystianwsul.common.firebase.models.schedule.Schedule
+import com.krystianwsul.common.firebase.models.schedule.SingleSchedule
 import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.time.ExactTimeStamp
-import com.krystianwsul.common.utils.InstanceKey
-import com.krystianwsul.common.utils.ProjectKey
-import com.krystianwsul.common.utils.TaskHierarchyKey
-import com.krystianwsul.common.utils.TaskKey
+import com.krystianwsul.common.utils.*
 
 
 class TaskRelevance(val task: Task) {
@@ -20,6 +19,7 @@ class TaskRelevance(val task: Task) {
         taskRelevances: Map<TaskKey, TaskRelevance>,
         taskHierarchyRelevances: Map<TaskHierarchyKey, TaskHierarchyRelevance>,
         instanceRelevances: MutableMap<InstanceKey, InstanceRelevance>,
+        scheduleRelevances: MutableMap<ScheduleKey, ScheduleRelevance>,
         now: ExactTimeStamp.Local,
         @Suppress("UNUSED_PARAMETER") source: List<String>,
     ) {
@@ -40,7 +40,8 @@ class TaskRelevance(val task: Task) {
                     taskRelevances,
                     taskHierarchyRelevances,
                     instanceRelevances,
-                    now
+                    scheduleRelevances,
+                    now,
                 )
             }
 
@@ -71,7 +72,39 @@ class TaskRelevance(val task: Task) {
             .values
             .filter { it.isRootInstance() && it.filterOldestVisible(now, true) }
             .map { instanceRelevances.getValue(it.instanceKey) }
-            .forEach { it.setRelevant(taskRelevances, taskHierarchyRelevances, instanceRelevances, now) }
+            .forEach { it.setRelevant(taskRelevances, taskHierarchyRelevances, instanceRelevances, scheduleRelevances, now) }
+
+        task.intervalInfo
+            .scheduleIntervals
+            .filter {
+                when (val schedule = it.schedule) {
+                    is SingleSchedule ->
+                        /**
+                         * Can't assume the instance is root; it could be joined.  But (I think) the schedule is still
+                         * relevant, since removing it would make the task unscheduled.
+                         */
+                        schedule.getInstance(schedule.topLevelTask)
+                            .isVisible(now, Instance.VisibilityOptions(hack24 = true))
+                    is RepeatingSchedule -> {
+                        if (it.notDeletedOffset() && schedule.notDeleted) {
+                            true
+                        } else {
+                            val oldestVisibleExactTimeStamp = schedule.oldestVisible
+                                .date
+                                ?.toMidnightExactTimeStamp()
+
+                            val scheduleEndExactTimeStamp = schedule.endExactTimeStampOffset
+
+                            if (oldestVisibleExactTimeStamp != null && scheduleEndExactTimeStamp != null)
+                                oldestVisibleExactTimeStamp <= scheduleEndExactTimeStamp
+                            else
+                                true
+                        }
+                    }
+                }
+            }
+            .map { scheduleRelevances.getOrPut(it.schedule) }
+            .forEach { it.setRelevant() }
     }
 
     fun setRemoteRelevant(

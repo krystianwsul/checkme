@@ -69,22 +69,39 @@ object Irrelevant {
                 .associate { it.instanceKey to InstanceRelevance(it) }
                 .toMutableMap()
 
+            val scheduleRelevances = mutableMapOf<ScheduleKey, ScheduleRelevance>()
+
             tasks.asSequence()
                 .filter { it.notDeleted && it.isTopLevelTask(now) && it.isVisible(now, true) }
                 .map { taskRelevances.getValue(it.taskKey) }
                 .forEach {
-                    it.setRelevant(taskRelevances, taskHierarchyRelevances, instanceRelevances, now, listOf("visible task"))
+                    it.setRelevant(
+                        taskRelevances,
+                        taskHierarchyRelevances,
+                        instanceRelevances,
+                        scheduleRelevances,
+                        now,
+                        listOf("visible task"),
+                    )
                 }
 
             rootInstances.map { instanceRelevances.getValue(it.instanceKey) }.forEach {
-                it.setRelevant(taskRelevances, taskHierarchyRelevances, instanceRelevances, now)
+                it.setRelevant(taskRelevances, taskHierarchyRelevances, instanceRelevances, scheduleRelevances, now)
             }
 
             existingInstances.asSequence()
                 // this probably makes the recursive set in tasks redundant
                 .filter { it.isVisible(now, Instance.VisibilityOptions(hack24 = true)) }
                 .map { instanceRelevances.getValue(it.instanceKey) }
-                .forEach { it.setRelevant(taskRelevances, taskHierarchyRelevances, instanceRelevances, now) }
+                .forEach {
+                    it.setRelevant(
+                        taskRelevances,
+                        taskHierarchyRelevances,
+                        instanceRelevances,
+                        scheduleRelevances,
+                        now,
+                    )
+                }
 
             val relevantTaskRelevances = taskRelevances.values.filter { it.relevant }
             val relevantTasks = relevantTaskRelevances.map { it.task }
@@ -120,40 +137,6 @@ object Irrelevant {
 
             val relevantExistingInstances = relevantInstances.filter { it.exists() }
             val irrelevantExistingInstances = existingInstances - relevantExistingInstances
-
-            val scheduleRelevances = mutableMapOf<ScheduleKey, ScheduleRelevance>()
-
-            relevantTasks.asSequence()
-                .flatMap { it.intervalInfo.scheduleIntervals }
-                .filter {
-                    when (val schedule = it.schedule) {
-                        is SingleSchedule ->
-                            /**
-                             * Can't assume the instance is root; it could be joined.  But (I think) the schedule is still
-                             * relevant, since removing it would make the task unscheduled.
-                             */
-                            schedule.getInstance(schedule.topLevelTask)
-                                .isVisible(now, Instance.VisibilityOptions(hack24 = true))
-                        is RepeatingSchedule -> {
-                            if (it.notDeletedOffset() && schedule.notDeleted) {
-                                true
-                            } else {
-                                val oldestVisibleExactTimeStamp = schedule.oldestVisible
-                                    .date
-                                    ?.toMidnightExactTimeStamp()
-
-                                val scheduleEndExactTimeStamp = schedule.endExactTimeStampOffset
-
-                                if (oldestVisibleExactTimeStamp != null && scheduleEndExactTimeStamp != null)
-                                    oldestVisibleExactTimeStamp <= scheduleEndExactTimeStamp
-                                else
-                                    true
-                            }
-                        }
-                    }
-                }
-                .map { scheduleRelevances.getOrPut(it.schedule) }
-                .forEach { it.setRelevant() }
 
             relevantTasks.mapNotNull { it as? RootTask }.forEach {
                 when (val taskParentEntry = it.getProjectIdTaskParentEntry()) {

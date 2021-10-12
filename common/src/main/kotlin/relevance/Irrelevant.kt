@@ -120,12 +120,15 @@ object Irrelevant {
             val irrelevantExistingInstances = existingInstances - relevantExistingInstances
 
             val irrelevantSchedules = mutableListOf<Schedule>()
+
+            relevantTasks.forEach { irrelevantSchedules += it.schedules }
+
             relevantTasks.forEach {
-                val scheduleIntervals = it.intervalInfo.scheduleIntervals
+                irrelevantSchedules -= it.intervalInfo.scheduleIntervals.map { it.schedule }
+            }
 
-                irrelevantSchedules += it.schedules - scheduleIntervals.map { it.schedule }
-
-                irrelevantSchedules += scheduleIntervals.filter { scheduleInterval ->
+            relevantTasks.forEach {
+                irrelevantSchedules += it.intervalInfo.scheduleIntervals.filter { scheduleInterval ->
                     val schedule = scheduleInterval.schedule
 
                     val result = if (schedule is SingleSchedule) {
@@ -153,26 +156,24 @@ object Irrelevant {
 
                     result
                 }.map { it.schedule }
+            }
 
-                (it as? RootTask)?.let { rootTask ->
-                    when (val taskParentEntry = rootTask.getProjectIdTaskParentEntry()) {
-                        is Schedule -> {
-                            irrelevantSchedules -= taskParentEntry
+            relevantTasks.mapNotNull { it as? RootTask }.forEach {
+                when (val taskParentEntry = it.getProjectIdTaskParentEntry()) {
+                    is Schedule -> {
+                        irrelevantSchedules -= taskParentEntry
 
-                            /**
-                             * My concern here is that,
-                             * 1. We need to keep the schedule, because it holds the project info.
-                             * 2. We can't remove the instance, since it'll just get regenerated
-                             * 3. Therefore, it should be relevant?
-                             */
+                        /**
+                         * My concern here is that,
+                         * 1. We need to keep the schedule, because it holds the project info.
+                         * 2. We can't remove the instance, since it'll just get regenerated
+                         * 3. Therefore, it should be relevant?
+                         */
 
-                            (taskParentEntry as? SingleSchedule)?.getInstance(rootTask)
-                                ?.takeIf { it.exists() }
-                                ?.takeIf { !instanceRelevances.getValue(it.instanceKey).relevant }
-                                ?.let {
-                                    throw InstanceIrrelevantForProjectScheduleException(rootTask.taskKey)
-                                }
-                        }
+                        (taskParentEntry as? SingleSchedule)?.getInstance(it)
+                            ?.takeIf { it.exists() }
+                            ?.takeIf { !instanceRelevances.getValue(it.instanceKey).relevant }
+                            ?.let { throw InstanceIrrelevantForProjectScheduleException(it.taskKey) }
                     }
                 }
             }

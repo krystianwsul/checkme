@@ -52,11 +52,11 @@ abstract class TaskRecord protected constructor(
             .toMutableMap()
     }
 
-    val singleScheduleRecords: ObservableMap<String, SingleScheduleRecord>
-    val weeklyScheduleRecords: ObservableMap<String, WeeklyScheduleRecord>
-    val monthlyDayScheduleRecords: ObservableMap<String, MonthlyDayScheduleRecord>
-    val monthlyWeekScheduleRecords: ObservableMap<String, MonthlyWeekScheduleRecord>
-    val yearlyScheduleRecords: ObservableMap<String, YearlyScheduleRecord>
+    val singleScheduleRecords: ObservableMap<ScheduleId, SingleScheduleRecord>
+    val weeklyScheduleRecords: ObservableMap<ScheduleId, WeeklyScheduleRecord>
+    val monthlyDayScheduleRecords: ObservableMap<ScheduleId, MonthlyDayScheduleRecord>
+    val monthlyWeekScheduleRecords: ObservableMap<ScheduleId, MonthlyWeekScheduleRecord>
+    val yearlyScheduleRecords: ObservableMap<ScheduleId, YearlyScheduleRecord>
 
     abstract val noScheduleOrParentRecords: Map<String, NoScheduleOrParentRecord>
 
@@ -99,16 +99,18 @@ abstract class TaskRecord protected constructor(
             taskJson.schedules.mapValues { it.value to ScheduleWrapperBridge.fromScheduleWrapper(it.value) }
 
         singleScheduleRecords = scheduleWrapperBridges.filter { it.value.second.singleScheduleJson != null }
-            .mapValues { (id, pair) ->
+            .entries
+            .associate { (id, pair) ->
+                val typedId = ScheduleId(id)
                 val (scheduleWrapper, scheduleWrapperBridge) = pair
 
                 @Suppress("LeakingThis")
-                SingleScheduleRecord(
+                typedId to SingleScheduleRecord(
                     this,
                     scheduleWrapper,
                     projectHelper,
                     newProjectRootDelegate(this, scheduleWrapperBridge.singleScheduleJson!!),
-                    id,
+                    typedId,
                     false,
                     scheduleWrapperBridge,
                 )
@@ -116,16 +118,18 @@ abstract class TaskRecord protected constructor(
             .toObservableMap()
 
         weeklyScheduleRecords = scheduleWrapperBridges.filter { it.value.second.weeklyScheduleJson != null }
-            .mapValues { (id, pair) ->
+            .entries
+            .associate { (id, pair) ->
+                val typedId = ScheduleId(id)
                 val (scheduleWrapper, scheduleWrapperBridge) = pair
 
                 @Suppress("LeakingThis")
-                WeeklyScheduleRecord(
+                typedId to WeeklyScheduleRecord(
                     this,
                     scheduleWrapper,
                     projectHelper,
                     newProjectRootDelegate(this, scheduleWrapperBridge.weeklyScheduleJson!!),
-                    id,
+                    typedId,
                     false,
                     scheduleWrapperBridge,
                 )
@@ -133,16 +137,18 @@ abstract class TaskRecord protected constructor(
             .toObservableMap()
 
         monthlyDayScheduleRecords = scheduleWrapperBridges.filter { it.value.second.monthlyDayScheduleJson != null }
-            .mapValues { (id, pair) ->
+            .entries
+            .associate { (id, pair) ->
+                val typedId = ScheduleId(id)
                 val (scheduleWrapper, scheduleWrapperBridge) = pair
 
                 @Suppress("LeakingThis")
-                MonthlyDayScheduleRecord(
+                typedId to MonthlyDayScheduleRecord(
                     this,
                     scheduleWrapper,
                     projectHelper,
                     newProjectRootDelegate(this, scheduleWrapperBridge.monthlyDayScheduleJson!!),
-                    id,
+                    typedId,
                     false,
                     scheduleWrapperBridge,
                 )
@@ -150,16 +156,18 @@ abstract class TaskRecord protected constructor(
             .toObservableMap()
 
         monthlyWeekScheduleRecords = scheduleWrapperBridges.filter { it.value.second.monthlyWeekScheduleJson != null }
-            .mapValues { (id, pair) ->
+            .entries
+            .associate { (id, pair) ->
+                val typedId = ScheduleId(id)
                 val (scheduleWrapper, scheduleWrapperBridge) = pair
 
                 @Suppress("LeakingThis")
-                MonthlyWeekScheduleRecord(
+                typedId to MonthlyWeekScheduleRecord(
                     this,
                     scheduleWrapper,
                     projectHelper,
                     newProjectRootDelegate(this, scheduleWrapperBridge.monthlyWeekScheduleJson!!),
-                    id,
+                    typedId,
                     false,
                     scheduleWrapperBridge,
                 )
@@ -167,16 +175,18 @@ abstract class TaskRecord protected constructor(
             .toObservableMap()
 
         yearlyScheduleRecords = scheduleWrapperBridges.filter { it.value.second.yearlyScheduleJson != null }
-            .mapValues { (id, pair) ->
+            .entries
+            .associate { (id, pair) ->
+                val typedId = ScheduleId(id)
                 val (scheduleWrapper, scheduleWrapperBridge) = pair
 
                 @Suppress("LeakingThis")
-                YearlyScheduleRecord(
+                typedId to YearlyScheduleRecord(
                     this,
                     scheduleWrapper,
                     projectHelper,
                     newProjectRootDelegate(this, scheduleWrapperBridge.yearlyScheduleJson!!),
-                    id,
+                    typedId,
                     false,
                     scheduleWrapperBridge,
                 )

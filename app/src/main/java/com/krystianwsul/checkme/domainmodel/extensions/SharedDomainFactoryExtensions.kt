@@ -27,10 +27,7 @@ import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.firebase.models.task.performRootIntervalUpdate
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.time.Date
-import com.krystianwsul.common.utils.InstanceKey
-import com.krystianwsul.common.utils.ProjectKey
-import com.krystianwsul.common.utils.TaskHierarchyKey
-import com.krystianwsul.common.utils.TaskKey
+import com.krystianwsul.common.utils.*
 import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Single
 import java.util.*
@@ -261,7 +258,7 @@ fun <T : Comparable<T>> DomainFactory.searchInstances(
 private class AddChildToParentUndoData(
     val taskKey: TaskKey,
     val taskHierarchyKeys: List<TaskHierarchyKey>,
-    val scheduleIds: List<String>,
+    val scheduleIds: List<ScheduleId>,
     val noScheduleOrParentsIds: List<String>,
     val deleteTaskHierarchyKey: TaskHierarchyKey,
     val unhideInstanceKey: InstanceKey?,
@@ -305,7 +302,7 @@ fun addChildToParent(
     childTask.requireNotDeleted()
 
     lateinit var taskHierarchyKeys: List<TaskHierarchyKey>
-    lateinit var scheduleIds: List<String>
+    lateinit var scheduleIds: List<ScheduleId>
     lateinit var noScheduleOrParentsIds: List<String>
     lateinit var deleteTaskHierarchyKey: TaskHierarchyKey
 

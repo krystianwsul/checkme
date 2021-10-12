@@ -5,6 +5,7 @@ import com.krystianwsul.common.firebase.records.noscheduleorparent.NoScheduleOrP
 import com.krystianwsul.common.firebase.records.schedule.ScheduleRecord
 import com.krystianwsul.common.firebase.records.taskhierarchy.TaskHierarchyRecord
 import com.krystianwsul.common.utils.ProjectKey
+import com.krystianwsul.common.utils.ScheduleId
 import com.krystianwsul.common.utils.TaskHierarchyId
 import com.krystianwsul.common.utils.UserKey
 
@@ -30,7 +31,8 @@ abstract class DatabaseWrapper {
 
     fun newRootTaskRecordId() = getNewId(TASKS_KEY)
 
-    fun newRootTaskScheduleRecordId(taskId: String) = getNewId("$TASKS_KEY/$taskId/${ScheduleRecord.SCHEDULES}")
+    fun newRootTaskScheduleRecordId(taskId: String) =
+        ScheduleId(getNewId("$TASKS_KEY/$taskId/${ScheduleRecord.SCHEDULES}"))
 
     fun newRootTaskNoScheduleOrParentRecordId(taskId: String) =
         getNewId("$TASKS_KEY/$taskId/${NoScheduleOrParentRecord.NO_SCHEDULE_OR_PARENT}")

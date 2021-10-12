@@ -14,6 +14,7 @@ import com.krystianwsul.common.firebase.records.schedule.*
 import com.krystianwsul.common.firebase.records.taskhierarchy.NestedTaskHierarchyRecord
 import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.utils.CustomTimeKey
+import com.krystianwsul.common.utils.ScheduleId
 import com.krystianwsul.common.utils.TaskKey
 
 class RootTaskRecord private constructor(
@@ -47,7 +48,7 @@ class RootTaskRecord private constructor(
                     .associateBy({ InstanceRecord.scheduleKeyToString(it.key) }, { it.value.createObject })
                     .toMutableMap()
 
-            val scheduleWrappers = HashMap<String, RootScheduleWrapper>()
+            val scheduleWrappers = HashMap<ScheduleId, RootScheduleWrapper>()
 
             for (singleScheduleRecord in singleScheduleRecords.values)
                 scheduleWrappers[singleScheduleRecord.id] = singleScheduleRecord.createObject as RootScheduleWrapper
@@ -66,7 +67,7 @@ class RootTaskRecord private constructor(
             for (yearlyScheduleRecord in yearlyScheduleRecords.values)
                 scheduleWrappers[yearlyScheduleRecord.id] = yearlyScheduleRecord.createObject as RootScheduleWrapper
 
-            taskJson.schedules = scheduleWrappers
+            taskJson.schedules = scheduleWrappers.mapKeys { it.key.value }.toMutableMap()
 
             taskJson.noScheduleOrParent = noScheduleOrParentRecords.mapValues { it.value.createObject }
 

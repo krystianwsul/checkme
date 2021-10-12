@@ -5,6 +5,7 @@ import com.krystianwsul.common.firebase.json.tasks.SharedTaskJson
 import com.krystianwsul.common.firebase.records.AssignedToHelper
 import com.krystianwsul.common.firebase.records.InstanceRecord
 import com.krystianwsul.common.firebase.records.project.SharedProjectRecord
+import com.krystianwsul.common.utils.ScheduleId
 
 class SharedTaskRecord(
     id: String,
@@ -19,7 +20,7 @@ class SharedTaskRecord(
                     .associateBy({ InstanceRecord.scheduleKeyToString(it.key) }, { it.value.createObject })
                     .toMutableMap()
 
-            val scheduleWrappers = HashMap<String, SharedScheduleWrapper>()
+            val scheduleWrappers = HashMap<ScheduleId, SharedScheduleWrapper>()
 
             for (singleScheduleRecord in singleScheduleRecords.values)
                 scheduleWrappers[singleScheduleRecord.id] = singleScheduleRecord.createObject as SharedScheduleWrapper
@@ -38,7 +39,7 @@ class SharedTaskRecord(
             for (yearlyScheduleRecord in yearlyScheduleRecords.values)
                 scheduleWrappers[yearlyScheduleRecord.id] = yearlyScheduleRecord.createObject as SharedScheduleWrapper
 
-            taskJson.schedules = scheduleWrappers
+            taskJson.schedules = scheduleWrappers.mapKeys { it.key.value }.toMutableMap()
 
             taskJson.noScheduleOrParent = noScheduleOrParentRecords.mapValues { it.value.createObject }
 

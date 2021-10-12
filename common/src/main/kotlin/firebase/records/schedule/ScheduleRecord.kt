@@ -9,13 +9,14 @@ import com.krystianwsul.common.firebase.records.RemoteRecord
 import com.krystianwsul.common.firebase.records.task.TaskRecord
 import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.ProjectKey
+import com.krystianwsul.common.utils.ScheduleId
 
 abstract class ScheduleRecord(
     val taskRecord: TaskRecord,
     final override val createObject: ScheduleWrapper,
     private val scheduleJson: ScheduleJson,
     scheduleTypeSubkey: String,
-    val id: String,
+    val id: ScheduleId,
     create: Boolean,
     val projectRootDelegate: ProjectRootDelegate,
 ) : RemoteRecord(create), ProjectIdOwner {

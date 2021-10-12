@@ -4,6 +4,7 @@ package com.krystianwsul.common.firebase.records.schedule
 import com.krystianwsul.common.firebase.json.schedule.ScheduleWrapper
 import com.krystianwsul.common.firebase.json.schedule.ScheduleWrapperBridge
 import com.krystianwsul.common.firebase.records.task.TaskRecord
+import com.krystianwsul.common.utils.ScheduleId
 
 
 class YearlyScheduleRecord(
@@ -11,10 +12,9 @@ class YearlyScheduleRecord(
     scheduleWrapper: ScheduleWrapper,
     override val projectHelper: ProjectHelper,
     projectRootDelegate: ProjectRootDelegate,
-    id: String,
+    id: ScheduleId,
     create: Boolean,
-    override val scheduleWrapperBridge: ScheduleWrapperBridge =
-        ScheduleWrapperBridge.fromScheduleWrapper(scheduleWrapper),
+    override val scheduleWrapperBridge: ScheduleWrapperBridge = ScheduleWrapperBridge.fromScheduleWrapper(scheduleWrapper),
 ) : RepeatingScheduleRecord(
     taskRecord,
     scheduleWrapper,

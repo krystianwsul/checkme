@@ -122,41 +122,39 @@ object Irrelevant {
 
             val scheduleRelevances = mutableMapOf<ScheduleKey, ScheduleRelevance>()
 
-            relevantTasks.forEach {
-                it.intervalInfo
-                    .scheduleIntervals
-                    .filter { scheduleInterval ->
-                        val schedule = scheduleInterval.schedule
+            relevantTasks.asSequence()
+                .flatMap { it.intervalInfo.scheduleIntervals }
+                .filter {
+                    val schedule = it.schedule
 
-                        val irrelevant = if (schedule is SingleSchedule) {
-                            /**
-                             * Can't assume the instance is root; it could be joined.  But (I think) the schedule is still
-                             * relevant, since removing it would make the task unscheduled.
-                             */
-                            !schedule.getInstance(schedule.topLevelTask)
-                                .isVisible(now, Instance.VisibilityOptions(hack24 = true))
+                    val irrelevant = if (schedule is SingleSchedule) {
+                        /**
+                         * Can't assume the instance is root; it could be joined.  But (I think) the schedule is still
+                         * relevant, since removing it would make the task unscheduled.
+                         */
+                        !schedule.getInstance(schedule.topLevelTask)
+                            .isVisible(now, Instance.VisibilityOptions(hack24 = true))
+                    } else {
+                        if (it.notDeletedOffset() && schedule.notDeleted) {
+                            false
                         } else {
-                            if (scheduleInterval.notDeletedOffset() && schedule.notDeleted) {
+                            val oldestVisibleExactTimeStamp = schedule.oldestVisible
+                                .date
+                                ?.toMidnightExactTimeStamp()
+
+                            val scheduleEndExactTimeStamp = schedule.endExactTimeStampOffset
+
+                            if (oldestVisibleExactTimeStamp != null && scheduleEndExactTimeStamp != null)
+                                oldestVisibleExactTimeStamp > scheduleEndExactTimeStamp
+                            else
                                 false
-                            } else {
-                                val oldestVisibleExactTimeStamp = schedule.oldestVisible
-                                    .date
-                                    ?.toMidnightExactTimeStamp()
-
-                                val scheduleEndExactTimeStamp = schedule.endExactTimeStampOffset
-
-                                if (oldestVisibleExactTimeStamp != null && scheduleEndExactTimeStamp != null)
-                                    oldestVisibleExactTimeStamp > scheduleEndExactTimeStamp
-                                else
-                                    false
-                            }
                         }
-
-                        !irrelevant
                     }
-                    .map { it.schedule }
-                    .forEach { scheduleRelevances.getOrPut(it).setRelevant() }
-            }
+
+                    !irrelevant
+                }
+                .map { it.schedule }
+                .forEach { scheduleRelevances.getOrPut(it).setRelevant() }
 
             relevantTasks.mapNotNull { it as? RootTask }.forEach {
                 when (val taskParentEntry = it.getProjectIdTaskParentEntry()) {

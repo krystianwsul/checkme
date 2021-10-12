@@ -6,6 +6,7 @@ import com.krystianwsul.common.firebase.models.noscheduleorparent.NoScheduleOrPa
 import com.krystianwsul.common.firebase.models.project.PrivateProject
 import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.project.SharedProject
+import com.krystianwsul.common.firebase.models.schedule.RepeatingSchedule
 import com.krystianwsul.common.firebase.models.schedule.Schedule
 import com.krystianwsul.common.firebase.models.schedule.SingleSchedule
 import com.krystianwsul.common.firebase.models.task.ProjectRootTaskIdTracker
@@ -125,33 +126,31 @@ object Irrelevant {
             relevantTasks.asSequence()
                 .flatMap { it.intervalInfo.scheduleIntervals }
                 .filter {
-                    val schedule = it.schedule
+                    when (val schedule = it.schedule) {
+                        is SingleSchedule ->
+                            /**
+                             * Can't assume the instance is root; it could be joined.  But (I think) the schedule is still
+                             * relevant, since removing it would make the task unscheduled.
+                             */
+                            schedule.getInstance(schedule.topLevelTask)
+                                .isVisible(now, Instance.VisibilityOptions(hack24 = true))
+                        is RepeatingSchedule -> {
+                            if (it.notDeletedOffset() && schedule.notDeleted) {
+                                true
+                            } else {
+                                val oldestVisibleExactTimeStamp = schedule.oldestVisible
+                                    .date
+                                    ?.toMidnightExactTimeStamp()
 
-                    val irrelevant = if (schedule is SingleSchedule) {
-                        /**
-                         * Can't assume the instance is root; it could be joined.  But (I think) the schedule is still
-                         * relevant, since removing it would make the task unscheduled.
-                         */
-                        !schedule.getInstance(schedule.topLevelTask)
-                            .isVisible(now, Instance.VisibilityOptions(hack24 = true))
-                    } else {
-                        if (it.notDeletedOffset() && schedule.notDeleted) {
-                            false
-                        } else {
-                            val oldestVisibleExactTimeStamp = schedule.oldestVisible
-                                .date
-                                ?.toMidnightExactTimeStamp()
+                                val scheduleEndExactTimeStamp = schedule.endExactTimeStampOffset
 
-                            val scheduleEndExactTimeStamp = schedule.endExactTimeStampOffset
-
-                            if (oldestVisibleExactTimeStamp != null && scheduleEndExactTimeStamp != null)
-                                oldestVisibleExactTimeStamp > scheduleEndExactTimeStamp
-                            else
-                                false
+                                if (oldestVisibleExactTimeStamp != null && scheduleEndExactTimeStamp != null)
+                                    oldestVisibleExactTimeStamp <= scheduleEndExactTimeStamp
+                                else
+                                    true
+                            }
                         }
                     }
-
-                    !irrelevant
                 }
                 .map { scheduleRelevances.getOrPut(it.schedule) }
                 .forEach { it.setRelevant() }

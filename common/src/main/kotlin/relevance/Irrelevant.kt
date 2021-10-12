@@ -109,7 +109,6 @@ object Irrelevant {
                 when (it) {
                     is ProjectTaskHierarchy -> true
                     is NestedTaskHierarchy -> taskRelevances.getValue(it.childTaskKey).relevant
-                    else -> throw UnsupportedOperationException() // compilation
                 }
             }
 
@@ -121,8 +120,6 @@ object Irrelevant {
             val irrelevantExistingInstances = existingInstances - relevantExistingInstances
 
             val irrelevantSchedules = mutableListOf<Schedule>()
-            val irrelevantNoScheduleOrParents = mutableListOf<NoScheduleOrParent>()
-
             relevantTasks.forEach {
                 val scheduleIntervals = it.intervalInfo.scheduleIntervals
 
@@ -157,15 +154,8 @@ object Irrelevant {
                     result
                 }.map { it.schedule }
 
-                val relevantNoScheduleOrParents = it.intervalInfo
-                    .noScheduleOrParentIntervals
-                    .filter { it.notDeletedOffset() }
-                    .map { it.noScheduleOrParent }
-
-                irrelevantNoScheduleOrParents += it.noScheduleOrParents - relevantNoScheduleOrParents
-
                 (it as? RootTask)?.let { rootTask ->
-                    when (val taskParentEntry = it.getProjectIdTaskParentEntry()) {
+                    when (val taskParentEntry = rootTask.getProjectIdTaskParentEntry()) {
                         is Schedule -> {
                             irrelevantSchedules -= taskParentEntry
 
@@ -183,10 +173,25 @@ object Irrelevant {
                                     throw InstanceIrrelevantForProjectScheduleException(rootTask.taskKey)
                                 }
                         }
+                    }
+                }
+            }
+
+            val irrelevantNoScheduleOrParents = mutableListOf<NoScheduleOrParent>()
+            relevantTasks.forEach {
+                val relevantNoScheduleOrParents = it.intervalInfo
+                    .noScheduleOrParentIntervals
+                    .filter { it.notDeletedOffset() }
+                    .map { it.noScheduleOrParent }
+
+                irrelevantNoScheduleOrParents += it.noScheduleOrParents - relevantNoScheduleOrParents
+
+                (it as? RootTask)?.let {
+                    when (val taskParentEntry = it.getProjectIdTaskParentEntry()) {
+                        // schedules handled elsewhere
                         is NoScheduleOrParent -> check(taskParentEntry in relevantNoScheduleOrParents)
                         is NestedTaskHierarchy ->
                             check(taskHierarchyRelevances.getValue(taskParentEntry.taskHierarchyKey).relevant)
-                        else -> throw IllegalStateException()
                     }
                 }
             }

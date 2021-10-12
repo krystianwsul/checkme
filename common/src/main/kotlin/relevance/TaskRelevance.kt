@@ -5,6 +5,7 @@ import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.schedule.RepeatingSchedule
 import com.krystianwsul.common.firebase.models.schedule.Schedule
 import com.krystianwsul.common.firebase.models.schedule.SingleSchedule
+import com.krystianwsul.common.firebase.models.task.RootTask
 import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.*
@@ -105,6 +106,21 @@ class TaskRelevance(val task: Task) {
             }
             .map { scheduleRelevances.getOrPut(it.schedule) }
             .forEach { it.setRelevant() }
+
+        (task as? RootTask)?.let { it.getProjectIdTaskParentEntry() as? Schedule }
+            ?.also { scheduleRelevances.getOrPut(it).setRelevant() }
+            ?.let { it as? SingleSchedule }
+            ?.let { it.getInstance(it.topLevelTask) }
+            ?.takeIf { it.exists() }
+            ?.let {
+                instanceRelevances.getValue(it.instanceKey).setRelevant(
+                    taskRelevances,
+                    taskHierarchyRelevances,
+                    instanceRelevances,
+                    scheduleRelevances,
+                    now,
+                )
+            }
     }
 
     fun setRemoteRelevant(

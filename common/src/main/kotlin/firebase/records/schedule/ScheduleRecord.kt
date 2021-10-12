@@ -10,6 +10,7 @@ import com.krystianwsul.common.firebase.records.task.TaskRecord
 import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ScheduleId
+import com.krystianwsul.common.utils.ScheduleKey
 
 abstract class ScheduleRecord(
     val taskRecord: TaskRecord,
@@ -52,6 +53,8 @@ abstract class ScheduleRecord(
     abstract val projectHelper: ProjectHelper
 
     val projectId get() = projectHelper.getProjectId(scheduleJson)
+
+    val scheduleKey by lazy { ScheduleKey(taskRecord.taskKey, id) }
 
     override fun updateProject(projectKey: ProjectKey<*>) =
         projectHelper.setProjectId(scheduleJson, projectKey.key) { subKey, value ->

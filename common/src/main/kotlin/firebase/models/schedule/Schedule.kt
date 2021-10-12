@@ -14,6 +14,7 @@ abstract class Schedule(val topLevelTask: Task) : TaskParentEntry, ProjectIdOwne
     protected abstract val scheduleRecord: ScheduleRecord
 
     val id get() = scheduleRecord.id
+    val key get() = scheduleRecord.scheduleKey
 
     val startExactTimeStamp by lazy { ExactTimeStamp.Local(scheduleRecord.startTime) }
 

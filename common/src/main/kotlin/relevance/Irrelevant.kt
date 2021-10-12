@@ -153,8 +153,8 @@ object Irrelevant {
 
                     !irrelevant
                 }
-                .map { it.schedule }
-                .forEach { scheduleRelevances.getOrPut(it).setRelevant() }
+                .map { scheduleRelevances.getOrPut(it.schedule) }
+                .forEach { it.setRelevant() }
 
             relevantTasks.mapNotNull { it as? RootTask }.forEach {
                 when (val taskParentEntry = it.getProjectIdTaskParentEntry()) {

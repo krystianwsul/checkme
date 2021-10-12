@@ -11,7 +11,7 @@ import com.krystianwsul.common.utils.invalidatableLazyCallbacks
 import com.soywiz.klock.days
 import com.soywiz.klock.plus
 
-abstract class RepeatingSchedule(topLevelTask: Task) : Schedule(topLevelTask) {
+sealed class RepeatingSchedule(topLevelTask: Task) : Schedule(topLevelTask) {
 
     protected abstract val repeatingScheduleRecord: RepeatingScheduleRecord
 

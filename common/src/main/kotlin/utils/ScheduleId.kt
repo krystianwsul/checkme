@@ -1,5 +1,7 @@
 package com.krystianwsul.common.utils
 
+import kotlin.jvm.JvmInline
+
 @JvmInline
 value class ScheduleId(val value: String) : Comparable<ScheduleId> {
 

@@ -11,6 +11,7 @@ import com.krystianwsul.common.utils.InstanceScheduleKey
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.common.utils.invalidatableLazy
 import kotlin.properties.Delegates.observable
+import kotlin.jvm.JvmStatic
 
 class InstanceRecord(
     create: Boolean,

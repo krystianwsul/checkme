@@ -167,9 +167,19 @@ object Irrelevant {
                         is Schedule -> {
                             irrelevantSchedules -= taskParentEntry
 
+                            /**
+                             * My concern here is that,
+                             * 1. We need to keep the schedule, because it hold the project info.
+                             * 2. We can't remove the instance, since it'll just get regenerated
+                             * 3. Therefore, it should be relevant?
+                             */
+
                             (taskParentEntry as? SingleSchedule)?.getInstance(rootTask)
                                 ?.takeIf { it.exists() }
-                                ?.let { check(instanceRelevances.getValue(it.instanceKey).relevant) }
+                                ?.takeIf { !instanceRelevances.getValue(it.instanceKey).relevant }
+                                ?.let {
+                                    throw InstanceIrrelevantForProjectScheduleException(rootTask.taskKey)
+                                }
                         }
                         is NoScheduleOrParent -> check(taskParentEntry in relevantNoScheduleOrParents)
                         is NestedTaskHierarchy ->
@@ -286,4 +296,7 @@ object Irrelevant {
 
     private class TaskInIrrelevantException(taskKey: TaskKey, projectKey: ProjectKey<*>) :
         Exception("task incorrectly irrelevant: $taskKey in $projectKey")
+
+    private class InstanceIrrelevantForProjectScheduleException(taskKey: TaskKey) :
+        Exception("single schedule instance incorrectly irrelevant for taskKey: $taskKey")
 }

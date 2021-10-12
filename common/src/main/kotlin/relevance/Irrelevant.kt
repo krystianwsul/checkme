@@ -120,46 +120,43 @@ object Irrelevant {
             val relevantExistingInstances = relevantInstances.filter { it.exists() }
             val irrelevantExistingInstances = existingInstances - relevantExistingInstances
 
-            val irrelevantSchedules = mutableListOf<Schedule>()
-
-            relevantTasks.forEach { irrelevantSchedules += it.schedules }
-
-            relevantTasks.forEach {
-                irrelevantSchedules -= it.intervalInfo.scheduleIntervals.map { it.schedule }
-            }
-
-            relevantTasks.forEach {
-                irrelevantSchedules += it.intervalInfo.scheduleIntervals.filter { scheduleInterval ->
-                    val schedule = scheduleInterval.schedule
-
-                    val result = if (schedule is SingleSchedule) {
-                        /**
-                         * Can't assume the instance is root; it could be joined.  But (I think) the schedule is still
-                         * relevant, since removing it would make the task unscheduled.
-                         */
-                        !schedule.getInstance(it).isVisible(now, Instance.VisibilityOptions(hack24 = true))
-                    } else {
-                        if (scheduleInterval.notDeletedOffset() && schedule.notDeleted) {
-                            false
-                        } else {
-                            val oldestVisibleExactTimeStamp = schedule.oldestVisible
-                                .date
-                                ?.toMidnightExactTimeStamp()
-
-                            val scheduleEndExactTimeStamp = schedule.endExactTimeStampOffset
-
-                            if (oldestVisibleExactTimeStamp != null && scheduleEndExactTimeStamp != null)
-                                oldestVisibleExactTimeStamp > scheduleEndExactTimeStamp
-                            else
-                                false
-                        }
-                    }
-
-                    result
-                }.map { it.schedule }
-            }
-
             val scheduleRelevances = mutableMapOf<ScheduleKey, ScheduleRelevance>()
+
+            relevantTasks.forEach {
+                it.intervalInfo
+                    .scheduleIntervals
+                    .filter { scheduleInterval ->
+                        val schedule = scheduleInterval.schedule
+
+                        val irrelevant = if (schedule is SingleSchedule) {
+                            /**
+                             * Can't assume the instance is root; it could be joined.  But (I think) the schedule is still
+                             * relevant, since removing it would make the task unscheduled.
+                             */
+                            !schedule.getInstance(schedule.topLevelTask)
+                                .isVisible(now, Instance.VisibilityOptions(hack24 = true))
+                        } else {
+                            if (scheduleInterval.notDeletedOffset() && schedule.notDeleted) {
+                                false
+                            } else {
+                                val oldestVisibleExactTimeStamp = schedule.oldestVisible
+                                    .date
+                                    ?.toMidnightExactTimeStamp()
+
+                                val scheduleEndExactTimeStamp = schedule.endExactTimeStampOffset
+
+                                if (oldestVisibleExactTimeStamp != null && scheduleEndExactTimeStamp != null)
+                                    oldestVisibleExactTimeStamp > scheduleEndExactTimeStamp
+                                else
+                                    false
+                            }
+                        }
+
+                        !irrelevant
+                    }
+                    .map { it.schedule }
+                    .forEach { scheduleRelevances.getOrPut(it).setRelevant() }
+            }
 
             relevantTasks.mapNotNull { it as? RootTask }.forEach {
                 when (val taskParentEntry = it.getProjectIdTaskParentEntry()) {
@@ -207,7 +204,7 @@ object Irrelevant {
                 .filter { it.relevant }
                 .map { it.schedule }
 
-            irrelevantSchedules -= relevantSchedules
+            val irrelevantSchedules = relevantTasks.flatMap { it.schedules } - relevantSchedules
 
             irrelevantExistingInstances.forEach { it.delete() }
             irrelevantSchedules.forEach { it.delete() }

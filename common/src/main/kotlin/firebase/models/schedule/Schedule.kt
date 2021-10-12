@@ -9,7 +9,7 @@ import com.krystianwsul.common.firebase.records.schedule.ScheduleRecord
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.*
 
-abstract class Schedule(val topLevelTask: Task) : TaskParentEntry, ProjectIdOwner {
+abstract class Schedule(val topLevelTask: Task) : TaskParentEntry, ProjectIdOwner { // todo schedule sealed
 
     protected abstract val scheduleRecord: ScheduleRecord
 

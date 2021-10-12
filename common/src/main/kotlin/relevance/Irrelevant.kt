@@ -138,26 +138,28 @@ object Irrelevant {
             val relevantExistingInstances = relevantInstances.filter { it.exists() }
             val irrelevantExistingInstances = existingInstances - relevantExistingInstances
 
-            relevantTasks.mapNotNull { it as? RootTask }.forEach {
-                when (val taskParentEntry = it.getProjectIdTaskParentEntry()) {
-                    is Schedule -> {
-                        scheduleRelevances.getOrPut(taskParentEntry).setRelevant()
+            relevantTasks.asSequence()
+                .mapNotNull { it as? RootTask }
+                .mapNotNull { it.getProjectIdTaskParentEntry() as? Schedule }
+                .forEach { scheduleRelevances.getOrPut(it).setRelevant() }
 
-                        /**
-                         * My concern here is that,
-                         * 1. We need to keep the schedule, because it holds the project info.
-                         * 2. We can't remove the instance, since it'll just get regenerated
-                         * 3. Therefore, it should be relevant?
-                         */
+            relevantTasks.asSequence()
+                .mapNotNull { it as? RootTask }
+                .mapNotNull { it.getProjectIdTaskParentEntry() as? SingleSchedule }
+                .forEach {
+                    /**
+                     * My concern here is that,
+                     * 1. We need to keep the schedule, because it holds the project info.
+                     * 2. We can't remove the instance, since it'll just get regenerated
+                     * 3. Therefore, it should be relevant?
+                     */
 
-                        // todo schedule move into ScheduleRelevance.setRelevant
-                        (taskParentEntry as? SingleSchedule)?.getInstance(it)
-                            ?.takeIf { it.exists() }
-                            ?.takeIf { !instanceRelevances.getValue(it.instanceKey).relevant }
-                            ?.let { throw InstanceIrrelevantForProjectScheduleException(it.taskKey) }
-                    }
+                    // todo schedule move into ScheduleRelevance.setRelevant
+                    (it as? SingleSchedule)?.getInstance(it.topLevelTask)
+                        ?.takeIf { it.exists() }
+                        ?.takeIf { !instanceRelevances.getValue(it.instanceKey).relevant }
+                        ?.let { throw InstanceIrrelevantForProjectScheduleException(it.taskKey) }
                 }
-            }
 
             val irrelevantNoScheduleOrParents = mutableListOf<NoScheduleOrParent>()
             relevantTasks.forEach {

@@ -15,10 +15,10 @@ class InstanceRelevance(val instance: Instance) {
         private set
 
     fun setRelevant(
-            taskRelevances: Map<TaskKey, TaskRelevance>,
-            taskHierarchyRelevances: Map<TaskHierarchyKey, TaskHierarchyRelevance>,
-            instanceRelevances: MutableMap<InstanceKey, InstanceRelevance>,
-            now: ExactTimeStamp.Local,
+        taskRelevances: Map<TaskKey, TaskRelevance>,
+        taskHierarchyRelevances: Map<TaskHierarchyKey, TaskHierarchyRelevance>,
+        instanceRelevances: MutableMap<InstanceKey, InstanceRelevance>,
+        now: ExactTimeStamp.Local,
     ) {
         if (relevant) return
 
@@ -26,10 +26,11 @@ class InstanceRelevance(val instance: Instance) {
 
         // set task relevant
         taskRelevances.getValue(instance.taskKey).setRelevant(
-                taskRelevances,
-                taskHierarchyRelevances,
-                instanceRelevances,
-                now
+            taskRelevances,
+            taskHierarchyRelevances,
+            instanceRelevances,
+            now,
+            listOf(instance.instanceKey.toString()),
         )
 
         // set parent instance relevant
@@ -41,25 +42,25 @@ class InstanceRelevance(val instance: Instance) {
                 instanceRelevances[parentInstanceKey] = InstanceRelevance(parentInstance)
 
             instanceRelevances.getValue(parentInstanceKey).setRelevant(
-                    taskRelevances,
-                    taskHierarchyRelevances,
-                    instanceRelevances,
-                    now
+                taskRelevances,
+                taskHierarchyRelevances,
+                instanceRelevances,
+                now
             )
         }
 
         // set child instances relevant
         instance.getChildInstances()
-                .filter { it.isVisible(now, Instance.VisibilityOptions(assumeChildOfVisibleParent = true)) }
-                .map { instance ->
-                    val instanceKey = instance.instanceKey
+            .filter { it.isVisible(now, Instance.VisibilityOptions(assumeChildOfVisibleParent = true)) }
+            .map { instance ->
+                val instanceKey = instance.instanceKey
 
-                    if (!instanceRelevances.containsKey(instanceKey))
-                        instanceRelevances[instanceKey] = InstanceRelevance(instance)
+                if (!instanceRelevances.containsKey(instanceKey))
+                    instanceRelevances[instanceKey] = InstanceRelevance(instance)
 
-                    instanceRelevances.getValue(instanceKey)
-                }
-                .forEach { it.setRelevant(taskRelevances, taskHierarchyRelevances, instanceRelevances, now) }
+                instanceRelevances.getValue(instanceKey)
+            }
+            .forEach { it.setRelevant(taskRelevances, taskHierarchyRelevances, instanceRelevances, now) }
     }
 
     fun setRemoteRelevant(

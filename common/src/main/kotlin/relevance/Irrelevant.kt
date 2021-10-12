@@ -70,7 +70,9 @@ object Irrelevant {
             tasks.asSequence()
                 .filter { it.notDeleted && it.isTopLevelTask(now) && it.isVisible(now, true) }
                 .map { taskRelevances.getValue(it.taskKey) }
-                .forEach { it.setRelevant(taskRelevances, taskHierarchyRelevances, instanceRelevances, now) }
+                .forEach {
+                    it.setRelevant(taskRelevances, taskHierarchyRelevances, instanceRelevances, now, listOf("visible task"))
+                }
 
             rootInstances.map { instanceRelevances.getValue(it.instanceKey) }.forEach {
                 it.setRelevant(taskRelevances, taskHierarchyRelevances, instanceRelevances, now)

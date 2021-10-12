@@ -12,14 +12,24 @@ class TaskHierarchyRelevance(val taskHierarchy: TaskHierarchy) {
     var relevant = false
         private set
 
-    fun setRelevant(taskRelevances: Map<TaskKey, TaskRelevance>, taskHierarchyRelevances: Map<TaskHierarchyKey, TaskHierarchyRelevance>, instanceRelevances: MutableMap<InstanceKey, InstanceRelevance>, now: ExactTimeStamp.Local) {
-        if (relevant)
-            return
+    fun setRelevant(
+        taskRelevances: Map<TaskKey, TaskRelevance>,
+        taskHierarchyRelevances: Map<TaskHierarchyKey, TaskHierarchyRelevance>,
+        instanceRelevances: MutableMap<InstanceKey, InstanceRelevance>,
+        now: ExactTimeStamp.Local,
+    ) {
+        if (relevant) return
 
         relevant = true
 
         listOf(taskHierarchy.parentTaskKey, taskHierarchy.childTaskKey).forEach {
-            taskRelevances.getValue(it).setRelevant(taskRelevances, taskHierarchyRelevances, instanceRelevances, now)
+            taskRelevances.getValue(it).setRelevant(
+                taskRelevances,
+                taskHierarchyRelevances,
+                instanceRelevances,
+                now,
+                listOf(taskHierarchy.taskHierarchyKey.toString()),
+            )
         }
     }
 }

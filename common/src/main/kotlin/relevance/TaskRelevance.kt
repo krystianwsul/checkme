@@ -21,6 +21,7 @@ class TaskRelevance(val task: Task) {
         taskHierarchyRelevances: Map<TaskHierarchyKey, TaskHierarchyRelevance>,
         instanceRelevances: MutableMap<InstanceKey, InstanceRelevance>,
         now: ExactTimeStamp.Local,
+        @Suppress("UNUSED_PARAMETER") source: List<String>,
     ) {
         if (relevant) return
 

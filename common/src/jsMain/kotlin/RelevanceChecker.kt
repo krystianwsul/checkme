@@ -33,6 +33,7 @@ object RelevanceChecker {
         response: MutableList<String>,
         updateDatabase: Boolean,
         onComplete: () -> Unit,
+        onError: (throwable: Throwable) -> Unit,
     ) {
         val roots = listOf("development", "production")
 
@@ -61,211 +62,226 @@ object RelevanceChecker {
             var sharedProjectMapTmp: Map<String, JsonWrapper>? = null
 
             fun proceed() {
-                val userWrapperMap = userWrapperMapTmp ?: return
-                val rootTaskMap = rootTaskMapTmp ?: return
-                val privateProjectMap = privateProjectMapTmp ?: return
-                val sharedProjectMap = sharedProjectMapTmp ?: return
+                try {
+                    val userWrapperMap = userWrapperMapTmp ?: return
+                    val rootTaskMap = rootTaskMapTmp ?: return
+                    val privateProjectMap = privateProjectMapTmp ?: return
+                    val sharedProjectMap = sharedProjectMapTmp ?: return
 
-                val rootUserManager = JsRootUserManager(databaseWrapper, userWrapperMap)
+                    val rootUserManager = JsRootUserManager(databaseWrapper, userWrapperMap)
 
-                val rootUsers = rootUserManager.records.mapValues { RootUser(it.value) }
+                    val rootUsers = rootUserManager.records.mapValues { RootUser(it.value) }
 
-                val userCustomTimes = rootUsers.flatMap { it.value.customTimes.values }
-                val userCustomTimeRelevances = userCustomTimes.associate { it.key to CustomTimeRelevance(it) }
+                    val userCustomTimes = rootUsers.flatMap { it.value.customTimes.values }
+                    val userCustomTimeRelevances = userCustomTimes.associate { it.key to CustomTimeRelevance(it) }
 
-                userCustomTimeRelevances.values
-                    .filter { (it.customTime as Time.Custom.User).notDeleted }
-                    .forEach { it.setRelevant() }
+                    userCustomTimeRelevances.values
+                        .filter { (it.customTime as Time.Custom.User).notDeleted }
+                        .forEach { it.setRelevant() }
 
-                val userCustomTimeProvider = object : JsonTime.UserCustomTimeProvider {
+                    val userCustomTimeProvider = object : JsonTime.UserCustomTimeProvider {
 
-                    override fun getUserCustomTime(userCustomTimeKey: CustomTimeKey.User): Time.Custom.User {
-                        return rootUsers.getValue(userCustomTimeKey.userKey).getUserCustomTime(userCustomTimeKey)
-                    }
-
-                    override fun tryGetUserCustomTime(userCustomTimeKey: CustomTimeKey.User) =
-                        getUserCustomTime(userCustomTimeKey)
-                }
-
-                val rootTaskManager = JsRootTasksManager(databaseWrapper, rootTaskMap)
-
-                lateinit var projectMap: Map<ProjectKey<*>, Project<*>>
-                lateinit var rootTasksByTaskKey: MutableMap<TaskKey.Root, RootTask>
-                lateinit var rootTasksByProjectId: MutableMap<String, MutableSet<RootTask>>
-
-                val rootTaskParent = object : RootTask.Parent {
-
-                    override val rootModelChangeManager = RootModelChangeManager()
-
-                    override fun createTask(
-                        now: ExactTimeStamp.Local,
-                        image: TaskJson.Image?,
-                        name: String,
-                        note: String?,
-                        ordinal: Double?
-                    ): RootTask {
-                        throw UnsupportedOperationException()
-                    }
-
-                    override fun updateProjectRecord(projectKey: ProjectKey<*>, dependentRootTaskKeys: Set<TaskKey.Root>) {
-                        // this is just for loading
-                    }
-
-                    override fun updateTaskRecord(taskKey: TaskKey.Root, dependentRootTaskKeys: Set<TaskKey.Root>) {
-                        // this is just for loading
-                    }
-
-                    override fun getProject(projectId: String): Project<*> {
-                        return projectMap.entries
-                            .single { it.key.key == projectId }
-                            .value
-                    }
-
-                    override fun getRootTask(rootTaskKey: TaskKey.Root) = rootTasksByTaskKey.getValue(rootTaskKey)
-
-                    override fun tryGetRootTask(rootTaskKey: TaskKey.Root) = getRootTask(rootTaskKey)
-
-                    override fun getTask(taskKey: TaskKey): Task {
-                        return when (taskKey) {
-                            is TaskKey.Root -> getRootTask(taskKey)
-                            is TaskKey.Project -> projectMap.getValue(taskKey.projectKey).getProjectTaskForce(taskKey)
-                        }
-                    }
-
-                    override fun getRootTasksForProject(projectKey: ProjectKey<*>): Collection<RootTask> {
-                        return rootTasksByProjectId[projectKey.key].orEmpty()
-                    }
-
-                    override fun getTaskHierarchiesByParentTaskKey(parentTaskKey: TaskKey): Set<TaskHierarchy> {
-                        return rootTasksByTaskKey.flatMap { it.value.nestedParentTaskHierarchies.values }
-                            .filter { it.parentTaskKey == parentTaskKey }
-                            .toSet()
-                    }
-
-                    override fun deleteRootTask(task: RootTask) {
-                        rootTasksByTaskKey.remove(task.taskKey)
-
-                        rootTasksByProjectId.values.forEach { it.remove(task) }
-                    }
-
-                    override fun getAllExistingInstances() = projectMap.values
-                        .asSequence()
-                        .flatMap { it.getAllTasks() }
-                        .flatMap { it.existingInstances.values }
-                }
-
-                rootTasksByTaskKey = rootTaskManager.records
-                    .map { RootTask(it.value, rootTaskParent, userCustomTimeProvider) }
-                    .associateBy { it.taskKey }
-                    .toMutableMap()
-
-                rootTasksByProjectId = rootTasksByTaskKey.values
-                    .groupBy { it.projectId }
-                    .mapValues { it.value.toMutableSet() }
-                    .toMutableMap()
-
-                val privateProjectManager = JsPrivateProjectManager(databaseWrapper, privateProjectMap)
-
-                val sharedProjectManager = JsSharedProjectManager(databaseWrapper, sharedProjectMap)
-
-                val privateProjects = privateProjectManager.value
-                    .map {
-                        PrivateProject(it, userCustomTimeProvider, rootTaskParent, rootTaskParent.rootModelChangeManager)
-                    }
-                    .associateBy { it.projectKey }
-
-                val sharedProjects = sharedProjectManager.records
-                    .values
-                    .map { SharedProject(it, userCustomTimeProvider, rootTaskParent, rootTaskParent.rootModelChangeManager) }
-                    .associateBy { it.projectKey }
-
-                projectMap = privateProjects + sharedProjects
-
-                val rootTaskProjectKeys = rootTasksByTaskKey.mapValues { it.value.project.projectKey }
-
-                val rootTasksInProjectKeys = projectMap.flatMap { (projectKey, project) ->
-                    project.projectRecord
-                        .rootTaskParentDelegate
-                        .rootTaskKeys
-                        .map { it to projectKey }
-                }
-                    .groupBy { it.first }
-                    .mapValues { it.value.map { it.second }.toSet() }
-
-                rootTaskProjectKeys.entries
-                    .map { (taskKey, projectKey) ->
-                        Triple(taskKey, projectKey, rootTasksInProjectKeys[taskKey] ?: setOf())
-                    }
-                    .filter { (_, correctProjectKey, allFeaturingProjectKeys) ->
-                        correctProjectKey !in allFeaturingProjectKeys
-                    }
-                    .takeIf { it.isNotEmpty() }
-                    ?.let { throw InconsistentRootTaskIdsException(it) }
-
-                val removedSharedProjects = Irrelevant.setIrrelevant(
-                    { rootTasksByTaskKey },
-                    userCustomTimeRelevances,
-                    { projectMap },
-                    rootTaskParent,
-                    ExactTimeStamp.Local.now,
-                ).removedSharedProjects
-
-                userCustomTimeRelevances.values
-                    .filter { !it.relevant }
-                    .forEach { (it.customTime as Time.Custom.User).delete() }
-
-                val removedSharedProjectKeys = removedSharedProjects.map { it.projectKey }
-
-                rootUsers.values.forEach { removedSharedProjectKeys.forEach(it::removeProject) }
-
-                projectMap.values.forEach { project ->
-                    project.projectRecord
-                        .rootTaskParentDelegate
-                        .rootTaskKeys
-                        .forEach {
-                            val task = rootTasksByTaskKey[it] ?: throw MissingTaskException(it, project.projectKey)
-
-                            if (task.deleted) throw DeletedTaskException(it, project.projectKey)
-                        }
-                }
-
-                rootTaskManager.records
-                    .values
-                    .filter { it.shouldDelete }
-                    .map { it.taskKey }
-                    .forEach { taskKey ->
-                        projectMap.values.forEach { project ->
-                            if (project.projectRecord.rootTaskParentDelegate.rootTaskKeys.contains(taskKey))
-                                throw DeletedRecordStillPresentException(taskKey, project.projectKey)
-                        }
-                    }
-
-                val values = mutableMapOf<String, Any?>()
-
-                privateProjectManager.save(values)
-                sharedProjectManager.save(values)
-                rootUserManager.save(values)
-                rootTaskManager.save(values)
-
-                ErrorLogger.instance.log("updateDatabase: $updateDatabase")
-                ErrorLogger.instance.log(
-                    "all database values: ${
-                        values.entries.joinToString(
-                            "<br>\n"
-                        )
-                    }"
-                )
-                if (updateDatabase) {
-                    databaseWrapper.update(values) { message, _, exception ->
-                        ErrorLogger.instance.apply {
-                            log(message)
-                            exception?.let { logException(it) }
+                        override fun getUserCustomTime(userCustomTimeKey: CustomTimeKey.User): Time.Custom.User {
+                            return rootUsers.getValue(userCustomTimeKey.userKey).getUserCustomTime(userCustomTimeKey)
                         }
 
+                        override fun tryGetUserCustomTime(userCustomTimeKey: CustomTimeKey.User) =
+                            getUserCustomTime(userCustomTimeKey)
+                    }
+
+                    val rootTaskManager = JsRootTasksManager(databaseWrapper, rootTaskMap)
+
+                    lateinit var projectMap: Map<ProjectKey<*>, Project<*>>
+                    lateinit var rootTasksByTaskKey: MutableMap<TaskKey.Root, RootTask>
+                    lateinit var rootTasksByProjectId: MutableMap<String, MutableSet<RootTask>>
+
+                    val rootTaskParent = object : RootTask.Parent {
+
+                        override val rootModelChangeManager = RootModelChangeManager()
+
+                        override fun createTask(
+                            now: ExactTimeStamp.Local,
+                            image: TaskJson.Image?,
+                            name: String,
+                            note: String?,
+                            ordinal: Double?
+                        ): RootTask {
+                            throw UnsupportedOperationException()
+                        }
+
+                        override fun updateProjectRecord(
+                            projectKey: ProjectKey<*>,
+                            dependentRootTaskKeys: Set<TaskKey.Root>
+                        ) {
+                            // this is just for loading
+                        }
+
+                        override fun updateTaskRecord(taskKey: TaskKey.Root, dependentRootTaskKeys: Set<TaskKey.Root>) {
+                            // this is just for loading
+                        }
+
+                        override fun getProject(projectId: String): Project<*> {
+                            return projectMap.entries
+                                .single { it.key.key == projectId }
+                                .value
+                        }
+
+                        override fun getRootTask(rootTaskKey: TaskKey.Root) = rootTasksByTaskKey.getValue(rootTaskKey)
+
+                        override fun tryGetRootTask(rootTaskKey: TaskKey.Root) = getRootTask(rootTaskKey)
+
+                        override fun getTask(taskKey: TaskKey): Task {
+                            return when (taskKey) {
+                                is TaskKey.Root -> getRootTask(taskKey)
+                                is TaskKey.Project -> projectMap.getValue(taskKey.projectKey)
+                                    .getProjectTaskForce(taskKey)
+                            }
+                        }
+
+                        override fun getRootTasksForProject(projectKey: ProjectKey<*>): Collection<RootTask> {
+                            return rootTasksByProjectId[projectKey.key].orEmpty()
+                        }
+
+                        override fun getTaskHierarchiesByParentTaskKey(parentTaskKey: TaskKey): Set<TaskHierarchy> {
+                            return rootTasksByTaskKey.flatMap { it.value.nestedParentTaskHierarchies.values }
+                                .filter { it.parentTaskKey == parentTaskKey }
+                                .toSet()
+                        }
+
+                        override fun deleteRootTask(task: RootTask) {
+                            rootTasksByTaskKey.remove(task.taskKey)
+
+                            rootTasksByProjectId.values.forEach { it.remove(task) }
+                        }
+
+                        override fun getAllExistingInstances() = projectMap.values
+                            .asSequence()
+                            .flatMap { it.getAllTasks() }
+                            .flatMap { it.existingInstances.values }
+                    }
+
+                    rootTasksByTaskKey = rootTaskManager.records
+                        .map { RootTask(it.value, rootTaskParent, userCustomTimeProvider) }
+                        .associateBy { it.taskKey }
+                        .toMutableMap()
+
+                    rootTasksByProjectId = rootTasksByTaskKey.values
+                        .groupBy { it.projectId }
+                        .mapValues { it.value.toMutableSet() }
+                        .toMutableMap()
+
+                    val privateProjectManager = JsPrivateProjectManager(databaseWrapper, privateProjectMap)
+
+                    val sharedProjectManager = JsSharedProjectManager(databaseWrapper, sharedProjectMap)
+
+                    val privateProjects = privateProjectManager.value
+                        .map {
+                            PrivateProject(
+                                it,
+                                userCustomTimeProvider,
+                                rootTaskParent,
+                                rootTaskParent.rootModelChangeManager
+                            )
+                        }
+                        .associateBy { it.projectKey }
+
+                    val sharedProjects = sharedProjectManager.records
+                        .values
+                        .map {
+                            SharedProject(
+                                it,
+                                userCustomTimeProvider,
+                                rootTaskParent,
+                                rootTaskParent.rootModelChangeManager
+                            )
+                        }
+                        .associateBy { it.projectKey }
+
+                    projectMap = privateProjects + sharedProjects
+
+                    val rootTaskProjectKeys = rootTasksByTaskKey.mapValues { it.value.project.projectKey }
+
+                    val rootTasksInProjectKeys = projectMap.flatMap { (projectKey, project) ->
+                        project.projectRecord
+                            .rootTaskParentDelegate
+                            .rootTaskKeys
+                            .map { it to projectKey }
+                    }
+                        .groupBy { it.first }
+                        .mapValues { it.value.map { it.second }.toSet() }
+
+                    rootTaskProjectKeys.entries
+                        .map { (taskKey, projectKey) ->
+                            Triple(taskKey, projectKey, rootTasksInProjectKeys[taskKey] ?: setOf())
+                        }
+                        .filter { (_, correctProjectKey, allFeaturingProjectKeys) ->
+                            correctProjectKey !in allFeaturingProjectKeys
+                        }
+                        .takeIf { it.isNotEmpty() }
+                        ?.let { throw InconsistentRootTaskIdsException(it) }
+
+                    val removedSharedProjects = Irrelevant.setIrrelevant(
+                        { rootTasksByTaskKey },
+                        userCustomTimeRelevances,
+                        { projectMap },
+                        rootTaskParent,
+                        ExactTimeStamp.Local.now,
+                    ).removedSharedProjects
+
+                    userCustomTimeRelevances.values
+                        .filter { !it.relevant }
+                        .forEach { (it.customTime as Time.Custom.User).delete() }
+
+                    val removedSharedProjectKeys = removedSharedProjects.map { it.projectKey }
+
+                    rootUsers.values.forEach { removedSharedProjectKeys.forEach(it::removeProject) }
+
+                    projectMap.values.forEach { project ->
+                        project.projectRecord
+                            .rootTaskParentDelegate
+                            .rootTaskKeys
+                            .forEach {
+                                val task = rootTasksByTaskKey[it] ?: throw MissingTaskException(it, project.projectKey)
+
+                                if (task.deleted) throw DeletedTaskException(it, project.projectKey)
+                            }
+                    }
+
+                    rootTaskManager.records
+                        .values
+                        .filter { it.shouldDelete }
+                        .map { it.taskKey }
+                        .forEach { taskKey ->
+                            projectMap.values.forEach { project ->
+                                if (project.projectRecord.rootTaskParentDelegate.rootTaskKeys.contains(taskKey))
+                                    throw DeletedRecordStillPresentException(taskKey, project.projectKey)
+                            }
+                        }
+
+                    val values = mutableMapOf<String, Any?>()
+
+                    privateProjectManager.save(values)
+                    sharedProjectManager.save(values)
+                    rootUserManager.save(values)
+                    rootTaskManager.save(values)
+
+                    ErrorLogger.instance.log("updateDatabase: $updateDatabase")
+                    ErrorLogger.instance.log("all database values: ${values.entries.joinToString("<br>\n")}")
+
+                    if (updateDatabase) {
+                        databaseWrapper.update(values) { message, _, exception ->
+                            ErrorLogger.instance.apply {
+                                log(message)
+                                exception?.let { logException(it) }
+                            }
+
+                            callback(root)
+                        }
+                    } else {
                         callback(root)
                     }
-                } else {
-                    callback(root)
+                } catch (throwable: Throwable) {
+                    onError(throwable)
                 }
             }
 

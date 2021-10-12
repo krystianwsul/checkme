@@ -34,32 +34,14 @@ class InstanceRelevance(val instance: Instance) {
         )
 
         // set parent instance relevant
-        val parentInstance = instance.parentInstance
-        if (parentInstance != null) {
-            val parentInstanceKey = parentInstance.instanceKey
-
-            if (!instanceRelevances.containsKey(parentInstanceKey))
-                instanceRelevances[parentInstanceKey] = InstanceRelevance(parentInstance)
-
-            instanceRelevances.getValue(parentInstanceKey).setRelevant(
-                taskRelevances,
-                taskHierarchyRelevances,
-                instanceRelevances,
-                now
-            )
+        instance.parentInstance?.let {
+            instanceRelevances.getOrPut(it).setRelevant(taskRelevances, taskHierarchyRelevances, instanceRelevances, now)
         }
 
         // set child instances relevant
         instance.getChildInstances()
             .filter { it.isVisible(now, Instance.VisibilityOptions(assumeChildOfVisibleParent = true)) }
-            .map { instance ->
-                val instanceKey = instance.instanceKey
-
-                if (!instanceRelevances.containsKey(instanceKey))
-                    instanceRelevances[instanceKey] = InstanceRelevance(instance)
-
-                instanceRelevances.getValue(instanceKey)
-            }
+            .map { instanceRelevances.getOrPut(it) }
             .forEach { it.setRelevant(taskRelevances, taskHierarchyRelevances, instanceRelevances, now) }
     }
 

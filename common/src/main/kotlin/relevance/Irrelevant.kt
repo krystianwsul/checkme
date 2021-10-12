@@ -171,7 +171,7 @@ object Irrelevant {
 
                             /**
                              * My concern here is that,
-                             * 1. We need to keep the schedule, because it hold the project info.
+                             * 1. We need to keep the schedule, because it holds the project info.
                              * 2. We can't remove the instance, since it'll just get regenerated
                              * 3. Therefore, it should be relevant?
                              */

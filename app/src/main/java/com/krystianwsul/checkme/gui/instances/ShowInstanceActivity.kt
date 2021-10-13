@@ -212,8 +212,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
 
         binding.groupListFragment.setFab(bottomFabMenuDelegate.fabDelegate)
 
-        check(intent.hasExtra(INSTANCE_KEY))
-        instanceKey = (savedInstanceState ?: intent.extras!!).getParcelable(INSTANCE_KEY)!!
+        instanceKey = (savedInstanceState ?: intent.extras)?.getParcelable(INSTANCE_KEY) ?: return
 
         showInstanceViewModel.apply {
             start(instanceKey)

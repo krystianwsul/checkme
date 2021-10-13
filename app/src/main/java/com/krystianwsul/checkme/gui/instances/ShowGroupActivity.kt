@@ -113,7 +113,7 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
 
         binding.groupListFragment.listener = this
 
-        parameters = intent.getParcelableExtra(KEY_PARAMETERS)!!
+        parameters = intent.getParcelableExtra(KEY_PARAMETERS) ?: return
 
         binding.groupListFragment.setFab(bottomFabMenuDelegate.fabDelegate)
 

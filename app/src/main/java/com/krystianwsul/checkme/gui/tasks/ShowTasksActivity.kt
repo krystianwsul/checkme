@@ -51,7 +51,7 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
 
     private lateinit var taskListFragment: TaskListFragment
 
-    private lateinit var showTasksViewModel: ShowTasksViewModel
+    private val showTasksViewModel by lazy { getViewModel<ShowTasksViewModel>() }
 
     override val taskSearch by lazy {
         binding.showTasksToolbarCollapseInclude
@@ -110,7 +110,7 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
             it.listener = this
         }
 
-        showTasksViewModel = getViewModel<ShowTasksViewModel>().apply {
+        showTasksViewModel.apply {
             start(parameters)
 
             createDisposable += data.subscribe { onLoadFinished(it) }
@@ -191,6 +191,7 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
     override fun startCopy(taskKey: TaskKey) {
         copiedTaskKey = taskKey
 
+        @Suppress("DEPRECATION")
         startActivityForResult(
             EditActivity.getParametersIntent(EditParameters.Copy(taskKey)),
             REQUEST_COPY,
@@ -198,6 +199,7 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        @Suppress("DEPRECATION")
         super.onActivityResult(requestCode, resultCode, data)
 
         if (requestCode == REQUEST_COPY && resultCode == Activity.RESULT_OK) {

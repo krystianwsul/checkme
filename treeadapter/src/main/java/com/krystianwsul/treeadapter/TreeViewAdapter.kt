@@ -221,7 +221,7 @@ class TreeViewAdapter<T : TreeHolder>(
             }
 
             private fun checkScroll(position: Int) {
-                if (position == 0 && !ignoreScroll) treeModelAdapter.scrollToTop()
+                //if (position == 0 && !ignoreScroll) treeModelAdapter.scrollToTop()
             }
 
             override fun onChanged(position: Int, count: Int, payload: Any?) =

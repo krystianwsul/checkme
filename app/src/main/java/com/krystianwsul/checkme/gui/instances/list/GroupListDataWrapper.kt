@@ -25,7 +25,6 @@ data class GroupListDataWrapper(
         override val taskKey: TaskKey,
         override val name: String,
         val children: List<TaskData>,
-        val startExactTimeStamp: ExactTimeStamp.Local,
         override val note: String?,
         val imageState: ImageState?,
         override val isAssignedToMe: Boolean,

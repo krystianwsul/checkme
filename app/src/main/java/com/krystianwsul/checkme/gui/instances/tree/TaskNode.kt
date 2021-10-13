@@ -138,15 +138,9 @@ class TaskNode(
     override val groupAdapter by lazy { taskParent.groupAdapter }
 
     override fun compareTo(other: ModelNode<AbstractHolder>) = if (other is TaskNode) {
-        other.taskData
-            .startExactTimeStamp
-            .let {
-                if (indentation == 0) {
-                    -taskData.startExactTimeStamp.compareTo(it)
-                } else {
-                    taskData.startExactTimeStamp.compareTo(it)
-                }
-            }
+        val comparison = taskData.ordinal.compareTo(other.taskData.ordinal)
+
+        if (indentation == 0) -comparison else comparison
     } else {
         1
     }

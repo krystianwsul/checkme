@@ -297,18 +297,21 @@ class DomainFactory(
             run {
                 val projectTasksWaiting = projectsFactory.projects
                     .values
-                    .any {
-                        it.projectTasks.any { !it.dependenciesLoaded }
-                    }
+                    .asSequence()
+                    .flatMap { it.projectTasks }
+                    .any { !it.dependenciesLoaded }
 
                 val projectsWaiting by lazy {
                     projectsFactory.projects
                         .values
                         .any {
-                            it.projectRecord
+                            val requiredTaskKeys = it.projectRecord
                                 .rootTaskParentDelegate
                                 .rootTaskKeys
-                                .size > it.getAllTasks().size
+
+                            !rootTasksFactory.rootTasks
+                                .keys
+                                .containsAll(requiredTaskKeys)
                         }
                 }
 

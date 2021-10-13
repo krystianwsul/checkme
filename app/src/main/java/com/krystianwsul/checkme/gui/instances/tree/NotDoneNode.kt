@@ -204,6 +204,7 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
                             done,
                         )
 
+                        // todo check inner todo if/when we debounce user actions
                         treeNode.treeViewAdapter.ignoreNextScroll()
 
                         setDone(!done).observeOn(AndroidSchedulers.mainThread())

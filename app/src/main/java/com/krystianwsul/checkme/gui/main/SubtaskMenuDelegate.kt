@@ -19,13 +19,14 @@ class SubtaskMenuDelegate(
     private val instanceDate: Date,
     private val createTaskTimePair: TimePair,
     private val projectKey: ProjectKey.Shared?,
+    private val showAddToTime: Boolean = true,
 ) : BottomFabMenuDelegate.MenuDelegate {
 
     override fun getItems() = listOfNotNull(
         taskKey?.let(::AddTaskList),
         projectKey?.let { AddToProject(instanceDate, createTaskTimePair, projectKey) },
-        AddTaskThisTime(instanceDate, createTaskTimePair),
-    )
+        AddTaskThisTime(instanceDate, createTaskTimePair).takeIf { showAddToTime },
+    ).also { check(it.isNotEmpty()) }
 }
 
 private class AddTaskThisTime(

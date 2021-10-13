@@ -663,10 +663,11 @@ class GroupListFragment @JvmOverloads constructor(
 
                     val canAddSubtask = parameters.fabActionMode.showSubtask && singleSelectedData.canAddSubtask
 
-                    val canAddToTime = parameters.fabActionMode.showTime
-                            && instanceData?.run { isRootInstance && instanceTimeStamp > TimeStamp.now } == true
+                    val rootAndTimeValid = instanceData?.run { isRootInstance && instanceTimeStamp > TimeStamp.now } == true
 
-                    val canAddToProject = canAddToTime && instanceData?.projectKey != null
+                    val canAddToTime = parameters.fabActionMode.showTime && rootAndTimeValid
+
+                    val canAddToProject = rootAndTimeValid && instanceData?.projectKey != null
 
                     val multipleValid = listOf(canAddToTime, canAddSubtask, canAddToProject).filter { it }.size > 1
 
@@ -680,6 +681,7 @@ class GroupListFragment @JvmOverloads constructor(
                                     instanceDateTime.date,
                                     createTaskTimePair,
                                     instanceData.projectKey,
+                                    canAddToTime,
                                 )
                             })
                         }
@@ -688,6 +690,10 @@ class GroupListFragment @JvmOverloads constructor(
                             true,
                         )
                         canAddToTime -> getStartEditActivityFabState(listOf(instanceData!!).getHint(), true)
+                        canAddToProject -> getStartEditActivityFabState(
+                            EditActivity.Hint.Project(instanceData!!.projectKey!!),
+                            true,
+                        )
                         else -> FabState.Hidden
                     }
                 } else {

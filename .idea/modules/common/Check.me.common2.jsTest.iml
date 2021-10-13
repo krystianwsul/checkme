@@ -68,7 +68,7 @@
       </configuration>
     </facet>
   </component>
-  <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_8">
+  <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_11">
     <output-test url="file://$MODULE_DIR$/../../../common/build/classes/kotlin/js/test" />
     <exclude-output />
     <content url="file://$MODULE_DIR$/../../../common/src/jsTest/kotlin" />

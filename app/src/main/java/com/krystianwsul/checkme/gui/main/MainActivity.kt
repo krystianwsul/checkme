@@ -468,7 +468,9 @@ class MainActivity :
 
         binding.mainSearchInclude
             .toolbar
-            .setNavigationOnClickListener { setTabSearchState(tabSearchStateRelay.value!!.closeSearch()) }
+            .navigationClicks()
+            .subscribe { setTabSearchState(tabSearchStateRelay.value!!.closeSearch()) }
+            .addTo(createDisposable)
 
         var debugFragment = supportFragmentManager.findFragmentById(R.id.mainDebugFrame)
         if (debugFragment != null) {

@@ -51,7 +51,7 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
 
     private lateinit var taskListFragment: TaskListFragment
 
-    private lateinit var showTasksViewModel: ShowTasksViewModel
+    private val showTasksViewModel by lazy { getViewModel<ShowTasksViewModel>() }
 
     override val taskSearch by lazy {
         binding.showTasksToolbarCollapseInclude
@@ -110,7 +110,7 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
             it.listener = this
         }
 
-        showTasksViewModel = getViewModel<ShowTasksViewModel>().apply {
+        showTasksViewModel.apply {
             start(parameters)
 
             createDisposable += data.subscribe { onLoadFinished(it) }

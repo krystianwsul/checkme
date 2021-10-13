@@ -95,7 +95,11 @@ class TreeViewAdapter<T : TreeHolder>(
     private var ignoreNextScroll: Boolean = false
 
     fun ignoreNextScroll() {
-        check(!ignoreNextScroll)
+        /*
+        todo this shouldn't happen.  But as it stands, we do allow multiple check clicks in NotDoneNode before a new dataset
+        is returned, so ignore for now.
+         */
+        //check(!ignoreNextScroll)
 
         ignoreNextScroll = true
     }

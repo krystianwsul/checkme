@@ -7,6 +7,7 @@ import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.inputmethod.InputMethodManager
 import android.widget.FrameLayout
+import com.jakewharton.rxbinding4.appcompat.navigationClicks
 import com.jakewharton.rxbinding4.widget.textChanges
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
@@ -98,8 +99,7 @@ class SearchToolbar @JvmOverloads constructor(context: Context, attrs: Attribute
         inputMethodManager.showSoftInput(binding.searchText, InputMethodManager.SHOW_IMPLICIT)
     }
 
-    fun setNavigationOnClickListener(listener: () -> Unit) =
-            binding.searchToolbar.setNavigationOnClickListener { listener() }
+    fun navigationClicks() = binding.searchToolbar.navigationClicks()
 
     override fun onSaveInstanceState(): Parcelable = SavedState(
         super.onSaveInstanceState(),

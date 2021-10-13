@@ -466,9 +466,17 @@ class MainActivity :
             }
         }
 
-        binding.mainSearchInclude
-            .toolbar
-            .setNavigationOnClickListener { setTabSearchState(tabSearchStateRelay.value!!.closeSearch()) }
+        tabSearchStateRelay.switchMap {
+            if (it.isSearching) {
+                binding.mainSearchInclude
+                    .toolbar
+                    .navigationClicks()
+            } else {
+                Observable.never()
+            }
+        }
+            .subscribe { setTabSearchState(tabSearchStateRelay.value!!.closeSearch()) }
+            .addTo(createDisposable)
 
         var debugFragment = supportFragmentManager.findFragmentById(R.id.mainDebugFrame)
         if (debugFragment != null) {

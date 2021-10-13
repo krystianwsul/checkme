@@ -25,6 +25,7 @@ import com.krystianwsul.checkme.utils.animateVisibility
 import com.krystianwsul.checkme.utils.dpToPx
 import com.krystianwsul.checkme.utils.getPrivateField
 import com.krystianwsul.treeadapter.FilterCriteria
+import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.plusAssign
@@ -77,17 +78,29 @@ class CollapseAppBarLayout : AppBarLayout {
     private val binding = CollapseAppBarLayoutBinding.inflate(LayoutInflater.from(context), this, true)
 
     init {
-        binding.searchInclude
-                .toolbar
-                .setNavigationOnClickListener { closeSearch() }
-
         binding.toolbarCollapseText.addOneShotGlobalLayoutListener { globalLayoutPerformed.accept(Unit) }
     }
 
     fun setSearchMenuOptions(showDeleted: Boolean, showAssignedToOthers: Boolean, showProjects: Boolean) {
         binding.searchInclude
-                .toolbar
-                .setMenuOptions(showDeleted, showAssignedToOthers, showProjects)
+            .toolbar
+            .setMenuOptions(showDeleted, showAssignedToOthers, showProjects)
+    }
+
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+
+        searchingRelay.switchMap {
+            if (it) {
+                binding.searchInclude
+                    .toolbar
+                    .navigationClicks()
+            } else {
+                Observable.never()
+            }
+        }
+            .subscribe { closeSearch() }
+            .addTo(attachedToWindowDisposable)
     }
 
     override fun onDetachedFromWindow() {
@@ -270,8 +283,8 @@ class CollapseAppBarLayout : AppBarLayout {
         animateVisibility(listOf(binding.searchInclude.toolbar), listOf(), duration = MyBottomBar.duration)
 
         binding.searchInclude
-                .toolbar
-                .requestSearchFocus()
+            .toolbar
+            .requestSearchFocus()
     }
 
     override fun onSaveInstanceState(): Parcelable = SavedState(super.onSaveInstanceState(), isSearching)

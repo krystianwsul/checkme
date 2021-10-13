@@ -111,6 +111,7 @@ dependencies {
     implementation "com.jakewharton.rxrelay3:rxrelay:$rxRelayVersion"
 
     implementation "com.jakewharton.rxbinding4:rxbinding:$rxBindingVersion"
+    implementation "com.jakewharton.rxbinding4:rxbinding-appcompat:$rxBindingVersion"
     implementation "com.jakewharton.rxbinding4:rxbinding-core:$rxBindingVersion"
     implementation "com.jakewharton.rxbinding4:rxbinding-material:$rxBindingVersion"
     implementation "com.jakewharton.rxbinding4:rxbinding-recyclerview:$rxBindingVersion"

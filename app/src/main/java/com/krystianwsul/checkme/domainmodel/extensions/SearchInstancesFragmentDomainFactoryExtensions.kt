@@ -71,7 +71,6 @@ fun DomainFactory.getCappedInstanceAndTaskDatas(
                 task.taskKey,
                 task.name,
                 getGroupListChildTaskDatas(task, now, childQuery),
-                task.startExactTimeStamp,
                 task.note,
                 task.getImage(deviceDbInfo),
                 task.isAssignedToMe(now, myUserFactory.user),

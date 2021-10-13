@@ -141,7 +141,7 @@ sealed class EditParameters : Parcelable {
 
         override val startParameters get() = EditViewModel.StartParameters.Task(taskKey)
 
-        override val currentParentSource get() = EditViewModel.CurrentParentSource.None
+        override val currentParentSource get() = EditViewModel.CurrentParentSource.FromTask(taskKey)
     }
 
     @Parcelize

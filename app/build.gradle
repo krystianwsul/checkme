@@ -172,5 +172,5 @@ dependencies {
 
     implementation 'commons-io:commons-io:2.10.0'
 
-    implementation "com.github.akarnokd:rxjava3-extensions:3.0.1"
+    implementation 'com.github.akarnokd:rxjava3-extensions:3.1.1'
 }

@@ -294,7 +294,14 @@ class MainActivity :
 
         val positionDiff = position - binding.mainDaysPager.currentPosition.coerceAtLeast(0)
 
-        binding.mainDaysPager.smoothScrollBy(positionDiff * width, 0)
+        val (instantScroll: Int?, smoothScroll: Int) = when {
+            positionDiff > 2 -> positionDiff - 2 to 2
+            positionDiff < -2 -> positionDiff - -2 to -2
+            else -> null to positionDiff
+        }
+
+        instantScroll?.let { binding.mainDaysPager.scrollBy(it * width, 0) }
+        binding.mainDaysPager.smoothScrollBy(smoothScroll * width, 0)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

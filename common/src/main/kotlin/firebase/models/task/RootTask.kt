@@ -116,7 +116,7 @@ class RootTask private constructor(
 
     override val projectCustomTimeIdProvider = JsonTime.ProjectCustomTimeIdProvider.rootTask
 
-    @VisibleForTesting
+    // visible for testing
     val rootTaskDependencyResolver = RootTaskDependencyResolver(this)
 
     override val dependenciesLoaded get() = rootTaskDependencyResolver.dependenciesLoaded

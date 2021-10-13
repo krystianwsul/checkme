@@ -118,7 +118,7 @@ dependencies {
     implementation 'com.android.volley:volley:1.2.1'
     implementation "net.danlew:android.joda:$jodaVersion"
     //noinspection GradleDependency
-    testImplementation 'joda-time:joda-time:2.10.9'
+    testImplementation 'joda-time:joda-time:2.10.12'
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-core:$serializationVersion"

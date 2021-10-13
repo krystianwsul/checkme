@@ -120,7 +120,7 @@ abstract class Project<T : ProjectType>(
 
     fun delete() = projectRecord.delete()
 
-    @VisibleForTesting
+    // visible for testing
     val rootTasksCache =
         invalidatableCache<Collection<RootTask>>(clearableInvalidatableManager) { invalidatableCache ->
             val managerRemovable =

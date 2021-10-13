@@ -466,9 +466,15 @@ class MainActivity :
             }
         }
 
-        binding.mainSearchInclude
-            .toolbar
-            .navigationClicks()
+        tabSearchStateRelay.switchMap {
+            if (it.isSearching) {
+                binding.mainSearchInclude
+                    .toolbar
+                    .navigationClicks()
+            } else {
+                Observable.never()
+            }
+        }
             .subscribe { setTabSearchState(tabSearchStateRelay.value!!.closeSearch()) }
             .addTo(createDisposable)
 

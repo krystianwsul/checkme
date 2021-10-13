@@ -50,5 +50,5 @@ ext {
     klockVersion = '2.2.0'
     reaktiveVersion = '1.2.0'
     rxBindingVersion = '4.0.0'
-    arrowVersion = "0.13.2"
+    arrowVersion = '1.0.0'
 }

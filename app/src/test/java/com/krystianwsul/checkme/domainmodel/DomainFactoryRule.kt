@@ -36,10 +36,7 @@ import com.krystianwsul.common.firebase.records.project.PrivateProjectRecord
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.HourMinute
-import com.krystianwsul.common.utils.ProjectKey
-import com.krystianwsul.common.utils.TaskHierarchyId
-import com.krystianwsul.common.utils.TaskKey
-import com.krystianwsul.common.utils.UserKey
+import com.krystianwsul.common.utils.*
 import com.mindorks.scheduler.RxPS
 import io.mockk.*
 import io.reactivex.rxjava3.android.plugins.RxAndroidPlugins
@@ -159,7 +156,7 @@ class DomainFactoryRule : TestRule {
 
             var rootTaskScheduleRecordId = 0
             every { newRootTaskScheduleRecordId(any()) } answers {
-                "rootTaskScheduleRecordId" + ++rootTaskScheduleRecordId
+                ScheduleId("rootTaskScheduleRecordId" + ++rootTaskScheduleRecordId)
             }
 
             var rootTaskNestedTaskHierarchyRecordId = 0

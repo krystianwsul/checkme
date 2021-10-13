@@ -33,6 +33,7 @@ import com.krystianwsul.common.firebase.records.task.RootTaskRecord
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ScheduleData
+import com.krystianwsul.common.utils.ScheduleId
 import com.krystianwsul.common.utils.TaskKey
 import io.mockk.every
 import io.mockk.mockk
@@ -127,7 +128,9 @@ class ChangeTypeSourceTest {
             every { newRootTaskRecordId() } answers { "rootTaskRecordId" + taskRecordId++ }
 
             var scheduleRecordId = 0
-            every { newRootTaskScheduleRecordId(any()) } answers { "scheduleRecordId" + scheduleRecordId++ }
+            every { newRootTaskScheduleRecordId(any()) } answers {
+                ScheduleId("scheduleRecordId" + scheduleRecordId++)
+            }
         }
 
         val rootTasksManager = AndroidRootTasksManager(databaseWrapper)

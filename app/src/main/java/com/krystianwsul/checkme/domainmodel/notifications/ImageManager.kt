@@ -9,14 +9,15 @@ import android.graphics.drawable.Drawable
 import com.bumptech.glide.request.target.SimpleTarget
 import com.bumptech.glide.request.target.Target
 import com.bumptech.glide.request.transition.Transition
+import com.jakewharton.rxrelay3.BehaviorRelay
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.domainmodel.observeOnDomain
 import com.krystianwsul.checkme.domainmodel.toImageLoader
 import com.krystianwsul.checkme.utils.circle
 import com.krystianwsul.checkme.utils.dpToPx
 import com.krystianwsul.common.domain.DeviceDbInfo
+import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.models.task.Task
-import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.kotlin.subscribeBy
 import io.reactivex.rxjava3.schedulers.Schedulers
@@ -78,54 +79,64 @@ object ImageManager {
 
         private fun getFile(uuid: String) = File(dir.absolutePath, uuid)
 
+        private val readyRelay = BehaviorRelay.create<Unit>()
+
         fun init() {
+            check(!readyRelay.hasValue())
+
             dir.mkdirs()
 
             Single.fromCallable {
+                check(!readyRelay.hasValue())
+
                 imageStates = (dir.listFiles()?.toList() ?: listOf()).map { it.name }
-                        .associateWith { State.Downloaded }
-                        .toMutableMap()
+                    .associateWith { State.Downloaded }
+                    .toMutableMap()
+
+                readyRelay.accept(Unit)
             }
                     .subscribeOn(Schedulers.io())
                     .subscribe()
         }
 
         fun prefetch(deviceDbInfo: DeviceDbInfo, tasks: List<Task>, callback: () -> Unit) {
-            val tasksWithImages = tasks.map { it to it.getImage(deviceDbInfo)?.uuid }
+            DomainThreadChecker.instance.requireDomainThread()
+
+            readyRelay.observeOnDomain().subscribe {
+                val tasksWithImages = tasks.map { it to it.getImage(deviceDbInfo)?.uuid }
                     .filter { it.second != null }
                     .associate { it.second!! to it.first }
 
-            val taskUuids = tasksWithImages.keys
-            val presentUuids = imageStates.keys
+                val taskUuids = tasksWithImages.keys
+                val presentUuids = imageStates.keys
 
-            val imagesToDownload = taskUuids - presentUuids
-            val imagesToRemove = presentUuids - taskUuids
+                val imagesToDownload = taskUuids - presentUuids
+                val imagesToRemove = presentUuids - taskUuids
 
-            val statesToRemove = imagesToRemove.map { it to imageStates.getValue(it) }
+                val statesToRemove = imagesToRemove.map { it to imageStates.getValue(it) }
 
-            imagesToRemove.forEach { imageStates.remove(it) }
+                imagesToRemove.forEach { imageStates.remove(it) }
 
-            statesToRemove.filter { it.second is State.Downloading }.forEach { (uuid, state) ->
-                (state as State.Downloading).target
+                statesToRemove.filter { it.second is State.Downloading }.forEach { (uuid, state) ->
+                    (state as State.Downloading).target
                         .request!!
                         .clear()
 
-                imageStates.remove(uuid)
-            }
-
-            Single.fromCallable {
-                statesToRemove.filter { it.second is State.Downloaded }.forEach {
-                    getFile(it.first).delete()
+                    imageStates.remove(uuid)
                 }
-            }
+
+                Single.fromCallable {
+                    statesToRemove.filter { it.second is State.Downloaded }.forEach {
+                        getFile(it.first).delete()
+                    }
+                }
                     .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
                     .subscribe()
 
-            val tasksToDownload = imagesToDownload.map { it to tasksWithImages.getValue(it) }
+                val tasksToDownload = imagesToDownload.map { it to tasksWithImages.getValue(it) }
 
-            imageStates.putAll(tasksToDownload.map { (uuid, task) ->
-                val target = task.getImage(deviceDbInfo)!!
+                imageStates += tasksToDownload.map { (uuid, task) ->
+                    val target = task.getImage(deviceDbInfo)!!
                         .toImageLoader()
                         .requestBuilder!!
                         .circle(circle)
@@ -148,15 +159,15 @@ object ImageManager {
                                         }
                                     }
                                 }
-                                        .subscribeOn(Schedulers.io())
-                                        .observeOnDomain()
-                                        .subscribeBy {
-                                            check(imageStates.getValue(uuid) is State.Downloading)
+                                    .subscribeOn(Schedulers.io())
+                                    .observeOnDomain()
+                                    .subscribeBy {
+                                        check(imageStates.getValue(uuid) is State.Downloading)
 
-                                            imageStates[uuid] = State.Downloaded
+                                        imageStates[uuid] = State.Downloaded
 
-                                            callback()
-                                        }
+                                        callback()
+                                    }
                             }
 
                             override fun onLoadFailed(errorDrawable: Drawable?) {
@@ -166,8 +177,9 @@ object ImageManager {
                             }
                         })
 
-                uuid to State.Downloading(target)
-            })
+                    uuid to State.Downloading(target)
+                }
+            }
         }
 
         fun getImage(uuid: String?) = uuid?.takeIf { (imageStates[it] is State.Downloaded) }?.let {

@@ -83,6 +83,8 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
 
     final override val propagateSelection = contentDelegate.propagateSelection
 
+    override val debugDescription = contentDelegate.debugDescription
+
     fun initialize(
         contentDelegateStates: Map<ContentDelegate.Id, ContentDelegate.State>,
         nodeContainer: NodeContainer<AbstractHolder>,
@@ -112,6 +114,8 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
         abstract val states: Map<Id, State>
 
         abstract val name: String
+
+        open val debugDescription: String? = null
 
         abstract fun initialize(
             contentDelegateStates: Map<Id, State>,
@@ -149,6 +153,8 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
             private lateinit var nodeCollection: NodeCollection
 
             override val name = instanceData.name
+
+            override val debugDescription = name
 
             override fun initialize(
                 contentDelegateStates: Map<ContentDelegate.Id, ContentDelegate.State>,

@@ -62,6 +62,8 @@ class DetailsNode(
     private fun projectNameShownInParent(): Boolean {
         if (parentNode == null) return false
 
+        if (parentNode.treeNode.isExpanded) return false
+
         val projectRowsDelegate = parentNode.rowsDelegate
         if (projectRowsDelegate.project == null) return false
 
@@ -182,6 +184,8 @@ class DetailsNode(
         val rowsDelegate: ProjectRowsDelegate
 
         val treeNode: TreeNode<AbstractHolder>
+
+        val debugDescription: String? get() = null
     }
 
     abstract class ProjectRowsDelegate(

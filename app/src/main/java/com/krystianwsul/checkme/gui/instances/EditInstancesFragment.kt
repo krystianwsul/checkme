@@ -104,9 +104,10 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
                 state.timePairPersist.hourMinute,
         ).setListener(timePickerDialogFragmentListener)
 
+        @Suppress("DEPRECATION")
         override fun onAddSelected() = startActivityForResult(
-                ShowCustomTimeActivity.getCreateIntent(requireContext()),
-                ShowCustomTimeActivity.CREATE_CUSTOM_TIME_REQUEST_CODE,
+            ShowCustomTimeActivity.getCreateIntent(requireContext()),
+            ShowCustomTimeActivity.CREATE_CUSTOM_TIME_REQUEST_CODE,
         )
     }
 
@@ -261,6 +262,7 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
 
     @SuppressLint("MissingSuperCall")
     override fun onActivityCreated(savedInstanceState: Bundle?) {
+        @Suppress("DEPRECATION")
         super.onActivityCreated(savedInstanceState)
 
         tryGetFragment<ParentPickerFragment>(TAG_PARENT_PICKER)?.initialize(parentPickerDelegate)
@@ -483,10 +485,9 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
         }
     }
 
-    abstract class SnackbarHostDelegate(
-        private val snackbarListener: SnackbarListener,
-        private val compositeDisposable: CompositeDisposable,
-    ) : HostDelegate() {
+    abstract class SnackbarHostDelegate(private val compositeDisposable: CompositeDisposable) : HostDelegate() {
+
+        protected abstract val snackbarListener: SnackbarListener
 
         override fun afterEditInstances(undoData: UndoData, count: Int, newTimeStamp: TimeStamp?) {
             snackbarListener.showSnackbarHourMaybe(count)

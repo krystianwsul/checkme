@@ -175,14 +175,13 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
         startDate(receiver)
     }
 
-    private val editInstancesHostDelegate = object : EditInstancesFragment.SnackbarHostDelegate(
-        this@ShowGroupActivity,
-        createDisposable,
-    ) {
+    private val editInstancesHostDelegate = object : EditInstancesFragment.SnackbarHostDelegate(createDisposable) {
 
         override val dataId get() = showGroupViewModel.dataId
 
         override val activity = this@ShowGroupActivity
+
+        override val snackbarListener = this@ShowGroupActivity
 
         private var possiblyClosing = false
 

@@ -833,14 +833,14 @@ class GroupListFragment @JvmOverloads constructor(
             }
     }
 
-    private inner class EditInstancesSnackbarHostDelegate : EditInstancesFragment.SnackbarHostDelegate(
-        listener,
-        attachedToWindowDisposable,
-    ) {
+    private inner class EditInstancesSnackbarHostDelegate :
+        EditInstancesFragment.SnackbarHostDelegate(attachedToWindowDisposable) {
 
         override val dataId get() = parameters.dataId
 
         override val activity get() = this@GroupListFragment.activity
+
+        override val snackbarListener get() = listener
 
         override fun beforeEditInstances(instanceKeys: Set<InstanceKey>) = selectionCallback.actionMode!!.finish()
     }

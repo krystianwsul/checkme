@@ -111,7 +111,7 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.Listener {
 
         initBottomBar()
 
-        taskKey = (savedInstanceState ?: intent.extras!!).getParcelable(TASK_KEY_KEY)!!
+        taskKey = (savedInstanceState ?: intent.extras)?.getParcelable(TASK_KEY_KEY) ?: return
 
         taskListFragment = getOrInitializeFragment(R.id.showTaskFragment) {
             TaskListFragment.newInstance()

@@ -86,7 +86,7 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
             savedInstanceState?.getParcelable(KEY_BOTTOM_FAB_MENU_DELEGATE_STATE),
         )
 
-        parameters = (savedInstanceState ?: intent.extras!!).getParcelable(KEY_PARAMETERS)!!
+        parameters = (savedInstanceState ?: intent.extras)?.getParcelable(KEY_PARAMETERS) ?: return
         copiedTaskKey = savedInstanceState?.getParcelable(KEY_COPIED_TASK_KEY)
 
         binding.showTasksToolbarCollapseInclude
@@ -191,6 +191,7 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
     override fun startCopy(taskKey: TaskKey) {
         copiedTaskKey = taskKey
 
+        @Suppress("DEPRECATION")
         startActivityForResult(
             EditActivity.getParametersIntent(EditParameters.Copy(taskKey)),
             REQUEST_COPY,
@@ -198,6 +199,7 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        @Suppress("DEPRECATION")
         super.onActivityResult(requestCode, resultCode, data)
 
         if (requestCode == REQUEST_COPY && resultCode == Activity.RESULT_OK) {

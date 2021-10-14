@@ -832,7 +832,7 @@ class MainActivity :
     override fun onResume() {
         super.onResume()
 
-        if (BuildConfig.DEBUG && !Preferences.instanceWarningSnoozeSet) {
+        if (BuildConfig.DEBUG && !Preferences.instanceWarningSnoozeSet && false) { // todo remove, along with setting
             DomainFactory.instanceRelay
                 .subscribeOnDomain(Priority.LOW)
                 .filterNotNull()

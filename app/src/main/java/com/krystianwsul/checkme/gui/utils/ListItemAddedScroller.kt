@@ -31,8 +31,7 @@ interface ListItemAddedScroller {
         val linearLayoutManager = recyclerView.layoutManager as LinearLayoutManager
         val firstCompletelyVisibleItemPosition = linearLayoutManager.findFirstCompletelyVisibleItemPosition()
 
-        if (firstCompletelyVisibleItemPosition == -1)
-            return
+        if (firstCompletelyVisibleItemPosition == -1) return
 
         fun smoothScroll(position: Int) {
             val scroller = object : LinearSmoothScroller(recyclerView.context) {

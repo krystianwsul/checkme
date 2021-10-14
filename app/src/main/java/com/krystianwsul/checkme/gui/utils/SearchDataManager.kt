@@ -88,6 +88,8 @@ abstract class SearchDataManager<DATA : Any, MODEL_ADAPTER : BaseAdapter>(
                     val first = this.data == null
                     val immediate = dataIsImmediate(data)
 
+                    val oldFilterCriteria = this.data?.let(::getFilterCriteriaFromData)
+
                     this.data = data
                     getFilterCriteriaFromData(data)?.let { filterCriteria = it }
 
@@ -122,6 +124,10 @@ abstract class SearchDataManager<DATA : Any, MODEL_ADAPTER : BaseAdapter>(
                     updateEmptyState(emptyBefore, immediate)
 
                     onDataChanged()
+
+                    // this scrolls to top on search changes
+                    if (listOfNotNull(oldFilterCriteria, filterCriteria).any { it.hasSearch })
+                        recyclerView.scrollToPosition(0)
                 }
                 .addTo(compositeDisposable)
     }
@@ -157,8 +163,8 @@ abstract class SearchDataManager<DATA : Any, MODEL_ADAPTER : BaseAdapter>(
 
     private fun updateEmptyState(emptyBefore: Boolean, immediate: Boolean) {
         val emptyAfter = isAdapterEmpty()
-        if (emptyBefore && !emptyAfter)
-            recyclerView.scrollToPosition(0)
+
+        if (emptyBefore && !emptyAfter) recyclerView.scrollToPosition(0)
 
         val hide = mutableListOf(progressView)
         val show = mutableListOf<View>()

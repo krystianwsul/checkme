@@ -126,7 +126,7 @@ abstract class SearchDataManager<DATA : Any, MODEL_ADAPTER : BaseAdapter>(
                     onDataChanged()
 
                     // this scrolls to top on search changes
-                    if (listOfNotNull(oldFilterCriteria, filterCriteria).any { it.hasSearch })
+                    if (listOf(oldFilterCriteria, filterCriteria).any { it?.hasSearch == true })
                         recyclerView.scrollToPosition(0)
                 }
                 .addTo(compositeDisposable)

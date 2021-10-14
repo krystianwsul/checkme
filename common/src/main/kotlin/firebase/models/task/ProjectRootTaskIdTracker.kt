@@ -24,78 +24,80 @@ class ProjectRootTaskIdTracker {
         ): T {
             check(instance == null)
 
-            instance = ProjectRootTaskIdTracker()
+            return try {
+                instance = ProjectRootTaskIdTracker()
 
-            fun Map<TaskKey.Root, RootTask>.getRootTaskDatas() = mapValues { (_, task) ->
-                TaskData(task, task.taskRecord.getDirectDependencyTaskKeys() + task.taskKey)
+                fun Map<TaskKey.Root, RootTask>.getRootTaskDatas() = mapValues { (_, task) ->
+                    TaskData(task, task.taskRecord.getDirectDependencyTaskKeys() + task.taskKey)
+                }
+
+                val rootTasksBefore = getRootTasks()
+                val rootTaskDatasBefore = rootTasksBefore.getRootTaskDatas()
+                val mapBefore = getProjectTaskMap(rootTasksBefore)
+                val graphsBefore = createRootTaskIdGraphs(rootTasksBefore)
+
+                val result = action()
+
+                val rootTasksAfter = getRootTasks()
+                val rootTaskDatasAfter = rootTasksAfter.getRootTaskDatas()
+                val mapAfter = getProjectTaskMap(rootTasksAfter)
+                val graphsAfter = createRootTaskIdGraphs(rootTasksAfter)
+
+                fun getGraphBefore(taskKey: TaskKey.Root) = graphsBefore.filter { taskKey in it }
+                    .singleOrEmpty()
+                    ?: emptySet()
+
+                fun getGraphAfter(taskKey: TaskKey.Root) = graphsAfter.single { taskKey in it }
+
+                rootTaskDatasAfter.forEach { (taskKey, taskData) ->
+                    val (task, keysToOmitAfter) = taskData
+
+                    val taskKeysBefore = getGraphBefore(taskKey) - rootTaskDatasBefore[taskKey]?.keysToOmit.orEmpty()
+                    val taskKeysAfter = getGraphAfter(taskKey) - keysToOmitAfter
+
+                    if (taskKeysBefore == taskKeysAfter) return@forEach
+
+                    val addedTaskKeys = taskKeysAfter - taskKeysBefore
+                    val removedTaskKeys = taskKeysBefore - taskKeysAfter
+
+                    val delegate = task.taskRecord.rootTaskParentDelegate
+
+                    addedTaskKeys.forEach(delegate::addRootTaskKey)
+                    removedTaskKeys.forEach(delegate::removeRootTaskKey)
+
+                    rootTaskProvider.updateTaskRecord(taskKey, taskKeysAfter)
+                }
+
+                getProjects().forEach { (projectKey, project) ->
+                    val taskKeysBefore = mapBefore.getOrElse(projectKey) { emptyList() }
+                        .map { task -> getGraphBefore(task.taskKey) }
+                        .flatten()
+                        .toSet()
+
+                    val taskKeysAfter = mapAfter.getOrElse(projectKey) { emptyList() }
+                        .map { task -> getGraphAfter(task.taskKey) }
+                        .flatten()
+                        .toSet()
+
+                    if (taskKeysBefore == taskKeysAfter) return@forEach
+
+                    val addedTaskKeys = taskKeysAfter - taskKeysBefore
+                    val removedTaskKeys = taskKeysBefore - taskKeysAfter
+
+                    val delegate = project.projectRecord.rootTaskParentDelegate
+
+                    addedTaskKeys.forEach(delegate::addRootTaskKey)
+                    removedTaskKeys.forEach(delegate::removeRootTaskKey)
+
+                    rootTaskProvider.updateProjectRecord(projectKey, taskKeysAfter)
+                }
+
+                checkNotNull(instance)
+
+                result
+            } finally {
+                instance = null
             }
-
-            val rootTasksBefore = getRootTasks()
-            val rootTaskDatasBefore = rootTasksBefore.getRootTaskDatas()
-            val mapBefore = getProjectTaskMap(rootTasksBefore)
-            val graphsBefore = createRootTaskIdGraphs(rootTasksBefore)
-
-            val result = action()
-
-            val rootTasksAfter = getRootTasks()
-            val rootTaskDatasAfter = rootTasksAfter.getRootTaskDatas()
-            val mapAfter = getProjectTaskMap(rootTasksAfter)
-            val graphsAfter = createRootTaskIdGraphs(rootTasksAfter)
-
-            fun getGraphBefore(taskKey: TaskKey.Root) = graphsBefore.filter { taskKey in it }
-                .singleOrEmpty()
-                ?: emptySet()
-
-            fun getGraphAfter(taskKey: TaskKey.Root) = graphsAfter.single { taskKey in it }
-
-            rootTaskDatasAfter.forEach { (taskKey, taskData) ->
-                val (task, keysToOmitAfter) = taskData
-
-                val taskKeysBefore = getGraphBefore(taskKey) - rootTaskDatasBefore[taskKey]?.keysToOmit.orEmpty()
-                val taskKeysAfter = getGraphAfter(taskKey) - keysToOmitAfter
-
-                if (taskKeysBefore == taskKeysAfter) return@forEach
-
-                val addedTaskKeys = taskKeysAfter - taskKeysBefore
-                val removedTaskKeys = taskKeysBefore - taskKeysAfter
-
-                val delegate = task.taskRecord.rootTaskParentDelegate
-
-                addedTaskKeys.forEach(delegate::addRootTaskKey)
-                removedTaskKeys.forEach(delegate::removeRootTaskKey)
-
-                rootTaskProvider.updateTaskRecord(taskKey, taskKeysAfter)
-            }
-
-            getProjects().forEach { (projectKey, project) ->
-                val taskKeysBefore = mapBefore.getOrElse(projectKey) { emptyList() }
-                    .map { task -> getGraphBefore(task.taskKey) }
-                    .flatten()
-                    .toSet()
-
-                val taskKeysAfter = mapAfter.getOrElse(projectKey) { emptyList() }
-                    .map { task -> getGraphAfter(task.taskKey) }
-                    .flatten()
-                    .toSet()
-
-                if (taskKeysBefore == taskKeysAfter) return@forEach
-
-                val addedTaskKeys = taskKeysAfter - taskKeysBefore
-                val removedTaskKeys = taskKeysBefore - taskKeysAfter
-
-                val delegate = project.projectRecord.rootTaskParentDelegate
-
-                addedTaskKeys.forEach(delegate::addRootTaskKey)
-                removedTaskKeys.forEach(delegate::removeRootTaskKey)
-
-                rootTaskProvider.updateProjectRecord(projectKey, taskKeysAfter)
-            }
-
-            checkNotNull(instance)
-
-            instance = null
-
-            return result
         }
 
         private fun getProjectTaskMap(rootTasks: Map<TaskKey.Root, RootTask>) =

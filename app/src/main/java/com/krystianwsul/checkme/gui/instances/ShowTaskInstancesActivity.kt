@@ -113,7 +113,7 @@ class ShowTaskInstancesActivity : AbstractActivity(), GroupListListener {
 
         savedInstanceState?.apply { page = getInt(KEY_PAGE) }
 
-        binding.groupListFragment.setFab(bottomFabMenuDelegate.fabDelegate)
+        binding.groupListFragment.setVisible(bottomFabMenuDelegate.fabDelegate)
 
         binding.showNotificationGroupToolbarCollapseInclude
             .collapseAppBarLayout

@@ -8,7 +8,7 @@ import com.krystianwsul.checkme.domainmodel.extensions.setInstancesNotNotified
 import com.krystianwsul.checkme.domainmodel.extensions.undoInstancesAddHour
 import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
 import com.krystianwsul.checkme.gui.base.SnackbarListener
-import com.krystianwsul.checkme.gui.instances.EditInstancesFragment
+import com.krystianwsul.checkme.gui.instances.edit.SnackbarEditInstancesHostDelegate
 import com.krystianwsul.checkme.viewmodels.DataId
 import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.InstanceKey
@@ -88,7 +88,7 @@ object GroupMenuUtils {
             .subscribe()
     }
 
-    fun onEdit(selectedDatas: SelectedDatas, snackbarHostDelegate: EditInstancesFragment.SnackbarHostDelegate) {
+    fun onEdit(selectedDatas: SelectedDatas, snackbarHostDelegate: SnackbarEditInstancesHostDelegate) {
         check(selectedDatas.isNotEmpty())
 
         snackbarHostDelegate.show(selectedDatas.map { (it as GroupListDataWrapper.InstanceData).instanceKey })

@@ -26,7 +26,7 @@ import com.krystianwsul.checkme.domainmodel.extensions.*
 import com.krystianwsul.checkme.gui.base.AbstractActivity
 import com.krystianwsul.checkme.gui.edit.EditActivity
 import com.krystianwsul.checkme.gui.edit.EditParameters
-import com.krystianwsul.checkme.gui.instances.EditInstancesFragment
+import com.krystianwsul.checkme.gui.instances.edit.SnackbarEditInstancesHostDelegate
 import com.krystianwsul.checkme.gui.instances.tree.*
 import com.krystianwsul.checkme.gui.main.FabUser
 import com.krystianwsul.checkme.gui.main.SubtaskMenuDelegate
@@ -523,8 +523,6 @@ class GroupListFragment @JvmOverloads constructor(
 
         activity.startTicks(receiver)
 
-        editInstancesHostDelegate.onCreate()
-
         searchDataManager.treeViewAdapterSingle
             .flatMapObservable { it.updates }
             .subscribe {
@@ -625,6 +623,13 @@ class GroupListFragment @JvmOverloads constructor(
         }
     }
 
+    fun setVisible(fabDelegate: BottomFabMenuDelegate.FabDelegate) {
+        setFab(fabDelegate)
+
+        editInstancesHostDelegate.onCreate()
+    }
+
+    // only call internally
     override fun setFab(fabDelegate: BottomFabMenuDelegate.FabDelegate) {
         this.fabDelegate = fabDelegate
 
@@ -840,7 +845,9 @@ class GroupListFragment @JvmOverloads constructor(
     }
 
     private inner class EditInstancesSnackbarHostDelegate :
-        EditInstancesFragment.SnackbarHostDelegate(attachedToWindowDisposable) {
+        SnackbarEditInstancesHostDelegate(attachedToWindowDisposable) {
+
+        override val tag = "groupListEditInstances"
 
         override val dataId get() = parameters.dataId
 

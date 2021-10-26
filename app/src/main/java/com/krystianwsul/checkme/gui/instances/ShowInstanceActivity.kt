@@ -16,6 +16,7 @@ import com.krystianwsul.checkme.gui.base.AbstractActivity
 import com.krystianwsul.checkme.gui.dialogs.RemoveInstancesDialogFragment
 import com.krystianwsul.checkme.gui.edit.EditActivity
 import com.krystianwsul.checkme.gui.edit.EditParameters
+import com.krystianwsul.checkme.gui.instances.edit.EditInstancesHostDelegate
 import com.krystianwsul.checkme.gui.instances.list.GroupListListener
 import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
@@ -124,7 +125,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
 
     private lateinit var bottomFabMenuDelegate: BottomFabMenuDelegate
 
-    private val editInstancesHostDelegate = object : EditInstancesFragment.HostDelegate() {
+    private val editInstancesHostDelegate = object : EditInstancesHostDelegate() {
 
         override val dataId get() = showInstanceViewModel.dataId
 
@@ -210,7 +211,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
 
         initBottomBar()
 
-        binding.groupListFragment.setFab(bottomFabMenuDelegate.fabDelegate)
+        binding.groupListFragment.setVisible(bottomFabMenuDelegate.fabDelegate)
 
         instanceKey = (savedInstanceState ?: intent.extras)?.getParcelable(INSTANCE_KEY) ?: return
 

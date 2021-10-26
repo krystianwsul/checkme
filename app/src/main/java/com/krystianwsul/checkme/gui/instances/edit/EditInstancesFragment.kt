@@ -1,4 +1,4 @@
-package com.krystianwsul.checkme.gui.instances
+package com.krystianwsul.checkme.gui.instances.edit
 
 import android.animation.ValueAnimator
 import android.annotation.SuppressLint
@@ -24,12 +24,9 @@ import com.krystianwsul.checkme.databinding.FragmentEditInstancesBinding
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.extensions.setInstancesDateTime
 import com.krystianwsul.checkme.domainmodel.extensions.setInstancesParent
-import com.krystianwsul.checkme.domainmodel.extensions.undo
 import com.krystianwsul.checkme.domainmodel.undo.UndoData
 import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
-import com.krystianwsul.checkme.gui.base.AbstractActivity
 import com.krystianwsul.checkme.gui.base.NoCollapseBottomSheetDialogFragment
-import com.krystianwsul.checkme.gui.base.SnackbarListener
 import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimeActivity
 import com.krystianwsul.checkme.gui.dialogs.*
 import com.krystianwsul.checkme.gui.edit.dialogs.ParentPickerFragment
@@ -48,7 +45,6 @@ import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.treeadapter.FilterCriteria
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Observable
-import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.subscribeBy
 import kotlinx.parcelize.Parcelize
@@ -124,7 +120,7 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
     private val editInstancesViewModel by lazy { getViewModel<EditInstancesViewModel>() }
     private val editInstancesSearchViewModel by lazy { getViewModel<EditInstancesSearchViewModel>() }
 
-    lateinit var listener: Listener
+    private lateinit var listener: Listener
 
     private val bindingProperty = ResettableProperty<FragmentEditInstancesBinding>()
     private var binding by bindingProperty
@@ -445,6 +441,12 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
         super.onDestroyView()
     }
 
+    fun setListener(listener: Listener) {
+        check(!this::listener.isInitialized)
+
+        this.listener = listener
+    }
+
     @Parcelize
     private data class State(
         var parentInstanceData: EditInstancesViewModel.ParentInstanceData?,
@@ -464,36 +466,4 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
         fun afterEditInstances(undoData: UndoData, count: Int, newTimeStamp: TimeStamp?)
     }
 
-    abstract class HostDelegate : Listener {
-
-        companion object {
-
-            private const val TAG_EDIT_INSTANCES = "editInstances"
-        }
-
-        protected abstract val activity: AbstractActivity
-
-        fun onCreate() {
-            activity.tryGetFragment<EditInstancesFragment>(TAG_EDIT_INSTANCES)?.listener = this
-        }
-
-        fun show(instanceKeys: List<InstanceKey>) {
-            newInstance(instanceKeys).also { it.listener = this }.show(
-                activity.supportFragmentManager,
-                TAG_EDIT_INSTANCES,
-            )
-        }
-    }
-
-    abstract class SnackbarHostDelegate(private val compositeDisposable: CompositeDisposable) : HostDelegate() {
-
-        protected abstract val snackbarListener: SnackbarListener
-
-        override fun afterEditInstances(undoData: UndoData, count: Int, newTimeStamp: TimeStamp?) {
-            snackbarListener.showSnackbarHourMaybe(count)
-                .flatMapCompletable { AndroidDomainUpdater.undo(notificationType, undoData) }
-                .subscribe()
-                .addTo(compositeDisposable)
-        }
-    }
 }

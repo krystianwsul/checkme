@@ -128,7 +128,8 @@ class DayFragment @JvmOverloads constructor(
             binding.groupListFragment.onRestoreInstanceState(it)
         }
 
-        fabDelegate?.let(binding.groupListFragment::setFab)
+        // this seems redundant/obsolete, but I'll leave it for now
+        fabDelegate?.let(binding.groupListFragment::setVisible)
 
         entry = dayViewModel.getEntry(timeRange, position).apply { start() }
     }
@@ -185,11 +186,9 @@ class DayFragment @JvmOverloads constructor(
     }
 
     private fun setFab(fabDelegate: BottomFabMenuDelegate.FabDelegate) {
-        if (this.fabDelegate === fabDelegate) return
-
         this.fabDelegate = fabDelegate
 
-        binding.groupListFragment.setFab(fabDelegate)
+        binding.groupListFragment.setVisible(fabDelegate)
     }
 
     private fun clearFab() {

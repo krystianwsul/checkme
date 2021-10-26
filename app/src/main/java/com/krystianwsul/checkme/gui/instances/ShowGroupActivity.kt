@@ -15,6 +15,7 @@ import com.krystianwsul.checkme.domainmodel.undo.UndoData
 import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
 import com.krystianwsul.checkme.gui.base.AbstractActivity
 import com.krystianwsul.checkme.gui.dialogs.RemoveInstancesDialogFragment
+import com.krystianwsul.checkme.gui.instances.edit.SnackbarEditInstancesHostDelegate
 import com.krystianwsul.checkme.gui.instances.list.GroupListListener
 import com.krystianwsul.checkme.gui.instances.list.GroupListParameters
 import com.krystianwsul.checkme.gui.instances.list.GroupMenuUtils
@@ -115,7 +116,7 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
 
         parameters = intent.getParcelableExtra(KEY_PARAMETERS) ?: return
 
-        binding.groupListFragment.setFab(bottomFabMenuDelegate.fabDelegate)
+        binding.groupListFragment.setVisible(bottomFabMenuDelegate.fabDelegate)
 
         binding.showGroupToolbarCollapseInclude
             .collapseAppBarLayout
@@ -175,7 +176,7 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
         startDate(receiver)
     }
 
-    private val editInstancesHostDelegate = object : EditInstancesFragment.SnackbarHostDelegate(createDisposable) {
+    private val editInstancesHostDelegate = object : SnackbarEditInstancesHostDelegate(createDisposable) {
 
         override val dataId get() = showGroupViewModel.dataId
 

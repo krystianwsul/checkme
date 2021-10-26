@@ -1048,7 +1048,7 @@ class MainActivity :
                 friendListFragment.clearFab()
 
                 if (tabSearchState.isSearching) {
-                    binding.mainSearchGroupListFragment.setFab(bottomFabMenuDelegate.fabDelegate)
+                    binding.mainSearchGroupListFragment.setVisible(bottomFabMenuDelegate.fabDelegate)
                 } else {
                     binding.mainSearchGroupListFragment.clearFab()
                 }

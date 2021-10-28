@@ -52,7 +52,9 @@ class NotificationStorage(
             return false
 
         savedProjectNotificationKeys = projectNotificationKeys
+
         savedInstanceShownMap = instanceShownMap
+        instanceShownMap = savedInstanceShownMap.toMutableMap()
 
         rxPaperBook.write(KEY_PROJECTS, projectNotificationKeys)
             .toV3()

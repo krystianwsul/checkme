@@ -111,6 +111,9 @@
     <string name="allFutureReminders">All future reminders</string>
     <string name="joinAllFutureReminders">Join all future reminders?</string>
     <string name="justTheseReminders">Just these reminders</string>
+    <string name="addToAllReminders">Add to all reminders?</string>
+    <string name="toAllReminders">All reminders</string>
+    <string name="justToThisReminder">Just this reminder</string>
     <string name="webSearch">Web search</string>
     <string name="weeksPrefix">every</string>
     <string name="weeksSuffix">weeks</string>

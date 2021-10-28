@@ -110,6 +110,9 @@
     <string name="allFutureReminders">Wszystkie pszyszłe przypomnienia</string>
     <string name="joinAllFutureReminders">Połączyć wszystkie pszyszłe przypomnienia?</string>
     <string name="justTheseReminders">Tylko te przypomnienia</string>
+    <string name="addToAllReminders">Dodać do wszystkich przypomnień?</string>
+    <string name="toAllReminders">Do wszystkich przypomnień</string>
+    <string name="justToThisReminder">Tylko do tego przypomnienia</string>
     <string name="webSearch">Szukaj w internecie</string>
     <string name="weeksPrefix">co</string>
     <string name="weeksSuffix">tygodni</string>

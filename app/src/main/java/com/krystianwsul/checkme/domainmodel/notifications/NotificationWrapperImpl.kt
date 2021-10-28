@@ -171,7 +171,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
             MyApplication.instance,
             notificationId,
             ShowInstanceActivity.getNotificationIntent(MyApplication.instance, instanceKey),
-            PendingIntent.FLAG_UPDATE_CURRENT,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
 
         val pendingDeleteIntent = NotificationActionReceiver.newPendingIntent(
@@ -282,7 +282,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
                 MyApplication.instance,
                 ShowGroupActivity.Parameters.Project(projectData.timeStamp, projectData.projectKey),
             ),
-            PendingIntent.FLAG_UPDATE_CURRENT,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
 
         val pendingDeleteIntent = NotificationActionReceiver.newPendingIntent(
@@ -569,7 +569,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
             MyApplication.instance,
             notificationId,
             ShowNotificationGroupActivity.getIntent(MyApplication.instance),
-            PendingIntent.FLAG_UPDATE_CURRENT,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
 
         val (inboxStyle, styleHash) = getInboxStyle(groupData.items.map { it.name + it.text }, groupData.summary)
@@ -620,7 +620,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
             MyApplication.instance,
             0,
             AlarmReceiver.newIntent(),
-            PendingIntent.FLAG_UPDATE_CURRENT,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )!!
 
         alarmManager.cancel(pendingIntent)
@@ -638,7 +638,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
             MyApplication.context,
             notificationId,
             MainActivity.newIntent(),
-            PendingIntent.FLAG_UPDATE_CURRENT,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
 
         notify(

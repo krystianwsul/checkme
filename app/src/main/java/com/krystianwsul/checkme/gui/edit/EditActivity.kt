@@ -240,9 +240,7 @@ class EditActivity : NavBarActivity() {
                 1,
             ).toObservable(),
             (supportFragmentManager.findFragmentByTag(SCHEDULE_DIALOG_TAG) as? ScheduleDialogFragment)?.let {
-                Observable.just(
-                    it
-                )
+                Observable.just(it)
             }?.flatMapSingle { it.result.firstOrError() }
         ).merge()
             .subscribe { result ->
@@ -1037,7 +1035,9 @@ class EditActivity : NavBarActivity() {
                             parent?.parentKey?.let {
                                 when (it) { // there's probably a helper for this somewhere
                                     is EditViewModel.ParentKey.Project -> EditParentHint.Project(it.projectId)
-                                    is EditViewModel.ParentKey.Task -> EditParentHint.Task(it.taskKey) // todo add instance pass through original
+                                    is EditViewModel.ParentKey.Task ->
+                                        parameters.getReplacementHintForNewTask(it.taskKey)
+                                            ?: EditParentHint.Task(it.taskKey)
                                 }
                             },
                             ParentScheduleState(

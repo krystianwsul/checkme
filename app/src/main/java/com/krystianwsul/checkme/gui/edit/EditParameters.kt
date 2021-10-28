@@ -91,6 +91,8 @@ sealed class EditParameters : Parcelable {
         editActivity: EditActivity,
     ) = Single.just(getInitialEditImageState(savedEditImageState))
 
+    open fun getReplacementHintForNewTask(taskKey: TaskKey): EditParentHint.Instance? = null
+
     @Parcelize
     class Create(
         val hint: EditParentHint? = null,
@@ -100,6 +102,8 @@ sealed class EditParameters : Parcelable {
     ) : EditParameters() {
 
         override val currentParentSource get() = hint?.toCurrentParent() ?: EditViewModel.CurrentParentSource.None
+
+        override fun getReplacementHintForNewTask(taskKey: TaskKey) = hint?.getReplacementHintForNewTask(taskKey)
     }
 
     @Parcelize

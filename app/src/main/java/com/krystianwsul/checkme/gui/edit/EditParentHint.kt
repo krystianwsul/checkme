@@ -24,6 +24,8 @@ sealed class EditParentHint : Parcelable {
     abstract fun toCurrentParent(): EditViewModel.CurrentParentSource
     abstract fun toParentKey(): EditViewModel.ParentKey?
 
+    open fun getReplacementHintForNewTask(taskKey: TaskKey): Instance? = null
+
     @Parcelize
     class Schedule(val date: Date, val timePair: TimePair, private val projectKey: ProjectKey.Shared? = null) :
         EditParentHint() {
@@ -58,6 +60,8 @@ sealed class EditParentHint : Parcelable {
             EditViewModel.CurrentParentSource.Set(EditViewModel.ParentKey.Task(instanceKey.taskKey))
 
         override fun toParentKey() = EditViewModel.ParentKey.Task(instanceKey.taskKey)
+
+        override fun getReplacementHintForNewTask(taskKey: TaskKey) = this.takeIf { taskKey == instanceKey.taskKey }
     }
 
     @Parcelize

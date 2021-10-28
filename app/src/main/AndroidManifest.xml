@@ -27,10 +27,11 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
-        tools:ignore="AllowBackup,GoogleAppIndexingWarning"
+        tools:ignore="AllowBackup,GoogleAppIndexingWarning,UnusedAttribute"
         android:requestLegacyExternalStorage="true"
         tools:targetApi="q"
-        android:fullBackupContent="@xml/backup_descriptor">
+        android:fullBackupContent="@xml/backup_descriptor"
+        android:dataExtractionRules="@xml/data_extraction_rules">
 
         <activity
             android:name=".gui.main.SettingsActivity"

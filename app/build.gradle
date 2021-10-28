@@ -14,11 +14,11 @@ repositories {
 }
 
 android {
-    compileSdkVersion 30
+    compileSdkVersion 31
     defaultConfig {
         applicationId 'com.krystianwsul.checkme'
         minSdkVersion 23
-        targetSdkVersion 30
+        targetSdkVersion 31
 
         versionCode 348
         versionName "0.61.0"
@@ -82,7 +82,7 @@ dependencies {
     implementation 'com.google.android:flexbox:2.0.1'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.1'
     implementation 'androidx.preference:preference-ktx:1.1.1'
-    implementation 'androidx.sharetarget:sharetarget:1.1.0'
+    implementation 'androidx.sharetarget:sharetarget:1.2.0-beta01'
     implementation 'androidx.core:core-ktx:1.6.0'
 
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion"

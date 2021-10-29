@@ -21,6 +21,8 @@ sealed class EditParentHint : Parcelable {
 
     open val showInitialSchedule = true
 
+    open val instanceKey: InstanceKey? = null
+
     abstract fun toCurrentParent(): EditViewModel.CurrentParentSource
     abstract fun toParentKey(): EditViewModel.ParentKey?
 
@@ -52,7 +54,7 @@ sealed class EditParentHint : Parcelable {
     }
 
     @Parcelize
-    class Instance(private val instanceKey: InstanceKey) : EditParentHint() {
+    class Instance(override val instanceKey: InstanceKey) : EditParentHint() {
 
         override val showInitialSchedule get() = false
 

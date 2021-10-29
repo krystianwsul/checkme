@@ -570,13 +570,17 @@ sealed class Task(
         .filterIsInstance<Interval.Ended>()
         .forEach { it.correctEndExactTimeStamps() }
 
-    fun hasOtherVisibleInstances(now: ExactTimeStamp.Local, instanceKey: InstanceKey?) = getInstances(
-        null,
-        null,
-        now,
-    ).filter { it.instanceKey != instanceKey }
-        .filter { it.isVisible(now, Instance.VisibilityOptions()) }
-        .any()
+    fun hasOtherVisibleInstances(now: ExactTimeStamp.Local, instanceKey: InstanceKey?): Boolean {
+        instanceKey?.let { check(it.taskKey == taskKey) }
+
+        return getInstances(
+            null,
+            null,
+            now,
+        ).filter { it.instanceKey != instanceKey }
+            .filter { it.isVisible(now, Instance.VisibilityOptions()) }
+            .any()
+    }
 
     final override fun toString() = super.toString() + ", name: $name, taskKey: $taskKey"
 

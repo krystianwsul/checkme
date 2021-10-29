@@ -78,7 +78,7 @@ sealed class EditParameters : Parcelable {
         }
     }
 
-    open val startParameters: EditViewModel.StartParameters = EditViewModel.StartParameters.Create
+    open val startParameters: EditViewModel.StartParameters = EditViewModel.StartParameters.Create(null)
 
     abstract val currentParentSource: EditViewModel.CurrentParentSource
 
@@ -100,6 +100,8 @@ sealed class EditParameters : Parcelable {
         val nameHint: String? = null,
         val showFirstSchedule: Boolean = true,
     ) : EditParameters() {
+
+        override val startParameters get() = EditViewModel.StartParameters.Create(hint?.instanceKey)
 
         override val currentParentSource get() = hint?.toCurrentParent() ?: EditViewModel.CurrentParentSource.None
 

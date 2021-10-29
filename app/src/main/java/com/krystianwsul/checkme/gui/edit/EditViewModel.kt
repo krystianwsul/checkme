@@ -470,6 +470,7 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
             override val note: String?,
             override val sortKey: SortKey.TaskSortKey,
             override val projectKey: ProjectKey<*>,
+            val hasMultipleInstances: Boolean?,
         ) : ParentEntryData() {
 
             override val normalizedFields by lazy { listOfNotNull(name, note).map { it.normalized() } }
@@ -523,10 +524,11 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
     sealed interface StartParameters {
 
         val excludedTaskKeys: Set<TaskKey>
+        val parentInstanceKey: InstanceKey? get() = null
 
         fun showAllInstancesDialog(domainFactory: DomainFactory, now: ExactTimeStamp.Local): Boolean? = null
 
-        object Create : StartParameters {
+        class Create(override val parentInstanceKey: InstanceKey?) : StartParameters {
 
             override val excludedTaskKeys = setOf<TaskKey>()
         }

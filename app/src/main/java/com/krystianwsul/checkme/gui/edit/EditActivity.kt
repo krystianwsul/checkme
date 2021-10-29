@@ -1059,9 +1059,7 @@ class EditActivity : NavBarActivity() {
                 .parent
                 ?.let { parent ->
                     { entryData: ParentPickerFragment.EntryData ->
-                        val parentTreeData = entryData as EditViewModel.ParentTreeData
-
-                        parentTreeData.entryKey == parent.parentKey
+                        (entryData as EditViewModel.ParentEntryData).entryKey == parent.parentKey
                     }
                 }
         }
@@ -1069,7 +1067,7 @@ class EditActivity : NavBarActivity() {
         override fun onEntrySelected(entryData: ParentPickerFragment.EntryData) {
             editViewModel.delegate
                 .parentScheduleManager
-                .parent = (entryData as EditViewModel.ParentTreeData).toParent()
+                .parent = (entryData as EditViewModel.ParentEntryData).toParent()
         }
 
         override fun onEntryDeleted() {

@@ -640,14 +640,14 @@ fun DomainUpdater.createJoinTopLevelTask(
 private fun DomainFactory.getParentTreeDatas(
     now: ExactTimeStamp.Local,
     excludedTaskKeys: Set<TaskKey>,
-): List<EditViewModel.ParentTreeData> {
-    val parentTreeDatas = mutableListOf<EditViewModel.ParentTreeData>()
+): List<EditViewModel.ParentEntryData> {
+    val parentTreeDatas = mutableListOf<EditViewModel.ParentEntryData>()
 
     parentTreeDatas += getAllTasks().asSequence()
         .filter { it.showAsParent(now, excludedTaskKeys) }
         .filter { it.isTopLevelTask(now) && (it.project as? SharedProject)?.notDeleted != true }
         .map {
-            EditViewModel.ParentTreeData(
+            EditViewModel.ParentEntryData.Task(
                 it.name,
                 getTaskListChildTaskDatas(now, it, excludedTaskKeys),
                 EditViewModel.ParentKey.Task(it.taskKey),
@@ -664,7 +664,7 @@ private fun DomainFactory.getParentTreeDatas(
         .asSequence()
         .filter { it.notDeleted }
         .map {
-            EditViewModel.ParentTreeData(
+            EditViewModel.ParentEntryData.Project(
                 it.name,
                 getProjectTaskTreeDatas(now, it, excludedTaskKeys),
                 EditViewModel.ParentKey.Project(it.projectKey),
@@ -683,12 +683,12 @@ private fun DomainFactory.getProjectTaskTreeDatas(
     now: ExactTimeStamp.Local,
     project: Project<*>,
     excludedTaskKeys: Set<TaskKey>,
-): List<EditViewModel.ParentTreeData> {
+): List<EditViewModel.ParentEntryData> {
     return project.getAllTasks()
         .filter { it.showAsParent(now, excludedTaskKeys) }
         .filter { it.isTopLevelTask(now) }
         .map {
-            EditViewModel.ParentTreeData(
+            EditViewModel.ParentEntryData.Task(
                 it.name,
                 getTaskListChildTaskDatas(now, it, excludedTaskKeys),
                 EditViewModel.ParentKey.Task(it.taskKey),
@@ -781,13 +781,13 @@ private fun DomainFactory.getTaskListChildTaskDatas(
     now: ExactTimeStamp.Local,
     parentTask: Task,
     excludedTaskKeys: Set<TaskKey>,
-): List<EditViewModel.ParentTreeData> =
+): List<EditViewModel.ParentEntryData> =
     parentTask.getChildTaskHierarchies(now)
         .asSequence()
         .map { it.childTask }
         .filter { it.showAsParent(now, excludedTaskKeys) }
         .map { childTask ->
-            EditViewModel.ParentTreeData(
+            EditViewModel.ParentEntryData.Task(
                 childTask.name,
                 getTaskListChildTaskDatas(now, childTask, excludedTaskKeys),
                 EditViewModel.ParentKey.Task(childTask.taskKey),

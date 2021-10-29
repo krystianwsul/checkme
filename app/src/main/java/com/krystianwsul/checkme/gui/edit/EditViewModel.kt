@@ -73,8 +73,8 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
     val mainData get() = mainDomainListener.data
     val parentPickerData get() = parentPickerDomainListener.data
 
-    private val editImageStateRelay = BehaviorRelay.create<EditImageState>()!!
-    val editImageStateObservable = editImageStateRelay.hide()!!
+    private val editImageStateRelay = BehaviorRelay.create<EditImageState>()
+    val editImageStateObservable = editImageStateRelay.hide()
     val editImageState get() = editImageStateRelay.value!!
 
     lateinit var delegate: EditDelegate
@@ -408,7 +408,7 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
         val currentParent: ParentScheduleManager.Parent?,
     ) : DomainData()
 
-    data class ParentPickerData(val parentTreeDatas: List<ParentTreeData>) : DomainData()
+    data class ParentPickerData(val parentTreeDatas: List<ParentEntryData>) : DomainData()
 
     data class CustomTimeData(
         val customTimeKey: CustomTimeKey,
@@ -428,26 +428,53 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
         val isRootTask: Boolean,
     )
 
-    data class ParentTreeData(
-        override val name: String,
-        override val childEntryDatas: List<ParentTreeData>,
-        override val entryKey: ParentKey,
-        override val details: String?,
-        override val note: String?,
-        override val sortKey: SortKey,
-        val projectUsers: Map<UserKey, UserData>,
-        private val projectKey: ProjectKey<*>,
-    ) : ParentPickerFragment.EntryData {
+    sealed class ParentEntryData : ParentPickerFragment.EntryData {
 
-        override val normalizedFields by lazy { listOfNotNull(name, note).map { it.normalized() } }
+        abstract fun toParent(): ParentScheduleManager.Parent
 
-        override fun normalize() {
-            normalizedFields
+        data class Project(
+            override val name: String,
+            override val childEntryDatas: List<ParentEntryData>,
+            override val entryKey: ParentKey,
+            override val details: String?,
+            override val note: String?,
+            override val sortKey: SortKey,
+            private val projectUsers: Map<UserKey, UserData>,
+            private val projectKey: ProjectKey<*>,
+        ) : ParentEntryData() {
+
+            override val normalizedFields by lazy { listOfNotNull(name, note).map { it.normalized() } }
+
+            override fun normalize() {
+                normalizedFields
+            }
+
+            override fun matchesTaskKey(taskKey: TaskKey) = (entryKey as? ParentKey.Task)?.taskKey == taskKey
+
+            override fun toParent() = ParentScheduleManager.Parent(name, entryKey, projectUsers, projectKey)
         }
 
-        override fun matchesTaskKey(taskKey: TaskKey) = (entryKey as? ParentKey.Task)?.taskKey == taskKey
+        data class Task(
+            override val name: String,
+            override val childEntryDatas: List<ParentEntryData>,
+            override val entryKey: ParentKey,
+            override val details: String?,
+            override val note: String?,
+            override val sortKey: SortKey,
+            private val projectUsers: Map<UserKey, UserData>,
+            private val projectKey: ProjectKey<*>,
+        ) : ParentEntryData() {
 
-        fun toParent() = ParentScheduleManager.Parent(name, entryKey, projectUsers, projectKey)
+            override val normalizedFields by lazy { listOfNotNull(name, note).map { it.normalized() } }
+
+            override fun normalize() {
+                normalizedFields
+            }
+
+            override fun matchesTaskKey(taskKey: TaskKey) = (entryKey as? ParentKey.Task)?.taskKey == taskKey
+
+            override fun toParent() = ParentScheduleManager.Parent(name, entryKey, projectUsers, projectKey)
+        }
     }
 
     sealed class ParentKey : Parcelable {

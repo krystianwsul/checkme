@@ -1037,7 +1037,7 @@ class EditActivity : NavBarActivity() {
                             parent?.parentKey?.let {
                                 when (it) { // there's probably a helper for this somewhere
                                     is EditViewModel.ParentKey.Project -> EditParentHint.Project(it.projectId)
-                                    is EditViewModel.ParentKey.Task -> EditParentHint.Task(it.taskKey)
+                                    is EditViewModel.ParentKey.Task -> EditParentHint.Task(it.taskKey) // todo add instance pass through original
                                 }
                             },
                             ParentScheduleState(

@@ -207,7 +207,7 @@ class GroupListFragment @JvmOverloads constructor(
                     }
 
                     val hint = if (parameters is GroupListParameters.InstanceKey) {
-                        EditParentHint.Task((parameters as GroupListParameters.InstanceKey).instanceKey.taskKey)
+                        EditParentHint.Instance((parameters as GroupListParameters.InstanceKey).instanceKey)
                     } else {
                         selectedDatas.filterIsInstance<GroupListDataWrapper.InstanceData>()
                             .minByOrNull { it.instanceTimeStamp }
@@ -683,7 +683,7 @@ class GroupListFragment @JvmOverloads constructor(
 
                             listener.showFabMenu(instanceData!!.run {
                                 SubtaskMenuDelegate(
-                                    taskKey.takeIf { canAddSubtask },
+                                    instanceKey.takeIf { canAddSubtask },
                                     instanceDateTime.date,
                                     createTaskTimePair,
                                     instanceData.projectKey,
@@ -692,7 +692,8 @@ class GroupListFragment @JvmOverloads constructor(
                             })
                         }
                         canAddSubtask -> getStartEditActivityFabState(
-                            EditParentHint.Task(singleSelectedData.taskKey),
+                            instanceData?.let { EditParentHint.Instance(it.instanceKey) }
+                                ?: EditParentHint.Task(singleSelectedData.taskKey),
                             true,
                         )
                         canAddToTime -> getStartEditActivityFabState(listOf(instanceData!!).getHint(), true)
@@ -759,7 +760,7 @@ class GroupListFragment @JvmOverloads constructor(
                     FabState.Hidden
                 }
                 is GroupListParameters.InstanceKey -> if (parameters.groupListDataWrapper.taskEditable!!)
-                    getStartEditActivityFabState(EditParentHint.Task(parameters.instanceKey.taskKey))
+                    getStartEditActivityFabState(EditParentHint.Instance(parameters.instanceKey))
                 else
                     FabState.Hidden
                 is GroupListParameters.Parent -> parameters.projectKey

@@ -180,8 +180,8 @@ abstract class EditDelegate(
 
     fun setParentTask(taskKey: TaskKey) = storeParentKey(EditViewModel.ParentKey.Task(taskKey), true)
 
-    fun createTask(createParameters: CreateParameters): Single<CreateResult> {
-        check(createParameters.allReminders || showAllRemindersDialog() != null)
+    fun createTask(createParameters: CreateParameters, allReminders: Boolean?): Single<CreateResult> {
+        check((allReminders != null) == (showAllRemindersDialog() != null))
 
         val projectId = (parentScheduleManager.parent?.parentKey as? EditViewModel.ParentKey.Project)?.projectId
         val assignedTo = parentScheduleManager.assignedTo
@@ -199,9 +199,11 @@ abstract class EditDelegate(
                 createParameters,
                 parentScheduleManager.schedules.map { it.scheduleDataWrapper.scheduleData },
                 sharedProjectParameters,
+                allReminders,
             )
             parentScheduleManager.parent?.parentKey is EditViewModel.ParentKey.Task -> {
                 check(sharedProjectParameters == null)
+                check(allReminders == null)
 
                 val parentTaskKey = (parentScheduleManager.parent!!.parentKey as EditViewModel.ParentKey.Task).taskKey
 
@@ -209,6 +211,7 @@ abstract class EditDelegate(
             }
             else -> {
                 check(assignedTo.isEmpty())
+                check(allReminders == null)
 
                 createTaskWithoutReminder(createParameters, projectId)
             }
@@ -219,6 +222,7 @@ abstract class EditDelegate(
         createParameters: CreateParameters,
         scheduleDatas: List<ScheduleData>,
         sharedProjectParameters: SharedProjectParameters?,
+        allReminders: Boolean?,
     ): Single<CreateResult>
 
     abstract fun createTaskWithParent(createParameters: CreateParameters, parentTaskKey: TaskKey): Single<CreateResult>
@@ -233,12 +237,11 @@ abstract class EditDelegate(
     class CreateParameters(
         val name: String,
         val note: String?,
-        val allReminders: Boolean,
         val imagePath: Pair<String, Uri>?,
     ) {
 
         // todo add image make default params
-        constructor(name: String) : this(name, null, true, null)
+        constructor(name: String) : this(name, null, null)
     }
 
     enum class ScheduleError(@StringRes val resource: Int) {

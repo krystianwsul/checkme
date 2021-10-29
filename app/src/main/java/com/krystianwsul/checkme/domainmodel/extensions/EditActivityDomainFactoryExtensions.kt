@@ -373,7 +373,7 @@ fun DomainUpdater.updateChildTask(
     createParameters: EditDelegate.CreateParameters,
     parentTaskKey: TaskKey,
     removeInstanceKey: InstanceKey?,
-    allReminders: Boolean,
+    allReminders: Boolean = true,
 ): Single<TaskKey.Root> = SingleDomainUpdate.create("updateChildTask") { now ->
     check(createParameters.name.isNotEmpty())
 

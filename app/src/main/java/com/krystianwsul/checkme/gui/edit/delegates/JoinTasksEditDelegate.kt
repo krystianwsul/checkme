@@ -16,11 +16,11 @@ import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 
 class JoinTasksEditDelegate(
-        private val parameters: EditParameters.Join,
-        override var data: EditViewModel.MainData,
-        savedInstanceState: Bundle?,
-        compositeDisposable: CompositeDisposable,
-        storeParentKey: (EditViewModel.ParentKey?, Boolean) -> Unit,
+    private val parameters: EditParameters.Join,
+    override var data: EditViewModel.MainData,
+    savedInstanceState: Bundle?,
+    compositeDisposable: CompositeDisposable,
+    storeParentKey: (EditViewModel.ParentKey?, Boolean) -> Unit,
 ) : EditDelegate(compositeDisposable, storeParentKey) {
 
     override val scheduleHint = parameters.hint?.toScheduleHint()
@@ -39,17 +39,17 @@ class JoinTasksEditDelegate(
     }
 
     override val parentScheduleManager = ParentMultiScheduleManager(
-            savedInstanceState,
-            this::initialStateGetter,
-            callbacks,
+        savedInstanceState,
+        this::initialStateGetter,
+        callbacks,
     )
 
     override fun showAllRemindersDialog(): Boolean? {
         if (!data.showAllInstancesDialog!!) return null
 
         val schedule = parentScheduleManager.schedules
-                .singleOrNull()
-                ?: return null
+            .singleOrNull()
+            ?: return null
 
         return if (schedule.scheduleDataWrapper.scheduleData is ScheduleData.Single)
             true
@@ -58,9 +58,10 @@ class JoinTasksEditDelegate(
     }
 
     override fun createTaskWithSchedule(
-            createParameters: CreateParameters,
-            scheduleDatas: List<ScheduleData>,
-            sharedProjectParameters: SharedProjectParameters?,
+        createParameters: CreateParameters,
+        scheduleDatas: List<ScheduleData>,
+        sharedProjectParameters: SharedProjectParameters?,
+        allReminders: Boolean?,
     ): Single<CreateResult> {
         return AndroidDomainUpdater.createScheduleJoinTopLevelTask(
             DomainListenerManager.NotificationType.All,
@@ -68,19 +69,17 @@ class JoinTasksEditDelegate(
             scheduleDatas,
             parameters.joinables,
             sharedProjectParameters,
-            createParameters.allReminders,
+            allReminders != false,
         )
-                .observeOn(AndroidSchedulers.mainThread())
-                .toCreateResult()
-                .applyCreatedTaskKey()
+            .observeOn(AndroidSchedulers.mainThread())
+            .toCreateResult()
+            .applyCreatedTaskKey()
     }
 
     override fun createTaskWithParent(
-            createParameters: CreateParameters,
-            parentTaskKey: TaskKey,
+        createParameters: CreateParameters,
+        parentTaskKey: TaskKey,
     ): Single<CreateResult> {
-        check(createParameters.allReminders)
-
         return AndroidDomainUpdater.createJoinChildTask(
             DomainListenerManager.NotificationType.All,
             parentTaskKey,
@@ -88,17 +87,15 @@ class JoinTasksEditDelegate(
             taskKeys,
             instanceKeys,
         )
-                .observeOn(AndroidSchedulers.mainThread())
-                .toCreateResult()
-                .applyCreatedTaskKey()
+            .observeOn(AndroidSchedulers.mainThread())
+            .toCreateResult()
+            .applyCreatedTaskKey()
     }
 
     override fun createTaskWithoutReminder(
-            createParameters: CreateParameters,
-            sharedProjectKey: ProjectKey.Shared?,
+        createParameters: CreateParameters,
+        sharedProjectKey: ProjectKey.Shared?,
     ): Single<CreateResult> {
-        check(createParameters.allReminders)
-
         return AndroidDomainUpdater.createJoinTopLevelTask(
             DomainListenerManager.NotificationType.All,
             createParameters,
@@ -106,8 +103,8 @@ class JoinTasksEditDelegate(
             sharedProjectKey,
             instanceKeys,
         )
-                .observeOn(AndroidSchedulers.mainThread())
-                .toCreateResult()
-                .applyCreatedTaskKey()
+            .observeOn(AndroidSchedulers.mainThread())
+            .toCreateResult()
+            .applyCreatedTaskKey()
     }
 }

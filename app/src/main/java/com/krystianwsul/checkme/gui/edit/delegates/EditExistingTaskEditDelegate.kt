@@ -45,8 +45,9 @@ class EditExistingTaskEditDelegate(
         createParameters: CreateParameters,
         scheduleDatas: List<ScheduleData>,
         sharedProjectParameters: SharedProjectParameters?,
+        allReminders: Boolean?,
     ): Single<CreateResult> {
-        check(createParameters.allReminders)
+        check(allReminders == null)
 
         return AndroidDomainUpdater.updateScheduleTask(
             DomainListenerManager.NotificationType.All,
@@ -69,7 +70,6 @@ class EditExistingTaskEditDelegate(
             createParameters,
             parentTaskKey,
             parameters.openedFromInstanceKey,
-            createParameters.allReminders,
         )
             .observeOn(AndroidSchedulers.mainThread())
             .toCreateResult()
@@ -79,8 +79,6 @@ class EditExistingTaskEditDelegate(
         createParameters: CreateParameters,
         sharedProjectKey: ProjectKey.Shared?,
     ): Single<CreateResult> {
-        check(createParameters.allReminders)
-
         return AndroidDomainUpdater.updateTopLevelTask(
             DomainListenerManager.NotificationType.All,
             parameters.taskKey,

@@ -180,7 +180,7 @@ class EditActivity : NavBarActivity() {
                     .apply { listener = allRemindersListener }
                     .show(supportFragmentManager, TAG_ALL_REMINDERS)
             } else {
-                save(andOpen, true)
+                save(andOpen)
             }
         }
 
@@ -457,7 +457,7 @@ class EditActivity : NavBarActivity() {
         }
     }
 
-    private fun save(andOpen: Boolean, allReminders: Boolean) {
+    private fun save(andOpen: Boolean, allReminders: Boolean? = null) {
         val name = binding.editToolbarEditTextInclude
             .toolbarEditText
             .text
@@ -471,14 +471,13 @@ class EditActivity : NavBarActivity() {
         val createParameters = EditDelegate.CreateParameters(
             name,
             note,
-            allReminders,
             editViewModel.editImageState
                 .writeImagePath
                 ?.value,
         )
 
         editViewModel.delegate
-            .createTask(createParameters)
+            .createTask(createParameters, allReminders)
             .subscribeBy {
                 if (andOpen) startActivity(it.intent)
 

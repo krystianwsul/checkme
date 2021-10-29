@@ -24,11 +24,12 @@ class CopyExistingTaskEditDelegate(
 ) : ExistingTaskEditDelegate(data, savedInstanceState, compositeDisposable, storeParentKey) {
 
     override fun createTaskWithSchedule(
-            createParameters: CreateParameters,
-            scheduleDatas: List<ScheduleData>,
-            sharedProjectParameters: SharedProjectParameters?,
+        createParameters: CreateParameters,
+        scheduleDatas: List<ScheduleData>,
+        sharedProjectParameters: SharedProjectParameters?,
+        allReminders: Boolean?,
     ): Single<CreateResult> {
-        check(createParameters.allReminders)
+        check(allReminders == null)
 
         return AndroidDomainUpdater.createScheduleTopLevelTask(
             DomainListenerManager.NotificationType.All,
@@ -45,8 +46,6 @@ class CopyExistingTaskEditDelegate(
             createParameters: CreateParameters,
             parentTaskKey: TaskKey,
     ): Single<CreateResult> {
-        check(createParameters.allReminders)
-
         return AndroidDomainUpdater.createChildTask(
             DomainListenerManager.NotificationType.All,
             parentTaskKey,
@@ -61,8 +60,6 @@ class CopyExistingTaskEditDelegate(
             createParameters: CreateParameters,
             sharedProjectKey: ProjectKey.Shared?,
     ): Single<CreateResult> {
-        check(createParameters.allReminders)
-
         return AndroidDomainUpdater.createTopLevelTask(
             DomainListenerManager.NotificationType.All,
             createParameters,

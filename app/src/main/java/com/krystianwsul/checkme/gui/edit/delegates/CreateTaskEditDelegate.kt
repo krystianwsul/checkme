@@ -118,8 +118,9 @@ class CreateTaskEditDelegate(
         createParameters: CreateParameters,
         scheduleDatas: List<ScheduleData>,
         sharedProjectParameters: SharedProjectParameters?,
+        allReminders: Boolean?,
     ): Single<CreateResult> {
-        check(createParameters.allReminders)
+        check(allReminders == null)
 
         return AndroidDomainUpdater.createScheduleTopLevelTask(
             DomainListenerManager.NotificationType.All,
@@ -135,8 +136,6 @@ class CreateTaskEditDelegate(
             createParameters: CreateParameters,
             parentTaskKey: TaskKey,
     ): Single<CreateResult> {
-        check(createParameters.allReminders)
-
         if (parameters is EditParameters.Share) ShortcutManager.addShortcut(parentTaskKey)
 
         return AndroidDomainUpdater.createChildTask(
@@ -152,8 +151,6 @@ class CreateTaskEditDelegate(
             createParameters: CreateParameters,
             sharedProjectKey: ProjectKey.Shared?,
     ): Single<CreateResult> {
-        check(createParameters.allReminders)
-
         return AndroidDomainUpdater.createTopLevelTask(
             DomainListenerManager.NotificationType.All,
             createParameters,

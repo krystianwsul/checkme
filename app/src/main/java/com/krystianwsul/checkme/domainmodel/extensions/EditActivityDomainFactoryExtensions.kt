@@ -667,12 +667,8 @@ private fun DomainFactory.getParentTreeDatas(
             EditViewModel.ParentEntryData.Project(
                 it.name,
                 getProjectTaskTreeDatas(now, it, excludedTaskKeys),
-                EditViewModel.ParentKey.Project(it.projectKey),
-                it.users.joinToString(", ") { it.name },
-                null,
-                EditViewModel.SortKey.ProjectSortKey(it.projectKey),
-                it.users.toUserDatas(),
                 it.projectKey,
+                it.users.toUserDatas(),
             )
         }
 
@@ -683,7 +679,7 @@ private fun DomainFactory.getProjectTaskTreeDatas(
     now: ExactTimeStamp.Local,
     project: Project<*>,
     excludedTaskKeys: Set<TaskKey>,
-): List<EditViewModel.ParentEntryData> {
+): List<EditViewModel.ParentEntryData.Task> {
     return project.getAllTasks()
         .filter { it.showAsParent(now, excludedTaskKeys) }
         .filter { it.isTopLevelTask(now) }
@@ -781,7 +777,7 @@ private fun DomainFactory.getTaskListChildTaskDatas(
     now: ExactTimeStamp.Local,
     parentTask: Task,
     excludedTaskKeys: Set<TaskKey>,
-): List<EditViewModel.ParentEntryData> =
+): List<EditViewModel.ParentEntryData.Task> =
     parentTask.getChildTaskHierarchies(now)
         .asSequence()
         .map { it.childTask }

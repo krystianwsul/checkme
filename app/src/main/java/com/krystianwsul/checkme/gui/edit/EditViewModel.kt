@@ -430,33 +430,39 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
 
     sealed class ParentEntryData : ParentPickerFragment.EntryData {
 
+        abstract override val childEntryDatas: Collection<Task>
+
         abstract fun toParent(): ParentScheduleManager.Parent
 
         data class Project(
             override val name: String,
-            override val childEntryDatas: List<ParentEntryData>,
-            override val entryKey: ParentKey,
-            override val details: String?,
-            override val note: String?,
-            override val sortKey: SortKey,
+            override val childEntryDatas: List<Task>,
+            private val projectKey: ProjectKey.Shared,
             private val projectUsers: Map<UserKey, UserData>,
-            private val projectKey: ProjectKey<*>,
         ) : ParentEntryData() {
 
             override val normalizedFields by lazy { listOfNotNull(name, note).map { it.normalized() } }
+
+            override val entryKey = ParentKey.Project(projectKey)
+
+            override val details = projectUsers.values.joinToString(", ") { it.name }
+
+            override val note: String? = null
+
+            override val sortKey = SortKey.ProjectSortKey(projectKey)
 
             override fun normalize() {
                 normalizedFields
             }
 
-            override fun matchesTaskKey(taskKey: TaskKey) = (entryKey as? ParentKey.Task)?.taskKey == taskKey
+            override fun matchesTaskKey(taskKey: TaskKey) = false
 
             override fun toParent() = ParentScheduleManager.Parent(name, entryKey, projectUsers, projectKey)
         }
 
         data class Task(
             override val name: String,
-            override val childEntryDatas: List<ParentEntryData>,
+            override val childEntryDatas: List<Task>,
             override val entryKey: ParentKey,
             override val details: String?,
             override val note: String?,

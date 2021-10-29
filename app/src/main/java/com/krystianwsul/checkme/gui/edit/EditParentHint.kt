@@ -4,6 +4,7 @@ import android.os.Parcelable
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.time.TimePair
+import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
 import kotlinx.parcelize.Parcelize
@@ -46,6 +47,17 @@ sealed class EditParentHint : Parcelable {
             EditViewModel.CurrentParentSource.Set(EditViewModel.ParentKey.Task(taskKey))
 
         override fun toParentKey() = EditViewModel.ParentKey.Task(taskKey)
+    }
+
+    @Parcelize
+    class Instance(private val instanceKey: InstanceKey) : EditParentHint() {
+
+        override val showInitialSchedule get() = false
+
+        override fun toCurrentParent() =
+            EditViewModel.CurrentParentSource.Set(EditViewModel.ParentKey.Task(instanceKey.taskKey))
+
+        override fun toParentKey() = EditViewModel.ParentKey.Task(instanceKey.taskKey)
     }
 
     @Parcelize

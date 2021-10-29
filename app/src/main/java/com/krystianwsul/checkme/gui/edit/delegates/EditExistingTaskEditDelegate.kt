@@ -55,7 +55,7 @@ class EditExistingTaskEditDelegate(
             scheduleDatas,
             createParameters.note,
             sharedProjectParameters,
-            createParameters.editImageState.writeImagePath,
+            createParameters.imagePath,
         )
             .observeOn(AndroidSchedulers.mainThread())
             .toCreateResult()
@@ -71,7 +71,7 @@ class EditExistingTaskEditDelegate(
             createParameters.name,
             parentTaskKey,
             createParameters.note,
-            createParameters.editImageState.writeImagePath,
+            createParameters.imagePath,
             parameters.openedFromInstanceKey,
             createParameters.allReminders,
         )
@@ -91,7 +91,7 @@ class EditExistingTaskEditDelegate(
             createParameters.name,
             createParameters.note,
             sharedProjectKey,
-            createParameters.editImageState.writeImagePath,
+            createParameters.imagePath,
         )
             .observeOn(AndroidSchedulers.mainThread())
             .toCreateResult()

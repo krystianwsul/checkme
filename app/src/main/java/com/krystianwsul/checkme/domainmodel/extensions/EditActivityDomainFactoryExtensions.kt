@@ -13,7 +13,6 @@ import com.krystianwsul.checkme.gui.edit.delegates.EditDelegate
 import com.krystianwsul.checkme.upload.Uploader
 import com.krystianwsul.checkme.utils.newUuid
 import com.krystianwsul.checkme.viewmodels.DomainResult
-import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.domain.ScheduleGroup
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.MyCustomTime
@@ -327,12 +326,12 @@ fun DomainUpdater.updateScheduleTask(
     scheduleDatas: List<ScheduleData>,
     note: String?,
     sharedProjectParameters: EditDelegate.SharedProjectParameters?,
-    imagePath: NullableWrapper<Pair<String, Uri>>?,
+    imagePath: Pair<String, Uri>?,
 ): Single<TaskKey.Root> = SingleDomainUpdate.create("updateScheduleTask") { now ->
     check(name.isNotEmpty())
     check(scheduleDatas.isNotEmpty())
 
-    val imageUuid = imagePath?.value?.let { newUuid() }
+    val imageUuid = imagePath?.let { newUuid() }
 
     val projectKey = sharedProjectParameters?.key ?: defaultProjectKey
 
@@ -366,7 +365,7 @@ fun DomainUpdater.updateScheduleTask(
         if (imagePath != null) setImage(deviceDbInfo, imageUuid?.let { ImageState.Local(imageUuid) })
     }
 
-    imageUuid?.let { Uploader.addUpload(deviceDbInfo, finalTask.taskKey, it, imagePath.value) }
+    imageUuid?.let { Uploader.addUpload(deviceDbInfo, finalTask.taskKey, it, imagePath) }
 
     DomainUpdater.Result(
         finalTask.taskKey,
@@ -383,7 +382,7 @@ fun DomainUpdater.updateChildTask(
     name: String,
     parentTaskKey: TaskKey,
     note: String?,
-    imagePath: NullableWrapper<Pair<String, Uri>>?,
+    imagePath: Pair<String, Uri>?,
     removeInstanceKey: InstanceKey?,
     allReminders: Boolean,
 ): Single<TaskKey.Root> = SingleDomainUpdate.create("updateChildTask") { now ->
@@ -428,7 +427,7 @@ fun DomainUpdater.updateChildTask(
 
     task.setName(name, note)
 
-    val imageUuid = imagePath?.value?.let { newUuid() }
+    val imageUuid = imagePath?.let { newUuid() }
     if (imagePath != null) task.setImage(deviceDbInfo, imageUuid?.let { ImageState.Local(imageUuid) })
 
     removeInstanceKey?.let {
@@ -441,7 +440,7 @@ fun DomainUpdater.updateChildTask(
         }
     }
 
-    imageUuid?.let { Uploader.addUpload(deviceDbInfo, task.taskKey, it, imagePath.value) }
+    imageUuid?.let { Uploader.addUpload(deviceDbInfo, task.taskKey, it, imagePath) }
 
     DomainUpdater.Result(
         task.taskKey,
@@ -458,7 +457,7 @@ fun DomainUpdater.updateTopLevelTask(
     name: String,
     note: String?,
     sharedProjectKey: ProjectKey.Shared?,
-    imagePath: NullableWrapper<Pair<String, Uri>>?,
+    imagePath: Pair<String, Uri>?,
 ): Single<TaskKey.Root> = SingleDomainUpdate.create("updateTopLevelTask") { now ->
     check(name.isNotEmpty())
 
@@ -484,11 +483,11 @@ fun DomainUpdater.updateTopLevelTask(
 
     finalTask.setName(name, note)
 
-    val imageUuid = imagePath?.value?.let { newUuid() }
+    val imageUuid = imagePath?.let { newUuid() }
 
     if (imagePath != null) finalTask.setImage(deviceDbInfo, imageUuid?.let { ImageState.Local(imageUuid) })
 
-    imageUuid?.let { Uploader.addUpload(deviceDbInfo, finalTask.taskKey, it, imagePath.value) }
+    imageUuid?.let { Uploader.addUpload(deviceDbInfo, finalTask.taskKey, it, imagePath) }
 
     DomainUpdater.Result(
         finalTask.taskKey,

@@ -123,13 +123,11 @@ class CreateTaskEditDelegate(
 
         return AndroidDomainUpdater.createScheduleTopLevelTask(
             DomainListenerManager.NotificationType.All,
-                createParameters.name,
-                scheduleDatas,
-                createParameters.note,
-                sharedProjectParameters,
-                createParameters.editImageState
-                        .writeImagePath
-                        ?.value,
+            createParameters.name,
+            scheduleDatas,
+            createParameters.note,
+            sharedProjectParameters,
+            createParameters.imagePath,
         )
                 .observeOn(AndroidSchedulers.mainThread())
                 .applyCreatedTaskKey()
@@ -144,13 +142,11 @@ class CreateTaskEditDelegate(
         if (parameters is EditParameters.Share) ShortcutManager.addShortcut(parentTaskKey)
 
         return AndroidDomainUpdater.createChildTask(
-                DomainListenerManager.NotificationType.All,
-                parentTaskKey,
-                createParameters.name,
-                createParameters.note,
-                createParameters.editImageState
-                        .writeImagePath
-                        ?.value,
+            DomainListenerManager.NotificationType.All,
+            parentTaskKey,
+            createParameters.name,
+            createParameters.note,
+            createParameters.imagePath,
         )
                 .observeOn(AndroidSchedulers.mainThread())
                 .applyCreatedTaskKey()
@@ -163,13 +159,11 @@ class CreateTaskEditDelegate(
         check(createParameters.allReminders)
 
         return AndroidDomainUpdater.createTopLevelTask(
-                DomainListenerManager.NotificationType.All,
-                createParameters.name,
-                createParameters.note,
-                sharedProjectKey,
-                createParameters.editImageState
-                        .writeImagePath
-                        ?.value,
+            DomainListenerManager.NotificationType.All,
+            createParameters.name,
+            createParameters.note,
+            sharedProjectKey,
+            createParameters.imagePath,
         )
                 .observeOn(AndroidSchedulers.mainThread())
                 .applyCreatedTaskKey()

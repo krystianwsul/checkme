@@ -31,15 +31,13 @@ class CopyExistingTaskEditDelegate(
         check(createParameters.allReminders)
 
         return AndroidDomainUpdater.createScheduleTopLevelTask(
-                DomainListenerManager.NotificationType.All,
-                createParameters.name,
-                scheduleDatas,
-                createParameters.note,
-                sharedProjectParameters,
-                createParameters.editImageState
-                        .writeImagePath
-                        ?.value,
-                parameters.taskKey,
+            DomainListenerManager.NotificationType.All,
+            createParameters.name,
+            scheduleDatas,
+            createParameters.note,
+            sharedProjectParameters,
+            createParameters.imagePath,
+            parameters.taskKey,
         )
                 .observeOn(AndroidSchedulers.mainThread())
                 .applyCreatedTaskKey()
@@ -52,14 +50,12 @@ class CopyExistingTaskEditDelegate(
         check(createParameters.allReminders)
 
         return AndroidDomainUpdater.createChildTask(
-                DomainListenerManager.NotificationType.All,
-                parentTaskKey,
-                createParameters.name,
-                createParameters.note,
-                createParameters.editImageState
-                        .writeImagePath
-                        ?.value,
-                parameters.taskKey,
+            DomainListenerManager.NotificationType.All,
+            parentTaskKey,
+            createParameters.name,
+            createParameters.note,
+            createParameters.imagePath,
+            parameters.taskKey,
         )
                 .observeOn(AndroidSchedulers.mainThread())
                 .applyCreatedTaskKey()
@@ -72,14 +68,12 @@ class CopyExistingTaskEditDelegate(
         check(createParameters.allReminders)
 
         return AndroidDomainUpdater.createTopLevelTask(
-                DomainListenerManager.NotificationType.All,
-                createParameters.name,
-                createParameters.note,
-                sharedProjectKey,
-                createParameters.editImageState
-                        .writeImagePath
-                        ?.value,
-                parameters.taskKey,
+            DomainListenerManager.NotificationType.All,
+            createParameters.name,
+            createParameters.note,
+            sharedProjectKey,
+            createParameters.imagePath,
+            parameters.taskKey,
         )
                 .observeOn(AndroidSchedulers.mainThread())
                 .applyCreatedTaskKey()

@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.gui.edit.delegates
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import androidx.annotation.StringRes
 import arrow.core.curried
@@ -22,18 +23,18 @@ import io.reactivex.rxjava3.kotlin.Observables
 import io.reactivex.rxjava3.kotlin.plusAssign
 
 abstract class EditDelegate(
-        compositeDisposable: CompositeDisposable,
-        private val storeParentKey: (EditViewModel.ParentKey?, Boolean) -> Unit,
+    compositeDisposable: CompositeDisposable,
+    private val storeParentKey: (EditViewModel.ParentKey?, Boolean) -> Unit,
 ) {
 
     companion object {
 
         fun fromParameters(
-                parameters: EditParameters,
-                data: EditViewModel.MainData,
-                savedInstanceState: Bundle?,
-                compositeDisposable: CompositeDisposable,
-                storeParentKey: (EditViewModel.ParentKey?, Boolean) -> Unit,
+            parameters: EditParameters,
+            data: EditViewModel.MainData,
+            savedInstanceState: Bundle?,
+            compositeDisposable: CompositeDisposable,
+            storeParentKey: (EditViewModel.ParentKey?, Boolean) -> Unit,
         ): EditDelegate {
             return when (parameters) {
                 is EditParameters.Copy -> ::CopyExistingTaskEditDelegate.curried()(parameters)
@@ -44,8 +45,8 @@ abstract class EditDelegate(
             }(data)(savedInstanceState)(compositeDisposable)(storeParentKey)
         }
 
-        fun Single<TaskKey.Root>.toCreateResult() = map<CreateResult>(CreateResult::Task)!!
-        fun Single<CreateResult>.applyCreatedTaskKey() = doOnSuccess { EditActivity.createdTaskKey = it.taskKey }!!
+        fun Single<TaskKey.Root>.toCreateResult() = map<CreateResult>(CreateResult::Task)
+        fun Single<CreateResult>.applyCreatedTaskKey() = doOnSuccess { EditActivity.createdTaskKey = it.taskKey }
     }
 
     fun newData(data: EditViewModel.MainData) {
@@ -59,7 +60,7 @@ abstract class EditDelegate(
         override fun getInitialParent() = data.currentParent
 
         override fun storeParent(parentKey: EditViewModel.ParentKey?) =
-                this@EditDelegate.storeParentKey(parentKey, false)
+            this@EditDelegate.storeParentKey(parentKey, false)
     }
 
     protected abstract var data: EditViewModel.MainData
@@ -77,7 +78,7 @@ abstract class EditDelegate(
 
     val firstScheduleEntry by lazy {
         val (date, timePair) = scheduleHint?.let { Pair(it.date, it.timePair) }
-                ?: HourMinute.nextHour.let { Pair(it.first, TimePair(it.second)) }
+            ?: HourMinute.nextHour.let { Pair(it.first, TimePair(it.second)) }
 
         ScheduleEntry(EditViewModel.ScheduleDataWrapper.Single(ScheduleData.Single(date, timePair)))
     }
@@ -90,18 +91,18 @@ abstract class EditDelegate(
         }.map { (parent, schedules) ->
             listOf(EditActivity.Item.Parent) +
                     listOfNotNull(
-                            parent.value
-                                    ?.projectUsers
-                                    ?.takeIf { it.size > 1 && schedules.isNotEmpty() }
-                                    ?.let { EditActivity.Item.AssignTo }
+                        parent.value
+                            ?.projectUsers
+                            ?.takeIf { it.size > 1 && schedules.isNotEmpty() }
+                            ?.let { EditActivity.Item.AssignTo }
                     ) +
                     schedules.map { EditActivity.Item.Schedule(it) } +
                     EditActivity.Item.NewSchedule +
                     EditActivity.Item.Note +
                     EditActivity.Item.Image
         }
-                .replay(1)!!
-                .apply { compositeDisposable += connect() }
+            .replay(1)
+            .apply { compositeDisposable += connect() }
     }
 
     fun checkDataChanged(editImageState: EditImageState, name: String, note: String?): Boolean {
@@ -117,9 +118,9 @@ abstract class EditDelegate(
     protected open fun checkNameNoteChanged(name: String, note: String?) = name.isNotEmpty() || !note.isNullOrEmpty()
 
     protected fun checkNameNoteChanged(
-            taskData: EditViewModel.TaskData,
-            name: String,
-            note: String?,
+        taskData: EditViewModel.TaskData,
+        name: String,
+        note: String?,
     ) = name != taskData.name || note != taskData.note
 
     fun getError(scheduleEntry: ScheduleEntry): ScheduleError? {
@@ -128,21 +129,21 @@ abstract class EditDelegate(
         if (skipScheduleCheck(scheduleEntry)) return null
 
         val date = scheduleEntry.scheduleDataWrapper
-                .scheduleData
-                .date
+            .scheduleData
+            .date
 
         if (date > Date.today()) return null
 
         if (date < Date.today()) return ScheduleError.DATE
 
         val hourMinute = scheduleEntry.scheduleDataWrapper
-                .timePair
-                .run {
-                    customTimeKey?.let { data.customTimeDatas.getValue(it) }
-                            ?.hourMinutes
-                            ?.getValue(date.dayOfWeek)
-                            ?: hourMinute!!
-                }
+            .timePair
+            .run {
+                customTimeKey?.let { data.customTimeDatas.getValue(it) }
+                    ?.hourMinutes
+                    ?.getValue(date.dayOfWeek)
+                    ?: hourMinute!!
+            }
 
         if (hourMinute <= HourMinute.now) return ScheduleError.TIME
 
@@ -169,7 +170,7 @@ abstract class EditDelegate(
     }
 
     fun removeSchedule(adapterPosition: Int) =
-            parentScheduleManager.removeSchedule(adapterPosition - scheduleOffset)
+        parentScheduleManager.removeSchedule(adapterPosition - scheduleOffset)
 
     open fun showAllRemindersDialog(): Boolean? { // null = no, true/false = plural
         check(data.showAllInstancesDialog == null)
@@ -195,9 +196,9 @@ abstract class EditDelegate(
 
         return when {
             parentScheduleManager.schedules.isNotEmpty() -> createTaskWithSchedule(
-                    createParameters,
-                    parentScheduleManager.schedules.map { it.scheduleDataWrapper.scheduleData },
-                    sharedProjectParameters,
+                createParameters,
+                parentScheduleManager.schedules.map { it.scheduleDataWrapper.scheduleData },
+                sharedProjectParameters,
             )
             parentScheduleManager.parent?.parentKey is EditViewModel.ParentKey.Task -> {
                 check(sharedProjectParameters == null)
@@ -215,25 +216,25 @@ abstract class EditDelegate(
     }
 
     abstract fun createTaskWithSchedule(
-            createParameters: CreateParameters,
-            scheduleDatas: List<ScheduleData>,
-            sharedProjectParameters: SharedProjectParameters?,
+        createParameters: CreateParameters,
+        scheduleDatas: List<ScheduleData>,
+        sharedProjectParameters: SharedProjectParameters?,
     ): Single<CreateResult>
 
     abstract fun createTaskWithParent(createParameters: CreateParameters, parentTaskKey: TaskKey): Single<CreateResult>
 
     abstract fun createTaskWithoutReminder(
-            createParameters: CreateParameters,
-            sharedProjectKey: ProjectKey.Shared?,
+        createParameters: CreateParameters,
+        sharedProjectKey: ProjectKey.Shared?,
     ): Single<CreateResult>
 
     fun saveState() = parentScheduleManager.saveState()
 
     class CreateParameters(
-            val name: String,
-            val note: String?,
-            val allReminders: Boolean,
-            val editImageState: EditImageState,
+        val name: String,
+        val note: String?,
+        val allReminders: Boolean,
+        val imagePath: Pair<String, Uri>?,
     )
 
     enum class ScheduleError(@StringRes val resource: Int) {

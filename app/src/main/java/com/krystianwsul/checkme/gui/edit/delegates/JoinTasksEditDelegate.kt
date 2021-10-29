@@ -63,16 +63,14 @@ class JoinTasksEditDelegate(
             sharedProjectParameters: SharedProjectParameters?,
     ): Single<CreateResult> {
         return AndroidDomainUpdater.createScheduleJoinTopLevelTask(
-                DomainListenerManager.NotificationType.All,
-                createParameters.name,
-                scheduleDatas,
-                parameters.joinables,
-                createParameters.note,
-                sharedProjectParameters,
-                createParameters.editImageState
-                        .writeImagePath
-                        ?.value,
-                createParameters.allReminders,
+            DomainListenerManager.NotificationType.All,
+            createParameters.name,
+            scheduleDatas,
+            parameters.joinables,
+            createParameters.note,
+            sharedProjectParameters,
+            createParameters.imagePath,
+            createParameters.allReminders,
         )
                 .observeOn(AndroidSchedulers.mainThread())
                 .toCreateResult()
@@ -86,15 +84,13 @@ class JoinTasksEditDelegate(
         check(createParameters.allReminders)
 
         return AndroidDomainUpdater.createJoinChildTask(
-                DomainListenerManager.NotificationType.All,
-                parentTaskKey,
-                createParameters.name,
-                taskKeys,
-                createParameters.note,
-                createParameters.editImageState
-                        .writeImagePath
-                        ?.value,
-                instanceKeys,
+            DomainListenerManager.NotificationType.All,
+            parentTaskKey,
+            createParameters.name,
+            taskKeys,
+            createParameters.note,
+            createParameters.imagePath,
+            instanceKeys,
         )
                 .observeOn(AndroidSchedulers.mainThread())
                 .toCreateResult()
@@ -108,15 +104,13 @@ class JoinTasksEditDelegate(
         check(createParameters.allReminders)
 
         return AndroidDomainUpdater.createJoinTopLevelTask(
-                DomainListenerManager.NotificationType.All,
-                createParameters.name,
-                taskKeys,
-                createParameters.note,
-                sharedProjectKey,
-                createParameters.editImageState
-                        .writeImagePath
-                        ?.value,
-                instanceKeys,
+            DomainListenerManager.NotificationType.All,
+            createParameters.name,
+            taskKeys,
+            createParameters.note,
+            sharedProjectKey,
+            createParameters.imagePath,
+            instanceKeys,
         )
                 .observeOn(AndroidSchedulers.mainThread())
                 .toCreateResult()

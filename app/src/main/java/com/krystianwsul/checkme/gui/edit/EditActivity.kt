@@ -468,7 +468,14 @@ class EditActivity : NavBarActivity() {
 
         editViewModel.stop()
 
-        val createParameters = EditDelegate.CreateParameters(name, note, allReminders, editViewModel.editImageState)
+        val createParameters = EditDelegate.CreateParameters(
+            name,
+            note,
+            allReminders,
+            editViewModel.editImageState
+                .writeImagePath
+                ?.value,
+        )
 
         editViewModel.delegate
             .createTask(createParameters)

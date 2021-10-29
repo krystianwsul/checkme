@@ -186,24 +186,26 @@ abstract class EditDelegate(
         val projectId = (parentScheduleManager.parent?.parentKey as? EditViewModel.ParentKey.Project)?.projectId
         val assignedTo = parentScheduleManager.assignedTo
 
-        val sharedProjectParameters = if (projectId == null) {
-            check(assignedTo.isEmpty())
-
-            null
-        } else {
-            SharedProjectParameters(projectId, assignedTo)
-        }
-
         return when {
-            parentScheduleManager.schedules.isNotEmpty() -> createTaskWithSchedule(
-                createParameters,
-                parentScheduleManager.schedules.map { it.scheduleDataWrapper.scheduleData },
-                sharedProjectParameters,
-                allReminders,
-            )
+            parentScheduleManager.schedules.isNotEmpty() -> {
+                val sharedProjectParameters = if (projectId == null) {
+                    check(assignedTo.isEmpty())
+
+                    null
+                } else {
+                    SharedProjectParameters(projectId, assignedTo)
+                }
+
+                createTaskWithSchedule(
+                    createParameters,
+                    parentScheduleManager.schedules.map { it.scheduleDataWrapper.scheduleData },
+                    sharedProjectParameters,
+                    allReminders,
+                )
+            }
             parentScheduleManager.parent?.parentKey is EditViewModel.ParentKey.Task -> {
-                check(sharedProjectParameters == null)
                 check(allReminders == null)
+                check(projectId == null)
 
                 val parentTaskKey = parentScheduleManager.parent!!
                     .parentKey

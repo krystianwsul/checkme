@@ -27,9 +27,9 @@ import com.krystianwsul.checkme.databinding.*
 import com.krystianwsul.checkme.gui.base.NavBarActivity
 import com.krystianwsul.checkme.gui.dialogs.ConfirmDialogFragment
 import com.krystianwsul.checkme.gui.edit.delegates.EditDelegate
-import com.krystianwsul.checkme.gui.edit.dialogs.AllRemindersDialogFragment
 import com.krystianwsul.checkme.gui.edit.dialogs.AssignToDialogFragment
 import com.krystianwsul.checkme.gui.edit.dialogs.CameraGalleryFragment
+import com.krystianwsul.checkme.gui.edit.dialogs.JoinAllRemindersDialogFragment
 import com.krystianwsul.checkme.gui.edit.dialogs.ParentPickerFragment
 import com.krystianwsul.checkme.gui.edit.dialogs.schedule.ScheduleDialogFragment
 import com.krystianwsul.checkme.gui.edit.dialogs.schedule.ScheduleDialogParameters
@@ -166,12 +166,12 @@ class EditActivity : NavBarActivity() {
         fun trySave(andOpen: Boolean) {
             if (updateError()) return
 
-            val showAllReminders = editViewModel.delegate.showAllRemindersDialog()
+            val showAllReminders = editViewModel.delegate.showJoinAllRemindersDialog()
 
             if (showAllReminders) {
                 check(!andOpen)
 
-                AllRemindersDialogFragment.newInstance()
+                JoinAllRemindersDialogFragment.newInstance()
                     .apply { listener = allRemindersListener }
                     .show(supportFragmentManager, TAG_ALL_REMINDERS)
             } else {
@@ -213,7 +213,7 @@ class EditActivity : NavBarActivity() {
             fun <T : Fragment> find(tag: String) = findFragmentByTag(tag) as? T
 
             find<ConfirmDialogFragment>(DISCARD_TAG)?.listener = discardDialogListener
-            find<AllRemindersDialogFragment>(TAG_ALL_REMINDERS)?.listener = allRemindersListener
+            find<JoinAllRemindersDialogFragment>(TAG_ALL_REMINDERS)?.listener = allRemindersListener
         }
 
         if (!noteHasFocusRelay.value!!)// keyboard hack

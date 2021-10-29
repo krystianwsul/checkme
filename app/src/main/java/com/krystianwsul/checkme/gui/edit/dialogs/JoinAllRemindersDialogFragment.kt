@@ -5,11 +5,11 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.base.AbstractDialogFragment
 
-class AllRemindersDialogFragment : AbstractDialogFragment() {
+class JoinAllRemindersDialogFragment : AbstractDialogFragment() {
 
     companion object {
 
-        fun newInstance() = AllRemindersDialogFragment()
+        fun newInstance() = JoinAllRemindersDialogFragment()
     }
 
     lateinit var listener: (Boolean) -> Unit

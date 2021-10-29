@@ -172,16 +172,16 @@ abstract class EditDelegate(
     fun removeSchedule(adapterPosition: Int) =
         parentScheduleManager.removeSchedule(adapterPosition - scheduleOffset)
 
-    open fun showAllRemindersDialog(): Boolean {
-        check(data.showAllInstancesDialog == null)
+    open fun showJoinAllRemindersDialog(): Boolean {
+        check(data.showJoinAllRemindersDialog == null)
 
         return false
     }
 
     fun setParentTask(taskKey: TaskKey) = storeParentKey(EditViewModel.ParentKey.Task(taskKey), true)
 
-    fun createTask(createParameters: CreateParameters, allReminders: Boolean?): Single<CreateResult> {
-        check((allReminders != null) == showAllRemindersDialog())
+    fun createTask(createParameters: CreateParameters, showAllReminders: Boolean?): Single<CreateResult> {
+        check((showAllReminders != null) == showJoinAllRemindersDialog())
 
         val projectId = (parentScheduleManager.parent?.parentKey as? EditViewModel.ParentKey.Project)?.projectId
         val assignedTo = parentScheduleManager.assignedTo
@@ -200,11 +200,11 @@ abstract class EditDelegate(
                     createParameters,
                     parentScheduleManager.schedules.map { it.scheduleDataWrapper.scheduleData },
                     sharedProjectParameters,
-                    allReminders,
+                    showAllReminders,
                 )
             }
             parentScheduleManager.parent?.parentKey is EditViewModel.ParentKey.Task -> {
-                check(allReminders == null)
+                check(showAllReminders == null)
                 check(projectId == null)
 
                 val parentTaskKey = parentScheduleManager.parent!!
@@ -216,7 +216,7 @@ abstract class EditDelegate(
             }
             else -> {
                 check(assignedTo.isEmpty())
-                check(allReminders == null)
+                check(showAllReminders == null)
 
                 createTaskWithoutReminder(createParameters, projectId)
             }

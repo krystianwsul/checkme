@@ -404,7 +404,7 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
     data class MainData(
         val taskData: TaskData?,
         val customTimeDatas: Map<CustomTimeKey, CustomTimeData>,
-        val showAllInstancesDialog: Boolean?,
+        val showJoinAllRemindersDialog: Boolean?,
         val currentParent: ParentScheduleManager.Parent?,
     ) : DomainData()
 

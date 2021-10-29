@@ -738,7 +738,7 @@ class GroupListFragment @JvmOverloads constructor(
                         )
                     )
                 }
-                is GroupListParameters.TimeStamp -> if (parameters.timeStamp > TimeStamp.now) {
+                is GroupListParameters.TimeStamp -> if (parameters.projectKey != null || parameters.timeStamp > TimeStamp.now) {
                     val hint = parameters.groupListDataWrapper
                         .instanceDatas
                         .let {

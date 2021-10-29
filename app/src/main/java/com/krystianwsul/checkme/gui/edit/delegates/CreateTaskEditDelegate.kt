@@ -89,21 +89,40 @@ class CreateTaskEditDelegate(
         }
 
         parentScheduleManager = ParentMultiScheduleManager(
-                savedInstanceState,
-                initialStateGetter,
-                callbacks,
+            savedInstanceState,
+            initialStateGetter,
+            callbacks,
         )
     }
 
+    override fun skipScheduleCheck(scheduleEntry: ScheduleEntry): Boolean {
+        if (parameters !is EditParameters.Create) return false
+
+        val scheduleHint = parameters.hint as? EditActivity.Hint.Schedule ?: return false
+        val projectParentKey = scheduleHint.toParentKey() ?: return false
+
+        if (parentScheduleManager.parent?.parentKey != projectParentKey) return false
+
+        val singleScheduleData = scheduleEntry.scheduleDataWrapper
+            .scheduleData
+            .let { it as? ScheduleData.Single }
+            ?: return false
+
+        if (singleScheduleData.date != scheduleHint.date) return false
+        if (singleScheduleData.timePair != scheduleHint.timePair) return false
+
+        return true
+    }
+
     override fun createTaskWithSchedule(
-            createParameters: CreateParameters,
-            scheduleDatas: List<ScheduleData>,
-            sharedProjectParameters: SharedProjectParameters?,
+        createParameters: CreateParameters,
+        scheduleDatas: List<ScheduleData>,
+        sharedProjectParameters: SharedProjectParameters?,
     ): Single<CreateResult> {
         check(createParameters.allReminders)
 
         return AndroidDomainUpdater.createScheduleTopLevelTask(
-                DomainListenerManager.NotificationType.All,
+            DomainListenerManager.NotificationType.All,
                 createParameters.name,
                 scheduleDatas,
                 createParameters.note,

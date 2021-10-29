@@ -25,6 +25,7 @@ import com.krystianwsul.checkme.gui.base.SnackbarListener
 import com.krystianwsul.checkme.gui.dialogs.RemoveInstancesDialogFragment
 import com.krystianwsul.checkme.gui.edit.EditActivity
 import com.krystianwsul.checkme.gui.edit.EditParameters
+import com.krystianwsul.checkme.gui.edit.EditParentHint
 import com.krystianwsul.checkme.gui.instances.ShowTaskInstancesActivity
 import com.krystianwsul.checkme.gui.instances.tree.*
 import com.krystianwsul.checkme.gui.main.FabUser
@@ -444,12 +445,12 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                     childTaskData?.canAddSubtask == true -> {
                         show()
 
-                        edit(EditParameters.Create(EditActivity.Hint.Task(childTaskData.taskKey)), true)
+                        edit(EditParameters.Create(EditParentHint.Task(childTaskData.taskKey)), true)
                     }
                     projectData?.canAddSubtask == true -> {
                         show()
 
-                        val hint = (projectData.projectKey as? ProjectKey.Shared)?.let(EditActivity.Hint::Project)
+                        val hint = (projectData.projectKey as? ProjectKey.Shared)?.let(EditParentHint::Project)
 
                         setOnClickListener {
                             selectionCallback.actionMode!!.finish()
@@ -972,28 +973,28 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         abstract val data: Data
         open val topLevelTaskData: TopLevelTaskData? = null
 
-        abstract val hint: EditActivity.Hint?
+        abstract val hint: EditParentHint?
 
         open val canDrag = true
 
         data class All(override val data: Data, override val canDrag: Boolean) : Parameters() {
 
-            override val hint: EditActivity.Hint? = null
+            override val hint: EditParentHint? = null
         }
 
         data class Notes(override val data: Data, override val canDrag: Boolean) : Parameters() {
 
-            override val hint: EditActivity.Hint? = null
+            override val hint: EditParentHint? = null
         }
 
         data class Project(override val data: Data, val projectKey: ProjectKey<*>) : Parameters() {
 
-            override val hint get() = (projectKey as? ProjectKey.Shared)?.let(EditActivity.Hint::Project)
+            override val hint get() = (projectKey as? ProjectKey.Shared)?.let(EditParentHint::Project)
         }
 
         data class Task(override val data: Data, override val topLevelTaskData: TopLevelTaskData) : Parameters() {
 
-            override val hint = EditActivity.Hint.Task(topLevelTaskData.taskKey)
+            override val hint = EditParentHint.Task(topLevelTaskData.taskKey)
         }
     }
 }

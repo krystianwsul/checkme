@@ -89,11 +89,11 @@ sealed class EditParameters : Parcelable {
         savedEditImageState: EditImageState?,
         taskDataSingle: Single<NullableWrapper<EditViewModel.TaskData>>,
         editActivity: EditActivity,
-    ) = Single.just(getInitialEditImageState(savedEditImageState))!!
+    ) = Single.just(getInitialEditImageState(savedEditImageState))
 
     @Parcelize
     class Create(
-        val hint: EditActivity.Hint? = null,
+        val hint: EditParentHint? = null,
         val parentScheduleState: ParentScheduleState? = null,
         val nameHint: String? = null,
         val showFirstSchedule: Boolean = true,
@@ -103,7 +103,7 @@ sealed class EditParameters : Parcelable {
     }
 
     @Parcelize
-    class Join(val joinables: List<Joinable>, val hint: EditActivity.Hint? = null) : EditParameters() {
+    class Join(val joinables: List<Joinable>, val hint: EditParentHint? = null) : EditParameters() {
 
         override val startParameters get() = EditViewModel.StartParameters.Join(joinables)
 

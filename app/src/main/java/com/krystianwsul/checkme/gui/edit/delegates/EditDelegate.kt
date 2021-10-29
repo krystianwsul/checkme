@@ -67,14 +67,14 @@ abstract class EditDelegate(
 
     open val initialName: String? = null
     open val initialNote: String? = null
-    open val scheduleHint: EditActivity.Hint.Schedule? = null
+    open val scheduleHint: EditParentHint.Schedule? = null
     open val showSaveAndOpen = false
 
     val customTimeDatas get() = data.customTimeDatas
 
     protected fun TaskKey.toParentKey() = EditViewModel.ParentKey.Task(this)
 
-    protected fun EditActivity.Hint.toScheduleHint() = this as? EditActivity.Hint.Schedule
+    protected fun EditParentHint.toScheduleHint() = this as? EditParentHint.Schedule
 
     val firstScheduleEntry by lazy {
         val (date, timePair) = scheduleHint?.let { Pair(it.date, it.timePair) }

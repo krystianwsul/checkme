@@ -25,7 +25,7 @@ class CreateTaskEditDelegate(
 ) : EditDelegate(compositeDisposable, storeParentKey) {
 
     override val initialName: String?
-    override val scheduleHint: EditActivity.Hint.Schedule?
+    override val scheduleHint: EditParentHint.Schedule?
     override val showSaveAndOpen = true
 
     override val parentScheduleManager: ParentScheduleManager
@@ -98,7 +98,7 @@ class CreateTaskEditDelegate(
     override fun skipScheduleCheck(scheduleEntry: ScheduleEntry): Boolean {
         if (parameters !is EditParameters.Create) return false
 
-        val scheduleHint = parameters.hint as? EditActivity.Hint.Schedule ?: return false
+        val scheduleHint = parameters.hint as? EditParentHint.Schedule ?: return false
         val projectParentKey = scheduleHint.toParentKey() ?: return false
 
         if (parentScheduleManager.parent?.parentKey != projectParentKey) return false

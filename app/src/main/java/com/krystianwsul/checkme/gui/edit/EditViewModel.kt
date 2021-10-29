@@ -203,7 +203,7 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
 
         abstract fun getText(customTimeDatas: Map<CustomTimeKey, CustomTimeData>, context: Context): String
 
-        fun getScheduleDialogData(scheduleHint: EditActivity.Hint.Schedule?) =
+        fun getScheduleDialogData(scheduleHint: EditParentHint.Schedule?) =
             getScheduleDialogDataHelper(scheduleHint?.date ?: Date.today())
 
         protected abstract fun getScheduleDialogDataHelper(suggestedDate: Date): ScheduleDialogData

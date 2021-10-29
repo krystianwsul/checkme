@@ -37,10 +37,6 @@ import com.krystianwsul.checkme.gui.edit.dialogs.schedule.ScheduleDialogResult
 import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity
 import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.common.criteria.SearchCriteria
-import com.krystianwsul.common.time.Date
-import com.krystianwsul.common.time.HourMinute
-import com.krystianwsul.common.time.TimePair
-import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.common.utils.UserKey
 import com.krystianwsul.treeadapter.FilterCriteria
@@ -55,7 +51,6 @@ import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.merge
 import io.reactivex.rxjava3.kotlin.plusAssign
 import io.reactivex.rxjava3.kotlin.subscribeBy
-import kotlinx.parcelize.Parcelize
 import kotlin.properties.Delegates.observable
 
 
@@ -508,50 +503,6 @@ class EditActivity : NavBarActivity() {
     }
 
     private fun newParentPickerDelegate() = ParentPickerDelegate()
-
-    sealed class Hint : Parcelable {
-
-        companion object {
-
-            protected fun ProjectKey.Shared.toCurrentParent() =
-                EditViewModel.CurrentParentSource.Set(EditViewModel.ParentKey.Project(this))
-
-            protected fun ProjectKey.Shared.toParentKey() = EditViewModel.ParentKey.Project(this)
-        }
-
-        abstract fun toCurrentParent(): EditViewModel.CurrentParentSource
-        abstract fun toParentKey(): EditViewModel.ParentKey?
-
-        @Parcelize
-        class Schedule(val date: Date, val timePair: TimePair, private val projectKey: ProjectKey.Shared? = null) : Hint() {
-
-            constructor(
-                date: Date,
-                pair: Pair<Date, HourMinute> = HourMinute.getNextHour(date),
-            ) : this(pair.first, TimePair(pair.second), null)
-
-            override fun toCurrentParent() = projectKey?.toCurrentParent() ?: EditViewModel.CurrentParentSource.None
-
-            override fun toParentKey() = projectKey?.toParentKey()
-        }
-
-        @Parcelize
-        class Task(private val taskKey: TaskKey) : Hint() {
-
-            override fun toCurrentParent() =
-                EditViewModel.CurrentParentSource.Set(EditViewModel.ParentKey.Task(taskKey))
-
-            override fun toParentKey() = EditViewModel.ParentKey.Task(taskKey)
-        }
-
-        @Parcelize
-        class Project(val projectKey: ProjectKey.Shared) : Hint() {
-
-            override fun toCurrentParent() = projectKey.toCurrentParent()
-
-            override fun toParentKey() = projectKey.toParentKey()
-        }
-    }
 
     enum class HolderType {
 
@@ -1085,8 +1036,8 @@ class EditActivity : NavBarActivity() {
                         EditParameters.Create(
                             parent?.parentKey?.let {
                                 when (it) { // there's probably a helper for this somewhere
-                                    is EditViewModel.ParentKey.Project -> Hint.Project(it.projectId)
-                                    is EditViewModel.ParentKey.Task -> Hint.Task(it.taskKey)
+                                    is EditViewModel.ParentKey.Project -> EditParentHint.Project(it.projectId)
+                                    is EditViewModel.ParentKey.Task -> EditParentHint.Task(it.taskKey)
                                 }
                             },
                             ParentScheduleState(

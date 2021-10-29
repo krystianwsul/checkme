@@ -5,6 +5,7 @@ import android.content.Context
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.edit.EditActivity
 import com.krystianwsul.checkme.gui.edit.EditParameters
+import com.krystianwsul.checkme.gui.edit.EditParentHint
 import com.krystianwsul.checkme.gui.instances.list.GroupListFragment
 import com.krystianwsul.checkme.gui.utils.BottomFabMenuDelegate
 import com.krystianwsul.common.time.Date
@@ -45,7 +46,7 @@ private class AddTaskList(val taskKey: TaskKey) : BottomFabMenuDelegate.MenuDele
 
     override fun getText(context: Context) = context.getString(R.string.addTaskList)
 
-    override fun onClick(activity: Activity) = activity.launchEditActivity(EditActivity.Hint.Task(taskKey))
+    override fun onClick(activity: Activity) = activity.launchEditActivity(EditParentHint.Task(taskKey))
 }
 
 private class AddToProject(
@@ -61,5 +62,5 @@ private class AddToProject(
     }
 }
 
-private fun Activity.launchEditActivity(hint: EditActivity.Hint) =
+private fun Activity.launchEditActivity(hint: EditParentHint) =
     startActivity(EditActivity.getParametersIntent(EditParameters.Create(hint)))

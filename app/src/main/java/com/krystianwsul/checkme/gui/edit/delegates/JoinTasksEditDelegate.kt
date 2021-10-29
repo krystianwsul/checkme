@@ -29,7 +29,7 @@ class JoinTasksEditDelegate(
     private val instanceKeys = parameters.joinables.mapNotNull { it.instanceKey }
 
     private fun initialStateGetter(): ParentScheduleState {
-        val schedule = if (parameters.hint is EditActivity.Hint.Task) {
+        val schedule = if (parameters.hint is EditParentHint.Task) {
             null
         } else {
             firstScheduleEntry.takeIf { Preferences.addDefaultReminder }

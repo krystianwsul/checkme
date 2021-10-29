@@ -39,9 +39,9 @@ interface ParentScheduleManager {
     }
 
     data class Parent(
-            val name: String,
-            val parentKey: EditViewModel.ParentKey,
-            val projectUsers: Map<UserKey, EditViewModel.UserData>,
-            val projectKey: ProjectKey<*>,
+        val name: String,
+        val parentKey: EditViewModel.ParentKey,
+        val projectUsers: Map<UserKey, EditViewModel.UserData>,
+        val projectKey: ProjectKey<*>,
     )
 }

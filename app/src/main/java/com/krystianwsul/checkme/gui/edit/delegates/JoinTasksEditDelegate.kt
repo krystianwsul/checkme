@@ -7,7 +7,10 @@ import com.krystianwsul.checkme.domainmodel.extensions.createJoinChildTask
 import com.krystianwsul.checkme.domainmodel.extensions.createJoinTopLevelTask
 import com.krystianwsul.checkme.domainmodel.extensions.createScheduleJoinTopLevelTask
 import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
-import com.krystianwsul.checkme.gui.edit.*
+import com.krystianwsul.checkme.gui.edit.EditParameters
+import com.krystianwsul.checkme.gui.edit.EditViewModel
+import com.krystianwsul.checkme.gui.edit.ParentMultiScheduleManager
+import com.krystianwsul.checkme.gui.edit.ParentScheduleState
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ScheduleData
 import com.krystianwsul.common.utils.TaskKey
@@ -29,7 +32,7 @@ class JoinTasksEditDelegate(
     private val instanceKeys = parameters.joinables.mapNotNull { it.instanceKey }
 
     private fun initialStateGetter(): ParentScheduleState {
-        val schedule = if (parameters.hint is EditParentHint.Task) {
+        val schedule = if (parameters.hint?.showInitialSchedule == false) {
             null
         } else {
             firstScheduleEntry.takeIf { Preferences.addDefaultReminder }

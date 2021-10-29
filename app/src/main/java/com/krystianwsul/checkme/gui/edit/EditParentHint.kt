@@ -18,6 +18,8 @@ sealed class EditParentHint : Parcelable {
         protected fun ProjectKey.Shared.toParentKey() = EditViewModel.ParentKey.Project(this)
     }
 
+    open val showInitialSchedule = true
+
     abstract fun toCurrentParent(): EditViewModel.CurrentParentSource
     abstract fun toParentKey(): EditViewModel.ParentKey?
 
@@ -37,6 +39,8 @@ sealed class EditParentHint : Parcelable {
 
     @Parcelize
     class Task(private val taskKey: TaskKey) : EditParentHint() {
+
+        override val showInitialSchedule get() = false
 
         override fun toCurrentParent() =
             EditViewModel.CurrentParentSource.Set(EditViewModel.ParentKey.Task(taskKey))

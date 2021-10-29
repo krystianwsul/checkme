@@ -778,15 +778,15 @@ class EditActivity : NavBarActivity() {
                 }
             }
 
+            override fun onNewParent(activity: EditActivity, holder: Holder) = onTimeChanged(activity, holder)
+
             override fun onTimeChanged(activity: EditActivity, holder: Holder) {
-                activity.editViewModel
+                (holder as ScheduleHolder).rowScheduleBinding
+                    .scheduleLayout
+                    .error = activity.editViewModel
                     .delegate
                     .getError(scheduleEntry)
-                    ?.let {
-                        (holder as ScheduleHolder).rowScheduleBinding
-                            .scheduleLayout
-                            .error = activity.getString(it.resource)
-                    }
+                    ?.let { activity.getString(it.resource) }
             }
 
             private fun same(other: ScheduleEntry): Boolean {

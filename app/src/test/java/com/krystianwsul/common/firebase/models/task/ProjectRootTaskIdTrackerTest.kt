@@ -41,10 +41,8 @@ class ProjectRootTaskIdTrackerTest {
 
         val privateWeeklyTaskKey = domainUpdater(now).createScheduleTopLevelTask(
             DomainListenerManager.NotificationType.All,
-            "private weekly",
+            EditDelegate.CreateParameters("private weekly"),
             listOf(ScheduleData.Weekly(setOf(DayOfWeek.WEDNESDAY), scheduleTimePair, null, null, 1)),
-            null,
-            null,
             null,
         )
             .blockingGet()
@@ -52,11 +50,9 @@ class ProjectRootTaskIdTrackerTest {
 
         val sharedSingleTaskKey = domainUpdater(now).createScheduleTopLevelTask(
             DomainListenerManager.NotificationType.All,
-            "shared single",
+            EditDelegate.CreateParameters("shared single"),
             listOf(ScheduleData.Single(date, scheduleTimePair)),
-            null,
             EditDelegate.SharedProjectParameters(sharedProjectKey, emptySet()),
-            null,
         )
             .blockingGet()
             .taskKey

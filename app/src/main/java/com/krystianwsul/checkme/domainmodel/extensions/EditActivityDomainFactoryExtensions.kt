@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.domainmodel.extensions
 
-import android.net.Uri
 import androidx.annotation.CheckResult
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.*
@@ -197,27 +196,25 @@ fun DomainFactory.getCreateTaskParentPickerData(
 @CheckResult
 fun DomainUpdater.createScheduleTopLevelTask(
     notificationType: DomainListenerManager.NotificationType,
-    name: String,
+    createParameters: EditDelegate.CreateParameters,
     scheduleDatas: List<ScheduleData>,
-    note: String?,
     sharedProjectParameters: EditDelegate.SharedProjectParameters?,
-    imagePath: Pair<String, Uri>?,
     copyTaskKey: TaskKey? = null,
 ): Single<EditDelegate.CreateResult> = SingleDomainUpdate.create("createScheduleTopLevelTask") { now ->
-    check(name.isNotEmpty())
+    check(createParameters.name.isNotEmpty())
     check(scheduleDatas.isNotEmpty())
 
     val finalProjectId = sharedProjectParameters?.key ?: defaultProjectKey
 
-    val imageUuid = imagePath?.let { newUuid() }
+    val imageUuid = createParameters.imagePath?.let { newUuid() }
 
     lateinit var task: RootTask
     trackRootTaskIds {
         task = createScheduleTopLevelTask(
             now,
-            name,
+            createParameters.name,
             scheduleDatas.map { it to getTime(it.timePair) },
-            note,
+            createParameters.note,
             finalProjectId,
             imageUuid,
             this,
@@ -227,7 +224,7 @@ fun DomainUpdater.createScheduleTopLevelTask(
         copyTaskKey?.let { copyTask(now, task, it) }
     }
 
-    imageUuid?.let { Uploader.addUpload(deviceDbInfo, task.taskKey, it, imagePath) }
+    imageUuid?.let { Uploader.addUpload(deviceDbInfo, task.taskKey, it, createParameters.imagePath) }
 
     DomainUpdater.Result(
         task.toCreateResult(now),
@@ -246,14 +243,12 @@ private fun RootTask.toCreateResult(now: ExactTimeStamp.Local) =
 fun DomainUpdater.createChildTask(
     notificationType: DomainListenerManager.NotificationType,
     parentTaskKey: TaskKey,
-    name: String,
-    note: String?,
-    imagePath: Pair<String, Uri>?,
+    createParameters: EditDelegate.CreateParameters,
     copyTaskKey: TaskKey? = null,
 ): Single<EditDelegate.CreateResult> = SingleDomainUpdate.create("createChildTask") { now ->
-    check(name.isNotEmpty())
+    check(createParameters.name.isNotEmpty())
 
-    val imageUuid = imagePath?.let { newUuid() }
+    val imageUuid = createParameters.imagePath?.let { newUuid() }
 
     lateinit var childTask: RootTask
     trackRootTaskIds {
@@ -263,14 +258,14 @@ fun DomainUpdater.createChildTask(
         childTask = createChildTask(
             now,
             parentTask,
-            name,
-            note,
+            createParameters.name,
+            createParameters.note,
             imageUuid?.let { TaskJson.Image(it, uuid) },
             copyTaskKey,
         )
     }
 
-    imageUuid?.let { Uploader.addUpload(deviceDbInfo, childTask.taskKey, it, imagePath) }
+    imageUuid?.let { Uploader.addUpload(deviceDbInfo, childTask.taskKey, it, createParameters.imagePath) }
 
     DomainUpdater.Result(
         childTask.toCreateResult(now),
@@ -283,24 +278,22 @@ fun DomainUpdater.createChildTask(
 @CheckResult
 fun DomainUpdater.createTopLevelTask(
     notificationType: DomainListenerManager.NotificationType,
-    name: String,
-    note: String?,
+    createParameters: EditDelegate.CreateParameters,
     sharedProjectKey: ProjectKey.Shared?,
-    imagePath: Pair<String, Uri>?,
     copyTaskKey: TaskKey? = null,
 ): Single<EditDelegate.CreateResult> = SingleDomainUpdate.create("createTopLevelTask") { now ->
-    check(name.isNotEmpty())
+    check(createParameters.name.isNotEmpty())
 
     val finalProjectId = sharedProjectKey ?: defaultProjectKey
 
-    val imageUuid = imagePath?.let { newUuid() }
+    val imageUuid = createParameters.imagePath?.let { newUuid() }
 
     lateinit var task: RootTask
     trackRootTaskIds {
         task = createNoScheduleOrParentTask(
             now,
-            name,
-            note,
+            createParameters.name,
+            createParameters.note,
             finalProjectId,
             imageUuid,
         )
@@ -308,7 +301,7 @@ fun DomainUpdater.createTopLevelTask(
         copyTaskKey?.let { copyTask(now, task, it) }
     }
 
-    imageUuid?.let { Uploader.addUpload(deviceDbInfo, task.taskKey, it, imagePath) }
+    imageUuid?.let { Uploader.addUpload(deviceDbInfo, task.taskKey, it, createParameters.imagePath) }
 
     DomainUpdater.Result(
         task.toCreateResult(now),
@@ -322,16 +315,14 @@ fun DomainUpdater.createTopLevelTask(
 fun DomainUpdater.updateScheduleTask(
     notificationType: DomainListenerManager.NotificationType,
     taskKey: TaskKey,
-    name: String,
+    createParameters: EditDelegate.CreateParameters,
     scheduleDatas: List<ScheduleData>,
-    note: String?,
     sharedProjectParameters: EditDelegate.SharedProjectParameters?,
-    imagePath: Pair<String, Uri>?,
 ): Single<TaskKey.Root> = SingleDomainUpdate.create("updateScheduleTask") { now ->
-    check(name.isNotEmpty())
+    check(createParameters.name.isNotEmpty())
     check(scheduleDatas.isNotEmpty())
 
-    val imageUuid = imagePath?.let { newUuid() }
+    val imageUuid = createParameters.imagePath?.let { newUuid() }
 
     val projectKey = sharedProjectParameters?.key ?: defaultProjectKey
 
@@ -362,10 +353,10 @@ fun DomainUpdater.updateScheduleTask(
     finalTask.apply {
         setName(name, note)
 
-        if (imagePath != null) setImage(deviceDbInfo, imageUuid?.let { ImageState.Local(imageUuid) })
+        if (createParameters.imagePath != null) setImage(deviceDbInfo, imageUuid?.let { ImageState.Local(imageUuid) })
     }
 
-    imageUuid?.let { Uploader.addUpload(deviceDbInfo, finalTask.taskKey, it, imagePath) }
+    imageUuid?.let { Uploader.addUpload(deviceDbInfo, finalTask.taskKey, it, createParameters.imagePath) }
 
     DomainUpdater.Result(
         finalTask.taskKey,
@@ -379,14 +370,12 @@ fun DomainUpdater.updateScheduleTask(
 fun DomainUpdater.updateChildTask(
     notificationType: DomainListenerManager.NotificationType,
     taskKey: TaskKey,
-    name: String,
+    createParameters: EditDelegate.CreateParameters,
     parentTaskKey: TaskKey,
-    note: String?,
-    imagePath: Pair<String, Uri>?,
     removeInstanceKey: InstanceKey?,
     allReminders: Boolean,
 ): Single<TaskKey.Root> = SingleDomainUpdate.create("updateChildTask") { now ->
-    check(name.isNotEmpty())
+    check(createParameters.name.isNotEmpty())
 
     lateinit var task: RootTask
     lateinit var originalProject: Project<*>
@@ -425,10 +414,10 @@ fun DomainUpdater.updateChildTask(
 
     }
 
-    task.setName(name, note)
+    task.setName(createParameters.name, createParameters.note)
 
-    val imageUuid = imagePath?.let { newUuid() }
-    if (imagePath != null) task.setImage(deviceDbInfo, imageUuid?.let { ImageState.Local(imageUuid) })
+    val imageUuid = createParameters.imagePath?.let { newUuid() }
+    if (createParameters.imagePath != null) task.setImage(deviceDbInfo, imageUuid?.let { ImageState.Local(imageUuid) })
 
     removeInstanceKey?.let {
         val instance = getInstance(it)
@@ -440,7 +429,7 @@ fun DomainUpdater.updateChildTask(
         }
     }
 
-    imageUuid?.let { Uploader.addUpload(deviceDbInfo, task.taskKey, it, imagePath) }
+    imageUuid?.let { Uploader.addUpload(deviceDbInfo, task.taskKey, it, createParameters.imagePath) }
 
     DomainUpdater.Result(
         task.taskKey,
@@ -454,12 +443,10 @@ fun DomainUpdater.updateChildTask(
 fun DomainUpdater.updateTopLevelTask(
     notificationType: DomainListenerManager.NotificationType,
     taskKey: TaskKey,
-    name: String,
-    note: String?,
+    createParameters: EditDelegate.CreateParameters,
     sharedProjectKey: ProjectKey.Shared?,
-    imagePath: Pair<String, Uri>?,
 ): Single<TaskKey.Root> = SingleDomainUpdate.create("updateTopLevelTask") { now ->
-    check(name.isNotEmpty())
+    check(createParameters.name.isNotEmpty())
 
     val projectKey = sharedProjectKey ?: defaultProjectKey
 
@@ -481,13 +468,13 @@ fun DomainUpdater.updateTopLevelTask(
         }
     }
 
-    finalTask.setName(name, note)
+    finalTask.setName(createParameters.name, createParameters.note)
 
-    val imageUuid = imagePath?.let { newUuid() }
+    val imageUuid = createParameters.imagePath?.let { newUuid() }
 
-    if (imagePath != null) finalTask.setImage(deviceDbInfo, imageUuid?.let { ImageState.Local(imageUuid) })
+    if (createParameters.imagePath != null) finalTask.setImage(deviceDbInfo, imageUuid?.let { ImageState.Local(imageUuid) })
 
-    imageUuid?.let { Uploader.addUpload(deviceDbInfo, finalTask.taskKey, it, imagePath) }
+    imageUuid?.let { Uploader.addUpload(deviceDbInfo, finalTask.taskKey, it, createParameters.imagePath) }
 
     DomainUpdater.Result(
         finalTask.taskKey,
@@ -500,21 +487,19 @@ fun DomainUpdater.updateTopLevelTask(
 @CheckResult
 fun DomainUpdater.createScheduleJoinTopLevelTask(
     notificationType: DomainListenerManager.NotificationType,
-    name: String,
+    createParameters: EditDelegate.CreateParameters,
     scheduleDatas: List<ScheduleData>,
     joinables: List<EditParameters.Join.Joinable>,
-    note: String?,
     sharedProjectParameters: EditDelegate.SharedProjectParameters?,
-    imagePath: Pair<String, Uri>?,
     allReminders: Boolean,
 ): Single<TaskKey.Root> = SingleDomainUpdate.create("createScheduleJoinTopLevelTask") { now ->
-    check(name.isNotEmpty())
+    check(createParameters.name.isNotEmpty())
     check(scheduleDatas.isNotEmpty())
     check(joinables.size > 1)
 
     val finalProjectKey = sharedProjectParameters?.key ?: defaultProjectKey
 
-    val imageUuid = imagePath?.let { newUuid() }
+    val imageUuid = createParameters.imagePath?.let { newUuid() }
 
     lateinit var newParentTask: RootTask
     trackRootTaskIds {
@@ -532,9 +517,9 @@ fun DomainUpdater.createScheduleJoinTopLevelTask(
 
         newParentTask = createScheduleTopLevelTask(
             now,
-            name,
+            createParameters.name,
             scheduleDatas.map { it to getTime(it.timePair) },
-            note,
+            createParameters.note,
             finalProjectKey,
             imageUuid,
             this,
@@ -548,7 +533,7 @@ fun DomainUpdater.createScheduleJoinTopLevelTask(
             joinJoinables(newParentTask, joinableMap, now)
     }
 
-    imageUuid?.let { Uploader.addUpload(deviceDbInfo, newParentTask.taskKey, it, imagePath) }
+    imageUuid?.let { Uploader.addUpload(deviceDbInfo, newParentTask.taskKey, it, createParameters.imagePath) }
 
     DomainUpdater.Result(
         newParentTask.taskKey,
@@ -562,16 +547,14 @@ fun DomainUpdater.createScheduleJoinTopLevelTask(
 fun DomainUpdater.createJoinChildTask(
     notificationType: DomainListenerManager.NotificationType,
     parentTaskKey: TaskKey,
-    name: String,
+    createParameters: EditDelegate.CreateParameters,
     joinTaskKeys: List<TaskKey>,
-    note: String?,
-    imagePath: Pair<String, Uri>?,
     removeInstanceKeys: List<InstanceKey>,
 ): Single<TaskKey.Root> = SingleDomainUpdate.create("createJoinChildTask") { now ->
-    check(name.isNotEmpty())
+    check(createParameters.name.isNotEmpty())
     check(joinTaskKeys.size > 1)
 
-    val imageUuid = imagePath?.let { newUuid() }
+    val imageUuid = createParameters.imagePath?.let { newUuid() }
 
     lateinit var childTask: RootTask
     trackRootTaskIds {
@@ -585,8 +568,8 @@ fun DomainUpdater.createJoinChildTask(
         childTask = createChildTask(
             now,
             parentTask,
-            name,
-            note,
+            createParameters.name,
+            createParameters.note,
             imageUuid?.let { TaskJson.Image(it, uuid) },
             ordinal = ordinal,
         )
@@ -594,7 +577,7 @@ fun DomainUpdater.createJoinChildTask(
         joinTasks(childTask, joinTasks, now, removeInstanceKeys)
     }
 
-    imageUuid?.let { Uploader.addUpload(deviceDbInfo, childTask.taskKey, it, imagePath) }
+    imageUuid?.let { Uploader.addUpload(deviceDbInfo, childTask.taskKey, it, createParameters.imagePath) }
 
     DomainUpdater.Result(
         childTask.taskKey,
@@ -607,14 +590,12 @@ fun DomainUpdater.createJoinChildTask(
 @CheckResult
 fun DomainUpdater.createJoinTopLevelTask(
     notificationType: DomainListenerManager.NotificationType,
-    name: String,
+    createParameters: EditDelegate.CreateParameters,
     joinTaskKeys: List<TaskKey>,
-    note: String?,
     sharedProjectKey: ProjectKey.Shared?,
-    imagePath: Pair<String, Uri>?,
     removeInstanceKeys: List<InstanceKey>,
 ): Single<TaskKey.Root> = SingleDomainUpdate.create("createJoinTopLevelTask") { now ->
-    check(name.isNotEmpty())
+    check(createParameters.name.isNotEmpty())
     check(joinTaskKeys.size > 1)
 
     val initialJoinTasks = joinTaskKeys.map(::getTaskForce)
@@ -626,7 +607,7 @@ fun DomainUpdater.createJoinTopLevelTask(
         .single()
         .projectKey
 
-    val imageUuid = imagePath?.let { newUuid() }
+    val imageUuid = createParameters.imagePath?.let { newUuid() }
 
     lateinit var newParentTask: RootTask
     trackRootTaskIds {
@@ -636,8 +617,8 @@ fun DomainUpdater.createJoinTopLevelTask(
 
         newParentTask = createNoScheduleOrParentTask(
             now,
-            name,
-            note,
+            createParameters.name,
+            createParameters.note,
             finalProjectId,
             imageUuid,
             ordinal,
@@ -646,7 +627,7 @@ fun DomainUpdater.createJoinTopLevelTask(
         joinTasks(newParentTask, joinTasks, now, removeInstanceKeys)
     }
 
-    imageUuid?.let { Uploader.addUpload(deviceDbInfo, newParentTask.taskKey, it, imagePath) }
+    imageUuid?.let { Uploader.addUpload(deviceDbInfo, newParentTask.taskKey, it, createParameters.imagePath) }
 
     DomainUpdater.Result(
         newParentTask.taskKey,

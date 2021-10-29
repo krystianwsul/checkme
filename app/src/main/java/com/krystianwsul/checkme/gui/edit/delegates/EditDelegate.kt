@@ -235,7 +235,11 @@ abstract class EditDelegate(
         val note: String?,
         val allReminders: Boolean,
         val imagePath: Pair<String, Uri>?,
-    )
+    ) {
+
+        // todo add image make default params
+        constructor(name: String) : this(name, null, true, null)
+    }
 
     enum class ScheduleError(@StringRes val resource: Int) {
 

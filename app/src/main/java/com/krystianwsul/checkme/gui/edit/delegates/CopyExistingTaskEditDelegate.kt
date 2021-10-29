@@ -32,11 +32,9 @@ class CopyExistingTaskEditDelegate(
 
         return AndroidDomainUpdater.createScheduleTopLevelTask(
             DomainListenerManager.NotificationType.All,
-            createParameters.name,
+            createParameters,
             scheduleDatas,
-            createParameters.note,
             sharedProjectParameters,
-            createParameters.imagePath,
             parameters.taskKey,
         )
                 .observeOn(AndroidSchedulers.mainThread())
@@ -52,9 +50,7 @@ class CopyExistingTaskEditDelegate(
         return AndroidDomainUpdater.createChildTask(
             DomainListenerManager.NotificationType.All,
             parentTaskKey,
-            createParameters.name,
-            createParameters.note,
-            createParameters.imagePath,
+            createParameters,
             parameters.taskKey,
         )
                 .observeOn(AndroidSchedulers.mainThread())
@@ -69,10 +65,8 @@ class CopyExistingTaskEditDelegate(
 
         return AndroidDomainUpdater.createTopLevelTask(
             DomainListenerManager.NotificationType.All,
-            createParameters.name,
-            createParameters.note,
+            createParameters,
             sharedProjectKey,
-            createParameters.imagePath,
             parameters.taskKey,
         )
                 .observeOn(AndroidSchedulers.mainThread())

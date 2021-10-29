@@ -51,11 +51,9 @@ class EditExistingTaskEditDelegate(
         return AndroidDomainUpdater.updateScheduleTask(
             DomainListenerManager.NotificationType.All,
             parameters.taskKey,
-            createParameters.name,
+            createParameters,
             scheduleDatas,
-            createParameters.note,
             sharedProjectParameters,
-            createParameters.imagePath,
         )
             .observeOn(AndroidSchedulers.mainThread())
             .toCreateResult()
@@ -68,10 +66,8 @@ class EditExistingTaskEditDelegate(
         return AndroidDomainUpdater.updateChildTask(
             DomainListenerManager.NotificationType.All,
             parameters.taskKey,
-            createParameters.name,
+            createParameters,
             parentTaskKey,
-            createParameters.note,
-            createParameters.imagePath,
             parameters.openedFromInstanceKey,
             createParameters.allReminders,
         )
@@ -88,10 +84,8 @@ class EditExistingTaskEditDelegate(
         return AndroidDomainUpdater.updateTopLevelTask(
             DomainListenerManager.NotificationType.All,
             parameters.taskKey,
-            createParameters.name,
-            createParameters.note,
+            createParameters,
             sharedProjectKey,
-            createParameters.imagePath,
         )
             .observeOn(AndroidSchedulers.mainThread())
             .toCreateResult()

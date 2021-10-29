@@ -64,12 +64,10 @@ class JoinTasksEditDelegate(
     ): Single<CreateResult> {
         return AndroidDomainUpdater.createScheduleJoinTopLevelTask(
             DomainListenerManager.NotificationType.All,
-            createParameters.name,
+            createParameters,
             scheduleDatas,
             parameters.joinables,
-            createParameters.note,
             sharedProjectParameters,
-            createParameters.imagePath,
             createParameters.allReminders,
         )
                 .observeOn(AndroidSchedulers.mainThread())
@@ -86,10 +84,8 @@ class JoinTasksEditDelegate(
         return AndroidDomainUpdater.createJoinChildTask(
             DomainListenerManager.NotificationType.All,
             parentTaskKey,
-            createParameters.name,
+            createParameters,
             taskKeys,
-            createParameters.note,
-            createParameters.imagePath,
             instanceKeys,
         )
                 .observeOn(AndroidSchedulers.mainThread())
@@ -105,11 +101,9 @@ class JoinTasksEditDelegate(
 
         return AndroidDomainUpdater.createJoinTopLevelTask(
             DomainListenerManager.NotificationType.All,
-            createParameters.name,
+            createParameters,
             taskKeys,
-            createParameters.note,
             sharedProjectKey,
-            createParameters.imagePath,
             instanceKeys,
         )
                 .observeOn(AndroidSchedulers.mainThread())

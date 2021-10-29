@@ -123,11 +123,9 @@ class CreateTaskEditDelegate(
 
         return AndroidDomainUpdater.createScheduleTopLevelTask(
             DomainListenerManager.NotificationType.All,
-            createParameters.name,
+            createParameters,
             scheduleDatas,
-            createParameters.note,
             sharedProjectParameters,
-            createParameters.imagePath,
         )
                 .observeOn(AndroidSchedulers.mainThread())
                 .applyCreatedTaskKey()
@@ -144,9 +142,7 @@ class CreateTaskEditDelegate(
         return AndroidDomainUpdater.createChildTask(
             DomainListenerManager.NotificationType.All,
             parentTaskKey,
-            createParameters.name,
-            createParameters.note,
-            createParameters.imagePath,
+            createParameters,
         )
                 .observeOn(AndroidSchedulers.mainThread())
                 .applyCreatedTaskKey()
@@ -160,10 +156,8 @@ class CreateTaskEditDelegate(
 
         return AndroidDomainUpdater.createTopLevelTask(
             DomainListenerManager.NotificationType.All,
-            createParameters.name,
-            createParameters.note,
+            createParameters,
             sharedProjectKey,
-            createParameters.imagePath,
         )
                 .observeOn(AndroidSchedulers.mainThread())
                 .applyCreatedTaskKey()

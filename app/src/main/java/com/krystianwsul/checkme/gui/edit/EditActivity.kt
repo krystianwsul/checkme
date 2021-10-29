@@ -171,12 +171,12 @@ class EditActivity : NavBarActivity() {
         fun trySave(andOpen: Boolean) {
             if (updateError()) return
 
-            val showAllRemindersPlural = editViewModel.delegate.showAllRemindersDialog()
+            val showAllReminders = editViewModel.delegate.showAllRemindersDialog()
 
-            if (showAllRemindersPlural != null) {
+            if (showAllReminders) {
                 check(!andOpen)
 
-                AllRemindersDialogFragment.newInstance(showAllRemindersPlural)
+                AllRemindersDialogFragment.newInstance()
                     .apply { listener = allRemindersListener }
                     .show(supportFragmentManager, TAG_ALL_REMINDERS)
             } else {

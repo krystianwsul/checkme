@@ -463,23 +463,24 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
         data class Task(
             override val name: String,
             override val childEntryDatas: List<Task>,
-            override val entryKey: ParentKey,
+            private val taskKey: TaskKey,
             override val details: String?,
             override val note: String?,
-            override val sortKey: SortKey,
-            private val projectUsers: Map<UserKey, UserData>,
+            override val sortKey: SortKey.TaskSortKey,
             private val projectKey: ProjectKey<*>,
         ) : ParentEntryData() {
 
             override val normalizedFields by lazy { listOfNotNull(name, note).map { it.normalized() } }
 
+            override val entryKey = ParentKey.Task(taskKey)
+
             override fun normalize() {
                 normalizedFields
             }
 
-            override fun matchesTaskKey(taskKey: TaskKey) = (entryKey as? ParentKey.Task)?.taskKey == taskKey
+            override fun matchesTaskKey(taskKey: TaskKey) = this.taskKey == taskKey
 
-            override fun toParent() = ParentScheduleManager.Parent(name, entryKey, projectUsers, projectKey)
+            override fun toParent() = ParentScheduleManager.Parent(name, entryKey, mapOf(), projectKey)
         }
     }
 

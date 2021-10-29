@@ -646,18 +646,7 @@ private fun DomainFactory.getParentTreeDatas(
     parentTreeDatas += getAllTasks().asSequence()
         .filter { it.showAsParent(now, excludedTaskKeys) }
         .filter { it.isTopLevelTask(now) && (it.project as? SharedProject)?.notDeleted != true }
-        .map {
-            EditViewModel.ParentEntryData.Task(
-                it.name,
-                getTaskListChildTaskDatas(now, it, excludedTaskKeys),
-                EditViewModel.ParentKey.Task(it.taskKey),
-                it.getScheduleText(ScheduleText, now),
-                it.note,
-                EditViewModel.SortKey.TaskSortKey(it.startExactTimeStamp),
-                mapOf(),
-                it.project.projectKey,
-            )
-        }
+        .map { it.toParentEntryData(this, now, excludedTaskKeys) }
 
     parentTreeDatas += projectsFactory.sharedProjects
         .values
@@ -683,18 +672,7 @@ private fun DomainFactory.getProjectTaskTreeDatas(
     return project.getAllTasks()
         .filter { it.showAsParent(now, excludedTaskKeys) }
         .filter { it.isTopLevelTask(now) }
-        .map {
-            EditViewModel.ParentEntryData.Task(
-                it.name,
-                getTaskListChildTaskDatas(now, it, excludedTaskKeys),
-                EditViewModel.ParentKey.Task(it.taskKey),
-                it.getScheduleText(ScheduleText, now),
-                it.note,
-                EditViewModel.SortKey.TaskSortKey(it.startExactTimeStamp),
-                mapOf(),
-                it.project.projectKey,
-            )
-        }
+        .map { it.toParentEntryData(this, now, excludedTaskKeys) }
         .toList()
 }
 
@@ -773,28 +751,31 @@ private fun DomainFactory.joinTasks(
         .forEach { it.hide() }
 }
 
+private fun Task.toParentEntryData(
+    domainFactory: DomainFactory,
+    now: ExactTimeStamp.Local,
+    excludedTaskKeys: Set<TaskKey>,
+    scheduleTextExactTimeStamp: ExactTimeStamp = now,
+) = EditViewModel.ParentEntryData.Task(
+    name,
+    domainFactory.getTaskListChildTaskDatas(now, this, excludedTaskKeys),
+    taskKey,
+    getScheduleText(ScheduleText, scheduleTextExactTimeStamp),
+    note,
+    EditViewModel.SortKey.TaskSortKey(startExactTimeStamp),
+    project.projectKey,
+)
+
 private fun DomainFactory.getTaskListChildTaskDatas(
     now: ExactTimeStamp.Local,
     parentTask: Task,
     excludedTaskKeys: Set<TaskKey>,
-): List<EditViewModel.ParentEntryData.Task> =
-    parentTask.getChildTaskHierarchies(now)
-        .asSequence()
-        .map { it.childTask }
-        .filter { it.showAsParent(now, excludedTaskKeys) }
-        .map { childTask ->
-            EditViewModel.ParentEntryData.Task(
-                childTask.name,
-                getTaskListChildTaskDatas(now, childTask, excludedTaskKeys),
-                EditViewModel.ParentKey.Task(childTask.taskKey),
-                childTask.getScheduleText(ScheduleText, childTask.getHierarchyExactTimeStamp(now)),
-                childTask.note,
-                EditViewModel.SortKey.TaskSortKey(childTask.startExactTimeStamp),
-                mapOf(),
-                childTask.project.projectKey,
-            )
-        }
-        .toList()
+): List<EditViewModel.ParentEntryData.Task> = parentTask.getChildTaskHierarchies(now)
+    .asSequence()
+    .map { it.childTask }
+    .filter { it.showAsParent(now, excludedTaskKeys) }
+    .map { it.toParentEntryData(this, now, excludedTaskKeys, it.getHierarchyExactTimeStamp(now)) }
+    .toList()
 
 private fun DomainFactory.copyTask(now: ExactTimeStamp.Local, task: RootTask, copyTaskKey: TaskKey) {
     val copiedTask = getTaskForce(copyTaskKey)

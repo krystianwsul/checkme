@@ -423,7 +423,7 @@ class EditActivity : NavBarActivity() {
         .parentScheduleManager
         .schedules
         .any { editViewModel.delegate.getError(it) != null }
-        .also { if (it) timeRelay.accept(Unit) }
+        .also { if (it) timeRelay.accept(Unit) } // todo add instance update error state on parent change
 
     override fun onDestroy() {
         unregisterReceiver(timeReceiver)
@@ -445,6 +445,7 @@ class EditActivity : NavBarActivity() {
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        @Suppress("DEPRECATION")
         super.onActivityResult(requestCode, resultCode, data)
 
         if (requestCode == REQUEST_CREATE_PARENT) {
@@ -1037,13 +1038,13 @@ class EditActivity : NavBarActivity() {
                 }
 
                 ParentPickerFragment.AdapterData(it.parentTreeDatas, filterCriteria)
-            }!!
+            }
         }
 
         private val queryRelay = BehaviorRelay.create<String>()
 
         override val filterCriteriaObservable by lazy {
-            queryRelay.distinctUntilChanged().map<FilterCriteria> { FilterCriteria.Full(it) }!!
+            queryRelay.distinctUntilChanged().map<FilterCriteria> { FilterCriteria.Full(it) }
         }
 
         override val initialScrollMatcher by lazy {
@@ -1071,6 +1072,7 @@ class EditActivity : NavBarActivity() {
                 .parent = null
         }
 
+        @Suppress("DEPRECATION")
         override fun onNewEntry(nameHint: String?) = startActivityForResult(
             getParametersIntent(
                 editViewModel.delegate

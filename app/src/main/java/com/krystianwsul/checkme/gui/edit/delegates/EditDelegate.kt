@@ -205,7 +205,10 @@ abstract class EditDelegate(
                 check(sharedProjectParameters == null)
                 check(allReminders == null)
 
-                val parentTaskKey = (parentScheduleManager.parent!!.parentKey as EditViewModel.ParentKey.Task).taskKey
+                val parentTaskKey = parentScheduleManager.parent!!
+                    .parentKey
+                    .let { it as EditViewModel.ParentKey.Task }
+                    .taskKey
 
                 createTaskWithParent(createParameters, parentTaskKey)
             }

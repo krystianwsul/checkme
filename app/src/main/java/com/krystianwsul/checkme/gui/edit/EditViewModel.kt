@@ -431,14 +431,18 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
     sealed class ParentEntryData : ParentPickerFragment.EntryData {
 
         abstract override val childEntryDatas: Collection<Task>
+        abstract override val entryKey: ParentKey
 
-        abstract fun toParent(): ParentScheduleManager.Parent
+        protected abstract val projectKey: ProjectKey<*>
+        protected abstract val projectUsers: Map<UserKey, UserData>
+
+        fun toParent() = ParentScheduleManager.Parent(name, entryKey, projectUsers, projectKey)
 
         data class Project(
             override val name: String,
             override val childEntryDatas: List<Task>,
-            private val projectKey: ProjectKey.Shared,
-            private val projectUsers: Map<UserKey, UserData>,
+            override val projectKey: ProjectKey.Shared,
+            override val projectUsers: Map<UserKey, UserData>,
         ) : ParentEntryData() {
 
             override val normalizedFields by lazy { listOfNotNull(name, note).map { it.normalized() } }
@@ -456,8 +460,6 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
             }
 
             override fun matchesTaskKey(taskKey: TaskKey) = false
-
-            override fun toParent() = ParentScheduleManager.Parent(name, entryKey, projectUsers, projectKey)
         }
 
         data class Task(
@@ -467,20 +469,20 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
             override val details: String?,
             override val note: String?,
             override val sortKey: SortKey.TaskSortKey,
-            private val projectKey: ProjectKey<*>,
+            override val projectKey: ProjectKey<*>,
         ) : ParentEntryData() {
 
             override val normalizedFields by lazy { listOfNotNull(name, note).map { it.normalized() } }
 
             override val entryKey = ParentKey.Task(taskKey)
 
+            override val projectUsers = mapOf<UserKey, UserData>()
+
             override fun normalize() {
                 normalizedFields
             }
 
             override fun matchesTaskKey(taskKey: TaskKey) = this.taskKey == taskKey
-
-            override fun toParent() = ParentScheduleManager.Parent(name, entryKey, mapOf(), projectKey)
         }
     }
 

@@ -16,20 +16,20 @@ import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 
 class CopyExistingTaskEditDelegate(
-        private val parameters: EditParameters.Copy,
-        data: EditViewModel.MainData,
-        savedInstanceState: Bundle?,
-        compositeDisposable: CompositeDisposable,
-        storeParentKey: (EditViewModel.ParentKey?, Boolean) -> Unit,
+    private val parameters: EditParameters.Copy,
+    data: EditViewModel.MainData,
+    savedInstanceState: Bundle?,
+    compositeDisposable: CompositeDisposable,
+    storeParentKey: (EditViewModel.ParentKey?, Boolean) -> Unit,
 ) : ExistingTaskEditDelegate(data, savedInstanceState, compositeDisposable, storeParentKey) {
 
     override fun createTaskWithSchedule(
         createParameters: CreateParameters,
         scheduleDatas: List<ScheduleData>,
         sharedProjectParameters: SharedProjectParameters?,
-        allReminders: Boolean?,
+        joinAllReminders: Boolean?,
     ): Single<CreateResult> {
-        check(allReminders == null)
+        check(joinAllReminders == null)
 
         return AndroidDomainUpdater.createScheduleTopLevelTask(
             DomainListenerManager.NotificationType.All,
@@ -38,27 +38,30 @@ class CopyExistingTaskEditDelegate(
             sharedProjectParameters,
             parameters.taskKey,
         )
-                .observeOn(AndroidSchedulers.mainThread())
-                .applyCreatedTaskKey()
+            .observeOn(AndroidSchedulers.mainThread())
+            .applyCreatedTaskKey()
     }
 
     override fun createTaskWithParent(
-            createParameters: CreateParameters,
-            parentTaskKey: TaskKey,
+        createParameters: CreateParameters,
+        parentTaskKey: TaskKey,
+        addToAllInstances: Boolean?,
     ): Single<CreateResult> {
+        check(addToAllInstances == null)
+
         return AndroidDomainUpdater.createChildTask(
             DomainListenerManager.NotificationType.All,
-            parentTaskKey,
+            CreateTaskEditDelegate.ParentParameter.Task(parentTaskKey),
             createParameters,
             parameters.taskKey,
         )
-                .observeOn(AndroidSchedulers.mainThread())
-                .applyCreatedTaskKey()
+            .observeOn(AndroidSchedulers.mainThread())
+            .applyCreatedTaskKey()
     }
 
     override fun createTaskWithoutReminder(
-            createParameters: CreateParameters,
-            sharedProjectKey: ProjectKey.Shared?,
+        createParameters: CreateParameters,
+        sharedProjectKey: ProjectKey.Shared?,
     ): Single<CreateResult> {
         return AndroidDomainUpdater.createTopLevelTask(
             DomainListenerManager.NotificationType.All,
@@ -66,7 +69,7 @@ class CopyExistingTaskEditDelegate(
             sharedProjectKey,
             parameters.taskKey,
         )
-                .observeOn(AndroidSchedulers.mainThread())
-                .applyCreatedTaskKey()
+            .observeOn(AndroidSchedulers.mainThread())
+            .applyCreatedTaskKey()
     }
 }

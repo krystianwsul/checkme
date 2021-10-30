@@ -8,6 +8,7 @@ import com.krystianwsul.checkme.domainmodel.update.SingleDomainUpdate
 import com.krystianwsul.checkme.gui.edit.EditParameters
 import com.krystianwsul.checkme.gui.edit.EditViewModel
 import com.krystianwsul.checkme.gui.edit.ParentScheduleManager
+import com.krystianwsul.checkme.gui.edit.delegates.CreateTaskEditDelegate
 import com.krystianwsul.checkme.gui.edit.delegates.EditDelegate
 import com.krystianwsul.checkme.upload.Uploader
 import com.krystianwsul.checkme.utils.newUuid
@@ -243,28 +244,57 @@ private fun RootTask.toCreateResult(now: ExactTimeStamp.Local) =
 
 @CheckResult
 fun DomainUpdater.createChildTask(
+    // todo add instance separate class
     notificationType: DomainListenerManager.NotificationType,
-    parentTaskKey: TaskKey,
+    parentParameter: CreateTaskEditDelegate.ParentParameter, // todo add instance move to new class
     createParameters: EditDelegate.CreateParameters,
     copyTaskKey: TaskKey? = null,
 ): Single<EditDelegate.CreateResult> = SingleDomainUpdate.create("createChildTask") { now ->
     check(createParameters.name.isNotEmpty())
 
     val imageUuid = createParameters.imagePath?.let { newUuid() }
+    val imageJson = imageUuid?.let { TaskJson.Image(it, uuid) }
 
-    lateinit var childTask: RootTask
-    trackRootTaskIds {
-        val parentTask = convertToRoot(getTaskForce(parentTaskKey), now)
-        parentTask.requireNotDeleted()
+    val childTask = trackRootTaskIds {
+        when (parentParameter) {
+            is CreateTaskEditDelegate.ParentParameter.Task -> {
+                val parentTask = convertToRoot(getTaskForce(parentParameter.taskKey), now)
+                parentTask.requireNotDeleted()
 
-        childTask = createChildTask(
-            now,
-            parentTask,
-            createParameters.name,
-            createParameters.note,
-            imageUuid?.let { TaskJson.Image(it, uuid) },
-            copyTaskKey,
-        )
+                createChildTask(
+                    now,
+                    parentTask,
+                    createParameters.name,
+                    createParameters.note,
+                    imageJson,
+                    copyTaskKey,
+                )
+            }
+            is CreateTaskEditDelegate.ParentParameter.Instance -> {
+                val parentTask = convertToRoot(getTaskForce(parentParameter.instanceKey.taskKey), now)
+                parentTask.requireNotDeleted()
+
+                val migratedInstanceScheduleKey = migrateInstanceScheduleKey(
+                    parentTask,
+                    parentParameter.instanceKey.instanceScheduleKey,
+                    now,
+                )
+
+                val parentInstance = parentTask.getInstance(migratedInstanceScheduleKey)
+
+                val scheduleTime = parentInstance.scheduleTime
+
+                createScheduleTopLevelTask(
+                    now,
+                    createParameters.name,
+                    listOf(Pair(ScheduleData.Single(parentInstance.scheduleDate, scheduleTime.timePair), scheduleTime)),
+                    createParameters.note,
+                    parentTask.project.projectKey,
+                    imageUuid,
+                    this,
+                ).also { it.getInstance(migratedInstanceScheduleKey).setParentState(parentInstance.instanceKey) }
+            }
+        }
     }
 
     imageUuid?.let { Uploader.addUpload(deviceDbInfo, childTask.taskKey, it, createParameters.imagePath) }
@@ -353,7 +383,7 @@ fun DomainUpdater.updateScheduleTask(
     }
 
     finalTask.apply {
-        setName(name, note)
+        setName(createParameters.name, createParameters.note)
 
         if (createParameters.imagePath != null) setImage(deviceDbInfo, imageUuid?.let { ImageState.Local(imageUuid) })
     }
@@ -690,6 +720,23 @@ private fun Task.showAsParent(now: ExactTimeStamp.Local, excludedTaskKeys: Set<T
     return true
 }
 
+private fun DomainFactory.migrateInstanceScheduleKey(
+    task: RootTask,
+    instanceScheduleKey: InstanceScheduleKey,
+    now: ExactTimeStamp.Local,
+): InstanceScheduleKey {
+    val originalTime = getTime(instanceScheduleKey.scheduleTimePair)
+
+    val migratedTime = task.getOrCopyTime(
+        instanceScheduleKey.scheduleDate.dayOfWeek,
+        originalTime,
+        this,
+        now,
+    )
+
+    return InstanceScheduleKey(instanceScheduleKey.scheduleDate, migratedTime.timePair)
+}
+
 private fun DomainFactory.joinJoinables(
     newParentTask: RootTask,
     joinableMap: List<Pair<EditParameters.Join.Joinable, RootTask>>,
@@ -709,22 +756,10 @@ private fun DomainFactory.joinJoinables(
         when (joinable) {
             is EditParameters.Join.Joinable.Task -> addChildToParent()
             is EditParameters.Join.Joinable.Instance -> {
-                val migratedScheduleKey = joinable.instanceKey
-                    .instanceScheduleKey
-                    .run {
-                        val originalTime = getTime(scheduleTimePair)
+                val migratedInstanceScheduleKey =
+                    migrateInstanceScheduleKey(task, joinable.instanceKey.instanceScheduleKey, now)
 
-                        val migratedTime = task.getOrCopyTime(
-                            scheduleDate.dayOfWeek,
-                            originalTime,
-                            this@joinJoinables,
-                            now,
-                        )
-
-                        InstanceScheduleKey(scheduleDate, migratedTime.timePair)
-                    }
-
-                val instance = task.getInstance(migratedScheduleKey)
+                val instance = task.getInstance(migratedInstanceScheduleKey)
 
                 if (parentTaskHasOtherInstances || task.hasOtherVisibleInstances(now, joinable.instanceKey)) {
                     instance.setParentState(Instance.ParentState.Parent(parentInstanceKey))

@@ -9,6 +9,7 @@ import com.krystianwsul.checkme.domainmodel.extensions.createScheduleTopLevelTas
 import com.krystianwsul.checkme.domainmodel.extensions.createTopLevelTask
 import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
 import com.krystianwsul.checkme.gui.edit.*
+import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ScheduleData
 import com.krystianwsul.common.utils.TaskKey
@@ -40,14 +41,14 @@ class CreateTaskEditDelegate(
 
                 initialStateGetter = {
                     parameters.parentScheduleState ?: ParentScheduleState(
-                            listOfNotNull(
-                                    firstScheduleEntry.takeIf {
-                                        parameters.hint?.showInitialSchedule != false &&
-                                                Preferences.addDefaultReminder &&
-                                                parameters.showFirstSchedule
-                                    }
-                            ),
-                            setOf()
+                        listOfNotNull(
+                            firstScheduleEntry.takeIf {
+                                parameters.hint?.showInitialSchedule != false &&
+                                        Preferences.addDefaultReminder &&
+                                        parameters.showFirstSchedule
+                            }
+                        ),
+                        setOf()
                     )
                 }
             }
@@ -58,12 +59,12 @@ class CreateTaskEditDelegate(
                 val initialParentKey = parameters.parentTaskKeyHint?.toParentKey()
                 initialStateGetter = {
                     ParentScheduleState(
-                            listOfNotNull(
-                                    firstScheduleEntry.takeIf {
-                                        initialParentKey == null && Preferences.addDefaultReminder
-                                    }
-                            ),
-                            setOf()
+                        listOfNotNull(
+                            firstScheduleEntry.takeIf {
+                                initialParentKey == null && Preferences.addDefaultReminder
+                            }
+                        ),
+                        setOf()
                     )
                 }
             }
@@ -79,8 +80,8 @@ class CreateTaskEditDelegate(
 
                 initialStateGetter = {
                     ParentScheduleState(
-                            listOfNotNull(firstScheduleEntry.takeIf { Preferences.addDefaultReminder }),
-                            setOf(),
+                        listOfNotNull(firstScheduleEntry.takeIf { Preferences.addDefaultReminder }),
+                        setOf(),
                     )
                 }
             }
@@ -134,9 +135,9 @@ class CreateTaskEditDelegate(
         createParameters: CreateParameters,
         scheduleDatas: List<ScheduleData>,
         sharedProjectParameters: SharedProjectParameters?,
-        allReminders: Boolean?,
+        joinAllReminders: Boolean?,
     ): Single<CreateResult> {
-        check(allReminders == null)
+        check(joinAllReminders == null)
 
         return AndroidDomainUpdater.createScheduleTopLevelTask(
             DomainListenerManager.NotificationType.All,
@@ -144,35 +145,51 @@ class CreateTaskEditDelegate(
             scheduleDatas,
             sharedProjectParameters,
         )
-                .observeOn(AndroidSchedulers.mainThread())
-                .applyCreatedTaskKey()
+            .observeOn(AndroidSchedulers.mainThread())
+            .applyCreatedTaskKey()
     }
 
     override fun createTaskWithParent(
-            createParameters: CreateParameters,
-            parentTaskKey: TaskKey,
+        createParameters: CreateParameters,
+        parentTaskKey: TaskKey,
+        addToAllInstances: Boolean?,
     ): Single<CreateResult> {
         if (parameters is EditParameters.Share) ShortcutManager.addShortcut(parentTaskKey)
 
+        val parentParameter = if (addToAllInstances == false) {
+            val parentInstanceKey = (parameters as EditParameters.Create).hint!!.instanceKey!!
+            check(parentInstanceKey.taskKey == parentTaskKey)
+
+            ParentParameter.Instance(parentInstanceKey)
+        } else {
+            ParentParameter.Task(parentTaskKey)
+        }
+
         return AndroidDomainUpdater.createChildTask(
             DomainListenerManager.NotificationType.All,
-            parentTaskKey,
+            parentParameter,
             createParameters,
         )
-                .observeOn(AndroidSchedulers.mainThread())
-                .applyCreatedTaskKey()
+            .observeOn(AndroidSchedulers.mainThread())
+            .applyCreatedTaskKey()
     }
 
     override fun createTaskWithoutReminder(
-            createParameters: CreateParameters,
-            sharedProjectKey: ProjectKey.Shared?,
+        createParameters: CreateParameters,
+        sharedProjectKey: ProjectKey.Shared?,
     ): Single<CreateResult> {
         return AndroidDomainUpdater.createTopLevelTask(
             DomainListenerManager.NotificationType.All,
             createParameters,
             sharedProjectKey,
         )
-                .observeOn(AndroidSchedulers.mainThread())
-                .applyCreatedTaskKey()
+            .observeOn(AndroidSchedulers.mainThread())
+            .applyCreatedTaskKey()
+    }
+
+    sealed interface ParentParameter {
+
+        data class Task(val taskKey: TaskKey) : ParentParameter
+        data class Instance(val instanceKey: InstanceKey) : ParentParameter
     }
 }

@@ -36,7 +36,8 @@ class Instance private constructor(
     val scheduleKey by lazy { InstanceScheduleKey(scheduleDate, data.scheduleTimePair) }
 
     val scheduleDate get() = data.scheduleDate
-    val scheduleDateTime get() = DateTime(scheduleDate, data.scheduleTime)
+    val scheduleTime get() = data.scheduleTime
+    val scheduleDateTime get() = DateTime(scheduleDate, scheduleTime)
 
     val instanceDate get() = data.instanceDate
     val instanceTime get() = data.instanceTime
@@ -619,6 +620,8 @@ class Instance private constructor(
             .let(task.project::getAssignedTo)
             .map { it.value }
     }
+
+    fun setParentState(parentInstanceKey: InstanceKey) = setParentState(ParentState.Parent(parentInstanceKey))
 
     fun setParentState(newParentState: ParentState) {
         check(newParentState.parentInstanceKey != instanceKey)

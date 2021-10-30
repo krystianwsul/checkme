@@ -137,9 +137,13 @@ class EditActivity : NavBarActivity() {
         override fun onReceive(context: Context?, intent: Intent?) = timeRelay.accept(Unit)
     }
 
-    private val joinAllRemindersListener = { allReminders: Boolean -> save(false, allReminders) }
+    private val joinAllRemindersListener = { allReminders: Boolean ->
+        save(false, EditDelegate.DialogResult.JoinAllInstances(allReminders))
+    }
 
-    private val addToAllRemindersListener = { allReminders: Boolean, andOpen: Boolean -> save(andOpen) }
+    private val addToAllRemindersListener = { allReminders: Boolean, andOpen: Boolean ->
+        save(andOpen, EditDelegate.DialogResult.AddToAllInstances(allReminders))
+    }
 
     override val rootView get() = binding.root
 
@@ -177,7 +181,7 @@ class EditActivity : NavBarActivity() {
                 EditDelegate.ShowDialog.ADD -> AddToAllRemindersDialogFragment.newInstance(andOpen)
                     .apply { listener = addToAllRemindersListener }
                     .show(supportFragmentManager, TAG_ADD_TO_ALL_REMINDERS)
-                EditDelegate.ShowDialog.NONE -> save(andOpen)
+                EditDelegate.ShowDialog.NONE -> save(andOpen, EditDelegate.DialogResult.None)
             }
         }
 
@@ -453,7 +457,7 @@ class EditActivity : NavBarActivity() {
         }
     }
 
-    private fun save(andOpen: Boolean, allReminders: Boolean? = null) {
+    private fun save(andOpen: Boolean, dialogResult: EditDelegate.DialogResult) {
         val name = binding.editToolbarEditTextInclude
             .toolbarEditText
             .text
@@ -473,7 +477,7 @@ class EditActivity : NavBarActivity() {
         )
 
         editViewModel.delegate
-            .createTask(createParameters, allReminders)
+            .createTask(createParameters, dialogResult)
             .subscribeBy {
                 if (andOpen) startActivity(it.intent)
 

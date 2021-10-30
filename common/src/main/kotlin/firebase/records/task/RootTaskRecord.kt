@@ -43,10 +43,9 @@ class RootTaskRecord private constructor(
 
     override val createObject: RootTaskJson // because of duplicate functionality when converting local task
         get() {
-            if (update != null)
-                taskJson.instances = instanceRecords.entries
-                    .associateBy({ InstanceRecord.scheduleKeyToString(it.key) }, { it.value.createObject })
-                    .toMutableMap()
+            taskJson.instances = instanceRecords.entries
+                .associateBy({ InstanceRecord.scheduleKeyToString(it.key) }, { it.value.createObject })
+                .toMutableMap()
 
             val scheduleWrappers = HashMap<ScheduleId, RootScheduleWrapper>()
 

@@ -180,14 +180,20 @@ abstract class EditDelegate(
 
     fun setParentTask(taskKey: TaskKey) = storeParentKey(EditViewModel.ParentKey.Task(taskKey), true)
 
-    fun createTask(createParameters: CreateParameters, showAllReminders: Boolean?): Single<CreateResult> {
-        check((showAllReminders != null) == (showDialog() == ShowDialog.JOIN))
+    fun createTask(createParameters: CreateParameters, dialogResult: DialogResult): Single<CreateResult> {
+        dialogResult.matchesShowDialog(showDialog())
 
         val projectId = (parentScheduleManager.parent?.parentKey as? EditViewModel.ParentKey.Project)?.projectId
         val assignedTo = parentScheduleManager.assignedTo
 
         return when {
             parentScheduleManager.schedules.isNotEmpty() -> {
+                val joinAllInstances = when (dialogResult) {
+                    is DialogResult.None -> null
+                    is DialogResult.JoinAllInstances -> dialogResult.value
+                    is DialogResult.AddToAllInstances -> throw IllegalArgumentException()
+                }
+
                 val sharedProjectParameters = if (projectId == null) {
                     check(assignedTo.isEmpty())
 
@@ -200,23 +206,28 @@ abstract class EditDelegate(
                     createParameters,
                     parentScheduleManager.schedules.map { it.scheduleDataWrapper.scheduleData },
                     sharedProjectParameters,
-                    showAllReminders,
+                    joinAllInstances,
                 )
             }
             parentScheduleManager.parent?.parentKey is EditViewModel.ParentKey.Task -> {
-                check(showAllReminders == null)
                 check(projectId == null)
+
+                val addToAllInstances = when (dialogResult) {
+                    DialogResult.None -> null
+                    is DialogResult.JoinAllInstances -> throw IllegalArgumentException()
+                    is DialogResult.AddToAllInstances -> dialogResult.value
+                }
 
                 val parentTaskKey = parentScheduleManager.parent!!
                     .parentKey
                     .let { it as EditViewModel.ParentKey.Task }
                     .taskKey
 
-                createTaskWithParent(createParameters, parentTaskKey)
+                createTaskWithParent(createParameters, parentTaskKey, addToAllInstances)
             }
             else -> {
                 check(assignedTo.isEmpty())
-                check(showAllReminders == null)
+                check(dialogResult == DialogResult.None)
 
                 createTaskWithoutReminder(createParameters, projectId)
             }
@@ -227,10 +238,14 @@ abstract class EditDelegate(
         createParameters: CreateParameters,
         scheduleDatas: List<ScheduleData>,
         sharedProjectParameters: SharedProjectParameters?,
-        allReminders: Boolean?,
+        joinAllReminders: Boolean?,
     ): Single<CreateResult>
 
-    abstract fun createTaskWithParent(createParameters: CreateParameters, parentTaskKey: TaskKey): Single<CreateResult>
+    abstract fun createTaskWithParent(
+        createParameters: CreateParameters,
+        parentTaskKey: TaskKey,
+        addToAllInstances: Boolean?,
+    ): Single<CreateResult>
 
     abstract fun createTaskWithoutReminder(
         createParameters: CreateParameters,
@@ -277,5 +292,25 @@ abstract class EditDelegate(
     enum class ShowDialog {
 
         JOIN, ADD, NONE
+    }
+
+    sealed class DialogResult {
+
+        abstract fun matchesShowDialog(showDialog: ShowDialog): Boolean
+
+        object None : DialogResult() {
+
+            override fun matchesShowDialog(showDialog: ShowDialog) = true
+        }
+
+        data class JoinAllInstances(val value: Boolean) : DialogResult() {
+
+            override fun matchesShowDialog(showDialog: ShowDialog) = showDialog == ShowDialog.JOIN
+        }
+
+        data class AddToAllInstances(val value: Boolean) : DialogResult() {
+
+            override fun matchesShowDialog(showDialog: ShowDialog) = showDialog == ShowDialog.ADD
+        }
     }
 }

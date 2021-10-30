@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.domainmodel
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.extensions.*
 import com.krystianwsul.checkme.gui.edit.EditParameters
+import com.krystianwsul.checkme.gui.edit.delegates.CreateTaskEditDelegate
 import com.krystianwsul.checkme.gui.edit.delegates.EditDelegate
 import com.krystianwsul.common.firebase.models.task.RootTask
 import com.krystianwsul.common.time.*
@@ -71,7 +72,7 @@ class DomainFactoryTest {
         val taskName2 = "task2"
         val taskKey2 = domainUpdater(now).createChildTask(
             DomainListenerManager.NotificationType.All,
-            taskKey1,
+            CreateTaskEditDelegate.ParentParameter.Task(taskKey1),
             EditDelegate.CreateParameters(taskName2),
         )
             .blockingGet()
@@ -127,7 +128,7 @@ class DomainFactoryTest {
 
         val doneChildTaskKey = domainUpdater(now).createChildTask(
             DomainListenerManager.NotificationType.All,
-            parentTask1Key,
+            CreateTaskEditDelegate.ParentParameter.Task(parentTask1Key),
             EditDelegate.CreateParameters("childTask1"),
             null,
         )
@@ -136,7 +137,7 @@ class DomainFactoryTest {
 
         val notDoneChildTaskKey = domainUpdater(now).createChildTask(
             DomainListenerManager.NotificationType.All,
-            parentTask1Key,
+            CreateTaskEditDelegate.ParentParameter.Task(parentTask1Key),
             EditDelegate.CreateParameters("childTask2"),
             null,
         )
@@ -239,7 +240,7 @@ class DomainFactoryTest {
 
         domainUpdater(now).createChildTask(
             DomainListenerManager.NotificationType.All,
-            parentTaskKey,
+            CreateTaskEditDelegate.ParentParameter.Task(parentTaskKey),
             EditDelegate.CreateParameters("childTask"),
             null,
         ).blockingGet()
@@ -280,7 +281,7 @@ class DomainFactoryTest {
 
         val task2Key = domainUpdater(now).createChildTask(
             DomainListenerManager.NotificationType.All,
-            task1Key,
+            CreateTaskEditDelegate.ParentParameter.Task(task1Key),
             EditDelegate.CreateParameters("task2"),
             null,
         )
@@ -661,7 +662,7 @@ class DomainFactoryTest {
 
         val childTaskKey = domainUpdater(now).createChildTask(
             DomainListenerManager.NotificationType.All,
-            parentTaskKey,
+            CreateTaskEditDelegate.ParentParameter.Task(parentTaskKey),
             EditDelegate.CreateParameters("child task"),
         )
             .blockingGet()
@@ -713,7 +714,7 @@ class DomainFactoryTest {
 
         domainUpdater(now).createChildTask(
             DomainListenerManager.NotificationType.All,
-            parentTaskKey,
+            CreateTaskEditDelegate.ParentParameter.Task(parentTaskKey),
             EditDelegate.CreateParameters("child task"),
         ).blockingGet()
 
@@ -1032,7 +1033,7 @@ class DomainFactoryTest {
 
         val taskKey2 = domainUpdater(now).createChildTask(
             DomainListenerManager.NotificationType.All,
-            taskKey1,
+            CreateTaskEditDelegate.ParentParameter.Task(taskKey1),
             EditDelegate.CreateParameters("task2"),
         )
             .blockingGet()
@@ -1040,7 +1041,7 @@ class DomainFactoryTest {
 
         val taskKey3 = domainUpdater(now).createChildTask(
             DomainListenerManager.NotificationType.All,
-            taskKey2,
+            CreateTaskEditDelegate.ParentParameter.Task(taskKey2),
             EditDelegate.CreateParameters("task3"),
         )
             .blockingGet()

@@ -261,6 +261,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
                     findItem(R.id.instance_menu_select_all).isVisible = selectAllVisible
                     findItem(R.id.instanceMenuCopyTask).isVisible = data?.taskCurrent == true
                     findItem(R.id.instanceMenuWebSearch).isVisible = data != null
+                    findItem(R.id.instanceMenuMigrateDescription).isVisible = data?.canMigrateDescription == true
                 }
     }
 
@@ -367,12 +368,15 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
                             deleteTasks(showInstanceViewModel.dataId, setOf(instanceKey.taskKey))
                         }
                         R.id.instance_menu_select_all -> binding.groupListFragment
-                                .treeViewAdapter
-                                .selectAll()
+                            .treeViewAdapter
+                            .selectAll()
                         R.id.instanceMenuCopyTask -> startActivity(
-                                EditActivity.getParametersIntent(EditParameters.Copy(data!!.taskKey))
+                            EditActivity.getParametersIntent(EditParameters.Copy(data!!.taskKey))
                         )
                         R.id.instanceMenuWebSearch -> startActivity(webSearchIntent(data!!.name))
+                        R.id.instanceMenuMigrateDescription -> {
+                            // todo migrate description
+                        }
                         else -> throw UnsupportedOperationException()
                     }
                 }

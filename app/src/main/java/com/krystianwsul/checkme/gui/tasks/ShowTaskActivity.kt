@@ -221,6 +221,7 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.Listener {
                 findItem(R.id.task_menu_show_instances).isVisible = data != null
                 findItem(R.id.taskMenuCopyTask).isVisible = data?.current == true
                 findItem(R.id.taskMenuWebSearch).isVisible = data != null
+                findItem(R.id.taskMenuMigrateDescription).isVisible = data?.canMigrateDescription == true
             }
     }
 
@@ -252,6 +253,9 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.Listener {
                     R.id.taskMenuCopyTask ->
                         startActivity(EditActivity.getParametersIntent(EditParameters.Copy(taskKey)))
                     R.id.taskMenuWebSearch -> startActivity(webSearchIntent(data!!.name))
+                    R.id.taskMenuMigrateDescription -> {
+                        // todo migrate description
+                    }
                     else -> throw UnsupportedOperationException()
                 }
 

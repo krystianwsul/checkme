@@ -229,6 +229,9 @@ class GroupListFragment @JvmOverloads constructor(
                     GroupMenuUtils.onNotify(selectedDatas, parameters.dataId).addTo(attachedToWindowDisposable)
                 R.id.actionGroupCopyTask -> activity.startActivity(getCopyTasksIntent(selectedDatas.map { it.taskKey }))
                 R.id.actionGroupWebSearch -> activity.startActivity(webSearchIntent(selectedDatas.single().name))
+                R.id.actionGroupMigrateDescription -> {
+                    // todo migrate description
+                }
                 else -> throw UnsupportedOperationException()
             }
 
@@ -270,7 +273,8 @@ class GroupListFragment @JvmOverloads constructor(
                     R.id.action_group_edit_task to selectedData.taskCurrent,
                     R.id.action_group_join to false,
                     R.id.action_group_delete_task to selectedData.taskCurrent,
-                    R.id.actionGroupWebSearch to true
+                    R.id.actionGroupWebSearch to true,
+                    R.id.actionGroupMigrateDescription to selectedData.canMigrateDescription,
                 )
             } else {
                 check(selectedDatas.size > 1)
@@ -279,6 +283,7 @@ class GroupListFragment @JvmOverloads constructor(
                     R.id.action_group_show_task to false,
                     R.id.action_group_edit_task to false,
                     R.id.actionGroupWebSearch to false,
+                    R.id.actionGroupMigrateDescription to false,
                 )
 
                 val allCurrent = selectedDatas.all { it.taskCurrent }

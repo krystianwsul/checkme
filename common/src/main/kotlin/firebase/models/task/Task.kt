@@ -185,6 +185,8 @@ sealed class Task(
         return getInstances(null, null, now).any { it.canAddSubtask(now, hack24) } to "based off instances"
     }
 
+    fun canMigrateDescription(now: ExactTimeStamp.Local) = !note.isNullOrEmpty() && isVisible(now)
+
     private fun getTopLevelTask(exactTimeStamp: ExactTimeStamp): Task =
         getParentTask(exactTimeStamp)?.getTopLevelTask(exactTimeStamp) ?: this
 

@@ -37,6 +37,7 @@ fun DomainFactory.getShowTasksData(parameters: ShowTasksActivity.Parameters): Sh
             getImage(deviceDbInfo),
             notDeleted,
             isVisible(now),
+            canMigrateDescription(now),
             ordinal,
             getProjectInfo(now, parameters.showProjects),
             isAssignedToMe(now, myUserFactory.user),

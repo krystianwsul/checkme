@@ -62,6 +62,6 @@
         android:title="@string/migrateDescription"
         android:orderInCategory="800"
         android:icon="@drawable/ic_baseline_description_24"
-        app:showAsAction="ifRoom" /><!-- todo migrate description -->
+        app:showAsAction="ifRoom" />
 
 </menu>

@@ -37,6 +37,7 @@ fun DomainFactory.getShowTaskData(requestTaskKey: TaskKey): ShowTaskViewModel.Da
                     childTask.getImage(deviceDbInfo),
                     childTask.notDeleted,
                     childTask.isVisible(now),
+                    childTask.canMigrateDescription(now),
                     childTask.ordinal,
                     childTask.getProjectInfo(now),
                     childTask.isAssignedToMe(now, myUserFactory.user),
@@ -68,6 +69,7 @@ fun DomainFactory.getShowTaskData(requestTaskKey: TaskKey): ShowTaskViewModel.Da
         ),
         task.getImage(deviceDbInfo),
         task.notDeleted,
+        task.canMigrateDescription(now),
         taskKey,
     )
 }

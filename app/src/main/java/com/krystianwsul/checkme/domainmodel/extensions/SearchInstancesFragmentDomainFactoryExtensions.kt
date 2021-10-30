@@ -76,6 +76,7 @@ fun DomainFactory.getCappedInstanceAndTaskDatas(
                 task.isAssignedToMe(now, myUserFactory.user),
                 task.getProjectInfo(now, includeProjectInfo),
                 task.ordinal,
+                task.canMigrateDescription(now),
             )
         }
         .toList()

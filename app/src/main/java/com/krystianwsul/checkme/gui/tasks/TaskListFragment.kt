@@ -168,6 +168,9 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                 )
                 R.id.actionTaskCopy -> startActivity(getCopyTasksIntent(taskKeys))
                 R.id.actionTaskWebSearch -> startActivity(webSearchIntent(selectedNodes.single().entryData.name))
+                R.id.actionTaskMigrateDescription -> {
+                    // todo migrate description
+                }
                 else -> throw UnsupportedOperationException()
             }
 
@@ -195,6 +198,10 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             val allTasks = selectedNodes.all { it is TaskNode }
 
             return if (allTasks) {
+                val singleTask = selectedNodes.singleOrNull()
+                    ?.let { it as TaskNode }
+                    ?.childTaskData
+
                 val single = selectedNodes.size == 1
 
                 val current = selectedNodes.map { (it as TaskNode).childTaskData }.all { it.current }
@@ -206,6 +213,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                     R.id.action_task_show_instances to single,
                     R.id.actionTaskCopy to current,
                     R.id.actionTaskWebSearch to single,
+                    R.id.actionTaskMigrateDescription to (singleTask?.canMigrateDescription == true),
                 )
             } else {
                 val single = selectedNodes.size == 1
@@ -217,6 +225,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                     R.id.action_task_show_instances to false,
                     R.id.actionTaskCopy to false,
                     R.id.actionTaskWebSearch to single,
+                    R.id.actionTaskMigrateDescription to false,
                 )
             }
         }
@@ -918,6 +927,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         val imageState: ImageState?,
         val current: Boolean,
         override val canAddSubtask: Boolean,
+        val canMigrateDescription: Boolean,
         val ordinal: Double,
         val projectInfo: DetailsNode.ProjectInfo?,
         override val isAssignedToMe: Boolean,

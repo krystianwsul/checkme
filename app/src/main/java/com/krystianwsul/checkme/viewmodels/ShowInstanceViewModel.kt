@@ -22,17 +22,18 @@ class ShowInstanceViewModel : DomainViewModel<ShowInstanceViewModel.Data>() {
     }
 
     data class Data(
-            val name: String,
-            val instanceDateTime: DateTime,
-            val done: Boolean,
-            val taskCurrent: Boolean,
-            val isRootInstance: Boolean,
-            val groupListDataWrapper: GroupListDataWrapper,
-            val notificationShown: Boolean,
-            val displayText: String,
-            val taskKey: TaskKey,
-            val isVisible: Boolean,
-            val newInstanceKey: InstanceKey,
+        val name: String,
+        val instanceDateTime: DateTime,
+        val done: Boolean,
+        val taskCurrent: Boolean,
+        val canMigrateDescription: Boolean,
+        val isRootInstance: Boolean,
+        val groupListDataWrapper: GroupListDataWrapper,
+        val notificationShown: Boolean,
+        val displayText: String,
+        val taskKey: TaskKey,
+        val isVisible: Boolean,
+        val newInstanceKey: InstanceKey,
     ) : DomainData() {
 
         init {

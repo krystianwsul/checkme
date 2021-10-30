@@ -72,7 +72,7 @@ class DomainFactory(
 
     companion object {
 
-        val instanceRelay = BehaviorRelay.createDefault(NullableWrapper<DomainFactory>())!!
+        val instanceRelay = BehaviorRelay.createDefault(NullableWrapper<DomainFactory>())
 
         val nullableInstance get() = instanceRelay.value!!.value
 
@@ -84,7 +84,7 @@ class DomainFactory(
             it.value
                 ?.isWaitingForTasks
                 ?: Observable.just(true)
-        }!!
+        }
     }
 
     var remoteReadTimes: ReadTimes
@@ -442,6 +442,7 @@ class DomainFactory(
             instance.instanceDateTime,
             instance.task.notDeleted,
             instance.canAddSubtask(now),
+            instance.canMigrateDescription(now),
             instance.isRootInstance(),
             instance.getCreateTaskTimePair(projectsFactory.privateProject),
             instance.task.note,
@@ -544,6 +545,7 @@ class DomainFactory(
                     childTask.getImage(deviceDbInfo),
                     childTask.notDeleted,
                     childTask.isVisible(now),
+                    childTask.canMigrateDescription(now),
                     childTask.ordinal,
                     childTask.getProjectInfo(now, includeProjectInfo),
                     childTask.isAssignedToMe(now, myUserFactory.user),

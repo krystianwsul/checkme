@@ -646,6 +646,8 @@ class Instance private constructor(
         return parentInstance?.canAddSubtask(now, hack24) ?: true
     }
 
+    fun canMigrateDescription(now: ExactTimeStamp.Local) = !task.note.isNullOrEmpty() && canAddSubtask(now)
+
     fun getProject(): Project<*> = parentInstance?.getProject() ?: task.project
 
     private sealed class Data {

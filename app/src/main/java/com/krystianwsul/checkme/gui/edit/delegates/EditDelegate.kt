@@ -44,11 +44,7 @@ abstract class EditDelegate(
                 is EditParameters.Copy -> ::CopyExistingTaskEditDelegate.curried()(parameters)
                 is EditParameters.Edit -> ::EditExistingTaskEditDelegate.curried()(parameters)
                 is EditParameters.Join -> ::JoinTasksEditDelegate.curried()(parameters)
-                is EditParameters.Create,
-                is EditParameters.MigrateDescription,
-                is EditParameters.Share,
-                is EditParameters.Shortcut,
-                EditParameters.None -> ::CreateTaskEditDelegate.curried()(parameters)
+                is EditParameters.CreateDelegateParameters -> ::CreateTaskEditDelegate.curried()(parameters)
             }(data)(savedInstanceState)(compositeDisposable)(storeParentKey)
         }
 

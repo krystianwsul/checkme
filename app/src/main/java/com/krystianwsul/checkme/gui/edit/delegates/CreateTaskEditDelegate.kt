@@ -9,6 +9,7 @@ import com.krystianwsul.checkme.domainmodel.extensions.createTopLevelTask
 import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
 import com.krystianwsul.checkme.domainmodel.updates.CreateChildTaskDomainUpdate
 import com.krystianwsul.checkme.gui.edit.*
+import com.krystianwsul.checkme.utils.exhaustive
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ScheduleData
 import com.krystianwsul.common.utils.TaskKey
@@ -17,7 +18,7 @@ import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 
 class CreateTaskEditDelegate(
-    private val parameters: EditParameters,
+    private val parameters: EditParameters.CreateDelegateParameters,
     override var data: EditViewModel.MainData,
     savedInstanceState: Bundle?,
     compositeDisposable: CompositeDisposable,
@@ -50,6 +51,12 @@ class CreateTaskEditDelegate(
                         setOf()
                     )
                 }
+            }
+            is EditParameters.MigrateDescription -> {
+                initialName = "" // todo migrate description
+                scheduleHint = null
+
+                initialStateGetter = { ParentScheduleState.create(setOf()) }
             }
             is EditParameters.Share -> {
                 initialName = parameters.nameHint
@@ -84,8 +91,7 @@ class CreateTaskEditDelegate(
                     )
                 }
             }
-            else -> throw IllegalArgumentException()
-        }
+        }.exhaustive()
 
         parentScheduleManager = ParentMultiScheduleManager(
             savedInstanceState,

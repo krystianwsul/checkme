@@ -44,6 +44,7 @@ interface ParentScheduleManager {
         val projectUsers: Map<UserKey, EditViewModel.UserData>,
         val projectKey: ProjectKey<*>,
         val hasMultipleInstances: Boolean?,
+        val projectParent: Parent?,
     ) {
 
         init {

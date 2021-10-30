@@ -33,7 +33,7 @@ class ParentMultiScheduleManager(
 
     private val scheduleProperty = NonNullRelayProperty(state.schedules) {
         if (it.isNotEmpty() && parent?.parentKey is EditViewModel.ParentKey.Task)
-            parent = null
+            parent = parent!!.projectParent
 
         if (it.isEmpty()) assignedTo = setOf()
     }

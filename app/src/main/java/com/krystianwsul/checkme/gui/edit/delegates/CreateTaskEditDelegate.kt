@@ -113,21 +113,21 @@ class CreateTaskEditDelegate(
         return true
     }
 
-    override fun showAddToAllRemindersDialog(): Boolean {
-        val parent = parentScheduleManager.parent ?: return false
+    override fun showDialog(): ShowDialog {
+        val parent = parentScheduleManager.parent ?: return ShowDialog.NONE
 
         val parentTaskKey = parent.parentKey
             .let { it as? EditViewModel.ParentKey.Task }
             ?.taskKey
-            ?: return false
+            ?: return ShowDialog.NONE
 
-        return if (parentTaskKey != (parameters as? EditParameters.Create)?.hint?.instanceKey?.taskKey) {
+        if (parentTaskKey != (parameters as? EditParameters.Create)?.hint?.instanceKey?.taskKey) {
             check(parent.hasMultipleInstances == null)
 
-            false
-        } else {
-            parent.hasMultipleInstances!!
+            return ShowDialog.NONE
         }
+
+        return if (parent.hasMultipleInstances!!) ShowDialog.ADD else ShowDialog.NONE
     }
 
     override fun createTaskWithSchedule(

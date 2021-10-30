@@ -43,14 +43,14 @@ class JoinTasksEditDelegate(
 
     override val parentScheduleManager = ParentMultiScheduleManager(savedInstanceState, this::initialStateGetter, callbacks)
 
-    override fun showJoinAllRemindersDialog(): Boolean {
-        if (!data.showJoinAllRemindersDialog!!) return false
+    override fun showDialog(): ShowDialog {
+        if (!data.showJoinAllRemindersDialog!!) return ShowDialog.NONE
 
         val schedule = parentScheduleManager.schedules
             .singleOrNull()
-            ?: return false
+            ?: return ShowDialog.NONE
 
-        return schedule.scheduleDataWrapper.scheduleData is ScheduleData.Single
+        return if (schedule.scheduleDataWrapper.scheduleData is ScheduleData.Single) ShowDialog.JOIN else ShowDialog.NONE
     }
 
     override fun createTaskWithSchedule(

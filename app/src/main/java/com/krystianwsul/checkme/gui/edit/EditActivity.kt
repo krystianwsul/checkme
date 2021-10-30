@@ -139,7 +139,7 @@ class EditActivity : NavBarActivity() {
 
     private val joinAllRemindersListener = { allReminders: Boolean -> save(false, allReminders) }
 
-    private val addToAllRemindersListener = { allReminders: Boolean, andOpen: Boolean -> save(andOpen, false) }
+    private val addToAllRemindersListener = { allReminders: Boolean, andOpen: Boolean -> save(andOpen) }
 
     override val rootView get() = binding.root
 
@@ -166,22 +166,18 @@ class EditActivity : NavBarActivity() {
         fun trySave(andOpen: Boolean) {
             if (updateError()) return
 
-            val showAllReminders = editViewModel.delegate.showJoinAllRemindersDialog()
-            val showAddToAllReminders = editViewModel.delegate.showAddToAllRemindersDialog()
+            when (editViewModel.delegate.showDialog()) {
+                EditDelegate.ShowDialog.JOIN -> {
+                    check(!andOpen)
 
-            if (showAllReminders) {
-                check(!andOpen)
-                check(!showAddToAllReminders)
-
-                JoinAllRemindersDialogFragment.newInstance()
-                    .apply { listener = joinAllRemindersListener }
-                    .show(supportFragmentManager, TAG_JOIN_ALL_REMINDERS)
-            } else if (showAddToAllReminders) {
-                AddToAllRemindersDialogFragment.newInstance(andOpen)
+                    JoinAllRemindersDialogFragment.newInstance()
+                        .apply { listener = joinAllRemindersListener }
+                        .show(supportFragmentManager, TAG_JOIN_ALL_REMINDERS)
+                }
+                EditDelegate.ShowDialog.ADD -> AddToAllRemindersDialogFragment.newInstance(andOpen)
                     .apply { listener = addToAllRemindersListener }
                     .show(supportFragmentManager, TAG_ADD_TO_ALL_REMINDERS)
-            } else {
-                save(andOpen)
+                EditDelegate.ShowDialog.NONE -> save(andOpen)
             }
         }
 

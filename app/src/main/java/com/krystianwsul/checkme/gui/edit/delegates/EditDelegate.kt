@@ -172,18 +172,16 @@ abstract class EditDelegate(
     fun removeSchedule(adapterPosition: Int) =
         parentScheduleManager.removeSchedule(adapterPosition - scheduleOffset)
 
-    open fun showJoinAllRemindersDialog(): Boolean {
+    open fun showDialog(): ShowDialog {
         check(data.showJoinAllRemindersDialog == null)
 
-        return false
+        return ShowDialog.NONE
     }
-
-    open fun showAddToAllRemindersDialog() = false
 
     fun setParentTask(taskKey: TaskKey) = storeParentKey(EditViewModel.ParentKey.Task(taskKey), true)
 
     fun createTask(createParameters: CreateParameters, showAllReminders: Boolean?): Single<CreateResult> {
-        check((showAllReminders != null) == showJoinAllRemindersDialog())
+        check((showAllReminders != null) == (showDialog() == ShowDialog.JOIN))
 
         val projectId = (parentScheduleManager.parent?.parentKey as? EditViewModel.ParentKey.Project)?.projectId
         val assignedTo = parentScheduleManager.assignedTo
@@ -274,5 +272,10 @@ abstract class EditDelegate(
 
             override val intent get() = ShowInstanceActivity.getIntent(MyApplication.instance, instanceKey)
         }
+    }
+
+    enum class ShowDialog {
+
+        JOIN, ADD, NONE
     }
 }

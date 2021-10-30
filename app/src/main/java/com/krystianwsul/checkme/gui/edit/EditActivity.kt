@@ -423,7 +423,7 @@ class EditActivity : NavBarActivity() {
         .parentScheduleManager
         .schedules
         .any { editViewModel.delegate.getError(it) != null }
-        .also { if (it) timeRelay.accept(Unit) } // todo add instance update error state on parent change
+        .also { if (it) timeRelay.accept(Unit) }
 
     override fun onDestroy() {
         unregisterReceiver(timeReceiver)

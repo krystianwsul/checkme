@@ -21,6 +21,8 @@ interface ParentScheduleManager {
 
     val changed: Boolean
 
+    fun clearParent()
+
     fun addSchedule(scheduleEntry: ScheduleEntry)
 
     fun setSchedule(position: Int, scheduleEntry: ScheduleEntry)

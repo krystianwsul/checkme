@@ -7,7 +7,10 @@ import com.krystianwsul.checkme.domainmodel.extensions.createJoinChildTask
 import com.krystianwsul.checkme.domainmodel.extensions.createJoinTopLevelTask
 import com.krystianwsul.checkme.domainmodel.extensions.createScheduleJoinTopLevelTask
 import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
-import com.krystianwsul.checkme.gui.edit.*
+import com.krystianwsul.checkme.gui.edit.EditParameters
+import com.krystianwsul.checkme.gui.edit.EditViewModel
+import com.krystianwsul.checkme.gui.edit.ParentMultiScheduleManager
+import com.krystianwsul.checkme.gui.edit.ParentScheduleState
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ScheduleData
 import com.krystianwsul.common.utils.TaskKey
@@ -16,11 +19,11 @@ import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 
 class JoinTasksEditDelegate(
-        private val parameters: EditParameters.Join,
-        override var data: EditViewModel.MainData,
-        savedInstanceState: Bundle?,
-        compositeDisposable: CompositeDisposable,
-        storeParentKey: (EditViewModel.ParentKey?, Boolean) -> Unit,
+    private val parameters: EditParameters.Join,
+    override var data: EditViewModel.MainData,
+    savedInstanceState: Bundle?,
+    compositeDisposable: CompositeDisposable,
+    storeParentKey: (EditViewModel.ParentKey?, Boolean) -> Unit,
 ) : EditDelegate(compositeDisposable, storeParentKey) {
 
     override val scheduleHint = parameters.hint?.toScheduleHint()
@@ -29,7 +32,7 @@ class JoinTasksEditDelegate(
     private val instanceKeys = parameters.joinables.mapNotNull { it.instanceKey }
 
     private fun initialStateGetter(): ParentScheduleState {
-        val schedule = if (parameters.hint is EditActivity.Hint.Task) {
+        val schedule = if (parameters.hint?.showInitialSchedule == false) {
             null
         } else {
             firstScheduleEntry.takeIf { Preferences.addDefaultReminder }
@@ -38,88 +41,69 @@ class JoinTasksEditDelegate(
         return ParentScheduleState(listOfNotNull(schedule), setOf())
     }
 
-    override val parentScheduleManager = ParentMultiScheduleManager(
-            savedInstanceState,
-            this::initialStateGetter,
-            callbacks,
-    )
+    override val parentScheduleManager = ParentMultiScheduleManager(savedInstanceState, this::initialStateGetter, callbacks)
 
-    override fun showAllRemindersDialog(): Boolean? {
-        if (!data.showAllInstancesDialog!!) return null
+    override fun showDialog(): ShowDialog {
+        if (!data.showJoinAllRemindersDialog!!) return ShowDialog.NONE
 
         val schedule = parentScheduleManager.schedules
-                .singleOrNull()
-                ?: return null
+            .singleOrNull()
+            ?: return ShowDialog.NONE
 
-        return if (schedule.scheduleDataWrapper.scheduleData is ScheduleData.Single)
-            true
-        else
-            null
+        return if (schedule.scheduleDataWrapper.scheduleData is ScheduleData.Single) ShowDialog.JOIN else ShowDialog.NONE
     }
 
     override fun createTaskWithSchedule(
-            createParameters: CreateParameters,
-            scheduleDatas: List<ScheduleData>,
-            sharedProjectParameters: SharedProjectParameters?,
+        createParameters: CreateParameters,
+        scheduleDatas: List<ScheduleData>,
+        sharedProjectParameters: SharedProjectParameters?,
+        joinAllReminders: Boolean?,
     ): Single<CreateResult> {
         return AndroidDomainUpdater.createScheduleJoinTopLevelTask(
-                DomainListenerManager.NotificationType.All,
-                createParameters.name,
-                scheduleDatas,
-                parameters.joinables,
-                createParameters.note,
-                sharedProjectParameters,
-                createParameters.editImageState
-                        .writeImagePath
-                        ?.value,
-                createParameters.allReminders,
+            DomainListenerManager.NotificationType.All,
+            createParameters,
+            scheduleDatas,
+            parameters.joinables,
+            sharedProjectParameters,
+            joinAllReminders != false,
         )
-                .observeOn(AndroidSchedulers.mainThread())
-                .toCreateResult()
-                .applyCreatedTaskKey()
+            .observeOn(AndroidSchedulers.mainThread())
+            .toCreateResult()
+            .applyCreatedTaskKey()
     }
 
     override fun createTaskWithParent(
-            createParameters: CreateParameters,
-            parentTaskKey: TaskKey,
+        createParameters: CreateParameters,
+        parentTaskKey: TaskKey,
+        addToAllInstances: Boolean?,
     ): Single<CreateResult> {
-        check(createParameters.allReminders)
+        check(addToAllInstances == null)
 
         return AndroidDomainUpdater.createJoinChildTask(
-                DomainListenerManager.NotificationType.All,
-                parentTaskKey,
-                createParameters.name,
-                taskKeys,
-                createParameters.note,
-                createParameters.editImageState
-                        .writeImagePath
-                        ?.value,
-                instanceKeys,
+            DomainListenerManager.NotificationType.All,
+            parentTaskKey,
+            createParameters,
+            taskKeys,
+            instanceKeys,
         )
-                .observeOn(AndroidSchedulers.mainThread())
-                .toCreateResult()
-                .applyCreatedTaskKey()
+            .observeOn(AndroidSchedulers.mainThread())
+            .toCreateResult()
+            .applyCreatedTaskKey()
     }
 
     override fun createTaskWithoutReminder(
-            createParameters: CreateParameters,
-            sharedProjectKey: ProjectKey.Shared?,
+        createParameters: CreateParameters,
+        sharedProjectKey: ProjectKey.Shared?,
     ): Single<CreateResult> {
-        check(createParameters.allReminders)
-
         return AndroidDomainUpdater.createJoinTopLevelTask(
-                DomainListenerManager.NotificationType.All,
-                createParameters.name,
-                taskKeys,
-                createParameters.note,
-                sharedProjectKey,
-                createParameters.editImageState
-                        .writeImagePath
-                        ?.value,
-                instanceKeys,
+            DomainListenerManager.NotificationType.All,
+            createParameters,
+            taskKeys,
+            sharedProjectKey,
+            instanceKeys,
         )
-                .observeOn(AndroidSchedulers.mainThread())
-                .toCreateResult()
-                .applyCreatedTaskKey()
+            .observeOn(AndroidSchedulers.mainThread())
+            .toCreateResult()
+            .applyCreatedTaskKey()
     }
 }

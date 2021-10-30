@@ -16,7 +16,7 @@ import org.apache.commons.io.IOUtils
 import java.io.File
 import java.io.FileOutputStream
 
-sealed class EditParameters : Parcelable {
+sealed interface EditParameters : Parcelable {
 
     companion object {
 
@@ -78,32 +78,47 @@ sealed class EditParameters : Parcelable {
         }
     }
 
-    open val startParameters: EditViewModel.StartParameters = EditViewModel.StartParameters.Create
+    val startParameters: EditViewModel.StartParameters get() = EditViewModel.StartParameters.Create(null)
 
-    abstract val currentParentSource: EditViewModel.CurrentParentSource
+    val currentParentSource: EditViewModel.CurrentParentSource
 
-    protected fun getInitialEditImageState(savedEditImageState: EditImageState?) =
-        savedEditImageState ?: EditImageState.None
+    fun getInitialEditImageState(savedEditImageState: EditImageState?) = savedEditImageState ?: EditImageState.None
 
-    open fun getInitialEditImageStateSingle(
+    fun getInitialEditImageStateSingle(
         savedEditImageState: EditImageState?,
         taskDataSingle: Single<NullableWrapper<EditViewModel.TaskData>>,
         editActivity: EditActivity,
-    ) = Single.just(getInitialEditImageState(savedEditImageState))!!
+    ) = Single.just(getInitialEditImageState(savedEditImageState))
+
+    fun getReplacementHintForNewTask(taskKey: TaskKey): EditParentHint.Instance? = null
+
+    sealed interface CreateDelegateParameters : EditParameters
 
     @Parcelize
     class Create(
-        val hint: EditActivity.Hint? = null,
+        val hint: EditParentHint? = null,
         val parentScheduleState: ParentScheduleState? = null,
         val nameHint: String? = null,
         val showFirstSchedule: Boolean = true,
-    ) : EditParameters() {
+    ) : CreateDelegateParameters {
+
+        override val startParameters get() = EditViewModel.StartParameters.Create(hint?.instanceKey)
 
         override val currentParentSource get() = hint?.toCurrentParent() ?: EditViewModel.CurrentParentSource.None
+
+        override fun getReplacementHintForNewTask(taskKey: TaskKey) = hint?.getReplacementHintForNewTask(taskKey)
     }
 
     @Parcelize
-    class Join(val joinables: List<Joinable>, val hint: EditActivity.Hint? = null) : EditParameters() {
+    class MigrateDescription(val taskKey: TaskKey) : CreateDelegateParameters {
+
+        override val startParameters get() = EditViewModel.StartParameters.MigrateDescription(taskKey)
+
+        override val currentParentSource get() = EditViewModel.CurrentParentSource.Set(EditViewModel.ParentKey.Task(taskKey))
+    }
+
+    @Parcelize
+    class Join(val joinables: List<Joinable>, val hint: EditParentHint? = null) : EditParameters {
 
         override val startParameters get() = EditViewModel.StartParameters.Join(joinables)
 
@@ -137,7 +152,7 @@ sealed class EditParameters : Parcelable {
     }
 
     @Parcelize
-    class Copy(val taskKey: TaskKey) : EditParameters() {
+    class Copy(val taskKey: TaskKey) : EditParameters {
 
         override val startParameters get() = EditViewModel.StartParameters.Task(taskKey)
 
@@ -145,7 +160,7 @@ sealed class EditParameters : Parcelable {
     }
 
     @Parcelize
-    class Edit(val taskKey: TaskKey, val openedFromInstanceKey: InstanceKey? = null) : EditParameters() {
+    class Edit(val taskKey: TaskKey, val openedFromInstanceKey: InstanceKey? = null) : EditParameters {
 
         constructor(instanceKey: InstanceKey) : this(instanceKey.taskKey, instanceKey)
 
@@ -172,7 +187,7 @@ sealed class EditParameters : Parcelable {
     }
 
     @Parcelize
-    class Shortcut(private val parentTaskKeyHint: TaskKey) : EditParameters() {
+    class Shortcut(private val parentTaskKeyHint: TaskKey) : CreateDelegateParameters {
 
         override val currentParentSource
             get() = EditViewModel.CurrentParentSource.Set(EditViewModel.ParentKey.Task(parentTaskKeyHint))
@@ -183,7 +198,7 @@ sealed class EditParameters : Parcelable {
         val nameHint: String? = null,
         val parentTaskKeyHint: TaskKey? = null,
         val uri: Uri? = null,
-    ) : EditParameters() {
+    ) : CreateDelegateParameters {
 
         companion object {
 
@@ -245,7 +260,7 @@ sealed class EditParameters : Parcelable {
     }
 
     @Parcelize
-    object None : EditParameters() {
+    object None : CreateDelegateParameters {
 
         override val currentParentSource get() = EditViewModel.CurrentParentSource.None
     }

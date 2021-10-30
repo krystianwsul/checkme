@@ -4,11 +4,12 @@ import android.os.Bundle
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.ShortcutManager
-import com.krystianwsul.checkme.domainmodel.extensions.createChildTask
 import com.krystianwsul.checkme.domainmodel.extensions.createScheduleTopLevelTask
 import com.krystianwsul.checkme.domainmodel.extensions.createTopLevelTask
 import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
+import com.krystianwsul.checkme.domainmodel.updates.CreateChildTaskDomainUpdate
 import com.krystianwsul.checkme.gui.edit.*
+import com.krystianwsul.checkme.utils.exhaustive
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ScheduleData
 import com.krystianwsul.common.utils.TaskKey
@@ -17,15 +18,15 @@ import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 
 class CreateTaskEditDelegate(
-        private val parameters: EditParameters,
-        override var data: EditViewModel.MainData,
-        savedInstanceState: Bundle?,
-        compositeDisposable: CompositeDisposable,
-        storeParentKey: (EditViewModel.ParentKey?, Boolean) -> Unit,
+    private val parameters: EditParameters.CreateDelegateParameters,
+    override var data: EditViewModel.MainData,
+    savedInstanceState: Bundle?,
+    compositeDisposable: CompositeDisposable,
+    storeParentKey: (EditViewModel.ParentKey?, Boolean) -> Unit,
 ) : EditDelegate(compositeDisposable, storeParentKey) {
 
     override val initialName: String?
-    override val scheduleHint: EditActivity.Hint.Schedule?
+    override val scheduleHint: EditParentHint.Schedule?
     override val showSaveAndOpen = true
 
     override val parentScheduleManager: ParentScheduleManager
@@ -38,19 +39,24 @@ class CreateTaskEditDelegate(
                 initialName = parameters.nameHint
                 scheduleHint = parameters.hint?.toScheduleHint()
 
-                val initialParentKey = parameters.hint?.toParentKey()
                 initialStateGetter = {
                     parameters.parentScheduleState ?: ParentScheduleState(
-                            listOfNotNull(
-                                    firstScheduleEntry.takeIf {
-                                        initialParentKey !is EditViewModel.ParentKey.Task
-                                                && Preferences.addDefaultReminder
-                                                && parameters.showFirstSchedule
-                                    }
-                            ),
-                            setOf()
+                        listOfNotNull(
+                            firstScheduleEntry.takeIf {
+                                parameters.hint?.showInitialSchedule != false &&
+                                        Preferences.addDefaultReminder &&
+                                        parameters.showFirstSchedule
+                            }
+                        ),
+                        setOf()
                     )
                 }
+            }
+            is EditParameters.MigrateDescription -> {
+                initialName = data.parentTaskDescription!!
+                scheduleHint = null
+
+                initialStateGetter = { ParentScheduleState.create(setOf()) }
             }
             is EditParameters.Share -> {
                 initialName = parameters.nameHint
@@ -59,12 +65,12 @@ class CreateTaskEditDelegate(
                 val initialParentKey = parameters.parentTaskKeyHint?.toParentKey()
                 initialStateGetter = {
                     ParentScheduleState(
-                            listOfNotNull(
-                                    firstScheduleEntry.takeIf {
-                                        initialParentKey == null && Preferences.addDefaultReminder
-                                    }
-                            ),
-                            setOf()
+                        listOfNotNull(
+                            firstScheduleEntry.takeIf {
+                                initialParentKey == null && Preferences.addDefaultReminder
+                            }
+                        ),
+                        setOf()
                     )
                 }
             }
@@ -80,13 +86,12 @@ class CreateTaskEditDelegate(
 
                 initialStateGetter = {
                     ParentScheduleState(
-                            listOfNotNull(firstScheduleEntry.takeIf { Preferences.addDefaultReminder }),
-                            setOf(),
+                        listOfNotNull(firstScheduleEntry.takeIf { Preferences.addDefaultReminder }),
+                        setOf(),
                     )
                 }
             }
-            else -> throw IllegalArgumentException()
-        }
+        }.exhaustive()
 
         parentScheduleManager = ParentMultiScheduleManager(
             savedInstanceState,
@@ -98,7 +103,7 @@ class CreateTaskEditDelegate(
     override fun skipScheduleCheck(scheduleEntry: ScheduleEntry): Boolean {
         if (parameters !is EditParameters.Create) return false
 
-        val scheduleHint = parameters.hint as? EditActivity.Hint.Schedule ?: return false
+        val scheduleHint = parameters.hint as? EditParentHint.Schedule ?: return false
         val projectParentKey = scheduleHint.toParentKey() ?: return false
 
         if (parentScheduleManager.parent?.parentKey != projectParentKey) return false
@@ -114,64 +119,78 @@ class CreateTaskEditDelegate(
         return true
     }
 
+    override fun showDialog(): ShowDialog {
+        val parent = parentScheduleManager.parent ?: return ShowDialog.NONE
+
+        val parentTaskKey = parent.parentKey
+            .let { it as? EditViewModel.ParentKey.Task }
+            ?.taskKey
+            ?: return ShowDialog.NONE
+
+        if (parentTaskKey != (parameters as? EditParameters.Create)?.hint?.instanceKey?.taskKey) {
+            check(parent.hasMultipleInstances == null)
+
+            return ShowDialog.NONE
+        }
+
+        return if (parent.hasMultipleInstances!!) ShowDialog.ADD else ShowDialog.NONE
+    }
+
     override fun createTaskWithSchedule(
         createParameters: CreateParameters,
         scheduleDatas: List<ScheduleData>,
         sharedProjectParameters: SharedProjectParameters?,
+        joinAllReminders: Boolean?,
     ): Single<CreateResult> {
-        check(createParameters.allReminders)
+        check(joinAllReminders == null)
 
         return AndroidDomainUpdater.createScheduleTopLevelTask(
             DomainListenerManager.NotificationType.All,
-                createParameters.name,
-                scheduleDatas,
-                createParameters.note,
-                sharedProjectParameters,
-                createParameters.editImageState
-                        .writeImagePath
-                        ?.value,
+            createParameters,
+            scheduleDatas,
+            sharedProjectParameters,
         )
-                .observeOn(AndroidSchedulers.mainThread())
-                .applyCreatedTaskKey()
+            .observeOn(AndroidSchedulers.mainThread())
+            .applyCreatedTaskKey()
     }
 
     override fun createTaskWithParent(
-            createParameters: CreateParameters,
-            parentTaskKey: TaskKey,
+        createParameters: CreateParameters,
+        parentTaskKey: TaskKey,
+        addToAllInstances: Boolean?,
     ): Single<CreateResult> {
-        check(createParameters.allReminders)
-
         if (parameters is EditParameters.Share) ShortcutManager.addShortcut(parentTaskKey)
 
-        return AndroidDomainUpdater.createChildTask(
-                DomainListenerManager.NotificationType.All,
-                parentTaskKey,
-                createParameters.name,
-                createParameters.note,
-                createParameters.editImageState
-                        .writeImagePath
-                        ?.value,
+        val parentParameter = if (addToAllInstances == false) {
+            val parentInstanceKey = (parameters as EditParameters.Create).hint!!.instanceKey!!
+            check(parentInstanceKey.taskKey == parentTaskKey)
+
+            CreateChildTaskDomainUpdate.Parent.Instance(parentInstanceKey)
+        } else {
+            CreateChildTaskDomainUpdate.Parent.Task(parentTaskKey)
+        }
+
+        return CreateChildTaskDomainUpdate(
+            DomainListenerManager.NotificationType.All,
+            parentParameter,
+            createParameters,
+            clearParentNote = parentTaskKey == (parameters as? EditParameters.MigrateDescription)?.taskKey,
         )
-                .observeOn(AndroidSchedulers.mainThread())
-                .applyCreatedTaskKey()
+            .perform(AndroidDomainUpdater)
+            .observeOn(AndroidSchedulers.mainThread())
+            .applyCreatedTaskKey()
     }
 
     override fun createTaskWithoutReminder(
-            createParameters: CreateParameters,
-            sharedProjectKey: ProjectKey.Shared?,
+        createParameters: CreateParameters,
+        sharedProjectKey: ProjectKey.Shared?,
     ): Single<CreateResult> {
-        check(createParameters.allReminders)
-
         return AndroidDomainUpdater.createTopLevelTask(
-                DomainListenerManager.NotificationType.All,
-                createParameters.name,
-                createParameters.note,
-                sharedProjectKey,
-                createParameters.editImageState
-                        .writeImagePath
-                        ?.value,
+            DomainListenerManager.NotificationType.All,
+            createParameters,
+            sharedProjectKey,
         )
-                .observeOn(AndroidSchedulers.mainThread())
-                .applyCreatedTaskKey()
+            .observeOn(AndroidSchedulers.mainThread())
+            .applyCreatedTaskKey()
     }
 }

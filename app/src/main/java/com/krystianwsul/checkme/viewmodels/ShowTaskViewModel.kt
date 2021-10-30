@@ -21,12 +21,13 @@ class ShowTaskViewModel : DomainViewModel<ShowTaskViewModel.Data>() {
     }
 
     data class Data(
-            val name: String,
-            val collapseText: String?,
-            val taskData: TaskListFragment.TaskData,
-            val imageData: ImageState?,
-            val current: Boolean,
-            val newTaskKey: TaskKey,
+        val name: String,
+        val collapseText: String?,
+        val taskData: TaskListFragment.TaskData,
+        val imageData: ImageState?,
+        val current: Boolean,
+        val canMigrateDescription: Boolean,
+        val newTaskKey: TaskKey,
     ) : DomainData() {
 
         init {

@@ -25,6 +25,7 @@ import com.krystianwsul.checkme.gui.base.SnackbarListener
 import com.krystianwsul.checkme.gui.dialogs.RemoveInstancesDialogFragment
 import com.krystianwsul.checkme.gui.edit.EditActivity
 import com.krystianwsul.checkme.gui.edit.EditParameters
+import com.krystianwsul.checkme.gui.edit.EditParentHint
 import com.krystianwsul.checkme.gui.instances.ShowTaskInstancesActivity
 import com.krystianwsul.checkme.gui.instances.tree.*
 import com.krystianwsul.checkme.gui.main.FabUser
@@ -167,6 +168,9 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                 )
                 R.id.actionTaskCopy -> startActivity(getCopyTasksIntent(taskKeys))
                 R.id.actionTaskWebSearch -> startActivity(webSearchIntent(selectedNodes.single().entryData.name))
+                R.id.actionTaskMigrateDescription -> startActivity(
+                    EditActivity.getParametersIntent(EditParameters.MigrateDescription(taskKeys.single()))
+                )
                 else -> throw UnsupportedOperationException()
             }
 
@@ -194,6 +198,10 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             val allTasks = selectedNodes.all { it is TaskNode }
 
             return if (allTasks) {
+                val singleTask = selectedNodes.singleOrNull()
+                    ?.let { it as TaskNode }
+                    ?.childTaskData
+
                 val single = selectedNodes.size == 1
 
                 val current = selectedNodes.map { (it as TaskNode).childTaskData }.all { it.current }
@@ -205,6 +213,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                     R.id.action_task_show_instances to single,
                     R.id.actionTaskCopy to current,
                     R.id.actionTaskWebSearch to single,
+                    R.id.actionTaskMigrateDescription to (singleTask?.canMigrateDescription == true),
                 )
             } else {
                 val single = selectedNodes.size == 1
@@ -216,6 +225,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                     R.id.action_task_show_instances to false,
                     R.id.actionTaskCopy to false,
                     R.id.actionTaskWebSearch to single,
+                    R.id.actionTaskMigrateDescription to false,
                 )
             }
         }
@@ -444,12 +454,12 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                     childTaskData?.canAddSubtask == true -> {
                         show()
 
-                        edit(EditParameters.Create(EditActivity.Hint.Task(childTaskData.taskKey)), true)
+                        edit(EditParameters.Create(EditParentHint.Task(childTaskData.taskKey)), true)
                     }
                     projectData?.canAddSubtask == true -> {
                         show()
 
-                        val hint = (projectData.projectKey as? ProjectKey.Shared)?.let(EditActivity.Hint::Project)
+                        val hint = (projectData.projectKey as? ProjectKey.Shared)?.let(EditParentHint::Project)
 
                         setOnClickListener {
                             selectionCallback.actionMode!!.finish()
@@ -917,6 +927,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         val imageState: ImageState?,
         val current: Boolean,
         override val canAddSubtask: Boolean,
+        val canMigrateDescription: Boolean,
         val ordinal: Double,
         val projectInfo: DetailsNode.ProjectInfo?,
         override val isAssignedToMe: Boolean,
@@ -972,28 +983,28 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         abstract val data: Data
         open val topLevelTaskData: TopLevelTaskData? = null
 
-        abstract val hint: EditActivity.Hint?
+        abstract val hint: EditParentHint?
 
         open val canDrag = true
 
         data class All(override val data: Data, override val canDrag: Boolean) : Parameters() {
 
-            override val hint: EditActivity.Hint? = null
+            override val hint: EditParentHint? = null
         }
 
         data class Notes(override val data: Data, override val canDrag: Boolean) : Parameters() {
 
-            override val hint: EditActivity.Hint? = null
+            override val hint: EditParentHint? = null
         }
 
         data class Project(override val data: Data, val projectKey: ProjectKey<*>) : Parameters() {
 
-            override val hint get() = (projectKey as? ProjectKey.Shared)?.let(EditActivity.Hint::Project)
+            override val hint get() = (projectKey as? ProjectKey.Shared)?.let(EditParentHint::Project)
         }
 
         data class Task(override val data: Data, override val topLevelTaskData: TopLevelTaskData) : Parameters() {
 
-            override val hint = EditActivity.Hint.Task(topLevelTaskData.taskKey)
+            override val hint = EditParentHint.Task(topLevelTaskData.taskKey)
         }
     }
 }

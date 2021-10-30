@@ -5,17 +5,18 @@ import android.content.Context
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.edit.EditActivity
 import com.krystianwsul.checkme.gui.edit.EditParameters
+import com.krystianwsul.checkme.gui.edit.EditParentHint
 import com.krystianwsul.checkme.gui.instances.list.GroupListFragment
 import com.krystianwsul.checkme.gui.utils.BottomFabMenuDelegate
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.TimePair
+import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.ProjectKey
-import com.krystianwsul.common.utils.TaskKey
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
 class SubtaskMenuDelegate(
-    val taskKey: TaskKey?,
+    val instanceKey: InstanceKey?,
     private val instanceDate: Date,
     private val createTaskTimePair: TimePair,
     private val projectKey: ProjectKey.Shared?,
@@ -23,7 +24,7 @@ class SubtaskMenuDelegate(
 ) : BottomFabMenuDelegate.MenuDelegate {
 
     override fun getItems() = listOfNotNull(
-        taskKey?.let(::AddTaskList),
+        instanceKey?.let(::AddTaskList),
         projectKey?.let { AddToProject(instanceDate, createTaskTimePair, projectKey) },
         AddTaskThisTime(instanceDate, createTaskTimePair).takeIf { showAddToTime },
     ).also { check(it.isNotEmpty()) }
@@ -41,11 +42,11 @@ private class AddTaskThisTime(
     }
 }
 
-private class AddTaskList(val taskKey: TaskKey) : BottomFabMenuDelegate.MenuDelegate.Item {
+private class AddTaskList(val instanceKey: InstanceKey) : BottomFabMenuDelegate.MenuDelegate.Item {
 
     override fun getText(context: Context) = context.getString(R.string.addTaskList)
 
-    override fun onClick(activity: Activity) = activity.launchEditActivity(EditActivity.Hint.Task(taskKey))
+    override fun onClick(activity: Activity) = activity.launchEditActivity(EditParentHint.Instance(instanceKey))
 }
 
 private class AddToProject(
@@ -61,5 +62,5 @@ private class AddToProject(
     }
 }
 
-private fun Activity.launchEditActivity(hint: EditActivity.Hint) =
+private fun Activity.launchEditActivity(hint: EditParentHint) =
     startActivity(EditActivity.getParametersIntent(EditParameters.Create(hint)))

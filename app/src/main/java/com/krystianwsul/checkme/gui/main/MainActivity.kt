@@ -110,7 +110,7 @@ class MainActivity :
 
     private var onPageChangeDisposable: Disposable? = null
 
-    val tabSearchStateRelay = BehaviorRelay.create<TabSearchState>()!!
+    val tabSearchStateRelay = BehaviorRelay.create<TabSearchState>()
     private val daysPosition = BehaviorRelay.create<Int>()
 
     override lateinit var hostEvents: Observable<DayFragment.Event>
@@ -137,7 +137,7 @@ class MainActivity :
 
     private lateinit var states: MutableMap<Pair<Preferences.TimeRange, Int>, Bundle>
 
-    val selectAllRelay = PublishRelay.create<Unit>()!!
+    val selectAllRelay = PublishRelay.create<Unit>()
 
     private var actionMode: ActionMode? = null
 
@@ -770,7 +770,7 @@ class MainActivity :
                 } else {
                     Observable.never()
                 }
-            }!!
+            }
         }
 
         override fun onCreateActionMode(actionMode: ActionMode) = this@MainActivity.onCreateActionMode(actionMode)
@@ -1169,11 +1169,12 @@ class MainActivity :
         if (immediate) {
             setTopMargin(targetHeight)
         } else {
-            ValueAnimator.ofInt(top, targetHeight).apply {
-                addUpdateListener { setTopMargin(it.animatedValue as Int) }
-                duration = resources.getInteger(android.R.integer.config_mediumAnimTime).toLong()
-                start()
-            }
+            ValueAnimator.ofInt(top, targetHeight)
+                .apply {
+                    addUpdateListener { setTopMargin(it.animatedValue as Int) }
+                    duration = resources.getInteger(android.R.integer.config_mediumAnimTime).toLong()
+                }
+                .start()
         }
     }
 

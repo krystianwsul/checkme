@@ -45,17 +45,16 @@ class EditExistingTaskEditDelegate(
         createParameters: CreateParameters,
         scheduleDatas: List<ScheduleData>,
         sharedProjectParameters: SharedProjectParameters?,
+        joinAllReminders: Boolean?,
     ): Single<CreateResult> {
-        check(createParameters.allReminders)
+        check(joinAllReminders == null)
 
         return AndroidDomainUpdater.updateScheduleTask(
             DomainListenerManager.NotificationType.All,
             parameters.taskKey,
-            createParameters.name,
+            createParameters,
             scheduleDatas,
-            createParameters.note,
             sharedProjectParameters,
-            createParameters.editImageState.writeImagePath,
         )
             .observeOn(AndroidSchedulers.mainThread())
             .toCreateResult()
@@ -64,16 +63,16 @@ class EditExistingTaskEditDelegate(
     override fun createTaskWithParent(
         createParameters: CreateParameters,
         parentTaskKey: TaskKey,
+        addToAllInstances: Boolean?,
     ): Single<CreateResult> {
+        check(addToAllInstances == null)
+
         return AndroidDomainUpdater.updateChildTask(
             DomainListenerManager.NotificationType.All,
             parameters.taskKey,
-            createParameters.name,
+            createParameters,
             parentTaskKey,
-            createParameters.note,
-            createParameters.editImageState.writeImagePath,
             parameters.openedFromInstanceKey,
-            createParameters.allReminders,
         )
             .observeOn(AndroidSchedulers.mainThread())
             .toCreateResult()
@@ -83,15 +82,11 @@ class EditExistingTaskEditDelegate(
         createParameters: CreateParameters,
         sharedProjectKey: ProjectKey.Shared?,
     ): Single<CreateResult> {
-        check(createParameters.allReminders)
-
         return AndroidDomainUpdater.updateTopLevelTask(
             DomainListenerManager.NotificationType.All,
             parameters.taskKey,
-            createParameters.name,
-            createParameters.note,
+            createParameters,
             sharedProjectKey,
-            createParameters.editImageState.writeImagePath,
         )
             .observeOn(AndroidSchedulers.mainThread())
             .toCreateResult()

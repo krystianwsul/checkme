@@ -27,20 +27,13 @@ import com.krystianwsul.checkme.databinding.*
 import com.krystianwsul.checkme.gui.base.NavBarActivity
 import com.krystianwsul.checkme.gui.dialogs.ConfirmDialogFragment
 import com.krystianwsul.checkme.gui.edit.delegates.EditDelegate
-import com.krystianwsul.checkme.gui.edit.dialogs.AllRemindersDialogFragment
-import com.krystianwsul.checkme.gui.edit.dialogs.AssignToDialogFragment
-import com.krystianwsul.checkme.gui.edit.dialogs.CameraGalleryFragment
-import com.krystianwsul.checkme.gui.edit.dialogs.ParentPickerFragment
+import com.krystianwsul.checkme.gui.edit.dialogs.*
 import com.krystianwsul.checkme.gui.edit.dialogs.schedule.ScheduleDialogFragment
 import com.krystianwsul.checkme.gui.edit.dialogs.schedule.ScheduleDialogParameters
 import com.krystianwsul.checkme.gui.edit.dialogs.schedule.ScheduleDialogResult
 import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity
 import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.common.criteria.SearchCriteria
-import com.krystianwsul.common.time.Date
-import com.krystianwsul.common.time.HourMinute
-import com.krystianwsul.common.time.TimePair
-import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.common.utils.UserKey
 import com.krystianwsul.treeadapter.FilterCriteria
@@ -55,7 +48,6 @@ import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.merge
 import io.reactivex.rxjava3.kotlin.plusAssign
 import io.reactivex.rxjava3.kotlin.subscribeBy
-import kotlinx.parcelize.Parcelize
 import kotlin.properties.Delegates.observable
 
 
@@ -78,7 +70,8 @@ class EditActivity : NavBarActivity() {
 
         private const val SCHEDULE_DIALOG_TAG = "scheduleDialog"
         private const val TAG_CAMERA_GALLERY = "cameraGallery"
-        private const val TAG_ALL_REMINDERS = "allReminders"
+        private const val TAG_JOIN_ALL_REMINDERS = "joinAllReminders"
+        private const val TAG_ADD_TO_ALL_REMINDERS = "addToAllReminders"
         private const val TAG_ASSIGN_TO = "assignTo"
 
         private const val REQUEST_CREATE_PARENT = 982
@@ -144,7 +137,13 @@ class EditActivity : NavBarActivity() {
         override fun onReceive(context: Context?, intent: Intent?) = timeRelay.accept(Unit)
     }
 
-    private val allRemindersListener = { allReminders: Boolean -> save(false, allReminders) }
+    private val joinAllRemindersListener = { allReminders: Boolean ->
+        save(false, EditDelegate.DialogResult.JoinAllInstances(allReminders))
+    }
+
+    private val addToAllRemindersListener = { allReminders: Boolean, andOpen: Boolean ->
+        save(andOpen, EditDelegate.DialogResult.AddToAllInstances(allReminders))
+    }
 
     override val rootView get() = binding.root
 
@@ -171,16 +170,18 @@ class EditActivity : NavBarActivity() {
         fun trySave(andOpen: Boolean) {
             if (updateError()) return
 
-            val showAllRemindersPlural = editViewModel.delegate.showAllRemindersDialog()
+            when (editViewModel.delegate.showDialog()) {
+                EditDelegate.ShowDialog.JOIN -> {
+                    check(!andOpen)
 
-            if (showAllRemindersPlural != null) {
-                check(!andOpen)
-
-                AllRemindersDialogFragment.newInstance(showAllRemindersPlural)
-                    .apply { listener = allRemindersListener }
-                    .show(supportFragmentManager, TAG_ALL_REMINDERS)
-            } else {
-                save(andOpen, true)
+                    JoinAllRemindersDialogFragment.newInstance()
+                        .apply { listener = joinAllRemindersListener }
+                        .show(supportFragmentManager, TAG_JOIN_ALL_REMINDERS)
+                }
+                EditDelegate.ShowDialog.ADD -> AddToAllRemindersDialogFragment.newInstance(andOpen)
+                    .apply { listener = addToAllRemindersListener }
+                    .show(supportFragmentManager, TAG_ADD_TO_ALL_REMINDERS)
+                EditDelegate.ShowDialog.NONE -> save(andOpen, EditDelegate.DialogResult.None)
             }
         }
 
@@ -218,7 +219,8 @@ class EditActivity : NavBarActivity() {
             fun <T : Fragment> find(tag: String) = findFragmentByTag(tag) as? T
 
             find<ConfirmDialogFragment>(DISCARD_TAG)?.listener = discardDialogListener
-            find<AllRemindersDialogFragment>(TAG_ALL_REMINDERS)?.listener = allRemindersListener
+            find<JoinAllRemindersDialogFragment>(TAG_JOIN_ALL_REMINDERS)?.listener = joinAllRemindersListener
+            find<AddToAllRemindersDialogFragment>(TAG_ADD_TO_ALL_REMINDERS)?.listener = addToAllRemindersListener
         }
 
         if (!noteHasFocusRelay.value!!)// keyboard hack
@@ -245,9 +247,7 @@ class EditActivity : NavBarActivity() {
                 1,
             ).toObservable(),
             (supportFragmentManager.findFragmentByTag(SCHEDULE_DIALOG_TAG) as? ScheduleDialogFragment)?.let {
-                Observable.just(
-                    it
-                )
+                Observable.just(it)
             }?.flatMapSingle { it.result.firstOrError() }
         ).merge()
             .subscribe { result ->
@@ -423,7 +423,7 @@ class EditActivity : NavBarActivity() {
         .parentScheduleManager
         .schedules
         .any { editViewModel.delegate.getError(it) != null }
-        .also { if (it) timeRelay.accept(Unit) } // todo add instance update error state on parent change
+        .also { if (it) timeRelay.accept(Unit) }
 
     override fun onDestroy() {
         unregisterReceiver(timeReceiver)
@@ -457,7 +457,7 @@ class EditActivity : NavBarActivity() {
         }
     }
 
-    private fun save(andOpen: Boolean, allReminders: Boolean) {
+    private fun save(andOpen: Boolean, dialogResult: EditDelegate.DialogResult) {
         val name = binding.editToolbarEditTextInclude
             .toolbarEditText
             .text
@@ -468,10 +468,16 @@ class EditActivity : NavBarActivity() {
 
         editViewModel.stop()
 
-        val createParameters = EditDelegate.CreateParameters(name, note, allReminders, editViewModel.editImageState)
+        val createParameters = EditDelegate.CreateParameters(
+            name,
+            note,
+            editViewModel.editImageState
+                .writeImagePath
+                ?.value,
+        )
 
         editViewModel.delegate
-            .createTask(createParameters)
+            .createTask(createParameters, dialogResult)
             .subscribeBy {
                 if (andOpen) startActivity(it.intent)
 
@@ -502,50 +508,6 @@ class EditActivity : NavBarActivity() {
     }
 
     private fun newParentPickerDelegate() = ParentPickerDelegate()
-
-    sealed class Hint : Parcelable {
-
-        companion object {
-
-            protected fun ProjectKey.Shared.toCurrentParent() =
-                EditViewModel.CurrentParentSource.Set(EditViewModel.ParentKey.Project(this))
-
-            protected fun ProjectKey.Shared.toParentKey() = EditViewModel.ParentKey.Project(this)
-        }
-
-        abstract fun toCurrentParent(): EditViewModel.CurrentParentSource
-        abstract fun toParentKey(): EditViewModel.ParentKey?
-
-        @Parcelize
-        class Schedule(val date: Date, val timePair: TimePair, private val projectKey: ProjectKey.Shared? = null) : Hint() {
-
-            constructor(
-                date: Date,
-                pair: Pair<Date, HourMinute> = HourMinute.getNextHour(date),
-            ) : this(pair.first, TimePair(pair.second), null)
-
-            override fun toCurrentParent() = projectKey?.toCurrentParent() ?: EditViewModel.CurrentParentSource.None
-
-            override fun toParentKey() = projectKey?.toParentKey()
-        }
-
-        @Parcelize
-        class Task(private val taskKey: TaskKey) : Hint() {
-
-            override fun toCurrentParent() =
-                EditViewModel.CurrentParentSource.Set(EditViewModel.ParentKey.Task(taskKey))
-
-            override fun toParentKey() = EditViewModel.ParentKey.Task(taskKey)
-        }
-
-        @Parcelize
-        class Project(val projectKey: ProjectKey.Shared) : Hint() {
-
-            override fun toCurrentParent() = projectKey.toCurrentParent()
-
-            override fun toParentKey() = projectKey.toParentKey()
-        }
-    }
 
     enum class HolderType {
 
@@ -1053,9 +1015,7 @@ class EditActivity : NavBarActivity() {
                 .parent
                 ?.let { parent ->
                     { entryData: ParentPickerFragment.EntryData ->
-                        val parentTreeData = entryData as EditViewModel.ParentTreeData
-
-                        parentTreeData.entryKey == parent.parentKey
+                        (entryData as EditViewModel.ParentEntryData).entryKey == parent.parentKey
                     }
                 }
         }
@@ -1063,7 +1023,7 @@ class EditActivity : NavBarActivity() {
         override fun onEntrySelected(entryData: ParentPickerFragment.EntryData) {
             editViewModel.delegate
                 .parentScheduleManager
-                .parent = (entryData as EditViewModel.ParentTreeData).toParent()
+                .parent = (entryData as EditViewModel.ParentEntryData).toParent()
         }
 
         override fun onEntryDeleted() {
@@ -1081,8 +1041,10 @@ class EditActivity : NavBarActivity() {
                         EditParameters.Create(
                             parent?.parentKey?.let {
                                 when (it) { // there's probably a helper for this somewhere
-                                    is EditViewModel.ParentKey.Project -> Hint.Project(it.projectId)
-                                    is EditViewModel.ParentKey.Task -> Hint.Task(it.taskKey)
+                                    is EditViewModel.ParentKey.Project -> EditParentHint.Project(it.projectId)
+                                    is EditViewModel.ParentKey.Task ->
+                                        parameters.getReplacementHintForNewTask(it.taskKey)
+                                            ?: EditParentHint.Task(it.taskKey)
                                 }
                             },
                             ParentScheduleState(

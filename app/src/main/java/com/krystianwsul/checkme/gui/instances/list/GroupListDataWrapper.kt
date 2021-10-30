@@ -30,6 +30,7 @@ data class GroupListDataWrapper(
         override val isAssignedToMe: Boolean,
         val projectInfo: DetailsNode.ProjectInfo?,
         val ordinal: Double,
+        override val canMigrateDescription: Boolean,
     ) : SelectedData, QueryMatchable, FilterParamsMatchable {
 
         init {
@@ -53,6 +54,7 @@ data class GroupListDataWrapper(
         val instanceDateTime: DateTime,
         override val taskCurrent: Boolean,
         override val canAddSubtask: Boolean,
+        override val canMigrateDescription: Boolean,
         val isRootInstance: Boolean,
         val createTaskTimePair: TimePair,
         override val note: String?,
@@ -91,6 +93,7 @@ data class GroupListDataWrapper(
 
         val taskCurrent: Boolean
         val canAddSubtask: Boolean
+        val canMigrateDescription: Boolean
         val taskKey: TaskKey
         val name: String
         val note: String?

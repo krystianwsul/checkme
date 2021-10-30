@@ -212,6 +212,7 @@ fun DomainFactory.getGroupListChildTaskDatas(
             childTask.isAssignedToMe(now, myUserFactory.user),
             childTask.getProjectInfo(now),
             childTask.ordinal,
+            childTask.canMigrateDescription(now),
         )
     }
     .toList()

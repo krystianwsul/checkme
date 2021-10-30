@@ -26,6 +26,7 @@ import com.krystianwsul.checkme.domainmodel.extensions.*
 import com.krystianwsul.checkme.gui.base.AbstractActivity
 import com.krystianwsul.checkme.gui.edit.EditActivity
 import com.krystianwsul.checkme.gui.edit.EditParameters
+import com.krystianwsul.checkme.gui.edit.EditParentHint
 import com.krystianwsul.checkme.gui.instances.edit.SnackbarEditInstancesHostDelegate
 import com.krystianwsul.checkme.gui.instances.tree.*
 import com.krystianwsul.checkme.gui.main.FabUser
@@ -106,14 +107,14 @@ class GroupListFragment @JvmOverloads constructor(
             return instanceDatas.toSet()
         }
 
-        fun getHint(triples: List<Triple<Date, TimePair, ProjectKey.Shared?>>): EditActivity.Hint.Schedule {
+        fun getHint(triples: List<Triple<Date, TimePair, ProjectKey.Shared?>>): EditParentHint.Schedule {
             val projectKey = triples.map { it.third }
                 .distinct()
                 .singleOrNull()
 
             val (date, timePair) = triples.firstOrNull { it.second.customTimeKey != null } ?: triples.first()
 
-            return EditActivity.Hint.Schedule(date, timePair, projectKey)
+            return EditParentHint.Schedule(date, timePair, projectKey)
         }
     }
 
@@ -206,7 +207,7 @@ class GroupListFragment @JvmOverloads constructor(
                     }
 
                     val hint = if (parameters is GroupListParameters.InstanceKey) {
-                        EditActivity.Hint.Task((parameters as GroupListParameters.InstanceKey).instanceKey.taskKey)
+                        EditParentHint.Instance((parameters as GroupListParameters.InstanceKey).instanceKey)
                     } else {
                         selectedDatas.filterIsInstance<GroupListDataWrapper.InstanceData>()
                             .minByOrNull { it.instanceTimeStamp }
@@ -214,7 +215,7 @@ class GroupListFragment @JvmOverloads constructor(
                                 val date = it.instanceTimeStamp.date
                                 val timePair = it.createTaskTimePair
 
-                                EditActivity.Hint.Schedule(date, timePair)
+                                EditParentHint.Schedule(date, timePair)
                             }
                     }
 
@@ -228,6 +229,9 @@ class GroupListFragment @JvmOverloads constructor(
                     GroupMenuUtils.onNotify(selectedDatas, parameters.dataId).addTo(attachedToWindowDisposable)
                 R.id.actionGroupCopyTask -> activity.startActivity(getCopyTasksIntent(selectedDatas.map { it.taskKey }))
                 R.id.actionGroupWebSearch -> activity.startActivity(webSearchIntent(selectedDatas.single().name))
+                R.id.actionGroupMigrateDescription -> activity.startActivity(
+                    EditActivity.getParametersIntent(EditParameters.MigrateDescription(selectedDatas.single().taskKey))
+                )
                 else -> throw UnsupportedOperationException()
             }
 
@@ -269,7 +273,8 @@ class GroupListFragment @JvmOverloads constructor(
                     R.id.action_group_edit_task to selectedData.taskCurrent,
                     R.id.action_group_join to false,
                     R.id.action_group_delete_task to selectedData.taskCurrent,
-                    R.id.actionGroupWebSearch to true
+                    R.id.actionGroupWebSearch to true,
+                    R.id.actionGroupMigrateDescription to selectedData.canMigrateDescription,
                 )
             } else {
                 check(selectedDatas.size > 1)
@@ -278,6 +283,7 @@ class GroupListFragment @JvmOverloads constructor(
                     R.id.action_group_show_task to false,
                     R.id.action_group_edit_task to false,
                     R.id.actionGroupWebSearch to false,
+                    R.id.actionGroupMigrateDescription to false,
                 )
 
                 val allCurrent = selectedDatas.all { it.taskCurrent }
@@ -636,14 +642,14 @@ class GroupListFragment @JvmOverloads constructor(
         updateFabVisibility()
     }
 
-    private fun getStartEditActivityFabState(hint: EditActivity.Hint, closeActionMode: Boolean = false) =
+    private fun getStartEditActivityFabState(hint: EditParentHint, closeActionMode: Boolean = false) =
         FabState.Visible {
             if (closeActionMode) selectionCallback.actionMode!!.finish()
 
             activity.startActivity(EditActivity.getParametersIntent(EditParameters.Create(hint)))
         }
 
-    private fun getFabMenuFabState(hint: EditActivity.Hint) =
+    private fun getFabMenuFabState(hint: EditParentHint) =
         FabState.Visible {
             selectionCallback.actionMode?.finish()
 
@@ -682,7 +688,7 @@ class GroupListFragment @JvmOverloads constructor(
 
                             listener.showFabMenu(instanceData!!.run {
                                 SubtaskMenuDelegate(
-                                    taskKey.takeIf { canAddSubtask },
+                                    instanceKey.takeIf { canAddSubtask },
                                     instanceDateTime.date,
                                     createTaskTimePair,
                                     instanceData.projectKey,
@@ -691,12 +697,13 @@ class GroupListFragment @JvmOverloads constructor(
                             })
                         }
                         canAddSubtask -> getStartEditActivityFabState(
-                            EditActivity.Hint.Task(singleSelectedData.taskKey),
+                            instanceData?.let { EditParentHint.Instance(it.instanceKey) }
+                                ?: EditParentHint.Task(singleSelectedData.taskKey),
                             true,
                         )
                         canAddToTime -> getStartEditActivityFabState(listOf(instanceData!!).getHint(), true)
                         canAddToProject -> getStartEditActivityFabState(
-                            EditActivity.Hint.Project(instanceData!!.projectKey!!),
+                            EditParentHint.Project(instanceData!!.projectKey!!),
                             true,
                         )
                         else -> FabState.Hidden
@@ -734,7 +741,7 @@ class GroupListFragment @JvmOverloads constructor(
                 is GroupListParameters.All -> FabState.Visible {
                     listener.showFabMenu(
                         ReminderOrNoteMenuDelegate(
-                            EditActivity.Hint.Schedule(rangePositionToDate(parameters.timeRange, parameters.position)),
+                            EditParentHint.Schedule(rangePositionToDate(parameters.timeRange, parameters.position)),
                         )
                     )
                 }
@@ -745,7 +752,7 @@ class GroupListFragment @JvmOverloads constructor(
                             if (it.isNotEmpty()) {
                                 it.getHint()
                             } else {
-                                EditActivity.Hint.Schedule(
+                                EditParentHint.Schedule(
                                     parameters.timeStamp.date,
                                     TimePair(parameters.timeStamp.hourMinute),
                                     parameters.projectKey,
@@ -758,11 +765,11 @@ class GroupListFragment @JvmOverloads constructor(
                     FabState.Hidden
                 }
                 is GroupListParameters.InstanceKey -> if (parameters.groupListDataWrapper.taskEditable!!)
-                    getStartEditActivityFabState(EditActivity.Hint.Task(parameters.instanceKey.taskKey))
+                    getStartEditActivityFabState(EditParentHint.Instance(parameters.instanceKey))
                 else
                     FabState.Hidden
                 is GroupListParameters.Parent -> parameters.projectKey
-                    ?.let { getFabMenuFabState(EditActivity.Hint.Project(it)) }
+                    ?.let { getFabMenuFabState(EditParentHint.Project(it)) }
                     ?: FabState.Hidden
                 else -> FabState.Hidden
             }

@@ -180,7 +180,7 @@ fun DomainUpdater.setInstancesParent(
             if (parentTaskHasOtherInstances || it.task.hasOtherVisibleInstances(now, it.instanceKey)) {
                 val undoData = SetInstanceParentUndoData(it.instanceKey, it.parentState)
 
-                it.setParentState(Instance.ParentState.Parent(parentInstanceKey))
+                it.setParentState(parentInstanceKey)
 
                 undoData
             } else {

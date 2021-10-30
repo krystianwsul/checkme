@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.domainmodel
 
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.extensions.*
+import com.krystianwsul.checkme.domainmodel.updates.CreateChildTaskDomainUpdate
 import com.krystianwsul.checkme.gui.edit.EditParameters
 import com.krystianwsul.checkme.gui.edit.delegates.EditDelegate
 import com.krystianwsul.common.firebase.models.task.RootTask
@@ -27,10 +28,8 @@ class DomainFactoryTest {
     fun testCreatingTask() {
         domainUpdater().createScheduleTopLevelTask(
             DomainListenerManager.NotificationType.All,
-            "task",
+            EditDelegate.CreateParameters("task"),
             listOf(ScheduleData.Single(Date(2020, 12, 20), TimePair(HourMinute(20, 0)))),
-            null,
-            null,
             null,
         ).blockingGet()
 
@@ -61,10 +60,8 @@ class DomainFactoryTest {
         val taskName1 = "task1"
         val taskKey1 = domainUpdater(now).createScheduleTopLevelTask(
             DomainListenerManager.NotificationType.All,
-            taskName1,
+            EditDelegate.CreateParameters(taskName1),
             scheduleDatas,
-            null,
-            null,
             null,
         )
             .blockingGet()
@@ -73,13 +70,12 @@ class DomainFactoryTest {
         now += 1.hours
 
         val taskName2 = "task2"
-        val taskKey2 = domainUpdater(now).createChildTask(
+        val taskKey2 = CreateChildTaskDomainUpdate(
             DomainListenerManager.NotificationType.All,
-            taskKey1,
-            taskName2,
-            null,
-            null,
+            CreateChildTaskDomainUpdate.Parent.Task(taskKey1),
+            EditDelegate.CreateParameters(taskName2),
         )
+            .perform(domainUpdater(now))
             .blockingGet()
             .taskKey
 
@@ -91,10 +87,8 @@ class DomainFactoryTest {
         domainUpdater(now).updateScheduleTask(
             DomainListenerManager.NotificationType.All,
             taskKey2,
-            taskName2,
+            EditDelegate.CreateParameters(taskName2),
             scheduleDatas,
-            null,
-            null,
             null,
         ).blockingGet()
 
@@ -105,10 +99,8 @@ class DomainFactoryTest {
         domainUpdater(now).updateChildTask(
             DomainListenerManager.NotificationType.All,
             taskKey1,
-            taskName1,
+            EditDelegate.CreateParameters(taskName1),
             taskKey2,
-            null,
-            null,
             null,
             true,
         ).blockingGet()
@@ -127,35 +119,31 @@ class DomainFactoryTest {
 
         val parentTask1Key = domainUpdater(now).createScheduleTopLevelTask(
             DomainListenerManager.NotificationType.All,
-            "parentTask1",
+            EditDelegate.CreateParameters("parentTask1"),
             listOf(ScheduleData.Single(date, TimePair(HourMinute(2, 0)))),
             null,
             null,
-            null,
-            null,
         )
             .blockingGet()
             .taskKey
 
-        val doneChildTaskKey = domainUpdater(now).createChildTask(
+        val doneChildTaskKey = CreateChildTaskDomainUpdate(
             DomainListenerManager.NotificationType.All,
-            parentTask1Key,
-            "childTask1",
-            null,
-            null,
+            CreateChildTaskDomainUpdate.Parent.Task(parentTask1Key),
+            EditDelegate.CreateParameters("childTask1"),
             null,
         )
+            .perform(domainUpdater(now))
             .blockingGet()
             .taskKey
 
-        val notDoneChildTaskKey = domainUpdater(now).createChildTask(
+        val notDoneChildTaskKey = CreateChildTaskDomainUpdate(
             DomainListenerManager.NotificationType.All,
-            parentTask1Key,
-            "childTask2",
-            null,
-            null,
+            CreateChildTaskDomainUpdate.Parent.Task(parentTask1Key),
+            EditDelegate.CreateParameters("childTask2"),
             null,
         )
+            .perform(domainUpdater(now))
             .blockingGet()
             .taskKey
 
@@ -184,10 +172,8 @@ class DomainFactoryTest {
 
         val parentTask2Key = domainUpdater(now).createScheduleTopLevelTask(
             DomainListenerManager.NotificationType.All,
-            "parentTask2",
+            EditDelegate.CreateParameters("parentTask2"),
             listOf(ScheduleData.Single(date, TimePair(HourMinute(3, 0)))),
-            null,
-            null,
             null,
             null,
         )
@@ -197,10 +183,8 @@ class DomainFactoryTest {
         domainUpdater(now).updateChildTask(
             DomainListenerManager.NotificationType.All,
             doneChildTaskKey,
-            "childTask1",
+            EditDelegate.CreateParameters("childTask1"),
             parentTask2Key,
-            null,
-            null,
             null,
             true,
         ).blockingGet()
@@ -208,10 +192,8 @@ class DomainFactoryTest {
         domainUpdater(now).updateChildTask(
             DomainListenerManager.NotificationType.All,
             notDoneChildTaskKey,
-            "childTask2",
+            EditDelegate.CreateParameters("childTask2"),
             parentTask2Key,
-            null,
-            null,
             null,
             true,
         ).blockingGet()
@@ -230,13 +212,11 @@ class DomainFactoryTest {
 
         val parentTaskKey = domainUpdater(now).createScheduleTopLevelTask(
             DomainListenerManager.NotificationType.All,
-            "parentTask",
+            EditDelegate.CreateParameters("parentTask"),
             listOf(
                 ScheduleData.Single(date, TimePair(HourMinute(3, 0))),
                 ScheduleData.Single(date, TimePair(HourMinute(4, 0)))
             ),
-            null,
-            null,
             null,
             null,
         )
@@ -261,14 +241,12 @@ class DomainFactoryTest {
 
         now += 1.hours
 
-        domainUpdater(now).createChildTask(
+        CreateChildTaskDomainUpdate(
             DomainListenerManager.NotificationType.All,
-            parentTaskKey,
-            "childTask",
+            CreateChildTaskDomainUpdate.Parent.Task(parentTaskKey),
+            EditDelegate.CreateParameters("childTask"),
             null,
-            null,
-            null,
-        ).blockingGet()
+        ).perform(domainUpdater(now)).blockingGet()
 
         val secondInstanceDatas = domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
             .groupListDataWrapper
@@ -286,10 +264,8 @@ class DomainFactoryTest {
 
         val task1Key = domainUpdater(now).createScheduleTopLevelTask(
             DomainListenerManager.NotificationType.All,
-            "task1",
+            EditDelegate.CreateParameters("task1"),
             listOf(ScheduleData.Single(date, TimePair(HourMinute(5, 0)))),
-            null,
-            null,
             null,
             null,
         )
@@ -306,14 +282,13 @@ class DomainFactoryTest {
 
         now += 1.hours
 
-        val task2Key = domainUpdater(now).createChildTask(
+        val task2Key = CreateChildTaskDomainUpdate(
             DomainListenerManager.NotificationType.All,
-            task1Key,
-            "task2",
-            null,
-            null,
+            CreateChildTaskDomainUpdate.Parent.Task(task1Key),
+            EditDelegate.CreateParameters("task2"),
             null,
         )
+            .perform(domainUpdater(now))
             .blockingGet()
             .taskKey
 
@@ -338,10 +313,8 @@ class DomainFactoryTest {
         domainUpdater(now).updateScheduleTask(
             DomainListenerManager.NotificationType.All,
             task2Key,
-            "task2",
+            EditDelegate.CreateParameters("task2"),
             listOf(ScheduleData.Single(date, TimePair(HourMinute(5, 0)))),
-            null,
-            null,
             null,
         ).blockingGet()
 
@@ -364,20 +337,16 @@ class DomainFactoryTest {
 
         domainUpdater(now).createScheduleTopLevelTask(
             DomainListenerManager.NotificationType.All,
-            "childTask1",
+            EditDelegate.CreateParameters("childTask1"),
             listOf(ScheduleData.Single(date, TimePair(HourMinute(2, 0)))),
-            null,
-            null,
             null,
             null,
         ).blockingGet()
 
         domainUpdater(now).createScheduleTopLevelTask(
             DomainListenerManager.NotificationType.All,
-            "childTask1",
+            EditDelegate.CreateParameters("childTask1"),
             listOf(ScheduleData.Single(date, TimePair(HourMinute(2, 0)))),
-            null,
-            null,
             null,
             null,
         ).blockingGet()
@@ -390,11 +359,9 @@ class DomainFactoryTest {
 
         domainUpdater(now).createScheduleJoinTopLevelTask(
             DomainListenerManager.NotificationType.All,
-            "parentTask",
+            EditDelegate.CreateParameters("parentTask"),
             listOf(ScheduleData.Single(date, TimePair(HourMinute(4, 0)))),
             childInstanceKeys.map { EditParameters.Join.Joinable.Instance(it) },
-            null,
-            null,
             null,
             true,
         ).blockingGet()
@@ -416,10 +383,8 @@ class DomainFactoryTest {
 
         val privateTaskKey = domainUpdater(now).createScheduleTopLevelTask(
             DomainListenerManager.NotificationType.All,
-            "task",
+            EditDelegate.CreateParameters("task"),
             listOf(ScheduleData.Single(date, TimePair(customTimeKey))),
-            null,
-            null,
             null,
             null,
         )
@@ -437,10 +402,8 @@ class DomainFactoryTest {
         domainUpdater(now).updateScheduleTask(
             DomainListenerManager.NotificationType.All,
             privateTaskKey,
-            "task",
+            EditDelegate.CreateParameters("task"),
             listOf(ScheduleData.Single(date, TimePair(HourMinute(3, 0)))),
-            null,
-            null,
             null,
         ).blockingGet()
 
@@ -455,11 +418,9 @@ class DomainFactoryTest {
         domainUpdater(now).updateScheduleTask(
             DomainListenerManager.NotificationType.All,
             privateTaskKey,
-            "task",
+            EditDelegate.CreateParameters("task"),
             listOf(ScheduleData.Single(date, TimePair(HourMinute(3, 0)))),
-            null,
             EditDelegate.SharedProjectParameters(sharedProjectKey, setOf()),
-            null,
         ).blockingGet()
 
         domainFactory.getShowInstanceData(instanceKey)
@@ -485,10 +446,8 @@ class DomainFactoryTest {
 
         val createResult = domainUpdater(now).createScheduleTopLevelTask(
             DomainListenerManager.NotificationType.All,
-            taskName,
+            EditDelegate.CreateParameters(taskName),
             listOf(ScheduleData.Single(Date(2021, 12, 20), TimePair(HourMinute(20, 0)))),
-            null,
-            null,
             null,
         ).blockingGet()
 
@@ -541,10 +500,8 @@ class DomainFactoryTest {
 
         val taskKey = domainUpdater(now).createScheduleTopLevelTask(
             DomainListenerManager.NotificationType.All,
-            taskName,
+            EditDelegate.CreateParameters(taskName),
             listOf(ScheduleData.Weekly(DayOfWeek.set, TimePair(hour2), null, null, 1)),
-            null,
-            null,
             null,
             null,
         )
@@ -556,11 +513,9 @@ class DomainFactoryTest {
         domainUpdater(now).updateScheduleTask(
             DomainListenerManager.NotificationType.All,
             taskKey,
-            taskName,
+            EditDelegate.CreateParameters(taskName),
             scheduleDatas,
-            null,
             EditDelegate.SharedProjectParameters(projectKey, emptySet()),
-            null,
         ).blockingGet()
 
         val task = domainFactory.rootTasksFactory.getTask(taskKey)
@@ -577,19 +532,15 @@ class DomainFactoryTest {
 
         val parentTask = domainUpdater(now).createScheduleTopLevelTask(
             DomainListenerManager.NotificationType.All,
-            "parent task",
+            EditDelegate.CreateParameters("parent task"),
             scheduleData,
-            null,
-            null,
             null,
         ).blockingGet()
 
         val childTask = domainUpdater(now).createScheduleTopLevelTask(
             DomainListenerManager.NotificationType.All,
-            "child task",
+            EditDelegate.CreateParameters("child task"),
             scheduleData,
-            null,
-            null,
             null,
         ).blockingGet()
 
@@ -639,19 +590,15 @@ class DomainFactoryTest {
 
         val parentTask = domainUpdater(now).createScheduleTopLevelTask(
             DomainListenerManager.NotificationType.All,
-            "parent task",
+            EditDelegate.CreateParameters("parent task"),
             scheduleData,
-            null,
-            null,
             null,
         ).blockingGet()
 
         val childTask = domainUpdater(now).createScheduleTopLevelTask(
             DomainListenerManager.NotificationType.All,
-            "child task",
+            EditDelegate.CreateParameters("child task"),
             scheduleData,
-            null,
-            null,
             null,
         ).blockingGet()
 
@@ -704,10 +651,8 @@ class DomainFactoryTest {
 
         val parentTaskKey = domainUpdater(now).createScheduleTopLevelTask(
             DomainListenerManager.NotificationType.All,
-            parentTaskName,
+            EditDelegate.CreateParameters(parentTaskName),
             scheduleDatas,
-            null,
-            null,
             null,
             null,
         )
@@ -719,13 +664,12 @@ class DomainFactoryTest {
         val parentTask = domainFactory.getTaskForce(parentTaskKey) as RootTask
         assertEquals(privateProjectKey, parentTask.project.projectKey)
 
-        val childTaskKey = domainUpdater(now).createChildTask(
+        val childTaskKey = CreateChildTaskDomainUpdate(
             DomainListenerManager.NotificationType.All,
-            parentTaskKey,
-            "child task",
-            null,
-            null,
+            CreateChildTaskDomainUpdate.Parent.Task(parentTaskKey),
+            EditDelegate.CreateParameters("child task"),
         )
+            .perform(domainUpdater(now))
             .blockingGet()
             .taskKey
 
@@ -737,11 +681,9 @@ class DomainFactoryTest {
         domainUpdater(now).updateScheduleTask(
             DomainListenerManager.NotificationType.All,
             parentTaskKey,
-            parentTaskName,
+            EditDelegate.CreateParameters(parentTaskName),
             scheduleDatas,
-            null,
             EditDelegate.SharedProjectParameters(sharedProjectKey, emptySet()),
-            null,
         ).blockingGet()
 
         assertEquals(sharedProjectKey, parentTask.project.projectKey)
@@ -760,10 +702,8 @@ class DomainFactoryTest {
 
         val parentTaskKey = domainUpdater(now).createScheduleTopLevelTask(
             DomainListenerManager.NotificationType.All,
-            parentTaskNameBefore,
+            EditDelegate.CreateParameters(parentTaskNameBefore),
             listOf(ScheduleData.Single(date, TimePair(hourMinute5))),
-            null,
-            null,
             null,
         )
             .blockingGet()
@@ -777,13 +717,11 @@ class DomainFactoryTest {
 
         now += 1.hours
 
-        domainUpdater(now).createChildTask(
+        CreateChildTaskDomainUpdate(
             DomainListenerManager.NotificationType.All,
-            parentTaskKey,
-            "child task",
-            null,
-            null,
-        ).blockingGet()
+            CreateChildTaskDomainUpdate.Parent.Task(parentTaskKey),
+            EditDelegate.CreateParameters("child task"),
+        ).perform(domainUpdater(now)).blockingGet()
 
         assertEquals(parentTaskNameBefore, getGroupListData().single().name)
 
@@ -816,10 +754,8 @@ class DomainFactoryTest {
 
         val privateTaskKey = domainUpdater(now).createScheduleTopLevelTask(
             DomainListenerManager.NotificationType.All,
-            "private task",
+            EditDelegate.CreateParameters("private task"),
             scheduleDatas,
-            null,
-            null,
             null,
         )
             .blockingGet()
@@ -829,11 +765,9 @@ class DomainFactoryTest {
 
         val sharedTaskKey = domainUpdater(now).createScheduleTopLevelTask(
             DomainListenerManager.NotificationType.All,
-            "shared task",
+            EditDelegate.CreateParameters("shared task"),
             scheduleDatas,
-            null,
             EditDelegate.SharedProjectParameters(sharedProjectKey, setOf()),
-            null,
         )
             .blockingGet()
             .taskKey
@@ -853,14 +787,12 @@ class DomainFactoryTest {
 
         val joinTaskKey = domainUpdater(now).createScheduleJoinTopLevelTask(
             DomainListenerManager.NotificationType.All,
-            "join task",
+            EditDelegate.CreateParameters("join task"),
             scheduleDatas,
             listOf(
                 EditParameters.Join.Joinable.Instance(privateInstanceKey),
                 EditParameters.Join.Joinable.Instance(sharedInstanceKey),
             ),
-            null,
-            null,
             null,
             true,
         ).blockingGet()
@@ -910,11 +842,9 @@ class DomainFactoryTest {
 
         val taskKey1 = domainUpdater(now).createScheduleTopLevelTask(
             DomainListenerManager.NotificationType.All,
-            "task 1 single",
+            EditDelegate.CreateParameters("task 1 single"),
             singleScheduleDatas,
-            null,
             EditDelegate.SharedProjectParameters(sharedProjectKey1, setOf()),
-            null,
         )
             .blockingGet()
             .taskKey
@@ -923,11 +853,9 @@ class DomainFactoryTest {
 
         val taskKey2 = domainUpdater(now).createScheduleTopLevelTask(
             DomainListenerManager.NotificationType.All,
-            "task 2 weekly",
+            EditDelegate.CreateParameters("task 2 weekly"),
             listOf(ScheduleData.Weekly(setOf(DayOfWeek.TUESDAY), scheduleTimePair, null, null, 1)),
-            null,
             EditDelegate.SharedProjectParameters(sharedProjectKey2, setOf()),
-            null,
         )
             .blockingGet()
             .taskKey
@@ -956,11 +884,9 @@ class DomainFactoryTest {
 
         val joinTaskKey = domainUpdater(now).createScheduleJoinTopLevelTask(
             DomainListenerManager.NotificationType.All,
-            "join task",
+            EditDelegate.CreateParameters("join task"),
             singleScheduleDatas,
             listOf(EditParameters.Join.Joinable.Instance(instanceKey1), EditParameters.Join.Joinable.Instance(instanceKey2)),
-            null,
-            null,
             null,
             false,
         ).blockingGet()
@@ -1019,11 +945,9 @@ class DomainFactoryTest {
 
         val taskKey1 = domainUpdater(now).createScheduleTopLevelTask(
             DomainListenerManager.NotificationType.All,
-            "task 1 single",
+            EditDelegate.CreateParameters("task 1 single"),
             singleScheduleDatas,
-            null,
             EditDelegate.SharedProjectParameters(sharedProjectKey1, setOf()),
-            null,
         )
             .blockingGet()
             .taskKey
@@ -1032,11 +956,9 @@ class DomainFactoryTest {
 
         val taskKey2 = domainUpdater(now).createScheduleTopLevelTask(
             DomainListenerManager.NotificationType.All,
-            "task 2 weekly",
+            EditDelegate.CreateParameters("task 2 weekly"),
             listOf(ScheduleData.Weekly(setOf(DayOfWeek.TUESDAY), scheduleTimePair, null, null, 1)),
-            null,
             EditDelegate.SharedProjectParameters(sharedProjectKey2, setOf()),
-            null,
         )
             .blockingGet()
             .taskKey
@@ -1065,11 +987,9 @@ class DomainFactoryTest {
 
         val joinTaskKey = domainUpdater(now).createScheduleJoinTopLevelTask(
             DomainListenerManager.NotificationType.All,
-            "join task",
+            EditDelegate.CreateParameters("join task"),
             singleScheduleDatas,
             listOf(EditParameters.Join.Joinable.Instance(instanceKey1), EditParameters.Join.Joinable.Instance(instanceKey2)),
-            null,
-            null,
             null,
             true,
         ).blockingGet()
@@ -1109,32 +1029,28 @@ class DomainFactoryTest {
 
         val taskKey1 = domainUpdater(now).createScheduleTopLevelTask(
             DomainListenerManager.NotificationType.All,
-            "task1",
+            EditDelegate.CreateParameters("task1"),
             scheduleDatas,
             null,
-            null,
-            null,
         )
             .blockingGet()
             .taskKey
 
-        val taskKey2 = domainUpdater(now).createChildTask(
+        val taskKey2 = CreateChildTaskDomainUpdate(
             DomainListenerManager.NotificationType.All,
-            taskKey1,
-            "task2",
-            null,
-            null,
+            CreateChildTaskDomainUpdate.Parent.Task(taskKey1),
+            EditDelegate.CreateParameters("task2"),
         )
+            .perform(domainUpdater(now))
             .blockingGet()
             .taskKey
 
-        val taskKey3 = domainUpdater(now).createChildTask(
+        val taskKey3 = CreateChildTaskDomainUpdate(
             DomainListenerManager.NotificationType.All,
-            taskKey2,
-            "task3",
-            null,
-            null,
+            CreateChildTaskDomainUpdate.Parent.Task(taskKey2),
+            EditDelegate.CreateParameters("task3"),
         )
+            .perform(domainUpdater(now))
             .blockingGet()
             .taskKey
 
@@ -1153,10 +1069,8 @@ class DomainFactoryTest {
         domainUpdater(now).updateScheduleTask(
             DomainListenerManager.NotificationType.All,
             taskKey3,
-            "task3",
+            EditDelegate.CreateParameters("task3"),
             scheduleDatas,
-            null,
-            null,
             null,
         )
 
@@ -1173,10 +1087,8 @@ class DomainFactoryTest {
         domainUpdater(now).updateChildTask(
             DomainListenerManager.NotificationType.All,
             taskKey1,
-            "task1",
+            EditDelegate.CreateParameters("task1"),
             taskKey3,
-            null,
-            null,
             null,
             true,
         )

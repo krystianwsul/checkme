@@ -36,7 +36,8 @@ class Instance private constructor(
     val scheduleKey by lazy { InstanceScheduleKey(scheduleDate, data.scheduleTimePair) }
 
     val scheduleDate get() = data.scheduleDate
-    val scheduleDateTime get() = DateTime(scheduleDate, data.scheduleTime)
+    val scheduleTime get() = data.scheduleTime
+    val scheduleDateTime get() = DateTime(scheduleDate, scheduleTime)
 
     val instanceDate get() = data.instanceDate
     val instanceTime get() = data.instanceTime
@@ -620,6 +621,8 @@ class Instance private constructor(
             .map { it.value }
     }
 
+    fun setParentState(parentInstanceKey: InstanceKey) = setParentState(ParentState.Parent(parentInstanceKey))
+
     fun setParentState(newParentState: ParentState) {
         check(newParentState.parentInstanceKey != instanceKey)
 
@@ -642,6 +645,8 @@ class Instance private constructor(
         // if it's a child, we also shouldn't add instances if the parent is done
         return parentInstance?.canAddSubtask(now, hack24) ?: true
     }
+
+    fun canMigrateDescription(now: ExactTimeStamp.Local) = !task.note.isNullOrEmpty() && canAddSubtask(now)
 
     fun getProject(): Project<*> = parentInstance?.getProject() ?: task.project
 

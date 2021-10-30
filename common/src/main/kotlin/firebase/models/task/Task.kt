@@ -185,6 +185,8 @@ sealed class Task(
         return getInstances(null, null, now).any { it.canAddSubtask(now, hack24) } to "based off instances"
     }
 
+    fun canMigrateDescription(now: ExactTimeStamp.Local) = !note.isNullOrEmpty() && isVisible(now)
+
     private fun getTopLevelTask(exactTimeStamp: ExactTimeStamp): Task =
         getParentTask(exactTimeStamp)?.getTopLevelTask(exactTimeStamp) ?: this
 
@@ -570,13 +572,17 @@ sealed class Task(
         .filterIsInstance<Interval.Ended>()
         .forEach { it.correctEndExactTimeStamps() }
 
-    fun hasOtherVisibleInstances(now: ExactTimeStamp.Local, instanceKey: InstanceKey?) = getInstances(
-        null,
-        null,
-        now,
-    ).filter { it.instanceKey != instanceKey }
-        .filter { it.isVisible(now, Instance.VisibilityOptions()) }
-        .any()
+    fun hasOtherVisibleInstances(now: ExactTimeStamp.Local, instanceKey: InstanceKey?): Boolean {
+        instanceKey?.let { check(it.taskKey == taskKey) }
+
+        return getInstances(
+            null,
+            null,
+            now,
+        ).filter { it.instanceKey != instanceKey }
+            .filter { it.isVisible(now, Instance.VisibilityOptions()) }
+            .any()
+    }
 
     final override fun toString() = super.toString() + ", name: $name, taskKey: $taskKey"
 

@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.domainmodel.extensions
 
-import android.net.Uri
 import androidx.annotation.CheckResult
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.*
@@ -10,10 +9,7 @@ import com.krystianwsul.checkme.gui.edit.EditParameters
 import com.krystianwsul.checkme.gui.edit.EditViewModel
 import com.krystianwsul.checkme.gui.edit.ParentScheduleManager
 import com.krystianwsul.checkme.gui.edit.delegates.EditDelegate
-import com.krystianwsul.checkme.upload.Uploader
-import com.krystianwsul.checkme.utils.newUuid
 import com.krystianwsul.checkme.viewmodels.DomainResult
-import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.domain.ScheduleGroup
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.MyCustomTime
@@ -64,7 +60,7 @@ private fun UserScope.getCreateTaskDataFast(): EditViewModel.MainData {
         .toMutableMap<CustomTimeKey, Time.Custom>()
         .toCustomTimeDatas()
 
-    return EditViewModel.MainData(null, customTimeDatas, null, null)
+    return EditViewModel.MainData(null, customTimeDatas, null, null, null)
 }
 
 private fun DomainFactory.getCreateTaskDataSlow(
@@ -163,6 +159,7 @@ private fun DomainFactory.getCreateTaskDataSlow(
                 EditViewModel.ParentKey.Task(task.taskKey),
                 mapOf(),
                 task.project.projectKey,
+                task.hasMultipleInstances(startParameters.parentInstanceKey, now)
             )
         }
         is EditViewModel.ParentKey.Project -> {
@@ -173,12 +170,17 @@ private fun DomainFactory.getCreateTaskDataSlow(
                 EditViewModel.ParentKey.Project(project.projectKey),
                 project.users.toUserDatas(),
                 project.projectKey,
+                null,
             )
         }
         null -> null
     }
 
-    return EditViewModel.MainData(taskData, customTimeDatas, showAllInstancesDialog, currentParent)
+    val parentTaskDescription = (startParameters as? EditViewModel.StartParameters.MigrateDescription)?.taskKey
+        ?.let(::getTaskForce)
+        ?.note
+
+    return EditViewModel.MainData(taskData, customTimeDatas, showAllInstancesDialog, currentParent, parentTaskDescription)
 }
 
 fun DomainFactory.getCreateTaskParentPickerData(
@@ -190,7 +192,7 @@ fun DomainFactory.getCreateTaskParentPickerData(
 
     val now = ExactTimeStamp.Local.now
 
-    val parentTreeDatas = getParentTreeDatas(now, startParameters.excludedTaskKeys)
+    val parentTreeDatas = getParentTreeDatas(now, startParameters.excludedTaskKeys, startParameters.parentInstanceKey)
 
     return EditViewModel.ParentPickerData(parentTreeDatas)
 }
@@ -198,29 +200,26 @@ fun DomainFactory.getCreateTaskParentPickerData(
 @CheckResult
 fun DomainUpdater.createScheduleTopLevelTask(
     notificationType: DomainListenerManager.NotificationType,
-    name: String,
+    createParameters: EditDelegate.CreateParameters,
     scheduleDatas: List<ScheduleData>,
-    note: String?,
     sharedProjectParameters: EditDelegate.SharedProjectParameters?,
-    imagePath: Pair<String, Uri>?,
     copyTaskKey: TaskKey? = null,
 ): Single<EditDelegate.CreateResult> = SingleDomainUpdate.create("createScheduleTopLevelTask") { now ->
-    check(name.isNotEmpty())
     check(scheduleDatas.isNotEmpty())
 
     val finalProjectId = sharedProjectParameters?.key ?: defaultProjectKey
 
-    val imageUuid = imagePath?.let { newUuid() }
+    val image = createParameters.getImage(this)
 
     lateinit var task: RootTask
     trackRootTaskIds {
         task = createScheduleTopLevelTask(
             now,
-            name,
+            createParameters.name,
             scheduleDatas.map { it to getTime(it.timePair) },
-            note,
+            createParameters.note,
             finalProjectId,
-            imageUuid,
+            image,
             this,
             assignedTo = sharedProjectParameters.nonNullAssignedTo,
         )
@@ -228,7 +227,7 @@ fun DomainUpdater.createScheduleTopLevelTask(
         copyTaskKey?.let { copyTask(now, task, it) }
     }
 
-    imageUuid?.let { Uploader.addUpload(deviceDbInfo, task.taskKey, it, imagePath) }
+    image?.upload(task.taskKey)
 
     DomainUpdater.Result(
         task.toCreateResult(now),
@@ -238,78 +237,36 @@ fun DomainUpdater.createScheduleTopLevelTask(
     )
 }.perform(this)
 
-private fun RootTask.toCreateResult(now: ExactTimeStamp.Local) =
+fun RootTask.toCreateResult(now: ExactTimeStamp.Local) =
     getInstances(null, null, now).singleOrNull()
         ?.let { EditDelegate.CreateResult.Instance(it.instanceKey) }
         ?: EditDelegate.CreateResult.Task(taskKey)
 
 @CheckResult
-fun DomainUpdater.createChildTask(
-    notificationType: DomainListenerManager.NotificationType,
-    parentTaskKey: TaskKey,
-    name: String,
-    note: String?,
-    imagePath: Pair<String, Uri>?,
-    copyTaskKey: TaskKey? = null,
-): Single<EditDelegate.CreateResult> = SingleDomainUpdate.create("createChildTask") { now ->
-    check(name.isNotEmpty())
-
-    val imageUuid = imagePath?.let { newUuid() }
-
-    lateinit var childTask: RootTask
-    trackRootTaskIds {
-        val parentTask = convertToRoot(getTaskForce(parentTaskKey), now)
-        parentTask.requireNotDeleted()
-
-        childTask = createChildTask(
-            now,
-            parentTask,
-            name,
-            note,
-            imageUuid?.let { TaskJson.Image(it, uuid) },
-            copyTaskKey,
-        )
-    }
-
-    imageUuid?.let { Uploader.addUpload(deviceDbInfo, childTask.taskKey, it, imagePath) }
-
-    DomainUpdater.Result(
-        childTask.toCreateResult(now),
-        true,
-        notificationType,
-        DomainFactory.CloudParams(childTask.project),
-    )
-}.perform(this)
-
-@CheckResult
 fun DomainUpdater.createTopLevelTask(
     notificationType: DomainListenerManager.NotificationType,
-    name: String,
-    note: String?,
+    createParameters: EditDelegate.CreateParameters,
     sharedProjectKey: ProjectKey.Shared?,
-    imagePath: Pair<String, Uri>?,
     copyTaskKey: TaskKey? = null,
 ): Single<EditDelegate.CreateResult> = SingleDomainUpdate.create("createTopLevelTask") { now ->
-    check(name.isNotEmpty())
-
     val finalProjectId = sharedProjectKey ?: defaultProjectKey
 
-    val imageUuid = imagePath?.let { newUuid() }
+    val image = createParameters.getImage(this)
 
     lateinit var task: RootTask
     trackRootTaskIds {
         task = createNoScheduleOrParentTask(
             now,
-            name,
-            note,
+            createParameters.name,
+            createParameters.note,
             finalProjectId,
-            imageUuid,
+            image,
         )
 
         copyTaskKey?.let { copyTask(now, task, it) }
     }
 
-    imageUuid?.let { Uploader.addUpload(deviceDbInfo, task.taskKey, it, imagePath) }
+    image?.upload(task.taskKey)
 
     DomainUpdater.Result(
         task.toCreateResult(now),
@@ -323,16 +280,13 @@ fun DomainUpdater.createTopLevelTask(
 fun DomainUpdater.updateScheduleTask(
     notificationType: DomainListenerManager.NotificationType,
     taskKey: TaskKey,
-    name: String,
+    createParameters: EditDelegate.CreateParameters,
     scheduleDatas: List<ScheduleData>,
-    note: String?,
     sharedProjectParameters: EditDelegate.SharedProjectParameters?,
-    imagePath: NullableWrapper<Pair<String, Uri>>?,
 ): Single<TaskKey.Root> = SingleDomainUpdate.create("updateScheduleTask") { now ->
-    check(name.isNotEmpty())
     check(scheduleDatas.isNotEmpty())
 
-    val imageUuid = imagePath?.value?.let { newUuid() }
+    val image = createParameters.getImage(this)
 
     val projectKey = sharedProjectParameters?.key ?: defaultProjectKey
 
@@ -361,12 +315,12 @@ fun DomainUpdater.updateScheduleTask(
     }
 
     finalTask.apply {
-        setName(name, note)
+        setName(createParameters.name, createParameters.note)
 
-        if (imagePath != null) setImage(deviceDbInfo, imageUuid?.let { ImageState.Local(imageUuid) })
+        image?.let { setImage(deviceDbInfo, ImageState.Local(it.uuid)) }
     }
 
-    imageUuid?.let { Uploader.addUpload(deviceDbInfo, finalTask.taskKey, it, imagePath.value) }
+    image?.upload(finalTask.taskKey)
 
     DomainUpdater.Result(
         finalTask.taskKey,
@@ -380,15 +334,11 @@ fun DomainUpdater.updateScheduleTask(
 fun DomainUpdater.updateChildTask(
     notificationType: DomainListenerManager.NotificationType,
     taskKey: TaskKey,
-    name: String,
+    createParameters: EditDelegate.CreateParameters,
     parentTaskKey: TaskKey,
-    note: String?,
-    imagePath: NullableWrapper<Pair<String, Uri>>?,
     removeInstanceKey: InstanceKey?,
-    allReminders: Boolean,
+    allReminders: Boolean = true,
 ): Single<TaskKey.Root> = SingleDomainUpdate.create("updateChildTask") { now ->
-    check(name.isNotEmpty())
-
     lateinit var task: RootTask
     lateinit var originalProject: Project<*>
     lateinit var parentTask: RootTask
@@ -426,10 +376,11 @@ fun DomainUpdater.updateChildTask(
 
     }
 
-    task.setName(name, note)
+    task.setName(createParameters.name, createParameters.note)
 
-    val imageUuid = imagePath?.value?.let { newUuid() }
-    if (imagePath != null) task.setImage(deviceDbInfo, imageUuid?.let { ImageState.Local(imageUuid) })
+    val image = createParameters.getImage(this)
+
+    image?.let { task.setImage(deviceDbInfo, ImageState.Local(it.uuid)) }
 
     removeInstanceKey?.let {
         val instance = getInstance(it)
@@ -441,7 +392,7 @@ fun DomainUpdater.updateChildTask(
         }
     }
 
-    imageUuid?.let { Uploader.addUpload(deviceDbInfo, task.taskKey, it, imagePath.value) }
+    image?.upload(task.taskKey)
 
     DomainUpdater.Result(
         task.taskKey,
@@ -455,13 +406,9 @@ fun DomainUpdater.updateChildTask(
 fun DomainUpdater.updateTopLevelTask(
     notificationType: DomainListenerManager.NotificationType,
     taskKey: TaskKey,
-    name: String,
-    note: String?,
+    createParameters: EditDelegate.CreateParameters,
     sharedProjectKey: ProjectKey.Shared?,
-    imagePath: NullableWrapper<Pair<String, Uri>>?,
 ): Single<TaskKey.Root> = SingleDomainUpdate.create("updateTopLevelTask") { now ->
-    check(name.isNotEmpty())
-
     val projectKey = sharedProjectKey ?: defaultProjectKey
 
     val originalTask = getTaskForce(taskKey)
@@ -482,13 +429,15 @@ fun DomainUpdater.updateTopLevelTask(
         }
     }
 
-    finalTask.setName(name, note)
+    finalTask.setName(createParameters.name, createParameters.note)
 
-    val imageUuid = imagePath?.value?.let { newUuid() }
+    val image = createParameters.getImage(this)
 
-    if (imagePath != null) finalTask.setImage(deviceDbInfo, imageUuid?.let { ImageState.Local(imageUuid) })
+    image?.let {
+        finalTask.setImage(deviceDbInfo, ImageState.Local(it.uuid))
 
-    imageUuid?.let { Uploader.addUpload(deviceDbInfo, finalTask.taskKey, it, imagePath.value) }
+        it.upload(finalTask.taskKey)
+    }
 
     DomainUpdater.Result(
         finalTask.taskKey,
@@ -501,21 +450,18 @@ fun DomainUpdater.updateTopLevelTask(
 @CheckResult
 fun DomainUpdater.createScheduleJoinTopLevelTask(
     notificationType: DomainListenerManager.NotificationType,
-    name: String,
+    createParameters: EditDelegate.CreateParameters,
     scheduleDatas: List<ScheduleData>,
     joinables: List<EditParameters.Join.Joinable>,
-    note: String?,
     sharedProjectParameters: EditDelegate.SharedProjectParameters?,
-    imagePath: Pair<String, Uri>?,
     allReminders: Boolean,
 ): Single<TaskKey.Root> = SingleDomainUpdate.create("createScheduleJoinTopLevelTask") { now ->
-    check(name.isNotEmpty())
     check(scheduleDatas.isNotEmpty())
     check(joinables.size > 1)
 
     val finalProjectKey = sharedProjectParameters?.key ?: defaultProjectKey
 
-    val imageUuid = imagePath?.let { newUuid() }
+    val image = createParameters.getImage(this)
 
     lateinit var newParentTask: RootTask
     trackRootTaskIds {
@@ -533,11 +479,11 @@ fun DomainUpdater.createScheduleJoinTopLevelTask(
 
         newParentTask = createScheduleTopLevelTask(
             now,
-            name,
+            createParameters.name,
             scheduleDatas.map { it to getTime(it.timePair) },
-            note,
+            createParameters.note,
             finalProjectKey,
-            imageUuid,
+            image,
             this,
             ordinal,
             sharedProjectParameters.nonNullAssignedTo,
@@ -549,7 +495,7 @@ fun DomainUpdater.createScheduleJoinTopLevelTask(
             joinJoinables(newParentTask, joinableMap, now)
     }
 
-    imageUuid?.let { Uploader.addUpload(deviceDbInfo, newParentTask.taskKey, it, imagePath) }
+    image?.upload(newParentTask.taskKey)
 
     DomainUpdater.Result(
         newParentTask.taskKey,
@@ -563,16 +509,13 @@ fun DomainUpdater.createScheduleJoinTopLevelTask(
 fun DomainUpdater.createJoinChildTask(
     notificationType: DomainListenerManager.NotificationType,
     parentTaskKey: TaskKey,
-    name: String,
+    createParameters: EditDelegate.CreateParameters,
     joinTaskKeys: List<TaskKey>,
-    note: String?,
-    imagePath: Pair<String, Uri>?,
     removeInstanceKeys: List<InstanceKey>,
 ): Single<TaskKey.Root> = SingleDomainUpdate.create("createJoinChildTask") { now ->
-    check(name.isNotEmpty())
     check(joinTaskKeys.size > 1)
 
-    val imageUuid = imagePath?.let { newUuid() }
+    val image = createParameters.getImage(this)
 
     lateinit var childTask: RootTask
     trackRootTaskIds {
@@ -586,16 +529,16 @@ fun DomainUpdater.createJoinChildTask(
         childTask = createChildTask(
             now,
             parentTask,
-            name,
-            note,
-            imageUuid?.let { TaskJson.Image(it, uuid) },
+            createParameters.name,
+            createParameters.note,
+            image?.json,
             ordinal = ordinal,
         )
 
         joinTasks(childTask, joinTasks, now, removeInstanceKeys)
     }
 
-    imageUuid?.let { Uploader.addUpload(deviceDbInfo, childTask.taskKey, it, imagePath) }
+    image?.upload(childTask.taskKey)
 
     DomainUpdater.Result(
         childTask.taskKey,
@@ -608,46 +551,43 @@ fun DomainUpdater.createJoinChildTask(
 @CheckResult
 fun DomainUpdater.createJoinTopLevelTask(
     notificationType: DomainListenerManager.NotificationType,
-    name: String,
+    createParameters: EditDelegate.CreateParameters,
     joinTaskKeys: List<TaskKey>,
-    note: String?,
     sharedProjectKey: ProjectKey.Shared?,
-    imagePath: Pair<String, Uri>?,
     removeInstanceKeys: List<InstanceKey>,
 ): Single<TaskKey.Root> = SingleDomainUpdate.create("createJoinTopLevelTask") { now ->
-    check(name.isNotEmpty())
     check(joinTaskKeys.size > 1)
 
     val initialJoinTasks = joinTaskKeys.map(::getTaskForce)
 
     val originalProjects = initialJoinTasks.map { it.project }
 
-    val finalProjectId = sharedProjectKey ?: initialJoinTasks.map { it.project }
+    val finalProjectKey = sharedProjectKey ?: initialJoinTasks.map { it.project }
         .distinct()
         .single()
         .projectKey
 
-    val imageUuid = imagePath?.let { newUuid() }
+    val image = createParameters.getImage(this)
 
     lateinit var newParentTask: RootTask
     trackRootTaskIds {
-        val joinTasks = joinTaskKeys.map { convertAndUpdateProject(getTaskForce(it), now, finalProjectId) }
+        val joinTasks = joinTaskKeys.map { convertAndUpdateProject(getTaskForce(it), now, finalProjectKey) }
 
         val ordinal = joinTasks.map { it.ordinal }.minOrNull()
 
         newParentTask = createNoScheduleOrParentTask(
             now,
-            name,
-            note,
-            finalProjectId,
-            imageUuid,
+            createParameters.name,
+            createParameters.note,
+            finalProjectKey,
+            image,
             ordinal,
         )
 
         joinTasks(newParentTask, joinTasks, now, removeInstanceKeys)
     }
 
-    imageUuid?.let { Uploader.addUpload(deviceDbInfo, newParentTask.taskKey, it, imagePath) }
+    image?.upload(newParentTask.taskKey)
 
     DomainUpdater.Result(
         newParentTask.taskKey,
@@ -660,39 +600,25 @@ fun DomainUpdater.createJoinTopLevelTask(
 private fun DomainFactory.getParentTreeDatas(
     now: ExactTimeStamp.Local,
     excludedTaskKeys: Set<TaskKey>,
-): List<EditViewModel.ParentTreeData> {
-    val parentTreeDatas = mutableListOf<EditViewModel.ParentTreeData>()
+    parentInstanceKey: InstanceKey?,
+): List<EditViewModel.ParentEntryData> {
+    val parentTreeDatas = mutableListOf<EditViewModel.ParentEntryData>()
 
     parentTreeDatas += getAllTasks().asSequence()
         .filter { it.showAsParent(now, excludedTaskKeys) }
         .filter { it.isTopLevelTask(now) && (it.project as? SharedProject)?.notDeleted != true }
-        .map {
-            EditViewModel.ParentTreeData(
-                it.name,
-                getTaskListChildTaskDatas(now, it, excludedTaskKeys),
-                EditViewModel.ParentKey.Task(it.taskKey),
-                it.getScheduleText(ScheduleText, now),
-                it.note,
-                EditViewModel.SortKey.TaskSortKey(it.startExactTimeStamp),
-                mapOf(),
-                it.project.projectKey,
-            )
-        }
+        .map { it.toParentEntryData(this, now, excludedTaskKeys, parentInstanceKey) }
 
     parentTreeDatas += projectsFactory.sharedProjects
         .values
         .asSequence()
         .filter { it.notDeleted }
         .map {
-            EditViewModel.ParentTreeData(
+            EditViewModel.ParentEntryData.Project(
                 it.name,
-                getProjectTaskTreeDatas(now, it, excludedTaskKeys),
-                EditViewModel.ParentKey.Project(it.projectKey),
-                it.users.joinToString(", ") { it.name },
-                null,
-                EditViewModel.SortKey.ProjectSortKey(it.projectKey),
-                it.users.toUserDatas(),
+                getProjectTaskTreeDatas(now, it, excludedTaskKeys, parentInstanceKey),
                 it.projectKey,
+                it.users.toUserDatas(),
             )
         }
 
@@ -703,22 +629,12 @@ private fun DomainFactory.getProjectTaskTreeDatas(
     now: ExactTimeStamp.Local,
     project: Project<*>,
     excludedTaskKeys: Set<TaskKey>,
-): List<EditViewModel.ParentTreeData> {
+    parentInstanceKey: InstanceKey?,
+): List<EditViewModel.ParentEntryData.Task> {
     return project.getAllTasks()
         .filter { it.showAsParent(now, excludedTaskKeys) }
         .filter { it.isTopLevelTask(now) }
-        .map {
-            EditViewModel.ParentTreeData(
-                it.name,
-                getTaskListChildTaskDatas(now, it, excludedTaskKeys),
-                EditViewModel.ParentKey.Task(it.taskKey),
-                it.getScheduleText(ScheduleText, now),
-                it.note,
-                EditViewModel.SortKey.TaskSortKey(it.startExactTimeStamp),
-                mapOf(),
-                it.project.projectKey,
-            )
-        }
+        .map { it.toParentEntryData(this, now, excludedTaskKeys, parentInstanceKey) }
         .toList()
 }
 
@@ -730,6 +646,23 @@ private fun Task.showAsParent(now: ExactTimeStamp.Local, excludedTaskKeys: Set<T
     if (!isVisible(now)) return false
 
     return true
+}
+
+fun DomainFactory.migrateInstanceScheduleKey(
+    task: RootTask,
+    instanceScheduleKey: InstanceScheduleKey,
+    now: ExactTimeStamp.Local,
+): InstanceScheduleKey {
+    val originalTime = getTime(instanceScheduleKey.scheduleTimePair)
+
+    val migratedTime = task.getOrCopyTime(
+        instanceScheduleKey.scheduleDate.dayOfWeek,
+        originalTime,
+        this,
+        now,
+    )
+
+    return InstanceScheduleKey(instanceScheduleKey.scheduleDate, migratedTime.timePair)
 }
 
 private fun DomainFactory.joinJoinables(
@@ -751,22 +684,10 @@ private fun DomainFactory.joinJoinables(
         when (joinable) {
             is EditParameters.Join.Joinable.Task -> addChildToParent()
             is EditParameters.Join.Joinable.Instance -> {
-                val migratedScheduleKey = joinable.instanceKey
-                    .instanceScheduleKey
-                    .run {
-                        val originalTime = getTime(scheduleTimePair)
+                val migratedInstanceScheduleKey =
+                    migrateInstanceScheduleKey(task, joinable.instanceKey.instanceScheduleKey, now)
 
-                        val migratedTime = task.getOrCopyTime(
-                            scheduleDate.dayOfWeek,
-                            originalTime,
-                            this@joinJoinables,
-                            now,
-                        )
-
-                        InstanceScheduleKey(scheduleDate, migratedTime.timePair)
-                    }
-
-                val instance = task.getInstance(migratedScheduleKey)
+                val instance = task.getInstance(migratedInstanceScheduleKey)
 
                 if (parentTaskHasOtherInstances || task.hasOtherVisibleInstances(now, joinable.instanceKey)) {
                     instance.setParentState(Instance.ParentState.Parent(parentInstanceKey))
@@ -797,28 +718,39 @@ private fun DomainFactory.joinTasks(
         .forEach { it.hide() }
 }
 
+private fun Task.hasMultipleInstances(parentInstanceKey: InstanceKey?, now: ExactTimeStamp.Local) =
+    parentInstanceKey?.takeIf { it.taskKey == taskKey }?.let { hasOtherVisibleInstances(now, it) }
+
+private fun Task.toParentEntryData(
+    domainFactory: DomainFactory,
+    now: ExactTimeStamp.Local,
+    excludedTaskKeys: Set<TaskKey>,
+    parentInstanceKey: InstanceKey?,
+    scheduleTextExactTimeStamp: ExactTimeStamp = now,
+) = EditViewModel.ParentEntryData.Task(
+    name,
+    domainFactory.getTaskListChildTaskDatas(now, this, excludedTaskKeys, parentInstanceKey),
+    taskKey,
+    getScheduleText(ScheduleText, scheduleTextExactTimeStamp),
+    note,
+    EditViewModel.SortKey.TaskSortKey(startExactTimeStamp),
+    project.projectKey,
+    hasMultipleInstances(parentInstanceKey, now),
+)
+
 private fun DomainFactory.getTaskListChildTaskDatas(
     now: ExactTimeStamp.Local,
     parentTask: Task,
     excludedTaskKeys: Set<TaskKey>,
-): List<EditViewModel.ParentTreeData> =
-    parentTask.getChildTaskHierarchies(now)
-        .asSequence()
-        .map { it.childTask }
-        .filter { it.showAsParent(now, excludedTaskKeys) }
-        .map { childTask ->
-            EditViewModel.ParentTreeData(
-                childTask.name,
-                getTaskListChildTaskDatas(now, childTask, excludedTaskKeys),
-                EditViewModel.ParentKey.Task(childTask.taskKey),
-                childTask.getScheduleText(ScheduleText, childTask.getHierarchyExactTimeStamp(now)),
-                childTask.note,
-                EditViewModel.SortKey.TaskSortKey(childTask.startExactTimeStamp),
-                mapOf(),
-                childTask.project.projectKey,
-            )
-        }
-        .toList()
+    parentInstanceKey: InstanceKey?,
+): List<EditViewModel.ParentEntryData.Task> = parentTask.getChildTaskHierarchies(now)
+    .asSequence()
+    .map { it.childTask }
+    .filter { it.showAsParent(now, excludedTaskKeys) }
+    .map {
+        it.toParentEntryData(this, now, excludedTaskKeys, parentInstanceKey, it.getHierarchyExactTimeStamp(now))
+    }
+    .toList()
 
 private fun DomainFactory.copyTask(now: ExactTimeStamp.Local, task: RootTask, copyTaskKey: TaskKey) {
     val copiedTask = getTaskForce(copyTaskKey)
@@ -838,7 +770,7 @@ private fun DomainFactory.copyTask(now: ExactTimeStamp.Local, task: RootTask, co
     }
 }
 
-private fun DomainFactory.createChildTask(
+fun DomainFactory.createChildTask(
     now: ExactTimeStamp.Local,
     parentTask: RootTask,
     name: String,
@@ -863,43 +795,41 @@ private fun Collection<ProjectUser>.toUserDatas() = associate {
 
 private val EditDelegate.SharedProjectParameters?.nonNullAssignedTo get() = this?.assignedTo.orEmpty()
 
-private fun DomainFactory.createScheduleTopLevelTask(
+fun DomainFactory.createScheduleTopLevelTask(
     now: ExactTimeStamp.Local,
     name: String,
     scheduleDatas: List<Pair<ScheduleData, Time>>,
     note: String?,
     projectKey: ProjectKey<*>,
-    imageUuid: String?,
+    image: EditDelegate.CreateParameters.Image?,
     customTimeMigrationHelper: Project.CustomTimeMigrationHelper,
     ordinal: Double? = null,
     assignedTo: Set<UserKey> = setOf(),
-) = createRootTask(now, imageUuid, name, note, ordinal).apply {
+) = createRootTask(now, image, name, note, ordinal).apply {
     createSchedules(now, scheduleDatas, assignedTo, customTimeMigrationHelper, projectKey)
 }
-
-private fun DomainFactory.getTaskJsonImage(imageUuid: String) = TaskJson.Image(imageUuid, deviceDbInfo.uuid)
 
 private fun DomainFactory.createNoScheduleOrParentTask(
     now: ExactTimeStamp.Local,
     name: String,
     note: String?,
     projectKey: ProjectKey<*>,
-    imageUuid: String?,
+    image: EditDelegate.CreateParameters.Image?,
     ordinal: Double? = null,
-) = createRootTask(now, imageUuid, name, note, ordinal).apply {
+) = createRootTask(now, image, name, note, ordinal).apply {
     performRootIntervalUpdate { setNoScheduleOrParent(now, projectKey) }
 }
 
 private fun DomainFactory.createRootTask(
     now: ExactTimeStamp.Local,
-    imageUuid: String?,
+    image: EditDelegate.CreateParameters.Image?,
     name: String,
     note: String?,
     ordinal: Double?,
 ): RootTask {
     return rootTasksFactory.createTask(
         now,
-        imageUuid?.let(::getTaskJsonImage),
+        image?.json,
         name,
         note,
         ordinal,
@@ -917,7 +847,7 @@ private fun DomainFactory.convertAndUpdateProject(
     }
 }
 
-private fun DomainFactory.convertToRoot(task: Task, now: ExactTimeStamp.Local): RootTask {
+fun DomainFactory.convertToRoot(task: Task, now: ExactTimeStamp.Local): RootTask {
     if (task is RootTask) return task
 
     return converter.convertToRoot(now, task as ProjectTask, task.project.projectKey)

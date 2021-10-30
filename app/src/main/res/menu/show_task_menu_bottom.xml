@@ -55,4 +55,11 @@
         android:icon="@drawable/ic_baseline_open_in_browser_24"
         app:showAsAction="ifRoom" />
 
+    <item
+        android:id="@+id/taskMenuMigrateDescription"
+        android:title="@string/migrateDescription"
+        android:orderInCategory="1000"
+        android:icon="@drawable/ic_baseline_description_24"
+        app:showAsAction="ifRoom" />
+
 </menu>

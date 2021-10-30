@@ -1029,7 +1029,7 @@ class EditActivity : NavBarActivity() {
         override fun onEntryDeleted() {
             editViewModel.delegate
                 .parentScheduleManager
-                .parent = null
+                .clearParent()
         }
 
         @Suppress("DEPRECATION")

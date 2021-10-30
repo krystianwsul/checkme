@@ -229,9 +229,9 @@ class GroupListFragment @JvmOverloads constructor(
                     GroupMenuUtils.onNotify(selectedDatas, parameters.dataId).addTo(attachedToWindowDisposable)
                 R.id.actionGroupCopyTask -> activity.startActivity(getCopyTasksIntent(selectedDatas.map { it.taskKey }))
                 R.id.actionGroupWebSearch -> activity.startActivity(webSearchIntent(selectedDatas.single().name))
-                R.id.actionGroupMigrateDescription -> {
-                    // todo migrate description
-                }
+                R.id.actionGroupMigrateDescription -> activity.startActivity(
+                    EditActivity.getParametersIntent(EditParameters.MigrateDescription(selectedDatas.single().taskKey))
+                )
                 else -> throw UnsupportedOperationException()
             }
 

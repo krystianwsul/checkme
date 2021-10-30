@@ -253,9 +253,8 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.Listener {
                     R.id.taskMenuCopyTask ->
                         startActivity(EditActivity.getParametersIntent(EditParameters.Copy(taskKey)))
                     R.id.taskMenuWebSearch -> startActivity(webSearchIntent(data!!.name))
-                    R.id.taskMenuMigrateDescription -> {
-                        // todo migrate description
-                    }
+                    R.id.taskMenuMigrateDescription ->
+                        startActivity(EditActivity.getParametersIntent(EditParameters.MigrateDescription(taskKey)))
                     else -> throw UnsupportedOperationException()
                 }
 

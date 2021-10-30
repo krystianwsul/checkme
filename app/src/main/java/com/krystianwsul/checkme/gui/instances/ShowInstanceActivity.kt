@@ -374,9 +374,9 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
                             EditActivity.getParametersIntent(EditParameters.Copy(data!!.taskKey))
                         )
                         R.id.instanceMenuWebSearch -> startActivity(webSearchIntent(data!!.name))
-                        R.id.instanceMenuMigrateDescription -> {
-                            // todo migrate description
-                        }
+                        R.id.instanceMenuMigrateDescription -> startActivity(
+                            EditActivity.getParametersIntent(EditParameters.MigrateDescription(data!!.taskKey))
+                        )
                         else -> throw UnsupportedOperationException()
                     }
                 }

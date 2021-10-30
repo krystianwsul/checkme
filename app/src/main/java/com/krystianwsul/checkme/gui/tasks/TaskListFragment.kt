@@ -168,9 +168,9 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                 )
                 R.id.actionTaskCopy -> startActivity(getCopyTasksIntent(taskKeys))
                 R.id.actionTaskWebSearch -> startActivity(webSearchIntent(selectedNodes.single().entryData.name))
-                R.id.actionTaskMigrateDescription -> {
-                    // todo migrate description
-                }
+                R.id.actionTaskMigrateDescription -> startActivity(
+                    EditActivity.getParametersIntent(EditParameters.MigrateDescription(taskKeys.single()))
+                )
                 else -> throw UnsupportedOperationException()
             }
 

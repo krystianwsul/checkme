@@ -109,6 +109,14 @@ sealed class EditParameters : Parcelable {
     }
 
     @Parcelize
+    class MigrateDescription(val taskKey: TaskKey) : EditParameters() {
+
+        override val startParameters get() = EditViewModel.StartParameters.MigrateDescription(taskKey)
+
+        override val currentParentSource get() = EditViewModel.CurrentParentSource.Set(EditViewModel.ParentKey.Task(taskKey))
+    }
+
+    @Parcelize
     class Join(val joinables: List<Joinable>, val hint: EditParentHint? = null) : EditParameters() {
 
         override val startParameters get() = EditViewModel.StartParameters.Join(joinables)

@@ -536,6 +536,11 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
             override val excludedTaskKeys = setOf<TaskKey>()
         }
 
+        class MigrateDescription(val taskKey: TaskKey) : StartParameters {
+
+            override val excludedTaskKeys = setOf<TaskKey>()
+        }
+
         class Task(val taskKey: TaskKey) : StartParameters {
 
             override val excludedTaskKeys = setOf(taskKey)

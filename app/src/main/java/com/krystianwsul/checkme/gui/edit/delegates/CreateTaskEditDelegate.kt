@@ -174,6 +174,7 @@ class CreateTaskEditDelegate(
             DomainListenerManager.NotificationType.All,
             parentParameter,
             createParameters,
+            clearParentNote = parentTaskKey == (parameters as? EditParameters.MigrateDescription)?.taskKey,
         )
             .perform(AndroidDomainUpdater)
             .observeOn(AndroidSchedulers.mainThread())

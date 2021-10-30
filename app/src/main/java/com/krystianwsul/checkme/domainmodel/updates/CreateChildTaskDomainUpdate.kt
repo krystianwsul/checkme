@@ -16,11 +16,12 @@ class CreateChildTaskDomainUpdate(
     private val parent: Parent,
     private val createParameters: EditDelegate.CreateParameters,
     private val copyTaskKey: TaskKey? = null,
+    private val clearParentNote: Boolean = false,
 ) : AbstractSingleDomainUpdate<EditDelegate.CreateResult>("createChildTask") {
 
     override fun doAction(
         domainFactory: DomainFactory,
-        now: ExactTimeStamp.Local
+        now: ExactTimeStamp.Local,
     ): DomainUpdater.Result<EditDelegate.CreateResult> {
         val image = createParameters.getImage(domainFactory)
 
@@ -29,6 +30,8 @@ class CreateChildTaskDomainUpdate(
                 is Parent.Task -> {
                     val parentTask = domainFactory.convertToRoot(domainFactory.getTaskForce(parent.taskKey), now)
                     parentTask.requireNotDeleted()
+
+                    if (clearParentNote) parentTask.clearNote()
 
                     domainFactory.createChildTask(
                         now,
@@ -46,6 +49,8 @@ class CreateChildTaskDomainUpdate(
                     )
 
                     parentTask.requireNotDeleted()
+
+                    if (clearParentNote) parentTask.clearNote()
 
                     val migratedInstanceScheduleKey = domainFactory.migrateInstanceScheduleKey(
                         parentTask,

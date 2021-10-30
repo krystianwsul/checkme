@@ -146,6 +146,14 @@ class RootTask private constructor(
         normalizedFieldsDelegate.invalidate()
     }
 
+    fun clearNote() {
+        check(!note.isNullOrEmpty())
+
+        taskRecord.note = null
+
+        normalizedFieldsDelegate.invalidate()
+    }
+
     fun setImage(deviceDbInfo: DeviceDbInfo, imageState: ImageState?) {
         taskRecord.image = when (imageState) {
             null -> null

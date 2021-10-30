@@ -406,6 +406,7 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
         val customTimeDatas: Map<CustomTimeKey, CustomTimeData>,
         val showJoinAllRemindersDialog: Boolean?,
         val currentParent: ParentScheduleManager.Parent?,
+        val parentTaskDescription: String?,
     ) : DomainData()
 
     data class ParentPickerData(val parentTreeDatas: List<ParentEntryData>) : DomainData()

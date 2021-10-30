@@ -60,7 +60,7 @@ private fun UserScope.getCreateTaskDataFast(): EditViewModel.MainData {
         .toMutableMap<CustomTimeKey, Time.Custom>()
         .toCustomTimeDatas()
 
-    return EditViewModel.MainData(null, customTimeDatas, null, null)
+    return EditViewModel.MainData(null, customTimeDatas, null, null, null)
 }
 
 private fun DomainFactory.getCreateTaskDataSlow(
@@ -176,7 +176,11 @@ private fun DomainFactory.getCreateTaskDataSlow(
         null -> null
     }
 
-    return EditViewModel.MainData(taskData, customTimeDatas, showAllInstancesDialog, currentParent)
+    val parentTaskDescription = (startParameters as? EditViewModel.StartParameters.MigrateDescription)?.taskKey
+        ?.let(::getTaskForce)
+        ?.note
+
+    return EditViewModel.MainData(taskData, customTimeDatas, showAllInstancesDialog, currentParent, parentTaskDescription)
 }
 
 fun DomainFactory.getCreateTaskParentPickerData(

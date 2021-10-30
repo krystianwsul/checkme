@@ -53,7 +53,7 @@ class CreateTaskEditDelegate(
                 }
             }
             is EditParameters.MigrateDescription -> {
-                initialName = "" // todo migrate description
+                initialName = data.parentTaskDescription!!
                 scheduleHint = null
 
                 initialStateGetter = { ParentScheduleState.create(setOf()) }

@@ -1214,6 +1214,8 @@ class MainActivity :
         }
     }
 
+    val dateChangeRelay = PublishRelay.create<Unit>()
+
     private fun onDateSwitch() {
         val today = Date.today()
         check(date != today)
@@ -1228,6 +1230,8 @@ class MainActivity :
         mainNoteViewModel.refresh()
         mainTaskViewModel.refresh()
         searchInstancesViewModel.refresh()
+
+        dateChangeRelay.accept(Unit)
     }
 
     private inner class MyFragmentStatePagerAdapter : RecyclerView.Adapter<Holder>() {

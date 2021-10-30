@@ -96,6 +96,8 @@ class DayFragment @JvmOverloads constructor(
     private val dayViewModel = activity.dayViewModel
     private var entry: DayViewModel.Entry? = null
 
+    private val attachedToWindowDisposable = CompositeDisposable()
+
     private val compositeDisposable = CompositeDisposable()
 
     private val binding: FragmentDayBinding
@@ -174,13 +176,20 @@ class DayFragment @JvmOverloads constructor(
             else
                 Observable.never()
         }
-                .filter { it }
+            .filter { it }
             .subscribe { binding.groupListFragment.checkCreatedTaskKey() }
             .addTo(compositeDisposable)
+
+        activity.dateChangeRelay
+            .subscribe {
+                binding.groupListFragment.scrollToTop()
+            }
+            .addTo(attachedToWindowDisposable)
     }
 
     override fun onDetachedFromWindow() {
         compositeDisposable.clear()
+        attachedToWindowDisposable.clear()
 
         super.onDetachedFromWindow()
     }

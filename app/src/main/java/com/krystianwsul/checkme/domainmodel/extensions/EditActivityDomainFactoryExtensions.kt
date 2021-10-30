@@ -150,6 +150,15 @@ private fun DomainFactory.getCreateTaskDataSlow(
         }
     }
 
+    fun SharedProject.toParent() = ParentScheduleManager.Parent(
+        name,
+        EditViewModel.ParentKey.Project(projectKey),
+        users.toUserDatas(),
+        projectKey,
+        null,
+        null,
+    )
+
     val currentParent: ParentScheduleManager.Parent? = when (currentParentKey) {
         is EditViewModel.ParentKey.Task -> {
             val task = getTaskForce(currentParentKey.taskKey)
@@ -159,7 +168,10 @@ private fun DomainFactory.getCreateTaskDataSlow(
                 EditViewModel.ParentKey.Task(task.taskKey),
                 mapOf(),
                 task.project.projectKey,
-                task.hasMultipleInstances(startParameters.parentInstanceKey, now)
+                task.hasMultipleInstances(startParameters.parentInstanceKey, now),
+                task.project
+                    .let { it as? SharedProject }
+                    ?.toParent()
             )
         }
         is EditViewModel.ParentKey.Project -> {
@@ -170,6 +182,7 @@ private fun DomainFactory.getCreateTaskDataSlow(
                 EditViewModel.ParentKey.Project(project.projectKey),
                 project.users.toUserDatas(),
                 project.projectKey,
+                null,
                 null,
             )
         }
@@ -619,10 +632,18 @@ private fun DomainFactory.getParentTreeDatas(
                 getProjectTaskTreeDatas(now, it, excludedTaskKeys, parentInstanceKey),
                 it.projectKey,
                 it.users.toUserDatas(),
-            )
+            ).also { it.childEntryDatas.setProjectParent(it) }
         }
 
     return parentTreeDatas
+}
+
+private fun List<EditViewModel.ParentEntryData.Task>.setProjectParent(projectParent: EditViewModel.ParentEntryData.Project) {
+    forEach {
+        it.projectParent = projectParent
+
+        it.childEntryDatas.setProjectParent(projectParent)
+    }
 }
 
 private fun DomainFactory.getProjectTaskTreeDatas(
@@ -748,7 +769,13 @@ private fun DomainFactory.getTaskListChildTaskDatas(
     .map { it.childTask }
     .filter { it.showAsParent(now, excludedTaskKeys) }
     .map {
-        it.toParentEntryData(this, now, excludedTaskKeys, parentInstanceKey, it.getHierarchyExactTimeStamp(now))
+        it.toParentEntryData(
+            this,
+            now,
+            excludedTaskKeys,
+            parentInstanceKey,
+            it.getHierarchyExactTimeStamp(now),
+        )
     }
     .toList()
 

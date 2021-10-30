@@ -32,8 +32,7 @@ class ParentMultiScheduleManager(
     override val parentObservable = parentProperty.observable
 
     private val scheduleProperty = NonNullRelayProperty(state.schedules) {
-        if (it.isNotEmpty() && parent?.parentKey is EditViewModel.ParentKey.Task)
-            parent = null
+        if (it.isNotEmpty() && parent?.parentKey is EditViewModel.ParentKey.Task) clearParent()
 
         if (it.isEmpty()) assignedTo = setOf()
     }
@@ -50,11 +49,15 @@ class ParentMultiScheduleManager(
 
     override val changed get() = toState() != initialState
 
+    override fun clearParent() {
+        parent = parent!!.projectParent
+    }
+
     private fun mutateSchedules(action: (MutableList<ScheduleEntry>) -> Unit): Unit =
-            scheduleProperty.mutate { it.toMutableList().also(action) }
+        scheduleProperty.mutate { it.toMutableList().also(action) }
 
     override fun setSchedule(position: Int, scheduleEntry: ScheduleEntry) =
-            mutateSchedules { it[position] = scheduleEntry }
+        mutateSchedules { it[position] = scheduleEntry }
 
     override fun removeSchedule(schedulePosition: Int) = mutateSchedules { it.removeAt(schedulePosition) }
 

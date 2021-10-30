@@ -21,6 +21,8 @@ interface ParentScheduleManager {
 
     val changed: Boolean
 
+    fun clearParent()
+
     fun addSchedule(scheduleEntry: ScheduleEntry)
 
     fun setSchedule(position: Int, scheduleEntry: ScheduleEntry)
@@ -44,6 +46,7 @@ interface ParentScheduleManager {
         val projectUsers: Map<UserKey, EditViewModel.UserData>,
         val projectKey: ProjectKey<*>,
         val hasMultipleInstances: Boolean?,
+        val projectParent: Parent?,
     ) {
 
         init {

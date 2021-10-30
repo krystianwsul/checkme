@@ -53,4 +53,11 @@
         android:icon="@drawable/ic_baseline_open_in_browser_24"
         app:showAsAction="ifRoom" />
 
+    <item
+        android:id="@+id/actionTaskMigrateDescription"
+        android:title="@string/migrateDescription"
+        android:orderInCategory="700"
+        android:icon="@drawable/ic_baseline_description_24"
+        app:showAsAction="ifRoom" /><!-- todo migrate description -->
+
 </menu>

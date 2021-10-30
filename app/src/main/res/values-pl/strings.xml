@@ -161,4 +161,5 @@
     <string name="evening">wieczorem</string>
     <string name="editProject">Edytuj projekt</string>
     <string name="showTasks">Pokaż zadania</string>
+    <string name="migrateDescription">Zmień opis na zadanie</string>
 </resources>

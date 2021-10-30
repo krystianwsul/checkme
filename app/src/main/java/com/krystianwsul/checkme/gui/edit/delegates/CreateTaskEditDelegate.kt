@@ -4,12 +4,11 @@ import android.os.Bundle
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.ShortcutManager
-import com.krystianwsul.checkme.domainmodel.extensions.createChildTask
 import com.krystianwsul.checkme.domainmodel.extensions.createScheduleTopLevelTask
 import com.krystianwsul.checkme.domainmodel.extensions.createTopLevelTask
 import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
+import com.krystianwsul.checkme.domainmodel.updates.CreateChildTaskDomainUpdate
 import com.krystianwsul.checkme.gui.edit.*
-import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ScheduleData
 import com.krystianwsul.common.utils.TaskKey
@@ -160,16 +159,17 @@ class CreateTaskEditDelegate(
             val parentInstanceKey = (parameters as EditParameters.Create).hint!!.instanceKey!!
             check(parentInstanceKey.taskKey == parentTaskKey)
 
-            ParentParameter.Instance(parentInstanceKey)
+            CreateChildTaskDomainUpdate.Parent.Instance(parentInstanceKey)
         } else {
-            ParentParameter.Task(parentTaskKey)
+            CreateChildTaskDomainUpdate.Parent.Task(parentTaskKey)
         }
 
-        return AndroidDomainUpdater.createChildTask(
+        return CreateChildTaskDomainUpdate(
             DomainListenerManager.NotificationType.All,
             parentParameter,
             createParameters,
         )
+            .perform(AndroidDomainUpdater)
             .observeOn(AndroidSchedulers.mainThread())
             .applyCreatedTaskKey()
     }
@@ -185,11 +185,5 @@ class CreateTaskEditDelegate(
         )
             .observeOn(AndroidSchedulers.mainThread())
             .applyCreatedTaskKey()
-    }
-
-    sealed interface ParentParameter {
-
-        data class Task(val taskKey: TaskKey) : ParentParameter
-        data class Instance(val instanceKey: InstanceKey) : ParentParameter
     }
 }

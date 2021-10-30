@@ -2,8 +2,8 @@ package com.krystianwsul.checkme.domainmodel
 
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.extensions.*
+import com.krystianwsul.checkme.domainmodel.updates.CreateChildTaskDomainUpdate
 import com.krystianwsul.checkme.gui.edit.EditParameters
-import com.krystianwsul.checkme.gui.edit.delegates.CreateTaskEditDelegate
 import com.krystianwsul.checkme.gui.edit.delegates.EditDelegate
 import com.krystianwsul.common.firebase.models.task.RootTask
 import com.krystianwsul.common.time.*
@@ -70,11 +70,12 @@ class DomainFactoryTest {
         now += 1.hours
 
         val taskName2 = "task2"
-        val taskKey2 = domainUpdater(now).createChildTask(
+        val taskKey2 = CreateChildTaskDomainUpdate(
             DomainListenerManager.NotificationType.All,
-            CreateTaskEditDelegate.ParentParameter.Task(taskKey1),
+            CreateChildTaskDomainUpdate.Parent.Task(taskKey1),
             EditDelegate.CreateParameters(taskName2),
         )
+            .perform(domainUpdater(now))
             .blockingGet()
             .taskKey
 
@@ -126,21 +127,23 @@ class DomainFactoryTest {
             .blockingGet()
             .taskKey
 
-        val doneChildTaskKey = domainUpdater(now).createChildTask(
+        val doneChildTaskKey = CreateChildTaskDomainUpdate(
             DomainListenerManager.NotificationType.All,
-            CreateTaskEditDelegate.ParentParameter.Task(parentTask1Key),
+            CreateChildTaskDomainUpdate.Parent.Task(parentTask1Key),
             EditDelegate.CreateParameters("childTask1"),
             null,
         )
+            .perform(domainUpdater(now))
             .blockingGet()
             .taskKey
 
-        val notDoneChildTaskKey = domainUpdater(now).createChildTask(
+        val notDoneChildTaskKey = CreateChildTaskDomainUpdate(
             DomainListenerManager.NotificationType.All,
-            CreateTaskEditDelegate.ParentParameter.Task(parentTask1Key),
+            CreateChildTaskDomainUpdate.Parent.Task(parentTask1Key),
             EditDelegate.CreateParameters("childTask2"),
             null,
         )
+            .perform(domainUpdater(now))
             .blockingGet()
             .taskKey
 
@@ -238,12 +241,12 @@ class DomainFactoryTest {
 
         now += 1.hours
 
-        domainUpdater(now).createChildTask(
+        CreateChildTaskDomainUpdate(
             DomainListenerManager.NotificationType.All,
-            CreateTaskEditDelegate.ParentParameter.Task(parentTaskKey),
+            CreateChildTaskDomainUpdate.Parent.Task(parentTaskKey),
             EditDelegate.CreateParameters("childTask"),
             null,
-        ).blockingGet()
+        ).perform(domainUpdater(now)).blockingGet()
 
         val secondInstanceDatas = domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
             .groupListDataWrapper
@@ -279,12 +282,13 @@ class DomainFactoryTest {
 
         now += 1.hours
 
-        val task2Key = domainUpdater(now).createChildTask(
+        val task2Key = CreateChildTaskDomainUpdate(
             DomainListenerManager.NotificationType.All,
-            CreateTaskEditDelegate.ParentParameter.Task(task1Key),
+            CreateChildTaskDomainUpdate.Parent.Task(task1Key),
             EditDelegate.CreateParameters("task2"),
             null,
         )
+            .perform(domainUpdater(now))
             .blockingGet()
             .taskKey
 
@@ -660,11 +664,12 @@ class DomainFactoryTest {
         val parentTask = domainFactory.getTaskForce(parentTaskKey) as RootTask
         assertEquals(privateProjectKey, parentTask.project.projectKey)
 
-        val childTaskKey = domainUpdater(now).createChildTask(
+        val childTaskKey = CreateChildTaskDomainUpdate(
             DomainListenerManager.NotificationType.All,
-            CreateTaskEditDelegate.ParentParameter.Task(parentTaskKey),
+            CreateChildTaskDomainUpdate.Parent.Task(parentTaskKey),
             EditDelegate.CreateParameters("child task"),
         )
+            .perform(domainUpdater(now))
             .blockingGet()
             .taskKey
 
@@ -712,11 +717,11 @@ class DomainFactoryTest {
 
         now += 1.hours
 
-        domainUpdater(now).createChildTask(
+        CreateChildTaskDomainUpdate(
             DomainListenerManager.NotificationType.All,
-            CreateTaskEditDelegate.ParentParameter.Task(parentTaskKey),
+            CreateChildTaskDomainUpdate.Parent.Task(parentTaskKey),
             EditDelegate.CreateParameters("child task"),
-        ).blockingGet()
+        ).perform(domainUpdater(now)).blockingGet()
 
         assertEquals(parentTaskNameBefore, getGroupListData().single().name)
 
@@ -1031,19 +1036,21 @@ class DomainFactoryTest {
             .blockingGet()
             .taskKey
 
-        val taskKey2 = domainUpdater(now).createChildTask(
+        val taskKey2 = CreateChildTaskDomainUpdate(
             DomainListenerManager.NotificationType.All,
-            CreateTaskEditDelegate.ParentParameter.Task(taskKey1),
+            CreateChildTaskDomainUpdate.Parent.Task(taskKey1),
             EditDelegate.CreateParameters("task2"),
         )
+            .perform(domainUpdater(now))
             .blockingGet()
             .taskKey
 
-        val taskKey3 = domainUpdater(now).createChildTask(
+        val taskKey3 = CreateChildTaskDomainUpdate(
             DomainListenerManager.NotificationType.All,
-            CreateTaskEditDelegate.ParentParameter.Task(taskKey2),
+            CreateChildTaskDomainUpdate.Parent.Task(taskKey2),
             EditDelegate.CreateParameters("task3"),
         )
+            .perform(domainUpdater(now))
             .blockingGet()
             .taskKey
 

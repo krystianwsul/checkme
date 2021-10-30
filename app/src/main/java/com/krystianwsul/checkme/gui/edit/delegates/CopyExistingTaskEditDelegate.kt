@@ -2,10 +2,10 @@ package com.krystianwsul.checkme.gui.edit.delegates
 
 import android.os.Bundle
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
-import com.krystianwsul.checkme.domainmodel.extensions.createChildTask
 import com.krystianwsul.checkme.domainmodel.extensions.createScheduleTopLevelTask
 import com.krystianwsul.checkme.domainmodel.extensions.createTopLevelTask
 import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
+import com.krystianwsul.checkme.domainmodel.updates.CreateChildTaskDomainUpdate
 import com.krystianwsul.checkme.gui.edit.EditParameters
 import com.krystianwsul.checkme.gui.edit.EditViewModel
 import com.krystianwsul.common.utils.ProjectKey
@@ -49,12 +49,13 @@ class CopyExistingTaskEditDelegate(
     ): Single<CreateResult> {
         check(addToAllInstances == null)
 
-        return AndroidDomainUpdater.createChildTask(
+        return CreateChildTaskDomainUpdate(
             DomainListenerManager.NotificationType.All,
-            CreateTaskEditDelegate.ParentParameter.Task(parentTaskKey),
+            CreateChildTaskDomainUpdate.Parent.Task(parentTaskKey),
             createParameters,
             parameters.taskKey,
         )
+            .perform(AndroidDomainUpdater)
             .observeOn(AndroidSchedulers.mainThread())
             .applyCreatedTaskKey()
     }

@@ -256,12 +256,13 @@ abstract class EditDelegate(
 
     class CreateParameters(
         val name: String,
-        val note: String?,
-        val imagePath: Pair<String, Uri>?,
+        val note: String? = null,
+        val imagePath: Pair<String, Uri>? = null,
     ) {
 
-        // todo add image make default params
-        constructor(name: String) : this(name, null, null)
+        init {
+            check(name.isNotEmpty())
+        }
     }
 
     enum class ScheduleError(@StringRes val resource: Int) {

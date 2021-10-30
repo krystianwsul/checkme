@@ -45,7 +45,6 @@ object Preferences {
     private const val KEY_SHOW_PROJECTS = "showProjects"
     private const val KEY_LANGUAGE = "language"
     private const val KEY_VERSION_CODE = "versionCode"
-    private const val KEY_SAVED_STATE_LOG = "savedStateLog"
     private const val KEY_INSTANCE_WARNING_SNOOZE = "instanceWarningSnooze"
 
     private val sharedPreferences by lazy { MyApplication.sharedPreferences }
@@ -86,11 +85,9 @@ object Preferences {
     val temporaryNotificationLog = Logger(KEY_TEMPORARY_NOTIFICATION_LOG)
 
     val tokenRelay =
-        BehaviorRelay.createDefault(NullableWrapper(sharedPreferences.getString(TOKEN_KEY, null)))!!
+        BehaviorRelay.createDefault(NullableWrapper(sharedPreferences.getString(TOKEN_KEY, null)))
 
     val mainTabsLog = Logger(KEY_MAIN_TABS_LOG, 10)
-
-    val savedStateLog = Logger(KEY_SAVED_STATE_LOG, 10)
 
     val versionCode get() = sharedPreferences.getInt(KEY_VERSION_CODE, -1).takeIf { it != -1 }
 
@@ -122,7 +119,7 @@ object Preferences {
     private val timeRangeProperty =
         NonNullRelayProperty(TimeRange.values()[sharedPreferences.getInt(KEY_TIME_RANGE, 0)])
     var timeRange by timeRangeProperty
-    val timeRangeObservable = timeRangeProperty.observable.distinctUntilChanged()!!
+    val timeRangeObservable = timeRangeProperty.observable.distinctUntilChanged()
 
     init {
         timeRangeObservable.skip(0)
@@ -139,15 +136,15 @@ object Preferences {
 
     private var showDeletedProperty = NonNullRelayProperty(sharedPreferences.getBoolean(KEY_SHOW_DELETED, false))
     var showDeleted by showDeletedProperty
-    val showDeletedObservable = showDeletedProperty.observable.distinctUntilChanged()!!
+    val showDeletedObservable = showDeletedProperty.observable.distinctUntilChanged()
 
     private var showAssignedProperty = NonNullRelayProperty(sharedPreferences.getBoolean(KEY_SHOW_ASSIGNED_TO, true))
     var showAssigned by showAssignedProperty
-    val showAssignedObservable = showAssignedProperty.observable.distinctUntilChanged()!!
+    val showAssignedObservable = showAssignedProperty.observable.distinctUntilChanged()
 
     private var showProjectsProperty = NonNullRelayProperty(sharedPreferences.getBoolean(KEY_SHOW_PROJECTS, false))
     var showProjects by showProjectsProperty
-    val showProjectsObservable = showProjectsProperty.observable.distinctUntilChanged()!!
+    val showProjectsObservable = showProjectsProperty.observable.distinctUntilChanged()
 
     val filterParamsObservable = Observable.combineLatest(
         showDeletedObservable,
@@ -155,7 +152,7 @@ object Preferences {
         showProjectsObservable,
     ) { showDeleted, showAssignedToOthers, showProjects ->
         FilterCriteria.Full.FilterParams(showDeleted, showAssignedToOthers, showProjects)
-    }.distinctUntilChanged()!!
+    }.distinctUntilChanged()
 
     var instanceWarningSnooze: ExactTimeStamp.Local?
         get() = sharedPreferences.getLong(KEY_INSTANCE_WARNING_SNOOZE, -1)

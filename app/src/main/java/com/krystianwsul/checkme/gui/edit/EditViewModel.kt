@@ -435,8 +435,9 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
 
         protected abstract val projectKey: ProjectKey<*>
         protected abstract val projectUsers: Map<UserKey, UserData>
+        protected abstract val hasMultipleInstances: Boolean?
 
-        fun toParent() = ParentScheduleManager.Parent(name, entryKey, projectUsers, projectKey)
+        fun toParent() = ParentScheduleManager.Parent(name, entryKey, projectUsers, projectKey, hasMultipleInstances)
 
         data class Project(
             override val name: String,
@@ -455,6 +456,8 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
 
             override val sortKey = SortKey.ProjectSortKey(projectKey)
 
+            override val hasMultipleInstances: Boolean? = null
+
             override fun normalize() {
                 normalizedFields
             }
@@ -470,7 +473,7 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
             override val note: String?,
             override val sortKey: SortKey.TaskSortKey,
             override val projectKey: ProjectKey<*>,
-            val hasMultipleInstances: Boolean?,
+            override val hasMultipleInstances: Boolean?,
         ) : ParentEntryData() {
 
             override val normalizedFields by lazy { listOfNotNull(name, note).map { it.normalized() } }

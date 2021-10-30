@@ -178,6 +178,8 @@ abstract class EditDelegate(
         return false
     }
 
+    open fun showAddToAllRemindersDialog() = false
+
     fun setParentTask(taskKey: TaskKey) = storeParentKey(EditViewModel.ParentKey.Task(taskKey), true)
 
     fun createTask(createParameters: CreateParameters, showAllReminders: Boolean?): Single<CreateResult> {

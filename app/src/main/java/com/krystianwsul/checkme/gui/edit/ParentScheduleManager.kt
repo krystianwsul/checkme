@@ -43,5 +43,11 @@ interface ParentScheduleManager {
         val parentKey: EditViewModel.ParentKey,
         val projectUsers: Map<UserKey, EditViewModel.UserData>,
         val projectKey: ProjectKey<*>,
-    )
+        val hasMultipleInstances: Boolean?,
+    ) {
+
+        init {
+            check((parentKey is EditViewModel.ParentKey.Task) || (hasMultipleInstances == null))
+        }
+    }
 }

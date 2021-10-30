@@ -27,10 +27,7 @@ import com.krystianwsul.checkme.databinding.*
 import com.krystianwsul.checkme.gui.base.NavBarActivity
 import com.krystianwsul.checkme.gui.dialogs.ConfirmDialogFragment
 import com.krystianwsul.checkme.gui.edit.delegates.EditDelegate
-import com.krystianwsul.checkme.gui.edit.dialogs.AssignToDialogFragment
-import com.krystianwsul.checkme.gui.edit.dialogs.CameraGalleryFragment
-import com.krystianwsul.checkme.gui.edit.dialogs.JoinAllRemindersDialogFragment
-import com.krystianwsul.checkme.gui.edit.dialogs.ParentPickerFragment
+import com.krystianwsul.checkme.gui.edit.dialogs.*
 import com.krystianwsul.checkme.gui.edit.dialogs.schedule.ScheduleDialogFragment
 import com.krystianwsul.checkme.gui.edit.dialogs.schedule.ScheduleDialogParameters
 import com.krystianwsul.checkme.gui.edit.dialogs.schedule.ScheduleDialogResult
@@ -73,7 +70,8 @@ class EditActivity : NavBarActivity() {
 
         private const val SCHEDULE_DIALOG_TAG = "scheduleDialog"
         private const val TAG_CAMERA_GALLERY = "cameraGallery"
-        private const val TAG_ALL_REMINDERS = "allReminders"
+        private const val TAG_JOIN_ALL_REMINDERS = "joinAllReminders"
+        private const val TAG_ADD_TO_ALL_REMINDERS = "addToAllReminders"
         private const val TAG_ASSIGN_TO = "assignTo"
 
         private const val REQUEST_CREATE_PARENT = 982
@@ -139,7 +137,9 @@ class EditActivity : NavBarActivity() {
         override fun onReceive(context: Context?, intent: Intent?) = timeRelay.accept(Unit)
     }
 
-    private val allRemindersListener = { allReminders: Boolean -> save(false, allReminders) }
+    private val joinAllRemindersListener = { allReminders: Boolean -> save(false, allReminders) }
+
+    private val addToAllRemindersListener = { allReminders: Boolean, andOpen: Boolean -> save(andOpen, false) }
 
     override val rootView get() = binding.root
 
@@ -167,13 +167,19 @@ class EditActivity : NavBarActivity() {
             if (updateError()) return
 
             val showAllReminders = editViewModel.delegate.showJoinAllRemindersDialog()
+            val showAddToAllReminders = editViewModel.delegate.showAddToAllRemindersDialog()
 
             if (showAllReminders) {
                 check(!andOpen)
+                check(!showAddToAllReminders)
 
                 JoinAllRemindersDialogFragment.newInstance()
-                    .apply { listener = allRemindersListener }
-                    .show(supportFragmentManager, TAG_ALL_REMINDERS)
+                    .apply { listener = joinAllRemindersListener }
+                    .show(supportFragmentManager, TAG_JOIN_ALL_REMINDERS)
+            } else if (showAddToAllReminders) {
+                AddToAllRemindersDialogFragment.newInstance(andOpen)
+                    .apply { listener = addToAllRemindersListener }
+                    .show(supportFragmentManager, TAG_ADD_TO_ALL_REMINDERS)
             } else {
                 save(andOpen)
             }
@@ -213,7 +219,8 @@ class EditActivity : NavBarActivity() {
             fun <T : Fragment> find(tag: String) = findFragmentByTag(tag) as? T
 
             find<ConfirmDialogFragment>(DISCARD_TAG)?.listener = discardDialogListener
-            find<JoinAllRemindersDialogFragment>(TAG_ALL_REMINDERS)?.listener = allRemindersListener
+            find<JoinAllRemindersDialogFragment>(TAG_JOIN_ALL_REMINDERS)?.listener = joinAllRemindersListener
+            find<AddToAllRemindersDialogFragment>(TAG_ADD_TO_ALL_REMINDERS)?.listener = addToAllRemindersListener
         }
 
         if (!noteHasFocusRelay.value!!)// keyboard hack

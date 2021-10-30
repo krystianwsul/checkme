@@ -161,6 +161,7 @@ private fun DomainFactory.getCreateTaskDataSlow(
                 EditViewModel.ParentKey.Task(task.taskKey),
                 mapOf(),
                 task.project.projectKey,
+                task.hasMultipleInstances(startParameters.parentInstanceKey, now)
             )
         }
         is EditViewModel.ParentKey.Project -> {
@@ -171,6 +172,7 @@ private fun DomainFactory.getCreateTaskDataSlow(
                 EditViewModel.ParentKey.Project(project.projectKey),
                 project.users.toUserDatas(),
                 project.projectKey,
+                null,
             )
         }
         null -> null
@@ -753,6 +755,9 @@ private fun DomainFactory.joinTasks(
         .forEach { it.hide() }
 }
 
+private fun Task.hasMultipleInstances(parentInstanceKey: InstanceKey?, now: ExactTimeStamp.Local) =
+    parentInstanceKey?.takeIf { it.taskKey == taskKey }?.let { hasOtherVisibleInstances(now, it) }
+
 private fun Task.toParentEntryData(
     domainFactory: DomainFactory,
     now: ExactTimeStamp.Local,
@@ -767,7 +772,7 @@ private fun Task.toParentEntryData(
     note,
     EditViewModel.SortKey.TaskSortKey(startExactTimeStamp),
     project.projectKey,
-    parentInstanceKey?.takeIf { it.taskKey == taskKey }?.let { hasOtherVisibleInstances(now, it) },
+    hasMultipleInstances(parentInstanceKey, now),
 )
 
 private fun DomainFactory.getTaskListChildTaskDatas(

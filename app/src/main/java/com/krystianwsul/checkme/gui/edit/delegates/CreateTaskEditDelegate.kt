@@ -17,11 +17,11 @@ import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 
 class CreateTaskEditDelegate(
-        private val parameters: EditParameters,
-        override var data: EditViewModel.MainData,
-        savedInstanceState: Bundle?,
-        compositeDisposable: CompositeDisposable,
-        storeParentKey: (EditViewModel.ParentKey?, Boolean) -> Unit,
+    private val parameters: EditParameters,
+    override var data: EditViewModel.MainData,
+    savedInstanceState: Bundle?,
+    compositeDisposable: CompositeDisposable,
+    storeParentKey: (EditViewModel.ParentKey?, Boolean) -> Unit,
 ) : EditDelegate(compositeDisposable, storeParentKey) {
 
     override val initialName: String?
@@ -111,6 +111,23 @@ class CreateTaskEditDelegate(
         if (singleScheduleData.timePair != scheduleHint.timePair) return false
 
         return true
+    }
+
+    override fun showAddToAllRemindersDialog(): Boolean {
+        val parent = parentScheduleManager.parent ?: return false
+
+        val parentTaskKey = parent.parentKey
+            .let { it as? EditViewModel.ParentKey.Task }
+            ?.taskKey
+            ?: return false
+
+        return if (parentTaskKey != (parameters as? EditParameters.Create)?.hint?.instanceKey?.taskKey) {
+            check(parent.hasMultipleInstances == null)
+
+            false
+        } else {
+            parent.hasMultipleInstances!!
+        }
     }
 
     override fun createTaskWithSchedule(

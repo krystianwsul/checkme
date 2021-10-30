@@ -7,11 +7,15 @@ import androidx.annotation.StringRes
 import arrow.core.curried
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
+import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.edit.*
 import com.krystianwsul.checkme.gui.edit.EditViewModel
 import com.krystianwsul.checkme.gui.edit.dialogs.schedule.ScheduleDialogData
 import com.krystianwsul.checkme.gui.instances.ShowInstanceActivity
 import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity
+import com.krystianwsul.checkme.upload.Uploader
+import com.krystianwsul.checkme.utils.newUuid
+import com.krystianwsul.common.firebase.json.tasks.TaskJson
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.time.TimePair
@@ -257,11 +261,30 @@ abstract class EditDelegate(
     class CreateParameters(
         val name: String,
         val note: String? = null,
-        val imagePath: Pair<String, Uri>? = null,
+        private val imagePath: Pair<String, Uri>? = null,
     ) {
 
         init {
             check(name.isNotEmpty())
+        }
+
+        fun getImage(domainFactory: DomainFactory): Image? {
+            if (imagePath == null) return null
+
+            val uuid = newUuid()
+            val json = TaskJson.Image(uuid, domainFactory.uuid)
+
+            return Image(domainFactory, imagePath, uuid, json)
+        }
+
+        class Image(
+            private val domainFactory: DomainFactory,
+            private val path: Pair<String, Uri>,
+            val uuid: String,
+            val json: TaskJson.Image,
+        ) {
+
+            fun upload(taskKey: TaskKey) = Uploader.addUpload(domainFactory.deviceDbInfo, taskKey, uuid, path)
         }
     }
 

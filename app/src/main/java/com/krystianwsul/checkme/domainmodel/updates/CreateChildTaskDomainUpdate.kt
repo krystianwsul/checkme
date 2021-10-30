@@ -6,9 +6,6 @@ import com.krystianwsul.checkme.domainmodel.extensions.*
 import com.krystianwsul.checkme.domainmodel.update.AbstractSingleDomainUpdate
 import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
 import com.krystianwsul.checkme.gui.edit.delegates.EditDelegate
-import com.krystianwsul.checkme.upload.Uploader
-import com.krystianwsul.checkme.utils.newUuid
-import com.krystianwsul.common.firebase.json.tasks.TaskJson
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.ScheduleData
@@ -25,8 +22,7 @@ class CreateChildTaskDomainUpdate(
         domainFactory: DomainFactory,
         now: ExactTimeStamp.Local
     ): DomainUpdater.Result<EditDelegate.CreateResult> {
-        val imageUuid = createParameters.imagePath?.let { newUuid() } // todo add instance new obj
-        val imageJson = imageUuid?.let { TaskJson.Image(it, domainFactory.uuid) }
+        val image = createParameters.getImage(domainFactory)
 
         val childTask = domainFactory.trackRootTaskIds {
             when (parent) {
@@ -39,7 +35,7 @@ class CreateChildTaskDomainUpdate(
                         parentTask,
                         createParameters.name,
                         createParameters.note,
-                        imageJson,
+                        image?.json,
                         copyTaskKey,
                     )
                 }
@@ -67,16 +63,14 @@ class CreateChildTaskDomainUpdate(
                         listOf(Pair(ScheduleData.Single(parentInstance.scheduleDate, scheduleTime.timePair), scheduleTime)),
                         createParameters.note,
                         parentTask.project.projectKey,
-                        imageUuid,
+                        image,
                         domainFactory,
                     ).also { it.getInstance(migratedInstanceScheduleKey).setParentState(parentInstance.instanceKey) }
                 }
             }
         }
 
-        imageUuid?.let {
-            Uploader.addUpload(domainFactory.deviceDbInfo, childTask.taskKey, it, createParameters.imagePath!!)
-        }
+        image?.upload(childTask.taskKey)
 
         return DomainUpdater.Result(
             childTask.toCreateResult(now),

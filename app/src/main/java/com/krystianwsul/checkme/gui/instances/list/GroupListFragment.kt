@@ -988,6 +988,7 @@ class GroupListFragment @JvmOverloads constructor(
                 ::matchGroupsByInstanceKeys,
                 ::matchGroupsByInstanceKeyIntersect,
                 ::matchInstances,
+                ::matchInstancesByTaskKey,
             ).forEach {
                 it(mutatedOldIds, mutatedNewIds)
                 it(mutatedNewIds, mutatedOldIds)
@@ -996,6 +997,7 @@ class GroupListFragment @JvmOverloads constructor(
             return mutatedOldIds to mutatedNewIds
         }
 
+        private fun List<Any>.filterInstanceId() = filterIsInstance<NotDoneNode.ContentDelegate.Instance.Id>()
         private fun List<Any>.filterGroupId() = filterIsInstance<NotDoneNode.ContentDelegate.Group.Id>()
         private fun List<Any>.filterTimeId() = filterIsInstance<NotDoneNode.ContentDelegate.Group.Id.Time>()
         private fun List<Any>.filterProjectId() = filterIsInstance<NotDoneNode.ContentDelegate.Group.Id.Project>()
@@ -1031,6 +1033,18 @@ class GroupListFragment @JvmOverloads constructor(
                     mutableList.filterGroupId()
                         .singleOrNull { it.instanceKeys.contains(instanceId.instanceKey) }
                         ?.takeIf { it !in referenceList }
+                        ?.let { mutableList[mutableList.indexOf(it)] = instanceId }
+                }
+        }
+
+        // this covers a schedule change.  Doesn't cover multiple matches
+        private fun matchInstancesByTaskKey(referenceList: List<Any>, mutableList: MutableList<Any>) {
+            referenceList.filterIsInstance<NotDoneNode.ContentDelegate.Instance.Id>()
+                .filter { it !in mutableList }
+                .forEach { instanceId ->
+                    mutableList.filterInstanceId()
+                        .filter { it !in referenceList } // order is important, search only unmatched
+                        .singleOrNull { it.instanceKey.taskKey == instanceId.instanceKey.taskKey }
                         ?.let { mutableList[mutableList.indexOf(it)] = instanceId }
                 }
         }

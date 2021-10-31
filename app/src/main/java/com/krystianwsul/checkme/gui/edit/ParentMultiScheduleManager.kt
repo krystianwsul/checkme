@@ -50,7 +50,7 @@ class ParentMultiScheduleManager(
     override val changed get() = toState() != initialState
 
     override fun clearParent() {
-        parent = parent!!.projectParent
+        parent = parent!!.clearParentTaskData
     }
 
     private fun mutateSchedules(action: (MutableList<ScheduleEntry>) -> Unit): Unit =

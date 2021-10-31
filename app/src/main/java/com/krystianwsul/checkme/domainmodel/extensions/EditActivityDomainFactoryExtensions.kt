@@ -632,18 +632,10 @@ private fun DomainFactory.getParentTreeDatas(
                 getProjectTaskTreeDatas(now, it, excludedTaskKeys, parentInstanceKey),
                 it.projectKey,
                 it.users.toUserDatas(),
-            ).also { it.childEntryDatas.setProjectParent(it) }
+            )
         }
 
     return parentTreeDatas
-}
-
-private fun List<EditViewModel.ParentEntryData.Task>.setProjectParent(projectParent: EditViewModel.ParentEntryData.Project) {
-    forEach {
-        it.projectParent = projectParent
-
-        it.childEntryDatas.setProjectParent(projectParent)
-    }
 }
 
 private fun DomainFactory.getProjectTaskTreeDatas(

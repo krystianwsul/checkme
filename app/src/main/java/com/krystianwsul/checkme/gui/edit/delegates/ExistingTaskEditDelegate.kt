@@ -22,7 +22,7 @@ abstract class ExistingTaskEditDelegate(
             ParentScheduleState.create(
                 taskData.assignedTo,
                 taskData.scheduleDataWrappers
-                    ?.map { ScheduleEntry(it) }
+                    ?.map(::ScheduleEntry)
                     ?.toList(),
             )
         },

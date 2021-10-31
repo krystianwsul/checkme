@@ -15,6 +15,7 @@ import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.MyCustomTime
 import com.krystianwsul.common.firebase.json.tasks.TaskJson
 import com.krystianwsul.common.firebase.models.*
+import com.krystianwsul.common.firebase.models.interval.ScheduleInterval
 import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.project.SharedProject
 import com.krystianwsul.common.firebase.models.task.*
@@ -63,6 +64,22 @@ private fun UserScope.getCreateTaskDataFast(): EditViewModel.MainData {
     return EditViewModel.MainData(null, customTimeDatas, null, null, null)
 }
 
+private fun getScheduleDataWrappersAndAssignedTo(
+    scheduleIntervals: List<ScheduleInterval>,
+): Pair<List<EditViewModel.ScheduleDataWrapper>, Set<UserKey>> {
+    val schedules = scheduleIntervals.map { it.schedule }
+
+    val scheduleDataWrappers = ScheduleGroup.getGroups(schedules).map {
+        EditViewModel.ScheduleDataWrapper.fromScheduleData(it.scheduleData)
+    }
+
+    val assignedTo = schedules.map { it.assignedTo }
+        .distinct()
+        .single()
+
+    return scheduleDataWrappers to assignedTo
+}
+
 private fun DomainFactory.getCreateTaskDataSlow(
     startParameters: EditViewModel.StartParameters,
     currentParentSource: EditViewModel.CurrentParentSource,
@@ -92,13 +109,10 @@ private fun DomainFactory.getCreateTaskDataSlow(
                 }
 
             if (schedules.isNotEmpty()) {
-                scheduleDataWrappers = ScheduleGroup.getGroups(schedules.map { it.schedule }).map {
-                    EditViewModel.ScheduleDataWrapper.fromScheduleData(it.scheduleData)
+                getScheduleDataWrappersAndAssignedTo(schedules).let {
+                    scheduleDataWrappers = it.first
+                    assignedTo = it.second
                 }
-
-                assignedTo = schedules.map { it.schedule.assignedTo }
-                    .distinct()
-                    .single()
             }
         } else {
             val parentTask = task.getParentTask(now)!!
@@ -169,9 +183,15 @@ private fun DomainFactory.getCreateTaskDataSlow(
                 mapOf(),
                 task.project.projectKey,
                 task.hasMultipleInstances(startParameters.parentInstanceKey, now),
-                task.project
-                    .let { it as? SharedProject }
-                    ?.toParent()
+                task.getTopLevelTask(now).let {
+                    val parent = it.project
+                        .let { it as? SharedProject }
+                        ?.toParent()
+
+                    val (scheduleDataWrappers, assignedTo) = getScheduleDataWrappersAndAssignedTo(it.intervalInfo.scheduleIntervals)
+
+                    Triple(parent, scheduleDataWrappers, assignedTo)
+                }
             )
         }
         is EditViewModel.ParentKey.Project -> {

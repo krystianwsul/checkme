@@ -22,11 +22,10 @@ interface ParentScheduleManager {
     val changed: Boolean
 
     fun clearParent()
+    fun clearParentAndReplaceSchedules()
 
     fun addSchedule(scheduleEntry: ScheduleEntry)
-
     fun setSchedule(position: Int, scheduleEntry: ScheduleEntry)
-
     fun removeSchedule(schedulePosition: Int)
 
     fun saveState(): Bundle
@@ -46,7 +45,7 @@ interface ParentScheduleManager {
         val projectUsers: Map<UserKey, EditViewModel.UserData>,
         val projectKey: ProjectKey<*>,
         val hasMultipleInstances: Boolean?,
-        val clearParentTaskData: Parent?,
+        val clearParentTaskData: Triple<Parent?, List<EditViewModel.ScheduleDataWrapper>, Set<UserKey>>?,
     ) {
 
         init {

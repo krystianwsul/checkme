@@ -687,7 +687,7 @@ class EditActivity : NavBarActivity() {
                                 activity.editViewModel
                                     .delegate
                                     .parentScheduleManager
-                                    .clearParent()
+                                    .clearParentAndReplaceSchedules()
                             }
                         } else {
                             setDropdown(::clickListener)
@@ -1029,7 +1029,7 @@ class EditActivity : NavBarActivity() {
         override fun onEntryDeleted() {
             editViewModel.delegate
                 .parentScheduleManager
-                .clearParent()
+                .clearParentAndReplaceSchedules()
         }
 
         @Suppress("DEPRECATION")

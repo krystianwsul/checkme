@@ -50,7 +50,20 @@ class ParentMultiScheduleManager(
     override val changed get() = toState() != initialState
 
     override fun clearParent() {
-        parent = parent!!.clearParentTaskData
+        parent = parent!!.clearParentTaskData?.first
+    }
+
+    override fun clearParentAndReplaceSchedules() {
+        val clearParentTaskData = parent!!.clearParentTaskData
+
+        // definitely want to set this to null
+        parent = clearParentTaskData?.first
+
+        // mess with schedules only if data present
+        clearParentTaskData?.let {
+            schedules = it.second.map(::ScheduleEntry)
+            assignedTo = it.third
+        }
     }
 
     private fun mutateSchedules(action: (MutableList<ScheduleEntry>) -> Unit): Unit =

@@ -187,7 +187,7 @@ sealed class Task(
 
     fun canMigrateDescription(now: ExactTimeStamp.Local) = !note.isNullOrEmpty() && isVisible(now)
 
-    private fun getTopLevelTask(exactTimeStamp: ExactTimeStamp): Task =
+    fun getTopLevelTask(exactTimeStamp: ExactTimeStamp): Task =
         getParentTask(exactTimeStamp)?.getTopLevelTask(exactTimeStamp) ?: this
 
     fun isTopLevelTask(exactTimeStamp: ExactTimeStamp): Boolean {

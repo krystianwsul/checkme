@@ -15,10 +15,12 @@ fun Sequence<Task>.filterSearch(search: SearchCriteria.Search?) = if (search?.ha
 
         InterruptionChecker.throwIfInterrupted()
 
+        // todo search child I think this is the place to do the filtering, but check where else it's used.  But why isn't it consistent with the child ultimately
+        // being present?
         if (
-                task.childHierarchyIntervals.any {
-                    childHierarchyMatches(it.taskHierarchy.childTask) != FilterResult.DOESNT_MATCH
-                }
+            task.childHierarchyIntervals.any {
+                childHierarchyMatches(it.taskHierarchy.childTask) != FilterResult.DOESNT_MATCH
+            }
         ) {
             return FilterResult.CHILD_MATCHES
         }

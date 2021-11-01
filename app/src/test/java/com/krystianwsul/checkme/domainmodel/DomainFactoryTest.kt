@@ -1189,10 +1189,12 @@ class DomainFactoryTest {
 
         val singleScheduleDatas = listOf(ScheduleData.Single(date, scheduleTimePair))
 
-        val joinables = domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
+        val repeatingInstanceKeys = domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
             .groupListDataWrapper
             .instanceDatas
-            .map { EditParameters.Join.Joinable.Instance(it.instanceKey) }
+            .map { it.instanceKey }
+
+        val joinables = repeatingInstanceKeys.map { EditParameters.Join.Joinable.Instance(it) }
 
         val outerJoinTaskKey = domainUpdater(now).createScheduleJoinTopLevelTask(
             DomainListenerManager.NotificationType.All,
@@ -1201,7 +1203,7 @@ class DomainFactoryTest {
             joinables,
             null,
             false,
-        )
+        ).blockingGet()
 
         assertEquals(
             1,
@@ -1223,6 +1225,68 @@ class DomainFactoryTest {
 
         assertEquals(
             2,
+            domainFactory.getGroupListData(now, 1, Preferences.TimeRange.DAY)
+                .groupListDataWrapper
+                .instanceDatas
+                .size,
+        )
+
+        now += 1.hours
+
+        /*
+        as-is, this SHOULD result in a tree:
+
+        outer join
+        -inner join
+        --repeating 1
+        --repeating 2
+
+        And should remove the instances for the next day.
+
+        This is as-is, despite the fact that I should support joining instances in this flow (support joinables as param),
+        which should give yet another different behavior.
+         */
+        domainUpdater(now).createJoinChildTask(
+            DomainListenerManager.NotificationType.All,
+            outerJoinTaskKey,
+            EditDelegate.CreateParameters("inner join"),
+            listOf(repeating1TaskKey, repeating2TaskKey),
+            repeatingInstanceKeys,
+        ).blockingGet()
+
+        assertEquals(
+            1,
+            domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
+                .groupListDataWrapper
+                .instanceDatas
+                .size,
+        )
+
+        assertEquals(
+            1,
+            domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
+                .groupListDataWrapper
+                .instanceDatas
+                .single()
+                .children
+                .size,
+        )
+
+        assertEquals(
+            2,
+            domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
+                .groupListDataWrapper
+                .instanceDatas
+                .single()
+                .children
+                .values
+                .single()
+                .children
+                .size,
+        )
+
+        assertEquals(
+            0,
             domainFactory.getGroupListData(now, 1, Preferences.TimeRange.DAY)
                 .groupListDataWrapper
                 .instanceDatas

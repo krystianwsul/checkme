@@ -494,7 +494,7 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
                 @Parcelize
                 class Project(
                     override val timeStamp: TimeStamp,
-                    override val instanceKeys: Set<InstanceKey>,
+                    override val instanceKeys: Set<InstanceKey>, // todo this should get moved out into the ContentDelegate
                     val projectKey: ProjectKey.Shared,
                 ) : Id {
 

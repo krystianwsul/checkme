@@ -1184,5 +1184,49 @@ class DomainFactoryTest {
                 .instanceDatas
                 .size,
         )
+
+        now += 1.hours
+
+        val singleScheduleDatas = listOf(ScheduleData.Single(date, scheduleTimePair))
+
+        val joinables = domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
+            .groupListDataWrapper
+            .instanceDatas
+            .map { EditParameters.Join.Joinable.Instance(it.instanceKey) }
+
+        val outerJoinTaskKey = domainUpdater(now).createScheduleJoinTopLevelTask(
+            DomainListenerManager.NotificationType.All,
+            EditDelegate.CreateParameters("outer join"),
+            singleScheduleDatas,
+            joinables,
+            null,
+            false,
+        )
+
+        assertEquals(
+            1,
+            domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
+                .groupListDataWrapper
+                .instanceDatas
+                .size,
+        )
+
+        assertEquals(
+            2,
+            domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
+                .groupListDataWrapper
+                .instanceDatas
+                .single()
+                .children
+                .size,
+        )
+
+        assertEquals(
+            2,
+            domainFactory.getGroupListData(now, 1, Preferences.TimeRange.DAY)
+                .groupListDataWrapper
+                .instanceDatas
+                .size,
+        )
     }
 }

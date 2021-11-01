@@ -546,11 +546,10 @@ fun DomainUpdater.createJoinChildTask(
     notificationType: DomainListenerManager.NotificationType,
     parentTaskKey: TaskKey,
     createParameters: EditDelegate.CreateParameters,
-    joinTaskKeys: List<TaskKey>,
-    removeInstanceKeys: List<InstanceKey>,
-    joinAllInstances: Boolean, // todo inner join
+    joinables: List<EditParameters.Join.Joinable>,
+    joinAllInstances: Boolean,
 ): Single<TaskKey.Root> = SingleDomainUpdate.create("createJoinChildTask") { now ->
-    check(joinTaskKeys.size > 1)
+    check(joinables.size > 1)
 
     val image = createParameters.getImage(this)
 
@@ -559,9 +558,17 @@ fun DomainUpdater.createJoinChildTask(
         val parentTask = convertToRoot(getTaskForce(parentTaskKey), now)
         parentTask.requireNotDeleted()
 
-        val joinTasks = joinTaskKeys.map { convertToRoot(getTaskForce(it), now) }
+        val joinableMap = if (joinAllInstances) {
+            /**
+             * I don't think the project updated is needed anymore, since that will happen with the new taskHierarchy records
+             * anyway
+             */
+            joinables.map { it to convertAndUpdateProject(getTaskForce(it.taskKey), now, parentTask.project.projectKey) }
+        } else {
+            joinables.map { it to convertToRoot(getTaskForce(it.taskKey), now) }
+        }
 
-        val ordinal = joinTasks.map { it.ordinal }.minOrNull()
+        val ordinal = joinableMap.map { it.second.ordinal }.minOrNull()
 
         childTask = createChildTask(
             now,
@@ -572,7 +579,10 @@ fun DomainUpdater.createJoinChildTask(
             ordinal = ordinal,
         )
 
-        joinTasks(childTask, joinTasks, now, removeInstanceKeys)
+        if (joinAllInstances)
+            joinTasks(childTask, joinableMap.map { it.second }, now, joinables.mapNotNull { it.instanceKey })
+        else
+            joinJoinables(childTask, joinableMap, now)
     }
 
     image?.upload(childTask.taskKey)

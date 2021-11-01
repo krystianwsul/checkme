@@ -90,8 +90,7 @@ class JoinTasksEditDelegate(
             DomainListenerManager.NotificationType.All,
             parentTaskKey,
             createParameters,
-            taskKeys,
-            instanceKeys,
+            parameters.joinables,
             dialogResult.joinAllInstances != false,
         )
             .observeOn(AndroidSchedulers.mainThread())

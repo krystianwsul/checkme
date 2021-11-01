@@ -1250,8 +1250,8 @@ class DomainFactoryTest {
             DomainListenerManager.NotificationType.All,
             outerJoinTaskKey,
             EditDelegate.CreateParameters("inner join"),
-            listOf(repeating1TaskKey, repeating2TaskKey),
-            repeatingInstanceKeys,
+            repeatingInstanceKeys.map { EditParameters.Join.Joinable.Instance(it) },
+            true,
         ).blockingGet()
 
         assertEquals(
@@ -1287,6 +1287,161 @@ class DomainFactoryTest {
 
         assertEquals(
             0,
+            domainFactory.getGroupListData(now, 1, Preferences.TimeRange.DAY)
+                .groupListDataWrapper
+                .instanceDatas
+                .size,
+        )
+    }
+
+    @Test
+    fun testInnerJoinJustTheseInstances() {
+        val date = Date(2021, 11, 1)
+
+        var now = ExactTimeStamp.Local(date, HourMinute(1, 0))
+
+        val scheduleTimePair = TimePair(HourMinute(5, 0))
+
+        val repeatingScheduleDatas = listOf(
+            ScheduleData.Weekly(DayOfWeek.set, scheduleTimePair, null, null, 1)
+        )
+
+        val repeating1TaskKey = domainUpdater(now).createScheduleTopLevelTask(
+            DomainListenerManager.NotificationType.All,
+            EditDelegate.CreateParameters("repeating 1"),
+            repeatingScheduleDatas,
+            null,
+        )
+            .blockingGet()
+            .taskKey
+
+        val repeating2TaskKey = domainUpdater(now).createScheduleTopLevelTask(
+            DomainListenerManager.NotificationType.All,
+            EditDelegate.CreateParameters("repeating 2"),
+            repeatingScheduleDatas,
+            null
+        )
+            .blockingGet()
+            .taskKey
+
+        assertEquals(
+            2,
+            domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
+                .groupListDataWrapper
+                .instanceDatas
+                .size,
+        )
+
+        assertEquals(
+            2,
+            domainFactory.getGroupListData(now, 1, Preferences.TimeRange.DAY)
+                .groupListDataWrapper
+                .instanceDatas
+                .size,
+        )
+
+        now += 1.hours
+
+        val singleScheduleDatas = listOf(ScheduleData.Single(date, scheduleTimePair))
+
+        val repeatingInstanceKeys = domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
+            .groupListDataWrapper
+            .instanceDatas
+            .map { it.instanceKey }
+
+        val joinables = repeatingInstanceKeys.map { EditParameters.Join.Joinable.Instance(it) }
+
+        val outerJoinTaskKey = domainUpdater(now).createScheduleJoinTopLevelTask(
+            DomainListenerManager.NotificationType.All,
+            EditDelegate.CreateParameters("outer join"),
+            singleScheduleDatas,
+            joinables,
+            null,
+            false,
+        ).blockingGet()
+
+        assertEquals(
+            1,
+            domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
+                .groupListDataWrapper
+                .instanceDatas
+                .size,
+        )
+
+        assertEquals(
+            2,
+            domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
+                .groupListDataWrapper
+                .instanceDatas
+                .single()
+                .children
+                .size,
+        )
+
+        assertEquals(
+            2,
+            domainFactory.getGroupListData(now, 1, Preferences.TimeRange.DAY)
+                .groupListDataWrapper
+                .instanceDatas
+                .size,
+        )
+
+        now += 1.hours
+
+        /*
+        as-is, this SHOULD result in a tree:
+
+        outer join
+        -inner join
+        --repeating 1
+        --repeating 2
+
+        And should remove the instances for the next day.
+
+        This is as-is, despite the fact that I should support joining instances in this flow (support joinables as param),
+        which should give yet another different behavior.
+         */
+        domainUpdater(now).createJoinChildTask(
+            DomainListenerManager.NotificationType.All,
+            outerJoinTaskKey,
+            EditDelegate.CreateParameters("inner join"),
+            repeatingInstanceKeys.map { EditParameters.Join.Joinable.Instance(it) },
+            false,
+        ).blockingGet()
+
+        assertEquals(
+            1,
+            domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
+                .groupListDataWrapper
+                .instanceDatas
+                .size,
+        )
+
+        assertEquals(
+            1,
+            domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
+                .groupListDataWrapper
+                .instanceDatas
+                .single()
+                .children
+                .size,
+        )
+
+        assertEquals(
+            2,
+            domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
+                .groupListDataWrapper
+                .instanceDatas
+                .single()
+                .children
+                .values
+                .single()
+                .children
+                .size,
+        )
+
+        assertEquals(
+            2,
             domainFactory.getGroupListData(now, 1, Preferences.TimeRange.DAY)
                 .groupListDataWrapper
                 .instanceDatas

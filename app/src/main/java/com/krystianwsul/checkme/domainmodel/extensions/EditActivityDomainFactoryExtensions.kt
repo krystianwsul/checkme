@@ -75,7 +75,8 @@ private fun getScheduleDataWrappersAndAssignedTo(
 
     val assignedTo = schedules.map { it.assignedTo }
         .distinct()
-        .single()
+        .singleOrEmpty()
+        .orEmpty()
 
     return scheduleDataWrappers to assignedTo
 }

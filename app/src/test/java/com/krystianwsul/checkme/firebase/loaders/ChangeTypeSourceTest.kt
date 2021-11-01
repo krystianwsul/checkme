@@ -85,6 +85,8 @@ class ChangeTypeSourceTest {
 
     private val domainDisposable = CompositeDisposable()
 
+    private lateinit var rxErrorChecker: RxErrorChecker
+
     private lateinit var privateProjectSnapshotObservable: PublishRelay<Snapshot<PrivateProjectJson>>
     private lateinit var rootTasksLoaderProvider: TestRootTasksLoaderProvider
 
@@ -103,12 +105,16 @@ class ChangeTypeSourceTest {
 
     @Before
     fun before() {
+        rxErrorChecker = RxErrorChecker()
+
         privateProjectSnapshotObservable = PublishRelay.create()
     }
 
     @After
     fun after() {
         domainDisposable.clear()
+
+        rxErrorChecker.check()
     }
 
     private fun immediateUserCustomTimeProviderSource() = object : UserCustomTimeProviderSource {

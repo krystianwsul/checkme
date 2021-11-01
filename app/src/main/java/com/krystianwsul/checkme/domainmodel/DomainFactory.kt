@@ -439,7 +439,7 @@ class DomainFactory(
             if (isRootInstance) instance.instanceDateTime.getDisplayText() else null,
             instance.name,
             instance.instanceDateTime.timeStamp,
-            instance.instanceDateTime,
+            instance.instanceDate,
             instance.task.notDeleted,
             instance.canAddSubtask(now),
             instance.canMigrateDescription(now),

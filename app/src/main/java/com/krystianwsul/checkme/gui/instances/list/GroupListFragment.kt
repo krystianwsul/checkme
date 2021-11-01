@@ -660,7 +660,7 @@ class GroupListFragment @JvmOverloads constructor(
         if (!parametersRelay.hasValue()) return FabState.Hidden
 
         fun List<GroupListDataWrapper.InstanceData>.getHint() =
-            getHint(map { Triple(it.instanceDateTime.date, it.createTaskTimePair, it.projectKey) })
+            getHint(map { Triple(it.instanceDate, it.createTaskTimePair, it.projectKey) })
 
         return if (selectionCallback.hasActionMode) {
             if (parameters.fabActionMode != GroupListParameters.FabActionMode.NONE) {
@@ -689,7 +689,7 @@ class GroupListFragment @JvmOverloads constructor(
                             listener.showFabMenu(instanceData!!.run {
                                 SubtaskMenuDelegate(
                                     instanceKey.takeIf { canAddSubtask },
-                                    instanceDateTime.date,
+                                    instanceDate,
                                     createTaskTimePair,
                                     instanceData.projectKey,
                                     canAddToTime,

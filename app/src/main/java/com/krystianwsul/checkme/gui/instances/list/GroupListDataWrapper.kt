@@ -5,6 +5,7 @@ import com.krystianwsul.checkme.utils.FilterParamsMatchable
 import com.krystianwsul.common.criteria.QueryMatchable
 import com.krystianwsul.common.firebase.models.ImageState
 import com.krystianwsul.common.time.*
+import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
@@ -51,7 +52,7 @@ data class GroupListDataWrapper(
         val displayText: String?,
         override val name: String,
         val instanceTimeStamp: TimeStamp,
-        val instanceDateTime: DateTime,
+        val instanceDate: Date,
         override val taskCurrent: Boolean,
         override val canAddSubtask: Boolean,
         override val canMigrateDescription: Boolean,

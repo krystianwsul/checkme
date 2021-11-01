@@ -39,7 +39,7 @@ fun DomainFactory.getShowNotificationGroupData(instanceKeys: Set<InstanceKey>): 
             instance.getDisplayData()?.getDisplayText(),
             instance.name,
             instance.instanceDateTime.timeStamp,
-            instance.instanceDateTime,
+            instance.instanceDate,
             task.notDeleted,
             instance.canAddSubtask(now),
             instance.canMigrateDescription(now),

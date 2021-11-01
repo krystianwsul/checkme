@@ -63,7 +63,7 @@ fun DomainFactory.getShowTaskInstancesData(
                             it.instanceDateTime.getDisplayText(),
                             it.name,
                             it.instanceDateTime.timeStamp,
-                            it.instanceDateTime,
+                            it.instanceDate,
                             it.task.notDeleted,
                             it.canAddSubtask(now),
                             it.canMigrateDescription(now),

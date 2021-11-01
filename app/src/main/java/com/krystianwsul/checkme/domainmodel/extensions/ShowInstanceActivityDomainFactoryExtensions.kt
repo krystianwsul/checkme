@@ -107,7 +107,7 @@ private fun DomainFactory.getGroupListData(
                 null,
                 childInstance.name,
                 childInstance.instanceDateTime.timeStamp,
-                childInstance.instanceDateTime,
+                childInstance.instanceDate,
                 childTask.notDeleted,
                 childTask.isVisible(now),
                 childInstance.canMigrateDescription(now),

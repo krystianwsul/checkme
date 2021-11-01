@@ -477,7 +477,8 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
             override val note: String?,
             override val sortKey: SortKey.TaskSortKey,
             override val projectKey: ProjectKey<*>,
-            val hasMultipleInstances: Boolean?,
+            val hasMultipleInstances: Boolean?, // only for certain scenarios with Create
+            val topLevelTaskIsSingleSchedule: Boolean, // only for join with showJoinAllRemindersDialog == true
         ) : ParentEntryData() {
 
             override val normalizedFields by lazy { listOfNotNull(name, note).map { it.normalized() } }
@@ -496,6 +497,7 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
                 projectKey,
                 hasMultipleInstances,
                 null,
+                topLevelTaskIsSingleSchedule,
             )
         }
     }

@@ -66,6 +66,7 @@ interface ParentScheduleManager {
             override val projectKey: ProjectKey<*>,
             override val hasMultipleInstances: Boolean?,
             override val clearParentTaskData: Triple<Parent?, List<EditViewModel.ScheduleDataWrapper>, Set<UserKey>>?,
+            val topLevelTaskIsSingleSchedule: Boolean,
         ) : Parent {
 
             override val projectUsers = mapOf<UserKey, EditViewModel.UserData>()

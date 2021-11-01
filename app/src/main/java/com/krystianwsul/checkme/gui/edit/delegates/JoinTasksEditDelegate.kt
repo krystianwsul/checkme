@@ -7,10 +7,7 @@ import com.krystianwsul.checkme.domainmodel.extensions.createJoinChildTask
 import com.krystianwsul.checkme.domainmodel.extensions.createJoinTopLevelTask
 import com.krystianwsul.checkme.domainmodel.extensions.createScheduleJoinTopLevelTask
 import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
-import com.krystianwsul.checkme.gui.edit.EditParameters
-import com.krystianwsul.checkme.gui.edit.EditViewModel
-import com.krystianwsul.checkme.gui.edit.ParentMultiScheduleManager
-import com.krystianwsul.checkme.gui.edit.ParentScheduleState
+import com.krystianwsul.checkme.gui.edit.*
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ScheduleData
 import com.krystianwsul.common.utils.TaskKey
@@ -44,17 +41,25 @@ class JoinTasksEditDelegate(
     override val parentScheduleManager = ParentMultiScheduleManager(savedInstanceState, this::initialStateGetter, callbacks)
 
     override fun showDialog(): ShowDialog {
-        if (!data.showJoinAllRemindersDialog!!) return ShowDialog.NONE
+        fun showJoinAllRemindersDialog(): Boolean {
+            if (!data.showJoinAllRemindersDialog!!) return false
 
-        // todo if parent task is present, this should instead check if the top-level task is has a single current single schedule
+            return when (val parent = parentScheduleManager.parent) {
+                is ParentScheduleManager.Parent.Task -> {
+                    check(parentScheduleManager.schedules.isEmpty())
 
-        parentScheduleManager.parent
+                    return parent.topLevelTaskIsSingleSchedule
+                }
+                is ParentScheduleManager.Parent.Project, null -> {
+                    parentScheduleManager.schedules
+                        .singleOrNull()
+                        ?.scheduleDataWrapper
+                        ?.scheduleData is ScheduleData.Single
+                }
+            }
+        }
 
-        val schedule = parentScheduleManager.schedules
-            .singleOrNull()
-            ?: return ShowDialog.NONE
-
-        return if (schedule.scheduleDataWrapper.scheduleData is ScheduleData.Single) ShowDialog.JOIN else ShowDialog.NONE
+        return if (showJoinAllRemindersDialog()) ShowDialog.JOIN else ShowDialog.NONE
     }
 
     override fun createTaskWithSchedule(

@@ -18,6 +18,7 @@ import com.krystianwsul.common.firebase.models.*
 import com.krystianwsul.common.firebase.models.interval.ScheduleInterval
 import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.project.SharedProject
+import com.krystianwsul.common.firebase.models.schedule.SingleSchedule
 import com.krystianwsul.common.firebase.models.task.*
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.Time
@@ -80,6 +81,11 @@ private fun getScheduleDataWrappersAndAssignedTo(
 
     return scheduleDataWrappers to assignedTo
 }
+
+private fun Task.topLevelTaskIsSingleSchedule(now: ExactTimeStamp.Local) = getTopLevelTask(now).intervalInfo
+    .scheduleIntervals
+    .singleOrNull()
+    ?.schedule is SingleSchedule
 
 private fun DomainFactory.getCreateTaskDataSlow(
     startParameters: EditViewModel.StartParameters,
@@ -189,7 +195,8 @@ private fun DomainFactory.getCreateTaskDataSlow(
                     val (scheduleDataWrappers, assignedTo) = getScheduleDataWrappersAndAssignedTo(it.intervalInfo.scheduleIntervals)
 
                     Triple(parent, scheduleDataWrappers, assignedTo)
-                }
+                },
+                task.topLevelTaskIsSingleSchedule(now),
             )
         }
         is EditViewModel.ParentKey.Project -> {
@@ -766,6 +773,7 @@ private fun Task.toParentEntryData(
     EditViewModel.SortKey.TaskSortKey(startExactTimeStamp),
     project.projectKey,
     hasMultipleInstances(parentInstanceKey, now),
+    topLevelTaskIsSingleSchedule(now),
 )
 
 private fun DomainFactory.getTaskListChildTaskDatas(

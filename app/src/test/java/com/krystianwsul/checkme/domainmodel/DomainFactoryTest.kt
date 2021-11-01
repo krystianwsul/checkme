@@ -1138,4 +1138,51 @@ class DomainFactoryTest {
                 .taskKey
         )
     }
+
+    @Test
+    fun testInnerJoinAllInstances() {
+        val date = Date(2021, 11, 1)
+
+        var now = ExactTimeStamp.Local(date, HourMinute(1, 0))
+
+        val scheduleTimePair = TimePair(HourMinute(5, 0))
+
+        val repeatingScheduleDatas = listOf(
+            ScheduleData.Weekly(DayOfWeek.set, scheduleTimePair, null, null, 1)
+        )
+
+        val repeating1TaskKey = domainUpdater(now).createScheduleTopLevelTask(
+            DomainListenerManager.NotificationType.All,
+            EditDelegate.CreateParameters("repeating 1"),
+            repeatingScheduleDatas,
+            null
+        )
+            .blockingGet()
+            .taskKey
+
+        val repeating2TaskKey = domainUpdater(now).createScheduleTopLevelTask(
+            DomainListenerManager.NotificationType.All,
+            EditDelegate.CreateParameters("repeating 2"),
+            repeatingScheduleDatas,
+            null
+        )
+            .blockingGet()
+            .taskKey
+
+        assertEquals(
+            2,
+            domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
+                .groupListDataWrapper
+                .instanceDatas
+                .size,
+        )
+
+        assertEquals(
+            2,
+            domainFactory.getGroupListData(now, 1, Preferences.TimeRange.DAY)
+                .groupListDataWrapper
+                .instanceDatas
+                .size,
+        )
+    }
 }

@@ -21,7 +21,12 @@ sealed class ScheduleData : Parcelable {
         val from: Date?,
         val until: Date?,
         val interval: Int,
-    ) : ScheduleData()
+    ) : ScheduleData() {
+
+        init {
+            check(interval > 0)
+        }
+    }
 
     @Parcelize
     data class MonthlyDay(

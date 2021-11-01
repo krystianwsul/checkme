@@ -261,7 +261,7 @@ private class AddChildToParentUndoData(
     val scheduleIds: List<ScheduleId>,
     val noScheduleOrParentsIds: List<String>,
     val deleteTaskHierarchyKey: TaskHierarchyKey,
-    val unhideInstanceKey: InstanceKey?,
+    val instanceUndoData: InstanceUndoData?,
 ) : UndoData {
 
     override fun undo(domainFactory: DomainFactory, now: ExactTimeStamp.Local) = domainFactory.run {
@@ -269,7 +269,13 @@ private class AddChildToParentUndoData(
 
         val initialProject = task.project
 
-        unhideInstanceKey?.let(::getInstance)?.unhide()
+        instanceUndoData?.let {
+            val instance by lazy { getInstance(it.instanceKey) }
+
+            it.parentState?.let(instance::setParentState)
+
+            if (it.unhide) instance.unhide()
+        }
 
         trackRootTaskIds {
             task.parentTaskHierarchies.single { it.taskHierarchyKey == deleteTaskHierarchyKey }.delete()
@@ -291,6 +297,12 @@ private class AddChildToParentUndoData(
 
         setOf(initialProject, finalProject)
     }
+
+    class InstanceUndoData(
+        val instanceKey: InstanceKey,
+        val parentState: Instance.ParentState?,
+        val unhide: Boolean,
+    )
 }
 
 fun addChildToParent(
@@ -314,16 +326,23 @@ fun addChildToParent(
         deleteTaskHierarchyKey = parentTask.addChild(this, now)
     }
 
-    val unhideInstanceKey = hideInstance?.also { it.setParentState(Instance.ParentState.Unset) } // todo inner join undo
-        ?.takeIf {
-            it.parentInstance?.task != parentTask &&
-                    it.isVisible(now, Instance.VisibilityOptions(hack24 = true))
-        }
-        ?.let {
+    val instanceUndoData = hideInstance?.let {
+        val previousParentState = it.parentState
+            .takeIf { it != Instance.ParentState.Unset }
+            .also { hideInstance.setParentState(Instance.ParentState.Unset) }
+
+        val unhide = if (it.parentInstance?.task != parentTask &&
+            it.isVisible(now, Instance.VisibilityOptions(hack24 = true))
+        ) {
             it.hide()
 
-            it.instanceKey
+            true
+        } else {
+            false
         }
+
+        AddChildToParentUndoData.InstanceUndoData(it.instanceKey, previousParentState, unhide)
+    }
 
     return AddChildToParentUndoData(
         childTask.taskKey,
@@ -331,7 +350,7 @@ fun addChildToParent(
         scheduleIds,
         noScheduleOrParentsIds,
         deleteTaskHierarchyKey,
-        unhideInstanceKey,
+        instanceUndoData,
     )
 }
 

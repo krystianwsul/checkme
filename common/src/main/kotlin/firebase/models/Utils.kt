@@ -5,7 +5,7 @@ import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.interrupt.InterruptionChecker
 import com.krystianwsul.common.time.ExactTimeStamp
 
-fun Sequence<Task>.filterSearch(search: SearchCriteria.Search?) = if (search?.hasSearch != true) {
+fun Sequence<Task>.filterSearch(search: SearchCriteria.Search?, now: ExactTimeStamp.Local) = if (search?.hasSearch != true) {
     map { it to FilterResult.MATCHES }
 } else {
     fun childHierarchyMatches(task: Task): FilterResult {
@@ -13,11 +13,9 @@ fun Sequence<Task>.filterSearch(search: SearchCriteria.Search?) = if (search?.ha
 
         if (task.matchesSearch(search)) return FilterResult.MATCHES
 
-        // todo search child I think this is the place to do the filtering, but check where else it's used.  But why isn't it consistent with the child ultimately
-        // being present?
         if (
-            task.childHierarchyIntervals.any {
-                childHierarchyMatches(it.taskHierarchy.childTask) != FilterResult.DOESNT_MATCH
+            task.getChildTaskHierarchies(now).any {
+                childHierarchyMatches(it.childTask) != FilterResult.DOESNT_MATCH
             }
         ) {
             return FilterResult.CHILD_MATCHES

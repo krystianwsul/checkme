@@ -199,7 +199,7 @@ fun DomainFactory.getGroupListChildTaskDatas(
 ): List<GroupListDataWrapper.TaskData> = parentTask.getChildTaskHierarchies(now)
     .asSequence()
     .map { it.childTask }
-    .filterSearch(searchCriteria?.search)
+    .filterSearch(searchCriteria?.search, now)
     .map { (childTask, filterResult) ->
         val childQuery = if (filterResult == FilterResult.MATCHES) null else searchCriteria
 

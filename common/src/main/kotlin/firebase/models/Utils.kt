@@ -13,8 +13,6 @@ fun Sequence<Task>.filterSearch(search: SearchCriteria.Search?) = if (search?.ha
 
         if (task.matchesSearch(search)) return FilterResult.MATCHES
 
-        InterruptionChecker.throwIfInterrupted()
-
         // todo search child I think this is the place to do the filtering, but check where else it's used.  But why isn't it consistent with the child ultimately
         // being present?
         if (

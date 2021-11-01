@@ -438,14 +438,7 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
         protected abstract val projectUsers: Map<UserKey, UserData>
         protected abstract val hasMultipleInstances: Boolean?
 
-        fun toParent(): ParentScheduleManager.Parent = ParentScheduleManager.Parent(
-            name,
-            entryKey,
-            projectUsers,
-            projectKey,
-            hasMultipleInstances,
-            null,
-        )
+        abstract fun toParent(): ParentScheduleManager.Parent
 
         data class Project(
             override val name: String,
@@ -471,6 +464,15 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
             }
 
             override fun matchesTaskKey(taskKey: TaskKey) = false
+
+            override fun toParent(): ParentScheduleManager.Parent = ParentScheduleManager.Parent.Project(
+                name,
+                entryKey,
+                projectUsers,
+                projectKey,
+                hasMultipleInstances,
+                null,
+            )
         }
 
         data class Task(
@@ -495,6 +497,15 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
             }
 
             override fun matchesTaskKey(taskKey: TaskKey) = this.taskKey == taskKey
+
+            override fun toParent(): ParentScheduleManager.Parent = ParentScheduleManager.Parent.Task(
+                name,
+                entryKey,
+                projectUsers,
+                projectKey,
+                hasMultipleInstances,
+                null,
+            )
         }
     }
 

@@ -48,6 +48,8 @@ class JoinTasksEditDelegate(
 
         // todo if parent task is present, this should instead check if the top-level task is has a single current single schedule
 
+        parentScheduleManager.parent
+
         val schedule = parentScheduleManager.schedules
             .singleOrNull()
             ?: return ShowDialog.NONE

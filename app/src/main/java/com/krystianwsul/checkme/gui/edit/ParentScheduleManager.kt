@@ -39,17 +39,41 @@ interface ParentScheduleManager {
         fun storeParent(parentKey: EditViewModel.ParentKey?)
     }
 
-    data class Parent(
-        val name: String,
-        val parentKey: EditViewModel.ParentKey,
-        val projectUsers: Map<UserKey, EditViewModel.UserData>,
-        val projectKey: ProjectKey<*>,
-        val hasMultipleInstances: Boolean?,
-        val clearParentTaskData: Triple<Parent?, List<EditViewModel.ScheduleDataWrapper>, Set<UserKey>>?,
-    ) {
+    sealed interface Parent {
 
-        init {
-            check((parentKey is EditViewModel.ParentKey.Task) || (hasMultipleInstances == null))
+        val name: String
+        val parentKey: EditViewModel.ParentKey
+        val projectUsers: Map<UserKey, EditViewModel.UserData>
+        val projectKey: ProjectKey<*>
+        val hasMultipleInstances: Boolean?
+        val clearParentTaskData: Triple<Parent?, List<EditViewModel.ScheduleDataWrapper>, Set<UserKey>>?
+
+        data class Project(
+            override val name: String,
+            override val parentKey: EditViewModel.ParentKey,
+            override val projectUsers: Map<UserKey, EditViewModel.UserData>,
+            override val projectKey: ProjectKey<*>,
+            override val hasMultipleInstances: Boolean?,
+            override val clearParentTaskData: Triple<Parent?, List<EditViewModel.ScheduleDataWrapper>, Set<UserKey>>?,
+        ) : Parent {
+
+            init {
+                check((parentKey is EditViewModel.ParentKey.Task) || (hasMultipleInstances == null))
+            }
+        }
+
+        data class Task(
+            override val name: String,
+            override val parentKey: EditViewModel.ParentKey,
+            override val projectUsers: Map<UserKey, EditViewModel.UserData>,
+            override val projectKey: ProjectKey<*>,
+            override val hasMultipleInstances: Boolean?,
+            override val clearParentTaskData: Triple<Parent?, List<EditViewModel.ScheduleDataWrapper>, Set<UserKey>>?,
+        ) : Parent {
+
+            init {
+                check((parentKey is EditViewModel.ParentKey.Task) || (hasMultipleInstances == null))
+            }
         }
     }
 }

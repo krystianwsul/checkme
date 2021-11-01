@@ -165,7 +165,7 @@ private fun DomainFactory.getCreateTaskDataSlow(
         }
     }
 
-    fun SharedProject.toParent() = ParentScheduleManager.Parent(
+    fun SharedProject.toParent() = ParentScheduleManager.Parent.Project(
         name,
         EditViewModel.ParentKey.Project(projectKey),
         users.toUserDatas(),
@@ -178,7 +178,7 @@ private fun DomainFactory.getCreateTaskDataSlow(
         is EditViewModel.ParentKey.Task -> {
             val task = getTaskForce(currentParentKey.taskKey)
 
-            ParentScheduleManager.Parent(
+            ParentScheduleManager.Parent.Task(
                 task.name,
                 EditViewModel.ParentKey.Task(task.taskKey),
                 mapOf(),
@@ -198,7 +198,7 @@ private fun DomainFactory.getCreateTaskDataSlow(
         is EditViewModel.ParentKey.Project -> {
             val project = projectsFactory.sharedProjects.getValue(currentParentKey.projectId)
 
-            ParentScheduleManager.Parent(
+            ParentScheduleManager.Parent.Project(
                 project.name,
                 EditViewModel.ParentKey.Project(project.projectKey),
                 project.users.toUserDatas(),

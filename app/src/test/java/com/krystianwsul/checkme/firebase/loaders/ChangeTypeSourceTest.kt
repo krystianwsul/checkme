@@ -85,6 +85,8 @@ class ChangeTypeSourceTest {
 
     private val domainDisposable = CompositeDisposable()
 
+    private lateinit var rxErrorChecker: RxErrorChecker
+
     private lateinit var privateProjectSnapshotObservable: PublishRelay<Snapshot<PrivateProjectJson>>
     private lateinit var rootTasksLoaderProvider: TestRootTasksLoaderProvider
 
@@ -103,12 +105,16 @@ class ChangeTypeSourceTest {
 
     @Before
     fun before() {
+        rxErrorChecker = RxErrorChecker()
+
         privateProjectSnapshotObservable = PublishRelay.create()
     }
 
     @After
     fun after() {
         domainDisposable.clear()
+
+        rxErrorChecker.check()
     }
 
     private fun immediateUserCustomTimeProviderSource() = object : UserCustomTimeProviderSource {
@@ -527,18 +533,20 @@ class ChangeTypeSourceTest {
         setup()
         acceptPrivateProject(PrivateProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true)))
 
-        // initial event ignored for project
-        rootTasksLoaderProvider.accept(
-            taskKey1,
-            RootTaskJson(
-                noScheduleOrParent = mapOf(
-                    "noScheduleOrParentId" to RootNoScheduleOrParentJson(
-                        startTimeOffset = 0.0,
-                        projectId = privateProjectId,
+        taskEmissionChecker.checkRemote {
+            rootTasksLoaderProvider.accept(
+                taskKey1,
+                RootTaskJson(
+                    noScheduleOrParent = mapOf(
+                        "noScheduleOrParentId" to RootNoScheduleOrParentJson(
+                            startTimeOffset = 0.0,
+                            projectId = privateProjectId,
+                        ),
                     ),
                 ),
-            ),
-        )
+            )
+        }
+
         checkEmpty()
 
         projectEmissionChecker.checkRemote { acceptPrivateProject(PrivateProjectJson()) }
@@ -750,11 +758,13 @@ class ChangeTypeSourceTest {
     fun testTaskCreateThenRemoteUpdate() {
         val taskKey = createTask()
 
-        acceptPrivateProject(
-            PrivateProjectJson(
-                rootTaskIds = mutableMapOf(taskKey1.taskId to true, taskKey.taskId to true)
+        projectEmissionChecker.checkRemote {
+            acceptPrivateProject(
+                PrivateProjectJson(
+                    rootTaskIds = mutableMapOf(taskKey1.taskId to true, taskKey.taskId to true)
+                )
             )
-        )
+        }
 
         taskEmissionChecker.checkRemote {
             rootTasksLoaderProvider.accept(

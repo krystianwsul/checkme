@@ -1,6 +1,6 @@
 package com.krystianwsul.checkme.firebase.loaders
 
-import io.reactivex.plugins.RxJavaPlugins
+import io.reactivex.rxjava3.plugins.RxJavaPlugins
 import org.junit.Assert
 
 class RxErrorChecker {

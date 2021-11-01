@@ -1155,7 +1155,7 @@ class DomainFactoryTest {
             DomainListenerManager.NotificationType.All,
             EditDelegate.CreateParameters("repeating 1"),
             repeatingScheduleDatas,
-            null
+            null,
         )
             .blockingGet()
             .taskKey

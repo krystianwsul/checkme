@@ -435,8 +435,6 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
         abstract override val entryKey: ParentKey
 
         protected abstract val projectKey: ProjectKey<*>
-        protected abstract val projectUsers: Map<UserKey, UserData>
-        protected abstract val hasMultipleInstances: Boolean?
 
         abstract fun toParent(): ParentScheduleManager.Parent
 
@@ -444,7 +442,7 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
             override val name: String,
             override val childEntryDatas: List<Task>,
             override val projectKey: ProjectKey.Shared,
-            override val projectUsers: Map<UserKey, UserData>,
+            private val projectUsers: Map<UserKey, UserData>,
         ) : ParentEntryData() {
 
             override val normalizedFields by lazy { listOfNotNull(name, note).map { it.normalized() } }
@@ -457,8 +455,6 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
 
             override val sortKey = SortKey.ProjectSortKey(projectKey)
 
-            override val hasMultipleInstances: Boolean? = null
-
             override fun normalize() {
                 normalizedFields
             }
@@ -470,8 +466,6 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
                 entryKey,
                 projectUsers,
                 projectKey,
-                hasMultipleInstances,
-                null,
             )
         }
 
@@ -483,14 +477,12 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
             override val note: String?,
             override val sortKey: SortKey.TaskSortKey,
             override val projectKey: ProjectKey<*>,
-            override val hasMultipleInstances: Boolean?,
+            val hasMultipleInstances: Boolean?,
         ) : ParentEntryData() {
 
             override val normalizedFields by lazy { listOfNotNull(name, note).map { it.normalized() } }
 
             override val entryKey = ParentKey.Task(taskKey)
-
-            override val projectUsers = mapOf<UserKey, UserData>()
 
             override fun normalize() {
                 normalizedFields
@@ -501,7 +493,6 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
             override fun toParent(): ParentScheduleManager.Parent = ParentScheduleManager.Parent.Task(
                 name,
                 entryKey,
-                projectUsers,
                 projectKey,
                 hasMultipleInstances,
                 null,

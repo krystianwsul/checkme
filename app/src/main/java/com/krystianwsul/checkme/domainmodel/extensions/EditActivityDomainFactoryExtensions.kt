@@ -170,8 +170,6 @@ private fun DomainFactory.getCreateTaskDataSlow(
         EditViewModel.ParentKey.Project(projectKey),
         users.toUserDatas(),
         projectKey,
-        null,
-        null,
     )
 
     val currentParent: ParentScheduleManager.Parent? = when (currentParentKey) {
@@ -181,7 +179,6 @@ private fun DomainFactory.getCreateTaskDataSlow(
             ParentScheduleManager.Parent.Task(
                 task.name,
                 EditViewModel.ParentKey.Task(task.taskKey),
-                mapOf(),
                 task.project.projectKey,
                 task.hasMultipleInstances(startParameters.parentInstanceKey, now),
                 task.getTopLevelTask(now).let {
@@ -203,8 +200,6 @@ private fun DomainFactory.getCreateTaskDataSlow(
                 EditViewModel.ParentKey.Project(project.projectKey),
                 project.users.toUserDatas(),
                 project.projectKey,
-                null,
-                null,
             )
         }
         null -> null

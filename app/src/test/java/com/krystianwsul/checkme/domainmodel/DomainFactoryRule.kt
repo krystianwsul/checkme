@@ -122,6 +122,9 @@ class DomainFactoryRule : TestRule {
         mockkObject(DefaultCustomTimeCreator)
         every { DefaultCustomTimeCreator.createDefaultCustomTimes(any()) } returns Unit
 
+        mockkObject(ShortcutQueue)
+        every { ShortcutQueue.updateShortcuts(any()) } returns Unit
+
         DomainThreadChecker.instance = mockk(relaxed = true)
 
         RxJavaPlugins.setSingleSchedulerHandler { Schedulers.trampoline() }

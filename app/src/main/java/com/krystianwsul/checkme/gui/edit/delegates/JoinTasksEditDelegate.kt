@@ -46,6 +46,8 @@ class JoinTasksEditDelegate(
     override fun showDialog(): ShowDialog {
         if (!data.showJoinAllRemindersDialog!!) return ShowDialog.NONE
 
+        // todo if parent task is present, this should instead check if the top-level task is has a single current single schedule
+
         val schedule = parentScheduleManager.schedules
             .singleOrNull()
             ?: return ShowDialog.NONE

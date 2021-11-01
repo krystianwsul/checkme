@@ -314,15 +314,16 @@ fun addChildToParent(
         deleteTaskHierarchyKey = parentTask.addChild(this, now)
     }
 
+    val unhideInstanceKey = hideInstance?.also { it.setParentState(Instance.ParentState.Unset) } // todo inner join undo
+        ?.takeIf {
+            it.parentInstance?.task != parentTask &&
+                    it.isVisible(now, Instance.VisibilityOptions(hack24 = true))
+        }
+        ?.let {
+            it.hide()
 
-    val unhideInstanceKey = hideInstance?.takeIf {
-        it.parentInstance?.task != parentTask &&
-                it.isVisible(now, Instance.VisibilityOptions(hack24 = true))
-    }?.let {
-        it.hide()
-
-        it.instanceKey
-    }
+            it.instanceKey
+        }
 
     return AddChildToParentUndoData(
         childTask.taskKey,

@@ -745,6 +745,7 @@ private fun DomainFactory.joinTasks(
     joinTasks.forEach { addChildToParent(it, newParentTask, now) }
 
     removeInstanceKeys.map(::getInstance)
+        .onEach { it.setParentState(Instance.ParentState.Unset) } // todo inner join undo
         .filter {
             it.parentInstance?.task != newParentTask &&
                     it.isVisible(now, Instance.VisibilityOptions(hack24 = true))

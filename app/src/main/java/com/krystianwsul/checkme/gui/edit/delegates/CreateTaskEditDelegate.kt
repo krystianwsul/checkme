@@ -140,9 +140,9 @@ class CreateTaskEditDelegate(
         createParameters: CreateParameters,
         scheduleDatas: List<ScheduleData>,
         sharedProjectParameters: SharedProjectParameters?,
-        joinAllReminders: Boolean?,
+        joinAllInstances: Boolean?,
     ): Single<CreateResult> {
-        check(joinAllReminders == null)
+        check(joinAllInstances == null)
 
         return AndroidDomainUpdater.createScheduleTopLevelTask(
             DomainListenerManager.NotificationType.All,
@@ -157,11 +157,11 @@ class CreateTaskEditDelegate(
     override fun createTaskWithParent(
         createParameters: CreateParameters,
         parentTaskKey: TaskKey,
-        addToAllInstances: Boolean?,
+        dialogResult: DialogResult,
     ): Single<CreateResult> {
         if (parameters is EditParameters.Share) ShortcutManager.addShortcut(parentTaskKey)
 
-        val parentParameter = if (addToAllInstances == false) {
+        val parentParameter = if (dialogResult.addToAllInstances == false) {
             val parentInstanceKey = (parameters as EditParameters.Create).hint!!.instanceKey!!
             check(parentInstanceKey.taskKey == parentTaskKey)
 

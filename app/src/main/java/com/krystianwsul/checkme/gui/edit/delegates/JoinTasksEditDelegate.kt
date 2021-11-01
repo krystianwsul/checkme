@@ -66,7 +66,7 @@ class JoinTasksEditDelegate(
         createParameters: CreateParameters,
         scheduleDatas: List<ScheduleData>,
         sharedProjectParameters: SharedProjectParameters?,
-        joinAllReminders: Boolean?,
+        joinAllInstances: Boolean?,
     ): Single<CreateResult> {
         return AndroidDomainUpdater.createScheduleJoinTopLevelTask(
             DomainListenerManager.NotificationType.All,
@@ -74,7 +74,7 @@ class JoinTasksEditDelegate(
             scheduleDatas,
             parameters.joinables,
             sharedProjectParameters,
-            joinAllReminders != false,
+            joinAllInstances != false,
         )
             .observeOn(AndroidSchedulers.mainThread())
             .toCreateResult()
@@ -84,16 +84,15 @@ class JoinTasksEditDelegate(
     override fun createTaskWithParent(
         createParameters: CreateParameters,
         parentTaskKey: TaskKey,
-        addToAllInstances: Boolean?,
+        dialogResult: DialogResult,
     ): Single<CreateResult> {
-        check(addToAllInstances == null)
-
         return AndroidDomainUpdater.createJoinChildTask(
             DomainListenerManager.NotificationType.All,
             parentTaskKey,
             createParameters,
             taskKeys,
             instanceKeys,
+            dialogResult.joinAllInstances != false,
         )
             .observeOn(AndroidSchedulers.mainThread())
             .toCreateResult()

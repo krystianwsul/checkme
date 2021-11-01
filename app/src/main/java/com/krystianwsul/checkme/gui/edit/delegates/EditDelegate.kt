@@ -191,12 +191,6 @@ abstract class EditDelegate(
 
         return when {
             parentScheduleManager.schedules.isNotEmpty() -> {
-                val joinAllInstances = when (dialogResult) {
-                    is DialogResult.None -> null
-                    is DialogResult.JoinAllInstances -> dialogResult.value
-                    is DialogResult.AddToAllInstances -> throw IllegalArgumentException()
-                }
-
                 val sharedProjectParameters = if (projectId == null) {
                     check(assignedTo.isEmpty())
 
@@ -209,24 +203,18 @@ abstract class EditDelegate(
                     createParameters,
                     parentScheduleManager.schedules.map { it.scheduleDataWrapper.scheduleData },
                     sharedProjectParameters,
-                    joinAllInstances,
+                    dialogResult.joinAllInstances,
                 )
             }
             parentScheduleManager.parent?.parentKey is EditViewModel.ParentKey.Task -> {
                 check(projectId == null)
-
-                val addToAllInstances = when (dialogResult) {
-                    DialogResult.None -> null
-                    is DialogResult.JoinAllInstances -> throw IllegalArgumentException()
-                    is DialogResult.AddToAllInstances -> dialogResult.value
-                }
 
                 val parentTaskKey = parentScheduleManager.parent!!
                     .parentKey
                     .let { it as EditViewModel.ParentKey.Task }
                     .taskKey
 
-                createTaskWithParent(createParameters, parentTaskKey, addToAllInstances)
+                createTaskWithParent(createParameters, parentTaskKey, dialogResult)
             }
             else -> {
                 check(assignedTo.isEmpty())
@@ -241,13 +229,13 @@ abstract class EditDelegate(
         createParameters: CreateParameters,
         scheduleDatas: List<ScheduleData>,
         sharedProjectParameters: SharedProjectParameters?,
-        joinAllReminders: Boolean?,
+        joinAllInstances: Boolean?,
     ): Single<CreateResult>
 
     abstract fun createTaskWithParent(
         createParameters: CreateParameters,
         parentTaskKey: TaskKey,
-        addToAllInstances: Boolean?,
+        dialogResult: DialogResult,
     ): Single<CreateResult>
 
     abstract fun createTaskWithoutReminder(
@@ -319,19 +307,29 @@ abstract class EditDelegate(
 
     sealed class DialogResult {
 
+        abstract val joinAllInstances: Boolean?
+        abstract val addToAllInstances: Boolean?
+
         abstract fun matchesShowDialog(showDialog: ShowDialog): Boolean
 
         object None : DialogResult() {
 
+            override val joinAllInstances: Boolean? = null
+            override val addToAllInstances: Boolean? = null
+
             override fun matchesShowDialog(showDialog: ShowDialog) = true
         }
 
-        data class JoinAllInstances(val value: Boolean) : DialogResult() {
+        data class JoinAllInstances(override val joinAllInstances: Boolean) : DialogResult() {
+
+            override val addToAllInstances: Boolean get() = throw IllegalArgumentException()
 
             override fun matchesShowDialog(showDialog: ShowDialog) = showDialog == ShowDialog.JOIN
         }
 
-        data class AddToAllInstances(val value: Boolean) : DialogResult() {
+        data class AddToAllInstances(override val addToAllInstances: Boolean) : DialogResult() {
+
+            override val joinAllInstances: Boolean get() = throw IllegalArgumentException()
 
             override fun matchesShowDialog(showDialog: ShowDialog) = showDialog == ShowDialog.ADD
         }

@@ -490,7 +490,7 @@ fun DomainUpdater.createScheduleJoinTopLevelTask(
     scheduleDatas: List<ScheduleData>,
     joinables: List<EditParameters.Join.Joinable>,
     sharedProjectParameters: EditDelegate.SharedProjectParameters?,
-    allReminders: Boolean,
+    joinAllInstances: Boolean,
 ): Single<TaskKey.Root> = SingleDomainUpdate.create("createScheduleJoinTopLevelTask") { now ->
     check(scheduleDatas.isNotEmpty())
     check(joinables.size > 1)
@@ -501,7 +501,7 @@ fun DomainUpdater.createScheduleJoinTopLevelTask(
 
     lateinit var newParentTask: RootTask
     trackRootTaskIds {
-        val joinableMap = if (allReminders) {
+        val joinableMap = if (joinAllInstances) {
             /**
              * I don't think the project updated is needed anymore, since that will happen with the new taskHierarchy records
              * anyway
@@ -525,7 +525,7 @@ fun DomainUpdater.createScheduleJoinTopLevelTask(
             sharedProjectParameters.nonNullAssignedTo,
         )
 
-        if (allReminders)
+        if (joinAllInstances)
             joinTasks(newParentTask, joinableMap.map { it.second }, now, joinables.mapNotNull { it.instanceKey })
         else
             joinJoinables(newParentTask, joinableMap, now)
@@ -548,6 +548,7 @@ fun DomainUpdater.createJoinChildTask(
     createParameters: EditDelegate.CreateParameters,
     joinTaskKeys: List<TaskKey>,
     removeInstanceKeys: List<InstanceKey>,
+    joinAllInstances: Boolean, // todo inner join
 ): Single<TaskKey.Root> = SingleDomainUpdate.create("createJoinChildTask") { now ->
     check(joinTaskKeys.size > 1)
 

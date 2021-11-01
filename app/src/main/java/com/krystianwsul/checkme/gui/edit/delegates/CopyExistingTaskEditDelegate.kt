@@ -27,9 +27,9 @@ class CopyExistingTaskEditDelegate(
         createParameters: CreateParameters,
         scheduleDatas: List<ScheduleData>,
         sharedProjectParameters: SharedProjectParameters?,
-        joinAllReminders: Boolean?,
+        joinAllInstances: Boolean?,
     ): Single<CreateResult> {
-        check(joinAllReminders == null)
+        check(joinAllInstances == null)
 
         return AndroidDomainUpdater.createScheduleTopLevelTask(
             DomainListenerManager.NotificationType.All,
@@ -45,9 +45,9 @@ class CopyExistingTaskEditDelegate(
     override fun createTaskWithParent(
         createParameters: CreateParameters,
         parentTaskKey: TaskKey,
-        addToAllInstances: Boolean?,
+        dialogResult: DialogResult,
     ): Single<CreateResult> {
-        check(addToAllInstances == null)
+        check(dialogResult == DialogResult.None)
 
         return CreateChildTaskDomainUpdate(
             DomainListenerManager.NotificationType.All,

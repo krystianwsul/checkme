@@ -133,7 +133,7 @@ class DayFragment @JvmOverloads constructor(
         // this seems redundant/obsolete, but I'll leave it for now
         fabDelegate?.let(binding.groupListFragment::setVisible)
 
-        entry = dayViewModel.getEntry(timeRange, position).apply { start() }
+        entry = dayViewModel.getEntry(timeRange, position)
     }
 
     override fun onAttachedToWindow() {
@@ -145,14 +145,18 @@ class DayFragment @JvmOverloads constructor(
             if (event is Event.PageVisible && event.position == key.second) {
                 setFab(event.fabDelegate)
 
+                entry!!.start()
+
                 activity.selectAllRelay
-                        .subscribe {
-                            binding.groupListFragment
-                                    .treeViewAdapter
-                                    .selectAll()
-                        }
-                        .addTo(compositeDisposable)
+                    .subscribe {
+                        binding.groupListFragment
+                            .treeViewAdapter
+                            .selectAll()
+                    }
+                    .addTo(compositeDisposable)
             } else {
+                entry!!.stop()
+
                 clearFab()
                 saveState()
             }

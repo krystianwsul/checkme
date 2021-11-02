@@ -52,6 +52,7 @@ import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.firebase.models.ImageState
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
+import com.krystianwsul.common.utils.filterValuesNotNull
 import com.krystianwsul.common.utils.normalized
 import com.krystianwsul.treeadapter.*
 import com.stfalcon.imageviewer.StfalconImageViewer
@@ -669,7 +670,10 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         override val indentation = 0
 
         override val taskExpansionStates get() = taskNodes.map { it.taskExpansionStates }.flatten()
-        override val projectExpansionStates get() = mapOf(projectData.projectKey to treeNode.expansionState)
+
+        override val projectExpansionStates
+            get() =
+                mapOf(projectData.projectKey to treeNode.getSaveExpansionState()).filterValuesNotNull()
 
         override val widthKey
             get() = MultiLineDelegate.WidthKey(
@@ -749,7 +753,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         DetailsNode.Parent {
 
         override val taskExpansionStates: Map<TaskKey, TreeNode.ExpansionState>
-            get() = mapOf(childTaskData.taskKey to treeNode.expansionState) +
+            get() = mapOf(childTaskData.taskKey to treeNode.getSaveExpansionState()).filterValuesNotNull() +
                     taskNodes.map { it.taskExpansionStates }.flatten()
 
         override val projectExpansionStates = emptyMap<ProjectKey<*>, TreeNode.ExpansionState>()

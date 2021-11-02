@@ -84,7 +84,7 @@ class UnscheduledNode(
         it.initialize(treeNode, taskExpansionStates, selectedTaskKeys)
     }
 
-    val expansionState get() = treeNode.expansionState
+    val expansionState get() = treeNode.getSaveExpansionState()
 
     override val groupAdapter by lazy { nodeCollection.groupAdapter }
 

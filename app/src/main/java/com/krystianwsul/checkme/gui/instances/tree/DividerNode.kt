@@ -79,7 +79,7 @@ class DividerNode(
         return childTreeNode
     }
 
-    val expansionState get() = treeNode.expansionState
+    val expansionState get() = treeNode.getSaveExpansionState()
 
     val contentDelegateStates get() = doneInstanceNodes.map { it.contentDelegate.states }.flatten()
 

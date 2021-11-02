@@ -35,6 +35,7 @@ import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.ProjectKey
+import com.krystianwsul.common.utils.filterValuesNotNull
 import com.krystianwsul.treeadapter.*
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Maybe
@@ -233,7 +234,7 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
             override val states: Map<ContentDelegate.Id, ContentDelegate.State>
                 get() {
                     val collectionExpansionState = CollectionExpansionState(
-                        treeNode.expansionState,
+                        treeNode.getSaveExpansionState(),
                         nodeCollection.doneExpansionState,
                     )
 
@@ -379,7 +380,9 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
 
             override val states: Map<ContentDelegate.Id, ContentDelegate.State>
                 get() {
-                    val myState = mapOf(id to State(treeNode.isSelected, treeNode.expansionState))
+                    val myState = mapOf(
+                        id to State(treeNode.isSelected, treeNode.getSaveExpansionState()).takeIf { !it.isDefault }
+                    ).filterValuesNotNull()
 
                     return myState + notDoneNodes.map { it.contentDelegate.states }.flatten()
                 }
@@ -512,11 +515,13 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
 
             @Parcelize
             private data class State(
-                val selected: Boolean,
-                val expansionState: TreeNode.ExpansionState,
+                val selected: Boolean = false,
+                val expansionState: TreeNode.ExpansionState? = null,
             ) : ContentDelegate.State {
 
                 constructor() : this(false, TreeNode.ExpansionState())
+
+                val isDefault get() = !selected && expansionState?.isDefault != false
             }
 
             enum class CheckboxMode(val indentChildren: Boolean = false) {

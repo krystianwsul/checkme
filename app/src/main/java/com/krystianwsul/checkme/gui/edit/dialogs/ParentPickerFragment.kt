@@ -23,10 +23,12 @@ import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineDelegate
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineModelNode
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineRow
 import com.krystianwsul.checkme.gui.utils.ResettableProperty
+import com.krystianwsul.checkme.gui.utils.flatten
 import com.krystianwsul.checkme.utils.getMap
 import com.krystianwsul.checkme.utils.putMap
 import com.krystianwsul.common.criteria.QueryMatchable
 import com.krystianwsul.common.criteria.SearchCriteria
+import com.krystianwsul.common.utils.filterValuesNotNull
 import com.krystianwsul.common.utils.normalized
 import com.krystianwsul.treeadapter.*
 import io.reactivex.rxjava3.core.Observable
@@ -114,8 +116,8 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
     fun initialize(delegate: Delegate) = delegateRelay.accept(delegate)
 
-    @SuppressLint("MissingSuperCall") // weird error, the call is right there
     override fun onActivityCreated(savedInstanceState: Bundle?) {
+        @Suppress("DEPRECATION")
         super.onActivityCreated(savedInstanceState)
 
         binding.parentPickerRecycler.layoutManager = LinearLayoutManager(activity)
@@ -135,7 +137,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
         ).subscribe { (delegate, query) -> delegate.onSearch(query) }
 
         delegateRelay.switchMap { delegate ->
-            getProgressShownObservable(binding.parentPickerRecycler) { treeViewAdapter!! }.map { delegate }!!
+            getProgressShownObservable(binding.parentPickerRecycler) { treeViewAdapter!! }.map { delegate }
         }
             .subscribe { it.onPaddingShown() }
             .addTo(viewCreatedDisposable)
@@ -248,7 +250,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
         override val taskAdapter = this
 
-        val expansionStates get() = taskWrappers.flatMap { it.expansionStates }
+        val expansionStates get() = taskWrappers.map { it.expansionStates }.flatten()
 
         override lateinit var treeNodeCollection: TreeNodeCollection<AbstractHolder>
             private set
@@ -303,9 +305,9 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
             override val taskAdapter get() = taskParent.taskAdapter
 
-            val expansionStates: List<Pair<Parcelable, TreeNode.ExpansionState>>
-                get() = listOf(entryData.entryKey to treeNode.expansionState) +
-                        taskWrappers.flatMap { it.expansionStates }
+            val expansionStates: Map<Parcelable, TreeNode.ExpansionState>
+                get() = mapOf(entryData.entryKey to treeNode.getSaveExpansionState()).filterValuesNotNull() +
+                        taskWrappers.map { it.expansionStates }.flatten()
 
             override val delegates by lazy {
                 listOf(

@@ -26,8 +26,9 @@ class TreeNode<T : TreeHolder>(
 
     override val treeNodeCollection by lazy { parent.treeNodeCollection }
 
-    lateinit var expansionState: ExpansionState
-        private set
+    private lateinit var expansionState: ExpansionState
+
+    fun getSaveExpansionState() = expansionState.takeIf { !it.isDefault }
 
     override val isExpanded get() = expansionState.isExpanded
 
@@ -461,6 +462,13 @@ class TreeNode<T : TreeHolder>(
     @Parcelize
     class ExpansionState(var programmatic: Boolean = false, var user: Boolean? = null) : Parcelable {
 
+        companion object {
+
+            private val default = ExpansionState()
+        }
+
         val isExpanded get() = user ?: programmatic
+
+        val isDefault get() = this == default
     }
 }

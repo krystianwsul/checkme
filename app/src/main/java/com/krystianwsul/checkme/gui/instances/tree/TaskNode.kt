@@ -23,6 +23,7 @@ import com.krystianwsul.checkme.gui.tree.delegates.thumbnail.ThumbnailModelNode
 import com.krystianwsul.checkme.gui.utils.flatten
 import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.utils.TaskKey
+import com.krystianwsul.common.utils.filterValuesNotNull
 import com.krystianwsul.treeadapter.*
 import io.reactivex.rxjava3.kotlin.addTo
 
@@ -75,7 +76,8 @@ class TaskNode(
 
     val taskExpansionStates: Map<TaskKey, TreeNode.ExpansionState>
         get() =
-            mapOf(taskData.taskKey to treeNode.expansionState) + taskNodes.map { it.taskExpansionStates }.flatten()
+            mapOf(taskData.taskKey to treeNode.getSaveExpansionState()).filterValuesNotNull() + taskNodes.map { it.taskExpansionStates }
+                .flatten()
 
     override val delegates by lazy {
         listOf(

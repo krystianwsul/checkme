@@ -163,7 +163,7 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
                 modelNode: DetailsNode.Parent,
             ): TreeNode<AbstractHolder> {
                 val state = contentDelegateStates[id] as? State ?: State()
-                val (expansionState, doneExpansionState) = state.collectionExpansionState
+                val (expansionState, doneExpansionState) = state.collectionExpansionState ?: CollectionExpansionState()
 
                 treeNode = TreeNode(modelNode, nodeContainer, state.selected, expansionState)
 
@@ -236,9 +236,11 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
                     val collectionExpansionState = CollectionExpansionState(
                         treeNode.getSaveExpansionState(),
                         nodeCollection.doneExpansionState,
-                    )
+                    ).takeIf { !it.isDefault }
 
-                    val myState = mapOf(id to State(treeNode.isSelected, collectionExpansionState))
+                    val myState = mapOf(
+                        id to State(treeNode.isSelected, collectionExpansionState).takeIf { !it.isDefault }
+                    ).filterValuesNotNull()
 
                     return myState + nodeCollection.contentDelegateStates
                 }
@@ -272,11 +274,11 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
 
             @Parcelize
             private data class State(
-                val selected: Boolean,
-                val collectionExpansionState: CollectionExpansionState,
+                val selected: Boolean = false,
+                val collectionExpansionState: CollectionExpansionState? = null,
             ) : ContentDelegate.State {
 
-                constructor() : this(false, CollectionExpansionState())
+                val isDefault get() = !selected && collectionExpansionState?.isDefault != false
             }
         }
 
@@ -518,8 +520,6 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
                 val selected: Boolean = false,
                 val expansionState: TreeNode.ExpansionState? = null,
             ) : ContentDelegate.State {
-
-                constructor() : this(false, TreeNode.ExpansionState())
 
                 val isDefault get() = !selected && expansionState?.isDefault != false
             }

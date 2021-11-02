@@ -8,4 +8,7 @@ import com.krystianwsul.treeadapter.TreeNode
 data class CollectionExpansionState(
         val collection: TreeNode.ExpansionState? = null,
         val done: TreeNode.ExpansionState? = null,
-) : Parcelable
+) : Parcelable {
+
+        val isDefault get() = collection?.isDefault != false && done?.isDefault != false
+}

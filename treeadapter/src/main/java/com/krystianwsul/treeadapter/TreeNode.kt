@@ -460,7 +460,7 @@ class TreeNode<T : TreeHolder>(
     override val id get() = modelNode.id
 
     @Parcelize
-    class ExpansionState(var programmatic: Boolean = false, var user: Boolean? = null) : Parcelable {
+    data class ExpansionState(var programmatic: Boolean = false, var user: Boolean? = null) : Parcelable {
 
         companion object {
 

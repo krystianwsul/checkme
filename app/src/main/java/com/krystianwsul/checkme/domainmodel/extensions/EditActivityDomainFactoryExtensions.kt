@@ -192,7 +192,8 @@ private fun DomainFactory.getCreateTaskDataSlow(
                         .let { it as? SharedProject }
                         ?.toParent()
 
-                    val (scheduleDataWrappers, assignedTo) = getScheduleDataWrappersAndAssignedTo(it.intervalInfo.scheduleIntervals)
+                    val (scheduleDataWrappers, assignedTo) =
+                        getScheduleDataWrappersAndAssignedTo(it.intervalInfo.getCurrentScheduleIntervals(now))
 
                     Triple(parent, scheduleDataWrappers, assignedTo)
                 },

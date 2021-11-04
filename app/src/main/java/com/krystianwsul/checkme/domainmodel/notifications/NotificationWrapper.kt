@@ -15,7 +15,6 @@ abstract class NotificationWrapper {
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q -> NotificationWrapperImplQ()
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1 -> NotificationWrapperImplOMr1()
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.O -> NotificationWrapperImplO() // todo sdk
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.N -> NotificationWrapperImplN() // todo sdk
             else -> NotificationWrapperImpl()
         }
     }

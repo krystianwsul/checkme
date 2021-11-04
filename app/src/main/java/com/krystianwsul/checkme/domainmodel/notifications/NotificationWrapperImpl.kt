@@ -6,10 +6,10 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.graphics.Bitmap
-import android.os.Build
 import android.os.Bundle
 import android.os.SystemClock
 import android.provider.Settings
+import android.service.notification.StatusBarNotification
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.core.app.NotificationCompat
@@ -49,6 +49,8 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         const val NOTIFICATION_ID_GROUP_NOT_SUMMARY = 1
 
         private const val TAG_TEMPORARY = "temporary"
+
+        private const val GROUP_KEY = "group"
 
         val showTemporary by lazy {
             !MyApplication.instance
@@ -355,7 +357,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         return (if (bits < 0) "--------------------" else "00000000000000000000").substring(s.length) + s
     }
 
-    protected open fun getExtraCount(lines: List<String>, summary: Boolean) = lines.size - maxInboxLines
+    protected open fun getExtraCount(lines: List<String>, summary: Boolean) = if (summary) 0 else lines.size - maxInboxLines
 
     private fun getInboxStyle(
         lines: List<String>,
@@ -429,6 +431,10 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         style?.let { builder.setStyle(it()) }
 
         largeIcon?.let { builder.setLargeIcon(it()) }
+
+        builder.setGroup(GROUP_KEY)
+
+        if (summary) builder.setGroupSummary(true)
 
         return builder
     }
@@ -609,10 +615,37 @@ open class NotificationWrapperImpl : NotificationWrapper() {
     }
 
     override fun cleanGroup(lastNotificationId: Int?) {
-        check(Build.VERSION.SDK_INT < Build.VERSION_CODES.N) // todo sdk
+        val statusBarNotifications = notificationManager.activeNotifications!!.filter { it.tag == null }
 
-        if (lastNotificationId != null)
-            cancelNotification(lastNotificationId, null)
+        if (lastNotificationId != null) {
+            when (statusBarNotifications.size) {
+                in (0..1) -> {
+                    if (statusBarNotifications.isNotEmpty())
+                        MyCrashlytics.logException(NotificationException(lastNotificationId, statusBarNotifications))
+
+                    // guessing, basically
+                    cancelNotification(NOTIFICATION_ID_GROUP)
+                    cancelNotification(lastNotificationId)
+                }
+                2 -> {
+                    if (statusBarNotifications.none { it.id == NOTIFICATION_ID_GROUP })
+                        throw NotificationException(lastNotificationId, statusBarNotifications)
+
+                    if (statusBarNotifications.any { it.id == lastNotificationId }) {
+                        cancelNotification(NOTIFICATION_ID_GROUP)
+                        cancelNotification(lastNotificationId)
+                    }
+                }
+                else -> cancelNotification(lastNotificationId)
+            }
+        } else {
+            if (statusBarNotifications.size != 1)
+                return
+
+            check(statusBarNotifications.single().id == NOTIFICATION_ID_GROUP)
+
+            cancelNotification(NOTIFICATION_ID_GROUP)
+        }
     }
 
     override fun updateAlarm(nextAlarm: TimeStamp?) {
@@ -745,4 +778,12 @@ open class NotificationWrapperImpl : NotificationWrapper() {
 
         val childNames = getInstanceNames(instances, now, false)
     }
+
+    class NotificationException(
+        lastNotificationId: Int,
+        statusBarNotifications: Iterable<StatusBarNotification>,
+    ) : RuntimeException(
+        "last id: $lastNotificationId, shown ids: " +
+                statusBarNotifications.joinToString(", ") { it.id.toString() }
+    )
 }

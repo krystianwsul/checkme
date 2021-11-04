@@ -8,16 +8,16 @@ import com.krystianwsul.checkme.MyApplication
 
 
 @SuppressLint("NewApi")
-open class NotificationWrapperImplO : NotificationWrapperImplN() {
+open class NotificationWrapperImplO : NotificationWrapperImpl() {
 
     companion object {
 
         private const val HIGH_CHANNEL_ID = "channel"
 
         private val HIGH_CHANNEL = NotificationChannel(
-                HIGH_CHANNEL_ID,
-                "Heads-up reminders",
-                NotificationManager.IMPORTANCE_HIGH,
+            HIGH_CHANNEL_ID,
+            "Heads-up reminders",
+            NotificationManager.IMPORTANCE_HIGH,
         )
 
         private const val MEDIUM_CHANNEL_ID = "mediumChannel"

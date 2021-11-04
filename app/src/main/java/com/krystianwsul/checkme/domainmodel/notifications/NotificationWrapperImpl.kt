@@ -133,8 +133,10 @@ open class NotificationWrapperImpl : NotificationWrapper() {
     }
 
     override fun cancelNotification(id: Int, tag: String?) {
-        Preferences.tickLog.logLineHour("NotificationManager.cancel id: $id, tag: $tag")
-        notificationManager.cancel(tag, id)
+        notificationRelay.accept {
+            Preferences.tickLog.logLineHour("NotificationManager.cancel id: $id, tag: $tag")
+            notificationManager.cancel(tag, id)
+        }
     }
 
     private fun getHighPriority(): Boolean? = when (Preferences.notificationLevel) {
@@ -647,97 +649,104 @@ open class NotificationWrapperImpl : NotificationWrapper() {
     }
 
     override fun cleanGroup(lastNotificationId: Int?) {
-        val statusBarNotifications = notificationManager.activeNotifications!!.filter { it.tag == null }
+        notificationRelay.accept {
+            val statusBarNotifications = notificationManager.activeNotifications!!.filter { it.tag == null }
 
-        if (lastNotificationId != null) {
-            when (statusBarNotifications.size) {
-                in (0..1) -> {
-                    if (statusBarNotifications.isNotEmpty())
-                        MyCrashlytics.logException(NotificationException(lastNotificationId, statusBarNotifications))
+            if (lastNotificationId != null) {
+                when (statusBarNotifications.size) {
+                    in (0..1) -> {
+                        if (statusBarNotifications.isNotEmpty())
+                            MyCrashlytics.logException(NotificationException(lastNotificationId, statusBarNotifications))
 
-                    // guessing, basically
-                    cancelNotification(NOTIFICATION_ID_GROUP)
-                    cancelNotification(lastNotificationId)
-                }
-                2 -> {
-                    if (statusBarNotifications.none { it.id == NOTIFICATION_ID_GROUP })
-                        throw NotificationException(lastNotificationId, statusBarNotifications)
-
-                    if (statusBarNotifications.any { it.id == lastNotificationId }) {
+                        // guessing, basically
                         cancelNotification(NOTIFICATION_ID_GROUP)
                         cancelNotification(lastNotificationId)
                     }
+                    2 -> {
+                        if (statusBarNotifications.none { it.id == NOTIFICATION_ID_GROUP })
+                            throw NotificationException(lastNotificationId, statusBarNotifications)
+
+                        if (statusBarNotifications.any { it.id == lastNotificationId }) {
+                            cancelNotification(NOTIFICATION_ID_GROUP)
+                            cancelNotification(lastNotificationId)
+                        }
+                    }
+                    else -> cancelNotification(lastNotificationId)
                 }
-                else -> cancelNotification(lastNotificationId)
+            } else {
+                if (statusBarNotifications.size != 1) return@accept
+
+                check(statusBarNotifications.single().id == NOTIFICATION_ID_GROUP)
+
+                cancelNotification(NOTIFICATION_ID_GROUP)
             }
-        } else {
-            if (statusBarNotifications.size != 1)
-                return
-
-            check(statusBarNotifications.single().id == NOTIFICATION_ID_GROUP)
-
-            cancelNotification(NOTIFICATION_ID_GROUP)
         }
     }
 
     override fun updateAlarm(nextAlarm: TimeStamp?) {
-        val pendingIntent = PendingIntent.getBroadcast(
-            MyApplication.instance,
-            0,
-            AlarmReceiver.newIntent(),
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
-        )!!
+        notificationRelay.accept {
+            val pendingIntent = PendingIntent.getBroadcast(
+                MyApplication.instance,
+                0,
+                AlarmReceiver.newIntent(),
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+            )!!
 
-        alarmManager.cancel(pendingIntent)
-        nextAlarm?.let { alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, it.long, pendingIntent) }
+            alarmManager.cancel(pendingIntent)
+            nextAlarm?.let { alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, it.long, pendingIntent) }
+        }
     }
 
     override fun notifyTemporary(notificationId: Int, source: String) {
-        Preferences.temporaryNotificationLog.logLineDate("notifyTemporary $source")
+        notificationRelay.accept {
+            Preferences.temporaryNotificationLog.logLineDate("notifyTemporary $source")
 
-        if (!showTemporary) return
+            if (!showTemporary) return@accept
 
-        val highPriority = getHighPriority() ?: return
+            val highPriority = getHighPriority() ?: return@accept
 
-        val pendingContentIntent = PendingIntent.getActivity(
-            MyApplication.context,
-            notificationId,
-            MainActivity.newIntent(),
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
-        )
+            val pendingContentIntent = PendingIntent.getActivity(
+                MyApplication.context,
+                notificationId,
+                MainActivity.newIntent(),
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+            )
 
-        notify(
-            source,
-            null,
-            notificationId,
-            null,
-            pendingContentIntent,
-            true,
-            listOf(),
-            null,
-            null,
-            summary = false,
-            sortKey = notificationId.toString(),
-            largeIcon = null,
-            notificationHash = NotificationHash(
+            notify(
                 source,
                 null,
                 notificationId,
                 null,
+                pendingContentIntent,
+                true,
+                listOf(),
                 null,
-                notificationId.toString(),
                 null,
-                TAG_TEMPORARY
-            ),
-            TAG_TEMPORARY,
-            highPriority,
-        )
+                summary = false,
+                sortKey = notificationId.toString(),
+                largeIcon = null,
+                notificationHash = NotificationHash(
+                    source,
+                    null,
+                    notificationId,
+                    null,
+                    null,
+                    notificationId.toString(),
+                    null,
+                    TAG_TEMPORARY
+                ),
+                TAG_TEMPORARY,
+                highPriority,
+            )
+        }
     }
 
     override fun hideTemporary(notificationId: Int, source: String) {
-        Preferences.temporaryNotificationLog.logLineHour("hideTemporary $source")
+        notificationRelay.accept {
+            Preferences.temporaryNotificationLog.logLineHour("hideTemporary $source")
 
-        cancelNotification(notificationId, TAG_TEMPORARY)
+            cancelNotification(notificationId, TAG_TEMPORARY)
+        }
     }
 
     protected data class NotificationHash(

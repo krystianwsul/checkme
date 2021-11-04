@@ -1,9 +1,6 @@
 package com.krystianwsul.checkme.domainmodel.notifications
 
-import android.app.AlarmManager
-import android.app.Notification
-import android.app.NotificationManager
-import android.app.PendingIntent
+import android.app.*
 import android.content.Context
 import android.graphics.Bitmap
 import android.os.Bundle
@@ -51,6 +48,30 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         private const val TAG_TEMPORARY = "temporary"
 
         private const val GROUP_KEY = "group"
+
+        private const val HIGH_CHANNEL_ID = "channel"
+
+        private val HIGH_CHANNEL = NotificationChannel(
+            HIGH_CHANNEL_ID,
+            "Heads-up reminders",
+            NotificationManager.IMPORTANCE_HIGH,
+        )
+
+        private const val MEDIUM_CHANNEL_ID = "mediumChannel"
+
+        private val MEDIUM_CHANNEL = NotificationChannel(
+            MEDIUM_CHANNEL_ID,
+            "Regular reminders",
+            NotificationManager.IMPORTANCE_DEFAULT,
+        )
+
+        private const val SILENT_CHANNEL_ID = "silentChannel"
+
+        private val SILENT_CHANNEL = NotificationChannel(
+            SILENT_CHANNEL_ID,
+            "Silent reminders",
+            NotificationManager.IMPORTANCE_LOW,
+        )
 
         val showTemporary by lazy {
             !MyApplication.instance
@@ -100,6 +121,11 @@ open class NotificationWrapperImpl : NotificationWrapper() {
     private val notificationRelay = PublishRelay.create<() -> Unit>()
 
     init {
+        HIGH_CHANNEL.enableVibration(true)
+        MEDIUM_CHANNEL.enableVibration(true)
+
+        notificationManager.createNotificationChannels(listOf(HIGH_CHANNEL, MEDIUM_CHANNEL, SILENT_CHANNEL))
+
         notificationRelay.toFlowable(BackpressureStrategy.BUFFER)
             .observeOn(Schedulers.io())
             .flatMapSingle({ Single.fromCallable(it) }, false, 1)
@@ -385,8 +411,14 @@ open class NotificationWrapperImpl : NotificationWrapper() {
     }
 
     @Suppress("DEPRECATION")
-    protected open fun newBuilder(silent: Boolean, highPriority: Boolean) =
-        NotificationCompat.Builder(MyApplication.instance)
+    protected open fun newBuilder(silent: Boolean, highPriority: Boolean) = NotificationCompat.Builder(
+        MyApplication.instance,
+        when {
+            silent -> SILENT_CHANNEL_ID
+            highPriority -> HIGH_CHANNEL_ID
+            else -> MEDIUM_CHANNEL_ID
+        },
+    )
 
     protected open fun getNotificationBuilder(
         title: String?,

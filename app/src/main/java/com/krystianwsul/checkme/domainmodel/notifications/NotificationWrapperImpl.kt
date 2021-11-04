@@ -530,7 +530,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
 
     override fun notifyGroup(
         instances: Collection<Instance>,
-        silent: Boolean, // not needed >= 24
+        silent: Boolean,
         now: ExactTimeStamp.Local,
         summary: Boolean,
         projects: Collection<GroupTypeFactory.Notification.Project>,

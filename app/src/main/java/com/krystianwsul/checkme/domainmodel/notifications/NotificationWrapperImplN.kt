@@ -18,7 +18,7 @@ open class NotificationWrapperImplN : NotificationWrapperImpl() {
     }
 
     override fun cleanGroup(lastNotificationId: Int?) {
-        check(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+        check(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) // todo sdk
 
         val statusBarNotifications = notificationManager.activeNotifications!!.filter { it.tag == null }
 

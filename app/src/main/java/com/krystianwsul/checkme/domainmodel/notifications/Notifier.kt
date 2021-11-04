@@ -24,8 +24,6 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
 
     companion object {
 
-        private const val MAX_NOTIFICATIONS_OLD = 3
-
         // To prevent spam if there's a huge backlog
         private const val MAX_NOTIFICATIONS_Q = 10
 
@@ -137,46 +135,6 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
         Preferences.tickLog.logLineHour("silent? $silent")
 
         when {
-            Build.VERSION.SDK_INT < Build.VERSION_CODES.N -> {
-                if (notificationInstances.size > MAX_NOTIFICATIONS_OLD) { // show group
-                    if (shownInstanceKeys.size > MAX_NOTIFICATIONS_OLD) { // group shown
-                        val silentParam =
-                            if (showInstanceKeys.isNotEmpty() || hideInstanceKeys.isNotEmpty()) silent else true
-
-                        NotificationWrapper.instance.notifyGroup(notificationInstances.values, silentParam, now)
-                    } else { // instances shown
-                        for (shownInstanceKey in shownInstanceKeys) {
-                            cancelInstance(domainFactory.getInstance(shownInstanceKey).notificationId)
-                        }
-
-                        notificationWrapper.notifyGroup(notificationInstances.values, silent, now)
-                    }
-                } else { // show instances
-                    if (shownInstanceKeys.size > MAX_NOTIFICATIONS_OLD) { // group shown
-                        NotificationWrapper.instance.cancelNotification(0)
-
-                        for (instance in notificationInstances.values)
-                            notifyInstance(instance, silent)
-                    } else { // instances shown
-                        for (hideInstanceKey in hideInstanceKeys) {
-                            cancelInstance(domainFactory.getInstance(hideInstanceKey).notificationId)
-                        }
-
-                        for (showInstanceKey in showInstanceKeys)
-                            notifyInstance(notificationInstances.getValue(showInstanceKey), silent)
-
-                        notificationInstances.values
-                            .filter { !showInstanceKeys.contains(it.instanceKey) }
-                            .forEach(::updateInstance)
-                    }
-                }
-
-                cancelNotificationDatas()
-
-                val notifications = getNotifications()
-                notifyInstances(notifications, now)
-                cancelProjectNotifications(notifications)
-            }
             Build.VERSION.SDK_INT < Build.VERSION_CODES.Q -> {
                 if (notificationInstances.isEmpty()) {
                     Preferences.tickLog.logLineHour("hiding group")

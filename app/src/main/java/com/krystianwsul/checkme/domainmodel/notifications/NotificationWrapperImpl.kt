@@ -609,7 +609,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
     }
 
     override fun cleanGroup(lastNotificationId: Int?) {
-        check(Build.VERSION.SDK_INT < Build.VERSION_CODES.N)
+        check(Build.VERSION.SDK_INT < Build.VERSION_CODES.N) // todo sdk
 
         if (lastNotificationId != null)
             cancelNotification(lastNotificationId, null)

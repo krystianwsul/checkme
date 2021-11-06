@@ -185,9 +185,13 @@ class DayFragment @JvmOverloads constructor(
             .addTo(compositeDisposable)
 
         activity.dateChangeRelay
-            .subscribe {
-                binding.groupListFragment.scrollToTop()
+            .switchMapSingle {
+                binding.groupListFragment
+                    .treeViewAdapter
+                    .listUpdates
+                    .firstOrError()
             }
+            .subscribe { binding.groupListFragment.scrollToTop() }
             .addTo(attachedToWindowDisposable)
     }
 

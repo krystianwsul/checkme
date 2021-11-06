@@ -5,6 +5,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.IdRes
 import androidx.annotation.LayoutRes
+import androidx.recyclerview.widget.BatchingListUpdateCallback
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListUpdateCallback
 import androidx.recyclerview.widget.RecyclerView
@@ -19,9 +20,9 @@ import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.schedulers.Schedulers
 
 class TreeViewAdapter<T : TreeHolder>(
-        val treeModelAdapter: TreeModelAdapter<T>,
-        private val paddingData: PaddingData,
-        initialFilterCriteria: FilterCriteria = FilterCriteria.None,
+    val treeModelAdapter: TreeModelAdapter<T>,
+    private val paddingData: PaddingData,
+    initialFilterCriteria: FilterCriteria = FilterCriteria.None,
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>(), ActionModeCallback by treeModelAdapter {
 
     companion object {
@@ -44,7 +45,9 @@ class TreeViewAdapter<T : TreeHolder>(
 
     private var updating = false
 
-    val updates = PublishRelay.create<Unit>()!!
+    val updates = PublishRelay.create<Unit>()
+
+    val listUpdates = PublishRelay.create<Unit>()
 
     var showProgress = false
 
@@ -67,17 +70,17 @@ class TreeViewAdapter<T : TreeHolder>(
             this.treeNodeCollection = treeNodeCollection
 
             treeNodeCollection.nodesObservable
-                    .firstOrError()
-                    .subscribe { _ ->
-                        check(!updating)
-                        check(locker == null)
+                .firstOrError()
+                .subscribe { _ ->
+                    check(!updating)
+                    check(locker == null)
 
-                        locker = AdapterLocker()
+                    locker = AdapterLocker()
 
-                        filterCriteria.search
-                            ?.takeIf { it.expandMatches }
-                            ?.let(treeNodeCollection::expandMatching)
-                    }
+                    filterCriteria.search
+                        ?.takeIf { it.expandMatches }
+                        ?.let(treeNodeCollection::expandMatching)
+                }
         } else {
             check(updating)
             check(locker == null)
@@ -91,18 +94,6 @@ class TreeViewAdapter<T : TreeHolder>(
     override fun getItemCount() = displayedNodes.size + if (showPadding) 1 else 0
 
     private fun getStates() = displayedNodes.map { it.state }
-
-    private var ignoreNextScroll: Boolean = false
-
-    fun ignoreNextScroll() {
-        /*
-        todo this shouldn't happen.  But as it stands, we do allow multiple check clicks in NotDoneNode before a new dataset
-        is returned, so ignore for now.
-         */
-        //check(!ignoreNextScroll)
-
-        ignoreNextScroll = true
-    }
 
     fun updateDisplayedNodes(action: (Placeholder) -> Unit) = updateDisplayedNodes(false, action)
 
@@ -124,8 +115,8 @@ class TreeViewAdapter<T : TreeHolder>(
         locker = AdapterLocker()
 
         if (
-                (newFilterCriteria != oldFilterCriteria) &&
-                (newFilterCriteria.expandMatches || oldFilterCriteria.expandMatches)
+            (newFilterCriteria != oldFilterCriteria) &&
+            (newFilterCriteria.expandMatches || oldFilterCriteria.expandMatches)
         ) {
             treeNodeCollection!!.apply {
                 resetExpansion(true, Placeholder.instance)
@@ -193,57 +184,52 @@ class TreeViewAdapter<T : TreeHolder>(
 
                 return oldStates[oldItemPosition].getPayload(newStates[newItemPosition])
             }
-        }).dispatchUpdatesTo(object : ListUpdateCallback {
+        }).dispatchUpdatesTo(
+            object : BatchingListUpdateCallback(
+                object : ListUpdateCallback {
 
-            private val ignoreScroll = this@TreeViewAdapter.ignoreNextScroll
+                    override fun onInserted(position: Int, count: Int) = notifyItemRangeInserted(position, count)
 
-            init {
-                this@TreeViewAdapter.ignoreNextScroll = false
-            }
+                    override fun onRemoved(position: Int, count: Int) = notifyItemRangeRemoved(position, count)
 
-            override fun onInserted(position: Int, count: Int) {
-                notifyItemRangeInserted(position, count)
+                    override fun onMoved(fromPosition: Int, toPosition: Int) {
+                        if (useMove) {
+                            notifyItemMoved(fromPosition, toPosition)
+                        } else {
+                            notifyItemRemoved(fromPosition)
+                            notifyItemInserted(toPosition)
+                        }
+                    }
 
-                checkScroll(position)
-            }
+                    override fun onChanged(position: Int, count: Int, payload: Any?) =
+                        notifyItemRangeChanged(position, count, payload)
+                }
+            ) {
 
-            override fun onRemoved(position: Int, count: Int) = notifyItemRangeRemoved(position, count)
+                override fun dispatchLastEvent() {
+                    super.dispatchLastEvent()
 
-            override fun onMoved(fromPosition: Int, toPosition: Int) {
-                if (useMove) {
-                    notifyItemMoved(fromPosition, toPosition)
-                } else {
-                    notifyItemRemoved(fromPosition)
-                    notifyItemInserted(toPosition)
-
-                    checkScroll(toPosition)
+                    listUpdates.accept(Unit)
                 }
             }
-
-            private fun checkScroll(position: Int) {
-                //if (position == 0 && !ignoreScroll) treeModelAdapter.scrollToTop()
-            }
-
-            override fun onChanged(position: Int, count: Int, payload: Any?) =
-                notifyItemRangeChanged(position, count, payload)
-        })
+        )
 
         updates.accept(Unit)
     }
 
     fun unselect(placeholder: Placeholder) = treeNodeCollection?.unselect(placeholder)
-            ?: throw SetTreeNodeCollectionNotCalledException()
+        ?: throw SetTreeNodeCollectionNotCalledException()
 
     fun selectAll() = treeNodeCollection?.let { updateDisplayedNodes(it::selectAll) }
-            ?: throw SetTreeNodeCollectionNotCalledException()
+        ?: throw SetTreeNodeCollectionNotCalledException()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return if (viewType == TYPE_PADDING) {
             check(showPadding)
 
             PaddingHolder(
-                    LayoutInflater.from(parent.context).inflate(paddingData.layoutId, parent, false)!!,
-                    paddingData.viewId
+                LayoutInflater.from(parent.context).inflate(paddingData.layoutId, parent, false)!!,
+                paddingData.viewId,
             )
         } else {
             treeModelAdapter.onCreateViewHolder(parent, viewType)
@@ -317,17 +303,17 @@ class TreeViewAdapter<T : TreeHolder>(
 
         normalizeRelay.switchMap {
             treeNodeCollection!!.nodesObservable
-                    .firstOrError()
-                    .flatMapObservable {
-                        Observable.fromCallable { treeNodeCollection!!.normalize() }
-                                .subscribeOn(Schedulers.computation())
-                                .map { true }
-                                .startWithItem(false)
-                                .observeOn(AndroidSchedulers.mainThread())
-                    }
+                .firstOrError()
+                .flatMapObservable {
+                    Observable.fromCallable { treeNodeCollection!!.normalize() }
+                        .subscribeOn(Schedulers.computation())
+                        .map { true }
+                        .startWithItem(false)
+                        .observeOn(AndroidSchedulers.mainThread())
+                }
         }
-                .subscribe(normalizedObservable::accept)
-                .addTo(recyclerAttachedToWindowDisposable)
+            .subscribe(normalizedObservable::accept)
+            .addTo(recyclerAttachedToWindowDisposable)
 
         attachedHolders.forEach { it.startRx() }
     }
@@ -353,13 +339,13 @@ class TreeViewAdapter<T : TreeHolder>(
     }
 
     fun moveItem(from: Int, to: Int, placeholder: Placeholder) =
-            treeNodeCollection?.moveItem(from, to, placeholder) ?: throw SetTreeNodeCollectionNotCalledException()
+        treeNodeCollection?.moveItem(from, to, placeholder) ?: throw SetTreeNodeCollectionNotCalledException()
 
     fun setNewItemPosition(position: Int) = treeNodeCollection?.setNewItemPosition(position)
-            ?: throw SetTreeNodeCollectionNotCalledException()
+        ?: throw SetTreeNodeCollectionNotCalledException()
 
     fun selectNode(position: Int) = treeNodeCollection?.selectNode(position)
-            ?: throw SetTreeNodeCollectionNotCalledException()
+        ?: throw SetTreeNodeCollectionNotCalledException()
 
     private var updatingAfterNormalizationDisposable: Disposable? = null
 
@@ -376,13 +362,14 @@ class TreeViewAdapter<T : TreeHolder>(
     }
 
     fun getTreeNodeCollection() = treeNodeCollection
-            ?: throw SetTreeNodeCollectionNotCalledException()
+        ?: throw SetTreeNodeCollectionNotCalledException()
 
     fun clearExpansionStates() = updateDisplayedNodes {
         treeNodeCollection?.resetExpansion(false, it) ?: throw SetTreeNodeCollectionNotCalledException()
     }
 
-    class SetTreeNodeCollectionNotCalledException : InitializationException("TreeViewAdapter.setTreeNodeCollection() has not been called.")
+    class SetTreeNodeCollectionNotCalledException :
+        InitializationException("TreeViewAdapter.setTreeNodeCollection() has not been called.")
 
     private class PaddingHolder(view: View, private val progressId: Int) : RecyclerView.ViewHolder(view) {
 
@@ -400,8 +387,8 @@ class TreeViewAdapter<T : TreeHolder>(
     }
 
     data class PaddingData(
-            @LayoutRes val layoutId: Int,
-            @IdRes val viewId: Int,
-            val hideWithoutProgress: Boolean = false,
+        @LayoutRes val layoutId: Int,
+        @IdRes val viewId: Int,
+        val hideWithoutProgress: Boolean = false,
     )
 }

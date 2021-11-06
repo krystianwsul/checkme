@@ -211,9 +211,6 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
                             done,
                         )
 
-                        // todo check inner todo if/when we debounce user actions
-                        treeNode.treeViewAdapter.ignoreNextScroll()
-
                         setDone(!done).observeOn(AndroidSchedulers.mainThread())
                             .andThen(Maybe.defer { groupListFragment.listener.showSnackbarDoneMaybe(1) })
                             .flatMapCompletable { setDone(done) }
@@ -361,8 +358,6 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
                                 done,
                             ).toSingleDefault(instanceKeys.size)
                         }
-
-                        treeNode.treeViewAdapter.ignoreNextScroll()
 
                         setDone(true).observeOn(AndroidSchedulers.mainThread())
                             .flatMapMaybe { groupListFragment.listener.showSnackbarDoneMaybe(it) }

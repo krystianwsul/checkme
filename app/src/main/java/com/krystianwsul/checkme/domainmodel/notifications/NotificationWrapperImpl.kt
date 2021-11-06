@@ -62,14 +62,6 @@ open class NotificationWrapperImpl : NotificationWrapper() {
             NotificationManager.IMPORTANCE_DEFAULT,
         )
 
-        private const val SILENT_CHANNEL_ID = "silentChannel"
-
-        private val SILENT_CHANNEL = NotificationChannel(
-            SILENT_CHANNEL_ID,
-            "Silent reminders",
-            NotificationManager.IMPORTANCE_LOW,
-        )
-
         val showTemporary by lazy {
             !MyApplication.instance
                 .resources
@@ -119,7 +111,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         HIGH_CHANNEL.enableVibration(true)
         MEDIUM_CHANNEL.enableVibration(true)
 
-        notificationManager.createNotificationChannels(listOf(HIGH_CHANNEL, MEDIUM_CHANNEL, SILENT_CHANNEL))
+        notificationManager.createNotificationChannels(listOf(HIGH_CHANNEL, MEDIUM_CHANNEL))
 
         notificationRelay.toFlowable(BackpressureStrategy.BUFFER)
             .observeOn(Schedulers.io())
@@ -393,11 +385,9 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         return Pair({ inboxStyle }, NotificationHash.Style.Inbox(finalLines, extraCount))
     }
 
-    @Suppress("DEPRECATION")
-    protected open fun newBuilder(silent: Boolean, highPriority: Boolean) = NotificationCompat.Builder(
+    protected open fun newBuilder(highPriority: Boolean) = NotificationCompat.Builder(
         MyApplication.instance,
         when {
-            silent -> SILENT_CHANNEL_ID
             highPriority -> HIGH_CHANNEL_ID
             else -> MEDIUM_CHANNEL_ID
         },
@@ -420,7 +410,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
     ): NotificationCompat.Builder {
         val priority = if (highPriority) NotificationCompat.PRIORITY_HIGH else NotificationCompat.PRIORITY_DEFAULT
 
-        val builder = newBuilder(silent, highPriority)
+        val builder = newBuilder(highPriority)
             .setContentTitle(title)
             .setSmallIcon(R.drawable.ikona_bez)
             .setContentIntent(contentIntent)
@@ -428,6 +418,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
             .setPriority(priority)
             .setSortKey(sortKey)
             .setOnlyAlertOnce(true)
+            .setSilent(silent)
             .setGroupAlertBehavior(NotificationCompat.GROUP_ALERT_CHILDREN)
             .addExtras(Bundle().apply { putInt(KEY_HASH_CODE, notificationHash.hashCode()) })
 

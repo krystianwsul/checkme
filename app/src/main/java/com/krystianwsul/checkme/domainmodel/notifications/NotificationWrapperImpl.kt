@@ -4,8 +4,6 @@ import android.app.*
 import android.content.Context
 import android.graphics.Bitmap
 import android.os.Bundle
-import android.os.SystemClock
-import android.provider.Settings
 import android.service.notification.StatusBarNotification
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
@@ -27,7 +25,6 @@ import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.project.SharedProject
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.TimeStamp
-import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.ProjectKey
 import io.reactivex.rxjava3.core.BackpressureStrategy
 import io.reactivex.rxjava3.core.Single
@@ -112,11 +109,9 @@ open class NotificationWrapperImpl : NotificationWrapper() {
 
     protected open val maxInboxLines = 5
 
-    protected val notificationManager by lazy {
+    private val notificationManager by lazy {
         MyApplication.context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     }
-
-    private val lastNotificationBeeps = mutableMapOf<InstanceKey, Long>()
 
     private val notificationRelay = PublishRelay.create<() -> Unit>()
 
@@ -170,27 +165,13 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         notificationRelay.accept { notifyProjectHelper(projectData) }
     }
 
-    protected open fun getInstanceData(
+    private fun getInstanceData(
         deviceDbInfo: DeviceDbInfo,
         instance: Instance,
         silent: Boolean,
         now: ExactTimeStamp.Local,
         highPriority: Boolean,
-    ): InstanceData {
-        val reallySilent = if (silent) {
-            true
-        } else {
-            lastNotificationBeeps.values
-                .maxOrNull()
-                ?.takeIf { SystemClock.elapsedRealtime() - it < 5000 }
-                ?.let { true } ?: false
-        }
-
-        if (!reallySilent)
-            lastNotificationBeeps[instance.instanceKey] = SystemClock.elapsedRealtime()
-
-        return InstanceData(deviceDbInfo, instance, now, reallySilent, highPriority)
-    }
+    ) = InstanceData(deviceDbInfo, instance, now, silent, highPriority)
 
     private fun notifyInstanceHelper(instanceData: InstanceData) {
         val notificationId = instanceData.notificationId
@@ -454,8 +435,6 @@ open class NotificationWrapperImpl : NotificationWrapper() {
 
         if (!text.isNullOrEmpty()) builder.setContentText(text)
 
-        if (!silent) builder.setSound(Settings.System.DEFAULT_NOTIFICATION_URI)
-
         check(actions.size <= 3)
 
         actions.forEach { builder.addAction(it) }
@@ -518,6 +497,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
             highPriority
         ).build()
 
+        // I don't think this has any effect, with channels
         @Suppress("Deprecation")
         if (!silent)
             notification.defaults = notification.defaults or Notification.DEFAULT_VIBRATE

@@ -1,6 +1,6 @@
 package com.krystianwsul.checkme.domainmodel.notifications
 
-class NotificationWrapperImplQ : NotificationWrapperImplOMr1() {
+class NotificationWrapperImplQ : NotificationWrapperImpl() {
 
     override val maxInboxLines = 6
 }

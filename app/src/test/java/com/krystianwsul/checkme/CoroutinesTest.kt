@@ -30,7 +30,7 @@ class CoroutinesTest {
     }
 
     @Test
-    fun testSharedFlowAsPublishRelay() {
+    fun testSharedFlowAsPublishRelayEmit() {
         var eventPassedThrough = false
 
         val sharedFlow = MutableSharedFlow<Unit>()
@@ -44,6 +44,25 @@ class CoroutinesTest {
             .addTo(compositeDisposable)
 
         runBlocking { sharedFlow.emit(Unit) }
+
+        assertTrue(eventPassedThrough)
+    }
+
+    @Test
+    fun testSharedFlowAsPublishRelayTryEmit() {
+        var eventPassedThrough = false
+
+        val sharedFlow = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+
+        sharedFlow.asObservable()
+            .subscribe {
+                check(!eventPassedThrough)
+
+                eventPassedThrough = true
+            }
+            .addTo(compositeDisposable)
+
+        sharedFlow.tryEmit(Unit)
 
         assertTrue(eventPassedThrough)
     }

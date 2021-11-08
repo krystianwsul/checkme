@@ -144,4 +144,29 @@ class FriendsLoaderTest {
             friendsKeysRelay.accept(setOf())
         }
     }
+
+    @Test
+    fun testAddRemoveFriendTwice() {
+        initialFriendsEmissionChecker.checkOne {
+            friendsKeysRelay.accept(setOf())
+        }
+
+        friendsKeysRelay.accept(setOf(friendKey1))
+        addChangeFriendEmissionChecker.checkOne {
+            friendsProvider.database.acceptUser(friendKey1, UserWrapper())
+        }
+
+        removeFriendsEmissionChecker.checkOne {
+            friendsKeysRelay.accept(setOf())
+        }
+
+        friendsKeysRelay.accept(setOf(friendKey1))
+        addChangeFriendEmissionChecker.checkOne {
+            friendsProvider.database.acceptUser(friendKey1, UserWrapper())
+        }
+
+        removeFriendsEmissionChecker.checkOne {
+            friendsKeysRelay.accept(setOf())
+        }
+    }
 }

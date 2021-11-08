@@ -39,7 +39,7 @@ class MyUserFactory(
             .map { ChangeType.LOCAL }
             .startWithItem(ChangeType.REMOTE)
             .map { ChangeWrapper(it, myUser.friends) }
-    }.distinctUntilChanged()
+    }
 
     init {
         user.name = deviceDbInfo.name

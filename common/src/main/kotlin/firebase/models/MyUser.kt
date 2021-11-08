@@ -7,7 +7,6 @@ import com.krystianwsul.common.firebase.records.MyUserRecord
 import com.krystianwsul.common.utils.CustomTimeId
 import com.krystianwsul.common.utils.UserKey
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.runBlocking
 
 
 class MyUser(private val remoteMyUserRecord: MyUserRecord) :
@@ -26,12 +25,12 @@ class MyUser(private val remoteMyUserRecord: MyUserRecord) :
             remoteMyUserRecord.photoUrl = value
         }
 
-    val friendChanges = MutableSharedFlow<Unit>()
+    val friendChanges = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
 
     override fun removeFriend(userKey: UserKey) {
         super.removeFriend(userKey)
 
-        runBlocking { friendChanges.emit(Unit) }
+        friendChanges.tryEmit(Unit)
     }
 
     fun newCustomTime(customTimeJson: UserCustomTimeJson): MyUserCustomTime {

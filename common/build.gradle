@@ -54,6 +54,8 @@ kotlin {
                 implementation 'org.jetbrains.kotlin:kotlin-stdlib-common'
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-core:$serializationVersion"
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$serializationVersion"
+                implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion"
+
                 implementation "com.soywiz.korlibs.klock:klock:$klockVersion"
 
                 implementation "com.badoo.reaktive:reaktive:$reaktiveVersion"
@@ -63,6 +65,8 @@ kotlin {
         androidMain {
             dependencies {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
+                implementation "org.jetbrains.kotlinx:kotlinx-coroutines-reactive:$coroutinesVersion"
+
                 implementation "com.soywiz.korlibs.klock:klock:$klockVersion"
                 implementation "net.danlew:android.joda:$jodaVersion"
             }

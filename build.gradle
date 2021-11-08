@@ -51,4 +51,5 @@ ext {
     reaktiveVersion = '1.2.0'
     rxBindingVersion = '4.0.0'
     arrowVersion = '1.0.1'
+    coroutinesVersion = '1.5.2'
 }

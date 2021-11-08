@@ -1,12 +1,12 @@
 package com.krystianwsul.common.firebase.models
 
-import com.badoo.reaktive.subject.publish.PublishSubject
 import com.krystianwsul.common.firebase.MyUserProperties
 import com.krystianwsul.common.firebase.json.customtimes.UserCustomTimeJson
 import com.krystianwsul.common.firebase.models.customtime.MyUserCustomTime
 import com.krystianwsul.common.firebase.records.MyUserRecord
 import com.krystianwsul.common.utils.CustomTimeId
 import com.krystianwsul.common.utils.UserKey
+import kotlinx.coroutines.flow.MutableSharedFlow
 
 
 class MyUser(private val remoteMyUserRecord: MyUserRecord) :
@@ -25,12 +25,12 @@ class MyUser(private val remoteMyUserRecord: MyUserRecord) :
             remoteMyUserRecord.photoUrl = value
         }
 
-    val friendChanges = PublishSubject<Unit>()
+    val friendChanges = MutableSharedFlow<Unit>()
 
     override fun removeFriend(userKey: UserKey) {
         super.removeFriend(userKey)
 
-        friendChanges.onNext(Unit)
+        friendChanges.tryEmit(Unit)
     }
 
     fun newCustomTime(customTimeJson: UserCustomTimeJson): MyUserCustomTime {

@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.firebase.factories
 
-import com.badoo.reaktive.rxjavainterop.asRxJava3Observable
 import com.jakewharton.rxrelay3.BehaviorRelay
 import com.krystianwsul.checkme.firebase.managers.MyUserManager
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
@@ -11,6 +10,7 @@ import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.json.UserWrapper
 import com.krystianwsul.common.firebase.models.MyUser
 import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
+import kotlinx.coroutines.rx3.asObservable
 
 class MyUserFactory(
     userSnapshot: Snapshot<UserWrapper>,
@@ -31,15 +31,15 @@ class MyUserFactory(
         get() = userRelay.value!!
         private set(value) = userRelay.accept(value)
 
-    val sharedProjectKeysObservable = userRelay.map { it.projectIds }.distinctUntilChanged()!!
+    val sharedProjectKeysObservable = userRelay.map { it.projectIds }.distinctUntilChanged()
 
     val friendKeysObservable = userRelay.switchMap { myUser ->
         myUser.friendChanges
-            .asRxJava3Observable()
-                .map { ChangeType.LOCAL }
-                .startWithItem(ChangeType.REMOTE)
-                .map { ChangeWrapper(it, myUser.friends) }
-    }.distinctUntilChanged()!!
+            .asObservable()
+            .map { ChangeType.LOCAL }
+            .startWithItem(ChangeType.REMOTE)
+            .map { ChangeWrapper(it, myUser.friends) }
+    }.distinctUntilChanged()
 
     init {
         user.name = deviceDbInfo.name

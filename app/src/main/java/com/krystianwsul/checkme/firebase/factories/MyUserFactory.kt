@@ -7,6 +7,7 @@ import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.ChangeWrapper
 import com.krystianwsul.common.firebase.DatabaseWrapper
+import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.json.UserWrapper
 import com.krystianwsul.common.firebase.models.MyUser
 import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
@@ -36,6 +37,7 @@ class MyUserFactory(
     val friendKeysObservable = userRelay.switchMap { myUser ->
         myUser.friendChanges
             .asObservable()
+            .doOnNext { DomainThreadChecker.instance.requireDomainThread() }
             .map { ChangeType.LOCAL }
             .startWithItem(ChangeType.REMOTE)
             .map { ChangeWrapper(it, myUser.friends) }

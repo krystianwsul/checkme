@@ -7,6 +7,7 @@ import com.krystianwsul.common.firebase.records.MyUserRecord
 import com.krystianwsul.common.utils.CustomTimeId
 import com.krystianwsul.common.utils.UserKey
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.runBlocking
 
 
 class MyUser(private val remoteMyUserRecord: MyUserRecord) :
@@ -30,7 +31,7 @@ class MyUser(private val remoteMyUserRecord: MyUserRecord) :
     override fun removeFriend(userKey: UserKey) {
         super.removeFriend(userKey)
 
-        friendChanges.tryEmit(Unit)
+        runBlocking { friendChanges.emit(Unit) }
     }
 
     fun newCustomTime(customTimeJson: UserCustomTimeJson): MyUserCustomTime {

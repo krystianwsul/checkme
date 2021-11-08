@@ -61,7 +61,7 @@ class NotificationStorage(
             .subscribeOn(Schedulers.io())
             .subscribe()
 
-        rxPaperBook.write(KEY_INSTANCES, instanceShownMap)
+        rxPaperBook.write(KEY_INSTANCES, instanceShownMap.toMutableMap())
             .toV3()
             .subscribeOn(Schedulers.io())
             .subscribe()

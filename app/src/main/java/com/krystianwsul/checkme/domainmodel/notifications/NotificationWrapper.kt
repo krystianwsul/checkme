@@ -11,11 +11,9 @@ abstract class NotificationWrapper {
 
     companion object {
 
-        // lazy for testing
         val instance by lazy {
             when {
                 Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q -> NotificationWrapperImplQ()
-                Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1 -> NotificationWrapperImplOMr1()
                 else -> NotificationWrapperImpl()
             }
         }

@@ -4,8 +4,6 @@ import android.app.*
 import android.content.Context
 import android.graphics.Bitmap
 import android.os.Bundle
-import android.os.SystemClock
-import android.provider.Settings
 import android.service.notification.StatusBarNotification
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
@@ -27,7 +25,6 @@ import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.project.SharedProject
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.TimeStamp
-import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.ProjectKey
 import io.reactivex.rxjava3.core.BackpressureStrategy
 import io.reactivex.rxjava3.core.Single
@@ -63,14 +60,6 @@ open class NotificationWrapperImpl : NotificationWrapper() {
             MEDIUM_CHANNEL_ID,
             "Regular reminders",
             NotificationManager.IMPORTANCE_DEFAULT,
-        )
-
-        private const val SILENT_CHANNEL_ID = "silentChannel"
-
-        private val SILENT_CHANNEL = NotificationChannel(
-            SILENT_CHANNEL_ID,
-            "Silent reminders",
-            NotificationManager.IMPORTANCE_LOW,
         )
 
         val showTemporary by lazy {
@@ -112,11 +101,9 @@ open class NotificationWrapperImpl : NotificationWrapper() {
 
     protected open val maxInboxLines = 5
 
-    protected val notificationManager by lazy {
+    private val notificationManager by lazy {
         MyApplication.context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     }
-
-    private val lastNotificationBeeps = mutableMapOf<InstanceKey, Long>()
 
     private val notificationRelay = PublishRelay.create<() -> Unit>()
 
@@ -124,7 +111,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         HIGH_CHANNEL.enableVibration(true)
         MEDIUM_CHANNEL.enableVibration(true)
 
-        notificationManager.createNotificationChannels(listOf(HIGH_CHANNEL, MEDIUM_CHANNEL, SILENT_CHANNEL))
+        notificationManager.createNotificationChannels(listOf(HIGH_CHANNEL, MEDIUM_CHANNEL))
 
         notificationRelay.toFlowable(BackpressureStrategy.BUFFER)
             .observeOn(Schedulers.io())
@@ -170,27 +157,13 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         notificationRelay.accept { notifyProjectHelper(projectData) }
     }
 
-    protected open fun getInstanceData(
+    private fun getInstanceData(
         deviceDbInfo: DeviceDbInfo,
         instance: Instance,
         silent: Boolean,
         now: ExactTimeStamp.Local,
         highPriority: Boolean,
-    ): InstanceData {
-        val reallySilent = if (silent) {
-            true
-        } else {
-            lastNotificationBeeps.values
-                .maxOrNull()
-                ?.takeIf { SystemClock.elapsedRealtime() - it < 5000 }
-                ?.let { true } ?: false
-        }
-
-        if (!reallySilent)
-            lastNotificationBeeps[instance.instanceKey] = SystemClock.elapsedRealtime()
-
-        return InstanceData(deviceDbInfo, instance, now, reallySilent, highPriority)
-    }
+    ) = InstanceData(deviceDbInfo, instance, now, silent, highPriority)
 
     private fun notifyInstanceHelper(instanceData: InstanceData) {
         val notificationId = instanceData.notificationId
@@ -412,11 +385,9 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         return Pair({ inboxStyle }, NotificationHash.Style.Inbox(finalLines, extraCount))
     }
 
-    @Suppress("DEPRECATION")
-    protected open fun newBuilder(silent: Boolean, highPriority: Boolean) = NotificationCompat.Builder(
+    protected open fun newBuilder(highPriority: Boolean) = NotificationCompat.Builder(
         MyApplication.instance,
         when {
-            silent -> SILENT_CHANNEL_ID
             highPriority -> HIGH_CHANNEL_ID
             else -> MEDIUM_CHANNEL_ID
         },
@@ -439,7 +410,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
     ): NotificationCompat.Builder {
         val priority = if (highPriority) NotificationCompat.PRIORITY_HIGH else NotificationCompat.PRIORITY_DEFAULT
 
-        val builder = newBuilder(silent, highPriority)
+        val builder = newBuilder(highPriority)
             .setContentTitle(title)
             .setSmallIcon(R.drawable.ikona_bez)
             .setContentIntent(contentIntent)
@@ -447,14 +418,13 @@ open class NotificationWrapperImpl : NotificationWrapper() {
             .setPriority(priority)
             .setSortKey(sortKey)
             .setOnlyAlertOnce(true)
+            .setSilent(silent)
             .setGroupAlertBehavior(NotificationCompat.GROUP_ALERT_CHILDREN)
             .addExtras(Bundle().apply { putInt(KEY_HASH_CODE, notificationHash.hashCode()) })
 
         deleteIntent?.let { builder.setDeleteIntent(it) }
 
         if (!text.isNullOrEmpty()) builder.setContentText(text)
-
-        if (!silent) builder.setSound(Settings.System.DEFAULT_NOTIFICATION_URI)
 
         check(actions.size <= 3)
 
@@ -518,6 +488,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
             highPriority
         ).build()
 
+        // I don't think this has any effect, with channels
         @Suppress("Deprecation")
         if (!silent)
             notification.defaults = notification.defaults or Notification.DEFAULT_VIBRATE

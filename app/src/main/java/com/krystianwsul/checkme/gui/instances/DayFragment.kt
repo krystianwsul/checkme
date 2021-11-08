@@ -17,6 +17,7 @@ import com.krystianwsul.checkme.gui.utils.BottomFabMenuDelegate
 import com.krystianwsul.checkme.utils.time.toDateTimeTz
 import com.krystianwsul.checkme.viewmodels.DayViewModel
 import com.krystianwsul.common.time.Date
+import io.reactivex.rxjava3.core.Maybe
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
@@ -184,10 +185,16 @@ class DayFragment @JvmOverloads constructor(
             .subscribe { binding.groupListFragment.checkCreatedTaskKey() }
             .addTo(compositeDisposable)
 
+        // this should be inside the GroupListFragment
         activity.dateChangeRelay
-            .subscribe {
-                binding.groupListFragment.scrollToTop()
+            .switchMapMaybe {
+                binding.groupListFragment
+                    .treeViewAdapterNullable
+                    ?.listUpdates
+                    ?.firstElement()
+                    ?: Maybe.empty()
             }
+            .subscribe { binding.groupListFragment.scrollToTop() }
             .addTo(attachedToWindowDisposable)
     }
 

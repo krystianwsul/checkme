@@ -142,6 +142,7 @@ class GroupListFragment @JvmOverloads constructor(
 
     var forceSaveStateListener: (() -> Unit)? = null
 
+    val treeViewAdapterNullable get() = searchDataManager.treeViewAdapterNullable
     val treeViewAdapter: TreeViewAdapter<AbstractHolder> get() = searchDataManager.treeViewAdapter
 
     val selectionCallback = object : SelectionCallback() {

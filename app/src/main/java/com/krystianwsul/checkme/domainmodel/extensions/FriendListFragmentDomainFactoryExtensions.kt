@@ -37,7 +37,12 @@ fun DomainUpdater.removeFriends(
         notificationType: DomainListenerManager.NotificationType,
         keys: Set<UserKey>,
 ): Completable = CompletableDomainUpdate.create("removeFriends") {
+    val friendsBefore = friendsFactory.getFriends().size
+
     keys.forEach { myUserFactory.user.removeFriend(it) }
+
+    val friendsAfter = friendsFactory.getFriends().size
+    check(friendsAfter == friendsBefore - keys.size)
 
     DomainUpdater.Params(false, notificationType)
 }.perform(this)

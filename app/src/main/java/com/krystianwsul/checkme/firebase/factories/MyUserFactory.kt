@@ -31,15 +31,15 @@ class MyUserFactory(
         get() = userRelay.value!!
         private set(value) = userRelay.accept(value)
 
-    val sharedProjectKeysObservable = userRelay.map { it.projectIds }.distinctUntilChanged()!!
+    val sharedProjectKeysObservable = userRelay.map { it.projectIds }.distinctUntilChanged()
 
     val friendKeysObservable = userRelay.switchMap { myUser ->
         myUser.friendChanges
             .asRxJava3Observable()
-                .map { ChangeType.LOCAL }
-                .startWithItem(ChangeType.REMOTE)
-                .map { ChangeWrapper(it, myUser.friends) }
-    }.distinctUntilChanged()!!
+            .map { ChangeType.LOCAL }
+            .startWithItem(ChangeType.REMOTE)
+            .map { ChangeWrapper(it, myUser.friends) }
+    }
 
     init {
         user.name = deviceDbInfo.name

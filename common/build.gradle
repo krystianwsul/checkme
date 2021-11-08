@@ -57,8 +57,6 @@ kotlin {
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion"
 
                 implementation "com.soywiz.korlibs.klock:klock:$klockVersion"
-
-                implementation "com.badoo.reaktive:reaktive:$reaktiveVersion"
             }
         }
 
@@ -76,9 +74,6 @@ kotlin {
             dependencies {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-js:$kotlinVersion"
                 implementation "com.soywiz.korlibs.klock:klock:$klockVersion"
-
-                implementation "com.badoo.reaktive:reaktive-js:$reaktiveVersion"
-                implementation "com.badoo.reaktive:utils-js:$reaktiveVersion"
             }
         }
     }

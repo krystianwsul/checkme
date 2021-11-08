@@ -75,6 +75,5 @@
       </library>
     </orderEntry>
     <orderEntry type="library" name="Gradle: com.soywiz.korlibs.klock:klock:2.2.2" level="project" />
-    <orderEntry type="library" name="Gradle: com.badoo.reaktive:reaktive:1.2.0" level="project" />
   </component>
 </module>

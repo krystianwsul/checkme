@@ -152,9 +152,6 @@ dependencies {
 
     implementation('com.uber.rxdogtag2:rxdogtag:2.0.1')
 
-    implementation "com.badoo.reaktive:reaktive:$reaktiveVersion"
-    implementation "com.badoo.reaktive:rxjava3-interop:$reaktiveVersion"
-
     implementation 'ca.antonious:materialdaypicker:0.7.2'
 
     implementation 'com.github.skydoves:balloon:1.4.0'

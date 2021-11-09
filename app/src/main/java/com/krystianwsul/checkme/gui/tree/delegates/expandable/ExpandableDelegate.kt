@@ -1,11 +1,15 @@
 package com.krystianwsul.checkme.gui.tree.delegates.expandable
 
-import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.Icon
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
-import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.tree.NodeDelegate
 import com.krystianwsul.treeadapter.TreeNode
 
@@ -27,15 +31,12 @@ class ExpandableDelegate(private val treeNode: TreeNode<*>) : NodeDelegate {
 
     @Composable
     private fun ExpandImage() {
-        val imageResource = if (treeNode.isExpanded)
-            R.drawable.ic_expand_less_black_36dp
+        val imageVector = if (treeNode.isExpanded)
+            Icons.Filled.ExpandLess
         else
-            R.drawable.ic_expand_more_black_36dp
+            Icons.Filled.ExpandMore
 
-        Image(
-            painter = painterResource(id = imageResource),
-            contentDescription = null,
-        )
+        Icon(imageVector = imageVector, contentDescription = null, Modifier.width(36.dp))
     }
 
     data class State(private val expandVisible: Boolean, private val isExpanded: Boolean)

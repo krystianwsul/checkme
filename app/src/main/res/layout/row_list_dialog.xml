@@ -53,14 +53,12 @@
 
         </LinearLayout>
 
-        <ImageView
+        <androidx.compose.ui.platform.ComposeView
             android:id="@+id/rowListDialogExpand"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:paddingStart="16dp"
             android:paddingEnd="24dp"
-            android:contentDescription="@string/expand"
-            android:src="@drawable/ic_expand_more_black_36dp"
             android:visibility="invisible" />
 
         <View

@@ -78,7 +78,7 @@
 
         </FrameLayout>
 
-        <ImageView
+        <androidx.compose.ui.platform.ComposeView
             android:id="@+id/rowListExpandableMultilineExpand"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
@@ -86,8 +86,6 @@
             android:paddingBottom="7dp"
             android:paddingStart="16dp"
             android:paddingEnd="16dp"
-            android:contentDescription="@string/expand"
-            android:src="@drawable/ic_expand_more_black_36dp"
             android:visibility="invisible" />
 
         <View

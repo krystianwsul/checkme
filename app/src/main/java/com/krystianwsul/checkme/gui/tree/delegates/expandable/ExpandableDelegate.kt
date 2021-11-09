@@ -22,7 +22,7 @@ class ExpandableDelegate(private val treeNode: TreeNode<*>) : NodeDelegate {
             rowExpand.apply {
                 isVisible = treeNode.expandVisible
 
-                setContent { ExpandImage() }
+                setContent { ExpandImage(treeNode.isExpanded) }
             }
 
             rowExpandMargin.isVisible = !treeNode.expandVisible
@@ -30,13 +30,12 @@ class ExpandableDelegate(private val treeNode: TreeNode<*>) : NodeDelegate {
     }
 
     @Composable
-    private fun ExpandImage() {
-        val imageVector = if (treeNode.isExpanded)
-            Icons.Filled.ExpandLess
-        else
-            Icons.Filled.ExpandMore
-
-        Icon(imageVector = imageVector, contentDescription = null, Modifier.width(36.dp))
+    private fun ExpandImage(isExpanded: Boolean) {
+        Icon(
+            imageVector = Icons.Filled.run { if (isExpanded) ExpandLess else ExpandMore },
+            contentDescription = null,
+            Modifier.width(36.dp),
+        )
     }
 
     data class State(private val expandVisible: Boolean, private val isExpanded: Boolean)

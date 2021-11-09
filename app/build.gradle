@@ -59,6 +59,11 @@ android {
 
     buildFeatures {
         viewBinding true
+        compose true
+    }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion '1.0.5'
     }
 }
 
@@ -88,6 +93,13 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion"
     implementation "androidx.lifecycle:lifecycle-viewmodel-savedstate:$lifecycleVersion"
     implementation "androidx.lifecycle:lifecycle-common-java8:$lifecycleVersion"
+
+    implementation 'androidx.activity:activity-compose:1.4.0'
+    implementation 'androidx.compose.material:material:1.0.5'
+    implementation 'androidx.compose.animation:animation:1.0.5'
+    implementation 'androidx.compose.ui:ui-tooling:1.0.5'
+    implementation "androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycleVersion"
+    implementation "com.google.android.material:compose-theme-adapter:1.0.4"
 
     implementation 'com.google.android.gms:play-services-auth:19.2.0'
 

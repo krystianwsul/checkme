@@ -199,26 +199,7 @@ object RelevanceChecker {
 
                     projectMap = privateProjects + sharedProjects
 
-                    val rootTaskProjectKeys = rootTasksByTaskKey.mapValues { it.value.project.projectKey }
-
-                    val rootTasksInProjectKeys = projectMap.flatMap { (projectKey, project) ->
-                        project.projectRecord
-                            .rootTaskParentDelegate
-                            .rootTaskKeys
-                            .map { it to projectKey }
-                    }
-                        .groupBy { it.first }
-                        .mapValues { it.value.map { it.second }.toSet() }
-
-                    rootTaskProjectKeys.entries
-                        .map { (taskKey, projectKey) ->
-                            Triple(taskKey, projectKey, rootTasksInProjectKeys[taskKey] ?: setOf())
-                        }
-                        .filter { (_, correctProjectKey, allFeaturingProjectKeys) ->
-                            correctProjectKey !in allFeaturingProjectKeys
-                        }
-                        .takeIf { it.isNotEmpty() }
-                        ?.let { throw InconsistentRootTaskIdsException(it) }
+                    checkInconsistentRootTaskIds(rootTasksByTaskKey.values, projectMap.values)
 
                     val removedSharedProjects = Irrelevant.setIrrelevant(
                         { rootTasksByTaskKey },

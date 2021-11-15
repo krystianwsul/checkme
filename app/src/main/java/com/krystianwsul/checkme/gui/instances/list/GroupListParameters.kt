@@ -16,7 +16,7 @@ sealed class GroupListParameters(val draggable: Boolean = true) {
     open val useDoneNode = true
     open val fabActionMode = FabActionMode.SUBTASK
 
-    open val groupingMode = GroupType.GroupingMode.NONE
+    open val groupingMode: GroupType.GroupingMode = GroupType.GroupingMode.None
 
     open val unscheduledFirst = false
 
@@ -33,7 +33,7 @@ sealed class GroupListParameters(val draggable: Boolean = true) {
 
         override val fabActionMode = FabActionMode.BOTH
 
-        override val groupingMode = GroupType.GroupingMode.TIME
+        override val groupingMode = GroupType.GroupingMode.Time
     }
 
     data class TimeStamp(
@@ -45,7 +45,7 @@ sealed class GroupListParameters(val draggable: Boolean = true) {
     ) : GroupListParameters() {
 
         override val groupingMode =
-            projectKey?.let { GroupType.GroupingMode.NONE } ?: GroupType.GroupingMode.PROJECT
+            projectKey?.let { GroupType.GroupingMode.None } ?: GroupType.GroupingMode.Project
     }
 
     data class InstanceKey(
@@ -61,7 +61,7 @@ sealed class GroupListParameters(val draggable: Boolean = true) {
         override val groupListDataWrapper: GroupListDataWrapper,
     ) : GroupListParameters(false) {
 
-        override val groupingMode = GroupType.GroupingMode.PROJECTS
+        override val groupingMode = GroupType.GroupingMode.Projects
     }
 
     data class Parent(

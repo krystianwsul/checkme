@@ -170,7 +170,7 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
                 nodeCollection = NodeCollection(
                     indentation + 1,
                     groupAdapter,
-                    GroupType.GroupingMode.NONE,
+                    GroupType.GroupingMode.None,
                     treeNode,
                     instanceData.note,
                     modelNode,

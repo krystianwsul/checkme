@@ -14,7 +14,7 @@ interface GroupType {
             if (instanceDescriptors.isEmpty()) return emptyList()
 
             return when (groupingMode) {
-                GroupingMode.TIME -> {
+                GroupingMode.Time -> {
                     val timeGroups = instanceDescriptors.groupBy { it.timeStamp }
 
                     timeGroups.map { (timeStamp, instanceDescriptors) ->
@@ -38,7 +38,7 @@ interface GroupType {
                         }
                     }
                 }
-                GroupingMode.PROJECTS -> { // don't group into time, but DO group into timeProject
+                GroupingMode.Projects -> { // don't group into time, but DO group into timeProject
                     val (projectInstances, noProjectInstances) =
                         instanceDescriptors.partition { it.projectDescriptor != null }
 
@@ -60,14 +60,14 @@ interface GroupType {
 
                     noProjectGroupTypes + projectGroupTypes
                 }
-                GroupingMode.PROJECT -> {
+                GroupingMode.Project -> {
                     val timeStamp = instanceDescriptors.map { it.timeStamp }
                         .distinct()
                         .single()
 
                     groupByProject(factory, timeStamp, instanceDescriptors)
                 }
-                GroupingMode.NONE -> instanceDescriptors.map(factory::createSingle)
+                GroupingMode.None -> instanceDescriptors.map(factory::createSingle)
             }
         }
 
@@ -159,8 +159,14 @@ interface GroupType {
 
     interface ProjectDescriptor
 
-    enum class GroupingMode {
+    sealed interface GroupingMode {
 
-        NONE, PROJECT, TIME, PROJECTS
+        object None : GroupingMode
+
+        object Project : GroupingMode
+
+        object Time : GroupingMode
+
+        object Projects : GroupingMode
     }
 }

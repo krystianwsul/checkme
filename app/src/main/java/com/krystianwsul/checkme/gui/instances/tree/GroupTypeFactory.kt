@@ -96,7 +96,7 @@ object GroupTypeFactory : GroupType.Factory {
             timeChildren,
             NotDoneNode.ContentDelegate.Group.Id.Time(timeStamp, timeChildren.flatMap { it.instanceKeys }.toSet()),
             NotDoneNode.ContentDelegate.Group.GroupRowsDelegate.Time(groupAdapter, timeStamp),
-            ShowGroupActivity.Parameters.Time(timeStamp),
+            ShowGroupActivity.Parameters.Time(timeStamp), // todo project group
             NotDoneNode.ContentDelegate.Group.CheckboxMode.INDENT,
         )
 

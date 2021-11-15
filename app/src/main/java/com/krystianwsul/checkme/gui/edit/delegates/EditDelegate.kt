@@ -55,7 +55,7 @@ abstract class EditDelegate(
     fun newData(data: EditViewModel.MainData) {
         this.data = data
 
-        parentScheduleManager.parent = data.currentParent
+        parentScheduleManager.setNewParent(data.currentParent)
     }
 
     protected val callbacks = object : ParentScheduleManager.Callbacks {

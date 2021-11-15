@@ -31,6 +31,8 @@ class ParentMultiScheduleManager(
     }
 
     override var parent by parentProperty
+        private set
+
     override val parentObservable = parentProperty.observable
 
     private val scheduleProperty = NonNullRelayProperty(state.schedules) {
@@ -50,6 +52,18 @@ class ParentMultiScheduleManager(
     override val assignedToUsers get() = assignedTo.associateWith { parent!!.projectUsers.getValue(it) }
 
     override val changed get() = toState() != initialState
+
+    override fun setNewParent(newParent: ParentScheduleManager.Parent?) {
+        val clearParentTaskData = parent?.clearParentTaskData
+
+        parent = newParent
+
+        clearParentTaskData?.takeIf { newParent?.compatibleWithSchedule != false }?.let {
+            schedules = it.second.map(::ScheduleEntry)
+
+            if (newParent == clearParentTaskData.first) assignedTo = it.third
+        }
+    }
 
     override fun clearParent() {
         parent = parent!!.clearParentTaskData?.first

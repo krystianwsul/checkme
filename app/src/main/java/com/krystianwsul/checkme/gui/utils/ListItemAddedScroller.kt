@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.LinearSmoothScroller
 import androidx.recyclerview.widget.RecyclerView
 import com.krystianwsul.checkme.gui.base.ListItemAddedListener
 import com.krystianwsul.checkme.gui.edit.EditActivity
+import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.TaskKey
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Single
@@ -16,8 +17,6 @@ import io.reactivex.rxjava3.kotlin.subscribeBy
 import java.util.concurrent.TimeUnit
 
 interface ListItemAddedScroller {
-
-    var scrollToTaskKey: TaskKey?
 
     fun findItem(): Int?
 
@@ -69,13 +68,11 @@ interface ListItemAddedScroller {
 
     fun tryScroll() {
         delay {
-            if (scrollToTaskKey == null) return@delay
-
             val target = findItem() ?: return@delay
 
             scrollToPosition(target)
 
-            scrollToTaskKey = null
+            setTaskScrollTargetMatcher(null)
         }
     }
 
@@ -88,7 +85,7 @@ interface ListItemAddedScroller {
     }
 
     fun checkCreatedTaskKey() {
-        scrollToTaskKey = EditActivity.createdTaskKey
+        EditActivity.createdTaskKey?.let { setTaskScrollTargetMatcher(ScrollTargetMatcher.Task(it)) }
         EditActivity.createdTaskKey = null
 
         tryScroll()
@@ -100,4 +97,13 @@ interface ListItemAddedScroller {
     }
 
     fun scrollToTop() = delay { scrollToPosition(0) }
+
+    fun setTaskScrollTargetMatcher(scrollTargetMatcher: ScrollTargetMatcher.Task?)
+
+    sealed interface ScrollTargetMatcher {
+
+        class Task(val taskKey: TaskKey) : ScrollTargetMatcher
+
+        class Instance(val instanceKey: InstanceKey) : ScrollTargetMatcher
+    }
 }

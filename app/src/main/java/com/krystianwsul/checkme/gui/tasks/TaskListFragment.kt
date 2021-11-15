@@ -250,7 +250,12 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
     private var showImage = false
     private var imageViewerData: Pair<ImageState, StfalconImageViewer<ImageState>>? = null
 
-    override var scrollToTaskKey: TaskKey? = null
+    private var scrollTargetMatcher: ListItemAddedScroller.ScrollTargetMatcher.Task? = null
+
+    override fun setTaskScrollTargetMatcher(scrollTargetMatcher: ListItemAddedScroller.ScrollTargetMatcher.Task?) {
+        this.scrollTargetMatcher = scrollTargetMatcher
+    }
+
     override val listItemAddedListener get() = listener
     override val recyclerView: RecyclerView get() = binding.taskListRecycler
 
@@ -377,17 +382,19 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
     override fun findItem(): Int? {
         if (!searchDataManager.treeViewAdapterInitialized) return null
 
+        val scrollTargetMatcher = this.scrollTargetMatcher ?: return null
+
         return treeViewAdapter.displayedNodes
             .firstOrNull {
                 val modelNode = it.modelNode
 
                 if (modelNode is TaskNode) {
                     if (it.isExpanded) {
-                        modelNode.childTaskData.taskKey == scrollToTaskKey
+                        modelNode.childTaskData.taskKey == scrollTargetMatcher.taskKey
                     } else {
                         modelNode.childTaskData
                             .allTaskKeys
-                            .contains(scrollToTaskKey)
+                            .contains(scrollTargetMatcher.taskKey)
                     }
                 } else {
                     false

@@ -44,7 +44,6 @@ import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.NullableWrapper
 import com.krystianwsul.common.utils.ProjectKey
-import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.treeadapter.*
 import com.skydoves.balloon.ArrowOrientation
 import com.stfalcon.imageviewer.StfalconImageViewer
@@ -341,7 +340,11 @@ class GroupListFragment @JvmOverloads constructor(
     private var showImage = false
     private var imageViewerData: Pair<ImageState, StfalconImageViewer<ImageState>>? = null
 
-    override var scrollToTaskKey: TaskKey? = null
+    var scrollTargetMatcher: ListItemAddedScroller.ScrollTargetMatcher? = null
+
+    override fun setTaskScrollTargetMatcher(scrollTargetMatcher: ListItemAddedScroller.ScrollTargetMatcher.Task?) {
+        this.scrollTargetMatcher = scrollTargetMatcher
+    }
 
     override val listItemAddedListener get() = listener
     override val recyclerView: RecyclerView get() = binding.groupListRecycler
@@ -814,6 +817,14 @@ class GroupListFragment @JvmOverloads constructor(
     override fun findItem(): Int? {
         if (!searchDataManager.treeViewAdapterInitialized) return null
 
+        val scrollTargetMatcher = this.scrollTargetMatcher ?: return null
+
+        fun ListItemAddedScroller.ScrollTargetMatcher.matchesInstanceData(instanceData: GroupListDataWrapper.InstanceData) =
+            when (this) {
+                is ListItemAddedScroller.ScrollTargetMatcher.Task -> instanceData.taskKey == taskKey
+                is ListItemAddedScroller.ScrollTargetMatcher.Instance -> instanceData.instanceKey == instanceKey
+            }
+
         return searchDataManager.treeViewAdapter
             .displayedNodes
             .firstOrNull {
@@ -821,25 +832,21 @@ class GroupListFragment @JvmOverloads constructor(
                     is NotDoneGroupNode -> {
                         if (it.isExpanded) {
                             if (modelNode.contentDelegate is NotDoneNode.ContentDelegate.Instance) {
-                                modelNode.contentDelegate.instanceData.taskKey == scrollToTaskKey
+                                scrollTargetMatcher.matchesInstanceData(modelNode.contentDelegate.instanceData)
                             } else {
                                 false
                             }
                         } else {
                             modelNode.contentDelegate
                                 .directInstanceDatas
-                                .map { it.allTaskKeys }
-                                .flatten()
-                                .contains(scrollToTaskKey)
+                                .any { getAllInstanceDatas(it).any(scrollTargetMatcher::matchesInstanceData) }
                         }
                     }
                     is NotDoneInstanceNode -> {
                         if (it.isExpanded) {
-                            modelNode.instanceData.taskKey == scrollToTaskKey
+                            scrollTargetMatcher.matchesInstanceData(modelNode.instanceData)
                         } else {
-                            modelNode.instanceData
-                                .allTaskKeys
-                                .contains(scrollToTaskKey)
+                            getAllInstanceDatas(modelNode.instanceData).any(scrollTargetMatcher::matchesInstanceData)
                         }
                     }
                     else -> false

@@ -8,7 +8,7 @@ import io.reactivex.rxjava3.core.Observable
 
 interface ParentScheduleManager {
 
-    var parent: Parent?
+    val parent: Parent?
     val parentObservable: Observable<NullableWrapper<Parent>>
 
     val schedules: List<ScheduleEntry>
@@ -21,6 +21,7 @@ interface ParentScheduleManager {
 
     val changed: Boolean
 
+    fun setNewParent(newParent: Parent?)
     fun clearParent()
     fun clearParentAndReplaceSchedules()
 
@@ -46,7 +47,8 @@ interface ParentScheduleManager {
         val projectUsers: Map<UserKey, EditViewModel.UserData>
         val projectKey: ProjectKey<*>
         val hasMultipleInstances: Boolean?
-        val clearParentTaskData: Triple<Parent?, List<EditViewModel.ScheduleDataWrapper>, Set<UserKey>>?
+        val clearParentTaskData: Triple<Project?, List<EditViewModel.ScheduleDataWrapper>, Set<UserKey>>?
+        val compatibleWithSchedule: Boolean
 
         data class Project(
             override val name: String,
@@ -57,7 +59,9 @@ interface ParentScheduleManager {
 
             override val hasMultipleInstances: Boolean? = null
 
-            override val clearParentTaskData: Triple<Parent?, List<EditViewModel.ScheduleDataWrapper>, Set<UserKey>>? = null
+            override val clearParentTaskData: Triple<Project?, List<EditViewModel.ScheduleDataWrapper>, Set<UserKey>>? = null
+
+            override val compatibleWithSchedule = true
         }
 
         data class Task(
@@ -65,11 +69,13 @@ interface ParentScheduleManager {
             override val parentKey: EditViewModel.ParentKey.Task,
             override val projectKey: ProjectKey<*>,
             override val hasMultipleInstances: Boolean?,
-            override val clearParentTaskData: Triple<Parent?, List<EditViewModel.ScheduleDataWrapper>, Set<UserKey>>?,
+            override val clearParentTaskData: Triple<Project?, List<EditViewModel.ScheduleDataWrapper>, Set<UserKey>>?,
             val topLevelTaskIsSingleSchedule: Boolean,
         ) : Parent {
 
             override val projectUsers = mapOf<UserKey, EditViewModel.UserData>()
+
+            override val compatibleWithSchedule = false
         }
     }
 }

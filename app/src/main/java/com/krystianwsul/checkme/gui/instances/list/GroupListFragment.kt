@@ -44,7 +44,6 @@ import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.NullableWrapper
 import com.krystianwsul.common.utils.ProjectKey
-import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.treeadapter.*
 import com.skydoves.balloon.ArrowOrientation
 import com.stfalcon.imageviewer.StfalconImageViewer
@@ -341,10 +340,10 @@ class GroupListFragment @JvmOverloads constructor(
     private var showImage = false
     private var imageViewerData: Pair<ImageState, StfalconImageViewer<ImageState>>? = null
 
-    private var scrollToTaskKey: TaskKey? = null
+    private var scrollTargetMatcher: ListItemAddedScroller.ScrollTargetMatcher? = null
 
-    override fun setScrollTargetMatcher(scrollTargetMatcher: TaskKey?) {
-        this.scrollToTaskKey = scrollTargetMatcher
+    override fun setScrollTargetMatcher(scrollTargetMatcher: ListItemAddedScroller.TaskScrollTargetMatcher?) {
+        this.scrollTargetMatcher = scrollTargetMatcher
     }
 
     override val listItemAddedListener get() = listener
@@ -818,6 +817,8 @@ class GroupListFragment @JvmOverloads constructor(
     override fun findItem(): Int? {
         if (!searchDataManager.treeViewAdapterInitialized) return null
 
+        val scrollTargetMatcher = this.scrollTargetMatcher as? ListItemAddedScroller.TaskScrollTargetMatcher ?: return null
+
         return searchDataManager.treeViewAdapter
             .displayedNodes
             .firstOrNull {
@@ -825,7 +826,7 @@ class GroupListFragment @JvmOverloads constructor(
                     is NotDoneGroupNode -> {
                         if (it.isExpanded) {
                             if (modelNode.contentDelegate is NotDoneNode.ContentDelegate.Instance) {
-                                modelNode.contentDelegate.instanceData.taskKey == scrollToTaskKey
+                                modelNode.contentDelegate.instanceData.taskKey == scrollTargetMatcher.taskKey
                             } else {
                                 false
                             }
@@ -834,16 +835,16 @@ class GroupListFragment @JvmOverloads constructor(
                                 .directInstanceDatas
                                 .map { it.allTaskKeys }
                                 .flatten()
-                                .contains(scrollToTaskKey)
+                                .contains(scrollTargetMatcher.taskKey)
                         }
                     }
                     is NotDoneInstanceNode -> {
                         if (it.isExpanded) {
-                            modelNode.instanceData.taskKey == scrollToTaskKey
+                            modelNode.instanceData.taskKey == scrollTargetMatcher.taskKey
                         } else {
                             modelNode.instanceData
                                 .allTaskKeys
-                                .contains(scrollToTaskKey)
+                                .contains(scrollTargetMatcher.taskKey)
                         }
                     }
                     else -> false

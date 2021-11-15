@@ -72,7 +72,7 @@ interface ListItemAddedScroller {
 
             scrollToPosition(target)
 
-            setScrollTargetMatcher(null)
+            setTaskScrollTargetMatcher(null)
         }
     }
 
@@ -85,7 +85,7 @@ interface ListItemAddedScroller {
     }
 
     fun checkCreatedTaskKey() {
-        EditActivity.createdTaskKey?.let { setScrollTargetMatcher(ScrollTargetMatcher.Task(it)) }
+        EditActivity.createdTaskKey?.let { setTaskScrollTargetMatcher(ScrollTargetMatcher.Task(it)) }
         EditActivity.createdTaskKey = null
 
         tryScroll()
@@ -98,7 +98,7 @@ interface ListItemAddedScroller {
 
     fun scrollToTop() = delay { scrollToPosition(0) }
 
-    fun setScrollTargetMatcher(scrollTargetMatcher: ScrollTargetMatcher.Task?)
+    fun setTaskScrollTargetMatcher(scrollTargetMatcher: ScrollTargetMatcher.Task?)
 
     sealed interface ScrollTargetMatcher {
 

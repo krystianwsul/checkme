@@ -26,6 +26,7 @@ import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineModelNode
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineRow
 import com.krystianwsul.checkme.gui.tree.delegates.thumbnail.ThumbnailDelegate
 import com.krystianwsul.checkme.gui.tree.delegates.thumbnail.ThumbnailModelNode
+import com.krystianwsul.checkme.gui.utils.ListItemAddedScroller
 import com.krystianwsul.checkme.gui.utils.flatten
 import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.common.criteria.SearchCriteria
@@ -38,6 +39,7 @@ import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.filterValuesNotNull
 import com.krystianwsul.treeadapter.*
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Maybe
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.kotlin.addTo
@@ -205,15 +207,24 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
                     val done = instanceData.done != null
 
                     CheckBoxState.Visible(done) {
-                        fun setDone(done: Boolean) = AndroidDomainUpdater.setInstanceDone(
-                            groupAdapter.dataId.toFirst(),
-                            instanceData.instanceKey,
-                            done,
-                        )
+                        fun setDone(done: Boolean): Completable {
+                            if (!done) {
+                                groupListFragment.scrollTargetMatcher =
+                                    ListItemAddedScroller.ScrollTargetMatcher.Instance(instanceData.instanceKey)
+                            }
+
+                            return AndroidDomainUpdater.setInstanceDone(
+                                groupAdapter.dataId.toFirst(),
+                                instanceData.instanceKey,
+                                done,
+                            )
+                        }
 
                         setDone(!done).observeOn(AndroidSchedulers.mainThread())
                             .andThen(Maybe.defer { groupListFragment.listener.showSnackbarDoneMaybe(1) })
-                            .flatMapCompletable { setDone(done) }
+                            .flatMapCompletable {
+                                setDone(done)
+                            }
                             .subscribe()
                             .addTo(groupListFragment.attachedToWindowDisposable)
 

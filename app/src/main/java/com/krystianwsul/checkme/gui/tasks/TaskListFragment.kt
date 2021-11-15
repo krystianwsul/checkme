@@ -252,7 +252,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
     private var scrollTargetMatcher: ListItemAddedScroller.ScrollTargetMatcher.Task? = null
 
-    override fun setScrollTargetMatcher(scrollTargetMatcher: ListItemAddedScroller.ScrollTargetMatcher.Task?) {
+    override fun setTaskScrollTargetMatcher(scrollTargetMatcher: ListItemAddedScroller.ScrollTargetMatcher.Task?) {
         this.scrollTargetMatcher = scrollTargetMatcher
     }
 

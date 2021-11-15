@@ -340,9 +340,9 @@ class GroupListFragment @JvmOverloads constructor(
     private var showImage = false
     private var imageViewerData: Pair<ImageState, StfalconImageViewer<ImageState>>? = null
 
-    private var scrollTargetMatcher: ListItemAddedScroller.ScrollTargetMatcher? = null
+    var scrollTargetMatcher: ListItemAddedScroller.ScrollTargetMatcher? = null
 
-    override fun setScrollTargetMatcher(scrollTargetMatcher: ListItemAddedScroller.ScrollTargetMatcher.Task?) {
+    override fun setTaskScrollTargetMatcher(scrollTargetMatcher: ListItemAddedScroller.ScrollTargetMatcher.Task?) {
         this.scrollTargetMatcher = scrollTargetMatcher
     }
 

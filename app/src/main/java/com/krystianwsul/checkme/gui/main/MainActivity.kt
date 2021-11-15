@@ -589,7 +589,13 @@ class MainActivity :
         mainNoteViewModel.data
             .subscribe {
                 noteListFragment.parameters = TaskListFragment.Parameters.Notes(
-                    TaskListFragment.Data(mainNoteViewModel.dataId, it.immediate, it.taskData, true),
+                    TaskListFragment.Data(
+                        mainNoteViewModel.dataId,
+                        it.immediate,
+                        it.taskData,
+                        true,
+                        showFirstSchedule = false,
+                    ),
                     true,
                 )
             }

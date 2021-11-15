@@ -15,6 +15,7 @@ import com.krystianwsul.checkme.gui.base.AbstractActivity
 import com.krystianwsul.checkme.gui.dialogs.ConfirmDialogFragment
 import com.krystianwsul.checkme.gui.edit.EditActivity
 import com.krystianwsul.checkme.gui.edit.EditParameters
+import com.krystianwsul.checkme.gui.edit.EditParentHint
 import com.krystianwsul.checkme.gui.utils.BottomFabMenuDelegate
 import com.krystianwsul.checkme.utils.exhaustive
 import com.krystianwsul.checkme.utils.getOrInitializeFragment
@@ -330,7 +331,11 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
             }
 
             override fun mapDataToTaskListFragmentParameters(dataId: DataId, data: ShowTasksViewModel.Data) =
-                TaskListFragment.Parameters.Notes(mapDataToTaskListFragmentData(dataId, data), true)
+                TaskListFragment.Parameters.Notes(
+                    mapDataToTaskListFragmentData(dataId, data),
+                    true,
+                    (projectKey as? ProjectKey.Shared)?.let(EditParentHint::Project),
+                )
         }
 
         @Parcelize

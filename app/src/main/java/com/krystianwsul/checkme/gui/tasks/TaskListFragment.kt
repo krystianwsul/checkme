@@ -250,7 +250,12 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
     private var showImage = false
     private var imageViewerData: Pair<ImageState, StfalconImageViewer<ImageState>>? = null
 
-    override var scrollToTaskKey: TaskKey? = null
+    private var scrollToTaskKey: TaskKey? = null
+
+    override fun setScrollTargetMatcher(scrollTargetMatcher: TaskKey?) {
+        this.scrollToTaskKey = scrollTargetMatcher
+    }
+
     override val listItemAddedListener get() = listener
     override val recyclerView: RecyclerView get() = binding.taskListRecycler
 

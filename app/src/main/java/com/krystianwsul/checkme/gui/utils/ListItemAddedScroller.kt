@@ -17,8 +17,6 @@ import java.util.concurrent.TimeUnit
 
 interface ListItemAddedScroller {
 
-    var scrollToTaskKey: TaskKey?
-
     fun findItem(): Int?
 
     val recyclerView: RecyclerView
@@ -69,13 +67,11 @@ interface ListItemAddedScroller {
 
     fun tryScroll() {
         delay {
-            if (scrollToTaskKey == null) return@delay
-
             val target = findItem() ?: return@delay
 
             scrollToPosition(target)
 
-            scrollToTaskKey = null
+            setScrollTargetMatcher(null)
         }
     }
 
@@ -88,7 +84,7 @@ interface ListItemAddedScroller {
     }
 
     fun checkCreatedTaskKey() {
-        scrollToTaskKey = EditActivity.createdTaskKey
+        EditActivity.createdTaskKey?.let { setScrollTargetMatcher(it) }
         EditActivity.createdTaskKey = null
 
         tryScroll()
@@ -100,4 +96,6 @@ interface ListItemAddedScroller {
     }
 
     fun scrollToTop() = delay { scrollToPosition(0) }
+
+    fun setScrollTargetMatcher(scrollTargetMatcher: TaskKey?)
 }

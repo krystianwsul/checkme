@@ -23,7 +23,9 @@ class ParentMultiScheduleManager(
     private val parentProperty = NullableRelayProperty(callbacks.getInitialParent()) {
         callbacks.storeParent(it?.parentKey)
 
-        if (it?.parentKey is EditViewModel.ParentKey.Task) mutateSchedules { it.clear() }
+        if (it?.compatibleWithSchedule == false) {
+            mutateSchedules { it.clear() }
+        }
 
         assignedTo = setOf()
     }
@@ -32,7 +34,7 @@ class ParentMultiScheduleManager(
     override val parentObservable = parentProperty.observable
 
     private val scheduleProperty = NonNullRelayProperty(state.schedules) {
-        if (it.isNotEmpty() && parent?.parentKey is EditViewModel.ParentKey.Task) clearParent()
+        if (it.isNotEmpty() && parent?.compatibleWithSchedule == false) clearParent()
 
         if (it.isEmpty()) assignedTo = setOf()
     }

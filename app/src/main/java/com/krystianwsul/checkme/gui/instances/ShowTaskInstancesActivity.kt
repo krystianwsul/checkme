@@ -295,7 +295,7 @@ class ShowTaskInstancesActivity : AbstractActivity(), GroupListListener {
         @Parcelize
         data class Project(override val projectKey: ProjectKey.Shared) : Parameters() {
 
-            override val groupingMode get() = GroupType.GroupingMode.Time
+            override val groupingMode get() = GroupType.GroupingMode.Time(projectKey)
         }
     }
 }

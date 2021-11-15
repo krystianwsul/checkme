@@ -288,7 +288,7 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
 
     private fun getNotifications(notifies: List<NotificationData.Notify>) = GroupTypeFactory.getGroupTypeTree(
         notifies.map { GroupTypeFactory.InstanceDescriptor(it.instance, it.silent) },
-        GroupType.GroupingMode.Time,
+        GroupType.GroupingMode.Time(),
     ).flatMap { it.getNotifications() }
 
     private fun notifyInstances(notifications: List<GroupTypeFactory.Notification>, now: ExactTimeStamp.Local) {

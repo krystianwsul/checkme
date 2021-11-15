@@ -1,6 +1,8 @@
 package com.krystianwsul.checkme.domainmodel
 
+import com.krystianwsul.checkme.gui.instances.ShowGroupActivity
 import com.krystianwsul.common.time.TimeStamp
+import com.krystianwsul.common.utils.ProjectKey
 
 interface GroupType {
 
@@ -14,7 +16,7 @@ interface GroupType {
             if (instanceDescriptors.isEmpty()) return emptyList()
 
             return when (groupingMode) {
-                GroupingMode.Time -> {
+                is GroupingMode.Time -> {
                     val timeGroups = instanceDescriptors.groupBy { it.timeStamp }
 
                     timeGroups.map { (timeStamp, instanceDescriptors) ->
@@ -30,7 +32,8 @@ interface GroupType {
                                 factory.createTimeProject(timeStamp, projectDescriptor, instanceDescriptors)
                             } ?: factory.createTime(
                                 timeStamp,
-                                groupByProject(factory, timeStamp, instanceDescriptors)
+                                groupByProject(factory, timeStamp, instanceDescriptors),
+                                groupingMode,
                             )
                         } else {
                             // if there's just one, there's our node
@@ -133,7 +136,7 @@ interface GroupType {
 
     interface Factory {
 
-        fun createTime(timeStamp: TimeStamp, groupTypes: List<TimeChild>): Time
+        fun createTime(timeStamp: TimeStamp, groupTypes: List<TimeChild>, groupingMode: GroupingMode.Time): Time
 
         fun createTimeProject(
             timeStamp: TimeStamp,
@@ -165,7 +168,12 @@ interface GroupType {
 
         object Project : GroupingMode
 
-        object Time : GroupingMode
+        class Time(private val projectKey: ProjectKey.Shared? = null) : GroupingMode {
+
+            fun newShowGroupActivityParameters(timeStamp: TimeStamp) =
+                projectKey?.let { ShowGroupActivity.Parameters.Project(timeStamp, it) }
+                    ?: ShowGroupActivity.Parameters.Time(timeStamp)
+        }
 
         object Projects : GroupingMode
     }

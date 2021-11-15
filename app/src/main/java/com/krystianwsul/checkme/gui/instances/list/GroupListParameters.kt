@@ -33,7 +33,7 @@ sealed class GroupListParameters(val draggable: Boolean = true) {
 
         override val fabActionMode = FabActionMode.BOTH
 
-        override val groupingMode = GroupType.GroupingMode.Time
+        override val groupingMode = GroupType.GroupingMode.Time()
     }
 
     data class TimeStamp(

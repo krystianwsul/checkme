@@ -996,10 +996,11 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             override val hint: EditParentHint? = null
         }
 
-        data class Notes(override val data: Data, override val canDrag: Boolean) : Parameters() {
-
-            override val hint: EditParentHint? = null
-        }
+        data class Notes(
+            override val data: Data,
+            override val canDrag: Boolean,
+            override val hint: EditParentHint.Project? = null,
+        ) : Parameters()
 
         data class Project(override val data: Data, val projectKey: ProjectKey<*>) : Parameters() {
 

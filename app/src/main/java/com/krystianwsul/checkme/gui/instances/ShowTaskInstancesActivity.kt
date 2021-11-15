@@ -10,6 +10,7 @@ import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.ActivityShowNotificationGroupBinding
 import com.krystianwsul.checkme.databinding.BottomBinding
+import com.krystianwsul.checkme.domainmodel.GroupType
 import com.krystianwsul.checkme.domainmodel.extensions.clearTaskEndTimeStamps
 import com.krystianwsul.checkme.domainmodel.extensions.setTaskEndTimeStamps
 import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
@@ -84,7 +85,7 @@ class ShowTaskInstancesActivity : AbstractActivity(), GroupListListener {
 
     private var page = 0
 
-    override val instanceSearch = Observable.just<FilterCriteria>(FilterCriteria.None)!!
+    override val instanceSearch = Observable.just<FilterCriteria>(FilterCriteria.None)
 
     private lateinit var binding: ActivityShowNotificationGroupBinding
     private lateinit var bottomBinding: BottomBinding
@@ -157,6 +158,7 @@ class ShowTaskInstancesActivity : AbstractActivity(), GroupListListener {
                             it.showLoader,
                             parameters.projectKey,
                             FilterCriteria.ExpandOnly(it.searchCriteria),
+                            parameters.groupingMode,
                         )
                     )
 
@@ -280,13 +282,20 @@ class ShowTaskInstancesActivity : AbstractActivity(), GroupListListener {
 
         abstract val projectKey: ProjectKey.Shared?
 
+        abstract val groupingMode: GroupType.GroupingMode
+
         @Parcelize
         data class Task(val taskKey: TaskKey) : Parameters() {
 
             override val projectKey: ProjectKey.Shared? get() = null
+
+            override val groupingMode get() = GroupType.GroupingMode.NONE
         }
 
         @Parcelize
-        data class Project(override val projectKey: ProjectKey.Shared) : Parameters()
+        data class Project(override val projectKey: ProjectKey.Shared) : Parameters() {
+
+            override val groupingMode get() = GroupType.GroupingMode.TIME
+        }
     }
 }

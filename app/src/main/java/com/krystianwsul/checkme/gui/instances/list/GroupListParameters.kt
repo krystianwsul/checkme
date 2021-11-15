@@ -71,6 +71,7 @@ sealed class GroupListParameters(val draggable: Boolean = true) {
         override val showProgress: Boolean,
         val projectKey: ProjectKey.Shared? = null,
         override val filterCriteria: FilterCriteria.ExpandOnly,
+        override val groupingMode: GroupType.GroupingMode,
     ) : GroupListParameters(false) {
 
         override val useDoneNode = false

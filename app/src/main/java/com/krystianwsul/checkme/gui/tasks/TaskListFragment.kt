@@ -737,6 +737,8 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                 )
             )
         }
+
+        override fun isVisible(actionMode: Boolean, hasVisibleChildren: Boolean) = hasVisibleChildren
     }
 
     private inner class TaskNode(

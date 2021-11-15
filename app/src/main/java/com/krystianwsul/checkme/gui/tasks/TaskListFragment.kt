@@ -250,9 +250,9 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
     private var showImage = false
     private var imageViewerData: Pair<ImageState, StfalconImageViewer<ImageState>>? = null
 
-    private var scrollTargetMatcher: ListItemAddedScroller.TaskScrollTargetMatcher? = null
+    private var scrollTargetMatcher: ListItemAddedScroller.ScrollTargetMatcher.Task? = null
 
-    override fun setScrollTargetMatcher(scrollTargetMatcher: ListItemAddedScroller.TaskScrollTargetMatcher?) {
+    override fun setScrollTargetMatcher(scrollTargetMatcher: ListItemAddedScroller.ScrollTargetMatcher.Task?) {
         this.scrollTargetMatcher = scrollTargetMatcher
     }
 

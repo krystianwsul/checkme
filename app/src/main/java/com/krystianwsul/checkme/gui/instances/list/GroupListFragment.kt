@@ -342,7 +342,7 @@ class GroupListFragment @JvmOverloads constructor(
 
     private var scrollTargetMatcher: ListItemAddedScroller.ScrollTargetMatcher? = null
 
-    override fun setScrollTargetMatcher(scrollTargetMatcher: ListItemAddedScroller.TaskScrollTargetMatcher?) {
+    override fun setScrollTargetMatcher(scrollTargetMatcher: ListItemAddedScroller.ScrollTargetMatcher.Task?) {
         this.scrollTargetMatcher = scrollTargetMatcher
     }
 
@@ -817,7 +817,13 @@ class GroupListFragment @JvmOverloads constructor(
     override fun findItem(): Int? {
         if (!searchDataManager.treeViewAdapterInitialized) return null
 
-        val scrollTargetMatcher = this.scrollTargetMatcher as? ListItemAddedScroller.TaskScrollTargetMatcher ?: return null
+        val scrollTargetMatcher = this.scrollTargetMatcher ?: return null
+
+        fun ListItemAddedScroller.ScrollTargetMatcher.matchesInstanceData(instanceData: GroupListDataWrapper.InstanceData) =
+            when (this) {
+                is ListItemAddedScroller.ScrollTargetMatcher.Task -> instanceData.taskKey == taskKey
+                is ListItemAddedScroller.ScrollTargetMatcher.Instance -> instanceData.instanceKey == instanceKey
+            }
 
         return searchDataManager.treeViewAdapter
             .displayedNodes
@@ -826,25 +832,21 @@ class GroupListFragment @JvmOverloads constructor(
                     is NotDoneGroupNode -> {
                         if (it.isExpanded) {
                             if (modelNode.contentDelegate is NotDoneNode.ContentDelegate.Instance) {
-                                modelNode.contentDelegate.instanceData.taskKey == scrollTargetMatcher.taskKey
+                                scrollTargetMatcher.matchesInstanceData(modelNode.contentDelegate.instanceData)
                             } else {
                                 false
                             }
                         } else {
                             modelNode.contentDelegate
                                 .directInstanceDatas
-                                .map { it.allTaskKeys }
-                                .flatten()
-                                .contains(scrollTargetMatcher.taskKey)
+                                .any { getAllInstanceDatas(it).any(scrollTargetMatcher::matchesInstanceData) }
                         }
                     }
                     is NotDoneInstanceNode -> {
                         if (it.isExpanded) {
-                            modelNode.instanceData.taskKey == scrollTargetMatcher.taskKey
+                            scrollTargetMatcher.matchesInstanceData(modelNode.instanceData)
                         } else {
-                            modelNode.instanceData
-                                .allTaskKeys
-                                .contains(scrollTargetMatcher.taskKey)
+                            getAllInstanceDatas(modelNode.instanceData).any(scrollTargetMatcher::matchesInstanceData)
                         }
                     }
                     else -> false

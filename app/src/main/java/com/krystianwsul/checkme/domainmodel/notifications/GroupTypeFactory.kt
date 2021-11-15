@@ -18,8 +18,11 @@ object GroupTypeFactory : GroupType.Factory {
         groupingMode: GroupType.GroupingMode,
     ) = GroupType.getGroupTypeTree(this, instanceDescriptors, groupingMode).map { it.fix() }
 
-    override fun createTime(timeStamp: TimeStamp, groupTypes: List<GroupType.TimeChild>) =
-        TimeBridge(timeStamp, groupTypes.map { it.fix() })
+    override fun createTime(
+        timeStamp: TimeStamp,
+        groupTypes: List<GroupType.TimeChild>,
+        groupingMode: GroupType.GroupingMode.Time
+    ) = TimeBridge(timeStamp, groupTypes.map { it.fix() })
 
     override fun createTimeProject(
         timeStamp: TimeStamp,

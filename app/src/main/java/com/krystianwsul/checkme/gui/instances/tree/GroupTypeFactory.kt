@@ -20,8 +20,11 @@ object GroupTypeFactory : GroupType.Factory {
         groupingMode: GroupType.GroupingMode,
     ) = GroupType.getGroupTypeTree(this, instanceDatas.map(::InstanceDescriptor), groupingMode).map { it.fix() }
 
-    override fun createTime(timeStamp: TimeStamp, groupTypes: List<GroupType.TimeChild>) =
-        TimeBridge(timeStamp, groupTypes.map { it.fix() })
+    override fun createTime(
+        timeStamp: TimeStamp,
+        groupTypes: List<GroupType.TimeChild>,
+        groupingMode: GroupType.GroupingMode.Time,
+    ) = TimeBridge(timeStamp, groupTypes.map { it.fix() }, groupingMode::newShowGroupActivityParameters)
 
     override fun createTimeProject(
         timeStamp: TimeStamp,
@@ -81,7 +84,11 @@ object GroupTypeFactory : GroupType.Factory {
         val instanceKeys: Set<InstanceKey>
     }
 
-    class TimeBridge(val timeStamp: TimeStamp, private val timeChildren: List<TimeChild>) : GroupType.Time, SingleParent {
+    class TimeBridge(
+        val timeStamp: TimeStamp,
+        private val timeChildren: List<TimeChild>,
+        private val newShowGroupActivityParameters: (TimeStamp) -> ShowGroupActivity.Parameters,
+    ) : GroupType.Time, SingleParent {
 
         override fun toContentDelegate(
             groupAdapter: GroupListFragment.GroupAdapter,
@@ -96,7 +103,7 @@ object GroupTypeFactory : GroupType.Factory {
             timeChildren,
             NotDoneNode.ContentDelegate.Group.Id.Time(timeStamp, timeChildren.flatMap { it.instanceKeys }.toSet()),
             NotDoneNode.ContentDelegate.Group.GroupRowsDelegate.Time(groupAdapter, timeStamp),
-            ShowGroupActivity.Parameters.Time(timeStamp),
+            newShowGroupActivityParameters(timeStamp),
             NotDoneNode.ContentDelegate.Group.CheckboxMode.INDENT,
         )
 
@@ -112,7 +119,7 @@ object GroupTypeFactory : GroupType.Factory {
 
     class TimeProjectBridge(
         val timeStamp: TimeStamp,
-        val projectDetails: DetailsNode.ProjectDetails,
+        private val projectDetails: DetailsNode.ProjectDetails,
         val instanceDatas: List<GroupListDataWrapper.InstanceData>,
     ) : GroupType.TimeProject, SingleParent {
 

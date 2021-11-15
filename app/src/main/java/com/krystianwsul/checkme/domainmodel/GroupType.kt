@@ -1,6 +1,8 @@
 package com.krystianwsul.checkme.domainmodel
 
+import com.krystianwsul.checkme.gui.instances.ShowGroupActivity
 import com.krystianwsul.common.time.TimeStamp
+import com.krystianwsul.common.utils.ProjectKey
 
 interface GroupType {
 
@@ -14,7 +16,7 @@ interface GroupType {
             if (instanceDescriptors.isEmpty()) return emptyList()
 
             return when (groupingMode) {
-                GroupingMode.TIME -> {
+                is GroupingMode.Time -> {
                     val timeGroups = instanceDescriptors.groupBy { it.timeStamp }
 
                     timeGroups.map { (timeStamp, instanceDescriptors) ->
@@ -30,7 +32,8 @@ interface GroupType {
                                 factory.createTimeProject(timeStamp, projectDescriptor, instanceDescriptors)
                             } ?: factory.createTime(
                                 timeStamp,
-                                groupByProject(factory, timeStamp, instanceDescriptors)
+                                groupByProject(factory, timeStamp, instanceDescriptors),
+                                groupingMode,
                             )
                         } else {
                             // if there's just one, there's our node
@@ -38,7 +41,7 @@ interface GroupType {
                         }
                     }
                 }
-                GroupingMode.PROJECTS -> { // don't group into time, but DO group into timeProject
+                GroupingMode.Projects -> { // don't group into time, but DO group into timeProject
                     val (projectInstances, noProjectInstances) =
                         instanceDescriptors.partition { it.projectDescriptor != null }
 
@@ -60,14 +63,14 @@ interface GroupType {
 
                     noProjectGroupTypes + projectGroupTypes
                 }
-                GroupingMode.PROJECT -> {
+                GroupingMode.Project -> {
                     val timeStamp = instanceDescriptors.map { it.timeStamp }
                         .distinct()
                         .single()
 
                     groupByProject(factory, timeStamp, instanceDescriptors)
                 }
-                GroupingMode.NONE -> instanceDescriptors.map(factory::createSingle)
+                GroupingMode.None -> instanceDescriptors.map(factory::createSingle)
             }
         }
 
@@ -133,7 +136,7 @@ interface GroupType {
 
     interface Factory {
 
-        fun createTime(timeStamp: TimeStamp, groupTypes: List<TimeChild>): Time
+        fun createTime(timeStamp: TimeStamp, groupTypes: List<TimeChild>, groupingMode: GroupingMode.Time): Time
 
         fun createTimeProject(
             timeStamp: TimeStamp,
@@ -159,8 +162,19 @@ interface GroupType {
 
     interface ProjectDescriptor
 
-    enum class GroupingMode {
+    sealed interface GroupingMode {
 
-        NONE, PROJECT, TIME, PROJECTS
+        object None : GroupingMode
+
+        object Project : GroupingMode
+
+        class Time(private val projectKey: ProjectKey.Shared? = null) : GroupingMode {
+
+            fun newShowGroupActivityParameters(timeStamp: TimeStamp) =
+                projectKey?.let { ShowGroupActivity.Parameters.Project(timeStamp, it) }
+                    ?: ShowGroupActivity.Parameters.Time(timeStamp)
+        }
+
+        object Projects : GroupingMode
     }
 }

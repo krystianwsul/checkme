@@ -51,10 +51,10 @@ class RootTasksFactory(
         rootTasksLoader.addChangeEvents
             .groupBy { it.rootTaskRecord.taskKey }
             .scan(mapOf<TaskKey.Root, RootTaskFactory>()) { oldMap, group ->
-                check(!oldMap.containsKey(group.key))
+                check(!oldMap.containsKey(group.key!!))
 
                 oldMap.toMutableMap().also {
-                    it[group.key] = RootTaskFactory(
+                    it[group.key!!] = RootTaskFactory(
                         rootTaskDependencyCoordinator,
                         this,
                         domainDisposable,
@@ -114,7 +114,7 @@ class RootTasksFactory(
     override fun getAllExistingInstances() = getProjectsFactory().projects
         .values
         .asSequence()
-        .flatMap { it.getAllTasks() }
+        .flatMap { it.getAllDependenciesLoadedTasks() }
         .flatMap { it.existingInstances.values }
 
     override fun getRootTasksForProject(projectKey: ProjectKey<*>) =

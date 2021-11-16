@@ -62,9 +62,9 @@ abstract class Project<T : ProjectType>(
     abstract val customTimes: Collection<Time.Custom.Project<T>>
 
     val taskHierarchies
-        get() = taskHierarchyContainer.all + getAllTasks().flatMap { it.nestedParentTaskHierarchies.values }
+        get() = taskHierarchyContainer.all + getAllDependenciesLoadedTasks().flatMap { it.nestedParentTaskHierarchies.values }
 
-    val existingInstances get() = getAllTasks().flatMap { it.existingInstances.values }
+    val existingInstances get() = getAllDependenciesLoadedTasks().flatMap { it.existingInstances.values }
 
     private fun getOrCreateCustomTime(
         dayOfWeek: DayOfWeek,
@@ -141,12 +141,13 @@ abstract class Project<T : ProjectType>(
             }
         }
 
-    fun getAllTasks(): Collection<Task> = _tasks.values.filter { it.dependenciesLoaded } + rootTasksCache.value
+    fun getAllDependenciesLoadedTasks(): Collection<Task> =
+        _tasks.values.filter { it.dependenciesLoaded } + rootTasksCache.value
 
     fun setEndExactTimeStamp(now: ExactTimeStamp.Local, projectUndoData: ProjectUndoData, removeInstances: Boolean) {
         requireNotDeleted()
 
-        getAllTasks().filter { it.notDeleted }.forEach {
+        getAllDependenciesLoadedTasks().filter { it.notDeleted }.forEach {
             it.performIntervalUpdate { setEndData(Task.EndData(now, removeInstances), projectUndoData.taskUndoData) }
         }
 
@@ -188,7 +189,7 @@ abstract class Project<T : ProjectType>(
     fun fixNotificationShown(
         shownFactory: Instance.ShownFactory,
         now: ExactTimeStamp.Local,
-    ) = getAllTasks().forEach {
+    ) = getAllDependenciesLoadedTasks().forEach {
         it.existingInstances
             .values
             .forEach { it.fixNotificationShown(shownFactory, now) }
@@ -207,7 +208,7 @@ abstract class Project<T : ProjectType>(
 
         InterruptionChecker.throwIfInterrupted()
 
-        val filteredTasks = getAllTasks().asSequence()
+        val filteredTasks = getAllDependenciesLoadedTasks().asSequence()
             .filter { it.mayHaveRootInstances() }
             .filterSearch(searchData?.searchCriteria?.search, now).map { it.first }
             .toList()

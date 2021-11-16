@@ -186,7 +186,7 @@ fun DomainUpdater.updatePhotoUrl(
 
 fun DomainFactory.getUnscheduledTasks(projectKey: ProjectKey.Shared? = null): List<Task> {
     val tasks = projectKey?.let(projectsFactory::getProjectForce)
-        ?.getAllTasks()
+        ?.getAllDependenciesLoadedTasks()
         ?: getAllTasks()
 
     return tasks.filter { it.notDeleted && it.intervalInfo.isUnscheduled() }

@@ -6,9 +6,7 @@ import com.krystianwsul.common.firebase.models.noscheduleorparent.NoScheduleOrPa
 import com.krystianwsul.common.firebase.models.project.PrivateProject
 import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.project.SharedProject
-import com.krystianwsul.common.firebase.models.schedule.RepeatingSchedule
 import com.krystianwsul.common.firebase.models.schedule.Schedule
-import com.krystianwsul.common.firebase.models.schedule.SingleSchedule
 import com.krystianwsul.common.firebase.models.task.ProjectRootTaskIdTracker
 import com.krystianwsul.common.firebase.models.task.RootTask
 import com.krystianwsul.common.firebase.models.task.Task
@@ -32,7 +30,7 @@ object Irrelevant {
         now: ExactTimeStamp.Local,
     ): Result {
         val projects = getProjects()
-        val tasks = projects.values.flatMap { it.getAllTasks() }
+        val tasks = projects.values.flatMap { it.getAllDependenciesLoadedTasks() }
 
         lateinit var taskRelevances: Map<TaskKey, TaskRelevance>
         lateinit var remoteProjectRelevances: Map<ProjectKey<*>, RemoteProjectRelevance>

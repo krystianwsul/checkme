@@ -51,7 +51,7 @@ fun DomainFactory.getShowTasksData(parameters: ShowTasksActivity.Parameters): Sh
 
     when (parameters) {
         is ShowTasksActivity.Parameters.Unscheduled -> {
-            fun Project<*>.getUnscheduledTaskDatas() = getAllTasks().filter {
+            fun Project<*>.getUnscheduledTaskDatas() = getAllDependenciesLoadedTasks().filter {
                 it.notDeleted && it.intervalInfo.isUnscheduled()
             }
                 .map { it.toChildTaskData(it.getHierarchyExactTimeStamp(now)) }
@@ -88,7 +88,7 @@ fun DomainFactory.getShowTasksData(parameters: ShowTasksActivity.Parameters): Sh
         is ShowTasksActivity.Parameters.Project -> {
             val project = projectsFactory.getProjectForce(parameters.projectKey)
 
-            entryDatas = project.getAllTasks()
+            entryDatas = project.getAllDependenciesLoadedTasks()
                 .asSequence()
                 .map { Pair(it, it.getHierarchyExactTimeStamp(now)) }
                 .filter { (task, hierarchyExactTimeStamp) -> task.isTopLevelTask(hierarchyExactTimeStamp) }

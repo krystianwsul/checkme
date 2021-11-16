@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.domainmodel
 import com.krystianwsul.checkme.domainmodel.update.DomainUpdate
 import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
 import com.krystianwsul.common.firebase.models.checkInconsistentRootTaskIds
+import com.krystianwsul.common.firebase.models.task.RootTask
 import com.krystianwsul.common.time.ExactTimeStamp
 import io.reactivex.rxjava3.core.Single
 
@@ -18,8 +19,8 @@ class TestDomainUpdater(
         domainFactory.updateNotifications(params, now)
 
         // todo remove this once error found
-        domainFactory.apply {
-            checkInconsistentRootTaskIds(domainFactory.rootTasksFactory.rootTasks.values, projectsFactory.projects.values)
+        domainFactory.projectsFactory.apply {
+            checkInconsistentRootTaskIds(allDependenciesLoadedTasks.filterIsInstance<RootTask>(), projects.values)
         }
 
         domainFactory.saveAndNotifyCloud(params, now)

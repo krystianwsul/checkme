@@ -679,7 +679,7 @@ private fun DomainFactory.getProjectTaskTreeDatas(
     excludedTaskKeys: Set<TaskKey>,
     parentInstanceKey: InstanceKey?,
 ): List<EditViewModel.ParentEntryData.Task> {
-    return project.getAllTasks()
+    return project.getAllDependenciesLoadedTasks()
         .filter { it.showAsParent(now, excludedTaskKeys) }
         .filter { it.isTopLevelTask(now) }
         .map { it.toParentEntryData(this, now, excludedTaskKeys, parentInstanceKey) }

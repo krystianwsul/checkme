@@ -137,7 +137,7 @@ class ProjectsFactory(
 
     val projectTasks get() = projects.values.flatMap { it.projectTasks }
 
-    val allTasks get() = projects.values.flatMap { it.getAllTasks() }
+    val allDependenciesLoadedTasks get() = projects.values.flatMap { it.getAllDependenciesLoadedTasks() }
 
     fun createProject(
         name: String,

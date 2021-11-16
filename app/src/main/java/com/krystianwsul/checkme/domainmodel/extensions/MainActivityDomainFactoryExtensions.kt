@@ -81,7 +81,7 @@ private fun DomainFactory.getMainData(
     } else {
         projectsFactory.projects
             .values
-            .map { it.toProjectData(it.getAllTasks().toChildTaskDatas()) }
+            .map { it.toProjectData(it.getAllDependenciesLoadedTasks().toChildTaskDatas()) }
     }.filter { it.children.isNotEmpty() }
 }
 

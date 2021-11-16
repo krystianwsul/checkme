@@ -211,7 +211,11 @@ class RootTask private constructor(
             is Type.Schedule -> type.getParentProjectSchedule()
             is Type.NoSchedule -> type.noScheduleOrParent!!
             is Type.Child -> null // called redundantly
-        }?.updateProject(projectKey)
+        }?.let {
+            it.updateProject(projectKey)
+
+            projectIdCache.invalidate()
+        }
 
         /**
          * Since the projectId depends on external factors, this call isn't 100% complete.  But the current purpose is just

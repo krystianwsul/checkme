@@ -900,7 +900,7 @@ private fun DomainFactory.convertAndUpdateProject(
     return when (task) {
         is RootTask -> task.updateProject(projectKey)
         is ProjectTask -> converter.convertToRoot(now, task, projectKey)
-    }
+    }.also { check(it.project.projectKey == projectKey) }
 }
 
 fun DomainFactory.convertToRoot(task: Task, now: ExactTimeStamp.Local): RootTask {

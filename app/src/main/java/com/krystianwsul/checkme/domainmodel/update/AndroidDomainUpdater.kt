@@ -7,8 +7,6 @@ import com.krystianwsul.checkme.domainmodel.observeOnDomain
 import com.krystianwsul.checkme.utils.filterNotNull
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.firebase.DomainThreadChecker
-import com.krystianwsul.common.firebase.models.checkInconsistentRootTaskIds
-import com.krystianwsul.common.firebase.models.task.RootTask
 import com.krystianwsul.common.time.ExactTimeStamp
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Single
@@ -97,10 +95,11 @@ object AndroidDomainUpdater : DomainUpdater() {
                 it.dispatchResult()
             }
 
-            // todo remove this once error found
+            /*
             domainFactory.projectsFactory.apply {
                 checkInconsistentRootTaskIds(allDependenciesLoadedTasks.filterIsInstance<RootTask>(), projects.values)
             }
+             */
 
             domainFactory.saveAndNotifyCloud(params, now)
 

@@ -5,6 +5,7 @@ import com.krystianwsul.checkme.domainmodel.extensions.*
 import com.krystianwsul.checkme.domainmodel.updates.CreateChildTaskDomainUpdate
 import com.krystianwsul.checkme.gui.edit.EditParameters
 import com.krystianwsul.checkme.gui.edit.delegates.EditDelegate
+import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.task.RootTask
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.ScheduleData
@@ -1151,7 +1152,7 @@ class DomainFactoryTest {
             ScheduleData.Weekly(DayOfWeek.set, scheduleTimePair, null, null, 1)
         )
 
-        val repeating1TaskKey = domainUpdater(now).createScheduleTopLevelTask(
+        domainUpdater(now).createScheduleTopLevelTask(
             DomainListenerManager.NotificationType.All,
             EditDelegate.CreateParameters("repeating 1"),
             repeatingScheduleDatas,
@@ -1160,7 +1161,7 @@ class DomainFactoryTest {
             .blockingGet()
             .taskKey
 
-        val repeating2TaskKey = domainUpdater(now).createScheduleTopLevelTask(
+        domainUpdater(now).createScheduleTopLevelTask(
             DomainListenerManager.NotificationType.All,
             EditDelegate.CreateParameters("repeating 2"),
             repeatingScheduleDatas,
@@ -1306,7 +1307,7 @@ class DomainFactoryTest {
             ScheduleData.Weekly(DayOfWeek.set, scheduleTimePair, null, null, 1)
         )
 
-        val repeating1TaskKey = domainUpdater(now).createScheduleTopLevelTask(
+        domainUpdater(now).createScheduleTopLevelTask(
             DomainListenerManager.NotificationType.All,
             EditDelegate.CreateParameters("repeating 1"),
             repeatingScheduleDatas,
@@ -1315,7 +1316,7 @@ class DomainFactoryTest {
             .blockingGet()
             .taskKey
 
-        val repeating2TaskKey = domainUpdater(now).createScheduleTopLevelTask(
+        domainUpdater(now).createScheduleTopLevelTask(
             DomainListenerManager.NotificationType.All,
             EditDelegate.CreateParameters("repeating 2"),
             repeatingScheduleDatas,
@@ -1447,5 +1448,53 @@ class DomainFactoryTest {
                 .instanceDatas
                 .size,
         )
+    }
+
+    @Test
+    fun testEditingProjectForMockSingleSchedule() {
+        val date = Date(2021, 11, 16)
+
+        var now = ExactTimeStamp.Local(date, HourMinute(1, 0))
+
+        val createParameters = EditDelegate.CreateParameters("task")
+
+        val taskKey = domainUpdater(now).createScheduleTopLevelTask(
+            DomainListenerManager.NotificationType.All,
+            createParameters,
+            listOf(ScheduleData.Single(date, TimePair(HourMinute(5, 0)))),
+            null,
+        )
+            .blockingGet()
+            .taskKey
+
+        now += 1.hours
+
+        val projectKey = domainUpdater(now).createProject(
+            DomainListenerManager.NotificationType.All,
+            "project",
+            setOf(),
+        ).blockingGet()
+
+        now += 1.hours
+
+        fun Project<*>.rootTaskIdCount() = projectRecord.rootTaskParentDelegate
+            .rootTaskKeys
+            .size
+
+        assertEquals(1, domainFactory.projectsFactory.privateProject.rootTaskIdCount())
+        assertEquals(0, domainFactory.projectsFactory.sharedProjects.getValue(projectKey).rootTaskIdCount())
+
+        domainUpdater(now).updateScheduleTask(
+            DomainListenerManager.NotificationType.All,
+            taskKey,
+            createParameters,
+            listOf(ScheduleData.Single(date, TimePair(HourMinute(6, 0)))),
+            EditDelegate.SharedProjectParameters(projectKey, setOf()),
+        ).blockingGet()
+
+        assertEquals(projectKey, domainFactory.getTaskForce(taskKey).project.projectKey)
+
+        assertEquals(0, domainFactory.projectsFactory.privateProject.rootTaskIdCount())
+        assertEquals(1, domainFactory.projectsFactory.sharedProjects.getValue(projectKey).rootTaskIdCount())
     }
 }

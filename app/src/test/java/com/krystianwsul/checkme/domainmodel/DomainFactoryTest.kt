@@ -1451,6 +1451,56 @@ class DomainFactoryTest {
     }
 
     @Test
+    fun testEditingProjectForRegularSingleSchedule() {
+        val date = Date(2021, 11, 16)
+
+        var now = ExactTimeStamp.Local(date, HourMinute(1, 0))
+
+        val createParameters = EditDelegate.CreateParameters("task")
+
+        val scheduleDatas = listOf(ScheduleData.Single(date, TimePair(HourMinute(5, 0))))
+
+        val taskKey = domainUpdater(now).createScheduleTopLevelTask(
+            DomainListenerManager.NotificationType.All,
+            createParameters,
+            scheduleDatas,
+            null,
+        )
+            .blockingGet()
+            .taskKey
+
+        now += 1.hours
+
+        val projectKey = domainUpdater(now).createProject(
+            DomainListenerManager.NotificationType.All,
+            "project",
+            setOf(),
+        ).blockingGet()
+
+        now += 1.hours
+
+        fun Project<*>.rootTaskIdCount() = projectRecord.rootTaskParentDelegate
+            .rootTaskKeys
+            .size
+
+        assertEquals(1, domainFactory.projectsFactory.privateProject.rootTaskIdCount())
+        assertEquals(0, domainFactory.projectsFactory.sharedProjects.getValue(projectKey).rootTaskIdCount())
+
+        domainUpdater(now).updateScheduleTask(
+            DomainListenerManager.NotificationType.All,
+            taskKey,
+            createParameters,
+            scheduleDatas,
+            EditDelegate.SharedProjectParameters(projectKey, setOf()),
+        ).blockingGet()
+
+        assertEquals(projectKey, domainFactory.getTaskForce(taskKey).project.projectKey)
+
+        assertEquals(0, domainFactory.projectsFactory.privateProject.rootTaskIdCount())
+        assertEquals(1, domainFactory.projectsFactory.sharedProjects.getValue(projectKey).rootTaskIdCount())
+    }
+
+    @Test
     fun testEditingProjectForMockSingleSchedule() {
         val date = Date(2021, 11, 16)
 

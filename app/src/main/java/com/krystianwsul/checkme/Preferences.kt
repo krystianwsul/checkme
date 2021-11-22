@@ -205,7 +205,7 @@ object Preferences {
     ) { _, _, newValue -> projectOrderString = serialize(HashMap(newValue)) }
         private set
 
-    private const val PROJECT_ORDER_INCREMENT = 1 / 4f
+    private const val PROJECT_ORDER_INCREMENT = 1 / 20f
 
     fun updateProjectOrder(addedProjectKey: ProjectKey.Shared, allProjectKeys: Set<ProjectKey.Shared>) {
         val oldProjectOrder = projectOrder.filterKeys { it in allProjectKeys }

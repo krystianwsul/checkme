@@ -235,6 +235,18 @@ fun DomainFactory.getCreateTaskParentPickerData(
     return EditViewModel.ParentPickerData(parentTreeDatas)
 }
 
+private fun DomainFactory.updateProjectOrder(task: Task?, newSharedProjectKey: ProjectKey.Shared?) {
+    newSharedProjectKey?.takeIf { it != task?.project?.projectKey }?.let {
+        Preferences.updateProjectOrder(
+            it,
+            projectsFactory.sharedProjects
+                .keys
+                .map { it as ProjectKey.Shared }
+                .toSet(),
+        )
+    }
+}
+
 @CheckResult
 fun DomainUpdater.createScheduleTopLevelTask(
     notificationType: DomainListenerManager.NotificationType,
@@ -244,6 +256,8 @@ fun DomainUpdater.createScheduleTopLevelTask(
     copyTaskKey: TaskKey? = null,
 ): Single<EditDelegate.CreateResult> = SingleDomainUpdate.create("createScheduleTopLevelTask") { now ->
     check(scheduleDatas.isNotEmpty())
+
+    updateProjectOrder(null, sharedProjectParameters?.key)
 
     val finalProjectId = sharedProjectParameters?.key ?: defaultProjectKey
 
@@ -287,6 +301,8 @@ fun DomainUpdater.createTopLevelTask(
     sharedProjectKey: ProjectKey.Shared?,
     copyTaskKey: TaskKey? = null,
 ): Single<EditDelegate.CreateResult> = SingleDomainUpdate.create("createTopLevelTask") { now ->
+    updateProjectOrder(null, sharedProjectKey)
+
     val finalProjectId = sharedProjectKey ?: defaultProjectKey
 
     val image = createParameters.getImage(this)
@@ -330,6 +346,8 @@ fun DomainUpdater.updateScheduleTask(
 
     val originalTask = getTaskForce(taskKey)
     originalTask.requireNotDeleted()
+
+    updateProjectOrder(originalTask, sharedProjectParameters?.key)
 
     val originalProject = originalTask.project
 
@@ -452,6 +470,8 @@ fun DomainUpdater.updateTopLevelTask(
     val originalTask = getTaskForce(taskKey)
     originalTask.requireNotDeleted()
 
+    updateProjectOrder(originalTask, sharedProjectKey)
+
     val originalProject = originalTask.project
 
     lateinit var finalTask: RootTask
@@ -496,6 +516,8 @@ fun DomainUpdater.createScheduleJoinTopLevelTask(
 ): Single<TaskKey.Root> = SingleDomainUpdate.create("createScheduleJoinTopLevelTask") { now ->
     check(scheduleDatas.isNotEmpty())
     check(joinables.size > 1)
+
+    updateProjectOrder(null, sharedProjectParameters?.key)
 
     val finalProjectKey = sharedProjectParameters?.key ?: defaultProjectKey
 
@@ -607,6 +629,8 @@ fun DomainUpdater.createJoinTopLevelTask(
 ): Single<TaskKey.Root> = SingleDomainUpdate.create("createJoinTopLevelTask") { now ->
     check(joinTaskKeys.size > 1)
 
+    updateProjectOrder(null, sharedProjectKey)
+
     val initialJoinTasks = joinTaskKeys.map(::getTaskForce)
 
     val originalProjects = initialJoinTasks.map { it.project }
@@ -663,7 +687,6 @@ private fun DomainFactory.getParentTreeDatas(
     parentTreeDatas += projectsFactory.sharedProjects
         .values
         .asSequence()
-        .sortedByDescending { projectOrder[it.projectKey] }
         .filter { it.notDeleted }
         .map {
             EditViewModel.ParentEntryData.Project(
@@ -671,6 +694,7 @@ private fun DomainFactory.getParentTreeDatas(
                 getProjectTaskTreeDatas(now, it, excludedTaskKeys, parentInstanceKey),
                 it.projectKey,
                 it.users.toUserDatas(),
+                projectOrder.getOrDefault(it.projectKey, 0f),
             )
         }
 

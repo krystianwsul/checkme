@@ -742,7 +742,7 @@ class MainActivity :
                 .toolbar
                 .apply {
                     visibility = View.VISIBLE
-                    requestSearchFocus()
+                    requestSearchFocus(true)
                 }
 
             TabSearchState.fromTabSetting(Preferences.getTab(), true)

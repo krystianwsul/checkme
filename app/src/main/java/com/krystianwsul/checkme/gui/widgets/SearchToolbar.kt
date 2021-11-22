@@ -7,6 +7,7 @@ import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.inputmethod.InputMethodManager
 import android.widget.FrameLayout
+import androidx.core.content.getSystemService
 import com.jakewharton.rxbinding4.appcompat.navigationClicks
 import com.jakewharton.rxbinding4.widget.textChanges
 import com.krystianwsul.checkme.Preferences
@@ -26,24 +27,22 @@ class SearchToolbar @JvmOverloads constructor(context: Context, attrs: Attribute
     private val binding =
             ToolbarSearchInnerBinding.inflate(LayoutInflater.from(context), this, true)
 
-    private val inputMethodManager by lazy {
-        context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-    }
+    private val inputMethodManager by lazy { context.getSystemService<InputMethodManager>()!! }
 
     val filterCriteriaObservable by lazy {
         Observables.combineLatest(
                 binding.searchText
-                        .textChanges()
-                        .map { it.toString() }
-                        .distinctUntilChanged()
-                        .map { it.normalized() }
-                        .distinctUntilChanged(),
-                Preferences.filterParamsObservable,
+                    .textChanges()
+                    .map { it.toString() }
+                    .distinctUntilChanged()
+                    .map { it.normalized() }
+                    .distinctUntilChanged(),
+            Preferences.filterParamsObservable,
         )
-                .map { (query, filterParams) -> FilterCriteria.Full(query, filterParams) }
-                .distinctUntilChanged()
-                .replay(1)
-                .apply { attachedToWindowDisposable += connect() }!! // this should be hooked up in attachedToWindow
+            .map { (query, filterParams) -> FilterCriteria.Full(query, filterParams) }
+            .distinctUntilChanged()
+            .replay(1)
+            .apply { attachedToWindowDisposable += connect() } // this should be hooked up in attachedToWindow
     }
 
     private val attachedToWindowDisposable = CompositeDisposable()
@@ -94,9 +93,16 @@ class SearchToolbar @JvmOverloads constructor(context: Context, attrs: Attribute
         super.onDetachedFromWindow()
     }
 
-    fun requestSearchFocus() {
+    fun requestSearchFocus(delayed: Boolean = false) {
         binding.searchText.requestFocus()
-        inputMethodManager.showSoftInput(binding.searchText, InputMethodManager.SHOW_IMPLICIT)
+
+        fun showKeyboard() = inputMethodManager.showSoftInput(binding.searchText, InputMethodManager.SHOW_IMPLICIT)
+
+        if (delayed) {
+            postDelayed(::showKeyboard, 1000)
+        } else {
+            showKeyboard()
+        }
     }
 
     fun navigationClicks() = binding.searchToolbar.navigationClicks()

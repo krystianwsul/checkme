@@ -140,12 +140,7 @@ class TreeNodeCollection<T : TreeHolder>(val treeViewAdapter: TreeViewAdapter<T>
         treeNodesRelay.accept(treeNodes)
     }
 
-    fun setNewItemPosition(position: Int) {
-        val allDisplayedNodes = displayedNodes
-        val adjustedPositionInAllNodes = min(allDisplayedNodes.size - 1, position) // padding
-        val currentTreeNode = allDisplayedNodes[adjustedPositionInAllNodes]
-        val currentNode = currentTreeNode.modelNode
-
+    private fun getAdjacentNodes(currentTreeNode: TreeNode<*>): Pair<Sortable?, Sortable?> {
         val displayedNodesInParent = currentTreeNode.parent.displayedChildNodes
         val currentPositionInParent = displayedNodesInParent.indexOf(currentTreeNode)
 
@@ -160,6 +155,24 @@ class TreeNodeCollection<T : TreeHolder>(val treeViewAdapter: TreeViewAdapter<T>
             ?.modelNode
             ?.let { it as? Sortable }
             ?.takeIf { it.sortable }
+
+        val reversedOrdinal = listOfNotNull(previousNode, nextNode).map { it.reversedOrdinal }
+            .distinct()
+            .single()
+
+        return if (reversedOrdinal)
+            nextNode to previousNode
+        else
+            previousNode to nextNode
+    }
+
+    fun setNewItemPosition(position: Int) {
+        val allDisplayedNodes = displayedNodes
+        val adjustedPositionInAllNodes = min(allDisplayedNodes.size - 1, position) // padding
+        val currentTreeNode = allDisplayedNodes[adjustedPositionInAllNodes]
+        val currentNode = currentTreeNode.modelNode
+
+        val (previousNode, nextNode) = getAdjacentNodes(currentTreeNode)
 
         check(previousNode != null || nextNode != null)
 

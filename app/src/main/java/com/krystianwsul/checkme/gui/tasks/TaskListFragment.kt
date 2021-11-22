@@ -607,7 +607,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
     private abstract class Node(
         val entryData: EntryData,
         private val nodeParent: NodeParent,
-        private val reverseSortOrder: Boolean,
+        reverseSortOrder: Boolean,
     ) : AbstractModelNode(), NodeParent, MultiLineModelNode, InvisibleCheckboxModelNode, IndentationModelNode {
 
         override val holderType = HolderType.EXPANDABLE_MULTILINE
@@ -641,9 +641,11 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
         protected val name = MultiLineRow.Visible(entryData.name, disabledOverride ?: R.color.textPrimary)
 
+        protected val reverseSortOrderFinal = taskListFragment.data!!.reverseOrderForTopLevelNodes && reverseSortOrder
+
         override fun compareTo(other: ModelNode<AbstractHolder>) = if (other is Node) {
             var comparison = entryData.compareTo(other.entryData)
-            if (taskListFragment.data!!.reverseOrderForTopLevelNodes && reverseSortOrder)
+            if (reverseSortOrderFinal)
                 comparison = -comparison
 
             comparison
@@ -864,6 +866,8 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         }
 
         override val thumbnail = childTaskData.imageState
+
+        override val reversedOrdinal get() = reverseSortOrderFinal
 
         override fun getOrdinal() = childTaskData.ordinal
 

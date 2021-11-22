@@ -64,7 +64,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
     private val delegateRelay = BehaviorRelay.create<Delegate>()
 
     private val treeViewAdapterRelay = BehaviorRelay.create<TreeViewAdapter<AbstractHolder>>()
-    private val treeViewAdapterSingle = treeViewAdapterRelay.singleOrError()
+    private val treeViewAdapterSingle = treeViewAdapterRelay.firstOrError()
     private val treeViewAdapter get() = treeViewAdapterRelay.value
 
     private var expansionStates: Map<Parcelable, TreeNode.ExpansionState>? = null

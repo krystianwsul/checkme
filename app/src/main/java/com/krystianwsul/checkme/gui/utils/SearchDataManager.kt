@@ -37,7 +37,7 @@ abstract class SearchDataManager<DATA : Any, MODEL_ADAPTER : BaseAdapter>(
     val treeViewAdapterInitialized get() = treeViewAdapterRelay.hasValue()
     val treeViewAdapterNullable get() = treeViewAdapterRelay.value
     val treeViewAdapter get() = treeViewAdapterNullable!!
-    val treeViewAdapterSingle = treeViewAdapterRelay.singleOrError()
+    val treeViewAdapterSingle = treeViewAdapterRelay.firstOrError()
 
     var modelAdapter: MODEL_ADAPTER? = null
         private set

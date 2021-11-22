@@ -211,10 +211,14 @@ object Preferences {
         val oldProjectOrder = projectOrder.filterKeys { it in allProjectKeys }
 
         val oldSum = oldProjectOrder.values.sum()
-        val oldTargetSum = 1 - PROJECT_ORDER_INCREMENT
+        val newProjectOrder = if (oldSum > 0) {
+            val oldTargetSum = 1 - PROJECT_ORDER_INCREMENT
 
-        val weight = oldTargetSum / oldSum
-        val newProjectOrder = oldProjectOrder.mapValues { it.value * weight }.toMutableMap()
+            val weight = oldTargetSum / oldSum
+            oldProjectOrder.mapValues { it.value * weight }.toMutableMap()
+        } else {
+            oldProjectOrder.toMutableMap()
+        }
 
         newProjectOrder[addedProjectKey] = newProjectOrder.getOrDefault(addedProjectKey, 0f) + PROJECT_ORDER_INCREMENT
 

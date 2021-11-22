@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.domainmodel.extensions
 
 import androidx.annotation.CheckResult
 import com.krystianwsul.checkme.MyCrashlytics
+import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.*
 import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
 import com.krystianwsul.checkme.domainmodel.update.SingleDomainUpdate
@@ -657,9 +658,12 @@ private fun DomainFactory.getParentTreeDatas(
         .filter { it.isTopLevelTask(now) && (it.project as? SharedProject)?.notDeleted != true }
         .map { it.toParentEntryData(this, now, excludedTaskKeys, parentInstanceKey) }
 
+    val projectOrder = Preferences.projectOrder
+
     parentTreeDatas += projectsFactory.sharedProjects
         .values
         .asSequence()
+        .sortedByDescending { projectOrder[it.projectKey] }
         .filter { it.notDeleted }
         .map {
             EditViewModel.ParentEntryData.Project(

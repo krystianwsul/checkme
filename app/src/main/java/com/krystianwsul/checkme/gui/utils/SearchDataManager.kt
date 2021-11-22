@@ -33,11 +33,11 @@ abstract class SearchDataManager<DATA : Any, MODEL_ADAPTER : BaseAdapter>(
     var filterCriteria: FilterCriteria = FilterCriteria.None
         private set
 
-    private val treeViewAdapterRelay = BehaviorRelay.create<TreeViewAdapter<AbstractHolder>>()!!
+    private val treeViewAdapterRelay = BehaviorRelay.create<TreeViewAdapter<AbstractHolder>>()
     val treeViewAdapterInitialized get() = treeViewAdapterRelay.hasValue()
     val treeViewAdapterNullable get() = treeViewAdapterRelay.value
     val treeViewAdapter get() = treeViewAdapterNullable!!
-    val treeViewAdapterSingle = treeViewAdapterRelay.firstOrError()!!
+    val treeViewAdapterSingle = treeViewAdapterRelay.singleOrError()
 
     var modelAdapter: MODEL_ADAPTER? = null
         private set

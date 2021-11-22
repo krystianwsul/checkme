@@ -23,32 +23,31 @@ fun DomainFactory.getShowTaskData(requestTaskKey: TaskKey): ShowTaskViewModel.Da
     val parentHierarchyExactTimeStamp = task.getHierarchyExactTimeStamp(now)
 
     val childTaskDatas = task.getChildTaskHierarchies(parentHierarchyExactTimeStamp, true)
-            .map { taskHierarchy ->
-                val childTask = taskHierarchy.childTask
+        .map { taskHierarchy ->
+            val childTask = taskHierarchy.childTask
 
-                val childHierarchyExactTimeStamp = childTask.getHierarchyExactTimeStamp(parentHierarchyExactTimeStamp)
+            val childHierarchyExactTimeStamp = childTask.getHierarchyExactTimeStamp(parentHierarchyExactTimeStamp)
 
-                TaskListFragment.ChildTaskData(
-                    childTask.name,
-                    childTask.getScheduleText(ScheduleText, childHierarchyExactTimeStamp),
-                    getTaskListChildTaskDatas(childTask, now, childHierarchyExactTimeStamp),
-                    childTask.note,
-                    childTask.taskKey,
-                    childTask.getImage(deviceDbInfo),
-                    childTask.notDeleted,
-                    childTask.isVisible(now),
-                    childTask.canMigrateDescription(now),
-                    childTask.ordinal,
-                    childTask.getProjectInfo(now),
-                    childTask.isAssignedToMe(now, myUserFactory.user),
-                )
-            }
-            .sorted()
+            TaskListFragment.ChildTaskData(
+                childTask.name,
+                childTask.getScheduleText(ScheduleText, childHierarchyExactTimeStamp),
+                getTaskListChildTaskDatas(childTask, now, childHierarchyExactTimeStamp),
+                childTask.note,
+                childTask.taskKey,
+                childTask.getImage(deviceDbInfo),
+                childTask.notDeleted,
+                childTask.isVisible(now),
+                childTask.canMigrateDescription(now),
+                childTask.ordinal,
+                childTask.getProjectInfo(now),
+                childTask.isAssignedToMe(now, myUserFactory.user),
+            )
+        }
+        .sorted()
 
     var collapseText = listOfNotNull(
-            task.getParentName(parentHierarchyExactTimeStamp).takeIf { it.isNotEmpty() },
-            task.getScheduleTextMultiline(ScheduleText, parentHierarchyExactTimeStamp)
-                    .takeIf { it.isNotEmpty() }
+        task.getParentTask(parentHierarchyExactTimeStamp)?.name,
+        task.getScheduleTextMultiline(ScheduleText, parentHierarchyExactTimeStamp).takeIf { it.isNotEmpty() }
     ).joinToString("\n\n")
 
     if (debugMode) {

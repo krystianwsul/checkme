@@ -479,8 +479,6 @@ class Instance private constructor(
         (data as Data.Real).instanceRecord.hidden = false
     }
 
-    fun getParentName() = parentInstance?.name ?: task.project.name
-
     fun getShown(shownFactory: ShownFactory) = shownHolder.getShown(shownFactory)
 
     /*

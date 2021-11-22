@@ -35,7 +35,7 @@ fun DomainFactory.getShowInstanceData(
     val parentInstance = instance.parentInstance
 
     var displayText = listOfNotNull(
-        instance.getParentName().takeIf { it.isNotEmpty() },
+        instance.parentInstance?.name,
         instanceDateTime.takeIf { instance.isRootInstance() }?.getDisplayText(),
     ).joinToString("\n\n")
 

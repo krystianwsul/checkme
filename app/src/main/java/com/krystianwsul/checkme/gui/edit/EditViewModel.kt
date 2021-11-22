@@ -443,6 +443,7 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
             override val childEntryDatas: List<Task>,
             override val projectKey: ProjectKey.Shared,
             private val projectUsers: Map<UserKey, UserData>,
+            private val projectOrder: Float,
         ) : ParentEntryData() {
 
             override val normalizedFields by lazy { listOfNotNull(name, note).map { it.normalized() } }
@@ -453,7 +454,7 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
 
             override val note: String? = null
 
-            override val sortKey = SortKey.ProjectSortKey(projectKey)
+            override val sortKey = SortKey.ProjectSortKey(projectKey, projectOrder)
 
             override fun normalize() {
                 normalizedFields
@@ -513,14 +514,16 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
 
     sealed class SortKey : ParentPickerFragment.SortKey {
 
-        data class ProjectSortKey(private val projectId: ProjectKey.Shared) : SortKey() {
+        data class ProjectSortKey(private val projectId: ProjectKey.Shared, private val projectOrder: Float) : SortKey() {
 
             override fun compareTo(other: ParentPickerFragment.SortKey): Int {
                 if (other is TaskSortKey) return 1
 
                 val projectSortKey = other as ProjectSortKey
 
-                return projectId.compareTo(projectSortKey.projectId)
+                return projectOrder.compareTo(projectSortKey.projectOrder)
+                    .takeIf { it != 0 }
+                    ?: projectId.compareTo(projectSortKey.projectId)
             }
         }
 

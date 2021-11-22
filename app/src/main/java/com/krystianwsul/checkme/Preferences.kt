@@ -11,6 +11,7 @@ import com.krystianwsul.checkme.utils.ignore
 import com.krystianwsul.checkme.utils.serialize
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.time.ExactTimeStamp
+import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.treeadapter.FilterCriteria
 import com.soywiz.klock.DateTimeTz
@@ -46,6 +47,7 @@ object Preferences {
     private const val KEY_LANGUAGE = "language"
     private const val KEY_VERSION_CODE = "versionCode"
     private const val KEY_INSTANCE_WARNING_SNOOZE = "instanceWarningSnooze"
+    private const val KEY_PROJECT_ORDER = "projectOrder"
 
     private val sharedPreferences by lazy { MyApplication.sharedPreferences }
 
@@ -194,6 +196,35 @@ object Preferences {
     fun setTooltipShown(type: TooltipManager.Type, shown: Boolean = true) =
         sharedPreferences.edit { putBoolean(KEY_TOOLTIP_SHOWN + type, shown) }
 
+    private var projectOrderString: String by observable(
+        sharedPreferences.getString(KEY_PROJECT_ORDER, "")!!
+    ) { _, _, newValue -> sharedPreferences.edit { putString(KEY_PROJECT_ORDER, newValue) } }
+
+    var projectOrder: Map<ProjectKey.Shared, Float> by observable(
+        deserialize<HashMap<ProjectKey.Shared, Float>>(projectOrderString) ?: mapOf()
+    ) { _, _, newValue -> projectOrderString = serialize(HashMap(newValue)) }
+        private set
+
+    private const val PROJECT_ORDER_INCREMENT = 1 / 20f
+
+    fun updateProjectOrder(addedProjectKey: ProjectKey.Shared, allProjectKeys: Set<ProjectKey.Shared>) {
+        val oldProjectOrder = projectOrder.filterKeys { it in allProjectKeys }
+
+        val oldSum = oldProjectOrder.values.sum()
+        val newProjectOrder = if (oldSum > 0) {
+            val oldTargetSum = 1 - PROJECT_ORDER_INCREMENT
+
+            val weight = oldTargetSum / oldSum
+            oldProjectOrder.mapValues { it.value * weight }.toMutableMap()
+        } else {
+            oldProjectOrder.toMutableMap()
+        }
+
+        newProjectOrder[addedProjectKey] = newProjectOrder.getOrDefault(addedProjectKey, 0f) + PROJECT_ORDER_INCREMENT
+
+        projectOrder = newProjectOrder
+    }
+
     private open class ReadOnlyStrPref(protected val key: String) : ReadOnlyProperty<Any, String> {
 
         final override fun getValue(
@@ -204,9 +235,8 @@ object Preferences {
 
     private class ReadWriteStrPref(key: String) : ReadOnlyStrPref(key), ReadWriteProperty<Any, String> {
 
-        override fun setValue(thisRef: Any, property: KProperty<*>, value: String) = sharedPreferences.edit()
-            .putString(key, value)
-            .apply()
+        override fun setValue(thisRef: Any, property: KProperty<*>, value: String) =
+            sharedPreferences.edit { putString(key, value) }
     }
 
     class Logger(key: String, private val length: Int = 100) {

@@ -34,6 +34,7 @@ import com.krystianwsul.treeadapter.*
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.kotlin.Observables
 import io.reactivex.rxjava3.kotlin.addTo
+import io.reactivex.rxjava3.kotlin.cast
 import io.reactivex.rxjava3.kotlin.plusAssign
 
 class ParentPickerFragment : AbstractDialogFragment() {
@@ -140,7 +141,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
         ).subscribe { (delegate, query) -> delegate.onSearch(query) }
 
         delegateRelay.switchMap { delegate ->
-            getProgressShownObservable(binding.parentPickerRecycler) { treeViewAdapter!! }.map { delegate }
+            getProgressShownObservable(binding.parentPickerRecycler, treeViewAdapterSingle.cast()).map { delegate }
         }
             .subscribe { it.onPaddingShown() }
             .addTo(viewCreatedDisposable)

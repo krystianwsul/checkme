@@ -50,6 +50,7 @@ import com.stfalcon.imageviewer.StfalconImageViewer
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
+import io.reactivex.rxjava3.kotlin.cast
 import java.util.*
 
 class GroupListFragment @JvmOverloads constructor(
@@ -122,7 +123,7 @@ class GroupListFragment @JvmOverloads constructor(
     lateinit var listener: GroupListListener
 
     val progressShown by lazy {
-        getProgressShownObservable(binding.groupListRecycler) { searchDataManager.treeViewAdapter }
+        getProgressShownObservable(binding.groupListRecycler, searchDataManager.treeViewAdapterSingle.cast())
     }
 
     private val parametersRelay = BehaviorRelay.create<GroupListParameters>()

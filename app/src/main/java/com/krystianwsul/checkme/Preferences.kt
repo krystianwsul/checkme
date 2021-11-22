@@ -214,7 +214,7 @@ object Preferences {
         val newProjectOrder = if (oldSum > 0) {
             val oldTargetSum = 1 - PROJECT_ORDER_INCREMENT
 
-            val weight = oldTargetSum / oldSum
+            val weight = (oldTargetSum / oldSum).coerceAtMost(1f)
             oldProjectOrder.mapValues { it.value * weight }.toMutableMap()
         } else {
             oldProjectOrder.toMutableMap()

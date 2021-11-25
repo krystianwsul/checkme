@@ -27,13 +27,15 @@ class YearlySchedule(topLevelTask: Task, override val repeatingScheduleRecord: Y
 
     fun getDateInYear(year: Int) = Date(year, month, day)
 
+    private fun containsDate(date: Date): Boolean {
+        val dateThisYear = getDateInYear(date.year)
+
+        return dateThisYear == date
+    }
+
     private inner class YearlyDateTimeSequenceGenerator : DailyDateTimeSequenceGenerator() {
 
-        override fun containsDate(date: Date): Boolean {
-            val dateThisYear = getDateInYear(date.year)
-
-            return dateThisYear == date
-        }
+        override fun containsDate(date: Date) = this@YearlySchedule.containsDate(date)
     }
 
     class ProxyDateTimeSequenceGenerator(
@@ -110,7 +112,7 @@ class YearlySchedule(topLevelTask: Task, override val repeatingScheduleRecord: Y
             startHourMilli: HourMilli?,
             endHourMilli: HourMilli?,
         ): Boolean {
-            if (!containsDate(date)) return false
+            check(containsDate(date))
 
             val hourMilli by lazy { time.getHourMinute(date.dayOfWeek).toHourMilli() }
 
@@ -118,12 +120,6 @@ class YearlySchedule(topLevelTask: Task, override val repeatingScheduleRecord: Y
             if (endHourMilli != null && endHourMilli <= hourMilli) return false
 
             return true
-        }
-
-        private fun containsDate(date: Date): Boolean {
-            val dateThisYear = getDateInYear(date.year)
-
-            return dateThisYear == date
         }
     }
 }

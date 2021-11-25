@@ -10,6 +10,7 @@ import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.utils.ScheduleType
 import com.soywiz.klock.days
 import com.soywiz.klock.plus
+import com.soywiz.klock.weeks
 
 class WeeklySchedule(topLevelTask: Task, override val repeatingScheduleRecord: WeeklyScheduleRecord) :
     RepeatingSchedule(topLevelTask) {
@@ -22,15 +23,11 @@ class WeeklySchedule(topLevelTask: Task, override val repeatingScheduleRecord: W
 
     val interval = repeatingScheduleRecord.interval
 
-    override val dateTimeSequenceGenerator: DateTimeSequenceGenerator = if (interval == 1) {
-        YearlySchedule.ProxyDateTimeSequenceGenerator(
-            WeeklyDateTimeSequenceGenerator(),
-            WeeklyNewDateTimeSequenceGenerator(),
-            FeatureFlagManager.Flag.NEW_WEEKLY_SCHEDULE,
-        )
-    } else {
-        WeeklyDateTimeSequenceGenerator()
-    }
+    override val dateTimeSequenceGenerator: DateTimeSequenceGenerator = YearlySchedule.ProxyDateTimeSequenceGenerator(
+        WeeklyDateTimeSequenceGenerator(),
+        WeeklyNewDateTimeSequenceGenerator(),
+        FeatureFlagManager.Flag.NEW_WEEKLY_SCHEDULE,
+    )
 
     fun containsDate(date: Date): Boolean {
         val day = date.dayOfWeek
@@ -51,10 +48,6 @@ class WeeklySchedule(topLevelTask: Task, override val repeatingScheduleRecord: W
     }
 
     private inner class WeeklyNewDateTimeSequenceGenerator : YearlySchedule.NewDateTimeSequenceGenerator() {
-
-        init {
-            check(interval == 1)
-        }
 
         override fun getNextValidDateHelper(startDateSoy: DateSoy): DateSoy {
             val startDate = startDateSoy.toDate()
@@ -79,13 +72,26 @@ class WeeklySchedule(topLevelTask: Task, override val repeatingScheduleRecord: W
                          */
                         startDateSoy + (7 + dayOfWeekDiff).days
                     }
-                    else -> throw IllegalStateException()
+                    else -> startDateSoy // todo sequence doubles above
                 }
 
                 val newStartDate = newStartDateSoy.toDate()
                 check(newStartDate.dayOfWeek == dayOfWeek) // todo sequence
 
-                return newStartDateSoy
+                return if (containsDate(newStartDate)) {
+                    newStartDateSoy
+                } else {
+                    check(interval != 1)
+
+                    val timeSpan = newStartDate.toDateSoy().dateTimeDayStart - from!!.toDateSoy().dateTimeDayStart
+                    val remainder = timeSpan.weeks.toInt().rem(interval)
+
+                    val newestStartDateSoy = newStartDateSoy + remainder.weeks
+                    val newestStartDate = newestStartDateSoy.toDate()
+                    check(containsDate(newestStartDate)) // todo sequence optimize
+
+                    newestStartDateSoy
+                }
             }
         }
 

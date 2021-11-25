@@ -9,9 +9,7 @@ import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.invalidatableLazy
 import com.krystianwsul.common.utils.invalidatableLazyCallbacks
 import com.soywiz.klock.days
-import com.soywiz.klock.plus
 import firebase.models.schedule.generators.DateTimeSequenceGenerator
-import firebase.models.schedule.generators.DateTimeSequenceGenerator.Companion.toDate
 
 sealed class RepeatingSchedule(topLevelTask: Task) : Schedule(topLevelTask) {
 
@@ -79,66 +77,6 @@ sealed class RepeatingSchedule(topLevelTask: Task) : Schedule(topLevelTask) {
         if (endExactTimeStamp?.let { it <= startExactTimeStamp } == true) return emptySequence()
 
         return dateTimeSequenceGenerator.generate(startExactTimeStamp, endExactTimeStamp)
-    }
-
-    protected abstract inner class DailyDateTimeSequenceGenerator : DateTimeSequenceGenerator {
-
-        override fun generate(
-            startExactTimeStamp: ExactTimeStamp,
-            endExactTimeStamp: ExactTimeStamp?,
-        ): Sequence<DateTime> {
-            val startSoyDate = startExactTimeStamp.date.toDateSoy()
-            var currentSoyDate = startSoyDate
-
-            val endSoyDate = endExactTimeStamp?.date?.toDateSoy()
-
-            return generateSequence {
-                var endHourMilli: HourMilli? = null
-                if (endSoyDate != null) {
-                    val comparison = currentSoyDate.compareTo(endSoyDate)
-                    if (comparison > 0) { // passed the end
-                        return@generateSequence null
-                    } else if (comparison == 0) { // last day
-                        endHourMilli = endExactTimeStamp.hourMilli
-                    }
-                }
-
-                // first day
-                val startHourMilli = if (startSoyDate == currentSoyDate) startExactTimeStamp.hourMilli else null
-
-                val date = currentSoyDate.toDate()
-                currentSoyDate += 1.days
-
-                getDateTimeInDate(date, startHourMilli, endHourMilli) ?: Unit
-            }.filterIsInstance<DateTime>()
-        }
-
-        private fun getDateTimeInDate(
-            date: Date,
-            startHourMilli: HourMilli?,
-            endHourMilli: HourMilli?,
-        ): DateTime? {
-            if (!hasInstanceInDate(date, startHourMilli, endHourMilli)) return null
-
-            return DateTime(date, time)
-        }
-
-        private fun hasInstanceInDate(
-            date: Date,
-            startHourMilli: HourMilli?,
-            endHourMilli: HourMilli?,
-        ): Boolean {
-            if (!containsDate(date)) return false
-
-            val hourMilli by lazy { time.getHourMinute(date.dayOfWeek).toHourMilli() }
-
-            if (startHourMilli != null && startHourMilli > hourMilli) return false
-            if (endHourMilli != null && endHourMilli <= hourMilli) return false
-
-            return true
-        }
-
-        protected abstract fun containsDate(date: Date): Boolean
     }
 
     override fun isAfterOldestVisible(exactTimeStamp: ExactTimeStamp): Boolean {

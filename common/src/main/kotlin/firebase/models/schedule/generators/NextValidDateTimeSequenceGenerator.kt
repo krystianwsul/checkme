@@ -5,7 +5,7 @@ import com.soywiz.klock.days
 import com.soywiz.klock.plus
 import firebase.models.schedule.generators.DateTimeSequenceGenerator.Companion.toDate
 
-abstract class NewDateTimeSequenceGenerator : DateTimeSequenceGenerator {
+abstract class NextValidDateTimeSequenceGenerator : DateTimeSequenceGenerator {
 
     private fun getNextValidDate(startDateSoy: DateSoy) = getNextValidDateHelper(startDateSoy).also {
         check(containsDate(it.toDate())) // todo sequence optimize

@@ -1,7 +1,6 @@
 package com.krystianwsul.common.firebase.models.schedule
 
 
-import com.krystianwsul.common.FeatureFlagManager
 import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.firebase.records.schedule.WeeklyScheduleRecord
 import com.krystianwsul.common.time.Date
@@ -13,8 +12,7 @@ import com.soywiz.klock.plus
 import com.soywiz.klock.weeks
 import firebase.models.schedule.generators.DateTimeSequenceGenerator
 import firebase.models.schedule.generators.DateTimeSequenceGenerator.Companion.toDate
-import firebase.models.schedule.generators.NewDateTimeSequenceGenerator
-import firebase.models.schedule.generators.ProxyDateTimeSequenceGenerator
+import firebase.models.schedule.generators.NextValidDateTimeSequenceGenerator
 
 class WeeklySchedule(topLevelTask: Task, override val repeatingScheduleRecord: WeeklyScheduleRecord) :
     RepeatingSchedule(topLevelTask) {
@@ -27,11 +25,7 @@ class WeeklySchedule(topLevelTask: Task, override val repeatingScheduleRecord: W
 
     val interval = repeatingScheduleRecord.interval
 
-    override val dateTimeSequenceGenerator: DateTimeSequenceGenerator = ProxyDateTimeSequenceGenerator(
-        WeeklyDateTimeSequenceGenerator(),
-        WeeklyNewDateTimeSequenceGenerator(),
-        FeatureFlagManager.Flag.NEW_WEEKLY_SCHEDULE,
-    )
+    override val dateTimeSequenceGenerator: DateTimeSequenceGenerator = WeeklyNextValidDateTimeSequenceGenerator()
 
     /*
     todo sequence optimize: I think all the related methods can benefit from a SoyDayOfWeek - DayOfWeek mapping
@@ -49,12 +43,7 @@ class WeeklySchedule(topLevelTask: Task, override val repeatingScheduleRecord: W
         return true
     }
 
-    private inner class WeeklyDateTimeSequenceGenerator : DailyDateTimeSequenceGenerator() {
-
-        override fun containsDate(date: Date) = this@WeeklySchedule.containsDate(date)
-    }
-
-    private inner class WeeklyNewDateTimeSequenceGenerator : NewDateTimeSequenceGenerator() {
+    private inner class WeeklyNextValidDateTimeSequenceGenerator : NextValidDateTimeSequenceGenerator() {
 
         override fun getNextValidDateHelper(startDateSoy: DateSoy): DateSoy {
             val startDate = startDateSoy.toDate() // todo sequence optimize find way to check day of week for Soy

@@ -6,7 +6,7 @@ import com.soywiz.klock.months
 import com.soywiz.klock.plus
 import firebase.models.schedule.generators.DateTimeSequenceGenerator.Companion.toDate
 
-abstract class MonthlyNewDateTimeSequenceGenerator : NewDateTimeSequenceGenerator() {
+abstract class MonthlyNextValidDateTimeSequenceGenerator : NextValidDateTimeSequenceGenerator() {
 
     protected abstract fun getDateInMonth(year: Int, month: Int): Date
 

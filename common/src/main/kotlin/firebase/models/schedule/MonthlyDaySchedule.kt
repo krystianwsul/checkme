@@ -1,15 +1,13 @@
 package com.krystianwsul.common.firebase.models.schedule
 
 
-import com.krystianwsul.common.FeatureFlagManager
 import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.firebase.records.schedule.MonthlyDayScheduleRecord
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.utils.ScheduleType
 import com.krystianwsul.common.utils.getDateInMonth
 import firebase.models.schedule.generators.DateTimeSequenceGenerator
-import firebase.models.schedule.generators.MonthlyNewDateTimeSequenceGenerator
-import firebase.models.schedule.generators.ProxyDateTimeSequenceGenerator
+import firebase.models.schedule.generators.MonthlyNextValidDateTimeSequenceGenerator
 
 class MonthlyDaySchedule(topLevelTask: Task, override val repeatingScheduleRecord: MonthlyDayScheduleRecord) :
         RepeatingSchedule(topLevelTask) {
@@ -22,11 +20,7 @@ class MonthlyDaySchedule(topLevelTask: Task, override val repeatingScheduleRecor
 
     override val scheduleType = ScheduleType.MONTHLY_DAY
 
-    override val dateTimeSequenceGenerator: DateTimeSequenceGenerator = ProxyDateTimeSequenceGenerator(
-        MonthlyDayDateTimeSequenceGenerator(),
-        MonthlyDayNewDateTimeSequenceGenerator(),
-        FeatureFlagManager.Flag.NEW_MONTHLY_DAY_SCHEDULE,
-    )
+    override val dateTimeSequenceGenerator: DateTimeSequenceGenerator = MonthlyDayNextValidDateTimeSequenceGenerator()
 
     fun getDateInMonth(year: Int, month: Int) = getDateInMonth(
         year,
@@ -41,12 +35,7 @@ class MonthlyDaySchedule(topLevelTask: Task, override val repeatingScheduleRecor
         return dateThisMonth == date
     }
 
-    private inner class MonthlyDayDateTimeSequenceGenerator : DailyDateTimeSequenceGenerator() {
-
-        override fun containsDate(date: Date) = this@MonthlyDaySchedule.containsDate(date)
-    }
-
-    private inner class MonthlyDayNewDateTimeSequenceGenerator : MonthlyNewDateTimeSequenceGenerator() {
+    private inner class MonthlyDayNextValidDateTimeSequenceGenerator : MonthlyNextValidDateTimeSequenceGenerator() {
 
         override fun getDateInMonth(year: Int, month: Int) = this@MonthlyDaySchedule.getDateInMonth(year, month)
 

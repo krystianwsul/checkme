@@ -10,13 +10,10 @@ import com.krystianwsul.common.utils.invalidatableLazy
 import com.krystianwsul.common.utils.invalidatableLazyCallbacks
 import com.soywiz.klock.days
 import com.soywiz.klock.plus
+import firebase.models.schedule.generators.DateTimeSequenceGenerator
+import firebase.models.schedule.generators.DateTimeSequenceGenerator.Companion.toDate
 
 sealed class RepeatingSchedule(topLevelTask: Task) : Schedule(topLevelTask) {
-
-    companion object {
-
-        fun DateSoy.toDate() = Date(year, month1, day)
-    }
 
     protected abstract val repeatingScheduleRecord: RepeatingScheduleRecord
 
@@ -82,11 +79,6 @@ sealed class RepeatingSchedule(topLevelTask: Task) : Schedule(topLevelTask) {
         if (endExactTimeStamp?.let { it <= startExactTimeStamp } == true) return emptySequence()
 
         return dateTimeSequenceGenerator.generate(startExactTimeStamp, endExactTimeStamp)
-    }
-
-    interface DateTimeSequenceGenerator {
-
-        fun generate(startExactTimeStamp: ExactTimeStamp, endExactTimeStamp: ExactTimeStamp?): Sequence<DateTime>
     }
 
     protected abstract inner class DailyDateTimeSequenceGenerator : DateTimeSequenceGenerator {

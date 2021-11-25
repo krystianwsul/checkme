@@ -5,11 +5,11 @@ import com.krystianwsul.common.FeatureFlagManager
 import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.firebase.records.schedule.MonthlyDayScheduleRecord
 import com.krystianwsul.common.time.Date
-import com.krystianwsul.common.time.DateSoy
 import com.krystianwsul.common.utils.ScheduleType
 import com.krystianwsul.common.utils.getDateInMonth
-import com.soywiz.klock.months
-import com.soywiz.klock.plus
+import firebase.models.schedule.generators.DateTimeSequenceGenerator
+import firebase.models.schedule.generators.MonthlyNewDateTimeSequenceGenerator
+import firebase.models.schedule.generators.ProxyDateTimeSequenceGenerator
 
 class MonthlyDaySchedule(topLevelTask: Task, override val repeatingScheduleRecord: MonthlyDayScheduleRecord) :
         RepeatingSchedule(topLevelTask) {
@@ -22,7 +22,7 @@ class MonthlyDaySchedule(topLevelTask: Task, override val repeatingScheduleRecor
 
     override val scheduleType = ScheduleType.MONTHLY_DAY
 
-    override val dateTimeSequenceGenerator: DateTimeSequenceGenerator = YearlySchedule.ProxyDateTimeSequenceGenerator(
+    override val dateTimeSequenceGenerator: DateTimeSequenceGenerator = ProxyDateTimeSequenceGenerator(
         MonthlyDayDateTimeSequenceGenerator(),
         MonthlyDayNewDateTimeSequenceGenerator(),
         FeatureFlagManager.Flag.NEW_MONTHLY_DAY_SCHEDULE,
@@ -44,34 +44,6 @@ class MonthlyDaySchedule(topLevelTask: Task, override val repeatingScheduleRecor
     private inner class MonthlyDayDateTimeSequenceGenerator : DailyDateTimeSequenceGenerator() {
 
         override fun containsDate(date: Date) = this@MonthlyDaySchedule.containsDate(date)
-    }
-
-    abstract class MonthlyNewDateTimeSequenceGenerator : YearlySchedule.NewDateTimeSequenceGenerator() {
-
-        protected abstract fun getDateInMonth(year: Int, month: Int): Date
-
-        override fun getNextValidDateHelper(startDateSoy: DateSoy): DateSoy {
-            val startDate = startDateSoy.toDate()
-
-            if (containsDate(startDate)) { // todo sequence optimize
-                return startDateSoy
-            } else {
-                val dateSameMonth = getDateInMonth(startDate.year, startDate.month)
-
-                val finalDate = when {
-                    dateSameMonth < startDate -> {
-                        val nextMonthDateSoy = startDateSoy + 1.months
-                        val nextMonthDate = nextMonthDateSoy.toDate()
-
-                        getDateInMonth(nextMonthDate.year, nextMonthDate.month)
-                    }
-                    dateSameMonth > startDate -> dateSameMonth
-                    else -> throw IllegalStateException() // todo sequence redundant with first check
-                }
-
-                return finalDate.toDateSoy()
-            }
-        }
     }
 
     private inner class MonthlyDayNewDateTimeSequenceGenerator : MonthlyNewDateTimeSequenceGenerator() {

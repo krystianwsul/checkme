@@ -11,6 +11,10 @@ import com.krystianwsul.common.utils.ScheduleType
 import com.soywiz.klock.days
 import com.soywiz.klock.plus
 import com.soywiz.klock.weeks
+import firebase.models.schedule.generators.DateTimeSequenceGenerator
+import firebase.models.schedule.generators.DateTimeSequenceGenerator.Companion.toDate
+import firebase.models.schedule.generators.NewDateTimeSequenceGenerator
+import firebase.models.schedule.generators.ProxyDateTimeSequenceGenerator
 
 class WeeklySchedule(topLevelTask: Task, override val repeatingScheduleRecord: WeeklyScheduleRecord) :
     RepeatingSchedule(topLevelTask) {
@@ -23,7 +27,7 @@ class WeeklySchedule(topLevelTask: Task, override val repeatingScheduleRecord: W
 
     val interval = repeatingScheduleRecord.interval
 
-    override val dateTimeSequenceGenerator: DateTimeSequenceGenerator = YearlySchedule.ProxyDateTimeSequenceGenerator(
+    override val dateTimeSequenceGenerator: DateTimeSequenceGenerator = ProxyDateTimeSequenceGenerator(
         WeeklyDateTimeSequenceGenerator(),
         WeeklyNewDateTimeSequenceGenerator(),
         FeatureFlagManager.Flag.NEW_WEEKLY_SCHEDULE,
@@ -50,7 +54,7 @@ class WeeklySchedule(topLevelTask: Task, override val repeatingScheduleRecord: W
         override fun containsDate(date: Date) = this@WeeklySchedule.containsDate(date)
     }
 
-    private inner class WeeklyNewDateTimeSequenceGenerator : YearlySchedule.NewDateTimeSequenceGenerator() {
+    private inner class WeeklyNewDateTimeSequenceGenerator : NewDateTimeSequenceGenerator() {
 
         override fun getNextValidDateHelper(startDateSoy: DateSoy): DateSoy {
             val startDate = startDateSoy.toDate() // todo sequence optimize find way to check day of week for Soy

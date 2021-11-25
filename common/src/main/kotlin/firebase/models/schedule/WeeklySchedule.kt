@@ -59,7 +59,7 @@ class WeeklySchedule(topLevelTask: Task, override val repeatingScheduleRecord: W
         override fun getNextValidDateHelper(startDateSoy: DateSoy): DateSoy {
             val startDate = startDateSoy.toDate()
 
-            if (containsDate(startDate)) {
+            if (containsDate(startDate)) { // todo sequence optimize, redundant with later check
                 return startDateSoy
             } else {
                 val startDayOfWeek = startDate.dayOfWeek

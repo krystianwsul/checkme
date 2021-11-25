@@ -58,7 +58,7 @@ class YearlySchedule(topLevelTask: Task, override val repeatingScheduleRecord: Y
     abstract class NewDateTimeSequenceGenerator : DateTimeSequenceGenerator {
 
         private fun getNextValidDate(startDateSoy: DateSoy) = getNextValidDateHelper(startDateSoy).also {
-            check(containsDate(it.toDate()))
+            check(containsDate(it.toDate())) // todo sequence optimize
         }
 
         protected abstract fun getNextValidDateHelper(startDateSoy: DateSoy): DateSoy

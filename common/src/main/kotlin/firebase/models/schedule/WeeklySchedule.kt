@@ -29,7 +29,10 @@ class WeeklySchedule(topLevelTask: Task, override val repeatingScheduleRecord: W
         FeatureFlagManager.Flag.NEW_WEEKLY_SCHEDULE,
     )
 
-    fun containsDate(date: Date): Boolean {
+    /*
+    todo sequence optimize: I think all the related methods can benefit from a SoyDayOfWeek - DayOfWeek mapping
+     */
+    fun containsDate(date: Date): Boolean { // todo sequence optimize
         val day = date.dayOfWeek
 
         if (dayOfWeek != day) return false
@@ -50,48 +53,44 @@ class WeeklySchedule(topLevelTask: Task, override val repeatingScheduleRecord: W
     private inner class WeeklyNewDateTimeSequenceGenerator : YearlySchedule.NewDateTimeSequenceGenerator() {
 
         override fun getNextValidDateHelper(startDateSoy: DateSoy): DateSoy {
-            val startDate = startDateSoy.toDate()
+            val startDate = startDateSoy.toDate() // todo sequence optimize find way to check day of week for Soy
 
-            if (containsDate(startDate)) { // todo sequence optimize, redundant with later check
-                return startDateSoy
+            val startDayOfWeek = startDate.dayOfWeek
+
+            val dayOfWeekDiff = dayOfWeek.ordinal - startDayOfWeek.ordinal
+
+            val newStartDateSoy = when {
+                dayOfWeekDiff > 0 -> {
+                    /*
+                    For example, the schedule date is Wednesday 4. The start date is Monday 2.  diff = 2
+                     */
+                    startDateSoy + dayOfWeekDiff.days
+                }
+                dayOfWeekDiff < 0 -> {
+                    /*
+                    For example, the schedule date is Monday 2. The start date is Wednesday 4.  diff = -2
+                     */
+                    startDateSoy + (7 + dayOfWeekDiff).days
+                }
+                else -> startDateSoy // todo sequence doubles above
+            }
+
+            val newStartDate = newStartDateSoy.toDate()
+            check(newStartDate.dayOfWeek == dayOfWeek) // todo sequence
+
+            return if (containsDate(newStartDate)) {
+                newStartDateSoy
             } else {
-                val startDayOfWeek = startDate.dayOfWeek
+                check(interval != 1)
 
-                val dayOfWeekDiff = dayOfWeek.ordinal - startDayOfWeek.ordinal
+                val timeSpan = newStartDate.toDateSoy().dateTimeDayStart - from!!.toDateSoy().dateTimeDayStart
+                val remainder = timeSpan.weeks.toInt().rem(interval)
 
-                val newStartDateSoy = when {
-                    dayOfWeekDiff > 0 -> {
-                        /*
-                        For example, the schedule date is Wednesday 4. The start date is Monday 2.  diff = 2
-                         */
-                        startDateSoy + dayOfWeekDiff.days
-                    }
-                    dayOfWeekDiff < 0 -> {
-                        /*
-                        For example, the schedule date is Monday 2. The start date is Wednesday 4.  diff = -2
-                         */
-                        startDateSoy + (7 + dayOfWeekDiff).days
-                    }
-                    else -> startDateSoy // todo sequence doubles above
-                }
+                val newestStartDateSoy = newStartDateSoy + remainder.weeks
+                val newestStartDate = newestStartDateSoy.toDate()
+                check(containsDate(newestStartDate)) // todo sequence optimize
 
-                val newStartDate = newStartDateSoy.toDate()
-                check(newStartDate.dayOfWeek == dayOfWeek) // todo sequence
-
-                return if (containsDate(newStartDate)) {
-                    newStartDateSoy
-                } else {
-                    check(interval != 1)
-
-                    val timeSpan = newStartDate.toDateSoy().dateTimeDayStart - from!!.toDateSoy().dateTimeDayStart
-                    val remainder = timeSpan.weeks.toInt().rem(interval)
-
-                    val newestStartDateSoy = newStartDateSoy + remainder.weeks
-                    val newestStartDate = newestStartDateSoy.toDate()
-                    check(containsDate(newestStartDate)) // todo sequence optimize
-
-                    newestStartDateSoy
-                }
+                newestStartDateSoy
             }
         }
 

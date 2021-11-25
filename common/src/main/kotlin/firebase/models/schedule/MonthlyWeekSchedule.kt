@@ -44,7 +44,5 @@ class MonthlyWeekSchedule(topLevelTask: Task, override val repeatingScheduleReco
         override fun getDateInMonth(year: Int, month: Int) = this@MonthlyWeekSchedule.getDateInMonth(year, month)
 
         override fun containsDate(date: Date) = this@MonthlyWeekSchedule.containsDate(date)
-
-        override fun getScheduleTime() = time
     }
 }

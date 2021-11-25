@@ -88,7 +88,5 @@ class WeeklySchedule(topLevelTask: Task, override val repeatingScheduleRecord: W
         }
 
         override fun containsDate(date: Date) = this@WeeklySchedule.containsDate(date)
-
-        override fun getScheduleTime() = time
     }
 }

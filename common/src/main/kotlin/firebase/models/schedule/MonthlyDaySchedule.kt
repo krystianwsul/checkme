@@ -40,7 +40,5 @@ class MonthlyDaySchedule(topLevelTask: Task, override val repeatingScheduleRecor
         override fun getDateInMonth(year: Int, month: Int) = this@MonthlyDaySchedule.getDateInMonth(year, month)
 
         override fun containsDate(date: Date) = this@MonthlyDaySchedule.containsDate(date)
-
-        override fun getScheduleTime() = time
     }
 }

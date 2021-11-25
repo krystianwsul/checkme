@@ -15,18 +15,15 @@ abstract class NextValidDateTimeSequenceGenerator : DateTimeSequenceGenerator {
 
     protected abstract fun containsDate(date: Date): Boolean
 
-    protected abstract fun getScheduleTime(): Time
-
     override fun generate(
         startExactTimeStamp: ExactTimeStamp,
         endExactTimeStamp: ExactTimeStamp?,
+        scheduleTime: Time,
     ): Sequence<DateTime> {
         val startSoyDate = startExactTimeStamp.date.toDateSoy()
         var currentSoyDate = getNextValidDate(startSoyDate)
 
         val endSoyDate = endExactTimeStamp?.date?.toDateSoy()
-
-        val scheduleTime = getScheduleTime()
 
         return generateSequence {
             var endHourMilli: HourMilli? = null

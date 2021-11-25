@@ -42,7 +42,5 @@ class YearlySchedule(topLevelTask: Task, override val repeatingScheduleRecord: Y
         }
 
         override fun containsDate(date: Date) = this@YearlySchedule.containsDate(date)
-
-        override fun getScheduleTime() = time
     }
 }

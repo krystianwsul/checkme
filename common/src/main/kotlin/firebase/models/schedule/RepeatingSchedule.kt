@@ -76,7 +76,7 @@ sealed class RepeatingSchedule(topLevelTask: Task) : Schedule(topLevelTask) {
 
         if (endExactTimeStamp?.let { it <= startExactTimeStamp } == true) return emptySequence()
 
-        return dateTimeSequenceGenerator.generate(startExactTimeStamp, endExactTimeStamp)
+        return dateTimeSequenceGenerator.generate(startExactTimeStamp, endExactTimeStamp, time)
     }
 
     override fun isAfterOldestVisible(exactTimeStamp: ExactTimeStamp): Boolean {

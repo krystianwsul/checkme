@@ -4,10 +4,7 @@ package com.krystianwsul.common.firebase.models.schedule
 import com.krystianwsul.common.FeatureFlagManager
 import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.firebase.records.schedule.YearlyScheduleRecord
-import com.krystianwsul.common.time.Date
-import com.krystianwsul.common.time.DateTime
-import com.krystianwsul.common.time.ExactTimeStamp
-import com.krystianwsul.common.time.HourMilli
+import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.ScheduleType
 import com.soywiz.klock.days
 import com.soywiz.klock.plus
@@ -53,12 +50,22 @@ class YearlySchedule(topLevelTask: Task, override val repeatingScheduleRecord: Y
 
     private inner class NewDateTimeSequenceGenerator : DateTimeSequenceGenerator {
 
+        fun getNextValidDate(startDateSoy: DateSoy): DateSoy {
+            val date = startDateSoy.toDate()
+
+            return if (containsDate(date)) {
+                startDateSoy
+            } else {
+                getDateInYear(date.year + 1).toDateSoy()
+            }
+        }
+
         override fun generate(
             startExactTimeStamp: ExactTimeStamp,
             endExactTimeStamp: ExactTimeStamp?,
         ): Sequence<DateTime> {
             val startSoyDate = startExactTimeStamp.date.toDateSoy()
-            var currentSoyDate = startSoyDate
+            var currentSoyDate = getNextValidDate(startSoyDate)
 
             val endSoyDate = endExactTimeStamp?.date?.toDateSoy()
 
@@ -77,7 +84,7 @@ class YearlySchedule(topLevelTask: Task, override val repeatingScheduleRecord: Y
                 val startHourMilli = if (startSoyDate == currentSoyDate) startExactTimeStamp.hourMilli else null
 
                 val date = currentSoyDate.toDate()
-                currentSoyDate += 1.days
+                currentSoyDate = getNextValidDate(currentSoyDate + 1.days)
 
                 getDateTimeInDate(date, startHourMilli, endHourMilli) ?: Unit
             }.filterIsInstance<DateTime>()

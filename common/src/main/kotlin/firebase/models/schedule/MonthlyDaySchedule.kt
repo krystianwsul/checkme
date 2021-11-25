@@ -46,7 +46,9 @@ class MonthlyDaySchedule(topLevelTask: Task, override val repeatingScheduleRecor
         override fun containsDate(date: Date) = this@MonthlyDaySchedule.containsDate(date)
     }
 
-    private inner class MonthlyDayNewDateTimeSequenceGenerator : YearlySchedule.NewDateTimeSequenceGenerator() {
+    abstract class MonthlyNewDateTimeSequenceGenerator : YearlySchedule.NewDateTimeSequenceGenerator() {
+
+        protected abstract fun getDateInMonth(year: Int, month: Int): Date
 
         override fun getNextValidDateHelper(startDateSoy: DateSoy): DateSoy {
             val startDate = startDateSoy.toDate()
@@ -70,6 +72,11 @@ class MonthlyDaySchedule(topLevelTask: Task, override val repeatingScheduleRecor
                 return finalDate.toDateSoy()
             }
         }
+    }
+
+    private inner class MonthlyDayNewDateTimeSequenceGenerator : MonthlyNewDateTimeSequenceGenerator() {
+
+        override fun getDateInMonth(year: Int, month: Int) = this@MonthlyDaySchedule.getDateInMonth(year, month)
 
         override fun containsDate(date: Date) = this@MonthlyDaySchedule.containsDate(date)
 

@@ -1,6 +1,7 @@
 package com.krystianwsul.common.firebase.models.schedule
 
 
+import com.krystianwsul.common.FeatureFlagManager
 import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.firebase.records.schedule.MonthlyWeekScheduleRecord
 import com.krystianwsul.common.time.Date
@@ -21,22 +22,37 @@ class MonthlyWeekSchedule(topLevelTask: Task, override val repeatingScheduleReco
 
     override val scheduleType get() = ScheduleType.MONTHLY_WEEK
 
-    override val dateTimeSequenceGenerator: DateTimeSequenceGenerator = MonthlyWeekDateTimeSequenceGenerator()
+    override val dateTimeSequenceGenerator: DateTimeSequenceGenerator = YearlySchedule.ProxyDateTimeSequenceGenerator(
+        MonthlyWeekDateTimeSequenceGenerator(),
+        MonthlyWeekNewDateTimeSequenceGenerator(),
+        FeatureFlagManager.Flag.NEW_MONTHLY_WEEK_SCHEDULE,
+    )
 
     private fun getDateInMonth(year: Int, month: Int) = getDateInMonth(
         year,
         month,
         repeatingScheduleRecord.weekOfMonth,
         dayOfWeek,
-        repeatingScheduleRecord.beginningOfMonth
+        repeatingScheduleRecord.beginningOfMonth,
     )
+
+    private fun containsDate(date: Date): Boolean {
+        val dateThisMonth = getDateInMonth(date.year, date.month)
+
+        return dateThisMonth == date
+    }
 
     private inner class MonthlyWeekDateTimeSequenceGenerator : DailyDateTimeSequenceGenerator() {
 
-        override fun containsDate(date: Date): Boolean {
-            val dateThisMonth = getDateInMonth(date.year, date.month)
+        override fun containsDate(date: Date) = this@MonthlyWeekSchedule.containsDate(date)
+    }
 
-            return dateThisMonth == date
-        }
+    private inner class MonthlyWeekNewDateTimeSequenceGenerator : MonthlyDaySchedule.MonthlyNewDateTimeSequenceGenerator() {
+
+        override fun getDateInMonth(year: Int, month: Int) = this@MonthlyWeekSchedule.getDateInMonth(year, month)
+
+        override fun containsDate(date: Date) = this@MonthlyWeekSchedule.containsDate(date)
+
+        override fun getScheduleTime() = time
     }
 }

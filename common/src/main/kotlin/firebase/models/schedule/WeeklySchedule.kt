@@ -20,7 +20,7 @@ class WeeklySchedule(topLevelTask: Task, override val repeatingScheduleRecord: W
 
     override val dateTimeSequenceGenerator: DateTimeSequenceGenerator = WeeklyDateTimeSequenceGenerator()
 
-    private inner class WeeklyDateTimeSequenceGenerator : DateTimeSequenceGenerator() {
+    private inner class WeeklyDateTimeSequenceGenerator : DailyDateTimeSequenceGenerator() {
 
         override fun containsDate(date: Date): Boolean {
             val day = date.dayOfWeek

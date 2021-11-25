@@ -31,7 +31,7 @@ class MonthlyWeekSchedule(topLevelTask: Task, override val repeatingScheduleReco
         repeatingScheduleRecord.beginningOfMonth
     )
 
-    private inner class MonthlyWeekDateTimeSequenceGenerator : DateTimeSequenceGenerator() {
+    private inner class MonthlyWeekDateTimeSequenceGenerator : DailyDateTimeSequenceGenerator() {
 
         override fun containsDate(date: Date): Boolean {
             val dateThisMonth = getDateInMonth(date.year, date.month)

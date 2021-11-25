@@ -14,6 +14,6 @@ object FeatureFlagManager {
 
     enum class Flag {
 
-        NEW_YEARLY_SCHEDULE
+        NEW_YEARLY_SCHEDULE, NEW_WEEKLY_SCHEDULE
     }
 }

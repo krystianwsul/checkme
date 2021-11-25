@@ -84,7 +84,7 @@ sealed class RepeatingSchedule(topLevelTask: Task) : Schedule(topLevelTask) {
         return dateTimeSequenceGenerator.generate(startExactTimeStamp, endExactTimeStamp)
     }
 
-    protected interface DateTimeSequenceGenerator {
+    interface DateTimeSequenceGenerator {
 
         fun generate(startExactTimeStamp: ExactTimeStamp, endExactTimeStamp: ExactTimeStamp?): Sequence<DateTime>
     }

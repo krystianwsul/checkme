@@ -19,7 +19,11 @@ class YearlySchedule(topLevelTask: Task, override val repeatingScheduleRecord: Y
 
     override val scheduleType = ScheduleType.YEARLY
 
-    override val dateTimeSequenceGenerator: DateTimeSequenceGenerator = ProxyDateTimeSequenceGenerator()
+    override val dateTimeSequenceGenerator: DateTimeSequenceGenerator = ProxyDateTimeSequenceGenerator(
+        YearlyDateTimeSequenceGenerator(),
+        NewDateTimeSequenceGenerator(),
+        FeatureFlagManager.Flag.NEW_SCHEDULE,
+    )
 
     fun getDateInYear(year: Int) = Date(year, month, day)
 
@@ -32,16 +36,17 @@ class YearlySchedule(topLevelTask: Task, override val repeatingScheduleRecord: Y
         }
     }
 
-    private inner class ProxyDateTimeSequenceGenerator : DateTimeSequenceGenerator {
-
-        private val yearlyDateTimeSequenceGenerator = YearlyDateTimeSequenceGenerator()
-        private val newDateTimeSequenceGenerator = NewDateTimeSequenceGenerator()
+    class ProxyDateTimeSequenceGenerator(
+        private val oldDateTimeSequenceGenerator: DateTimeSequenceGenerator,
+        private val newDateTimeSequenceGenerator: DateTimeSequenceGenerator,
+        private val flag: FeatureFlagManager.Flag,
+    ) : DateTimeSequenceGenerator {
 
         override fun generate(startExactTimeStamp: ExactTimeStamp, endExactTimeStamp: ExactTimeStamp?): Sequence<DateTime> {
-            val generator = if (FeatureFlagManager.getFlag(FeatureFlagManager.Flag.NEW_SCHEDULE)) {
+            val generator = if (FeatureFlagManager.getFlag(flag)) {
                 newDateTimeSequenceGenerator
             } else {
-                yearlyDateTimeSequenceGenerator
+                oldDateTimeSequenceGenerator
             }
 
             return generator.generate(startExactTimeStamp, endExactTimeStamp)

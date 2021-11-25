@@ -21,7 +21,7 @@ class YearlySchedule(topLevelTask: Task, override val repeatingScheduleRecord: Y
 
     override val dateTimeSequenceGenerator: DateTimeSequenceGenerator = ProxyDateTimeSequenceGenerator(
         YearlyDateTimeSequenceGenerator(),
-        NewDateTimeSequenceGenerator(),
+        YearlyNewDateTimeSequenceGenerator(),
         FeatureFlagManager.Flag.NEW_YEARLY_SCHEDULE,
     )
 
@@ -55,17 +55,13 @@ class YearlySchedule(topLevelTask: Task, override val repeatingScheduleRecord: Y
         }
     }
 
-    private inner class NewDateTimeSequenceGenerator : DateTimeSequenceGenerator {
+    private abstract class NewDateTimeSequenceGenerator : DateTimeSequenceGenerator {
 
-        fun getNextValidDate(startDateSoy: DateSoy): DateSoy {
-            val date = startDateSoy.toDate()
+        protected abstract fun getNextValidDate(startDateSoy: DateSoy): DateSoy
 
-            return if (containsDate(date)) {
-                startDateSoy
-            } else {
-                getDateInYear(date.year + 1).toDateSoy()
-            }
-        }
+        protected abstract fun containsDate(date: Date): Boolean
+
+        protected abstract fun getScheduleTime(): Time
 
         override fun generate(
             startExactTimeStamp: ExactTimeStamp,
@@ -75,6 +71,8 @@ class YearlySchedule(topLevelTask: Task, override val repeatingScheduleRecord: Y
             var currentSoyDate = getNextValidDate(startSoyDate)
 
             val endSoyDate = endExactTimeStamp?.date?.toDateSoy()
+
+            val scheduleTime = getScheduleTime()
 
             return generateSequence {
                 var endHourMilli: HourMilli? = null
@@ -93,7 +91,7 @@ class YearlySchedule(topLevelTask: Task, override val repeatingScheduleRecord: Y
                 val date = currentSoyDate.toDate()
                 currentSoyDate = getNextValidDate(currentSoyDate + 1.days)
 
-                getDateTimeInDate(date, startHourMilli, endHourMilli) ?: Unit
+                getDateTimeInDate(date, startHourMilli, endHourMilli, scheduleTime) ?: Unit
             }.filterIsInstance<DateTime>()
         }
 
@@ -101,25 +99,44 @@ class YearlySchedule(topLevelTask: Task, override val repeatingScheduleRecord: Y
             date: Date,
             startHourMilli: HourMilli?,
             endHourMilli: HourMilli?,
+            scheduleTime: Time,
         ): DateTime? {
-            if (!hasInstanceInDate(date, startHourMilli, endHourMilli)) return null
+            if (!hasInstanceInDate(date, startHourMilli, endHourMilli, scheduleTime)) return null
 
-            return DateTime(date, time)
+            return DateTime(date, scheduleTime)
         }
 
         private fun hasInstanceInDate(
             date: Date,
             startHourMilli: HourMilli?,
             endHourMilli: HourMilli?,
+            scheduleTime: Time,
         ): Boolean {
             check(containsDate(date))
 
-            val hourMilli by lazy { time.getHourMinute(date.dayOfWeek).toHourMilli() }
+            val hourMilli by lazy { scheduleTime.getHourMinute(date.dayOfWeek).toHourMilli() }
 
             if (startHourMilli != null && startHourMilli > hourMilli) return false
             if (endHourMilli != null && endHourMilli <= hourMilli) return false
 
             return true
         }
+    }
+
+    private inner class YearlyNewDateTimeSequenceGenerator : NewDateTimeSequenceGenerator() {
+
+        override fun getNextValidDate(startDateSoy: DateSoy): DateSoy {
+            val date = startDateSoy.toDate()
+
+            return if (containsDate(date)) {
+                startDateSoy
+            } else {
+                getDateInYear(date.year + 1).toDateSoy()
+            }
+        }
+
+        override fun containsDate(date: Date) = this@YearlySchedule.containsDate(date)
+
+        override fun getScheduleTime() = time
     }
 }

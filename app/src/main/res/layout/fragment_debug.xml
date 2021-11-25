@@ -28,6 +28,11 @@
             android:text="Instance warning snooze"
             tools:ignore="HardcodedText" />
 
+        <androidx.compose.ui.platform.ComposeView
+            android:id="@+id/debugFeatureFlagContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
         <Button
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

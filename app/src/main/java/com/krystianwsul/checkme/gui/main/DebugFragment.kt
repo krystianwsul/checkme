@@ -6,6 +6,17 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material.Switch
+import androidx.compose.material.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import com.google.android.material.composethemeadapter.MdcTheme
 import com.jakewharton.rxbinding4.view.clicks
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
@@ -17,6 +28,7 @@ import com.krystianwsul.checkme.gui.base.AbstractFragment
 import com.krystianwsul.checkme.gui.utils.ResettableProperty
 import com.krystianwsul.checkme.ticks.Ticker
 import com.krystianwsul.checkme.utils.filterNotNull
+import com.krystianwsul.common.FeatureFlagManager
 import com.krystianwsul.common.time.ExactTimeStamp
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.BackpressureStrategy
@@ -39,6 +51,12 @@ class DebugFragment : AbstractFragment() {
     @SuppressLint("SetTextI18n")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        binding.debugFeatureFlagContainer.setContent {
+            MdcTheme {
+                FeatureFlagSwitches()
+            }
+        }
 
         DomainFactory.instanceRelay
             .filterNotNull()
@@ -151,5 +169,25 @@ class DebugFragment : AbstractFragment() {
         bindingProperty.reset()
 
         super.onDestroyView()
+    }
+
+    @Composable
+    private fun FeatureFlagSwitches() {
+        Column {
+            FeatureFlagManager.getFlags().forEach { (flag, initialValue) ->
+                val state = remember { mutableStateOf(initialValue) }
+
+                Row(
+                    Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(text = flag.toString(), modifier = Modifier.weight(1f))
+                    Switch(checked = state.value, onCheckedChange = {
+                        state.value = it
+                        FeatureFlagManager.setFlag(flag, it)
+                    })
+                }
+            }
+        }
     }
 }

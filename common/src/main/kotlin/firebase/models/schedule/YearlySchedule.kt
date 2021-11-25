@@ -22,7 +22,7 @@ class YearlySchedule(topLevelTask: Task, override val repeatingScheduleRecord: Y
     override val dateTimeSequenceGenerator: DateTimeSequenceGenerator = ProxyDateTimeSequenceGenerator(
         YearlyDateTimeSequenceGenerator(),
         NewDateTimeSequenceGenerator(),
-        FeatureFlagManager.Flag.NEW_SCHEDULE,
+        FeatureFlagManager.Flag.NEW_YEARLY_SCHEDULE,
     )
 
     fun getDateInYear(year: Int) = Date(year, month, day)

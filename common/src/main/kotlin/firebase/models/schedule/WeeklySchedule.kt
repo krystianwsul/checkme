@@ -18,16 +18,21 @@ class WeeklySchedule(topLevelTask: Task, override val repeatingScheduleRecord: W
 
     val interval = repeatingScheduleRecord.interval
 
-    override fun containsDate(date: Date): Boolean {
-        val day = date.dayOfWeek
+    override val dateTimeSequenceGenerator: DateTimeSequenceGenerator = WeeklyDateTimeSequenceGenerator()
 
-        if (dayOfWeek != day) return false
+    private inner class WeeklyDateTimeSequenceGenerator : DateTimeSequenceGenerator() {
 
-        if (interval != 1) {
-            val timeSpan = date.toDateSoy().dateTimeDayStart - from!!.toDateSoy().dateTimeDayStart
-            if (timeSpan.weeks.toInt().rem(interval) != 0) return false
+        override fun containsDate(date: Date): Boolean {
+            val day = date.dayOfWeek
+
+            if (dayOfWeek != day) return false
+
+            if (interval != 1) {
+                val timeSpan = date.toDateSoy().dateTimeDayStart - from!!.toDateSoy().dateTimeDayStart
+                if (timeSpan.weeks.toInt().rem(interval) != 0) return false
+            }
+
+            return true
         }
-
-        return true
     }
 }

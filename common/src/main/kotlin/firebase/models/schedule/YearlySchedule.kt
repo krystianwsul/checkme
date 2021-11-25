@@ -16,11 +16,16 @@ class YearlySchedule(topLevelTask: Task, override val repeatingScheduleRecord: Y
 
     override val scheduleType = ScheduleType.YEARLY
 
-    override fun containsDate(date: Date): Boolean {
-        val dateThisYear = getDateInYear(date.year)
-
-        return dateThisYear == date
-    }
+    override val dateTimeSequenceGenerator: DateTimeSequenceGenerator = YearlyDateTimeSequenceGenerator()
 
     fun getDateInYear(year: Int) = Date(year, month, day)
+
+    private inner class YearlyDateTimeSequenceGenerator : DateTimeSequenceGenerator() {
+
+        override fun containsDate(date: Date): Boolean {
+            val dateThisYear = getDateInYear(date.year)
+
+            return dateThisYear == date
+        }
+    }
 }

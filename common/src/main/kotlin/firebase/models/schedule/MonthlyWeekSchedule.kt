@@ -21,17 +21,22 @@ class MonthlyWeekSchedule(topLevelTask: Task, override val repeatingScheduleReco
 
     override val scheduleType get() = ScheduleType.MONTHLY_WEEK
 
-    override fun containsDate(date: Date): Boolean {
-        val dateThisMonth = getDateInMonth(date.year, date.month)
-
-        return dateThisMonth == date
-    }
+    override val dateTimeSequenceGenerator: DateTimeSequenceGenerator = MonthlyWeekDateTimeSequenceGenerator()
 
     private fun getDateInMonth(year: Int, month: Int) = getDateInMonth(
-            year,
-            month,
-            repeatingScheduleRecord.weekOfMonth,
-            dayOfWeek,
-            repeatingScheduleRecord.beginningOfMonth
+        year,
+        month,
+        repeatingScheduleRecord.weekOfMonth,
+        dayOfWeek,
+        repeatingScheduleRecord.beginningOfMonth
     )
+
+    private inner class MonthlyWeekDateTimeSequenceGenerator : DateTimeSequenceGenerator() {
+
+        override fun containsDate(date: Date): Boolean {
+            val dateThisMonth = getDateInMonth(date.year, date.month)
+
+            return dateThisMonth == date
+        }
+    }
 }

@@ -57,7 +57,11 @@ class YearlySchedule(topLevelTask: Task, override val repeatingScheduleRecord: Y
 
     abstract class NewDateTimeSequenceGenerator : DateTimeSequenceGenerator {
 
-        protected abstract fun getNextValidDate(startDateSoy: DateSoy): DateSoy
+        private fun getNextValidDate(startDateSoy: DateSoy) = getNextValidDateHelper(startDateSoy).also {
+            check(containsDate(it.toDate()))
+        }
+
+        protected abstract fun getNextValidDateHelper(startDateSoy: DateSoy): DateSoy
 
         protected abstract fun containsDate(date: Date): Boolean
 
@@ -112,8 +116,6 @@ class YearlySchedule(topLevelTask: Task, override val repeatingScheduleRecord: Y
             endHourMilli: HourMilli?,
             scheduleTime: Time,
         ): Boolean {
-            check(containsDate(date))
-
             val hourMilli by lazy { scheduleTime.getHourMinute(date.dayOfWeek).toHourMilli() }
 
             if (startHourMilli != null && startHourMilli > hourMilli) return false
@@ -125,7 +127,7 @@ class YearlySchedule(topLevelTask: Task, override val repeatingScheduleRecord: Y
 
     private inner class YearlyNewDateTimeSequenceGenerator : NewDateTimeSequenceGenerator() {
 
-        override fun getNextValidDate(startDateSoy: DateSoy): DateSoy {
+        override fun getNextValidDateHelper(startDateSoy: DateSoy): DateSoy {
             val date = startDateSoy.toDate()
 
             return if (containsDate(date)) {

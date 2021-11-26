@@ -398,9 +398,9 @@ class RootTask private constructor(
             val dayOfWeek = when (schedule) {
                 is SingleSchedule -> schedule.date.dayOfWeek
                 is WeeklySchedule -> schedule.dayOfWeek
-                is MonthlyDaySchedule -> schedule.getDateInMonth(today.year, today.month).dayOfWeek
+                is MonthlyDaySchedule -> DayOfWeek.fromDateSoy(schedule.getDateSoyInMonth(today.year, today.month))
                 is MonthlyWeekSchedule -> schedule.dayOfWeek
-                is YearlySchedule -> schedule.getDateInYear(today.year).dayOfWeek
+                is YearlySchedule -> DayOfWeek.fromDateSoy(schedule.getDateSoyInYear(today.year))
                 else -> throw UnsupportedOperationException()
             }
 

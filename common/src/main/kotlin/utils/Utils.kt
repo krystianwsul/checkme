@@ -1,17 +1,25 @@
 package com.krystianwsul.common.utils
 
 import com.krystianwsul.common.time.Date
+import com.krystianwsul.common.time.DateSoy
 import com.krystianwsul.common.time.DayOfWeek
 import com.soywiz.klock.Month
 
-fun getDateInMonth(
-        year: Int,
-        month: Int,
-        dayOfMonth: Int,
-        beginningOfMonth: Boolean
-) = Date(year, month, if (beginningOfMonth) dayOfMonth else Month(month).days(year) - dayOfMonth + 1)
+fun getDateSoyInMonth(
+    year: Int,
+    month: Int,
+    dayOfMonth: Int,
+    beginningOfMonth: Boolean
+) = DateSoy(year, month, if (beginningOfMonth) dayOfMonth else Month(month).days(year) - dayOfMonth + 1)
 
-fun getDateInMonth(year: Int, month: Int, weekOfMonth: Int, dayOfWeek: DayOfWeek, beginningOfMonth: Boolean): Date {
+fun getDateInMonth(
+    year: Int,
+    month: Int,
+    dayOfMonth: Int,
+    beginningOfMonth: Boolean
+) = Date(getDateSoyInMonth(year, month, dayOfMonth, beginningOfMonth))
+
+fun getDateSoyInMonth(year: Int, month: Int, weekOfMonth: Int, dayOfWeek: DayOfWeek, beginningOfMonth: Boolean): DateSoy {
     if (beginningOfMonth) {
         val first = Date(year, month, 1)
 
@@ -21,7 +29,7 @@ fun getDateInMonth(year: Int, month: Int, weekOfMonth: Int, dayOfWeek: DayOfWeek
             weekOfMonth * 7 + (dayOfWeek.ordinal - first.dayOfWeek.ordinal) + 1
         }
 
-        return Date(year, month, day)
+        return DateSoy(year, month, day)
     } else {
         val daysInMonth = Month(month).days(year)
 
@@ -33,9 +41,12 @@ fun getDateInMonth(year: Int, month: Int, weekOfMonth: Int, dayOfWeek: DayOfWeek
             weekOfMonth * 7 + (last.dayOfWeek.ordinal - dayOfWeek.ordinal) + 1
         }
 
-        return Date(year, month, daysInMonth - day + 1)
+        return DateSoy(year, month, daysInMonth - day + 1)
     }
 }
+
+fun getDateInMonth(year: Int, month: Int, weekOfMonth: Int, dayOfWeek: DayOfWeek, beginningOfMonth: Boolean) =
+    Date(getDateSoyInMonth(year, month, weekOfMonth, dayOfWeek, beginningOfMonth))
 
 fun <T> Collection<T>.singleOrEmpty(): T? {
     check(size < 2)

@@ -3,7 +3,6 @@ package com.krystianwsul.common.firebase.models.schedule
 
 import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.firebase.records.schedule.YearlyScheduleRecord
-import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.DateSoy
 import com.krystianwsul.common.utils.ScheduleType
 import firebase.models.schedule.generators.DateTimeSequenceGenerator
@@ -21,7 +20,6 @@ class YearlySchedule(topLevelTask: Task, override val repeatingScheduleRecord: Y
 
     override val dateTimeSequenceGenerator: DateTimeSequenceGenerator = YearlyNextValidDateTimeSequenceGenerator()
 
-    fun getDateInYear(year: Int) = Date(year, month, day)
     fun getDateSoyInYear(year: Int) = DateSoy(year, month, day)
 
     private inner class YearlyNextValidDateTimeSequenceGenerator : NextValidDateTimeSequenceGenerator() {

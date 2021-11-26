@@ -3,7 +3,6 @@ package com.krystianwsul.common.firebase.models.schedule
 
 import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.firebase.records.schedule.WeeklyScheduleRecord
-import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.DateSoy
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.utils.ScheduleType
@@ -70,18 +69,7 @@ class WeeklySchedule(topLevelTask: Task, override val repeatingScheduleRecord: W
             }
         }
 
-        override fun containsDate(date: Date): Boolean { // todo sequence toDate
-            if (dayOfWeek != date.dayOfWeek) return false
-
-            if (interval != 1) {
-                val timeSpan = date.toDateSoy().dateTimeDayStart - from!!.toDateSoy().dateTimeDayStart
-                if (timeSpan.weeks.toInt().rem(interval) != 0) return false
-            }
-
-            return true
-        }
-
-        override fun containsDateSoy(dateSoy: DateSoy): Boolean { // todo sequence toDate
+        override fun containsDateSoy(dateSoy: DateSoy): Boolean {
             if (dayOfWeek.ordinal != dateSoy.dayOfWeek.ordinal) return false
 
             if (interval != 1) {

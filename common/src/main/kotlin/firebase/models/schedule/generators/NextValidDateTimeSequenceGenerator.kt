@@ -13,9 +13,7 @@ abstract class NextValidDateTimeSequenceGenerator : DateTimeSequenceGenerator {
 
     protected abstract fun getNextValidDateHelper(startDateSoy: DateSoy): DateSoy
 
-    protected abstract fun containsDate(date: Date): Boolean // todo sequence toDate
-
-    protected abstract fun containsDateSoy(dateSoy: DateSoy): Boolean // todo sequence toDate
+    protected abstract fun containsDateSoy(dateSoy: DateSoy): Boolean // todo sequence checks
 
     override fun generate(
         startExactTimeStamp: ExactTimeStamp,

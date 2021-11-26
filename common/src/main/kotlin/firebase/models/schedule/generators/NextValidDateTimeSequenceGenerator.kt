@@ -3,7 +3,6 @@ package firebase.models.schedule.generators
 import com.krystianwsul.common.time.*
 import com.soywiz.klock.days
 import com.soywiz.klock.plus
-import firebase.models.schedule.generators.DateTimeSequenceGenerator.Companion.toDate
 
 abstract class NextValidDateTimeSequenceGenerator : DateTimeSequenceGenerator {
 
@@ -39,24 +38,24 @@ abstract class NextValidDateTimeSequenceGenerator : DateTimeSequenceGenerator {
             // first day
             val startHourMilli = if (startSoyDate == currentSoyDate) startExactTimeStamp.hourMilli else null
 
-            val date = currentSoyDate.toDate()
+            val tmpDateSoy = currentSoyDate
             currentSoyDate = getNextValidDate(currentSoyDate + 1.days)
 
-            getDateTimeInDate(date, startHourMilli, endHourMilli, scheduleTime) ?: Unit
+            getDateTimeInDate(tmpDateSoy, startHourMilli, endHourMilli, scheduleTime) ?: Unit
         }.filterIsInstance<DateTime>()
     }
 
     private fun getDateTimeInDate(
-        date: Date,
+        dateSoy: DateSoy,
         startHourMilli: HourMilli?,
         endHourMilli: HourMilli?,
         scheduleTime: Time,
     ): DateTime? {
-        val hourMilli by lazy { scheduleTime.getHourMinute(date.dayOfWeek).toHourMilli() }
+        val hourMilli by lazy { scheduleTime.getHourMinute(DayOfWeek.fromDateSoy(dateSoy)).toHourMilli() }
 
         if (startHourMilli != null && startHourMilli > hourMilli) return null
         if (endHourMilli != null && endHourMilli <= hourMilli) return null
 
-        return DateTime(date, scheduleTime)
+        return DateTime(Date(dateSoy), scheduleTime)
     }
 }

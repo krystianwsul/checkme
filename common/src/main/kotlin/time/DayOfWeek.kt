@@ -14,10 +14,12 @@ enum class DayOfWeek {
         private val dateCache = mutableMapOf<Date, DayOfWeek>() // because I can't hold this on a parcelable date
 
         fun fromDate(date: Date): DayOfWeek {
-            if (!dateCache.containsKey(date)) dateCache[date] = values()[date.toDateSoy().dayOfWeekInt]
+            if (!dateCache.containsKey(date)) dateCache[date] = fromDateSoy(date.toDateSoy())
 
             return dateCache.getValue(date)
         }
+
+        fun fromDateSoy(dateSoy: DateSoy) = values()[dateSoy.dayOfWeekInt]
 
         val set by lazy { values().toSet() }
     }

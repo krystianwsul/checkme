@@ -29,6 +29,8 @@ data class Date(val year: Int, val month: Int, val day: Int) : Comparable<Date>,
 
     constructor(dateTimeTz: DateTimeTz) : this(dateTimeTz.yearInt, dateTimeTz.month1, dateTimeTz.dayOfMonth)
 
+    constructor(dateSoy: DateSoy) : this(dateSoy.year, dateSoy.month1, dateSoy.day)
+
     override fun compareTo(other: Date) = compareValuesBy(this, other, { it.year }, { it.month }, { it.day })
 
     override fun toString() = toDateSoy().formatDate()

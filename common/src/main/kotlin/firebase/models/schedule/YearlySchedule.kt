@@ -7,7 +7,6 @@ import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.DateSoy
 import com.krystianwsul.common.utils.ScheduleType
 import firebase.models.schedule.generators.DateTimeSequenceGenerator
-import firebase.models.schedule.generators.DateTimeSequenceGenerator.Companion.toDate
 import firebase.models.schedule.generators.NextValidDateTimeSequenceGenerator
 
 class YearlySchedule(topLevelTask: Task, override val repeatingScheduleRecord: YearlyScheduleRecord) :
@@ -23,18 +22,16 @@ class YearlySchedule(topLevelTask: Task, override val repeatingScheduleRecord: Y
     override val dateTimeSequenceGenerator: DateTimeSequenceGenerator = YearlyNextValidDateTimeSequenceGenerator()
 
     fun getDateInYear(year: Int) = Date(year, month, day)
-
     fun getDateSoyInYear(year: Int) = DateSoy(year, month, day)
 
     private inner class YearlyNextValidDateTimeSequenceGenerator : NextValidDateTimeSequenceGenerator() {
 
         override fun getNextValidDateHelper(startDateSoy: DateSoy): DateSoy {
-            val startDate = startDateSoy.toDate()
-            val dateThisYear = getDateInYear(startDate.year)
+            val dateSoyThisYear = getDateSoyInYear(startDateSoy.year)
 
-            return when (val comparison = dateThisYear.compareTo(startDate)) {
-                1 -> dateThisYear.toDateSoy()
-                -1 -> getDateInYear(startDate.year + 1).toDateSoy()
+            return when (val comparison = dateSoyThisYear.compareTo(startDateSoy)) {
+                1 -> dateSoyThisYear
+                -1 -> getDateSoyInYear(startDateSoy.year + 1)
                 else -> {
                     check(comparison == 0) // todo sequence checks
 

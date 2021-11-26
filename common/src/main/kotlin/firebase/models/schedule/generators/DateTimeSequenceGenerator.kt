@@ -1,13 +1,10 @@
 package firebase.models.schedule.generators
 
-import com.krystianwsul.common.time.*
+import com.krystianwsul.common.time.DateTime
+import com.krystianwsul.common.time.ExactTimeStamp
+import com.krystianwsul.common.time.Time
 
 interface DateTimeSequenceGenerator {
-
-    companion object {
-
-        fun DateSoy.toDate() = Date(year, month1, day) // todo sequence toDate
-    }
 
     fun generate(
         startExactTimeStamp: ExactTimeStamp,

@@ -24,6 +24,8 @@ class YearlySchedule(topLevelTask: Task, override val repeatingScheduleRecord: Y
 
     fun getDateInYear(year: Int) = Date(year, month, day)
 
+    fun getDateSoyInYear(year: Int) = DateSoy(year, month, day)
+
     private inner class YearlyNextValidDateTimeSequenceGenerator : NextValidDateTimeSequenceGenerator() {
 
         override fun getNextValidDateHelper(startDateSoy: DateSoy): DateSoy {
@@ -38,5 +40,7 @@ class YearlySchedule(topLevelTask: Task, override val repeatingScheduleRecord: Y
         }
 
         override fun containsDate(date: Date) = date == getDateInYear(date.year)
+
+        override fun containsDateSoy(dateSoy: DateSoy) = dateSoy == getDateSoyInYear(dateSoy.year)
     }
 }

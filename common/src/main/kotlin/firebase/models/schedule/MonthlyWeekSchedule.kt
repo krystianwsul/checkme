@@ -4,10 +4,12 @@ package com.krystianwsul.common.firebase.models.schedule
 import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.firebase.records.schedule.MonthlyWeekScheduleRecord
 import com.krystianwsul.common.time.Date
+import com.krystianwsul.common.time.DateSoy
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.utils.ScheduleType
 import com.krystianwsul.common.utils.getDateInMonth
 import firebase.models.schedule.generators.DateTimeSequenceGenerator
+import firebase.models.schedule.generators.DateTimeSequenceGenerator.Companion.toDate
 import firebase.models.schedule.generators.MonthlyNextValidDateTimeSequenceGenerator
 
 class MonthlyWeekSchedule(topLevelTask: Task, override val repeatingScheduleRecord: MonthlyWeekScheduleRecord) :
@@ -38,5 +40,7 @@ class MonthlyWeekSchedule(topLevelTask: Task, override val repeatingScheduleReco
         override fun getDateInMonth(year: Int, month: Int) = this@MonthlyWeekSchedule.getDateInMonth(year, month)
 
         override fun containsDate(date: Date) = date == getDateInMonth(date.year, date.month)
+
+        override fun containsDateSoy(dateSoy: DateSoy) = dateSoy.toDate() == getDateInMonth(dateSoy.year, dateSoy.month1)
     }
 }

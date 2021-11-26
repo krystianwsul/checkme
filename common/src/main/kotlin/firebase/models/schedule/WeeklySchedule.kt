@@ -50,32 +50,44 @@ class WeeklySchedule(topLevelTask: Task, override val repeatingScheduleRecord: W
 
             check(fixedDayDateSoy.dayOfWeek.ordinal == dayOfWeek.ordinal) // todo sequence checks
 
-            val timeSpan = fixedDayDateSoy.dateTimeDayStart - from!!.toDateSoy().dateTimeDayStart
+            return if (interval == 1) {
+                containsDateSoy(fixedDayDateSoy) // todo sequence checks
 
-            val remainder = timeSpan.weeks
-                .toInt()
-                .rem(interval)
-
-            return if (remainder != 0) {
-                check(interval != 1)
-
-                val fixedWeekDateSoy = fixedDayDateSoy + remainder.weeks
-                val newestStartDate = fixedWeekDateSoy.toDate() // todo sequence optimize
-                check(containsDate(newestStartDate)) // todo sequence checks
-
-                fixedWeekDateSoy
-            } else {
                 fixedDayDateSoy
+            } else {
+                val timeSpan = fixedDayDateSoy.dateTimeDayStart - from!!.toDateSoy().dateTimeDayStart
+                val remainder = timeSpan.weeks.toInt().rem(interval)
+
+                if (remainder == 0) {
+                    check(containsDateSoy(fixedDayDateSoy)) // todo sequence checks
+
+                    fixedDayDateSoy
+                } else {
+                    val fixedWeekDateSoy = fixedDayDateSoy + remainder.weeks
+                    val newestStartDate = fixedWeekDateSoy.toDate() // todo sequence optimize
+                    check(containsDate(newestStartDate)) // todo sequence checks
+
+                    fixedWeekDateSoy
+                }
             }
         }
 
         override fun containsDate(date: Date): Boolean { // todo sequence optimize
-            val day = date.dayOfWeek
-
-            if (dayOfWeek != day) return false
+            if (dayOfWeek != date.dayOfWeek) return false
 
             if (interval != 1) {
                 val timeSpan = date.toDateSoy().dateTimeDayStart - from!!.toDateSoy().dateTimeDayStart
+                if (timeSpan.weeks.toInt().rem(interval) != 0) return false
+            }
+
+            return true
+        }
+
+        override fun containsDateSoy(dateSoy: DateSoy): Boolean { // todo sequence optimize
+            if (dayOfWeek.ordinal != dateSoy.dayOfWeek.ordinal) return false
+
+            if (interval != 1) {
+                val timeSpan = dateSoy.dateTimeDayStart - from!!.toDateSoy().dateTimeDayStart
                 if (timeSpan.weeks.toInt().rem(interval) != 0) return false
             }
 

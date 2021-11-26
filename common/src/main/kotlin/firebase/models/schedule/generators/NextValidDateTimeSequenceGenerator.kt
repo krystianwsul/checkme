@@ -14,6 +14,21 @@ abstract class NextValidDateTimeSequenceGenerator : DateTimeSequenceGenerator {
 
     protected abstract fun containsDateSoy(dateSoy: DateSoy): Boolean // todo sequence checks
 
+    /*
+    todo sequence the algorithm here is kind of ridiculous.  getNextValidDate checks if the current date is valid for a given schedule
+    (excluding start/end, from/until, etc.) and if not, returns the next date that is.  Then, we check that against the
+    aforementioned.  And on the next loop, we increment the day by 1, then check it again.
+
+    It would be more performant to directly generate a sequence of valid dates, with a given starting point.  And relatively
+    straightforward once we have a valid date:
+
+    Weekly: add a week timeSpan, recalculate
+    Monthly*, Yearly: increment the month/year param, regenerate
+
+    Furthermore, we should fetch the next possible date at the beginning of the next loop (with an edge case for the first
+    iteration), instead of doing it at the end.  Unless we make a sequence of dates first, in which case looping won't
+    be relevant.
+     */
     override fun generate(
         startExactTimeStamp: ExactTimeStamp,
         endExactTimeStamp: ExactTimeStamp?,

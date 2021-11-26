@@ -61,7 +61,7 @@ class WeeklySchedule(topLevelTask: Task, override val repeatingScheduleRecord: W
 
                     fixedDayDateSoy
                 } else {
-                    val fixedWeekDateSoy = fixedDayDateSoy + remainder.weeks
+                    val fixedWeekDateSoy = fixedDayDateSoy + (interval - remainder).weeks
                     check(containsDateSoy(fixedWeekDateSoy)) // todo sequence checks
 
                     fixedWeekDateSoy

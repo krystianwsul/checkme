@@ -19,10 +19,10 @@ abstract class NextValidDateTimeSequenceGenerator : DateTimeSequenceGenerator {
         endExactTimeStamp: ExactTimeStamp?,
         scheduleTime: Time,
     ): Sequence<DateTime> {
-        val startSoyDate = startExactTimeStamp.date.toDateSoy()
+        val startSoyDate = startExactTimeStamp.dateSoy
         var currentSoyDate = getNextValidDate(startSoyDate)
 
-        val endSoyDate = endExactTimeStamp?.date?.toDateSoy()
+        val endSoyDate = endExactTimeStamp?.dateSoy
 
         return generateSequence {
             var endHourMilli: HourMilli? = null

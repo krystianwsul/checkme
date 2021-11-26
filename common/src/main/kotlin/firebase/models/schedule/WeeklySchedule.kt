@@ -53,7 +53,7 @@ class WeeklySchedule(topLevelTask: Task, override val repeatingScheduleRecord: W
 
                 fixedDayDateSoy
             } else {
-                val timeSpan = fixedDayDateSoy.dateTimeDayStart - from!!.toDateSoy().dateTimeDayStart
+                val timeSpan = fixedDayDateSoy.dateTimeDayStart - from!!.toDateTimeSoy()
                 val remainder = timeSpan.weeks.toInt().rem(interval)
 
                 if (remainder == 0) {
@@ -73,7 +73,7 @@ class WeeklySchedule(topLevelTask: Task, override val repeatingScheduleRecord: W
             if (dayOfWeek.ordinal != dateSoy.dayOfWeek.ordinal) return false
 
             if (interval != 1) {
-                val timeSpan = dateSoy.dateTimeDayStart - from!!.toDateSoy().dateTimeDayStart
+                val timeSpan = dateSoy.dateTimeDayStart - from!!.toDateTimeSoy()
                 if (timeSpan.weeks.toInt().rem(interval) != 0) return false
             }
 

@@ -20,11 +20,14 @@ sealed class ExactTimeStamp : Comparable<ExactTimeStamp> {
 
         override val date get() = Date(toDateTimeTzLocal())
 
+        override val dateSoy: DateSoy get() = toDateTimeTzLocal().run { DateSoy(yearInt, month1, dayOfMonth) }
+
         override val hourMilli get() = HourMilli(toDateTimeTzLocal())
 
         constructor(dateTimeSoy: DateTimeSoy) : this(dateTimeSoy.unixMillisLong)
 
-        constructor(date: Date, hourMilli: HourMilli) : this(DateTimeSoy(
+        constructor(date: Date, hourMilli: HourMilli) : this(
+            DateTimeSoy(
                 date.year,
                 date.month,
                 date.day,
@@ -89,6 +92,8 @@ sealed class ExactTimeStamp : Comparable<ExactTimeStamp> {
 
         override val date get() = Date(toDateTimeTz())
 
+        override val dateSoy: DateSoy get() = toDateTimeTz().run { DateSoy(yearInt, month1, dayOfMonth) }
+
         override val hourMilli get() = HourMilli(toDateTimeTz())
 
         constructor(dateTimeTz: DateTimeTz) : this(dateTimeTz.utc.unixMillisLong, dateTimeTz.offset.totalMilliseconds)
@@ -103,6 +108,8 @@ sealed class ExactTimeStamp : Comparable<ExactTimeStamp> {
     }
 
     abstract val date: Date
+
+    abstract val dateSoy: DateSoy
 
     abstract val hourMilli: HourMilli
 

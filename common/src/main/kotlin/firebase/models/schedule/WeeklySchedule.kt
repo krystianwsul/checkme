@@ -30,13 +30,9 @@ class WeeklySchedule(topLevelTask: Task, override val repeatingScheduleRecord: W
     private inner class WeeklyNextValidDateTimeSequenceGenerator : NextValidDateTimeSequenceGenerator() {
 
         override fun getNextValidDateHelper(startDateSoy: DateSoy): DateSoy {
-            val startDate = startDateSoy.toDate() // todo sequence optimize find way to check day of week for Soy
+            val dayOfWeekDiff = dayOfWeek.ordinal - startDateSoy.dayOfWeekInt
 
-            val startDayOfWeek = startDate.dayOfWeek
-
-            val dayOfWeekDiff = dayOfWeek.ordinal - startDayOfWeek.ordinal
-
-            val newStartDateSoy = when {
+            val fixedDayDateSoy = when {
                 dayOfWeekDiff > 0 -> {
                     /*
                     For example, the schedule date is Wednesday 4. The start date is Monday 2.  diff = 2
@@ -52,28 +48,27 @@ class WeeklySchedule(topLevelTask: Task, override val repeatingScheduleRecord: W
                 else -> startDateSoy
             }
 
-            val newStartDate = newStartDateSoy.toDate()
-            check(newStartDate.dayOfWeek == dayOfWeek) // todo sequence checks
+            check(fixedDayDateSoy.dayOfWeek.ordinal == dayOfWeek.ordinal) // todo sequence checks
 
-            return if (containsDate(newStartDate)) {
-                newStartDateSoy
-            } else {
+            val timeSpan = fixedDayDateSoy.dateTimeDayStart - from!!.toDateSoy().dateTimeDayStart
+
+            val remainder = timeSpan.weeks
+                .toInt()
+                .rem(interval)
+
+            return if (remainder != 0) {
                 check(interval != 1)
 
-                val timeSpan = newStartDate.toDateSoy().dateTimeDayStart - from!!.toDateSoy().dateTimeDayStart
-                val remainder = timeSpan.weeks.toInt().rem(interval)
-
-                val newestStartDateSoy = newStartDateSoy + remainder.weeks
-                val newestStartDate = newestStartDateSoy.toDate()
+                val fixedWeekDateSoy = fixedDayDateSoy + remainder.weeks
+                val newestStartDate = fixedWeekDateSoy.toDate() // todo sequence optimize
                 check(containsDate(newestStartDate)) // todo sequence checks
 
-                newestStartDateSoy
+                fixedWeekDateSoy
+            } else {
+                fixedDayDateSoy
             }
         }
 
-        /*
-        todo sequence optimize: I think all the related methods can benefit from a SoyDayOfWeek - DayOfWeek mapping
-         */
         override fun containsDate(date: Date): Boolean { // todo sequence optimize
             val day = date.dayOfWeek
 

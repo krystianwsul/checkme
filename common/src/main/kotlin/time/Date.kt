@@ -35,7 +35,7 @@ data class Date(val year: Int, val month: Int, val day: Int) : Comparable<Date>,
 
     fun toJson() = toDateSoy().format(ISO8601.DATE_CALENDAR_COMPLETE)
 
-    fun toDateSoy() = DateSoy(year, month, day)
+    fun toDateSoy() = DateSoy(year, month, day) // todo sequence optimize
 
     fun toMidnightExactTimeStamp() = ExactTimeStamp.Local(this, HourMilli(0, 0, 0, 0))
 }

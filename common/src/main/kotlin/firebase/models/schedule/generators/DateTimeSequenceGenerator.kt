@@ -6,7 +6,7 @@ interface DateTimeSequenceGenerator {
 
     companion object {
 
-        fun DateSoy.toDate() = Date(year, month1, day)
+        fun DateSoy.toDate() = Date(year, month1, day) // todo sequence optimize
     }
 
     fun generate(

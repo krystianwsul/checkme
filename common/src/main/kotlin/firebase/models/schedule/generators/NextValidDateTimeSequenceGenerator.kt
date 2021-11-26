@@ -8,14 +8,14 @@ import firebase.models.schedule.generators.DateTimeSequenceGenerator.Companion.t
 abstract class NextValidDateTimeSequenceGenerator : DateTimeSequenceGenerator {
 
     private fun getNextValidDate(startDateSoy: DateSoy) = getNextValidDateHelper(startDateSoy).also {
-        check(containsDate(it.toDate())) // todo sequence optimize
+        check(containsDateSoy(it)) // todo sequence checks
     }
 
     protected abstract fun getNextValidDateHelper(startDateSoy: DateSoy): DateSoy
 
-    protected abstract fun containsDate(date: Date): Boolean // todo sequence optimize
+    protected abstract fun containsDate(date: Date): Boolean // todo sequence toDate
 
-    protected abstract fun containsDateSoy(dateSoy: DateSoy): Boolean // todo sequence optimize
+    protected abstract fun containsDateSoy(dateSoy: DateSoy): Boolean // todo sequence toDate
 
     override fun generate(
         startExactTimeStamp: ExactTimeStamp,

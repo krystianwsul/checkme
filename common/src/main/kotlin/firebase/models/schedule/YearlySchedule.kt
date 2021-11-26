@@ -32,10 +32,14 @@ class YearlySchedule(topLevelTask: Task, override val repeatingScheduleRecord: Y
             val startDate = startDateSoy.toDate()
             val dateThisYear = getDateInYear(startDate.year)
 
-            return when { // todo sequence optimize comparison
-                dateThisYear > startDate -> dateThisYear.toDateSoy()
-                dateThisYear < startDate -> getDateInYear(startDate.year + 1).toDateSoy()
-                else -> startDateSoy
+            return when (val comparison = dateThisYear.compareTo(startDate)) {
+                1 -> dateThisYear.toDateSoy()
+                -1 -> getDateInYear(startDate.year + 1).toDateSoy()
+                else -> {
+                    check(comparison == 0) // todo sequence checks
+
+                    startDateSoy
+                }
             }
         }
 

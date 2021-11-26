@@ -11,7 +11,6 @@ import com.soywiz.klock.days
 import com.soywiz.klock.plus
 import com.soywiz.klock.weeks
 import firebase.models.schedule.generators.DateTimeSequenceGenerator
-import firebase.models.schedule.generators.DateTimeSequenceGenerator.Companion.toDate
 import firebase.models.schedule.generators.NextValidDateTimeSequenceGenerator
 
 class WeeklySchedule(topLevelTask: Task, override val repeatingScheduleRecord: WeeklyScheduleRecord) :
@@ -64,15 +63,14 @@ class WeeklySchedule(topLevelTask: Task, override val repeatingScheduleRecord: W
                     fixedDayDateSoy
                 } else {
                     val fixedWeekDateSoy = fixedDayDateSoy + remainder.weeks
-                    val newestStartDate = fixedWeekDateSoy.toDate() // todo sequence optimize
-                    check(containsDate(newestStartDate)) // todo sequence checks
+                    check(containsDateSoy(fixedWeekDateSoy)) // todo sequence checks
 
                     fixedWeekDateSoy
                 }
             }
         }
 
-        override fun containsDate(date: Date): Boolean { // todo sequence optimize
+        override fun containsDate(date: Date): Boolean { // todo sequence toDate
             if (dayOfWeek != date.dayOfWeek) return false
 
             if (interval != 1) {
@@ -83,7 +81,7 @@ class WeeklySchedule(topLevelTask: Task, override val repeatingScheduleRecord: W
             return true
         }
 
-        override fun containsDateSoy(dateSoy: DateSoy): Boolean { // todo sequence optimize
+        override fun containsDateSoy(dateSoy: DateSoy): Boolean { // todo sequence toDate
             if (dayOfWeek.ordinal != dateSoy.dayOfWeek.ordinal) return false
 
             if (interval != 1) {

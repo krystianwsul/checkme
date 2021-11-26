@@ -8,22 +8,26 @@ import firebase.models.schedule.generators.DateTimeSequenceGenerator.Companion.t
 
 abstract class MonthlyNextValidDateTimeSequenceGenerator : NextValidDateTimeSequenceGenerator() {
 
-    protected abstract fun getDateInMonth(year: Int, month: Int): Date // todo sequence optimize consider soy signature
+    protected abstract fun getDateInMonth(year: Int, month: Int): Date // todo sequence toDate
 
     override fun getNextValidDateHelper(startDateSoy: DateSoy): DateSoy {
         val startDate = startDateSoy.toDate()
 
         val dateSameMonth = getDateInMonth(startDate.year, startDate.month)
 
-        return when { // todo sequence optimize execute comparison once
-            dateSameMonth < startDate -> {
+        return when (val comparison = dateSameMonth.compareTo(startDate)) {
+            -1 -> {
                 val nextMonthDateSoy = startDateSoy + 1.months
                 val nextMonthDate = nextMonthDateSoy.toDate()
 
                 getDateInMonth(nextMonthDate.year, nextMonthDate.month).toDateSoy()
             }
-            dateSameMonth > startDate -> dateSameMonth.toDateSoy()
-            else -> startDateSoy
+            1 -> dateSameMonth.toDateSoy()
+            else -> {
+                check(comparison == 0) // todo sequence checks
+
+                startDateSoy
+            }
         }
     }
 }

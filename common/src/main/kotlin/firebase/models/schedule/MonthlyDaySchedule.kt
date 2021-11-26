@@ -38,6 +38,6 @@ class MonthlyDaySchedule(topLevelTask: Task, override val repeatingScheduleRecor
         override fun containsDate(date: Date) = date == getDateInMonth(date.year, date.month)
 
         override fun containsDateSoy(dateSoy: DateSoy) =
-            dateSoy.toDate() == getDateInMonth(dateSoy.year, dateSoy.month1) // todo sequence optimize
+            dateSoy.toDate() == getDateInMonth(dateSoy.year, dateSoy.month1) // todo sequence toDate
     }
 }

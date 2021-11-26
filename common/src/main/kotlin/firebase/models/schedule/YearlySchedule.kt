@@ -27,18 +27,13 @@ class YearlySchedule(topLevelTask: Task, override val repeatingScheduleRecord: Y
     private inner class YearlyNextValidDateTimeSequenceGenerator : NextValidDateTimeSequenceGenerator() {
 
         override fun getNextValidDateHelper(startDateSoy: DateSoy): DateSoy {
-            val date = startDateSoy.toDate()
+            val startDate = startDateSoy.toDate()
+            val dateThisYear = getDateInYear(startDate.year)
 
-            return if (containsDate(date)) {
-                startDateSoy
-            } else {
-                val dateThisYear = getDateInYear(date.year)
-
-                if (dateThisYear > date) { // todo sequence redundant with containsDate
-                    dateThisYear.toDateSoy()
-                } else {
-                    getDateInYear(date.year + 1).toDateSoy()
-                }
+            return when { // todo sequence optimize comparison
+                dateThisYear > startDate -> dateThisYear.toDateSoy()
+                dateThisYear < startDate -> getDateInYear(startDate.year + 1).toDateSoy()
+                else -> startDateSoy
             }
         }
 

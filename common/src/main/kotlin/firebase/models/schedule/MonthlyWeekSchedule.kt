@@ -8,7 +8,6 @@ import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.utils.ScheduleType
 import com.krystianwsul.common.utils.getDateInMonth
 import firebase.models.schedule.generators.DateTimeSequenceGenerator
-import firebase.models.schedule.generators.DateTimeSequenceGenerator.Companion.toDate
 import firebase.models.schedule.generators.MonthlyNextValidDateTimeSequenceGenerator
 
 class MonthlyWeekSchedule(topLevelTask: Task, override val repeatingScheduleRecord: MonthlyWeekScheduleRecord) :
@@ -36,8 +35,8 @@ class MonthlyWeekSchedule(topLevelTask: Task, override val repeatingScheduleReco
 
     private inner class MonthlyWeekNextValidDateTimeSequenceGenerator : MonthlyNextValidDateTimeSequenceGenerator() {
 
-        override fun getDateInMonth(year: Int, month: Int) = this@MonthlyWeekSchedule.getDateInMonth(year, month)
+        override fun getDateSoyInMonth(year: Int, month: Int) = getDateInMonth(year, month).toDateSoy() // todo sequence soy
 
-        override fun containsDateSoy(dateSoy: DateSoy) = dateSoy.toDate() == getDateInMonth(dateSoy.year, dateSoy.month1)
+        override fun containsDateSoy(dateSoy: DateSoy) = dateSoy == getDateSoyInMonth(dateSoy.year, dateSoy.month1)
     }
 }

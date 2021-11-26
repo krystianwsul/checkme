@@ -1,27 +1,23 @@
 package firebase.models.schedule.generators
 
-import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.DateSoy
 import com.soywiz.klock.months
 import com.soywiz.klock.plus
-import firebase.models.schedule.generators.DateTimeSequenceGenerator.Companion.toDate
 
 abstract class MonthlyNextValidDateTimeSequenceGenerator : NextValidDateTimeSequenceGenerator() {
 
-    protected abstract fun getDateInMonth(year: Int, month: Int): Date // todo sequence toDate
+    protected abstract fun getDateSoyInMonth(year: Int, month: Int): DateSoy
 
     override fun getNextValidDateHelper(startDateSoy: DateSoy): DateSoy {
-        val startDate = startDateSoy.toDate()
+        val dateSoySameMonth = getDateSoyInMonth(startDateSoy.year, startDateSoy.month1)
 
-        val dateSameMonth = getDateInMonth(startDate.year, startDate.month)
-
-        return when (val comparison = dateSameMonth.compareTo(startDate)) {
+        return when (val comparison = dateSoySameMonth.compareTo(startDateSoy)) {
             -1 -> {
                 val nextMonthDateSoy = startDateSoy + 1.months
 
-                getDateInMonth(nextMonthDateSoy.year, nextMonthDateSoy.month1).toDateSoy()
+                getDateSoyInMonth(nextMonthDateSoy.year, nextMonthDateSoy.month1)
             }
-            1 -> dateSameMonth.toDateSoy()
+            1 -> dateSoySameMonth
             else -> {
                 check(comparison == 0) // todo sequence checks
 

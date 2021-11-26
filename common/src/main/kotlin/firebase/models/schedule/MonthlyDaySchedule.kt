@@ -7,7 +7,6 @@ import com.krystianwsul.common.time.DateSoy
 import com.krystianwsul.common.utils.ScheduleType
 import com.krystianwsul.common.utils.getDateInMonth
 import firebase.models.schedule.generators.DateTimeSequenceGenerator
-import firebase.models.schedule.generators.DateTimeSequenceGenerator.Companion.toDate
 import firebase.models.schedule.generators.MonthlyNextValidDateTimeSequenceGenerator
 
 class MonthlyDaySchedule(topLevelTask: Task, override val repeatingScheduleRecord: MonthlyDayScheduleRecord) :
@@ -32,9 +31,8 @@ class MonthlyDaySchedule(topLevelTask: Task, override val repeatingScheduleRecor
 
     private inner class MonthlyDayNextValidDateTimeSequenceGenerator : MonthlyNextValidDateTimeSequenceGenerator() {
 
-        override fun getDateInMonth(year: Int, month: Int) = this@MonthlyDaySchedule.getDateInMonth(year, month)
+        override fun getDateSoyInMonth(year: Int, month: Int) = getDateInMonth(year, month).toDateSoy() // todo sequence soy
 
-        override fun containsDateSoy(dateSoy: DateSoy) =
-            dateSoy.toDate() == getDateInMonth(dateSoy.year, dateSoy.month1) // todo sequence toDate
+        override fun containsDateSoy(dateSoy: DateSoy) = dateSoy == getDateSoyInMonth(dateSoy.year, dateSoy.month1)
     }
 }

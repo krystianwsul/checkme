@@ -52,22 +52,11 @@ abstract class NextValidDateTimeSequenceGenerator : DateTimeSequenceGenerator {
         endHourMilli: HourMilli?,
         scheduleTime: Time,
     ): DateTime? {
-        if (!hasInstanceInDate(date, startHourMilli, endHourMilli, scheduleTime)) return null
-
-        return DateTime(date, scheduleTime)
-    }
-
-    private fun hasInstanceInDate(
-        date: Date,
-        startHourMilli: HourMilli?,
-        endHourMilli: HourMilli?,
-        scheduleTime: Time,
-    ): Boolean {
         val hourMilli by lazy { scheduleTime.getHourMinute(date.dayOfWeek).toHourMilli() }
 
-        if (startHourMilli != null && startHourMilli > hourMilli) return false
-        if (endHourMilli != null && endHourMilli <= hourMilli) return false
+        if (startHourMilli != null && startHourMilli > hourMilli) return null
+        if (endHourMilli != null && endHourMilli <= hourMilli) return null
 
-        return true
+        return DateTime(date, scheduleTime)
     }
 }

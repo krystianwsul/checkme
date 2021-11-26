@@ -3,7 +3,8 @@ package com.krystianwsul.common.firebase.models.schedule
 
 import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.firebase.records.schedule.YearlyScheduleRecord
-import com.krystianwsul.common.time.*
+import com.krystianwsul.common.time.Date
+import com.krystianwsul.common.time.DateSoy
 import com.krystianwsul.common.utils.ScheduleType
 import firebase.models.schedule.generators.DateTimeSequenceGenerator
 import firebase.models.schedule.generators.DateTimeSequenceGenerator.Companion.toDate
@@ -23,12 +24,6 @@ class YearlySchedule(topLevelTask: Task, override val repeatingScheduleRecord: Y
 
     fun getDateInYear(year: Int) = Date(year, month, day)
 
-    private fun containsDate(date: Date): Boolean {
-        val dateThisYear = getDateInYear(date.year)
-
-        return dateThisYear == date
-    }
-
     private inner class YearlyNextValidDateTimeSequenceGenerator : NextValidDateTimeSequenceGenerator() {
 
         override fun getNextValidDateHelper(startDateSoy: DateSoy): DateSoy {
@@ -37,10 +32,16 @@ class YearlySchedule(topLevelTask: Task, override val repeatingScheduleRecord: Y
             return if (containsDate(date)) {
                 startDateSoy
             } else {
-                getDateInYear(date.year + 1).toDateSoy()
+                val dateThisYear = getDateInYear(date.year)
+
+                if (dateThisYear > date) { // todo sequence redundant with containsDate
+                    dateThisYear.toDateSoy()
+                } else {
+                    getDateInYear(date.year + 1).toDateSoy()
+                }
             }
         }
 
-        override fun containsDate(date: Date) = this@YearlySchedule.containsDate(date)
+        override fun containsDate(date: Date) = date == getDateInYear(date.year)
     }
 }

@@ -69,7 +69,7 @@ class WeeklySchedule(topLevelTask: Task, override val repeatingScheduleRecord: W
             }
 
             val newStartDate = newStartDateSoy.toDate()
-            check(newStartDate.dayOfWeek == dayOfWeek) // todo sequence
+            check(newStartDate.dayOfWeek == dayOfWeek) // todo sequence checks
 
             return if (containsDate(newStartDate)) {
                 newStartDateSoy
@@ -81,7 +81,7 @@ class WeeklySchedule(topLevelTask: Task, override val repeatingScheduleRecord: W
 
                 val newestStartDateSoy = newStartDateSoy + remainder.weeks
                 val newestStartDate = newestStartDateSoy.toDate()
-                check(containsDate(newestStartDate)) // todo sequence optimize
+                check(containsDate(newestStartDate)) // todo sequence checks
 
                 newestStartDateSoy
             }

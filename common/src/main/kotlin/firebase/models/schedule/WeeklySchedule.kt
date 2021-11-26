@@ -27,22 +27,6 @@ class WeeklySchedule(topLevelTask: Task, override val repeatingScheduleRecord: W
 
     override val dateTimeSequenceGenerator: DateTimeSequenceGenerator = WeeklyNextValidDateTimeSequenceGenerator()
 
-    /*
-    todo sequence optimize: I think all the related methods can benefit from a SoyDayOfWeek - DayOfWeek mapping
-     */
-    fun containsDate(date: Date): Boolean { // todo sequence optimize
-        val day = date.dayOfWeek
-
-        if (dayOfWeek != day) return false
-
-        if (interval != 1) {
-            val timeSpan = date.toDateSoy().dateTimeDayStart - from!!.toDateSoy().dateTimeDayStart
-            if (timeSpan.weeks.toInt().rem(interval) != 0) return false
-        }
-
-        return true
-    }
-
     private inner class WeeklyNextValidDateTimeSequenceGenerator : NextValidDateTimeSequenceGenerator() {
 
         override fun getNextValidDateHelper(startDateSoy: DateSoy): DateSoy {
@@ -65,7 +49,7 @@ class WeeklySchedule(topLevelTask: Task, override val repeatingScheduleRecord: W
                      */
                     startDateSoy + (7 + dayOfWeekDiff).days
                 }
-                else -> startDateSoy // todo sequence doubles above
+                else -> startDateSoy
             }
 
             val newStartDate = newStartDateSoy.toDate()
@@ -87,6 +71,20 @@ class WeeklySchedule(topLevelTask: Task, override val repeatingScheduleRecord: W
             }
         }
 
-        override fun containsDate(date: Date) = this@WeeklySchedule.containsDate(date)
+        /*
+        todo sequence optimize: I think all the related methods can benefit from a SoyDayOfWeek - DayOfWeek mapping
+         */
+        override fun containsDate(date: Date): Boolean { // todo sequence optimize
+            val day = date.dayOfWeek
+
+            if (dayOfWeek != day) return false
+
+            if (interval != 1) {
+                val timeSpan = date.toDateSoy().dateTimeDayStart - from!!.toDateSoy().dateTimeDayStart
+                if (timeSpan.weeks.toInt().rem(interval) != 0) return false
+            }
+
+            return true
+        }
     }
 }

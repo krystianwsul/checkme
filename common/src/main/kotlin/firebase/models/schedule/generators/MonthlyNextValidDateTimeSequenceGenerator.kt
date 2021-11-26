@@ -18,9 +18,8 @@ abstract class MonthlyNextValidDateTimeSequenceGenerator : NextValidDateTimeSequ
         return when (val comparison = dateSameMonth.compareTo(startDate)) {
             -1 -> {
                 val nextMonthDateSoy = startDateSoy + 1.months
-                val nextMonthDate = nextMonthDateSoy.toDate()
 
-                getDateInMonth(nextMonthDate.year, nextMonthDate.month).toDateSoy()
+                getDateInMonth(nextMonthDateSoy.year, nextMonthDateSoy.month1).toDateSoy()
             }
             1 -> dateSameMonth.toDateSoy()
             else -> {

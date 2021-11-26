@@ -25,4 +25,21 @@ abstract class MonthlyNextValidDateTimeSequenceGenerator : NextValidDateTimeSequ
             }
         }
     }
+
+    override fun getDateSequenceHelper(startDateSoy: DateSoy, endDateSoy: DateSoy?): Sequence<DateSoy> {
+        var currentDateSoy = getNextValidDateHelper(startDateSoy)
+
+        return generateSequence {
+            val tmpDateSoy = currentDateSoy
+
+            currentDateSoy += 1.months
+
+            getDateSoyInMonth(tmpDateSoy.year, tmpDateSoy.month1).takeIf {
+                if (endDateSoy != null)
+                    it <= endDateSoy
+                else
+                    true
+            }
+        }
+    }
 }

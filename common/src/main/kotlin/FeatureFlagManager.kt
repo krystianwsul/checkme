@@ -14,5 +14,6 @@ object FeatureFlagManager {
 
     enum class Flag {
 
+        SCHEDULE_DATE_SEQUENCE
     }
 }

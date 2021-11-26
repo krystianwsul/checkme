@@ -61,10 +61,27 @@ class WeeklySchedule(topLevelTask: Task, override val repeatingScheduleRecord: W
 
                     fixedDayDateSoy
                 } else {
-                    val fixedWeekDateSoy = fixedDayDateSoy + remainder.weeks
+                    val fixedWeekDateSoy = fixedDayDateSoy + (interval - remainder).weeks
                     check(containsDateSoy(fixedWeekDateSoy)) // todo sequence checks
 
                     fixedWeekDateSoy
+                }
+            }
+        }
+
+        override fun getDateSequenceHelper(startDateSoy: DateSoy, endDateSoy: DateSoy?): Sequence<DateSoy> {
+            var currentDateSoy = getNextValidDateHelper(startDateSoy)
+
+            return generateSequence {
+                val tmpDateSoy = currentDateSoy
+
+                currentDateSoy += interval.weeks
+
+                tmpDateSoy.takeIf {
+                    if (endDateSoy != null)
+                        it <= endDateSoy
+                    else
+                        true
                 }
             }
         }

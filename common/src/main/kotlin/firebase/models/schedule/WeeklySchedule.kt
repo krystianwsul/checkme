@@ -27,7 +27,7 @@ class WeeklySchedule(topLevelTask: Task, override val repeatingScheduleRecord: W
 
     private inner class WeeklyNextValidDateTimeSequenceGenerator : NextValidDateTimeSequenceGenerator() {
 
-        override fun getNextValidDateHelper(startDateSoy: DateSoy): DateSoy {
+        override fun getFirstDateSoyHelper(startDateSoy: DateSoy): DateSoy {
             val dayOfWeekDiff = dayOfWeek.ordinal - startDateSoy.dayOfWeekInt
 
             val fixedDayDateSoy = when {
@@ -69,12 +69,7 @@ class WeeklySchedule(topLevelTask: Task, override val repeatingScheduleRecord: W
             }
         }
 
-        override fun getDateSequenceHelper(startDateSoy: DateSoy, endDateSoy: DateSoy?): Sequence<DateSoy> {
-            return generateSequence(
-                { getNextValidDateHelper(startDateSoy).filterEnd(endDateSoy) },
-                { (it + interval.weeks).filterEnd(endDateSoy) },
-            )
-        }
+        override fun getNextDateSoy(currentDateSoy: DateSoy) = currentDateSoy + interval.weeks
 
         override fun containsDateSoy(dateSoy: DateSoy): Boolean {
             if (dayOfWeek.ordinal != dateSoy.dayOfWeek.ordinal) return false

@@ -16,17 +16,20 @@ abstract class NextValidDateTimeSequenceGenerator : DateTimeSequenceGenerator {
         }
     }
 
-    private fun getNextValidDate(startDateSoy: DateSoy) = getNextValidDateHelper(startDateSoy).also {
+    private fun getFirstDateSoy(startDateSoy: DateSoy) = getFirstDateSoyHelper(startDateSoy).also {
         check(containsDateSoy(it)) // todo sequence checks
     }
 
-    protected abstract fun getNextValidDateHelper(startDateSoy: DateSoy): DateSoy
+    private fun getDateSequence(startDateSoy: DateSoy, endDateSoy: DateSoy?): Sequence<DateSoy> {
+        return generateSequence(
+            { getFirstDateSoyHelper(startDateSoy).filterEnd(endDateSoy) },
+            { getNextDateSoy(it).filterEnd(endDateSoy) },
+        ).onEach { check(containsDateSoy(it)) } // todo sequence checks
+    }
 
-    // todo sequence checks
-    private fun getDateSequence(startDateSoy: DateSoy, endDateSoy: DateSoy?) =
-        getDateSequenceHelper(startDateSoy, endDateSoy).also { it.onEach { check(containsDateSoy(it)) } }
+    protected abstract fun getFirstDateSoyHelper(startDateSoy: DateSoy): DateSoy
 
-    protected abstract fun getDateSequenceHelper(startDateSoy: DateSoy, endDateSoy: DateSoy?): Sequence<DateSoy>
+    protected abstract fun getNextDateSoy(currentDateSoy: DateSoy): DateSoy
 
     protected abstract fun containsDateSoy(dateSoy: DateSoy): Boolean // todo sequence checks
 
@@ -46,7 +49,7 @@ abstract class NextValidDateTimeSequenceGenerator : DateTimeSequenceGenerator {
                 getDateTimeInDate(dateSoy, startHourMilli, endHourMilli, scheduleTime)
             }
         } else {
-            var currentSoyDate = getNextValidDate(startSoyDate)
+            var currentSoyDate = getFirstDateSoy(startSoyDate)
 
             return generateSequence {
                 var endHourMilli: HourMilli? = null
@@ -63,7 +66,7 @@ abstract class NextValidDateTimeSequenceGenerator : DateTimeSequenceGenerator {
                 val startHourMilli = if (startSoyDate == currentSoyDate) startExactTimeStamp.hourMilli else null
 
                 val tmpDateSoy = currentSoyDate
-                currentSoyDate = getNextValidDate(currentSoyDate + 1.days)
+                currentSoyDate = getFirstDateSoy(currentSoyDate + 1.days)
 
                 getDateTimeInDate(tmpDateSoy, startHourMilli, endHourMilli, scheduleTime) ?: Unit
             }.filterIsInstance<DateTime>()

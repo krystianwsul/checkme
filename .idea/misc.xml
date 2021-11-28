@@ -3,6 +3,12 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Users/kryst/.gradle/caches/transforms-3/e49441c0562153c6d0c6f3bd0ce6ac2a/transformed/material-1.5.0-alpha05/res/drawable/mtrl_ic_arrow_drop_down.xml" value="0.25416666666666665" />
+        <entry key="..\:/Users/kryst/.gradle/caches/transforms-3/e49441c0562153c6d0c6f3bd0ce6ac2a/transformed/material-1.5.0-alpha05/res/drawable/mtrl_ic_arrow_drop_up.xml" value="0.25416666666666665" />
+        <entry key="..\:/Users/kryst/.gradle/caches/transforms-3/e49441c0562153c6d0c6f3bd0ce6ac2a/transformed/material-1.5.0-alpha05/res/drawable/mtrl_ic_cancel.xml" value="0.25416666666666665" />
+        <entry key="..\:/Users/kryst/StudioProjects/Check.me/app/src/main/res/drawable/copied_mtrl_ic_arrow_drop_down.xml" value="0.25416666666666665" />
+        <entry key="..\:/Users/kryst/StudioProjects/Check.me/app/src/main/res/drawable/copied_mtrl_ic_arrow_drop_up.xml" value="0.25416666666666665" />
+        <entry key="..\:/Users/kryst/StudioProjects/Check.me/app/src/main/res/drawable/copied_mtrl_ic_cancel.xml" value="0.25416666666666665" />
         <entry key="..\:/Users/kryst/StudioProjects/Check.me/app/src/main/res/drawable/ic_baseline_open_in_browser_24.xml" value="0.18854166666666666" />
       </map>
     </option>

@@ -39,9 +39,7 @@ class MyTextInputLayout : TextInputLayout {
 
     private lateinit var mode: Mode
 
-    private fun getDrawable(@DrawableRes drawableId: Int) = ContextCompat.getDrawable(context, drawableId)!!.apply {
-        setTint(ContextCompat.getColor(context, R.color.textInputIcon))
-    }
+    private fun getDrawable(@DrawableRes drawableId: Int) = ContextCompat.getDrawable(context, drawableId)!!
 
     private fun TextInputLayout.getEndIconView(): CheckableImageButton = getPrivateField("endIconView")
 
@@ -178,16 +176,16 @@ class MyTextInputLayout : TextInputLayout {
         object Close : Mode() {
 
             override fun updateIcon(myTextInputLayout: MyTextInputLayout) =
-                    myTextInputLayout.setDrawableRes(R.drawable.mtrl_ic_cancel)
+                myTextInputLayout.setDrawableRes(R.drawable.copied_mtrl_ic_cancel)
         }
 
         class Dropdown(var isChecked: Boolean = false) : Mode() {
 
             override fun updateIcon(myTextInputLayout: MyTextInputLayout) {
                 val icon = if (isChecked)
-                    R.drawable.mtrl_ic_arrow_drop_up
+                    R.drawable.copied_mtrl_ic_arrow_drop_up
                 else
-                    R.drawable.mtrl_ic_arrow_drop_down
+                    R.drawable.copied_mtrl_ic_arrow_drop_down
 
                 myTextInputLayout.setDrawableRes(icon)
             }

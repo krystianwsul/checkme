@@ -28,7 +28,7 @@ abstract class MonthlyNextValidDateTimeSequenceGenerator : NextValidDateTimeSequ
 
     override fun getDateSequenceHelper(startDateSoy: DateSoy, endDateSoy: DateSoy?): Sequence<DateSoy> {
         return generateSequence(
-            { getNextValidDateHelper(startDateSoy) },
+            { getNextValidDateHelper(startDateSoy).filterEnd(endDateSoy) },
             {
                 (it + 1.months).run { getDateSoyInMonth(year, month1).filterEnd(endDateSoy) }
             },

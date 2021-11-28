@@ -49,7 +49,7 @@ fun getDateInMonth(year: Int, month: Int, weekOfMonth: Int, dayOfWeek: DayOfWeek
     Date(getDateSoyInMonth(year, month, weekOfMonth, dayOfWeek, beginningOfMonth))
 
 fun <T> Collection<T>.singleOrEmpty(): T? {
-    check(size < 2)
+    check(size < 2) { "size is $size" }
 
     return singleOrNull()
 }

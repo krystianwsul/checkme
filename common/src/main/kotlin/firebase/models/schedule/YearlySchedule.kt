@@ -39,12 +39,13 @@ class YearlySchedule(topLevelTask: Task, override val repeatingScheduleRecord: Y
         }
 
         override fun getDateSequenceHelper(startDateSoy: DateSoy, endDateSoy: DateSoy?): Sequence<DateSoy> {
-            val fixedStartDateSoy = getNextValidDateHelper(startDateSoy)
-
-            var currentYear = fixedStartDateSoy.year
-            return generateSequence { getDateSoyInYear(currentYear++).filterEnd(endDateSoy) }
+            return generateSequence(
+                { getNextValidDateHelper(startDateSoy).filterEnd(endDateSoy) },
+                { getDateSoyInYear(it.year + 1).filterEnd(endDateSoy) },
+            )
         }
 
-        override fun containsDateSoy(dateSoy: DateSoy) = dateSoy == getDateSoyInYear(dateSoy.year)
+        override fun containsDateSoy(dateSoy: DateSoy) =
+            dateSoy == getDateSoyInYear(dateSoy.year) // todo sequence just compare the month and day
     }
 }

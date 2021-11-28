@@ -27,7 +27,7 @@ class WeeklySchedule(topLevelTask: Task, override val repeatingScheduleRecord: W
 
     private inner class WeeklyNextValidDateTimeSequenceGenerator : NextValidDateTimeSequenceGenerator() {
 
-        override fun getFirstDateSoyHelper(startDateSoy: DateSoy): DateSoy {
+        override fun getFirstDateSoy(startDateSoy: DateSoy): DateSoy {
             val dayOfWeekDiff = dayOfWeek.ordinal - startDateSoy.dayOfWeekInt
 
             val fixedDayDateSoy = when {

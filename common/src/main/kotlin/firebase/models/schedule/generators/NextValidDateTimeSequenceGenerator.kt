@@ -1,9 +1,6 @@
 package firebase.models.schedule.generators
 
-import com.krystianwsul.common.FeatureFlagManager
 import com.krystianwsul.common.time.*
-import com.soywiz.klock.days
-import com.soywiz.klock.plus
 
 abstract class NextValidDateTimeSequenceGenerator : DateTimeSequenceGenerator {
 
@@ -16,18 +13,14 @@ abstract class NextValidDateTimeSequenceGenerator : DateTimeSequenceGenerator {
         }
     }
 
-    private fun getFirstDateSoy(startDateSoy: DateSoy) = getFirstDateSoyHelper(startDateSoy).also {
-        check(containsDateSoy(it)) // todo sequence checks
-    }
-
     private fun getDateSequence(startDateSoy: DateSoy, endDateSoy: DateSoy?): Sequence<DateSoy> {
         return generateSequence(
-            { getFirstDateSoyHelper(startDateSoy).filterEnd(endDateSoy) },
+            { getFirstDateSoy(startDateSoy).filterEnd(endDateSoy) },
             { getNextDateSoy(it).filterEnd(endDateSoy) },
         ).onEach { check(containsDateSoy(it)) } // todo sequence checks
     }
 
-    protected abstract fun getFirstDateSoyHelper(startDateSoy: DateSoy): DateSoy
+    protected abstract fun getFirstDateSoy(startDateSoy: DateSoy): DateSoy
 
     protected abstract fun getNextDateSoy(currentDateSoy: DateSoy): DateSoy
 
@@ -41,35 +34,11 @@ abstract class NextValidDateTimeSequenceGenerator : DateTimeSequenceGenerator {
         val startSoyDate = startExactTimeStamp.dateSoy
         val endSoyDate = endExactTimeStamp?.dateSoy
 
-        if (FeatureFlagManager.getFlag(FeatureFlagManager.Flag.SCHEDULE_DATE_SEQUENCE) || true) {
-            return getDateSequence(startSoyDate, endSoyDate).mapNotNull { dateSoy ->
-                val startHourMilli = startExactTimeStamp.takeIf { dateSoy == startSoyDate }?.hourMilli
-                val endHourMilli = endExactTimeStamp?.takeIf { dateSoy == endSoyDate }?.hourMilli
+        return getDateSequence(startSoyDate, endSoyDate).mapNotNull { dateSoy ->
+            val startHourMilli = startExactTimeStamp.takeIf { dateSoy == startSoyDate }?.hourMilli
+            val endHourMilli = endExactTimeStamp?.takeIf { dateSoy == endSoyDate }?.hourMilli
 
-                getDateTimeInDate(dateSoy, startHourMilli, endHourMilli, scheduleTime)
-            }
-        } else {
-            var currentSoyDate = getFirstDateSoy(startSoyDate)
-
-            return generateSequence {
-                var endHourMilli: HourMilli? = null
-                if (endSoyDate != null) {
-                    val comparison = currentSoyDate.compareTo(endSoyDate)
-                    if (comparison > 0) { // passed the end
-                        return@generateSequence null
-                    } else if (comparison == 0) { // last day
-                        endHourMilli = endExactTimeStamp.hourMilli
-                    }
-                }
-
-                // first day
-                val startHourMilli = if (startSoyDate == currentSoyDate) startExactTimeStamp.hourMilli else null
-
-                val tmpDateSoy = currentSoyDate
-                currentSoyDate = getFirstDateSoy(currentSoyDate + 1.days)
-
-                getDateTimeInDate(tmpDateSoy, startHourMilli, endHourMilli, scheduleTime) ?: Unit
-            }.filterIsInstance<DateTime>()
+            getDateTimeInDate(dateSoy, startHourMilli, endHourMilli, scheduleTime)
         }
     }
 

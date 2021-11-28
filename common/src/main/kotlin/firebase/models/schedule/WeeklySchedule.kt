@@ -77,12 +77,7 @@ class WeeklySchedule(topLevelTask: Task, override val repeatingScheduleRecord: W
 
                 currentDateSoy += interval.weeks
 
-                tmpDateSoy.takeIf {
-                    if (endDateSoy != null)
-                        it <= endDateSoy
-                    else
-                        true
-                }
+                tmpDateSoy.filterEnd(endDateSoy)
             }
         }
 

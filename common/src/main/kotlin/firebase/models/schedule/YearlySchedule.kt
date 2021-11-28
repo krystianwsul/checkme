@@ -42,14 +42,7 @@ class YearlySchedule(topLevelTask: Task, override val repeatingScheduleRecord: Y
             val fixedStartDateSoy = getNextValidDateHelper(startDateSoy)
 
             var currentYear = fixedStartDateSoy.year
-            return generateSequence {
-                getDateSoyInYear(currentYear++).takeIf {
-                    if (endDateSoy != null)
-                        it <= endDateSoy
-                    else
-                        true
-                }
-            }
+            return generateSequence { getDateSoyInYear(currentYear++).filterEnd(endDateSoy) }
         }
 
         override fun containsDateSoy(dateSoy: DateSoy) = dateSoy == getDateSoyInYear(dateSoy.year)

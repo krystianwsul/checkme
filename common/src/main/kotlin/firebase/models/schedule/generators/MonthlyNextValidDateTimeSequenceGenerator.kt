@@ -34,12 +34,7 @@ abstract class MonthlyNextValidDateTimeSequenceGenerator : NextValidDateTimeSequ
 
             currentDateSoy += 1.months
 
-            getDateSoyInMonth(tmpDateSoy.year, tmpDateSoy.month1).takeIf {
-                if (endDateSoy != null)
-                    it <= endDateSoy
-                else
-                    true
-            }
+            getDateSoyInMonth(tmpDateSoy.year, tmpDateSoy.month1).filterEnd(endDateSoy)
         }
     }
 }

@@ -70,15 +70,10 @@ class WeeklySchedule(topLevelTask: Task, override val repeatingScheduleRecord: W
         }
 
         override fun getDateSequenceHelper(startDateSoy: DateSoy, endDateSoy: DateSoy?): Sequence<DateSoy> {
-            var currentDateSoy = getNextValidDateHelper(startDateSoy)
-
-            return generateSequence {
-                val tmpDateSoy = currentDateSoy
-
-                currentDateSoy += interval.weeks
-
-                tmpDateSoy.filterEnd(endDateSoy)
-            }
+            return generateSequence(
+                { getNextValidDateHelper(startDateSoy).filterEnd(endDateSoy) },
+                { (it + interval.weeks).filterEnd(endDateSoy) },
+            )
         }
 
         override fun containsDateSoy(dateSoy: DateSoy): Boolean {

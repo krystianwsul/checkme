@@ -27,19 +27,13 @@ class YearlySchedule(topLevelTask: Task, override val repeatingScheduleRecord: Y
         override fun getFirstDateSoy(startDateSoy: DateSoy): DateSoy {
             val dateSoyThisYear = getDateSoyInYear(startDateSoy.year)
 
-            return when (val comparison = dateSoyThisYear.compareTo(startDateSoy)) {
+            return when (dateSoyThisYear.compareTo(startDateSoy)) {
                 1 -> dateSoyThisYear
                 -1 -> getDateSoyInYear(startDateSoy.year + 1)
-                else -> {
-                    check(comparison == 0) // todo sequence checks
-
-                    startDateSoy
-                }
+                else -> startDateSoy
             }
         }
 
         override fun getNextDateSoy(currentDateSoy: DateSoy) = getDateSoyInYear(currentDateSoy.year + 1)
-
-        override fun containsDateSoy(dateSoy: DateSoy) = dateSoy.month1 == month && dateSoy.day == day
     }
 }

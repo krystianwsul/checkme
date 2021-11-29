@@ -17,14 +17,12 @@ abstract class NextValidDateTimeSequenceGenerator : DateTimeSequenceGenerator {
         return generateSequence(
             { getFirstDateSoy(startDateSoy).filterEnd(endDateSoy) },
             { getNextDateSoy(it).filterEnd(endDateSoy) },
-        ).onEach { check(containsDateSoy(it)) } // todo sequence checks
+        )
     }
 
     protected abstract fun getFirstDateSoy(startDateSoy: DateSoy): DateSoy
 
     protected abstract fun getNextDateSoy(currentDateSoy: DateSoy): DateSoy
-
-    protected abstract fun containsDateSoy(dateSoy: DateSoy): Boolean // todo sequence checks
 
     override fun generate(
         startExactTimeStamp: ExactTimeStamp,

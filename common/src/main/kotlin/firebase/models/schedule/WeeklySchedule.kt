@@ -46,40 +46,19 @@ class WeeklySchedule(topLevelTask: Task, override val repeatingScheduleRecord: W
                 else -> startDateSoy
             }
 
-            check(fixedDayDateSoy.dayOfWeek.ordinal == dayOfWeek.ordinal) // todo sequence checks
-
             return if (interval == 1) {
-                containsDateSoy(fixedDayDateSoy) // todo sequence checks
-
                 fixedDayDateSoy
             } else {
                 val timeSpan = fixedDayDateSoy.dateTimeDayStart - from!!.toDateTimeSoy()
                 val remainder = timeSpan.weeks.toInt().rem(interval)
 
-                if (remainder == 0) {
-                    check(containsDateSoy(fixedDayDateSoy)) // todo sequence checks
-
+                if (remainder == 0)
                     fixedDayDateSoy
-                } else {
-                    val fixedWeekDateSoy = fixedDayDateSoy + (interval - remainder).weeks
-                    check(containsDateSoy(fixedWeekDateSoy)) // todo sequence checks
-
-                    fixedWeekDateSoy
-                }
+                else
+                    fixedDayDateSoy + (interval - remainder).weeks
             }
         }
 
         override fun getNextDateSoy(currentDateSoy: DateSoy) = currentDateSoy + interval.weeks
-
-        override fun containsDateSoy(dateSoy: DateSoy): Boolean {
-            if (dayOfWeek.ordinal != dateSoy.dayOfWeek.ordinal) return false
-
-            if (interval != 1) {
-                val timeSpan = dateSoy.dateTimeDayStart - from!!.toDateTimeSoy()
-                if (timeSpan.weeks.toInt().rem(interval) != 0) return false
-            }
-
-            return true
-        }
     }
 }

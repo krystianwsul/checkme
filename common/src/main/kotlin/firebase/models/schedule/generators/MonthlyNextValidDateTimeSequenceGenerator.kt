@@ -11,18 +11,14 @@ abstract class MonthlyNextValidDateTimeSequenceGenerator : NextValidDateTimeSequ
     override fun getFirstDateSoy(startDateSoy: DateSoy): DateSoy {
         val dateSoySameMonth = getDateSoyInMonth(startDateSoy.year, startDateSoy.month1)
 
-        return when (val comparison = dateSoySameMonth.compareTo(startDateSoy)) {
+        return when (dateSoySameMonth.compareTo(startDateSoy)) {
             -1 -> {
                 val nextMonthDateSoy = startDateSoy + 1.months
 
                 getDateSoyInMonth(nextMonthDateSoy.year, nextMonthDateSoy.month1)
             }
             1 -> dateSoySameMonth
-            else -> {
-                check(comparison == 0) // todo sequence checks
-
-                startDateSoy
-            }
+            else -> startDateSoy
         }
     }
 

@@ -453,7 +453,7 @@ class MainActivity :
                             animateVisibility(
                                 listOf(binding.mainSearchInclude.toolbar),
                                 listOf(),
-                                duration = MyBottomBar.duration
+                                duration = MyBottomBar.duration,
                             )
 
                             binding.mainSearchInclude
@@ -911,21 +911,21 @@ class MainActivity :
         val tabSearchState = tabSearchStateRelay.value!!
 
         val itemVisibilities = when (tabSearchState) {
-            is TabSearchState.Instances -> {
-                listOf(
-                    R.id.actionMainCalendar to (Preferences.timeRange == Preferences.TimeRange.DAY),
-                    R.id.actionMainSearch to true
-                )
-            }
+            is TabSearchState.Instances -> listOf(
+                R.id.actionMainCalendar to (Preferences.timeRange == Preferences.TimeRange.DAY),
+                R.id.actionMainSearch to true,
+            )
             is TabSearchState.Notes, is TabSearchState.Tasks -> listOf(
                 R.id.actionMainCalendar to false,
                 R.id.actionMainSearch to true,
             )
             else -> listOf(
                 R.id.actionMainCalendar to false,
-                R.id.actionMainSearch to false
+                R.id.actionMainSearch to false,
             )
         }
+
+        MyCrashlytics.log("updateTopMenu search visible? " + itemVisibilities.single { it.first == R.id.actionMainSearch }.second)
 
         binding.mainActivityToolbar.apply {
             animateItems(itemVisibilities) {
@@ -968,6 +968,7 @@ class MainActivity :
     private var elevationValueAnimator: ValueAnimator? = null
 
     fun setTabSearchState(tabSearchState: TabSearchState, immediate: Boolean = false) {
+        MyCrashlytics.log("tabSearchState: $tabSearchState")
         val tab = tabSearchState.tab
 
         elevationValueAnimator?.cancel()

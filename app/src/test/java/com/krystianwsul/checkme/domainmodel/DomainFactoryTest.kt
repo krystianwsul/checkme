@@ -8,6 +8,7 @@ import com.krystianwsul.checkme.gui.edit.delegates.EditDelegate
 import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.task.RootTask
 import com.krystianwsul.common.time.*
+import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.ScheduleData
 import com.krystianwsul.common.utils.TaskKey
 import com.soywiz.klock.hours
@@ -1546,5 +1547,71 @@ class DomainFactoryTest {
 
         assertEquals(0, domainFactory.projectsFactory.privateProject.rootTaskIdCount())
         assertEquals(1, domainFactory.projectsFactory.sharedProjects.getValue(projectKey).rootTaskIdCount())
+    }
+
+    @Test
+    fun testAddingExistingInstanceToRecurringInstance() {
+        val date = Date(2021, 12, 3)
+
+        var now = ExactTimeStamp.Local(date, HourMinute(1, 0))
+
+        val singleTaskKey = domainUpdater(now).createScheduleTopLevelTask(
+            DomainListenerManager.NotificationType.All,
+            EditDelegate.CreateParameters("single task"),
+            listOf(ScheduleData.Single(date, TimePair(HourMinute(4, 0)))),
+            null,
+        )
+            .blockingGet()
+            .taskKey
+
+        val repeatingTaskKey = domainUpdater(now).createScheduleTopLevelTask(
+            DomainListenerManager.NotificationType.All,
+            EditDelegate.CreateParameters("repeating task"),
+            listOf(ScheduleData.Weekly(setOf(DayOfWeek.FRIDAY), TimePair(HourMinute(5, 0)), null, null, 1)),
+            null,
+        )
+            .blockingGet()
+            .taskKey
+
+        val instanceDatas = domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
+            .groupListDataWrapper
+            .instanceDatas
+
+        val singleInstanceKey = instanceDatas.single { it.taskKey == singleTaskKey }.instanceKey
+        val repeatingInstanceKey = instanceDatas.single { it.taskKey == repeatingTaskKey }.instanceKey
+
+        now += 1.hours
+
+        fun InstanceKey.setDone(done: Boolean) = domainUpdater(now).setInstanceDone(
+            DomainListenerManager.NotificationType.All,
+            this,
+            done,
+        ).blockingSubscribe()
+
+        singleInstanceKey.setDone(true)
+        singleInstanceKey.setDone(false)
+
+        repeatingInstanceKey.setDone(true)
+        repeatingInstanceKey.setDone(false)
+
+        now += 1.hours
+
+        domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
+
+        domainUpdater(now).setInstancesParent(
+            DomainListenerManager.NotificationType.All,
+            setOf(singleInstanceKey),
+            repeatingInstanceKey,
+        )
+
+        assertEquals(
+            1,
+            domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
+                .groupListDataWrapper
+                .instanceDatas
+                .single()
+                .children
+                .size,
+        )
     }
 }

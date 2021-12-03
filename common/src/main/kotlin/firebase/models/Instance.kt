@@ -631,6 +631,9 @@ class Instance private constructor(
         createInstanceRecord().parentState = newParentState
 
         tearDownParentInstanceData()
+
+        // so that this instance appears in its new parents' children
+        parentInstance?.existingChildInstancesCache?.invalidate()
     }
 
     fun canAddSubtask(now: ExactTimeStamp.Local, hack24: Boolean = false): Boolean {

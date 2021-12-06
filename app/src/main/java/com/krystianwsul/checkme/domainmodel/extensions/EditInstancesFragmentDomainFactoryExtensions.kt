@@ -9,7 +9,7 @@ import com.krystianwsul.checkme.domainmodel.undo.UndoData
 import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
 import com.krystianwsul.checkme.domainmodel.update.SingleDomainUpdate
 import com.krystianwsul.checkme.utils.time.getDisplayText
-import com.krystianwsul.checkme.viewmodels.DomainResult
+import com.krystianwsul.checkme.viewmodels.DomainQuery
 import com.krystianwsul.checkme.viewmodels.EditInstancesSearchViewModel
 import com.krystianwsul.checkme.viewmodels.EditInstancesViewModel
 import com.krystianwsul.common.criteria.SearchCriteria
@@ -203,7 +203,7 @@ fun DomainUpdater.setInstancesParent(
 fun DomainFactory.getEditInstancesSearchData(
     searchCriteria: SearchCriteria,
     page: Int,
-): DomainResult<EditInstancesSearchViewModel.Data> {
+): DomainQuery<EditInstancesSearchViewModel.Data> {
     MyCrashlytics.log("DomainFactory.getEditInstancesSearchData")
 
     DomainThreadChecker.instance.requireDomainThread()

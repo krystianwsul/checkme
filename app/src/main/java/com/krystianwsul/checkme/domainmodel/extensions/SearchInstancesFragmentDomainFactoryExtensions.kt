@@ -5,7 +5,7 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.getDomainResultInterrupting
 import com.krystianwsul.checkme.domainmodel.getProjectInfo
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
-import com.krystianwsul.checkme.viewmodels.DomainResult
+import com.krystianwsul.checkme.viewmodels.DomainQuery
 import com.krystianwsul.checkme.viewmodels.SearchInstancesViewModel
 import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.firebase.DomainThreadChecker
@@ -18,7 +18,7 @@ import com.krystianwsul.common.utils.ProjectKey
 fun DomainFactory.getSearchInstancesData(
     searchCriteria: SearchCriteria,
     page: Int,
-): DomainResult<SearchInstancesViewModel.Data> {
+): DomainQuery<SearchInstancesViewModel.Data> {
     MyCrashlytics.log("DomainFactory.getSearchInstancesData")
 
     DomainThreadChecker.instance.requireDomainThread()

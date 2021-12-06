@@ -91,18 +91,31 @@ abstract class DomainListener<DOMAIN_DATA : DomainData> {
         fun getDomainResult(userScope: UserScope): Single<DomainResult<DOMAIN_DATA>>
 
         open class DomainFactoryDomainResult<DOMAIN_DATA : DomainData>(
-            private val getDomainResult: (domainFactory: DomainFactory) -> DomainResult<DOMAIN_DATA>
+            private val newDomainQuery: (DomainFactory) -> DomainQuery<DOMAIN_DATA>,
         ) : DomainResultFetcher<DOMAIN_DATA> {
 
             override fun getDomainResult(userScope: UserScope): Single<DomainResult<DOMAIN_DATA>> {
+                var domainQuery: DomainQuery<DOMAIN_DATA>? = null
+
                 return userScope.domainFactorySingle
                     .map { it as DomainFactory }
-                    .map(getDomainResult)
+                    .map {
+                        domainQuery = newDomainQuery(it)
+
+                        domainQuery!!.getDomainResult()
+                    }
+                    .doOnDispose { domainQuery?.interrupt() }
             }
+
         }
 
         class DomainFactoryData<DOMAIN_DATA : DomainData>(
-            private val getDomainData: (domainFactory: DomainFactory) -> DOMAIN_DATA
-        ) : DomainFactoryDomainResult<DOMAIN_DATA>({ DomainResult.Completed(getDomainData(it)) })
+            private val getDomainData: (domainFactory: DomainFactory) -> DOMAIN_DATA,
+        ) : DomainFactoryDomainResult<DOMAIN_DATA>({
+            object : DomainQuery<DOMAIN_DATA> {
+
+                override fun getDomainResult() = DomainResult.Completed(getDomainData(it))
+            }
+        })
     }
 }

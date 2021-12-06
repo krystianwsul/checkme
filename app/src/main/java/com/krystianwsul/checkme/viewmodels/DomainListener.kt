@@ -6,6 +6,7 @@ import com.krystianwsul.checkme.domainmodel.UserScope
 import com.krystianwsul.checkme.domainmodel.observeOnDomain
 import com.krystianwsul.checkme.utils.filterNotNull
 import com.krystianwsul.checkme.utils.mapNotNull
+import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.mindorks.scheduler.Priority
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.BackpressureStrategy
@@ -22,7 +23,7 @@ abstract class DomainListener<DOMAIN_DATA : DomainData> {
     }
 
     val dataId = DataId(nextId)
-    val data = BehaviorRelay.create<DOMAIN_DATA>()!!
+    val data = BehaviorRelay.create<DOMAIN_DATA>()
 
     private var disposable: Disposable? = null
 
@@ -59,9 +60,12 @@ abstract class DomainListener<DOMAIN_DATA : DomainData> {
                     .map { userScope }
             }
             .toFlowable(BackpressureStrategy.LATEST)
-            .observeOnDomain(priority)
             .flatMapMaybe(
-                { domainResultFetcher.getDomainResult(it).mapNotNull { it.data } },
+                {
+                    DomainThreadChecker.instance.requireDomainThread()
+
+                    domainResultFetcher.getDomainResult(it).mapNotNull { it.data }
+                },
                 false,
                 1,
             )

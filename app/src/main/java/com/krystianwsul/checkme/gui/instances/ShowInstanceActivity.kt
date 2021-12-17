@@ -18,6 +18,7 @@ import com.krystianwsul.checkme.gui.edit.EditActivity
 import com.krystianwsul.checkme.gui.edit.EditParameters
 import com.krystianwsul.checkme.gui.instances.edit.EditInstancesHostDelegate
 import com.krystianwsul.checkme.gui.instances.list.GroupListListener
+import com.krystianwsul.checkme.gui.main.DebugFragment
 import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
 import com.krystianwsul.checkme.gui.utils.BottomFabMenuDelegate
@@ -291,6 +292,8 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
     }
 
     private fun onLoadFinished(data: ShowInstanceViewModel.Data) {
+        DebugFragment.logDone("ShowInstanceActivity.onLoadFinished")
+
         this.data = data
         this.instanceKey = data.newInstanceKey
 
@@ -317,9 +320,10 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
     }
 
     private fun setDone(done: Boolean) {
+        DebugFragment.logDone("ShowInstanceActivity.setDone start")
         AndroidDomainUpdater.setInstanceDone(showInstanceViewModel.dataId.toFirst(), instanceKey, done)
-                .subscribe()
-                .addTo(createDisposable)
+            .subscribe { DebugFragment.logDone("ShowInstanceActivity.setDone onSuccess") }
+            .addTo(createDisposable)
     }
 
     override fun onCreateGroupActionMode(

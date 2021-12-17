@@ -11,6 +11,7 @@ import com.krystianwsul.checkme.domainmodel.update.CompletableDomainUpdate
 import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
 import com.krystianwsul.checkme.domainmodel.update.SingleDomainUpdate
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
+import com.krystianwsul.checkme.gui.main.DebugFragment
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.utils.time.calendar
 import com.krystianwsul.checkme.utils.time.toDateTimeTz
@@ -152,11 +153,14 @@ fun DomainUpdater.setInstanceDone(
     instanceKey: InstanceKey,
     done: Boolean,
 ): Completable = CompletableDomainUpdate.create("setInstanceDone") { now ->
+    DebugFragment.logDone("DomainFactory.setInstanceDone start")
     val instance = getInstance(instanceKey)
 
     instance.setDone(shownFactory, done, now)
 
-    DomainUpdater.Params(true, notificationType, DomainFactory.CloudParams(instance.task.project))
+    DomainUpdater.Params(true, notificationType, DomainFactory.CloudParams(instance.task.project)).also {
+        DebugFragment.logDone("DomainFactory.setInstanceDone end")
+    }
 }.perform(this)
 
 @CheckResult

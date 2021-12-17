@@ -41,7 +41,14 @@ class DebugFragment : AbstractFragment() {
 
     companion object {
 
+        private val doneLog = mutableListOf<String>()
+
         fun newInstance() = DebugFragment()
+
+        fun logDone(message: String) {
+            if (DomainFactory.nullableInstance?.debugMode == true)
+                doneLog += ExactTimeStamp.Local.now.hourMilli.toString() + " " + message
+        }
     }
 
     private val bindingProperty = ResettableProperty<FragmentDebugBinding>()
@@ -67,7 +74,11 @@ class DebugFragment : AbstractFragment() {
                 binding.debugViewSwitch.apply {
                     isChecked = it.debugMode
 
-                    setOnCheckedChangeListener { _, isChecked -> AndroidDomainUpdater.setDebugMode(isChecked).subscribe() }
+                    setOnCheckedChangeListener { _, isChecked ->
+                        doneLog.clear()
+
+                        AndroidDomainUpdater.setDebugMode(isChecked).subscribe()
+                    }
                 }
             }
             .addTo(viewCreatedDisposable)
@@ -142,6 +153,9 @@ class DebugFragment : AbstractFragment() {
                     append(domainFactory.customTimeCount)
                     append("\ninstance shown: ")
                     append(domainFactory.instanceShownCount)
+
+                    append("\n\ndone log:\n")
+                    append(doneLog.joinToString("\n"))
 
                     append("\n\ntab log:\n")
                     append(Preferences.mainTabsLog.log)

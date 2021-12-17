@@ -4,6 +4,7 @@ import com.jakewharton.rxrelay3.PublishRelay
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.observeOnDomain
+import com.krystianwsul.checkme.gui.main.DebugFragment
 import com.krystianwsul.checkme.utils.filterNotNull
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.firebase.DomainThreadChecker
@@ -76,6 +77,7 @@ object AndroidDomainUpdater : DomainUpdater() {
 
         private fun dispatchItems(domainFactory: DomainFactory, items: List<Item>) {
             MyCrashlytics.log("AndroidDomainUpdater.dispatchItems begin: " + items.joinToString(", ") { it.name })
+            DebugFragment.logDone("AndroidDomainUpdater.dispatchItems start")
 
             DomainThreadChecker.instance.requireDomainThread()
 
@@ -88,7 +90,9 @@ object AndroidDomainUpdater : DomainUpdater() {
                 it.getParams(domainFactory, now)
             })
 
+            DebugFragment.logDone("AndroidDomainUpdater.dispatchItems updating notifications")
             domainFactory.updateNotifications(params, now)
+            DebugFragment.logDone("AndroidDomainUpdater.dispatchItems notifications updated")
 
             items.forEach {
                 MyCrashlytics.log("AndroidDomainUpdater.dispatchItems dispatchResult " + it.name)
@@ -104,6 +108,7 @@ object AndroidDomainUpdater : DomainUpdater() {
             domainFactory.saveAndNotifyCloud(params, now)
 
             MyCrashlytics.log("AndroidDomainUpdater.dispatchItems end")
+            DebugFragment.logDone("AndroidDomainUpdater.dispatchItems end")
         }
 
         private interface Item {

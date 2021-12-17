@@ -23,7 +23,9 @@ import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.databinding.FragmentDebugBinding
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.extensions.getGroupListData
+import com.krystianwsul.checkme.domainmodel.extensions.setDebugMode
 import com.krystianwsul.checkme.domainmodel.observeOnDomain
+import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
 import com.krystianwsul.checkme.gui.base.AbstractFragment
 import com.krystianwsul.checkme.gui.utils.ResettableProperty
 import com.krystianwsul.checkme.ticks.Ticker
@@ -65,9 +67,7 @@ class DebugFragment : AbstractFragment() {
                 binding.debugViewSwitch.apply {
                     isChecked = it.debugMode
 
-                    setOnCheckedChangeListener { _, isChecked ->
-                        it.debugMode = isChecked
-                    }
+                    setOnCheckedChangeListener { _, isChecked -> AndroidDomainUpdater.setDebugMode(isChecked).subscribe() }
                 }
             }
             .addTo(viewCreatedDisposable)

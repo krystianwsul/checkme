@@ -48,7 +48,6 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.merge
 import java.util.concurrent.TimeUnit
-import kotlin.properties.Delegates.observable
 
 @Suppress("LeakingThis")
 class DomainFactory(
@@ -157,7 +156,7 @@ class DomainFactory(
 
     val uuid get() = deviceDbInfo.uuid
 
-    var debugMode by observable(false) { _, _, _ -> domainListenerManager.notify(NotificationType.All) }
+    var debugMode = false
 
     val copiedTaskKeys = mutableMapOf<TaskKey, TaskKey>()
 

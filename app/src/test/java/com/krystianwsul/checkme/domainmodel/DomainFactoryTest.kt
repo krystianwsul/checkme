@@ -1684,9 +1684,11 @@ class DomainFactoryTest {
         val date = Date(2021, 12, 20)
         var now = ExactTimeStamp.Local(date, HourMinute(1, 0))
 
+        val parentTaskCreateParameters = EditDelegate.CreateParameters("parent task")
+
         val parentTaskKey = domainUpdater(now).createScheduleTopLevelTask(
             DomainListenerManager.NotificationType.All,
-            EditDelegate.CreateParameters("parent task"),
+            parentTaskCreateParameters,
             getSingleScheduleData(date, 12, 0),
             null,
         )
@@ -1761,9 +1763,30 @@ class DomainFactoryTest {
 
         domainUpdater(now).updateScheduleTask(
             DomainListenerManager.NotificationType.All,
+            parentTaskKey,
+            parentTaskCreateParameters,
+            getSingleScheduleData(date, 13, 0),
+            null,
+        ).blockingGet()
+
+        getInstanceDatasToday(now).single()
+            .children
+            .values
+            .single()
+            .children
+            .values
+            .let {
+                assertEquals(1, it.filter { it.done == null }.size)
+                assertEquals(1, it.filter { it.done != null }.size)
+            }
+
+        now += 1.hours
+
+        domainUpdater(now).updateScheduleTask(
+            DomainListenerManager.NotificationType.All,
             middleTaskKey,
             middleTaskCreateParameters,
-            getSingleScheduleData(date, 13, 0),
+            getSingleScheduleData(date, 14, 0),
             null,
         ).blockingGet()
 

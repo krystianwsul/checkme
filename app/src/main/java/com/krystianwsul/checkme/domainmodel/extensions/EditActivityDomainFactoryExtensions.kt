@@ -355,6 +355,18 @@ fun DomainUpdater.updateScheduleTask(
     trackRootTaskIds {
         finalTask = convertAndUpdateProject(originalTask, now, projectKey)
 
+        /*
+        Not the prettiest way to do this, but if we're editing a child task to make it a top-level task, we try to carry
+        over the previous instance instead of creating a new one
+         */
+        val parentSingleSchedule = finalTask.getParentTask(now)
+            ?.getTopLevelTask(now)
+            ?.intervalInfo
+            ?.getCurrentScheduleIntervals(now)
+            ?.singleOrNull()
+            ?.schedule
+            ?.let { it as? SingleSchedule }
+
         finalTask.performRootIntervalUpdate {
             endAllCurrentTaskHierarchies(now)
             endAllCurrentNoScheduleOrParents(now)
@@ -366,6 +378,7 @@ fun DomainUpdater.updateScheduleTask(
                 sharedProjectParameters.nonNullAssignedTo,
                 this@create,
                 projectKey,
+                parentSingleSchedule,
             )
         }
     }

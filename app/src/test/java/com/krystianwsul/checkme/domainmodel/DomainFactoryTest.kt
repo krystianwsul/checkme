@@ -1614,4 +1614,61 @@ class DomainFactoryTest {
                 .size,
         )
     }
+
+    @Test
+    fun testMakeChildTaskTopLevelAndAssignToProject() {
+        val date = Date(2021, 12, 20)
+
+        var now = ExactTimeStamp.Local(date, HourMinute(1, 0))
+
+        val scheduleDatas = listOf(ScheduleData.Single(date, TimePair(HourMinute(5, 0))))
+
+        val parentTaskKey = domainUpdater(now).createScheduleTopLevelTask(
+            DomainListenerManager.NotificationType.All,
+            EditDelegate.CreateParameters("parent task"),
+            listOf(ScheduleData.Single(date, TimePair(HourMinute(5, 0)))),
+            null,
+        )
+            .blockingGet()
+            .taskKey
+
+        now += 1.hours
+
+        val childTaskCreateParameters = EditDelegate.CreateParameters("child task")
+
+        val childTaskKey = CreateChildTaskDomainUpdate(
+            DomainListenerManager.NotificationType.All,
+            CreateChildTaskDomainUpdate.Parent.Task(parentTaskKey),
+            childTaskCreateParameters,
+        ).perform(domainUpdater(now))
+            .blockingGet()
+            .taskKey
+
+        now += 1.hours
+
+        val projectKey = domainUpdater(now).createProject(
+            DomainListenerManager.NotificationType.All,
+            "project",
+            setOf(),
+        ).blockingGet()
+
+        now += 1.hours
+
+        val childTask = domainFactory.getTaskForce(childTaskKey)
+
+        assertEquals(
+            domainFactoryRule.domainFactory.projectsFactory.privateProject.projectKey,
+            childTask.project.projectKey,
+        )
+
+        domainUpdater(now).updateScheduleTask(
+            DomainListenerManager.NotificationType.All,
+            childTaskKey,
+            childTaskCreateParameters,
+            scheduleDatas,
+            EditDelegate.SharedProjectParameters(projectKey, setOf()),
+        ).blockingGet()
+
+        assertEquals(projectKey, childTask.project.projectKey)
+    }
 }

@@ -1615,10 +1615,14 @@ class DomainFactoryTest {
         )
     }
 
+    private fun getInstanceDatasToday(now: ExactTimeStamp.Local) =
+        domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
+            .groupListDataWrapper
+            .instanceDatas
+
     @Test
     fun testMakeChildTaskTopLevelAndAssignToProject() {
         val date = Date(2021, 12, 20)
-
         var now = ExactTimeStamp.Local(date, HourMinute(1, 0))
 
         val scheduleDatas = listOf(ScheduleData.Single(date, TimePair(HourMinute(5, 0))))
@@ -1670,5 +1674,108 @@ class DomainFactoryTest {
         ).blockingGet()
 
         assertEquals(projectKey, childTask.project.projectKey)
+    }
+
+    private fun getSingleScheduleData(date: Date, hour: Int, minute: Int) =
+        listOf(ScheduleData.Single(date, TimePair(HourMinute(hour, minute))))
+
+    @Test
+    fun testSubchildrenDonePreservedForChildInstanceAfterSettingSchedule() {
+        val date = Date(2021, 12, 20)
+        var now = ExactTimeStamp.Local(date, HourMinute(1, 0))
+
+        val parentTaskKey = domainUpdater(now).createScheduleTopLevelTask(
+            DomainListenerManager.NotificationType.All,
+            EditDelegate.CreateParameters("parent task"),
+            getSingleScheduleData(date, 12, 0),
+            null,
+        )
+            .blockingGet()
+            .taskKey
+
+        now += 1.hours
+
+        val middleTaskCreateParameters = EditDelegate.CreateParameters("middle task")
+
+        val middleTaskKey = CreateChildTaskDomainUpdate(
+            DomainListenerManager.NotificationType.All,
+            CreateChildTaskDomainUpdate.Parent.Task(parentTaskKey),
+            middleTaskCreateParameters,
+        ).perform(domainUpdater(now))
+            .blockingGet()
+            .taskKey
+
+        now += 1.hours
+
+        val doneChildTaskKey = CreateChildTaskDomainUpdate(
+            DomainListenerManager.NotificationType.All,
+            CreateChildTaskDomainUpdate.Parent.Task(middleTaskKey),
+            EditDelegate.CreateParameters("done child"),
+        ).perform(domainUpdater(now))
+            .blockingGet()
+            .taskKey
+
+        now += 1.hours
+
+        CreateChildTaskDomainUpdate(
+            DomainListenerManager.NotificationType.All,
+            CreateChildTaskDomainUpdate.Parent.Task(middleTaskKey),
+            EditDelegate.CreateParameters("not done child"),
+        ).perform(domainUpdater(now))
+            .blockingGet()
+            .taskKey
+
+        assertTrue(
+            getInstanceDatasToday(now).single()
+                .children
+                .values
+                .single()
+                .children
+                .values
+                .all { it.done == null }
+        )
+
+        now += 1.hours
+
+        val doneInstance =
+            domainFactory.getTaskForce(doneChildTaskKey).getInstances(null, null, now).single()
+
+        domainUpdater(now).setInstanceDone(
+            DomainListenerManager.NotificationType.All,
+            doneInstance.instanceKey,
+            true,
+        ).blockingSubscribe()
+
+        getInstanceDatasToday(now).single()
+            .children
+            .values
+            .single()
+            .children
+            .values
+            .let {
+                assertEquals(1, it.filter { it.done == null }.size)
+                assertEquals(1, it.filter { it.done != null }.size)
+            }
+
+        now += 1.hours
+
+        domainUpdater(now).updateScheduleTask(
+            DomainListenerManager.NotificationType.All,
+            middleTaskKey,
+            middleTaskCreateParameters,
+            getSingleScheduleData(date, 13, 0),
+            null,
+        ).blockingGet()
+
+        getInstanceDatasToday(now).let {
+            assertEquals(2, it.size)
+
+            assertTrue(it[0].children.isEmpty())
+
+            val middleInstanceChildren = it[1].children.values
+
+            assertEquals(1, middleInstanceChildren.filter { it.done == null }.size)
+            assertEquals(1, middleInstanceChildren.filter { it.done != null }.size)
+        }
     }
 }

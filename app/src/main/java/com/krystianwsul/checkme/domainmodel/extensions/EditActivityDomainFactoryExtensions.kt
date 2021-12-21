@@ -765,8 +765,6 @@ private fun DomainFactory.joinJoinables(
         .single()
         .instanceKey
 
-    val parentTaskHasOtherInstances = newParentTask.hasOtherVisibleInstances(now, parentInstanceKey)
-
     joinableMap.forEach { (joinable, task) ->
         fun addChildToParent(instance: Instance? = null) = addChildToParent(task, newParentTask, now, instance)
 
@@ -776,13 +774,7 @@ private fun DomainFactory.joinJoinables(
                 val migratedInstanceScheduleKey =
                     migrateInstanceScheduleKey(task, joinable.instanceKey.instanceScheduleKey, now)
 
-                val instance = task.getInstance(migratedInstanceScheduleKey)
-
-                if (parentTaskHasOtherInstances || task.hasOtherVisibleInstances(now, joinable.instanceKey)) {
-                    instance.setParentState(Instance.ParentState.Parent(parentInstanceKey))
-                } else {
-                    addChildToParent(instance)
-                }
+                task.getInstance(migratedInstanceScheduleKey).setParentState(Instance.ParentState.Parent(parentInstanceKey))
             }
         }
     }

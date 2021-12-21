@@ -68,12 +68,16 @@ class RootIntervalUpdate(val rootTask: RootTask, intervalInfo: IntervalInfo) :
 
             if (assignedTo.isNotEmpty()) singleRemoveSchedule.setAssignedTo(assignedTo)
 
-            singleRemoveSchedule.getInstance(rootTask).setInstanceDateTime(
-                shownFactory,
-                singleAddSchedulePair.second.run { DateTime((first as ScheduleData.Single).date, second) },
-                customTimeMigrationHelper,
-                now,
-            )
+            singleRemoveSchedule.getInstance(rootTask).let {
+                it.setInstanceDateTime(
+                    shownFactory,
+                    singleAddSchedulePair.second.run { DateTime((first as ScheduleData.Single).date, second) },
+                    customTimeMigrationHelper,
+                    now,
+                )
+
+                it.setParentState(Instance.ParentState.NoParent)
+            }
         } else if (parentSingleSchedule != null && singleAddSchedulePair != null) {
             check(removeSchedules.isEmpty())
 
@@ -91,12 +95,16 @@ class RootIntervalUpdate(val rootTask: RootTask, intervalInfo: IntervalInfo) :
                 projectKey,
             )
 
-            parentSingleSchedule.getInstance(rootTask).setInstanceDateTime(
-                shownFactory,
-                singleAddSchedulePair.second.run { DateTime((first as ScheduleData.Single).date, second) },
-                customTimeMigrationHelper,
-                now,
-            )
+            parentSingleSchedule.getInstance(rootTask).let {
+                check(it.isRootInstance())
+
+                it.setInstanceDateTime(
+                    shownFactory,
+                    singleAddSchedulePair.second.run { DateTime((first as ScheduleData.Single).date, second) },
+                    customTimeMigrationHelper,
+                    now,
+                )
+            }
         } else {
             removeSchedules.forEach { it.setEndExactTimeStamp(now.toOffset()) }
 

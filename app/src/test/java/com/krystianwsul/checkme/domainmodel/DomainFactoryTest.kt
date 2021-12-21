@@ -842,7 +842,7 @@ class DomainFactoryTest {
 
         val singleScheduleDatas = listOf(ScheduleData.Single(date, scheduleTimePair))
 
-        val taskKey1 = domainUpdater(now).createScheduleTopLevelTask(
+        /*val taskKey1 = */domainUpdater(now).createScheduleTopLevelTask(
             DomainListenerManager.NotificationType.All,
             EditDelegate.CreateParameters("task 1 single"),
             singleScheduleDatas,
@@ -898,7 +898,6 @@ class DomainFactoryTest {
             .projectKey
 
         assertEquals(privateProjectKey, getProjectKey(joinTaskKey))
-        assertEquals(privateProjectKey, getProjectKey(taskKey1))
         assertEquals(sharedProjectKey2, getProjectKey(taskKey2))
 
         val instanceData = domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)

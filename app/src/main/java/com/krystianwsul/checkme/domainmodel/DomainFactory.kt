@@ -292,38 +292,32 @@ class DomainFactory(
             }
         )
 
-        isWaitingForTasks.accept(
-            run {
-                val projectTasksWaiting = projectsFactory.projects
-                    .values
-                    .asSequence()
-                    .flatMap { it.projectTasks }
-                    .any { !it.dependenciesLoaded }
-
-                val projectsWaiting by lazy {
-                    projectsFactory.projects
-                        .values
-                        .any {
-                            val requiredTaskKeys = it.projectRecord
-                                .rootTaskParentDelegate
-                                .rootTaskKeys
-
-                            !rootTasksFactory.rootTasks
-                                .keys
-                                .containsAll(requiredTaskKeys)
-                        }
-                }
-
-                val rootTasksWaiting by lazy {
-                    rootTasksFactory.rootTasks
-                        .values
-                        .any { !it.dependenciesLoaded }
-                }
-
-                projectTasksWaiting || projectsWaiting || rootTasksWaiting
-            }
-        )
+        isWaitingForTasks.accept(waitingProjectTasks().any() || waitingProjects().any() || waitingRootTasks().any())
     }
+
+    fun waitingProjectTasks() = projectsFactory.projects
+        .values
+        .asSequence()
+        .flatMap { it.projectTasks }
+        .filter { !it.dependenciesLoaded }
+
+    fun waitingProjects() = projectsFactory.projects
+        .values
+        .asSequence()
+        .filter {
+            val requiredTaskKeys = it.projectRecord
+                .rootTaskParentDelegate
+                .rootTaskKeys
+
+            !rootTasksFactory.rootTasks
+                .keys
+                .containsAll(requiredTaskKeys)
+        }
+
+    fun waitingRootTasks() = rootTasksFactory.rootTasks
+        .values
+        .asSequence()
+        .filter { !it.dependenciesLoaded }
 
     private enum class RunType {
 

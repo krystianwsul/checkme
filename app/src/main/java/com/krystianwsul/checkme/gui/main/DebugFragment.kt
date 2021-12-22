@@ -100,14 +100,24 @@ class DebugFragment : AbstractFragment() {
 
                         val t2 = ExactTimeStamp.Local.now
 
-                        t2.long - t1.long
+                        val loadTime = t2.long - t1.long
+
+                        val waitingOnDependencies = DomainFactory.instance.run {
+                            val waitingNames = waitingProjectTasks().map { it.name } +
+                                    waitingProjects().map { it.name } +
+                                    waitingRootTasks().map { it.name }
+
+                            waitingNames.joinToString("\n")
+                        }
+
+                        Pair(loadTime, waitingOnDependencies)
                     }
                 },
                 false,
                 1,
             )
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe { loadTime ->
+            .subscribe { (loadTime, waitingOnDependencies) ->
                 binding.debugData.text = StringBuilder().apply {
                     val lastTick = Preferences.lastTick
                     val tickLog = Preferences.tickLog.log
@@ -142,6 +152,9 @@ class DebugFragment : AbstractFragment() {
                     append(domainFactory.customTimeCount)
                     append("\ninstance shown: ")
                     append(domainFactory.instanceShownCount)
+
+                    append("\n\nwaiting on dependencies:\n")
+                    append(waitingOnDependencies)
 
                     append("\n\ntab log:\n")
                     append(Preferences.mainTabsLog.log)

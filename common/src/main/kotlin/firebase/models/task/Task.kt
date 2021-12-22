@@ -266,8 +266,9 @@ sealed class Task(
                         checked.
 
                         Of course, the sane thing would be to rewrite this logic to return an empty sequence in that
-                        situation.  (Presumably figure out what to do about the end range.)  But that's, like, super
-                        complicated, and this seems to be harmless for now.
+                        situation.  (Presumably figure out what to do about the end range, since that extra logic in
+                        Instance.getTaskHierarchyParentInstance may not be relevant for virtual instances.)  But that's,
+                        like, super complicated, and this seems to be harmless for now.
                          */
 
                         InstanceInfo(

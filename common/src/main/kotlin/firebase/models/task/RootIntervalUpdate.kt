@@ -96,14 +96,14 @@ class RootIntervalUpdate(val rootTask: RootTask, intervalInfo: IntervalInfo) :
             )
 
             parentSingleSchedule.getInstance(rootTask).let {
-                check(it.isRootInstance())
-
                 it.setInstanceDateTime(
                     shownFactory,
                     singleAddSchedulePair.second.run { DateTime((first as ScheduleData.Single).date, second) },
                     customTimeMigrationHelper,
                     now,
                 )
+
+                it.setParentState(Instance.ParentState.NoParent)
             }
         } else {
             removeSchedules.forEach { it.setEndExactTimeStamp(now.toOffset()) }

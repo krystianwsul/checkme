@@ -47,16 +47,31 @@ fun <T : Any> combineSequences(sequences: List<Sequence<T>>, selector: (List<T?>
     }
 }
 
-fun combineInstanceSequences(instanceSequences: List<Sequence<Instance>>): Sequence<Instance> {
-    data class InstanceInfo(val dateTime: DateTime, val ordinal: Double)
+data class InstanceInfo(val dateTime: DateTime, val instance: Instance?) {
+
+    constructor(instance: Instance) : this(instance.instanceDateTime, instance)
+}
+
+fun Sequence<InstanceInfo>.toInstances() = mapNotNull { it.instance }
+
+fun combineInstanceSequences(instanceSequences: List<Sequence<Instance>>): Sequence<Instance> = combineInstanceInfoSequences(
+    instanceSequences.map {
+        it.map { InstanceInfo(it.instanceDateTime, it) }
+    }
+).toInstances()
+
+fun combineInstanceInfoSequences(instanceSequences: List<Sequence<InstanceInfo>>): Sequence<InstanceInfo> {
     data class Entry(val instanceInfo: InstanceInfo?, val index: Int)
 
     return combineSequences(instanceSequences) {
-        val finalPair = it.mapIndexed { index, instance ->
-            Entry(instance?.let { InstanceInfo(it.instanceDateTime, it.task.ordinal) }, index)
-        }
+        val finalPair = it.mapIndexed { index, instanceInfo -> Entry(instanceInfo, index) }
             .filter { it.instanceInfo != null }
-            .minWithOrNull(compareBy({ it.instanceInfo!!.dateTime }, { it.instanceInfo!!.ordinal }))!!
+            .minWithOrNull(
+                compareBy(
+                    { it.instanceInfo!!.dateTime },
+                    { it.instanceInfo!!.instance?.task?.ordinal },
+                )
+            )!!
 
         finalPair.index
     }

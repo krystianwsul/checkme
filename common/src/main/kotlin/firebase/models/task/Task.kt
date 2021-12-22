@@ -240,7 +240,7 @@ sealed class Task(
         givenEndExactTimeStamp: ExactTimeStamp.Offset?,
         now: ExactTimeStamp.Local,
         excludedParentTasks: Set<TaskKey>,
-    ): Sequence<Instance> {
+    ): Sequence<InstanceInfo> {
         val instanceSequences = intervalInfo.parentHierarchyIntervals
             .map { it.taskHierarchy }
             .filter { it.parentTaskKey !in excludedParentTasks }
@@ -253,14 +253,34 @@ sealed class Task(
                         excludedParentTasks = excludedParentTasks + taskKey,
                     )
                     .filter { it.isVisible(now, Instance.VisibilityOptions(hack24 = true)) }
-                    .mapNotNull {
-                        it.getChildInstances()
-                            .singleOrNull { it.taskKey == taskKey }
-                            ?.takeIf { !it.exists() }
+                    .map {
+                        /*
+                        Using InstanceInfo adds overhead, but:
+                        1. The above parent.getInstances call doesn't filter by the hierarchyInterval's start/end, because
+                        the logic for determining appropriate hierarchyIntervals is in
+                        Instance.getTaskHierarchyParentInstance and it's kinda crazy.  I know that here I can't limit by
+                        start, and I don't *think* I can limit by end, either.
+                        2. But there are certain hierarchyInfo configurations in which this sequence will de facto have no
+                        instances, but instead of returning an empty sequence, this function will iterate endlessly over
+                        parent instances.  So, I need to return a placeholder for a given date, to indicate that it's been
+                        checked.
+
+                        Of course, the sane thing would be to rewrite this logic to return an empty sequence in that
+                        situation.  (Presumably figure out what to do about the end range.)  But that's, like, super
+                        complicated, and this seems to be harmless for now.
+                         */
+
+                        InstanceInfo(
+                            it.instanceDateTime,
+                            it.getChildInstances()
+                                .filter { it.taskKey == taskKey }
+                                .singleOrEmpty()
+                                ?.takeIf { !it.exists() },
+                        )
                     }
             }
 
-        return combineInstanceSequences(instanceSequences)
+        return combineInstanceInfoSequences(instanceSequences)
     }
 
     // contains only generated, root instances that aren't virtual parents
@@ -336,16 +356,23 @@ sealed class Task(
         return if (filterVisible && !notDeleted && endData!!.deleteInstances) {
             getExistingInstances(startExactTimeStamp, endExactTimeStamp, onlyRoot).filter { it.done != null }
         } else {
-            val instanceSequences = mutableListOf<Sequence<Instance>>()
+            val instanceInfoSequences = mutableListOf<Sequence<InstanceInfo>>()
 
-            instanceSequences += getExistingInstances(startExactTimeStamp, endExactTimeStamp, onlyRoot)
+            instanceInfoSequences +=
+                getExistingInstances(startExactTimeStamp, endExactTimeStamp, onlyRoot).map(::InstanceInfo)
 
-            if (!onlyRoot)
-                instanceSequences += getParentInstances(startExactTimeStamp, endExactTimeStamp, now, excludedParentTasks)
+            if (!onlyRoot) {
+                instanceInfoSequences += getParentInstances(
+                    startExactTimeStamp,
+                    endExactTimeStamp,
+                    now,
+                    excludedParentTasks,
+                )
+            }
 
-            instanceSequences += getScheduleInstances(startExactTimeStamp, endExactTimeStamp)
+            instanceInfoSequences += getScheduleInstances(startExactTimeStamp, endExactTimeStamp).map(::InstanceInfo)
 
-            combineInstanceSequences(instanceSequences)
+            combineInstanceInfoSequences(instanceInfoSequences).toInstances()
         }.also {
             check(gettingInstances)
             gettingInstances = false

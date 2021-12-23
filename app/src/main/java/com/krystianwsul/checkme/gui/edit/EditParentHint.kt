@@ -67,7 +67,7 @@ sealed class EditParentHint : Parcelable {
     }
 
     @Parcelize
-    class Project(val projectKey: ProjectKey.Shared) : EditParentHint() {
+    class Project(val projectKey: ProjectKey.Shared, override val showInitialSchedule: Boolean = true) : EditParentHint() {
 
         override fun toCurrentParent() = projectKey.toCurrentParent()
 

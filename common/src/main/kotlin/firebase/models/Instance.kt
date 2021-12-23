@@ -1,6 +1,7 @@
 package com.krystianwsul.common.firebase.models
 
 
+import com.krystianwsul.common.ErrorLogger
 import com.krystianwsul.common.criteria.Assignable
 import com.krystianwsul.common.firebase.MyCustomTime
 import com.krystianwsul.common.firebase.models.cache.InvalidatableCache
@@ -139,14 +140,33 @@ class Instance private constructor(
         val finalInterval = scheduleOrChildInterval ?: noScheduleOrParentInterval
 
         return when (val type = finalInterval.type) {
-            is Type.Child -> type.getHierarchyInterval(finalInterval)
-                .taskHierarchy
-                .parentTask
-                .getInstance(scheduleDateTime)
+            is Type.Child -> {
+                type.getHierarchyInterval(finalInterval)
+                    .also {
+                        if (!exists() &&
+                            it.endExactTimeStampOffset != null &&
+                            scheduleDateTime.toLocalExactTimeStamp() >= it.endExactTimeStampOffset
+                        ) {
+                            ErrorLogger.instance.logException(
+                                throw EndedTaskHierarchyException(
+                                    "instance.scheduleDateTime: $scheduleDateTime >= " +
+                                            "hierarchyInterval.endExactTimeStampOffset: ${it.endExactTimeStampOffset}, " +
+                                            "instanceKey: $instanceKey, " +
+                                            "taskHierarchyKey: ${it.taskHierarchy.taskHierarchyKey}"
+                                )
+                            )
+                        }
+                    }
+                    .taskHierarchy
+                    .parentTask
+                    .getInstance(scheduleDateTime)
+            }
             is Type.Schedule -> null
             is Type.NoSchedule -> null
         }
     }
+
+    private class EndedTaskHierarchyException(message: String) : Exception(message)
 
     private val parentInstanceCache =
         invalidatableCache<Instance?>(task.clearableInvalidatableManager) { invalidatableCache ->

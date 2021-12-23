@@ -2,12 +2,11 @@ package com.krystianwsul.treeadapter
 
 import android.content.Context
 import android.util.AttributeSet
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.TreeLinearLayoutManager
 
 class TreeRecyclerView : RecyclerView {
 
-    private var preventSettingLayoutManager = false
 
     private var adapter: TreeViewAdapter<*>? = null
 
@@ -15,10 +14,8 @@ class TreeRecyclerView : RecyclerView {
     constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 
-    init {
-        layoutManager = LinearLayoutManager(context)
-        preventSettingLayoutManager = true
-    }
+    private val treeLinearLayoutManager = TreeLinearLayoutManager(context).also(::setLayoutManager)
+    private val preventSettingLayoutManager = true
 
     override fun setAdapter(adapter: Adapter<*>?) {
         check(adapter is TreeViewAdapter<*>)
@@ -51,4 +48,6 @@ class TreeRecyclerView : RecyclerView {
 
         super.setLayoutManager(layout)
     }
+
+    fun freezeTopPosition() = treeLinearLayoutManager.freezeTopPosition()
 }

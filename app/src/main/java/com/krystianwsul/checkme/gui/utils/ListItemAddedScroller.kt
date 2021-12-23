@@ -96,7 +96,7 @@ interface ListItemAddedScroller {
         it[1]
     }
 
-    fun scrollToTop() = delay { scrollToPosition(0) } // todo check usage
+    fun scrollToTop() = delay { scrollToPosition(0) }
 
     fun setTaskScrollTargetMatcher(scrollTargetMatcher: ScrollTargetMatcher.Task?)
 

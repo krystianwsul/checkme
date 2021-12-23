@@ -7,7 +7,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.CustomItemAnimator
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.jakewharton.rxrelay3.BehaviorRelay
 import com.krystianwsul.checkme.Preferences
@@ -364,8 +363,6 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        binding.taskListRecycler.layoutManager = LinearLayoutManager(context)
 
         viewCreatedObservable.accept(true)
 

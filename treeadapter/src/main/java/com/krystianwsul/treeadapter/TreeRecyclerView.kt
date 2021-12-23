@@ -2,15 +2,23 @@ package com.krystianwsul.treeadapter
 
 import android.content.Context
 import android.util.AttributeSet
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
 class TreeRecyclerView : RecyclerView {
+
+    private var preventSettingLayoutManager = false
 
     private var adapter: TreeViewAdapter<*>? = null
 
     constructor(context: Context) : super(context)
     constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
+
+    init {
+        layoutManager = LinearLayoutManager(context)
+        preventSettingLayoutManager = true
+    }
 
     override fun setAdapter(adapter: Adapter<*>?) {
         check(adapter is TreeViewAdapter<*>)
@@ -37,4 +45,10 @@ class TreeRecyclerView : RecyclerView {
     }
 
     fun fixDrag() = cleanupLayoutState(this)
+
+    override fun setLayoutManager(layout: LayoutManager?) {
+        if (preventSettingLayoutManager) throw UnsupportedOperationException()
+
+        super.setLayoutManager(layout)
+    }
 }

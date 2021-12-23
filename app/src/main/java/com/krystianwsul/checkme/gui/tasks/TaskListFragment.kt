@@ -1017,7 +1017,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
         data class Project(override val data: Data, val projectKey: ProjectKey<*>) : Parameters() {
 
-            override val hint get() = (projectKey as? ProjectKey.Shared)?.let(EditParentHint::Project)
+            override val hint get() = (projectKey as? ProjectKey.Shared)?.let { EditParentHint.Project(it, false) }
         }
 
         data class Task(override val data: Data, override val topLevelTaskData: TopLevelTaskData) : Parameters() {

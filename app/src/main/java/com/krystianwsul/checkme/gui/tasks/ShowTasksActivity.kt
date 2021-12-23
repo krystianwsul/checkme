@@ -174,7 +174,7 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
 
             setOnMenuItemClickListener {
                 when (it.itemId) {
-                    R.id.projectMenuSelectAll -> taskListFragment.treeViewAdapter.selectAll()
+                    R.id.action_select_all -> taskListFragment.treeViewAdapter.selectAll()
                     else -> throw UnsupportedOperationException()
                 }
 

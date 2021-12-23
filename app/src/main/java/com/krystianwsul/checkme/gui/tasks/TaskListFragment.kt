@@ -600,8 +600,6 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
             treeNodeCollection.nodes = treeNodes
         }
-
-        override fun scrollToTop() = this@TaskListFragment.scrollToTop()
     }
 
     private abstract class Node(

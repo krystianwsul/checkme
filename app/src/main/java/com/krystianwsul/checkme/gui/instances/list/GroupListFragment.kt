@@ -987,8 +987,6 @@ class GroupListFragment @JvmOverloads constructor(
 
         override val groupAdapter = this
 
-        override fun scrollToTop() = groupListFragment.scrollToTop()
-
         override fun mutateIds(oldIds: List<Any>, newIds: List<Any>): Pair<List<Any>, List<Any>> {
             val mutatedOldIds = oldIds.toMutableList()
             val mutatedNewIds = newIds.toMutableList()

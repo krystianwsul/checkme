@@ -112,6 +112,7 @@ class UserListFragment : AbstractFragment(), FabUser {
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
+        @Suppress("DEPRECATION")
         super.onActivityCreated(savedInstanceState)
 
         binding.friendListRecycler.layoutManager = LinearLayoutManager(activity)

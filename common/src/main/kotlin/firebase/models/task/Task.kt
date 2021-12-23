@@ -269,6 +269,12 @@ sealed class Task(
                         situation.  (Presumably figure out what to do about the end range, since that extra logic in
                         Instance.getTaskHierarchyParentInstance may not be relevant for virtual instances.)  But that's,
                         like, super complicated, and this seems to be harmless for now.
+
+                        I added EndedTaskHierarchyException to the Instance algorithm to narrow this down.  Next time I'm
+                        sniffing around here, and that exception has never been logged, that means I'm in the clear to
+                        limit the upper range with something like:
+
+                        givenEndExactTimeStamp -> listOfNotNull(givenEndExactTimeStamp, hierarchyInterval.endOffset).minOrNull()
                          */
 
                         InstanceInfo(

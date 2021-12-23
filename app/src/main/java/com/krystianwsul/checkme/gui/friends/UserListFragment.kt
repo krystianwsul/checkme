@@ -9,7 +9,6 @@ import android.view.ViewGroup
 import androidx.annotation.CheckResult
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.CustomItemAnimator
-import androidx.recyclerview.widget.LinearLayoutManager
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.FragmentFriendListBinding
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
@@ -112,9 +111,8 @@ class UserListFragment : AbstractFragment(), FabUser {
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
+        @Suppress("DEPRECATION")
         super.onActivityCreated(savedInstanceState)
-
-        binding.friendListRecycler.layoutManager = LinearLayoutManager(activity)
 
         if (savedInstanceState?.containsKey(SAVE_STATE_KEY) == true)
             saveState = savedInstanceState.getParcelable(SAVE_STATE_KEY)!!

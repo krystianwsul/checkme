@@ -405,10 +405,6 @@ class GroupListFragment @JvmOverloads constructor(
         selectedData.childSelectedDatas.forEach { printTree(lines, indentation + 1, it) }
     }
 
-    init {
-        binding.groupListRecycler.layoutManager = LinearLayoutManager(context)
-    }
-
     private fun newSearchDataManager() = object : SearchDataManager<GroupListParameters, GroupAdapter>(
         activity.started,
         parametersRelay
@@ -998,8 +994,6 @@ class GroupListFragment @JvmOverloads constructor(
         }
 
         override val groupAdapter = this
-
-        override fun scrollToTop() = groupListFragment.scrollToTop()
 
         override fun mutateIds(oldIds: List<Any>, newIds: List<Any>): Pair<List<Any>, List<Any>> {
             val mutatedOldIds = oldIds.toMutableList()

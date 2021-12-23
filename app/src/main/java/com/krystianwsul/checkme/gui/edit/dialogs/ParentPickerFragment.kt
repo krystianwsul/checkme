@@ -7,7 +7,6 @@ import android.os.Bundle
 import android.os.Parcelable
 import android.view.MotionEvent
 import androidx.recyclerview.widget.CustomItemAnimator
-import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.jakewharton.rxbinding4.view.touches
 import com.jakewharton.rxbinding4.widget.textChanges
@@ -123,8 +122,6 @@ class ParentPickerFragment : AbstractDialogFragment() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         @Suppress("DEPRECATION")
         super.onActivityCreated(savedInstanceState)
-
-        binding.parentPickerRecycler.layoutManager = LinearLayoutManager(activity)
 
         delegateRelay.switchMap { it.adapterDataObservable }
             .subscribe(::initialize)

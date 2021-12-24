@@ -9,6 +9,7 @@ import androidx.appcompat.view.ActionMode
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.ActivityShowInstanceBinding
 import com.krystianwsul.checkme.databinding.BottomBinding
+import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.extensions.*
 import com.krystianwsul.checkme.domainmodel.undo.UndoData
 import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
@@ -191,13 +192,21 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
                                                         it,
                                                 )
                                             }
-                                            .subscribe()
-                                            .addTo(createDisposable)
+                                        .subscribe()
+                                        .addTo(createDisposable)
                                 }
                                 R.id.instanceMenuEditInstance -> {
                                     check(!it.done)
 
                                     editInstancesHostDelegate.show(listOf(instanceKey))
+                                }
+                                R.id.instanceMenuSplit -> {
+                                    AndroidDomainUpdater.splitInstance(
+                                        DomainListenerManager.NotificationType.All,
+                                        instanceKey,
+                                    ).subscribe()
+
+                                    finish()
                                 }
                                 R.id.instanceMenuCheck -> if (!it.done) setDone(true) // todo flowable
                                 R.id.instanceMenuUncheck -> if (it.done) setDone(false)
@@ -237,9 +246,12 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
                 .menu
                 .apply {
                     findItem(R.id.instanceMenuSearch).isVisible = !data?.groupListDataWrapper
-                            ?.instanceDatas
-                            .isNullOrEmpty()
+                        ?.instanceDatas
+                        .isNullOrEmpty()
                     findItem(R.id.instanceMenuEditInstance).isVisible = data?.done == false
+                    findItem(R.id.instanceMenuSplit).isVisible = data?.run {
+                        !done && groupListDataWrapper.instanceDatas.size > 1
+                    } == true
                     findItem(R.id.instanceMenuNotify).isVisible = data?.run {
                         !done && isRootInstance && instanceDateTime.timeStamp <= TimeStamp.now && !notificationShown
                     } == true

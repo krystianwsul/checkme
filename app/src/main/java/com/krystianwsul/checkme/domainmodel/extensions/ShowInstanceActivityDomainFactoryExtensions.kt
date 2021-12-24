@@ -5,6 +5,7 @@ import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.getProjectInfo
+import com.krystianwsul.checkme.domainmodel.update.CompletableDomainUpdate
 import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
 import com.krystianwsul.checkme.domainmodel.update.SingleDomainUpdate
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
@@ -18,6 +19,7 @@ import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
+import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Single
 
 fun DomainFactory.getShowInstanceData(
@@ -83,6 +85,37 @@ fun DomainUpdater.setTaskEndTimeStamps(
         ),
         params,
     )
+}.perform(this)
+
+@CheckResult
+fun DomainUpdater.splitInstance(
+    notificationType: DomainListenerManager.NotificationType,
+    instanceKey: InstanceKey,
+): Completable = CompletableDomainUpdate.create("splitInstance") { now ->
+    val instance = getInstance(instanceKey)
+
+    val childInstances = instance.getChildInstances()
+    check(childInstances.size > 1)
+
+    trackRootTaskIds {
+        if (instance.parentInstance != null) {
+            childInstances.forEach { it.setParentState(instance.parentInstance!!.instanceKey) }
+        } else {
+            childInstances.forEach {
+                it.setParentState(Instance.ParentState.NoParent)
+
+                val instanceDateTime = instance.instanceDateTime
+
+                it.setInstanceDateTime(shownFactory, instanceDateTime, this, now)
+            }
+        }
+    }
+
+    instance.hide()
+
+    val remoteProjects = (childInstances + instance).map { it.getProject() }
+
+    DomainUpdater.Params(true, notificationType, DomainFactory.CloudParams(remoteProjects))
 }.perform(this)
 
 private fun DomainFactory.getGroupListData(

@@ -90,4 +90,75 @@ class SplitInstanceTest {
             )
         }
     }
+
+    @Test
+    fun testSplitWeeklyInstance() {
+        val date = Date(2021, 12, 25)
+
+        var now = ExactTimeStamp.Local(date, HourMinute(1, 0))
+
+        val parentTaskKey = domainUpdater(now).createScheduleTopLevelTask(
+            DomainListenerManager.NotificationType.All,
+            EditDelegate.CreateParameters("parent task"),
+            listOf(ScheduleData.Weekly(setOf(date.dayOfWeek), TimePair(HourMinute(5, 0)), null, null, 1)),
+            null,
+        )
+            .blockingGet()
+            .taskKey
+
+        now += 1.hours
+
+        val child1TaskKey = CreateChildTaskDomainUpdate(
+            DomainListenerManager.NotificationType.All,
+            CreateChildTaskDomainUpdate.Parent.Task(parentTaskKey),
+            EditDelegate.CreateParameters("child 1 task"),
+        ).perform(domainUpdater(now))
+            .blockingGet()
+            .taskKey
+
+        now += 1.hours
+
+        val child2TaskKey = CreateChildTaskDomainUpdate(
+            DomainListenerManager.NotificationType.All,
+            CreateChildTaskDomainUpdate.Parent.Task(parentTaskKey),
+            EditDelegate.CreateParameters("child 2 task"),
+        ).perform(domainUpdater(now))
+            .blockingGet()
+            .taskKey
+
+        val parentInstanceKey = getDayInstanceDatas(now).let {
+            assertEquals(1, it.size)
+            assertEquals(2, it.single().children.size)
+
+            it.single().instanceKey
+        }
+
+        getDayInstanceDatas(now, 7).let {
+            assertEquals(1, it.size)
+            assertEquals(2, it.single().children.size)
+
+            it.single().instanceKey
+        }
+
+        now += 1.hours
+
+        domainUpdater(now).splitInstance(
+            DomainListenerManager.NotificationType.All,
+            parentInstanceKey,
+        ).blockingSubscribe()
+
+        getDayInstanceDatas(now).let {
+            assertEquals(
+                setOf(child1TaskKey, child2TaskKey),
+                it.map { it.taskKey }.toSet(),
+            )
+        }
+
+        getDayInstanceDatas(now, 7).let {
+            assertEquals(1, it.size)
+            assertEquals(2, it.single().children.size)
+
+            it.single().instanceKey
+        }
+    }
 }

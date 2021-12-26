@@ -109,10 +109,15 @@ class TreeNodeCollection<T : TreeHolder>(val treeViewAdapter: TreeViewAdapter<T>
         val fromTreeNode = getNode(fromPosition, PositionMode.DISPLAYED)
         val toTreeNode = getNode(toPosition, PositionMode.DISPLAYED)
 
-        listOf(fromTreeNode, toTreeNode).map { it.parent }
-            .distinct()
-            .single()
-            .swapNodePositions(fromTreeNode, toTreeNode, placeholder)
+        val fromParent = fromTreeNode.parent
+        val toParent = toTreeNode.parent
+
+        if (fromParent == toParent) {
+            fromParent.swapNodePositions(fromTreeNode, toTreeNode, placeholder)
+        } else {
+            fromParent.removeForSwap(fromTreeNode, placeholder)
+            toParent.addForSwap(fromTreeNode, toTreeNode, placeholder)
+        }
     }
 
     override fun swapNodePositions(
@@ -136,6 +141,37 @@ class TreeNodeCollection<T : TreeHolder>(val treeViewAdapter: TreeViewAdapter<T>
             removeAt(fromPosition)
             add(toPosition, fromTreeNode)
         }
+
+        treeNodesRelay.accept(treeNodes)
+    }
+
+    override fun removeForSwap(fromTreeNode: TreeNode<T>, placeholder: TreeViewAdapter.Placeholder) {
+        check(treeViewAdapter.locker == null)
+
+        val treeNodes = treeNodesRelay.value
+            ?.toMutableList()
+            ?: throw SetTreeNodesNotCalledException()
+
+        val fromPosition = treeNodes.indexOf(fromTreeNode)
+        check(fromPosition >= 0)
+
+        treeNodes.removeAt(fromPosition)
+
+        treeNodesRelay.accept(treeNodes)
+    }
+
+    override fun addForSwap(fromTreeNode: TreeNode<T>, toTreeNode: TreeNode<T>, placeholder: TreeViewAdapter.Placeholder) {
+        check(treeViewAdapter.locker == null)
+
+        val treeNodes = treeNodesRelay.value
+            ?.toMutableList()
+            ?: throw SetTreeNodesNotCalledException()
+
+        val toPosition = treeNodes.indexOf(toTreeNode)
+        check(toPosition >= 0)
+
+        fromTreeNode.parent = this
+        treeNodes.add(toPosition, fromTreeNode)
 
         treeNodesRelay.accept(treeNodes)
     }

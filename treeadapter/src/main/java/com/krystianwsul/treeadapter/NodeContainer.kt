@@ -30,4 +30,7 @@ interface NodeContainer<T : TreeHolder> {
     fun add(treeNode: TreeNode<T>, placeholder: TreeViewAdapter.Placeholder)
 
     fun swapNodePositions(fromTreeNode: TreeNode<T>, toTreeNode: TreeNode<T>, placeholder: TreeViewAdapter.Placeholder)
+
+    fun removeForSwap(fromTreeNode: TreeNode<T>, placeholder: TreeViewAdapter.Placeholder)
+    fun addForSwap(fromTreeNode: TreeNode<T>, toTreeNode: TreeNode<T>, placeholder: TreeViewAdapter.Placeholder)
 }

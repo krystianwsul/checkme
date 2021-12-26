@@ -8,7 +8,7 @@ import java.util.*
 
 class TreeNode<T : TreeHolder>(
     val modelNode: ModelNode<T>,
-    val parent: NodeContainer<T>,
+    var parent: NodeContainer<T>,
     private var selected: Boolean = false,
     private val initialExpansionState: ExpansionState? = null,
 ) : Comparable<TreeNode<T>>, NodeContainer<T> {
@@ -16,11 +16,13 @@ class TreeNode<T : TreeHolder>(
     companion object {
 
         private tailrec fun parentHierarchyMatchesSearch(treeNode: TreeNode<*>, search: SearchCriteria.Search): Boolean {
-            if (treeNode.parent !is TreeNode<*>) return false
+            treeNode.parent.let {
+                if (it !is TreeNode<*>) return false
 
-            if (treeNode.parent.matchesSearch(search)) return true
+                if (it.matchesSearch(search)) return true
 
-            return parentHierarchyMatchesSearch(treeNode.parent, search)
+                return parentHierarchyMatchesSearch(it, search)
+            }
         }
     }
 
@@ -421,6 +423,25 @@ class TreeNode<T : TreeHolder>(
             removeAt(fromPosition)
             add(toPosition, fromTreeNode)
         }
+    }
+
+    override fun removeForSwap(fromTreeNode: TreeNode<T>, placeholder: TreeViewAdapter.Placeholder) {
+        check(treeViewAdapter.locker == null)
+
+        val fromPosition = childTreeNodes.indexOf(fromTreeNode)
+        check(fromPosition >= 0)
+
+        childTreeNodes.removeAt(fromPosition)
+    }
+
+    override fun addForSwap(fromTreeNode: TreeNode<T>, toTreeNode: TreeNode<T>, placeholder: TreeViewAdapter.Placeholder) {
+        check(treeViewAdapter.locker == null)
+
+        val toPosition = childTreeNodes.indexOf(toTreeNode)
+        check(toPosition >= 0)
+
+        fromTreeNode.parent = this
+        childTreeNodes.add(toPosition, fromTreeNode)
     }
 
     class SetChildTreeNodesNotCalledException : InitializationException("TreeNode.setChildTreeNodes() has not been called.")

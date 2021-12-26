@@ -269,6 +269,13 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
                     .addTo(groupListFragment.attachedToWindowDisposable)
             }
 
+            override fun canDropOn(other: Sortable): Boolean {
+                val otherNotDoneNode = other as? NotDoneNode ?: return false
+                //val otherInstance = otherNotDoneNode.contentDelegate as? Instance ?: return false
+
+                return treeNode.parent == otherNotDoneNode.treeNode.parent
+            }
+
             override fun normalize() = instanceData.normalize()
 
             override fun matchesFilterParams(filterParams: FilterCriteria.Full.FilterParams) =
@@ -405,6 +412,8 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
 
             override fun getOrdinal(): Double = throw UnsupportedOperationException()
             override fun setOrdinal(ordinal: Double) = throw UnsupportedOperationException()
+
+            override fun canDropOn(other: Sortable) = throw UnsupportedOperationException()
 
             // I don't really understand, or feel like understanding, why these three funs need to access allInstanceDatas
             override fun normalize() = allInstanceDatas.forEach { it.normalize() }

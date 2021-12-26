@@ -7,4 +7,6 @@ interface Sortable {
 
     fun getOrdinal(): Double
     fun setOrdinal(ordinal: Double)
+
+    fun canDropOn(other: Sortable): Boolean
 }

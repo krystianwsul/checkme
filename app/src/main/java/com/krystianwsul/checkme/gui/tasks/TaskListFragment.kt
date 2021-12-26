@@ -871,6 +871,12 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                 .subscribe()
                 .addTo(createDisposable)
         }
+
+        override fun canDropOn(other: Sortable): Boolean {
+            val otherTaskNode = other as? TaskNode ?: return false
+
+            return treeNode.parent == otherTaskNode.treeNode.parent
+        }
     }
 
     private interface NodeParent {

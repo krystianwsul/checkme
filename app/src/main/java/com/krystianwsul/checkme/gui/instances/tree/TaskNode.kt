@@ -192,4 +192,10 @@ class TaskNode(
             .subscribe()
             .addTo(groupListFragment.attachedToWindowDisposable)
     }
+
+    override fun canDropOn(other: Sortable): Boolean {
+        val otherTaskNode = other as? TaskNode ?: return false
+
+        return treeNode.parent == otherTaskNode.treeNode.parent
+    }
 }

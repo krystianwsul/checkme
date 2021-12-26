@@ -271,9 +271,17 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
 
             override fun canDropOn(other: Sortable): Boolean {
                 val otherNotDoneNode = other as? NotDoneNode ?: return false
-                //val otherInstance = otherNotDoneNode.contentDelegate as? Instance ?: return false
 
-                return treeNode.parent == otherNotDoneNode.treeNode.parent
+                if (treeNode.parent == otherNotDoneNode.treeNode.parent) return true
+
+                val otherInstance = otherNotDoneNode.contentDelegate as? Instance ?: return false
+
+                if (!instanceData.isRootInstance) return false
+                if (!otherInstance.instanceData.isRootInstance) return false
+
+                if (instanceData.projectKey != null && otherInstance.instanceData.projectKey == null) return true
+
+                return false
             }
 
             override fun normalize() = instanceData.normalize()

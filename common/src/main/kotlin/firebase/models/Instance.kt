@@ -246,6 +246,7 @@ class Instance private constructor(
 
             val childInstances = task.childHierarchyIntervals
                 .asSequence()
+                .filter { it.currentOffset(scheduleDateTime.toLocalExactTimeStamp()) } // todo hierarchy this may require invalidating on custom time change
                 /**
                  * todo it seems to me that this `filter` should be redundant with the check in getParentInstance, but a
                  * test fails if I remove it.

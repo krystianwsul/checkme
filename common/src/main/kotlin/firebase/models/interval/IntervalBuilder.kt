@@ -18,7 +18,14 @@ object IntervalBuilder {
             task.parentTaskHierarchies.map { TypeBuilder.Parent(it) },
             task.noScheduleOrParents.map { TypeBuilder.NoScheduleOrParent(it) },
         ).flatten()
-            .sortedBy { it.startExactTimeStampOffset }
+            .filter { it.startExactTimeStampOffset != it.endExactTimeStampOffset }
+            .sortedWith(
+                compareBy(
+                    { it.startExactTimeStampOffset },
+                    { it.endExactTimeStampOffset == null }, // move undended to the end
+                    { it.endExactTimeStampOffset }, // then in increasing order
+                )
+            )
             .toMutableList()
 
         fun getNextTypeBuilder() = allTypeBuilders.takeIf { it.isNotEmpty() }?.removeAt(0)
@@ -179,12 +186,14 @@ object IntervalBuilder {
     private sealed class TypeBuilder {
 
         abstract val startExactTimeStampOffset: ExactTimeStamp.Offset
+        abstract val endExactTimeStampOffset: ExactTimeStamp.Offset?
 
         abstract fun toIntervalBuilder(): IntervalBuilder
 
         class Parent(val parentTaskHierarchy: TaskHierarchy) : TypeBuilder() {
 
             override val startExactTimeStampOffset = parentTaskHierarchy.startExactTimeStampOffset
+            override val endExactTimeStampOffset = parentTaskHierarchy.endExactTimeStampOffset
 
             override fun toIntervalBuilder() = IntervalBuilder.Child(startExactTimeStampOffset, parentTaskHierarchy)
         }
@@ -194,6 +203,7 @@ object IntervalBuilder {
         ) : TypeBuilder() {
 
             override val startExactTimeStampOffset = schedule.startExactTimeStampOffset
+            override val endExactTimeStampOffset = schedule.endExactTimeStampOffset
 
             override fun toIntervalBuilder() = IntervalBuilder.Schedule(
                 startExactTimeStampOffset,
@@ -206,6 +216,7 @@ object IntervalBuilder {
         ) : TypeBuilder() {
 
             override val startExactTimeStampOffset = noScheduleOrParent.startExactTimeStampOffset
+            override val endExactTimeStampOffset = noScheduleOrParent.endExactTimeStampOffset
 
             override fun toIntervalBuilder() =
                 IntervalBuilder.NoSchedule(startExactTimeStampOffset, noScheduleOrParent)

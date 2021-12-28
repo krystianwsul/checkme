@@ -930,12 +930,14 @@ private fun DomainFactory.convertAndUpdateProject(
     now: ExactTimeStamp.Local,
     projectKey: ProjectKey<*>,
 ): RootTask {
+    val isTopLevelTask = task.isTopLevelTask(now)
+
     return when (task) {
         is RootTask -> task.updateProject(projectKey)
         is ProjectTask -> converter.convertToRoot(now, task, projectKey)
     }.also {
         // this function is may be a no-op for child tasks
-        if (task.isTopLevelTask(now)) check(it.project.projectKey == projectKey)
+        if (isTopLevelTask) check(it.project.projectKey == projectKey)
     }
 }
 

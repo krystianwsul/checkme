@@ -42,8 +42,8 @@ class CustomTimesInvalidatableManagerTest {
         domainUpdater(now).updateCustomTime(
             DomainListenerManager.NotificationType.All,
             customTimeKey,
-            "custom time x",
-            DayOfWeek.values().associateWith { HourMinute(1, 0) },
+            "custom time",
+            DayOfWeek.values().associateWith { HourMinute(2, 0) },
         ).blockingSubscribe()
 
         testInvalidatable.assertInvalidated()
@@ -54,8 +54,6 @@ class CustomTimesInvalidatableManagerTest {
         private var invalidated = false
 
         override fun invalidate() {
-            check(!invalidated)
-
             invalidated = true
         }
 

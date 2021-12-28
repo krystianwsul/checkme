@@ -171,6 +171,8 @@ class DomainFactoryRule : TestRule {
             }
         }
 
+        rootModelChangeManager = RootModelChangeManager()
+
         val myUserFactory = mockk<MyUserFactory> {
             every { save(any()) } returns Unit
 
@@ -180,7 +182,8 @@ class DomainFactoryRule : TestRule {
                     false,
                     mockk(relaxed = true),
                     userKey,
-                )
+                ),
+                rootModelChangeManager,
             )
         }
 
@@ -212,8 +215,6 @@ class DomainFactoryRule : TestRule {
         val rootTaskDependencyCoordinator = mockk<RootTaskDependencyCoordinator> {
             every { getDependencies(any()) } returns myUserFactory.user
         }
-
-        rootModelChangeManager = RootModelChangeManager()
 
         val rootTaskFactory = RootTasksFactory(
             rootTasksLoader,

@@ -12,7 +12,7 @@ import com.google.android.material.appbar.AppBarLayout;
 
 public class CustomAppBarLayoutBehavior extends AppBarLayout.Behavior {
 
-    private boolean shouldScroll = false;
+    private boolean shouldScroll = true;
 
     public CustomAppBarLayoutBehavior() {
         super();
@@ -24,7 +24,7 @@ public class CustomAppBarLayoutBehavior extends AppBarLayout.Behavior {
 
     @Override
     public boolean onStartNestedScroll(CoordinatorLayout parent, AppBarLayout child, View directTargetChild, View target, int nestedScrollAxes, int type) {
-        return shouldScroll;
+        return super.onStartNestedScroll(parent, child, directTargetChild, target, nestedScrollAxes, type) && shouldScroll;
     }
 
     @Override

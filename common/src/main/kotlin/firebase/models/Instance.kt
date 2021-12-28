@@ -259,6 +259,11 @@ class Instance private constructor(
                         .childTask
                         .getInstance(scheduleDateTime)
                 }
+                /*
+                todo this doesn't really make sense to me.  I feel like these instances should be filtered by !exists,
+                (because that's redundant with existingChildInstancesCache) and then the remainder of this chain
+                shouldn't be needed.  But trying that made some tests fail, and I don't feel like figuring it out now.
+                 */
                 .filter { it.parentInstance == this }
                 .distinct()
                 .toList()

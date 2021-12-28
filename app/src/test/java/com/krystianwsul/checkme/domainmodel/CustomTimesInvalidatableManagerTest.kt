@@ -2,6 +2,8 @@ package com.krystianwsul.checkme.domainmodel
 
 import com.krystianwsul.checkme.domainmodel.extensions.createCustomTime
 import com.krystianwsul.checkme.domainmodel.extensions.updateCustomTime
+import com.krystianwsul.checkme.firebase.snapshot.Snapshot
+import com.krystianwsul.common.firebase.json.UserWrapper
 import com.krystianwsul.common.firebase.models.cache.Invalidatable
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.DayOfWeek
@@ -45,6 +47,21 @@ class CustomTimesInvalidatableManagerTest {
             "custom time",
             DayOfWeek.values().associateWith { HourMinute(2, 0) },
         ).blockingSubscribe()
+
+        testInvalidatable.assertInvalidated()
+    }
+
+    @Test
+    fun testRemoteMyUserChange() {
+        val testInvalidatable = TestInvalidatable()
+
+        domainFactoryRule.rootModelChangeManager
+            .customTimesInvalidatableManager
+            .addInvalidatable(testInvalidatable)
+
+        domainFactory.myUserFactory.onNewSnapshot(
+            Snapshot(domainFactory.myUserFactory.user.userKey.key, UserWrapper())
+        )
 
         testInvalidatable.assertInvalidated()
     }

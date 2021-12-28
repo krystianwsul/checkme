@@ -14,8 +14,12 @@ class RootModelChangeManager {
 
     val userInvalidatableManager = InvalidatableManager()
 
-    // This handles *all* custom time changes, not just models getting swapped out like the others
-    val customTimesInvalidatableManager = InvalidatableManager()
+    /*
+    This handles an atypical subset of changes:
+    1. Local edits to the HourMinutes for existing CustomTimes
+    2. Remote changes to my user
+     */
+    val customTimesInvalidatableManager = InvalidatableManager().also(userInvalidatableManager::addInvalidatable)
 
     fun invalidateExistingInstances() = existingInstancesInvalidatableManager.invalidate()
 

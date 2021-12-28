@@ -18,6 +18,7 @@ class RootModelChangeManager {
     This handles an atypical subset of changes:
     1. Local edits to the HourMinutes for existing CustomTimes
     2. Remote changes to my user
+    3. Remote changes to other users
      */
     val customTimesInvalidatableManager = InvalidatableManager().also(userInvalidatableManager::addInvalidatable)
 

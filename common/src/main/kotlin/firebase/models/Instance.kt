@@ -280,12 +280,18 @@ class Instance private constructor(
                 .invalidatableManager
                 .addInvalidatable(invalidatableCache)
 
+            val customTimesRemovable = task.rootModelChangeManager
+                .customTimesInvalidatableManager
+                .addInvalidatable(invalidatableCache)
+
             InvalidatableCache.ValueHolder(childInstances) {
                 doneOffsetProperty.removeCallback(doneOffsetCallback)
 
                 parentInstanceRemovables.forEach { it.remove() }
 
                 childHierarchyIntervalsRemovable.remove()
+
+                customTimesRemovable.remove()
             }
         }
 

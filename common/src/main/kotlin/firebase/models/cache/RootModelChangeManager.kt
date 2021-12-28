@@ -14,6 +14,9 @@ class RootModelChangeManager {
 
     val userInvalidatableManager = InvalidatableManager()
 
+    // This handles *all* custom time changes, not just models getting swapped out like the others
+    val customTimesInvalidatableManager = InvalidatableManager()
+
     fun invalidateExistingInstances() = existingInstancesInvalidatableManager.invalidate()
 
     fun invalidateRootTaskProjectIds() = rootTaskProjectIdInvalidatableManager.invalidate()

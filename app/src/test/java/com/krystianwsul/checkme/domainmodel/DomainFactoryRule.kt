@@ -76,6 +76,9 @@ class DomainFactoryRule : TestRule {
     lateinit var domainFactory: DomainFactory
         private set
 
+    lateinit var rootModelChangeManager: RootModelChangeManager
+        private set
+
     private val rootTaskRelays = mutableMapOf<TaskKey.Root, PublishRelay<RootTaskJson>>()
 
     fun acceptRootTaskJson(taskKey: TaskKey.Root, rootTaskJson: RootTaskJson) {
@@ -210,7 +213,7 @@ class DomainFactoryRule : TestRule {
             every { getDependencies(any()) } returns myUserFactory.user
         }
 
-        val rootModelChangeManager = RootModelChangeManager()
+        rootModelChangeManager = RootModelChangeManager()
 
         val rootTaskFactory = RootTasksFactory(
             rootTasksLoader,

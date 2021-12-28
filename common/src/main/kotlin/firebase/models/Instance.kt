@@ -148,7 +148,7 @@ class Instance private constructor(
                             scheduleDateTime.toLocalExactTimeStamp() >= it.endExactTimeStampOffset
                         ) {
                             ErrorLogger.instance.logException(
-                                throw EndedTaskHierarchyException(
+                                EndedTaskHierarchyException(
                                     "instance.scheduleDateTime: $scheduleDateTime >= " +
                                             "hierarchyInterval.endExactTimeStampOffset: ${it.endExactTimeStampOffset}, " +
                                             "instanceKey: $instanceKey, " +

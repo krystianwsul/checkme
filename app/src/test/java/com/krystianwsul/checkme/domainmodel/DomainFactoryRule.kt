@@ -27,11 +27,10 @@ import com.krystianwsul.common.domain.DeviceInfo
 import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.DomainThreadChecker
+import com.krystianwsul.common.firebase.json.UserWrapper
 import com.krystianwsul.common.firebase.json.projects.PrivateProjectJson
 import com.krystianwsul.common.firebase.json.tasks.RootTaskJson
-import com.krystianwsul.common.firebase.models.MyUser
 import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
-import com.krystianwsul.common.firebase.records.MyUserRecord
 import com.krystianwsul.common.firebase.records.project.PrivateProjectRecord
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.ExactTimeStamp
@@ -74,6 +73,9 @@ class DomainFactoryRule : TestRule {
     private val compositeDisposable = CompositeDisposable()
 
     lateinit var domainFactory: DomainFactory
+        private set
+
+    lateinit var rootModelChangeManager: RootModelChangeManager
         private set
 
     private val rootTaskRelays = mutableMapOf<TaskKey.Root, PublishRelay<RootTaskJson>>()
@@ -168,18 +170,14 @@ class DomainFactoryRule : TestRule {
             }
         }
 
-        val myUserFactory = mockk<MyUserFactory> {
-            every { save(any()) } returns Unit
+        rootModelChangeManager = RootModelChangeManager()
 
-            every { user } returns MyUser(
-                MyUserRecord(
-                    databaseWrapper,
-                    false,
-                    mockk(relaxed = true),
-                    userKey,
-                )
-            )
-        }
+        val myUserFactory = MyUserFactory(
+            Snapshot(userKey.key, UserWrapper()),
+            deviceDbInfo,
+            databaseWrapper,
+            rootModelChangeManager,
+        )
 
         lateinit var projectsFactory: ProjectsFactory
 
@@ -209,8 +207,6 @@ class DomainFactoryRule : TestRule {
         val rootTaskDependencyCoordinator = mockk<RootTaskDependencyCoordinator> {
             every { getDependencies(any()) } returns myUserFactory.user
         }
-
-        val rootModelChangeManager = RootModelChangeManager()
 
         val rootTaskFactory = RootTasksFactory(
             rootTasksLoader,

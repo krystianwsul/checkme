@@ -246,6 +246,7 @@ class Instance private constructor(
 
             val childInstances = task.childHierarchyIntervals
                 .asSequence()
+                .filter { it.currentOffset(scheduleDateTime.toLocalExactTimeStamp()) } // todo hierarchy this may require invalidating on custom time change
                 /**
                  * todo it seems to me that this `filter` should be redundant with the check in getParentInstance, but a
                  * test fails if I remove it.
@@ -258,6 +259,11 @@ class Instance private constructor(
                         .childTask
                         .getInstance(scheduleDateTime)
                 }
+                /*
+                todo this doesn't really make sense to me.  I feel like these instances should be filtered by !exists,
+                (because that's redundant with existingChildInstancesCache) and then the remainder of this chain
+                shouldn't be needed.  But trying that made some tests fail, and I don't feel like figuring it out now.
+                 */
                 .filter { it.parentInstance == this }
                 .distinct()
                 .toList()
@@ -274,12 +280,18 @@ class Instance private constructor(
                 .invalidatableManager
                 .addInvalidatable(invalidatableCache)
 
+            val customTimesRemovable = task.rootModelChangeManager
+                .customTimesInvalidatableManager
+                .addInvalidatable(invalidatableCache)
+
             InvalidatableCache.ValueHolder(childInstances) {
                 doneOffsetProperty.removeCallback(doneOffsetCallback)
 
                 parentInstanceRemovables.forEach { it.remove() }
 
                 childHierarchyIntervalsRemovable.remove()
+
+                customTimesRemovable.remove()
             }
         }
 

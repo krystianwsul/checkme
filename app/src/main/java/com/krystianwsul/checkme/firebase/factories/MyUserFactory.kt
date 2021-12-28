@@ -22,7 +22,7 @@ class MyUserFactory(
 
     private val myUserManager = MyUserManager(deviceDbInfo, userSnapshot, databaseWrapper)
 
-    private val userRelay = BehaviorRelay.createDefault(MyUser(myUserManager.value))
+    private val userRelay = BehaviorRelay.createDefault(MyUser(myUserManager.value, rootModelChangeManager))
 
     init {
         rootModelChangeManager.invalidateUsers()
@@ -53,7 +53,7 @@ class MyUserFactory(
             user.clearableInvalidatableManager.clear()
             rootModelChangeManager.invalidateUsers()
 
-            user = MyUser(it.data)
+            user = MyUser(it.data, rootModelChangeManager)
 
             it.changeType
         }

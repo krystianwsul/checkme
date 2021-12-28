@@ -4,8 +4,8 @@ import com.krystianwsul.common.time.ExactTimeStamp
 
 interface CurrentOffset {
 
-    val startExactTimeStampOffset: ExactTimeStamp
-    val endExactTimeStampOffset: ExactTimeStamp?
+    val startExactTimeStampOffset: ExactTimeStamp.Offset
+    val endExactTimeStampOffset: ExactTimeStamp.Offset?
 
     fun notDeletedOffset(exactTimeStamp: ExactTimeStamp? = null): Boolean {
         return if (exactTimeStamp != null)

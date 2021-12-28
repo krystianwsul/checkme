@@ -5,6 +5,7 @@ import com.krystianwsul.common.firebase.models.noscheduleorparent.NoScheduleOrPa
 import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.firebase.models.taskhierarchy.TaskHierarchy
 import com.krystianwsul.common.time.ExactTimeStamp
+import com.krystianwsul.common.utils.CurrentOffset
 
 object IntervalBuilder {
 
@@ -18,7 +19,7 @@ object IntervalBuilder {
             task.parentTaskHierarchies.map { TypeBuilder.Parent(it) },
             task.noScheduleOrParents.map { TypeBuilder.NoScheduleOrParent(it) },
         ).flatten()
-            .filter { it.startExactTimeStampOffset != it.endExactTimeStampOffset }
+            .filter { it.startExactTimeStampOffset != it.endExactTimeStampOffset } // these are no-ops
             .sortedWith(
                 compareBy(
                     { it.startExactTimeStampOffset },
@@ -183,43 +184,27 @@ object IntervalBuilder {
      */
     private class OverlapException(message: String) : Exception(message)
 
-    private sealed class TypeBuilder {
-
-        abstract val startExactTimeStampOffset: ExactTimeStamp.Offset
-        abstract val endExactTimeStampOffset: ExactTimeStamp.Offset?
+    private sealed class TypeBuilder(currentOffset: CurrentOffset) : CurrentOffset by currentOffset {
 
         abstract fun toIntervalBuilder(): IntervalBuilder
 
-        class Parent(val parentTaskHierarchy: TaskHierarchy) : TypeBuilder() {
-
-            override val startExactTimeStampOffset = parentTaskHierarchy.startExactTimeStampOffset
-            override val endExactTimeStampOffset = parentTaskHierarchy.endExactTimeStampOffset
+        class Parent(val parentTaskHierarchy: TaskHierarchy) : TypeBuilder(parentTaskHierarchy) {
 
             override fun toIntervalBuilder() = IntervalBuilder.Child(startExactTimeStampOffset, parentTaskHierarchy)
         }
 
         class Schedule(
             val schedule: com.krystianwsul.common.firebase.models.schedule.Schedule,
-        ) : TypeBuilder() {
+        ) : TypeBuilder(schedule) {
 
-            override val startExactTimeStampOffset = schedule.startExactTimeStampOffset
-            override val endExactTimeStampOffset = schedule.endExactTimeStampOffset
-
-            override fun toIntervalBuilder() = IntervalBuilder.Schedule(
-                startExactTimeStampOffset,
-                mutableListOf(schedule),
-            )
+            override fun toIntervalBuilder() = IntervalBuilder.Schedule(startExactTimeStampOffset, mutableListOf(schedule))
         }
 
         class NoScheduleOrParent(
             val noScheduleOrParent: com.krystianwsul.common.firebase.models.noscheduleorparent.NoScheduleOrParent,
-        ) : TypeBuilder() {
+        ) : TypeBuilder(noScheduleOrParent) {
 
-            override val startExactTimeStampOffset = noScheduleOrParent.startExactTimeStampOffset
-            override val endExactTimeStampOffset = noScheduleOrParent.endExactTimeStampOffset
-
-            override fun toIntervalBuilder() =
-                IntervalBuilder.NoSchedule(startExactTimeStampOffset, noScheduleOrParent)
+            override fun toIntervalBuilder() = IntervalBuilder.NoSchedule(startExactTimeStampOffset, noScheduleOrParent)
         }
     }
 

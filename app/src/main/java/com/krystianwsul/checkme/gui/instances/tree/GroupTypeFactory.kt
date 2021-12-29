@@ -82,6 +82,7 @@ object GroupTypeFactory : GroupType.Factory {
     sealed interface TimeChild : Bridge, GroupType.TimeChild {
 
         val instanceKeys: Set<InstanceKey>
+        val ordinal: Double
     }
 
     class TimeBridge(
@@ -164,6 +165,8 @@ object GroupTypeFactory : GroupType.Factory {
 
         override val instanceKeys = instanceDatas.map { it.instanceKey }.toSet()
 
+        override val ordinal = projectDetails.projectKey.getOrdinal()
+
         override fun toContentDelegate(
             groupAdapter: GroupListFragment.GroupAdapter,
             indentation: Int,
@@ -185,8 +188,7 @@ object GroupTypeFactory : GroupType.Factory {
             return when (other) {
                 is TimeBridge -> throw UnsupportedOperationException()
                 is TimeProjectBridge -> throw UnsupportedOperationException()
-                is ProjectBridge -> projectDetails.projectKey.compareTo(other.projectDetails.projectKey)
-                is SingleBridge -> -1
+                is TimeChild -> ordinal.compareTo(other.ordinal)
             }
         }
     }
@@ -194,6 +196,8 @@ object GroupTypeFactory : GroupType.Factory {
     class SingleBridge(val instanceData: GroupListDataWrapper.InstanceData) : GroupType.Single, TimeChild {
 
         override val instanceKeys = setOf(instanceData.instanceKey)
+
+        override val ordinal = instanceData.ordinal
 
         override fun toContentDelegate(
             groupAdapter: GroupListFragment.GroupAdapter,
@@ -205,8 +209,7 @@ object GroupTypeFactory : GroupType.Factory {
             return when (other) {
                 is TimeBridge -> instanceData.instanceTimeStamp.compareTo(other.timeStamp)
                 is TimeProjectBridge -> instanceData.instanceTimeStamp.compareTo(other.timeStamp)
-                is ProjectBridge -> 1
-                is SingleBridge -> instanceData.compareTo(other.instanceData)
+                is TimeChild -> ordinal.compareTo(other.ordinal)
             }
         }
     }

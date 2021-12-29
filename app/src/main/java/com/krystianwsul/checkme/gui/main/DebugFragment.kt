@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material.Button
 import androidx.compose.material.Switch
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -94,6 +95,12 @@ class DebugFragment : AbstractFragment() {
             .switchMapCompletable { Ticker.tick("DebugFragment") }
             .subscribe()
             .addTo(viewCreatedDisposable)
+
+        binding.debugLoadState.setContent {
+            MdcTheme {
+                LoadStateButton()
+            }
+        }
 
         binding.debugLoad
             .clicks()
@@ -215,6 +222,13 @@ class DebugFragment : AbstractFragment() {
                     })
                 }
             }
+        }
+    }
+
+    @Composable
+    private fun LoadStateButton() {
+        Button(onClick = { /*TODO*/ }) {
+            Text("REFRESH LOAD STATE")
         }
     }
 }

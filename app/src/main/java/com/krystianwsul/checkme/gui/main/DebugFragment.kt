@@ -128,7 +128,10 @@ class DebugFragment : AbstractFragment() {
                             waitingNames.joinToString("\n")
                         }
 
-                        Pair(loadTime, waitingOnDependencies)
+                        Pair(
+                            loadTime,
+                            "isWaitingForTasks? ${DomainFactory.instance.isWaitingForTasks.value}\n$waitingOnDependencies"
+                        )
                     }
                 },
                 false,

@@ -19,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.google.android.material.composethemeadapter.MdcTheme
 import com.jakewharton.rxbinding4.view.clicks
+import com.jakewharton.rxrelay3.PublishRelay
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.databinding.FragmentDebugBinding
@@ -96,11 +97,18 @@ class DebugFragment : AbstractFragment() {
             .subscribe()
             .addTo(viewCreatedDisposable)
 
+        val loadStateClicks = PublishRelay.create<Unit>()
+
         binding.debugLoadState.setContent {
             MdcTheme {
-                LoadStateButton()
+                LoadStateButton { loadStateClicks.accept(Unit) }
             }
         }
+
+        loadStateClicks.toFlowable(BackpressureStrategy.DROP)
+            .observeOnDomain()
+            .subscribe { DomainFactory.instance.updateIsWaitingForTasks() }
+            .addTo(viewCreatedDisposable)
 
         binding.debugLoad
             .clicks()
@@ -229,8 +237,8 @@ class DebugFragment : AbstractFragment() {
     }
 
     @Composable
-    private fun LoadStateButton() {
-        Button(onClick = { /*TODO*/ }) {
+    private fun LoadStateButton(onClick: () -> Unit) {
+        Button(onClick = onClick) {
             Text("REFRESH LOAD STATE")
         }
     }

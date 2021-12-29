@@ -290,6 +290,10 @@ class DomainFactory(
             }
         )
 
+        updateIsWaitingForTasks()
+    }
+
+    fun updateIsWaitingForTasks() {
         isWaitingForTasks.accept(waitingProjectTasks().any() || waitingProjects().any() || waitingRootTasks().any())
     }
 

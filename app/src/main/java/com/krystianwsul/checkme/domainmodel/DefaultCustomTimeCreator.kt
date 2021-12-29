@@ -38,8 +38,10 @@ object DefaultCustomTimeCreator {
     }
 
     fun createDefaultCustomTimes(myUser: MyUser) {
-        createCustomTime(myUser, R.string.morning, HourMinute(9, 0))
-        createCustomTime(myUser, R.string.afternoon, HourMinute(13, 0))
-        createCustomTime(myUser, R.string.evening, HourMinute(18, 0))
+        if (myUser.customTimes.isEmpty()) {
+            createCustomTime(myUser, R.string.morning, HourMinute(9, 0))
+            createCustomTime(myUser, R.string.afternoon, HourMinute(13, 0))
+            createCustomTime(myUser, R.string.evening, HourMinute(18, 0))
+        }
     }
 }

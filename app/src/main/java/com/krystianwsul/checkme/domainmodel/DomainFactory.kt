@@ -107,13 +107,9 @@ class DomainFactory(
         remoteReadTimes = ReadTimes(startTime, readTime, now)
 
         projectsFactory.privateProject.let {
-            val user = myUserFactory.user
+            if (!it.defaultTimesCreated) DefaultCustomTimeCreator.createDefaultCustomTimes(myUserFactory.user)
 
-            if (!it.defaultTimesCreated && user.customTimes.isEmpty()) {
-                DefaultCustomTimeCreator.createDefaultCustomTimes(user)
-
-                it.defaultTimesCreated = true
-            }
+            it.defaultTimesCreated = true
         }
 
         tryNotifyListeners(

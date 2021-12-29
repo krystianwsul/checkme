@@ -107,8 +107,10 @@ class DomainFactory(
         remoteReadTimes = ReadTimes(startTime, readTime, now)
 
         projectsFactory.privateProject.let {
-            if (it.run { !defaultTimesCreated && customTimes.isEmpty() }) {
-                DefaultCustomTimeCreator.createDefaultCustomTimes(myUserFactory.user)
+            val user = myUserFactory.user
+
+            if (!it.defaultTimesCreated && user.customTimes.isEmpty()) {
+                DefaultCustomTimeCreator.createDefaultCustomTimes(user)
 
                 it.defaultTimesCreated = true
             }

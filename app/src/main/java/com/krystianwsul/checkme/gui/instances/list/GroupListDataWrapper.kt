@@ -63,7 +63,7 @@ data class GroupListDataWrapper(
         val isRootInstance: Boolean,
         val createTaskTimePair: TimePair,
         override val note: String?,
-        val children: MixedInstanceDataCollection,
+        val children: MixedInstanceDataCollection, // todo ordinal make this a data class, check all descendants
         val ordinal: Double,
         val notificationShown: Boolean,
         val imageState: ImageState?,

@@ -158,7 +158,6 @@ class ShowTaskInstancesActivity : AbstractActivity(), GroupListListener {
                             it.showLoader,
                             parameters.projectKey,
                             FilterCriteria.ExpandOnly(it.searchCriteria),
-                            parameters.groupingMode,
                         )
                     )
 

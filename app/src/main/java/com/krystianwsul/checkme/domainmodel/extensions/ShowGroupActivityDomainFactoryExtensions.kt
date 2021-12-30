@@ -2,9 +2,11 @@ package com.krystianwsul.checkme.domainmodel.extensions
 
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.GroupType
 import com.krystianwsul.checkme.domainmodel.getProjectInfo
 import com.krystianwsul.checkme.gui.instances.ShowGroupActivity
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
+import com.krystianwsul.checkme.gui.instances.tree.NotDoneGroupCollection
 import com.krystianwsul.checkme.utils.time.calendar
 import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.checkme.utils.time.toDateTimeSoy
@@ -42,13 +44,18 @@ fun DomainFactory.getShowGroupData(parameters: ShowGroupActivity.Parameters): Sh
             .name to displayText
     }
 
-    return ShowGroupViewModel.Data(title, subtitle, getGroupListData(timeStamp, now, parameters.projectKey))
+    return ShowGroupViewModel.Data(
+        title,
+        subtitle,
+        getGroupListData(timeStamp, now, parameters.projectKey, parameters.groupingMode)
+    )
 }
 
 private fun DomainFactory.getGroupListData(
     timeStamp: TimeStamp,
     now: ExactTimeStamp.Local,
-    projectKey: ProjectKey.Shared? = null,
+    projectKey: ProjectKey.Shared?,
+    groupingMode: GroupType.GroupingMode,
 ): GroupListDataWrapper {
     val endCalendar = timeStamp.calendar.apply { add(Calendar.MINUTE, 1) }
     val endExactTimeStamp = ExactTimeStamp.Local(endCalendar.toDateTimeSoy()).toOffset()
@@ -106,7 +113,7 @@ private fun DomainFactory.getGroupListData(
         null,
         listOf(),
         null,
-        mixedInstanceDatas,
+        NotDoneGroupCollection.MixedInstanceDataCollection(mixedInstanceDatas, groupingMode),
         doneInstanceDatas,
         null,
         null

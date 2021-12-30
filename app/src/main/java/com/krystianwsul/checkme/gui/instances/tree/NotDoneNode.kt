@@ -6,6 +6,7 @@ import com.krystianwsul.checkme.domainmodel.GroupTypeFactory
 import com.krystianwsul.checkme.domainmodel.extensions.setInstanceDone
 import com.krystianwsul.checkme.domainmodel.extensions.setInstancesDone
 import com.krystianwsul.checkme.domainmodel.extensions.setOrdinal
+import com.krystianwsul.checkme.domainmodel.extensions.setOrdinalProject
 import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
 import com.krystianwsul.checkme.gui.instances.ShowGroupActivity
 import com.krystianwsul.checkme.gui.instances.ShowInstanceActivity
@@ -264,9 +265,7 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
                     groupListFragment.parameters.dataId.toFirst(),
                     instanceData.taskKey,
                     ordinal,
-                )
-                    .subscribe()
-                    .addTo(groupListFragment.attachedToWindowDisposable)
+                ).subscribe()
             }
 
             override fun normalize() = instanceData.normalize()
@@ -403,8 +402,15 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
 
             override val sortable = bridge.sortable
 
-            override fun getOrdinal(): Double = throw UnsupportedOperationException()
-            override fun setOrdinal(ordinal: Double) = throw UnsupportedOperationException()
+            override fun getOrdinal(): Double = bridge.ordinal
+
+            override fun setOrdinal(ordinal: Double) {
+                AndroidDomainUpdater.setOrdinalProject(
+                    groupListFragment.parameters.dataId.toFirst(),
+                    bridge.let { it as GroupTypeFactory.ProjectBridge }.instanceKeys,
+                    ordinal,
+                ).subscribe()
+            }
 
             // I don't really understand, or feel like understanding, why these three funs need to access allInstanceDatas
             override fun normalize() = allInstanceDatas.forEach { it.normalize() }

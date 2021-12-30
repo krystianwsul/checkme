@@ -108,6 +108,7 @@ class GroupTypeFactory(
         val name: String get() = throw UnsupportedOperationException()
 
         val sortable: Boolean get() = false
+        val ordinal: Double get() = throw UnsupportedOperationException()
     }
 
     sealed interface TimeChild : Bridge, GroupType.TimeChild {
@@ -188,7 +189,7 @@ class GroupTypeFactory(
 
     class ProjectBridge(
         val timeStamp: TimeStamp,
-        val projectDetails: DetailsNode.ProjectDetails,
+        private val projectDetails: DetailsNode.ProjectDetails,
         val instanceDatas: List<GroupListDataWrapper.InstanceData>,
         override val ordinal: Double,
     ) : GroupType.Project, SingleParent, TimeChild {

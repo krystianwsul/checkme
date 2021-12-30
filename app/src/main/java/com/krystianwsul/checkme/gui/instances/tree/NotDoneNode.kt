@@ -121,6 +121,8 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
 
         open val debugDescription: String? = null
 
+        abstract val overrideDraggable: Boolean
+
         abstract fun initialize(
             contentDelegateStates: Map<Id, State>,
             nodeContainer: NodeContainer<AbstractHolder>,
@@ -159,6 +161,8 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
             override val name = instanceData.name
 
             override val debugDescription = name
+
+            override val overrideDraggable = false
 
             override fun initialize(
                 contentDelegateStates: Map<ContentDelegate.Id, ContentDelegate.State>,
@@ -401,6 +405,8 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
             }
 
             override val sortable = bridge.sortable
+
+            override val overrideDraggable = true
 
             override fun getOrdinal(): Double = bridge.ordinal
 

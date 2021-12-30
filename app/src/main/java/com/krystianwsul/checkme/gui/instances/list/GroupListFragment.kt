@@ -21,6 +21,8 @@ import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.TooltipManager
 import com.krystianwsul.checkme.TooltipManager.subscribeShowBalloon
 import com.krystianwsul.checkme.databinding.FragmentGroupListBinding
+import com.krystianwsul.checkme.domainmodel.GroupTypeFactory
+import com.krystianwsul.checkme.domainmodel.MixedInstanceDataCollection
 import com.krystianwsul.checkme.domainmodel.extensions.*
 import com.krystianwsul.checkme.gui.base.AbstractActivity
 import com.krystianwsul.checkme.gui.edit.EditActivity
@@ -932,7 +934,7 @@ class GroupListFragment @JvmOverloads constructor(
         fun initialize(
             dataId: DataId,
             customTimeDatas: List<GroupListDataWrapper.CustomTimeData>,
-            mixedInstanceDataCollection: NotDoneGroupCollection.MixedInstanceDataCollection,
+            mixedInstanceDataCollection: MixedInstanceDataCollection,
             doneInstanceDatas: List<GroupListDataWrapper.InstanceData>,
             groupListState: GroupListState,
             taskDatas: List<GroupListDataWrapper.TaskData>,

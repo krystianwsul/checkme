@@ -1,13 +1,9 @@
 package com.krystianwsul.checkme.domainmodel.extensions
 
 import com.krystianwsul.checkme.MyCrashlytics
-import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.domainmodel.getDomainResultInterrupting
-import com.krystianwsul.checkme.domainmodel.getProjectInfo
-import com.krystianwsul.checkme.domainmodel.takeAndHasMore
+import com.krystianwsul.checkme.domainmodel.*
 import com.krystianwsul.checkme.gui.instances.ShowTaskInstancesActivity
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
-import com.krystianwsul.checkme.gui.instances.tree.NotDoneGroupCollection
 import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.checkme.viewmodels.DomainQuery
 import com.krystianwsul.checkme.viewmodels.ShowTaskInstancesViewModel
@@ -71,7 +67,7 @@ fun DomainFactory.getShowTaskInstancesData(
                             it.isRootInstance(),
                             it.getCreateTaskTimePair(projectsFactory.privateProject),
                             it.task.note,
-                            NotDoneGroupCollection.MixedInstanceDataCollection(children),
+                            MixedInstanceDataCollection(children),
                             it.task.ordinal,
                             it.getNotificationShown(shownFactory),
                             it.task.getImage(deviceDbInfo),
@@ -99,7 +95,7 @@ fun DomainFactory.getShowTaskInstancesData(
                 parent.notDeleted,
                 taskDatas,
                 null,
-                NotDoneGroupCollection.MixedInstanceDataCollection(instanceDatas, parameters.groupingMode),
+                MixedInstanceDataCollection(instanceDatas, parameters.groupingMode),
                 listOf(),
                 null,
                 null,

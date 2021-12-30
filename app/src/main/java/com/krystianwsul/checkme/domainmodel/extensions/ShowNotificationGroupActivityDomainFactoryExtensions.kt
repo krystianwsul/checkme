@@ -3,10 +3,10 @@ package com.krystianwsul.checkme.domainmodel.extensions
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.GroupType
+import com.krystianwsul.checkme.domainmodel.MixedInstanceDataCollection
 import com.krystianwsul.checkme.domainmodel.getProjectInfo
 import com.krystianwsul.checkme.domainmodel.notifications.Notifier
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
-import com.krystianwsul.checkme.gui.instances.tree.NotDoneGroupCollection
 import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.checkme.viewmodels.ShowNotificationGroupViewModel
 import com.krystianwsul.common.firebase.DomainThreadChecker
@@ -48,7 +48,7 @@ fun DomainFactory.getShowNotificationGroupData(instanceKeys: Set<InstanceKey>): 
             instance.isRootInstance(),
             instance.getCreateTaskTimePair(projectsFactory.privateProject),
             task.note,
-            NotDoneGroupCollection.MixedInstanceDataCollection(children),
+            MixedInstanceDataCollection(children),
             instance.task.ordinal,
             instance.getNotificationShown(shownFactory),
             task.getImage(deviceDbInfo),
@@ -65,7 +65,7 @@ fun DomainFactory.getShowNotificationGroupData(instanceKeys: Set<InstanceKey>): 
         null,
         listOf(),
         null,
-        NotDoneGroupCollection.MixedInstanceDataCollection(mixedInstanceDatas, GroupType.GroupingMode.Projects),
+        MixedInstanceDataCollection(mixedInstanceDatas, GroupType.GroupingMode.Projects),
         doneInstanceDatas,
         null,
         null

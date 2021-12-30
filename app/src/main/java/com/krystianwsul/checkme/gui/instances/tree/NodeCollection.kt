@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
+import com.krystianwsul.checkme.domainmodel.MixedInstanceDataCollection
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.instances.list.GroupListFragment
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
@@ -36,7 +37,7 @@ class NodeCollection(
     val unscheduledFirst by lazy { groupAdapter.groupListFragment.unscheduledFirst }
 
     fun initialize(
-        mixedInstanceDataCollection: NotDoneGroupCollection.MixedInstanceDataCollection,
+        mixedInstanceDataCollection: MixedInstanceDataCollection,
         doneInstanceDatas: List<GroupListDataWrapper.InstanceData>,
         contentDelegateStates: Map<NotDoneNode.ContentDelegate.Id, NotDoneNode.ContentDelegate.State>,
         doneExpansionState: TreeNode.ExpansionState?,

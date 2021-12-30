@@ -2,12 +2,8 @@ package com.krystianwsul.checkme.domainmodel.extensions
 
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
-import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.domainmodel.GroupType
-import com.krystianwsul.checkme.domainmodel.ScheduleText
-import com.krystianwsul.checkme.domainmodel.getProjectInfo
+import com.krystianwsul.checkme.domainmodel.*
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
-import com.krystianwsul.checkme.gui.instances.tree.NotDoneGroupCollection
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.utils.time.calendar
 import com.krystianwsul.checkme.utils.time.getDisplayText
@@ -167,7 +163,7 @@ fun DomainFactory.getGroupListData(
             instance.isRootInstance(),
             instance.getCreateTaskTimePair(projectsFactory.privateProject),
             task.note,
-            NotDoneGroupCollection.MixedInstanceDataCollection(children),
+            MixedInstanceDataCollection(children),
             instance.task.ordinal,
             instance.getNotificationShown(shownFactory),
             task.getImage(deviceDbInfo),
@@ -184,7 +180,7 @@ fun DomainFactory.getGroupListData(
         null,
         listOf(),
         null,
-        NotDoneGroupCollection.MixedInstanceDataCollection(mixedInstanceDatas, GroupType.GroupingMode.Time()),
+        MixedInstanceDataCollection(mixedInstanceDatas, GroupType.GroupingMode.Time()),
         doneInstanceDatas,
         null,
         null,

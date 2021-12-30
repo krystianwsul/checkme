@@ -1,9 +1,10 @@
-package com.krystianwsul.checkme.gui.instances.tree
+package com.krystianwsul.checkme.domainmodel
 
-import com.krystianwsul.checkme.domainmodel.GroupType
 import com.krystianwsul.checkme.gui.instances.ShowGroupActivity
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.instances.list.GroupListFragment
+import com.krystianwsul.checkme.gui.instances.tree.NodeCollection
+import com.krystianwsul.checkme.gui.instances.tree.NotDoneNode
 import com.krystianwsul.checkme.gui.tree.DetailsNode
 import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.InstanceKey
@@ -18,7 +19,8 @@ object GroupTypeFactory : GroupType.Factory {
     fun getGroupTypeTree(
         instanceDatas: List<GroupListDataWrapper.InstanceData>,
         groupingMode: GroupType.GroupingMode,
-    ) = GroupType.getGroupTypeTree(this, instanceDatas.map(::InstanceDescriptor), groupingMode).map { it.fix() }
+    ) = GroupType.getGroupTypeTree(this, instanceDatas.map(GroupTypeFactory::InstanceDescriptor), groupingMode)
+        .map { it.fix() }
 
     override fun createTime(
         timeStamp: TimeStamp,
@@ -60,7 +62,7 @@ object GroupTypeFactory : GroupType.Factory {
 
         override val projectDescriptor = instanceData.projectInfo
             ?.projectDetails
-            ?.let(::ProjectDescriptor)
+            ?.let(GroupTypeFactory::ProjectDescriptor)
     }
 
     data class ProjectDescriptor(val projectDetails: DetailsNode.ProjectDetails) : GroupType.ProjectDescriptor
@@ -138,7 +140,7 @@ object GroupTypeFactory : GroupType.Factory {
             instanceDatas,
             indentation,
             nodeCollection,
-            instanceDatas.map(::SingleBridge),
+            instanceDatas.map(GroupTypeFactory::SingleBridge),
             NotDoneNode.ContentDelegate.Group.Id.Project(timeStamp, instanceKeys, projectDetails.projectKey),
             NotDoneNode.ContentDelegate.Group.GroupRowsDelegate.Project(groupAdapter, timeStamp, projectDetails.name),
             ShowGroupActivity.Parameters.Project(timeStamp, projectDetails.projectKey),
@@ -177,7 +179,7 @@ object GroupTypeFactory : GroupType.Factory {
             instanceDatas,
             indentation,
             nodeCollection,
-            instanceDatas.map(::SingleBridge),
+            instanceDatas.map(GroupTypeFactory::SingleBridge),
             NotDoneNode.ContentDelegate.Group.Id.Project(timeStamp, instanceKeys, projectDetails.projectKey),
             NotDoneNode.ContentDelegate.Group.GroupRowsDelegate.Project(groupAdapter, null, projectDetails.name),
             ShowGroupActivity.Parameters.Project(timeStamp, projectDetails.projectKey),

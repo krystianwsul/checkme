@@ -2,15 +2,11 @@ package com.krystianwsul.checkme.domainmodel.extensions
 
 import androidx.annotation.CheckResult
 import com.krystianwsul.checkme.MyCrashlytics
-import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.domainmodel.DomainListenerManager
-import com.krystianwsul.checkme.domainmodel.GroupType
-import com.krystianwsul.checkme.domainmodel.getProjectInfo
+import com.krystianwsul.checkme.domainmodel.*
 import com.krystianwsul.checkme.domainmodel.update.CompletableDomainUpdate
 import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
 import com.krystianwsul.checkme.domainmodel.update.SingleDomainUpdate
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
-import com.krystianwsul.checkme.gui.instances.tree.NotDoneGroupCollection
 import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.checkme.viewmodels.ShowInstanceViewModel
 import com.krystianwsul.common.domain.TaskUndoData
@@ -149,7 +145,7 @@ private fun DomainFactory.getGroupListData(
                 childInstance.isRootInstance(),
                 childInstance.getCreateTaskTimePair(projectsFactory.privateProject),
                 childTask.note,
-                NotDoneGroupCollection.MixedInstanceDataCollection(children),
+                MixedInstanceDataCollection(children),
                 childTask.ordinal,
                 childInstance.getNotificationShown(shownFactory),
                 childTask.getImage(deviceDbInfo),
@@ -166,7 +162,7 @@ private fun DomainFactory.getGroupListData(
         instance.canAddSubtask(now),
         listOf(),
         task.note,
-        NotDoneGroupCollection.MixedInstanceDataCollection(mixedInstanceDatas, GroupType.GroupingMode.None),
+        MixedInstanceDataCollection(mixedInstanceDatas, GroupType.GroupingMode.None),
         doneInstanceDatas,
         task.getImage(deviceDbInfo),
         instance.getProjectInfo(now),

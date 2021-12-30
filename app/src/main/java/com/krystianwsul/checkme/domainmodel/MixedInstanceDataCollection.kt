@@ -4,8 +4,11 @@ import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 
 class MixedInstanceDataCollection(
     val instanceDatas: Collection<GroupListDataWrapper.InstanceData>,
-    private val groupingMode: GroupType.GroupingMode = GroupType.GroupingMode.None,
+    val groupTypeTree: List<GroupTypeFactory.Bridge>,
 ) {
 
-    fun getGroupTypeTree() = GroupTypeFactory.getGroupTypeTree(instanceDatas.toList(), groupingMode)
+    constructor(
+        instanceDatas: Collection<GroupListDataWrapper.InstanceData>,
+        groupingMode: GroupType.GroupingMode = GroupType.GroupingMode.None,
+    ) : this(instanceDatas, GroupTypeFactory.getGroupTypeTree(instanceDatas.toList(), groupingMode))
 }

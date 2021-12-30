@@ -19,7 +19,7 @@ class NotDoneGroupCollection(
         mixedInstanceDataCollection: MixedInstanceDataCollection,
         contentDelegateStates: Map<NotDoneNode.ContentDelegate.Id, NotDoneNode.ContentDelegate.State>,
     ): List<TreeNode<AbstractHolder>> {
-        val contentDelegates = mixedInstanceDataCollection.getGroupTypeTree().map {
+        val contentDelegates = mixedInstanceDataCollection.groupTypeTree.map {
             it.toContentDelegate(nodeCollection.groupAdapter, indentation, nodeCollection)
         }
 

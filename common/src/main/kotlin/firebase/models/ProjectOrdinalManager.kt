@@ -10,8 +10,8 @@ class ProjectOrdinalManager(private val project: SharedProject) {
 
     private var ordinals = mutableMapOf<Key, Value>()
 
-    fun setOrdinal(instances: Set<Instance>, ordinal: Double, now: ExactTimeStamp.Local) {
-        ordinals[Key(instances)] = Value(ordinal, now)
+    fun setOrdinal(key: Key, ordinal: Double, now: ExactTimeStamp.Local) {
+        ordinals[key] = Value(ordinal, now)
     }
 
     private fun <T> getMatchByAspect(searchKey: Key, aspectSelector: (Key.Entry) -> T?): Double? {
@@ -37,9 +37,7 @@ class ProjectOrdinalManager(private val project: SharedProject) {
             ?.ordinal
     }
 
-    fun getOrdinal(instances: Set<Instance>): Double {
-        val key = Key(instances)
-
+    fun getOrdinal(key: Key): Double {
         fun DateTimePair.getHourMinute() = project.getTime(timePair).getHourMinute(date.dayOfWeek)
 
         listOf<(Key.Entry) -> Any?>(
@@ -59,17 +57,9 @@ class ProjectOrdinalManager(private val project: SharedProject) {
         return project.projectKey.getOrdinal()
     }
 
-    private data class Key(val entries: Set<Entry>) {
+    data class Key(val entries: Set<Entry>) {
 
-        companion object {
-
-            operator fun invoke(instances: Set<Instance>) = Key(instances.map(::Entry).toSet())
-        }
-
-        data class Entry(val instanceKey: InstanceKey, val instanceDateTimePair: DateTimePair) {
-
-            constructor(instance: Instance) : this(instance.instanceKey, instance.instanceDateTime.toDateTimePair())
-        }
+        data class Entry(val instanceKey: InstanceKey, val instanceDateTimePair: DateTimePair)
     }
 
     private data class Value(val ordinal: Double, val updated: ExactTimeStamp.Local)

@@ -35,10 +35,16 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
 
     private const val ENABLE_PAPER = true
 
+    private const val FORCE_PRODUCTION = false
+
     val root: String by lazy {
-        MyApplication.instance
-            .resources
-            .getString(R.string.firebase_root)
+        if (FORCE_PRODUCTION) {
+            "production"
+        } else {
+            MyApplication.instance
+                .resources
+                .getString(R.string.firebase_root)
+        }
     }
 
     private val rootReference by lazy {

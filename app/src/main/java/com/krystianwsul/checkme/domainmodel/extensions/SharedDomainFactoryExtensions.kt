@@ -226,7 +226,7 @@ fun <T : Comparable<T>> DomainFactory.searchInstances(
     searchCriteria: SearchCriteria,
     page: Int,
     projectKey: ProjectKey<*>?,
-    mapper: (Instance, MutableMap<InstanceKey, T>) -> T,
+    mapper: (Instance, Collection<T>) -> T,
 ): Pair<List<T>, Boolean> {
     DomainThreadChecker.instance.requireDomainThread()
 

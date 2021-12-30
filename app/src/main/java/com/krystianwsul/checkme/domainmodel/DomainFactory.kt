@@ -420,7 +420,7 @@ class DomainFactory(
     fun instanceToGroupListData(
         instance: Instance,
         now: ExactTimeStamp.Local,
-        children: MutableMap<InstanceKey, GroupListDataWrapper.InstanceData>,
+        children: Collection<GroupListDataWrapper.InstanceData>,
         includeProjectInfo: Boolean = true,
     ): GroupListDataWrapper.InstanceData {
         val isRootInstance = instance.isRootInstance()
@@ -438,7 +438,7 @@ class DomainFactory(
             instance.isRootInstance(),
             instance.getCreateTaskTimePair(projectsFactory.privateProject),
             instance.task.note,
-            NotDoneGroupCollection.MixedInstanceDataCollection(children.values), // todo ordinal stupid map
+            NotDoneGroupCollection.MixedInstanceDataCollection(children),
             instance.task.ordinal,
             instance.getNotificationShown(shownFactory),
             instance.task.getImage(deviceDbInfo),
@@ -451,10 +451,10 @@ class DomainFactory(
     fun <T> getChildInstanceDatas(
         instance: Instance,
         now: ExactTimeStamp.Local,
-        mapper: (Instance, MutableMap<InstanceKey, T>) -> T,
+        mapper: (Instance, Collection<T>) -> T,
         searchCriteria: SearchCriteria = SearchCriteria.empty,
         filterVisible: Boolean = true,
-    ): MutableMap<InstanceKey, T> {
+    ): Collection<T> {
         return instance.getChildInstances()
             .asSequence()
             .filter {
@@ -475,12 +475,11 @@ class DomainFactory(
                 val children = getChildInstanceDatas(childInstance, now, mapper, childrenQuery, filterVisible)
 
                 if (childTaskMatches || children.isNotEmpty())
-                    childInstance.instanceKey to mapper(childInstance, children)
+                    mapper(childInstance, children)
                 else
                     null
             }
-            .toMap()
-            .toMutableMap()
+            .toList()
     }
 
     fun getChildInstanceDatas(
@@ -489,8 +488,8 @@ class DomainFactory(
         searchCriteria: SearchCriteria = SearchCriteria.empty,
         filterVisible: Boolean = true,
         includeProjectInfo: Boolean = true,
-    ): MutableMap<InstanceKey, GroupListDataWrapper.InstanceData> =
-        getChildInstanceDatas(
+    ): Collection<GroupListDataWrapper.InstanceData> =
+        getChildInstanceDatas<GroupListDataWrapper.InstanceData>(
             instance,
             now,
             { childInstance, children -> instanceToGroupListData(childInstance, now, children, includeProjectInfo) },

@@ -167,7 +167,7 @@ fun DomainFactory.getGroupListData(
             instance.isRootInstance(),
             instance.getCreateTaskTimePair(projectsFactory.privateProject),
             task.note,
-            NotDoneGroupCollection.MixedInstanceDataCollection(children.values), // todo ordinal map
+            NotDoneGroupCollection.MixedInstanceDataCollection(children),
             instance.task.ordinal,
             instance.getNotificationShown(shownFactory),
             task.getImage(deviceDbInfo),

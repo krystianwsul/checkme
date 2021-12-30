@@ -149,7 +149,7 @@ private fun DomainFactory.getGroupListData(
                 childInstance.isRootInstance(),
                 childInstance.getCreateTaskTimePair(projectsFactory.privateProject),
                 childTask.note,
-                NotDoneGroupCollection.MixedInstanceDataCollection(children.values), // todo ordinal map
+                NotDoneGroupCollection.MixedInstanceDataCollection(children),
                 childTask.ordinal,
                 childInstance.getNotificationShown(shownFactory),
                 childTask.getImage(deviceDbInfo),

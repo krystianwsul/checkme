@@ -71,7 +71,7 @@ fun DomainFactory.getShowTaskInstancesData(
                             it.isRootInstance(),
                             it.getCreateTaskTimePair(projectsFactory.privateProject),
                             it.task.note,
-                            NotDoneGroupCollection.MixedInstanceDataCollection(children.values), // todo ordinal map
+                            NotDoneGroupCollection.MixedInstanceDataCollection(children),
                             it.task.ordinal,
                             it.getNotificationShown(shownFactory),
                             it.task.getImage(deviceDbInfo),

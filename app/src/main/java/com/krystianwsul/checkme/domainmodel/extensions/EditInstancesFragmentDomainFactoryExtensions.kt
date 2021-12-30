@@ -218,7 +218,7 @@ fun DomainFactory.getEditInstancesSearchData(
             ) { instance, children ->
                 EditInstancesSearchViewModel.InstanceEntryData(
                     instance.name,
-                    children.values,
+                    children,
                     instance.instanceKey,
                     if (instance.isRootInstance()) instance.instanceDateTime.getDisplayText() else null,
                     instance.task.note,

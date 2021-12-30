@@ -37,31 +37,24 @@ class ProjectOrdinalManager(private val project: SharedProject) {
             ?.ordinal
     }
 
-    // todo ordinal make list of selectors to avoid repetitive let { return }
     fun getOrdinal(instances: Set<Instance>): Double {
         val key = Key(instances)
 
-        // instanceKey (taskKey + customTime/hourMinute)
-        getMatchByAspect(key) { it.instanceKey }?.let { return it }
+        fun DateTimePair.getHourMinute() = project.getTime(timePair).getHourMinute(date.dayOfWeek)
 
-        // instance dateTimePair
-        getMatchByAspect(key) { it.instanceDateTimePair }?.let { return it }
-
-        // instance Timestamp
-        getMatchByAspect(key) {
-            it.instanceDateTimePair.run { TimeStamp(date, project.getTime(timePair).getHourMinute(date.dayOfWeek)) }
-        }?.let { return it }
-
-        // instance timePair
-        getMatchByAspect(key) { it.instanceDateTimePair.timePair }?.let { return it }
-
-        // instance hourMinute
-        getMatchByAspect(key) {
-            it.instanceDateTimePair.run { project.getTime(timePair).getHourMinute(date.dayOfWeek) }
-        }?.let { return it }
-
-        // taskKey
-        getMatchByAspect(key) { it.instanceKey.taskKey }?.let { return it }
+        listOf<(Key.Entry) -> Any?>(
+            { it.instanceKey }, // instanceKey (taskKey + customTime/hourMinute)
+            { it.instanceDateTimePair }, // instance dateTimePair
+            { // instance Timestamp
+                it.instanceDateTimePair.run { TimeStamp(date, getHourMinute()) }
+            },
+            { it.instanceDateTimePair.timePair }, // instance timePair
+            { it.instanceDateTimePair.getHourMinute() }, // instance hourMinute
+            { it.instanceKey.taskKey }, // taskKey
+        ).asSequence()
+            .mapNotNull { getMatchByAspect(key, it) }
+            .firstOrNull()
+            ?.let { return it }
 
         return project.projectKey.getOrdinal()
     }

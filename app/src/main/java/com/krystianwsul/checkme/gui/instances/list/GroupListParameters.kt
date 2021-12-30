@@ -15,6 +15,7 @@ sealed class GroupListParameters(val draggable: Boolean = true) {
     open val showProgress: Boolean = false
     open val fabActionMode = FabActionMode.SUBTASK
 
+    // todo ordinal remove
     open val groupingMode: GroupType.GroupingMode = GroupType.GroupingMode.None
 
     open val unscheduledFirst = false
@@ -48,10 +49,10 @@ sealed class GroupListParameters(val draggable: Boolean = true) {
     }
 
     data class InstanceKey(
-            override val dataId: DataId,
-            override val immediate: Boolean,
-            override val groupListDataWrapper: GroupListDataWrapper,
-            val instanceKey: com.krystianwsul.common.utils.InstanceKey,
+        override val dataId: DataId,
+        override val immediate: Boolean,
+        override val groupListDataWrapper: GroupListDataWrapper,
+        val instanceKey: com.krystianwsul.common.utils.InstanceKey,
     ) : GroupListParameters()
 
     data class InstanceKeys(

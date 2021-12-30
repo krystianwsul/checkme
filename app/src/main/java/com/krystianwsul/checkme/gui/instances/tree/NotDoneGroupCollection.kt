@@ -41,10 +41,10 @@ class NotDoneGroupCollection(
 
     // todo ordinal move this class elsewhere, if it doesn't get eliminated entirely
     class MixedInstanceDataCollection(
-        private val mixedInstanceDatas: Collection<GroupListDataWrapper.InstanceData>,
+        val instanceDatas: Collection<GroupListDataWrapper.InstanceData>,
         private val groupingMode: GroupType.GroupingMode,
     ) {
 
-        fun getGroupTypeTree() = GroupTypeFactory.getGroupTypeTree(mixedInstanceDatas.toList(), groupingMode)
+        fun getGroupTypeTree() = GroupTypeFactory.getGroupTypeTree(instanceDatas.toList(), groupingMode)
     }
 }

@@ -21,7 +21,6 @@ import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.TooltipManager
 import com.krystianwsul.checkme.TooltipManager.subscribeShowBalloon
 import com.krystianwsul.checkme.databinding.FragmentGroupListBinding
-import com.krystianwsul.checkme.domainmodel.GroupType
 import com.krystianwsul.checkme.domainmodel.extensions.*
 import com.krystianwsul.checkme.gui.base.AbstractActivity
 import com.krystianwsul.checkme.gui.edit.EditActivity
@@ -469,8 +468,7 @@ class GroupListFragment @JvmOverloads constructor(
             modelAdapter.initialize(
                 data.dataId,
                 data.groupListDataWrapper.customTimeDatas,
-                data.groupingMode,
-                data.groupListDataWrapper.mixedInstanceDatas,
+                data.groupListDataWrapper.mixedInstanceDataCollection,
                 data.groupListDataWrapper.doneInstanceDatas,
                 state,
                 data.groupListDataWrapper.taskDatas,
@@ -934,8 +932,7 @@ class GroupListFragment @JvmOverloads constructor(
         fun initialize(
             dataId: DataId,
             customTimeDatas: List<GroupListDataWrapper.CustomTimeData>,
-            groupingMode: GroupType.GroupingMode,
-            mixedInstanceDatas: List<GroupListDataWrapper.InstanceData>,
+            mixedInstanceDataCollection: NotDoneGroupCollection.MixedInstanceDataCollection,
             doneInstanceDatas: List<GroupListDataWrapper.InstanceData>,
             groupListState: GroupListState,
             taskDatas: List<GroupListDataWrapper.TaskData>,
@@ -960,7 +957,7 @@ class GroupListFragment @JvmOverloads constructor(
             )
 
             treeNodeCollection.nodes = nodeCollection.initialize(
-                NotDoneGroupCollection.MixedInstanceDataCollection(mixedInstanceDatas, groupingMode),
+                mixedInstanceDataCollection,
                 doneInstanceDatas,
                 groupListState.contentDelegateStates,
                 groupListState.doneExpansionState,

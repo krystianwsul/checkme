@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.gui.instances.list
 
+import com.krystianwsul.checkme.gui.instances.tree.NotDoneGroupCollection
 import com.krystianwsul.checkme.gui.tree.DetailsNode
 import com.krystianwsul.checkme.utils.FilterParamsMatchable
 import com.krystianwsul.common.criteria.QueryMatchable
@@ -17,13 +18,13 @@ data class GroupListDataWrapper(
     val taskEditable: Boolean?,
     val taskDatas: List<TaskData>,
     val note: String?,
-    val mixedInstanceDatas: List<InstanceData>,
+    val mixedInstanceDataCollection: NotDoneGroupCollection.MixedInstanceDataCollection,
     val doneInstanceDatas: List<InstanceData>,
     val imageData: ImageState?,
     val projectInfo: DetailsNode.ProjectInfo?,
 ) {
 
-    val allInstanceDatas get() = mixedInstanceDatas + doneInstanceDatas
+    val allInstanceDatas get() = mixedInstanceDataCollection.instanceDatas + doneInstanceDatas
 
     data class TaskData(
         override val taskKey: TaskKey,

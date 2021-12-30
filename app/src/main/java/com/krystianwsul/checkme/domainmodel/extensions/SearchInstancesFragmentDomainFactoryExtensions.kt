@@ -2,9 +2,11 @@ package com.krystianwsul.checkme.domainmodel.extensions
 
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.GroupType
 import com.krystianwsul.checkme.domainmodel.getDomainResultInterrupting
 import com.krystianwsul.checkme.domainmodel.getProjectInfo
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
+import com.krystianwsul.checkme.gui.instances.tree.NotDoneGroupCollection
 import com.krystianwsul.checkme.viewmodels.DomainQuery
 import com.krystianwsul.checkme.viewmodels.SearchInstancesViewModel
 import com.krystianwsul.common.criteria.SearchCriteria
@@ -36,7 +38,7 @@ fun DomainFactory.getSearchInstancesData(
                 null,
                 taskDatas,
                 null,
-                cappedInstanceDatas,
+                NotDoneGroupCollection.MixedInstanceDataCollection(cappedInstanceDatas, GroupType.GroupingMode.None),
                 listOf(),
                 null,
                 null,

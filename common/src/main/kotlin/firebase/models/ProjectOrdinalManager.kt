@@ -12,8 +12,8 @@ class ProjectOrdinalManager(private val project: SharedProject) {
         ordinals[Key(instanceKeys)] = Value(ordinal, now)
     }
 
-    private fun <T> getMatchesByOverlap(searchKey: Key, selector: (InstanceKey) -> T): Double? {
-        fun Key.toMatchElements() = instanceKeys.map(selector).toSet()
+    private fun <T> getMatchByAspect(searchKey: Key, aspectSelector: (InstanceKey) -> T): Double? {
+        fun Key.toMatchElements() = instanceKeys.map(aspectSelector).toSet()
 
         val inputMatchElements = searchKey.toMatchElements()
 
@@ -28,19 +28,15 @@ class ProjectOrdinalManager(private val project: SharedProject) {
             .filter { it.key > 0 }
             .maxByOrNull { it.key } // find the most match elements in common
             ?.value
-            ?.groupBy { it.matchElements.size }
-            ?.minByOrNull { it.key } // find the least extra match elements
-            ?.value
-            ?.map { it.entry }
-            ?.minByOrNull { it.key.instanceKeys.size } // find the smallest instance key count
-            ?.value
+            ?.map { it.entry.value }
+            ?.maxByOrNull { it.updated }
             ?.ordinal
     }
 
     // todo ordinal add info about instanceDateTime
     fun getOrdinal(instanceKeys: Set<InstanceKey>): Double {
-        getMatchesByOverlap(Key(instanceKeys)) { it }?.let { return it }
-        getMatchesByOverlap(Key(instanceKeys)) { it.taskKey }?.let { return it }
+        getMatchByAspect(Key(instanceKeys)) { it }?.let { return it }
+        getMatchByAspect(Key(instanceKeys)) { it.taskKey }?.let { return it }
 
         // match those that contain the most instances with the exact same DateTime
 

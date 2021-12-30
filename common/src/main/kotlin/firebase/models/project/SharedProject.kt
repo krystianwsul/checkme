@@ -13,10 +13,7 @@ import com.krystianwsul.common.firebase.records.AssignedToHelper
 import com.krystianwsul.common.firebase.records.project.SharedProjectRecord
 import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.time.Time
-import com.krystianwsul.common.utils.CustomTimeId
-import com.krystianwsul.common.utils.CustomTimeKey
-import com.krystianwsul.common.utils.ProjectType
-import com.krystianwsul.common.utils.UserKey
+import com.krystianwsul.common.utils.*
 
 class SharedProject(
     override val projectRecord: SharedProjectRecord,
@@ -129,4 +126,40 @@ class SharedProject(
         getProjectCustomTime(projectCustomTimeKey.customTimeId)
 
     override fun getAssignedTo(userKeys: Set<UserKey>) = remoteUsers.filterKeys { it in userKeys }
+
+    private var ordinals = mutableMapOf<Set<InstanceKey>, Double>()
+
+    fun setOrdinal(instanceKeys: Set<InstanceKey>, ordinal: Double) {
+        ordinals[instanceKeys] = ordinal
+    }
+
+    fun <T> getMatchesByOverlap(instanceKeys: Set<InstanceKey>, selector: (InstanceKey) -> T): Double? {
+        fun Set<InstanceKey>.toMatchElements() = map(selector).toSet()
+
+        val inputMatchElements = instanceKeys.toMatchElements()
+
+        return ordinals.entries
+            .map { it to it.key.toMatchElements() }
+            .groupBy { it.second.intersect(inputMatchElements).size }
+            .filter { it.key > 0 }
+            .maxByOrNull { it.key } // find the most match elements in common
+            ?.value
+            ?.groupBy { it.second.size }
+            ?.minByOrNull { it.key } // find the least extra match elements
+            ?.value
+            ?.map { it.first }
+            ?.minByOrNull { it.key.size } // find the smallest instance key count
+            ?.value
+    }
+
+    // todo ordinal add info about instanceDateTime
+    fun getOrdinal(instanceKeys: Set<InstanceKey>): Double {
+        getMatchesByOverlap(instanceKeys) { it }?.let { return it }
+        getMatchesByOverlap(instanceKeys) { it.taskKey }?.let { return it }
+
+        // match those that contain the most instances with the exact same DateTime
+
+
+        return projectKey.getOrdinal()
+    }
 }

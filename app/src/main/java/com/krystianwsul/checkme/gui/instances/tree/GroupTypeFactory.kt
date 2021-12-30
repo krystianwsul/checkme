@@ -209,7 +209,8 @@ object GroupTypeFactory : GroupType.Factory {
             return when (other) {
                 is TimeBridge -> instanceData.instanceTimeStamp.compareTo(other.timeStamp)
                 is TimeProjectBridge -> instanceData.instanceTimeStamp.compareTo(other.timeStamp)
-                is TimeChild -> ordinal.compareTo(other.ordinal)
+                is ProjectBridge -> ordinal.compareTo(other.ordinal)
+                is SingleBridge -> instanceData.compareTo(other.instanceData)
             }
         }
     }

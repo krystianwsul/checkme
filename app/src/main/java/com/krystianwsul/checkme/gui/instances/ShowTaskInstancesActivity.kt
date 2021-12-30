@@ -250,7 +250,7 @@ class ShowTaskInstancesActivity : AbstractActivity(), GroupListListener {
     private fun updateTopMenu() {
         val showProjectOptions = parameters is Parameters.Project &&
                 !data?.groupListDataWrapper
-                    ?.instanceDatas
+                    ?.allInstanceDatas
                     .isNullOrEmpty()
 
         binding.showNotificationGroupToolbarCollapseInclude

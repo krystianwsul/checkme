@@ -419,3 +419,5 @@ fun <T> DomainFactory.trackRootTaskIds(action: () -> T): T =
         rootTasksFactory,
         action,
     )
+
+fun List<GroupListDataWrapper.InstanceData>.splitDone() = partition { it.done == null }

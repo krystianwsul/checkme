@@ -29,7 +29,7 @@ class SplitInstanceTest {
     private fun getDayInstanceDatas(now: ExactTimeStamp.Local, day: Int = 0) =
         domainFactory.getGroupListData(now, day, Preferences.TimeRange.DAY)
             .groupListDataWrapper
-            .instanceDatas
+            .allInstanceDatas
 
     private fun getSingleScheduleData(date: Date, hour: Int, minute: Int) =
         listOf(ScheduleData.Single(date, TimePair(HourMinute(hour, minute))))

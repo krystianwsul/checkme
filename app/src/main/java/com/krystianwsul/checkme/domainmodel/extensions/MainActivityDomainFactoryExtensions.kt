@@ -175,12 +175,15 @@ fun DomainFactory.getGroupListData(
         )
     }
 
+    val (mixedInstanceDatas, doneInstanceDatas) = instanceDatas.splitDone()
+
     val dataWrapper = GroupListDataWrapper(
         customTimeDatas,
         null,
         listOf(),
         null,
-        instanceDatas,
+        mixedInstanceDatas,
+        doneInstanceDatas,
         null,
         null,
     )

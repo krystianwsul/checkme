@@ -318,7 +318,7 @@ class GroupListFragment @JvmOverloads constructor(
     val shareData: String
         get() {
             val instanceDatas = parameters.groupListDataWrapper
-                .instanceDatas
+                .allInstanceDatas
                 .sorted()
 
             val lines = mutableListOf<String>()
@@ -470,13 +470,13 @@ class GroupListFragment @JvmOverloads constructor(
                 data.dataId,
                 data.groupListDataWrapper.customTimeDatas,
                 data.groupingMode,
-                data.groupListDataWrapper.instanceDatas,
+                data.groupListDataWrapper.mixedInstanceDatas,
+                data.groupListDataWrapper.doneInstanceDatas,
                 state,
                 data.groupListDataWrapper.taskDatas,
                 data.groupListDataWrapper.note,
                 data.groupListDataWrapper.imageData,
                 data.showProgress,
-                data.useDoneNode,
                 data.groupListDataWrapper.projectInfo,
             )
         }
@@ -545,7 +545,7 @@ class GroupListFragment @JvmOverloads constructor(
                         searchDataManager.treeViewAdapter
                             .displayedNodes
                             .none { it.isExpanded || it.isSelected } &&
-                        it.groupListDataWrapper.instanceDatas.size > 1
+                        it.groupListDataWrapper.allInstanceDatas.size > 1
             }
             .mapNotNull {
                 val linearLayoutManager = recyclerView.layoutManager as LinearLayoutManager
@@ -760,7 +760,7 @@ class GroupListFragment @JvmOverloads constructor(
                 }
                 is GroupListParameters.TimeStamp -> if (parameters.projectKey != null || parameters.timeStamp > TimeStamp.now) {
                     val hint = parameters.groupListDataWrapper
-                        .instanceDatas
+                        .allInstanceDatas
                         .let {
                             if (it.isNotEmpty()) {
                                 it.getHint()
@@ -935,13 +935,13 @@ class GroupListFragment @JvmOverloads constructor(
             dataId: DataId,
             customTimeDatas: List<GroupListDataWrapper.CustomTimeData>,
             groupingMode: GroupType.GroupingMode,
-            instanceDatas: Collection<GroupListDataWrapper.InstanceData>,
+            mixedInstanceDatas: List<GroupListDataWrapper.InstanceData>,
+            doneInstanceDatas: List<GroupListDataWrapper.InstanceData>,
             groupListState: GroupListState,
             taskDatas: List<GroupListDataWrapper.TaskData>,
             note: String?,
             imageState: ImageState?,
             showProgress: Boolean,
-            useDoneNode: Boolean,
             projectInfo: DetailsNode.ProjectInfo?,
         ) {
             this.dataId = dataId
@@ -958,11 +958,11 @@ class GroupListFragment @JvmOverloads constructor(
                 null,
                 projectInfo,
                 unscheduledNodeProjectKey,
-                useDoneNode,
             )
 
             treeNodeCollection.nodes = nodeCollection.initialize(
-                instanceDatas,
+                mixedInstanceDatas,
+                doneInstanceDatas,
                 groupListState.contentDelegateStates,
                 groupListState.doneExpansionState,
                 taskDatas,

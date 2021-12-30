@@ -13,7 +13,6 @@ sealed class GroupListParameters(val draggable: Boolean = true) {
     abstract val groupListDataWrapper: GroupListDataWrapper
 
     open val showProgress: Boolean = false
-    open val useDoneNode = true
     open val fabActionMode = FabActionMode.SUBTASK
 
     open val groupingMode: GroupType.GroupingMode = GroupType.GroupingMode.None
@@ -74,8 +73,6 @@ sealed class GroupListParameters(val draggable: Boolean = true) {
         override val groupingMode: GroupType.GroupingMode,
     ) : GroupListParameters(false) {
 
-        override val useDoneNode = false
-
         override val unscheduledFirst = true
     }
 
@@ -86,8 +83,6 @@ sealed class GroupListParameters(val draggable: Boolean = true) {
         override val showProgress: Boolean,
         override val filterCriteria: FilterCriteria.ExpandOnly,
     ) : GroupListParameters(false) {
-
-        override val useDoneNode = false
 
         override val fabActionMode = FabActionMode.BOTH
 

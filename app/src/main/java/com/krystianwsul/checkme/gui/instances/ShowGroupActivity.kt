@@ -127,7 +127,7 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
                     R.id.actionShowGroupSearch,
                     showAssignedToOthersId = R.id.actionShowGroupAssigned
                 ) { itemId ->
-                    val instanceDatas = data!!.groupListDataWrapper!!.instanceDatas
+                    val instanceDatas = data!!.groupListDataWrapper!!.allInstanceDatas
                     val dataId = showGroupViewModel.dataId
                     val listener = this@ShowGroupActivity
 
@@ -189,7 +189,7 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
         override fun beforeEditInstances(instanceKeys: Set<InstanceKey>) {
             if (parameters is Parameters.Project &&
                 instanceKeys == data!!.groupListDataWrapper!!
-                    .instanceDatas
+                    .allInstanceDatas
                     .map { it.instanceKey }
                     .toSet()
             ) {
@@ -225,7 +225,7 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
     }
 
     private fun updateTopMenu() {
-        val instanceDatas = data?.groupListDataWrapper?.instanceDatas
+        val instanceDatas = data?.groupListDataWrapper?.allInstanceDatas
 
         var hasItems = false
         var notify = false

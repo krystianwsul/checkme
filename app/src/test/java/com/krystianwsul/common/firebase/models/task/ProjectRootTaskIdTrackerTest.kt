@@ -74,7 +74,7 @@ class ProjectRootTaskIdTrackerTest {
 
         val instanceKeys = domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
             .groupListDataWrapper
-            .instanceDatas
+            .allInstanceDatas
             .map { it.instanceKey }
 
         assertEquals(2, instanceKeys.size)
@@ -94,7 +94,7 @@ class ProjectRootTaskIdTrackerTest {
             1,
             domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
                 .groupListDataWrapper
-                .instanceDatas
+                .allInstanceDatas
                 .size,
         )
 

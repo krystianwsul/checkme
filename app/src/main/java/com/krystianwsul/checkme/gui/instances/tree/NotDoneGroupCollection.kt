@@ -16,11 +16,11 @@ class NotDoneGroupCollection(
     private val notDoneGroupNodes = mutableListOf<NotDoneGroupNode>()
 
     fun initialize(
-        notDoneInstanceDatas: List<GroupListDataWrapper.InstanceData>,
+        mixedInstanceDatas: Collection<GroupListDataWrapper.InstanceData>,
         contentDelegateStates: Map<NotDoneNode.ContentDelegate.Id, NotDoneNode.ContentDelegate.State>,
     ): List<TreeNode<AbstractHolder>> {
         val contentDelegates = GroupTypeFactory
-            .getGroupTypeTree(notDoneInstanceDatas, nodeCollection.groupingMode)
+            .getGroupTypeTree(mixedInstanceDatas.toList(), nodeCollection.groupingMode)
             .map { it.toContentDelegate(nodeCollection.groupAdapter, indentation, nodeCollection) }
 
         val nodePairs = contentDelegates.map {

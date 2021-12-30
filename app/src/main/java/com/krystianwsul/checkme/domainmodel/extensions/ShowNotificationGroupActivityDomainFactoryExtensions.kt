@@ -56,12 +56,15 @@ fun DomainFactory.getShowNotificationGroupData(instanceKeys: Set<InstanceKey>): 
         )
     }
 
+    val (mixedInstanceDatas, doneInstanceDatas) = instanceDatas.splitDone()
+
     val dataWrapper = GroupListDataWrapper(
         customTimeDatas,
         null,
         listOf(),
         null,
-        instanceDatas,
+        mixedInstanceDatas,
+        doneInstanceDatas,
         null,
         null
     )

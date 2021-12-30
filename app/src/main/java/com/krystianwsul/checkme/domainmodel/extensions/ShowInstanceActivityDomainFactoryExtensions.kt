@@ -157,12 +157,15 @@ private fun DomainFactory.getGroupListData(
             )
         }
 
+    val (mixedInstanceDatas, doneInstanceDatas) = instanceDatas.splitDone()
+
     return GroupListDataWrapper(
         customTimeDatas,
         instance.canAddSubtask(now),
         listOf(),
         task.note,
-        instanceDatas,
+        mixedInstanceDatas,
+        doneInstanceDatas,
         task.getImage(deviceDbInfo),
         instance.getProjectInfo(now),
     )

@@ -20,7 +20,6 @@ class NodeCollection(
     val parentNode: DetailsNode.Parent?,
     private val projectInfo: DetailsNode.ProjectInfo?,
     private val unscheduledProjectKey: ProjectKey.Shared?,
-    private val useDoneNode: Boolean = true,
 ) {
 
     private lateinit var notDoneGroupCollection: NotDoneGroupCollection
@@ -39,7 +38,8 @@ class NodeCollection(
     val unscheduledFirst by lazy { groupAdapter.groupListFragment.unscheduledFirst }
 
     fun initialize(
-        instanceDatas: Collection<GroupListDataWrapper.InstanceData>,
+        mixedInstanceDatas: Collection<GroupListDataWrapper.InstanceData>,
+        doneInstanceDatas: List<GroupListDataWrapper.InstanceData>,
         contentDelegateStates: Map<NotDoneNode.ContentDelegate.Id, NotDoneNode.ContentDelegate.State>,
         doneExpansionState: TreeNode.ExpansionState?,
         taskDatas: List<GroupListDataWrapper.TaskData>,
@@ -48,8 +48,6 @@ class NodeCollection(
         selectedTaskKeys: List<TaskKey>,
         imageData: ImageNode.ImageData?,
     ): List<TreeNode<AbstractHolder>> {
-        val (notDoneInstanceDatas, doneInstanceDatas) = instanceDatas.partition { it.done == null || !useDoneNode }
-
         val treeNodes = mutableListOf<TreeNode<AbstractHolder>>()
 
         treeNodes += DetailsNode(
@@ -67,7 +65,7 @@ class NodeCollection(
 
         notDoneGroupCollection = NotDoneGroupCollection(indentation, this, nodeContainer)
 
-        treeNodes += notDoneGroupCollection.initialize(notDoneInstanceDatas, contentDelegateStates)
+        treeNodes += notDoneGroupCollection.initialize(mixedInstanceDatas, contentDelegateStates)
 
         check(indentation == 0 || taskDatas.isEmpty())
         if (taskDatas.isNotEmpty()) {

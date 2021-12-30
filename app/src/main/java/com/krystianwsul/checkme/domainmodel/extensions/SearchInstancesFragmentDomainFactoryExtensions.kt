@@ -37,6 +37,7 @@ fun DomainFactory.getSearchInstancesData(
                 taskDatas,
                 null,
                 cappedInstanceDatas,
+                listOf(),
                 null,
                 null,
             )

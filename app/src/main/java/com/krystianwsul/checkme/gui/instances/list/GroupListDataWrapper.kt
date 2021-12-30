@@ -13,14 +13,17 @@ import com.krystianwsul.common.utils.normalized
 import java.util.*
 
 data class GroupListDataWrapper(
-        val customTimeDatas: List<CustomTimeData>,
-        val taskEditable: Boolean?,
-        val taskDatas: List<TaskData>,
-        val note: String?,
-        val instanceDatas: List<InstanceData>,
-        val imageData: ImageState?,
-        val projectInfo: DetailsNode.ProjectInfo?,
+    val customTimeDatas: List<CustomTimeData>,
+    val taskEditable: Boolean?,
+    val taskDatas: List<TaskData>,
+    val note: String?,
+    val mixedInstanceDatas: List<InstanceData>,
+    val doneInstanceDatas: List<InstanceData>,
+    val imageData: ImageState?,
+    val projectInfo: DetailsNode.ProjectInfo?,
 ) {
+
+    val allInstanceDatas get() = mixedInstanceDatas + doneInstanceDatas
 
     data class TaskData(
         override val taskKey: TaskKey,

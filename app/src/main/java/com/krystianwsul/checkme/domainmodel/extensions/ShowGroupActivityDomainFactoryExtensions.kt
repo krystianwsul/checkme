@@ -3,7 +3,7 @@ package com.krystianwsul.checkme.domainmodel.extensions
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.GroupType
-import com.krystianwsul.checkme.domainmodel.MixedInstanceDataCollection
+import com.krystianwsul.checkme.domainmodel.GroupTypeFactory
 import com.krystianwsul.checkme.domainmodel.getProjectInfo
 import com.krystianwsul.checkme.gui.instances.ShowGroupActivity
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
@@ -78,12 +78,12 @@ private fun DomainFactory.getGroupListData(
 
     val includeProjectInfo = projectKey == null
 
-    val instanceDatas = currentInstances.map { instance ->
+    val instanceDescriptors = currentInstances.map { instance ->
         val task = instance.task
 
         val children = getChildInstanceDatas(instance, now, includeProjectInfo = includeProjectInfo)
 
-        GroupListDataWrapper.InstanceData(
+        val instanceData = GroupListDataWrapper.InstanceData(
             instance.done,
             instance.instanceKey,
             null,
@@ -96,7 +96,7 @@ private fun DomainFactory.getGroupListData(
             instance.isRootInstance(),
             instance.getCreateTaskTimePair(projectsFactory.privateProject),
             task.note,
-            MixedInstanceDataCollection(children),
+            newMixedInstanceDataCollection(children),
             task.ordinal,
             instance.getNotificationShown(shownFactory),
             task.getImage(deviceDbInfo),
@@ -104,17 +104,19 @@ private fun DomainFactory.getGroupListData(
             instance.getProjectInfo(now, includeProjectInfo),
             instance.getProject().projectKey as? ProjectKey.Shared,
         )
+
+        GroupTypeFactory.InstanceDescriptor(instanceData, instance.instanceDateTime.toDateTimePair())
     }
 
-    val (mixedInstanceDatas, doneInstanceDatas) = instanceDatas.splitDone()
+    val (mixedInstanceDescriptors, doneInstanceDescriptors) = instanceDescriptors.splitDone()
 
     return GroupListDataWrapper(
         customTimeDatas,
         null,
         listOf(),
         null,
-        MixedInstanceDataCollection(mixedInstanceDatas, groupingMode),
-        doneInstanceDatas,
+        newMixedInstanceDataCollection(mixedInstanceDescriptors, groupingMode),
+        doneInstanceDescriptors.toInstanceDatas(),
         null,
         null
     )

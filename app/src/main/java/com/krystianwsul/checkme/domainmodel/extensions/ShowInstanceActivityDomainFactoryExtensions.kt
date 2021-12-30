@@ -125,14 +125,14 @@ private fun DomainFactory.getGroupListData(
         GroupListDataWrapper.CustomTimeData(it.name, it.hourMinutes.toSortedMap())
     }
 
-    val instanceDatas = instance.getChildInstances()
+    val instanceDescriptors = instance.getChildInstances()
         .filter { it.isVisible(now, Instance.VisibilityOptions(assumeChildOfVisibleParent = true)) }
         .map { childInstance ->
             val childTask = childInstance.task
 
             val children = getChildInstanceDatas(childInstance, now)
 
-            GroupListDataWrapper.InstanceData(
+            val instanceData = GroupListDataWrapper.InstanceData(
                 childInstance.done,
                 childInstance.instanceKey,
                 null,
@@ -145,7 +145,7 @@ private fun DomainFactory.getGroupListData(
                 childInstance.isRootInstance(),
                 childInstance.getCreateTaskTimePair(projectsFactory.privateProject),
                 childTask.note,
-                MixedInstanceDataCollection(children),
+                newMixedInstanceDataCollection(children),
                 childTask.ordinal,
                 childInstance.getNotificationShown(shownFactory),
                 childTask.getImage(deviceDbInfo),
@@ -153,17 +153,19 @@ private fun DomainFactory.getGroupListData(
                 childInstance.getProjectInfo(now),
                 childInstance.getProject().projectKey as? ProjectKey.Shared,
             )
+
+            GroupTypeFactory.InstanceDescriptor(instanceData, childInstance.instanceDateTime.toDateTimePair())
         }
 
-    val (mixedInstanceDatas, doneInstanceDatas) = instanceDatas.splitDone()
+    val (mixedInstanceDescriptors, doneInstanceDescriptors) = instanceDescriptors.splitDone()
 
     return GroupListDataWrapper(
         customTimeDatas,
         instance.canAddSubtask(now),
         listOf(),
         task.note,
-        MixedInstanceDataCollection(mixedInstanceDatas, GroupType.GroupingMode.None),
-        doneInstanceDatas,
+        newMixedInstanceDataCollection(mixedInstanceDescriptors, GroupType.GroupingMode.None),
+        doneInstanceDescriptors.toInstanceDatas(),
         task.getImage(deviceDbInfo),
         instance.getProjectInfo(now),
     )

@@ -63,4 +63,9 @@ class ProjectOrdinalManager(private val project: SharedProject) {
     }
 
     private data class Value(val ordinal: Double, val updated: ExactTimeStamp.Local)
+
+    interface Provider {
+
+        fun getProjectOrdinalManager(project: SharedProject): ProjectOrdinalManager
+    }
 }

@@ -6,10 +6,17 @@ import com.krystianwsul.checkme.gui.instances.list.GroupListFragment
 import com.krystianwsul.checkme.gui.instances.tree.NodeCollection
 import com.krystianwsul.checkme.gui.instances.tree.NotDoneNode
 import com.krystianwsul.checkme.gui.tree.DetailsNode
+import com.krystianwsul.common.firebase.models.ProjectOrdinalManager
+import com.krystianwsul.common.firebase.models.project.SharedProject
+import com.krystianwsul.common.time.DateTimePair
 import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.InstanceKey
+import com.krystianwsul.common.utils.ProjectKey
 
-object GroupTypeFactory : GroupType.Factory {
+class GroupTypeFactory(
+    private val projectOrdinalManagerProvider: ProjectOrdinalManager.Provider,
+    private val projectProvider: ProjectProvider,
+) : GroupType.Factory {
 
     private fun GroupType.fix() = this as Bridge
     private fun GroupType.TimeChild.fix() = this as TimeChild
@@ -17,9 +24,9 @@ object GroupTypeFactory : GroupType.Factory {
     private fun GroupType.ProjectDescriptor.fix() = this as ProjectDescriptor
 
     fun getGroupTypeTree(
-        instanceDatas: List<GroupListDataWrapper.InstanceData>,
+        instanceDescriptors: Collection<InstanceDescriptor>,
         groupingMode: GroupType.GroupingMode,
-    ) = GroupType.getGroupTypeTree(this, instanceDatas.map(GroupTypeFactory::InstanceDescriptor), groupingMode)
+    ) = GroupType.getGroupTypeTree(this, instanceDescriptors, groupingMode)
         .map { it.fix() }
 
     override fun createTime(
@@ -45,9 +52,24 @@ object GroupTypeFactory : GroupType.Factory {
         instanceDescriptors: List<GroupType.InstanceDescriptor>,
     ): GroupType.Project {
         val projectDetails = projectDescriptor.fix().projectDetails
-        val instanceDatas = instanceDescriptors.map { it.fix().instanceData.copy(projectInfo = null) }
 
-        return ProjectBridge(timeStamp, projectDetails, instanceDatas)
+        val fixedInstanceDescriptors = instanceDescriptors.map { it.fix() }
+        val instanceDatas = fixedInstanceDescriptors.map { it.instanceData.copy(projectInfo = null) }
+
+        val key = ProjectOrdinalManager.Key(
+            fixedInstanceDescriptors.map {
+                ProjectOrdinalManager.Key.Entry(it.instanceData.instanceKey, it.instanceDateTimePair)
+            }.toSet()
+        )
+
+        val project = projectProvider.getProject(projectDetails.projectKey)
+
+        return ProjectBridge(
+            timeStamp,
+            projectDetails,
+            instanceDatas,
+            projectOrdinalManagerProvider.getProjectOrdinalManager(project).getOrdinal(key),
+        )
     }
 
     override fun createSingle(instanceDescriptor: GroupType.InstanceDescriptor): GroupType.Single {
@@ -56,13 +78,18 @@ object GroupTypeFactory : GroupType.Factory {
         return SingleBridge(instanceData)
     }
 
-    class InstanceDescriptor(val instanceData: GroupListDataWrapper.InstanceData) : GroupType.InstanceDescriptor {
+    class InstanceDescriptor(
+        val instanceData: GroupListDataWrapper.InstanceData,
+        val instanceDateTimePair: DateTimePair,
+    ) : GroupType.InstanceDescriptor, Comparable<InstanceDescriptor> {
 
         override val timeStamp get() = instanceData.instanceTimeStamp
 
         override val projectDescriptor = instanceData.projectInfo
             ?.projectDetails
             ?.let(GroupTypeFactory::ProjectDescriptor)
+
+        override fun compareTo(other: InstanceDescriptor) = instanceData.compareTo(other.instanceData)
     }
 
     data class ProjectDescriptor(val projectDetails: DetailsNode.ProjectDetails) : GroupType.ProjectDescriptor
@@ -161,13 +188,12 @@ object GroupTypeFactory : GroupType.Factory {
         val timeStamp: TimeStamp,
         val projectDetails: DetailsNode.ProjectDetails,
         val instanceDatas: List<GroupListDataWrapper.InstanceData>,
+        override val ordinal: Double,
     ) : GroupType.Project, SingleParent, TimeChild {
 
         override val name get() = projectDetails.name
 
         override val instanceKeys = instanceDatas.map { it.instanceKey }.toSet()
-
-        override val ordinal = projectDetails.projectKey.getOrdinal()
 
         override fun toContentDelegate(
             groupAdapter: GroupListFragment.GroupAdapter,
@@ -215,5 +241,10 @@ object GroupTypeFactory : GroupType.Factory {
                 is SingleBridge -> instanceData.compareTo(other.instanceData)
             }
         }
+    }
+
+    fun interface ProjectProvider {
+
+        fun getProject(projectKey: ProjectKey.Shared): SharedProject
     }
 }

@@ -1,7 +1,10 @@
 package com.krystianwsul.checkme.domainmodel.extensions
 
 import com.krystianwsul.checkme.MyCrashlytics
-import com.krystianwsul.checkme.domainmodel.*
+import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.GroupTypeFactory
+import com.krystianwsul.checkme.domainmodel.getDomainResultInterrupting
+import com.krystianwsul.checkme.domainmodel.getProjectInfo
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.viewmodels.DomainQuery
 import com.krystianwsul.checkme.viewmodels.SearchInstancesViewModel
@@ -27,14 +30,14 @@ fun DomainFactory.getSearchInstancesData(
                 GroupListDataWrapper.CustomTimeData(it.name, it.hourMinutes.toSortedMap())
             }
 
-            val (cappedInstanceDatas, taskDatas, hasMore) = getCappedInstanceAndTaskDatas(now, searchCriteria, page)
+            val (cappedInstanceDescriptors, taskDatas, hasMore) = getCappedInstanceAndTaskDatas(now, searchCriteria, page)
 
             val dataWrapper = GroupListDataWrapper(
                 customTimeDatas,
                 null,
                 taskDatas,
                 null,
-                MixedInstanceDataCollection(cappedInstanceDatas, GroupType.GroupingMode.None),
+                newMixedInstanceDataCollection(cappedInstanceDescriptors),
                 listOf(),
                 null,
                 null,
@@ -50,10 +53,10 @@ fun DomainFactory.getCappedInstanceAndTaskDatas(
     searchCriteria: SearchCriteria,
     page: Int,
     projectKey: ProjectKey.Shared? = null,
-): Triple<List<GroupListDataWrapper.InstanceData>, List<GroupListDataWrapper.TaskData>, Boolean> {
+): Triple<List<GroupTypeFactory.InstanceDescriptor>, List<GroupListDataWrapper.TaskData>, Boolean> {
     val includeProjectInfo = projectKey == null
 
-    val (cappedInstanceDatas, hasMore) = searchInstances<GroupListDataWrapper.InstanceData>(
+    val (cappedInstanceDescriptors, hasMore) = searchInstances<GroupTypeFactory.InstanceDescriptor>(
         now,
         searchCriteria,
         page,
@@ -80,5 +83,5 @@ fun DomainFactory.getCappedInstanceAndTaskDatas(
         }
         .toList()
 
-    return Triple(cappedInstanceDatas, taskDatas, hasMore)
+    return Triple(cappedInstanceDescriptors, taskDatas, hasMore)
 }

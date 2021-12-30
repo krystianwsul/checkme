@@ -3,7 +3,7 @@ package com.krystianwsul.checkme.domainmodel.extensions
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.GroupType
-import com.krystianwsul.checkme.domainmodel.MixedInstanceDataCollection
+import com.krystianwsul.checkme.domainmodel.GroupTypeFactory
 import com.krystianwsul.checkme.domainmodel.getProjectInfo
 import com.krystianwsul.checkme.domainmodel.notifications.Notifier
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
@@ -30,12 +30,12 @@ fun DomainFactory.getShowNotificationGroupData(instanceKeys: Set<InstanceKey>): 
         GroupListDataWrapper.CustomTimeData(it.name, it.hourMinutes.toSortedMap())
     }
 
-    val instanceDatas = instances.map { instance ->
+    val instanceDescriptors = instances.map { instance ->
         val task = instance.task
 
         val children = getChildInstanceDatas(instance, now)
 
-        GroupListDataWrapper.InstanceData(
+        val instanceData = GroupListDataWrapper.InstanceData(
             instance.done,
             instance.instanceKey,
             instance.getDisplayData()?.getDisplayText(),
@@ -48,7 +48,7 @@ fun DomainFactory.getShowNotificationGroupData(instanceKeys: Set<InstanceKey>): 
             instance.isRootInstance(),
             instance.getCreateTaskTimePair(projectsFactory.privateProject),
             task.note,
-            MixedInstanceDataCollection(children),
+            newMixedInstanceDataCollection(children),
             instance.task.ordinal,
             instance.getNotificationShown(shownFactory),
             task.getImage(deviceDbInfo),
@@ -56,17 +56,19 @@ fun DomainFactory.getShowNotificationGroupData(instanceKeys: Set<InstanceKey>): 
             instance.getProjectInfo(now),
             instance.getProject().projectKey as? ProjectKey.Shared,
         )
+
+        GroupTypeFactory.InstanceDescriptor(instanceData, instance.instanceDateTime.toDateTimePair())
     }
 
-    val (mixedInstanceDatas, doneInstanceDatas) = instanceDatas.splitDone()
+    val (mixedInstanceDatas, doneInstanceDatas) = instanceDescriptors.splitDone()
 
     val dataWrapper = GroupListDataWrapper(
         customTimeDatas,
         null,
         listOf(),
         null,
-        MixedInstanceDataCollection(mixedInstanceDatas, GroupType.GroupingMode.Projects),
-        doneInstanceDatas,
+        newMixedInstanceDataCollection(mixedInstanceDatas, GroupType.GroupingMode.Projects),
+        doneInstanceDatas.toInstanceDatas(),
         null,
         null
     )

@@ -145,12 +145,12 @@ fun DomainFactory.getGroupListData(
         GroupListDataWrapper.CustomTimeData(it.name, it.hourMinutes.toSortedMap())
     }
 
-    val instanceDatas = currentInstances.map { instance ->
+    val instanceDescriptors = currentInstances.map { instance ->
         val task = instance.task
 
         val children = getChildInstanceDatas(instance, now)
 
-        GroupListDataWrapper.InstanceData(
+        val instanceData = GroupListDataWrapper.InstanceData(
             instance.done,
             instance.instanceKey,
             instance.getDisplayData()?.getDisplayText(),
@@ -163,7 +163,7 @@ fun DomainFactory.getGroupListData(
             instance.isRootInstance(),
             instance.getCreateTaskTimePair(projectsFactory.privateProject),
             task.note,
-            MixedInstanceDataCollection(children),
+            newMixedInstanceDataCollection(children),
             instance.task.ordinal,
             instance.getNotificationShown(shownFactory),
             task.getImage(deviceDbInfo),
@@ -171,17 +171,19 @@ fun DomainFactory.getGroupListData(
             instance.getProjectInfo(now),
             instance.getProject().projectKey as? ProjectKey.Shared,
         )
+
+        GroupTypeFactory.InstanceDescriptor(instanceData, instance.instanceDateTime.toDateTimePair())
     }
 
-    val (mixedInstanceDatas, doneInstanceDatas) = instanceDatas.splitDone()
+    val (mixedInstanceDescriptors, doneInstanceDescriptors) = instanceDescriptors.splitDone()
 
     val dataWrapper = GroupListDataWrapper(
         customTimeDatas,
         null,
         listOf(),
         null,
-        MixedInstanceDataCollection(mixedInstanceDatas, GroupType.GroupingMode.Time()),
-        doneInstanceDatas,
+        newMixedInstanceDataCollection(mixedInstanceDescriptors, GroupType.GroupingMode.Time()),
+        doneInstanceDescriptors.toInstanceDatas(),
         null,
         null,
     )

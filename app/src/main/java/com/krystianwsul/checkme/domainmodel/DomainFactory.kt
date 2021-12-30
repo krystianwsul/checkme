@@ -419,12 +419,12 @@ class DomainFactory(
     fun instanceToGroupListData(
         instance: Instance,
         now: ExactTimeStamp.Local,
-        children: Collection<GroupListDataWrapper.InstanceData>,
+        children: Collection<GroupTypeFactory.InstanceDescriptor>,
         includeProjectInfo: Boolean = true,
-    ): GroupListDataWrapper.InstanceData {
+    ): GroupTypeFactory.InstanceDescriptor {
         val isRootInstance = instance.isRootInstance()
 
-        return GroupListDataWrapper.InstanceData(
+        val instanceData = GroupListDataWrapper.InstanceData(
             instance.done,
             instance.instanceKey,
             if (isRootInstance) instance.instanceDateTime.getDisplayText() else null,
@@ -437,7 +437,7 @@ class DomainFactory(
             instance.isRootInstance(),
             instance.getCreateTaskTimePair(projectsFactory.privateProject),
             instance.task.note,
-            MixedInstanceDataCollection(children),
+            newMixedInstanceDataCollection(children),
             instance.task.ordinal,
             instance.getNotificationShown(shownFactory),
             instance.task.getImage(deviceDbInfo),
@@ -445,6 +445,8 @@ class DomainFactory(
             instance.getProjectInfo(now, includeProjectInfo),
             instance.getProject().projectKey as? ProjectKey.Shared,
         )
+
+        return GroupTypeFactory.InstanceDescriptor(instanceData, instance.instanceDateTime.toDateTimePair())
     }
 
     fun <T> getChildInstanceDatas(
@@ -487,8 +489,8 @@ class DomainFactory(
         searchCriteria: SearchCriteria = SearchCriteria.empty,
         filterVisible: Boolean = true,
         includeProjectInfo: Boolean = true,
-    ): Collection<GroupListDataWrapper.InstanceData> =
-        getChildInstanceDatas<GroupListDataWrapper.InstanceData>(
+    ): Collection<GroupTypeFactory.InstanceDescriptor> =
+        getChildInstanceDatas<GroupTypeFactory.InstanceDescriptor>(
             instance,
             now,
             { childInstance, children -> instanceToGroupListData(childInstance, now, children, includeProjectInfo) },
@@ -627,6 +629,16 @@ class DomainFactory(
 
         return migratePrivateCustomTime(privateCustomTime, now)
     }
+
+    fun newMixedInstanceDataCollection(
+        instanceDescriptors: Collection<GroupTypeFactory.InstanceDescriptor>,
+        groupingMode: GroupType.GroupingMode = GroupType.GroupingMode.None,
+    ) = MixedInstanceDataCollection(
+        instanceDescriptors,
+        myUserFactory.user,
+        { projectsFactory.sharedProjects.getValue(it) },
+        groupingMode,
+    )
 
     // this shouldn't use DateTime, since that leaks Time.Custom which is a model object
     class HourUndoData(val instanceDateTimes: Map<InstanceKey, DateTime>, val newTimeStamp: TimeStamp)

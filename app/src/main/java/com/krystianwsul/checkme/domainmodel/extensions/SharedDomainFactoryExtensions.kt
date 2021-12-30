@@ -420,4 +420,5 @@ fun <T> DomainFactory.trackRootTaskIds(action: () -> T): T =
         action,
     )
 
-fun List<GroupListDataWrapper.InstanceData>.splitDone() = partition { it.done == null }
+fun List<GroupTypeFactory.InstanceDescriptor>.splitDone() = partition { it.instanceData.done == null }
+fun List<GroupTypeFactory.InstanceDescriptor>.toInstanceDatas() = map { it.instanceData }

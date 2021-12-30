@@ -106,6 +106,8 @@ class GroupTypeFactory(
     sealed interface SingleParent : Bridge, GroupType.SingleParent {
 
         val name: String get() = throw UnsupportedOperationException()
+
+        val sortable: Boolean get() = false
     }
 
     sealed interface TimeChild : Bridge, GroupType.TimeChild {
@@ -194,6 +196,8 @@ class GroupTypeFactory(
         override val name get() = projectDetails.name
 
         override val instanceKeys = instanceDatas.map { it.instanceKey }.toSet()
+
+        override val sortable = true
 
         override fun toContentDelegate(
             groupAdapter: GroupListFragment.GroupAdapter,

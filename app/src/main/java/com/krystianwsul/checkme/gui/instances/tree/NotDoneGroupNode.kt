@@ -19,7 +19,7 @@ class NotDoneGroupNode(
     override fun tryStartDrag(viewHolder: RecyclerView.ViewHolder): Boolean {
         val groupListFragment = groupAdapter.groupListFragment
 
-        return if (contentDelegate is ContentDelegate.Instance
+        return if (contentDelegate.sortable
             && groupListFragment.parameters.groupListDataWrapper.taskEditable != false
             && groupAdapter.treeNodeCollection.selectedChildren.isEmpty()
             && treeNode.parent.displayedChildNodes.none { it.isExpanded }

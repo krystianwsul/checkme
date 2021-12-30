@@ -172,7 +172,6 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
                 nodeCollection = NodeCollection(
                     indentation + 1,
                     groupAdapter,
-                    GroupType.GroupingMode.None,
                     treeNode,
                     instanceData.note,
                     modelNode,
@@ -182,7 +181,10 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
 
                 treeNode.setChildTreeNodes(
                     nodeCollection.initialize(
-                        instanceData.children.values,
+                        NotDoneGroupCollection.MixedInstanceDataCollection(
+                            instanceData.children.values,
+                            GroupType.GroupingMode.None
+                        ),
                         listOf(),
                         contentDelegateStates,
                         doneExpansionState,

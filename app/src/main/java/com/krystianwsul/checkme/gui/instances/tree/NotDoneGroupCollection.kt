@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
+import com.krystianwsul.checkme.domainmodel.GroupType
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
 import com.krystianwsul.checkme.gui.utils.flatten
@@ -16,12 +17,12 @@ class NotDoneGroupCollection(
     private val notDoneGroupNodes = mutableListOf<NotDoneGroupNode>()
 
     fun initialize(
-        mixedInstanceDatas: Collection<GroupListDataWrapper.InstanceData>,
+        mixedInstanceDataCollection: MixedInstanceDataCollection,
         contentDelegateStates: Map<NotDoneNode.ContentDelegate.Id, NotDoneNode.ContentDelegate.State>,
     ): List<TreeNode<AbstractHolder>> {
-        val contentDelegates = GroupTypeFactory
-            .getGroupTypeTree(mixedInstanceDatas.toList(), nodeCollection.groupingMode)
-            .map { it.toContentDelegate(nodeCollection.groupAdapter, indentation, nodeCollection) }
+        val contentDelegates = mixedInstanceDataCollection.getGroupTypeTree().map {
+            it.toContentDelegate(nodeCollection.groupAdapter, indentation, nodeCollection)
+        }
 
         val nodePairs = contentDelegates.map {
             val notDoneGroupNode = NotDoneGroupNode(indentation, nodeCollection, it)
@@ -37,4 +38,13 @@ class NotDoneGroupCollection(
     }
 
     val contentDelegateStates get() = notDoneGroupNodes.map { it.contentDelegate.states }.flatten()
+
+    // todo ordinal move this class elsewhere, if it doesn't get eliminated entirely
+    class MixedInstanceDataCollection(
+        private val mixedInstanceDatas: Collection<GroupListDataWrapper.InstanceData>,
+        private val groupingMode: GroupType.GroupingMode,
+    ) {
+
+        fun getGroupTypeTree() = GroupTypeFactory.getGroupTypeTree(mixedInstanceDatas.toList(), groupingMode)
+    }
 }

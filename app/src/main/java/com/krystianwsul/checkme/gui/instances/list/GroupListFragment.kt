@@ -952,7 +952,6 @@ class GroupListFragment @JvmOverloads constructor(
             nodeCollection = NodeCollection(
                 0,
                 this,
-                groupingMode,
                 treeNodeCollection,
                 note,
                 null,
@@ -961,7 +960,7 @@ class GroupListFragment @JvmOverloads constructor(
             )
 
             treeNodeCollection.nodes = nodeCollection.initialize(
-                mixedInstanceDatas,
+                NotDoneGroupCollection.MixedInstanceDataCollection(mixedInstanceDatas, groupingMode),
                 doneInstanceDatas,
                 groupListState.contentDelegateStates,
                 groupListState.doneExpansionState,

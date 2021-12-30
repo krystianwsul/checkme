@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
-import com.krystianwsul.checkme.domainmodel.GroupType
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.instances.list.GroupListFragment
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
@@ -14,7 +13,6 @@ import com.krystianwsul.treeadapter.TreeNode
 class NodeCollection(
     private val indentation: Int,
     val groupAdapter: GroupListFragment.GroupAdapter,
-    val groupingMode: GroupType.GroupingMode,
     val nodeContainer: NodeContainer<AbstractHolder>,
     private val note: String?,
     val parentNode: DetailsNode.Parent?,
@@ -38,7 +36,7 @@ class NodeCollection(
     val unscheduledFirst by lazy { groupAdapter.groupListFragment.unscheduledFirst }
 
     fun initialize(
-        mixedInstanceDatas: Collection<GroupListDataWrapper.InstanceData>,
+        mixedInstanceDataCollection: NotDoneGroupCollection.MixedInstanceDataCollection,
         doneInstanceDatas: List<GroupListDataWrapper.InstanceData>,
         contentDelegateStates: Map<NotDoneNode.ContentDelegate.Id, NotDoneNode.ContentDelegate.State>,
         doneExpansionState: TreeNode.ExpansionState?,
@@ -65,7 +63,7 @@ class NodeCollection(
 
         notDoneGroupCollection = NotDoneGroupCollection(indentation, this, nodeContainer)
 
-        treeNodes += notDoneGroupCollection.initialize(mixedInstanceDatas, contentDelegateStates)
+        treeNodes += notDoneGroupCollection.initialize(mixedInstanceDataCollection, contentDelegateStates)
 
         check(indentation == 0 || taskDatas.isEmpty())
         if (taskDatas.isNotEmpty()) {

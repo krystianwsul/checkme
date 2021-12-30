@@ -48,7 +48,7 @@ fun DomainFactory.getShowNotificationGroupData(instanceKeys: Set<InstanceKey>): 
             instance.isRootInstance(),
             instance.getCreateTaskTimePair(projectsFactory.privateProject),
             task.note,
-            children,
+            NotDoneGroupCollection.MixedInstanceDataCollection(children.values), // todo ordinal map
             instance.task.ordinal,
             instance.getNotificationShown(shownFactory),
             task.getImage(deviceDbInfo),

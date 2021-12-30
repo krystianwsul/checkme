@@ -382,7 +382,7 @@ class GroupListFragment @JvmOverloads constructor(
     ): Boolean = if (shareTree.containsKey(instanceData.instanceKey))
         true
     else
-        shareTree.values.any { inTree(it.children, instanceData) }
+        shareTree.values.any { inTree(it.children.instanceDatas.associateBy { it.instanceKey }, instanceData) }
 
     private fun inTree(
         shareTree: List<GroupListDataWrapper.TaskData>,
@@ -814,7 +814,7 @@ class GroupListFragment @JvmOverloads constructor(
     private fun getAllInstanceDatas(instanceData: GroupListDataWrapper.InstanceData): List<GroupListDataWrapper.InstanceData> {
         return listOf(
             listOf(listOf(instanceData)),
-            instanceData.children.values.map { getAllInstanceDatas(it) }
+            instanceData.children.instanceDatas.map(::getAllInstanceDatas)
         ).flatten().flatten()
     }
 

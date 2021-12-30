@@ -63,7 +63,7 @@ data class GroupListDataWrapper(
         val isRootInstance: Boolean,
         val createTaskTimePair: TimePair,
         override val note: String?,
-        val children: Map<InstanceKey, InstanceData>,
+        val children: NotDoneGroupCollection.MixedInstanceDataCollection,
         val ordinal: Double,
         val notificationShown: Boolean,
         val imageState: ImageState?,
@@ -87,7 +87,7 @@ data class GroupListDataWrapper(
 
         override val taskKey = instanceKey.taskKey
 
-        override val childSelectedDatas get() = children.values
+        override val childSelectedDatas get() = children.instanceDatas
 
         fun normalize() {
             normalizedFields

@@ -21,6 +21,7 @@ import com.krystianwsul.checkme.firebase.factories.ProjectsFactory
 import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.checkme.firebase.roottask.RootTasksFactory
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
+import com.krystianwsul.checkme.gui.instances.tree.NotDoneGroupCollection
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.utils.checkError
 import com.krystianwsul.checkme.utils.time.getDisplayText
@@ -437,7 +438,7 @@ class DomainFactory(
             instance.isRootInstance(),
             instance.getCreateTaskTimePair(projectsFactory.privateProject),
             instance.task.note,
-            children,
+            NotDoneGroupCollection.MixedInstanceDataCollection(children.values), // todo ordinal stupid map
             instance.task.ordinal,
             instance.getNotificationShown(shownFactory),
             instance.task.getImage(deviceDbInfo),

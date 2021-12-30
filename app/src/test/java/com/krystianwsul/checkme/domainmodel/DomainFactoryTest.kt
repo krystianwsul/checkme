@@ -82,7 +82,7 @@ class DomainFactoryTest {
             .taskKey
 
         assertEquals(taskKey1, getTodayInstanceDatas(now).single().taskKey)
-        assertEquals(taskKey2, getTodayInstanceDatas(now).single().children.values.single().taskKey)
+        assertEquals(taskKey2, getTodayInstanceDatas(now).single().children.instanceDatas.single().taskKey)
 
         now += 1.hours
 
@@ -111,7 +111,7 @@ class DomainFactoryTest {
         domainFactory.getTaskForce(taskKey2).invalidateIntervals()
 
         assertEquals(taskKey2, getTodayInstanceDatas(now).single().taskKey)
-        assertEquals(taskKey1, getTodayInstanceDatas(now).single().children.values.single().taskKey)
+        assertEquals(taskKey1, getTodayInstanceDatas(now).single().children.instanceDatas.single().taskKey)
     }
 
     @Test
@@ -150,11 +150,11 @@ class DomainFactoryTest {
             .taskKey
 
         assertEquals(1, getTodayInstanceDatas(now).size)
-        assertEquals(2, getTodayInstanceDatas(now).single().children.size)
+        assertEquals(2, getTodayInstanceDatas(now).single().children.instanceDatas.size)
 
         val doneInstanceKey = getTodayInstanceDatas(now).single()
             .children
-            .values
+            .instanceDatas
             .single { it.taskKey == doneChildTaskKey }
             .instanceKey
 
@@ -167,8 +167,8 @@ class DomainFactoryTest {
         ).subscribe()
 
         assertEquals(1, getTodayInstanceDatas(now).size)
-        assertEquals(2, getTodayInstanceDatas(now).single().children.size)
-        assertEquals(1, getTodayInstanceDatas(now).single().children.count { it.value.done != null })
+        assertEquals(2, getTodayInstanceDatas(now).single().children.instanceDatas.size)
+        assertEquals(1, getTodayInstanceDatas(now).single().children.instanceDatas.count { it.done != null })
 
         now += 1.hours
 
@@ -202,8 +202,8 @@ class DomainFactoryTest {
 
         assertEquals(2, getTodayInstanceDatas(now).size)
 
-        assertEquals(1, getTodayInstanceDatas(now).single { it.taskKey == parentTask1Key }.children.size)
-        assertEquals(2, getTodayInstanceDatas(now).single { it.taskKey == parentTask2Key }.children.size)
+        assertEquals(1, getTodayInstanceDatas(now).single { it.taskKey == parentTask1Key }.children.instanceDatas.size)
+        assertEquals(2, getTodayInstanceDatas(now).single { it.taskKey == parentTask2Key }.children.instanceDatas.size)
     }
 
     @Test
@@ -252,8 +252,11 @@ class DomainFactoryTest {
 
         val secondGroupListWrapper = domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY).groupListDataWrapper
 
-        assertEquals(0, secondGroupListWrapper.doneInstanceDatas.single().children.size)
-        assertEquals(1, secondGroupListWrapper.mixedInstanceDatas.single().children.size)
+        assertEquals(0, secondGroupListWrapper.doneInstanceDatas.single().children.instanceDatas.size)
+        assertEquals(
+            1,
+            secondGroupListWrapper.mixedInstanceDataCollection.instanceDatas.single().children.instanceDatas.size
+        )
     }
 
     @Test
@@ -296,10 +299,10 @@ class DomainFactoryTest {
             .allInstanceDatas
             .let {
                 assertEquals(1, it.size)
-                assertEquals(1, it[0].children.size)
+                assertEquals(1, it[0].children.instanceDatas.size)
 
                 it[0].children
-                    .values
+                    .instanceDatas
                     .single()
                     .instanceKey
             }
@@ -322,8 +325,8 @@ class DomainFactoryTest {
             .allInstanceDatas
             .let {
                 assertEquals(2, it.size)
-                assertEquals(0, it[0].children.size)
-                assertEquals(0, it[1].children.size)
+                assertEquals(0, it[0].children.instanceDatas.size)
+                assertEquals(0, it[1].children.instanceDatas.size)
             }
 
         assertNull(instance.parentInstance)
@@ -366,7 +369,7 @@ class DomainFactoryTest {
         ).blockingGet()
 
         assertEquals(1, getTodayInstanceDatas(now).size)
-        assertEquals(2, getTodayInstanceDatas(now).single().children.size)
+        assertEquals(2, getTodayInstanceDatas(now).single().children.instanceDatas.size)
     }
 
     @Test
@@ -569,7 +572,7 @@ class DomainFactoryTest {
         val singleInstanceData = instanceDatasAfter.single()
         assertEquals(parentInstanceKey, singleInstanceData.instanceKey)
 
-        assertEquals(childInstanceKey, singleInstanceData.children.values.single().instanceKey)
+        assertEquals(childInstanceKey, singleInstanceData.children.instanceDatas.single().instanceKey)
     }
 
     @Test
@@ -627,7 +630,7 @@ class DomainFactoryTest {
         val singleInstanceData = instanceDatasAfter.single()
         assertEquals(parentInstanceKey, singleInstanceData.instanceKey)
 
-        assertEquals(childInstanceKey, singleInstanceData.children.values.single().instanceKey)
+        assertEquals(childInstanceKey, singleInstanceData.children.instanceDatas.single().instanceKey)
     }
 
     @Test
@@ -810,8 +813,8 @@ class DomainFactoryTest {
             .single()
 
         assertEquals(null, instanceData.projectKey)
-        assertEquals(2, instanceData.children.size)
-        assertTrue(instanceData.children.values.all { it.projectKey == null })
+        assertEquals(2, instanceData.children.instanceDatas.size)
+        assertTrue(instanceData.children.instanceDatas.all { it.projectKey == null })
     }
 
     @Test
@@ -903,8 +906,8 @@ class DomainFactoryTest {
             .single()
 
         assertEquals(null, instanceData.projectKey)
-        assertEquals(2, instanceData.children.size)
-        assertTrue(instanceData.children.values.all { it.projectKey == null })
+        assertEquals(2, instanceData.children.instanceDatas.size)
+        assertTrue(instanceData.children.instanceDatas.all { it.projectKey == null })
 
         assertEquals(
             sharedProjectKey2,
@@ -1006,8 +1009,8 @@ class DomainFactoryTest {
             .single()
 
         assertEquals(null, instanceData.projectKey)
-        assertEquals(2, instanceData.children.size)
-        assertTrue(instanceData.children.values.all { it.projectKey == null })
+        assertEquals(2, instanceData.children.instanceDatas.size)
+        assertTrue(instanceData.children.instanceDatas.all { it.projectKey == null })
 
         assertTrue(
             domainFactory.getGroupListData(now, 7, Preferences.TimeRange.DAY)
@@ -1108,11 +1111,11 @@ class DomainFactoryTest {
         assertEquals(taskKey1, instanceData1.instanceKey.taskKey)
 
         val instanceData2 = instanceData1.children
-            .values
+            .instanceDatas
             .single()
 
         assertEquals(taskKey2, instanceData2.instanceKey.taskKey)
-        assertTrue(instanceData2.children.isEmpty())
+        assertTrue(instanceData2.children.instanceDatas.isEmpty())
 
         listOf(taskKey1, taskKey2, taskKey3).forEach {
             domainFactory.rootTasksFactory
@@ -1218,6 +1221,7 @@ class DomainFactoryTest {
                 .allInstanceDatas
                 .single()
                 .children
+                .instanceDatas
                 .size,
         )
 
@@ -1267,6 +1271,7 @@ class DomainFactoryTest {
                 .allInstanceDatas
                 .single()
                 .children
+                .instanceDatas
                 .size,
         )
 
@@ -1277,9 +1282,10 @@ class DomainFactoryTest {
                 .allInstanceDatas
                 .single()
                 .children
-                .values
+                .instanceDatas
                 .single()
                 .children
+                .instanceDatas
                 .size,
         )
 
@@ -1373,6 +1379,7 @@ class DomainFactoryTest {
                 .allInstanceDatas
                 .single()
                 .children
+                .instanceDatas
                 .size,
         )
 
@@ -1422,6 +1429,7 @@ class DomainFactoryTest {
                 .allInstanceDatas
                 .single()
                 .children
+                .instanceDatas
                 .size,
         )
 
@@ -1432,9 +1440,10 @@ class DomainFactoryTest {
                 .allInstanceDatas
                 .single()
                 .children
-                .values
+                .instanceDatas
                 .single()
                 .children
+                .instanceDatas
                 .size,
         )
 
@@ -1607,6 +1616,7 @@ class DomainFactoryTest {
                 .allInstanceDatas
                 .single()
                 .children
+                .instanceDatas
                 .size,
         )
     }
@@ -1726,10 +1736,10 @@ class DomainFactoryTest {
         assertTrue(
             getInstanceDatasToday(now).single()
                 .children
-                .values
+                .instanceDatas
                 .single()
                 .children
-                .values
+                .instanceDatas
                 .all { it.done == null }
         )
 
@@ -1746,10 +1756,10 @@ class DomainFactoryTest {
 
         getInstanceDatasToday(now).single()
             .children
-            .values
+            .instanceDatas
             .single()
             .children
-            .values
+            .instanceDatas
             .let {
                 assertEquals(1, it.filter { it.done == null }.size)
                 assertEquals(1, it.filter { it.done != null }.size)
@@ -1767,10 +1777,10 @@ class DomainFactoryTest {
 
         getInstanceDatasToday(now).single()
             .children
-            .values
+            .instanceDatas
             .single()
             .children
-            .values
+            .instanceDatas
             .let {
                 assertEquals(1, it.filter { it.done == null }.size)
                 assertEquals(1, it.filter { it.done != null }.size)
@@ -1789,9 +1799,9 @@ class DomainFactoryTest {
         getInstanceDatasToday(now).let {
             assertEquals(2, it.size)
 
-            assertTrue(it[0].children.isEmpty())
+            assertTrue(it[0].children.instanceDatas.isEmpty())
 
-            val middleInstanceChildren = it[1].children.values
+            val middleInstanceChildren = it[1].children.instanceDatas
 
             assertEquals(1, middleInstanceChildren.filter { it.done == null }.size)
             assertEquals(1, middleInstanceChildren.filter { it.done != null }.size)
@@ -1850,7 +1860,7 @@ class DomainFactoryTest {
         assertTrue(
             getInstanceDatasToday(now).single { it.taskKey == singleMiddleTaskKey }
                 .children
-                .values
+                .instanceDatas
                 .all { it.done == null }
         )
 
@@ -1867,7 +1877,7 @@ class DomainFactoryTest {
 
         getInstanceDatasToday(now).single { it.taskKey == singleMiddleTaskKey }
             .children
-            .values
+            .instanceDatas
             .let {
                 assertEquals(1, it.filter { it.done == null }.size)
                 assertEquals(1, it.filter { it.done != null }.size)
@@ -1890,10 +1900,10 @@ class DomainFactoryTest {
 
         getInstanceDatasToday(now).single()
             .children
-            .values
+            .instanceDatas
             .single { it.taskKey == singleMiddleTaskKey }
             .children
-            .values
+            .instanceDatas
             .let {
                 assertEquals(1, it.filter { it.done == null }.size)
                 assertEquals(1, it.filter { it.done != null }.size)
@@ -1911,10 +1921,10 @@ class DomainFactoryTest {
 
         getInstanceDatasToday(now).single()
             .children
-            .values
+            .instanceDatas
             .single { it.taskKey == singleMiddleTaskKey }
             .children
-            .values
+            .instanceDatas
             .let {
                 assertEquals(1, it.filter { it.done == null }.size)
                 assertEquals(1, it.filter { it.done != null }.size)
@@ -1933,9 +1943,9 @@ class DomainFactoryTest {
         getInstanceDatasToday(now).let {
             assertEquals(2, it.size)
 
-            assertTrue(it[0].children.entries.single().value.taskKey == weeklyMiddleTaskKey)
+            assertTrue(it[0].children.instanceDatas.single().taskKey == weeklyMiddleTaskKey)
 
-            val middleInstanceChildren = it[1].children.values
+            val middleInstanceChildren = it[1].children.instanceDatas
 
             assertEquals(1, middleInstanceChildren.filter { it.done == null }.size)
             assertEquals(1, middleInstanceChildren.filter { it.done != null }.size)

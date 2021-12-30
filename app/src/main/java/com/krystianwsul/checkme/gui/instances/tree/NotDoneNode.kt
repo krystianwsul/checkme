@@ -2,7 +2,6 @@ package com.krystianwsul.checkme.gui.instances.tree
 
 import android.os.Parcelable
 import com.krystianwsul.checkme.R
-import com.krystianwsul.checkme.domainmodel.GroupType
 import com.krystianwsul.checkme.domainmodel.extensions.setInstanceDone
 import com.krystianwsul.checkme.domainmodel.extensions.setInstancesDone
 import com.krystianwsul.checkme.domainmodel.extensions.setOrdinal
@@ -181,10 +180,7 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
 
                 treeNode.setChildTreeNodes(
                     nodeCollection.initialize(
-                        NotDoneGroupCollection.MixedInstanceDataCollection(
-                            instanceData.children.values,
-                            GroupType.GroupingMode.None
-                        ),
+                        instanceData.children,
                         listOf(),
                         contentDelegateStates,
                         doneExpansionState,

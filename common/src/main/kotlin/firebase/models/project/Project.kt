@@ -179,7 +179,7 @@ abstract class Project<T : ProjectType>(
     override fun getProjectCustomTimeKey(projectCustomTimeId: CustomTimeId.Project) =
         projectRecord.getProjectCustomTimeKey(projectCustomTimeId)
 
-    private fun getTime(timePair: TimePair) = timePair.customTimeKey
+    fun getTime(timePair: TimePair) = timePair.customTimeKey
         ?.let(::getCustomTime)
         ?: Time.Normal(timePair.hourMinute!!)
 

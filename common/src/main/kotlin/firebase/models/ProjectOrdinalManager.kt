@@ -1,7 +1,9 @@
 package com.krystianwsul.common.firebase.models
 
 import com.krystianwsul.common.firebase.models.project.SharedProject
+import com.krystianwsul.common.time.DateTimePair
 import com.krystianwsul.common.time.ExactTimeStamp
+import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.InstanceKey
 
 class ProjectOrdinalManager(private val project: SharedProject) {
@@ -12,10 +14,12 @@ class ProjectOrdinalManager(private val project: SharedProject) {
         ordinals[Key(instances)] = Value(ordinal, now)
     }
 
-    private fun <T> getMatchByAspect(searchKey: Key, aspectSelector: (Key.Entry) -> T): Double? {
-        fun Key.toMatchElements() = entries.map(aspectSelector).toSet()
+    private fun <T> getMatchByAspect(searchKey: Key, aspectSelector: (Key.Entry) -> T?): Double? {
+        fun Key.toMatchElements() = entries.mapNotNull(aspectSelector).toSet()
 
         val inputMatchElements = searchKey.toMatchElements()
+            .takeIf { it.isNotEmpty() }
+            ?: return null
 
         data class MatchData(val entry: Map.Entry<Key, Value>, val matchElements: Set<T>) {
 
@@ -33,12 +37,31 @@ class ProjectOrdinalManager(private val project: SharedProject) {
             ?.ordinal
     }
 
-    // todo ordinal add info about instanceDateTime
+    // todo ordinal make list of selectors to avoid repetitive let { return }
     fun getOrdinal(instances: Set<Instance>): Double {
-        getMatchByAspect(Key(instances)) { it.instanceKey }?.let { return it }
-        getMatchByAspect(Key(instances)) { it.instanceKey.taskKey }?.let { return it }
+        val key = Key(instances)
 
-        // match those that contain the most instances with the exact same DateTime
+        // instanceKey (taskKey + customTime/hourMinute)
+        getMatchByAspect(key) { it.instanceKey }?.let { return it }
+
+        // instance dateTimePair
+        getMatchByAspect(key) { it.instanceDateTimePair }?.let { return it }
+
+        // instance Timestamp
+        getMatchByAspect(key) {
+            it.instanceDateTimePair.run { TimeStamp(date, project.getTime(timePair).getHourMinute(date.dayOfWeek)) }
+        }?.let { return it }
+
+        // instance timePair
+        getMatchByAspect(key) { it.instanceDateTimePair.timePair }?.let { return it }
+
+        // instance hourMinute
+        getMatchByAspect(key) {
+            it.instanceDateTimePair.run { project.getTime(timePair).getHourMinute(date.dayOfWeek) }
+        }?.let { return it }
+
+        // taskKey
+        getMatchByAspect(key) { it.instanceKey.taskKey }?.let { return it }
 
         return project.projectKey.getOrdinal()
     }
@@ -50,9 +73,9 @@ class ProjectOrdinalManager(private val project: SharedProject) {
             operator fun invoke(instances: Set<Instance>) = Key(instances.map(::Entry).toSet())
         }
 
-        data class Entry(val instanceKey: InstanceKey) {
+        data class Entry(val instanceKey: InstanceKey, val instanceDateTimePair: DateTimePair) {
 
-            constructor(instance: Instance) : this(instance.instanceKey)
+            constructor(instance: Instance) : this(instance.instanceKey, instance.instanceDateTime.toDateTimePair())
         }
     }
 

@@ -279,7 +279,8 @@ abstract class Project<T : ProjectType>(
 
         fun tryGetRootTask(rootTaskKey: TaskKey.Root): RootTask?
 
-        fun getRootTask(rootTaskKey: TaskKey.Root) = tryGetRootTask(rootTaskKey)!!
+        fun getRootTask(rootTaskKey: TaskKey.Root) =
+            tryGetRootTask(rootTaskKey) ?: throw MissingRootTaskException(rootTaskKey)
 
         fun getRootTasksForProject(projectKey: ProjectKey<*>): Collection<RootTask>
 
@@ -296,5 +297,7 @@ abstract class Project<T : ProjectType>(
         ): Task
 
         fun getAllExistingInstances(): Sequence<Instance>
+
+        private class MissingRootTaskException(taskKey: TaskKey.Root) : Exception("taskKey: $taskKey")
     }
 }

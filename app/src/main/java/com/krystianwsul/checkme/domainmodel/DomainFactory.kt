@@ -97,7 +97,7 @@ class DomainFactory(
 
     val converter = Converter()
 
-    private val isWaitingForTasks = BehaviorRelay.create<Boolean>()
+    val isWaitingForTasks = BehaviorRelay.create<Boolean>()
 
     init {
         Preferences.tickLog.logLineHour("DomainFactory.init")
@@ -290,6 +290,10 @@ class DomainFactory(
             }
         )
 
+        updateIsWaitingForTasks()
+    }
+
+    fun updateIsWaitingForTasks() {
         isWaitingForTasks.accept(waitingProjectTasks().any() || waitingProjects().any() || waitingRootTasks().any())
     }
 

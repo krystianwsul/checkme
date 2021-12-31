@@ -126,6 +126,7 @@ object Irrelevant {
                 when (it) {
                     is ProjectTaskHierarchy -> true
                     is NestedTaskHierarchy -> taskRelevances.getValue(it.childTaskKey).relevant
+                    else -> throw UnsupportedOperationException() // oh for fuck's sake, this still happens in 1.6.0
                 }
             }
 

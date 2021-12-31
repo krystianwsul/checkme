@@ -8,7 +8,7 @@ import com.krystianwsul.checkme.domainmodel.takeAndHasMore
 import com.krystianwsul.checkme.gui.instances.ShowTaskInstancesActivity
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.utils.time.getDisplayText
-import com.krystianwsul.checkme.viewmodels.DomainResult
+import com.krystianwsul.checkme.viewmodels.DomainQuery
 import com.krystianwsul.checkme.viewmodels.ShowTaskInstancesViewModel
 import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.firebase.DomainThreadChecker
@@ -21,7 +21,7 @@ fun DomainFactory.getShowTaskInstancesData(
     parameters: ShowTaskInstancesActivity.Parameters,
     page: Int,
     searchCriteria: SearchCriteria,
-): DomainResult<ShowTaskInstancesViewModel.Data> {
+): DomainQuery<ShowTaskInstancesViewModel.Data> {
     MyCrashlytics.log("DomainFactory.getShowTaskInstancesData")
 
     DomainThreadChecker.instance.requireDomainThread()

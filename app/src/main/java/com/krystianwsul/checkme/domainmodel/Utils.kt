@@ -4,6 +4,7 @@ import android.util.Log
 import com.google.firebase.auth.FirebaseUser
 import com.krystianwsul.checkme.gui.tree.DetailsNode
 import com.krystianwsul.checkme.viewmodels.DomainData
+import com.krystianwsul.checkme.viewmodels.DomainQuery
 import com.krystianwsul.checkme.viewmodels.DomainResult
 import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.models.ImageState
@@ -18,24 +19,36 @@ fun FirebaseUser.toUserInfo() = UserInfo(email!!, displayName!!, uid)
 
 fun ImageState.toImageLoader() = ImageLoader(this)
 
-fun <T : DomainData> getDomainResultInterrupting(action: () -> T): DomainResult<T> {
+fun <T : DomainData> getDomainResultInterrupting(action: () -> T): DomainQuery<T> {
     check(InterruptionChecker.instance == null)
 
-    InterruptionChecker.instance = InterruptionChecker { Thread.interrupted() }
+    var interrupted = false
 
-    val domainResult = try {
-        DomainResult.Completed(action())
-    } catch (domainInterruptedException: DomainInterruptedException) {
-        Log.e("asdf", "domain interrupted", domainInterruptedException)
+    InterruptionChecker.instance = InterruptionChecker { interrupted || Thread.interrupted() }
 
-        DomainResult.Interrupted()
+    return object : DomainQuery<T> {
+
+        override fun getDomainResult(): DomainResult<T> {
+            val domainResult = try {
+                DomainResult.Completed(action())
+            } catch (domainInterruptedException: DomainInterruptedException) {
+                Log.e("asdf", "magic domain interrupted", domainInterruptedException)
+
+                DomainResult.Interrupted()
+            }
+
+            checkNotNull(InterruptionChecker.instance)
+
+            InterruptionChecker.instance = null
+
+            return domainResult
+
+        }
+
+        override fun interrupt() {
+            interrupted = true
+        }
     }
-
-    checkNotNull(InterruptionChecker.instance)
-
-    InterruptionChecker.instance = null
-
-    return domainResult
 }
 
 fun <T> Sequence<T>.takeAndHasMore(n: Int): Pair<List<T>, Boolean> {

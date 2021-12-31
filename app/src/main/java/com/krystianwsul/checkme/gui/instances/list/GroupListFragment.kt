@@ -405,10 +405,6 @@ class GroupListFragment @JvmOverloads constructor(
         selectedData.childSelectedDatas.forEach { printTree(lines, indentation + 1, it) }
     }
 
-    init {
-        binding.groupListRecycler.layoutManager = LinearLayoutManager(context)
-    }
-
     private fun newSearchDataManager() = object : SearchDataManager<GroupListParameters, GroupAdapter>(
         activity.started,
         parametersRelay
@@ -723,13 +719,25 @@ class GroupListFragment @JvmOverloads constructor(
                     if (showTime && selectedDatas.all { it is GroupListDataWrapper.InstanceData }) {
                         val instanceDatas = selectedDatas.map { it as GroupListDataWrapper.InstanceData }
 
-                        if (instanceDatas.asSequence()
-                                .filter { it.isRootInstance }
-                                .map { it.instanceTimeStamp }
-                                .distinct()
-                                .singleOrNull()
-                                ?.takeIf { it > TimeStamp.now } != null
-                        ) {
+                        fun canAddToInstances(): Boolean {
+                            val rootInstances = instanceDatas.filter { it.isRootInstance }
+
+                            if (rootInstances.isEmpty()) return false
+
+                            if (rootInstances.map { it.instanceTimeStamp }
+                                    .distinct()
+                                    .singleOrNull()
+                                    ?.let { it > TimeStamp.now } == true
+                            ) {
+                                return true
+                            }
+
+                            if (instanceDatas.map { it.projectKey }.distinct().singleOrNull() != null) return true
+
+                            return false
+                        }
+
+                        if (canAddToInstances()) {
                             getStartEditActivityFabState(instanceDatas.getHint(), true)
                         } else {
                             FabState.Hidden
@@ -986,8 +994,6 @@ class GroupListFragment @JvmOverloads constructor(
         }
 
         override val groupAdapter = this
-
-        override fun scrollToTop() = groupListFragment.scrollToTop()
 
         override fun mutateIds(oldIds: List<Any>, newIds: List<Any>): Pair<List<Any>, List<Any>> {
             val mutatedOldIds = oldIds.toMutableList()

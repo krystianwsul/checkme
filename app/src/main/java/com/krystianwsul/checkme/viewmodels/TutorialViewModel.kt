@@ -12,12 +12,12 @@ import com.krystianwsul.checkme.MyCrashlytics
 
 class TutorialViewModel : ViewModel() {
 
-    val state = BehaviorRelay.createDefault<State>(State.Initial)!!
+    val state = BehaviorRelay.createDefault<State>(State.Initial)
 
     fun startSignIn() = state.accept(State.Progress)
 
     fun onActivityResult(data: Intent?) {
-        val googleSignInResult = Auth.GoogleSignInApi.getSignInResultFromIntent(data)!!
+        val googleSignInResult = Auth.GoogleSignInApi.getSignInResultFromIntent(data!!)!!
 
         if (googleSignInResult.isSuccess) {
             val googleSignInAccount = googleSignInResult.signInAccount!!

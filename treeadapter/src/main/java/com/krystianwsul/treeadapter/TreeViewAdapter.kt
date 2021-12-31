@@ -207,6 +207,8 @@ class TreeViewAdapter<T : TreeHolder>(
             ) {
 
                 override fun dispatchLastEvent() {
+                    treeRecyclerView!!.freezeTopPosition()
+
                     super.dispatchLastEvent()
 
                     listUpdates.accept(Unit)
@@ -292,8 +294,18 @@ class TreeViewAdapter<T : TreeHolder>(
         attachedHolders -= holder
     }
 
+    private var treeRecyclerView: TreeRecyclerView? = null
+
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
         check(recyclerView is TreeRecyclerView)
+
+        treeRecyclerView = recyclerView
+    }
+
+    override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
+        check(treeRecyclerView == recyclerView)
+
+        treeRecyclerView = null
     }
 
     fun onRecyclerAttachedToWindow() {

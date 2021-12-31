@@ -93,6 +93,7 @@ class SettingsActivity : NavBarActivity() {
                         if (it.value != null) {
                             settingsActivity.updateFromAccount(it.value)
                         } else {
+                            @Suppress("Deprecation")
                             startActivityForResult(MyApplication.instance.googleSignInClient.signInIntent, RC_SIGN_IN)
 
                             Completable.complete()
@@ -201,11 +202,12 @@ class SettingsActivity : NavBarActivity() {
         }
 
         override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+            @Suppress("Deprecation")
             super.onActivityResult(requestCode, resultCode, data)
 
             check(requestCode == RC_SIGN_IN)
 
-            val result = Auth.GoogleSignInApi.getSignInResultFromIntent(data)!!
+            val result = Auth.GoogleSignInApi.getSignInResultFromIntent(data!!)!!
             val account = result.signInAccount
 
             if (account != null) {

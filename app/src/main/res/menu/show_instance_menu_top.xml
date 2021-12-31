@@ -37,6 +37,14 @@
         android:visible="false" />
 
     <item
+        android:id="@+id/instanceMenuSplit"
+        android:title="@string/split"
+        android:orderInCategory="600"
+        app:showAsAction="ifRoom"
+        android:icon="@drawable/ic_baseline_call_split_24"
+        android:visible="false" />
+
+    <item
         android:id="@+id/instanceMenuCheck"
         android:title="@string/mark_done"
         android:orderInCategory="1000"

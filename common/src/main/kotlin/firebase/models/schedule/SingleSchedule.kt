@@ -27,7 +27,7 @@ class SingleSchedule(topLevelTask: Task, val singleScheduleRecord: SingleSchedul
 
     override val scheduleType get() = ScheduleType.SINGLE
 
-    private val originalScheduleDateTime
+    val originalScheduleDateTime
         get() = singleScheduleRecord.run { // specifically not scheduleRecord
             DateTime(originalDate, originalTimePair.toTime())
         }

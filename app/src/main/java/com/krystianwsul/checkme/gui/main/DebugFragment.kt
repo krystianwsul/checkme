@@ -23,7 +23,9 @@ import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.databinding.FragmentDebugBinding
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.extensions.getGroupListData
+import com.krystianwsul.checkme.domainmodel.extensions.setDebugMode
 import com.krystianwsul.checkme.domainmodel.observeOnDomain
+import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
 import com.krystianwsul.checkme.gui.base.AbstractFragment
 import com.krystianwsul.checkme.gui.utils.ResettableProperty
 import com.krystianwsul.checkme.ticks.Ticker
@@ -39,7 +41,14 @@ class DebugFragment : AbstractFragment() {
 
     companion object {
 
+        private val doneLog = mutableListOf<String>()
+
         fun newInstance() = DebugFragment()
+
+        fun logDone(message: String) {
+            if (DomainFactory.nullableInstance?.debugMode == true)
+                doneLog += ExactTimeStamp.Local.now.hourMilli.toString() + " " + message
+        }
     }
 
     private val bindingProperty = ResettableProperty<FragmentDebugBinding>()
@@ -66,7 +75,9 @@ class DebugFragment : AbstractFragment() {
                     isChecked = it.debugMode
 
                     setOnCheckedChangeListener { _, isChecked ->
-                        it.debugMode = isChecked
+                        doneLog.clear()
+
+                        AndroidDomainUpdater.setDebugMode(isChecked).subscribe()
                     }
                 }
             }
@@ -100,14 +111,24 @@ class DebugFragment : AbstractFragment() {
 
                         val t2 = ExactTimeStamp.Local.now
 
-                        t2.long - t1.long
+                        val loadTime = t2.long - t1.long
+
+                        val waitingOnDependencies = DomainFactory.instance.run {
+                            val waitingNames = waitingProjectTasks().map { it.name } +
+                                    waitingProjects().map { it.name } +
+                                    waitingRootTasks().map { it.name }
+
+                            waitingNames.joinToString("\n")
+                        }
+
+                        Pair(loadTime, waitingOnDependencies)
                     }
                 },
                 false,
                 1,
             )
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe { loadTime ->
+            .subscribe { (loadTime, waitingOnDependencies) ->
                 binding.debugData.text = StringBuilder().apply {
                     val lastTick = Preferences.lastTick
                     val tickLog = Preferences.tickLog.log
@@ -142,6 +163,12 @@ class DebugFragment : AbstractFragment() {
                     append(domainFactory.customTimeCount)
                     append("\ninstance shown: ")
                     append(domainFactory.instanceShownCount)
+
+                    append("\n\nwaiting on dependencies:\n")
+                    append(waitingOnDependencies)
+
+                    append("\n\ndone log:\n")
+                    append(doneLog.joinToString("\n"))
 
                     append("\n\ntab log:\n")
                     append(Preferences.mainTabsLog.log)

@@ -355,6 +355,18 @@ fun DomainUpdater.updateScheduleTask(
     trackRootTaskIds {
         finalTask = convertAndUpdateProject(originalTask, now, projectKey)
 
+        /*
+        Not the prettiest way to do this, but if we're editing a child task to make it a top-level task, we try to carry
+        over the previous instance instead of creating a new one
+         */
+        val parentSingleSchedule = finalTask.getParentTask(now)
+            ?.getTopLevelTask(now)
+            ?.intervalInfo
+            ?.getCurrentScheduleIntervals(now)
+            ?.singleOrNull()
+            ?.schedule
+            ?.let { it as? SingleSchedule }
+
         finalTask.performRootIntervalUpdate {
             endAllCurrentTaskHierarchies(now)
             endAllCurrentNoScheduleOrParents(now)
@@ -366,6 +378,7 @@ fun DomainUpdater.updateScheduleTask(
                 sharedProjectParameters.nonNullAssignedTo,
                 this@create,
                 projectKey,
+                parentSingleSchedule,
             )
         }
     }
@@ -752,8 +765,6 @@ private fun DomainFactory.joinJoinables(
         .single()
         .instanceKey
 
-    val parentTaskHasOtherInstances = newParentTask.hasOtherVisibleInstances(now, parentInstanceKey)
-
     joinableMap.forEach { (joinable, task) ->
         fun addChildToParent(instance: Instance? = null) = addChildToParent(task, newParentTask, now, instance)
 
@@ -763,13 +774,7 @@ private fun DomainFactory.joinJoinables(
                 val migratedInstanceScheduleKey =
                     migrateInstanceScheduleKey(task, joinable.instanceKey.instanceScheduleKey, now)
 
-                val instance = task.getInstance(migratedInstanceScheduleKey)
-
-                if (parentTaskHasOtherInstances || task.hasOtherVisibleInstances(now, joinable.instanceKey)) {
-                    instance.setParentState(Instance.ParentState.Parent(parentInstanceKey))
-                } else {
-                    addChildToParent(instance)
-                }
+                task.getInstance(migratedInstanceScheduleKey).setParentState(Instance.ParentState.Parent(parentInstanceKey))
             }
         }
     }
@@ -925,10 +930,15 @@ private fun DomainFactory.convertAndUpdateProject(
     now: ExactTimeStamp.Local,
     projectKey: ProjectKey<*>,
 ): RootTask {
+    val isTopLevelTask = task.isTopLevelTask(now)
+
     return when (task) {
         is RootTask -> task.updateProject(projectKey)
         is ProjectTask -> converter.convertToRoot(now, task, projectKey)
-    }.also { check(it.project.projectKey == projectKey) }
+    }.also {
+        // this function is may be a no-op for child tasks
+        if (isTopLevelTask) check(it.project.projectKey == projectKey)
+    }
 }
 
 fun DomainFactory.convertToRoot(task: Task, now: ExactTimeStamp.Local): RootTask {

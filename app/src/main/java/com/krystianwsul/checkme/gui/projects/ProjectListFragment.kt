@@ -7,7 +7,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.CustomItemAnimator
-import androidx.recyclerview.widget.LinearLayoutManager
 import com.jakewharton.rxrelay3.BehaviorRelay
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.FragmentProjectListBinding
@@ -181,8 +180,6 @@ class ProjectListFragment : AbstractFragment(), FabUser {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        binding.projectListRecycler.layoutManager = LinearLayoutManager(activity)
 
         projectListViewModel = getViewModel<ProjectListViewModel>().apply {
             viewCreatedDisposable += isVisible.subscribe { if (it) start() else stop() }

@@ -147,9 +147,13 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
         taskListFragment.parameters = parameters.mapDataToTaskListFragmentParameters(showTasksViewModel.dataId, data)
     }
 
-    override fun onCreateActionMode(actionMode: ActionMode) = Unit
+    override fun onCreateActionMode(actionMode: ActionMode) = binding.showTasksToolbarCollapseInclude
+        .collapseAppBarLayout
+        .collapse()
 
-    override fun onDestroyActionMode() = Unit
+    override fun onDestroyActionMode() = binding.showTasksToolbarCollapseInclude
+        .collapseAppBarLayout
+        .expand()
 
     override fun setTaskSelectAllVisibility(selectAllVisible: Boolean) {
         this.selectAllVisible = selectAllVisible && !parameters.copying
@@ -174,7 +178,7 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
 
             setOnMenuItemClickListener {
                 when (it.itemId) {
-                    R.id.projectMenuSelectAll -> taskListFragment.treeViewAdapter.selectAll()
+                    R.id.action_select_all -> taskListFragment.treeViewAdapter.selectAll()
                     else -> throw UnsupportedOperationException()
                 }
 

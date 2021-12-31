@@ -14,6 +14,7 @@ import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.appcompat.view.ActionMode
 import androidx.appcompat.widget.Toolbar
+import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.view.*
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
@@ -42,6 +43,7 @@ import com.krystianwsul.checkme.gui.projects.ProjectListFragment
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
 import com.krystianwsul.checkme.gui.utils.BottomFabMenuDelegate
+import com.krystianwsul.checkme.gui.utils.CustomAppBarLayoutBehavior
 import com.krystianwsul.checkme.gui.utils.connectInstanceSearch
 import com.krystianwsul.checkme.gui.utils.measureVisibleHeight
 import com.krystianwsul.checkme.gui.widgets.MyBottomBar
@@ -205,7 +207,13 @@ class MainActivity :
                 .skip(1)
                 .subscribe { actionMode.finish() }
 
-            tabLayoutVisibleRelay.accept(TabLayoutVisibility.Gone(initial))
+            setToolbarExpanded(false)
+            setScrollBehavior(false)
+            //tabLayoutVisibleRelay.accept(TabLayoutVisibility.Gone(initial))
+        }
+
+        private fun setScrollBehavior(shouldScroll: Boolean) {
+            customAppBarLayoutBehavior.setScrollBehavior(shouldScroll)
         }
 
         override fun onDestroyGroupActionMode() {
@@ -216,7 +224,9 @@ class MainActivity :
             onPageChangeDisposable!!.dispose()
             onPageChangeDisposable = null
 
-            tabLayoutVisibleRelay.accept(TabLayoutVisibility.Visible)
+            setToolbarExpanded(true)
+            setScrollBehavior(true)
+            //tabLayoutVisibleRelay.accept(TabLayoutVisibility.Visible)
         }
 
         override fun setGroupMenuItemVisibility(position: Int?, selectAllVisible: Boolean) {
@@ -304,12 +314,19 @@ class MainActivity :
         binding.mainDaysPager.smoothScrollBy(smoothScroll * width, 0)
     }
 
+    private val customAppBarLayoutBehavior = CustomAppBarLayoutBehavior()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         bottomBinding = BottomBinding.bind(binding.root)
         setContentView(binding.root)
+
+        binding.mainActivityAppBarLayout
+            .layoutParams
+            .let { it as CoordinatorLayout.LayoutParams }
+            .behavior = customAppBarLayoutBehavior
 
         bottomFabMenuDelegate = BottomFabMenuDelegate(
             bottomBinding,
@@ -453,7 +470,7 @@ class MainActivity :
                             animateVisibility(
                                 listOf(binding.mainSearchInclude.toolbar),
                                 listOf(),
-                                duration = MyBottomBar.duration
+                                duration = MyBottomBar.duration,
                             )
 
                             binding.mainSearchInclude
@@ -911,21 +928,21 @@ class MainActivity :
         val tabSearchState = tabSearchStateRelay.value!!
 
         val itemVisibilities = when (tabSearchState) {
-            is TabSearchState.Instances -> {
-                listOf(
-                    R.id.actionMainCalendar to (Preferences.timeRange == Preferences.TimeRange.DAY),
-                    R.id.actionMainSearch to true
-                )
-            }
+            is TabSearchState.Instances -> listOf(
+                R.id.actionMainCalendar to (Preferences.timeRange == Preferences.TimeRange.DAY),
+                R.id.actionMainSearch to true,
+            )
             is TabSearchState.Notes, is TabSearchState.Tasks -> listOf(
                 R.id.actionMainCalendar to false,
                 R.id.actionMainSearch to true,
             )
             else -> listOf(
                 R.id.actionMainCalendar to false,
-                R.id.actionMainSearch to false
+                R.id.actionMainSearch to false,
             )
         }
+
+        MyCrashlytics.log("updateTopMenu search visible? " + itemVisibilities.single { it.first == R.id.actionMainSearch }.second)
 
         binding.mainActivityToolbar.apply {
             animateItems(itemVisibilities) {
@@ -968,6 +985,7 @@ class MainActivity :
     private var elevationValueAnimator: ValueAnimator? = null
 
     fun setTabSearchState(tabSearchState: TabSearchState, immediate: Boolean = false) {
+        MyCrashlytics.log("tabSearchState: $tabSearchState")
         val tab = tabSearchState.tab
 
         elevationValueAnimator?.cancel()

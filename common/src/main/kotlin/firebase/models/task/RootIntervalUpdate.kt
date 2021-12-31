@@ -31,6 +31,7 @@ class RootIntervalUpdate(val rootTask: RootTask, intervalInfo: IntervalInfo) :
         assignedTo: Set<UserKey>,
         customTimeMigrationHelper: Project.CustomTimeMigrationHelper,
         projectKey: ProjectKey<*>,
+        parentSingleSchedule: SingleSchedule? = null,
     ) {
         val removeSchedules = mutableListOf<Schedule>()
         val addScheduleDatas = scheduleDatas.map { ScheduleDiffKey(it.first, assignedTo) to it }.toMutableList()
@@ -63,14 +64,47 @@ class RootIntervalUpdate(val rootTask: RootTask, intervalInfo: IntervalInfo) :
         }
 
         if (singleRemoveSchedule != null && singleAddSchedulePair != null) {
+            check(parentSingleSchedule == null)
+
             if (assignedTo.isNotEmpty()) singleRemoveSchedule.setAssignedTo(assignedTo)
 
-            singleRemoveSchedule.getInstance(rootTask).setInstanceDateTime(
-                shownFactory,
-                singleAddSchedulePair.second.run { DateTime((first as ScheduleData.Single).date, second) },
-                customTimeMigrationHelper,
+            singleRemoveSchedule.getInstance(rootTask).let {
+                it.setInstanceDateTime(
+                    shownFactory,
+                    singleAddSchedulePair.second.run { DateTime((first as ScheduleData.Single).date, second) },
+                    customTimeMigrationHelper,
+                    now,
+                )
+
+                it.setParentState(Instance.ParentState.NoParent)
+            }
+        } else if (parentSingleSchedule != null && singleAddSchedulePair != null) {
+            check(removeSchedules.isEmpty())
+
+            /*
+            In this scenario, we create a schedule that matches the parent's original one, and then manipulate the instance
+            time.  That way, we get to keep the previous instance, along with its children's done states.
+             */
+            rootTask.createSchedules(
                 now,
+                parentSingleSchedule.originalScheduleDateTime.let {
+                    listOf(ScheduleData.Single(it.date, it.time.timePair) to it.time)
+                },
+                assignedTo,
+                customTimeMigrationHelper,
+                projectKey,
             )
+
+            parentSingleSchedule.getInstance(rootTask).let {
+                it.setInstanceDateTime(
+                    shownFactory,
+                    singleAddSchedulePair.second.run { DateTime((first as ScheduleData.Single).date, second) },
+                    customTimeMigrationHelper,
+                    now,
+                )
+
+                it.setParentState(Instance.ParentState.NoParent)
+            }
         } else {
             removeSchedules.forEach { it.setEndExactTimeStamp(now.toOffset()) }
 

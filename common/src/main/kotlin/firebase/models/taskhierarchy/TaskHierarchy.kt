@@ -37,12 +37,18 @@ sealed class TaskHierarchy(
     val id by lazy { taskHierarchyRecord.id }
 
     private val parentTaskCache = invalidatableCache<Task>(clearableInvalidatableManager) { invalidatableCache ->
-        val parentTask = parentTaskDelegate.getTask(parentTaskId)
+        try {
+            val parentTask = parentTaskDelegate.getTask(parentTaskId)
 
-        val removable = parentTask.clearableInvalidatableManager.addInvalidatable(invalidatableCache)
+            val removable = parentTask.clearableInvalidatableManager.addInvalidatable(invalidatableCache)
 
-        InvalidatableCache.ValueHolder(parentTask) { removable.remove() }
+            InvalidatableCache.ValueHolder(parentTask) { removable.remove() }
+        } catch (exception: Exception) {
+            throw GetParentTaskException(exception)
+        }
     }
+
+    private inner class GetParentTaskException(cause: Throwable) : Exception("taskHierarchyKey: $taskHierarchyKey", cause)
 
     val parentTask by parentTaskCache
     abstract val childTask: Task

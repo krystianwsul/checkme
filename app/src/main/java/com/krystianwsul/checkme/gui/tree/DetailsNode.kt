@@ -48,7 +48,7 @@ class DetailsNode(
 
     override val disableRipple = true
 
-    override val showSeparatorWhenParentExpanded = false
+    override fun showSeparatorWhenParentExpanded(top: Boolean) = !top
 
     fun initialize(nodeContainer: NodeContainer<AbstractHolder>): TreeNode<AbstractHolder> {
         this.nodeContainer = nodeContainer

@@ -131,13 +131,14 @@ class TreeNode<T : TreeHolder>(
             if (positionInCollection == treeNodeCollection.displayedNodes.size - 1) return false
 
             if (parent.getPosition(this, PositionMode.DISPLAYED) == parent.displayedNodes.size - 1)
-                return parent.wantsSeparators
+                return parent.wantsSeparators(false)
 
             val nextTreeNode = treeNodeCollection.getNode(positionInCollection + 1, PositionMode.DISPLAYED)
-            return modelNode.isSeparatorVisibleWhenNotExpanded || nextTreeNode.wantsSeparators
+            return modelNode.isSeparatorVisibleWhenNotExpanded || nextTreeNode.wantsSeparators(true)
         }
 
-    override val wantsSeparators get() = displayedChildNodes.any { it.modelNode.showSeparatorWhenParentExpanded }
+    override fun wantsSeparators(top: Boolean) =
+        displayedChildNodes.any { it.modelNode.showSeparatorWhenParentExpanded(top) }
 
     val allChildren: List<TreeNode<T>> get() = childTreeNodes
 

@@ -72,13 +72,27 @@ class OrdinalProcessor(
                             Instance.VisibilityOptions(hack24 = true),
                         )
 
-                        if (!isVisible) mutableKeyEntry.mutableTaskInfo!!.scheduleDateTimePair = null
+                        if (!isVisible) {
+                            mutableKeyEntry.instanceDateOrDayOfWeek
+                                .date
+                                ?.let { mutableKeyEntry.instanceDateOrDayOfWeek = DateOrDayOfWeek.DayOfWeek(it.dayOfWeek) }
+
+                            mutableKeyEntry.mutableTaskInfo!!.scheduleDateTimePair = null
+                        }
                     }
+                }
+
+                mutableKeyEntry.instanceDateOrDayOfWeek.date?.let { instanceDate ->
+                    val oldestVisibleDate = oldestVisibleProjectDates.getValue(projectOrdinalManager.project.projectKey)
+
+                    if (oldestVisibleDate == null || instanceDate < oldestVisibleDate)
+                        mutableKeyEntry.instanceDateOrDayOfWeek = DateOrDayOfWeek.DayOfWeek(instanceDate.dayOfWeek)
                 }
             }
         }
 
         // todo ordinal remove
+        // todo ordinal compact before this.  Keys better be unique
         val immutableEntries = mutableOrdinalEntries.associate { it.toImmutableEntryPair() }
     }
 
@@ -107,7 +121,7 @@ class OrdinalProcessor(
 
     private data class MutableKeyEntry(
         var mutableTaskInfo: MutableTaskInfo?,
-        val instanceDateOrDayOfWeek: DateOrDayOfWeek,
+        var instanceDateOrDayOfWeek: DateOrDayOfWeek,
         val instanceTimePair: TimePair,
     ) {
 

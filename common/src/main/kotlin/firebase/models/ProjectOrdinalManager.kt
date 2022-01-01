@@ -10,6 +10,8 @@ class ProjectOrdinalManager(val project: SharedProject) {
 
     private var ordinals = mutableMapOf<Key, Value>()
 
+    val allEntries: Collection<Pair<Key, Value>> = ordinals.entries.map { it.key to it.value }
+
     fun setOrdinal(key: Key, ordinal: Double, now: ExactTimeStamp.Local) {
         ordinals[key] = Value(ordinal, now)
     }
@@ -73,7 +75,7 @@ class ProjectOrdinalManager(val project: SharedProject) {
         data class Entry(val instanceKey: InstanceKey, val instanceDateTimePair: DateTimePair)
     }
 
-    private data class Value(val ordinal: Double, val updated: ExactTimeStamp.Local)
+    data class Value(val ordinal: Double, val updated: ExactTimeStamp.Local)
 
     interface Provider {
 

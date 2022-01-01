@@ -2,6 +2,7 @@ package com.krystianwsul.common.relevance
 
 
 import com.krystianwsul.common.firebase.models.Instance
+import com.krystianwsul.common.firebase.models.ProjectOrdinalManager
 import com.krystianwsul.common.firebase.models.RootUser
 import com.krystianwsul.common.firebase.models.noscheduleorparent.NoScheduleOrParent
 import com.krystianwsul.common.firebase.models.project.PrivateProject
@@ -213,7 +214,7 @@ object Irrelevant {
 
             val irrelevantProjects = projects.values - relevantProjects
 
-            users.forEach { processProjectOrdinals(it, relevantProjects) }
+            users.forEach { processProjectOrdinalManagers(it, relevantProjects) }
 
             irrelevantExistingInstances.forEach { it.delete() }
             irrelevantSchedules.forEach { it.delete() }
@@ -258,11 +259,19 @@ object Irrelevant {
         return result
     }
 
-    private fun processProjectOrdinals(user: RootUser, relevantProjects: Set<Project<*>>) {
-        val (relevantProjectOrdinalManager, irrelevantProjectOrdinalManagers) =
+    private fun processProjectOrdinalManagers(user: RootUser, relevantProjects: Set<Project<*>>) {
+        val (relevantProjectOrdinalManagers, irrelevantProjectOrdinalManagers) =
             user.allProjectOrdinalManagers.partition { it.project in relevantProjects }
 
+        relevantProjectOrdinalManagers.forEach { processProjectOrdinals(it) }
+
         // todo ordinal remove irrelevantProjectOrdinalManagers
+    }
+
+    private fun processProjectOrdinals(projectOrdinalManager: ProjectOrdinalManager) {
+        val originalEntries = projectOrdinalManager.allEntries
+
+
     }
 
     private class VisibleIrrelevantTasksException(message: String) : Exception(message)

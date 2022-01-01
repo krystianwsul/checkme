@@ -612,7 +612,8 @@ class Instance private constructor(
                             customTime.privateKey!!,
                         )
 
-                        privateProject.getProjectCustomTime(privateCustomTimeKey)
+                        privateProject.tryGetProjectCustomTime(privateCustomTimeKey)
+                        // todo next, try to find User custom time in the same way
                     } else {
                         null
                     }

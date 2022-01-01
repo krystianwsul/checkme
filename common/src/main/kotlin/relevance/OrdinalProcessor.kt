@@ -6,9 +6,10 @@ import com.krystianwsul.common.firebase.models.RootUser
 import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.time.DateOrDayOfWeek
+import com.krystianwsul.common.time.DateTimePair
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.TimePair
-import com.krystianwsul.common.utils.InstanceKey
+import com.krystianwsul.common.utils.InstanceScheduleKey
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
 
@@ -57,19 +58,27 @@ class OrdinalProcessor(
 
         mutableOrdinalEntries.forEach { mutableOrdinalEntry ->
             mutableOrdinalEntry.mutableKeyEntries.forEach { mutableKeyEntry ->
-                mutableKeyEntry.instanceKey?.let {
-                    if (
-                        relevantTasks[it.taskKey]?.getInstance(it.instanceScheduleKey)?.isVisible(
+                mutableKeyEntry.mutableTaskInfo?.let {
+                    val task = relevantTasks[it.taskKey]
+
+                    if (task == null) {
+                        mutableKeyEntry.mutableTaskInfo = null
+                    } else if (it.scheduleDateTimePair != null) {
+                        val instanceScheduleKey =
+                            InstanceScheduleKey(it.scheduleDateTimePair!!.date, it.scheduleDateTimePair!!.timePair)
+
+                        val isVisible = task.getInstance(instanceScheduleKey).isVisible(
                             now,
                             Instance.VisibilityOptions(hack24 = true),
-                        ) != true
-                    ) {
-                        mutableKeyEntry.instanceKey = null
+                        )
+
+                        if (!isVisible) mutableKeyEntry.mutableTaskInfo!!.scheduleDateTimePair = null
                     }
                 }
             }
         }
 
+        // todo ordinal remove
         val immutableEntries = mutableOrdinalEntries.associate { it.toImmutableEntryPair() }
     }
 
@@ -97,19 +106,31 @@ class OrdinalProcessor(
     }
 
     private data class MutableKeyEntry(
-        var instanceKey: InstanceKey?,
+        var mutableTaskInfo: MutableTaskInfo?,
         val instanceDateOrDayOfWeek: DateOrDayOfWeek,
         val instanceTimePair: TimePair,
     ) {
 
         constructor(immutableEntry: ProjectOrdinalManager.Key.Entry) : this(
-            immutableEntry.instanceKey,
+            immutableEntry.taskInfo?.let(::MutableTaskInfo),
             immutableEntry.instanceDateOrDayOfWeek,
             immutableEntry.instanceTimePair,
         )
 
         fun toImmutableKeyEntry(): ProjectOrdinalManager.Key.Entry {
-            return ProjectOrdinalManager.Key.Entry(instanceKey, instanceDateOrDayOfWeek, instanceTimePair)
+            return ProjectOrdinalManager.Key.Entry(
+                mutableTaskInfo?.toImmutableTaskInfo(),
+                instanceDateOrDayOfWeek,
+                instanceTimePair,
+            )
+        }
+
+        // todo ordinal strip out scheduleDateTimePair instead of taskKey
+        data class MutableTaskInfo(val taskKey: TaskKey, var scheduleDateTimePair: DateTimePair?) {
+
+            constructor(taskInfo: ProjectOrdinalManager.Key.TaskInfo) : this(taskInfo.taskKey, taskInfo.scheduleDateTimePair)
+
+            fun toImmutableTaskInfo() = ProjectOrdinalManager.Key.TaskInfo(taskKey, scheduleDateTimePair)
         }
     }
 }

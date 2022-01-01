@@ -221,7 +221,12 @@ object Irrelevant {
             irrelevantTasks.forEach { it.delete() }
 
             // we want this to run after everything from the task down is deleted, but before custom times
-            OrdinalProcessor(users, relevantProjects).process()
+            OrdinalProcessor(
+                users,
+                relevantProjects.associateBy { it.projectKey },
+                relevantTasks.associateBy { it.taskKey },
+                now,
+            ).process()
 
             irrelevantRemoteCustomTimes.forEach { it.delete() }
             irrelevantProjects.forEach { it.delete() }

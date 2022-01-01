@@ -3,6 +3,7 @@ package com.krystianwsul.common.firebase.models
 import com.krystianwsul.common.firebase.models.project.SharedProject
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.InstanceKey
+import com.krystianwsul.common.utils.TaskKey
 
 class ProjectOrdinalManager(val project: SharedProject) {
 
@@ -41,7 +42,11 @@ class ProjectOrdinalManager(val project: SharedProject) {
         fun Key.Entry.getHourMinute() = project.getTime(instanceTimePair).getHourMinute(instanceDateOrDayOfWeek.dayOfWeek)
 
         listOf<(Key.Entry) -> Any?>(
-            { it.instanceKey }, // instanceKey
+            {
+                it.taskInfo?.let { taskInfo ->
+                    taskInfo.scheduleDateTimePair?.let { taskInfo to it }
+                }
+            }, // instanceKey
             { entry ->
                 entry.instanceDateOrDayOfWeek
                     .date
@@ -54,7 +59,7 @@ class ProjectOrdinalManager(val project: SharedProject) {
             }, // instance Timestamp
             { it.instanceTimePair }, // instance timePair
             { it.getHourMinute() }, // instance hourMinute
-            { it.instanceKey?.taskKey }, // taskKey
+            { it.taskInfo?.taskKey }, // taskKey
         ).asSequence()
             .mapNotNull { getMatchByAspect(key, it) }
             .firstOrNull()
@@ -70,10 +75,25 @@ class ProjectOrdinalManager(val project: SharedProject) {
     data class Key(val entries: Set<Entry>) {
 
         data class Entry(
-            val instanceKey: InstanceKey?,
+            val taskInfo: TaskInfo?,
             val instanceDateOrDayOfWeek: DateOrDayOfWeek,
             val instanceTimePair: TimePair,
-        )
+        ) {
+
+            constructor(instanceKey: InstanceKey, instanceDateTimePair: DateTimePair) : this(
+                TaskInfo(instanceKey),
+                DateOrDayOfWeek.Date(instanceDateTimePair.date),
+                instanceDateTimePair.timePair,
+            )
+        }
+
+        data class TaskInfo(val taskKey: TaskKey, val scheduleDateTimePair: DateTimePair?) {
+
+            constructor(instanceKey: InstanceKey) : this(
+                instanceKey.taskKey,
+                instanceKey.instanceScheduleKey.run { DateTimePair(scheduleDate, scheduleTimePair) },
+            )
+        }
     }
 
     data class Value(val ordinal: Double, val updated: ExactTimeStamp.Local)

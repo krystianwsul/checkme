@@ -309,9 +309,13 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
         actionMode: ActionMode,
         treeViewAdapter: TreeViewAdapter<AbstractHolder>,
         initial: Boolean,
-    ) = Unit
+    ) = binding.showGroupToolbarCollapseInclude
+        .collapseAppBarLayout
+        .collapse()
 
-    override fun onDestroyGroupActionMode() = Unit
+    override fun onDestroyGroupActionMode() = binding.showGroupToolbarCollapseInclude
+        .collapseAppBarLayout
+        .expand()
 
     override fun setGroupMenuItemVisibility(position: Int?, selectAllVisible: Boolean) {
         this.selectAllVisible = selectAllVisible

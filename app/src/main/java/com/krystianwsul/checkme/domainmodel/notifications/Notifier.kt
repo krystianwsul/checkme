@@ -94,6 +94,8 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
         else
             getNotificationInstances(domainFactory, now).associateBy { it.instanceKey }
 
+        check(notificationInstances.values.all { it.task.dependenciesLoaded })
+
         Preferences.tickLog.logLineHour(
             "notification instances: " + notificationInstances.values.joinToString(", ") { it.name }
         )

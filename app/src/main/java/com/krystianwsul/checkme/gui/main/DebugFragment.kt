@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material.Button
 import androidx.compose.material.Switch
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -18,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.google.android.material.composethemeadapter.MdcTheme
 import com.jakewharton.rxbinding4.view.clicks
+import com.jakewharton.rxrelay3.PublishRelay
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.databinding.FragmentDebugBinding
@@ -95,6 +97,19 @@ class DebugFragment : AbstractFragment() {
             .subscribe()
             .addTo(viewCreatedDisposable)
 
+        val loadStateClicks = PublishRelay.create<Unit>()
+
+        binding.debugLoadState.setContent {
+            MdcTheme {
+                LoadStateButton { loadStateClicks.accept(Unit) }
+            }
+        }
+
+        loadStateClicks.toFlowable(BackpressureStrategy.DROP)
+            .observeOnDomain()
+            .subscribe { DomainFactory.instance.updateIsWaitingForTasks() }
+            .addTo(viewCreatedDisposable)
+
         binding.debugLoad
             .clicks()
             .toFlowable(BackpressureStrategy.DROP)
@@ -121,7 +136,10 @@ class DebugFragment : AbstractFragment() {
                             waitingNames.joinToString("\n")
                         }
 
-                        Pair(loadTime, waitingOnDependencies)
+                        Pair(
+                            loadTime,
+                            "isWaitingForTasks? ${DomainFactory.instance.isWaitingForTasks.value}\n$waitingOnDependencies"
+                        )
                     }
                 },
                 false,
@@ -215,6 +233,13 @@ class DebugFragment : AbstractFragment() {
                     })
                 }
             }
+        }
+    }
+
+    @Composable
+    private fun LoadStateButton(onClick: () -> Unit) {
+        Button(onClick = onClick) {
+            Text("REFRESH LOAD STATE")
         }
     }
 }

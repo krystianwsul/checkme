@@ -102,7 +102,7 @@ object Irrelevant {
                 }
 
             val relevantTaskRelevances = taskRelevances.values.filter { it.relevant }
-            val relevantTasks = relevantTaskRelevances.map { it.task }
+            val relevantTasks = relevantTaskRelevances.map { it.task }.toSet()
 
             irrelevantTasks = tasks - relevantTasks
 
@@ -114,7 +114,7 @@ object Irrelevant {
             }
 
             val relevantTaskHierarchyRelevances = taskHierarchyRelevances.values.filter { it.relevant }
-            val relevantTaskHierarchies = relevantTaskHierarchyRelevances.map { it.taskHierarchy }
+            val relevantTaskHierarchies = relevantTaskHierarchyRelevances.map { it.taskHierarchy }.toSet()
 
             /**
              * The first is removed normally.  The second is for nested task hierarchies, inside tasks that will also be deleted.
@@ -133,8 +133,9 @@ object Irrelevant {
             val relevantInstances = instanceRelevances.values
                 .filter { it.relevant }
                 .map { it.instance }
+                .toSet()
 
-            val relevantExistingInstances = relevantInstances.filter { it.exists() }
+            val relevantExistingInstances = relevantInstances.filter { it.exists() }.toSet()
             val irrelevantExistingInstances = existingInstances - relevantExistingInstances
 
             val irrelevantNoScheduleOrParents = mutableListOf<NoScheduleOrParent>()
@@ -143,6 +144,7 @@ object Irrelevant {
                     .noScheduleOrParentIntervals
                     .filter { it.notDeletedOffset() }
                     .map { it.noScheduleOrParent }
+                    .toSet()
 
                 irrelevantNoScheduleOrParents += it.noScheduleOrParents - relevantNoScheduleOrParents
 
@@ -161,6 +163,7 @@ object Irrelevant {
             val relevantSchedules = scheduleRelevances.values
                 .filter { it.relevant }
                 .map { it.schedule }
+                .toSet()
 
             val irrelevantSchedules = relevantTasks.flatMap { it.schedules } - relevantSchedules
 
@@ -203,6 +206,7 @@ object Irrelevant {
                 .values
                 .filter { it.relevant }
                 .map { it.customTime as Time.Custom.Project<*> }
+                .toSet()
 
             val irrelevantRemoteCustomTimes = remoteCustomTimes - relevantRemoteCustomTimes
 
@@ -269,7 +273,4 @@ object Irrelevant {
 
     private class TaskInIrrelevantException(taskKey: TaskKey, projectKey: ProjectKey<*>) :
         Exception("task incorrectly irrelevant: $taskKey in $projectKey")
-
-    private class InstanceIrrelevantForProjectScheduleException(taskKey: TaskKey) :
-        Exception("single schedule instance incorrectly irrelevant for taskKey: $taskKey")
 }

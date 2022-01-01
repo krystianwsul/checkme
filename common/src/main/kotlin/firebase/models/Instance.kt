@@ -596,7 +596,7 @@ class Instance private constructor(
     }
 
     // todo use for all CreateTaskActivity schedule hints.  Either filter by current, or add non-current to create task data
-    fun getCreateTaskTimePair(privateProject: PrivateProject): TimePair {
+    fun getCreateTaskTimePair(privateProject: PrivateProject, myUser: MyUser): TimePair {
         val instanceTimePair = instanceTime.timePair
 
         return if (instanceTimePair.customTimeKey != null) {
@@ -612,7 +612,11 @@ class Instance private constructor(
                             customTime.privateKey!!,
                         )
 
-                        privateProject.getProjectCustomTime(privateCustomTimeKey)
+                        myUser.customTimes
+                            .values
+                            .filter { it.customTimeRecord.privateCustomTimeId == privateCustomTimeKey.customTimeId }
+                            .singleOrEmpty()
+                            ?: privateProject.tryGetProjectCustomTime(privateCustomTimeKey)
                     } else {
                         null
                     }

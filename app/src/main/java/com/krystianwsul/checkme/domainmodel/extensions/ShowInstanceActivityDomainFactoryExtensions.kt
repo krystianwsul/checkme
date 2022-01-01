@@ -143,7 +143,7 @@ private fun DomainFactory.getGroupListData(
                 childTask.isVisible(now),
                 childInstance.canMigrateDescription(now),
                 childInstance.isRootInstance(),
-                childInstance.getCreateTaskTimePair(projectsFactory.privateProject),
+                childInstance.getCreateTaskTimePair(projectsFactory.privateProject, myUserFactory.user),
                 childTask.note,
                 newMixedInstanceDataCollection(children),
                 childTask.ordinal,

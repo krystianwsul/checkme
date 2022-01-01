@@ -3,8 +3,6 @@ package com.krystianwsul.common.relevance
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.ProjectOrdinalManager
 import com.krystianwsul.common.firebase.models.RootUser
-import com.krystianwsul.common.firebase.models.project.PrivateProject
-import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.project.SharedProject
 import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.time.DateOrDayOfWeek
@@ -17,7 +15,7 @@ import com.krystianwsul.common.utils.TaskKey
 
 class OrdinalProcessor(
     private val users: Collection<RootUser>,
-    private val relevantProjects: Map<ProjectKey<*>, Project<*>>,
+    private val relevantProjects: Map<ProjectKey.Shared, SharedProject>,
     private val relevantTasks: Map<TaskKey, Task>,
     private val customTimeRelevanceCollection: CustomTimeRelevanceCollection,
     private val now: ExactTimeStamp.Local,
@@ -46,21 +44,11 @@ class OrdinalProcessor(
     }
 
     private fun processProjects(user: RootUser) {
-        fun Project<*>.relevantToUser(): Boolean {
-            return when (this) {
-                is PrivateProject -> {
-                    check(projectKey.toUserKey() == user.userKey)
-
-                    true
-                }
-                is SharedProject -> projectKey in user.projectIds
-                else -> throw UnsupportedOperationException() // still not working in 1.6.0
-            }
-        }
-
         val (relevantProjectOrdinalManagers, irrelevantProjectOrdinalManagers) =
             user.allProjectOrdinalManagers.partition {
-                it.project.projectKey in relevantProjects && it.project.relevantToUser()
+                it.project
+                    .projectKey
+                    .let { it in relevantProjects && it in user.projectIds }
             }
 
         relevantProjectOrdinalManagers.forEach(::processProject)

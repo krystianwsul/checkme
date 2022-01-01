@@ -222,7 +222,7 @@ object Irrelevant {
             // we want this to run after everything from the task down is deleted, but before custom times
             OrdinalProcessor(
                 users,
-                relevantProjects.associateBy { it.projectKey },
+                relevantProjects.filterIsInstance<SharedProject>().associateBy { it.projectKey },
                 relevantTasks.associateBy { it.taskKey },
                 customTimeRelevanceCollection,
                 now,

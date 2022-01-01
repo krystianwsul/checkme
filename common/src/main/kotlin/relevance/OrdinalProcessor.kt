@@ -95,7 +95,10 @@ class OrdinalProcessor(
         }
     }
 
-    private data class MutableKeyEntry(var instanceKey: InstanceKey?, val instanceDateTimePair: DateTimePair) {
+    private data class MutableKeyEntry(
+        var instanceKey: InstanceKey?,
+        val instanceDateTimePair: DateTimePair
+    ) {
 
         constructor(immutableEntry: ProjectOrdinalManager.Key.Entry) :
                 this(immutableEntry.instanceKey, immutableEntry.instanceDateTimePair)
@@ -103,12 +106,5 @@ class OrdinalProcessor(
         fun toImmutableKeyEntry(): ProjectOrdinalManager.Key.Entry {
             return ProjectOrdinalManager.Key.Entry(instanceKey, instanceDateTimePair)
         }
-    }
-
-    sealed class DateOrDayOfWeek {
-
-        data class Date(val date: com.krystianwsul.common.time.Date) : DateOrDayOfWeek()
-
-        data class DayOfWeek(val dayOfWeek: com.krystianwsul.common.time.DayOfWeek) : DateOrDayOfWeek()
     }
 }

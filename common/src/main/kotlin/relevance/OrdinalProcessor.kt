@@ -5,8 +5,9 @@ import com.krystianwsul.common.firebase.models.ProjectOrdinalManager
 import com.krystianwsul.common.firebase.models.RootUser
 import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.task.Task
-import com.krystianwsul.common.time.DateTimePair
+import com.krystianwsul.common.time.DateOrDayOfWeek
 import com.krystianwsul.common.time.ExactTimeStamp
+import com.krystianwsul.common.time.TimePair
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
@@ -97,14 +98,18 @@ class OrdinalProcessor(
 
     private data class MutableKeyEntry(
         var instanceKey: InstanceKey?,
-        val instanceDateTimePair: DateTimePair
+        val instanceDateOrDayOfWeek: DateOrDayOfWeek,
+        val instanceTimePair: TimePair,
     ) {
 
-        constructor(immutableEntry: ProjectOrdinalManager.Key.Entry) :
-                this(immutableEntry.instanceKey, immutableEntry.instanceDateTimePair)
+        constructor(immutableEntry: ProjectOrdinalManager.Key.Entry) : this(
+            immutableEntry.instanceKey,
+            immutableEntry.instanceDateOrDayOfWeek,
+            immutableEntry.instanceTimePair,
+        )
 
         fun toImmutableKeyEntry(): ProjectOrdinalManager.Key.Entry {
-            return ProjectOrdinalManager.Key.Entry(instanceKey, instanceDateTimePair)
+            return ProjectOrdinalManager.Key.Entry(instanceKey, instanceDateOrDayOfWeek, instanceTimePair)
         }
     }
 }

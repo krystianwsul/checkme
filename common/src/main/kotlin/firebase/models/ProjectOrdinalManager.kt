@@ -1,9 +1,7 @@
 package com.krystianwsul.common.firebase.models
 
 import com.krystianwsul.common.firebase.models.project.SharedProject
-import com.krystianwsul.common.time.DateTimePair
-import com.krystianwsul.common.time.ExactTimeStamp
-import com.krystianwsul.common.time.TimeStamp
+import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.InstanceKey
 
 class ProjectOrdinalManager(val project: SharedProject) {
@@ -40,16 +38,22 @@ class ProjectOrdinalManager(val project: SharedProject) {
     }
 
     fun getOrdinal(key: Key): Double {
-        fun DateTimePair.getHourMinute() = project.getTime(timePair).getHourMinute(date.dayOfWeek)
+        fun Key.Entry.getHourMinute() = project.getTime(instanceTimePair).getHourMinute(instanceDateOrDayOfWeek.dayOfWeek)
 
         listOf<(Key.Entry) -> Any?>(
             { it.instanceKey }, // instanceKey
-            { it.instanceDateTimePair }, // instance dateTimePair
-            { // instance Timestamp
-                it.instanceDateTimePair.run { TimeStamp(date, getHourMinute()) }
-            },
-            { it.instanceDateTimePair.timePair }, // instance timePair
-            { it.instanceDateTimePair.getHourMinute() }, // instance hourMinute
+            { entry ->
+                entry.instanceDateOrDayOfWeek
+                    .date
+                    ?.let { DateTimePair(it, entry.instanceTimePair) }
+            }, // instance dateTimePair
+            { entry ->
+                entry.instanceDateOrDayOfWeek
+                    .date
+                    ?.let { TimeStamp(it, entry.getHourMinute()) }
+            }, // instance Timestamp
+            { it.instanceTimePair }, // instance timePair
+            { it.getHourMinute() }, // instance hourMinute
             { it.instanceKey?.taskKey }, // taskKey
         ).asSequence()
             .mapNotNull { getMatchByAspect(key, it) }
@@ -65,7 +69,11 @@ class ProjectOrdinalManager(val project: SharedProject) {
 
     data class Key(val entries: Set<Entry>) {
 
-        data class Entry(val instanceKey: InstanceKey?, val instanceDateTimePair: DateTimePair)
+        data class Entry(
+            val instanceKey: InstanceKey?,
+            val instanceDateOrDayOfWeek: DateOrDayOfWeek,
+            val instanceTimePair: TimePair,
+        )
     }
 
     data class Value(val ordinal: Double, val updated: ExactTimeStamp.Local)

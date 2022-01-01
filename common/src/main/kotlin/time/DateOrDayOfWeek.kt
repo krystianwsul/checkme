@@ -2,7 +2,16 @@ package com.krystianwsul.common.time
 
 sealed class DateOrDayOfWeek {
 
-    data class Date(val date: com.krystianwsul.common.time.Date) : DateOrDayOfWeek()
+    abstract val date: com.krystianwsul.common.time.Date?
+    abstract val dayOfWeek: com.krystianwsul.common.time.DayOfWeek
 
-    data class DayOfWeek(val dayOfWeek: com.krystianwsul.common.time.DayOfWeek) : DateOrDayOfWeek()
+    data class Date(override val date: com.krystianwsul.common.time.Date) : DateOrDayOfWeek() {
+
+        override val dayOfWeek get() = date.dayOfWeek
+    }
+
+    data class DayOfWeek(override val dayOfWeek: com.krystianwsul.common.time.DayOfWeek) : DateOrDayOfWeek() {
+
+        override val date: com.krystianwsul.common.time.Date? get() = null
+    }
 }

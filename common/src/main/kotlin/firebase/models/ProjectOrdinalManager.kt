@@ -56,7 +56,7 @@ class ProjectOrdinalManager(val project: SharedProject) {
             },
             { it.instanceDateTimePair.timePair }, // instance timePair
             { it.instanceDateTimePair.getHourMinute() }, // instance hourMinute
-            { it.instanceKey.taskKey }, // taskKey
+            { it.instanceKey?.taskKey }, // taskKey
             { it.instanceDateTimePair.date.dayOfWeek }, // instance dayOfWeek
         ).asSequence()
             .mapNotNull { getMatchByAspect(key, it) }
@@ -72,7 +72,7 @@ class ProjectOrdinalManager(val project: SharedProject) {
 
     data class Key(val entries: Set<Entry>) {
 
-        data class Entry(val instanceKey: InstanceKey, val instanceDateTimePair: DateTimePair)
+        data class Entry(val instanceKey: InstanceKey?, val instanceDateTimePair: DateTimePair)
     }
 
     data class Value(val ordinal: Double, val updated: ExactTimeStamp.Local)

@@ -3,11 +3,17 @@ package com.krystianwsul.common.relevance
 import com.krystianwsul.common.firebase.models.ProjectOrdinalManager
 import com.krystianwsul.common.firebase.models.RootUser
 import com.krystianwsul.common.firebase.models.project.Project
+import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.time.DateTimePair
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.InstanceKey
+import com.krystianwsul.common.utils.TaskKey
 
-class OrdinalProcessor(private val users: Collection<RootUser>, private val relevantProjects: Set<Project<*>>) {
+class OrdinalProcessor(
+    private val users: Collection<RootUser>,
+    private val relevantProjects: Set<Project<*>>,
+    private val relevantTasks: Map<TaskKey, Task>,
+) {
 
     fun process() {
         users.forEach { processProjects(it) }
@@ -27,7 +33,12 @@ class OrdinalProcessor(private val users: Collection<RootUser>, private val rele
             .map(::MutableOrdinalEntry)
             .toMutableList()
 
-        mutableOrdinalEntries.forEach { mutableEntryKey ->
+        mutableOrdinalEntries.forEach { mutableOrdinalEntry ->
+            mutableOrdinalEntry.mutableKeyEntries.forEach { mutableKeyEntry ->
+                mutableKeyEntry.instanceKey?.let {
+                    if (it.taskKey !in relevantTasks) mutableKeyEntry.instanceKey = null
+                }
+            }
         }
 
         val immutableEntries = mutableOrdinalEntries.associate { it.toImmutableEntryPair() }
@@ -56,7 +67,7 @@ class OrdinalProcessor(private val users: Collection<RootUser>, private val rele
         }
     }
 
-    private data class MutableKeyEntry(val instanceKey: InstanceKey, val instanceDateTimePair: DateTimePair) {
+    private data class MutableKeyEntry(var instanceKey: InstanceKey?, val instanceDateTimePair: DateTimePair) {
 
         constructor(immutableEntry: ProjectOrdinalManager.Key.Entry) :
                 this(immutableEntry.instanceKey, immutableEntry.instanceDateTimePair)

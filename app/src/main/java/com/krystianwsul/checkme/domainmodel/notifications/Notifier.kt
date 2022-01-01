@@ -343,6 +343,7 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
                 { domainFactory.projectsFactory.projects },
                 domainFactory.rootTasksFactory,
                 exactTimeStamp,
+                listOf(domainFactory.myUserFactory.user),
             )
 
             results.irrelevantExistingInstances

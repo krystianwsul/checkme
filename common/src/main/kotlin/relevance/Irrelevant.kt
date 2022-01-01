@@ -2,6 +2,7 @@ package com.krystianwsul.common.relevance
 
 
 import com.krystianwsul.common.firebase.models.Instance
+import com.krystianwsul.common.firebase.models.RootUser
 import com.krystianwsul.common.firebase.models.noscheduleorparent.NoScheduleOrParent
 import com.krystianwsul.common.firebase.models.project.PrivateProject
 import com.krystianwsul.common.firebase.models.project.Project
@@ -28,6 +29,7 @@ object Irrelevant {
         getProjects: () -> Map<ProjectKey<*>, Project<*>>,
         rootTaskProvider: Project.RootTaskProvider,
         now: ExactTimeStamp.Local,
+        users: Collection<RootUser>,
     ): Result {
         val projects = getProjects()
         val tasks = projects.values.flatMap { it.getAllDependenciesLoadedTasks() }

@@ -211,7 +211,7 @@ object Irrelevant {
                 .map { it.project }
                 .toSet()
 
-            val irrelevantProjects = projects.values - relevantProjects
+            val irrelevantProjects = (projects.values - relevantProjects).map { it as SharedProject }
 
             irrelevantExistingInstances.forEach { it.delete() }
             irrelevantSchedules.forEach { it.delete() }

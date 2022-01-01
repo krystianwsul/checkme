@@ -21,7 +21,7 @@ import com.krystianwsul.common.interrupt.InterruptionChecker
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.*
 
-abstract class Project<T : ProjectType>(
+sealed class Project<T : ProjectType>(
     val assignedToHelper: AssignedToHelper,
     userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
     val rootTaskProvider: RootTaskProvider,

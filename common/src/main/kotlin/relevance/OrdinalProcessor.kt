@@ -8,14 +8,33 @@ import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.time.DateTimePair
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.InstanceKey
+import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
 
 class OrdinalProcessor(
     private val users: Collection<RootUser>,
-    private val relevantProjects: Set<Project<*>>,
+    private val relevantProjects: Map<ProjectKey<*>, Project<*>>,
     private val relevantTasks: Map<TaskKey, Task>,
     private val now: ExactTimeStamp.Local,
 ) {
+
+    private val oldestVisibleTaskDates = relevantTasks.mapValues { (_, task) ->
+        task.getInstances(
+            null,
+            null,
+            now,
+            filterVisible = false,
+        )
+            .firstOrNull()
+            ?.instanceDate
+    }
+
+    private val oldestVisibleProjectDates = relevantProjects.mapValues { (_, project) ->
+        project.getAllDependenciesLoadedTasks()
+            .asSequence()
+            .mapNotNull { oldestVisibleTaskDates[it.taskKey] }
+            .minOrNull()
+    }
 
     fun process() {
         users.forEach { processProjects(it) }
@@ -23,7 +42,7 @@ class OrdinalProcessor(
 
     private fun processProjects(user: RootUser) {
         val (relevantProjectOrdinalManagers, irrelevantProjectOrdinalManagers) =
-            user.allProjectOrdinalManagers.partition { it.project in relevantProjects }
+            user.allProjectOrdinalManagers.partition { it.project.projectKey in relevantProjects }
 
         relevantProjectOrdinalManagers.forEach(::processProject)
 

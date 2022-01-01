@@ -204,6 +204,7 @@ object Irrelevant {
                 .map { it.customTime as Time.Custom.Project<*> }
                 .toSet()
 
+            // todo do I not remove user custom times at all?
             val irrelevantRemoteCustomTimes = remoteCustomTimes - relevantRemoteCustomTimes
 
             val relevantProjects = remoteProjectRelevances.values
@@ -213,13 +214,15 @@ object Irrelevant {
 
             val irrelevantProjects = projects.values - relevantProjects
 
-            OrdinalProcessor(users, relevantProjects).process()
-
             irrelevantExistingInstances.forEach { it.delete() }
             irrelevantSchedules.forEach { it.delete() }
             irrelevantNoScheduleOrParents.forEach { it.delete() }
             irrelevantTaskHierarchies.forEach { it.delete() }
             irrelevantTasks.forEach { it.delete() }
+
+            // we want this to run after everything from the task down is deleted, but before custom times
+            OrdinalProcessor(users, relevantProjects).process()
+
             irrelevantRemoteCustomTimes.forEach { it.delete() }
             irrelevantProjects.forEach { it.delete() }
 

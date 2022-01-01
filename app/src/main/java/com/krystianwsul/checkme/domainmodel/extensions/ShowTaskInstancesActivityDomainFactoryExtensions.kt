@@ -68,7 +68,7 @@ fun DomainFactory.getShowTaskInstancesData(
                             it.canAddSubtask(now),
                             it.canMigrateDescription(now),
                             it.isRootInstance(),
-                            it.getCreateTaskTimePair(projectsFactory.privateProject),
+                            it.getCreateTaskTimePair(projectsFactory.privateProject, myUserFactory.user),
                             it.task.note,
                             children,
                             it.task.ordinal,

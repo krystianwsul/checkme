@@ -44,7 +44,7 @@ fun DomainFactory.getShowNotificationGroupData(instanceKeys: Set<InstanceKey>): 
             instance.canAddSubtask(now),
             instance.canMigrateDescription(now),
             instance.isRootInstance(),
-            instance.getCreateTaskTimePair(projectsFactory.privateProject),
+            instance.getCreateTaskTimePair(projectsFactory.privateProject, myUserFactory.user),
             task.note,
             children,
             instance.task.ordinal,

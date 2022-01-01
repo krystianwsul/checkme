@@ -1,5 +1,6 @@
 package com.krystianwsul.common.relevance
 
+import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.ProjectOrdinalManager
 import com.krystianwsul.common.firebase.models.RootUser
 import com.krystianwsul.common.firebase.models.project.Project
@@ -13,6 +14,7 @@ class OrdinalProcessor(
     private val users: Collection<RootUser>,
     private val relevantProjects: Set<Project<*>>,
     private val relevantTasks: Map<TaskKey, Task>,
+    private val now: ExactTimeStamp.Local,
 ) {
 
     fun process() {
@@ -36,7 +38,14 @@ class OrdinalProcessor(
         mutableOrdinalEntries.forEach { mutableOrdinalEntry ->
             mutableOrdinalEntry.mutableKeyEntries.forEach { mutableKeyEntry ->
                 mutableKeyEntry.instanceKey?.let {
-                    if (it.taskKey !in relevantTasks) mutableKeyEntry.instanceKey = null
+                    if (
+                        relevantTasks[it.taskKey]?.getInstance(it.instanceScheduleKey)?.isVisible(
+                            now,
+                            Instance.VisibilityOptions(hack24 = true),
+                        ) != true
+                    ) {
+                        mutableKeyEntry.instanceKey = null
+                    }
                 }
             }
         }

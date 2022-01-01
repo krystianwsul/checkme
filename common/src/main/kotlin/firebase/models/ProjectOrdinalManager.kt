@@ -54,6 +54,10 @@ class ProjectOrdinalManager(private val project: SharedProject) {
             .firstOrNull()
             ?.let { return it }
 
+        ordinals.values
+            .maxByOrNull { it.updated }
+            ?.let { return it.ordinal }
+
         return project.projectKey.getOrdinal()
     }
 

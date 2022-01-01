@@ -43,21 +43,14 @@ class ProjectOrdinalManager(val project: SharedProject) {
         fun DateTimePair.getHourMinute() = project.getTime(timePair).getHourMinute(date.dayOfWeek)
 
         listOf<(Key.Entry) -> Any?>(
-            { it.instanceKey }, // instanceKey (taskKey + customTime/hourMinute)
+            { it.instanceKey }, // instanceKey
             { it.instanceDateTimePair }, // instance dateTimePair
             { // instance Timestamp
                 it.instanceDateTimePair.run { TimeStamp(date, getHourMinute()) }
             },
-            { // instance dayOfWeek + timePair
-                it.instanceDateTimePair.run { date.dayOfWeek to timePair }
-            },
-            { // instance dayOfWeek + timePair
-                it.instanceDateTimePair.run { date.dayOfWeek to getHourMinute() }
-            },
             { it.instanceDateTimePair.timePair }, // instance timePair
             { it.instanceDateTimePair.getHourMinute() }, // instance hourMinute
             { it.instanceKey?.taskKey }, // taskKey
-            { it.instanceDateTimePair.date.dayOfWeek }, // instance dayOfWeek
         ).asSequence()
             .mapNotNull { getMatchByAspect(key, it) }
             .firstOrNull()

@@ -213,6 +213,8 @@ object Irrelevant {
 
             val irrelevantProjects = projects.values - relevantProjects
 
+            users.forEach { processProjectOrdinals(it, relevantProjects) }
+
             irrelevantExistingInstances.forEach { it.delete() }
             irrelevantSchedules.forEach { it.delete() }
             irrelevantNoScheduleOrParents.forEach { it.delete() }
@@ -254,6 +256,13 @@ object Irrelevant {
         }
 
         return result
+    }
+
+    private fun processProjectOrdinals(user: RootUser, relevantProjects: Set<Project<*>>) {
+        val (relevantProjectOrdinalManager, irrelevantProjectOrdinalManagers) =
+            user.allProjectOrdinalManagers.partition { it.project in relevantProjects }
+
+        // todo ordinal remove irrelevantProjectOrdinalManagers
     }
 
     private class VisibleIrrelevantTasksException(message: String) : Exception(message)

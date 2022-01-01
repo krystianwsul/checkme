@@ -7,7 +7,7 @@ import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.CustomTimeId
 import com.krystianwsul.common.utils.CustomTimeKey
-import com.krystianwsul.common.utils.UserKey
+import com.krystianwsul.common.utils.ProjectKey
 
 
 open class RootUser(private val remoteRootUserRecord: RootUserRecord) :
@@ -23,6 +23,10 @@ open class RootUser(private val remoteRootUserRecord: RootUserRecord) :
 
     val clearableInvalidatableManager = ClearableInvalidatableManager()
 
+    protected val projectOrdinalManagers = mutableMapOf<ProjectKey.Shared, ProjectOrdinalManager>()
+
+    val allProjectOrdinalManagers: Collection<ProjectOrdinalManager> = projectOrdinalManagers.values
+
     fun deleteCustomTime(customTime: Time.Custom.User) {
         check(_customTimes.containsKey(customTime.id))
 
@@ -30,7 +34,4 @@ open class RootUser(private val remoteRootUserRecord: RootUserRecord) :
     }
 
     override fun tryGetUserCustomTime(userCustomTimeKey: CustomTimeKey.User) = customTimes[userCustomTimeKey.customTimeId]
-
-    class MissingCustomTimeException(userKey: UserKey, userCustomTimeKey: CustomTimeKey.User) :
-        Exception("customTime $userCustomTimeKey missing from user $userKey")
 }

@@ -6,7 +6,7 @@ import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.InstanceKey
 
-class ProjectOrdinalManager(private val project: SharedProject) {
+class ProjectOrdinalManager(val project: SharedProject) {
 
     private var ordinals = mutableMapOf<Key, Value>()
 

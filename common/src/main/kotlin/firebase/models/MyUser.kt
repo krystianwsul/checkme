@@ -7,7 +7,6 @@ import com.krystianwsul.common.firebase.models.customtime.MyUserCustomTime
 import com.krystianwsul.common.firebase.models.project.SharedProject
 import com.krystianwsul.common.firebase.records.MyUserRecord
 import com.krystianwsul.common.utils.CustomTimeId
-import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.UserKey
 import kotlinx.coroutines.flow.MutableSharedFlow
 
@@ -46,8 +45,6 @@ class MyUser(private val remoteMyUserRecord: MyUserRecord, private val rootModel
 
         return userCustomTime
     }
-
-    private val projectOrdinalManagers = mutableMapOf<ProjectKey.Shared, ProjectOrdinalManager>()
 
     override fun getProjectOrdinalManager(project: SharedProject) =
         projectOrdinalManagers.getOrPut(project.projectKey) { ProjectOrdinalManager(project) }

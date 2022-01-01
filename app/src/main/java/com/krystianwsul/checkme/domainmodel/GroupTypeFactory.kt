@@ -33,7 +33,7 @@ class GroupTypeFactory(
         timeStamp: TimeStamp,
         groupTypes: List<GroupType.TimeChild>,
         groupingMode: GroupType.GroupingMode.Time,
-    ) = TimeBridge(timeStamp, groupTypes.map { it.fix() }, groupingMode::newShowGroupActivityParameters)
+    ) = TimeBridge(timeStamp, groupTypes.map { it.fix() }, groupingMode.newShowGroupActivityParameters(timeStamp))
 
     override fun createTimeProject(
         timeStamp: TimeStamp,
@@ -120,7 +120,7 @@ class GroupTypeFactory(
     data class TimeBridge(
         val timeStamp: TimeStamp,
         private val timeChildren: List<TimeChild>,
-        private val newShowGroupActivityParameters: (TimeStamp) -> ShowGroupActivity.Parameters, // todo ordinal make this a data class, check all descendants
+        private val showGroupActivityParameters: ShowGroupActivity.Parameters,
     ) : GroupType.Time, SingleParent {
 
         override fun toContentDelegate(
@@ -136,7 +136,7 @@ class GroupTypeFactory(
             timeChildren,
             NotDoneNode.ContentDelegate.Group.Id.Time(timeStamp, timeChildren.flatMap { it.instanceKeys }.toSet()),
             NotDoneNode.ContentDelegate.Group.GroupRowsDelegate.Time(groupAdapter, timeStamp),
-            newShowGroupActivityParameters(timeStamp),
+            showGroupActivityParameters,
             NotDoneNode.ContentDelegate.Group.CheckboxMode.INDENT,
         )
 

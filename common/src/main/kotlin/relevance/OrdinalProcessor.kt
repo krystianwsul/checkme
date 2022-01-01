@@ -59,6 +59,7 @@ class OrdinalProcessor(
 
         mutableOrdinalEntries.forEach { mutableOrdinalEntry ->
             // pruning
+
             mutableOrdinalEntry.mutableKeyEntries.forEach { mutableKeyEntry ->
                 mutableKeyEntry.mutableTaskInfo?.let {
                     val task = relevantTasks[it.taskKey]
@@ -107,9 +108,13 @@ class OrdinalProcessor(
             }
         }
 
-        // todo ordinal remove
-        // todo ordinal compact before this.  Keys better be unique
-        val immutableEntries = mutableOrdinalEntries.associate { it.toImmutableEntryPair() }
+        // todo ordinal store
+        val immutableEntries = mutableOrdinalEntries.groupBy { it.getImmutableKeys() }
+            .mapValues {
+                it.value
+                    .map { it.getImmutableValue() }
+                    .maxByOrNull { it.updated }!!
+            }
     }
 
     private data class MutableOrdinalEntry(
@@ -127,12 +132,9 @@ class OrdinalProcessor(
             pair.second.updated,
         )
 
-        fun toImmutableEntryPair(): Pair<ProjectOrdinalManager.Key, ProjectOrdinalManager.Value> {
-            return Pair(
-                ProjectOrdinalManager.Key(mutableKeyEntries.map { it.toImmutableKeyEntry() }.toSet()),
-                ProjectOrdinalManager.Value(ordinal, updated)
-            )
-        }
+        fun getImmutableKeys() = ProjectOrdinalManager.Key(mutableKeyEntries.map { it.toImmutableKeyEntry() }.toSet())
+
+        fun getImmutableValue() = ProjectOrdinalManager.Value(ordinal, updated)
     }
 
     private data class MutableKeyEntry(

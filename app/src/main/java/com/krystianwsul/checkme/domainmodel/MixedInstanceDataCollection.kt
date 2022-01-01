@@ -3,7 +3,7 @@ package com.krystianwsul.checkme.domainmodel
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.common.firebase.models.ProjectOrdinalManager
 
-class MixedInstanceDataCollection(
+data class MixedInstanceDataCollection(
     val instanceDatas: Collection<GroupListDataWrapper.InstanceData>,
     val groupTypeTree: List<GroupTypeFactory.Bridge>,
 ) {

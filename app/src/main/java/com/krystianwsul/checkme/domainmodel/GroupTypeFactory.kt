@@ -117,10 +117,10 @@ class GroupTypeFactory(
         val ordinal: Double
     }
 
-    class TimeBridge(
+    data class TimeBridge(
         val timeStamp: TimeStamp,
         private val timeChildren: List<TimeChild>,
-        private val newShowGroupActivityParameters: (TimeStamp) -> ShowGroupActivity.Parameters,
+        private val newShowGroupActivityParameters: (TimeStamp) -> ShowGroupActivity.Parameters, // todo ordinal make this a data class, check all descendants
     ) : GroupType.Time, SingleParent {
 
         override fun toContentDelegate(
@@ -150,7 +150,7 @@ class GroupTypeFactory(
         }
     }
 
-    class TimeProjectBridge(
+    data class TimeProjectBridge(
         val timeStamp: TimeStamp,
         private val projectDetails: DetailsNode.ProjectDetails,
         val instanceDatas: List<GroupListDataWrapper.InstanceData>,

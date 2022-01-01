@@ -17,6 +17,7 @@ class OrdinalProcessor(
     private val users: Collection<RootUser>,
     private val relevantProjects: Map<ProjectKey<*>, Project<*>>,
     private val relevantTasks: Map<TaskKey, Task>,
+    private val customTimeRelevanceCollection: CustomTimeRelevanceCollection,
     private val now: ExactTimeStamp.Local,
 ) {
 

@@ -169,11 +169,11 @@ object Irrelevant {
 
             val irrelevantSchedules = relevantTasks.flatMap { it.schedules } - relevantSchedules
 
-            val remoteCustomTimes = projects.values.flatMap { it.customTimes }
+            val projectCustomTimes = projects.values.flatMap { it.customTimes }
 
             val customTimeRelevanceCollection = CustomTimeRelevanceCollection(
                 userCustomTimeRelevances,
-                remoteCustomTimes.associate { it.key to CustomTimeRelevance(it) },
+                projectCustomTimes.associate { it.key to CustomTimeRelevance(it) },
             )
 
             projects.values
@@ -198,14 +198,13 @@ object Irrelevant {
                 .filter { it.relevant }
                 .forEach { it.setRemoteRelevant(customTimeRelevanceCollection, remoteProjectRelevances) }
 
-            val relevantRemoteCustomTimes = customTimeRelevanceCollection.projectCustomTimeRelevances
+            val relevantProjectCustomTimes = customTimeRelevanceCollection.projectCustomTimeRelevances
                 .values
                 .filter { it.relevant }
                 .map { it.customTime as Time.Custom.Project<*> }
                 .toSet()
 
-            // todo do I not remove user custom times at all?
-            val irrelevantRemoteCustomTimes = remoteCustomTimes - relevantRemoteCustomTimes
+            val irrelevantProjectCustomTimes = projectCustomTimes - relevantProjectCustomTimes
 
             val relevantProjects = remoteProjectRelevances.values
                 .filter { it.relevant }
@@ -225,10 +224,11 @@ object Irrelevant {
                 users,
                 relevantProjects.associateBy { it.projectKey },
                 relevantTasks.associateBy { it.taskKey },
+                customTimeRelevanceCollection,
                 now,
             ).process()
 
-            irrelevantRemoteCustomTimes.forEach { it.delete() }
+            irrelevantProjectCustomTimes.forEach { it.delete() }
             irrelevantProjects.forEach { it.delete() }
 
             Result(
@@ -237,7 +237,7 @@ object Irrelevant {
                 irrelevantSchedules,
                 irrelevantNoScheduleOrParents,
                 irrelevantTasks,
-                irrelevantRemoteCustomTimes,
+                irrelevantProjectCustomTimes,
                 remoteProjectRelevances.values
                     .filter { !it.relevant }
                     .map { it.project as SharedProject },

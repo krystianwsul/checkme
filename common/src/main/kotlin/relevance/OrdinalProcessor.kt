@@ -58,6 +58,7 @@ class OrdinalProcessor(
             .toMutableList()
 
         mutableOrdinalEntries.forEach { mutableOrdinalEntry ->
+            // pruning
             mutableOrdinalEntry.mutableKeyEntries.forEach { mutableKeyEntry ->
                 mutableKeyEntry.mutableTaskInfo?.let {
                     val task = relevantTasks[it.taskKey]
@@ -89,6 +90,20 @@ class OrdinalProcessor(
                     if (oldestVisibleDate == null || instanceDate < oldestVisibleDate)
                         mutableKeyEntry.instanceDateOrDayOfWeek = DateOrDayOfWeek.DayOfWeek(instanceDate.dayOfWeek)
                 }
+
+                mutableKeyEntry.instanceTimePair
+                    .customTimeKey
+                    ?.let { instanceCustomTimeKey ->
+                        val customTimeRelevance = customTimeRelevanceCollection.relevances.getValue(instanceCustomTimeKey)
+
+                        if (!customTimeRelevance.relevant) {
+                            mutableKeyEntry.instanceTimePair = TimePair(
+                                customTimeRelevance.customTime.getHourMinute(
+                                    mutableKeyEntry.instanceDateOrDayOfWeek.dayOfWeek
+                                )
+                            )
+                        }
+                    }
             }
         }
 
@@ -123,7 +138,7 @@ class OrdinalProcessor(
     private data class MutableKeyEntry(
         var mutableTaskInfo: MutableTaskInfo?,
         var instanceDateOrDayOfWeek: DateOrDayOfWeek,
-        val instanceTimePair: TimePair,
+        var instanceTimePair: TimePair,
     ) {
 
         constructor(immutableEntry: ProjectOrdinalManager.Key.Entry) : this(

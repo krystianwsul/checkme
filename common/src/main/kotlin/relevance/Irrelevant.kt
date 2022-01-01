@@ -169,12 +169,6 @@ object Irrelevant {
 
             val irrelevantSchedules = relevantTasks.flatMap { it.schedules } - relevantSchedules
 
-            irrelevantExistingInstances.forEach { it.delete() }
-            irrelevantSchedules.forEach { it.delete() }
-            irrelevantNoScheduleOrParents.forEach { it.delete() }
-            irrelevantTaskHierarchies.forEach { it.delete() }
-            irrelevantTasks.forEach { it.delete() }
-
             val remoteCustomTimes = projects.values.flatMap { it.customTimes }
 
             val customTimeRelevanceCollection = CustomTimeRelevanceCollection(
@@ -212,13 +206,20 @@ object Irrelevant {
 
             val irrelevantRemoteCustomTimes = remoteCustomTimes - relevantRemoteCustomTimes
 
+            val relevantProjects = remoteProjectRelevances.values
+                .filter { it.relevant }
+                .map { it.project }
+                .toSet()
+
+            val irrelevantProjects = projects.values - relevantProjects
+
+            irrelevantExistingInstances.forEach { it.delete() }
+            irrelevantSchedules.forEach { it.delete() }
+            irrelevantNoScheduleOrParents.forEach { it.delete() }
+            irrelevantTaskHierarchies.forEach { it.delete() }
+            irrelevantTasks.forEach { it.delete() }
             irrelevantRemoteCustomTimes.forEach { it.delete() }
-
-            remoteProjectRelevances.values.forEach { remoteProjectRelevance ->
-                val project = remoteProjectRelevance.project
-
-                if (!remoteProjectRelevance.relevant) project.delete()
-            }
+            irrelevantProjects.forEach { it.delete() }
 
             Result(
                 irrelevantExistingInstances,

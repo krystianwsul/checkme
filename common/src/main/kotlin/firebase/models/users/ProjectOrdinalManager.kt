@@ -81,6 +81,21 @@ class ProjectOrdinalManager(val project: SharedProject) {
             val instanceTimePair: TimePair,
         ) {
 
+            companion object {
+
+                fun fromJson(
+                    projectCustomTimeIdAndKeyProvider: JsonTime.ProjectCustomTimeIdAndKeyProvider,
+                    entryJson: ProjectOrdinalKeyEntryJson,
+                ) = Entry(
+                    entryJson.taskInfoJson?.let { TaskInfo.fromJson(projectCustomTimeIdAndKeyProvider, it) },
+                    DateOrDayOfWeek.fromJson(entryJson.instanceDateOrDayOfWeek),
+                    JsonTime.fromJson(
+                        projectCustomTimeIdAndKeyProvider,
+                        entryJson.instanceTime,
+                    ).toTimePair(projectCustomTimeIdAndKeyProvider),
+                )
+            }
+
             constructor(instanceKey: InstanceKey, instanceDateTimePair: DateTimePair) : this(
                 TaskInfo(instanceKey),
                 DateOrDayOfWeek.Date(instanceDateTimePair.date),
@@ -95,6 +110,19 @@ class ProjectOrdinalManager(val project: SharedProject) {
         }
 
         data class TaskInfo(val taskKey: TaskKey, val scheduleDateTimePair: DateTimePair?) {
+
+            companion object {
+
+                fun fromJson(
+                    projectCustomTimeIdAndKeyProvider: JsonTime.ProjectCustomTimeIdAndKeyProvider,
+                    taskInfoJson: ProjectOrdinalKeyEntryJson.TaskInfoJson,
+                ) = TaskInfo(
+                    TaskKey.fromShortcut(taskInfoJson.taskKey),
+                    taskInfoJson.scheduleDateTimePairJson?.let {
+                        DateTimePair.fromJson(projectCustomTimeIdAndKeyProvider, it)
+                    },
+                )
+            }
 
             constructor(instanceKey: InstanceKey) : this(
                 instanceKey.taskKey,

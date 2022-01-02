@@ -12,6 +12,7 @@ import com.krystianwsul.checkme.domainmodel.observeOnDomain
 import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.checkme.utils.getMessage
+import com.krystianwsul.checkme.utils.toSingleTask
 import com.krystianwsul.checkme.utils.toV3
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.firebase.DatabaseCallback
@@ -142,9 +143,10 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
         sharedProjectQuery(projectKey).typedSnapshotChanges<JsonWrapper>()
 
     override fun update(values: Map<String, Any?>, callback: DatabaseCallback) {
-        rootReference.updateChildren(values).addOnCompleteListener {
-            callback(it.getMessage(), it.isSuccessful, it.exception)
-        }
+        rootReference.updateChildren(values)
+            .toSingleTask()
+            .observeOnDomain(Priority.IMMEDIATE)
+            .subscribe { task -> callback(task.getMessage(), task.isSuccessful, task.exception) }
     }
 
     private fun privateProjectQuery(key: ProjectKey.Private) =

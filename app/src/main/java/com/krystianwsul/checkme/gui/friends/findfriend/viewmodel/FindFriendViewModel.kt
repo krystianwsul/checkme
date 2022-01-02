@@ -8,7 +8,7 @@ import com.jakewharton.rxrelay3.PublishRelay
 import com.krystianwsul.checkme.firebase.AndroidDatabaseWrapper
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.checkme.utils.mapNotNull
-import com.krystianwsul.common.firebase.json.UserWrapper
+import com.krystianwsul.common.firebase.json.users.UserWrapper
 import hu.akarnokd.rxjava3.subjects.UnicastWorkSubject
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.disposables.CompositeDisposable
@@ -50,9 +50,9 @@ class FindFriendViewModel(private val savedStateHandle: SavedStateHandle) : View
                 .addTo(clearedDisposable)
     }
 
-    val viewStateObservable = viewStateRelay.distinctUntilChanged()!!
+    val viewStateObservable = viewStateRelay.distinctUntilChanged()
 
-    val viewActionRelay = PublishRelay.create<FindFriendViewEvent>()!!
+    val viewActionRelay = PublishRelay.create<FindFriendViewEvent>()
 
     init {
         stateRelay.mapNotNull { it.toSerializableState() }
@@ -73,9 +73,9 @@ class FindFriendViewModel(private val savedStateHandle: SavedStateHandle) : View
 
     @Parcelize
     data class Person(
-            val displayName: String,
-            val email: String,
-            val photoUri: String?,
-            val userWrapper: UserWrapper?,
+        val displayName: String,
+        val email: String,
+        val photoUri: String?,
+        val userWrapper: UserWrapper?,
     ) : Parcelable
 }

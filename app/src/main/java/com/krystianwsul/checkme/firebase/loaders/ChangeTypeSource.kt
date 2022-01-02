@@ -8,19 +8,19 @@ import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.checkme.utils.mapNotNull
 import com.krystianwsul.checkme.utils.publishImmediate
 import com.krystianwsul.common.firebase.ChangeType
-import com.krystianwsul.common.firebase.json.UserWrapper
+import com.krystianwsul.common.firebase.json.users.UserWrapper
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.merge
 
 class ChangeTypeSource(
-        projectsFactorySingle: Single<ProjectsFactory>,
-        friendsFactorySingle: Single<FriendsFactory>,
-        userDatabaseRx: DatabaseRx<Snapshot<UserWrapper>>,
-        userFactorySingle: Single<MyUserFactory>,
-        rootTasksFactory: RootTasksFactory,
-        domainDisposable: CompositeDisposable,
+    projectsFactorySingle: Single<ProjectsFactory>,
+    friendsFactorySingle: Single<FriendsFactory>,
+    userDatabaseRx: DatabaseRx<Snapshot<UserWrapper>>,
+    userFactorySingle: Single<MyUserFactory>,
+    rootTasksFactory: RootTasksFactory,
+    domainDisposable: CompositeDisposable,
 ) {
 
     val changeTypes: Observable<ChangeType>

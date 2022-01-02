@@ -2,7 +2,7 @@ package com.krystianwsul.common.firebase.records.project
 
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.json.JsonWrapper
-import com.krystianwsul.common.firebase.json.UserJson
+import com.krystianwsul.common.firebase.json.users.UserJson
 import com.krystianwsul.common.firebase.records.customtime.SharedCustomTimeRecord
 import com.krystianwsul.common.firebase.records.task.SharedTaskRecord
 import com.krystianwsul.common.firebase.records.task.TaskRecord

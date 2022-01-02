@@ -7,7 +7,7 @@ import com.krystianwsul.checkme.utils.zipSingle
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.ChangeWrapper
 import com.krystianwsul.common.firebase.UserLoadReason
-import com.krystianwsul.common.firebase.json.UserWrapper
+import com.krystianwsul.common.firebase.json.users.UserWrapper
 import com.krystianwsul.common.utils.UserKey
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Single
@@ -21,7 +21,7 @@ class FriendsLoader(
         private val friendsProvider: FriendsProvider,
 ) {
 
-    private fun <T> Observable<T>.replayImmediate() = replay().apply { domainDisposable += connect() }!!
+    private fun <T : Any> Observable<T>.replayImmediate() = replay().apply { domainDisposable += connect() }
 
     private val databaseRx: Observable<MapChanges<ChangeWrapper<Map<UserKey, UserKeyStore.LoadUserData>>, UserKey, DatabaseRx<Snapshot<UserWrapper>>>> =
             userKeyStore.loadUserDataObservable

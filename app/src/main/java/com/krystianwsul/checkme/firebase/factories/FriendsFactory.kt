@@ -11,8 +11,8 @@ import com.krystianwsul.common.firebase.ReasonWrapper
 import com.krystianwsul.common.firebase.UserLoadReason
 import com.krystianwsul.common.firebase.json.UserJson
 import com.krystianwsul.common.firebase.json.UserWrapper
-import com.krystianwsul.common.firebase.models.RootUser
 import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
+import com.krystianwsul.common.firebase.models.users.RootUser
 import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.CustomTimeKey

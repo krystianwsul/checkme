@@ -1,4 +1,4 @@
-package com.krystianwsul.common.firebase.models
+package com.krystianwsul.common.firebase.models.users
 
 import com.krystianwsul.common.firebase.RootUserProperties
 import com.krystianwsul.common.firebase.models.cache.ClearableInvalidatableManager

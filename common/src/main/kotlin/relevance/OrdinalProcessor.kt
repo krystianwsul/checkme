@@ -1,10 +1,10 @@
 package com.krystianwsul.common.relevance
 
 import com.krystianwsul.common.firebase.models.Instance
-import com.krystianwsul.common.firebase.models.ProjectOrdinalManager
-import com.krystianwsul.common.firebase.models.RootUser
 import com.krystianwsul.common.firebase.models.project.SharedProject
 import com.krystianwsul.common.firebase.models.task.Task
+import com.krystianwsul.common.firebase.models.users.ProjectOrdinalManager
+import com.krystianwsul.common.firebase.models.users.RootUser
 import com.krystianwsul.common.time.DateOrDayOfWeek
 import com.krystianwsul.common.time.DateTimePair
 import com.krystianwsul.common.time.ExactTimeStamp

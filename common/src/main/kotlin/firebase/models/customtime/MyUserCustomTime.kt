@@ -1,8 +1,8 @@
 package com.krystianwsul.common.firebase.models.customtime
 
 import com.krystianwsul.common.firebase.MyCustomTime
-import com.krystianwsul.common.firebase.models.MyUser
 import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
+import com.krystianwsul.common.firebase.models.users.MyUser
 import com.krystianwsul.common.firebase.records.customtime.UserCustomTimeRecord
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.HourMinute

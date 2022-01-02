@@ -1,4 +1,4 @@
-package com.krystianwsul.common.firebase.models
+package com.krystianwsul.common.firebase.models.users
 
 import com.krystianwsul.common.firebase.MyUserProperties
 import com.krystianwsul.common.firebase.json.customtimes.UserCustomTimeJson

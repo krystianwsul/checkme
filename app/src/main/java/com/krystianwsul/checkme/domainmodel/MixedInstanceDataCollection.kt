@@ -1,7 +1,7 @@
 package com.krystianwsul.checkme.domainmodel
 
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
-import com.krystianwsul.common.firebase.models.ProjectOrdinalManager
+import com.krystianwsul.common.firebase.models.users.ProjectOrdinalManager
 
 data class MixedInstanceDataCollection(
     val instanceDatas: Collection<GroupListDataWrapper.InstanceData>,

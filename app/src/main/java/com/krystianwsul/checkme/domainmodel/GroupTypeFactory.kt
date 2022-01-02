@@ -6,8 +6,8 @@ import com.krystianwsul.checkme.gui.instances.list.GroupListFragment
 import com.krystianwsul.checkme.gui.instances.tree.NodeCollection
 import com.krystianwsul.checkme.gui.instances.tree.NotDoneNode
 import com.krystianwsul.checkme.gui.tree.DetailsNode
-import com.krystianwsul.common.firebase.models.ProjectOrdinalManager
 import com.krystianwsul.common.firebase.models.project.SharedProject
+import com.krystianwsul.common.firebase.models.users.ProjectOrdinalManager
 import com.krystianwsul.common.time.DateTimePair
 import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.InstanceKey

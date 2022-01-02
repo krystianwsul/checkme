@@ -14,6 +14,8 @@ import com.krystianwsul.common.firebase.models.project.PrivateProject
 import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.task.ProjectRootTaskIdTracker
 import com.krystianwsul.common.firebase.models.task.Task
+import com.krystianwsul.common.firebase.models.users.MyUser
+import com.krystianwsul.common.firebase.models.users.ProjectUser
 import com.krystianwsul.common.firebase.records.InstanceRecord
 import com.krystianwsul.common.locker.LockerManager
 import com.krystianwsul.common.time.*

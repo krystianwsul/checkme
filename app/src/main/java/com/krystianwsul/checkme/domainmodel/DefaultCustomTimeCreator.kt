@@ -4,7 +4,7 @@ import androidx.annotation.StringRes
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
 import com.krystianwsul.common.firebase.json.customtimes.UserCustomTimeJson
-import com.krystianwsul.common.firebase.models.MyUser
+import com.krystianwsul.common.firebase.models.users.MyUser
 import com.krystianwsul.common.time.HourMinute
 
 object DefaultCustomTimeCreator {

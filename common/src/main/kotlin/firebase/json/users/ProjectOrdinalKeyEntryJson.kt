@@ -10,7 +10,7 @@ data class ProjectOrdinalKeyEntryJson @JvmOverloads constructor(
 
     data class TaskInfoJson @JvmOverloads constructor(
         val taskKey: String = "", // todo ordinal use method from Task.fromShortcut
-        val dateTimePairJson: DateTimePairJson? = null,
+        val scheduleDateTimePairJson: DateTimePairJson? = null,
     ) {
 
         data class DateTimePairJson @JvmOverloads constructor(

@@ -15,4 +15,6 @@ data class TimePair(val customTimeKey: CustomTimeKey?, val hourMinute: HourMinut
     init {
         check((customTimeKey == null) != (hourMinute == null))
     }
+
+    fun toJsonTime() = JsonTime.fromTimePair(this)
 }

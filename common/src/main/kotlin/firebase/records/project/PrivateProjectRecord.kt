@@ -12,7 +12,7 @@ import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ProjectType
 
 class PrivateProjectRecord(
-    private val databaseWrapper: DatabaseWrapper,
+    private val databaseWrapper: DatabaseWrapper, // todo remove
     create: Boolean,
     override val projectKey: ProjectKey.Private,
     private val projectJson: PrivateProjectJson,
@@ -79,7 +79,7 @@ class PrivateProjectRecord(
 
     override val childKey get() = key
 
-    var defaultTimesCreated by Committer(projectJson::defaultTimesCreated, PROJECT_JSON)
+    var defaultTimesCreated by Committer(projectJson::defaultTimesCreated)
 
     override fun deleteFromParent() = throw UnsupportedOperationException()
 

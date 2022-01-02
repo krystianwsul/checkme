@@ -236,7 +236,6 @@ class DomainFactoryRule : TestRule {
             ProjectLoader.InitialProjectEvent(
                 mockk(relaxed = true),
                 PrivateProjectRecord(
-                    databaseWrapper,
                     deviceDbInfo.userInfo,
                     PrivateProjectJson(
                         startTime = domainFactoryStartTime.long,

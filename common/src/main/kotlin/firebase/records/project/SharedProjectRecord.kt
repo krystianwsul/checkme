@@ -10,7 +10,6 @@ import com.krystianwsul.common.firebase.records.task.TaskRecord
 import com.krystianwsul.common.utils.*
 
 class SharedProjectRecord(
-    private val databaseWrapper: DatabaseWrapper,
     private val parent: Parent,
     create: Boolean,
     override val projectKey: ProjectKey.Shared,
@@ -65,30 +64,10 @@ class SharedProjectRecord(
 
     override val children get() = super.children + userRecords.values
 
-    constructor(
-        databaseWrapper: DatabaseWrapper,
-        parent: Parent,
-        id: ProjectKey.Shared,
-        jsonWrapper: JsonWrapper,
-    ) : this(
-        databaseWrapper,
-        parent,
-        false,
-        id,
-        jsonWrapper,
-    )
+    constructor(parent: Parent, id: ProjectKey.Shared, jsonWrapper: JsonWrapper) : this(parent, false, id, jsonWrapper)
 
-    constructor(
-        databaseWrapper: DatabaseWrapper,
-        parent: Parent,
-        jsonWrapper: JsonWrapper,
-    ) : this(
-        databaseWrapper,
-        parent,
-        true,
-        databaseWrapper.newSharedProjectRecordId(),
-        jsonWrapper,
-    )
+    constructor(databaseWrapper: DatabaseWrapper, parent: Parent, jsonWrapper: JsonWrapper) :
+            this(parent, true, databaseWrapper.newSharedProjectRecordId(), jsonWrapper)
 
     fun newRemoteUserRecord(userJson: UserJson): ProjectUserRecord {
         val remoteProjectUserRecord = ProjectUserRecord(true, this, userJson)

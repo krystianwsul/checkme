@@ -43,4 +43,6 @@ fun <T> Task<T>.toSingle() = Single.create<NullableWrapper<T>> { subscriber ->
     addOnCompleteListener {
         subscriber.onSuccess(NullableWrapper(it.takeIf { it.isSuccessful }?.result))
     }
-}!!
+}
+
+fun <T> Task<T>.toSingleTask() = Single.create<Task<T>> { addOnCompleteListener(it::onSuccess) }

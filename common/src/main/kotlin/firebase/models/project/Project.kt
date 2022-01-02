@@ -3,6 +3,7 @@ package com.krystianwsul.common.firebase.models.project
 import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.domain.ProjectUndoData
 import com.krystianwsul.common.domain.TaskHierarchyContainer
+import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.json.tasks.TaskJson
 import com.krystianwsul.common.firebase.models.*
 import com.krystianwsul.common.firebase.models.cache.ClearableInvalidatableManager
@@ -141,8 +142,11 @@ sealed class Project<T : ProjectType>(
             }
         }
 
-    fun getAllDependenciesLoadedTasks(): Collection<Task> =
-        _tasks.values.filter { it.dependenciesLoaded } + rootTasksCache.value
+    fun getAllDependenciesLoadedTasks(): Collection<Task> {
+        DomainThreadChecker.instance.requireDomainThread()
+
+        return _tasks.values.filter { it.dependenciesLoaded } + rootTasksCache.value
+    }
 
     fun setEndExactTimeStamp(now: ExactTimeStamp.Local, projectUndoData: ProjectUndoData, removeInstances: Boolean) {
         requireNotDeleted()

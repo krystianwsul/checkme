@@ -120,16 +120,16 @@ class ProjectFactoryTest {
 
         private val userInfo = UserInfo("email", "name", "uid")
 
-        override val projectManager = AndroidPrivateProjectManager(userInfo, mockk(relaxed = true))
+        override val projectManager = AndroidPrivateProjectManager(userInfo)
 
-        private val projectRecord = PrivateProjectRecord(mockk(), projectKey, PrivateProjectJson())
+        private val projectRecord = PrivateProjectRecord(projectKey, PrivateProjectJson())
 
         private val event = ProjectLoader.InitialProjectEvent(projectManager, projectRecord, mockk())
 
-        override val initialProjectEvent = Single.just(ChangeWrapper(ChangeType.REMOTE, event))!!
+        override val initialProjectEvent = Single.just(ChangeWrapper(ChangeType.REMOTE, event))
 
         override val changeProjectEvents =
-                PublishRelay.create<ProjectLoader.ChangeProjectEvent<ProjectType.Private>>()!!
+            PublishRelay.create<ProjectLoader.ChangeProjectEvent<ProjectType.Private>>()
     }
 
     @get:Rule

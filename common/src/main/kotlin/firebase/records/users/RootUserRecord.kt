@@ -1,9 +1,10 @@
-package com.krystianwsul.common.firebase.records
+package com.krystianwsul.common.firebase.records.users
 
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.RootUserProperties
 import com.krystianwsul.common.firebase.json.UserWrapper
 import com.krystianwsul.common.firebase.json.customtimes.UserCustomTimeJson
+import com.krystianwsul.common.firebase.records.RemoteRecord
 import com.krystianwsul.common.firebase.records.customtime.UserCustomTimeRecord
 import com.krystianwsul.common.utils.CustomTimeId
 import com.krystianwsul.common.utils.ProjectKey

@@ -1,4 +1,4 @@
-package com.krystianwsul.common.firebase.records
+package com.krystianwsul.common.firebase.records.users
 
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.firebase.DatabaseWrapper

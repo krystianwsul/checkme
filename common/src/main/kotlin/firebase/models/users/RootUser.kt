@@ -2,7 +2,7 @@ package com.krystianwsul.common.firebase.models.users
 
 import com.krystianwsul.common.firebase.RootUserProperties
 import com.krystianwsul.common.firebase.models.cache.ClearableInvalidatableManager
-import com.krystianwsul.common.firebase.records.RootUserRecord
+import com.krystianwsul.common.firebase.records.users.RootUserRecord
 import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.CustomTimeId

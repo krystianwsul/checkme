@@ -39,7 +39,7 @@ class FactoryLoader(
     init {
         val domainDisposable = CompositeDisposable()
 
-        fun <T> Single<T>.cacheImmediate() = cacheImmediate(domainDisposable)
+        fun <T : Any> Single<T>.cacheImmediate() = cacheImmediate(domainDisposable)
 
         userScopeObservable = userInfoObservable.observeOnDomain()
             .switchMapSingle {
@@ -68,7 +68,7 @@ class FactoryLoader(
                             factoryProvider.database.getPrivateProjectObservable(privateProjectKey),
                         )
 
-                        val privateProjectManager = AndroidPrivateProjectManager(userInfo, factoryProvider.database)
+                        val privateProjectManager = AndroidPrivateProjectManager(userInfo)
 
                         val rootModelChangeManager = RootModelChangeManager()
 

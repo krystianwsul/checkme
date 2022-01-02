@@ -1,7 +1,6 @@
 package com.krystianwsul.common.firebase.records.project
 
 import com.krystianwsul.common.domain.UserInfo
-import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.json.projects.PrivateProjectJson
 import com.krystianwsul.common.firebase.records.customtime.PrivateCustomTimeRecord
 import com.krystianwsul.common.firebase.records.task.PrivateTaskRecord
@@ -12,7 +11,6 @@ import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ProjectType
 
 class PrivateProjectRecord(
-    private val databaseWrapper: DatabaseWrapper, // todo remove
     create: Boolean,
     override val projectKey: ProjectKey.Private,
     private val projectJson: PrivateProjectJson,
@@ -48,17 +46,10 @@ class PrivateProjectRecord(
             .toMutableMap()
     }
 
-    constructor(
-        databaseWrapper: DatabaseWrapper,
-        id: ProjectKey.Private,
-        projectJson: PrivateProjectJson
-    ) : this(databaseWrapper, false, id, projectJson)
+    constructor(id: ProjectKey.Private, projectJson: PrivateProjectJson) : this(false, id, projectJson)
 
-    constructor(
-        databaseWrapper: DatabaseWrapper,
-        userInfo: UserInfo,
-        projectJson: PrivateProjectJson
-    ) : this(databaseWrapper, true, userInfo.key.toPrivateProjectKey(), projectJson)
+    constructor(userInfo: UserInfo, projectJson: PrivateProjectJson) :
+            this(true, userInfo.key.toPrivateProjectKey(), projectJson)
 
     private val createProjectJson
         get() = projectJson.apply {

@@ -80,7 +80,7 @@ class ProjectsFactoryTest {
 
         privateProjectRelay = PublishRelay.create()
         factoryProvider = ProjectFactoryTest.TestFactoryProvider()
-        privateProjectManager = AndroidPrivateProjectManager(userInfo, factoryProvider.database)
+        privateProjectManager = AndroidPrivateProjectManager(userInfo)
 
         privateProjectLoader = ProjectLoader.Impl(
             privateProjectRelay,

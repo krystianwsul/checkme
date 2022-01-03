@@ -26,40 +26,38 @@ class ProjectOrdinalManager(private val timeConverter: TimeConverter, val projec
         ordinals[key] = Value(ordinal, now)
     }
 
-    private fun <T> getMatchByAspect(searchKey: Key, mostInCommon: Boolean, aspectSelector: (Key.Entry) -> T?): Double? {
-        fun Key.toMatchElements() = entries.mapNotNull(aspectSelector).toSet()
+    private inner class Matcher<T>(private val mostInCommon: Boolean, private val aspectSelector: (Key.Entry) -> T?) {
 
-        val inputMatchElements = searchKey.toMatchElements()
-            .takeIf { it.isNotEmpty() }
-            ?: return null
+        fun match(searchKey: Key): Double? {
+            fun Key.toMatchElements() = entries.mapNotNull(aspectSelector).toSet()
 
-        data class MatchData(val entry: Map.Entry<Key, Value>, val matchElements: Set<T>) {
+            val inputMatchElements = searchKey.toMatchElements()
+                .takeIf { it.isNotEmpty() }
+                ?: return null
 
-            constructor(entry: Map.Entry<Key, Value>) : this(entry, entry.key.toMatchElements())
-        }
+            data class MatchData(val entry: Map.Entry<Key, Value>, val matchElements: Set<T>) {
 
-        return ordinals.entries
-            .map(::MatchData)
-            .groupBy { it.matchElements.intersect(inputMatchElements).size }
-            .filter { it.key > 0 }
-            .let {
-                if (mostInCommon) {
-                    it.maxByOrNull { it.key }?.value // find the most match elements in common
-                } else {
-                    it.flatMap { it.value } // find any match elements in common
-                }
+                constructor(entry: Map.Entry<Key, Value>) : this(entry, entry.key.toMatchElements())
             }
-            ?.map { it.entry.value }
-            ?.maxByOrNull { it.updated }
-            ?.ordinal
+
+            return ordinals.entries
+                .map(::MatchData)
+                .groupBy { it.matchElements.intersect(inputMatchElements).size }
+                .filter { it.key > 0 }
+                .let {
+                    if (mostInCommon) {
+                        it.maxByOrNull { it.key }?.value // find the most match elements in common
+                    } else {
+                        it.flatMap { it.value } // find any match elements in common
+                    }
+                }
+                ?.map { it.entry.value }
+                ?.maxByOrNull { it.updated }
+                ?.ordinal
+        }
     }
 
     fun getOrdinal(key: Key): Double {
-        // exact match
-        ordinals[key]?.let { return it.ordinal }
-
-        class Matcher<T>(val mostInCommon: Boolean, val aspectSelector: (Key.Entry) -> T?)
-
         listOf<Matcher<*>>(
             Matcher(false) { entry ->
                 entry.instanceDateOrDayOfWeek
@@ -80,7 +78,7 @@ class ProjectOrdinalManager(private val timeConverter: TimeConverter, val projec
             Matcher(true) { it.getHourMinute() }, // instance hourMinute
             Matcher(true) { it.taskInfo?.taskKey }, // taskKey
         ).asSequence()
-            .mapNotNull { getMatchByAspect(key, it.mostInCommon, it.aspectSelector) }
+            .mapNotNull { it.match(key) }
             .firstOrNull()
             ?.let { return it }
 

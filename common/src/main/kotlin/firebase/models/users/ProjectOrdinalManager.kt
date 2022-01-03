@@ -26,7 +26,7 @@ class ProjectOrdinalManager(private val timeConverter: TimeConverter, val projec
         ordinals[key] = Value(ordinal, now)
     }
 
-    private fun <T> getMatchByAspect(searchKey: Key, aspectSelector: (Key.Entry) -> T?): Double? {
+    private fun <T> getMatchByAspect(searchKey: Key, mostInCommon: Boolean, aspectSelector: (Key.Entry) -> T?): Double? {
         fun Key.toMatchElements() = entries.mapNotNull(aspectSelector).toSet()
 
         val inputMatchElements = searchKey.toMatchElements()
@@ -42,8 +42,13 @@ class ProjectOrdinalManager(private val timeConverter: TimeConverter, val projec
             .map(::MatchData)
             .groupBy { it.matchElements.intersect(inputMatchElements).size }
             .filter { it.key > 0 }
-            .maxByOrNull { it.key } // find the most match elements in common
-            ?.value
+            .let {
+                if (mostInCommon) {
+                    it.maxByOrNull { it.key }?.value // find the most match elements in common
+                } else {
+                    it.flatMap { it.value } // find any match elements in common
+                }
+            }
             ?.map { it.entry.value }
             ?.maxByOrNull { it.updated }
             ?.ordinal
@@ -53,27 +58,29 @@ class ProjectOrdinalManager(private val timeConverter: TimeConverter, val projec
         // exact match
         ordinals[key]?.let { return it.ordinal }
 
-        listOf<(Key.Entry) -> Any?>(
-            {
-                it.taskInfo?.let { taskInfo ->
-                    taskInfo.scheduleDateTimePair?.let { taskInfo to it }
-                }
-            }, // instanceKey
-            { entry ->
+        class Matcher<T>(val mostInCommon: Boolean, val aspectSelector: (Key.Entry) -> T?)
+
+        listOf<Matcher<*>>(
+            Matcher(false) { entry ->
                 entry.instanceDateOrDayOfWeek
                     .date
                     ?.let { DateTimePair(it, entry.instanceTimePair) }
             }, // instance dateTimePair
-            { entry ->
+            Matcher(false) { entry ->
                 entry.instanceDateOrDayOfWeek
                     .date
                     ?.let { TimeStamp(it, entry.getHourMinute()) }
             }, // instance Timestamp
-            { it.instanceTimePair }, // instance timePair
-            { it.getHourMinute() }, // instance hourMinute
-            { it.taskInfo?.taskKey }, // taskKey
+            Matcher(true) {
+                it.taskInfo?.let { taskInfo ->
+                    taskInfo.scheduleDateTimePair?.let { taskInfo to it }
+                }
+            }, // instanceKey
+            Matcher(true) { it.instanceTimePair }, // instance timePair
+            Matcher(true) { it.getHourMinute() }, // instance hourMinute
+            Matcher(true) { it.taskInfo?.taskKey }, // taskKey
         ).asSequence()
-            .mapNotNull { getMatchByAspect(key, it) }
+            .mapNotNull { getMatchByAspect(key, it.mostInCommon, it.aspectSelector) }
             .firstOrNull()
             ?.let { return it }
 

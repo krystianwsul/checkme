@@ -29,6 +29,8 @@ class ProjectOrdinalManagerMatcherTest {
             object : ProjectOrdinalManager.Callbacks {
 
                 override fun getHourMinute(dayOfWeek: DayOfWeek, timePair: TimePair) = timePair.hourMinute!!
+
+                override fun addOrdinalEntry(ordinalEntry: ProjectOrdinalManager.OrdinalEntry) {}
             },
             mockk(),
             mutableListOf(),

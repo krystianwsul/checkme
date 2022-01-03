@@ -56,10 +56,15 @@ class MyUser(private val remoteMyUserRecord: MyUserRecord, private val rootModel
             .toMutableList()
 
         ProjectOrdinalManager(
+            // todo ordinal I can't keep this project object.  Gotta re-fetch it every time.  Maybe pass it into the ProjectOrdinalManager calls?
             object : ProjectOrdinalManager.Callbacks {
 
                 override fun getHourMinute(dayOfWeek: DayOfWeek, timePair: TimePair) =
                     project.getTime(timePair).getHourMinute(dayOfWeek)
+
+                override fun addOrdinalEntry(ordinalEntry: ProjectOrdinalManager.OrdinalEntry) {
+                    remoteMyUserRecord.addOrdinalEntry(project.projectKey, ordinalEntry.toJson())
+                }
             },
             project.projectKey,
             ordinalEntries,

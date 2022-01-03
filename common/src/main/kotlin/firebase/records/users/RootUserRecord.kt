@@ -12,7 +12,7 @@ import com.krystianwsul.common.utils.UserKey
 
 
 open class RootUserRecord(
-    private val databaseWrapper: DatabaseWrapper,
+    protected val databaseWrapper: DatabaseWrapper,
     create: Boolean,
     final override val userWrapper: UserWrapper,
     override val userKey: UserKey,

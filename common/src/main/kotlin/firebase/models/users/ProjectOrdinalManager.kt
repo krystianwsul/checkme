@@ -26,7 +26,10 @@ class ProjectOrdinalManager(
                 .size == 1
         )
 
-        ordinalEntries += OrdinalEntry(key, Value(ordinal, now))
+        OrdinalEntry(key, Value(ordinal, now)).let {
+            ordinalEntries += it
+            callbacks.addOrdinalEntry(it)
+        }
     }
 
     private inner class Matcher<T>(private val mostInCommon: Boolean, private val aspectSelector: (Key.Entry) -> T?) {
@@ -186,6 +189,8 @@ class ProjectOrdinalManager(
     interface Callbacks {
 
         fun getHourMinute(dayOfWeek: DayOfWeek, timePair: TimePair): HourMinute
+
+        fun addOrdinalEntry(ordinalEntry: OrdinalEntry)
     }
 
     interface Provider {

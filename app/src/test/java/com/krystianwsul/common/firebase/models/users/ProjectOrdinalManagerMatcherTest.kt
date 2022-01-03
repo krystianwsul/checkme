@@ -26,8 +26,12 @@ class ProjectOrdinalManagerMatcherTest {
     @Before
     fun before() {
         projectOrdinalManager = ProjectOrdinalManager(
-            { _, timePair -> timePair.hourMinute!! },
+            object : ProjectOrdinalManager.Callbacks {
+
+                override fun getHourMinute(dayOfWeek: DayOfWeek, timePair: TimePair) = timePair.hourMinute!!
+            },
             mockk(),
+            mutableListOf(),
         )
     }
 

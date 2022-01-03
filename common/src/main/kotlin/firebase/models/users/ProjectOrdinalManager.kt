@@ -9,14 +9,14 @@ import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
 
 class ProjectOrdinalManager(
-    private val timeConverter: TimeConverter,
+    private val callbacks: Callbacks,
     val projectKey: ProjectKey.Shared,
     private val ordinalEntries: MutableList<OrdinalEntry>,
 ) {
 
     val allEntries: Collection<OrdinalEntry> = ordinalEntries
 
-    private fun Key.Entry.getHourMinute() = timeConverter.getHourMinute(instanceDateOrDayOfWeek.dayOfWeek, instanceTimePair)
+    private fun Key.Entry.getHourMinute() = callbacks.getHourMinute(instanceDateOrDayOfWeek.dayOfWeek, instanceTimePair)
 
     fun setOrdinal(key: Key, ordinal: Double, now: ExactTimeStamp.Local) {
         check(
@@ -183,7 +183,7 @@ class ProjectOrdinalManager(
 
     data class Value(val ordinal: Double, val updated: ExactTimeStamp.Local)
 
-    fun interface TimeConverter {
+    interface Callbacks {
 
         fun getHourMinute(dayOfWeek: DayOfWeek, timePair: TimePair): HourMinute
     }

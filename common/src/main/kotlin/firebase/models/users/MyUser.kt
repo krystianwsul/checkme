@@ -6,6 +6,8 @@ import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
 import com.krystianwsul.common.firebase.models.customtime.MyUserCustomTime
 import com.krystianwsul.common.firebase.models.project.SharedProject
 import com.krystianwsul.common.firebase.records.users.MyUserRecord
+import com.krystianwsul.common.time.DayOfWeek
+import com.krystianwsul.common.time.TimePair
 import com.krystianwsul.common.utils.CustomTimeId
 import com.krystianwsul.common.utils.UserKey
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -54,7 +56,11 @@ class MyUser(private val remoteMyUserRecord: MyUserRecord, private val rootModel
             .toMutableList()
 
         ProjectOrdinalManager(
-            { dayOfWeek, timePair -> project.getTime(timePair).getHourMinute(dayOfWeek) },
+            object : ProjectOrdinalManager.Callbacks {
+
+                override fun getHourMinute(dayOfWeek: DayOfWeek, timePair: TimePair) =
+                    project.getTime(timePair).getHourMinute(dayOfWeek)
+            },
             project.projectKey,
             ordinalEntries,
         )

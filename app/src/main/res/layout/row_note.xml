@@ -15,7 +15,6 @@
         android:layout_height="wrap_content"
         android:hint="@string/description"
         app:hintAnimationEnabled="false"
-        app:errorEnabled="true"
         style="@style/NewTextInput">
 
         <com.google.android.material.textfield.TextInputEditText

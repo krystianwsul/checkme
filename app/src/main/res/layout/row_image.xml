@@ -32,7 +32,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="@string/add_an_image"
-        app:errorEnabled="true"
         app:hintAnimationEnabled="false">
 
         <AutoCompleteTextView

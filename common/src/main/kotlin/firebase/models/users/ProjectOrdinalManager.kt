@@ -77,6 +77,7 @@ class ProjectOrdinalManager(private val timeConverter: TimeConverter, val projec
             .firstOrNull()
             ?.let { return it }
 
+        // if nothing matches, return the most recently-set ordinal
         ordinals.values
             .maxByOrNull { it.updated }
             ?.let { return it.ordinal }

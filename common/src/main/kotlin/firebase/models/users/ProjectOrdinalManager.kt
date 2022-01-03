@@ -40,6 +40,9 @@ class ProjectOrdinalManager(val project: SharedProject) {
     }
 
     fun getOrdinal(key: Key): Double {
+        // exact match
+        ordinals[key]?.let { return it.ordinal }
+
         fun Key.Entry.getHourMinute() = project.getTime(instanceTimePair).getHourMinute(instanceDateOrDayOfWeek.dayOfWeek)
 
         listOf<(Key.Entry) -> Any?>(

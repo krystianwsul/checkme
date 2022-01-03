@@ -8,11 +8,13 @@ import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
 
-class ProjectOrdinalManager(private val timeConverter: TimeConverter, val projectKey: ProjectKey.Shared) {
+class ProjectOrdinalManager(
+    private val timeConverter: TimeConverter,
+    val projectKey: ProjectKey.Shared,
+    private val ordinalEntries: MutableList<OrdinalEntry>,
+) {
 
-    private val ordinals = mutableListOf<OrdinalEntry>()
-
-    val allEntries: Collection<OrdinalEntry> = ordinals
+    val allEntries: Collection<OrdinalEntry> = ordinalEntries
 
     private fun Key.Entry.getHourMinute() = timeConverter.getHourMinute(instanceDateOrDayOfWeek.dayOfWeek, instanceTimePair)
 
@@ -24,7 +26,7 @@ class ProjectOrdinalManager(private val timeConverter: TimeConverter, val projec
                 .size == 1
         )
 
-        ordinals += OrdinalEntry(key, Value(ordinal, now))
+        ordinalEntries += OrdinalEntry(key, Value(ordinal, now))
     }
 
     private inner class Matcher<T>(private val mostInCommon: Boolean, private val aspectSelector: (Key.Entry) -> T?) {
@@ -41,7 +43,7 @@ class ProjectOrdinalManager(private val timeConverter: TimeConverter, val projec
                 constructor(ordinalEntry: OrdinalEntry) : this(ordinalEntry, ordinalEntry.key.toMatchElements())
             }
 
-            return ordinals.map(::MatchData)
+            return ordinalEntries.map(::MatchData)
                 .groupBy { it.matchElements.intersect(inputMatchElements).size }
                 .filter { it.key > 0 }
                 .let {
@@ -83,7 +85,7 @@ class ProjectOrdinalManager(private val timeConverter: TimeConverter, val projec
             ?.let { return it }
 
         // if nothing matches, return the most recently-set ordinal
-        ordinals.maxByOrNull { it.value.updated }?.let { return it.value.ordinal }
+        ordinalEntries.maxByOrNull { it.value.updated }?.let { return it.value.ordinal }
 
         return projectKey.getOrdinal()
     }

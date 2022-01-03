@@ -47,9 +47,16 @@ class MyUser(private val remoteMyUserRecord: MyUserRecord, private val rootModel
     }
 
     override fun getProjectOrdinalManager(project: SharedProject) = projectOrdinalManagers.getOrPut(project.projectKey) {
+        val ordinalEntries = userWrapper.ordinalEntries
+            .getOrDefault(project.projectKey.key, mapOf())
+            .values
+            .map { ProjectOrdinalManager.OrdinalEntry.fromJson(project.projectRecord, it) }
+            .toMutableList()
+
         ProjectOrdinalManager(
             { dayOfWeek, timePair -> project.getTime(timePair).getHourMinute(dayOfWeek) },
             project.projectKey,
+            ordinalEntries,
         )
     }
 }

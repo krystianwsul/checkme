@@ -165,4 +165,82 @@ class ProjectOrdinalManagerMatcherTest {
 
         assertEquals(secondOrdinal, projectOrdinalManager.getOrdinal(notDoneKey))
     }
+
+    @Test
+    fun testRescheduleInstancesMarkDoneSetOrdinalMarkUndone() {
+        val date = Date(2022, 1, 3)
+        val earlierTimePair = TimePair(2, 0)
+
+        val instanceKey1 = InstanceKey(TaskKey.Root("taskKey1"), date, earlierTimePair)
+        val instanceKey2 = InstanceKey(TaskKey.Root("taskKey2"), date, earlierTimePair)
+        val instanceKey3 = InstanceKey(TaskKey.Root("taskKey3"), date, earlierTimePair)
+
+        val earlierInstanceDateTimePair = DateTimePair(date, earlierTimePair)
+
+        val earlierKey = newKey(
+            instanceKey1 to earlierInstanceDateTimePair,
+            instanceKey2 to earlierInstanceDateTimePair,
+            instanceKey3 to earlierInstanceDateTimePair,
+        )
+
+        // 1. set ordinal for earlier time
+        var now = ExactTimeStamp.Local(date, HourMinute(1, 0))
+
+        val earlierOrdinal = 1.0
+
+        projectOrdinalManager.setOrdinal(earlierKey, earlierOrdinal, now)
+
+        // 2. reschedule instances
+        now += 1.hours
+
+        val laterTimePair = TimePair(3, 0)
+        val laterInstanceDateTimePair = DateTimePair(date, laterTimePair)
+
+        val laterNotDoneKey = newKey(
+            instanceKey1 to laterInstanceDateTimePair,
+            instanceKey2 to laterInstanceDateTimePair,
+            instanceKey3 to laterInstanceDateTimePair,
+        )
+
+        assertEquals(earlierOrdinal, projectOrdinalManager.getOrdinal(laterNotDoneKey))
+
+        // 3. mark instance done
+
+        now += 1.hours
+
+        val laterDoneKey = newKey(
+            instanceKey1 to laterInstanceDateTimePair,
+            instanceKey2 to laterInstanceDateTimePair,
+        )
+
+        assertEquals(earlierOrdinal, projectOrdinalManager.getOrdinal(laterDoneKey))
+
+        // 4. set new ordinal
+
+        val newerOrdinal = 2.0
+
+        projectOrdinalManager.setOrdinal(laterDoneKey, newerOrdinal, now)
+        assertEquals(newerOrdinal, projectOrdinalManager.getOrdinal(laterDoneKey))
+
+        // 5. mark instance not done
+
+        now += 1.hours
+
+        assertEquals(newerOrdinal, projectOrdinalManager.getOrdinal(laterNotDoneKey))
+
+        // 6. set new ordinal
+
+        now += 1.hours
+
+        val newestOrdinal = 3.0
+
+        projectOrdinalManager.setOrdinal(laterNotDoneKey, newestOrdinal, now)
+        assertEquals(newestOrdinal, projectOrdinalManager.getOrdinal(laterNotDoneKey))
+
+        // 7. mark instance done again
+
+        now += 1.hours
+
+        assertEquals(newestOrdinal, projectOrdinalManager.getOrdinal(laterDoneKey))
+    }
 }

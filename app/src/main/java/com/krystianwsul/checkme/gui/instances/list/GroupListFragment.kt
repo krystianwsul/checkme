@@ -40,7 +40,6 @@ import com.krystianwsul.checkme.viewmodels.DataId
 import com.krystianwsul.common.firebase.models.ImageState
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.TimePair
-import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.NullableWrapper
 import com.krystianwsul.common.utils.ProjectKey
@@ -675,11 +674,11 @@ class GroupListFragment @JvmOverloads constructor(
 
                     val canAddSubtask = parameters.fabActionMode.showSubtask && singleSelectedData.canAddSubtask
 
-                    val rootAndTimeValid = instanceData?.run { isRootInstance && instanceTimeStamp > TimeStamp.now } == true
+                    val isTopLevel = instanceData?.isRootInstance == true
 
-                    val canAddToTime = parameters.fabActionMode.showTime && rootAndTimeValid
+                    val canAddToTime = parameters.fabActionMode.showTime && isTopLevel
 
-                    val canAddToProject = rootAndTimeValid && instanceData?.projectKey != null
+                    val canAddToProject = isTopLevel && instanceData?.projectKey != null
 
                     val multipleValid = listOf(canAddToTime, canAddSubtask, canAddToProject).filter { it }.size > 1
 
@@ -724,17 +723,7 @@ class GroupListFragment @JvmOverloads constructor(
 
                             if (rootInstances.isEmpty()) return false
 
-                            if (rootInstances.map { it.instanceTimeStamp }
-                                    .distinct()
-                                    .singleOrNull()
-                                    ?.let { it > TimeStamp.now } == true
-                            ) {
-                                return true
-                            }
-
-                            if (instanceDatas.map { it.projectKey }.distinct().singleOrNull() != null) return true
-
-                            return false
+                            return true
                         }
 
                         if (canAddToInstances()) {
@@ -758,7 +747,7 @@ class GroupListFragment @JvmOverloads constructor(
                         )
                     )
                 }
-                is GroupListParameters.TimeStamp -> if (parameters.projectKey != null || parameters.timeStamp > TimeStamp.now) {
+                is GroupListParameters.TimeStamp -> {
                     val hint = parameters.groupListDataWrapper
                         .instanceDatas
                         .let {
@@ -774,8 +763,6 @@ class GroupListFragment @JvmOverloads constructor(
                         }
 
                     getStartEditActivityFabState(hint)
-                } else {
-                    FabState.Hidden
                 }
                 is GroupListParameters.InstanceKey -> if (parameters.groupListDataWrapper.taskEditable!!)
                     getStartEditActivityFabState(EditParentHint.Instance(parameters.instanceKey))

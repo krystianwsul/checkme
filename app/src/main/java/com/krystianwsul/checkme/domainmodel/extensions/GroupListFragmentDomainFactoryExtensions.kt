@@ -45,7 +45,7 @@ fun DomainUpdater.setOrdinalProject(
         instances.map { ProjectOrdinalManager.Key.Entry(it.instanceKey, it.instanceDateTime.toDateTimePair()) }.toSet()
     )
 
-    myUserFactory.user.getProjectOrdinalManager(project).setOrdinal(key, ordinal, now)
+    myUserFactory.user.getProjectOrdinalManager(project).setOrdinal(project, key, ordinal, now)
 
 //    DomainUpdater.Params(true, notificationType, DomainFactory.CloudParams(project)) todo ordinal revert once this actually commits DB changes
     DomainUpdater.Params(Notifier.Params(), DomainFactory.SaveParams(notificationType, true))

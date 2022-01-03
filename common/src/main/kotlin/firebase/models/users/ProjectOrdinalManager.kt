@@ -16,12 +16,15 @@ class ProjectOrdinalManager(
 
     val allEntries: Collection<OrdinalEntry> = ordinalEntries
 
-    private fun Key.Entry.getHourMinute() = callbacks.getHourMinute(instanceDateOrDayOfWeek.dayOfWeek, instanceTimePair)
+    private fun Key.Entry.getHourMinute(project: SharedProject) =
+        project.getTime(instanceTimePair).getHourMinute(instanceDateOrDayOfWeek.dayOfWeek)
 
-    fun setOrdinal(key: Key, ordinal: Double, now: ExactTimeStamp.Local) {
+    fun setOrdinal(project: SharedProject, key: Key, ordinal: Double, now: ExactTimeStamp.Local) {
+        check(project.projectKey == projectKey)
+
         check(
             key.entries
-                .map { TimeStamp(it.instanceDateOrDayOfWeek.date!!, it.getHourMinute()) }
+                .map { TimeStamp(it.instanceDateOrDayOfWeek.date!!, it.getHourMinute(project)) }
                 .distinct()
                 .size == 1
         )
@@ -62,7 +65,9 @@ class ProjectOrdinalManager(
         }
     }
 
-    fun getOrdinal(key: Key): Double {
+    fun getOrdinal(project: SharedProject, key: Key): Double {
+        check(project.projectKey == projectKey)
+
         listOf<Matcher<*>>(
             Matcher(false) { entry ->
                 entry.instanceDateOrDayOfWeek
@@ -72,7 +77,7 @@ class ProjectOrdinalManager(
             Matcher(false) { entry ->
                 entry.instanceDateOrDayOfWeek
                     .date
-                    ?.let { TimeStamp(it, entry.getHourMinute()) }
+                    ?.let { TimeStamp(it, entry.getHourMinute(project)) }
             }, // instance Timestamp
             Matcher(true) {
                 it.taskInfo?.let { taskInfo ->
@@ -80,7 +85,7 @@ class ProjectOrdinalManager(
                 }
             }, // instanceKey
             Matcher(true) { it.instanceTimePair }, // instance timePair
-            Matcher(true) { it.getHourMinute() }, // instance hourMinute
+            Matcher(true) { it.getHourMinute(project) }, // instance hourMinute
             Matcher(true) { it.taskInfo?.taskKey }, // taskKey
         ).asSequence()
             .mapNotNull { it.match(key) }
@@ -186,9 +191,7 @@ class ProjectOrdinalManager(
 
     data class Value(val ordinal: Double, val updated: ExactTimeStamp.Local)
 
-    interface Callbacks {
-
-        fun getHourMinute(dayOfWeek: DayOfWeek, timePair: TimePair): HourMinute
+    fun interface Callbacks {
 
         fun addOrdinalEntry(ordinalEntry: OrdinalEntry)
     }

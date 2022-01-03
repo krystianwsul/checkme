@@ -68,7 +68,7 @@ class GroupTypeFactory(
             timeStamp,
             projectDetails,
             instanceDatas,
-            projectOrdinalManagerProvider.getProjectOrdinalManager(project).getOrdinal(key),
+            projectOrdinalManagerProvider.getProjectOrdinalManager(project).getOrdinal(project, key),
         )
     }
 

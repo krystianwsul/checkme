@@ -1,11 +1,15 @@
 package com.krystianwsul.common.firebase.models.users
 
+import com.krystianwsul.common.firebase.models.project.SharedProject
 import com.krystianwsul.common.invoke
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.InstanceKey
+import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
 import com.soywiz.klock.hours
+import io.mockk.every
 import io.mockk.mockk
+import io.mockk.slot
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
@@ -23,18 +27,23 @@ class ProjectOrdinalManagerMatcherTest {
 
     private lateinit var projectOrdinalManager: ProjectOrdinalManager
 
+    private val projectKey = ProjectKey.Shared("projectKey")
+
+    private val project = mockk<SharedProject> {
+        val timePairSlot = slot<TimePair>()
+
+        every { this@mockk.projectKey } returns this@ProjectOrdinalManagerMatcherTest.projectKey
+
+        every { getTime(capture(timePairSlot)) } answers {
+            mockk {
+                every { getHourMinute(any()) } returns timePairSlot.captured.hourMinute!!
+            }
+        }
+    }
+
     @Before
     fun before() {
-        projectOrdinalManager = ProjectOrdinalManager(
-            object : ProjectOrdinalManager.Callbacks {
-
-                override fun getHourMinute(dayOfWeek: DayOfWeek, timePair: TimePair) = timePair.hourMinute!!
-
-                override fun addOrdinalEntry(ordinalEntry: ProjectOrdinalManager.OrdinalEntry) {}
-            },
-            mockk(),
-            mutableListOf(),
-        )
+        projectOrdinalManager = ProjectOrdinalManager({ }, projectKey, mutableListOf())
     }
 
     @Test
@@ -56,9 +65,9 @@ class ProjectOrdinalManagerMatcherTest {
 
         val ordinal = 1.0
 
-        projectOrdinalManager.setOrdinal(key, ordinal, now)
+        projectOrdinalManager.setOrdinal(project, key, ordinal, now)
 
-        assertEquals(ordinal, projectOrdinalManager.getOrdinal(key))
+        assertEquals(ordinal, projectOrdinalManager.getOrdinal(project, key))
     }
 
     @Test
@@ -80,7 +89,7 @@ class ProjectOrdinalManagerMatcherTest {
 
         val ordinal = 1.0
 
-        projectOrdinalManager.setOrdinal(originalKey, ordinal, now)
+        projectOrdinalManager.setOrdinal(project, originalKey, ordinal, now)
 
         val rescheduledTimePair = TimePair(3, 0)
         val rescheduledInstanceDateTimePair = DateTimePair(date, rescheduledTimePair)
@@ -90,7 +99,7 @@ class ProjectOrdinalManagerMatcherTest {
             instanceKey2 to rescheduledInstanceDateTimePair,
         )
 
-        assertEquals(ordinal, projectOrdinalManager.getOrdinal(rescheduledKey))
+        assertEquals(ordinal, projectOrdinalManager.getOrdinal(project, rescheduledKey))
     }
 
     @Test
@@ -112,7 +121,7 @@ class ProjectOrdinalManagerMatcherTest {
 
         val ordinal = 1.0
 
-        projectOrdinalManager.setOrdinal(firstKey, ordinal, now)
+        projectOrdinalManager.setOrdinal(project, firstKey, ordinal, now)
 
         val secondDate = Date(2022, 1, 4)
 
@@ -126,7 +135,7 @@ class ProjectOrdinalManagerMatcherTest {
             instanceKey4 to secondInstanceDateTimePair,
         )
 
-        assertEquals(ordinal, projectOrdinalManager.getOrdinal(secondKey))
+        assertEquals(ordinal, projectOrdinalManager.getOrdinal(project, secondKey))
     }
 
     @Test
@@ -151,7 +160,7 @@ class ProjectOrdinalManagerMatcherTest {
         // first, we set an ordinal for all three instances
         var now = ExactTimeStamp.Local(date, HourMinute(1, 0))
 
-        projectOrdinalManager.setOrdinal(notDoneKey, firstOrdinal, now)
+        projectOrdinalManager.setOrdinal(project, notDoneKey, firstOrdinal, now)
 
         // second, we simulate an instance being marked as done, and the ordinal then being changed
         now += 1.hours
@@ -163,13 +172,13 @@ class ProjectOrdinalManagerMatcherTest {
 
         val secondOrdinal = 2.0
 
-        projectOrdinalManager.setOrdinal(doneKey, secondOrdinal, now)
-        assertEquals(secondOrdinal, projectOrdinalManager.getOrdinal(doneKey))
+        projectOrdinalManager.setOrdinal(project, doneKey, secondOrdinal, now)
+        assertEquals(secondOrdinal, projectOrdinalManager.getOrdinal(project, doneKey))
 
         // finally, we mark the instance not done, and make sure the new ordinal is still in place
         now += 1.hours
 
-        assertEquals(secondOrdinal, projectOrdinalManager.getOrdinal(notDoneKey))
+        assertEquals(secondOrdinal, projectOrdinalManager.getOrdinal(project, notDoneKey))
     }
 
     @Test
@@ -194,7 +203,7 @@ class ProjectOrdinalManagerMatcherTest {
 
         val earlierOrdinal = 1.0
 
-        projectOrdinalManager.setOrdinal(earlierKey, earlierOrdinal, now)
+        projectOrdinalManager.setOrdinal(project, earlierKey, earlierOrdinal, now)
 
         // 2. reschedule instances
         now += 1.hours
@@ -208,7 +217,7 @@ class ProjectOrdinalManagerMatcherTest {
             instanceKey3 to laterInstanceDateTimePair,
         )
 
-        assertEquals(earlierOrdinal, projectOrdinalManager.getOrdinal(laterNotDoneKey))
+        assertEquals(earlierOrdinal, projectOrdinalManager.getOrdinal(project, laterNotDoneKey))
 
         // 3. mark instance done
 
@@ -219,20 +228,20 @@ class ProjectOrdinalManagerMatcherTest {
             instanceKey2 to laterInstanceDateTimePair,
         )
 
-        assertEquals(earlierOrdinal, projectOrdinalManager.getOrdinal(laterDoneKey))
+        assertEquals(earlierOrdinal, projectOrdinalManager.getOrdinal(project, laterDoneKey))
 
         // 4. set new ordinal
 
         val newerOrdinal = 2.0
 
-        projectOrdinalManager.setOrdinal(laterDoneKey, newerOrdinal, now)
-        assertEquals(newerOrdinal, projectOrdinalManager.getOrdinal(laterDoneKey))
+        projectOrdinalManager.setOrdinal(project, laterDoneKey, newerOrdinal, now)
+        assertEquals(newerOrdinal, projectOrdinalManager.getOrdinal(project, laterDoneKey))
 
         // 5. mark instance not done
 
         now += 1.hours
 
-        assertEquals(newerOrdinal, projectOrdinalManager.getOrdinal(laterNotDoneKey))
+        assertEquals(newerOrdinal, projectOrdinalManager.getOrdinal(project, laterNotDoneKey))
 
         // 6. set new ordinal
 
@@ -240,13 +249,13 @@ class ProjectOrdinalManagerMatcherTest {
 
         val newestOrdinal = 3.0
 
-        projectOrdinalManager.setOrdinal(laterNotDoneKey, newestOrdinal, now)
-        assertEquals(newestOrdinal, projectOrdinalManager.getOrdinal(laterNotDoneKey))
+        projectOrdinalManager.setOrdinal(project, laterNotDoneKey, newestOrdinal, now)
+        assertEquals(newestOrdinal, projectOrdinalManager.getOrdinal(project, laterNotDoneKey))
 
         // 7. mark instance done again
 
         now += 1.hours
 
-        assertEquals(newestOrdinal, projectOrdinalManager.getOrdinal(laterDoneKey))
+        assertEquals(newestOrdinal, projectOrdinalManager.getOrdinal(project, laterDoneKey))
     }
 }

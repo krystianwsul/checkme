@@ -13,4 +13,5 @@ data class UserWrapper @JvmOverloads constructor(
     val projects: MutableMap<String, Boolean> = mutableMapOf(),
     val friends: MutableMap<String, Boolean> = mutableMapOf(),
     var customTimes: MutableMap<String, UserCustomTimeJson> = mutableMapOf(),
+    val ordinalEntries: Map<String, Map<String, ProjectOrdinalEntryJson>> = mapOf(), // first key is projectKey, second is push key
 ) : Parcelable, Parsable

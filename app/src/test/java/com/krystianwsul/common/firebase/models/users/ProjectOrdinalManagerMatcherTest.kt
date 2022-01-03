@@ -85,4 +85,40 @@ class ProjectOrdinalManagerMatcherTest {
 
         assertEquals(ordinal, projectOrdinalManager.getOrdinal(rescheduledKey))
     }
+
+    @Test
+    fun testHintOnOtherDay() {
+        val firstDate = Date(2022, 1, 3)
+        val timePair = TimePair(2, 0)
+
+        val instanceKey1 = InstanceKey(TaskKey.Root("taskKey1"), firstDate, timePair)
+        val instanceKey2 = InstanceKey(TaskKey.Root("taskKey2"), firstDate, timePair)
+
+        val firstInstanceDateTimePair = DateTimePair(firstDate, timePair)
+
+        val firstKey = newKey(
+            instanceKey1 to firstInstanceDateTimePair,
+            instanceKey2 to firstInstanceDateTimePair,
+        )
+
+        var now = ExactTimeStamp.Local(firstDate, HourMinute(1, 0))
+
+        val ordinal = 1.0
+
+        projectOrdinalManager.setOrdinal(firstKey, ordinal, now)
+
+        val secondDate = Date(2022, 1, 4)
+
+        val secondInstanceDateTimePair = DateTimePair(secondDate, timePair)
+
+        val instanceKey3 = InstanceKey(TaskKey.Root("taskKey3"), secondDate, timePair)
+        val instanceKey4 = InstanceKey(TaskKey.Root("taskKey4"), secondDate, timePair)
+
+        val secondKey = newKey(
+            instanceKey3 to secondInstanceDateTimePair,
+            instanceKey4 to secondInstanceDateTimePair,
+        )
+
+        assertEquals(ordinal, projectOrdinalManager.getOrdinal(secondKey))
+    }
 }

@@ -125,13 +125,13 @@ class OrdinalProcessor(
         val updated: ExactTimeStamp.Local,
     ) {
 
-        constructor(pair: Pair<ProjectOrdinalManager.Key, ProjectOrdinalManager.Value>) : this(
-            pair.first
+        constructor(ordinalEntry: ProjectOrdinalManager.OrdinalEntry) : this(
+            ordinalEntry.key
                 .entries
                 .map(::MutableKeyEntry)
                 .toMutableList(),
-            pair.second.ordinal,
-            pair.second.updated,
+            ordinalEntry.value.ordinal,
+            ordinalEntry.value.updated,
         )
 
         fun getImmutableKeys() = ProjectOrdinalManager.Key(mutableKeyEntries.map { it.toImmutableKeyEntry() }.toSet())

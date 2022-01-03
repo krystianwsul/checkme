@@ -9,9 +9,9 @@ import com.krystianwsul.common.utils.TaskKey
 
 class ProjectOrdinalManager(private val timeConverter: TimeConverter, val projectKey: ProjectKey.Shared) {
 
-    private var ordinals = mutableMapOf<Key, Value>()
+    private val ordinals = mutableListOf<OrdinalEntry>()
 
-    val allEntries: Collection<Pair<Key, Value>> = ordinals.entries.map { it.key to it.value }
+    val allEntries: Collection<OrdinalEntry> = ordinals
 
     private fun Key.Entry.getHourMinute() = timeConverter.getHourMinute(instanceDateOrDayOfWeek.dayOfWeek, instanceTimePair)
 
@@ -23,7 +23,7 @@ class ProjectOrdinalManager(private val timeConverter: TimeConverter, val projec
                 .size == 1
         )
 
-        ordinals[key] = Value(ordinal, now)
+        ordinals += OrdinalEntry(key, Value(ordinal, now))
     }
 
     private inner class Matcher<T>(private val mostInCommon: Boolean, private val aspectSelector: (Key.Entry) -> T?) {
@@ -35,13 +35,12 @@ class ProjectOrdinalManager(private val timeConverter: TimeConverter, val projec
                 .takeIf { it.isNotEmpty() }
                 ?: return null
 
-            data class MatchData(val entry: Map.Entry<Key, Value>, val matchElements: Set<T>) {
+            data class MatchData(val ordinalEntry: OrdinalEntry, val matchElements: Set<T>) {
 
-                constructor(entry: Map.Entry<Key, Value>) : this(entry, entry.key.toMatchElements())
+                constructor(ordinalEntry: OrdinalEntry) : this(ordinalEntry, ordinalEntry.key.toMatchElements())
             }
 
-            return ordinals.entries
-                .map(::MatchData)
+            return ordinals.map(::MatchData)
                 .groupBy { it.matchElements.intersect(inputMatchElements).size }
                 .filter { it.key > 0 }
                 .let {
@@ -51,7 +50,7 @@ class ProjectOrdinalManager(private val timeConverter: TimeConverter, val projec
                         it.flatMap { it.value } // find any match elements in common
                     }
                 }
-                ?.map { it.entry.value }
+                ?.map { it.ordinalEntry.value }
                 ?.maxByOrNull { it.updated }
                 ?.ordinal
         }
@@ -83,12 +82,12 @@ class ProjectOrdinalManager(private val timeConverter: TimeConverter, val projec
             ?.let { return it }
 
         // if nothing matches, return the most recently-set ordinal
-        ordinals.values
-            .maxByOrNull { it.updated }
-            ?.let { return it.ordinal }
+        ordinals.maxByOrNull { it.value.updated }?.let { return it.value.ordinal }
 
         return projectKey.getOrdinal()
     }
+
+    data class OrdinalEntry(val key: Key, val value: Value)
 
     data class Key(val entries: Set<Entry>) {
 

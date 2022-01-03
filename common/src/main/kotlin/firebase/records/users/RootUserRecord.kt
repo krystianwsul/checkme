@@ -3,6 +3,7 @@ package com.krystianwsul.common.firebase.records.users
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.RootUserProperties
 import com.krystianwsul.common.firebase.json.customtimes.UserCustomTimeJson
+import com.krystianwsul.common.firebase.json.users.ProjectOrdinalEntryJson
 import com.krystianwsul.common.firebase.json.users.UserWrapper
 import com.krystianwsul.common.firebase.records.RemoteRecord
 import com.krystianwsul.common.firebase.records.customtime.UserCustomTimeRecord
@@ -23,6 +24,7 @@ open class RootUserRecord(
         const val USER_DATA = "userData"
         private const val FRIENDS = "friends"
         const val PROJECTS = "projects"
+        const val ORDINAL_ENTRIES = "ordinalEntries"
     }
 
     final override val userJson by lazy { userWrapper.userData }
@@ -119,5 +121,12 @@ open class RootUserRecord(
         customTimeRecords[remoteCustomTimeRecord.id] = remoteCustomTimeRecord
 
         return remoteCustomTimeRecord
+    }
+
+    // this doesn't diff, but it's fired from the backend, so I'm not too concerned about bandwidth
+    fun setOrdinalEntries(projectKey: ProjectKey.Shared, ordinalEntries: Map<String, ProjectOrdinalEntryJson>) {
+        userWrapper.ordinalEntries[projectKey.key] = ordinalEntries.toMutableMap()
+
+        addValue("$key/$ORDINAL_ENTRIES/${projectKey.key}", ordinalEntries)
     }
 }

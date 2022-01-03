@@ -4,7 +4,7 @@ import com.krystianwsul.common.firebase.records.customtime.CustomTimeRecord
 import com.krystianwsul.common.firebase.records.noscheduleorparent.NoScheduleOrParentRecord
 import com.krystianwsul.common.firebase.records.schedule.ScheduleRecord
 import com.krystianwsul.common.firebase.records.taskhierarchy.TaskHierarchyRecord
-import com.krystianwsul.common.firebase.records.users.MyUserRecord
+import com.krystianwsul.common.firebase.records.users.RootUserRecord
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ScheduleId
 import com.krystianwsul.common.utils.TaskHierarchyId
@@ -42,5 +42,5 @@ abstract class DatabaseWrapper {
         TaskHierarchyId(getNewId("$TASKS_KEY/$taskId/${TaskHierarchyRecord.TASK_HIERARCHIES}"))
 
     fun newProjectOrdinalEntryId(userKey: UserKey, projectKey: ProjectKey.Shared) =
-        getNewId("$USERS_KEY/${userKey.key}/${MyUserRecord.ORDINAL_ENTRIES}/${projectKey.key}")
+        getNewId("$USERS_KEY/${userKey.key}/${RootUserRecord.ORDINAL_ENTRIES}/${projectKey.key}")
 }

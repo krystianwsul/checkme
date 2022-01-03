@@ -16,11 +16,6 @@ class MyUserRecord(
     userKey: UserKey,
 ) : RootUserRecord(databaseWrapper, create, createObject, userKey), MyUserProperties {
 
-    companion object {
-
-        const val ORDINAL_ENTRIES = "ordinalEntries"
-    }
-
     override fun setToken(deviceDbInfo: DeviceDbInfo) {
         if (deviceDbInfo.token == userJson.tokens[deviceDbInfo.uuid]) return
 
@@ -37,6 +32,6 @@ class MyUserRecord(
 
         userWrapper.ordinalEntries.getOrPut(projectKey.key) { mutableMapOf() }[ordinalEntryId] = projectOrdinalEntryJson
 
-        addValue("$key/${ORDINAL_ENTRIES}/${projectKey.key}/$ordinalEntryId", projectOrdinalEntryJson)
+        addValue("$key/$ORDINAL_ENTRIES/${projectKey.key}/$ordinalEntryId", projectOrdinalEntryJson)
     }
 }

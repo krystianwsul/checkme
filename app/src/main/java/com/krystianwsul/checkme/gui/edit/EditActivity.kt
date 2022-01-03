@@ -2,8 +2,6 @@ package com.krystianwsul.checkme.gui.edit
 
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.content.BroadcastReceiver
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
@@ -129,13 +127,6 @@ class EditActivity : NavBarActivity() {
     val editViewModel by viewModels<EditViewModel>()
 
     private val parametersRelay = PublishRelay.create<ScheduleDialogParameters>()
-
-    private val timeRelay = BehaviorRelay.createDefault(Unit) // this is just a trigger to re-check schedule errors
-
-    private val timeReceiver = object : BroadcastReceiver() {
-
-        override fun onReceive(context: Context?, intent: Intent?) = timeRelay.accept(Unit)
-    }
 
     private val joinAllRemindersListener = { allReminders: Boolean ->
         save(false, EditDelegate.DialogResult.JoinAllInstances(allReminders))
@@ -266,8 +257,6 @@ class EditActivity : NavBarActivity() {
                 }
             }
             .addTo(createDisposable)
-
-        startTicks(timeReceiver)
 
         Observable.combineLatest(
             keyboardInsetRelay,
@@ -419,17 +408,7 @@ class EditActivity : NavBarActivity() {
         return error != null
     }
 
-    private fun updateError() = updateNameError() || editViewModel.delegate
-        .parentScheduleManager
-        .schedules
-        .any { editViewModel.delegate.getError(it) != null }
-        .also { if (it) timeRelay.accept(Unit) }
-
-    override fun onDestroy() {
-        unregisterReceiver(timeReceiver)
-
-        super.onDestroy()
-    }
+    private fun updateError() = updateNameError()
 
     private fun dataChanged(): Boolean {
         if (!editViewModel.hasDelegate) return false
@@ -598,10 +577,6 @@ class EditActivity : NavBarActivity() {
                 .subscribe { getItem()?.onNewAssignedTo(this@EditActivity, holder) }
                 .addTo(holder.compositeDisposable)
 
-            holder.compositeDisposable += timeRelay.subscribe {
-                getItem()?.onTimeChanged(this@EditActivity, holder)
-            }
-
             createDisposable += holder.compositeDisposable
         }
 
@@ -640,8 +615,6 @@ class EditActivity : NavBarActivity() {
         open fun onNewImageState(imageState: EditImageState, holder: Holder) = Unit
 
         open fun onNewParent(activity: EditActivity, holder: Holder) = Unit
-
-        open fun onTimeChanged(activity: EditActivity, holder: Holder) = Unit
 
         open fun onNewAssignedTo(activity: EditActivity, holder: Holder) = Unit
 
@@ -742,13 +715,11 @@ class EditActivity : NavBarActivity() {
 
             override fun onNewParent(activity: EditActivity, holder: Holder) = onTimeChanged(activity, holder)
 
-            override fun onTimeChanged(activity: EditActivity, holder: Holder) {
+            fun onTimeChanged(activity: EditActivity, holder: Holder) {
+                // todo schedule change error padding
                 (holder as ScheduleHolder).rowScheduleBinding
                     .scheduleLayout
-                    .error = activity.editViewModel
-                    .delegate
-                    .getError(scheduleEntry)
-                    ?.let { activity.getString(it.resource) }
+                    .error = null
             }
 
             private fun same(other: ScheduleEntry): Boolean {

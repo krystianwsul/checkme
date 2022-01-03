@@ -2,7 +2,6 @@ package com.krystianwsul.checkme.gui.edit
 
 import android.os.Bundle
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
-import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.UserKey
 import io.reactivex.rxjava3.core.Observable
 
@@ -45,7 +44,6 @@ interface ParentScheduleManager {
         val name: String
         val parentKey: EditViewModel.ParentKey
         val projectUsers: Map<UserKey, EditViewModel.UserData>
-        val projectKey: ProjectKey<*>
         val hasMultipleInstances: Boolean?
         val clearParentTaskData: Triple<Project?, List<EditViewModel.ScheduleDataWrapper>, Set<UserKey>>?
         val compatibleWithSchedule: Boolean
@@ -54,7 +52,6 @@ interface ParentScheduleManager {
             override val name: String,
             override val parentKey: EditViewModel.ParentKey.Project,
             override val projectUsers: Map<UserKey, EditViewModel.UserData>,
-            override val projectKey: ProjectKey.Shared,
         ) : Parent {
 
             override val hasMultipleInstances: Boolean? = null
@@ -67,7 +64,6 @@ interface ParentScheduleManager {
         data class Task(
             override val name: String,
             override val parentKey: EditViewModel.ParentKey.Task,
-            override val projectKey: ProjectKey<*>,
             override val hasMultipleInstances: Boolean?,
             override val clearParentTaskData: Triple<Project?, List<EditViewModel.ScheduleDataWrapper>, Set<UserKey>>?,
             val topLevelTaskIsSingleSchedule: Boolean,

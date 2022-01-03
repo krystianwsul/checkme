@@ -8,7 +8,6 @@ import com.krystianwsul.checkme.domainmodel.extensions.updateTopLevelTask
 import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
 import com.krystianwsul.checkme.gui.edit.EditParameters
 import com.krystianwsul.checkme.gui.edit.EditViewModel
-import com.krystianwsul.checkme.gui.edit.ScheduleEntry
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ScheduleData
 import com.krystianwsul.common.utils.TaskKey
@@ -23,23 +22,6 @@ class EditExistingTaskEditDelegate(
     compositeDisposable: CompositeDisposable,
     storeParentKey: (EditViewModel.ParentKey?, Boolean) -> Unit,
 ) : ExistingTaskEditDelegate(data, savedInstanceState, compositeDisposable, storeParentKey) {
-
-    override fun skipScheduleCheck(scheduleEntry: ScheduleEntry): Boolean {
-        if (taskData.scheduleDataWrappers?.contains(scheduleEntry.scheduleDataWrapper) != true) return false
-
-        val parentKey = parentScheduleManager.parent?.parentKey
-
-        if (taskData.parentKey == parentKey) return true
-
-        fun EditViewModel.ParentKey?.representsProject() = this?.let { it is EditViewModel.ParentKey.Project } != false
-
-        if (taskData.parentKey.representsProject() && parentKey.representsProject() && taskData.isRootTask) return true
-
-        val initialProject = taskData.projectKey
-        val finalProject = parentScheduleManager.parent?.projectKey
-
-        return initialProject == finalProject
-    }
 
     override fun createTaskWithSchedule(
         createParameters: CreateParameters,

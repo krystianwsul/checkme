@@ -3,10 +3,8 @@ package com.krystianwsul.checkme.gui.edit.delegates
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import androidx.annotation.StringRes
 import arrow.core.curried
 import com.krystianwsul.checkme.MyApplication
-import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.edit.*
 import com.krystianwsul.checkme.gui.edit.EditViewModel
@@ -16,7 +14,6 @@ import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity
 import com.krystianwsul.checkme.upload.Uploader
 import com.krystianwsul.checkme.utils.newUuid
 import com.krystianwsul.common.firebase.json.tasks.TaskJson
-import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.time.TimePair
 import com.krystianwsul.common.utils.*
@@ -125,35 +122,6 @@ abstract class EditDelegate(
         name: String,
         note: String?,
     ) = name != taskData.name || note != taskData.note
-
-    fun getError(scheduleEntry: ScheduleEntry): ScheduleError? {
-        if (scheduleEntry.scheduleDataWrapper !is EditViewModel.ScheduleDataWrapper.Single) return null
-
-        if (skipScheduleCheck(scheduleEntry)) return null
-
-        val date = scheduleEntry.scheduleDataWrapper
-            .scheduleData
-            .date
-
-        if (date > Date.today()) return null
-
-        if (date < Date.today()) return ScheduleError.DATE
-
-        val hourMinute = scheduleEntry.scheduleDataWrapper
-            .timePair
-            .run {
-                customTimeKey?.let { data.customTimeDatas.getValue(it) }
-                    ?.hourMinutes
-                    ?.getValue(date.dayOfWeek)
-                    ?: hourMinute!!
-            }
-
-        if (hourMinute <= HourMinute.now) return ScheduleError.TIME
-
-        return null
-    }
-
-    protected open fun skipScheduleCheck(scheduleEntry: ScheduleEntry): Boolean = false
 
     private val scheduleOffset
         get() = adapterItemObservable.getCurrentValue().indexOfFirst { it is EditActivity.Item.Schedule }
@@ -273,11 +241,6 @@ abstract class EditDelegate(
 
             fun upload(taskKey: TaskKey) = Uploader.addUpload(domainFactory.deviceDbInfo, taskKey, uuid, path)
         }
-    }
-
-    enum class ScheduleError(@StringRes val resource: Int) {
-
-        DATE(R.string.error_date), TIME(R.string.error_time)
     }
 
     class SharedProjectParameters(val key: ProjectKey.Shared, val assignedTo: Set<UserKey>)

@@ -807,9 +807,6 @@ class GroupListFragment @JvmOverloads constructor(
         ).flatten().flatten()
     }
 
-    private val GroupListDataWrapper.InstanceData.allTaskKeys
-        get() = getAllInstanceDatas(this).map { it.taskKey }
-
     override fun findItem(): Int? {
         if (!searchDataManager.treeViewAdapterInitialized) return null
 

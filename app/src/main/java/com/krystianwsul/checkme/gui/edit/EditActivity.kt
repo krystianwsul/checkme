@@ -713,15 +713,6 @@ class EditActivity : NavBarActivity() {
                 }
             }
 
-            override fun onNewParent(activity: EditActivity, holder: Holder) = onTimeChanged(activity, holder)
-
-            fun onTimeChanged(activity: EditActivity, holder: Holder) {
-                // todo schedule change error padding
-                (holder as ScheduleHolder).rowScheduleBinding
-                    .scheduleLayout
-                    .error = null
-            }
-
             private fun same(other: ScheduleEntry): Boolean {
                 if (scheduleEntry.id == other.id) return true
 

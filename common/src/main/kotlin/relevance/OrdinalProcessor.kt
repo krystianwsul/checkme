@@ -44,20 +44,23 @@ class OrdinalProcessor(
     }
 
     private fun processProjects(user: RootUser) {
-        // todo ordinal write (overwrite), after actually implementing return types
-        val relevantEntries = user.projectIds
+        user.projectIds
             .mapNotNull { relevantProjects[it] }
-            .map {
-                val ordinalEntries = user.getOrdinalEntriesForProject(it)
-
-                processProject(it, ordinalEntries)
+            .forEach {
+                user.remoteRootUserRecord.setOrdinalEntries(
+                    it.projectKey,
+                    processProject(it, user.getOrdinalEntriesForProject(it)).mapValues { it.value.toJson() }
+                )
             }
     }
 
-    private fun processProject(project: SharedProject, ordinalEntries: List<ProjectOrdinalManager.OrdinalEntry>) {
-        val mutableOrdinalEntries = ordinalEntries.map(::MutableOrdinalEntry).toMutableList()
+    private fun processProject(
+        project: SharedProject,
+        ordinalEntries: Map<String, ProjectOrdinalManager.OrdinalEntry>,
+    ): Map<String, ProjectOrdinalManager.OrdinalEntry> {
+        val mutableOrdinalEntries = ordinalEntries.mapValues { MutableOrdinalEntry(it.value) }
 
-        mutableOrdinalEntries.forEach { mutableOrdinalEntry ->
+        mutableOrdinalEntries.values.forEach { mutableOrdinalEntry ->
             // pruning
 
             mutableOrdinalEntry.mutableKeyEntries.forEach { mutableKeyEntry ->
@@ -108,13 +111,16 @@ class OrdinalProcessor(
             }
         }
 
-        // todo ordinal store
-        val immutableEntries = mutableOrdinalEntries.groupBy { it.getImmutableKeys() }
-            .mapValues {
-                it.value
-                    .map { it.getImmutableValue() }
-                    .maxByOrNull { it.updated }!!
+        return mutableOrdinalEntries.mapValues {
+            ProjectOrdinalManager.OrdinalEntry(it.value.getImmutableKeys(), it.value.getImmutableValue())
+        }
+            .entries
+            .groupBy { it.value.key }
+            .entries
+            .map { (_, ordinalEntries) ->
+                ordinalEntries.maxByOrNull { it.value.value.updated }!!
             }
+            .associate { it.key to it.value }
     }
 
     private data class MutableOrdinalEntry(

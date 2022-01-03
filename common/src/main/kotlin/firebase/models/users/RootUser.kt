@@ -11,9 +11,9 @@ import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.ProjectKey
 
 
-open class RootUser(private val remoteRootUserRecord: RootUserRecord) :
-        RootUserProperties by remoteRootUserRecord,
-        JsonTime.UserCustomTimeProvider {
+open class RootUser(val remoteRootUserRecord: RootUserRecord) :
+    RootUserProperties by remoteRootUserRecord,
+    JsonTime.UserCustomTimeProvider {
 
     protected open val _customTimes: MutableMap<CustomTimeId.User, out Time.Custom.User> =
         remoteRootUserRecord.customTimeRecords
@@ -36,7 +36,5 @@ open class RootUser(private val remoteRootUserRecord: RootUserRecord) :
 
     fun getOrdinalEntriesForProject(project: SharedProject) = userWrapper.ordinalEntries
         .getOrDefault(project.projectKey.key, mapOf())
-        .values
-        .map { ProjectOrdinalManager.OrdinalEntry.fromJson(project.projectRecord, it) }
-        .toMutableList()
+        .mapValues { ProjectOrdinalManager.OrdinalEntry.fromJson(project.projectRecord, it.value) }
 }

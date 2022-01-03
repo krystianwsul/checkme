@@ -50,7 +50,7 @@ class MyUser(private val remoteMyUserRecord: MyUserRecord, private val rootModel
         // don't hold a reference to project
         val projectKey = project.projectKey
 
-        val ordinalEntries = getOrdinalEntriesForProject(project)
+        val ordinalEntries = getOrdinalEntriesForProject(project).values.toMutableList()
 
         ProjectOrdinalManager(
             { remoteMyUserRecord.addOrdinalEntry(projectKey, it.toJson()) },

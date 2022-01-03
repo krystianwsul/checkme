@@ -48,14 +48,9 @@ class MyUser(private val remoteMyUserRecord: MyUserRecord, private val rootModel
 
     override fun getProjectOrdinalManager(project: SharedProject) = projectOrdinalManagers.getOrPut(project.projectKey) {
         // don't hold a reference to project
-
         val projectKey = project.projectKey
 
-        val ordinalEntries = userWrapper.ordinalEntries
-            .getOrDefault(projectKey.key, mapOf())
-            .values
-            .map { ProjectOrdinalManager.OrdinalEntry.fromJson(project.projectRecord, it) }
-            .toMutableList()
+        val ordinalEntries = getOrdinalEntriesForProject(project)
 
         ProjectOrdinalManager(
             { remoteMyUserRecord.addOrdinalEntry(projectKey, it.toJson()) },

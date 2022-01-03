@@ -2,6 +2,7 @@ package com.krystianwsul.common.firebase.models.users
 
 import com.krystianwsul.common.firebase.RootUserProperties
 import com.krystianwsul.common.firebase.models.cache.ClearableInvalidatableManager
+import com.krystianwsul.common.firebase.models.project.SharedProject
 import com.krystianwsul.common.firebase.records.users.RootUserRecord
 import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.time.Time
@@ -25,8 +26,6 @@ open class RootUser(private val remoteRootUserRecord: RootUserRecord) :
 
     protected val projectOrdinalManagers = mutableMapOf<ProjectKey.Shared, ProjectOrdinalManager>()
 
-    val allProjectOrdinalManagers: Collection<ProjectOrdinalManager> = projectOrdinalManagers.values
-
     fun deleteCustomTime(customTime: Time.Custom.User) {
         check(_customTimes.containsKey(customTime.id))
 
@@ -34,4 +33,10 @@ open class RootUser(private val remoteRootUserRecord: RootUserRecord) :
     }
 
     override fun tryGetUserCustomTime(userCustomTimeKey: CustomTimeKey.User) = customTimes[userCustomTimeKey.customTimeId]
+
+    fun getOrdinalEntriesForProject(project: SharedProject) = userWrapper.ordinalEntries
+        .getOrDefault(project.projectKey.key, mapOf())
+        .values
+        .map { ProjectOrdinalManager.OrdinalEntry.fromJson(project.projectRecord, it) }
+        .toMutableList()
 }

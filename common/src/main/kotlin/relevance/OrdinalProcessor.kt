@@ -44,20 +44,18 @@ class OrdinalProcessor(
     }
 
     private fun processProjects(user: RootUser) {
-        val (relevantProjectOrdinalManagers, irrelevantProjectOrdinalManagers) =
-            user.allProjectOrdinalManagers.partition {
-                it.projectKey.let { it in relevantProjects && it in user.projectIds }
+        // todo ordinal write (overwrite), after actually implementing return types
+        val relevantEntries = user.projectIds
+            .mapNotNull { relevantProjects[it] }
+            .map {
+                val ordinalEntries = user.getOrdinalEntriesForProject(it)
+
+                processProject(it, ordinalEntries)
             }
-
-        relevantProjectOrdinalManagers.forEach(::processProject)
-
-        // todo ordinal remove irrelevantProjectOrdinalManagers
     }
 
-    private fun processProject(projectOrdinalManager: ProjectOrdinalManager) {
-        val mutableOrdinalEntries = projectOrdinalManager.allEntries
-            .map(::MutableOrdinalEntry)
-            .toMutableList()
+    private fun processProject(project: SharedProject, ordinalEntries: List<ProjectOrdinalManager.OrdinalEntry>) {
+        val mutableOrdinalEntries = ordinalEntries.map(::MutableOrdinalEntry).toMutableList()
 
         mutableOrdinalEntries.forEach { mutableOrdinalEntry ->
             // pruning
@@ -88,7 +86,7 @@ class OrdinalProcessor(
                 }
 
                 mutableKeyEntry.instanceDateOrDayOfWeek.date?.let { instanceDate ->
-                    val oldestVisibleDate = oldestVisibleProjectDates.getValue(projectOrdinalManager.projectKey)
+                    val oldestVisibleDate = oldestVisibleProjectDates.getValue(project.projectKey)
 
                     if (oldestVisibleDate == null || instanceDate < oldestVisibleDate)
                         mutableKeyEntry.instanceDateOrDayOfWeek = DateOrDayOfWeek.DayOfWeek(instanceDate.dayOfWeek)
@@ -159,7 +157,6 @@ class OrdinalProcessor(
             )
         }
 
-        // todo ordinal strip out scheduleDateTimePair instead of taskKey
         data class MutableTaskInfo(val taskKey: TaskKey, var scheduleDateTimePair: DateTimePair?) {
 
             constructor(taskInfo: ProjectOrdinalManager.Key.TaskInfo) : this(taskInfo.taskKey, taskInfo.scheduleDateTimePair)

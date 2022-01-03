@@ -4,6 +4,7 @@ import com.krystianwsul.common.invoke
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.TaskKey
+import com.soywiz.klock.hours
 import io.mockk.mockk
 import org.junit.Assert
 import org.junit.Before
@@ -45,7 +46,7 @@ class ProjectOrdinalManagerMatcherTest {
             instanceKey2 to instanceDateTimePair,
         )
 
-        var now = ExactTimeStamp.Local(date, HourMinute(1, 0))
+        val now = ExactTimeStamp.Local(date, HourMinute(1, 0))
 
         val ordinal = 1.0
 
@@ -69,7 +70,7 @@ class ProjectOrdinalManagerMatcherTest {
             instanceKey2 to originalInstanceDateTimePair,
         )
 
-        var now = ExactTimeStamp.Local(date, HourMinute(1, 0))
+        val now = ExactTimeStamp.Local(date, HourMinute(1, 0))
 
         val ordinal = 1.0
 
@@ -101,7 +102,7 @@ class ProjectOrdinalManagerMatcherTest {
             instanceKey2 to firstInstanceDateTimePair,
         )
 
-        var now = ExactTimeStamp.Local(firstDate, HourMinute(1, 0))
+        val now = ExactTimeStamp.Local(firstDate, HourMinute(1, 0))
 
         val ordinal = 1.0
 
@@ -120,5 +121,48 @@ class ProjectOrdinalManagerMatcherTest {
         )
 
         assertEquals(ordinal, projectOrdinalManager.getOrdinal(secondKey))
+    }
+
+    @Test
+    fun testSetOrdinalMarkDoneSetOrdinalMarkUndone() {
+        val date = Date(2022, 1, 3)
+        val timePair = TimePair(2, 3)
+
+        val instanceKey1 = InstanceKey(TaskKey.Root("taskKey1"), date, timePair)
+        val instanceKey2 = InstanceKey(TaskKey.Root("taskKey2"), date, timePair)
+        val instanceKey3 = InstanceKey(TaskKey.Root("taskKey3"), date, timePair)
+
+        val instanceDateTimePair = DateTimePair(date, timePair)
+
+        val notDoneKey = newKey(
+            instanceKey1 to instanceDateTimePair,
+            instanceKey2 to instanceDateTimePair,
+            instanceKey3 to instanceDateTimePair,
+        )
+
+        val firstOrdinal = 1.0
+
+        // first, we set an ordinal for all three instances
+        var now = ExactTimeStamp.Local(date, HourMinute(1, 0))
+
+        projectOrdinalManager.setOrdinal(notDoneKey, firstOrdinal, now)
+
+        // second, we simulate an instance being marked as done, and the ordinal then being changed
+        now += 1.hours
+
+        val doneKey = newKey(
+            instanceKey1 to instanceDateTimePair,
+            instanceKey2 to instanceDateTimePair,
+        )
+
+        val secondOrdinal = 2.0
+
+        projectOrdinalManager.setOrdinal(doneKey, secondOrdinal, now)
+        assertEquals(secondOrdinal, projectOrdinalManager.getOrdinal(doneKey))
+
+        // finally, we mark the instance not done, and make sure the new ordinal is still in place
+        now += 1.hours
+
+        assertEquals(secondOrdinal, projectOrdinalManager.getOrdinal(notDoneKey))
     }
 }

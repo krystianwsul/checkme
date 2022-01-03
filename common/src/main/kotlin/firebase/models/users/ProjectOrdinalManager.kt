@@ -1,5 +1,6 @@
 package com.krystianwsul.common.firebase.models.users
 
+import com.krystianwsul.common.firebase.json.users.ProjectOrdinalEntryJson
 import com.krystianwsul.common.firebase.json.users.ProjectOrdinalKeyEntryJson
 import com.krystianwsul.common.firebase.models.project.SharedProject
 import com.krystianwsul.common.time.*
@@ -87,7 +88,33 @@ class ProjectOrdinalManager(private val timeConverter: TimeConverter, val projec
         return projectKey.getOrdinal()
     }
 
-    data class OrdinalEntry(val key: Key, val value: Value)
+    data class OrdinalEntry(val key: Key, val value: Value) {
+
+        companion object {
+
+            fun fromJson(
+                projectCustomTimeIdAndKeyProvider: JsonTime.ProjectCustomTimeIdAndKeyProvider,
+                json: ProjectOrdinalEntryJson,
+            ): OrdinalEntry {
+                return OrdinalEntry(
+                    Key(
+                        json.keyEntries
+                            .map { Key.Entry.fromJson(projectCustomTimeIdAndKeyProvider, it) }
+                            .toSet()
+                    ),
+                    Value(json.ordinal, ExactTimeStamp.Local(json.updated))
+                )
+            }
+        }
+
+        fun toJson(): ProjectOrdinalEntryJson {
+            return ProjectOrdinalEntryJson(
+                key.entries.map { it.toJson() },
+                value.ordinal,
+                value.updated.long,
+            )
+        }
+    }
 
     data class Key(val entries: Set<Entry>) {
 

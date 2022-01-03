@@ -8,7 +8,7 @@ import io.mockk.mockk
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
-class ProjectOrdinalManagerTest {
+class ProjectOrdinalManagerSerializationTest {
 
     @Test
     fun testDateTimePairHourMinuteSerialization() {

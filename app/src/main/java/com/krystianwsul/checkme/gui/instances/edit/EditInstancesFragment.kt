@@ -211,11 +211,6 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
         }
 
         binding.editInstanceSave.setOnClickListener {
-            if (state.parentInstanceData == null) {
-                check(isValidDate)
-                check(isValidDateTime)
-            }
-
             editInstancesViewModel.stop()
 
             listener.beforeEditInstances(instanceKeys)
@@ -396,8 +391,6 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
 
         binding.editInstanceDateLayout.error = dateError
         binding.editInstanceTimeLayout.error = timeError
-
-        binding.editInstanceSave.isEnabled = isValidDateTime || state.parentInstanceData != null
 
         val show: View
         val hide: View

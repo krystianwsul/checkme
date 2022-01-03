@@ -46,9 +46,7 @@ class OrdinalProcessor(
     private fun processProjects(user: RootUser) {
         val (relevantProjectOrdinalManagers, irrelevantProjectOrdinalManagers) =
             user.allProjectOrdinalManagers.partition {
-                it.project
-                    .projectKey
-                    .let { it in relevantProjects && it in user.projectIds }
+                it.projectKey.let { it in relevantProjects && it in user.projectIds }
             }
 
         relevantProjectOrdinalManagers.forEach(::processProject)
@@ -90,7 +88,7 @@ class OrdinalProcessor(
                 }
 
                 mutableKeyEntry.instanceDateOrDayOfWeek.date?.let { instanceDate ->
-                    val oldestVisibleDate = oldestVisibleProjectDates.getValue(projectOrdinalManager.project.projectKey)
+                    val oldestVisibleDate = oldestVisibleProjectDates.getValue(projectOrdinalManager.projectKey)
 
                     if (oldestVisibleDate == null || instanceDate < oldestVisibleDate)
                         mutableKeyEntry.instanceDateOrDayOfWeek = DateOrDayOfWeek.DayOfWeek(instanceDate.dayOfWeek)

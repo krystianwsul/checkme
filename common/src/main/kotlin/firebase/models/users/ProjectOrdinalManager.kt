@@ -4,15 +4,25 @@ import com.krystianwsul.common.firebase.json.users.ProjectOrdinalKeyEntryJson
 import com.krystianwsul.common.firebase.models.project.SharedProject
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.InstanceKey
+import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
 
-class ProjectOrdinalManager(val project: SharedProject) {
+class ProjectOrdinalManager(private val timeConverter: TimeConverter, val projectKey: ProjectKey.Shared) {
 
     private var ordinals = mutableMapOf<Key, Value>()
 
     val allEntries: Collection<Pair<Key, Value>> = ordinals.entries.map { it.key to it.value }
 
+    private fun Key.Entry.getHourMinute() = timeConverter.getHourMinute(instanceDateOrDayOfWeek.dayOfWeek, instanceTimePair)
+
     fun setOrdinal(key: Key, ordinal: Double, now: ExactTimeStamp.Local) {
+        check(
+            key.entries
+                .map { TimeStamp(it.instanceDateOrDayOfWeek.date!!, it.getHourMinute()) }
+                .distinct()
+                .size == 1
+        )
+
         ordinals[key] = Value(ordinal, now)
     }
 
@@ -43,8 +53,6 @@ class ProjectOrdinalManager(val project: SharedProject) {
         // exact match
         ordinals[key]?.let { return it.ordinal }
 
-        fun Key.Entry.getHourMinute() = project.getTime(instanceTimePair).getHourMinute(instanceDateOrDayOfWeek.dayOfWeek)
-
         listOf<(Key.Entry) -> Any?>(
             {
                 it.taskInfo?.let { taskInfo ->
@@ -73,7 +81,7 @@ class ProjectOrdinalManager(val project: SharedProject) {
             .maxByOrNull { it.updated }
             ?.let { return it.ordinal }
 
-        return project.projectKey.getOrdinal()
+        return projectKey.getOrdinal()
     }
 
     data class Key(val entries: Set<Entry>) {
@@ -140,6 +148,11 @@ class ProjectOrdinalManager(val project: SharedProject) {
     }
 
     data class Value(val ordinal: Double, val updated: ExactTimeStamp.Local)
+
+    fun interface TimeConverter {
+
+        fun getHourMinute(dayOfWeek: DayOfWeek, timePair: TimePair): HourMinute
+    }
 
     interface Provider {
 

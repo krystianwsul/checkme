@@ -46,6 +46,10 @@ class MyUser(private val remoteMyUserRecord: MyUserRecord, private val rootModel
         return userCustomTime
     }
 
-    override fun getProjectOrdinalManager(project: SharedProject) =
-        projectOrdinalManagers.getOrPut(project.projectKey) { ProjectOrdinalManager(project) }
+    override fun getProjectOrdinalManager(project: SharedProject) = projectOrdinalManagers.getOrPut(project.projectKey) {
+        ProjectOrdinalManager(
+            { dayOfWeek, timePair -> project.getTime(timePair).getHourMinute(dayOfWeek) },
+            project.projectKey,
+        )
+    }
 }

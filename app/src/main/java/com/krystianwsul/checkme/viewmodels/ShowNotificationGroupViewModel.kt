@@ -21,7 +21,7 @@ class ShowNotificationGroupViewModel : DomainViewModel<ShowNotificationGroupView
     init {
         clearedDisposable += data.subscribe {
             cachedInstanceKeys = it.groupListDataWrapper
-                .instanceDatas
+                .allInstanceDatas
                 .map { it.instanceKey }
                 .toSet()
         }

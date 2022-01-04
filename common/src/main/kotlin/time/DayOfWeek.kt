@@ -21,8 +21,12 @@ enum class DayOfWeek {
 
         fun fromDateSoy(dateSoy: DateSoy) = values()[dateSoy.dayOfWeekInt]
 
+        fun fromJson(json: String) = values()[json.toInt()]
+
         val set by lazy { values().toSet() }
     }
 
     override fun toString() = format()
+
+    fun toJson() = ordinal.toString()
 }

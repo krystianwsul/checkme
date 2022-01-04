@@ -9,6 +9,7 @@ import androidx.appcompat.view.ActionMode
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.ActivityShowGroupBinding
 import com.krystianwsul.checkme.databinding.BottomBinding
+import com.krystianwsul.checkme.domainmodel.GroupType
 import com.krystianwsul.checkme.domainmodel.extensions.clearTaskEndTimeStamps
 import com.krystianwsul.checkme.domainmodel.extensions.setTaskEndTimeStamps
 import com.krystianwsul.checkme.domainmodel.undo.UndoData
@@ -127,7 +128,7 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
                     R.id.actionShowGroupSearch,
                     showAssignedToOthersId = R.id.actionShowGroupAssigned
                 ) { itemId ->
-                    val instanceDatas = data!!.groupListDataWrapper!!.instanceDatas
+                    val instanceDatas = data!!.groupListDataWrapper!!.allInstanceDatas
                     val dataId = showGroupViewModel.dataId
                     val listener = this@ShowGroupActivity
 
@@ -189,7 +190,7 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
         override fun beforeEditInstances(instanceKeys: Set<InstanceKey>) {
             if (parameters is Parameters.Project &&
                 instanceKeys == data!!.groupListDataWrapper!!
-                    .instanceDatas
+                    .allInstanceDatas
                     .map { it.instanceKey }
                     .toSet()
             ) {
@@ -225,7 +226,7 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
     }
 
     private fun updateTopMenu() {
-        val instanceDatas = data?.groupListDataWrapper?.instanceDatas
+        val instanceDatas = data?.groupListDataWrapper?.allInstanceDatas
 
         var hasItems = false
         var notify = false
@@ -369,14 +370,20 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
 
         abstract val timeStamp: TimeStamp
         abstract val projectKey: ProjectKey.Shared?
+        abstract val groupingMode: GroupType.GroupingMode
 
         @Parcelize
         data class Time(override val timeStamp: TimeStamp) : Parameters() {
 
             override val projectKey: ProjectKey.Shared? get() = null
+
+            override val groupingMode get() = GroupType.GroupingMode.Project
         }
 
         @Parcelize
-        data class Project(override val timeStamp: TimeStamp, override val projectKey: ProjectKey.Shared) : Parameters()
+        data class Project(override val timeStamp: TimeStamp, override val projectKey: ProjectKey.Shared) : Parameters() {
+
+            override val groupingMode get() = GroupType.GroupingMode.None
+        }
     }
 }

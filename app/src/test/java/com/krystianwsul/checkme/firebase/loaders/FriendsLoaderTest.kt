@@ -6,7 +6,7 @@ import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.ChangeWrapper
 import com.krystianwsul.common.firebase.DatabaseCallback
-import com.krystianwsul.common.firebase.json.UserWrapper
+import com.krystianwsul.common.firebase.json.users.UserWrapper
 import com.krystianwsul.common.utils.UserKey
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
@@ -25,8 +25,8 @@ class FriendsLoaderTest {
             private val userObservables = mutableMapOf<UserKey, PublishRelay<Snapshot<UserWrapper>>>()
 
             fun acceptUser(
-                    userKey: UserKey,
-                    userWrapper: UserWrapper,
+                userKey: UserKey,
+                userWrapper: UserWrapper,
             ) = userObservables.getValue(userKey).accept(Snapshot(userKey.key, userWrapper))
 
             override fun getUserObservable(userKey: UserKey): Observable<Snapshot<UserWrapper>> {

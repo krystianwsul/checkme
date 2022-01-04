@@ -5,24 +5,28 @@ import com.krystianwsul.common.domain.ProjectUndoData
 import com.krystianwsul.common.domain.TaskHierarchyContainer
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.json.tasks.TaskJson
-import com.krystianwsul.common.firebase.models.*
+import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.cache.ClearableInvalidatableManager
 import com.krystianwsul.common.firebase.models.cache.InvalidatableCache
 import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
 import com.krystianwsul.common.firebase.models.cache.invalidatableCache
+import com.krystianwsul.common.firebase.models.filterSearch
+import com.krystianwsul.common.firebase.models.filterSearchCriteria
 import com.krystianwsul.common.firebase.models.task.ProjectTask
 import com.krystianwsul.common.firebase.models.task.RootTask
 import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.firebase.models.task.performIntervalUpdate
 import com.krystianwsul.common.firebase.models.taskhierarchy.ProjectTaskHierarchy
 import com.krystianwsul.common.firebase.models.taskhierarchy.TaskHierarchy
+import com.krystianwsul.common.firebase.models.users.MyUser
+import com.krystianwsul.common.firebase.models.users.ProjectUser
 import com.krystianwsul.common.firebase.records.AssignedToHelper
 import com.krystianwsul.common.firebase.records.project.ProjectRecord
 import com.krystianwsul.common.interrupt.InterruptionChecker
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.*
 
-abstract class Project<T : ProjectType>(
+sealed class Project<T : ProjectType>(
     val assignedToHelper: AssignedToHelper,
     userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
     val rootTaskProvider: RootTaskProvider,
@@ -183,7 +187,7 @@ abstract class Project<T : ProjectType>(
     override fun getProjectCustomTimeKey(projectCustomTimeId: CustomTimeId.Project) =
         projectRecord.getProjectCustomTimeKey(projectCustomTimeId)
 
-    private fun getTime(timePair: TimePair) = timePair.customTimeKey
+    fun getTime(timePair: TimePair) = timePair.customTimeKey
         ?.let(::getCustomTime)
         ?: Time.Normal(timePair.hourMinute!!)
 

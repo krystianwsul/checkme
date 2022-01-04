@@ -208,6 +208,7 @@ class IrrelevantTest {
             { mapOf(project.projectKey to project) },
             rootTasksFactory,
             now,
+            emptyList(),
         )
 
         assertTrue(task.isReminderless())
@@ -307,6 +308,7 @@ class IrrelevantTest {
             { mapOf(project.projectKey to project) },
             newMockRootTaskProvider(),
             now,
+            emptyList(),
         )
 
         assertTrue(task.intervalInfo.getCurrentScheduleIntervals(now).size == 1)
@@ -453,6 +455,7 @@ class IrrelevantTest {
             { mapOf(project.projectKey to project) },
             newMockRootTaskProvider(),
             now,
+            emptyList(),
         )
     }
 
@@ -592,6 +595,7 @@ class IrrelevantTest {
             { mapOf(project.projectKey to project) },
             newMockRootTaskProvider(),
             now,
+            emptyList(),
         )
     }
 
@@ -709,6 +713,7 @@ class IrrelevantTest {
             { mapOf(project.projectKey to project) },
             taskParent,
             now,
+            emptyList(),
         )
 
         val result1 = setIrrelevant(now)

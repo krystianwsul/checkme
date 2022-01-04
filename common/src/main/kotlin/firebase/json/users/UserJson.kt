@@ -1,9 +1,8 @@
-package com.krystianwsul.common.firebase.json
+package com.krystianwsul.common.firebase.json.users
 
 import com.krystianwsul.common.utils.Parcelable
 import com.krystianwsul.common.utils.Parcelize
 import kotlinx.serialization.Serializable
-import kotlin.jvm.JvmOverloads
 
 @Serializable
 @Parcelize

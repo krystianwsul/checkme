@@ -208,6 +208,7 @@ object RelevanceChecker {
                         { projectMap },
                         rootTaskParent,
                         ExactTimeStamp.Local.now,
+                        rootUsers.values,
                     ).removedSharedProjects
 
                     userCustomTimeRelevances.values

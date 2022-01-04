@@ -8,6 +8,8 @@ import com.krystianwsul.common.utils.Serializable
 @Parcelize
 data class TimePair(val customTimeKey: CustomTimeKey?, val hourMinute: HourMinute?) : Parcelable, Serializable {
 
+    companion object {}
+
     constructor(customTimeKey: CustomTimeKey) : this(customTimeKey, null)
 
     constructor(hourMinute: HourMinute) : this(null, hourMinute)
@@ -15,4 +17,6 @@ data class TimePair(val customTimeKey: CustomTimeKey?, val hourMinute: HourMinut
     init {
         check((customTimeKey == null) != (hourMinute == null))
     }
+
+    fun toJsonTime() = JsonTime.fromTimePair(this)
 }

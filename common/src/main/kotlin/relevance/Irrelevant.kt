@@ -13,6 +13,7 @@ import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.firebase.models.taskhierarchy.NestedTaskHierarchy
 import com.krystianwsul.common.firebase.models.taskhierarchy.ProjectTaskHierarchy
 import com.krystianwsul.common.firebase.models.taskhierarchy.TaskHierarchy
+import com.krystianwsul.common.firebase.models.users.RootUser
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.CustomTimeKey
@@ -28,6 +29,7 @@ object Irrelevant {
         getProjects: () -> Map<ProjectKey<*>, Project<*>>,
         rootTaskProvider: Project.RootTaskProvider,
         now: ExactTimeStamp.Local,
+        users: Collection<RootUser>,
     ): Result {
         val projects = getProjects()
         val tasks = projects.values.flatMap { it.getAllDependenciesLoadedTasks() }
@@ -102,7 +104,7 @@ object Irrelevant {
                 }
 
             val relevantTaskRelevances = taskRelevances.values.filter { it.relevant }
-            val relevantTasks = relevantTaskRelevances.map { it.task }
+            val relevantTasks = relevantTaskRelevances.map { it.task }.toSet()
 
             irrelevantTasks = tasks - relevantTasks
 
@@ -114,7 +116,7 @@ object Irrelevant {
             }
 
             val relevantTaskHierarchyRelevances = taskHierarchyRelevances.values.filter { it.relevant }
-            val relevantTaskHierarchies = relevantTaskHierarchyRelevances.map { it.taskHierarchy }
+            val relevantTaskHierarchies = relevantTaskHierarchyRelevances.map { it.taskHierarchy }.toSet()
 
             /**
              * The first is removed normally.  The second is for nested task hierarchies, inside tasks that will also be deleted.
@@ -133,8 +135,9 @@ object Irrelevant {
             val relevantInstances = instanceRelevances.values
                 .filter { it.relevant }
                 .map { it.instance }
+                .toSet()
 
-            val relevantExistingInstances = relevantInstances.filter { it.exists() }
+            val relevantExistingInstances = relevantInstances.filter { it.exists() }.toSet()
             val irrelevantExistingInstances = existingInstances - relevantExistingInstances
 
             val irrelevantNoScheduleOrParents = mutableListOf<NoScheduleOrParent>()
@@ -143,6 +146,7 @@ object Irrelevant {
                     .noScheduleOrParentIntervals
                     .filter { it.notDeletedOffset() }
                     .map { it.noScheduleOrParent }
+                    .toSet()
 
                 irrelevantNoScheduleOrParents += it.noScheduleOrParents - relevantNoScheduleOrParents
 
@@ -161,20 +165,15 @@ object Irrelevant {
             val relevantSchedules = scheduleRelevances.values
                 .filter { it.relevant }
                 .map { it.schedule }
+                .toSet()
 
             val irrelevantSchedules = relevantTasks.flatMap { it.schedules } - relevantSchedules
 
-            irrelevantExistingInstances.forEach { it.delete() }
-            irrelevantSchedules.forEach { it.delete() }
-            irrelevantNoScheduleOrParents.forEach { it.delete() }
-            irrelevantTaskHierarchies.forEach { it.delete() }
-            irrelevantTasks.forEach { it.delete() }
-
-            val remoteCustomTimes = projects.values.flatMap { it.customTimes }
+            val projectCustomTimes = projects.values.flatMap { it.customTimes }
 
             val customTimeRelevanceCollection = CustomTimeRelevanceCollection(
                 userCustomTimeRelevances,
-                remoteCustomTimes.associate { it.key to CustomTimeRelevance(it) },
+                projectCustomTimes.associate { it.key to CustomTimeRelevance(it) },
             )
 
             projects.values
@@ -199,20 +198,38 @@ object Irrelevant {
                 .filter { it.relevant }
                 .forEach { it.setRemoteRelevant(customTimeRelevanceCollection, remoteProjectRelevances) }
 
-            val relevantRemoteCustomTimes = customTimeRelevanceCollection.projectCustomTimeRelevances
+            val relevantProjectCustomTimes = customTimeRelevanceCollection.projectCustomTimeRelevances
                 .values
                 .filter { it.relevant }
                 .map { it.customTime as Time.Custom.Project<*> }
+                .toSet()
 
-            val irrelevantRemoteCustomTimes = remoteCustomTimes - relevantRemoteCustomTimes
+            val irrelevantProjectCustomTimes = projectCustomTimes - relevantProjectCustomTimes
 
-            irrelevantRemoteCustomTimes.forEach { it.delete() }
+            val relevantProjects = remoteProjectRelevances.values
+                .filter { it.relevant }
+                .map { it.project }
+                .toSet()
 
-            remoteProjectRelevances.values.forEach { remoteProjectRelevance ->
-                val project = remoteProjectRelevance.project
+            val irrelevantProjects = (projects.values - relevantProjects).map { it as SharedProject }
 
-                if (!remoteProjectRelevance.relevant) project.delete()
-            }
+            irrelevantExistingInstances.forEach { it.delete() }
+            irrelevantSchedules.forEach { it.delete() }
+            irrelevantNoScheduleOrParents.forEach { it.delete() }
+            irrelevantTaskHierarchies.forEach { it.delete() }
+            irrelevantTasks.forEach { it.delete() }
+
+            // we want this to run after everything from the task down is deleted, but before custom times
+            OrdinalProcessor(
+                users,
+                relevantProjects.filterIsInstance<SharedProject>().associateBy { it.projectKey },
+                relevantTasks.associateBy { it.taskKey },
+                customTimeRelevanceCollection,
+                now,
+            ).process()
+
+            irrelevantProjectCustomTimes.forEach { it.delete() }
+            irrelevantProjects.forEach { it.delete() }
 
             Result(
                 irrelevantExistingInstances,
@@ -220,7 +237,7 @@ object Irrelevant {
                 irrelevantSchedules,
                 irrelevantNoScheduleOrParents,
                 irrelevantTasks,
-                irrelevantRemoteCustomTimes,
+                irrelevantProjectCustomTimes,
                 remoteProjectRelevances.values
                     .filter { !it.relevant }
                     .map { it.project as SharedProject },
@@ -269,7 +286,4 @@ object Irrelevant {
 
     private class TaskInIrrelevantException(taskKey: TaskKey, projectKey: ProjectKey<*>) :
         Exception("task incorrectly irrelevant: $taskKey in $projectKey")
-
-    private class InstanceIrrelevantForProjectScheduleException(taskKey: TaskKey) :
-        Exception("single schedule instance incorrectly irrelevant for taskKey: $taskKey")
 }

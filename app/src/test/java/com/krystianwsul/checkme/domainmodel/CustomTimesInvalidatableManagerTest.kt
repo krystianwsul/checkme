@@ -3,7 +3,7 @@ package com.krystianwsul.checkme.domainmodel
 import com.krystianwsul.checkme.domainmodel.extensions.createCustomTime
 import com.krystianwsul.checkme.domainmodel.extensions.updateCustomTime
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
-import com.krystianwsul.common.firebase.json.UserWrapper
+import com.krystianwsul.common.firebase.json.users.UserWrapper
 import com.krystianwsul.common.firebase.models.cache.Invalidatable
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.DayOfWeek

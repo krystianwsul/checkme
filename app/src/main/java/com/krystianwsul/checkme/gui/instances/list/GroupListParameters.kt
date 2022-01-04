@@ -1,7 +1,6 @@
 package com.krystianwsul.checkme.gui.instances.list
 
 import com.krystianwsul.checkme.Preferences
-import com.krystianwsul.checkme.domainmodel.GroupType
 import com.krystianwsul.checkme.viewmodels.DataId
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.treeadapter.FilterCriteria
@@ -13,10 +12,7 @@ sealed class GroupListParameters(val draggable: Boolean = true) {
     abstract val groupListDataWrapper: GroupListDataWrapper
 
     open val showProgress: Boolean = false
-    open val useDoneNode = true
     open val fabActionMode = FabActionMode.SUBTASK
-
-    open val groupingMode: GroupType.GroupingMode = GroupType.GroupingMode.None
 
     open val unscheduledFirst = false
 
@@ -32,8 +28,6 @@ sealed class GroupListParameters(val draggable: Boolean = true) {
     ) : GroupListParameters(false) {
 
         override val fabActionMode = FabActionMode.BOTH
-
-        override val groupingMode = GroupType.GroupingMode.Time()
     }
 
     data class TimeStamp(
@@ -42,27 +36,20 @@ sealed class GroupListParameters(val draggable: Boolean = true) {
         override val groupListDataWrapper: GroupListDataWrapper,
         val timeStamp: com.krystianwsul.common.time.TimeStamp,
         val projectKey: ProjectKey.Shared?,
-    ) : GroupListParameters() {
-
-        override val groupingMode =
-            projectKey?.let { GroupType.GroupingMode.None } ?: GroupType.GroupingMode.Project
-    }
+    ) : GroupListParameters()
 
     data class InstanceKey(
-            override val dataId: DataId,
-            override val immediate: Boolean,
-            override val groupListDataWrapper: GroupListDataWrapper,
-            val instanceKey: com.krystianwsul.common.utils.InstanceKey,
+        override val dataId: DataId,
+        override val immediate: Boolean,
+        override val groupListDataWrapper: GroupListDataWrapper,
+        val instanceKey: com.krystianwsul.common.utils.InstanceKey,
     ) : GroupListParameters()
 
     data class InstanceKeys(
         override val dataId: DataId,
         override val immediate: Boolean,
         override val groupListDataWrapper: GroupListDataWrapper,
-    ) : GroupListParameters(false) {
-
-        override val groupingMode = GroupType.GroupingMode.Projects
-    }
+    ) : GroupListParameters(false)
 
     data class Parent(
         override val dataId: DataId,
@@ -71,10 +58,7 @@ sealed class GroupListParameters(val draggable: Boolean = true) {
         override val showProgress: Boolean,
         val projectKey: ProjectKey.Shared? = null,
         override val filterCriteria: FilterCriteria.ExpandOnly,
-        override val groupingMode: GroupType.GroupingMode,
     ) : GroupListParameters(false) {
-
-        override val useDoneNode = false
 
         override val unscheduledFirst = true
     }
@@ -86,8 +70,6 @@ sealed class GroupListParameters(val draggable: Boolean = true) {
         override val showProgress: Boolean,
         override val filterCriteria: FilterCriteria.ExpandOnly,
     ) : GroupListParameters(false) {
-
-        override val useDoneNode = false
 
         override val fabActionMode = FabActionMode.BOTH
 

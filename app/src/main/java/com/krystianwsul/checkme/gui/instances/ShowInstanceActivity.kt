@@ -246,11 +246,11 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
                 .menu
                 .apply {
                     findItem(R.id.instanceMenuSearch).isVisible = !data?.groupListDataWrapper
-                        ?.instanceDatas
+                        ?.allInstanceDatas
                         .isNullOrEmpty()
                     findItem(R.id.instanceMenuEditInstance).isVisible = data?.done == false
                     findItem(R.id.instanceMenuSplit).isVisible = data?.run {
-                        !done && groupListDataWrapper.instanceDatas.size > 1
+                        !done && groupListDataWrapper.allInstanceDatas.size > 1
                     } == true
                     findItem(R.id.instanceMenuNotify).isVisible = data?.run {
                         !done && isRootInstance && instanceDateTime.timeStamp <= TimeStamp.now && !notificationShown

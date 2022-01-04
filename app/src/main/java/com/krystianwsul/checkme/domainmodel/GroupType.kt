@@ -10,7 +10,7 @@ interface GroupType {
 
         fun getGroupTypeTree(
             factory: Factory,
-            instanceDescriptors: List<InstanceDescriptor>,
+            instanceDescriptors: Collection<InstanceDescriptor>,
             groupingMode: GroupingMode,
         ): List<GroupType> {
             if (instanceDescriptors.isEmpty()) return emptyList()
@@ -77,7 +77,7 @@ interface GroupType {
         private fun groupByProject(
             factory: Factory,
             timeStamp: TimeStamp,
-            instanceDescriptor: List<InstanceDescriptor>,
+            instanceDescriptor: Collection<InstanceDescriptor>,
         ): List<TimeChild> {
             if (instanceDescriptor.isEmpty()) return emptyList()
 

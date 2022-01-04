@@ -2,9 +2,7 @@ package com.krystianwsul.checkme.domainmodel.extensions
 
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
-import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.domainmodel.ScheduleText
-import com.krystianwsul.checkme.domainmodel.getProjectInfo
+import com.krystianwsul.checkme.domainmodel.*
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.utils.time.calendar
@@ -147,12 +145,12 @@ fun DomainFactory.getGroupListData(
         GroupListDataWrapper.CustomTimeData(it.name, it.hourMinutes.toSortedMap())
     }
 
-    val instanceDatas = currentInstances.map { instance ->
+    val instanceDescriptors = currentInstances.map { instance ->
         val task = instance.task
 
         val children = getChildInstanceDatas(instance, now)
 
-        GroupListDataWrapper.InstanceData(
+        val instanceData = GroupListDataWrapper.InstanceData(
             instance.done,
             instance.instanceKey,
             instance.getDisplayData()?.getDisplayText(),
@@ -165,7 +163,7 @@ fun DomainFactory.getGroupListData(
             instance.isRootInstance(),
             instance.getCreateTaskTimePair(projectsFactory.privateProject, myUserFactory.user),
             task.note,
-            children,
+            newMixedInstanceDataCollection(children),
             instance.task.ordinal,
             instance.getNotificationShown(shownFactory),
             task.getImage(deviceDbInfo),
@@ -173,14 +171,19 @@ fun DomainFactory.getGroupListData(
             instance.getProjectInfo(now),
             instance.getProject().projectKey as? ProjectKey.Shared,
         )
+
+        GroupTypeFactory.InstanceDescriptor(instanceData, instance.instanceDateTime.toDateTimePair())
     }
+
+    val (mixedInstanceDescriptors, doneInstanceDescriptors) = instanceDescriptors.splitDone()
 
     val dataWrapper = GroupListDataWrapper(
         customTimeDatas,
         null,
         listOf(),
         null,
-        instanceDatas,
+        newMixedInstanceDataCollection(mixedInstanceDescriptors, GroupType.GroupingMode.Time()),
+        doneInstanceDescriptors.toInstanceDatas(),
         null,
         null,
     )

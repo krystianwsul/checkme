@@ -1,9 +1,9 @@
 package com.krystianwsul.common.firebase
 
 import com.krystianwsul.common.firebase.json.JsonWrapper
-import com.krystianwsul.common.firebase.json.UserWrapper
 import com.krystianwsul.common.firebase.json.projects.PrivateProjectJson
 import com.krystianwsul.common.firebase.json.tasks.RootTaskJson
+import com.krystianwsul.common.firebase.json.users.UserWrapper
 import json
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.Serializable

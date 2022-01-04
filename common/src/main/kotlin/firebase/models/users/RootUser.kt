@@ -34,7 +34,7 @@ open class RootUser(val remoteRootUserRecord: RootUserRecord) :
 
     override fun tryGetUserCustomTime(userCustomTimeKey: CustomTimeKey.User) = customTimes[userCustomTimeKey.customTimeId]
 
-    fun getOrdinalEntriesForProject(project: SharedProject) = userWrapper.ordinalEntries
-        .getOrDefault(project.projectKey.key, mapOf())
-        .mapValues { ProjectOrdinalManager.OrdinalEntry.fromJson(project.projectRecord, it.value) }
+    fun getOrdinalEntriesForProject(project: SharedProject) = userWrapper.ordinalEntries[project.projectKey.key]
+        ?.mapValues { ProjectOrdinalManager.OrdinalEntry.fromJson(project.projectRecord, it.value) }
+        .orEmpty()
 }

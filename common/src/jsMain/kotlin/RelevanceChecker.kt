@@ -1,15 +1,14 @@
 import com.krystianwsul.common.ErrorLogger
 import com.krystianwsul.common.firebase.JsDatabaseWrapper
 import com.krystianwsul.common.firebase.json.JsonWrapper
-import com.krystianwsul.common.firebase.json.UserWrapper
 import com.krystianwsul.common.firebase.json.projects.PrivateProjectJson
 import com.krystianwsul.common.firebase.json.tasks.RootTaskJson
 import com.krystianwsul.common.firebase.json.tasks.TaskJson
+import com.krystianwsul.common.firebase.json.users.UserWrapper
 import com.krystianwsul.common.firebase.managers.JsPrivateProjectManager
 import com.krystianwsul.common.firebase.managers.JsRootTasksManager
 import com.krystianwsul.common.firebase.managers.JsRootUserManager
 import com.krystianwsul.common.firebase.managers.JsSharedProjectManager
-import com.krystianwsul.common.firebase.models.RootUser
 import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
 import com.krystianwsul.common.firebase.models.checkInconsistentRootTaskIds
 import com.krystianwsul.common.firebase.models.project.PrivateProject
@@ -18,6 +17,7 @@ import com.krystianwsul.common.firebase.models.project.SharedProject
 import com.krystianwsul.common.firebase.models.task.RootTask
 import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.firebase.models.taskhierarchy.TaskHierarchy
+import com.krystianwsul.common.firebase.models.users.RootUser
 import com.krystianwsul.common.relevance.CustomTimeRelevance
 import com.krystianwsul.common.relevance.Irrelevant
 import com.krystianwsul.common.time.ExactTimeStamp
@@ -171,7 +171,7 @@ object RelevanceChecker {
                         .mapValues { it.value.toMutableSet() }
                         .toMutableMap()
 
-                    val privateProjectManager = JsPrivateProjectManager(databaseWrapper, privateProjectMap)
+                    val privateProjectManager = JsPrivateProjectManager(privateProjectMap)
 
                     val sharedProjectManager = JsSharedProjectManager(databaseWrapper, sharedProjectMap)
 

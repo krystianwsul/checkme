@@ -3,7 +3,6 @@ package com.krystianwsul.checkme.domainmodel.extensions
 import androidx.annotation.CheckResult
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
-import com.krystianwsul.checkme.domainmodel.notifications.Notifier
 import com.krystianwsul.checkme.domainmodel.update.CompletableDomainUpdate
 import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
 import com.krystianwsul.common.firebase.models.project.SharedProject
@@ -47,6 +46,5 @@ fun DomainUpdater.setOrdinalProject(
 
     myUserFactory.user.getProjectOrdinalManager(project).setOrdinal(project, key, ordinal, now)
 
-//    DomainUpdater.Params(true, notificationType, DomainFactory.CloudParams(project)) todo ordinal revert once this actually commits DB changes
-    DomainUpdater.Params(Notifier.Params(), DomainFactory.SaveParams(notificationType, true))
+    DomainUpdater.Params(true, notificationType, DomainFactory.CloudParams(project))
 }.perform(this)

@@ -11,6 +11,7 @@ import com.krystianwsul.common.firebase.managers.JsRootUserManager
 import com.krystianwsul.common.firebase.managers.JsSharedProjectManager
 import com.krystianwsul.common.firebase.models.RootUser
 import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
+import com.krystianwsul.common.firebase.models.checkInconsistentRootTaskIds
 import com.krystianwsul.common.firebase.models.project.PrivateProject
 import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.project.SharedProject
@@ -156,7 +157,7 @@ object RelevanceChecker {
 
                         override fun getAllExistingInstances() = projectMap.values
                             .asSequence()
-                            .flatMap { it.getAllTasks() }
+                            .flatMap { it.getAllDependenciesLoadedTasks() }
                             .flatMap { it.existingInstances.values }
                     }
 

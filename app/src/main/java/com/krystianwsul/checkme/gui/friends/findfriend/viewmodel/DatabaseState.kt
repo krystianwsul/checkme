@@ -2,15 +2,15 @@ package com.krystianwsul.checkme.gui.friends.findfriend.viewmodel
 
 import com.krystianwsul.checkme.gui.friends.findfriend.viewmodel.DatabaseState.Loaded
 import com.krystianwsul.checkme.gui.friends.findfriend.viewmodel.DatabaseState.Loading
-import com.krystianwsul.common.firebase.json.UserWrapper
+import com.krystianwsul.common.firebase.json.users.UserWrapper
 import kotlinx.parcelize.Parcelize
 
 sealed class DatabaseState(viewModel: FindFriendViewModel) :
         ModelState<FindFriendViewEvent, FindFriendViewModel> {
 
     override val nextStateSingle = viewModel.usersSubject
-            .firstOrError()
-            .map { Loaded(viewModel, it.value!!.values.toList()) }!!
+        .firstOrError()
+        .map { Loaded(viewModel, it.value!!.values.toList()) }
 
     abstract override fun toSerializableState(): SerializableState?
 
@@ -22,8 +22,8 @@ sealed class DatabaseState(viewModel: FindFriendViewModel) :
     }
 
     class Loaded(
-            viewModel: FindFriendViewModel,
-            val userWrappers: List<UserWrapper>,
+        viewModel: FindFriendViewModel,
+        val userWrappers: List<UserWrapper>,
     ) : DatabaseState(viewModel) {
 
         override fun toSerializableState() = SerializableState.Loaded(userWrappers)

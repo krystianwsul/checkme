@@ -5,13 +5,13 @@ import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
 import com.krystianwsul.checkme.domainmodel.update.SingleDomainUpdate
 import com.krystianwsul.common.firebase.UserData
-import com.krystianwsul.common.firebase.json.UserWrapper
+import com.krystianwsul.common.firebase.json.users.UserWrapper
 import io.reactivex.rxjava3.core.Single
 
 @CheckResult
 fun DomainUpdater.tryAddFriend(
-        notificationType: DomainListenerManager.NotificationType,
-        userWrapper: UserWrapper,
+    notificationType: DomainListenerManager.NotificationType,
+    userWrapper: UserWrapper,
 ): Single<Boolean> = SingleDomainUpdate.create("tryAddFriend") {
     val userKey = UserData.getKey(userWrapper.userData.email)
 

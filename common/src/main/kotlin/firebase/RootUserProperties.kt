@@ -1,7 +1,7 @@
 package com.krystianwsul.common.firebase
 
-import com.krystianwsul.common.firebase.json.UserJson
-import com.krystianwsul.common.firebase.json.UserWrapper
+import com.krystianwsul.common.firebase.json.users.UserJson
+import com.krystianwsul.common.firebase.json.users.UserWrapper
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.UserKey
 

@@ -3,16 +3,16 @@ package com.krystianwsul.checkme.firebase.managers
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.firebase.DatabaseWrapper
-import com.krystianwsul.common.firebase.json.UserJson
-import com.krystianwsul.common.firebase.json.UserWrapper
+import com.krystianwsul.common.firebase.json.users.UserJson
+import com.krystianwsul.common.firebase.json.users.UserWrapper
 import com.krystianwsul.common.firebase.managers.ValueRecordManager
-import com.krystianwsul.common.firebase.records.MyUserRecord
+import com.krystianwsul.common.firebase.records.users.MyUserRecord
 import com.krystianwsul.common.utils.UserKey
 
 class MyUserManager(
-        deviceDbInfo: DeviceDbInfo,
-        snapshot: Snapshot<UserWrapper>,
-        private val databaseWrapper: DatabaseWrapper,
+    deviceDbInfo: DeviceDbInfo,
+    snapshot: Snapshot<UserWrapper>,
+    private val databaseWrapper: DatabaseWrapper,
 ) : ValueRecordManager<MyUserRecord>() {
 
     companion object {

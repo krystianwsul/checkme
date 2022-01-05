@@ -13,11 +13,11 @@ import com.krystianwsul.common.firebase.json.JsonWrapper
 import com.krystianwsul.common.firebase.json.projects.PrivateProjectJson
 import com.krystianwsul.common.firebase.json.projects.SharedProjectJson
 import com.krystianwsul.common.firebase.models.Instance
-import com.krystianwsul.common.firebase.models.RootUser
 import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
 import com.krystianwsul.common.firebase.models.project.PrivateProject
 import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.project.SharedProject
+import com.krystianwsul.common.firebase.models.users.RootUser
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.*
 import io.reactivex.rxjava3.core.Observable

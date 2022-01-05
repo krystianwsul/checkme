@@ -21,6 +21,8 @@ import com.krystianwsul.common.firebase.json.projects.SharedProjectJson
 import com.krystianwsul.common.firebase.json.tasks.PrivateTaskJson
 import com.krystianwsul.common.firebase.json.tasks.RootTaskJson
 import com.krystianwsul.common.firebase.json.tasks.SharedTaskJson
+import com.krystianwsul.common.firebase.json.users.UserJson
+import com.krystianwsul.common.firebase.json.users.UserWrapper
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.ProjectKey
@@ -84,12 +86,12 @@ class FactoryLoaderTest {
 
     private class TestDatabase : FactoryProvider.Database() {
 
-        val privateProjectObservable = PublishRelay.create<PrivateProjectJson>()!!
-        val sharedProjectObservable = PublishRelay.create<Snapshot<JsonWrapper>>()!!
-        val userObservable = PublishRelay.create<Snapshot<UserWrapper>>()!!
+        val privateProjectObservable = PublishRelay.create<PrivateProjectJson>()
+        val sharedProjectObservable = PublishRelay.create<Snapshot<JsonWrapper>>()
+        val userObservable = PublishRelay.create<Snapshot<UserWrapper>>()
 
         override fun getPrivateProjectObservable(key: ProjectKey.Private) =
-            privateProjectObservable.map { Snapshot(key.key, it) }!!
+            privateProjectObservable.map { Snapshot(key.key, it) }
 
         override fun getSharedProjectObservable(projectKey: ProjectKey.Shared) = sharedProjectObservable
 

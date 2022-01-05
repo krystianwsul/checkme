@@ -8,9 +8,9 @@ import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.ChangeWrapper
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.DomainThreadChecker
-import com.krystianwsul.common.firebase.json.UserWrapper
-import com.krystianwsul.common.firebase.models.MyUser
+import com.krystianwsul.common.firebase.json.users.UserWrapper
 import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
+import com.krystianwsul.common.firebase.models.users.MyUser
 import kotlinx.coroutines.rx3.asObservable
 
 class MyUserFactory(

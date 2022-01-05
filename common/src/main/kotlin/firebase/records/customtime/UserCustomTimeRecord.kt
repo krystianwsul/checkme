@@ -1,7 +1,7 @@
 package com.krystianwsul.common.firebase.records.customtime
 
 import com.krystianwsul.common.firebase.json.customtimes.UserCustomTimeJson
-import com.krystianwsul.common.firebase.records.RootUserRecord
+import com.krystianwsul.common.firebase.records.users.RootUserRecord
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.utils.CustomTimeId
@@ -9,16 +9,16 @@ import com.krystianwsul.common.utils.CustomTimeKey
 
 
 class UserCustomTimeRecord(
-        create: Boolean,
-        override val id: CustomTimeId.User,
-        override val customTimeJson: UserCustomTimeJson,
-        private val rootUserRecord: RootUserRecord,
+    create: Boolean,
+    override val id: CustomTimeId.User,
+    override val customTimeJson: UserCustomTimeJson,
+    private val rootUserRecord: RootUserRecord,
 ) : CustomTimeRecord(create) {
 
     constructor(
-            id: CustomTimeId.User,
-            rootUserRecord: RootUserRecord,
-            customTimeJson: UserCustomTimeJson,
+        id: CustomTimeId.User,
+        rootUserRecord: RootUserRecord,
+        customTimeJson: UserCustomTimeJson,
     ) : this(false, id, customTimeJson, rootUserRecord)
 
     constructor(

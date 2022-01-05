@@ -29,7 +29,7 @@ class SplitInstanceTest {
     private fun getDayInstanceDatas(now: ExactTimeStamp.Local, day: Int = 0) =
         domainFactory.getGroupListData(now, day, Preferences.TimeRange.DAY)
             .groupListDataWrapper
-            .instanceDatas
+            .allInstanceDatas
 
     private fun getSingleScheduleData(date: Date, hour: Int, minute: Int) =
         listOf(ScheduleData.Single(date, TimePair(HourMinute(hour, minute))))
@@ -71,7 +71,7 @@ class SplitInstanceTest {
 
         val parentInstanceKey = getDayInstanceDatas(now).let {
             assertEquals(1, it.size)
-            assertEquals(2, it.single().children.size)
+            assertEquals(2, it.single().children.instanceDatas.size)
 
             it.single().instanceKey
         }
@@ -128,14 +128,14 @@ class SplitInstanceTest {
 
         val parentInstanceKey = getDayInstanceDatas(now).let {
             assertEquals(1, it.size)
-            assertEquals(2, it.single().children.size)
+            assertEquals(2, it.single().children.instanceDatas.size)
 
             it.single().instanceKey
         }
 
         getDayInstanceDatas(now, 7).let {
             assertEquals(1, it.size)
-            assertEquals(2, it.single().children.size)
+            assertEquals(2, it.single().children.instanceDatas.size)
 
             it.single().instanceKey
         }
@@ -156,7 +156,7 @@ class SplitInstanceTest {
 
         getDayInstanceDatas(now, 7).let {
             assertEquals(1, it.size)
-            assertEquals(2, it.single().children.size)
+            assertEquals(2, it.single().children.instanceDatas.size)
 
             it.single().instanceKey
         }

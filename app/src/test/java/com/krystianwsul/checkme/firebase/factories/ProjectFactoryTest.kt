@@ -14,10 +14,10 @@ import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.ChangeWrapper
 import com.krystianwsul.common.firebase.DatabaseCallback
 import com.krystianwsul.common.firebase.json.JsonWrapper
-import com.krystianwsul.common.firebase.json.UserWrapper
 import com.krystianwsul.common.firebase.json.projects.PrivateProjectJson
 import com.krystianwsul.common.firebase.json.projects.SharedProjectJson
 import com.krystianwsul.common.firebase.json.tasks.RootTaskJson
+import com.krystianwsul.common.firebase.json.users.UserWrapper
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
 import com.krystianwsul.common.firebase.records.project.PrivateProjectRecord

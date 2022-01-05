@@ -1,18 +1,19 @@
-package com.krystianwsul.common.firebase.models
+package com.krystianwsul.common.firebase.models.users
 
 import com.krystianwsul.common.firebase.RootUserProperties
 import com.krystianwsul.common.firebase.models.cache.ClearableInvalidatableManager
-import com.krystianwsul.common.firebase.records.RootUserRecord
+import com.krystianwsul.common.firebase.models.project.SharedProject
+import com.krystianwsul.common.firebase.records.users.RootUserRecord
 import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.CustomTimeId
 import com.krystianwsul.common.utils.CustomTimeKey
-import com.krystianwsul.common.utils.UserKey
+import com.krystianwsul.common.utils.ProjectKey
 
 
-open class RootUser(private val remoteRootUserRecord: RootUserRecord) :
-        RootUserProperties by remoteRootUserRecord,
-        JsonTime.UserCustomTimeProvider {
+open class RootUser(val remoteRootUserRecord: RootUserRecord) :
+    RootUserProperties by remoteRootUserRecord,
+    JsonTime.UserCustomTimeProvider {
 
     protected open val _customTimes: MutableMap<CustomTimeId.User, out Time.Custom.User> =
         remoteRootUserRecord.customTimeRecords
@@ -23,6 +24,8 @@ open class RootUser(private val remoteRootUserRecord: RootUserRecord) :
 
     val clearableInvalidatableManager = ClearableInvalidatableManager()
 
+    protected val projectOrdinalManagers = mutableMapOf<ProjectKey.Shared, ProjectOrdinalManager>()
+
     fun deleteCustomTime(customTime: Time.Custom.User) {
         check(_customTimes.containsKey(customTime.id))
 
@@ -31,6 +34,7 @@ open class RootUser(private val remoteRootUserRecord: RootUserRecord) :
 
     override fun tryGetUserCustomTime(userCustomTimeKey: CustomTimeKey.User) = customTimes[userCustomTimeKey.customTimeId]
 
-    class MissingCustomTimeException(userKey: UserKey, userCustomTimeKey: CustomTimeKey.User) :
-        Exception("customTime $userCustomTimeKey missing from user $userKey")
+    fun getOrdinalEntriesForProject(project: SharedProject) = userWrapper.ordinalEntries[project.projectKey.key]
+        ?.mapValues { ProjectOrdinalManager.OrdinalEntry.fromJson(project.projectRecord, it.value) }
+        .orEmpty()
 }

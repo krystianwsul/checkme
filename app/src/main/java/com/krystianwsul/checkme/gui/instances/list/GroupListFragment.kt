@@ -21,7 +21,8 @@ import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.TooltipManager
 import com.krystianwsul.checkme.TooltipManager.subscribeShowBalloon
 import com.krystianwsul.checkme.databinding.FragmentGroupListBinding
-import com.krystianwsul.checkme.domainmodel.GroupType
+import com.krystianwsul.checkme.domainmodel.GroupTypeFactory
+import com.krystianwsul.checkme.domainmodel.MixedInstanceDataCollection
 import com.krystianwsul.checkme.domainmodel.extensions.*
 import com.krystianwsul.checkme.gui.base.AbstractActivity
 import com.krystianwsul.checkme.gui.edit.EditActivity
@@ -317,7 +318,7 @@ class GroupListFragment @JvmOverloads constructor(
     val shareData: String
         get() {
             val instanceDatas = parameters.groupListDataWrapper
-                .instanceDatas
+                .allInstanceDatas
                 .sorted()
 
             val lines = mutableListOf<String>()
@@ -382,7 +383,7 @@ class GroupListFragment @JvmOverloads constructor(
     ): Boolean = if (shareTree.containsKey(instanceData.instanceKey))
         true
     else
-        shareTree.values.any { inTree(it.children, instanceData) }
+        shareTree.values.any { inTree(it.children.instanceDatas.associateBy { it.instanceKey }, instanceData) }
 
     private fun inTree(
         shareTree: List<GroupListDataWrapper.TaskData>,
@@ -468,14 +469,13 @@ class GroupListFragment @JvmOverloads constructor(
             modelAdapter.initialize(
                 data.dataId,
                 data.groupListDataWrapper.customTimeDatas,
-                data.groupingMode,
-                data.groupListDataWrapper.instanceDatas,
+                data.groupListDataWrapper.mixedInstanceDataCollection,
+                data.groupListDataWrapper.doneInstanceDatas,
                 state,
                 data.groupListDataWrapper.taskDatas,
                 data.groupListDataWrapper.note,
                 data.groupListDataWrapper.imageData,
                 data.showProgress,
-                data.useDoneNode,
                 data.groupListDataWrapper.projectInfo,
             )
         }
@@ -544,7 +544,7 @@ class GroupListFragment @JvmOverloads constructor(
                         searchDataManager.treeViewAdapter
                             .displayedNodes
                             .none { it.isExpanded || it.isSelected } &&
-                        it.groupListDataWrapper.instanceDatas.size > 1
+                        it.groupListDataWrapper.allInstanceDatas.size > 1
             }
             .mapNotNull {
                 val linearLayoutManager = recyclerView.layoutManager as LinearLayoutManager
@@ -749,7 +749,7 @@ class GroupListFragment @JvmOverloads constructor(
                 }
                 is GroupListParameters.TimeStamp -> {
                     val hint = parameters.groupListDataWrapper
-                        .instanceDatas
+                        .allInstanceDatas
                         .let {
                             if (it.isNotEmpty()) {
                                 it.getHint()
@@ -803,7 +803,7 @@ class GroupListFragment @JvmOverloads constructor(
     private fun getAllInstanceDatas(instanceData: GroupListDataWrapper.InstanceData): List<GroupListDataWrapper.InstanceData> {
         return listOf(
             listOf(listOf(instanceData)),
-            instanceData.children.values.map { getAllInstanceDatas(it) }
+            instanceData.children.instanceDatas.map(::getAllInstanceDatas)
         ).flatten().flatten()
     }
 
@@ -918,14 +918,13 @@ class GroupListFragment @JvmOverloads constructor(
         fun initialize(
             dataId: DataId,
             customTimeDatas: List<GroupListDataWrapper.CustomTimeData>,
-            groupingMode: GroupType.GroupingMode,
-            instanceDatas: Collection<GroupListDataWrapper.InstanceData>,
+            mixedInstanceDataCollection: MixedInstanceDataCollection,
+            doneInstanceDatas: List<GroupListDataWrapper.InstanceData>,
             groupListState: GroupListState,
             taskDatas: List<GroupListDataWrapper.TaskData>,
             note: String?,
             imageState: ImageState?,
             showProgress: Boolean,
-            useDoneNode: Boolean,
             projectInfo: DetailsNode.ProjectInfo?,
         ) {
             this.dataId = dataId
@@ -936,17 +935,16 @@ class GroupListFragment @JvmOverloads constructor(
             nodeCollection = NodeCollection(
                 0,
                 this,
-                groupingMode,
                 treeNodeCollection,
                 note,
                 null,
                 projectInfo,
                 unscheduledNodeProjectKey,
-                useDoneNode,
             )
 
             treeNodeCollection.nodes = nodeCollection.initialize(
-                instanceDatas,
+                mixedInstanceDataCollection,
+                doneInstanceDatas,
                 groupListState.contentDelegateStates,
                 groupListState.doneExpansionState,
                 taskDatas,

@@ -158,7 +158,6 @@ class ShowTaskInstancesActivity : AbstractActivity(), GroupListListener {
                             it.showLoader,
                             parameters.projectKey,
                             FilterCriteria.ExpandOnly(it.searchCriteria),
-                            parameters.groupingMode,
                         )
                     )
 
@@ -250,7 +249,7 @@ class ShowTaskInstancesActivity : AbstractActivity(), GroupListListener {
     private fun updateTopMenu() {
         val showProjectOptions = parameters is Parameters.Project &&
                 !data?.groupListDataWrapper
-                    ?.instanceDatas
+                    ?.allInstanceDatas
                     .isNullOrEmpty()
 
         binding.showNotificationGroupToolbarCollapseInclude

@@ -1,7 +1,7 @@
 package com.krystianwsul.common.criteria
 
-import com.krystianwsul.common.firebase.models.MyUser
-import com.krystianwsul.common.firebase.models.ProjectUser
+import com.krystianwsul.common.firebase.models.users.MyUser
+import com.krystianwsul.common.firebase.models.users.ProjectUser
 import com.krystianwsul.common.time.ExactTimeStamp
 
 interface Assignable {

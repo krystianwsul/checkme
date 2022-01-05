@@ -148,7 +148,7 @@ class ShowNotificationGroupActivity : AbstractActivity(), GroupListListener {
             .menu
             .findItem(R.id.actionShowTaskSearch)
             .isVisible = !data?.groupListDataWrapper
-            ?.instanceDatas
+            ?.allInstanceDatas
             .isNullOrEmpty()
     }
 

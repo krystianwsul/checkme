@@ -2,6 +2,8 @@ package com.krystianwsul.checkme.domainmodel.extensions
 
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.GroupType
+import com.krystianwsul.checkme.domainmodel.GroupTypeFactory
 import com.krystianwsul.checkme.domainmodel.getProjectInfo
 import com.krystianwsul.checkme.gui.instances.ShowGroupActivity
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
@@ -42,13 +44,18 @@ fun DomainFactory.getShowGroupData(parameters: ShowGroupActivity.Parameters): Sh
             .name to displayText
     }
 
-    return ShowGroupViewModel.Data(title, subtitle, getGroupListData(timeStamp, now, parameters.projectKey))
+    return ShowGroupViewModel.Data(
+        title,
+        subtitle,
+        getGroupListData(timeStamp, now, parameters.projectKey, parameters.groupingMode)
+    )
 }
 
 private fun DomainFactory.getGroupListData(
     timeStamp: TimeStamp,
     now: ExactTimeStamp.Local,
-    projectKey: ProjectKey.Shared? = null,
+    projectKey: ProjectKey.Shared?,
+    groupingMode: GroupType.GroupingMode,
 ): GroupListDataWrapper {
     val endCalendar = timeStamp.calendar.apply { add(Calendar.MINUTE, 1) }
     val endExactTimeStamp = ExactTimeStamp.Local(endCalendar.toDateTimeSoy()).toOffset()
@@ -71,12 +78,12 @@ private fun DomainFactory.getGroupListData(
 
     val includeProjectInfo = projectKey == null
 
-    val instanceDatas = currentInstances.map { instance ->
+    val instanceDescriptors = currentInstances.map { instance ->
         val task = instance.task
 
         val children = getChildInstanceDatas(instance, now, includeProjectInfo = includeProjectInfo)
 
-        GroupListDataWrapper.InstanceData(
+        val instanceData = GroupListDataWrapper.InstanceData(
             instance.done,
             instance.instanceKey,
             null,
@@ -89,7 +96,7 @@ private fun DomainFactory.getGroupListData(
             instance.isRootInstance(),
             instance.getCreateTaskTimePair(projectsFactory.privateProject, myUserFactory.user),
             task.note,
-            children,
+            newMixedInstanceDataCollection(children),
             task.ordinal,
             instance.getNotificationShown(shownFactory),
             task.getImage(deviceDbInfo),
@@ -97,15 +104,20 @@ private fun DomainFactory.getGroupListData(
             instance.getProjectInfo(now, includeProjectInfo),
             instance.getProject().projectKey as? ProjectKey.Shared,
         )
+
+        GroupTypeFactory.InstanceDescriptor(instanceData, instance.instanceDateTime.toDateTimePair())
     }
 
+    val (mixedInstanceDescriptors, doneInstanceDescriptors) = instanceDescriptors.splitDone()
+
     return GroupListDataWrapper(
-            customTimeDatas,
-            null,
-            listOf(),
-            null,
-            instanceDatas,
-            null,
-            null
+        customTimeDatas,
+        null,
+        listOf(),
+        null,
+        newMixedInstanceDataCollection(mixedInstanceDescriptors, groupingMode),
+        doneInstanceDescriptors.toInstanceDatas(),
+        null,
+        null
     )
 }

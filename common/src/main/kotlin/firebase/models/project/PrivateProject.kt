@@ -1,11 +1,11 @@
 package com.krystianwsul.common.firebase.models.project
 
 import com.krystianwsul.common.domain.TaskHierarchyContainer
-import com.krystianwsul.common.firebase.models.ProjectUser
 import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
 import com.krystianwsul.common.firebase.models.customtime.PrivateCustomTime
 import com.krystianwsul.common.firebase.models.task.ProjectTask
 import com.krystianwsul.common.firebase.models.taskhierarchy.ProjectTaskHierarchy
+import com.krystianwsul.common.firebase.models.users.ProjectUser
 import com.krystianwsul.common.firebase.records.AssignedToHelper
 import com.krystianwsul.common.firebase.records.project.PrivateProjectRecord
 import com.krystianwsul.common.time.JsonTime

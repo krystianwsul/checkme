@@ -17,6 +17,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import arrow.core.Tuple4
+import arrow.core.Tuple5
 import com.google.android.material.composethemeadapter.MdcTheme
 import com.jakewharton.rxbinding4.view.clicks
 import com.jakewharton.rxrelay3.PublishRelay
@@ -117,6 +119,8 @@ class DebugFragment : AbstractFragment() {
             .flatMapSingle(
                 {
                     Single.fromCallable {
+                        val domainFactory = DomainFactory.instance
+
                         val t1 = ExactTimeStamp.Local.now
                         DomainFactory.instance.getGroupListData(
                             ExactTimeStamp.Local.now,
@@ -136,9 +140,24 @@ class DebugFragment : AbstractFragment() {
                             waitingNames.joinToString("\n")
                         }
 
-                        Pair(
+                        val ordinalCount = DomainFactory.instance.run {
+                            val user = myUserFactory.user
+
+                            user.projectIds
+                                .map {
+                                    user.getOrdinalEntriesForProject(projectsFactory.sharedProjects.getValue(it))
+                                        .values
+                                        .count()
+                                }
+                                .sum()
+                        }
+
+                        Tuple5(
                             loadTime,
-                            "isWaitingForTasks? ${DomainFactory.instance.isWaitingForTasks.value}\n$waitingOnDependencies"
+                            "isWaitingForTasks? ${DomainFactory.instance.isWaitingForTasks.value}\n$waitingOnDependencies",
+                            ordinalCount,
+                            domainFactory.taskCount,
+                            domainFactory.instanceCount,
                         )
                     }
                 },
@@ -146,7 +165,7 @@ class DebugFragment : AbstractFragment() {
                 1,
             )
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe { (loadTime, waitingOnDependencies) ->
+            .subscribe { (loadTime, waitingOnDependencies, ordinalCount, taskCount, instanceCount) ->
                 binding.debugData.text = StringBuilder().apply {
                     val lastTick = Preferences.lastTick
                     val tickLog = Preferences.tickLog.log
@@ -170,9 +189,9 @@ class DebugFragment : AbstractFragment() {
                     append(")")
 
                     append("\n\ntasks: ")
-                    append(domainFactory.taskCount)
+                    append(taskCount)
                     append("\nall existing instances: ")
-                    append(domainFactory.instanceCount)
+                    append(instanceCount)
                     append("\nfirst page root instances: existing ")
                     append(domainFactory.instanceInfo.first)
                     append(", virtual ")
@@ -181,6 +200,8 @@ class DebugFragment : AbstractFragment() {
                     append(domainFactory.customTimeCount)
                     append("\ninstance shown: ")
                     append(domainFactory.instanceShownCount)
+                    append("\nproject ordinal entries: ")
+                    append(ordinalCount)
 
                     append("\n\nwaiting on dependencies:\n")
                     append(waitingOnDependencies)

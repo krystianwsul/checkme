@@ -1,12 +1,16 @@
 package com.krystianwsul.common.firebase
 
+import com.krystianwsul.common.ErrorLogger
 import com.krystianwsul.common.firebase.json.JsonWrapper
 import com.krystianwsul.common.firebase.json.projects.PrivateProjectJson
 import com.krystianwsul.common.firebase.json.tasks.RootTaskJson
+import com.krystianwsul.common.firebase.json.users.ProjectOrdinalEntryJson
 import com.krystianwsul.common.firebase.json.users.UserWrapper
 import json
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.encodeToDynamic
 
 class JsDatabaseWrapper(admin: dynamic, root: String) : DatabaseWrapper() {
 
@@ -20,7 +24,21 @@ class JsDatabaseWrapper(admin: dynamic, root: String) : DatabaseWrapper() {
         val dynamicValues: dynamic = object {}
 
         values.forEach {
-            dynamicValues[it.key] = it.value
+            val value = it.value.let {
+                if (it is Map<*, *>) {
+                    val map: dynamic = object {}
+
+                    it.forEach { (key, value) ->
+                        map[key as String] = json.encodeToDynamic(value as ProjectOrdinalEntryJson)
+                    }
+
+                    map
+                } else {
+                    it
+                }
+            }
+
+            dynamicValues[it.key] = value
         }
 
         rootReference.update(dynamicValues) { error ->

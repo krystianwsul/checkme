@@ -53,7 +53,7 @@ fun DomainFactory.getShowTaskInstancesData(
 
                     instanceDescriptors = pair.first.map {
                         val (notDoneChildInstanceDescriptors, doneChildInstanceDescriptors) =
-                            getChildInstanceDatas(it, now, includeProjectInfo = true).splitDone()
+                            getChildInstanceDatas(it, now, includeProjectInfo = true)
 
                         val instanceData = GroupListDataWrapper.InstanceData(
                             it.done,

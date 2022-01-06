@@ -489,7 +489,6 @@ class DomainFactory(
     }
 
     fun getChildInstanceDatas(
-        // todo done does this ever *not* get splitDone?
         instance: Instance,
         now: ExactTimeStamp.Local,
         searchCriteria: SearchCriteria = SearchCriteria.empty,
@@ -501,7 +500,7 @@ class DomainFactory(
         { childInstance, children -> instanceToGroupListData(childInstance, now, children, includeProjectInfo) },
         searchCriteria,
         filterVisible,
-    )
+    ).splitDone()
 
     private val ownerKey get() = myUserFactory.user.userKey
 

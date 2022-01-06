@@ -33,7 +33,8 @@ fun DomainFactory.getShowNotificationGroupData(instanceKeys: Set<InstanceKey>): 
     val instanceDescriptors = instances.map { instance ->
         val task = instance.task
 
-        val children = getChildInstanceDatas(instance, now)
+        val (notDoneChildInstanceDescriptors, doneChildInstanceDescriptors) =
+            getChildInstanceDatas(instance, now).splitDone()
 
         val instanceData = GroupListDataWrapper.InstanceData(
             instance.done,
@@ -48,7 +49,8 @@ fun DomainFactory.getShowNotificationGroupData(instanceKeys: Set<InstanceKey>): 
             instance.isRootInstance(),
             instance.getCreateTaskTimePair(projectsFactory.privateProject, myUserFactory.user),
             task.note,
-            newMixedInstanceDataCollection(children),
+            newMixedInstanceDataCollection(notDoneChildInstanceDescriptors),
+            doneChildInstanceDescriptors.toInstanceDatas().toSet(),
             instance.task.ordinal,
             instance.getNotificationShown(shownFactory),
             task.getImage(deviceDbInfo),

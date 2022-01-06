@@ -81,7 +81,8 @@ private fun DomainFactory.getGroupListData(
     val instanceDescriptors = currentInstances.map { instance ->
         val task = instance.task
 
-        val children = getChildInstanceDatas(instance, now, includeProjectInfo = includeProjectInfo)
+        val (notDoneChildInstanceDescriptors, doneChildInstanceDescriptors) =
+            getChildInstanceDatas(instance, now, includeProjectInfo = includeProjectInfo).splitDone()
 
         val instanceData = GroupListDataWrapper.InstanceData(
             instance.done,
@@ -96,7 +97,8 @@ private fun DomainFactory.getGroupListData(
             instance.isRootInstance(),
             instance.getCreateTaskTimePair(projectsFactory.privateProject, myUserFactory.user),
             task.note,
-            newMixedInstanceDataCollection(children),
+            newMixedInstanceDataCollection(notDoneChildInstanceDescriptors),
+            doneChildInstanceDescriptors.toInstanceDatas().toSet(),
             task.ordinal,
             instance.getNotificationShown(shownFactory),
             task.getImage(deviceDbInfo),

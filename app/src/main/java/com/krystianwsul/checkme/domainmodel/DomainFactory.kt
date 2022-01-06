@@ -7,9 +7,7 @@ import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager.NotificationType
-import com.krystianwsul.checkme.domainmodel.extensions.fixOffsetsAndCustomTimes
-import com.krystianwsul.checkme.domainmodel.extensions.migratePrivateCustomTime
-import com.krystianwsul.checkme.domainmodel.extensions.updateNotifications
+import com.krystianwsul.checkme.domainmodel.extensions.*
 import com.krystianwsul.checkme.domainmodel.notifications.ImageManager
 import com.krystianwsul.checkme.domainmodel.notifications.NotificationWrapper
 import com.krystianwsul.checkme.domainmodel.notifications.Notifier
@@ -423,10 +421,12 @@ class DomainFactory(
     fun instanceToGroupListData(
         instance: Instance,
         now: ExactTimeStamp.Local,
-        children: Collection<GroupTypeFactory.InstanceDescriptor>,
+        childInstanceDescriptors: Collection<GroupTypeFactory.InstanceDescriptor>,
         includeProjectInfo: Boolean = true,
     ): GroupTypeFactory.InstanceDescriptor {
         val isRootInstance = instance.isRootInstance()
+
+        val (notDoneInstanceDescriptors, doneInstanceDescriptors) = childInstanceDescriptors.splitDone()
 
         val instanceData = GroupListDataWrapper.InstanceData(
             instance.done,
@@ -441,7 +441,8 @@ class DomainFactory(
             instance.isRootInstance(),
             instance.getCreateTaskTimePair(projectsFactory.privateProject, myUserFactory.user),
             instance.task.note,
-            newMixedInstanceDataCollection(children),
+            newMixedInstanceDataCollection(notDoneInstanceDescriptors),
+            doneInstanceDescriptors.toInstanceDatas().toSet(),
             instance.task.ordinal,
             instance.getNotificationShown(shownFactory),
             instance.task.getImage(deviceDbInfo),
@@ -488,19 +489,19 @@ class DomainFactory(
     }
 
     fun getChildInstanceDatas(
+        // todo done does this ever *not* get splitDone?
         instance: Instance,
         now: ExactTimeStamp.Local,
         searchCriteria: SearchCriteria = SearchCriteria.empty,
         filterVisible: Boolean = true,
         includeProjectInfo: Boolean = true,
-    ): Collection<GroupTypeFactory.InstanceDescriptor> =
-        getChildInstanceDatas<GroupTypeFactory.InstanceDescriptor>(
-            instance,
-            now,
-            { childInstance, children -> instanceToGroupListData(childInstance, now, children, includeProjectInfo) },
-            searchCriteria,
-            filterVisible,
-        )
+    ) = getChildInstanceDatas<GroupTypeFactory.InstanceDescriptor>(
+        instance,
+        now,
+        { childInstance, children -> instanceToGroupListData(childInstance, now, children, includeProjectInfo) },
+        searchCriteria,
+        filterVisible,
+    )
 
     private val ownerKey get() = myUserFactory.user.userKey
 

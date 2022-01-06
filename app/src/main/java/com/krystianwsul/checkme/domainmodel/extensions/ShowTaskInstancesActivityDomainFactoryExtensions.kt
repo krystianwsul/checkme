@@ -52,7 +52,8 @@ fun DomainFactory.getShowTaskInstancesData(
                     hasMore = pair.second
 
                     instanceDescriptors = pair.first.map {
-                        val children = getChildInstanceDatas(it, now, includeProjectInfo = true)
+                        val (notDoneChildInstanceDescriptors, doneChildInstanceDescriptors) =
+                            getChildInstanceDatas(it, now, includeProjectInfo = true).splitDone()
 
                         val instanceData = GroupListDataWrapper.InstanceData(
                             it.done,
@@ -67,7 +68,8 @@ fun DomainFactory.getShowTaskInstancesData(
                             it.isRootInstance(),
                             it.getCreateTaskTimePair(projectsFactory.privateProject, myUserFactory.user),
                             it.task.note,
-                            newMixedInstanceDataCollection(children),
+                            newMixedInstanceDataCollection(notDoneChildInstanceDescriptors),
+                            doneChildInstanceDescriptors.toInstanceDatas().toSet(),
                             it.task.ordinal,
                             it.getNotificationShown(shownFactory),
                             it.task.getImage(deviceDbInfo),

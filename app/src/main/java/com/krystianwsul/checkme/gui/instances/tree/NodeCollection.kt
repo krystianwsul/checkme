@@ -38,7 +38,7 @@ class NodeCollection(
 
     fun initialize(
         mixedInstanceDataCollection: MixedInstanceDataCollection,
-        doneInstanceDatas: List<GroupListDataWrapper.InstanceData>,
+        doneInstanceDatas: Set<GroupListDataWrapper.InstanceData>, // todo done revert to list
         contentDelegateStates: Map<NotDoneNode.ContentDelegate.Id, NotDoneNode.ContentDelegate.State>,
         doneExpansionState: TreeNode.ExpansionState?,
         taskDatas: List<GroupListDataWrapper.TaskData>,
@@ -84,7 +84,7 @@ class NodeCollection(
         treeNodes += dividerNode.initialize(
             doneExpansionState,
             nodeContainer,
-            doneInstanceDatas,
+            doneInstanceDatas.toList(),
             contentDelegateStates,
         )
 

@@ -63,7 +63,8 @@ data class GroupListDataWrapper(
         val isRootInstance: Boolean,
         val createTaskTimePair: TimePair,
         override val note: String?,
-        val children: MixedInstanceDataCollection,
+        val mixedInstanceDataCollection: MixedInstanceDataCollection,
+        val doneInstanceDatas: Set<InstanceData>,
         val ordinal: Double,
         val notificationShown: Boolean,
         val imageState: ImageState?,
@@ -71,6 +72,8 @@ data class GroupListDataWrapper(
         val projectInfo: DetailsNode.ProjectInfo?, // this is for what's displayed
         val projectKey: ProjectKey.Shared? // this is for creating new tasks via ActionMode.  Always set
     ) : Comparable<InstanceData>, SelectedData, QueryMatchable, FilterParamsMatchable {
+
+        val allChildren = mixedInstanceDataCollection.instanceDatas + doneInstanceDatas
 
         override val normalizedFields by lazy { listOfNotNull(name, note).map { it.normalized() } }
 
@@ -87,7 +90,7 @@ data class GroupListDataWrapper(
 
         override val taskKey = instanceKey.taskKey
 
-        override val childSelectedDatas get() = children.instanceDatas
+        override val childSelectedDatas get() = allChildren
 
         fun normalize() {
             normalizedFields

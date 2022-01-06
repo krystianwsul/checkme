@@ -1,10 +1,10 @@
 package com.krystianwsul.treeadapter
 
+import android.util.Log
 import com.jakewharton.rxrelay3.BehaviorRelay
 import com.krystianwsul.common.criteria.SearchCriteria
 import io.reactivex.rxjava3.core.Observable
-import kotlin.math.ceil
-import kotlin.math.min
+import kotlin.math.*
 
 class TreeNodeCollection<T : TreeHolder>(val treeViewAdapter: TreeViewAdapter<T>) : NodeContainer<T> {
 
@@ -189,7 +189,9 @@ class TreeNodeCollection<T : TreeHolder>(val treeViewAdapter: TreeViewAdapter<T>
             nextOrdinal = nextNode?.getOrdinal() ?: lastOrdinal
         } else {
             nextOrdinal = (nextNode as Sortable).getOrdinal()
-            previousOrdinal = nextOrdinal - 1000
+
+            //previousOrdinal = nextOrdinal - 1000 ordinal double hack
+            previousOrdinal = nextOrdinal - max(1000.0, abs(nextOrdinal) / 10)
         }
 
         (currentNode as Sortable).setOrdinal((previousOrdinal + nextOrdinal) / 2)

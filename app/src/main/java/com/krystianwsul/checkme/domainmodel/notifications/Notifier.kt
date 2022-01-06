@@ -7,6 +7,7 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.GroupType
 import com.krystianwsul.checkme.ticks.Ticker
 import com.krystianwsul.common.firebase.models.Instance
+import com.krystianwsul.common.firebase.models.users.ProjectOrdinalManager
 import com.krystianwsul.common.relevance.CustomTimeRelevance
 import com.krystianwsul.common.relevance.Irrelevant
 import com.krystianwsul.common.time.DateTimeSoy
@@ -301,7 +302,12 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
                 is GroupTypeFactory.Notification.Project -> {
                     it.instances.forEach { NotificationWrapper.instance.cancelNotification(it.notificationId) }
 
-                    notificationWrapper.notifyProject(it.project, it.instances, it.timeStamp, it.silent, now)
+                    val ordinal = domainFactory.myUserFactory
+                        .user
+                        .getProjectOrdinalManager(it.project)
+                        .getOrdinal(it.project, ProjectOrdinalManager.Key(it.instances))
+
+                    notificationWrapper.notifyProject(it.project, it.instances, it.timeStamp, it.silent, now, ordinal)
                 }
             }
         }

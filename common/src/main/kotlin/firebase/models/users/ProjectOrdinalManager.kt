@@ -2,6 +2,7 @@ package com.krystianwsul.common.firebase.models.users
 
 import com.krystianwsul.common.firebase.json.users.ProjectOrdinalEntryJson
 import com.krystianwsul.common.firebase.json.users.ProjectOrdinalKeyEntryJson
+import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.project.SharedProject
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.InstanceKey
@@ -130,6 +131,8 @@ class ProjectOrdinalManager(
 
     data class Key(val entries: Set<Entry>) {
 
+        constructor(instances: Collection<Instance>) : this(instances.map(::Entry).toSet())
+
         data class Entry(
             val taskInfo: TaskInfo?,
             val instanceDateOrDayOfWeek: DateOrDayOfWeek,
@@ -155,6 +158,11 @@ class ProjectOrdinalManager(
                 TaskInfo(instanceKey),
                 DateOrDayOfWeek.Date(instanceDateTimePair.date),
                 instanceDateTimePair.timePair,
+            )
+
+            constructor(instance: Instance) : this(
+                instance.instanceKey,
+                instance.instanceDateTime.toDateTimePair(),
             )
 
             fun toJson() = ProjectOrdinalKeyEntryJson(

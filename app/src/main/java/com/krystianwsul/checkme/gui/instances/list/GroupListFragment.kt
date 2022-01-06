@@ -944,7 +944,7 @@ class GroupListFragment @JvmOverloads constructor(
 
             treeNodeCollection.nodes = nodeCollection.initialize(
                 mixedInstanceDataCollection,
-                doneInstanceDatas.toSet(),
+                doneInstanceDatas,
                 groupListState.contentDelegateStates,
                 groupListState.doneExpansionState,
                 taskDatas,

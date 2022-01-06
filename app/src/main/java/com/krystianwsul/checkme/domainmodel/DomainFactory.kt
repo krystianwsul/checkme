@@ -442,7 +442,7 @@ class DomainFactory(
             instance.getCreateTaskTimePair(projectsFactory.privateProject, myUserFactory.user),
             instance.task.note,
             newMixedInstanceDataCollection(notDoneInstanceDescriptors),
-            doneInstanceDescriptors.toInstanceDatas().toSet(),
+            doneInstanceDescriptors.toInstanceDatas(),
             instance.task.ordinal,
             instance.getNotificationShown(shownFactory),
             instance.task.getImage(deviceDbInfo),

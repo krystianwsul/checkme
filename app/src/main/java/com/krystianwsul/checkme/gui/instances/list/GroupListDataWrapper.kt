@@ -64,7 +64,7 @@ data class GroupListDataWrapper(
         val createTaskTimePair: TimePair,
         override val note: String?,
         val mixedInstanceDataCollection: MixedInstanceDataCollection,
-        val doneInstanceDatas: Set<InstanceData>,
+        val doneInstanceDatas: List<InstanceData>,
         val ordinal: Double,
         val notificationShown: Boolean,
         val imageState: ImageState?,

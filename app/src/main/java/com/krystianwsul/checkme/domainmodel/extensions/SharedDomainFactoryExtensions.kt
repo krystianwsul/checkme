@@ -63,19 +63,6 @@ fun DomainUpdater.clearTaskEndTimeStamps(
 }.perform(this)
 
 @CheckResult
-fun DomainUpdater.setOrdinal(
-    notificationType: DomainListenerManager.NotificationType,
-    taskKey: TaskKey,
-    ordinal: Double,
-): Completable = CompletableDomainUpdate.create("setOrdinal") {
-    val task = getTaskForce(taskKey)
-
-    task.ordinal = ordinal
-
-    DomainUpdater.Params(true, notificationType, DomainFactory.CloudParams(task.project))
-}.perform(this)
-
-@CheckResult
 fun DomainUpdater.setInstancesNotNotified(
     notificationType: DomainListenerManager.NotificationType,
     instanceKeys: List<InstanceKey>,

@@ -433,9 +433,20 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
                 ).subscribe()
             }
 
-            override fun canDropOn(other: Sortable) = throw UnsupportedOperationException()
+            override fun canDropOn(other: Sortable): Boolean {
+                val otherNotDoneNode = other as? NotDoneNode ?: return false
 
-            // I don't really understand, or feel like understanding, why these three funs need to access allInstanceDatas
+                if (treeNode.parent == otherNotDoneNode.treeNode.parent) return true
+
+                val otherInstance = otherNotDoneNode.contentDelegate as? Instance ?: return false
+
+                if (!otherInstance.instanceData.isRootInstance) return false
+
+                if (otherInstance.instanceData.projectKey == null) return true
+
+                return false
+            }
+
             override fun normalize() = allInstanceDatas.forEach { it.normalize() }
 
             override fun matchesFilterParams(filterParams: FilterCriteria.Full.FilterParams) =

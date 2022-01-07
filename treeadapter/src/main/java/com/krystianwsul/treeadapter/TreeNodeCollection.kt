@@ -64,6 +64,8 @@ class TreeNodeCollection<T : TreeHolder>(val treeViewAdapter: TreeViewAdapter<T>
             ?.flatMap { it.displayableNodes }
             ?: throw SetTreeNodesNotCalledException()
 
+    override val displayedDirectChildNodes get() = nodes.filter { it.visible() }
+
     fun unselect(x: TreeViewAdapter.Placeholder) = treeNodesRelay.value
         ?.forEach { it.unselect(x) }
         ?: throw SetTreeNodesNotCalledException()
@@ -177,7 +179,7 @@ class TreeNodeCollection<T : TreeHolder>(val treeViewAdapter: TreeViewAdapter<T>
     }
 
     private fun getAdjacentNodes(currentTreeNode: TreeNode<*>): Pair<Sortable?, Sortable?> {
-        val displayedNodesInParent = currentTreeNode.parent.displayedChildNodes
+        val displayedNodesInParent = currentTreeNode.parent.displayedDirectChildNodes
         val currentPositionInParent = displayedNodesInParent.indexOf(currentTreeNode)
 
         val previousNode = currentPositionInParent.takeIf { it > 0 }

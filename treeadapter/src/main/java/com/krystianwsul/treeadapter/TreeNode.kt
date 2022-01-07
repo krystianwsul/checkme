@@ -300,6 +300,13 @@ class TreeNode<T : TreeHolder>(
                 listOf()
         }
 
+    override val displayedDirectChildNodes: List<TreeNode<T>>
+        get() {
+            check(visible())
+
+            return childTreeNodes.filter { it.visible() }
+        }
+
     private fun getLocker() = treeViewAdapter.locker?.getNodeLocker(this)
 
     private val modelNodeVisible get() = modelNode.isVisible(hasActionMode(), childTreeNodes.any { it.canBeShown() })

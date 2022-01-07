@@ -14,6 +14,8 @@ interface NodeContainer<T : TreeHolder> {
     val displayedChildNodes: List<TreeNode<T>>
     val displayableNodes: List<TreeNode<T>>
 
+    val displayedDirectChildNodes: List<TreeNode<T>>
+
     val id: Any
 
     fun wantsSeparators(top: Boolean): Boolean

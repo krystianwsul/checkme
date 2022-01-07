@@ -6,6 +6,7 @@ import com.krystianwsul.checkme.domainmodel.GroupType
 import com.krystianwsul.checkme.domainmodel.GroupTypeFactory
 import com.krystianwsul.checkme.domainmodel.getProjectInfo
 import com.krystianwsul.checkme.gui.instances.ShowGroupActivity
+import com.krystianwsul.checkme.gui.instances.drag.DropParent
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.utils.time.calendar
 import com.krystianwsul.checkme.utils.time.getDisplayText
@@ -120,6 +121,7 @@ private fun DomainFactory.getGroupListData(
         newMixedInstanceDataCollection(mixedInstanceDescriptors, groupingMode),
         doneInstanceDescriptors.toInstanceDatas(),
         null,
-        null
+        null,
+        DropParent.TopLevel(true),
     )
 }

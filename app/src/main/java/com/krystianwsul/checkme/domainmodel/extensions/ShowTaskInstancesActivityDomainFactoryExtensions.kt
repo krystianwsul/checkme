@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.domainmodel.extensions
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.*
 import com.krystianwsul.checkme.gui.instances.ShowTaskInstancesActivity
+import com.krystianwsul.checkme.gui.instances.drag.DropParent
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.checkme.viewmodels.DomainQuery
@@ -103,6 +104,7 @@ fun DomainFactory.getShowTaskInstancesData(
                 listOf(),
                 null,
                 null,
+                DropParent.TopLevel(false),
             )
 
             ShowTaskInstancesViewModel.Data(

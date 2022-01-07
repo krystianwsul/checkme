@@ -14,8 +14,8 @@ interface BaseHolder {
 
     fun getTreeNode() = if (holderPosition >= 0) baseAdapter.getTreeNode(holderPosition) else null
 
-    fun Observable<*>.mapTreeNode() = filter { holderPosition >= 0 }.map { baseAdapter.getTreeNode(holderPosition) }!!
-    fun Single<*>.mapTreeNode() = filter { holderPosition >= 0 }.map { baseAdapter.getTreeNode(holderPosition) }!!
+    fun Observable<*>.mapTreeNode() = filter { holderPosition >= 0 }.map { baseAdapter.getTreeNode(holderPosition) }
+    fun Single<*>.mapTreeNode() = filter { holderPosition >= 0 }.map { baseAdapter.getTreeNode(holderPosition) }
 
     fun startRx()
     fun stopRx()

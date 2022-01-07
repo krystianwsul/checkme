@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.domainmodel.extensions
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.*
+import com.krystianwsul.checkme.gui.instances.drag.DropParent
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.utils.time.calendar
@@ -187,6 +188,7 @@ fun DomainFactory.getGroupListData(
         doneInstanceDescriptors.toInstanceDatas(),
         null,
         null,
+        DropParent.TopLevel(false),
     )
 
     return DayViewModel.DayData(dataWrapper)

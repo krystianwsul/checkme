@@ -28,6 +28,7 @@ import com.krystianwsul.checkme.gui.base.AbstractActivity
 import com.krystianwsul.checkme.gui.edit.EditActivity
 import com.krystianwsul.checkme.gui.edit.EditParameters
 import com.krystianwsul.checkme.gui.edit.EditParentHint
+import com.krystianwsul.checkme.gui.instances.drag.DropParent
 import com.krystianwsul.checkme.gui.instances.edit.SnackbarEditInstancesHostDelegate
 import com.krystianwsul.checkme.gui.instances.tree.*
 import com.krystianwsul.checkme.gui.main.FabUser
@@ -477,6 +478,7 @@ class GroupListFragment @JvmOverloads constructor(
                 data.groupListDataWrapper.imageData,
                 data.showProgress,
                 data.groupListDataWrapper.projectInfo,
+                data.groupListDataWrapper.dropParent,
             )
         }
 
@@ -915,6 +917,9 @@ class GroupListFragment @JvmOverloads constructor(
         lateinit var customTimeDatas: List<GroupListDataWrapper.CustomTimeData>
             private set
 
+        lateinit var dropParent: DropParent
+            private set
+
         fun initialize(
             dataId: DataId,
             customTimeDatas: List<GroupListDataWrapper.CustomTimeData>,
@@ -926,9 +931,11 @@ class GroupListFragment @JvmOverloads constructor(
             imageState: ImageState?,
             showProgress: Boolean,
             projectInfo: DetailsNode.ProjectInfo?,
+            dropParent: DropParent,
         ) {
             this.dataId = dataId
             this.customTimeDatas = customTimeDatas
+            this.dropParent = dropParent
 
             treeNodeCollection = TreeNodeCollection(treeViewAdapter)
 

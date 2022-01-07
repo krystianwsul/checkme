@@ -1,6 +1,6 @@
 package com.krystianwsul.treeadapter
 
-interface NodeContainer<T : TreeHolder> {
+sealed interface NodeContainer<T : TreeHolder> {
 
     val isExpanded: Boolean
 

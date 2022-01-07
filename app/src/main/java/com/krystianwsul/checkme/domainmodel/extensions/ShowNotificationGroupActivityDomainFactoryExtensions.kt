@@ -6,6 +6,7 @@ import com.krystianwsul.checkme.domainmodel.GroupType
 import com.krystianwsul.checkme.domainmodel.GroupTypeFactory
 import com.krystianwsul.checkme.domainmodel.getProjectInfo
 import com.krystianwsul.checkme.domainmodel.notifications.Notifier
+import com.krystianwsul.checkme.gui.instances.drag.DropParent
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.checkme.viewmodels.ShowNotificationGroupViewModel
@@ -71,7 +72,8 @@ fun DomainFactory.getShowNotificationGroupData(instanceKeys: Set<InstanceKey>): 
         newMixedInstanceDataCollection(mixedInstanceDatas, GroupType.GroupingMode.Projects),
         doneInstanceDatas.toInstanceDatas(),
         null,
-        null
+        null,
+        DropParent.TopLevel(false),
     )
 
     return ShowNotificationGroupViewModel.Data(dataWrapper)

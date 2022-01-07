@@ -6,6 +6,7 @@ import com.krystianwsul.checkme.domainmodel.*
 import com.krystianwsul.checkme.domainmodel.update.CompletableDomainUpdate
 import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
 import com.krystianwsul.checkme.domainmodel.update.SingleDomainUpdate
+import com.krystianwsul.checkme.gui.instances.drag.DropParent
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.checkme.viewmodels.ShowInstanceViewModel
@@ -169,5 +170,6 @@ private fun DomainFactory.getGroupListData(
         doneInstanceDescriptors.toInstanceDatas(),
         task.getImage(deviceDbInfo),
         instance.getProjectInfo(now),
+        DropParent.ParentInstance(instance.instanceKey),
     )
 }

@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.gui.instances.tree
 
 import android.os.Parcelable
 import com.krystianwsul.checkme.R
+import com.krystianwsul.checkme.domainmodel.GroupType
 import com.krystianwsul.checkme.domainmodel.GroupTypeFactory
 import com.krystianwsul.checkme.domainmodel.extensions.setInstanceDone
 import com.krystianwsul.checkme.domainmodel.extensions.setInstancesDone
@@ -273,20 +274,17 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
             }
 
             override fun canDropOn(other: Sortable): Boolean {
-                val otherNotDoneNode = other as? NotDoneNode ?: return false
+                check(other is NotDoneNode)
 
-                if (treeNode.parent == otherNotDoneNode.treeNode.parent) return true
+                val dropParent = when (val parent = other.treeNode.parent) {
+                    is TreeNode<*> -> parent.modelNode
+                        .let { it as NotDoneNode }
+                        .contentDelegate
+                        .bridge
+                    is TreeNodeCollection<*> -> groupAdapter.dropParent
+                }
 
-                // todo draggable check if instance can leave its parent
-
-                val otherInstance = otherNotDoneNode.contentDelegate as? Instance ?: return false
-
-                if (!instanceData.isRootInstance) return false
-                if (!otherInstance.instanceData.isRootInstance) return false
-
-                if (instanceData.projectKey != null && otherInstance.instanceData.projectKey == null) return true
-
-                return false
+                return dropParent.canDropIntoParent(bridge)
             }
 
             override fun normalize() = instanceData.normalize()
@@ -436,19 +434,17 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
             }
 
             override fun canDropOn(other: Sortable): Boolean {
-                val otherNotDoneNode = other as? NotDoneNode ?: return false
+                check(other is NotDoneNode)
 
-                if (treeNode.parent == otherNotDoneNode.treeNode.parent) return true
+                val dropParent = when (val parent = other.treeNode.parent) {
+                    is TreeNode<*> -> parent.modelNode
+                        .let { it as NotDoneNode }
+                        .contentDelegate
+                        .bridge
+                    is TreeNodeCollection<*> -> groupAdapter.dropParent
+                }
 
-                // todo draggable check if node can leave its parent
-
-                val otherInstance = otherNotDoneNode.contentDelegate as? Instance ?: return false
-
-                if (!otherInstance.instanceData.isRootInstance) return false
-
-                if (otherInstance.instanceData.projectKey == null) return true
-
-                return false
+                return dropParent.canDropIntoParent(bridge as GroupTypeFactory.TimeChild)
             }
 
             override fun normalize() = allInstanceDatas.forEach { it.normalize() }

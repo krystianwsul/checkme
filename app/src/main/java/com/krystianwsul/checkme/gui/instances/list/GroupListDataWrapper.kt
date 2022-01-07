@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.gui.instances.list
 
 import com.krystianwsul.checkme.domainmodel.MixedInstanceDataCollection
+import com.krystianwsul.checkme.gui.instances.drag.DropParent
 import com.krystianwsul.checkme.gui.tree.DetailsNode
 import com.krystianwsul.checkme.utils.FilterParamsMatchable
 import com.krystianwsul.common.criteria.QueryMatchable
@@ -22,6 +23,7 @@ data class GroupListDataWrapper(
     val doneInstanceDatas: List<InstanceData>,
     val imageData: ImageState?,
     val projectInfo: DetailsNode.ProjectInfo?,
+    val dropParent: DropParent,
 ) {
 
     val allInstanceDatas get() = mixedInstanceDataCollection.instanceDatas + doneInstanceDatas

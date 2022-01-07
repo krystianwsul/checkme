@@ -65,7 +65,6 @@ fun DomainFactory.getShowTaskInstancesData(
                             it.task.notDeleted,
                             it.canAddSubtask(now),
                             it.canMigrateDescription(now),
-                            it.isRootInstance(),
                             it.getCreateTaskTimePair(projectsFactory.privateProject, myUserFactory.user),
                             it.task.note,
                             newMixedInstanceDataCollection(notDoneChildInstanceDescriptors),
@@ -76,6 +75,7 @@ fun DomainFactory.getShowTaskInstancesData(
                             it.isAssignedToMe(now, myUserFactory.user),
                             it.getProjectInfo(now, parameters.projectKey == null),
                             it.getProject().projectKey as? ProjectKey.Shared,
+                            it.parentInstance?.instanceKey,
                         )
 
                         GroupTypeFactory.InstanceDescriptor(instanceData, it.instanceDateTime.toDateTimePair())

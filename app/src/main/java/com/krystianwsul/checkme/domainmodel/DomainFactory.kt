@@ -438,7 +438,6 @@ class DomainFactory(
             instance.task.notDeleted,
             instance.canAddSubtask(now),
             instance.canMigrateDescription(now),
-            instance.isRootInstance(),
             instance.getCreateTaskTimePair(projectsFactory.privateProject, myUserFactory.user),
             instance.task.note,
             newMixedInstanceDataCollection(notDoneInstanceDescriptors),
@@ -449,6 +448,7 @@ class DomainFactory(
             instance.isAssignedToMe(now, myUserFactory.user),
             instance.getProjectInfo(now, includeProjectInfo),
             instance.getProject().projectKey as? ProjectKey.Shared,
+            instance.parentInstance?.instanceKey,
         )
 
         return GroupTypeFactory.InstanceDescriptor(instanceData, instance.instanceDateTime.toDateTimePair())

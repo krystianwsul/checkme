@@ -60,7 +60,6 @@ data class GroupListDataWrapper(
         override val taskCurrent: Boolean,
         override val canAddSubtask: Boolean,
         override val canMigrateDescription: Boolean,
-        val isRootInstance: Boolean,
         val createTaskTimePair: TimePair,
         override val note: String?,
         val mixedInstanceDataCollection: MixedInstanceDataCollection,
@@ -71,7 +70,10 @@ data class GroupListDataWrapper(
         override val isAssignedToMe: Boolean,
         val projectInfo: DetailsNode.ProjectInfo?, // this is for what's displayed
         val projectKey: ProjectKey.Shared?, // this is for creating new tasks via ActionMode.  Always set
+        val parentInstanceKey: InstanceKey?,
     ) : Comparable<InstanceData>, SelectedData, QueryMatchable, FilterParamsMatchable {
+
+        val isRootInstance = parentInstanceKey == null
 
         val allChildren = mixedInstanceDataCollection.instanceDatas + doneInstanceDatas
 

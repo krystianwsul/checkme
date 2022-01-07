@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.domainmodel
 
 import com.krystianwsul.checkme.gui.instances.ShowGroupActivity
+import com.krystianwsul.checkme.gui.instances.drag.DropParent
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.instances.list.GroupListFragment
 import com.krystianwsul.checkme.gui.instances.tree.NodeCollection
@@ -94,7 +95,7 @@ class GroupTypeFactory(
 
     data class ProjectDescriptor(val projectDetails: DetailsNode.ProjectDetails) : GroupType.ProjectDescriptor
 
-    sealed interface Bridge : Comparable<Bridge> {
+    sealed interface Bridge : Comparable<Bridge>, DropParent {
 
         fun toContentDelegate(
             groupAdapter: GroupListFragment.GroupAdapter,
@@ -148,6 +149,11 @@ class GroupTypeFactory(
                 is SingleBridge -> timeStamp.compareTo(other.instanceData.instanceTimeStamp)
             }
         }
+
+        override fun canDropIntoParent(droppedTimeChild: TimeChild) = when (droppedTimeChild) {
+            is ProjectBridge -> timeStamp == droppedTimeChild.timeStamp
+            is SingleBridge -> droppedTimeChild.instanceData.let { timeStamp == it.instanceTimeStamp && it.isRootInstance }
+        }
     }
 
     data class TimeProjectBridge(
@@ -185,12 +191,19 @@ class GroupTypeFactory(
                 is SingleBridge -> timeStamp.compareTo(other.instanceData.instanceTimeStamp)
             }
         }
+
+        override fun canDropIntoParent(droppedTimeChild: TimeChild) = when (droppedTimeChild) {
+            is ProjectBridge -> throw UnsupportedOperationException()
+            is SingleBridge -> droppedTimeChild.instanceData.let {
+                timeStamp == it.instanceTimeStamp && projectDetails.projectKey == it.projectKey && it.isRootInstance
+            }
+        }
     }
 
     class ProjectBridge(
         val timeStamp: TimeStamp,
         private val projectDetails: DetailsNode.ProjectDetails,
-        val instanceDatas: List<GroupListDataWrapper.InstanceData>,
+        private val instanceDatas: List<GroupListDataWrapper.InstanceData>,
         override val ordinal: Double,
     ) : GroupType.Project, SingleParent, TimeChild {
 
@@ -224,6 +237,13 @@ class GroupTypeFactory(
                 is TimeChild -> ordinal.compareTo(other.ordinal)
             }
         }
+
+        override fun canDropIntoParent(droppedTimeChild: TimeChild) = when (droppedTimeChild) {
+            is ProjectBridge -> false
+            is SingleBridge -> droppedTimeChild.instanceData.let {
+                timeStamp == it.instanceTimeStamp && projectDetails.projectKey == it.projectKey && it.isRootInstance
+            }
+        }
     }
 
     class SingleBridge(val instanceData: GroupListDataWrapper.InstanceData) : GroupType.Single, TimeChild {
@@ -245,6 +265,11 @@ class GroupTypeFactory(
                 is ProjectBridge -> ordinal.compareTo(other.ordinal)
                 is SingleBridge -> instanceData.compareTo(other.instanceData)
             }
+        }
+
+        override fun canDropIntoParent(droppedTimeChild: TimeChild) = when (droppedTimeChild) {
+            is ProjectBridge -> false
+            is SingleBridge -> instanceData.instanceKey == droppedTimeChild.instanceData.parentInstanceKey
         }
     }
 

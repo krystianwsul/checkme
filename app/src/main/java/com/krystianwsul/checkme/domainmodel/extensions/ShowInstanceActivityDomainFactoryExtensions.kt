@@ -142,7 +142,6 @@ private fun DomainFactory.getGroupListData(
                 childTask.notDeleted,
                 childTask.isVisible(now),
                 childInstance.canMigrateDescription(now),
-                childInstance.isRootInstance(),
                 childInstance.getCreateTaskTimePair(projectsFactory.privateProject, myUserFactory.user),
                 childTask.note,
                 newMixedInstanceDataCollection(notDoneChildInstanceDescriptors),
@@ -153,6 +152,7 @@ private fun DomainFactory.getGroupListData(
                 childInstance.isAssignedToMe(now, myUserFactory.user),
                 childInstance.getProjectInfo(now),
                 childInstance.getProject().projectKey as? ProjectKey.Shared,
+                childInstance.parentInstance?.instanceKey,
             )
 
             GroupTypeFactory.InstanceDescriptor(instanceData, childInstance.instanceDateTime.toDateTimePair())

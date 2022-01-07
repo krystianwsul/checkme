@@ -160,7 +160,6 @@ fun DomainFactory.getGroupListData(
             task.notDeleted,
             instance.canAddSubtask(now),
             instance.canMigrateDescription(now),
-            instance.isRootInstance(),
             instance.getCreateTaskTimePair(projectsFactory.privateProject, myUserFactory.user),
             task.note,
             newMixedInstanceDataCollection(notDoneChildInstanceDescriptors),
@@ -171,6 +170,7 @@ fun DomainFactory.getGroupListData(
             instance.isAssignedToMe(now, myUserFactory.user),
             instance.getProjectInfo(now),
             instance.getProject().projectKey as? ProjectKey.Shared,
+            instance.parentInstance?.instanceKey,
         )
 
         GroupTypeFactory.InstanceDescriptor(instanceData, instance.instanceDateTime.toDateTimePair())

@@ -277,6 +277,8 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
 
                 if (treeNode.parent == otherNotDoneNode.treeNode.parent) return true
 
+                // todo draggable check if instance can leave its parent
+
                 val otherInstance = otherNotDoneNode.contentDelegate as? Instance ?: return false
 
                 if (!instanceData.isRootInstance) return false
@@ -437,6 +439,8 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
                 val otherNotDoneNode = other as? NotDoneNode ?: return false
 
                 if (treeNode.parent == otherNotDoneNode.treeNode.parent) return true
+
+                // todo draggable check if node can leave its parent
 
                 val otherInstance = otherNotDoneNode.contentDelegate as? Instance ?: return false
 

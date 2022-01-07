@@ -8,7 +8,7 @@ import com.krystianwsul.checkme.domainmodel.update.CompletableDomainUpdate
 import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
 import com.krystianwsul.checkme.viewmodels.FriendListViewModel
 import com.krystianwsul.common.firebase.DomainThreadChecker
-import com.krystianwsul.common.firebase.json.UserWrapper
+import com.krystianwsul.common.firebase.json.users.UserWrapper
 import com.krystianwsul.common.utils.UserKey
 import io.reactivex.rxjava3.core.Completable
 
@@ -49,8 +49,8 @@ fun DomainUpdater.removeFriends(
 
 @CheckResult
 fun DomainUpdater.addFriends(
-        notificationType: DomainListenerManager.NotificationType,
-        userMap: Map<UserKey, UserWrapper>,
+    notificationType: DomainListenerManager.NotificationType,
+    userMap: Map<UserKey, UserWrapper>,
 ): Completable = CompletableDomainUpdate.create("addFriends") {
     userMap.forEach {
         myUserFactory.user.addFriend(it.key)

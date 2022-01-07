@@ -2,9 +2,7 @@ package com.krystianwsul.checkme.domainmodel.extensions
 
 import androidx.annotation.CheckResult
 import com.krystianwsul.checkme.MyCrashlytics
-import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.domainmodel.DomainListenerManager
-import com.krystianwsul.checkme.domainmodel.getProjectInfo
+import com.krystianwsul.checkme.domainmodel.*
 import com.krystianwsul.checkme.domainmodel.update.CompletableDomainUpdate
 import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
 import com.krystianwsul.checkme.domainmodel.update.SingleDomainUpdate
@@ -127,14 +125,14 @@ private fun DomainFactory.getGroupListData(
         GroupListDataWrapper.CustomTimeData(it.name, it.hourMinutes.toSortedMap())
     }
 
-    val instanceDatas = instance.getChildInstances()
+    val instanceDescriptors = instance.getChildInstances()
         .filter { it.isVisible(now, Instance.VisibilityOptions(assumeChildOfVisibleParent = true)) }
         .map { childInstance ->
             val childTask = childInstance.task
 
-            val children = getChildInstanceDatas(childInstance, now)
+            val (notDoneChildInstanceDescriptors, doneChildInstanceDescriptors) = getChildInstanceDatas(childInstance, now)
 
-            GroupListDataWrapper.InstanceData(
+            val instanceData = GroupListDataWrapper.InstanceData(
                 childInstance.done,
                 childInstance.instanceKey,
                 null,
@@ -145,9 +143,10 @@ private fun DomainFactory.getGroupListData(
                 childTask.isVisible(now),
                 childInstance.canMigrateDescription(now),
                 childInstance.isRootInstance(),
-                childInstance.getCreateTaskTimePair(projectsFactory.privateProject),
+                childInstance.getCreateTaskTimePair(projectsFactory.privateProject, myUserFactory.user),
                 childTask.note,
-                children,
+                newMixedInstanceDataCollection(notDoneChildInstanceDescriptors),
+                doneChildInstanceDescriptors.toInstanceDatas(),
                 childTask.ordinal,
                 childInstance.getNotificationShown(shownFactory),
                 childTask.getImage(deviceDbInfo),
@@ -155,14 +154,19 @@ private fun DomainFactory.getGroupListData(
                 childInstance.getProjectInfo(now),
                 childInstance.getProject().projectKey as? ProjectKey.Shared,
             )
+
+            GroupTypeFactory.InstanceDescriptor(instanceData, childInstance.instanceDateTime.toDateTimePair())
         }
+
+    val (mixedInstanceDescriptors, doneInstanceDescriptors) = instanceDescriptors.splitDone()
 
     return GroupListDataWrapper(
         customTimeDatas,
         instance.canAddSubtask(now),
         listOf(),
         task.note,
-        instanceDatas,
+        newMixedInstanceDataCollection(mixedInstanceDescriptors, GroupType.GroupingMode.None),
+        doneInstanceDescriptors.toInstanceDatas(),
         task.getImage(deviceDbInfo),
         instance.getProjectInfo(now),
     )

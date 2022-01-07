@@ -110,6 +110,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         }
 
         override fun onAddSelected() {
+            @Suppress("DEPRECATION")
             startActivityForResult(
                 ShowCustomTimeActivity.getCreateIntent(activity!!),
                 ShowCustomTimeActivity.CREATE_CUSTOM_TIME_REQUEST_CODE
@@ -153,7 +154,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
     private var position: Int? = null
 
-    val result = PublishRelay.create<ScheduleDialogResult>()!!
+    val result = PublishRelay.create<ScheduleDialogResult>()
 
     private val dateFieldDatas by lazy {
         listOf(
@@ -232,6 +233,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
     @SuppressLint("SetTextI18n", "MissingSuperCall")
     override fun onActivityCreated(savedInstanceState: Bundle?) {
+        @Suppress("DEPRECATION")
         super.onActivityCreated(savedInstanceState)
 
         scheduleDialogData = (savedInstanceState ?: requireArguments()).run {
@@ -574,7 +576,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
         abstract val visibilities: Visibilities
 
-        abstract fun isValid(): ErrorData
+        abstract fun isValid(): WarningErrorData
 
         abstract fun getCustomTimeDatas(list: List<EditViewModel.CustomTimeData>): List<TimeDialogFragment.CustomTimeData>
 
@@ -599,11 +601,11 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
         override val visibilities = Visibilities(date = true)
 
-        override fun isValid(): ErrorData {
+        override fun isValid(): WarningErrorData {
             val today = Date.today()
 
             if (scheduleDialogData.date < today) {
-                return ErrorData(getString(R.string.error_date))
+                return WarningErrorData(getString(R.string.error_date))
             } else {
                 val customTimeKey = scheduleDialogData.timePairPersist.customTimeKey
 
@@ -616,9 +618,9 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
                 }
 
                 return if (scheduleDialogData.date == today && hourMinute < HourMinute.now)
-                    ErrorData(time = getString(R.string.error_time))
+                    WarningErrorData(time = getString(R.string.error_time))
                 else
-                    ErrorData()
+                    WarningErrorData()
             }
         }
 
@@ -650,7 +652,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
         protected val repeatingVisibilities = Visibilities(from = true, until = true)
 
-        override fun isValid(): ErrorData {
+        override fun isValid(): WarningErrorData {
             var fromError: String? = null
             var untilError: String? = null
 
@@ -668,7 +670,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
                 }
             }
 
-            return ErrorData(from = fromError, until = untilError)
+            return WarningErrorData(from = fromError, until = untilError)
         }
 
         override fun getCustomTimeDatas(list: List<EditViewModel.CustomTimeData>): List<TimeDialogFragment.CustomTimeData> {
@@ -728,7 +730,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
         override val visibilities = repeatingVisibilities.copy(day = true)
 
-        override fun isValid(): ErrorData {
+        override fun isValid(): WarningErrorData {
             val errorData = super.isValid()
 
             val from = errorData.from ?: getIntervalFromError()
@@ -828,7 +830,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         override fun getDatePicker() = newYearMaterialDatePicker(scheduleDialogData.date)
     }
 
-    private data class ErrorData(
+    private data class WarningErrorData(
         val date: String? = null,
         val time: String? = null,
         val from: String? = null,
@@ -836,7 +838,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         val noDaysChosen: Boolean = false,
     ) {
 
-        fun isValid() = listOf(date, time, from, until).all { it.isNullOrEmpty() } && !noDaysChosen
+        fun isValid() = listOf(from, until).all { it.isNullOrEmpty() } && !noDaysChosen
     }
 
     private data class Visibilities(

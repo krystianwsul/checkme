@@ -50,7 +50,7 @@ class ShowNotificationGroupActivity : AbstractActivity(), GroupListListener {
 
     private var selectAllVisible = false
 
-    private lateinit var showNotificationGroupViewModel: ShowNotificationGroupViewModel
+    private val showNotificationGroupViewModel by lazy { getViewModel<ShowNotificationGroupViewModel>() }
 
     override val snackbarParent get() = binding.showNotificationGroupCoordinator
 
@@ -117,7 +117,7 @@ class ShowNotificationGroupActivity : AbstractActivity(), GroupListListener {
 
         val projectKey = intent.getParcelableExtra<ProjectKey.Shared>(KEY_PROJECT_KEY)
 
-        showNotificationGroupViewModel = getViewModel<ShowNotificationGroupViewModel>().apply {
+        showNotificationGroupViewModel.apply {
             start(projectKey)
 
             createDisposable += data.subscribe {
@@ -148,7 +148,7 @@ class ShowNotificationGroupActivity : AbstractActivity(), GroupListListener {
             .menu
             .findItem(R.id.actionShowTaskSearch)
             .isVisible = !data?.groupListDataWrapper
-            ?.instanceDatas
+            ?.allInstanceDatas
             .isNullOrEmpty()
     }
 

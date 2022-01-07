@@ -1,11 +1,11 @@
 package com.krystianwsul.common.firebase.models.project
 
 import com.krystianwsul.common.domain.TaskHierarchyContainer
-import com.krystianwsul.common.firebase.models.ProjectUser
 import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
 import com.krystianwsul.common.firebase.models.customtime.PrivateCustomTime
 import com.krystianwsul.common.firebase.models.task.ProjectTask
 import com.krystianwsul.common.firebase.models.taskhierarchy.ProjectTaskHierarchy
+import com.krystianwsul.common.firebase.models.users.ProjectUser
 import com.krystianwsul.common.firebase.records.AssignedToHelper
 import com.krystianwsul.common.firebase.records.project.PrivateProjectRecord
 import com.krystianwsul.common.time.JsonTime
@@ -67,14 +67,17 @@ class PrivateProject(
         remoteCustomTimes.remove(remoteCustomTime.id)
     }
 
-    override fun getProjectCustomTime(projectCustomTimeId: CustomTimeId.Project): PrivateCustomTime {
-        check(remoteCustomTimes.containsKey(projectCustomTimeId as CustomTimeId.Project.Private))
+    override fun getProjectCustomTime(projectCustomTimeId: CustomTimeId.Project) =
+        remoteCustomTimes.getValue(projectCustomTimeId as CustomTimeId.Project.Private)
 
-        return remoteCustomTimes.getValue(projectCustomTimeId)
-    }
+    private fun tryGetProjectCustomTime(projectCustomTimeId: CustomTimeId.Project) =
+        remoteCustomTimes[projectCustomTimeId as CustomTimeId.Project.Private]
 
-    override fun getProjectCustomTime(projectCustomTimeKey: CustomTimeKey.Project<ProjectType.Private>): PrivateCustomTime =
-        getProjectCustomTime(projectCustomTimeKey.customTimeId)
+    override fun getProjectCustomTime(projectCustomTimeKey: CustomTimeKey.Project<ProjectType.Private>) =
+        tryGetProjectCustomTime(projectCustomTimeKey)!!
+
+    fun tryGetProjectCustomTime(projectCustomTimeKey: CustomTimeKey.Project<ProjectType.Private>) =
+        tryGetProjectCustomTime(projectCustomTimeKey.customTimeId)
 
     override fun getAssignedTo(userKeys: Set<UserKey>) = mapOf<UserKey, ProjectUser>()
 }

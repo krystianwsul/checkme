@@ -21,6 +21,7 @@ import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.project.SharedProject
 import com.krystianwsul.common.firebase.models.schedule.SingleSchedule
 import com.krystianwsul.common.firebase.models.task.*
+import com.krystianwsul.common.firebase.models.users.ProjectUser
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.*
@@ -137,8 +138,6 @@ private fun DomainFactory.getCreateTaskDataSlow(
                 .getAssignedTo(assignedTo)
                 .map { it.key }
                 .toSet(),
-            task.project.projectKey,
-            task is RootTask,
         )
     }
 
@@ -176,7 +175,6 @@ private fun DomainFactory.getCreateTaskDataSlow(
         name,
         EditViewModel.ParentKey.Project(projectKey),
         users.toUserDatas(),
-        projectKey,
     )
 
     val currentParent: ParentScheduleManager.Parent? = when (currentParentKey) {
@@ -186,7 +184,6 @@ private fun DomainFactory.getCreateTaskDataSlow(
             ParentScheduleManager.Parent.Task(
                 task.name,
                 EditViewModel.ParentKey.Task(task.taskKey),
-                task.project.projectKey,
                 task.hasMultipleInstances(startParameters.parentInstanceKey, now),
                 task.getTopLevelTask(now).let {
                     val parent = it.project
@@ -208,7 +205,6 @@ private fun DomainFactory.getCreateTaskDataSlow(
                 project.name,
                 EditViewModel.ParentKey.Project(project.projectKey),
                 project.users.toUserDatas(),
-                project.projectKey,
             )
         }
         null -> null
@@ -930,12 +926,14 @@ private fun DomainFactory.convertAndUpdateProject(
     now: ExactTimeStamp.Local,
     projectKey: ProjectKey<*>,
 ): RootTask {
+    val isTopLevelTask = task.isTopLevelTask(now)
+
     return when (task) {
         is RootTask -> task.updateProject(projectKey)
         is ProjectTask -> converter.convertToRoot(now, task, projectKey)
     }.also {
         // this function is may be a no-op for child tasks
-        if (task.isTopLevelTask(now)) check(it.project.projectKey == projectKey)
+        if (isTopLevelTask) check(it.project.projectKey == projectKey)
     }
 }
 

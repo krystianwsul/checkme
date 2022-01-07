@@ -49,7 +49,6 @@ class ProjectLoaderTest {
     private lateinit var rxErrorChecker: RxErrorChecker
 
     private lateinit var projectSnapshotRelay: BehaviorRelay<Snapshot<PrivateProjectJson>>
-    private lateinit var projectProvider: TestProjectProvider
     private lateinit var projectManager: AndroidPrivateProjectManager
     private lateinit var projectLoader: ProjectLoader<ProjectType.Private, PrivateProjectJson>
 
@@ -69,8 +68,7 @@ class ProjectLoaderTest {
         rxErrorChecker = RxErrorChecker()
 
         projectSnapshotRelay = BehaviorRelay.create()
-        projectProvider = TestProjectProvider()
-        projectManager = AndroidPrivateProjectManager(UserInfo("email", "name", "uid"), projectProvider.database)
+        projectManager = AndroidPrivateProjectManager(UserInfo("email", "name", "uid"))
 
         projectLoader = ProjectLoader.Impl(
             projectSnapshotRelay,

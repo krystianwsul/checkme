@@ -56,8 +56,8 @@ interface SharedProjectsLoader {
                 .addTo(domainDisposable)
         }
 
-        private fun <T> Observable<T>.replayImmediate() = replay().apply { domainDisposable += connect() }!!
-        private fun <T> Single<T>.cacheImmediate() = cache().apply { domainDisposable += subscribe() }!!
+        private fun <T : Any> Observable<T>.replayImmediate() = replay().apply { domainDisposable += connect() }
+        private fun <T : Any> Single<T>.cacheImmediate() = cache().apply { domainDisposable += subscribe() }
 
         private data class ProjectData(
             val userChangeType: ChangeType,

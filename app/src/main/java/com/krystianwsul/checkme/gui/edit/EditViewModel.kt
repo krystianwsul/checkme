@@ -425,8 +425,6 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
         val note: String?,
         val imageState: ImageState?,
         val assignedTo: Set<UserKey>,
-        val projectKey: ProjectKey<*>,
-        val isRootTask: Boolean,
     )
 
     sealed class ParentEntryData : ParentPickerFragment.EntryData {
@@ -462,12 +460,7 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
 
             override fun matchesTaskKey(taskKey: TaskKey) = false
 
-            override fun toParent(): ParentScheduleManager.Parent = ParentScheduleManager.Parent.Project(
-                name,
-                entryKey,
-                projectUsers,
-                projectKey,
-            )
+            override fun toParent() = ParentScheduleManager.Parent.Project(name, entryKey, projectUsers)
         }
 
         data class Task(
@@ -495,7 +488,6 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
             override fun toParent(): ParentScheduleManager.Parent = ParentScheduleManager.Parent.Task(
                 name,
                 entryKey,
-                projectKey,
                 hasMultipleInstances,
                 null,
                 topLevelTaskIsSingleSchedule,

@@ -1,8 +1,9 @@
-package com.krystianwsul.common.firebase.records
+package com.krystianwsul.common.firebase.records.users
 
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.firebase.UserData
-import com.krystianwsul.common.firebase.json.UserJson
+import com.krystianwsul.common.firebase.json.users.UserJson
+import com.krystianwsul.common.firebase.records.RemoteRecord
 import com.krystianwsul.common.firebase.records.project.SharedProjectRecord
 
 

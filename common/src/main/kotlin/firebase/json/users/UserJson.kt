@@ -1,4 +1,4 @@
-package com.krystianwsul.common.firebase.json
+package com.krystianwsul.common.firebase.json.users
 
 import com.krystianwsul.common.utils.Parcelable
 import com.krystianwsul.common.utils.Parcelize

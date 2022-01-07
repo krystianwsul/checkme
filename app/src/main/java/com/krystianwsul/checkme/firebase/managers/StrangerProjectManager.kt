@@ -2,7 +2,7 @@ package com.krystianwsul.checkme.firebase.managers
 
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.common.firebase.DatabaseWrapper
-import com.krystianwsul.common.firebase.records.RootUserRecord
+import com.krystianwsul.common.firebase.records.users.RootUserRecord
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.UserKey
 

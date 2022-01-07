@@ -7,9 +7,7 @@ import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager.NotificationType
-import com.krystianwsul.checkme.domainmodel.extensions.fixOffsetsAndCustomTimes
-import com.krystianwsul.checkme.domainmodel.extensions.migratePrivateCustomTime
-import com.krystianwsul.checkme.domainmodel.extensions.updateNotifications
+import com.krystianwsul.checkme.domainmodel.extensions.*
 import com.krystianwsul.checkme.domainmodel.notifications.ImageManager
 import com.krystianwsul.checkme.domainmodel.notifications.NotificationWrapper
 import com.krystianwsul.checkme.domainmodel.notifications.Notifier
@@ -97,7 +95,7 @@ class DomainFactory(
 
     val converter = Converter()
 
-    private val isWaitingForTasks = BehaviorRelay.create<Boolean>()
+    val isWaitingForTasks = BehaviorRelay.create<Boolean>()
 
     init {
         Preferences.tickLog.logLineHour("DomainFactory.init")
@@ -107,11 +105,9 @@ class DomainFactory(
         remoteReadTimes = ReadTimes(startTime, readTime, now)
 
         projectsFactory.privateProject.let {
-            if (it.run { !defaultTimesCreated && customTimes.isEmpty() }) {
-                DefaultCustomTimeCreator.createDefaultCustomTimes(myUserFactory.user)
+            if (!it.defaultTimesCreated) DefaultCustomTimeCreator.createDefaultCustomTimes(myUserFactory.user)
 
-                it.defaultTimesCreated = true
-            }
+            it.defaultTimesCreated = true
         }
 
         tryNotifyListeners(
@@ -292,6 +288,10 @@ class DomainFactory(
             }
         )
 
+        updateIsWaitingForTasks()
+    }
+
+    fun updateIsWaitingForTasks() {
         isWaitingForTasks.accept(waitingProjectTasks().any() || waitingProjects().any() || waitingRootTasks().any())
     }
 
@@ -421,12 +421,14 @@ class DomainFactory(
     fun instanceToGroupListData(
         instance: Instance,
         now: ExactTimeStamp.Local,
-        children: MutableMap<InstanceKey, GroupListDataWrapper.InstanceData>,
+        childInstanceDescriptors: Collection<GroupTypeFactory.InstanceDescriptor>,
         includeProjectInfo: Boolean = true,
-    ): GroupListDataWrapper.InstanceData {
+    ): GroupTypeFactory.InstanceDescriptor {
         val isRootInstance = instance.isRootInstance()
 
-        return GroupListDataWrapper.InstanceData(
+        val (notDoneInstanceDescriptors, doneInstanceDescriptors) = childInstanceDescriptors.splitDone()
+
+        val instanceData = GroupListDataWrapper.InstanceData(
             instance.done,
             instance.instanceKey,
             if (isRootInstance) instance.instanceDateTime.getDisplayText() else null,
@@ -437,9 +439,10 @@ class DomainFactory(
             instance.canAddSubtask(now),
             instance.canMigrateDescription(now),
             instance.isRootInstance(),
-            instance.getCreateTaskTimePair(projectsFactory.privateProject),
+            instance.getCreateTaskTimePair(projectsFactory.privateProject, myUserFactory.user),
             instance.task.note,
-            children,
+            newMixedInstanceDataCollection(notDoneInstanceDescriptors),
+            doneInstanceDescriptors.toInstanceDatas(),
             instance.task.ordinal,
             instance.getNotificationShown(shownFactory),
             instance.task.getImage(deviceDbInfo),
@@ -447,15 +450,17 @@ class DomainFactory(
             instance.getProjectInfo(now, includeProjectInfo),
             instance.getProject().projectKey as? ProjectKey.Shared,
         )
+
+        return GroupTypeFactory.InstanceDescriptor(instanceData, instance.instanceDateTime.toDateTimePair())
     }
 
     fun <T> getChildInstanceDatas(
         instance: Instance,
         now: ExactTimeStamp.Local,
-        mapper: (Instance, MutableMap<InstanceKey, T>) -> T,
+        mapper: (Instance, Collection<T>) -> T,
         searchCriteria: SearchCriteria = SearchCriteria.empty,
         filterVisible: Boolean = true,
-    ): MutableMap<InstanceKey, T> {
+    ): Collection<T> {
         return instance.getChildInstances()
             .asSequence()
             .filter {
@@ -476,12 +481,11 @@ class DomainFactory(
                 val children = getChildInstanceDatas(childInstance, now, mapper, childrenQuery, filterVisible)
 
                 if (childTaskMatches || children.isNotEmpty())
-                    childInstance.instanceKey to mapper(childInstance, children)
+                    mapper(childInstance, children)
                 else
                     null
             }
-            .toMap()
-            .toMutableMap()
+            .toList()
     }
 
     fun getChildInstanceDatas(
@@ -490,14 +494,13 @@ class DomainFactory(
         searchCriteria: SearchCriteria = SearchCriteria.empty,
         filterVisible: Boolean = true,
         includeProjectInfo: Boolean = true,
-    ): MutableMap<InstanceKey, GroupListDataWrapper.InstanceData> =
-        getChildInstanceDatas(
-            instance,
-            now,
-            { childInstance, children -> instanceToGroupListData(childInstance, now, children, includeProjectInfo) },
-            searchCriteria,
-            filterVisible,
-        )
+    ) = getChildInstanceDatas<GroupTypeFactory.InstanceDescriptor>(
+        instance,
+        now,
+        { childInstance, children -> instanceToGroupListData(childInstance, now, children, includeProjectInfo) },
+        searchCriteria,
+        filterVisible,
+    ).splitDone()
 
     private val ownerKey get() = myUserFactory.user.userKey
 
@@ -630,6 +633,16 @@ class DomainFactory(
 
         return migratePrivateCustomTime(privateCustomTime, now)
     }
+
+    fun newMixedInstanceDataCollection(
+        instanceDescriptors: Collection<GroupTypeFactory.InstanceDescriptor>,
+        groupingMode: GroupType.GroupingMode = GroupType.GroupingMode.None,
+    ) = MixedInstanceDataCollection(
+        instanceDescriptors,
+        myUserFactory.user,
+        { projectsFactory.sharedProjects.getValue(it) },
+        groupingMode,
+    )
 
     // this shouldn't use DateTime, since that leaks Time.Custom which is a model object
     class HourUndoData(val instanceDateTimes: Map<InstanceKey, DateTime>, val newTimeStamp: TimeStamp)

@@ -19,12 +19,12 @@ import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.json.JsonWrapper
-import com.krystianwsul.common.firebase.json.UserJson
 import com.krystianwsul.common.firebase.json.noscheduleorparent.RootNoScheduleOrParentJson
 import com.krystianwsul.common.firebase.json.projects.PrivateProjectJson
 import com.krystianwsul.common.firebase.json.projects.SharedProjectJson
 import com.krystianwsul.common.firebase.json.taskhierarchies.NestedTaskHierarchyJson
 import com.krystianwsul.common.firebase.json.tasks.RootTaskJson
+import com.krystianwsul.common.firebase.json.users.UserJson
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
 import com.krystianwsul.common.firebase.models.task.ProjectRootTaskIdTracker
@@ -168,10 +168,7 @@ class ChangeTypeSourceTest {
             existingInstanceChangeManager,
         ) { projectsFactory }
 
-        val privateProjectManager = AndroidPrivateProjectManager(
-            DomainFactoryRule.deviceDbInfo.userInfo,
-            databaseWrapper,
-        )
+        val privateProjectManager = AndroidPrivateProjectManager(DomainFactoryRule.deviceDbInfo.userInfo)
 
         val privateProjectLoader = ProjectLoader.Impl(
             privateProjectSnapshotObservable,

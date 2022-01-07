@@ -226,7 +226,7 @@ fun <T : Comparable<T>> DomainFactory.searchInstances(
     searchCriteria: SearchCriteria,
     page: Int,
     projectKey: ProjectKey<*>?,
-    mapper: (Instance, MutableMap<InstanceKey, T>) -> T,
+    mapper: (Instance, Collection<T>) -> T,
 ): Pair<List<T>, Boolean> {
     DomainThreadChecker.instance.requireDomainThread()
 
@@ -419,3 +419,6 @@ fun <T> DomainFactory.trackRootTaskIds(action: () -> T): T =
         rootTasksFactory,
         action,
     )
+
+fun Collection<GroupTypeFactory.InstanceDescriptor>.splitDone() = partition { it.instanceData.done == null }
+fun List<GroupTypeFactory.InstanceDescriptor>.toInstanceDatas() = map { it.instanceData }

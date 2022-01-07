@@ -7,7 +7,9 @@ class CustomTimeRelevanceCollection(
         val projectCustomTimeRelevances: Map<CustomTimeKey.Project<*>, CustomTimeRelevance>,
 ) {
 
+    val relevances = userCustomTimeRelevances + projectCustomTimeRelevances
+
     fun getRelevance(customTimeKey: CustomTimeKey) =
-            userCustomTimeRelevances[customTimeKey]
-                    ?: projectCustomTimeRelevances.getValue(customTimeKey as CustomTimeKey.Project<*>)
+        userCustomTimeRelevances[customTimeKey]
+            ?: projectCustomTimeRelevances.getValue(customTimeKey as CustomTimeKey.Project<*>)
 }

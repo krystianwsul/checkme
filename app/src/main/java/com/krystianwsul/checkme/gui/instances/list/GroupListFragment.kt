@@ -21,7 +21,8 @@ import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.TooltipManager
 import com.krystianwsul.checkme.TooltipManager.subscribeShowBalloon
 import com.krystianwsul.checkme.databinding.FragmentGroupListBinding
-import com.krystianwsul.checkme.domainmodel.GroupType
+import com.krystianwsul.checkme.domainmodel.GroupTypeFactory
+import com.krystianwsul.checkme.domainmodel.MixedInstanceDataCollection
 import com.krystianwsul.checkme.domainmodel.extensions.*
 import com.krystianwsul.checkme.gui.base.AbstractActivity
 import com.krystianwsul.checkme.gui.edit.EditActivity
@@ -40,7 +41,6 @@ import com.krystianwsul.checkme.viewmodels.DataId
 import com.krystianwsul.common.firebase.models.ImageState
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.TimePair
-import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.NullableWrapper
 import com.krystianwsul.common.utils.ProjectKey
@@ -318,7 +318,7 @@ class GroupListFragment @JvmOverloads constructor(
     val shareData: String
         get() {
             val instanceDatas = parameters.groupListDataWrapper
-                .instanceDatas
+                .allInstanceDatas
                 .sorted()
 
             val lines = mutableListOf<String>()
@@ -383,7 +383,7 @@ class GroupListFragment @JvmOverloads constructor(
     ): Boolean = if (shareTree.containsKey(instanceData.instanceKey))
         true
     else
-        shareTree.values.any { inTree(it.children, instanceData) }
+        shareTree.values.any { inTree(it.allChildren.associateBy { it.instanceKey }, instanceData) }
 
     private fun inTree(
         shareTree: List<GroupListDataWrapper.TaskData>,
@@ -469,14 +469,13 @@ class GroupListFragment @JvmOverloads constructor(
             modelAdapter.initialize(
                 data.dataId,
                 data.groupListDataWrapper.customTimeDatas,
-                data.groupingMode,
-                data.groupListDataWrapper.instanceDatas,
+                data.groupListDataWrapper.mixedInstanceDataCollection,
+                data.groupListDataWrapper.doneInstanceDatas,
                 state,
                 data.groupListDataWrapper.taskDatas,
                 data.groupListDataWrapper.note,
                 data.groupListDataWrapper.imageData,
                 data.showProgress,
-                data.useDoneNode,
                 data.groupListDataWrapper.projectInfo,
             )
         }
@@ -545,7 +544,7 @@ class GroupListFragment @JvmOverloads constructor(
                         searchDataManager.treeViewAdapter
                             .displayedNodes
                             .none { it.isExpanded || it.isSelected } &&
-                        it.groupListDataWrapper.instanceDatas.size > 1
+                        it.groupListDataWrapper.allInstanceDatas.size > 1
             }
             .mapNotNull {
                 val linearLayoutManager = recyclerView.layoutManager as LinearLayoutManager
@@ -675,11 +674,11 @@ class GroupListFragment @JvmOverloads constructor(
 
                     val canAddSubtask = parameters.fabActionMode.showSubtask && singleSelectedData.canAddSubtask
 
-                    val rootAndTimeValid = instanceData?.run { isRootInstance && instanceTimeStamp > TimeStamp.now } == true
+                    val isTopLevel = instanceData?.isRootInstance == true
 
-                    val canAddToTime = parameters.fabActionMode.showTime && rootAndTimeValid
+                    val canAddToTime = parameters.fabActionMode.showTime && isTopLevel
 
-                    val canAddToProject = rootAndTimeValid && instanceData?.projectKey != null
+                    val canAddToProject = isTopLevel && instanceData?.projectKey != null
 
                     val multipleValid = listOf(canAddToTime, canAddSubtask, canAddToProject).filter { it }.size > 1
 
@@ -724,17 +723,7 @@ class GroupListFragment @JvmOverloads constructor(
 
                             if (rootInstances.isEmpty()) return false
 
-                            if (rootInstances.map { it.instanceTimeStamp }
-                                    .distinct()
-                                    .singleOrNull()
-                                    ?.let { it > TimeStamp.now } == true
-                            ) {
-                                return true
-                            }
-
-                            if (instanceDatas.map { it.projectKey }.distinct().singleOrNull() != null) return true
-
-                            return false
+                            return true
                         }
 
                         if (canAddToInstances()) {
@@ -758,9 +747,9 @@ class GroupListFragment @JvmOverloads constructor(
                         )
                     )
                 }
-                is GroupListParameters.TimeStamp -> if (parameters.projectKey != null || parameters.timeStamp > TimeStamp.now) {
+                is GroupListParameters.TimeStamp -> {
                     val hint = parameters.groupListDataWrapper
-                        .instanceDatas
+                        .allInstanceDatas
                         .let {
                             if (it.isNotEmpty()) {
                                 it.getHint()
@@ -774,8 +763,6 @@ class GroupListFragment @JvmOverloads constructor(
                         }
 
                     getStartEditActivityFabState(hint)
-                } else {
-                    FabState.Hidden
                 }
                 is GroupListParameters.InstanceKey -> if (parameters.groupListDataWrapper.taskEditable!!)
                     getStartEditActivityFabState(EditParentHint.Instance(parameters.instanceKey))
@@ -816,12 +803,9 @@ class GroupListFragment @JvmOverloads constructor(
     private fun getAllInstanceDatas(instanceData: GroupListDataWrapper.InstanceData): List<GroupListDataWrapper.InstanceData> {
         return listOf(
             listOf(listOf(instanceData)),
-            instanceData.children.values.map { getAllInstanceDatas(it) }
+            instanceData.allChildren.map(::getAllInstanceDatas)
         ).flatten().flatten()
     }
-
-    private val GroupListDataWrapper.InstanceData.allTaskKeys
-        get() = getAllInstanceDatas(this).map { it.taskKey }
 
     override fun findItem(): Int? {
         if (!searchDataManager.treeViewAdapterInitialized) return null
@@ -934,14 +918,13 @@ class GroupListFragment @JvmOverloads constructor(
         fun initialize(
             dataId: DataId,
             customTimeDatas: List<GroupListDataWrapper.CustomTimeData>,
-            groupingMode: GroupType.GroupingMode,
-            instanceDatas: Collection<GroupListDataWrapper.InstanceData>,
+            mixedInstanceDataCollection: MixedInstanceDataCollection,
+            doneInstanceDatas: List<GroupListDataWrapper.InstanceData>,
             groupListState: GroupListState,
             taskDatas: List<GroupListDataWrapper.TaskData>,
             note: String?,
             imageState: ImageState?,
             showProgress: Boolean,
-            useDoneNode: Boolean,
             projectInfo: DetailsNode.ProjectInfo?,
         ) {
             this.dataId = dataId
@@ -952,17 +935,16 @@ class GroupListFragment @JvmOverloads constructor(
             nodeCollection = NodeCollection(
                 0,
                 this,
-                groupingMode,
                 treeNodeCollection,
                 note,
                 null,
                 projectInfo,
                 unscheduledNodeProjectKey,
-                useDoneNode,
             )
 
             treeNodeCollection.nodes = nodeCollection.initialize(
-                instanceDatas,
+                mixedInstanceDataCollection,
+                doneInstanceDatas,
                 groupListState.contentDelegateStates,
                 groupListState.doneExpansionState,
                 taskDatas,

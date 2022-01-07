@@ -1,10 +1,7 @@
 package com.krystianwsul.checkme.domainmodel.extensions
 
 import com.krystianwsul.checkme.MyCrashlytics
-import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.domainmodel.getDomainResultInterrupting
-import com.krystianwsul.checkme.domainmodel.getProjectInfo
-import com.krystianwsul.checkme.domainmodel.takeAndHasMore
+import com.krystianwsul.checkme.domainmodel.*
 import com.krystianwsul.checkme.gui.instances.ShowTaskInstancesActivity
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.utils.time.getDisplayText
@@ -36,7 +33,7 @@ fun DomainFactory.getShowTaskInstancesData(
 
             val parent: Endable
             val taskDatas: List<GroupListDataWrapper.TaskData>
-            val instanceDatas: List<GroupListDataWrapper.InstanceData>
+            val instanceDescriptors: List<GroupTypeFactory.InstanceDescriptor>
             val hasMore: Boolean
             when (parameters) {
                 is ShowTaskInstancesActivity.Parameters.Task -> {
@@ -54,10 +51,11 @@ fun DomainFactory.getShowTaskInstancesData(
 
                     hasMore = pair.second
 
-                    instanceDatas = pair.first.map {
-                        val children = getChildInstanceDatas(it, now, includeProjectInfo = true)
+                    instanceDescriptors = pair.first.map {
+                        val (notDoneChildInstanceDescriptors, doneChildInstanceDescriptors) =
+                            getChildInstanceDatas(it, now, includeProjectInfo = true)
 
-                        GroupListDataWrapper.InstanceData(
+                        val instanceData = GroupListDataWrapper.InstanceData(
                             it.done,
                             it.instanceKey,
                             it.instanceDateTime.getDisplayText(),
@@ -68,9 +66,10 @@ fun DomainFactory.getShowTaskInstancesData(
                             it.canAddSubtask(now),
                             it.canMigrateDescription(now),
                             it.isRootInstance(),
-                            it.getCreateTaskTimePair(projectsFactory.privateProject),
+                            it.getCreateTaskTimePair(projectsFactory.privateProject, myUserFactory.user),
                             it.task.note,
-                            children,
+                            newMixedInstanceDataCollection(notDoneChildInstanceDescriptors),
+                            doneChildInstanceDescriptors.toInstanceDatas(),
                             it.task.ordinal,
                             it.getNotificationShown(shownFactory),
                             it.task.getImage(deviceDbInfo),
@@ -78,6 +77,8 @@ fun DomainFactory.getShowTaskInstancesData(
                             it.getProjectInfo(now, parameters.projectKey == null),
                             it.getProject().projectKey as? ProjectKey.Shared,
                         )
+
+                        GroupTypeFactory.InstanceDescriptor(instanceData, it.instanceDateTime.toDateTimePair())
                     }
                 }
                 is ShowTaskInstancesActivity.Parameters.Project -> {
@@ -87,7 +88,7 @@ fun DomainFactory.getShowTaskInstancesData(
 
                     val triple = getCappedInstanceAndTaskDatas(now, searchCriteria, page, parameters.projectKey)
 
-                    instanceDatas = triple.first
+                    instanceDescriptors = triple.first
                     taskDatas = triple.second
                     hasMore = triple.third
                 }
@@ -98,7 +99,8 @@ fun DomainFactory.getShowTaskInstancesData(
                 parent.notDeleted,
                 taskDatas,
                 null,
-                instanceDatas,
+                newMixedInstanceDataCollection(instanceDescriptors, parameters.groupingMode),
+                listOf(),
                 null,
                 null,
             )

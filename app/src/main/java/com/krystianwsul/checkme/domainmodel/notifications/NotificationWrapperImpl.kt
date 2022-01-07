@@ -150,10 +150,11 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         timeStamp: TimeStamp,
         silent: Boolean,
         now: ExactTimeStamp.Local,
+        ordinal: Double,
     ) {
         val highPriority = getHighPriority() ?: return
 
-        val projectData = ProjectData(project, instances, now, silent, highPriority, timeStamp)
+        val projectData = ProjectData(project, instances, now, silent, highPriority, timeStamp, ordinal)
         notificationRelay.accept { notifyProjectHelper(projectData) }
     }
 
@@ -778,13 +779,12 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         val silent: Boolean,
         val highPriority: Boolean,
         val timeStamp: TimeStamp,
+        val ordinal: Double,
     ) {
 
         val projectKey = project.projectKey
 
         val notificationId = getProjectNotificationId(projectKey, timeStamp)
-
-        val ordinal = instances.map { it.task.ordinal }.minOrNull()!!
 
         val name = project.name
 

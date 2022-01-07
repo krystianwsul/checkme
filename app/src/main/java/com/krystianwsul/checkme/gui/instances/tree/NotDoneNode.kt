@@ -2,10 +2,11 @@ package com.krystianwsul.checkme.gui.instances.tree
 
 import android.os.Parcelable
 import com.krystianwsul.checkme.R
-import com.krystianwsul.checkme.domainmodel.GroupType
+import com.krystianwsul.checkme.domainmodel.GroupTypeFactory
 import com.krystianwsul.checkme.domainmodel.extensions.setInstanceDone
 import com.krystianwsul.checkme.domainmodel.extensions.setInstancesDone
 import com.krystianwsul.checkme.domainmodel.extensions.setOrdinal
+import com.krystianwsul.checkme.domainmodel.extensions.setOrdinalProject
 import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
 import com.krystianwsul.checkme.gui.instances.ShowGroupActivity
 import com.krystianwsul.checkme.gui.instances.ShowInstanceActivity
@@ -120,6 +121,8 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
 
         open val debugDescription: String? = null
 
+        abstract val overrideDraggable: Boolean
+
         abstract fun initialize(
             contentDelegateStates: Map<Id, State>,
             nodeContainer: NodeContainer<AbstractHolder>,
@@ -159,6 +162,8 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
 
             override val debugDescription = name
 
+            override val overrideDraggable = false
+
             override fun initialize(
                 contentDelegateStates: Map<ContentDelegate.Id, ContentDelegate.State>,
                 nodeContainer: NodeContainer<AbstractHolder>,
@@ -172,7 +177,6 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
                 nodeCollection = NodeCollection(
                     indentation + 1,
                     groupAdapter,
-                    GroupType.GroupingMode.None,
                     treeNode,
                     instanceData.note,
                     modelNode,
@@ -182,7 +186,8 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
 
                 treeNode.setChildTreeNodes(
                     nodeCollection.initialize(
-                        instanceData.children.values,
+                        instanceData.mixedInstanceDataCollection,
+                        instanceData.doneInstanceDatas,
                         contentDelegateStates,
                         doneExpansionState,
                         listOf(),
@@ -264,9 +269,7 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
                     groupListFragment.parameters.dataId.toFirst(),
                     instanceData.taskKey,
                     ordinal,
-                )
-                    .subscribe()
-                    .addTo(groupListFragment.attachedToWindowDisposable)
+                ).subscribe()
             }
 
             override fun canDropOn(other: Sortable): Boolean {
@@ -416,10 +419,19 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
                 it.startActivity(ShowGroupActivity.getIntent(it, showGroupActivityParameters))
             }
 
-            override val sortable = false
+            override val sortable = bridge.sortable
 
-            override fun getOrdinal(): Double = throw UnsupportedOperationException()
-            override fun setOrdinal(ordinal: Double) = throw UnsupportedOperationException()
+            override val overrideDraggable = true
+
+            override fun getOrdinal(): Double = bridge.ordinal
+
+            override fun setOrdinal(ordinal: Double) {
+                AndroidDomainUpdater.setOrdinalProject(
+                    groupListFragment.parameters.dataId.toFirst(),
+                    bridge.let { it as GroupTypeFactory.ProjectBridge }.instanceKeys,
+                    ordinal,
+                ).subscribe()
+            }
 
             override fun canDropOn(other: Sortable) = throw UnsupportedOperationException()
 

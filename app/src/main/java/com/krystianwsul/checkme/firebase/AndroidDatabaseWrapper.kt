@@ -12,14 +12,15 @@ import com.krystianwsul.checkme.domainmodel.observeOnDomain
 import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.checkme.utils.getMessage
+import com.krystianwsul.checkme.utils.toSingleTask
 import com.krystianwsul.checkme.utils.toV3
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.firebase.DatabaseCallback
 import com.krystianwsul.common.firebase.json.JsonWrapper
 import com.krystianwsul.common.firebase.json.Parsable
-import com.krystianwsul.common.firebase.json.UserWrapper
 import com.krystianwsul.common.firebase.json.projects.PrivateProjectJson
 import com.krystianwsul.common.firebase.json.tasks.RootTaskJson
+import com.krystianwsul.common.firebase.json.users.UserWrapper
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.common.utils.UserKey
@@ -35,10 +36,16 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
 
     private const val ENABLE_PAPER = true
 
+    private const val FORCE_PRODUCTION = false
+
     val root: String by lazy {
-        MyApplication.instance
-            .resources
-            .getString(R.string.firebase_root)
+        if (FORCE_PRODUCTION) {
+            "production"
+        } else {
+            MyApplication.instance
+                .resources
+                .getString(R.string.firebase_root)
+        }
     }
 
     private val rootReference by lazy {
@@ -136,9 +143,10 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
         sharedProjectQuery(projectKey).typedSnapshotChanges<JsonWrapper>()
 
     override fun update(values: Map<String, Any?>, callback: DatabaseCallback) {
-        rootReference.updateChildren(values).addOnCompleteListener {
-            callback(it.getMessage(), it.isSuccessful, it.exception)
-        }
+        rootReference.updateChildren(values)
+            .toSingleTask()
+            .observeOnDomain(Priority.IMMEDIATE)
+            .subscribe { task -> callback(task.getMessage(), task.isSuccessful, task.exception) }
     }
 
     private fun privateProjectQuery(key: ProjectKey.Private) =

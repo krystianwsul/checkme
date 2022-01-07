@@ -34,6 +34,7 @@ abstract class NotificationWrapper {
         timeStamp: TimeStamp,
         silent: Boolean,
         now: ExactTimeStamp.Local,
+        ordinal: Double,
     )
 
     abstract fun notifyGroup(

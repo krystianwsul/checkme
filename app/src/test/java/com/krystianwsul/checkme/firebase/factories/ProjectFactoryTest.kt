@@ -14,10 +14,10 @@ import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.ChangeWrapper
 import com.krystianwsul.common.firebase.DatabaseCallback
 import com.krystianwsul.common.firebase.json.JsonWrapper
-import com.krystianwsul.common.firebase.json.UserWrapper
 import com.krystianwsul.common.firebase.json.projects.PrivateProjectJson
 import com.krystianwsul.common.firebase.json.projects.SharedProjectJson
 import com.krystianwsul.common.firebase.json.tasks.RootTaskJson
+import com.krystianwsul.common.firebase.json.users.UserWrapper
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
 import com.krystianwsul.common.firebase.records.project.PrivateProjectRecord
@@ -120,16 +120,16 @@ class ProjectFactoryTest {
 
         private val userInfo = UserInfo("email", "name", "uid")
 
-        override val projectManager = AndroidPrivateProjectManager(userInfo, mockk(relaxed = true))
+        override val projectManager = AndroidPrivateProjectManager(userInfo)
 
-        private val projectRecord = PrivateProjectRecord(mockk(), projectKey, PrivateProjectJson())
+        private val projectRecord = PrivateProjectRecord(projectKey, PrivateProjectJson())
 
         private val event = ProjectLoader.InitialProjectEvent(projectManager, projectRecord, mockk())
 
-        override val initialProjectEvent = Single.just(ChangeWrapper(ChangeType.REMOTE, event))!!
+        override val initialProjectEvent = Single.just(ChangeWrapper(ChangeType.REMOTE, event))
 
         override val changeProjectEvents =
-                PublishRelay.create<ProjectLoader.ChangeProjectEvent<ProjectType.Private>>()!!
+            PublishRelay.create<ProjectLoader.ChangeProjectEvent<ProjectType.Private>>()
     }
 
     @get:Rule

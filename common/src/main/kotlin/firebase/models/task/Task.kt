@@ -19,6 +19,7 @@ import com.krystianwsul.common.firebase.models.taskhierarchy.NestedTaskHierarchy
 import com.krystianwsul.common.firebase.models.taskhierarchy.ParentTaskDelegate
 import com.krystianwsul.common.firebase.models.taskhierarchy.ProjectTaskHierarchy
 import com.krystianwsul.common.firebase.models.taskhierarchy.TaskHierarchy
+import com.krystianwsul.common.firebase.models.users.ProjectUser
 import com.krystianwsul.common.firebase.records.InstanceRecord
 import com.krystianwsul.common.firebase.records.task.TaskRecord
 import com.krystianwsul.common.interrupt.InterruptionChecker
@@ -358,29 +359,31 @@ sealed class Task(
         check(!gettingInstances)
         gettingInstances = true
 
-        InterruptionChecker.throwIfInterrupted()
+        return try {
+            InterruptionChecker.throwIfInterrupted()
 
-        return if (filterVisible && !notDeleted && endData!!.deleteInstances) {
-            getExistingInstances(startExactTimeStamp, endExactTimeStamp, onlyRoot).filter { it.done != null }
-        } else {
-            val instanceInfoSequences = mutableListOf<Sequence<InstanceInfo>>()
+            if (filterVisible && !notDeleted && endData!!.deleteInstances) {
+                getExistingInstances(startExactTimeStamp, endExactTimeStamp, onlyRoot).filter { it.done != null }
+            } else {
+                val instanceInfoSequences = mutableListOf<Sequence<InstanceInfo>>()
 
-            instanceInfoSequences +=
-                getExistingInstances(startExactTimeStamp, endExactTimeStamp, onlyRoot).map(::InstanceInfo)
+                instanceInfoSequences +=
+                    getExistingInstances(startExactTimeStamp, endExactTimeStamp, onlyRoot).map(::InstanceInfo)
 
-            if (!onlyRoot) {
-                instanceInfoSequences += getParentInstances(
-                    startExactTimeStamp,
-                    endExactTimeStamp,
-                    now,
-                    excludedParentTasks,
-                )
+                if (!onlyRoot) {
+                    instanceInfoSequences += getParentInstances(
+                        startExactTimeStamp,
+                        endExactTimeStamp,
+                        now,
+                        excludedParentTasks,
+                    )
+                }
+
+                instanceInfoSequences += getScheduleInstances(startExactTimeStamp, endExactTimeStamp).map(::InstanceInfo)
+
+                combineInstanceInfoSequences(instanceInfoSequences).toInstances()
             }
-
-            instanceInfoSequences += getScheduleInstances(startExactTimeStamp, endExactTimeStamp).map(::InstanceInfo)
-
-            combineInstanceInfoSequences(instanceInfoSequences).toInstances()
-        }.also {
+        } finally {
             check(gettingInstances)
             gettingInstances = false
         }

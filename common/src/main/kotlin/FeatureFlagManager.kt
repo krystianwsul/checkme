@@ -4,7 +4,7 @@ object FeatureFlagManager {
 
     private val map = mutableMapOf<Flag, Boolean>()
 
-    fun getFlag(flag: Flag) = map.getOrDefault(flag, false)
+    fun getFlag(flag: Flag) = map[flag] ?: false
 
     fun getFlags() = Flag.values().associateWith(::getFlag)
 

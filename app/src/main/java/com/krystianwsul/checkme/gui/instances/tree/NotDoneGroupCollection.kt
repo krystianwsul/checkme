@@ -1,6 +1,6 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
-import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
+import com.krystianwsul.checkme.domainmodel.MixedInstanceDataCollection
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
 import com.krystianwsul.checkme.gui.utils.flatten
 import com.krystianwsul.treeadapter.NodeContainer
@@ -16,12 +16,12 @@ class NotDoneGroupCollection(
     private val notDoneGroupNodes = mutableListOf<NotDoneGroupNode>()
 
     fun initialize(
-        notDoneInstanceDatas: List<GroupListDataWrapper.InstanceData>,
+        mixedInstanceDataCollection: MixedInstanceDataCollection,
         contentDelegateStates: Map<NotDoneNode.ContentDelegate.Id, NotDoneNode.ContentDelegate.State>,
     ): List<TreeNode<AbstractHolder>> {
-        val contentDelegates = GroupTypeFactory
-            .getGroupTypeTree(notDoneInstanceDatas, nodeCollection.groupingMode)
-            .map { it.toContentDelegate(nodeCollection.groupAdapter, indentation, nodeCollection) }
+        val contentDelegates = mixedInstanceDataCollection.groupTypeTree.map {
+            it.toContentDelegate(nodeCollection.groupAdapter, indentation, nodeCollection)
+        }
 
         val nodePairs = contentDelegates.map {
             val notDoneGroupNode = NotDoneGroupNode(indentation, nodeCollection, it)
@@ -37,4 +37,5 @@ class NotDoneGroupCollection(
     }
 
     val contentDelegateStates get() = notDoneGroupNodes.map { it.contentDelegate.states }.flatten()
+
 }

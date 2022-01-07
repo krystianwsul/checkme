@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.gui.instances.list
 
+import com.krystianwsul.checkme.domainmodel.MixedInstanceDataCollection
 import com.krystianwsul.checkme.gui.tree.DetailsNode
 import com.krystianwsul.checkme.utils.FilterParamsMatchable
 import com.krystianwsul.common.criteria.QueryMatchable
@@ -13,14 +14,17 @@ import com.krystianwsul.common.utils.normalized
 import java.util.*
 
 data class GroupListDataWrapper(
-        val customTimeDatas: List<CustomTimeData>,
-        val taskEditable: Boolean?,
-        val taskDatas: List<TaskData>,
-        val note: String?,
-        val instanceDatas: List<InstanceData>,
-        val imageData: ImageState?,
-        val projectInfo: DetailsNode.ProjectInfo?,
+    val customTimeDatas: List<CustomTimeData>,
+    val taskEditable: Boolean?,
+    val taskDatas: List<TaskData>,
+    val note: String?,
+    val mixedInstanceDataCollection: MixedInstanceDataCollection,
+    val doneInstanceDatas: List<InstanceData>,
+    val imageData: ImageState?,
+    val projectInfo: DetailsNode.ProjectInfo?,
 ) {
+
+    val allInstanceDatas get() = mixedInstanceDataCollection.instanceDatas + doneInstanceDatas
 
     data class TaskData(
         override val taskKey: TaskKey,
@@ -59,7 +63,8 @@ data class GroupListDataWrapper(
         val isRootInstance: Boolean,
         val createTaskTimePair: TimePair,
         override val note: String?,
-        val children: Map<InstanceKey, InstanceData>,
+        val mixedInstanceDataCollection: MixedInstanceDataCollection,
+        val doneInstanceDatas: List<InstanceData>,
         val ordinal: Double,
         val notificationShown: Boolean,
         val imageState: ImageState?,
@@ -67,6 +72,8 @@ data class GroupListDataWrapper(
         val projectInfo: DetailsNode.ProjectInfo?, // this is for what's displayed
         val projectKey: ProjectKey.Shared?, // this is for creating new tasks via ActionMode.  Always set
     ) : Comparable<InstanceData>, SelectedData, QueryMatchable, FilterParamsMatchable {
+
+        val allChildren = mixedInstanceDataCollection.instanceDatas + doneInstanceDatas
 
         override val normalizedFields by lazy { listOfNotNull(name, note).map { it.normalized() } }
 
@@ -83,7 +90,7 @@ data class GroupListDataWrapper(
 
         override val taskKey = instanceKey.taskKey
 
-        override val childSelectedDatas get() = children.values
+        override val childSelectedDatas get() = allChildren
 
         fun normalize() {
             normalizedFields

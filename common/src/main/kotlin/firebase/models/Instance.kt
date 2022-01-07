@@ -14,6 +14,8 @@ import com.krystianwsul.common.firebase.models.project.PrivateProject
 import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.task.ProjectRootTaskIdTracker
 import com.krystianwsul.common.firebase.models.task.Task
+import com.krystianwsul.common.firebase.models.users.MyUser
+import com.krystianwsul.common.firebase.models.users.ProjectUser
 import com.krystianwsul.common.firebase.records.InstanceRecord
 import com.krystianwsul.common.locker.LockerManager
 import com.krystianwsul.common.time.*
@@ -148,7 +150,7 @@ class Instance private constructor(
                             scheduleDateTime.toLocalExactTimeStamp() >= it.endExactTimeStampOffset
                         ) {
                             ErrorLogger.instance.logException(
-                                throw EndedTaskHierarchyException(
+                                EndedTaskHierarchyException(
                                     "instance.scheduleDateTime: $scheduleDateTime >= " +
                                             "hierarchyInterval.endExactTimeStampOffset: ${it.endExactTimeStampOffset}, " +
                                             "instanceKey: $instanceKey, " +
@@ -246,6 +248,7 @@ class Instance private constructor(
 
             val childInstances = task.childHierarchyIntervals
                 .asSequence()
+                .filter { it.notDeletedOffset(scheduleDateTime.toLocalExactTimeStamp()) }
                 /**
                  * todo it seems to me that this `filter` should be redundant with the check in getParentInstance, but a
                  * test fails if I remove it.
@@ -258,6 +261,11 @@ class Instance private constructor(
                         .childTask
                         .getInstance(scheduleDateTime)
                 }
+                /*
+                todo this doesn't really make sense to me.  I feel like these instances should be filtered by !exists,
+                (because that's redundant with existingChildInstancesCache) and then the remainder of this chain
+                shouldn't be needed.  But trying that made some tests fail, and I don't feel like figuring it out now.
+                 */
                 .filter { it.parentInstance == this }
                 .distinct()
                 .toList()
@@ -274,12 +282,18 @@ class Instance private constructor(
                 .invalidatableManager
                 .addInvalidatable(invalidatableCache)
 
+            val customTimesRemovable = task.rootModelChangeManager
+                .customTimesInvalidatableManager
+                .addInvalidatable(invalidatableCache)
+
             InvalidatableCache.ValueHolder(childInstances) {
                 doneOffsetProperty.removeCallback(doneOffsetCallback)
 
                 parentInstanceRemovables.forEach { it.remove() }
 
                 childHierarchyIntervalsRemovable.remove()
+
+                customTimesRemovable.remove()
             }
         }
 
@@ -584,7 +598,7 @@ class Instance private constructor(
     }
 
     // todo use for all CreateTaskActivity schedule hints.  Either filter by current, or add non-current to create task data
-    fun getCreateTaskTimePair(privateProject: PrivateProject): TimePair {
+    fun getCreateTaskTimePair(privateProject: PrivateProject, myUser: MyUser): TimePair {
         val instanceTimePair = instanceTime.timePair
 
         return if (instanceTimePair.customTimeKey != null) {
@@ -600,7 +614,11 @@ class Instance private constructor(
                             customTime.privateKey!!,
                         )
 
-                        privateProject.getProjectCustomTime(privateCustomTimeKey)
+                        myUser.customTimes
+                            .values
+                            .filter { it.customTimeRecord.privateCustomTimeId == privateCustomTimeKey.customTimeId }
+                            .singleOrEmpty()
+                            ?: privateProject.tryGetProjectCustomTime(privateCustomTimeKey)
                     } else {
                         null
                     }

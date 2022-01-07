@@ -13,10 +13,10 @@ import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.DeviceInfo
 import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.ChangeType
-import com.krystianwsul.common.firebase.json.UserJson
 import com.krystianwsul.common.firebase.json.projects.PrivateProjectJson
 import com.krystianwsul.common.firebase.json.projects.SharedProjectJson
 import com.krystianwsul.common.firebase.json.tasks.PrivateTaskJson
+import com.krystianwsul.common.firebase.json.users.UserJson
 import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.ProjectKey
@@ -80,7 +80,7 @@ class ProjectsFactoryTest {
 
         privateProjectRelay = PublishRelay.create()
         factoryProvider = ProjectFactoryTest.TestFactoryProvider()
-        privateProjectManager = AndroidPrivateProjectManager(userInfo, factoryProvider.database)
+        privateProjectManager = AndroidPrivateProjectManager(userInfo)
 
         privateProjectLoader = ProjectLoader.Impl(
             privateProjectRelay,

@@ -100,25 +100,6 @@ class CreateTaskEditDelegate(
         )
     }
 
-    override fun skipScheduleCheck(scheduleEntry: ScheduleEntry): Boolean {
-        if (parameters !is EditParameters.Create) return false
-
-        val scheduleHint = parameters.hint as? EditParentHint.Schedule ?: return false
-        val projectParentKey = scheduleHint.toParentKey() ?: return false
-
-        if (parentScheduleManager.parent?.parentKey != projectParentKey) return false
-
-        val singleScheduleData = scheduleEntry.scheduleDataWrapper
-            .scheduleData
-            .let { it as? ScheduleData.Single }
-            ?: return false
-
-        if (singleScheduleData.date != scheduleHint.date) return false
-        if (singleScheduleData.timePair != scheduleHint.timePair) return false
-
-        return true
-    }
-
     override fun showDialog(): ShowDialog {
         val parent = parentScheduleManager.parent ?: return ShowDialog.NONE
 

@@ -14,7 +14,7 @@ import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineRow
 import com.krystianwsul.checkme.utils.loadPhoto
 import com.krystianwsul.common.criteria.QueryMatchable
 import com.krystianwsul.common.criteria.SearchCriteria
-import com.krystianwsul.common.firebase.models.ProjectUser
+import com.krystianwsul.common.firebase.models.users.ProjectUser
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.normalized
 import com.krystianwsul.treeadapter.ModelNode
@@ -48,7 +48,7 @@ class DetailsNode(
 
     override val disableRipple = true
 
-    override val showSeparatorWhenParentExpanded = false
+    override fun showSeparatorWhenParentExpanded(top: Boolean) = !top
 
     fun initialize(nodeContainer: NodeContainer<AbstractHolder>): TreeNode<AbstractHolder> {
         this.nodeContainer = nodeContainer

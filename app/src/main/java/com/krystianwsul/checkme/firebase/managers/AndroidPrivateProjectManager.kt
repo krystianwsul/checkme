@@ -4,22 +4,18 @@ import com.krystianwsul.checkme.firebase.loaders.ProjectProvider
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.ChangeWrapper
-import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.json.projects.PrivateProjectJson
 import com.krystianwsul.common.firebase.managers.PrivateProjectManager
 import com.krystianwsul.common.firebase.records.project.PrivateProjectRecord
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.ProjectType
 
-class AndroidPrivateProjectManager(
-        private val userInfo: UserInfo,
-        override val databaseWrapper: DatabaseWrapper,
-) : PrivateProjectManager(), ProjectProvider.ProjectManager<ProjectType.Private, PrivateProjectJson> {
+class AndroidPrivateProjectManager(private val userInfo: UserInfo) :
+    PrivateProjectManager(), ProjectProvider.ProjectManager<ProjectType.Private, PrivateProjectJson> {
 
     private fun Snapshot<PrivateProjectJson>.toRecord() = PrivateProjectRecord(
-            databaseWrapper,
-            userInfo.key.toPrivateProjectKey(),
-            value!!,
+        userInfo.key.toPrivateProjectKey(),
+        value!!,
     )
 
     private var first = true
@@ -36,7 +32,6 @@ class AndroidPrivateProjectManager(
                         snapshot.takeIf { it.exists }
                                 ?.toRecord()
                                 ?: PrivateProjectRecord(
-                                        databaseWrapper,
                                         userInfo,
                                         PrivateProjectJson(startTime = now.long, startTimeOffset = now.offset),
                                 )

@@ -100,7 +100,7 @@ class IrrelevantTest {
         var now = ExactTimeStamp.Local(day1, hour1)
 
         val projectJson = PrivateProjectJson(startTime = now.long)
-        val projectRecord = PrivateProjectRecord(databaseWrapper, userInfo, projectJson)
+        val projectRecord = PrivateProjectRecord(userInfo, projectJson)
 
         val rootTasksManager = AndroidRootTasksManager(databaseWrapper)
 
@@ -208,6 +208,7 @@ class IrrelevantTest {
             { mapOf(project.projectKey to project) },
             rootTasksFactory,
             now,
+            emptyList(),
         )
 
         assertTrue(task.isReminderless())
@@ -265,7 +266,7 @@ class IrrelevantTest {
 
         val existingInstanceChangeManager = RootModelChangeManager()
 
-        val projectRecord = PrivateProjectRecord(databaseWrapper, projectKey, projectJson)
+        val projectRecord = PrivateProjectRecord(projectKey, projectJson)
         val project = PrivateProject(projectRecord, mockk(), mockk(relaxed = true), existingInstanceChangeManager)
         val task = project.projectTasks.single()
 
@@ -307,6 +308,7 @@ class IrrelevantTest {
             { mapOf(project.projectKey to project) },
             newMockRootTaskProvider(),
             now,
+            emptyList(),
         )
 
         assertTrue(task.intervalInfo.getCurrentScheduleIntervals(now).size == 1)
@@ -399,7 +401,7 @@ class IrrelevantTest {
 
         val existingInstanceChangeManager = RootModelChangeManager()
 
-        val projectRecord = PrivateProjectRecord(databaseWrapper, projectKey, projectJson)
+        val projectRecord = PrivateProjectRecord(projectKey, projectJson)
         val project = PrivateProject(projectRecord, mockk(), mockk(relaxed = true), existingInstanceChangeManager)
 
         val parentTask = project.projectTasks.single { it.isTopLevelTask(now) }
@@ -453,6 +455,7 @@ class IrrelevantTest {
             { mapOf(project.projectKey to project) },
             newMockRootTaskProvider(),
             now,
+            emptyList(),
         )
     }
 
@@ -538,7 +541,7 @@ class IrrelevantTest {
 
         val existingInstanceChangeManager = RootModelChangeManager()
 
-        val projectRecord = PrivateProjectRecord(databaseWrapper, projectKey, projectJson)
+        val projectRecord = PrivateProjectRecord(projectKey, projectJson)
         val project = PrivateProject(projectRecord, mockk(), mockk(relaxed = true), existingInstanceChangeManager)
 
         val parentTask = project.projectTasks.single { it.isTopLevelTask(now) }
@@ -592,6 +595,7 @@ class IrrelevantTest {
             { mapOf(project.projectKey to project) },
             newMockRootTaskProvider(),
             now,
+            emptyList(),
         )
     }
 
@@ -671,7 +675,7 @@ class IrrelevantTest {
         val projectKey = ProjectKey.Private(userKey.key)
         val projectJson = PrivateProjectJson(startTime = now.long)
 
-        val projectRecord = PrivateProjectRecord(databaseWrapper, projectKey, projectJson)
+        val projectRecord = PrivateProjectRecord(projectKey, projectJson)
         project = PrivateProject(projectRecord, mockk(), taskParent, existingInstanceChangeManager)
 
         // 2. Mark today's instance done
@@ -709,6 +713,7 @@ class IrrelevantTest {
             { mapOf(project.projectKey to project) },
             taskParent,
             now,
+            emptyList(),
         )
 
         val result1 = setIrrelevant(now)

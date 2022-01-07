@@ -3,7 +3,7 @@ package com.krystianwsul.checkme.gui.instances.tree
 import androidx.recyclerview.widget.RecyclerView
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
-import com.krystianwsul.checkme.domainmodel.updates.SetOrdinalDomainUpdate
+import com.krystianwsul.checkme.domainmodel.updates.SetTaskOrdinalDomainUpdate
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
@@ -25,7 +25,6 @@ import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.common.utils.filterValuesNotNull
 import com.krystianwsul.treeadapter.*
-import io.reactivex.rxjava3.kotlin.addTo
 
 class TaskNode(
     override val indentation: Int,
@@ -188,7 +187,7 @@ class TaskNode(
     override fun getOrdinal() = taskData.ordinal
 
     override fun setOrdinal(ordinal: Double) {
-        SetOrdinalDomainUpdate(
+        SetTaskOrdinalDomainUpdate(
             groupListFragment.parameters
                 .dataId.toFirst(),
             taskData.taskKey,

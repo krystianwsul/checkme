@@ -16,7 +16,7 @@ import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.extensions.clearTaskEndTimeStamps
 import com.krystianwsul.checkme.domainmodel.extensions.setTaskEndTimeStamps
 import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
-import com.krystianwsul.checkme.domainmodel.updates.SetOrdinalDomainUpdate
+import com.krystianwsul.checkme.domainmodel.updates.SetTaskOrdinalDomainUpdate
 import com.krystianwsul.checkme.gui.base.AbstractFragment
 import com.krystianwsul.checkme.gui.base.ActionModeListener
 import com.krystianwsul.checkme.gui.base.ListItemAddedListener
@@ -867,7 +867,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         override fun getOrdinal() = childTaskData.ordinal
 
         override fun setOrdinal(ordinal: Double) {
-            SetOrdinalDomainUpdate(
+            SetTaskOrdinalDomainUpdate(
                 taskListFragment.data!!
                     .dataId
                     .toFirst(),

@@ -7,7 +7,7 @@ import com.krystianwsul.checkme.domainmodel.extensions.setInstanceDone
 import com.krystianwsul.checkme.domainmodel.extensions.setInstancesDone
 import com.krystianwsul.checkme.domainmodel.extensions.setOrdinalProject
 import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
-import com.krystianwsul.checkme.domainmodel.updates.SetOrdinalDomainUpdate
+import com.krystianwsul.checkme.domainmodel.updates.SetTaskOrdinalDomainUpdate
 import com.krystianwsul.checkme.gui.instances.ShowGroupActivity
 import com.krystianwsul.checkme.gui.instances.ShowInstanceActivity
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
@@ -265,7 +265,7 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
             override fun getOrdinal() = instanceData.ordinal
 
             override fun setOrdinal(ordinal: Double) {
-                SetOrdinalDomainUpdate(
+                SetTaskOrdinalDomainUpdate(
                     groupListFragment.parameters.dataId.toFirst(),
                     instanceData.taskKey,
                     ordinal,

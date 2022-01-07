@@ -7,7 +7,7 @@ import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.TaskKey
 
-class SetOrdinalDomainUpdate(
+class SetTaskOrdinalDomainUpdate(
     private val notificationType: DomainListenerManager.NotificationType,
     private val taskKey: TaskKey,
     private val ordinal: Double,

@@ -10,5 +10,6 @@ import kotlin.jvm.JvmOverloads
 data class ProjectOrdinalEntryJson @JvmOverloads constructor(
     val keyEntries: Map<String, ProjectOrdinalKeyEntryJson> = mapOf(),
     val ordinal: Double = 0.0,
+    val ordinalString: String? = null,
     val updated: Long = 0,
 ) : Parcelable

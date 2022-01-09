@@ -25,6 +25,7 @@ import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.project.SharedProject
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.TimeStamp
+import com.krystianwsul.common.utils.Ordinal
 import com.krystianwsul.common.utils.ProjectKey
 import io.reactivex.rxjava3.core.BackpressureStrategy
 import io.reactivex.rxjava3.core.Single
@@ -242,7 +243,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
 
         val timeStampLong = instanceData.timeStampLong
 
-        val sortKey = timeStampLong.toString() + doubleToString(instanceData.ordinal)
+        val sortKey = timeStampLong.toString() + instanceData.ordinal.padded()
 
         val largeIcon = ImageManager.getLargeIcon(instanceData.uuid)
 
@@ -321,7 +322,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
 
         val timeStampLong = projectData.timeStamp.long
 
-        val sortKey = timeStampLong.toString() + doubleToString(projectData.ordinal)
+        val sortKey = timeStampLong.toString() + projectData.ordinal.padded()
 
         val notificationHash = NotificationHash(
             projectData.name,
@@ -351,12 +352,6 @@ open class NotificationWrapperImpl : NotificationWrapper() {
             tag = null,
             highPriority = projectData.highPriority
         )
-    }
-
-    private fun doubleToString(d: Double): String {
-        val bits = java.lang.Double.doubleToLongBits(d)
-        val s = bits.toString()
-        return (if (bits < 0) "--------------------" else "00000000000000000000").substring(s.length) + s
     }
 
     protected open fun getExtraCount(lines: List<String>, summary: Boolean) = if (summary) 0 else lines.size - maxInboxLines

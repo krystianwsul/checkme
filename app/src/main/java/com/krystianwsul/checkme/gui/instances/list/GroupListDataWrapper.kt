@@ -8,10 +8,7 @@ import com.krystianwsul.common.criteria.QueryMatchable
 import com.krystianwsul.common.firebase.models.ImageState
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.time.Date
-import com.krystianwsul.common.utils.InstanceKey
-import com.krystianwsul.common.utils.ProjectKey
-import com.krystianwsul.common.utils.TaskKey
-import com.krystianwsul.common.utils.normalized
+import com.krystianwsul.common.utils.*
 import java.util.*
 
 data class GroupListDataWrapper(
@@ -36,7 +33,7 @@ data class GroupListDataWrapper(
         val imageState: ImageState?,
         override val isAssignedToMe: Boolean,
         val projectInfo: DetailsNode.ProjectInfo?,
-        val ordinal: Double,
+        val ordinal: Ordinal,
         override val canMigrateDescription: Boolean,
     ) : SelectedData, QueryMatchable, FilterParamsMatchable {
 
@@ -66,7 +63,7 @@ data class GroupListDataWrapper(
         override val note: String?,
         val mixedInstanceDataCollection: MixedInstanceDataCollection,
         val doneInstanceDatas: List<InstanceData>,
-        val ordinal: Double,
+        val ordinal: Ordinal,
         val notificationShown: Boolean,
         val imageState: ImageState?,
         override val isAssignedToMe: Boolean,

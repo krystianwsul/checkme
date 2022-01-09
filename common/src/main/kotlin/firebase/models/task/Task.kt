@@ -136,7 +136,7 @@ sealed class Task(
         .toMutableMap()
 
     var ordinal
-        get() = taskRecord.ordinal ?: startExactTimeStamp.long.toDouble()
+        get() = taskRecord.ordinal ?: startExactTimeStamp.long.toOrdinal()
         set(value) {
             taskRecord.ordinal = value
         }

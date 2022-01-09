@@ -10,6 +10,7 @@ import com.krystianwsul.common.time.DateTimePair
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.TimePair
 import com.krystianwsul.common.utils.InstanceScheduleKey
+import com.krystianwsul.common.utils.Ordinal
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
 
@@ -125,7 +126,7 @@ class OrdinalProcessor(
 
     private data class MutableOrdinalEntry(
         val mutableKeyEntries: MutableList<MutableKeyEntry>,
-        val ordinal: Double,
+        val ordinal: Ordinal,
         val updated: ExactTimeStamp.Local,
     ) {
 

@@ -126,7 +126,7 @@ class RootTask private constructor(
         name: String,
         note: String?,
         image: TaskJson.Image?,
-        ordinal: Double?,
+        ordinal: Ordinal?,
     ): RootTask {
         ProjectRootTaskIdTracker.checkTracking()
 
@@ -535,7 +535,7 @@ class RootTask private constructor(
             image: TaskJson.Image?,
             name: String,
             note: String?,
-            ordinal: Double?,
+            ordinal: Ordinal?,
         ): RootTask
     }
 }

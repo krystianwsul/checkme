@@ -747,13 +747,16 @@ class DomainFactory(
             newProject: Project<*>,
             customTimeMigrationHelper: Project.CustomTimeMigrationHelper,
         ): RootTask {
+            val (ordinalDouble, ordinal128) = oldTask.ordinal.toFields()
+
             val newTask = rootTasksFactory.newTask(
                 RootTaskJson(
                     oldTask.name,
                     now.long,
                     now.offset,
                     oldTask.note,
-                    ordinal = oldTask.ordinal.toDouble(),
+                    ordinal = ordinalDouble,
+                    ordinal128 = ordinal128,
                 )
             )
 

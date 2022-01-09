@@ -11,7 +11,9 @@ interface TaskJson {
     val name: String
     val note: String?
     val image: Image?
+
     var ordinal: Double?
+    var ordinal128: String?
 
     val startTime: Long
     val startTimeOffset: Double?

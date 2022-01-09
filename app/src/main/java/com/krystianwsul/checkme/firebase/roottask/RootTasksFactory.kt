@@ -14,6 +14,7 @@ import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.firebase.models.taskhierarchy.TaskHierarchy
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.Ordinal
+import com.krystianwsul.common.utils.toFields
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.common.utils.mapValuesNotNull
@@ -133,7 +134,21 @@ class RootTasksFactory(
         name: String,
         note: String?,
         ordinal: Ordinal?,
-    ) = newTask(RootTaskJson(name, now.long, now.offset, note = note, image = image, ordinal = ordinal?.toDouble()))
+    ): RootTask {
+        val (ordinalDouble, ordinal128) = ordinal.toFields()
+
+        return newTask(
+            RootTaskJson(
+                name,
+                now.long,
+                now.offset,
+                note = note,
+                image = image,
+                ordinal = ordinalDouble,
+                ordinal128 = ordinal128,
+            )
+        )
+    }
 
     override fun updateProjectRecord(projectKey: ProjectKey<*>, dependentRootTaskKeys: Set<TaskKey.Root>) {
         rootTasksLoader.ignoreKeyUpdates {

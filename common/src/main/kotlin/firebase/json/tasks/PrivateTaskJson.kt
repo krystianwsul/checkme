@@ -20,5 +20,6 @@ data class PrivateTaskJson @JvmOverloads constructor(
     override var endData: ProjectTaskJson.EndData? = null,
     override var noScheduleOrParent: Map<String, ProjectNoScheduleOrParentJson> = mapOf(),
     override var ordinal: Double? = null,
+    override var ordinal128: String? = null,
     override var taskHierarchies: Map<String, NestedTaskHierarchyJson> = mapOf(),
 ) : ProjectTaskJson

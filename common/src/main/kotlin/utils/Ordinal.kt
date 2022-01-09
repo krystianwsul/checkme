@@ -13,11 +13,16 @@ class Ordinal(_bigDecimal: BigDecimal) : Comparable<Ordinal> {
         private fun BigDecimal.toOrdinal() = Ordinal(this)
 
         private const val PAD_LENGTH = 50
+
+        fun fromFields(ordinal: Double?, ordinal128: String?): Ordinal? {
+            val bigDecimal = ordinal128?.let { BigDecimal(it, mathContext) } ?: ordinal?.let(::BigDecimal)
+
+            return bigDecimal?.toOrdinal()
+        }
     }
 
     private val bigDecimal = _bigDecimal.setScale(mathContext.precision, mathContext.roundingMode)
 
-    constructor(double: Double) : this(BigDecimal.of(double, mathContext))
     constructor(int: Int) : this(BigDecimal.of(int, mathContext))
     constructor(long: Long) : this(BigDecimal.of(long, mathContext))
 
@@ -45,7 +50,7 @@ class Ordinal(_bigDecimal: BigDecimal) : Comparable<Ordinal> {
     operator fun div(divisor: Ordinal) = bigDecimal.div(divisor.bigDecimal, mathContext)!!.toOrdinal()
     operator fun div(divisor: Int) = div(divisor.toOrdinal())
 
-    fun toDouble() = bigDecimal.toDouble()
+    fun toFields() = Pair(bigDecimal.toDouble(), toString())
 
     fun pow(n: Int) = bigDecimal.pow(n, mathContext)!!.toOrdinal()
 
@@ -63,7 +68,6 @@ class Ordinal(_bigDecimal: BigDecimal) : Comparable<Ordinal> {
     fun ceiling() = bigDecimal.setScale(0, RoundingMode.CEILING).toOrdinal()
 }
 
-fun Double.toOrdinal() = Ordinal(this)
 fun Int.toOrdinal() = Ordinal(this)
 fun Long.toOrdinal() = Ordinal(this)
 
@@ -74,3 +78,5 @@ fun Iterable<Ordinal>.sum(): Ordinal {
     }
     return sum
 }
+
+fun Ordinal?.toFields() = this?.toFields() ?: Pair(null, null)

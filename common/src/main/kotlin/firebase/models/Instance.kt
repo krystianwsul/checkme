@@ -78,25 +78,29 @@ class Instance private constructor(
     }
     private val matchingScheduleIntervals by matchingScheduleIntervalsProperty
 
-    // todo ordinal
-    var ordinal
-        get() = task.ordinal
-        private set(value) {
-            task.ordinal = value
+    private var myOrdinal: Ordinal? = null
+
+    private fun useMyOrdinal() = !groupIntoProject && isRootInstance()
+
+    val ordinal
+        get() = if (useMyOrdinal()) {
+            myOrdinal ?: task.ordinal
+        } else {
+            task.ordinal
         }
 
-    var splitFromProject = false
+    var groupIntoProject = true
         private set
 
     fun setOrdinal(ordinal: Ordinal, newParentInfo: NewParentInfo) {
-        splitFromProject = when (newParentInfo) {
-            NewParentInfo.NO_OP -> splitFromProject
-            NewParentInfo.TOP_LEVEL -> true
-            NewParentInfo.PROJECT -> false
+        when (newParentInfo) {
+            NewParentInfo.NO_OP -> {}
+            NewParentInfo.TOP_LEVEL -> groupIntoProject = false
+            NewParentInfo.PROJECT -> groupIntoProject = true
         }
 
-        if (splitFromProject) {
-            this.ordinal = ordinal
+        if (useMyOrdinal()) {
+            myOrdinal = ordinal
         } else {
             task.ordinal = ordinal
         }

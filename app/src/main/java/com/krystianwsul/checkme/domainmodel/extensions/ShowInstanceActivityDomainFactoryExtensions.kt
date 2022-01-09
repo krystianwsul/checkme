@@ -156,7 +156,11 @@ private fun DomainFactory.getGroupListData(
                 childInstance.parentInstance?.instanceKey,
             )
 
-            GroupTypeFactory.InstanceDescriptor(instanceData, childInstance.instanceDateTime.toDateTimePair())
+            GroupTypeFactory.InstanceDescriptor(
+                instanceData,
+                childInstance.instanceDateTime.toDateTimePair(),
+                childInstance.groupIntoProject,
+            )
         }
 
     val (mixedInstanceDescriptors, doneInstanceDescriptors) = instanceDescriptors.splitDone()

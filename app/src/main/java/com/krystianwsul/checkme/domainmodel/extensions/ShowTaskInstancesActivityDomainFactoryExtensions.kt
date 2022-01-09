@@ -79,7 +79,11 @@ fun DomainFactory.getShowTaskInstancesData(
                             it.parentInstance?.instanceKey,
                         )
 
-                        GroupTypeFactory.InstanceDescriptor(instanceData, it.instanceDateTime.toDateTimePair())
+                        GroupTypeFactory.InstanceDescriptor(
+                            instanceData,
+                            it.instanceDateTime.toDateTimePair(),
+                            it.groupIntoProject,
+                        )
                     }
                 }
                 is ShowTaskInstancesActivity.Parameters.Project -> {

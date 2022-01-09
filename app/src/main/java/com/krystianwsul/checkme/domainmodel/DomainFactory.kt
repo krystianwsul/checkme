@@ -451,7 +451,11 @@ class DomainFactory(
             instance.parentInstance?.instanceKey,
         )
 
-        return GroupTypeFactory.InstanceDescriptor(instanceData, instance.instanceDateTime.toDateTimePair())
+        return GroupTypeFactory.InstanceDescriptor(
+            instanceData,
+            instance.instanceDateTime.toDateTimePair(),
+            instance.groupIntoProject,
+        )
     }
 
     fun <T> getChildInstanceDatas(

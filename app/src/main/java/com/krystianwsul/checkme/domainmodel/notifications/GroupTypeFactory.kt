@@ -45,6 +45,8 @@ object GroupTypeFactory : GroupType.Factory {
         override val projectDescriptor = instance.getProject()
             .let { it as? SharedProject }
             ?.let(::ProjectDescriptor)
+
+        override val groupIntoProject get() = instance.groupIntoProject
     }
 
     data class ProjectDescriptor(val project: SharedProject) : GroupType.ProjectDescriptor

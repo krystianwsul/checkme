@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.domainmodel
 
-import com.krystianwsul.checkme.domainmodel.updates.SetInstanceOrdinalDomainUpdate
 import com.krystianwsul.checkme.gui.instances.ShowGroupActivity
 import com.krystianwsul.checkme.gui.instances.drag.DropParent
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
@@ -85,6 +84,7 @@ class GroupTypeFactory(
     class InstanceDescriptor(
         val instanceData: GroupListDataWrapper.InstanceData,
         val instanceDateTimePair: DateTimePair,
+        override val groupIntoProject: Boolean,
     ) : GroupType.InstanceDescriptor, Comparable<InstanceDescriptor> {
 
         override val timeStamp get() = instanceData.instanceTimeStamp

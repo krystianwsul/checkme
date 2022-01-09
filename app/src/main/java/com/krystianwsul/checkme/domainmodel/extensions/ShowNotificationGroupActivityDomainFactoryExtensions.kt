@@ -59,7 +59,11 @@ fun DomainFactory.getShowNotificationGroupData(instanceKeys: Set<InstanceKey>): 
             instance.parentInstance?.instanceKey,
         )
 
-        GroupTypeFactory.InstanceDescriptor(instanceData, instance.instanceDateTime.toDateTimePair())
+        GroupTypeFactory.InstanceDescriptor(
+            instanceData,
+            instance.instanceDateTime.toDateTimePair(),
+            instance.groupIntoProject,
+        )
     }
 
     val (mixedInstanceDatas, doneInstanceDatas) = instanceDescriptors.splitDone()

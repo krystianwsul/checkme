@@ -193,6 +193,8 @@ class TreeNodeCollection<T : TreeHolder>(val treeViewAdapter: TreeViewAdapter<T>
             previousOrdinal = nextOrdinal - 1000
         }
 
+        check(nextOrdinal > previousOrdinal)
+
         (currentNode as Sortable).setOrdinal((previousOrdinal + nextOrdinal) / 2)
     }
 

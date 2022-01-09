@@ -135,7 +135,7 @@ class RootTasksFactory(
         note: String?,
         ordinal: Ordinal?,
     ): RootTask {
-        val (ordinalDouble, ordinal128) = ordinal.toFields()
+        val (ordinalDouble, ordinalString) = ordinal.toFields()
 
         return newTask(
             RootTaskJson(
@@ -145,7 +145,7 @@ class RootTasksFactory(
                 note = note,
                 image = image,
                 ordinal = ordinalDouble,
-                ordinal128 = ordinal128,
+                ordinalString = ordinalString,
             )
         )
     }

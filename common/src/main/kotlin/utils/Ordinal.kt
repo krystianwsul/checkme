@@ -8,14 +8,14 @@ class Ordinal(_bigDecimal: BigDecimal) : Comparable<Ordinal> {
 
     companion object {
 
-        private val mathContext = MathContext.DECIMAL128
+        private val mathContext = MathContext(100, RoundingMode.HALF_UP)
 
         private fun BigDecimal.toOrdinal() = Ordinal(this)
 
         private const val PAD_LENGTH = 50
 
-        fun fromFields(ordinal: Double?, ordinal128: String?): Ordinal? {
-            val bigDecimal = ordinal128?.let { BigDecimal(it, mathContext) } ?: ordinal?.let(::BigDecimal)
+        fun fromFields(ordinalDouble: Double?, ordinalString: String?): Ordinal? {
+            val bigDecimal = ordinalString?.let { BigDecimal(it, mathContext) } ?: ordinalDouble?.let(::BigDecimal)
 
             return bigDecimal?.toOrdinal()
         }

@@ -83,11 +83,11 @@ abstract class TaskRecord protected constructor(
 
     abstract fun setEndData(endData: RootTaskJson.EndData?)
 
-    var ordinal by Delegates.observable(Ordinal.fromFields(taskJson.ordinal, taskJson.ordinal128)) { _, _, newValue ->
-        val (ordinalDouble, ordinal128) = newValue.toFields()
+    var ordinal by Delegates.observable(Ordinal.fromFields(taskJson.ordinal, taskJson.ordinalString)) { _, _, newValue ->
+        val (ordinalDouble, ordinalString) = newValue.toFields()
 
         setProperty(taskJson::ordinal, ordinalDouble)
-        setProperty(taskJson::ordinal128, ordinal128)
+        setProperty(taskJson::ordinalString, ordinalString)
     }
 
     final override val children

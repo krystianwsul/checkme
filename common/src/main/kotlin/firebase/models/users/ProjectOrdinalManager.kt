@@ -110,20 +110,20 @@ class ProjectOrdinalManager(
                             .map { Key.Entry.fromJson(projectCustomTimeIdAndKeyProvider, it.value) }
                             .toSet()
                     ),
-                    Value(Ordinal.fromFields(json.ordinal, json.ordinal128)!!, ExactTimeStamp.Local(json.updated))
+                    Value(Ordinal.fromFields(json.ordinal, json.ordinalString)!!, ExactTimeStamp.Local(json.updated))
                 )
             }
         }
 
         fun toJson(): ProjectOrdinalEntryJson {
-            val (ordinalDouble, ordinal128) = value.ordinal.toFields()
+            val (ordinalDouble, ordinalString) = value.ordinal.toFields()
 
             return ProjectOrdinalEntryJson(
                 key.entries
                     .mapIndexed { index, entry -> "a$index" to entry.toJson() }
                     .toMap(), // ridiculous hack to fix Java vs. JS parsing
                 ordinalDouble,
-                ordinal128,
+                ordinalString,
                 value.updated.long,
             )
         }

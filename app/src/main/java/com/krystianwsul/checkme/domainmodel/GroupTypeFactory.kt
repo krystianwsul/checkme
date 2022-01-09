@@ -207,7 +207,7 @@ class GroupTypeFactory(
         }
     }
 
-    class ProjectBridge(
+    data class ProjectBridge(
         val timeStamp: TimeStamp,
         private val projectDetails: DetailsNode.ProjectDetails,
         private val instanceDatas: List<GroupListDataWrapper.InstanceData>,
@@ -255,7 +255,7 @@ class GroupTypeFactory(
         }
     }
 
-    class SingleBridge(val instanceData: GroupListDataWrapper.InstanceData) : GroupType.Single, TimeChild {
+    data class SingleBridge(val instanceData: GroupListDataWrapper.InstanceData) : GroupType.Single, TimeChild {
 
         override val instanceKeys = setOf(instanceData.instanceKey)
 

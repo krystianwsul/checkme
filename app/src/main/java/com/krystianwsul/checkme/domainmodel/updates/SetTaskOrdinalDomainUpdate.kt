@@ -5,12 +5,13 @@ import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.update.AbstractCompletableDomainUpdate
 import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
 import com.krystianwsul.common.time.ExactTimeStamp
+import com.krystianwsul.common.utils.Ordinal
 import com.krystianwsul.common.utils.TaskKey
 
 class SetTaskOrdinalDomainUpdate(
     private val notificationType: DomainListenerManager.NotificationType,
     private val taskKey: TaskKey,
-    private val ordinal: Double,
+    private val ordinal: Ordinal,
 ) : AbstractCompletableDomainUpdate("setOrdinal") {
 
     override fun doCompletableAction(domainFactory: DomainFactory, now: ExactTimeStamp.Local): DomainUpdater.Params {

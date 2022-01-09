@@ -228,17 +228,7 @@ class TreeNodeCollection<T : TreeHolder>(val treeViewAdapter: TreeViewAdapter<T>
             nextOrdinal = nextNode?.getOrdinal() ?: lastOrdinal
         } else {
             nextOrdinal = (nextNode as Sortable).getOrdinal()
-
-            /*
-            ordinal double hack
-
-            previous code:
             previousOrdinal = nextOrdinal - 1000
-
-            if this keeps causing issues, throw in the towel, create a new ordinalStr field in FB, store BigDecimal in it,
-            and do a migration
-             */
-            previousOrdinal = nextOrdinal - max(1000.0, abs(nextOrdinal) / 10)
         }
 
         check(nextOrdinal > previousOrdinal)

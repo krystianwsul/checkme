@@ -151,7 +151,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         timeStamp: TimeStamp,
         silent: Boolean,
         now: ExactTimeStamp.Local,
-        ordinal: Double,
+        ordinal: Ordinal,
     ) {
         val highPriority = getHighPriority() ?: return
 
@@ -774,7 +774,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         val silent: Boolean,
         val highPriority: Boolean,
         val timeStamp: TimeStamp,
-        val ordinal: Double,
+        val ordinal: Ordinal,
     ) {
 
         val projectKey = project.projectKey

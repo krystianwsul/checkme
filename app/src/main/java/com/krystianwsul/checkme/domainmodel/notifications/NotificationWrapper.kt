@@ -6,6 +6,7 @@ import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.project.SharedProject
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.TimeStamp
+import com.krystianwsul.common.utils.Ordinal
 
 abstract class NotificationWrapper {
 
@@ -34,7 +35,7 @@ abstract class NotificationWrapper {
         timeStamp: TimeStamp,
         silent: Boolean,
         now: ExactTimeStamp.Local,
-        ordinal: Double,
+        ordinal: Ordinal,
     )
 
     abstract fun notifyGroup(

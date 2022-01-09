@@ -442,7 +442,7 @@ class DomainFactory(
             instance.task.note,
             newMixedInstanceDataCollection(notDoneInstanceDescriptors),
             doneInstanceDescriptors.toInstanceDatas(),
-            instance.task.ordinal,
+            instance.ordinal,
             instance.getNotificationShown(shownFactory),
             instance.task.getImage(deviceDbInfo),
             instance.isAssignedToMe(now, myUserFactory.user),

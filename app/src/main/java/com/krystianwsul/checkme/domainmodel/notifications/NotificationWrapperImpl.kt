@@ -95,7 +95,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         ) = instances.asSequence()
             .filter { it.done == null }
             .filter { it.isVisible(now, Instance.VisibilityOptions(assumeChildOfVisibleParent = assumeChild)) }
-            .sortedBy { it.task.ordinal }
+            .sortedBy { it.ordinal }
             .map { it.name }
             .toList()
     }
@@ -531,7 +531,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
                 override val text = getInstanceText(instance, now)
                 override val timeStamp = instance.instanceDateTime.timeStamp
 
-                private val ordinal = instance.task.ordinal
+                private val ordinal = instance.ordinal
 
                 override fun compareTo(other: Item): Int {
                     timeStamp.compareTo(other.timeStamp)
@@ -551,7 +551,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
                 override val text = getInstanceText(project.instances.map { it.name }, null)
                 override val timeStamp = project.timeStamp
 
-                private val ordinal = project.instances.map { it.task.ordinal }.minOrNull()!!
+                private val ordinal = project.instances.map { it.ordinal }.minOrNull()!!
 
                 override fun compareTo(other: Item): Int {
                     timeStamp.compareTo(other.timeStamp)
@@ -756,7 +756,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
             .timeStamp
             .long
 
-        val ordinal = instance.task.ordinal
+        val ordinal = instance.ordinal
 
         val name = instance.name
 

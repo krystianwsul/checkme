@@ -78,6 +78,13 @@ class Instance private constructor(
     }
     private val matchingScheduleIntervals by matchingScheduleIntervalsProperty
 
+    // todo ordinal
+    var ordinal
+        get() = task.ordinal
+        set(value) {
+            task.ordinal = value
+        }
+
     fun getTaskHierarchyParentInstance(): Instance? {
         /**
          * The baseline here is getting the interval corresponding to the scheduleDateTime, as in

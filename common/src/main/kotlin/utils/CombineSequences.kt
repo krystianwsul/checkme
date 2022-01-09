@@ -69,7 +69,7 @@ fun combineInstanceInfoSequences(instanceSequences: List<Sequence<InstanceInfo>>
             .minWithOrNull(
                 compareBy(
                     { it.instanceInfo!!.dateTime },
-                    { it.instanceInfo!!.instance?.task?.ordinal },
+                    { it.instanceInfo!!.instance?.ordinal },
                 )
             )!!
 

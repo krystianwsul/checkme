@@ -222,9 +222,9 @@ fun DomainFactory.getEditInstancesSearchData(
                     instance.instanceKey,
                     if (instance.isRootInstance()) instance.instanceDateTime.getDisplayText() else null,
                     instance.task.note,
-                    instance.run { EditInstancesSearchViewModel.SortKey(instanceDateTime.timeStamp, task.ordinal) },
+                    instance.run { EditInstancesSearchViewModel.SortKey(instanceDateTime.timeStamp, ordinal) },
                     instance.instanceDateTime.timeStamp,
-                    instance.task.ordinal,
+                    instance.ordinal,
                     instance.instanceKey,
                 )
             }

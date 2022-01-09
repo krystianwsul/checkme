@@ -70,7 +70,7 @@ fun DomainFactory.getShowTaskInstancesData(
                             it.task.note,
                             newMixedInstanceDataCollection(notDoneChildInstanceDescriptors),
                             doneChildInstanceDescriptors.toInstanceDatas(),
-                            it.task.ordinal,
+                            it.ordinal,
                             it.getNotificationShown(shownFactory),
                             it.task.getImage(deviceDbInfo),
                             it.isAssignedToMe(now, myUserFactory.user),

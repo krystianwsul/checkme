@@ -49,10 +49,7 @@ import com.krystianwsul.checkme.viewmodels.DataId
 import com.krystianwsul.common.criteria.QueryMatchable
 import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.firebase.models.ImageState
-import com.krystianwsul.common.utils.ProjectKey
-import com.krystianwsul.common.utils.TaskKey
-import com.krystianwsul.common.utils.filterValuesNotNull
-import com.krystianwsul.common.utils.normalized
+import com.krystianwsul.common.utils.*
 import com.krystianwsul.treeadapter.*
 import com.stfalcon.imageviewer.StfalconImageViewer
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
@@ -866,7 +863,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
         override fun getOrdinal() = childTaskData.ordinal
 
-        override fun setOrdinal(ordinal: Double) {
+        override fun setOrdinal(ordinal: Ordinal) {
             AndroidDomainUpdater.setOrdinal(taskListFragment.data!!.dataId.toFirst(), childTaskData.taskKey, ordinal)
                 .subscribe()
                 .addTo(createDisposable)
@@ -940,7 +937,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         val current: Boolean,
         override val canAddSubtask: Boolean,
         val canMigrateDescription: Boolean,
-        val ordinal: Double,
+        val ordinal: Ordinal,
         val projectInfo: DetailsNode.ProjectInfo?,
         override val isAssignedToMe: Boolean,
     ) : EntryData {

@@ -301,7 +301,7 @@ sealed class Project<T : ProjectType>(
             image: TaskJson.Image?,
             name: String,
             note: String?,
-            ordinal: Double?,
+            ordinal: Ordinal?,
         ): Task
 
         fun getAllExistingInstances(): Sequence<Instance>

@@ -753,7 +753,7 @@ class DomainFactory(
                     now.long,
                     now.offset,
                     oldTask.note,
-                    ordinal = oldTask.ordinal,
+                    ordinal = oldTask.ordinal.toDouble(),
                 )
             )
 

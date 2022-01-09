@@ -8,6 +8,7 @@ import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
 import com.krystianwsul.common.firebase.models.project.SharedProject
 import com.krystianwsul.common.firebase.models.users.ProjectOrdinalManager
 import com.krystianwsul.common.utils.InstanceKey
+import com.krystianwsul.common.utils.Ordinal
 import io.reactivex.rxjava3.core.Completable
 
 @CheckResult
@@ -31,7 +32,7 @@ fun DomainUpdater.setInstancesDone(
 fun DomainUpdater.setOrdinalProject(
     notificationType: DomainListenerManager.NotificationType,
     instanceKeys: Set<InstanceKey>,
-    ordinal: Double,
+    ordinal: Ordinal,
 ): Completable = CompletableDomainUpdate.create("setOrdinalProject") { now ->
     val instances = instanceKeys.map(::getInstance)
 

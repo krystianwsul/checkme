@@ -11,6 +11,7 @@ import com.krystianwsul.common.firebase.models.users.ProjectOrdinalManager
 import com.krystianwsul.common.time.DateTimePair
 import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.InstanceKey
+import com.krystianwsul.common.utils.Ordinal
 import com.krystianwsul.common.utils.ProjectKey
 
 class GroupTypeFactory(
@@ -108,13 +109,13 @@ class GroupTypeFactory(
         val name: String get() = throw UnsupportedOperationException()
 
         val sortable: Boolean get() = false
-        val ordinal: Double get() = throw UnsupportedOperationException()
+        val ordinal: Ordinal get() = throw UnsupportedOperationException()
     }
 
     sealed interface TimeChild : Bridge, GroupType.TimeChild {
 
         val instanceKeys: Set<InstanceKey>
-        val ordinal: Double
+        val ordinal: Ordinal
     }
 
     data class TimeBridge(
@@ -191,7 +192,7 @@ class GroupTypeFactory(
         val timeStamp: TimeStamp,
         private val projectDetails: DetailsNode.ProjectDetails,
         val instanceDatas: List<GroupListDataWrapper.InstanceData>,
-        override val ordinal: Double,
+        override val ordinal: Ordinal,
     ) : GroupType.Project, SingleParent, TimeChild {
 
         override val name get() = projectDetails.name

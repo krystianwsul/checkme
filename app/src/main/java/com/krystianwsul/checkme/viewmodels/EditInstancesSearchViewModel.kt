@@ -6,6 +6,7 @@ import com.krystianwsul.checkme.gui.edit.dialogs.ParentPickerFragment
 import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.InstanceKey
+import com.krystianwsul.common.utils.Ordinal
 import com.krystianwsul.common.utils.normalized
 
 class EditInstancesSearchViewModel : DomainViewModel<EditInstancesSearchViewModel.Data>() {
@@ -38,15 +39,15 @@ class EditInstancesSearchViewModel : DomainViewModel<EditInstancesSearchViewMode
     ) : DomainData()
 
     data class InstanceEntryData(
-            override val name: String,
-            override val childEntryDatas: Collection<InstanceEntryData>,
-            override val entryKey: Parcelable,
-            override val details: String?,
-            override val note: String?,
-            override val sortKey: SortKey,
-            val instanceTimeStamp: TimeStamp,
-            var ordinal: Double,
-            val instanceKey: InstanceKey,
+        override val name: String,
+        override val childEntryDatas: Collection<InstanceEntryData>,
+        override val entryKey: Parcelable,
+        override val details: String?,
+        override val note: String?,
+        override val sortKey: SortKey,
+        val instanceTimeStamp: TimeStamp,
+        var ordinal: Ordinal,
+        val instanceKey: InstanceKey,
     ) : Comparable<InstanceEntryData>, ParentPickerFragment.EntryData {
 
         override val normalizedFields by lazy { listOfNotNull(name, note).map { it.normalized() } }
@@ -66,8 +67,8 @@ class EditInstancesSearchViewModel : DomainViewModel<EditInstancesSearchViewMode
     private data class Parameters(val searchCriteria: SearchCriteria = SearchCriteria.empty, val page: Int = 0)
 
     data class SortKey(
-            val instanceTimeStamp: TimeStamp,
-            val ordinal: Double,
+        val instanceTimeStamp: TimeStamp,
+        val ordinal: Ordinal,
     ) : ParentPickerFragment.SortKey {
 
         override fun compareTo(other: ParentPickerFragment.SortKey) =

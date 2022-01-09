@@ -4,9 +4,7 @@ import com.krystianwsul.common.firebase.json.users.ProjectOrdinalEntryJson
 import com.krystianwsul.common.firebase.json.users.ProjectOrdinalKeyEntryJson
 import com.krystianwsul.common.firebase.models.project.SharedProject
 import com.krystianwsul.common.time.*
-import com.krystianwsul.common.utils.InstanceKey
-import com.krystianwsul.common.utils.ProjectKey
-import com.krystianwsul.common.utils.TaskKey
+import com.krystianwsul.common.utils.*
 
 class ProjectOrdinalManager(
     private val callbacks: Callbacks,
@@ -19,7 +17,7 @@ class ProjectOrdinalManager(
     private fun Key.Entry.getHourMinute(project: SharedProject) =
         project.getTime(instanceTimePair).getHourMinute(instanceDateOrDayOfWeek.dayOfWeek)
 
-    fun setOrdinal(project: SharedProject, key: Key, ordinal: Double, now: ExactTimeStamp.Local) {
+    fun setOrdinal(project: SharedProject, key: Key, ordinal: Ordinal, now: ExactTimeStamp.Local) {
         check(project.projectKey == projectKey)
 
         check(
@@ -37,7 +35,7 @@ class ProjectOrdinalManager(
 
     private inner class Matcher<T>(private val mostInCommon: Boolean, private val aspectSelector: (Key.Entry) -> T?) {
 
-        fun match(searchKey: Key): Double? {
+        fun match(searchKey: Key): Ordinal? {
             fun Key.toMatchElements() = entries.mapNotNull(aspectSelector).toSet()
 
             val inputMatchElements = searchKey.toMatchElements()
@@ -65,7 +63,7 @@ class ProjectOrdinalManager(
         }
     }
 
-    fun getOrdinal(project: SharedProject, key: Key): Double {
+    fun getOrdinal(project: SharedProject, key: Key): Ordinal {
         check(project.projectKey == projectKey)
 
         listOf<Matcher<*>>(
@@ -112,7 +110,7 @@ class ProjectOrdinalManager(
                             .map { Key.Entry.fromJson(projectCustomTimeIdAndKeyProvider, it.value) }
                             .toSet()
                     ),
-                    Value(json.ordinal, ExactTimeStamp.Local(json.updated))
+                    Value(json.ordinal.toOrdinal(), ExactTimeStamp.Local(json.updated))
                 )
             }
         }
@@ -122,7 +120,7 @@ class ProjectOrdinalManager(
                 key.entries
                     .mapIndexed { index, entry -> "a$index" to entry.toJson() }
                     .toMap(), // ridiculous hack to fix Java vs. JS parsing
-                value.ordinal,
+                value.ordinal.toDouble(),
                 value.updated.long,
             )
         }
@@ -191,7 +189,7 @@ class ProjectOrdinalManager(
         }
     }
 
-    data class Value(val ordinal: Double, val updated: ExactTimeStamp.Local)
+    data class Value(val ordinal: Ordinal, val updated: ExactTimeStamp.Local)
 
     fun interface Callbacks {
 

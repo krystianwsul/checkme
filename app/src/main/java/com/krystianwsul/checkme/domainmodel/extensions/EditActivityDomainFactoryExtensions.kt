@@ -862,7 +862,7 @@ fun DomainFactory.createChildTask(
     note: String?,
     imageJson: TaskJson.Image?,
     copyTaskKey: TaskKey? = null,
-    ordinal: Double? = null,
+    ordinal: Ordinal? = null,
 ): RootTask {
     check(name.isNotEmpty())
     parentTask.requireNotDeleted()
@@ -888,7 +888,7 @@ fun DomainFactory.createScheduleTopLevelTask(
     projectKey: ProjectKey<*>,
     image: EditDelegate.CreateParameters.Image?,
     customTimeMigrationHelper: Project.CustomTimeMigrationHelper,
-    ordinal: Double? = null,
+    ordinal: Ordinal? = null,
     assignedTo: Set<UserKey> = setOf(),
 ) = createRootTask(now, image, name, note, ordinal).apply {
     createSchedules(now, scheduleDatas, assignedTo, customTimeMigrationHelper, projectKey)
@@ -900,7 +900,7 @@ private fun DomainFactory.createNoScheduleOrParentTask(
     note: String?,
     projectKey: ProjectKey<*>,
     image: EditDelegate.CreateParameters.Image?,
-    ordinal: Double? = null,
+    ordinal: Ordinal? = null,
 ) = createRootTask(now, image, name, note, ordinal).apply {
     performRootIntervalUpdate { setNoScheduleOrParent(now, projectKey) }
 }
@@ -910,7 +910,7 @@ private fun DomainFactory.createRootTask(
     image: EditDelegate.CreateParameters.Image?,
     name: String,
     note: String?,
-    ordinal: Double?,
+    ordinal: Ordinal?,
 ): RootTask {
     return rootTasksFactory.createTask(
         now,

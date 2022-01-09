@@ -36,6 +36,7 @@ import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.InstanceKey
+import com.krystianwsul.common.utils.Ordinal
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.filterValuesNotNull
 import com.krystianwsul.treeadapter.*
@@ -264,7 +265,7 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
 
             override fun getOrdinal() = instanceData.ordinal
 
-            override fun setOrdinal(ordinal: Double) {
+            override fun setOrdinal(ordinal: Ordinal) {
                 AndroidDomainUpdater.setOrdinal(
                     groupListFragment.parameters.dataId.toFirst(),
                     instanceData.taskKey,
@@ -408,9 +409,9 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
 
             override val overrideDraggable = true
 
-            override fun getOrdinal(): Double = bridge.ordinal
+            override fun getOrdinal() = bridge.ordinal
 
-            override fun setOrdinal(ordinal: Double) {
+            override fun setOrdinal(ordinal: Ordinal) {
                 AndroidDomainUpdater.setOrdinalProject(
                     groupListFragment.parameters.dataId.toFirst(),
                     bridge.let { it as GroupTypeFactory.ProjectBridge }.instanceKeys,

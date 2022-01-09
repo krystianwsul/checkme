@@ -9,13 +9,13 @@ sealed class ProjectKey<T : ProjectType> : Parcelable, Serializable {
         private const val KEY_LENGTH = 20
         private const val PUSH_CHARS = "-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz"
 
-        private const val MULTIPLIER = PUSH_CHARS.length.toDouble()
+        private val MULTIPLIER = Ordinal(PUSH_CHARS.length)
 
         private val MAX_KEY = PUSH_CHARS.last()
             .toString()
             .repeat(KEY_LENGTH)
 
-        private fun keyToRawOrdinal(key: String): Double {
+        private fun keyToRawOrdinal(key: String): Ordinal {
             return key.reversed().mapIndexed { index, char ->
                 check(index < KEY_LENGTH)
 

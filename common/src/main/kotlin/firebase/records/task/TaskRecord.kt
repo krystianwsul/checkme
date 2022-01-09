@@ -13,6 +13,7 @@ import com.krystianwsul.common.firebase.records.schedule.*
 import com.krystianwsul.common.firebase.records.taskhierarchy.NestedTaskHierarchyRecord
 import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.utils.*
+import kotlin.properties.Delegates
 
 abstract class TaskRecord protected constructor(
     create: Boolean,
@@ -82,7 +83,9 @@ abstract class TaskRecord protected constructor(
 
     abstract fun setEndData(endData: RootTaskJson.EndData?)
 
-    var ordinal by Committer(taskJson::ordinal)
+    var ordinal by Delegates.observable(taskJson.ordinal?.let(::Ordinal)) { _, _, newValue ->
+        setProperty(taskJson::ordinal, newValue?.toDouble())
+    }
 
     final override val children
         get() = instanceRecords.values +

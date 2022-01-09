@@ -22,6 +22,7 @@ import com.krystianwsul.checkme.gui.tree.delegates.thumbnail.ThumbnailDelegate
 import com.krystianwsul.checkme.gui.tree.delegates.thumbnail.ThumbnailModelNode
 import com.krystianwsul.checkme.gui.utils.flatten
 import com.krystianwsul.common.criteria.SearchCriteria
+import com.krystianwsul.common.utils.Ordinal
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.common.utils.filterValuesNotNull
 import com.krystianwsul.treeadapter.*
@@ -187,7 +188,7 @@ class TaskNode(
 
     override fun getOrdinal() = taskData.ordinal
 
-    override fun setOrdinal(ordinal: Double) {
+    override fun setOrdinal(ordinal: Ordinal) {
         AndroidDomainUpdater.setOrdinal(groupListFragment.parameters.dataId.toFirst(), taskData.taskKey, ordinal)
             .subscribe()
             .addTo(groupListFragment.attachedToWindowDisposable)

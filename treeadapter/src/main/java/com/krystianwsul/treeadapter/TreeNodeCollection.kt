@@ -2,6 +2,7 @@ package com.krystianwsul.treeadapter
 
 import com.jakewharton.rxrelay3.BehaviorRelay
 import com.krystianwsul.common.criteria.SearchCriteria
+import com.krystianwsul.common.utils.Ordinal
 import io.reactivex.rxjava3.core.Observable
 import kotlin.math.ceil
 import kotlin.math.min
@@ -176,15 +177,15 @@ class TreeNodeCollection<T : TreeHolder>(val treeViewAdapter: TreeViewAdapter<T>
 
         check(previousNode != null || nextNode != null)
 
-        val previousOrdinal: Double
-        val nextOrdinal: Double
+        val previousOrdinal: Ordinal
+        val nextOrdinal: Ordinal
         if (previousNode != null) {
             previousOrdinal = previousNode.getOrdinal()
 
-            val lastOrdinal = if (previousOrdinal.toInt() == ceil(previousOrdinal).toInt())
+            val lastOrdinal = if (previousOrdinal.isInt())
                 previousOrdinal + 1
             else
-                ceil(previousOrdinal)
+                previousOrdinal.ceiling()
 
             nextOrdinal = nextNode?.getOrdinal() ?: lastOrdinal
         } else {

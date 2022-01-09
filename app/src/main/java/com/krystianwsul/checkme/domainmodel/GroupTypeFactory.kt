@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.domainmodel
 
+import com.krystianwsul.checkme.domainmodel.updates.SetInstanceOrdinalDomainUpdate
 import com.krystianwsul.checkme.gui.instances.ShowGroupActivity
 import com.krystianwsul.checkme.gui.instances.drag.DropParent
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
@@ -7,6 +8,7 @@ import com.krystianwsul.checkme.gui.instances.list.GroupListFragment
 import com.krystianwsul.checkme.gui.instances.tree.NodeCollection
 import com.krystianwsul.checkme.gui.instances.tree.NotDoneNode
 import com.krystianwsul.checkme.gui.tree.DetailsNode
+import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.project.SharedProject
 import com.krystianwsul.common.firebase.models.users.ProjectOrdinalManager
 import com.krystianwsul.common.time.DateTimePair
@@ -125,6 +127,8 @@ class GroupTypeFactory(
         private val showGroupActivityParameters: ShowGroupActivity.Parameters,
     ) : GroupType.Time, SingleParent {
 
+        override val newParentInfo = Instance.NewParentInfo.TOP_LEVEL
+
         override fun toContentDelegate(
             groupAdapter: GroupListFragment.GroupAdapter,
             indentation: Int,
@@ -166,6 +170,8 @@ class GroupTypeFactory(
         override val name get() = projectDetails.name
 
         val instanceKeys = instanceDatas.map { it.instanceKey }.toSet()
+
+        override val newParentInfo = Instance.NewParentInfo.NO_OP
 
         override fun toContentDelegate(
             groupAdapter: GroupListFragment.GroupAdapter,
@@ -214,6 +220,8 @@ class GroupTypeFactory(
 
         override val sortable = true
 
+        override val newParentInfo = Instance.NewParentInfo.PROJECT
+
         override fun toContentDelegate(
             groupAdapter: GroupListFragment.GroupAdapter,
             indentation: Int,
@@ -252,6 +260,8 @@ class GroupTypeFactory(
         override val instanceKeys = setOf(instanceData.instanceKey)
 
         override val ordinal = instanceData.ordinal
+
+        override val newParentInfo = Instance.NewParentInfo.NO_OP
 
         override fun toContentDelegate(
             groupAdapter: GroupListFragment.GroupAdapter,

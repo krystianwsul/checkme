@@ -81,9 +81,26 @@ class Instance private constructor(
     // todo ordinal
     var ordinal
         get() = task.ordinal
-        set(value) {
+        private set(value) {
             task.ordinal = value
         }
+
+    var splitFromProject = false
+        private set
+
+    fun setOrdinal(ordinal: Ordinal, newParentInfo: NewParentInfo) {
+        splitFromProject = when (newParentInfo) {
+            NewParentInfo.NO_OP -> splitFromProject
+            NewParentInfo.TOP_LEVEL -> true
+            NewParentInfo.PROJECT -> false
+        }
+
+        if (splitFromProject) {
+            this.ordinal = ordinal
+        } else {
+            task.ordinal = ordinal
+        }
+    }
 
     fun getTaskHierarchyParentInstance(): Instance? {
         /**
@@ -862,5 +879,10 @@ class Instance private constructor(
 
             override val noParent = false
         }
+    }
+
+    enum class NewParentInfo {
+
+        NO_OP, TOP_LEVEL, PROJECT
     }
 }

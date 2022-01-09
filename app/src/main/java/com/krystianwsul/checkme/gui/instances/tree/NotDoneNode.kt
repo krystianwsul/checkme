@@ -12,6 +12,7 @@ import com.krystianwsul.checkme.domainmodel.updates.SetInstanceOrdinalDomainUpda
 import com.krystianwsul.checkme.domainmodel.updates.SetTaskOrdinalDomainUpdate
 import com.krystianwsul.checkme.gui.instances.ShowGroupActivity
 import com.krystianwsul.checkme.gui.instances.ShowInstanceActivity
+import com.krystianwsul.checkme.gui.instances.drag.DropParent
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.instances.list.GroupListFragment
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
@@ -133,6 +134,16 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
         ): TreeNode<AbstractHolder>
 
         abstract fun onClick(holder: AbstractHolder)
+
+        protected fun TreeNode<*>.getDropParent(): DropParent {
+            return when (val parent = parent) {
+                is TreeNode<*> -> parent.modelNode
+                    .let { it as NotDoneNode }
+                    .contentDelegate
+                    .bridge
+                is TreeNodeCollection<*> -> groupAdapter.dropParent
+            }
+        }
 
         class Instance(
             override val groupAdapter: GroupListFragment.GroupAdapter,
@@ -272,21 +283,16 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
                     groupListFragment.parameters.dataId.toFirst(),
                     instanceData.instanceKey,
                     ordinal,
+                    treeNode.getDropParent().newParentInfo,
                 ).perform(AndroidDomainUpdater).subscribe()
             }
 
             override fun canDropOn(other: Sortable): Boolean {
                 check(other is NotDoneNode)
 
-                val dropParent = when (val parent = other.treeNode.parent) {
-                    is TreeNode<*> -> parent.modelNode
-                        .let { it as NotDoneNode }
-                        .contentDelegate
-                        .bridge
-                    is TreeNodeCollection<*> -> groupAdapter.dropParent
-                }
-
-                return dropParent.canDropIntoParent(bridge)
+                return other.treeNode
+                    .getDropParent()
+                    .canDropIntoParent(bridge)
             }
 
             override fun normalize() = instanceData.normalize()
@@ -438,15 +444,9 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
             override fun canDropOn(other: Sortable): Boolean {
                 check(other is NotDoneNode)
 
-                val dropParent = when (val parent = other.treeNode.parent) {
-                    is TreeNode<*> -> parent.modelNode
-                        .let { it as NotDoneNode }
-                        .contentDelegate
-                        .bridge
-                    is TreeNodeCollection<*> -> groupAdapter.dropParent
-                }
-
-                return dropParent.canDropIntoParent(bridge as GroupTypeFactory.TimeChild)
+                return other.treeNode
+                    .getDropParent()
+                    .canDropIntoParent(bridge as GroupTypeFactory.TimeChild)
             }
 
             override fun normalize() = allInstanceDatas.forEach { it.normalize() }

@@ -35,7 +35,7 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
                 it.done == null &&
                         !it.getNotified(domainFactory.shownFactory) &&
                         it.isAssignedToMe(now, domainFactory.myUserFactory.user)
-            }.toList()
+            }
 
         fun getNotificationInstances(domainFactory: DomainFactory, now: ExactTimeStamp.Local) =
             domainFactory.getRootInstances(
@@ -57,7 +57,7 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
                 offset.plusOne(),
                 now,
                 projectKey = projectKey,
-            ).filterNotifications(domainFactory, now)
+            ).filterNotifications(domainFactory, now).toList()
         }
     }
 
@@ -261,7 +261,7 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
             notificationWrapper.updateAlarm(null)
         } else {
             val nextAlarmInstance = domainFactory.getRootInstances(now.toOffset().plusOne(), null, now)
-                .filter { it.isAssignedToMe(now, domainFactory.myUserFactory.user) }
+                .filterNotifications(domainFactory, now)
                 .firstOrNull()
 
             if (nextAlarmInstance != null) {

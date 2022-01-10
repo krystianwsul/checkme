@@ -8,6 +8,7 @@ import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
 import com.krystianwsul.checkme.utils.dpToPx
+import com.krystianwsul.treeadapter.PositionMode
 import com.krystianwsul.treeadapter.Sortable
 import com.krystianwsul.treeadapter.TreeRecyclerView
 import com.krystianwsul.treeadapter.TreeViewAdapter
@@ -83,7 +84,9 @@ abstract class DragHelper(callback: MyCallback = MyCallback()) : ItemTouchHelper
 
             if (startPosition != endPosition) getTreeViewAdapter().setNewItemPosition(endPosition!!)
 
-            getTreeViewAdapter().notifyItemChanged(viewHolder.adapterPosition)
+            getTreeViewAdapter().getTreeNodeCollection()
+                .getNode(viewHolder.adapterPosition, PositionMode.DISPLAYED)
+                .onBindViewHolder(viewHolder)
         } else {
             startPosition?.let { getTreeViewAdapter().selectNode(it) }
         }

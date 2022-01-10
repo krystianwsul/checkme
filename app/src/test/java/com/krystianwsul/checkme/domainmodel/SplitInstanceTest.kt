@@ -71,7 +71,7 @@ class SplitInstanceTest {
 
         val parentInstanceKey = getDayInstanceDatas(now).let {
             assertEquals(1, it.size)
-            assertEquals(2, it.single().children.instanceDatas.size)
+            assertEquals(2, it.single().allChildren.size)
 
             it.single().instanceKey
         }
@@ -128,14 +128,14 @@ class SplitInstanceTest {
 
         val parentInstanceKey = getDayInstanceDatas(now).let {
             assertEquals(1, it.size)
-            assertEquals(2, it.single().children.instanceDatas.size)
+            assertEquals(2, it.single().allChildren.size)
 
             it.single().instanceKey
         }
 
         getDayInstanceDatas(now, 7).let {
             assertEquals(1, it.size)
-            assertEquals(2, it.single().children.instanceDatas.size)
+            assertEquals(2, it.single().allChildren.size)
 
             it.single().instanceKey
         }
@@ -156,7 +156,7 @@ class SplitInstanceTest {
 
         getDayInstanceDatas(now, 7).let {
             assertEquals(1, it.size)
-            assertEquals(2, it.single().children.instanceDatas.size)
+            assertEquals(2, it.single().allChildren.size)
 
             it.single().instanceKey
         }

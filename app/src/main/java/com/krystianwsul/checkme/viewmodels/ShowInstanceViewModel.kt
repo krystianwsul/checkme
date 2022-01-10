@@ -29,7 +29,6 @@ class ShowInstanceViewModel : DomainViewModel<ShowInstanceViewModel.Data>() {
         val canMigrateDescription: Boolean,
         val isRootInstance: Boolean,
         val groupListDataWrapper: GroupListDataWrapper,
-        val notificationShown: Boolean,
         val displayText: String,
         val taskKey: TaskKey,
         val isVisible: Boolean,

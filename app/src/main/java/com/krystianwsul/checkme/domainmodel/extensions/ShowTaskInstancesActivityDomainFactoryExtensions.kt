@@ -71,7 +71,6 @@ fun DomainFactory.getShowTaskInstancesData(
                             newMixedInstanceDataCollection(notDoneChildInstanceDescriptors),
                             doneChildInstanceDescriptors.toInstanceDatas(),
                             it.ordinal,
-                            it.getNotificationShown(shownFactory),
                             it.task.getImage(deviceDbInfo),
                             it.isAssignedToMe(now, myUserFactory.user),
                             it.getProjectInfo(now, parameters.projectKey == null),

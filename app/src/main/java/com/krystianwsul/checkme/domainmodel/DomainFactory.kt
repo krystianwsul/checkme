@@ -443,7 +443,6 @@ class DomainFactory(
             newMixedInstanceDataCollection(notDoneInstanceDescriptors),
             doneInstanceDescriptors.toInstanceDatas(),
             instance.ordinal,
-            instance.getNotificationShown(shownFactory),
             instance.task.getImage(deviceDbInfo),
             instance.isAssignedToMe(now, myUserFactory.user),
             instance.getProjectInfo(now, includeProjectInfo),

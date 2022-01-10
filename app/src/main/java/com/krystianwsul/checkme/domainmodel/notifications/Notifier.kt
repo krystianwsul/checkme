@@ -30,12 +30,13 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
 
         const val TEST_IRRELEVANT = false
 
+        // duplicate of logic in Instance.shouldShowNotification
         private fun Sequence<Instance>.filterNotifications(domainFactory: DomainFactory, now: ExactTimeStamp.Local) =
             filter {
                 it.done == null &&
                         !it.getNotified(domainFactory.shownFactory) &&
                         it.isAssignedToMe(now, domainFactory.myUserFactory.user)
-            }.toList()
+            }
 
         fun getNotificationInstances(domainFactory: DomainFactory, now: ExactTimeStamp.Local) =
             domainFactory.getRootInstances(
@@ -57,7 +58,7 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
                 offset.plusOne(),
                 now,
                 projectKey = projectKey,
-            ).filterNotifications(domainFactory, now)
+            ).filterNotifications(domainFactory, now).toList()
         }
     }
 
@@ -90,10 +91,37 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
             notificationDatas += NotificationData.Cancel(instanceId)
         }
 
-        val notificationInstances = if (clear)
-            mapOf()
-        else
-            getNotificationInstances(domainFactory, now).associateBy { it.instanceKey }
+        val notificationInstances: Map<InstanceKey, Instance>
+        val nextAlarmInstance: Instance?
+        if (clear) {
+            notificationInstances = mapOf()
+            nextAlarmInstance = null
+        } else {
+            val notificationInstanceSequence = domainFactory.getRootInstances(
+                null,
+                null,
+                now,
+            ).filterNotifications(domainFactory, now)
+
+            var needsOneExtra = true
+            val allNotificationInstances =
+                notificationInstanceSequence.map { (it.instanceDateTime.toLocalExactTimeStamp() <= now) to it }
+                    .takeWhile { (beforeNow, _) ->
+                        when {
+                            beforeNow -> true
+                            needsOneExtra -> {
+                                needsOneExtra = false
+
+                                true
+                            }
+                            else -> false
+                        }
+                    }
+                    .groupBy({ it.first }, { it.second })
+
+            notificationInstances = allNotificationInstances[true].orEmpty().associateBy { it.instanceKey }
+            nextAlarmInstance = allNotificationInstances[false].orEmpty().singleOrEmpty()
+        }
 
         check(notificationInstances.values.all { it.task.dependenciesLoaded })
 
@@ -260,10 +288,6 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
         if (clear) {
             notificationWrapper.updateAlarm(null)
         } else {
-            val nextAlarmInstance = domainFactory.getRootInstances(now.toOffset().plusOne(), null, now)
-                .filter { it.isAssignedToMe(now, domainFactory.myUserFactory.user) }
-                .firstOrNull()
-
             if (nextAlarmInstance != null) {
                 val nextAlarmTimeStamp = nextAlarmInstance.instanceDateTime.timeStamp
 

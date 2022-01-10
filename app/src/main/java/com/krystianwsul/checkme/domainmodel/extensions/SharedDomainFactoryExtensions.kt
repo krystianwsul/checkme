@@ -66,13 +66,16 @@ fun DomainUpdater.clearTaskEndTimeStamps(
 fun DomainUpdater.setInstancesNotNotified(
     notificationType: DomainListenerManager.NotificationType,
     instanceKeys: List<InstanceKey>,
+    checkConsistency: Boolean = true,
 ): Completable = CompletableDomainUpdate.create("setInstancesNotNotified") { now ->
     instanceKeys.forEach {
         val instance = getInstance(it)
-        check(instance.done == null)
-        check(instance.instanceDateTime.timeStamp.toLocalExactTimeStamp() <= now)
-        check(!instance.getNotificationShown(shownFactory))
-        check(instance.isRootInstance())
+
+        if (checkConsistency) {
+            check(instance.done == null)
+            check(instance.instanceDateTime.timeStamp.toLocalExactTimeStamp() <= now)
+            check(instance.isRootInstance())
+        }
 
         instance.setNotified(shownFactory, false)
         instance.setNotificationShown(shownFactory, false)

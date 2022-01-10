@@ -166,7 +166,6 @@ fun DomainFactory.getGroupListData(
             newMixedInstanceDataCollection(notDoneChildInstanceDescriptors),
             doneChildInstanceDescriptors.toInstanceDatas(),
             instance.ordinal,
-            instance.getNotificationShown(shownFactory),
             task.getImage(deviceDbInfo),
             instance.isAssignedToMe(now, myUserFactory.user),
             instance.getProjectInfo(now),

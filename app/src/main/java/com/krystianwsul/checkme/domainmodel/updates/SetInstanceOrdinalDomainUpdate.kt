@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.domainmodel.updates
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
+import com.krystianwsul.checkme.domainmodel.notifications.Notifier
 import com.krystianwsul.checkme.domainmodel.update.AbstractCompletableDomainUpdate
 import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
 import com.krystianwsul.common.firebase.models.Instance
@@ -21,6 +22,12 @@ class SetInstanceOrdinalDomainUpdate(
 
         instance.setOrdinal(ordinal, newParentInfo)
 
-        return DomainUpdater.Params(true, notificationType, DomainFactory.CloudParams(instance.getProject()))
+        //todo ordinal
+//        return DomainUpdater.Params(true, notificationType, DomainFactory.CloudParams(instance.getProject()))
+        return DomainUpdater.Params(
+            Notifier.Params(),
+            DomainFactory.SaveParams(notificationType, true),
+            DomainFactory.CloudParams(instance.getProject())
+        )
     }
 }

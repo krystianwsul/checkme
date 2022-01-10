@@ -88,31 +88,31 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
         showInstanceViewModel.stop()
 
         val undoTaskDataSingle = AndroidDomainUpdater.setTaskEndTimeStamps(
-                showInstanceViewModel.dataId.toFirst(),
-                taskKeys as Set<TaskKey>,
-                removeInstances,
-                instanceKey,
+            showInstanceViewModel.dataId.toFirst(),
+            taskKeys as Set<TaskKey>,
+            removeInstances,
+            instanceKey,
         )
-                .observeOn(AndroidSchedulers.mainThread())
-                .cache()
+            .observeOn(AndroidSchedulers.mainThread())
+            .cache()
 
         undoTaskDataSingle.filter { (_, visible) -> visible }
-                .map { (undoTaskData, _) -> undoTaskData }
-                .doOnSuccess { showInstanceViewModel.start(instanceKey) }
-                .flatMap { showSnackbarRemovedMaybe(taskKeys.size).map { _ -> it } }
-                .flatMapCompletable {
-                    AndroidDomainUpdater.clearTaskEndTimeStamps(showInstanceViewModel.dataId.toFirst(), it)
-                }
-                .subscribe()
-                .addTo(createDisposable)
+            .map { (undoTaskData, _) -> undoTaskData }
+            .doOnSuccess { showInstanceViewModel.start(instanceKey) }
+            .flatMap { showSnackbarRemovedMaybe(taskKeys.size).map { _ -> it } }
+            .flatMapCompletable {
+                AndroidDomainUpdater.clearTaskEndTimeStamps(showInstanceViewModel.dataId.toFirst(), it)
+            }
+            .subscribe()
+            .addTo(createDisposable)
 
         undoTaskDataSingle.filter { (_, visible) -> !visible }
-                .map { (undoTaskData, _) -> undoTaskData }
-                .subscribe {
-                    setSnackbar(it)
-                    finish()
-                }
-                .addTo(createDisposable)
+            .map { (undoTaskData, _) -> undoTaskData }
+            .subscribe {
+                setSnackbar(it)
+                finish()
+            }
+            .addTo(createDisposable)
     }
 
     override val instanceSearch by lazy {
@@ -159,58 +159,54 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
 
                 configureMenu(R.menu.show_instance_menu_top, R.id.instanceMenuSearch) { itemId ->
                     data!!.also {
-                            when (itemId) {
-                                R.id.instanceMenuNotify -> {
-                                    check(!it.done)
-                                    check(it.instanceDateTime.timeStamp <= TimeStamp.now)
-                                    check(it.isRootInstance)
+                        when (itemId) {
+                            R.id.instanceMenuNotify -> {
+                                check(!it.done)
+                                check(it.instanceDateTime.timeStamp <= TimeStamp.now)
+                                check(it.isRootInstance)
 
-                                    // to ignore double taps
-                                    if (!it.notificationShown) {
-                                        AndroidDomainUpdater.setInstancesNotNotified(
-                                                showInstanceViewModel.dataId.toFirst(),
-                                                listOf(instanceKey),
-                                        )
-                                                .subscribe()
-                                                .addTo(createDisposable)
-                                    }
-                                }
-                                R.id.instanceMenuHour -> {
-                                    check(showHour())
-
-                                    AndroidDomainUpdater.setInstancesAddHourActivity(
-                                            showInstanceViewModel.dataId.toFirst(),
-                                            listOf(instanceKey),
-                                    )
-                                            .observeOn(AndroidSchedulers.mainThread())
-                                            .flatMapMaybe {
-                                                showSnackbarHourMaybe(it.instanceDateTimes.size).map { _ -> it }
-                                            }
-                                            .flatMapCompletable {
-                                                AndroidDomainUpdater.undoInstancesAddHour(
-                                                        showInstanceViewModel.dataId.toFirst(),
-                                                        it,
-                                                )
-                                            }
-                                        .subscribe()
-                                        .addTo(createDisposable)
-                                }
-                                R.id.instanceMenuEditInstance -> {
-                                    check(!it.done)
-
-                                    editInstancesHostDelegate.show(listOf(instanceKey))
-                                }
-                                R.id.instanceMenuSplit -> {
-                                    AndroidDomainUpdater.splitInstance(
-                                        DomainListenerManager.NotificationType.All,
-                                        instanceKey,
-                                    ).subscribe()
-
-                                    finish()
-                                }
-                                R.id.instanceMenuCheck -> if (!it.done) setDone(true) // todo flowable
-                                R.id.instanceMenuUncheck -> if (it.done) setDone(false)
+                                AndroidDomainUpdater.setInstancesNotNotified(
+                                    showInstanceViewModel.dataId.toFirst(),
+                                    listOf(instanceKey),
+                                    false,
+                                ).subscribe()
                             }
+                            R.id.instanceMenuHour -> {
+                                check(showHour())
+
+                                AndroidDomainUpdater.setInstancesAddHourActivity(
+                                    showInstanceViewModel.dataId.toFirst(),
+                                    listOf(instanceKey),
+                                )
+                                    .observeOn(AndroidSchedulers.mainThread())
+                                    .flatMapMaybe {
+                                        showSnackbarHourMaybe(it.instanceDateTimes.size).map { _ -> it }
+                                    }
+                                    .flatMapCompletable {
+                                        AndroidDomainUpdater.undoInstancesAddHour(
+                                            showInstanceViewModel.dataId.toFirst(),
+                                            it,
+                                        )
+                                    }
+                                    .subscribe()
+                                    .addTo(createDisposable)
+                            }
+                            R.id.instanceMenuEditInstance -> {
+                                check(!it.done)
+
+                                editInstancesHostDelegate.show(listOf(instanceKey))
+                            }
+                            R.id.instanceMenuSplit -> {
+                                AndroidDomainUpdater.splitInstance(
+                                    DomainListenerManager.NotificationType.All,
+                                    instanceKey,
+                                ).subscribe()
+
+                                finish()
+                            }
+                            R.id.instanceMenuCheck -> if (!it.done) setDone(true) // todo flowable
+                            R.id.instanceMenuUncheck -> if (it.done) setDone(false)
+                        }
                     }
                 }
             }
@@ -242,40 +238,40 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
 
     private fun updateTopMenu() {
         binding.showInstanceToolbarCollapseInclude
-                .collapseAppBarLayout
-                .menu
-                .apply {
-                    findItem(R.id.instanceMenuSearch).isVisible = !data?.groupListDataWrapper
-                        ?.allInstanceDatas
-                        .isNullOrEmpty()
-                    findItem(R.id.instanceMenuEditInstance).isVisible = data?.done == false
-                    findItem(R.id.instanceMenuSplit).isVisible = data?.run {
-                        !done && groupListDataWrapper.allInstanceDatas.size > 1
-                    } == true
-                    findItem(R.id.instanceMenuNotify).isVisible = data?.run {
-                        !done && isRootInstance && instanceDateTime.timeStamp <= TimeStamp.now && !notificationShown
-                    } == true
-                    findItem(R.id.instanceMenuHour).isVisible = showHour()
-                    findItem(R.id.instanceMenuCheck).isVisible = data?.done == false
-                    findItem(R.id.instanceMenuUncheck).isVisible = data?.done == true
-                }
+            .collapseAppBarLayout
+            .menu
+            .apply {
+                findItem(R.id.instanceMenuSearch).isVisible = !data?.groupListDataWrapper
+                    ?.allInstanceDatas
+                    .isNullOrEmpty()
+                findItem(R.id.instanceMenuEditInstance).isVisible = data?.done == false
+                findItem(R.id.instanceMenuSplit).isVisible = data?.run {
+                    !done && groupListDataWrapper.allInstanceDatas.size > 1
+                } == true
+                findItem(R.id.instanceMenuNotify).isVisible = data?.run {
+                    !done && isRootInstance && instanceDateTime.timeStamp <= TimeStamp.now
+                } == true
+                findItem(R.id.instanceMenuHour).isVisible = showHour()
+                findItem(R.id.instanceMenuCheck).isVisible = data?.done == false
+                findItem(R.id.instanceMenuUncheck).isVisible = data?.done == true
+            }
     }
 
     private fun updateBottomMenu() {
         bottomBinding.bottomAppBar
-                .menu
-                .run {
-                    if (findItem(R.id.instance_menu_share) == null) return
+            .menu
+            .run {
+                if (findItem(R.id.instance_menu_share) == null) return
 
-                    findItem(R.id.instance_menu_share).isVisible = data != null
-                    findItem(R.id.instance_menu_show_task).isVisible = data != null
-                    findItem(R.id.instance_menu_edit_task).isVisible = data?.taskCurrent == true
-                    findItem(R.id.instance_menu_delete_task).isVisible = data?.taskCurrent == true
-                    findItem(R.id.instance_menu_select_all).isVisible = selectAllVisible
-                    findItem(R.id.instanceMenuCopyTask).isVisible = data?.taskCurrent == true
-                    findItem(R.id.instanceMenuWebSearch).isVisible = data != null
-                    findItem(R.id.instanceMenuMigrateDescription).isVisible = data?.canMigrateDescription == true
-                }
+                findItem(R.id.instance_menu_share).isVisible = data != null
+                findItem(R.id.instance_menu_show_task).isVisible = data != null
+                findItem(R.id.instance_menu_edit_task).isVisible = data?.taskCurrent == true
+                findItem(R.id.instance_menu_delete_task).isVisible = data?.taskCurrent == true
+                findItem(R.id.instance_menu_select_all).isVisible = selectAllVisible
+                findItem(R.id.instanceMenuCopyTask).isVisible = data?.taskCurrent == true
+                findItem(R.id.instanceMenuWebSearch).isVisible = data != null
+                findItem(R.id.instanceMenuMigrateDescription).isVisible = data?.canMigrateDescription == true
+            }
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -317,17 +313,17 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
         val immediate = data.immediate
 
         binding.showInstanceToolbarCollapseInclude
-                .collapseAppBarLayout
-                .setText(data.name, data.displayText, binding.groupListFragment.emptyTextLayout, immediate)
+            .collapseAppBarLayout
+            .setText(data.name, data.displayText, binding.groupListFragment.emptyTextLayout, immediate)
 
         updateTopMenu()
         updateBottomMenu()
 
         binding.groupListFragment.setInstanceKey(
-                instanceKey,
-                showInstanceViewModel.dataId,
-                immediate,
-                data.groupListDataWrapper,
+            instanceKey,
+            showInstanceViewModel.dataId,
+            immediate,
+            data.groupListDataWrapper,
         )
     }
 
@@ -339,16 +335,16 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
     }
 
     override fun onCreateGroupActionMode(
-            actionMode: ActionMode,
-            treeViewAdapter: TreeViewAdapter<AbstractHolder>,
-            initial: Boolean,
+        actionMode: ActionMode,
+        treeViewAdapter: TreeViewAdapter<AbstractHolder>,
+        initial: Boolean,
     ) = binding.showInstanceToolbarCollapseInclude
-            .collapseAppBarLayout
-            .collapse()
+        .collapseAppBarLayout
+        .collapse()
 
     override fun onDestroyGroupActionMode() = binding.showInstanceToolbarCollapseInclude
-            .collapseAppBarLayout
-            .expand()
+        .collapseAppBarLayout
+        .expand()
 
     override fun setGroupMenuItemVisibility(position: Int?, selectAllVisible: Boolean) {
         this.selectAllVisible = selectAllVisible
@@ -368,8 +364,8 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
                         R.id.instance_menu_share -> {
                             val shareData = binding.groupListFragment.shareData
                             Utils.share(
-                                    this@ShowInstanceActivity,
-                                    it.name + if (shareData.isEmpty()) "" else "\n" + shareData
+                                this@ShowInstanceActivity,
+                                it.name + if (shareData.isEmpty()) "" else "\n" + shareData
                             )
                         }
                         R.id.instance_menu_show_task -> startActivity(ShowTaskActivity.newIntent(instanceKey.taskKey))
@@ -427,12 +423,12 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
     }
 
     override fun setToolbarExpanded(expanded: Boolean) = binding.showInstanceToolbarCollapseInclude
-            .collapseAppBarLayout
-            .setExpanded(expanded)
+        .collapseAppBarLayout
+        .setExpanded(expanded)
 
     override fun onBackPressed() {
         binding.showInstanceToolbarCollapseInclude
-                .collapseAppBarLayout
-                .apply { if (isSearching) closeSearch() else super.onBackPressed() }
+            .collapseAppBarLayout
+            .apply { if (isSearching) closeSearch() else super.onBackPressed() }
     }
 }

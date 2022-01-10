@@ -30,6 +30,7 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
 
         const val TEST_IRRELEVANT = false
 
+        // duplicate of logic in Instance.shouldShowNotification
         private fun Sequence<Instance>.filterNotifications(domainFactory: DomainFactory, now: ExactTimeStamp.Local) =
             filter {
                 it.done == null &&

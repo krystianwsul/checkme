@@ -25,10 +25,9 @@ object GroupMenuUtils {
     }
 
     private fun GroupListDataWrapper.SelectedData.showNotification() =
-        this is GroupListDataWrapper.InstanceData && showHour(this) && !notificationShown
+        this is GroupListDataWrapper.InstanceData && showHour(this)
 
-    fun showNotification(selectedDatas: SelectedDatas) =
-        selectedDatas.any { it.showNotification() }
+    fun showNotification(selectedDatas: SelectedDatas) = selectedDatas.any { it.showNotification() }
 
     fun showHour(selectedDatas: SelectedDatas) = selectedDatas.all { showHour(it) }
 
@@ -47,9 +46,7 @@ object GroupMenuUtils {
 
     @CheckResult
     fun onNotify(selectedDatas: SelectedDatas, dataId: DataId): Disposable {
-        val instanceDatas =
-            selectedDatas.filter { it.showNotification() }.map { it as GroupListDataWrapper.InstanceData }
-
+        val instanceDatas = selectedDatas.filterIsInstance<GroupListDataWrapper.InstanceData>()
         check(instanceDatas.isNotEmpty())
 
         val instanceKeys = instanceDatas.map { it.instanceKey }
@@ -57,6 +54,7 @@ object GroupMenuUtils {
         return AndroidDomainUpdater.setInstancesNotNotified(
             DomainListenerManager.NotificationType.First(dataId),
             instanceKeys,
+            false,
         ).subscribe()
     }
 

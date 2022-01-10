@@ -6,7 +6,6 @@ import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.GroupType
 import com.krystianwsul.checkme.ticks.Ticker
-import com.krystianwsul.common.FeatureFlagManager
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.users.ProjectOrdinalManager
 import com.krystianwsul.common.relevance.CustomTimeRelevance
@@ -91,43 +90,36 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
             notificationDatas += NotificationData.Cancel(instanceId)
         }
 
-        val newMethod = FeatureFlagManager.getFlag(FeatureFlagManager.Flag.COMBINED_NOTIFICATIONS)
-
         val notificationInstances: Map<InstanceKey, Instance>
-        val futureInstance: Instance?
+        val nextAlarmInstance: Instance?
         if (clear) {
             notificationInstances = mapOf()
-            futureInstance = null
+            nextAlarmInstance = null
         } else {
-            if (newMethod) {
-                val notificationInstanceSequence = domainFactory.getRootInstances(
-                    null,
-                    null,
-                    now,
-                ).filterNotifications(domainFactory, now)
+            val notificationInstanceSequence = domainFactory.getRootInstances(
+                null,
+                null,
+                now,
+            ).filterNotifications(domainFactory, now)
 
-                var needsOneExtra = true
-                val allNotificationInstances =
-                    notificationInstanceSequence.map { (it.instanceDateTime.toLocalExactTimeStamp() <= now) to it }
-                        .takeWhile { (beforeNow, _) ->
-                            when {
-                                beforeNow -> true
-                                needsOneExtra -> {
-                                    needsOneExtra = false
+            var needsOneExtra = true
+            val allNotificationInstances =
+                notificationInstanceSequence.map { (it.instanceDateTime.toLocalExactTimeStamp() <= now) to it }
+                    .takeWhile { (beforeNow, _) ->
+                        when {
+                            beforeNow -> true
+                            needsOneExtra -> {
+                                needsOneExtra = false
 
-                                    true
-                                }
-                                else -> false
+                                true
                             }
+                            else -> false
                         }
-                        .groupBy({ it.first }, { it.second })
+                    }
+                    .groupBy({ it.first }, { it.second })
 
-                notificationInstances = allNotificationInstances[true].orEmpty().associateBy { it.instanceKey }
-                futureInstance = allNotificationInstances[false].orEmpty().singleOrEmpty()
-            } else {
-                notificationInstances = getNotificationInstances(domainFactory, now).associateBy { it.instanceKey }
-                futureInstance = null
-            }
+            notificationInstances = allNotificationInstances[true].orEmpty().associateBy { it.instanceKey }
+            nextAlarmInstance = allNotificationInstances[false].orEmpty().singleOrEmpty()
         }
 
         check(notificationInstances.values.all { it.task.dependenciesLoaded })
@@ -295,14 +287,6 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
         if (clear) {
             notificationWrapper.updateAlarm(null)
         } else {
-            val nextAlarmInstance = if (newMethod) {
-                futureInstance
-            } else {
-                domainFactory.getRootInstances(now.toOffset().plusOne(), null, now)
-                    .filterNotifications(domainFactory, now)
-                    .firstOrNull()
-            }
-
             if (nextAlarmInstance != null) {
                 val nextAlarmTimeStamp = nextAlarmInstance.instanceDateTime.timeStamp
 

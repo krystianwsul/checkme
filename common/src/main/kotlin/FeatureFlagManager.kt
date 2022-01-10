@@ -14,6 +14,5 @@ object FeatureFlagManager {
 
     enum class Flag {
 
-        COMBINED_NOTIFICATIONS
     }
 }

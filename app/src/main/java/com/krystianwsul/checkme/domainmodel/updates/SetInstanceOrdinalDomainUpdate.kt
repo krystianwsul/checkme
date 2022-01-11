@@ -22,12 +22,6 @@ class SetInstanceOrdinalDomainUpdate(
 
         instance.setOrdinal(ordinal, newParentInfo)
 
-        //todo ordinal
-//        return DomainUpdater.Params(true, notificationType, DomainFactory.CloudParams(instance.getProject()))
-        return DomainUpdater.Params(
-            Notifier.Params(),
-            DomainFactory.SaveParams(notificationType, true),
-            DomainFactory.CloudParams(instance.getProject())
-        )
+        return DomainUpdater.Params(true, notificationType, DomainFactory.CloudParams(instance.getProject()))
     }
 }

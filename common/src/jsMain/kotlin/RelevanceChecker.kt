@@ -26,6 +26,7 @@ import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
+import com.krystianwsul.common.utils.Ordinal
 
 object RelevanceChecker {
 
@@ -105,7 +106,7 @@ object RelevanceChecker {
                             image: TaskJson.Image?,
                             name: String,
                             note: String?,
-                            ordinal: Double?
+                            ordinal: Ordinal?
                         ): RootTask {
                             throw UnsupportedOperationException()
                         }

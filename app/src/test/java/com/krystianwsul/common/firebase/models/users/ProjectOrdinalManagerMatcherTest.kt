@@ -6,19 +6,19 @@ import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
+import com.krystianwsul.common.utils.toOrdinal
 import com.soywiz.klock.hours
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import org.junit.Assert
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 
 class ProjectOrdinalManagerMatcherTest {
 
     companion object {
-
-        private fun assertEquals(expected: Double, actual: Double) = Assert.assertEquals(expected, actual, 0.0)
 
         private fun newKey(vararg entries: Pair<InstanceKey, DateTimePair>) = ProjectOrdinalManager.Key(
             entries.map { ProjectOrdinalManager.Key.Entry(it.first, it.second) }.toSet()
@@ -63,7 +63,7 @@ class ProjectOrdinalManagerMatcherTest {
 
         val now = ExactTimeStamp.Local(date, HourMinute(1, 0))
 
-        val ordinal = 1.0
+        val ordinal = 1.toOrdinal()
 
         projectOrdinalManager.setOrdinal(project, key, ordinal, now)
 
@@ -87,7 +87,7 @@ class ProjectOrdinalManagerMatcherTest {
 
         val now = ExactTimeStamp.Local(date, HourMinute(1, 0))
 
-        val ordinal = 1.0
+        val ordinal = 1.toOrdinal()
 
         projectOrdinalManager.setOrdinal(project, originalKey, ordinal, now)
 
@@ -119,7 +119,7 @@ class ProjectOrdinalManagerMatcherTest {
 
         val now = ExactTimeStamp.Local(firstDate, HourMinute(1, 0))
 
-        val ordinal = 1.0
+        val ordinal = 1.toOrdinal()
 
         projectOrdinalManager.setOrdinal(project, firstKey, ordinal, now)
 
@@ -155,7 +155,7 @@ class ProjectOrdinalManagerMatcherTest {
             instanceKey3 to instanceDateTimePair,
         )
 
-        val firstOrdinal = 1.0
+        val firstOrdinal = 1.toOrdinal()
 
         // first, we set an ordinal for all three instances
         var now = ExactTimeStamp.Local(date, HourMinute(1, 0))
@@ -170,7 +170,7 @@ class ProjectOrdinalManagerMatcherTest {
             instanceKey2 to instanceDateTimePair,
         )
 
-        val secondOrdinal = 2.0
+        val secondOrdinal = 2.toOrdinal()
 
         projectOrdinalManager.setOrdinal(project, doneKey, secondOrdinal, now)
         assertEquals(secondOrdinal, projectOrdinalManager.getOrdinal(project, doneKey))
@@ -201,7 +201,7 @@ class ProjectOrdinalManagerMatcherTest {
         // 1. set ordinal for earlier time
         var now = ExactTimeStamp.Local(date, HourMinute(1, 0))
 
-        val earlierOrdinal = 1.0
+        val earlierOrdinal = 1.toOrdinal()
 
         projectOrdinalManager.setOrdinal(project, earlierKey, earlierOrdinal, now)
 
@@ -232,7 +232,7 @@ class ProjectOrdinalManagerMatcherTest {
 
         // 4. set new ordinal
 
-        val newerOrdinal = 2.0
+        val newerOrdinal = 2.toOrdinal()
 
         projectOrdinalManager.setOrdinal(project, laterDoneKey, newerOrdinal, now)
         assertEquals(newerOrdinal, projectOrdinalManager.getOrdinal(project, laterDoneKey))
@@ -247,7 +247,7 @@ class ProjectOrdinalManagerMatcherTest {
 
         now += 1.hours
 
-        val newestOrdinal = 3.0
+        val newestOrdinal = 3.toOrdinal()
 
         projectOrdinalManager.setOrdinal(project, laterNotDoneKey, newestOrdinal, now)
         assertEquals(newestOrdinal, projectOrdinalManager.getOrdinal(project, laterNotDoneKey))

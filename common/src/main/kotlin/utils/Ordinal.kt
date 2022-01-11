@@ -35,6 +35,8 @@ class Ordinal(_bigDecimal: BigDecimal) : Comparable<Ordinal> {
     }
 
     override fun toString() = bigDecimal.toString()
+        .trimEnd('0')
+        .trimEnd('.')
 
     override fun compareTo(other: Ordinal) = bigDecimal.compareTo(other.bigDecimal)
 

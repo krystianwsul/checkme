@@ -17,7 +17,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import arrow.core.Tuple4
 import arrow.core.Tuple5
 import com.google.android.material.composethemeadapter.MdcTheme
 import com.jakewharton.rxbinding4.view.clicks
@@ -40,6 +39,8 @@ import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.BackpressureStrategy
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.kotlin.addTo
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.rx3.asObservable
 
 class DebugFragment : AbstractFragment() {
 
@@ -50,7 +51,7 @@ class DebugFragment : AbstractFragment() {
         fun newInstance() = DebugFragment()
 
         fun logDone(message: String) {
-            if (DomainFactory.nullableInstance?.debugMode == true)
+            if (FeatureFlagManager.getFlag(FeatureFlagManager.Flag.LOG_NOT_DONE_PERFORMANCE))
                 doneLog += ExactTimeStamp.Local.now.hourMilli.toString() + " " + message
         }
     }
@@ -78,13 +79,14 @@ class DebugFragment : AbstractFragment() {
                 binding.debugViewSwitch.apply {
                     isChecked = it.debugMode
 
-                    setOnCheckedChangeListener { _, isChecked ->
-                        doneLog.clear()
-
-                        AndroidDomainUpdater.setDebugMode(isChecked).subscribe()
-                    }
+                    setOnCheckedChangeListener { _, isChecked -> AndroidDomainUpdater.setDebugMode(isChecked).subscribe() }
                 }
             }
+            .addTo(viewCreatedDisposable)
+
+        FeatureFlagManager.getFlow(FeatureFlagManager.Flag.LOG_NOT_DONE_PERFORMANCE)
+            .asObservable(MainScope().coroutineContext)
+            .subscribe { doneLog.clear() }
             .addTo(viewCreatedDisposable)
 
         binding.debugInstanceWarningSnooze.apply {

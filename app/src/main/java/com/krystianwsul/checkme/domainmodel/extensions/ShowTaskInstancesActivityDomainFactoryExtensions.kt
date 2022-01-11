@@ -81,7 +81,7 @@ fun DomainFactory.getShowTaskInstancesData(
                         GroupTypeFactory.InstanceDescriptor(
                             instanceData,
                             it.instanceDateTime.toDateTimePair(),
-                            it.groupIntoProject,
+                            it.groupByProject,
                         )
                     }
                 }

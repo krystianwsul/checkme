@@ -78,29 +78,30 @@ class Instance private constructor(
     }
     private val matchingScheduleIntervals by matchingScheduleIntervalsProperty
 
-    private var myOrdinal: Ordinal? = null
-
-    private fun useMyOrdinal() = !groupIntoProject && isRootInstance()
+    private fun useMyOrdinal() = !groupByProject && isRootInstance()
 
     val ordinal
         get() = if (useMyOrdinal()) {
-            myOrdinal ?: task.ordinal
+            data.ordinal ?: task.ordinal
         } else {
             task.ordinal
         }
 
-    var groupIntoProject = true
-        private set
+    var groupByProject
+        get() = data.groupByProject
+        private set(value) {
+            if (value != data.groupByProject) createInstanceRecord().groupByProject = value
+        }
 
     fun setOrdinal(ordinal: Ordinal, newParentInfo: NewParentInfo) {
         when (newParentInfo) {
             NewParentInfo.NO_OP -> {}
-            NewParentInfo.TOP_LEVEL -> groupIntoProject = false
-            NewParentInfo.PROJECT -> groupIntoProject = true
+            NewParentInfo.TOP_LEVEL -> groupByProject = false
+            NewParentInfo.PROJECT -> groupByProject = true
         }
 
         if (useMyOrdinal()) {
-            myOrdinal = ordinal
+            createInstanceRecord().ordinal = ordinal
         } else {
             task.ordinal = ordinal
         }
@@ -717,26 +718,29 @@ class Instance private constructor(
 
     fun getProject(): Project<*> = parentInstance?.getProject() ?: task.project
 
-    private sealed class Data {
+    private sealed interface Data {
 
-        abstract val scheduleDate: Date
-        abstract val instanceDate: Date
+        val scheduleDate: Date
+        val instanceDate: Date
 
-        abstract val scheduleTime: Time
-        abstract val instanceTime: Time
+        val scheduleTime: Time
+        val instanceTime: Time
 
-        abstract val recordInstanceDateTime: DateTime?
+        val recordInstanceDateTime: DateTime?
 
-        abstract val done: Long?
-        abstract val doneOffset: Double?
+        val done: Long?
+        val doneOffset: Double?
 
-        abstract val hidden: Boolean
+        val hidden: Boolean
 
-        abstract val scheduleTimePair: TimePair
+        val scheduleTimePair: TimePair
 
-        abstract val parentState: ParentState
+        val parentState: ParentState
 
-        class Real(private val task: Task, val instanceRecord: InstanceRecord) : Data() {
+        val ordinal: Ordinal?
+        val groupByProject: Boolean
+
+        class Real(private val task: Task, val instanceRecord: InstanceRecord) : Data {
 
             override val scheduleDate get() = instanceRecord.run { Date(scheduleYear, scheduleMonth, scheduleDay) }
 
@@ -799,13 +803,16 @@ class Instance private constructor(
                         }
                     }
                 }
+
+            override var ordinal by instanceRecord::ordinal
+            override var groupByProject by instanceRecord::groupByProject
         }
 
         class Virtual(
             override val scheduleDate: Date,
             private val scheduleJsonTime: JsonTime,
             private val customTimeProvider: JsonTime.CustomTimeProvider,
-        ) : Data() {
+        ) : Data {
 
             override val instanceDate = scheduleDate
 
@@ -822,6 +829,9 @@ class Instance private constructor(
             override val parentState = ParentState.Unset
 
             override val recordInstanceDateTime: DateTime? = null
+
+            override val ordinal: Ordinal? = null
+            override val groupByProject = true
         }
     }
 

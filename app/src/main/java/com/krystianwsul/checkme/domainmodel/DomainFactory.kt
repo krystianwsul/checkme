@@ -453,7 +453,7 @@ class DomainFactory(
         return GroupTypeFactory.InstanceDescriptor(
             instanceData,
             instance.instanceDateTime.toDateTimePair(),
-            instance.groupIntoProject,
+            instance.groupByProject,
         )
     }
 

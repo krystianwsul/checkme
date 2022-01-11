@@ -6,10 +6,7 @@ import com.krystianwsul.common.firebase.records.task.TaskRecord
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.time.JsonTime
-import com.krystianwsul.common.utils.InstanceKey
-import com.krystianwsul.common.utils.InstanceScheduleKey
-import com.krystianwsul.common.utils.TaskKey
-import com.krystianwsul.common.utils.invalidatableLazy
+import com.krystianwsul.common.utils.*
 import kotlin.properties.Delegates.observable
 import kotlin.jvm.JvmStatic
 
@@ -143,6 +140,12 @@ class InstanceRecord(
     }
 
     var noParent by Committer(createObject::noParent)
+
+    var ordinal by observable(createObject.ordinal?.let(Ordinal::fromJson)) { _, _, newValue ->
+        setProperty(createObject::ordinal, newValue?.toString())
+    }
+
+    var groupByProject by Committer(createObject::groupByProject)
 
     override fun deleteFromParent() = check(taskRecord.instanceRecords.remove(instanceScheduleKey) == this)
 }

@@ -157,7 +157,7 @@ private fun DomainFactory.getGroupListData(
             GroupTypeFactory.InstanceDescriptor(
                 instanceData,
                 childInstance.instanceDateTime.toDateTimePair(),
-                childInstance.groupIntoProject,
+                childInstance.groupByProject,
             )
         }
 

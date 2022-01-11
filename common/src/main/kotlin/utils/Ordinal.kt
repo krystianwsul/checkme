@@ -15,10 +15,10 @@ class Ordinal(_bigDecimal: BigDecimal) : Comparable<Ordinal> {
         private const val PAD_LENGTH = 50
 
         fun fromFields(ordinalDouble: Double?, ordinalString: String?): Ordinal? {
-            val bigDecimal = ordinalString?.let { BigDecimal(it, mathContext) } ?: ordinalDouble?.let(::BigDecimal)
-
-            return bigDecimal?.toOrdinal()
+            return ordinalString?.let(::fromJson) ?: ordinalDouble?.let(::BigDecimal)?.toOrdinal()
         }
+
+        fun fromJson(ordinalString: String) = BigDecimal(ordinalString, mathContext).toOrdinal()
     }
 
     private val bigDecimal = _bigDecimal.setScale(mathContext.precision, mathContext.roundingMode)

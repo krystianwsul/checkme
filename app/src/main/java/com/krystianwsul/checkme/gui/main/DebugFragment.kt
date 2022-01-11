@@ -17,7 +17,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import arrow.core.Tuple4
 import arrow.core.Tuple5
 import com.google.android.material.composethemeadapter.MdcTheme
 import com.jakewharton.rxbinding4.view.clicks
@@ -50,7 +49,7 @@ class DebugFragment : AbstractFragment() {
         fun newInstance() = DebugFragment()
 
         fun logDone(message: String) {
-            if (DomainFactory.nullableInstance?.debugMode == true)
+            if (FeatureFlagManager.getFlag(FeatureFlagManager.Flag.LOG_NOT_DONE_PERFORMANCE))
                 doneLog += ExactTimeStamp.Local.now.hourMilli.toString() + " " + message
         }
     }

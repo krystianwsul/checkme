@@ -14,5 +14,6 @@ object FeatureFlagManager {
 
     enum class Flag {
 
+        LOG_NOT_DONE_PERFORMANCE
     }
 }

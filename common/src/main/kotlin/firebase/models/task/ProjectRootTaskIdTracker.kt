@@ -69,12 +69,12 @@ class ProjectRootTaskIdTracker {
                 }
 
                 getProjects().forEach { (projectKey, project) ->
-                    val taskKeysBefore = mapBefore.getOrElse(projectKey) { emptyList() }
+                    val taskKeysBefore = mapBefore.getOrElse(projectKey.key) { emptyList() }
                         .map { task -> getGraphBefore(task.taskKey) }
                         .flatten()
                         .toSet()
 
-                    val taskKeysAfter = mapAfter.getOrElse(projectKey) { emptyList() }
+                    val taskKeysAfter = mapAfter.getOrElse(projectKey.key) { emptyList() }
                         .map { task -> getGraphAfter(task.taskKey) }
                         .flatten()
                         .toSet()
@@ -101,7 +101,7 @@ class ProjectRootTaskIdTracker {
         }
 
         private fun getProjectTaskMap(rootTasks: Map<TaskKey.Root, RootTask>) =
-            rootTasks.values.groupBy { it.project.projectKey }
+            rootTasks.values.groupBy { it.projectId } // don't use project key, since project may not be loaded
 
         private fun createRootTaskIdGraphs(rootTasks: Map<TaskKey.Root, RootTask>): List<Set<TaskKey.Root>> {
             val graphs = mutableListOf<MutableSet<TaskKey.Root>>()

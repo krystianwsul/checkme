@@ -66,7 +66,6 @@ data class GroupListDataWrapper(
         val mixedInstanceDataCollection: MixedInstanceDataCollection,
         val doneInstanceDatas: List<InstanceData>,
         val ordinal: Double,
-        val notificationShown: Boolean,
         val imageState: ImageState?,
         override val isAssignedToMe: Boolean,
         val projectInfo: DetailsNode.ProjectInfo?, // this is for what's displayed

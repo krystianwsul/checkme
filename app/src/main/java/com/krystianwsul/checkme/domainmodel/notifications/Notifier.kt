@@ -7,6 +7,7 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.GroupType
 import com.krystianwsul.checkme.ticks.Ticker
 import com.krystianwsul.common.firebase.models.Instance
+import com.krystianwsul.common.firebase.models.users.ProjectOrdinalManager
 import com.krystianwsul.common.relevance.CustomTimeRelevance
 import com.krystianwsul.common.relevance.Irrelevant
 import com.krystianwsul.common.time.DateTimeSoy
@@ -29,12 +30,13 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
 
         const val TEST_IRRELEVANT = false
 
+        // duplicate of logic in Instance.shouldShowNotification
         private fun Sequence<Instance>.filterNotifications(domainFactory: DomainFactory, now: ExactTimeStamp.Local) =
             filter {
                 it.done == null &&
                         !it.getNotified(domainFactory.shownFactory) &&
                         it.isAssignedToMe(now, domainFactory.myUserFactory.user)
-            }.toList()
+            }
 
         fun getNotificationInstances(domainFactory: DomainFactory, now: ExactTimeStamp.Local) =
             domainFactory.getRootInstances(
@@ -56,7 +58,7 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
                 offset.plusOne(),
                 now,
                 projectKey = projectKey,
-            ).filterNotifications(domainFactory, now)
+            ).filterNotifications(domainFactory, now).toList()
         }
     }
 
@@ -89,10 +91,37 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
             notificationDatas += NotificationData.Cancel(instanceId)
         }
 
-        val notificationInstances = if (clear)
-            mapOf()
-        else
-            getNotificationInstances(domainFactory, now).associateBy { it.instanceKey }
+        val notificationInstances: Map<InstanceKey, Instance>
+        val nextAlarmInstance: Instance?
+        if (clear) {
+            notificationInstances = mapOf()
+            nextAlarmInstance = null
+        } else {
+            val notificationInstanceSequence = domainFactory.getRootInstances(
+                null,
+                null,
+                now,
+            ).filterNotifications(domainFactory, now)
+
+            var needsOneExtra = true
+            val allNotificationInstances =
+                notificationInstanceSequence.map { (it.instanceDateTime.toLocalExactTimeStamp() <= now) to it }
+                    .takeWhile { (beforeNow, _) ->
+                        when {
+                            beforeNow -> true
+                            needsOneExtra -> {
+                                needsOneExtra = false
+
+                                true
+                            }
+                            else -> false
+                        }
+                    }
+                    .groupBy({ it.first }, { it.second })
+
+            notificationInstances = allNotificationInstances[true].orEmpty().associateBy { it.instanceKey }
+            nextAlarmInstance = allNotificationInstances[false].orEmpty().singleOrEmpty()
+        }
 
         check(notificationInstances.values.all { it.task.dependenciesLoaded })
 
@@ -259,10 +288,6 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
         if (clear) {
             notificationWrapper.updateAlarm(null)
         } else {
-            val nextAlarmInstance = domainFactory.getRootInstances(now.toOffset().plusOne(), null, now)
-                .filter { it.isAssignedToMe(now, domainFactory.myUserFactory.user) }
-                .firstOrNull()
-
             if (nextAlarmInstance != null) {
                 val nextAlarmTimeStamp = nextAlarmInstance.instanceDateTime.timeStamp
 
@@ -301,7 +326,12 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
                 is GroupTypeFactory.Notification.Project -> {
                     it.instances.forEach { NotificationWrapper.instance.cancelNotification(it.notificationId) }
 
-                    notificationWrapper.notifyProject(it.project, it.instances, it.timeStamp, it.silent, now)
+                    val ordinal = domainFactory.myUserFactory
+                        .user
+                        .getProjectOrdinalManager(it.project)
+                        .getOrdinal(it.project, ProjectOrdinalManager.Key(it.instances))
+
+                    notificationWrapper.notifyProject(it.project, it.instances, it.timeStamp, it.silent, now, ordinal)
                 }
             }
         }

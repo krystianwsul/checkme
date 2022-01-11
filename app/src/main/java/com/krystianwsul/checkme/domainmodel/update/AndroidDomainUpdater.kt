@@ -90,14 +90,14 @@ object AndroidDomainUpdater : DomainUpdater() {
                 it.getParams(domainFactory, now)
             })
 
-            DebugFragment.logDone("AndroidDomainUpdater.dispatchItems updating notifications")
-            domainFactory.updateNotifications(params, now)
-            DebugFragment.logDone("AndroidDomainUpdater.dispatchItems notifications updated")
-
             items.forEach {
                 MyCrashlytics.log("AndroidDomainUpdater.dispatchItems dispatchResult " + it.name)
                 it.dispatchResult()
             }
+
+            DebugFragment.logDone("AndroidDomainUpdater.dispatchItems updating notifications")
+            domainFactory.updateNotifications(params, now)
+            DebugFragment.logDone("AndroidDomainUpdater.dispatchItems notifications updated")
 
             /*
             domainFactory.projectsFactory.apply {

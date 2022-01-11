@@ -40,9 +40,7 @@ fun DomainUpdater.setOrdinalProject(
         .single()
         .let { it as SharedProject }
 
-    val key = ProjectOrdinalManager.Key(
-        instances.map { ProjectOrdinalManager.Key.Entry(it.instanceKey, it.instanceDateTime.toDateTimePair()) }.toSet()
-    )
+    val key = ProjectOrdinalManager.Key(instances)
 
     myUserFactory.user.getProjectOrdinalManager(project).setOrdinal(project, key, ordinal, now)
 

@@ -8,7 +8,7 @@ class BehaviorFlow<T> private constructor(private val flow: MutableSharedFlow<T>
 
     companion object {
 
-        fun <T> invoke(initialValue: T? = null): BehaviorFlow<T> {
+        operator fun <T> invoke(initialValue: T? = null): BehaviorFlow<T> {
             val flow = MutableSharedFlow<T>(replay = 1)
 
             initialValue?.let(flow::tryEmit)
@@ -22,4 +22,8 @@ class BehaviorFlow<T> private constructor(private val flow: MutableSharedFlow<T>
     val value get() = valueOrNull!!
 
     val hasValue get() = valueOrNull != null
+
+    fun accept(value: T) {
+        flow.tryEmit(value)
+    }
 }

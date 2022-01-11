@@ -1,16 +1,22 @@
 package com.krystianwsul.common
 
+import com.krystianwsul.common.utils.flow.BehaviorFlow
+
 object FeatureFlagManager {
 
-    private val map = mutableMapOf<Flag, Boolean>()
+    private val map = mutableMapOf<Flag, BehaviorFlow<Boolean>>()
 
-    fun getFlag(flag: Flag) = map[flag] ?: false
+    fun getFlag(flag: Flag) = map[flag]?.valueOrNull ?: false
 
     fun getFlags() = Flag.values().associateWith(::getFlag)
 
-    fun setFlag(flag: Flag, value: Boolean) {
-        map[flag] = value
+    fun getFlow(flag: Flag): BehaviorFlow<Boolean> {
+        if (!map.containsKey(flag)) map[flag] = BehaviorFlow()
+
+        return map.getValue(flag)
     }
+
+    fun setFlag(flag: Flag, value: Boolean) = getFlow(flag).accept(value)
 
     enum class Flag {
 

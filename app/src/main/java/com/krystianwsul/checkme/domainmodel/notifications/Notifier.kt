@@ -5,6 +5,7 @@ import android.util.Log
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.GroupType
+import com.krystianwsul.checkme.gui.main.DebugFragment
 import com.krystianwsul.checkme.ticks.Ticker
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.users.ProjectOrdinalManager
@@ -97,11 +98,15 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
             notificationInstances = mapOf()
             nextAlarmInstance = null
         } else {
+            DebugFragment.logDone("Notifier.updateNotifications getRootInstances start")
             val notificationInstanceSequence = domainFactory.getRootInstances(
                 null,
                 null,
                 now,
-            ).filterNotifications(domainFactory, now)
+            ).also {
+                DebugFragment.logDone("Notifier.updateNotifications getRootInstances end")
+            }.filterNotifications(domainFactory, now)
+            DebugFragment.logDone("Notifier.updateNotifications filterNotifications end")
 
             var needsOneExtra = true
             val allNotificationInstances =

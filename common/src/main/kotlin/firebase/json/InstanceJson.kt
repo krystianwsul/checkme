@@ -3,6 +3,7 @@ package com.krystianwsul.common.firebase.json
 import com.krystianwsul.common.firebase.records.InstanceRecord
 import com.krystianwsul.common.utils.InstanceKey
 import kotlinx.serialization.Serializable
+import kotlin.jvm.JvmOverloads
 
 @Serializable
 data class InstanceJson @JvmOverloads constructor(

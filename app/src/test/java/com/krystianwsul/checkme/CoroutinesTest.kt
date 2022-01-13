@@ -1,7 +1,7 @@
 package com.krystianwsul.checkme
 
 import com.krystianwsul.checkme.firebase.loaders.RxErrorChecker
-import com.krystianwsul.common.utils.singleOrEmpty
+import com.krystianwsul.common.utils.flow.BehaviorFlow
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -70,24 +70,24 @@ class CoroutinesTest {
     }
 
     @Test
-    fun testSharedFlowAsBehaviorRelay() {
-        val sharedFlow = MutableSharedFlow<Int>(replay = 1)
+    fun testBehaviorFlow() {
+        val flow = BehaviorFlow<Int>()
 
         var lastEmission = 0
 
-        sharedFlow.asObservable()
+        flow.asObservable()
             .subscribe { lastEmission = it }
             .addTo(compositeDisposable)
 
-        sharedFlow.tryEmit(1)
+        flow.value = 1
         assertEquals(1, lastEmission)
 
-        sharedFlow.tryEmit(2)
+        flow.value = 2
         assertEquals(2, lastEmission)
 
         var newLastEmission = 0
 
-        val disposable = sharedFlow.asObservable().subscribe {
+        val disposable = flow.asObservable().subscribe {
             check(newLastEmission == 0)
             newLastEmission = it
         }
@@ -95,6 +95,6 @@ class CoroutinesTest {
         assertEquals(2, newLastEmission)
         disposable.dispose()
 
-        assertEquals(2, sharedFlow.replayCache.singleOrEmpty())
+        assertEquals(2, flow.value)
     }
 }

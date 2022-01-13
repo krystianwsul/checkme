@@ -3,12 +3,17 @@ package com.krystianwsul.common.utils.flow
 import com.krystianwsul.common.utils.singleOrEmpty
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 
-class BehaviorFlow<T> private constructor(private val flow: MutableSharedFlow<T>) : Flow<T> by flow {
+/*
+    Use StateFlow when initial value is present.
+    Also, don't try changing this to nullable T; valueOrNull and hasValue would fall apart.
+ */
+class BehaviorFlow<T : Any> private constructor(private val flow: MutableSharedFlow<T>) : Flow<T> by flow {
 
     companion object {
 
-        operator fun <T> invoke(initialValue: T? = null): BehaviorFlow<T> {
+        operator fun <T : Any> invoke(initialValue: T? = null): BehaviorFlow<T> {
             val flow = MutableSharedFlow<T>(replay = 1)
 
             initialValue?.let(flow::tryEmit)
@@ -19,11 +24,11 @@ class BehaviorFlow<T> private constructor(private val flow: MutableSharedFlow<T>
 
     val valueOrNull get() = flow.replayCache.singleOrEmpty()
 
-    val value get() = valueOrNull!!
+    var value
+        get() = valueOrNull!!
+        set(value) {
+            flow.tryEmit(value)
+        }
 
     val hasValue get() = valueOrNull != null
-
-    fun accept(value: T) {
-        flow.tryEmit(value)
-    }
 }

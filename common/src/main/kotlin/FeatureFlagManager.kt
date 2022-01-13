@@ -16,7 +16,9 @@ object FeatureFlagManager {
         return map.getValue(flag)
     }
 
-    fun setFlag(flag: Flag, value: Boolean) = getFlow(flag).accept(value)
+    fun setFlag(flag: Flag, value: Boolean) {
+        getFlow(flag).value = value
+    }
 
     enum class Flag {
 

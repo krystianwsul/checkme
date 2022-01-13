@@ -2,14 +2,12 @@ package com.krystianwsul.checkme.gui.instances.tree
 
 import android.os.Parcelable
 import com.krystianwsul.checkme.R
-import com.krystianwsul.checkme.domainmodel.GroupType
 import com.krystianwsul.checkme.domainmodel.GroupTypeFactory
 import com.krystianwsul.checkme.domainmodel.extensions.setInstanceDone
 import com.krystianwsul.checkme.domainmodel.extensions.setInstancesDone
 import com.krystianwsul.checkme.domainmodel.extensions.setOrdinalProject
 import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
 import com.krystianwsul.checkme.domainmodel.updates.SetInstanceOrdinalDomainUpdate
-import com.krystianwsul.checkme.domainmodel.updates.SetTaskOrdinalDomainUpdate
 import com.krystianwsul.checkme.gui.instances.ShowGroupActivity
 import com.krystianwsul.checkme.gui.instances.ShowInstanceActivity
 import com.krystianwsul.checkme.gui.instances.drag.DropParent
@@ -93,6 +91,9 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
 
     override val debugDescription = contentDelegate.debugDescription
 
+    override val wantsDetailsSeparator: Boolean?
+        get() = contentDelegate.wantsDetailsSeparator
+
     fun initialize(
         contentDelegateStates: Map<ContentDelegate.Id, ContentDelegate.State>,
         nodeContainer: NodeContainer<AbstractHolder>,
@@ -126,6 +127,8 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
         open val debugDescription: String? = null
 
         abstract val overrideDraggable: Boolean
+
+        open val wantsDetailsSeparator: Boolean? = null
 
         abstract fun initialize(
             contentDelegateStates: Map<Id, State>,
@@ -302,6 +305,17 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
 
             override fun getMatchResult(search: SearchCriteria.Search) =
                 ModelNode.MatchResult.fromBoolean(instanceData.matchesSearch(search))
+
+            override val wantsDetailsSeparator: Boolean? // todo separator
+                get() {
+                    if (!treeNode.isExpanded) return null
+
+                    return when (instanceData.name) {
+                        "task 2" -> false
+                        "task 4" -> true
+                        else -> null
+                    }
+                }
 
             @Parcelize
             data class Id(val instanceKey: InstanceKey) : ContentDelegate.Id

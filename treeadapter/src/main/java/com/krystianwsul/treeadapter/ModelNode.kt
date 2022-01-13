@@ -10,7 +10,7 @@ interface ModelNode<T : TreeHolder> : Comparable<ModelNode<T>>, Matchable {
 
     val isSeparatorVisibleWhenNotExpanded get() = false
 
-    fun showSeparatorWhenParentExpanded(top: Boolean) = true
+    val showSeparatorWhenParentExpanded get() = true
 
     val state: ModelState
 

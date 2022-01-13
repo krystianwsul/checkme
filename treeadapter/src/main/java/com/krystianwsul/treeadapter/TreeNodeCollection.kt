@@ -28,7 +28,7 @@ class TreeNodeCollection<T : TreeHolder>(val treeViewAdapter: TreeViewAdapter<T>
             treeNodesRelay.accept(rootTreeNodes.sorted())
         }
 
-    override fun wantsSeparators(top: Boolean) = false
+    override val wantsSeparators = false
 
     override fun getNode(position: Int, positionMode: PositionMode): TreeNode<T> {
         check(position >= 0)

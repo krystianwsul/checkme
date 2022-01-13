@@ -48,7 +48,10 @@ class DetailsNode(
 
     override val disableRipple = true
 
-    override fun showSeparatorWhenParentExpanded(top: Boolean) = !top
+    override val wantsSeparator: Boolean?
+        get() = parentNode?.wantsDetailsSeparator
+
+    override val showSeparatorWhenParentExpanded = false
 
     fun initialize(nodeContainer: NodeContainer<AbstractHolder>): TreeNode<AbstractHolder> {
         this.nodeContainer = nodeContainer
@@ -186,6 +189,8 @@ class DetailsNode(
         val treeNode: TreeNode<AbstractHolder>
 
         val debugDescription: String? get() = null
+
+        val wantsDetailsSeparator: Boolean? get() = null // todo separator remove
     }
 
     abstract class ProjectRowsDelegate(

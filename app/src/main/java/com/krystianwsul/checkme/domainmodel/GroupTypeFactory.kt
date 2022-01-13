@@ -44,7 +44,7 @@ class GroupTypeFactory(
         instanceDescriptors: List<GroupType.InstanceDescriptor>,
     ): GroupType.TimeProject {
         val projectDetails = projectDescriptor.fix().projectDetails
-        val instanceDatas = instanceDescriptors.map { it.fix().instanceData.copy(projectInfo = null) }
+        val instanceDatas = instanceDescriptors.map { it.fix().instanceData.stripProjectDetails() }
 
         return TimeProjectBridge(timeStamp, projectDetails, instanceDatas)
     }
@@ -57,7 +57,7 @@ class GroupTypeFactory(
         val projectDetails = projectDescriptor.fix().projectDetails
 
         val fixedInstanceDescriptors = instanceDescriptors.map { it.fix() }
-        val instanceDatas = fixedInstanceDescriptors.map { it.instanceData.copy(projectInfo = null) }
+        val instanceDatas = fixedInstanceDescriptors.map { it.instanceData.stripProjectDetails() }
 
         val key = ProjectOrdinalManager.Key(
             fixedInstanceDescriptors.map {

@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.gui.instances.list
 
+import arrow.optics.optics
 import com.krystianwsul.checkme.domainmodel.MixedInstanceDataCollection
 import com.krystianwsul.checkme.gui.instances.drag.DropParent
 import com.krystianwsul.checkme.gui.tree.DetailsNode
@@ -49,6 +50,7 @@ data class GroupListDataWrapper(
         override val childSelectedDatas get() = children
     }
 
+    @optics
     data class InstanceData(
         val done: ExactTimeStamp.Local?,
         val instanceKey: InstanceKey,
@@ -70,6 +72,8 @@ data class GroupListDataWrapper(
         val projectKey: ProjectKey.Shared?, // this is for creating new tasks via ActionMode.  Always set
         val parentInstanceKey: InstanceKey?,
     ) : Comparable<InstanceData>, SelectedData, QueryMatchable, FilterParamsMatchable {
+
+        companion object
 
         val isRootInstance = parentInstanceKey == null
 
@@ -95,6 +99,8 @@ data class GroupListDataWrapper(
         fun normalize() {
             normalizedFields
         }
+
+        fun stripProjectDetails() = Companion.projectInfo.modify(this) { it.copy(projectDetails = null) }
     }
 
     interface SelectedData {

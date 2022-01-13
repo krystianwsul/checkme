@@ -181,6 +181,7 @@ dependencies {
     implementation 'com.akexorcist:localization:1.2.10'
 
     implementation "io.arrow-kt:arrow-core:$arrowVersion"
+    implementation "io.arrow-kt:arrow-optics:$arrowVersion"
     kapt "io.arrow-kt:arrow-meta:$arrowVersion"
 
     implementation 'commons-io:commons-io:2.11.0'

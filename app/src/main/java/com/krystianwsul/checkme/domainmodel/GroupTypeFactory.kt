@@ -212,15 +212,13 @@ class GroupTypeFactory(
         private val projectDetails: DetailsNode.ProjectDetails,
         private val instanceDatas: List<GroupListDataWrapper.InstanceData>,
         override val ordinal: Ordinal,
-    ) : GroupType.Project, SingleParent, TimeChild {
+    ) : GroupType.Project, SingleParent, TimeChild, DropParent by DropParent.Project(timeStamp, projectDetails.projectKey) {
 
         override val name get() = projectDetails.name
 
         override val instanceKeys = instanceDatas.map { it.instanceKey }.toSet()
 
         override val sortable = true
-
-        override val newParentInfo = Instance.NewParentInfo.PROJECT
 
         override fun toContentDelegate(
             groupAdapter: GroupListFragment.GroupAdapter,
@@ -244,13 +242,6 @@ class GroupTypeFactory(
                 is TimeBridge -> throw UnsupportedOperationException()
                 is TimeProjectBridge -> throw UnsupportedOperationException()
                 is TimeChild -> ordinal.compareTo(other.ordinal)
-            }
-        }
-
-        override fun canDropIntoParent(droppedTimeChild: TimeChild) = when (droppedTimeChild) {
-            is ProjectBridge -> false
-            is SingleBridge -> droppedTimeChild.instanceData.let {
-                timeStamp == it.instanceTimeStamp && projectDetails.projectKey == it.projectKey && it.isRootInstance
             }
         }
     }

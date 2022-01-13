@@ -116,6 +116,8 @@ private fun DomainFactory.getGroupListData(
 
     val (mixedInstanceDescriptors, doneInstanceDescriptors) = instanceDescriptors.splitDone()
 
+    val dropParent = projectKey?.let { DropParent.Project(timeStamp, it) } ?: DropParent.TopLevel(true)
+
     return GroupListDataWrapper(
         customTimeDatas,
         null,
@@ -125,6 +127,6 @@ private fun DomainFactory.getGroupListData(
         doneInstanceDescriptors.toInstanceDatas(),
         null,
         null,
-        DropParent.TopLevel(true),
+        dropParent,
     )
 }

@@ -91,9 +91,6 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
 
     override val debugDescription = contentDelegate.debugDescription
 
-    override val wantsDetailsSeparator: Boolean?
-        get() = contentDelegate.wantsDetailsSeparator
-
     fun initialize(
         contentDelegateStates: Map<ContentDelegate.Id, ContentDelegate.State>,
         nodeContainer: NodeContainer<AbstractHolder>,
@@ -127,8 +124,6 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
         open val debugDescription: String? = null
 
         abstract val overrideDraggable: Boolean
-
-        open val wantsDetailsSeparator: Boolean? = null
 
         abstract fun initialize(
             contentDelegateStates: Map<Id, State>,
@@ -305,17 +300,6 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
 
             override fun getMatchResult(search: SearchCriteria.Search) =
                 ModelNode.MatchResult.fromBoolean(instanceData.matchesSearch(search))
-
-            override val wantsDetailsSeparator: Boolean? // todo separator
-                get() {
-                    if (!treeNode.isExpanded) return null
-
-                    return when (instanceData.name) {
-                        "task 2" -> false
-                        "task 4" -> true
-                        else -> null
-                    }
-                }
 
             @Parcelize
             data class Id(val instanceKey: InstanceKey) : ContentDelegate.Id

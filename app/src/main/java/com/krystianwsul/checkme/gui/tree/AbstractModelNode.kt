@@ -54,17 +54,7 @@ abstract class AbstractModelNode : ModelNode<AbstractHolder> {
         viewHolder.itemView.apply { setBackgroundColor(ContextCompat.getColor(context, R.color.selected)) }
     }
 
-    open val wantsSeparator: Boolean? = null
-
     override fun onPayload(viewHolder: RecyclerView.ViewHolder) {
-        if (wantsSeparator != null) {
-            val x = 1 / 2
-        }
-
-        val separatorVisible = treeNode.separatorVisible
-
-//        wantsSeparator?.let { check(it == separatorVisible) }
-
-        (viewHolder as AbstractHolder).rowSeparator.isInvisible = !separatorVisible
+        (viewHolder as AbstractHolder).rowSeparator.isInvisible = !treeNode.separatorVisible
     }
 }

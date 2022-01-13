@@ -148,12 +148,7 @@ class TreeNode<T : TreeHolder>(
 
     override val showInheritableBottomSeparator: Boolean
         get() {
-            val x = parent.getPosition(this, PositionMode.DISPLAYED)
-            val y = parent.displayedDirectChildNodes.size
-
-            if (this == parent.displayedDirectChildNodes.last()) {
-                return parent.wantsSeparators
-            }
+            if (this == parent.displayedDirectChildNodes.last()) return parent.wantsSeparators
 
             return false
         }

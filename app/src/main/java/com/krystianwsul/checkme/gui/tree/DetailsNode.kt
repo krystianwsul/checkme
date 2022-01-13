@@ -53,6 +53,8 @@ class DetailsNode(
 
     override val showSeparatorWhenParentExpanded = false
 
+    override val inheritParentBottomSeparator = true
+
     fun initialize(nodeContainer: NodeContainer<AbstractHolder>): TreeNode<AbstractHolder> {
         this.nodeContainer = nodeContainer
 

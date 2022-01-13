@@ -20,6 +20,8 @@ sealed interface NodeContainer<T : TreeHolder> {
 
     val wantsSeparators: Boolean
 
+    val showInheritableBottomSeparator: Boolean
+
     fun getPosition(treeNode: TreeNode<T>, positionMode: PositionMode = PositionMode.COMPAT) =
         getPosition(positionMode) { it == treeNode }
 

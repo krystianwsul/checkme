@@ -108,6 +108,8 @@ class TreeNodeCollection<T : TreeHolder>(val treeViewAdapter: TreeViewAdapter<T>
 
     override val indentation = 0
 
+    override val showInheritableBottomSeparator = false
+
     fun moveItem(fromPosition: Int, toPosition: Int, placeholder: TreeViewAdapter.Placeholder) {
         val fromTreeNode = getNode(fromPosition, PositionMode.DISPLAYED)
         val toTreeNode = getNode(toPosition, PositionMode.DISPLAYED)

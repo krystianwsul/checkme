@@ -132,8 +132,11 @@ class TreeNode<T : TreeHolder>(
 
             if (positionInCollection == treeNodeCollection.displayedNodes.size - 1) return false
 
-            if (parent.getPosition(this, PositionMode.DISPLAYED) == parent.displayedNodes.size - 1)
-                return parent.wantsSeparators
+            if (parent.getPosition(this, PositionMode.DISPLAYED) == parent.displayedNodes.size - 1) {
+                if (modelNode.inheritParentBottomSeparator && parent.showInheritableBottomSeparator) return true
+
+                if (parent.wantsSeparators) return true
+            }
 
             val nextTreeNode = treeNodeCollection.getNode(positionInCollection + 1, PositionMode.DISPLAYED)
             return modelNode.isSeparatorVisibleWhenNotExpanded || nextTreeNode.wantsSeparators
@@ -142,6 +145,18 @@ class TreeNode<T : TreeHolder>(
     override val wantsSeparators get() = displayedChildNodes.any { it.modelNode.showSeparatorWhenParentExpanded }
 
     val allChildren: List<TreeNode<T>> get() = childTreeNodes
+
+    override val showInheritableBottomSeparator: Boolean
+        get() {
+            val x = parent.getPosition(this, PositionMode.DISPLAYED)
+            val y = parent.displayedDirectChildNodes.size
+
+            if (this == parent.displayedDirectChildNodes.last()) {
+                return parent.wantsSeparators
+            }
+
+            return false
+        }
 
     init {
         if (selected && !modelNode.isSelectable) throw NotSelectableSelectedException()

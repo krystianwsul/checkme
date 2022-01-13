@@ -63,7 +63,7 @@ abstract class AbstractModelNode : ModelNode<AbstractHolder> {
 
         val separatorVisible = treeNode.separatorVisible
 
-        wantsSeparator?.let { check(it == separatorVisible) }
+//        wantsSeparator?.let { check(it == separatorVisible) }
 
         (viewHolder as AbstractHolder).rowSeparator.isInvisible = !separatorVisible
     }

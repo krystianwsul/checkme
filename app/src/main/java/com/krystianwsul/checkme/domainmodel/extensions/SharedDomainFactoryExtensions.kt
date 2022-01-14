@@ -411,8 +411,5 @@ fun <T> DomainFactory.trackRootTaskIds(action: () -> T): T =
     )
 
 fun Collection<GroupTypeFactory.InstanceDescriptor>.splitDone() = partition { it.instanceData.done == null }
-fun List<GroupTypeFactory.InstanceDescriptor>.toInstanceDatas() =
-    map { it.instanceData } // todo display not sure if this is needed
 
-fun List<GroupTypeFactory.InstanceDescriptor>.toDoneSingleBridges() =
-    toInstanceDatas().map { GroupTypeFactory.SingleBridge.createDone(it) }
+fun List<GroupTypeFactory.InstanceDescriptor>.toDoneSingleBridges() = map { GroupTypeFactory.SingleBridge.createDone(it) }

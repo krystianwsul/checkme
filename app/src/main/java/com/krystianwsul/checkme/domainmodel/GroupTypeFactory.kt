@@ -278,19 +278,19 @@ class GroupTypeFactory(
         // don't use constructor directly
         val instanceData: GroupListDataWrapper.InstanceData,
         val isGroupedInProject: Boolean?, // null means throw an error if you need it
-        val showDetails: Boolean, // todo display replace with displayText later on
+        val displayText: String?,
     ) : GroupType.Single, TimeChild {
 
         companion object {
 
             fun createDone(instanceDescriptor: InstanceDescriptor) =
-                SingleBridge(instanceDescriptor.instanceData, false, true)
+                SingleBridge(instanceDescriptor.instanceData, false, instanceDescriptor.instanceData.displayText)
 
             fun createGroupChild(instanceDescriptor: InstanceDescriptor) =
-                SingleBridge(instanceDescriptor.instanceData, false, false)
+                SingleBridge(instanceDescriptor.instanceData, false, null)
 
             fun createTopLevelNotDone(instanceDescriptor: InstanceDescriptor) =
-                SingleBridge(instanceDescriptor.instanceData, false, true)
+                SingleBridge(instanceDescriptor.instanceData, false, instanceDescriptor.instanceData.displayText)
         }
 
         override val instanceKeys = setOf(instanceData.instanceKey)

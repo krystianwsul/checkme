@@ -6,7 +6,7 @@ import com.krystianwsul.checkme.gui.tree.DetailsNode
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineRow
 import com.krystianwsul.treeadapter.TreeNode
 
-class InstanceRowsDelegate(singleBridge: GroupTypeFactory.SingleBridge, showDetails: Boolean = true) :
+class InstanceRowsDelegate(singleBridge: GroupTypeFactory.SingleBridge) :
     DetailsNode.ProjectRowsDelegate(
         singleBridge.instanceData.projectInfo,
         if (singleBridge.instanceData.taskCurrent) R.color.textSecondary else R.color.textDisabled,
@@ -19,9 +19,7 @@ class InstanceRowsDelegate(singleBridge: GroupTypeFactory.SingleBridge, showDeta
         if (instanceData.taskCurrent) R.color.textPrimary else R.color.textDisabled,
     )
 
-    private val details: MultiLineRow.Visible? = instanceData.takeIf { showDetails } // todo display
-        ?.displayText
-        .toSecondaryRow()
+    private val details: MultiLineRow.Visible? = singleBridge.displayText.toSecondaryRow()
 
     private val note = instanceData.note.toSecondaryRow()
 

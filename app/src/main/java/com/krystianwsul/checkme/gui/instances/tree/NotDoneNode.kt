@@ -200,7 +200,7 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
                 return treeNode
             }
 
-            override val rowsDelegate = InstanceRowsDelegate(bridge, bridge.showDetails)
+            override val rowsDelegate = InstanceRowsDelegate(bridge)
 
             override val thumbnail = instanceData.imageState
 

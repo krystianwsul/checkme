@@ -12,6 +12,7 @@ import com.krystianwsul.common.firebase.models.interval.ScheduleInterval
 import com.krystianwsul.common.firebase.models.interval.Type
 import com.krystianwsul.common.firebase.models.project.PrivateProject
 import com.krystianwsul.common.firebase.models.project.Project
+import com.krystianwsul.common.firebase.models.project.SharedProject
 import com.krystianwsul.common.firebase.models.task.ProjectRootTaskIdTracker
 import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.firebase.models.users.MyUser
@@ -97,7 +98,11 @@ class Instance private constructor(
         when (newParentInfo) {
             NewParentInfo.NO_OP -> {}
             NewParentInfo.TOP_LEVEL -> groupByProject = false
-            NewParentInfo.PROJECT -> groupByProject = true
+            NewParentInfo.PROJECT -> {
+                check(getProject() is SharedProject)
+
+                groupByProject = true
+            }
         }
 
         if (useMyOrdinal()) {

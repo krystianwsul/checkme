@@ -75,10 +75,13 @@ class GroupTypeFactory(
         )
     }
 
-    override fun createSingle(instanceDescriptor: GroupType.InstanceDescriptor): GroupType.Single {
+    override fun createSingle(instanceDescriptor: GroupType.InstanceDescriptor, nested: Boolean): GroupType.Single {
         val instanceData = instanceDescriptor.fix().instanceData
 
-        return SingleBridge.createTopLevelNotDone(instanceData)
+        return if (nested)
+            SingleBridge.createGroupChild(instanceData)
+        else
+            SingleBridge.createTopLevelNotDone(instanceData)
     }
 
     class InstanceDescriptor(
@@ -249,6 +252,7 @@ class GroupTypeFactory(
     }
 
     data class SingleBridge(
+        // don't use constructor directly
         val instanceData: GroupListDataWrapper.InstanceData,
         val isGroupedInProject: Boolean?, // null means throw an error if you need it
         val showDetails: Boolean, // todo display replace with displayText later on

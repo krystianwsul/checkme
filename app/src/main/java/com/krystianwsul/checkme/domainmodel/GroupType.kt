@@ -34,12 +34,12 @@ interface GroupType {
                                 ?.let { factory.createTimeProject(timeStamp, it, instanceDescriptors) }
                                 ?: factory.createTime(
                                     timeStamp,
-                                    groupByProject(factory, timeStamp, instanceDescriptors),
+                                    groupByProject(factory, timeStamp, instanceDescriptors, true),
                                     groupingMode,
                                 )
                         } else {
                             // if there's just one, there's our node
-                            factory.createSingle(instanceDescriptors.single())
+                            factory.createSingle(instanceDescriptors.single(), false)
                         }
                     }
                 }
@@ -47,7 +47,7 @@ interface GroupType {
                     val (projectInstances, noProjectInstances) =
                         instanceDescriptors.partition { it.projectDescriptor != null && it.groupIntoProject }
 
-                    val noProjectGroupTypes = noProjectInstances.map(factory::createSingle)
+                    val noProjectGroupTypes = noProjectInstances.map { factory.createSingle(it, false) }
 
                     val projectTimeGroups = projectInstances.groupBy { it.timeStamp to it.projectDescriptor!! }
 
@@ -59,7 +59,7 @@ interface GroupType {
 
                             factory.createTimeProject(timeStamp, projectDescriptor, groupInstanceDescriptors)
                         } else {
-                            factory.createSingle(groupInstanceDescriptors.single())
+                            factory.createSingle(groupInstanceDescriptors.single(), false)
                         }
                     }
 
@@ -70,9 +70,9 @@ interface GroupType {
                         .distinct()
                         .single()
 
-                    groupByProject(factory, timeStamp, instanceDescriptors)
+                    groupByProject(factory, timeStamp, instanceDescriptors, false)
                 }
-                GroupingMode.None -> instanceDescriptors.map(factory::createSingle)
+                GroupingMode.None -> instanceDescriptors.map { factory.createSingle(it, false) }
             }
         }
 
@@ -80,6 +80,7 @@ interface GroupType {
             factory: Factory,
             timeStamp: TimeStamp,
             instanceDescriptors: Collection<InstanceDescriptor>,
+            nested: Boolean,
         ): List<TimeChild> {
             if (instanceDescriptors.isEmpty()) return emptyList()
 
@@ -95,11 +96,11 @@ interface GroupType {
                     if (instanceDescriptors.size > 1) {
                         factory.createProject(timeStamp, projectDescriptor, instanceDescriptors)
                     } else {
-                        factory.createSingle(instanceDescriptors.single())
+                        factory.createSingle(instanceDescriptors.single(), nested)
                     }
                 }
 
-            val groupTypesForPrivate = noProjectInstances.map(factory::createSingle)
+            val groupTypesForPrivate = noProjectInstances.map { factory.createSingle(it, nested) }
 
             return listOf(groupTypesForShared, groupTypesForPrivate).flatten()
         }
@@ -154,7 +155,7 @@ interface GroupType {
             instanceDescriptors: List<InstanceDescriptor>,
         ): Project
 
-        fun createSingle(instanceDescriptor: InstanceDescriptor): Single
+        fun createSingle(instanceDescriptor: InstanceDescriptor, nested: Boolean): Single
     }
 
     interface InstanceDescriptor {

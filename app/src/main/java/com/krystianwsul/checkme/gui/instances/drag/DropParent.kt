@@ -9,7 +9,11 @@ import com.krystianwsul.common.utils.ProjectKey
 
 interface DropParent {
 
-    val newParentInfo: Instance.NewParentInfo
+    /*
+    todo really, the DropParent shouldn't be the one making this decision.  The domain layer should be told what the target,
+    and figure out the rest on its own.  I'll do a workaround for now, and clean it up if more issues come up.
+     */
+    fun getNewParentInfo(isGroupedInProject: Boolean?): Instance.NewParentInfo
 
     fun canDropIntoParent(droppedTimeChild: GroupTypeFactory.TimeChild): Boolean
 
@@ -17,7 +21,8 @@ interface DropParent {
 
     data class TopLevel(val canDropOnTopLevel: Boolean) : DropParent {
 
-        override val newParentInfo = Instance.NewParentInfo.TOP_LEVEL
+        override fun getNewParentInfo(isGroupedInProject: Boolean?) =
+            if (isGroupedInProject!!) Instance.NewParentInfo.TOP_LEVEL else Instance.NewParentInfo.NO_OP
 
         override fun canDropIntoParent(droppedTimeChild: GroupTypeFactory.TimeChild): Boolean {
             if (!canDropOnTopLevel) return false
@@ -31,7 +36,7 @@ interface DropParent {
 
     data class ParentInstance(val parentInstanceKey: InstanceKey) : DropParent {
 
-        override val newParentInfo = Instance.NewParentInfo.NO_OP
+        override fun getNewParentInfo(isGroupedInProject: Boolean?) = Instance.NewParentInfo.NO_OP
 
         override fun canDropIntoParent(droppedTimeChild: GroupTypeFactory.TimeChild) = when (droppedTimeChild) {
             is GroupTypeFactory.ProjectBridge -> throw UnsupportedOperationException()
@@ -41,7 +46,7 @@ interface DropParent {
 
     data class Project(val timeStamp: TimeStamp, val projectKey: ProjectKey.Shared) : DropParent {
 
-        override val newParentInfo = Instance.NewParentInfo.PROJECT
+        override fun getNewParentInfo(isGroupedInProject: Boolean?) = Instance.NewParentInfo.PROJECT
 
         override fun canDropIntoParent(droppedTimeChild: GroupTypeFactory.TimeChild) = when (droppedTimeChild) {
             is GroupTypeFactory.ProjectBridge -> false

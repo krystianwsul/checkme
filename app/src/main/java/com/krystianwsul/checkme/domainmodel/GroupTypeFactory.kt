@@ -85,6 +85,7 @@ class GroupTypeFactory(
         val instanceData: GroupListDataWrapper.InstanceData,
         val instanceDateTimePair: DateTimePair,
         override val groupIntoProject: Boolean,
+        val instance: Instance,
     ) : GroupType.InstanceDescriptor, Comparable<InstanceDescriptor> {
 
         override val timeStamp get() = instanceData.instanceTimeStamp

@@ -454,6 +454,7 @@ class DomainFactory(
             instanceData,
             instance.instanceDateTime.toDateTimePair(),
             instance.groupByProject,
+            instance,
         )
     }
 

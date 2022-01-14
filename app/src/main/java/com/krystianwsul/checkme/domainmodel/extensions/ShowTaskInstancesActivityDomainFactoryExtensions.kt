@@ -82,6 +82,7 @@ fun DomainFactory.getShowTaskInstancesData(
                             instanceData,
                             it.instanceDateTime.toDateTimePair(),
                             it.groupByProject,
+                            it,
                         )
                     }
                 }

@@ -117,7 +117,7 @@ fun DomainUpdater.splitInstance(
 }.perform(this)
 
 private fun DomainFactory.getGroupListData(
-    instance: Instance,
+    parentInstance: Instance,
     task: Task,
     now: ExactTimeStamp.Local,
 ): GroupListDataWrapper {
@@ -125,7 +125,7 @@ private fun DomainFactory.getGroupListData(
         GroupListDataWrapper.CustomTimeData(it.name, it.hourMinutes.toSortedMap())
     }
 
-    val instanceDescriptors = instance.getChildInstances()
+    val instanceDescriptors = parentInstance.getChildInstances()
         .filter { it.isVisible(now, Instance.VisibilityOptions(assumeChildOfVisibleParent = true)) }
         .map { childInstance ->
             val childTask = childInstance.task
@@ -158,6 +158,7 @@ private fun DomainFactory.getGroupListData(
                 instanceData,
                 childInstance.instanceDateTime.toDateTimePair(),
                 childInstance.groupByProject,
+                childInstance,
             )
         }
 
@@ -165,13 +166,13 @@ private fun DomainFactory.getGroupListData(
 
     return GroupListDataWrapper(
         customTimeDatas,
-        instance.canAddSubtask(now),
+        parentInstance.canAddSubtask(now),
         listOf(),
         task.note,
         newMixedInstanceDataCollection(mixedInstanceDescriptors, GroupType.GroupingMode.None),
         doneInstanceDescriptors.toInstanceDatas(),
         task.getImage(deviceDbInfo),
-        instance.getProjectInfo(now),
-        DropParent.ParentInstance(instance.instanceKey),
+        parentInstance.getProjectInfo(now),
+        DropParent.ParentInstance(parentInstance.instanceKey),
     )
 }

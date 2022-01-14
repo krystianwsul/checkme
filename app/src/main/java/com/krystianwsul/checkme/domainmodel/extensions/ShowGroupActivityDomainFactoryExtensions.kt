@@ -111,6 +111,7 @@ private fun DomainFactory.getGroupListData(
             instanceData,
             instance.instanceDateTime.toDateTimePair(),
             instance.groupByProject,
+            instance,
         )
     }
 

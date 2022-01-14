@@ -62,6 +62,7 @@ fun DomainFactory.getShowNotificationGroupData(instanceKeys: Set<InstanceKey>): 
             instanceData,
             instance.instanceDateTime.toDateTimePair(),
             instance.groupByProject,
+            instance,
         )
     }
 

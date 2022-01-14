@@ -15,9 +15,8 @@ class NotDoneInstanceNode(
 ) : NotDoneNode(
     ContentDelegate.Instance(
         groupAdapter,
-        GroupTypeFactory.SingleBridge(instanceData, false),
+        GroupTypeFactory.SingleBridge(instanceData, false, false),
         indentation,
-        false
     )
 ) {
 

@@ -78,7 +78,7 @@ class GroupTypeFactory(
     override fun createSingle(instanceDescriptor: GroupType.InstanceDescriptor): GroupType.Single {
         val instanceData = instanceDescriptor.fix().instanceData
 
-        return SingleBridge(instanceData, false)
+        return SingleBridge(instanceData, false, true)
     }
 
     class InstanceDescriptor(
@@ -185,7 +185,7 @@ class GroupTypeFactory(
             instanceDatas,
             indentation,
             nodeCollection,
-            instanceDatas.map { SingleBridge(it, null) },
+            instanceDatas.map { SingleBridge(it, null, true) },
             NotDoneNode.ContentDelegate.Group.Id.Project(timeStamp, instanceKeys, projectDetails.projectKey),
             NotDoneNode.ContentDelegate.Group.GroupRowsDelegate.Project(groupAdapter, timeStamp, projectDetails.name),
             ShowGroupActivity.Parameters.Project(timeStamp, projectDetails.projectKey),
@@ -232,7 +232,7 @@ class GroupTypeFactory(
             instanceDatas,
             indentation,
             nodeCollection,
-            instanceDatas.map { SingleBridge(it, true) },
+            instanceDatas.map { SingleBridge(it, true, true) },
             NotDoneNode.ContentDelegate.Group.Id.Project(timeStamp, instanceKeys, projectDetails.projectKey),
             NotDoneNode.ContentDelegate.Group.GroupRowsDelegate.Project(groupAdapter, null, projectDetails.name),
             ShowGroupActivity.Parameters.Project(timeStamp, projectDetails.projectKey),
@@ -251,6 +251,7 @@ class GroupTypeFactory(
     data class SingleBridge(
         val instanceData: GroupListDataWrapper.InstanceData,
         val isGroupedInProject: Boolean?, // null means throw an error if you need it
+        val showDetails: Boolean, // todo display replace with displayText later on
     ) : GroupType.Single, TimeChild {
 
         override val instanceKeys = setOf(instanceData.instanceKey)
@@ -267,7 +268,7 @@ class GroupTypeFactory(
             groupAdapter: GroupListFragment.GroupAdapter,
             indentation: Int,
             nodeCollection: NodeCollection,
-        ) = NotDoneNode.ContentDelegate.Instance(groupAdapter, this, indentation, true)
+        ) = NotDoneNode.ContentDelegate.Instance(groupAdapter, this, indentation)
 
         override fun compareTo(other: Bridge): Int {
             return when (other) {

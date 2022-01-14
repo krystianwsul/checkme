@@ -12,9 +12,8 @@ class DoneInstanceNode(
 ) : NotDoneNode(
     ContentDelegate.Instance(
         parentNode.nodeCollection.groupAdapter,
-        GroupTypeFactory.SingleBridge(instanceData, false),
+        GroupTypeFactory.SingleBridge(instanceData, false, true),
         indentation,
-        true
     )
 ) {
 

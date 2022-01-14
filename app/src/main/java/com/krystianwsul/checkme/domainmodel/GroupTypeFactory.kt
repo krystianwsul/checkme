@@ -78,7 +78,7 @@ class GroupTypeFactory(
     override fun createSingle(instanceDescriptor: GroupType.InstanceDescriptor): GroupType.Single {
         val instanceData = instanceDescriptor.fix().instanceData
 
-        return SingleBridge(instanceData, false, true)
+        return SingleBridge.createTopLevelNotDone(instanceData)
     }
 
     class InstanceDescriptor(
@@ -185,7 +185,7 @@ class GroupTypeFactory(
             instanceDatas,
             indentation,
             nodeCollection,
-            instanceDatas.map { SingleBridge(it, null, true) },
+            instanceDatas.map { SingleBridge.createTimeProjectBridgeChild(it) },
             NotDoneNode.ContentDelegate.Group.Id.Project(timeStamp, instanceKeys, projectDetails.projectKey),
             NotDoneNode.ContentDelegate.Group.GroupRowsDelegate.Project(groupAdapter, timeStamp, projectDetails.name),
             ShowGroupActivity.Parameters.Project(timeStamp, projectDetails.projectKey),
@@ -232,7 +232,7 @@ class GroupTypeFactory(
             instanceDatas,
             indentation,
             nodeCollection,
-            instanceDatas.map { SingleBridge(it, true, true) },
+            instanceDatas.map { SingleBridge.createProjectBridgeChild(it) },
             NotDoneNode.ContentDelegate.Group.Id.Project(timeStamp, instanceKeys, projectDetails.projectKey),
             NotDoneNode.ContentDelegate.Group.GroupRowsDelegate.Project(groupAdapter, null, projectDetails.name),
             ShowGroupActivity.Parameters.Project(timeStamp, projectDetails.projectKey),
@@ -253,6 +253,24 @@ class GroupTypeFactory(
         val isGroupedInProject: Boolean?, // null means throw an error if you need it
         val showDetails: Boolean, // todo display replace with displayText later on
     ) : GroupType.Single, TimeChild {
+
+        companion object {
+
+            fun createDone(instanceData: GroupListDataWrapper.InstanceData) =
+                SingleBridge(instanceData, false, true)
+
+            fun createGroupChild(instanceData: GroupListDataWrapper.InstanceData) =
+                SingleBridge(instanceData, false, false)
+
+            fun createTopLevelNotDone(instanceData: GroupListDataWrapper.InstanceData) =
+                SingleBridge(instanceData, false, true)
+
+            fun createProjectBridgeChild(instanceData: GroupListDataWrapper.InstanceData) =
+                SingleBridge(instanceData, true, true)
+
+            fun createTimeProjectBridgeChild(instanceData: GroupListDataWrapper.InstanceData) =
+                SingleBridge(instanceData, null, true)
+        }
 
         override val instanceKeys = setOf(instanceData.instanceKey)
 

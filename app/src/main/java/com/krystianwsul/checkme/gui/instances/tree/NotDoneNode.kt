@@ -147,14 +147,14 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
             override val groupAdapter: GroupListFragment.GroupAdapter,
             override val bridge: GroupTypeFactory.SingleBridge,
             override val indentation: Int,
-            showDetails: Boolean = true,
+            showDetails: Boolean,
         ) : ContentDelegate() {
 
             constructor(
                 groupAdapter: GroupListFragment.GroupAdapter,
                 instanceData: GroupListDataWrapper.InstanceData,
                 indentation: Int,
-                showDetails: Boolean = true,
+                showDetails: Boolean,
             ) : this(
                 groupAdapter,
                 GroupTypeFactory.SingleBridge(

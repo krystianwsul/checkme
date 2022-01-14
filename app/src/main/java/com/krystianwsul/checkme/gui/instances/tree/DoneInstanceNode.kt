@@ -8,7 +8,7 @@ class DoneInstanceNode(
     override val indentation: Int,
     private val instanceData: GroupListDataWrapper.InstanceData,
     override val parentNode: DividerNode,
-) : NotDoneNode(ContentDelegate.Instance(parentNode.nodeCollection.groupAdapter, instanceData, indentation)) {
+) : NotDoneNode(ContentDelegate.Instance(parentNode.nodeCollection.groupAdapter, instanceData, indentation, true)) {
 
     override val groupAdapter by lazy { parentNode.nodeCollection.groupAdapter }
 

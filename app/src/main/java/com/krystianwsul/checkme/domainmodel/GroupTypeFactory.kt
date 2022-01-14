@@ -267,7 +267,7 @@ class GroupTypeFactory(
             groupAdapter: GroupListFragment.GroupAdapter,
             indentation: Int,
             nodeCollection: NodeCollection,
-        ) = NotDoneNode.ContentDelegate.Instance(groupAdapter, this, indentation)
+        ) = NotDoneNode.ContentDelegate.Instance(groupAdapter, this, indentation, true)
 
         override fun compareTo(other: Bridge): Int {
             return when (other) {

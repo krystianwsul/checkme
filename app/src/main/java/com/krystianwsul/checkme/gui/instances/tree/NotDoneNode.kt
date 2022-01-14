@@ -147,23 +147,8 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
             override val groupAdapter: GroupListFragment.GroupAdapter,
             override val bridge: GroupTypeFactory.SingleBridge,
             override val indentation: Int,
-            showDetails: Boolean,
+            showDetails: Boolean, // todo display this should get moved out, but I need to analyze where to set showDetails
         ) : ContentDelegate() {
-
-            constructor(
-                groupAdapter: GroupListFragment.GroupAdapter,
-                instanceData: GroupListDataWrapper.InstanceData,
-                indentation: Int,
-                showDetails: Boolean,
-            ) : this(
-                groupAdapter,
-                GroupTypeFactory.SingleBridge(
-                    instanceData,
-                    false,
-                ), // todo display this should get moved out, but I need to analyze where to set showDetails
-                indentation,
-                showDetails,
-            )
 
             val instanceData get() = bridge.instanceData
 

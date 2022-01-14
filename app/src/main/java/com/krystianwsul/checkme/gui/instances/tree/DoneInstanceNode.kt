@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
+import com.krystianwsul.checkme.domainmodel.GroupTypeFactory
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
 import com.krystianwsul.treeadapter.ModelNode
@@ -8,7 +9,14 @@ class DoneInstanceNode(
     override val indentation: Int,
     private val instanceData: GroupListDataWrapper.InstanceData,
     override val parentNode: DividerNode,
-) : NotDoneNode(ContentDelegate.Instance(parentNode.nodeCollection.groupAdapter, instanceData, indentation, true)) {
+) : NotDoneNode(
+    ContentDelegate.Instance(
+        parentNode.nodeCollection.groupAdapter,
+        GroupTypeFactory.SingleBridge(instanceData, false),
+        indentation,
+        true
+    )
+) {
 
     override val groupAdapter by lazy { parentNode.nodeCollection.groupAdapter }
 

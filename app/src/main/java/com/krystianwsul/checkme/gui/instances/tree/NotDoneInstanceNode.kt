@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
 import androidx.recyclerview.widget.RecyclerView
+import com.krystianwsul.checkme.domainmodel.GroupTypeFactory
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.instances.list.GroupListFragment
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
@@ -11,7 +12,14 @@ class NotDoneInstanceNode(
     val instanceData: GroupListDataWrapper.InstanceData,
     override val parentNode: ModelNode<AbstractHolder>,
     override val groupAdapter: GroupListFragment.GroupAdapter,
-) : NotDoneNode(ContentDelegate.Instance(groupAdapter, instanceData, indentation, false)) {
+) : NotDoneNode(
+    ContentDelegate.Instance(
+        groupAdapter,
+        GroupTypeFactory.SingleBridge(instanceData, false),
+        indentation,
+        false
+    )
+) {
 
     override fun compareTo(other: ModelNode<AbstractHolder>) =
         contentDelegate.bridge.compareTo((other as NotDoneNode).contentDelegate.bridge)

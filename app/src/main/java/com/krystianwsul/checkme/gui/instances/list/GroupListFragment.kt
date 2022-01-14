@@ -471,7 +471,7 @@ class GroupListFragment @JvmOverloads constructor(
                 data.dataId,
                 data.groupListDataWrapper.customTimeDatas,
                 data.groupListDataWrapper.mixedInstanceDataCollection,
-                data.groupListDataWrapper.doneInstanceDatas,
+                data.groupListDataWrapper.doneSingleBridges,
                 state,
                 data.groupListDataWrapper.taskDatas,
                 data.groupListDataWrapper.note,
@@ -924,7 +924,7 @@ class GroupListFragment @JvmOverloads constructor(
             dataId: DataId,
             customTimeDatas: List<GroupListDataWrapper.CustomTimeData>,
             mixedInstanceDataCollection: MixedInstanceDataCollection,
-            doneInstanceDatas: List<GroupListDataWrapper.InstanceData>,
+            doneSingleBridges: List<GroupTypeFactory.SingleBridge>,
             groupListState: GroupListState,
             taskDatas: List<GroupListDataWrapper.TaskData>,
             note: String?,
@@ -951,7 +951,7 @@ class GroupListFragment @JvmOverloads constructor(
 
             treeNodeCollection.nodes = nodeCollection.initialize(
                 mixedInstanceDataCollection,
-                doneInstanceDatas,
+                doneSingleBridges,
                 groupListState.contentDelegateStates,
                 groupListState.doneExpansionState,
                 taskDatas,

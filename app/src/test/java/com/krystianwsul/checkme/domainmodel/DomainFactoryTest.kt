@@ -251,7 +251,7 @@ class DomainFactoryTest {
 
         val secondGroupListWrapper = domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY).groupListDataWrapper
 
-        assertEquals(0, secondGroupListWrapper.doneInstanceDatas.single().allChildren.size)
+        assertEquals(0, secondGroupListWrapper.doneSingleBridges.single().instanceData.allChildren.size)
         assertEquals(
             1,
             secondGroupListWrapper.mixedInstanceDataCollection.instanceDatas.single().allChildren.size

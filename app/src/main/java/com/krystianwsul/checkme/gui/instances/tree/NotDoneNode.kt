@@ -186,7 +186,7 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
                 treeNode.setChildTreeNodes(
                     nodeCollection.initialize(
                         instanceData.mixedInstanceDataCollection,
-                        instanceData.doneInstanceDatas,
+                        instanceData.doneSingleBridges,
                         contentDelegateStates,
                         doneExpansionState,
                         listOf(),

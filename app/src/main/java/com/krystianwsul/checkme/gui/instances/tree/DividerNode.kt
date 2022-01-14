@@ -2,7 +2,6 @@ package com.krystianwsul.checkme.gui.instances.tree
 
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.GroupTypeFactory
-import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.tree.*
 import com.krystianwsul.checkme.gui.tree.delegates.expandable.ExpandableDelegate
 import com.krystianwsul.checkme.gui.tree.delegates.indentation.IndentationDelegate
@@ -49,16 +48,16 @@ class DividerNode(
     fun initialize(
         initialExpansionState: TreeNode.ExpansionState?,
         nodeContainer: NodeContainer<AbstractHolder>,
-        doneInstanceDatas: List<GroupListDataWrapper.InstanceData>,
+        doneSingleBridges: List<GroupTypeFactory.SingleBridge>,
         contentDelegateStates: Map<NotDoneNode.ContentDelegate.Id, NotDoneNode.ContentDelegate.State>,
     ): TreeNode<AbstractHolder> {
         treeNode = TreeNode(
             this,
             nodeContainer,
-            initialExpansionState = initialExpansionState.takeIf { doneInstanceDatas.isNotEmpty() },
+            initialExpansionState = initialExpansionState.takeIf { doneSingleBridges.isNotEmpty() },
         )
 
-        val childTreeNodes = doneInstanceDatas.map { newChildTreeNode(it, contentDelegateStates) }
+        val childTreeNodes = doneSingleBridges.map { newChildTreeNode(it, contentDelegateStates) }
 
         treeNode.setChildTreeNodes(childTreeNodes)
 
@@ -66,12 +65,12 @@ class DividerNode(
     }
 
     private fun newChildTreeNode(
-        instanceData: GroupListDataWrapper.InstanceData,
+        singleBridge: GroupTypeFactory.SingleBridge,
         contentDelegateStates: Map<NotDoneNode.ContentDelegate.Id, NotDoneNode.ContentDelegate.State>,
     ): TreeNode<AbstractHolder> {
-        checkNotNull(instanceData.done)
+        checkNotNull(singleBridge.instanceData.done)
 
-        val doneInstanceNode = DoneInstanceNode(indentation, GroupTypeFactory.SingleBridge(instanceData, false, true), this)
+        val doneInstanceNode = DoneInstanceNode(indentation, singleBridge, this)
 
         val childTreeNode = doneInstanceNode.initialize(contentDelegateStates, treeNode)
 

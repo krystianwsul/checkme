@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
+import com.krystianwsul.checkme.domainmodel.GroupTypeFactory
 import com.krystianwsul.checkme.domainmodel.MixedInstanceDataCollection
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.instances.list.GroupListFragment
@@ -23,8 +24,7 @@ class NodeCollection(
 
     private lateinit var notDoneGroupCollection: NotDoneGroupCollection
 
-    lateinit var dividerNode: DividerNode
-        private set
+    private lateinit var dividerNode: DividerNode
 
     private var unscheduledNode: UnscheduledNode? = null
 
@@ -38,7 +38,7 @@ class NodeCollection(
 
     fun initialize(
         mixedInstanceDataCollection: MixedInstanceDataCollection,
-        doneInstanceDatas: List<GroupListDataWrapper.InstanceData>,
+        doneSingleBridges: List<GroupTypeFactory.SingleBridge>,
         contentDelegateStates: Map<NotDoneNode.ContentDelegate.Id, NotDoneNode.ContentDelegate.State>,
         doneExpansionState: TreeNode.ExpansionState?,
         taskDatas: List<GroupListDataWrapper.TaskData>,
@@ -84,7 +84,7 @@ class NodeCollection(
         treeNodes += dividerNode.initialize(
             doneExpansionState,
             nodeContainer,
-            doneInstanceDatas.toList(),
+            doneSingleBridges,
             contentDelegateStates,
         )
 

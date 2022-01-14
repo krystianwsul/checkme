@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.gui.instances.list
 
 import arrow.optics.optics
+import com.krystianwsul.checkme.domainmodel.GroupTypeFactory
 import com.krystianwsul.checkme.domainmodel.MixedInstanceDataCollection
 import com.krystianwsul.checkme.gui.instances.drag.DropParent
 import com.krystianwsul.checkme.gui.tree.DetailsNode
@@ -18,13 +19,13 @@ data class GroupListDataWrapper(
     val taskDatas: List<TaskData>,
     val note: String?,
     val mixedInstanceDataCollection: MixedInstanceDataCollection,
-    val doneInstanceDatas: List<InstanceData>,
+    val doneSingleBridges: List<GroupTypeFactory.SingleBridge>,
     val imageData: ImageState?,
     val projectInfo: DetailsNode.ProjectInfo?,
     val dropParent: DropParent,
 ) {
 
-    val allInstanceDatas get() = mixedInstanceDataCollection.instanceDatas + doneInstanceDatas
+    val allInstanceDatas get() = mixedInstanceDataCollection.instanceDatas + doneSingleBridges.map { it.instanceData }
 
     data class TaskData(
         override val taskKey: TaskKey,
@@ -64,7 +65,7 @@ data class GroupListDataWrapper(
         val createTaskTimePair: TimePair,
         override val note: String?,
         val mixedInstanceDataCollection: MixedInstanceDataCollection,
-        val doneInstanceDatas: List<InstanceData>,
+        val doneSingleBridges: List<GroupTypeFactory.SingleBridge>,
         val ordinal: Ordinal,
         val imageState: ImageState?,
         override val isAssignedToMe: Boolean,
@@ -77,7 +78,7 @@ data class GroupListDataWrapper(
 
         val isRootInstance = parentInstanceKey == null
 
-        val allChildren = mixedInstanceDataCollection.instanceDatas + doneInstanceDatas
+        val allChildren = mixedInstanceDataCollection.instanceDatas + doneSingleBridges.map { it.instanceData }
 
         override val normalizedFields by lazy { listOfNotNull(name, note).map { it.normalized() } }
 

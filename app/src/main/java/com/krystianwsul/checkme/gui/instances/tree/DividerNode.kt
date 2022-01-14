@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
 import com.krystianwsul.checkme.R
+import com.krystianwsul.checkme.domainmodel.GroupTypeFactory
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.tree.*
 import com.krystianwsul.checkme.gui.tree.delegates.expandable.ExpandableDelegate
@@ -70,7 +71,7 @@ class DividerNode(
     ): TreeNode<AbstractHolder> {
         checkNotNull(instanceData.done)
 
-        val doneInstanceNode = DoneInstanceNode(indentation, instanceData, this)
+        val doneInstanceNode = DoneInstanceNode(indentation, GroupTypeFactory.SingleBridge(instanceData, false, true), this)
 
         val childTreeNode = doneInstanceNode.initialize(contentDelegateStates, treeNode)
 

@@ -159,8 +159,8 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
                 groupAdapter,
                 GroupTypeFactory.SingleBridge(
                     instanceData,
-                    false
-                ), // todo ordinal this should get moved out, but I need to analyze where to set showDetails
+                    false,
+                ), // todo display this should get moved out, but I need to analyze where to set showDetails
                 indentation,
                 showDetails,
             )
@@ -216,7 +216,7 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
                 return treeNode
             }
 
-            override val rowsDelegate = InstanceRowsDelegate(instanceData, showDetails)
+            override val rowsDelegate = InstanceRowsDelegate(bridge, showDetails)
 
             override val thumbnail = instanceData.imageState
 

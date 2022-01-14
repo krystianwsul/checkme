@@ -424,14 +424,12 @@ class DomainFactory(
         childInstanceDescriptors: Collection<GroupTypeFactory.InstanceDescriptor>,
         includeProjectInfo: Boolean = true,
     ): GroupTypeFactory.InstanceDescriptor {
-        val isRootInstance = instance.isRootInstance()
-
         val (notDoneInstanceDescriptors, doneInstanceDescriptors) = childInstanceDescriptors.splitDone()
 
         val instanceData = GroupListDataWrapper.InstanceData(
             instance.done,
             instance.instanceKey,
-            if (isRootInstance) instance.instanceDateTime.getDisplayText() else null,
+            instance.getDisplayData()?.getDisplayText(),
             instance.name,
             instance.instanceDateTime.timeStamp,
             instance.instanceDate,

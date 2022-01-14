@@ -2,7 +2,10 @@ package com.krystianwsul.checkme.domainmodel.extensions
 
 import androidx.annotation.CheckResult
 import com.krystianwsul.checkme.MyCrashlytics
-import com.krystianwsul.checkme.domainmodel.*
+import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.DomainListenerManager
+import com.krystianwsul.checkme.domainmodel.GroupTypeFactory
+import com.krystianwsul.checkme.domainmodel.getProjectInfo
 import com.krystianwsul.checkme.domainmodel.update.CompletableDomainUpdate
 import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
 import com.krystianwsul.checkme.domainmodel.update.SingleDomainUpdate
@@ -169,7 +172,7 @@ private fun DomainFactory.getGroupListData(
         parentInstance.canAddSubtask(now),
         listOf(),
         task.note,
-        newMixedInstanceDataCollection(mixedInstanceDescriptors, GroupType.GroupingMode.None),
+        newMixedInstanceDataCollection(mixedInstanceDescriptors),
         doneInstanceDescriptors.toDoneSingleBridges(),
         task.getImage(deviceDbInfo),
         parentInstance.getProjectInfo(now),

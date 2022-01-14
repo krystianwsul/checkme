@@ -157,7 +157,10 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
                 showDetails: Boolean = true,
             ) : this(
                 groupAdapter,
-                GroupTypeFactory.SingleBridge(instanceData),
+                GroupTypeFactory.SingleBridge(
+                    instanceData,
+                    false
+                ), // todo ordinal this should get moved out, but I need to analyze where to set showDetails
                 indentation,
                 showDetails,
             )
@@ -281,7 +284,7 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
                     groupListFragment.parameters.dataId.toFirst(),
                     instanceData.instanceKey,
                     ordinal,
-                    treeNode.getDropParent().newParentInfo,
+                    treeNode.getDropParent().getNewParentInfo(bridge.isGroupedInProject),
                 ).perform(AndroidDomainUpdater).subscribe()
             }
 

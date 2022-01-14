@@ -78,7 +78,7 @@ class GroupTypeFactory(
     override fun createSingle(instanceDescriptor: GroupType.InstanceDescriptor): GroupType.Single {
         val instanceData = instanceDescriptor.fix().instanceData
 
-        return SingleBridge(instanceData)
+        return SingleBridge(instanceData, false)
     }
 
     class InstanceDescriptor(
@@ -127,7 +127,8 @@ class GroupTypeFactory(
         private val showGroupActivityParameters: ShowGroupActivity.Parameters,
     ) : GroupType.Time, SingleParent {
 
-        override val newParentInfo = Instance.NewParentInfo.TOP_LEVEL
+        override fun getNewParentInfo(isGroupedInProject: Boolean?) =
+            if (isGroupedInProject!!) Instance.NewParentInfo.TOP_LEVEL else Instance.NewParentInfo.NO_OP
 
         override fun toContentDelegate(
             groupAdapter: GroupListFragment.GroupAdapter,
@@ -171,7 +172,7 @@ class GroupTypeFactory(
 
         val instanceKeys = instanceDatas.map { it.instanceKey }.toSet()
 
-        override val newParentInfo = Instance.NewParentInfo.NO_OP
+        override fun getNewParentInfo(isGroupedInProject: Boolean?) = Instance.NewParentInfo.NO_OP
 
         override fun toContentDelegate(
             groupAdapter: GroupListFragment.GroupAdapter,
@@ -183,7 +184,7 @@ class GroupTypeFactory(
             instanceDatas,
             indentation,
             nodeCollection,
-            instanceDatas.map(GroupTypeFactory::SingleBridge),
+            instanceDatas.map { SingleBridge(it, null) },
             NotDoneNode.ContentDelegate.Group.Id.Project(timeStamp, instanceKeys, projectDetails.projectKey),
             NotDoneNode.ContentDelegate.Group.GroupRowsDelegate.Project(groupAdapter, timeStamp, projectDetails.name),
             ShowGroupActivity.Parameters.Project(timeStamp, projectDetails.projectKey),
@@ -230,7 +231,7 @@ class GroupTypeFactory(
             instanceDatas,
             indentation,
             nodeCollection,
-            instanceDatas.map(GroupTypeFactory::SingleBridge),
+            instanceDatas.map { SingleBridge(it, true) },
             NotDoneNode.ContentDelegate.Group.Id.Project(timeStamp, instanceKeys, projectDetails.projectKey),
             NotDoneNode.ContentDelegate.Group.GroupRowsDelegate.Project(groupAdapter, null, projectDetails.name),
             ShowGroupActivity.Parameters.Project(timeStamp, projectDetails.projectKey),
@@ -246,13 +247,20 @@ class GroupTypeFactory(
         }
     }
 
-    data class SingleBridge(val instanceData: GroupListDataWrapper.InstanceData) : GroupType.Single, TimeChild {
+    data class SingleBridge(
+        val instanceData: GroupListDataWrapper.InstanceData,
+        val isGroupedInProject: Boolean?, // null means throw an error if you need it
+    ) : GroupType.Single, TimeChild {
 
         override val instanceKeys = setOf(instanceData.instanceKey)
 
+        init {
+            if (instanceData.name.contains("like") && isGroupedInProject == null) throw Exception()
+        }
+
         override val ordinal = instanceData.ordinal
 
-        override val newParentInfo = Instance.NewParentInfo.NO_OP
+        override fun getNewParentInfo(isGroupedInProject: Boolean?) = Instance.NewParentInfo.NO_OP
 
         override fun toContentDelegate(
             groupAdapter: GroupListFragment.GroupAdapter,

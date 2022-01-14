@@ -2,23 +2,18 @@ package com.krystianwsul.checkme.gui.instances.tree
 
 import androidx.recyclerview.widget.RecyclerView
 import com.krystianwsul.checkme.domainmodel.GroupTypeFactory
-import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.instances.list.GroupListFragment
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
 import com.krystianwsul.treeadapter.ModelNode
 
 class NotDoneInstanceNode(
     override val indentation: Int,
-    val instanceData: GroupListDataWrapper.InstanceData,
+    singleBridge: GroupTypeFactory.SingleBridge,
     override val parentNode: ModelNode<AbstractHolder>,
     override val groupAdapter: GroupListFragment.GroupAdapter,
-) : NotDoneNode(
-    ContentDelegate.Instance(
-        groupAdapter,
-        GroupTypeFactory.SingleBridge(instanceData, false, false),
-        indentation,
-    )
-) {
+) : NotDoneNode(ContentDelegate.Instance(groupAdapter, singleBridge, indentation)) {
+
+    val instanceData = singleBridge.instanceData
 
     override fun compareTo(other: ModelNode<AbstractHolder>) =
         contentDelegate.bridge.compareTo((other as NotDoneNode).contentDelegate.bridge)

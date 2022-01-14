@@ -343,7 +343,7 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
                     val notDoneNode = if (contentDelegate is Instance) {
                         NotDoneInstanceNode(
                             contentDelegate.indentation,
-                            contentDelegate.instanceData,
+                            GroupTypeFactory.SingleBridge(contentDelegate.instanceData, false, false),
                             modelNode,
                             nodeCollection.groupAdapter,
                         )

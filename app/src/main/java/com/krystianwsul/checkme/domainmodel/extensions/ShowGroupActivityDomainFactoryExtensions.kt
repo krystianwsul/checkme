@@ -124,11 +124,8 @@ private fun DomainFactory.getGroupListData(
         null,
         listOf(),
         null,
-        newMixedInstanceDataCollection(
-            mixedInstanceDescriptors,
-            groupingMode
-        ), // todo display pass in param to hide displayText
-        doneInstanceDescriptors.toDoneSingleBridges(), // todo display pass in param to hide displayText
+        newMixedInstanceDataCollection(mixedInstanceDescriptors, groupingMode, false),
+        doneInstanceDescriptors.toDoneSingleBridges(false),
         null,
         null,
         dropParent,

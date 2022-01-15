@@ -639,11 +639,13 @@ class DomainFactory(
     fun newMixedInstanceDataCollection(
         instanceDescriptors: Collection<GroupTypeFactory.InstanceDescriptor>,
         groupingMode: GroupType.GroupingMode = GroupType.GroupingMode.None,
+        showDisplayText: Boolean = true,
     ) = MixedInstanceDataCollection(
         instanceDescriptors,
         myUserFactory.user,
         { projectsFactory.sharedProjects.getValue(it) },
         groupingMode,
+        showDisplayText,
     )
 
     // this shouldn't use DateTime, since that leaks Time.Custom which is a model object

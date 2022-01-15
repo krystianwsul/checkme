@@ -13,8 +13,12 @@ data class MixedInstanceDataCollection(
         projectOrdinalManagerProvider: ProjectOrdinalManager.Provider,
         projectProvider: GroupTypeFactory.ProjectProvider,
         groupingMode: GroupType.GroupingMode,
+        showDisplayText: Boolean,
     ) : this(
         instanceDescriptors.map { it.instanceData },
-        GroupTypeFactory(projectOrdinalManagerProvider, projectProvider).getGroupTypeTree(instanceDescriptors, groupingMode),
+        GroupTypeFactory(projectOrdinalManagerProvider, projectProvider, showDisplayText).getGroupTypeTree(
+            instanceDescriptors,
+            groupingMode
+        ),
     )
 }

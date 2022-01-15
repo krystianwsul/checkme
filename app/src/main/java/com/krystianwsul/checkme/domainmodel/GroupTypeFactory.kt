@@ -7,6 +7,7 @@ import com.krystianwsul.checkme.gui.instances.list.GroupListFragment
 import com.krystianwsul.checkme.gui.instances.tree.NodeCollection
 import com.krystianwsul.checkme.gui.instances.tree.NotDoneNode
 import com.krystianwsul.checkme.gui.tree.DetailsNode
+import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.project.SharedProject
 import com.krystianwsul.common.firebase.models.users.ProjectOrdinalManager
@@ -19,6 +20,7 @@ import com.krystianwsul.common.utils.ProjectKey
 class GroupTypeFactory(
     private val projectOrdinalManagerProvider: ProjectOrdinalManager.Provider,
     private val projectProvider: ProjectProvider,
+    private val showDisplayText: Boolean,
 ) : GroupType.Factory {
 
     private fun GroupType.fix() = this as Bridge
@@ -100,7 +102,7 @@ class GroupTypeFactory(
         return if (nested)
             SingleBridge.createGroupChild(fixedInstanceDescriptor)
         else
-            SingleBridge.createTopLevelNotDone(fixedInstanceDescriptor)
+            SingleBridge.createTopLevelNotDone(fixedInstanceDescriptor, showDisplayText)
     }
 
     class InstanceDescriptor(
@@ -283,14 +285,26 @@ class GroupTypeFactory(
 
         companion object {
 
-            fun createDone(instanceDescriptor: InstanceDescriptor) =
-                SingleBridge(instanceDescriptor.instanceData, false, instanceDescriptor.instanceData.displayText)
+            fun createDone(instanceDescriptor: InstanceDescriptor, showDisplayText: Boolean) = SingleBridge(
+                instanceDescriptor.instanceData,
+                false,
+                instanceDescriptor.takeIf { showDisplayText }
+                    ?.instance
+                    ?.getDisplayData()
+                    ?.getDisplayText(),
+            )
 
             fun createGroupChild(instanceDescriptor: InstanceDescriptor) =
                 SingleBridge(instanceDescriptor.instanceData, false, null)
 
-            fun createTopLevelNotDone(instanceDescriptor: InstanceDescriptor) =
-                SingleBridge(instanceDescriptor.instanceData, false, instanceDescriptor.instanceData.displayText)
+            fun createTopLevelNotDone(instanceDescriptor: InstanceDescriptor, showDisplayText: Boolean) = SingleBridge(
+                instanceDescriptor.instanceData,
+                false,
+                instanceDescriptor.takeIf { showDisplayText }
+                    ?.instance
+                    ?.getDisplayData()
+                    ?.getDisplayText(),
+            )
         }
 
         override val instanceKeys = setOf(instanceData.instanceKey)

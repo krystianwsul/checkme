@@ -100,6 +100,7 @@ data class GroupListDataWrapper(
             normalizedFields
         }
 
+        // todo display
         fun stripProjectDetails() = Companion.projectInfo.modify(this) { it.copy(projectDetails = null) }
     }
 

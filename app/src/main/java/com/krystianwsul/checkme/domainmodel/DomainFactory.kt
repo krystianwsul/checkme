@@ -421,7 +421,6 @@ class DomainFactory(
         instance: Instance,
         now: ExactTimeStamp.Local,
         childInstanceDescriptors: Collection<GroupTypeFactory.InstanceDescriptor>,
-        includeProjectInfo: Boolean = true,
     ): GroupTypeFactory.InstanceDescriptor {
         val (notDoneInstanceDescriptors, doneInstanceDescriptors) = childInstanceDescriptors.splitDone()
 
@@ -441,7 +440,6 @@ class DomainFactory(
             instance.ordinal,
             instance.task.getImage(deviceDbInfo),
             instance.isAssignedToMe(now, myUserFactory.user),
-            instance.getProjectInfo(includeProjectInfo),
             instance.getProject().projectKey as? ProjectKey.Shared,
             instance.parentInstance?.instanceKey,
         )
@@ -496,7 +494,7 @@ class DomainFactory(
     ) = getChildInstanceDatas<GroupTypeFactory.InstanceDescriptor>(
         instance,
         now,
-        { childInstance, children -> instanceToGroupListData(childInstance, now, children, false) },
+        { childInstance, children -> instanceToGroupListData(childInstance, now, children) },
         searchCriteria,
         filterVisible,
     ).splitDone()

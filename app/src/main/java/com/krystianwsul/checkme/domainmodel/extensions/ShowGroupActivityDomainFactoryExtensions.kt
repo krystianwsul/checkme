@@ -4,7 +4,6 @@ import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.GroupType
 import com.krystianwsul.checkme.domainmodel.GroupTypeFactory
-import com.krystianwsul.checkme.domainmodel.getProjectInfo
 import com.krystianwsul.checkme.gui.instances.ShowGroupActivity
 import com.krystianwsul.checkme.gui.instances.drag.DropParent
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
@@ -100,7 +99,6 @@ private fun DomainFactory.getGroupListData(
             instance.ordinal,
             task.getImage(deviceDbInfo),
             instance.isAssignedToMe(now, myUserFactory.user),
-            instance.getProjectInfo(includeProjectDetails),
             instance.getProject().projectKey as? ProjectKey.Shared,
             instance.parentInstance?.instanceKey,
         )

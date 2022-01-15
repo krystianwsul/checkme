@@ -111,7 +111,7 @@ class GroupTypeFactory(
     }
 
     data class ProjectDescriptor(val projectKey: ProjectKey.Shared) :
-        GroupType.ProjectDescriptor // todo details just stick the project here
+        GroupType.ProjectDescriptor // todo display just stick the project here
 
     sealed interface Bridge : Comparable<Bridge>, DropParent {
 

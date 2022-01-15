@@ -66,8 +66,7 @@ data class GroupListDataWrapper(
         val ordinal: Ordinal,
         val imageState: ImageState?,
         override val isAssignedToMe: Boolean,
-        val projectInfo: DetailsNode.ProjectInfo?, // this is for what's displayed // todo display
-        val projectKey: ProjectKey.Shared?, // this is for creating new tasks via ActionMode.  Always set
+        val projectKey: ProjectKey.Shared?,
         val parentInstanceKey: InstanceKey?,
     ) : Comparable<InstanceData>, SelectedData, QueryMatchable, FilterParamsMatchable {
 

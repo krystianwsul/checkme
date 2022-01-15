@@ -56,14 +56,14 @@ fun DomainFactory.getCappedInstanceAndTaskDatas(
     page: Int,
     projectKey: ProjectKey.Shared? = null,
 ): Triple<List<GroupTypeFactory.InstanceDescriptor>, List<GroupListDataWrapper.TaskData>, Boolean> {
-    val includeProjectInfo = projectKey == null
+    val includeProjectDetails = projectKey == null
 
     val (cappedInstanceDescriptors, hasMore) = searchInstances<GroupTypeFactory.InstanceDescriptor>(
         now,
         searchCriteria,
         page,
         projectKey,
-    ) { instance, children -> instanceToGroupListData(instance, now, children, includeProjectInfo) }
+    ) { instance, children -> instanceToGroupListData(instance, now, children) }
 
     val taskDatas = getUnscheduledTasks(projectKey)
         .asSequence()
@@ -78,7 +78,7 @@ fun DomainFactory.getCappedInstanceAndTaskDatas(
                 task.note,
                 task.getImage(deviceDbInfo),
                 task.isAssignedToMe(now, myUserFactory.user),
-                task.getProjectInfo(now, includeProjectInfo),
+                task.getProjectInfo(now, includeProjectDetails),
                 task.ordinal,
                 task.canMigrateDescription(now),
             )

@@ -166,7 +166,6 @@ fun DomainFactory.getGroupListData(
             instance.ordinal,
             task.getImage(deviceDbInfo),
             instance.isAssignedToMe(now, myUserFactory.user),
-            instance.getProjectInfo(),
             instance.getProject().projectKey as? ProjectKey.Shared,
             instance.parentInstance?.instanceKey,
         )

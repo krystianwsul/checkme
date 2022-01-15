@@ -101,7 +101,11 @@ fun DomainFactory.getShowTaskInstancesData(
                 parent.notDeleted,
                 taskDatas,
                 null,
-                newMixedInstanceDataCollection(instanceDescriptors, parameters.groupingMode),
+                newMixedInstanceDataCollection(
+                    instanceDescriptors,
+                    parameters.groupingMode,
+                    includeProjectDetails = parameters.projectKey == null,
+                ),
                 listOf(),
                 null,
                 null,

@@ -55,7 +55,6 @@ data class GroupListDataWrapper(
     data class InstanceData(
         val done: ExactTimeStamp.Local?,
         val instanceKey: InstanceKey,
-        val displayText: String?, // todo display
         override val name: String,
         val instanceTimeStamp: TimeStamp,
         val instanceDate: Date,

@@ -8,7 +8,6 @@ import com.krystianwsul.checkme.domainmodel.getProjectInfo
 import com.krystianwsul.checkme.domainmodel.notifications.Notifier
 import com.krystianwsul.checkme.gui.instances.drag.DropParent
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
-import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.checkme.viewmodels.ShowNotificationGroupViewModel
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.time.ExactTimeStamp
@@ -39,7 +38,6 @@ fun DomainFactory.getShowNotificationGroupData(instanceKeys: Set<InstanceKey>): 
         val instanceData = GroupListDataWrapper.InstanceData(
             instance.done,
             instance.instanceKey,
-            instance.getDisplayData()?.getDisplayText(),
             instance.name,
             instance.instanceDateTime.timeStamp,
             instance.instanceDate,

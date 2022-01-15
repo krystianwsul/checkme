@@ -7,7 +7,6 @@ import com.krystianwsul.checkme.gui.instances.drag.DropParent
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.utils.time.calendar
-import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.checkme.utils.time.toDateTimeTz
 import com.krystianwsul.checkme.viewmodels.DayViewModel
 import com.krystianwsul.checkme.viewmodels.MainNoteViewModel
@@ -154,7 +153,6 @@ fun DomainFactory.getGroupListData(
         val instanceData = GroupListDataWrapper.InstanceData(
             instance.done,
             instance.instanceKey,
-            instance.getDisplayData()?.getDisplayText(),
             instance.name,
             instance.instanceDateTime.timeStamp,
             instance.instanceDate,

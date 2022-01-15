@@ -138,7 +138,6 @@ private fun DomainFactory.getGroupListData(
             val instanceData = GroupListDataWrapper.InstanceData(
                 childInstance.done,
                 childInstance.instanceKey,
-                null,
                 childInstance.name,
                 childInstance.instanceDateTime.timeStamp,
                 childInstance.instanceDate,

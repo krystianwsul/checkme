@@ -5,7 +5,6 @@ import com.krystianwsul.checkme.domainmodel.*
 import com.krystianwsul.checkme.gui.instances.ShowTaskInstancesActivity
 import com.krystianwsul.checkme.gui.instances.drag.DropParent
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
-import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.checkme.viewmodels.DomainQuery
 import com.krystianwsul.checkme.viewmodels.ShowTaskInstancesViewModel
 import com.krystianwsul.common.criteria.SearchCriteria
@@ -59,7 +58,6 @@ fun DomainFactory.getShowTaskInstancesData(
                         val instanceData = GroupListDataWrapper.InstanceData(
                             it.done,
                             it.instanceKey,
-                            it.instanceDateTime.getDisplayText(),
                             it.name,
                             it.instanceDateTime.timeStamp,
                             it.instanceDate,

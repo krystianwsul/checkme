@@ -28,10 +28,7 @@ interface GroupType {
                                 .distinct()
                                 .singleOrNull()
 
-                            projectDescriptor.takeIf {
-                                instanceDescriptors.all { it.groupIntoProject }
-                            }
-                                ?.let { factory.createTimeProject(timeStamp, it, instanceDescriptors) }
+                            projectDescriptor?.let { factory.createTimeProject(timeStamp, it, instanceDescriptors) }
                                 ?: factory.createTime(
                                     timeStamp,
                                     groupByProject(factory, timeStamp, instanceDescriptors, true),
@@ -45,7 +42,7 @@ interface GroupType {
                 }
                 GroupingMode.Projects -> { // don't group into time, but DO group into timeProject
                     val (projectInstances, noProjectInstances) =
-                        instanceDescriptors.partition { it.projectDescriptor != null && it.groupIntoProject }
+                        instanceDescriptors.partition { it.projectDescriptor != null }
 
                     val noProjectGroupTypes = noProjectInstances.map { factory.createSingle(it, false) }
 
@@ -84,8 +81,7 @@ interface GroupType {
         ): List<TimeChild> {
             if (instanceDescriptors.isEmpty()) return emptyList()
 
-            val (projectInstances, noProjectInstances) =
-                instanceDescriptors.partition { it.projectDescriptor != null && it.groupIntoProject }
+            val (projectInstances, noProjectInstances) = instanceDescriptors.partition { it.projectDescriptor != null }
 
             val projectGroups = projectInstances.groupBy { it.projectDescriptor!! }
 
@@ -163,8 +159,6 @@ interface GroupType {
         val timeStamp: TimeStamp
 
         val projectDescriptor: ProjectDescriptor?
-
-        val groupIntoProject: Boolean
     }
 
     interface ProjectDescriptor

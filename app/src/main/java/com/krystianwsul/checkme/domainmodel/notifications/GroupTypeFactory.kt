@@ -43,11 +43,10 @@ object GroupTypeFactory : GroupType.Factory {
 
         override val timeStamp get() = instance.instanceDateTime.timeStamp
 
-        override val projectDescriptor = instance.getProject()
+        override val projectDescriptor = instance.takeIf { it.groupByProject }
+            ?.getProject()
             .let { it as? SharedProject }
             ?.let(::ProjectDescriptor)
-
-        override val groupIntoProject get() = instance.groupByProject
     }
 
     data class ProjectDescriptor(val project: SharedProject) : GroupType.ProjectDescriptor

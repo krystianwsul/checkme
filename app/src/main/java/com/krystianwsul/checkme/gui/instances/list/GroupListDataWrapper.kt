@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.gui.instances.list
 
-import arrow.optics.optics
 import com.krystianwsul.checkme.domainmodel.GroupTypeFactory
 import com.krystianwsul.checkme.domainmodel.MixedInstanceDataCollection
 import com.krystianwsul.checkme.gui.instances.drag.DropParent
@@ -51,7 +50,6 @@ data class GroupListDataWrapper(
         override val childSelectedDatas get() = children
     }
 
-    @optics // todo display
     data class InstanceData(
         val done: ExactTimeStamp.Local?,
         val instanceKey: InstanceKey,
@@ -99,9 +97,6 @@ data class GroupListDataWrapper(
         fun normalize() {
             normalizedFields
         }
-
-        // todo display
-        fun stripProjectDetails() = Companion.projectInfo.modify(this) { it.copy(projectDetails = null) }
     }
 
     interface SelectedData {

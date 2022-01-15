@@ -92,13 +92,14 @@ class GroupTypeFactory(
     class InstanceDescriptor(
         val instanceData: GroupListDataWrapper.InstanceData,
         val instanceDateTimePair: DateTimePair,
-        override val groupIntoProject: Boolean,
+        groupIntoProject: Boolean,
         val instance: Instance,
     ) : GroupType.InstanceDescriptor, Comparable<InstanceDescriptor> {
 
         override val timeStamp get() = instanceData.instanceTimeStamp
 
-        override val projectDescriptor = instanceData.projectInfo
+        override val projectDescriptor = instanceData.takeIf { groupIntoProject }
+            ?.projectInfo
             ?.projectDetails
             ?.let(GroupTypeFactory::ProjectDescriptor)
 

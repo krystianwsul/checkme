@@ -19,7 +19,6 @@ import com.krystianwsul.common.utils.ProjectKey
 
 class GroupTypeFactory(
     private val projectOrdinalManagerProvider: ProjectOrdinalManager.Provider,
-    private val projectProvider: ProjectProvider,
     private val showDisplayText: Boolean,
     private val includeProjectDetails: Boolean,
 ) : GroupType.Factory {
@@ -46,13 +45,11 @@ class GroupTypeFactory(
         projectDescriptor: GroupType.ProjectDescriptor,
         instanceDescriptors: List<GroupType.InstanceDescriptor>,
     ): GroupType.TimeProject {
-        val projectKey = projectDescriptor.fix().projectKey
+        val project = projectDescriptor.fix().project
 
         val singleBridges = instanceDescriptors.map { SingleBridge.createGroupChild(it.fix(), false) }
 
-        val project = projectProvider.getProject(projectKey)
-
-        return TimeProjectBridge(timeStamp, project.name, projectKey, singleBridges)
+        return TimeProjectBridge(timeStamp, project.name, project.projectKey, singleBridges)
     }
 
     override fun createProject(
@@ -60,7 +57,7 @@ class GroupTypeFactory(
         projectDescriptor: GroupType.ProjectDescriptor,
         instanceDescriptors: List<GroupType.InstanceDescriptor>,
     ): GroupType.Project {
-        val projectKey = projectDescriptor.fix().projectKey
+        val project = projectDescriptor.fix().project
 
         val fixedInstanceDescriptors = instanceDescriptors.map { it.fix() }
 
@@ -72,12 +69,10 @@ class GroupTypeFactory(
             }.toSet()
         )
 
-        val project = projectProvider.getProject(projectKey)
-
         return ProjectBridge(
             timeStamp,
             project.name,
-            projectKey,
+            project.projectKey,
             singleBridges,
             projectOrdinalManagerProvider.getProjectOrdinalManager(project).getOrdinal(project, key),
         )
@@ -104,14 +99,12 @@ class GroupTypeFactory(
         override val projectDescriptor = instance.takeIf { groupIntoProject }
             ?.getProject()
             ?.let { it as? SharedProject }
-            ?.projectKey
             ?.let(GroupTypeFactory::ProjectDescriptor)
 
         override fun compareTo(other: InstanceDescriptor) = instanceData.compareTo(other.instanceData)
     }
 
-    data class ProjectDescriptor(val projectKey: ProjectKey.Shared) :
-        GroupType.ProjectDescriptor // todo display just stick the project here
+    data class ProjectDescriptor(val project: SharedProject) : GroupType.ProjectDescriptor
 
     sealed interface Bridge : Comparable<Bridge>, DropParent {
 
@@ -341,10 +334,5 @@ class GroupTypeFactory(
             is ProjectBridge -> false
             is SingleBridge -> instanceData.instanceKey == droppedTimeChild.instanceData.parentInstanceKey
         }
-    }
-
-    fun interface ProjectProvider {
-
-        fun getProject(projectKey: ProjectKey.Shared): SharedProject
     }
 }

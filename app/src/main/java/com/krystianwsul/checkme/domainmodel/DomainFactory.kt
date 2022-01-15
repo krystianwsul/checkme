@@ -639,7 +639,6 @@ class DomainFactory(
     ) = MixedInstanceDataCollection(
         instanceDescriptors,
         myUserFactory.user,
-        { projectsFactory.sharedProjects.getValue(it) },
         groupingMode,
         showDisplayText,
         includeProjectDetails,

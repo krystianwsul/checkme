@@ -11,7 +11,6 @@ data class MixedInstanceDataCollection(
     constructor(
         instanceDescriptors: Collection<GroupTypeFactory.InstanceDescriptor>,
         projectOrdinalManagerProvider: ProjectOrdinalManager.Provider,
-        projectProvider: GroupTypeFactory.ProjectProvider,
         groupingMode: GroupType.GroupingMode,
         showDisplayText: Boolean,
         includeProjectDetails: Boolean,
@@ -19,7 +18,6 @@ data class MixedInstanceDataCollection(
         instanceDescriptors.map { it.instanceData },
         GroupTypeFactory(
             projectOrdinalManagerProvider,
-            projectProvider,
             showDisplayText,
             includeProjectDetails,
         ).getGroupTypeTree(instanceDescriptors, groupingMode),

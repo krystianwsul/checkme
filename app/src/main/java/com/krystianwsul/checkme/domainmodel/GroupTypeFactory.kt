@@ -281,6 +281,7 @@ class GroupTypeFactory(
         val instanceData: GroupListDataWrapper.InstanceData,
         val isGroupedInProject: Boolean?, // null means throw an error if you need it
         val displayText: String?,
+        val projectInfo: DetailsNode.ProjectInfo?,
     ) : GroupType.Single, TimeChild {
 
         companion object {
@@ -292,10 +293,15 @@ class GroupTypeFactory(
                     ?.instance
                     ?.getDisplayData()
                     ?.getDisplayText(),
+                instanceDescriptor.instanceData.projectInfo,
             )
 
-            fun createGroupChild(instanceDescriptor: InstanceDescriptor) =
-                SingleBridge(instanceDescriptor.instanceData, false, null)
+            fun createGroupChild(instanceDescriptor: InstanceDescriptor) = SingleBridge(
+                instanceDescriptor.instanceData,
+                false,
+                null,
+                instanceDescriptor.instanceData.projectInfo,
+            )
 
             fun createTopLevelNotDone(instanceDescriptor: InstanceDescriptor, showDisplayText: Boolean) = SingleBridge(
                 instanceDescriptor.instanceData,
@@ -304,6 +310,7 @@ class GroupTypeFactory(
                     ?.instance
                     ?.getDisplayData()
                     ?.getDisplayText(),
+                instanceDescriptor.instanceData.projectInfo,
             )
         }
 

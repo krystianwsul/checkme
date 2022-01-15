@@ -179,7 +179,7 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
                     treeNode,
                     instanceData.note,
                     modelNode,
-                    instanceData.projectInfo,
+                    bridge.projectInfo,
                     null,
                 )
 

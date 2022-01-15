@@ -8,7 +8,7 @@ import com.krystianwsul.treeadapter.TreeNode
 
 class InstanceRowsDelegate(singleBridge: GroupTypeFactory.SingleBridge) :
     DetailsNode.ProjectRowsDelegate(
-        singleBridge.instanceData.projectInfo,
+        singleBridge.projectInfo,
         if (singleBridge.instanceData.taskCurrent) R.color.textSecondary else R.color.textDisabled,
     ) {
 

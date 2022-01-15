@@ -680,7 +680,9 @@ class Instance private constructor(
         }
     }
 
-    override fun getAssignedTo(now: ExactTimeStamp.Local): List<ProjectUser> {
+    override fun getAssignedTo(now: ExactTimeStamp.Local) = getAssignedTo()
+
+    fun getAssignedTo(): List<ProjectUser> {
         if (!isRootInstance()) return listOf()
 
         return getMatchingScheduleIntervals(false).map { it.schedule.assignedTo }

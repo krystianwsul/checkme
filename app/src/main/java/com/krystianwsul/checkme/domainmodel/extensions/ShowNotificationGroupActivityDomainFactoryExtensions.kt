@@ -51,7 +51,7 @@ fun DomainFactory.getShowNotificationGroupData(instanceKeys: Set<InstanceKey>): 
             instance.ordinal,
             task.getImage(deviceDbInfo),
             instance.isAssignedToMe(now, myUserFactory.user),
-            instance.getProjectInfo(now),
+            instance.getProjectInfo(),
             instance.getProject().projectKey as? ProjectKey.Shared,
             instance.parentInstance?.instanceKey,
         )

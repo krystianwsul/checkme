@@ -51,7 +51,7 @@ data class GroupListDataWrapper(
         override val childSelectedDatas get() = children
     }
 
-    @optics
+    @optics // todo display
     data class InstanceData(
         val done: ExactTimeStamp.Local?,
         val instanceKey: InstanceKey,

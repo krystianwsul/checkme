@@ -76,7 +76,7 @@ fun Task.getProjectInfo(now: ExactTimeStamp.Local, includeProjectDetails: Boolea
     }
 }
 
-fun Instance.getProjectInfo(now: ExactTimeStamp.Local, includeProjectDetails: Boolean = true): DetailsNode.ProjectInfo? {
+fun Instance.getProjectInfo(includeProjectDetails: Boolean = true): DetailsNode.ProjectInfo? {
     val sharedProjectKey = task.project.projectKey as? ProjectKey.Shared
 
     return if (isRootInstance() && sharedProjectKey != null) {
@@ -84,10 +84,10 @@ fun Instance.getProjectInfo(now: ExactTimeStamp.Local, includeProjectDetails: Bo
             task.project
                 .takeIf { includeProjectDetails }
                 ?.let { DetailsNode.ProjectDetails(it.name, sharedProjectKey) },
-            DetailsNode.User.fromProjectUsers(getAssignedTo(now)),
+            DetailsNode.User.fromProjectUsers(getAssignedTo()),
         )
     } else {
-        check(getAssignedTo(now).isEmpty())
+        check(getAssignedTo().isEmpty())
 
         null
     }

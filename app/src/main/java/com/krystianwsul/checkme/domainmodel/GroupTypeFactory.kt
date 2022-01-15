@@ -281,14 +281,7 @@ class GroupTypeFactory(
                     ?.instance
                     ?.getDisplayData()
                     ?.getDisplayText(),
-                instanceDescriptor.instanceData
-                    .let {
-                        if (includeProjectDetails)
-                            it
-                        else
-                            it.stripProjectDetails()
-                    }
-                    .projectInfo,
+                instanceDescriptor.instance.getProjectInfo(includeProjectDetails),
             )
 
             fun createGroupChild(instanceDescriptor: InstanceDescriptor, includeProjectDetails: Boolean = true) =
@@ -296,14 +289,7 @@ class GroupTypeFactory(
                     instanceDescriptor.instanceData,
                     false,
                     null,
-                    instanceDescriptor.instanceData
-                        .let {
-                            if (includeProjectDetails)
-                                it
-                            else
-                                it.stripProjectDetails()
-                        }
-                        .projectInfo,
+                    instanceDescriptor.instance.getProjectInfo(includeProjectDetails),
                 )
 
             fun createTopLevelNotDone(
@@ -317,14 +303,7 @@ class GroupTypeFactory(
                     ?.instance
                     ?.getDisplayData()
                     ?.getDisplayText(),
-                instanceDescriptor.instanceData
-                    .let {
-                        if (includeProjectDetails)
-                            it
-                        else
-                            it.stripProjectDetails()
-                    }
-                    .projectInfo,
+                instanceDescriptor.instance.getProjectInfo(includeProjectDetails),
             )
         }
 

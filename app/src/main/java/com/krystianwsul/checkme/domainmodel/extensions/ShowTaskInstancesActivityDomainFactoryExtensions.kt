@@ -53,7 +53,7 @@ fun DomainFactory.getShowTaskInstancesData(
 
                     instanceDescriptors = pair.first.map {
                         val (notDoneChildInstanceDescriptors, doneChildInstanceDescriptors) =
-                            getChildInstanceDatas(it, now, includeProjectInfo = true)
+                            getChildInstanceDatas(it, now, includeProjectInfo = true) // todo display this is bizarre
 
                         val instanceData = GroupListDataWrapper.InstanceData(
                             it.done,
@@ -71,7 +71,7 @@ fun DomainFactory.getShowTaskInstancesData(
                             it.ordinal,
                             it.task.getImage(deviceDbInfo),
                             it.isAssignedToMe(now, myUserFactory.user),
-                            it.getProjectInfo(now, parameters.projectKey == null), // todo display include
+                            it.getProjectInfo(now),
                             it.getProject().projectKey as? ProjectKey.Shared,
                             it.parentInstance?.instanceKey,
                         )

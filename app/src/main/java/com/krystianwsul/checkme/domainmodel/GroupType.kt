@@ -24,16 +24,24 @@ interface GroupType {
 
                         // these are all instances at the same time
                         if (instanceDescriptors.size > 1) {
-                            val projectDescriptor = instanceDescriptors.map { it.projectDescriptor }
-                                .distinct()
-                                .singleOrNull()
+                            if (groupingMode.groupByProject) {
+                                val projectDescriptor = instanceDescriptors.map { it.projectDescriptor }
+                                    .distinct()
+                                    .singleOrNull()
 
-                            projectDescriptor?.let { factory.createTimeProject(timeStamp, it, instanceDescriptors) }
-                                ?: factory.createTime(
+                                projectDescriptor?.let { factory.createTimeProject(timeStamp, it, instanceDescriptors) }
+                                    ?: factory.createTime(
+                                        timeStamp,
+                                        groupByProject(factory, timeStamp, instanceDescriptors, true),
+                                        groupingMode,
+                                    )
+                            } else {
+                                factory.createTime(
                                     timeStamp,
-                                    groupByProject(factory, timeStamp, instanceDescriptors, true),
+                                    instanceDescriptors.map { factory.createSingle(it, true) },
                                     groupingMode,
                                 )
+                            }
                         } else {
                             // if there's just one, there's our node
                             factory.createSingle(instanceDescriptors.single(), false)
@@ -170,6 +178,8 @@ interface GroupType {
         object Project : GroupingMode
 
         class Time(private val projectKey: ProjectKey.Shared? = null) : GroupingMode {
+
+            val groupByProject = projectKey == null
 
             fun newShowGroupActivityParameters(timeStamp: TimeStamp) =
                 projectKey?.let { ShowGroupActivity.Parameters.Project(timeStamp, it) }

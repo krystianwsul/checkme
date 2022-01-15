@@ -46,11 +46,13 @@ class GroupTypeFactory(
         projectDescriptor: GroupType.ProjectDescriptor,
         instanceDescriptors: List<GroupType.InstanceDescriptor>,
     ): GroupType.TimeProject {
-        val projectDetails = projectDescriptor.fix().projectDetails
+        val projectKey = projectDescriptor.fix().projectKey
 
         val singleBridges = instanceDescriptors.map { SingleBridge.createGroupChild(it.fix(), false) }
 
-        return TimeProjectBridge(timeStamp, projectDetails, singleBridges)
+        val project = projectProvider.getProject(projectKey)
+
+        return TimeProjectBridge(timeStamp, project.name, projectKey, singleBridges)
     }
 
     override fun createProject(
@@ -58,7 +60,7 @@ class GroupTypeFactory(
         projectDescriptor: GroupType.ProjectDescriptor,
         instanceDescriptors: List<GroupType.InstanceDescriptor>,
     ): GroupType.Project {
-        val projectDetails = projectDescriptor.fix().projectDetails
+        val projectKey = projectDescriptor.fix().projectKey
 
         val fixedInstanceDescriptors = instanceDescriptors.map { it.fix() }
 
@@ -70,11 +72,12 @@ class GroupTypeFactory(
             }.toSet()
         )
 
-        val project = projectProvider.getProject(projectDetails.projectKey)
+        val project = projectProvider.getProject(projectKey)
 
         return ProjectBridge(
             timeStamp,
-            projectDetails,
+            project.name,
+            projectKey,
             singleBridges,
             projectOrdinalManagerProvider.getProjectOrdinalManager(project).getOrdinal(project, key),
         )
@@ -101,12 +104,14 @@ class GroupTypeFactory(
         override val projectDescriptor = instanceData.takeIf { groupIntoProject }
             ?.projectInfo
             ?.projectDetails
+            ?.projectKey
             ?.let(GroupTypeFactory::ProjectDescriptor)
 
         override fun compareTo(other: InstanceDescriptor) = instanceData.compareTo(other.instanceData)
     }
 
-    data class ProjectDescriptor(val projectDetails: DetailsNode.ProjectDetails) : GroupType.ProjectDescriptor
+    data class ProjectDescriptor(val projectKey: ProjectKey.Shared) :
+        GroupType.ProjectDescriptor // todo details just stick the project here
 
     sealed interface Bridge : Comparable<Bridge>, DropParent {
 
@@ -174,11 +179,11 @@ class GroupTypeFactory(
 
     data class TimeProjectBridge(
         val timeStamp: TimeStamp,
-        private val projectDetails: DetailsNode.ProjectDetails,
+        override val name: String,
+        private val projectKey: ProjectKey.Shared,
         private val singleBridges: List<SingleBridge>,
     ) : GroupType.TimeProject, SingleParent {
 
-        override val name get() = projectDetails.name
 
         private val instanceDatas = singleBridges.map { it.instanceData }
 
@@ -197,9 +202,9 @@ class GroupTypeFactory(
             indentation,
             nodeCollection,
             singleBridges,
-            NotDoneNode.ContentDelegate.Group.Id.Project(timeStamp, instanceKeys, projectDetails.projectKey),
-            NotDoneNode.ContentDelegate.Group.GroupRowsDelegate.Project(groupAdapter, timeStamp, projectDetails.name),
-            ShowGroupActivity.Parameters.Project(timeStamp, projectDetails.projectKey),
+            NotDoneNode.ContentDelegate.Group.Id.Project(timeStamp, instanceKeys, projectKey),
+            NotDoneNode.ContentDelegate.Group.GroupRowsDelegate.Project(groupAdapter, timeStamp, name),
+            ShowGroupActivity.Parameters.Project(timeStamp, projectKey),
             NotDoneNode.ContentDelegate.Group.CheckboxMode.CHECKBOX,
         )
 
@@ -215,19 +220,18 @@ class GroupTypeFactory(
         override fun canDropIntoParent(droppedTimeChild: TimeChild) = when (droppedTimeChild) {
             is ProjectBridge -> throw UnsupportedOperationException()
             is SingleBridge -> droppedTimeChild.instanceData.let {
-                timeStamp == it.instanceTimeStamp && projectDetails.projectKey == it.projectKey && it.isRootInstance
+                timeStamp == it.instanceTimeStamp && projectKey == it.projectKey && it.isRootInstance
             }
         }
     }
 
     data class ProjectBridge(
         val timeStamp: TimeStamp,
-        private val projectDetails: DetailsNode.ProjectDetails,
+        override val name: String,
+        private val projectKey: ProjectKey.Shared,
         private val singeBridges: List<SingleBridge>,
         override val ordinal: Ordinal,
-    ) : GroupType.Project, SingleParent, TimeChild, DropParent by DropParent.Project(timeStamp, projectDetails.projectKey) {
-
-        override val name get() = projectDetails.name
+    ) : GroupType.Project, SingleParent, TimeChild, DropParent by DropParent.Project(timeStamp, projectKey) {
 
         private val instanceDatas = singeBridges.map { it.instanceData }
 
@@ -246,9 +250,9 @@ class GroupTypeFactory(
             indentation,
             nodeCollection,
             singeBridges,
-            NotDoneNode.ContentDelegate.Group.Id.Project(timeStamp, instanceKeys, projectDetails.projectKey),
-            NotDoneNode.ContentDelegate.Group.GroupRowsDelegate.Project(groupAdapter, null, projectDetails.name),
-            ShowGroupActivity.Parameters.Project(timeStamp, projectDetails.projectKey),
+            NotDoneNode.ContentDelegate.Group.Id.Project(timeStamp, instanceKeys, projectKey),
+            NotDoneNode.ContentDelegate.Group.GroupRowsDelegate.Project(groupAdapter, null, name),
+            ShowGroupActivity.Parameters.Project(timeStamp, projectKey),
             NotDoneNode.ContentDelegate.Group.CheckboxMode.CHECKBOX,
         )
 

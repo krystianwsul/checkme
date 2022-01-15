@@ -21,6 +21,7 @@ class GroupTypeFactory(
     private val projectOrdinalManagerProvider: ProjectOrdinalManager.Provider,
     private val projectProvider: ProjectProvider,
     private val showDisplayText: Boolean,
+    private val includeProjectDetails: Boolean,
 ) : GroupType.Factory {
 
     private fun GroupType.fix() = this as Bridge
@@ -85,7 +86,7 @@ class GroupTypeFactory(
         return if (nested)
             SingleBridge.createGroupChild(fixedInstanceDescriptor)
         else
-            SingleBridge.createTopLevelNotDone(fixedInstanceDescriptor, showDisplayText)
+            SingleBridge.createTopLevelNotDone(fixedInstanceDescriptor, showDisplayText, includeProjectDetails)
     }
 
     class InstanceDescriptor(
@@ -269,14 +270,25 @@ class GroupTypeFactory(
 
         companion object {
 
-            fun createDone(instanceDescriptor: InstanceDescriptor, showDisplayText: Boolean) = SingleBridge(
+            fun createDone(
+                instanceDescriptor: InstanceDescriptor,
+                showDisplayText: Boolean,
+                includeProjectDetails: Boolean,
+            ) = SingleBridge(
                 instanceDescriptor.instanceData,
                 false,
                 instanceDescriptor.takeIf { showDisplayText }
                     ?.instance
                     ?.getDisplayData()
                     ?.getDisplayText(),
-                instanceDescriptor.instanceData.projectInfo,
+                instanceDescriptor.instanceData
+                    .let {
+                        if (includeProjectDetails)
+                            it
+                        else
+                            it.stripProjectDetails()
+                    }
+                    .projectInfo,
             )
 
             fun createGroupChild(instanceDescriptor: InstanceDescriptor, includeProjectDetails: Boolean = true) =
@@ -294,14 +306,25 @@ class GroupTypeFactory(
                         .projectInfo,
                 )
 
-            fun createTopLevelNotDone(instanceDescriptor: InstanceDescriptor, showDisplayText: Boolean) = SingleBridge(
+            fun createTopLevelNotDone(
+                instanceDescriptor: InstanceDescriptor,
+                showDisplayText: Boolean,
+                includeProjectDetails: Boolean,
+            ) = SingleBridge(
                 instanceDescriptor.instanceData,
                 false,
                 instanceDescriptor.takeIf { showDisplayText }
                     ?.instance
                     ?.getDisplayData()
                     ?.getDisplayText(),
-                instanceDescriptor.instanceData.projectInfo,
+                instanceDescriptor.instanceData
+                    .let {
+                        if (includeProjectDetails)
+                            it
+                        else
+                            it.stripProjectDetails()
+                    }
+                    .projectInfo,
             )
         }
 

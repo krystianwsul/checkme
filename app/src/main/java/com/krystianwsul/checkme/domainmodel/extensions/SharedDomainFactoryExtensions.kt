@@ -412,5 +412,7 @@ fun <T> DomainFactory.trackRootTaskIds(action: () -> T): T =
 
 fun Collection<GroupTypeFactory.InstanceDescriptor>.splitDone() = partition { it.instanceData.done == null }
 
-fun List<GroupTypeFactory.InstanceDescriptor>.toDoneSingleBridges(showDisplayText: Boolean = true) =
-    map { GroupTypeFactory.SingleBridge.createDone(it, showDisplayText) }
+fun List<GroupTypeFactory.InstanceDescriptor>.toDoneSingleBridges(
+    showDisplayText: Boolean = true,
+    includeProjectDetails: Boolean = true,
+) = map { GroupTypeFactory.SingleBridge.createDone(it, showDisplayText, includeProjectDetails) }

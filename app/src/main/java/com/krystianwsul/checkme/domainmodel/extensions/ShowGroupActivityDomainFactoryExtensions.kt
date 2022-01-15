@@ -77,13 +77,13 @@ private fun DomainFactory.getGroupListData(
         )
     }
 
-    val includeProjectInfo = projectKey == null
+    val includeProjectDetails = projectKey == null
 
     val instanceDescriptors = currentInstances.map { instance ->
         val task = instance.task
 
         val (notDoneChildInstanceDescriptors, doneChildInstanceDescriptors) =
-            getChildInstanceDatas(instance, now, includeProjectInfo = includeProjectInfo)
+            getChildInstanceDatas(instance, now, includeProjectInfo = includeProjectDetails)
 
         val instanceData = GroupListDataWrapper.InstanceData(
             instance.done,
@@ -101,7 +101,7 @@ private fun DomainFactory.getGroupListData(
             instance.ordinal,
             task.getImage(deviceDbInfo),
             instance.isAssignedToMe(now, myUserFactory.user),
-            instance.getProjectInfo(now, includeProjectInfo), // todo display include
+            instance.getProjectInfo(now, includeProjectDetails),
             instance.getProject().projectKey as? ProjectKey.Shared,
             instance.parentInstance?.instanceKey,
         )
@@ -123,8 +123,8 @@ private fun DomainFactory.getGroupListData(
         null,
         listOf(),
         null,
-        newMixedInstanceDataCollection(mixedInstanceDescriptors, groupingMode, false),
-        doneInstanceDescriptors.toDoneSingleBridges(false),
+        newMixedInstanceDataCollection(mixedInstanceDescriptors, groupingMode, false, includeProjectDetails),
+        doneInstanceDescriptors.toDoneSingleBridges(false, includeProjectDetails),
         null,
         null,
         dropParent,

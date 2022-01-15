@@ -71,7 +71,7 @@ fun DomainFactory.getShowTaskInstancesData(
                             it.ordinal,
                             it.task.getImage(deviceDbInfo),
                             it.isAssignedToMe(now, myUserFactory.user),
-                            it.getProjectInfo(now, parameters.projectKey == null),
+                            it.getProjectInfo(now, parameters.projectKey == null), // todo display include
                             it.getProject().projectKey as? ProjectKey.Shared,
                             it.parentInstance?.instanceKey,
                         )

@@ -82,8 +82,7 @@ private fun DomainFactory.getGroupListData(
     val instanceDescriptors = currentInstances.map { instance ->
         val task = instance.task
 
-        val (notDoneChildInstanceDescriptors, doneChildInstanceDescriptors) =
-            getChildInstanceDatas(instance, now, includeProjectInfo = includeProjectDetails)
+        val (notDoneChildInstanceDescriptors, doneChildInstanceDescriptors) = getChildInstanceDatas(instance, now)
 
         val instanceData = GroupListDataWrapper.InstanceData(
             instance.done,

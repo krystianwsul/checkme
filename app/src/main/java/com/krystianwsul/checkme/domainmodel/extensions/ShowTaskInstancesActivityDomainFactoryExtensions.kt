@@ -52,8 +52,7 @@ fun DomainFactory.getShowTaskInstancesData(
                     hasMore = pair.second
 
                     instanceDescriptors = pair.first.map {
-                        val (notDoneChildInstanceDescriptors, doneChildInstanceDescriptors) =
-                            getChildInstanceDatas(it, now, includeProjectInfo = true) // todo display this is bizarre
+                        val (notDoneChildInstanceDescriptors, doneChildInstanceDescriptors) = getChildInstanceDatas(it, now)
 
                         val instanceData = GroupListDataWrapper.InstanceData(
                             it.done,

@@ -493,11 +493,10 @@ class DomainFactory(
         now: ExactTimeStamp.Local,
         searchCriteria: SearchCriteria = SearchCriteria.empty,
         filterVisible: Boolean = true,
-        includeProjectInfo: Boolean = true,
     ) = getChildInstanceDatas<GroupTypeFactory.InstanceDescriptor>(
         instance,
         now,
-        { childInstance, children -> instanceToGroupListData(childInstance, now, children, includeProjectInfo) },
+        { childInstance, children -> instanceToGroupListData(childInstance, now, children, false) },
         searchCriteria,
         filterVisible,
     ).splitDone()

@@ -387,11 +387,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
             }
 
             override fun compareTo(other: ModelNode<AbstractHolder>): Int {
-                var comparison = entryData.sortKey.compareTo((other as TaskWrapper).entryData.sortKey)
-                if (indentation == 0)
-                    comparison = -comparison
-
-                return comparison
+                return -entryData.sortKey.compareTo((other as TaskWrapper).entryData.sortKey)
             }
 
             override fun normalize() = entryData.normalize()

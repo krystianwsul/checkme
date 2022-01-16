@@ -50,6 +50,13 @@ data class GroupListDataWrapper(
         override val childSelectedDatas get() = children
     }
 
+    /*
+    The next time you want to add something here, consider these options:
+
+    1. For location-dependent properties of instance, consider putting it in SingleBridge.
+    2. If for whatever reason you need a separate class, consider making new InstanceMetadata class that's created inside
+    SingleBridge.
+     */
     data class InstanceData(
         val done: ExactTimeStamp.Local?,
         val instanceKey: InstanceKey,

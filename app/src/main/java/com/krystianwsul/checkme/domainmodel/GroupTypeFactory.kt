@@ -309,7 +309,7 @@ class GroupTypeFactory(
 
             fun createProject(instanceDescriptor: InstanceDescriptor) = SingleBridge(
                 instanceDescriptor.instanceData,
-                false, // are nested in time
+                true, // are nested in time
                 null,
                 instanceDescriptor.instance.getProjectInfo(false),
             )

@@ -47,7 +47,7 @@ class GroupTypeFactory(
     ): GroupType.TimeProject {
         val project = projectDescriptor.fix().project
 
-        val singleBridges = instanceDescriptors.map { SingleBridge.createGroupChild(it.fix(), false) }
+        val singleBridges = instanceDescriptors.map { SingleBridge.createTimeProject(it.fix()) }
 
         return TimeProjectBridge(timeStamp, project.name, project.projectKey, singleBridges)
     }
@@ -61,7 +61,7 @@ class GroupTypeFactory(
 
         val fixedInstanceDescriptors = instanceDescriptors.map { it.fix() }
 
-        val singleBridges = fixedInstanceDescriptors.map { SingleBridge.createGroupChild(it, false) }
+        val singleBridges = fixedInstanceDescriptors.map { SingleBridge.createProject(it) }
 
         val key = ProjectOrdinalManager.Key(
             fixedInstanceDescriptors.map {
@@ -79,7 +79,7 @@ class GroupTypeFactory(
     }
 
     override fun createTimeSingle(instanceDescriptor: GroupType.InstanceDescriptor) =
-        SingleBridge.createGroupChild(instanceDescriptor.fix())
+        SingleBridge.createTime(instanceDescriptor.fix())
 
     override fun createTopLevelSingle(instanceDescriptor: GroupType.InstanceDescriptor) =
         SingleBridge.createTopLevel(instanceDescriptor.fix(), showDisplayText, includeProjectDetails)
@@ -271,7 +271,7 @@ class GroupTypeFactory(
                 includeProjectDetails: Boolean,
             ) = SingleBridge(
                 instanceDescriptor.instanceData,
-                false,
+                null,
                 instanceDescriptor.takeIf { showDisplayText }
                     ?.instance
                     ?.getDisplayData()
@@ -279,26 +279,39 @@ class GroupTypeFactory(
                 instanceDescriptor.instance.getProjectInfo(includeProjectDetails),
             )
 
-            fun createGroupChild(instanceDescriptor: InstanceDescriptor, includeProjectDetails: Boolean = true) =
-                SingleBridge(
-                    instanceDescriptor.instanceData,
-                    false,
-                    null,
-                    instanceDescriptor.instance.getProjectInfo(includeProjectDetails),
-                )
-
             fun createTopLevel(
                 instanceDescriptor: InstanceDescriptor,
                 showDisplayText: Boolean,
                 includeProjectDetails: Boolean,
             ) = SingleBridge(
                 instanceDescriptor.instanceData,
-                false,
+                false, // are directly in time
                 instanceDescriptor.takeIf { showDisplayText }
                     ?.instance
                     ?.getDisplayData()
                     ?.getDisplayText(),
                 instanceDescriptor.instance.getProjectInfo(includeProjectDetails),
+            )
+
+            fun createTime(instanceDescriptor: InstanceDescriptor) = SingleBridge(
+                instanceDescriptor.instanceData,
+                false,
+                null,
+                instanceDescriptor.instance.getProjectInfo(),
+            )
+
+            fun createTimeProject(instanceDescriptor: InstanceDescriptor) = SingleBridge(
+                instanceDescriptor.instanceData,
+                null, // can't be moved into time
+                null,
+                instanceDescriptor.instance.getProjectInfo(false),
+            )
+
+            fun createProject(instanceDescriptor: InstanceDescriptor) = SingleBridge(
+                instanceDescriptor.instanceData,
+                false, // are nested in time
+                null,
+                instanceDescriptor.instance.getProjectInfo(false),
             )
         }
 

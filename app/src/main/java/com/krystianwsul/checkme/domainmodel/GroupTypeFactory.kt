@@ -79,7 +79,7 @@ class GroupTypeFactory(
     }
 
     override fun createTimeSingle(instanceDescriptor: GroupType.InstanceDescriptor) =
-        SingleBridge.createTime(instanceDescriptor.fix())
+        SingleBridge.createTime(instanceDescriptor.fix(), includeProjectDetails)
 
     override fun createTopLevelSingle(instanceDescriptor: GroupType.InstanceDescriptor) =
         SingleBridge.createTopLevel(instanceDescriptor.fix(), showDisplayText, includeProjectDetails)
@@ -293,11 +293,11 @@ class GroupTypeFactory(
                 instanceDescriptor.instance.getProjectInfo(includeProjectDetails),
             )
 
-            fun createTime(instanceDescriptor: InstanceDescriptor) = SingleBridge(
+            fun createTime(instanceDescriptor: InstanceDescriptor, includeProjectDetails: Boolean) = SingleBridge(
                 instanceDescriptor.instanceData,
                 false,
                 null,
-                instanceDescriptor.instance.getProjectInfo(),
+                instanceDescriptor.instance.getProjectInfo(includeProjectDetails),
             )
 
             fun createTimeProject(instanceDescriptor: InstanceDescriptor) = SingleBridge(

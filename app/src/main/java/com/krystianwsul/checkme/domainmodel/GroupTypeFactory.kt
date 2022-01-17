@@ -78,14 +78,11 @@ class GroupTypeFactory(
         )
     }
 
-    override fun createSingle(instanceDescriptor: GroupType.InstanceDescriptor, nested: Boolean): GroupType.Single {
-        val fixedInstanceDescriptor = instanceDescriptor.fix()
+    override fun createTimeSingle(instanceDescriptor: GroupType.InstanceDescriptor) =
+        SingleBridge.createGroupChild(instanceDescriptor.fix())
 
-        return if (nested)
-            SingleBridge.createGroupChild(fixedInstanceDescriptor)
-        else
-            SingleBridge.createTopLevelNotDone(fixedInstanceDescriptor, showDisplayText, includeProjectDetails)
-    }
+    override fun createTopLevelSingle(instanceDescriptor: GroupType.InstanceDescriptor) =
+        SingleBridge.createTopLevel(instanceDescriptor.fix(), showDisplayText, includeProjectDetails)
 
     class InstanceDescriptor(
         val instanceData: GroupListDataWrapper.InstanceData,
@@ -290,7 +287,7 @@ class GroupTypeFactory(
                     instanceDescriptor.instance.getProjectInfo(includeProjectDetails),
                 )
 
-            fun createTopLevelNotDone(
+            fun createTopLevel(
                 instanceDescriptor: InstanceDescriptor,
                 showDisplayText: Boolean,
                 includeProjectDetails: Boolean,

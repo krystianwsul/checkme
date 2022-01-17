@@ -317,10 +317,6 @@ class GroupTypeFactory(
 
         override val instanceKeys = setOf(instanceData.instanceKey)
 
-        init {
-            if (instanceData.name.contains("like") && isGroupedInProject == null) throw Exception()
-        }
-
         override val ordinal = instanceData.ordinal
 
         override fun getNewParentInfo(isGroupedInProject: Boolean?) = Instance.NewParentInfo.NO_OP

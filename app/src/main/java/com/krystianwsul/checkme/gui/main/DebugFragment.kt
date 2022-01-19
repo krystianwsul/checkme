@@ -136,7 +136,7 @@ class DebugFragment : AbstractFragment() {
 
                         val waitingOnDependencies = DomainFactory.instance.run {
                             val waitingNames = waitingProjectTasks().map { it.name } +
-                                    waitingProjects().map { it.name } +
+                                    waitingProjects().map { it.name + " " + it.projectKey } +
                                     waitingRootTasks().map { it.name }
 
                             waitingNames.joinToString("\n")

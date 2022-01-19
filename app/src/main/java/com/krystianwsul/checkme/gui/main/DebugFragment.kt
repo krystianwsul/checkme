@@ -135,9 +135,15 @@ class DebugFragment : AbstractFragment() {
                         val loadTime = t2.long - t1.long
 
                         val waitingOnDependencies = DomainFactory.instance.run {
-                            val waitingNames = waitingProjectTasks().map { it.name } +
-                                    waitingProjects().map { it.name + " " + it.projectKey } +
-                                    waitingRootTasks().map { it.name }
+                            val projectTaskRows = waitingProjectTasks().map { it.name }.toList()
+
+                            val projectRows = waitingProjectDetails().map { (project, taskKeys) ->
+                                listOf(project.name + " " + project.projectKey) + taskKeys.map { "\t" + it.toString() }
+                            }.flatten()
+
+                            val rootTaskRows = waitingRootTasks().map { it.name }.toList()
+
+                            val waitingNames = projectTaskRows + projectRows + rootTaskRows
 
                             waitingNames.joinToString("\n")
                         }

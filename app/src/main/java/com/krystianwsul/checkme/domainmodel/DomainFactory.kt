@@ -313,6 +313,17 @@ class DomainFactory(
                 .containsAll(requiredTaskKeys)
         }
 
+    fun waitingProjectDetails() = projectsFactory.projects
+        .values
+        .associateWith {
+            val requiredTaskKeys = it.projectRecord
+                .rootTaskParentDelegate
+                .rootTaskKeys
+
+            requiredTaskKeys - rootTasksFactory.rootTasks.keys
+        }
+        .filterValues { it.isNotEmpty() }
+
     fun waitingRootTasks() = rootTasksFactory.rootTasks
         .values
         .asSequence()

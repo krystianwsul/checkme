@@ -1,14 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<module external.linked.project.id=":common2:commonTest" external.linked.project.path="$MODULE_DIR$/../../../common" external.root.project.path="$MODULE_DIR$/../../.." external.system.id="GRADLE" external.system.module.group="Check.me" external.system.module.type="sourceSet" external.system.module.version="unspecified" type="JAVA_MODULE" version="4">
+<module external.linked.project.id=":common2:androidTestFixturesProto" external.linked.project.path="$MODULE_DIR$/../../../common" external.root.project.path="$MODULE_DIR$/../../.." external.system.id="GRADLE" external.system.module.group="Check.me" external.system.module.type="sourceSet" external.system.module.version="unspecified" type="JAVA_MODULE" version="4">
   <component name="FacetManager">
     <facet type="kotlin-language" name="Kotlin">
-      <configuration version="4" platform="Common (experimental) " allPlatforms="JS []/JVM [1.8]/Native []/Native [general]" useProjectSettings="false" isTestModule="true" externalProjectId=":common2" pureKotlinSourceFolders="C:\Users\kryst\StudioProjects\Check.me\common\src\androidDebug\kotlin;C:\Users\kryst\StudioProjects\Check.me\common\src\debug\kotlin;C:\Users\kryst\StudioProjects\Check.me\common\src\debug\java;C:\Users\kryst\StudioProjects\Check.me\common\src\androidDebugAndroidTest\kotlin;C:\Users\kryst\StudioProjects\Check.me\common\src\androidDebugUnitTest\kotlin;C:\Users\kryst\StudioProjects\Check.me\common\src\androidProto\kotlin;C:\Users\kryst\StudioProjects\Check.me\common\src\proto\kotlin;C:\Users\kryst\StudioProjects\Check.me\common\src\proto\java;C:\Users\kryst\StudioProjects\Check.me\common\src\androidProtoUnitTest\kotlin;C:\Users\kryst\StudioProjects\Check.me\common\src\androidRelease\kotlin;C:\Users\kryst\StudioProjects\Check.me\common\src\release\kotlin;C:\Users\kryst\StudioProjects\Check.me\common\src\release\java;C:\Users\kryst\StudioProjects\Check.me\common\src\androidReleaseUnitTest\kotlin;C:\Users\kryst\StudioProjects\Check.me\common\src\jsMain\kotlin;C:\Users\kryst\StudioProjects\Check.me\common\src\jsTest\kotlin">
+      <configuration version="4" platform="Common (experimental) " allPlatforms="JS []/JVM [1.8]" useProjectSettings="false" isTestModule="false" externalProjectId=":common2" pureKotlinSourceFolders="C:\Users\kryst\StudioProjects\Check.me\common\src\androidDebug\kotlin;C:\Users\kryst\StudioProjects\Check.me\common\src\debug\kotlin;C:\Users\kryst\StudioProjects\Check.me\common\src\debug\java;C:\Users\kryst\StudioProjects\Check.me\common\src\androidDebugAndroidTest\kotlin;C:\Users\kryst\StudioProjects\Check.me\common\src\androidDebugUnitTest\kotlin;C:\Users\kryst\StudioProjects\Check.me\common\src\androidProto\kotlin;C:\Users\kryst\StudioProjects\Check.me\common\src\proto\kotlin;C:\Users\kryst\StudioProjects\Check.me\common\src\proto\java;C:\Users\kryst\StudioProjects\Check.me\common\src\androidProtoUnitTest\kotlin;C:\Users\kryst\StudioProjects\Check.me\common\src\androidRelease\kotlin;C:\Users\kryst\StudioProjects\Check.me\common\src\release\kotlin;C:\Users\kryst\StudioProjects\Check.me\common\src\release\java;C:\Users\kryst\StudioProjects\Check.me\common\src\androidReleaseUnitTest\kotlin;C:\Users\kryst\StudioProjects\Check.me\common\src\jsMain\kotlin;C:\Users\kryst\StudioProjects\Check.me\common\src\jsTest\kotlin">
         <newMppModelJpsModuleKind>SOURCE_SET_HOLDER</newMppModelJpsModuleKind>
-        <externalSystemTestTasks>
-          <externalSystemTestTask>testDebugUnitTest|:common2|android</externalSystemTestTask>
-          <externalSystemTestTask>testProtoUnitTest|:common2|android</externalSystemTestTask>
-          <externalSystemTestTask>testReleaseUnitTest|:common2|android</externalSystemTestTask>
-        </externalSystemTestTasks>
         <compilerSettings />
         <compilerArguments>
           <option name="languageVersion" value="1.6" />
@@ -55,12 +50,18 @@
   </component>
   <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_11" inherit-compiler-output="true">
     <exclude-output />
-    <content url="file://$MODULE_DIR$/../../../common/src/commonTest/kotlin" />
-    <content url="file://$MODULE_DIR$/../../../common/src/commonTest/resources" />
+    <content url="file://$MODULE_DIR$/../../../common/src/androidTestFixturesProto/kotlin" />
+    <content url="file://$MODULE_DIR$/../../../common/src/androidTestFixturesProto/resources" />
+    <content url="file://$MODULE_DIR$/../../../common/src/testFixturesProto/java" />
+    <content url="file://$MODULE_DIR$/../../../common/src/testFixturesProto/kotlin" />
+    <content url="file://$MODULE_DIR$/../../../common/src/testFixturesProto/resources" />
     <orderEntry type="jdk" jdkName="Android API 30 Platform" jdkType="Android SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="module" module-name="Check.me.common2.commonMain" scope="TEST" />
-    <orderEntry type="module-library" scope="TEST">
+    <orderEntry type="module" module-name="Check.me.common2.commonMain" />
+    <orderEntry type="library" name="Gradle: org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2" level="project" />
+    <orderEntry type="library" name="Gradle: org.jetbrains.kotlinx:kotlinx-serialization-core:1.3.2" level="project" />
+    <orderEntry type="library" name="Gradle: org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0" level="project" />
+    <orderEntry type="module-library">
       <library name="Gradle: org.jetbrains.kotlin:kotlin-stdlib-common:1.6.10">
         <CLASSES>
           <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib-common/1.6.10/c118700e3a33c8a0d9adc920e9dec0831171925/kotlin-stdlib-common-1.6.10.jar!/" />
@@ -71,10 +72,6 @@
         </SOURCES>
       </library>
     </orderEntry>
-    <orderEntry type="library" scope="TEST" name="Gradle: org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2" level="project" />
-    <orderEntry type="library" scope="TEST" name="Gradle: org.jetbrains.kotlinx:kotlinx-serialization-core:1.3.2" level="project" />
-    <orderEntry type="library" scope="TEST" name="Gradle: org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0" level="project" />
-    <orderEntry type="library" scope="TEST" name="Gradle: com.soywiz.korlibs.klock:klock:2.2.2" level="project" />
+    <orderEntry type="library" name="Gradle: com.soywiz.korlibs.klock:klock:2.2.2" level="project" />
   </component>
-  <component name="TestModuleProperties" production-module="Check.me.common2.commonMain" />
 </module>

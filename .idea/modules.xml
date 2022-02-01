@@ -7,6 +7,10 @@
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/common/Check.me.common2.iml" filepath="$PROJECT_DIR$/.idea/modules/common/Check.me.common2.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/common/Check.me.common2.androidAndroidTestProto.iml" filepath="$PROJECT_DIR$/.idea/modules/common/Check.me.common2.androidAndroidTestProto.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/common/Check.me.common2.androidAndroidTestRelease.iml" filepath="$PROJECT_DIR$/.idea/modules/common/Check.me.common2.androidAndroidTestRelease.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/common/Check.me.common2.androidTestFixtures.iml" filepath="$PROJECT_DIR$/.idea/modules/common/Check.me.common2.androidTestFixtures.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/common/Check.me.common2.androidTestFixturesDebug.iml" filepath="$PROJECT_DIR$/.idea/modules/common/Check.me.common2.androidTestFixturesDebug.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/common/Check.me.common2.androidTestFixturesProto.iml" filepath="$PROJECT_DIR$/.idea/modules/common/Check.me.common2.androidTestFixturesProto.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/common/Check.me.common2.androidTestFixturesRelease.iml" filepath="$PROJECT_DIR$/.idea/modules/common/Check.me.common2.androidTestFixturesRelease.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/common/Check.me.common2.commonMain.iml" filepath="$PROJECT_DIR$/.idea/modules/common/Check.me.common2.commonMain.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/common/Check.me.common2.commonTest.iml" filepath="$PROJECT_DIR$/.idea/modules/common/Check.me.common2.commonTest.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/common/Check.me.common2.jsMain.iml" filepath="$PROJECT_DIR$/.idea/modules/common/Check.me.common2.jsMain.iml" />

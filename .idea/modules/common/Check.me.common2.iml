@@ -5,7 +5,7 @@
       <configuration>
         <option name="GRADLE_PROJECT_PATH" value=":common2" />
         <option name="LAST_SUCCESSFUL_SYNC_AGP_VERSION" value="7.0.4" />
-        <option name="LAST_KNOWN_AGP_VERSION" value="7.0.4" />
+        <option name="LAST_KNOWN_AGP_VERSION" value="7.1.0" />
       </configuration>
     </facet>
     <facet type="kotlin-language" name="Kotlin">
@@ -20,7 +20,7 @@
         </compilerSettings>
         <compilerArguments>
           <option name="destination" value="$MODULE_DIR$/../../../common/build/tmp/kotlin-classes/debug" />
-          <option name="classpath" value="$MODULE_DIR$/../../../common/build/intermediates/compile_r_class_jar/debug/R.jar;C:/Users/kryst/.gradle/caches/transforms-3/1932ec68909bf5c47780c50e58b7aa60/transformed/jetified-kotlin-parcelize-runtime-1.6.10.jar;C:/Users/kryst/.gradle/caches/transforms-3/597c26d8cebd86343f564e19e9cb6954/transformed/jetified-kotlinx-serialization-json-jvm-1.3.2.jar;C:/Users/kryst/.gradle/caches/transforms-3/7469af8db0183b6243e951131138fd41/transformed/jetified-kotlinx-serialization-core-jvm-1.3.2.jar;C:/Users/kryst/.gradle/caches/transforms-3/c023b4938f0f1e4b27217b1ed52b7b9b/transformed/jetified-kotlin-android-extensions-runtime-1.6.10.jar;C:/Users/kryst/.gradle/caches/transforms-3/ffd93c7639c827c1f5f2b167fce787f3/transformed/jetified-klock-debug-api.jar;C:/Users/kryst/.gradle/caches/transforms-3/c6dc145afb654df8a94b7744bc00fcaa/transformed/jetified-kotlinx-coroutines-core-jvm-1.6.0.jar;C:/Users/kryst/.gradle/caches/transforms-3/10702341e17ef5254a7feab40bd5410c/transformed/jetified-kotlin-stdlib-jdk8-1.6.0.jar;C:/Users/kryst/.gradle/caches/transforms-3/ab109edfc3d93936da54ba08eaee04fb/transformed/jetified-kotlin-stdlib-jdk7-1.6.0.jar;C:/Users/kryst/.gradle/caches/transforms-3/3006dccfc8690d8a17488216cd992849/transformed/jetified-kotlin-stdlib-1.6.10.jar;C:/Users/kryst/.gradle/caches/transforms-3/846f14df7e7562c9f574773662bea15d/transformed/jetified-android.joda-2.10.12-api.jar;C:/Users/kryst/.gradle/caches/transforms-3/8d2e0d603d842a4800151157bbaae7b8/transformed/jetified-annotations-13.0.jar;C:/Users/kryst/.gradle/caches/transforms-3/b373589928ae0f3e46fa0c4569a11d58/transformed/jetified-joda-time-2.10.12-no-tzdb.jar;C:/Users/kryst/AppData/Local/Android/Sdk/platforms/android-30/android.jar;C:/Users/kryst/AppData/Local/Android/Sdk/build-tools/30.0.2/core-lambda-stubs.jar" />
+          <option name="classpath" value="$MODULE_DIR$/../../../common/build/intermediates/compile_r_class_jar/debug/R.jar;C:/Users/kryst/.gradle/caches/transforms-3/4e057154a740bd7d984b5ba18c8f3130/transformed/jetified-kotlin-parcelize-runtime-1.6.10.jar;C:/Users/kryst/.gradle/caches/transforms-3/7e998eae0f9ba73e9e5e8d55b435c97e/transformed/jetified-kotlinx-serialization-json-jvm-1.3.2.jar;C:/Users/kryst/.gradle/caches/transforms-3/400d63948e2a572ab1a7a924761f906a/transformed/jetified-kotlinx-serialization-core-jvm-1.3.2.jar;C:/Users/kryst/.gradle/caches/transforms-3/f8a0e5b89d6d4bc9c62a1ba69e9c0210/transformed/jetified-kotlin-android-extensions-runtime-1.6.10.jar;C:/Users/kryst/.gradle/caches/transforms-3/2714f90925a68ec18e2e8f03a64f1476/transformed/jetified-klock-debug-api.jar;C:/Users/kryst/.gradle/caches/transforms-3/784d76901923c11de4a6b8d490709cba/transformed/jetified-kotlinx-coroutines-core-jvm-1.6.0.jar;C:/Users/kryst/.gradle/caches/transforms-3/f6bbb9deff60cfa6f30b9545feb04c1d/transformed/jetified-kotlin-stdlib-jdk8-1.6.0.jar;C:/Users/kryst/.gradle/caches/transforms-3/d6a987b990e55f21461a18121f2f0f43/transformed/jetified-kotlin-stdlib-jdk7-1.6.0.jar;C:/Users/kryst/.gradle/caches/transforms-3/c0e5acc0b66c8a22c941200e24cf86e4/transformed/jetified-kotlin-stdlib-1.6.10.jar;C:/Users/kryst/.gradle/caches/transforms-3/89a1f945ff6895581c967c9d802ba526/transformed/jetified-android.joda-2.10.12-api.jar;C:/Users/kryst/.gradle/caches/transforms-3/c0bce0357d825711d3d3b1f5330c3e08/transformed/jetified-annotations-13.0.jar;C:/Users/kryst/.gradle/caches/transforms-3/04dd2d4407beab7e5230ad05622b0a5a/transformed/jetified-joda-time-2.10.12-no-tzdb.jar;C:/Users/kryst/AppData/Local/Android/Sdk/platforms/android-30/android.jar;C:/Users/kryst/AppData/Local/Android/Sdk/build-tools/30.0.3/core-lambda-stubs.jar" />
           <option name="noStdlib" value="true" />
           <option name="moduleName" value="common2_debug" />
           <option name="languageVersion" value="1.6" />
@@ -153,6 +153,10 @@
     <orderEntry type="library" name="Gradle: net.danlew:android.joda:2.10.12@aar" level="project" />
     <orderEntry type="module" module-name="Check.me.common2.androidAndroidTestProto" scope="TEST" />
     <orderEntry type="module" module-name="Check.me.common2.androidAndroidTestRelease" scope="TEST" />
+    <orderEntry type="module" module-name="Check.me.common2.androidTestFixtures" scope="TEST" />
+    <orderEntry type="module" module-name="Check.me.common2.androidTestFixturesDebug" scope="TEST" />
+    <orderEntry type="module" module-name="Check.me.common2.androidTestFixturesProto" scope="TEST" />
+    <orderEntry type="module" module-name="Check.me.common2.androidTestFixturesRelease" scope="TEST" />
     <orderEntry type="module" module-name="Check.me.common2.commonMain" />
     <orderEntry type="module" module-name="Check.me.common2.commonTest" scope="TEST" production-on-test="" />
   </component>

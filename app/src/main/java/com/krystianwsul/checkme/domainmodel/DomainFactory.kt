@@ -23,7 +23,9 @@ import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.utils.checkError
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.criteria.SearchCriteria
-import com.krystianwsul.common.domain.*
+import com.krystianwsul.common.domain.DeviceDbInfo
+import com.krystianwsul.common.domain.ProjectToRootConversion
+import com.krystianwsul.common.domain.TaskUndoData
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.DomainThreadChecker
@@ -684,14 +686,14 @@ class DomainFactory(
                     this@DomainFactory,
                 )
 
-                projectToRootConversion.endTasks[pair.first.id] = task
+                projectToRootConversion.endTasks[pair.first.taskKey] = task
                 projectToRootConversion.copiedTaskKeys[pair.first.taskKey] = task.taskKey
             }
 
             for (startTaskHierarchy in projectToRootConversion.startTaskHierarchies.values) {
-                val parentTask = projectToRootConversion.endTasks.getValue(startTaskHierarchy.parentTaskId)
-
-                val childTask = projectToRootConversion.endTasks.getValue(startTaskHierarchy.childTaskId)
+                val parentTask =
+                    projectToRootConversion.endTasks.getValue(startTaskHierarchy.parentTaskKey as TaskKey.Project)
+                val childTask = projectToRootConversion.endTasks.getValue(startTaskHierarchy.childTaskKey as TaskKey.Project)
 
                 childTask.performRootIntervalUpdate { copyParentNestedTaskHierarchy(now, startTaskHierarchy, parentTask.id) }
 
@@ -713,7 +715,7 @@ class DomainFactory(
 
             copiedTaskKeys.putAll(projectToRootConversion.copiedTaskKeys)
 
-            return projectToRootConversion.endTasks.getValue(startTask.id)
+            return projectToRootConversion.endTasks.getValue(startTask.taskKey)
         }
 
         private fun convertProjectToRootHelper(
@@ -721,9 +723,9 @@ class DomainFactory(
             projectToRootConversion: ProjectToRootConversion,
             startTask: ProjectTask,
         ) {
-            if (projectToRootConversion.startTasks.containsKey(startTask.id)) return
+            if (projectToRootConversion.startTasks.containsKey(startTask.taskKey)) return
 
-            projectToRootConversion.startTasks[startTask.id] = Pair(
+            projectToRootConversion.startTasks[startTask.taskKey] = Pair(
                 startTask,
                 startTask.existingInstances
                     .values

@@ -54,9 +54,6 @@ sealed class TaskHierarchy(
     val parentTask by parentTaskCache
     abstract val childTask: Task
 
-    val parentTaskId by lazy { taskHierarchyRecord.parentTaskId }
-    abstract val childTaskId: String
-
     abstract val taskHierarchyKey: TaskHierarchyKey
 
     override fun setEndExactTimeStamp(endExactTimeStamp: ExactTimeStamp) {

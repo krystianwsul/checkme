@@ -13,7 +13,6 @@ class NestedTaskHierarchy(
 ) : TaskHierarchy(childTask.clearableInvalidatableManager, taskHierarchyRecord, parentTaskDelegateFactory) {
 
     override val childTaskKey get() = childTask.taskKey
-    override val childTaskId get() = childTaskKey.taskId
 
     override val taskHierarchyKey by lazy { TaskHierarchyKey.Nested(childTaskKey, taskHierarchyRecord.id) }
 

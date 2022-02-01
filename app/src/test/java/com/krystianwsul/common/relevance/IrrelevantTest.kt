@@ -367,6 +367,7 @@ class IrrelevantTest {
             startTime = now.long,
         )
         val child1TaskId = "child1TaskKey"
+        val child1TaskKey = TaskKey.Project(projectKey, child1TaskId)
         val taskHierarchy1Json = ProjectTaskHierarchyJson(
             parentTaskId = parentTaskId,
             childTaskId = child1TaskId,
@@ -379,6 +380,7 @@ class IrrelevantTest {
             startTime = now.long,
         )
         val child2TaskId = "child2TaskKey"
+        val child2TaskKey = TaskKey.Project(projectKey, child2TaskId)
         val taskHierarchy2Json = ProjectTaskHierarchyJson(
             parentTaskId = parentTaskId,
             childTaskId = child2TaskId,
@@ -408,11 +410,11 @@ class IrrelevantTest {
         assertEquals(2, parentTask.getChildTaskHierarchies(now).size)
 
         val child1Task = parentTask.getChildTaskHierarchies(now)
-            .single { it.childTaskId == child1TaskId }
+            .single { it.childTaskKey == child1TaskKey }
             .childTask
 
         val child2Task = parentTask.getChildTaskHierarchies(now)
-            .single { it.childTaskId == child2TaskId }
+            .single { it.childTaskKey == child2TaskKey }
             .childTask
 
         now = ExactTimeStamp.Local(day1, hour2)
@@ -513,6 +515,7 @@ class IrrelevantTest {
             taskHierarchies = mapOf(taskHierarchy1Id to taskHierarchy1Json),
         )
         val child1TaskId = "child1TaskKey"
+        val child1TaskKey = TaskKey.Project(projectKey, child1TaskId)
 
         val taskHierarchy2Json = NestedTaskHierarchyJson(
             parentTaskId = parentTaskId,
@@ -528,6 +531,7 @@ class IrrelevantTest {
             taskHierarchies = mapOf(taskHierarchy2Id to taskHierarchy2Json),
         )
         val child2TaskId = "child2TaskKey"
+        val child2TaskKey = TaskKey.Project(projectKey, child2TaskId)
 
         val projectJson = PrivateProjectJson(
             startTime = now.long,
@@ -548,11 +552,11 @@ class IrrelevantTest {
         assertEquals(2, parentTask.getChildTaskHierarchies(now).size)
 
         val child1Task = parentTask.getChildTaskHierarchies(now)
-            .single { it.childTaskId == child1TaskId }
+            .single { it.childTaskKey == child1TaskKey }
             .childTask
 
         val child2Task = parentTask.getChildTaskHierarchies(now)
-            .single { it.childTaskId == child2TaskId }
+            .single { it.childTaskKey == child2TaskKey }
             .childTask
 
         now = ExactTimeStamp.Local(day1, hour2)

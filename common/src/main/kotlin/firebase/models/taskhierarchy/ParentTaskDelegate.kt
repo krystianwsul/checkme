@@ -7,30 +7,30 @@ import com.krystianwsul.common.firebase.models.taskhierarchy.ParentTaskDelegate.
 import com.krystianwsul.common.firebase.records.taskhierarchy.TaskHierarchyRecord
 import com.krystianwsul.common.utils.TaskKey
 
-sealed class ParentTaskDelegate(private val taskHierarchyRecord: TaskHierarchyRecord<*>) {
+sealed class ParentTaskDelegate {
 
-    abstract fun getTaskKey(parentTaskId: String): TaskKey
+    abstract val parentTaskKey: TaskKey
 
-    abstract fun getTask(parentTaskKey: String): Task
+    abstract fun getParentTask(): Task
 
     class Project(
         private val project: com.krystianwsul.common.firebase.models.project.Project<*>,
         taskHierarchyRecord: TaskHierarchyRecord<*>,
-    ) : ParentTaskDelegate(taskHierarchyRecord) {
+    ) : ParentTaskDelegate() {
 
-        override fun getTaskKey(parentTaskId: String) = TaskKey.Project(project.projectKey, parentTaskId)
+        override val parentTaskKey by lazy { TaskKey.Project(project.projectKey, taskHierarchyRecord.parentTaskId) }
 
-        override fun getTask(parentTaskKey: String): Task = project.getProjectTaskForce(getTaskKey(parentTaskKey))
+        override fun getParentTask() = project.getProjectTaskForce(parentTaskKey)
     }
 
     class Root(
         private val rootTaskParent: RootTask.Parent,
         taskHierarchyRecord: TaskHierarchyRecord<*>,
-    ) : ParentTaskDelegate(taskHierarchyRecord) {
+    ) : ParentTaskDelegate() {
 
-        override fun getTaskKey(parentTaskId: String) = TaskKey.Root(parentTaskId)
+        override val parentTaskKey by lazy { TaskKey.Root(taskHierarchyRecord.parentTaskId) }
 
-        override fun getTask(parentTaskKey: String) = rootTaskParent.getRootTask(getTaskKey(parentTaskKey))
+        override fun getParentTask() = rootTaskParent.getRootTask(parentTaskKey)
     }
 
     sealed interface Factory {

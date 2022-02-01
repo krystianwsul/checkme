@@ -13,10 +13,11 @@ import com.krystianwsul.common.utils.TaskKey
 
 sealed class TaskHierarchy(
     clearableInvalidatableManager: ClearableInvalidatableManager,
-    private val parentTaskDelegate: ParentTaskDelegate,
+    private val taskHierarchyRecord: TaskHierarchyRecord<*>,
+    parentTaskDelegateFactory: ParentTaskDelegate.Factory,
 ) : TaskParentEntry {
 
-    protected abstract val taskHierarchyRecord: TaskHierarchyRecord<*>
+    private val parentTaskDelegate = parentTaskDelegateFactory.newDelegate(taskHierarchyRecord)
 
     val startExactTimeStamp by lazy { ExactTimeStamp.Local(taskHierarchyRecord.startTime) }
 

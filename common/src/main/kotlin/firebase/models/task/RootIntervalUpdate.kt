@@ -161,7 +161,7 @@ class RootIntervalUpdate(val rootTask: RootTask, intervalInfo: IntervalInfo) :
 
     private fun createParentNestedTaskHierarchy(nestedTaskHierarchyJson: NestedTaskHierarchyJson): NestedTaskHierarchy {
         val taskHierarchyRecord = rootTask.taskRecord.newTaskHierarchyRecord(nestedTaskHierarchyJson)
-        val taskHierarchy = NestedTaskHierarchy(rootTask, taskHierarchyRecord, rootTask.parentTaskDelegate)
+        val taskHierarchy = NestedTaskHierarchy(rootTask, taskHierarchyRecord, rootTask.parentTaskDelegateFactory)
 
         rootTask.nestedParentTaskHierarchies[taskHierarchy.id] = taskHierarchy
 

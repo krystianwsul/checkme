@@ -4,9 +4,10 @@ import com.krystianwsul.common.criteria.Assignable
 import com.krystianwsul.common.criteria.QueryMatchable
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.ScheduleGroup
-import com.krystianwsul.common.firebase.json.*
+import com.krystianwsul.common.firebase.json.InstanceJson
 import com.krystianwsul.common.firebase.json.tasks.RootTaskJson
-import com.krystianwsul.common.firebase.models.*
+import com.krystianwsul.common.firebase.models.ImageState
+import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.cache.ClearableInvalidatableManager
 import com.krystianwsul.common.firebase.models.cache.InvalidatableCache
 import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
@@ -29,7 +30,7 @@ import com.krystianwsul.common.utils.*
 sealed class Task(
     val customTimeProvider: JsonTime.CustomTimeProvider,
     private val taskRecord: TaskRecord,
-    val parentTaskDelegate: ParentTaskDelegate,
+    val parentTaskDelegateFactory: ParentTaskDelegate.Factory,
     val clearableInvalidatableManager: ClearableInvalidatableManager,
     val rootModelChangeManager: RootModelChangeManager,
 ) : Endable, CurrentOffset, QueryMatchable, Assignable {
@@ -79,7 +80,7 @@ sealed class Task(
     protected abstract val projectParentTaskHierarchies: Set<ProjectTaskHierarchy>
 
     val nestedParentTaskHierarchies = taskRecord.taskHierarchyRecords
-        .mapValues { NestedTaskHierarchy(this, it.value, parentTaskDelegate) }
+        .mapValues { NestedTaskHierarchy(this, it.value, parentTaskDelegateFactory) }
         .toMutableMap()
 
     val parentTaskHierarchies get() = projectParentTaskHierarchies + nestedParentTaskHierarchies.values

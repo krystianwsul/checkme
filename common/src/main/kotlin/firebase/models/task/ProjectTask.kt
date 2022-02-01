@@ -17,7 +17,7 @@ import com.krystianwsul.common.utils.invalidatableLazy
 class ProjectTask(override val project: Project<*>, private val taskRecord: ProjectTaskRecord) : Task(
     project,
     taskRecord,
-    ParentTaskDelegate.Project(project),
+    ParentTaskDelegate.Factory.Project(project),
     project.clearableInvalidatableManager,
     project.rootModelChangeManager,
 ) {

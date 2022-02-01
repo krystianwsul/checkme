@@ -123,6 +123,7 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
                         }
                     }
                     .groupBy({ it.first }, { it.second })
+            DebugFragment.logDone("Notifier.updateNotifications finish sequence")
 
             notificationInstances = allNotificationInstances[true].orEmpty().associateBy { it.instanceKey }
             nextAlarmInstance = allNotificationInstances[false].orEmpty().singleOrEmpty()

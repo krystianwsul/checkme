@@ -411,7 +411,20 @@ sealed class Task(
     fun getHierarchyExactTimeStamp(exactTimeStamp: ExactTimeStamp) =
         exactTimeStamp.coerceIn(startExactTimeStampOffset, endExactTimeStampOffset?.minusOne())
 
+    fun getChildTasks(exactTimeStamp: ExactTimeStamp): Set<Task> {
+        val taskHierarchyChildTasks =
+            getChildTaskHierarchies(exactTimeStamp, true).map { it.childTask }.toSet()
+
+        val instanceChildTasks = parent.getAllExistingInstances()
+            .filter { it.parentInstance?.task == this }
+            .map { it.task }
+            .filter { it.getParentTask(exactTimeStamp) == this }
+
+        return taskHierarchyChildTasks + instanceChildTasks
+    }
+
     fun getChildTaskHierarchies(
+        // todo hierarchy getChildTasks
         exactTimeStamp: ExactTimeStamp,
         currentByHierarchy: Boolean = false,
     ): List<TaskHierarchy> {

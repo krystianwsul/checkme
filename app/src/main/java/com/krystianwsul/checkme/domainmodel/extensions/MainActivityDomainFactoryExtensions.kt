@@ -51,6 +51,7 @@ private fun DomainFactory.getMainData(
         .filter { (task, hierarchyExactTimeStamp) -> task.isTopLevelTask(hierarchyExactTimeStamp) }
         .map { (task, hierarchyExactTimeStamp) ->
             TaskListFragment.ChildTaskData(
+                // todo hierarchy getChildTasks
                 task.name,
                 task.getScheduleText(ScheduleText, hierarchyExactTimeStamp),
                 getTaskListChildTaskDatas(

@@ -103,7 +103,7 @@ fun DomainFactory.getShowTasksData(parameters: ShowTasksActivity.Parameters): Sh
     }
 
     return ShowTasksViewModel.Data(
-        TaskListFragment.TaskData(entryDatas, null, !parameters.copying, null), // todo hierarchy getChildTasks
+        TaskListFragment.TaskData(entryDatas, null, !parameters.copying, null),
         title,
         subtitle,
         isSharedProject,

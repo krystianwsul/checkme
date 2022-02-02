@@ -530,10 +530,8 @@ class DomainFactory(
         parentHierarchyExactTimeStamp: ExactTimeStamp,
         includeProjectInfo: Boolean = true,
     ): List<TaskListFragment.ChildTaskData> {
-        return parentTask.getChildTaskHierarchies(parentHierarchyExactTimeStamp, true)
-            .map { taskHierarchy ->
-                val childTask = taskHierarchy.childTask
-
+        return parentTask.getChildTasks(parentHierarchyExactTimeStamp)
+            .map { childTask ->
                 val childHierarchyExactTimeStamp =
                     childTask.getHierarchyExactTimeStamp(parentHierarchyExactTimeStamp)
 

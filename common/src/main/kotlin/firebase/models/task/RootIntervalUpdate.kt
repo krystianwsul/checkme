@@ -64,7 +64,8 @@ class RootIntervalUpdate(val rootTask: RootTask, intervalInfo: IntervalInfo) :
         }
 
         if (singleRemoveSchedule != null && singleAddSchedulePair != null) {
-            check(parentSingleSchedule == null)
+            // todo hierarchy later: schedule checks
+            // check(parentSingleSchedule == null)
 
             if (assignedTo.isNotEmpty()) singleRemoveSchedule.setAssignedTo(assignedTo)
 

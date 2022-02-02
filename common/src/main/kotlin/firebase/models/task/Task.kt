@@ -230,6 +230,13 @@ sealed class Task(
         }
     }
 
+    /**
+     * todo: if performance becomes an issue, I could try adding a wrapper that informs me whether or not this is being
+     * called with "now". Or, pass in now as a separate param, and compare them.  Either way, create a separate cache for
+     * that case.
+     *
+     * For the other values, consider a map-based cache.
+     */
     fun getParentTask(exactTimeStamp: ExactTimeStamp): Task? {
         requireNotDeletedOffset(exactTimeStamp)
 
@@ -447,7 +454,6 @@ sealed class Task(
         val taskHierarchyChildTasks =
             getChildTaskHierarchies(exactTimeStamp, true).map { it.childTask }.toSet()
 
-        // todo hierarchy later: this should get cached, like above
         val instanceChildTasks = parent.getAllExistingInstances()
             .filter { it.parentInstance?.task == this }
             .map { it.task }

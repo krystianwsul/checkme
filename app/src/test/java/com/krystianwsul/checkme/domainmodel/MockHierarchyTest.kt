@@ -226,6 +226,58 @@ class MockHierarchyTest {
         assertEquals(setOf(parentInstanceKey, childInstanceKey), getTodayInstanceDatas(now).map { it.instanceKey }.toSet())
     }
 
+    @Test
+    fun testCreateMockChildTaskViaEditActivity() {
+        val date = Date(2022, 2, 2)
+
+        var now = ExactTimeStamp.Local(date, HourMinute(1, 0))
+
+        val parentTaskKey = domainUpdater(now).createScheduleTopLevelTask(
+            DomainListenerManager.NotificationType.All,
+            EditDelegate.CreateParameters("parent task"),
+            getSingleScheduleData(date, 5, 0),
+            null,
+        )
+            .blockingGet()
+            .taskKey
+
+        now += 1.hours
+
+        val childTaskKey = domainUpdater(now).createScheduleTopLevelTask(
+            DomainListenerManager.NotificationType.All,
+            EditDelegate.CreateParameters("child task"),
+            getSingleScheduleData(date, 6, 0),
+            null,
+        )
+            .blockingGet()
+            .taskKey
+
+        val (parentInstanceKey, childInstanceKey) = getTodayInstanceDatas(now).let {
+            assertEquals(2, it.size)
+
+            it.single { it.taskKey == parentTaskKey }.instanceKey to it.single { it.taskKey == childTaskKey }.instanceKey
+        }
+
+        now += 1.hours
+
+        domainUpdater(now).updateChildTask(
+            DomainListenerManager.NotificationType.All,
+            childTaskKey,
+            EditDelegate.CreateParameters("child task"),
+            parentTaskKey,
+            childInstanceKey,
+        ).blockingSubscribe()
+
+        getTodayInstanceDatas(now).let {
+            assertEquals(1, it.size)
+
+            assertEquals(parentInstanceKey, it.single().instanceKey)
+            assertEquals(childInstanceKey, it.single().allChildren.single().instanceKey)
+        }
+
+        assertEquals(1, domainFactory.getTaskForce(childTaskKey).intervalInfo.getCurrentScheduleIntervals(now).size)
+    }
+
     // todo hierarchy add test for editing parent
     // todo hierarchy add test for SETTING parent initially (remember to check if both tasks are single schedule)
 }

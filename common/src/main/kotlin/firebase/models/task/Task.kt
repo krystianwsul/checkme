@@ -198,6 +198,38 @@ sealed class Task(
 
     fun getNestedTaskHierarchy(taskHierarchyId: TaskHierarchyId) = nestedParentTaskHierarchies.getValue(taskHierarchyId)
 
+    fun getParentTaskData(exactTimeStamp: ExactTimeStamp): Pair<Task, SingleSchedule?>? {
+        requireNotDeletedOffset(exactTimeStamp)
+
+        val interval = intervalInfo.getInterval(exactTimeStamp)
+
+        return when (val type = interval.type) {
+            is Type.Child -> type.getHierarchyInterval(interval).run {
+                requireNotDeletedOffset(exactTimeStamp)
+                taskHierarchy.requireNotDeletedOffset(exactTimeStamp)
+
+                taskHierarchy.parentTask.apply { requireNotDeletedOffset(exactTimeStamp) } to null
+            }
+            is Type.Schedule -> {
+                // hierarchy hack
+                type.getScheduleIntervals(interval)
+                    .singleOrNull()
+                    ?.also { it.requireNotDeletedOffset(exactTimeStamp) }
+                    ?.schedule
+                    ?.also { it.requireNotDeletedOffset(exactTimeStamp) }
+                    ?.let { it as? SingleSchedule }
+                    ?.let { singleSchedule ->
+                        singleSchedule.getInstance(this)
+                            .parentInstance
+                            ?.task
+                            ?.also { it.requireNotDeletedOffset(exactTimeStamp) }
+                            ?.let { it to singleSchedule }
+                    }
+            }
+            is Type.NoSchedule -> null
+        }
+    }
+
     fun getParentTask(exactTimeStamp: ExactTimeStamp): Task? {
         requireNotDeletedOffset(exactTimeStamp)
 

@@ -421,7 +421,9 @@ fun DomainUpdater.updateChildTask(
         check(!parentTask.hasAncestor(taskKey))
 
         task.performRootIntervalUpdate {
-            if (task.getParentTask(now) != parentTask) {
+            val parentTaskData = task.getParentTaskData(now)
+
+            fun setParentViaTaskHierarchy() {
                 if (allReminders) endAllCurrentTaskHierarchies(now)
 
                 parentTask.addChild(this, now)
@@ -429,6 +431,33 @@ fun DomainUpdater.updateChildTask(
                 if (allReminders) {
                     endAllCurrentSchedules(now)
                     endAllCurrentNoScheduleOrParents(now)
+                }
+            }
+
+            if (parentTaskData?.first != parentTask) {
+                val singleSchedule = parentTaskData?.second
+                    ?: task.intervalInfo
+                        .getCurrentScheduleIntervals(now)
+                        .singleOrNull()
+                        ?.let { it.schedule as? SingleSchedule }
+
+                if (singleSchedule != null) {
+                    // hierarchy hack
+                    val singleParentInstance = parentTask.getInstances(null, null, now)
+                        .filter { it.isVisible(now, Instance.VisibilityOptions()) }
+                        .singleOrNull()
+
+                    if (singleParentInstance != null) {
+                        singleSchedule.getInstance(task).let { singleInstance ->
+                            removeInstanceKey?.let { check(it == singleInstance.instanceKey) }
+
+                            singleInstance.setParentState(singleParentInstance.instanceKey)
+                        }
+                    } else {
+                        setParentViaTaskHierarchy()
+                    }
+                } else {
+                    setParentViaTaskHierarchy()
                 }
             }
         }

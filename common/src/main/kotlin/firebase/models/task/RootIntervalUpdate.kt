@@ -127,9 +127,7 @@ class RootIntervalUpdate(val rootTask: RootTask, intervalInfo: IntervalInfo) :
                 it.setParentState(Instance.ParentState.NoParent)
             }
         } else {
-            if (addScheduleDatas.isEmpty()) {
-                // hierarchy hack
-
+            if (!rootTask.isTopLevelTask(now)) { // hierarchy hack
                 check(removeSchedules.isEmpty())
                 check(initialAddScheduleDatas.size == 1)
                 check(oldScheduleDatas.size == 1)
@@ -145,8 +143,6 @@ class RootIntervalUpdate(val rootTask: RootTask, intervalInfo: IntervalInfo) :
 
                 singleOldSchedule.setTimeOnInstance(singleAddSchedule, singleInitialAddSchedulePair.second)
             } else {
-                check(addScheduleDatas.isNotEmpty())
-
                 removeSchedules.forEach { it.setEndExactTimeStamp(now.toOffset()) }
 
                 rootTask.createSchedules(

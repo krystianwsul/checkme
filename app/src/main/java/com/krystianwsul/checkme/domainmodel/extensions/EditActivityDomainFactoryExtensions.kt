@@ -420,47 +420,7 @@ fun DomainUpdater.updateChildTask(
 
         check(!parentTask.hasAncestor(taskKey))
 
-        task.performRootIntervalUpdate {
-            val parentTaskData = task.getParentTaskData(now)
-
-            fun setParentViaTaskHierarchy() {
-                if (allReminders) endAllCurrentTaskHierarchies(now)
-
-                parentTask.addChild(this, now)
-
-                if (allReminders) {
-                    endAllCurrentSchedules(now)
-                    endAllCurrentNoScheduleOrParents(now)
-                }
-            }
-
-            if (parentTaskData?.first != parentTask) {
-                val singleSchedule = parentTaskData?.second
-                    ?: task.intervalInfo
-                        .getCurrentScheduleIntervals(now)
-                        .singleOrNull()
-                        ?.let { it.schedule as? SingleSchedule }
-
-                if (singleSchedule != null) {
-                    // hierarchy hack
-                    val singleParentInstance = parentTask.getInstances(null, null, now)
-                        .filter { it.isVisible(now, Instance.VisibilityOptions()) }
-                        .singleOrNull()
-
-                    if (singleParentInstance != null) {
-                        singleSchedule.getInstance(task).let { singleInstance ->
-                            removeInstanceKey?.let { check(it == singleInstance.instanceKey) }
-
-                            singleInstance.setParentState(singleParentInstance.instanceKey)
-                        }
-                    } else {
-                        setParentViaTaskHierarchy()
-                    }
-                } else {
-                    setParentViaTaskHierarchy()
-                }
-            }
-        }
+        addChildToParent(task, parentTask, now, removeInstanceKey?.let(::getInstance), allReminders)
     }
 
     task.setName(createParameters.name, createParameters.note)
@@ -468,16 +428,6 @@ fun DomainUpdater.updateChildTask(
     val image = createParameters.getImage(this)
 
     image?.let { task.setImage(deviceDbInfo, ImageState.Local(it.uuid)) }
-
-    removeInstanceKey?.let {
-        val instance = getInstance(it)
-
-        if (instance.parentInstance?.task != parentTask
-            && instance.isVisible(now, Instance.VisibilityOptions(hack24 = true))
-        ) {
-            instance.hide()
-        }
-    }
 
     image?.upload(task.taskKey)
 
@@ -805,15 +755,22 @@ private fun DomainFactory.joinTasks(
     newParentTask.requireNotDeleted()
     check(joinTasks.size > 1)
 
-    joinTasks.forEach { addChildToParent(it, newParentTask, now) }
+    // todo this would be a lot easier if I paired them immediately
+    val unusedRemoveInstanceKeys = removeInstanceKeys.toMutableList()
 
-    removeInstanceKeys.map(::getInstance)
-        .onEach { it.setParentState(Instance.ParentState.Unset) }
-        .filter {
-            it.parentInstance?.task != newParentTask &&
-                    it.isVisible(now, Instance.VisibilityOptions(hack24 = true))
-        }
-        .forEach { it.hide() }
+    joinTasks.forEach { task ->
+        val removeInstance = removeInstanceKeys.filter { it.taskKey == task.taskKey }
+            .singleOrEmpty()
+            ?.let {
+                unusedRemoveInstanceKeys -= it
+
+                getInstance(it)
+            }
+
+        addChildToParent(task, newParentTask, now, removeInstance)
+    }
+
+    check(unusedRemoveInstanceKeys.isEmpty())
 }
 
 private fun Task.hasMultipleInstances(parentInstanceKey: InstanceKey?, now: ExactTimeStamp.Local) =

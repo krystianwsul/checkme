@@ -139,25 +139,6 @@ private class ListUndoData(private val undoDatas: List<UndoData>) : UndoData {
         undoDatas.flatMap { it.undo(domainFactory, now) }.toSet()
 }
 
-private class SetInstanceParentUndoData(
-    private val instanceKey: InstanceKey,
-    private val parentState: Instance.ParentState,
-) : UndoData {
-
-    override fun undo(
-        domainFactory: DomainFactory,
-        now: ExactTimeStamp.Local,
-    ) = domainFactory.getInstance(instanceKey).let {
-        val initialProject = it.task.project
-
-        domainFactory.trackRootTaskIds { it.setParentState(parentState) }
-
-        val finalProject = it.task.project
-
-        setOf(initialProject, finalProject)
-    }
-}
-
 @CheckResult
 fun DomainUpdater.setInstancesParent(
     notificationType: DomainListenerManager.NotificationType,

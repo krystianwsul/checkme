@@ -22,6 +22,7 @@ import com.krystianwsul.common.firebase.models.FilterResult
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.filterSearch
 import com.krystianwsul.common.firebase.models.project.Project
+import com.krystianwsul.common.firebase.models.schedule.SingleSchedule
 import com.krystianwsul.common.firebase.models.task.ProjectRootTaskIdTracker
 import com.krystianwsul.common.firebase.models.task.RootTask
 import com.krystianwsul.common.firebase.models.task.Task
@@ -300,53 +301,97 @@ private class AddChildToParentUndoData(
 }
 
 fun addChildToParent(
-    // todo hierarchy
+    // todo hierarchy remove return type
     childTask: RootTask,
     parentTask: RootTask,
     now: ExactTimeStamp.Local,
     hideInstance: Instance? = null,
-): UndoData {
+    allReminders: Boolean = true,
+): UndoData? {
     childTask.requireNotDeleted()
 
-    lateinit var taskHierarchyKeys: List<TaskHierarchyKey>
-    lateinit var scheduleIds: List<ScheduleId>
-    lateinit var noScheduleOrParentsIds: List<String>
-    lateinit var deleteTaskHierarchyKey: TaskHierarchyKey
+    val parentTaskData = childTask.getParentTaskData(now)
 
-    childTask.performRootIntervalUpdate {
-        taskHierarchyKeys = endAllCurrentTaskHierarchies(now)
-        scheduleIds = endAllCurrentSchedules(now)
-        noScheduleOrParentsIds = endAllCurrentNoScheduleOrParents(now)
+    return if (parentTaskData?.first != parentTask) {
+        fun setParentViaTaskHierarchy(): AddChildToParentUndoData {
+            lateinit var taskHierarchyKeys: List<TaskHierarchyKey>
+            lateinit var scheduleIds: List<ScheduleId>
+            lateinit var noScheduleOrParentsIds: List<String>
+            lateinit var deleteTaskHierarchyKey: TaskHierarchyKey
 
-        deleteTaskHierarchyKey = parentTask.addChild(this, now)
-    }
+            childTask.performRootIntervalUpdate {
+                if (allReminders) {
+                    taskHierarchyKeys = endAllCurrentTaskHierarchies(now)
+                    scheduleIds = endAllCurrentSchedules(now)
+                    noScheduleOrParentsIds = endAllCurrentNoScheduleOrParents(now)
+                } else {
+                    taskHierarchyKeys = listOf()
+                    scheduleIds = listOf()
+                    noScheduleOrParentsIds = listOf()
+                }
 
-    val instanceUndoData = hideInstance?.let {
-        val previousParentState = it.parentState
-            .takeIf { it != Instance.ParentState.Unset }
-            .also { hideInstance.setParentState(Instance.ParentState.Unset) }
+                deleteTaskHierarchyKey = parentTask.addChild(this, now)
+            }
 
-        val unhide = if (it.parentInstance?.task != parentTask &&
-            it.isVisible(now, Instance.VisibilityOptions(hack24 = true))
-        ) {
-            it.hide()
+            val instanceUndoData = hideInstance?.let {
+                val previousParentState = it.parentState
+                    .takeIf { it != Instance.ParentState.Unset }
+                    .also { hideInstance.setParentState(Instance.ParentState.Unset) }
 
-            true
-        } else {
-            false
+                val unhide = if (it.parentInstance?.task != parentTask &&
+                    it.isVisible(now, Instance.VisibilityOptions(hack24 = true))
+                ) {
+                    it.hide()
+
+                    true
+                } else {
+                    false
+                }
+
+                AddChildToParentUndoData.InstanceUndoData(it.instanceKey, previousParentState, unhide)
+            }
+
+            return AddChildToParentUndoData(
+                childTask.taskKey,
+                taskHierarchyKeys,
+                scheduleIds,
+                noScheduleOrParentsIds,
+                deleteTaskHierarchyKey,
+                instanceUndoData,
+            )
         }
 
-        AddChildToParentUndoData.InstanceUndoData(it.instanceKey, previousParentState, unhide)
-    }
+        val singleSchedule = parentTaskData?.second
+            ?: childTask.intervalInfo
+                .getCurrentScheduleIntervals(now)
+                .singleOrNull()
+                ?.let { it.schedule as? SingleSchedule }
 
-    return AddChildToParentUndoData(
-        childTask.taskKey,
-        taskHierarchyKeys,
-        scheduleIds,
-        noScheduleOrParentsIds,
-        deleteTaskHierarchyKey,
-        instanceUndoData,
-    )
+        if (singleSchedule != null) {
+            // hierarchy hack
+            val singleParentInstance = parentTask.getInstances(null, null, now)
+                .filter { it.isVisible(now, Instance.VisibilityOptions()) }
+                .singleOrNull()
+
+            if (singleParentInstance != null) {
+                singleSchedule.getInstance(childTask).let { singleInstance ->
+                    hideInstance?.let { check(it == singleInstance) }
+
+                    val undoData = SetInstanceParentUndoData(singleInstance.instanceKey, singleInstance.parentState)
+
+                    singleInstance.setParentState(singleParentInstance.instanceKey)
+
+                    undoData
+                }
+            } else {
+                setParentViaTaskHierarchy()
+            }
+        } else {
+            setParentViaTaskHierarchy()
+        }
+    } else {
+        null
+    }
 }
 
 @CheckResult
@@ -417,3 +462,22 @@ fun List<GroupTypeFactory.InstanceDescriptor>.toDoneSingleBridges(
     showDisplayText: Boolean = true,
     includeProjectDetails: Boolean = true,
 ) = map { GroupTypeFactory.SingleBridge.createDone(it, showDisplayText, includeProjectDetails) }
+
+class SetInstanceParentUndoData(
+    private val instanceKey: InstanceKey,
+    private val parentState: Instance.ParentState,
+) : UndoData {
+
+    override fun undo(
+        domainFactory: DomainFactory,
+        now: ExactTimeStamp.Local,
+    ) = domainFactory.getInstance(instanceKey).let {
+        val initialProject = it.task.project
+
+        domainFactory.trackRootTaskIds { it.setParentState(parentState) }
+
+        val finalProject = it.task.project
+
+        setOf(initialProject, finalProject)
+    }
+}

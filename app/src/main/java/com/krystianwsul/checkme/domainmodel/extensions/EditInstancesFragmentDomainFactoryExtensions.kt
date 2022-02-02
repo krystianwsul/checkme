@@ -16,7 +16,6 @@ import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.MyCustomTime
 import com.krystianwsul.common.firebase.models.Instance
-import com.krystianwsul.common.firebase.models.task.RootTask
 import com.krystianwsul.common.locker.LockerManager
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.InstanceKey
@@ -171,22 +170,23 @@ fun DomainUpdater.setInstancesParent(
 
     val originalProjects = instances.map { it.task.project }
 
-    val parentTask = getTaskForce(parentInstanceKey.taskKey)
+    //val parentTask = getTaskForce(parentInstanceKey.taskKey)
 
-    val parentTaskHasOtherInstances = parentTask.hasOtherVisibleInstances(now, parentInstanceKey)
+    //val parentTaskHasOtherInstances = parentTask.hasOtherVisibleInstances(now, parentInstanceKey)
 
     val undoDatas = trackRootTaskIds {
         instances.map {
-            if (parentTaskHasOtherInstances || it.task.hasOtherVisibleInstances(now, it.instanceKey)) {
-                val undoData = SetInstanceParentUndoData(it.instanceKey, it.parentState)
+            // todo hierarchy
+            //if (parentTaskHasOtherInstances || it.task.hasOtherVisibleInstances(now, it.instanceKey)) {
+            val undoData = SetInstanceParentUndoData(it.instanceKey, it.parentState)
 
-                it.setParentState(parentInstanceKey)
+            it.setParentState(parentInstanceKey)
 
-                undoData
-            } else {
-                // this is very rare, so I'll just hope for the best with casting
-                addChildToParent(it.task as RootTask, parentTask as RootTask, now)
-            }
+            undoData
+            //} else {
+            // this is very rare, so I'll just hope for the best with casting
+            //  addChildToParent(it.task as RootTask, parentTask as RootTask, now)
+            //}
         }
     }
 

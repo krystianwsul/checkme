@@ -176,7 +176,7 @@ fun DomainUpdater.setInstancesParent(
 
     val undoDatas = trackRootTaskIds {
         instances.map {
-            // todo hierarchy
+            // todo hierarchy later
             //if (parentTaskHasOtherInstances || it.task.hasOtherVisibleInstances(now, it.instanceKey)) {
             val undoData = SetInstanceParentUndoData(it.instanceKey, it.parentState)
 

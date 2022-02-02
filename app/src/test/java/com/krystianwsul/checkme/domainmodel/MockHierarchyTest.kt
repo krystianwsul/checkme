@@ -277,7 +277,4 @@ class MockHierarchyTest {
 
         assertEquals(1, domainFactory.getTaskForce(childTaskKey).intervalInfo.getCurrentScheduleIntervals(now).size)
     }
-
-    // todo hierarchy add test for editing parent
-    // todo hierarchy add test for SETTING parent initially (remember to check if both tasks are single schedule)
 }

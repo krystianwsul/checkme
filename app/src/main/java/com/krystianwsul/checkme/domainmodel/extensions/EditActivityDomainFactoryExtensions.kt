@@ -844,9 +844,8 @@ private fun DomainFactory.getTaskListChildTaskDatas(
     parentTask: Task,
     excludedTaskKeys: Set<TaskKey>,
     parentInstanceKey: InstanceKey?,
-): List<EditViewModel.ParentEntryData.Task> = parentTask.getChildTaskHierarchies(now)
+): List<EditViewModel.ParentEntryData.Task> = parentTask.getChildTasks(now)
     .asSequence()
-    .map { it.childTask }
     .filter { it.showAsParent(now, excludedTaskKeys) }
     .map {
         it.toParentEntryData(

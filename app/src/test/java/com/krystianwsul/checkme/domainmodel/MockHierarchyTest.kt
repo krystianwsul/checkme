@@ -1,10 +1,7 @@
 package com.krystianwsul.checkme.domainmodel
 
 import com.krystianwsul.checkme.Preferences
-import com.krystianwsul.checkme.domainmodel.extensions.createScheduleTopLevelTask
-import com.krystianwsul.checkme.domainmodel.extensions.getGroupListData
-import com.krystianwsul.checkme.domainmodel.extensions.setInstancesParent
-import com.krystianwsul.checkme.domainmodel.extensions.updateScheduleTask
+import com.krystianwsul.checkme.domainmodel.extensions.*
 import com.krystianwsul.checkme.gui.edit.delegates.EditDelegate
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.ExactTimeStamp
@@ -85,6 +82,8 @@ class MockHierarchyTest {
 
         assertEquals(1, domainFactory.getTaskForce(childTaskKey).intervalInfo.getCurrentScheduleIntervals(now).size)
 
+        now += 1.hours
+
         domainUpdater(now).updateScheduleTask(
             DomainListenerManager.NotificationType.All,
             childTaskKey,
@@ -95,4 +94,76 @@ class MockHierarchyTest {
 
         assertEquals(2, getTodayInstanceDatas(now).size)
     }
+
+    @Test
+    fun testUpdateNameForMockChildTask() {
+        val date = Date(2022, 2, 2)
+
+        var now = ExactTimeStamp.Local(date, HourMinute(1, 0))
+
+        val singleScheduleData = getSingleScheduleData(date, 5, 0)
+
+        val parentTaskKey = domainUpdater(now).createScheduleTopLevelTask(
+            DomainListenerManager.NotificationType.All,
+            EditDelegate.CreateParameters("parent task"),
+            singleScheduleData,
+            null,
+        )
+            .blockingGet()
+            .taskKey
+
+        now += 1.hours
+
+        val childTaskKey = domainUpdater(now).createScheduleTopLevelTask(
+            DomainListenerManager.NotificationType.All,
+            EditDelegate.CreateParameters("child task"),
+            singleScheduleData,
+            null,
+        )
+            .blockingGet()
+            .taskKey
+
+        val (parentInstanceKey, childInstanceKey) = getTodayInstanceDatas(now).let {
+            assertEquals(2, it.size)
+
+            it.single { it.taskKey == parentTaskKey }.instanceKey to it.single { it.taskKey == childTaskKey }.instanceKey
+        }
+
+        now += 1.hours
+
+        domainUpdater(now).setInstancesParent(
+            DomainListenerManager.NotificationType.All,
+            setOf(childInstanceKey),
+            parentInstanceKey,
+        ).blockingSubscribe()
+
+        getTodayInstanceDatas(now).let {
+            assertEquals(1, it.size)
+
+            assertEquals(parentInstanceKey, it.single().instanceKey)
+            assertEquals(childInstanceKey, it.single().allChildren.single().instanceKey)
+        }
+
+        assertEquals(1, domainFactory.getTaskForce(childTaskKey).intervalInfo.getCurrentScheduleIntervals(now).size)
+
+        now += 1.hours
+
+        domainUpdater(now).updateChildTask(
+            DomainListenerManager.NotificationType.All,
+            childTaskKey,
+            EditDelegate.CreateParameters("child task"),
+            parentTaskKey,
+            null,
+        ).blockingSubscribe()
+
+        getTodayInstanceDatas(now).let {
+            assertEquals(1, it.size)
+
+            assertEquals(parentInstanceKey, it.single().instanceKey)
+            assertEquals(childInstanceKey, it.single().allChildren.single().instanceKey)
+        }
+    }
+
+    // todo hierarchy add test for editing parent
+    // todo hierarchy add test for SETTING parent initially (remember to check if both tasks are single schedule)
 }

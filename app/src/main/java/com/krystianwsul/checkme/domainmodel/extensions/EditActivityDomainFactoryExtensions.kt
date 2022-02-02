@@ -425,14 +425,13 @@ fun DomainUpdater.updateChildTask(
                 if (allReminders) endAllCurrentTaskHierarchies(now)
 
                 parentTask.addChild(this, now)
-            }
 
-            if (allReminders) {
-                endAllCurrentSchedules(now)
-                endAllCurrentNoScheduleOrParents(now)
+                if (allReminders) {
+                    endAllCurrentSchedules(now)
+                    endAllCurrentNoScheduleOrParents(now)
+                }
             }
         }
-
     }
 
     task.setName(createParameters.name, createParameters.note)

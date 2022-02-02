@@ -424,11 +424,7 @@ sealed class Task(
         return taskHierarchyChildTasks + instanceChildTasks
     }
 
-    fun getChildTaskHierarchies(
-        // todo hierarchy getChildTasks
-        exactTimeStamp: ExactTimeStamp,
-        currentByHierarchy: Boolean = false,
-    ): List<TaskHierarchy> {
+    fun getChildTaskHierarchies(exactTimeStamp: ExactTimeStamp, currentByHierarchy: Boolean = false): List<TaskHierarchy> {
         val taskHierarchies = childHierarchyIntervals.filter {
             val currentCheckExactTimeStamp = if (currentByHierarchy) {
                 it.taskHierarchy

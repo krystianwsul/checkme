@@ -38,7 +38,6 @@ fun DomainFactory.getMainTaskData(now: ExactTimeStamp.Local = ExactTimeStamp.Loc
 
     DomainThreadChecker.instance.requireDomainThread()
 
-    // todo hierarchy getChildTasks
     return MainTaskViewModel.Data(TaskListFragment.TaskData(getMainData(now), null, true, null))
 }
 

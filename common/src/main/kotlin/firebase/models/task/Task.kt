@@ -415,6 +415,7 @@ sealed class Task(
         val taskHierarchyChildTasks =
             getChildTaskHierarchies(exactTimeStamp, true).map { it.childTask }.toSet()
 
+        // todo hierarchy this should get cached, like above
         val instanceChildTasks = parent.getAllExistingInstances()
             .filter { it.parentInstance?.task == this }
             .map { it.task }

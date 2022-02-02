@@ -301,7 +301,6 @@ private class AddChildToParentUndoData(
 }
 
 fun addChildToParent(
-    // todo hierarchy remove return type
     childTask: RootTask,
     parentTask: RootTask,
     now: ExactTimeStamp.Local,

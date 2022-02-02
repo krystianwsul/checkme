@@ -535,7 +535,7 @@ class Instance private constructor(
     override fun toString() =
         "${super.toString()} name: $name, schedule time: $scheduleDateTime, instance time: $instanceDateTime, done: $done"
 
-    fun hide() { // todo hierarchy
+    fun hide() {
         check(!data.hidden)
 
         createInstanceRecord().instanceRecord.hidden = true

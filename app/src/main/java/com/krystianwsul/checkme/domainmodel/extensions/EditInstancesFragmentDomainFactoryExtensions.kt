@@ -170,23 +170,13 @@ fun DomainUpdater.setInstancesParent(
 
     val originalProjects = instances.map { it.task.project }
 
-    //val parentTask = getTaskForce(parentInstanceKey.taskKey)
-
-    //val parentTaskHasOtherInstances = parentTask.hasOtherVisibleInstances(now, parentInstanceKey)
-
     val undoDatas = trackRootTaskIds {
         instances.map {
-            // todo hierarchy later
-            //if (parentTaskHasOtherInstances || it.task.hasOtherVisibleInstances(now, it.instanceKey)) {
             val undoData = SetInstanceParentUndoData(it.instanceKey, it.parentState)
 
             it.setParentState(parentInstanceKey)
 
             undoData
-            //} else {
-            // this is very rare, so I'll just hope for the best with casting
-            //  addChildToParent(it.task as RootTask, parentTask as RootTask, now)
-            //}
         }
     }
 

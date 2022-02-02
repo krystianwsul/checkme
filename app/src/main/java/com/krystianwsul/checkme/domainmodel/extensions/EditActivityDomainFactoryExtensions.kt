@@ -784,10 +784,8 @@ private fun DomainFactory.joinJoinables(
         .instanceKey
 
     joinableMap.forEach { (joinable, task) ->
-        fun addChildToParent(instance: Instance? = null) = addChildToParent(task, newParentTask, now, instance)
-
         when (joinable) {
-            is EditParameters.Join.Joinable.Task -> addChildToParent()
+            is EditParameters.Join.Joinable.Task -> addChildToParent(task, newParentTask, now)
             is EditParameters.Join.Joinable.Instance -> {
                 val migratedInstanceScheduleKey =
                     migrateInstanceScheduleKey(task, joinable.instanceKey.instanceScheduleKey, now)

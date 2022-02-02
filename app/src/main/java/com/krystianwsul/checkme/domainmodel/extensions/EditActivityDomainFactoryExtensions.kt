@@ -143,15 +143,16 @@ private fun DomainFactory.getCreateTaskDataSlow(
         is EditViewModel.CurrentParentSource.Set -> currentParentSource.parentKey
         is EditViewModel.CurrentParentSource.FromTask -> {
             val task = getTaskForce(currentParentSource.taskKey)
+            val parentTask = task.getParentTask(now)
 
-            if (task.isTopLevelTask(now)) {
+            if (parentTask == null) {
                 when (val projectKey = task.project.projectKey) {
                     is ProjectKey.Private -> null
                     is ProjectKey.Shared -> EditViewModel.ParentKey.Project(projectKey)
                     else -> throw UnsupportedOperationException()
                 }
             } else {
-                task.getParentTask(now)?.let { EditViewModel.ParentKey.Task(it.taskKey) }
+                EditViewModel.ParentKey.Task(parentTask.taskKey)
             }
         }
         is EditViewModel.CurrentParentSource.FromTasks -> {

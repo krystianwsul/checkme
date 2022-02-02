@@ -3,7 +3,10 @@ package com.krystianwsul.checkme.domainmodel.extensions
 import androidx.annotation.CheckResult
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
-import com.krystianwsul.checkme.domainmodel.*
+import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.DomainListenerManager
+import com.krystianwsul.checkme.domainmodel.ScheduleText
+import com.krystianwsul.checkme.domainmodel.UserScope
 import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
 import com.krystianwsul.checkme.domainmodel.update.SingleDomainUpdate
 import com.krystianwsul.checkme.gui.edit.EditParameters
@@ -15,7 +18,8 @@ import com.krystianwsul.common.domain.ScheduleGroup
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.MyCustomTime
 import com.krystianwsul.common.firebase.json.tasks.TaskJson
-import com.krystianwsul.common.firebase.models.*
+import com.krystianwsul.common.firebase.models.ImageState
+import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.interval.ScheduleInterval
 import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.project.SharedProject
@@ -102,7 +106,6 @@ private fun DomainFactory.getCreateTaskDataSlow(
     val taskData = (startParameters as? EditViewModel.StartParameters.Task)?.let {
         val task = getTaskForce(it.taskKey)
 
-        val parentKey: EditViewModel.ParentKey?
         var scheduleDataWrappers: List<EditViewModel.ScheduleDataWrapper>? = null
         var assignedTo: Set<UserKey> = setOf()
 
@@ -111,26 +114,16 @@ private fun DomainFactory.getCreateTaskDataSlow(
 
             customTimes += schedules.mapNotNull { it.schedule.customTimeKey }.map { it to getCustomTime(it) }
 
-            parentKey = task.project
-                .projectKey
-                .let {
-                    (it as? ProjectKey.Shared)?.let { EditViewModel.ParentKey.Project(it) }
-                }
-
             if (schedules.isNotEmpty()) {
                 getScheduleDataWrappersAndAssignedTo(schedules).let {
                     scheduleDataWrappers = it.first
                     assignedTo = it.second
                 }
             }
-        } else {
-            val parentTask = task.getParentTask(now)!!
-            parentKey = EditViewModel.ParentKey.Task(parentTask.taskKey)
         }
 
         EditViewModel.TaskData(
             task.name,
-            parentKey,
             scheduleDataWrappers,
             task.note,
             task.getImage(deviceDbInfo),

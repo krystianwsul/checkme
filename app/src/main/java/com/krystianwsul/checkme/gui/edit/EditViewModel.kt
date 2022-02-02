@@ -420,7 +420,6 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
 
     data class TaskData(
         val name: String,
-        val parentKey: ParentKey?,
         val scheduleDataWrappers: List<ScheduleDataWrapper>?,
         val note: String?,
         val imageState: ImageState?,

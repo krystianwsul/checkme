@@ -49,10 +49,9 @@ fun DomainFactory.getShowInstanceData(
         displayText += "\ncustom time: " + instanceKey.instanceScheduleKey.scheduleTimePair.customTimeKey
         displayText += "\nnormal time: " + instanceKey.instanceScheduleKey.scheduleTimePair.hourMinute
         displayText += "\nexists? " + instance.exists()
-        displayText += "\nisVisible? " + instance.isVisibleDebug(
-            now,
-            Instance.VisibilityOptions(hack24 = true, assumeRoot = true)
-        ).let { "${it.first}, ${it.second}" }
+        displayText += "\nisVisible? " + instance.isVisibleDebug(now, Instance.VisibilityOptions(hack24 = true))
+            .let { "${it.first}, ${it.second}" }
+        displayText += "\nparent state: " + instance.parentState.javaClass.simpleName
     }
 
     return ShowInstanceViewModel.Data(

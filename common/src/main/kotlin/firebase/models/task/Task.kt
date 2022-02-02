@@ -231,11 +231,13 @@ sealed class Task(
     }
 
     /**
-     * todo: if performance becomes an issue, I could try adding a wrapper that informs me whether or not this is being
-     * called with "now". Or, pass in now as a separate param, and compare them.  Either way, create a separate cache for
-     * that case.
+     * todo: if performance becomes an issue for the Schedule case, I could try adding a wrapper that informs me whether or
+     * not this is being called with "now". Or, pass in now as a separate param, and compare them.  Either way, create a
+     * separate cache for that specific param value.
      *
      * For the other values, consider a map-based cache.
+     *
+     * If it's just stupidly re-entrant, I could also consider using a locker.
      */
     fun getParentTask(exactTimeStamp: ExactTimeStamp): Task? {
         requireNotDeletedOffset(exactTimeStamp)

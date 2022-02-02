@@ -25,7 +25,7 @@ fun DomainFactory.getMainNoteData(now: ExactTimeStamp.Local = ExactTimeStamp.Loc
 
     return MainNoteViewModel.Data(
         TaskListFragment.TaskData(
-            getMainData(now) { it.intervalInfo.isUnscheduled() },
+            getMainData(now) { it.intervalInfo.isUnscheduled() }, // todo hierarchy getChildTasks
             null,
             true,
             null,
@@ -38,6 +38,7 @@ fun DomainFactory.getMainTaskData(now: ExactTimeStamp.Local = ExactTimeStamp.Loc
 
     DomainThreadChecker.instance.requireDomainThread()
 
+    // todo hierarchy getChildTasks
     return MainTaskViewModel.Data(TaskListFragment.TaskData(getMainData(now), null, true, null))
 }
 

@@ -629,7 +629,8 @@ sealed class Task(
                 scheduleTextFactory.getScheduleText(it, customTimeProvider)
             }
         } else {
-            check(currentScheduleIntervals.isEmpty())
+            // todo hierarchy later
+            // check(currentScheduleIntervals.isEmpty())
 
             parentTask.name.takeIf { showParent }
         }

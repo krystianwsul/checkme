@@ -22,10 +22,8 @@ fun DomainFactory.getShowTaskData(requestTaskKey: TaskKey): ShowTaskViewModel.Da
     val task = getTaskForce(taskKey)
     val parentHierarchyExactTimeStamp = task.getHierarchyExactTimeStamp(now)
 
-    val childTaskDatas = task.getChildTaskHierarchies(parentHierarchyExactTimeStamp, true)
-        .map { taskHierarchy ->
-            val childTask = taskHierarchy.childTask
-
+    val childTaskDatas = task.getChildTasks(parentHierarchyExactTimeStamp)
+        .map { childTask ->
             val childHierarchyExactTimeStamp = childTask.getHierarchyExactTimeStamp(parentHierarchyExactTimeStamp)
 
             TaskListFragment.ChildTaskData(

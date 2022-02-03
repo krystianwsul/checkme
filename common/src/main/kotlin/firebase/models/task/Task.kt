@@ -456,6 +456,9 @@ sealed class Task(
         val taskHierarchyChildTasks =
             getChildTaskHierarchies(exactTimeStamp, true).map { it.childTask }.toSet()
 
+        // todo hierarchy this is *not* performant.  But, check how badly it affects startup.  Use proto data
+
+        // hierarchy hack
         val instanceChildTasks = parent.getAllExistingInstances()
             .filter { it.parentInstance?.task == this }
             .map { it.task }

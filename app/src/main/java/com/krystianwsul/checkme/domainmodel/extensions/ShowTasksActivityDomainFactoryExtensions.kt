@@ -25,7 +25,7 @@ fun DomainFactory.getShowTasksData(parameters: ShowTasksActivity.Parameters): Sh
     fun Task.toChildTaskData(hierarchyExactTimeStamp: ExactTimeStamp): TaskListFragment.ChildTaskData {
         return TaskListFragment.ChildTaskData(
             name,
-            getScheduleText(ScheduleText, hierarchyExactTimeStamp),
+            getScheduleText(ScheduleText),
             getTaskListChildTaskDatas(
                 this,
                 now,

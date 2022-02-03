@@ -650,19 +650,11 @@ sealed class Task(
             )
     }
 
-    fun getScheduleText(
-        scheduleTextFactory: ScheduleTextFactory,
-        exactTimeStamp: ExactTimeStamp, // todo hierarchy now
-        showParent: Boolean = false,
-    ): String? {
-        requireCurrentOffset(exactTimeStamp)
-
-        val currentScheduleIntervals = intervalInfo.getCurrentScheduleIntervals(exactTimeStamp)
+    fun getScheduleText(scheduleTextFactory: ScheduleTextFactory, showParent: Boolean = false): String? {
+        val currentScheduleIntervals = intervalInfo.currentScheduleIntervals
         val parentTask = getParentTask()
 
         return if (parentTask == null) {
-            currentScheduleIntervals.forEach { it.requireCurrentOffset(exactTimeStamp) }
-
             ScheduleGroup.getGroups(currentScheduleIntervals.map { it.schedule }).joinToString(", ") {
                 scheduleTextFactory.getScheduleText(it, customTimeProvider)
             }

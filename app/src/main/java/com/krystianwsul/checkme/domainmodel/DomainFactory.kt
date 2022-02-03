@@ -535,7 +535,7 @@ class DomainFactory(
 
                 TaskListFragment.ChildTaskData(
                     childTask.name,
-                    childTask.getScheduleText(ScheduleText, childHierarchyExactTimeStamp),
+                    childTask.getScheduleText(ScheduleText),
                     getTaskListChildTaskDatas(
                         childTask,
                         now,

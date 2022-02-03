@@ -28,7 +28,7 @@ fun DomainFactory.getShowTaskData(requestTaskKey: TaskKey): ShowTaskViewModel.Da
 
             TaskListFragment.ChildTaskData(
                 childTask.name,
-                childTask.getScheduleText(ScheduleText, childHierarchyExactTimeStamp),
+                childTask.getScheduleText(ScheduleText),
                 getTaskListChildTaskDatas(childTask, now, childHierarchyExactTimeStamp),
                 childTask.note,
                 childTask.taskKey,

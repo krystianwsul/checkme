@@ -782,12 +782,11 @@ private fun Task.toParentEntryData(
     now: ExactTimeStamp.Local,
     excludedTaskKeys: Set<TaskKey>,
     parentInstanceKey: InstanceKey?,
-    scheduleTextExactTimeStamp: ExactTimeStamp = now,
 ) = EditViewModel.ParentEntryData.Task(
     name,
     domainFactory.getTaskListChildTaskDatas(now, this, excludedTaskKeys, parentInstanceKey),
     taskKey,
-    getScheduleText(ScheduleText, scheduleTextExactTimeStamp),
+    getScheduleText(ScheduleText),
     note,
     EditViewModel.SortKey.TaskSortKey(startExactTimeStamp),
     project.projectKey,
@@ -809,7 +808,6 @@ private fun DomainFactory.getTaskListChildTaskDatas(
             now,
             excludedTaskKeys,
             parentInstanceKey,
-            it.getHierarchyExactTimeStamp(now),
         )
     }
     .toList()

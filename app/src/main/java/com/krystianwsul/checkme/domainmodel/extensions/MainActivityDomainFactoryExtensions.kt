@@ -51,7 +51,7 @@ private fun DomainFactory.getMainData(
         .map { (task, hierarchyExactTimeStamp) ->
             TaskListFragment.ChildTaskData(
                 task.name,
-                task.getScheduleText(ScheduleText, hierarchyExactTimeStamp),
+                task.getScheduleText(ScheduleText),
                 getTaskListChildTaskDatas(
                     task,
                     now,

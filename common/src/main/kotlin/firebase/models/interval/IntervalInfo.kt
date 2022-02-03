@@ -29,6 +29,16 @@ class IntervalInfo(val task: Task, val intervals: List<Interval>) {
         }
     }
 
+    val currentScheduleIntervals by lazy {
+        intervals.last().let { interval ->
+            interval.type
+                .let { it as? Type.Schedule }
+                ?.getScheduleIntervals(interval)
+                .orEmpty()
+                .filter { it.schedule.notDeleted }
+        }
+    }
+
     fun getCurrentScheduleIntervals(exactTimeStamp: ExactTimeStamp): List<ScheduleInterval> {
         task.requireCurrentOffset(exactTimeStamp)
 

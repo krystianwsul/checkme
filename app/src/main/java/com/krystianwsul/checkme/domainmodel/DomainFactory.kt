@@ -450,7 +450,7 @@ class DomainFactory(
             doneInstanceDescriptors.toDoneSingleBridges(),
             instance.ordinal,
             instance.task.getImage(deviceDbInfo),
-            instance.isAssignedToMe(now, myUserFactory.user),
+            instance.isAssignedToMe(myUserFactory.user),
             instance.getProject().projectKey as? ProjectKey.Shared,
             instance.parentInstance?.instanceKey,
         )
@@ -539,8 +539,8 @@ class DomainFactory(
                 childTask.isVisible(now),
                 childTask.canMigrateDescription(now),
                 childTask.ordinal,
-                childTask.getProjectInfo(now, includeProjectInfo),
-                childTask.isAssignedToMe(now, myUserFactory.user),
+                childTask.getProjectInfo(),
+                childTask.isAssignedToMe(myUserFactory.user),
             )
             }
     }

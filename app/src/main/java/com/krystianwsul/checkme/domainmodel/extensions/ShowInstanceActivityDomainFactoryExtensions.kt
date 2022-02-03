@@ -149,7 +149,7 @@ private fun DomainFactory.getGroupListData(
                 doneChildInstanceDescriptors.toDoneSingleBridges(),
                 childInstance.ordinal,
                 childTask.getImage(deviceDbInfo),
-                childInstance.isAssignedToMe(now, myUserFactory.user),
+                childInstance.isAssignedToMe(myUserFactory.user),
                 childInstance.getProject().projectKey as? ProjectKey.Shared,
                 childInstance.parentInstance?.instanceKey,
             )

@@ -665,8 +665,8 @@ sealed class Task(
 
     final override fun toString() = super.toString() + ", name: $name, taskKey: $taskKey"
 
-    final override fun getAssignedTo(now: ExactTimeStamp.Local): List<ProjectUser> {
-        val currentScheduleIntervals = intervalInfo.getCurrentScheduleIntervals(getHierarchyExactTimeStamp(now))
+    override fun getAssignedTo(): List<ProjectUser> {
+        val currentScheduleIntervals = intervalInfo.currentScheduleIntervals
 
         return if (currentScheduleIntervals.isEmpty()) {
             listOf()

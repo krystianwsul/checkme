@@ -49,7 +49,7 @@ fun DomainFactory.getShowNotificationGroupData(instanceKeys: Set<InstanceKey>): 
             doneChildInstanceDescriptors.toDoneSingleBridges(),
             instance.ordinal,
             task.getImage(deviceDbInfo),
-            instance.isAssignedToMe(now, myUserFactory.user),
+            instance.isAssignedToMe(myUserFactory.user),
             instance.getProject().projectKey as? ProjectKey.Shared,
             instance.parentInstance?.instanceKey,
         )

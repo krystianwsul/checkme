@@ -34,8 +34,8 @@ fun DomainFactory.getShowTasksData(parameters: ShowTasksActivity.Parameters): Sh
             isVisible(now),
             canMigrateDescription(now),
             ordinal,
-            getProjectInfo(now, parameters.showProjects),
-            isAssignedToMe(now, myUserFactory.user),
+            getProjectInfo(parameters.showProjects),
+            isAssignedToMe(myUserFactory.user),
         )
     }
 

@@ -37,7 +37,7 @@ fun Sequence<Instance>.filterSearchCriteria(
     fun childHierarchyMatches(instance: Instance): Boolean {
         InterruptionChecker.throwIfInterrupted()
 
-        if (!searchCriteria.showAssignedToOthers && !instance.isAssignedToMe(now, myUser)) return false
+        if (!searchCriteria.showAssignedToOthers && !instance.isAssignedToMe(myUser)) return false
 
         if (!searchCriteria.showDone && instance.done != null) return false
 
@@ -58,6 +58,7 @@ enum class FilterResult {
     DOESNT_MATCH, CHILD_MATCHES, MATCHES
 }
 
+// used in RelevanceChecker
 fun checkInconsistentRootTaskIds(rootTasks: Collection<RootTask>, projects: Collection<Project<*>>) {
     val rootTaskProjectKeys = rootTasks.associate { it.taskKey to it.project.projectKey }
 

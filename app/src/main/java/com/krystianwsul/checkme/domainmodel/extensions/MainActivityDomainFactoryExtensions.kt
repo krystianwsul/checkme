@@ -57,8 +57,8 @@ private fun DomainFactory.getMainData(now: ExactTimeStamp.Local, filter: (Task) 
                 it.isVisible(now),
                 it.canMigrateDescription(now),
                 it.ordinal,
-                it.getProjectInfo(now),
-                it.isAssignedToMe(now, myUserFactory.user),
+                it.getProjectInfo(),
+                it.isAssignedToMe(myUserFactory.user),
             )
         }
         .sortedDescending()
@@ -158,7 +158,7 @@ fun DomainFactory.getGroupListData(
             doneChildInstanceDescriptors.toDoneSingleBridges(),
             instance.ordinal,
             task.getImage(deviceDbInfo),
-            instance.isAssignedToMe(now, myUserFactory.user),
+            instance.isAssignedToMe(myUserFactory.user),
             instance.getProject().projectKey as? ProjectKey.Shared,
             instance.parentInstance?.instanceKey,
         )

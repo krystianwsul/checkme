@@ -430,7 +430,11 @@ sealed class Task(
     fun getChildTasks(): Set<Task> {
         val taskHierarchyChildTasks = getChildTaskHierarchies().map { it.childTask }.toSet()
 
-        // todo hierarchy this is *not* performant.  But, check how badly it affects startup.  Use proto data
+        /**
+         * todo if performance becomes an issue here, then I can try caching the part below.  I believe that I'd need to
+         * reset the cache not only when tasks change, but also from within the instance when its parentInstance changes,
+         * on both its old and new parentInstance.task
+         */
 
         // hierarchy hack
         val instanceChildTasks = parent.getAllExistingInstances()

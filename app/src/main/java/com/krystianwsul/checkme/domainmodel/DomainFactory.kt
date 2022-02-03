@@ -346,7 +346,7 @@ class DomainFactory(
     ): Pair<TaskUndoData, DomainUpdater.Params> {
         check(taskKeys.isNotEmpty())
 
-        fun Task.getAllChildren(): List<Task> = listOf(this) + getChildTasks(now).map { it.getAllChildren() }.flatten()
+        fun Task.getAllChildren(): List<Task> = listOf(this) + getChildTasks().map { it.getAllChildren() }.flatten()
 
         val tasks = taskKeys.map { getTaskForce(it).getAllChildren() }
             .flatten()
@@ -525,33 +525,23 @@ class DomainFactory(
     fun getTaskListChildTaskDatas(
         parentTask: Task,
         now: ExactTimeStamp.Local,
-        parentHierarchyExactTimeStamp: ExactTimeStamp,
         includeProjectInfo: Boolean = true,
     ): List<TaskListFragment.ChildTaskData> {
-        return parentTask.getChildTasks(parentHierarchyExactTimeStamp, true)
-            .map { childTask ->
-                val childHierarchyExactTimeStamp =
-                    childTask.getHierarchyExactTimeStamp(parentHierarchyExactTimeStamp)
-
-                TaskListFragment.ChildTaskData(
-                    childTask.name,
-                    childTask.getScheduleText(ScheduleText),
-                    getTaskListChildTaskDatas(
-                        childTask,
-                        now,
-                        childHierarchyExactTimeStamp,
-                        includeProjectInfo,
-                    ),
-                    childTask.note,
-                    childTask.taskKey,
-                    childTask.getImage(deviceDbInfo),
-                    childTask.notDeleted,
-                    childTask.isVisible(now),
-                    childTask.canMigrateDescription(now),
-                    childTask.ordinal,
-                    childTask.getProjectInfo(now, includeProjectInfo),
-                    childTask.isAssignedToMe(now, myUserFactory.user),
-                )
+        return parentTask.getChildTasks().map { childTask ->
+            TaskListFragment.ChildTaskData(
+                childTask.name,
+                childTask.getScheduleText(ScheduleText),
+                getTaskListChildTaskDatas(childTask, now, includeProjectInfo),
+                childTask.note,
+                childTask.taskKey,
+                childTask.getImage(deviceDbInfo),
+                childTask.notDeleted,
+                childTask.isVisible(now),
+                childTask.canMigrateDescription(now),
+                childTask.ordinal,
+                childTask.getProjectInfo(now, includeProjectInfo),
+                childTask.isAssignedToMe(now, myUserFactory.user),
+            )
             }
     }
 
@@ -733,7 +723,7 @@ class DomainFactory(
                     },
             )
 
-            val childTaskHierarchies = startTask.getChildTaskHierarchies(now)
+            val childTaskHierarchies = startTask.getChildTaskHierarchies()
             val parentTaskHierarchies = startTask.parentTaskHierarchies
 
             val taskHierarchyMap = (childTaskHierarchies + parentTaskHierarchies).associateBy { it.taskHierarchyKey }

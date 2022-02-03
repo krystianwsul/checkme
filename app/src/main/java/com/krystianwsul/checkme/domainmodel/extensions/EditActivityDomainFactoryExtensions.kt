@@ -799,7 +799,7 @@ private fun DomainFactory.getTaskListChildTaskDatas(
     parentTask: Task,
     excludedTaskKeys: Set<TaskKey>,
     parentInstanceKey: InstanceKey?,
-): List<EditViewModel.ParentEntryData.Task> = parentTask.getChildTasks(now)
+): List<EditViewModel.ParentEntryData.Task> = parentTask.getChildTasks()
     .asSequence()
     .filter { it.showAsParent(now, excludedTaskKeys) }
     .map {
@@ -815,7 +815,7 @@ private fun DomainFactory.getTaskListChildTaskDatas(
 private fun DomainFactory.copyTask(now: ExactTimeStamp.Local, task: RootTask, copyTaskKey: TaskKey) {
     val copiedTask = getTaskForce(copyTaskKey)
 
-    copiedTask.getChildTasks(now).forEach {
+    copiedTask.getChildTasks().forEach {
         it.getImage(deviceDbInfo)?.let { check(it is ImageState.Remote) }
 
         createChildTask(

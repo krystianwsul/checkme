@@ -144,7 +144,7 @@ fun DomainUpdater.setInstancesParent(
     notificationType: DomainListenerManager.NotificationType,
     instanceKeys: Set<InstanceKey>,
     parentInstanceKey: InstanceKey,
-): Single<EditInstancesResult> = SingleDomainUpdate.create("setInstancesParent") { now ->
+): Single<EditInstancesResult> = SingleDomainUpdate.create("setInstancesParent") {
     check(instanceKeys.isNotEmpty())
 
     val instances = instanceKeys.map(this::getInstance)

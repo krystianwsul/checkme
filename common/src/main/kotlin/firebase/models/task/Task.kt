@@ -447,9 +447,8 @@ sealed class Task(
     fun getHierarchyExactTimeStamp(exactTimeStamp: ExactTimeStamp) =
         exactTimeStamp.coerceIn(startExactTimeStampOffset, endExactTimeStampOffset?.minusOne())
 
-    fun getChildTasks(exactTimeStamp: ExactTimeStamp, currentByHierarchy: Boolean = false): Set<Task> {
-        val taskHierarchyChildTasks =
-            getChildTaskHierarchies(exactTimeStamp, currentByHierarchy).map { it.childTask }.toSet()
+    fun getChildTasks(): Set<Task> {
+        val taskHierarchyChildTasks = getChildTaskHierarchies().map { it.childTask }.toSet()
 
         // todo hierarchy this is *not* performant.  But, check how badly it affects startup.  Use proto data
 
@@ -466,19 +465,9 @@ sealed class Task(
     todo hierarchy now check usages: does this boil down to now/hierarchy? if so, attempt to use just the most recent one.
     Or, reach into each possible child, and check if this is the parent.
      */
-    fun getChildTaskHierarchies(exactTimeStamp: ExactTimeStamp, currentByHierarchy: Boolean = false): List<TaskHierarchy> {
+    fun getChildTaskHierarchies(): List<TaskHierarchy> {
         val taskHierarchies = childHierarchyIntervals.filter {
-            val currentCheckExactTimeStamp = if (currentByHierarchy) {
-                it.taskHierarchy
-                    .childTask
-                    .getHierarchyExactTimeStamp(exactTimeStamp)
-            } else {
-                exactTimeStamp
-            }
-
-            it.currentOffset(currentCheckExactTimeStamp)
-                    && it.taskHierarchy.currentOffset(currentCheckExactTimeStamp)
-                    && it.taskHierarchy.childTask.currentOffset(currentCheckExactTimeStamp)
+            it.notDeletedOffset() && it.taskHierarchy.notDeleted && it.taskHierarchy.childTask.notDeleted
         }
             .map { it.taskHierarchy }
             .toMutableSet()
@@ -617,14 +606,8 @@ sealed class Task(
         }
     }
 
-    fun getScheduleTextMultiline(
-        scheduleTextFactory: ScheduleTextFactory,
-        exactTimeStamp: ExactTimeStamp,
-    ): String {
-        requireCurrentOffset(exactTimeStamp)
-
-        val currentScheduleIntervals = intervalInfo.getCurrentScheduleIntervals(exactTimeStamp)
-        currentScheduleIntervals.forEach { it.requireCurrentOffset(exactTimeStamp) }
+    fun getScheduleTextMultiline(scheduleTextFactory: ScheduleTextFactory): String {
+        val currentScheduleIntervals = intervalInfo.currentScheduleIntervals
 
         return ScheduleGroup.getGroups(currentScheduleIntervals.map { it.schedule }).joinToString("\n") {
             scheduleTextFactory.getScheduleText(it, customTimeProvider)

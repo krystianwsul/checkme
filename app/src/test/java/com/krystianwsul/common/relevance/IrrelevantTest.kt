@@ -407,13 +407,13 @@ class IrrelevantTest {
         val project = PrivateProject(projectRecord, mockk(), mockk(relaxed = true), existingInstanceChangeManager)
 
         val parentTask = project.projectTasks.single { it.isTopLevelTask() }
-        assertEquals(2, parentTask.getChildTaskHierarchies(now).size)
+        assertEquals(2, parentTask.getChildTaskHierarchies().size)
 
-        val child1Task = parentTask.getChildTaskHierarchies(now)
+        val child1Task = parentTask.getChildTaskHierarchies()
             .single { it.childTaskKey == child1TaskKey }
             .childTask
 
-        val child2Task = parentTask.getChildTaskHierarchies(now)
+        val child2Task = parentTask.getChildTaskHierarchies()
             .single { it.childTaskKey == child2TaskKey }
             .childTask
 
@@ -442,7 +442,7 @@ class IrrelevantTest {
 
         now = ExactTimeStamp.Local(day1, hour4)
 
-        assertTrue(parentTask.getChildTaskHierarchies(now).isEmpty())
+        assertTrue(parentTask.getChildTaskHierarchies().isEmpty())
         assertTrue(
             parentInstance.getChildInstances().single {
                 it.isVisible(now, Instance.VisibilityOptions(assumeChildOfVisibleParent = true))
@@ -549,13 +549,13 @@ class IrrelevantTest {
         val project = PrivateProject(projectRecord, mockk(), mockk(relaxed = true), existingInstanceChangeManager)
 
         val parentTask = project.projectTasks.single { it.isTopLevelTask() }
-        assertEquals(2, parentTask.getChildTaskHierarchies(now).size)
+        assertEquals(2, parentTask.getChildTaskHierarchies().size)
 
-        val child1Task = parentTask.getChildTaskHierarchies(now)
+        val child1Task = parentTask.getChildTaskHierarchies()
             .single { it.childTaskKey == child1TaskKey }
             .childTask
 
-        val child2Task = parentTask.getChildTaskHierarchies(now)
+        val child2Task = parentTask.getChildTaskHierarchies()
             .single { it.childTaskKey == child2TaskKey }
             .childTask
 
@@ -584,7 +584,7 @@ class IrrelevantTest {
 
         now = ExactTimeStamp.Local(day1, hour4)
 
-        assertTrue(parentTask.getChildTaskHierarchies(now).isEmpty())
+        assertTrue(parentTask.getChildTaskHierarchies().isEmpty())
         assertTrue(
             parentInstance.getChildInstances().single {
                 it.isVisible(now, Instance.VisibilityOptions(assumeChildOfVisibleParent = true))

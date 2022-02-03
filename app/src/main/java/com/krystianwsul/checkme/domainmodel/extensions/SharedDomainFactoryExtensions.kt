@@ -191,9 +191,9 @@ fun DomainFactory.getGroupListChildTaskDatas(
     parentTask: Task,
     now: ExactTimeStamp.Local,
     searchCriteria: SearchCriteria? = null,
-): List<GroupListDataWrapper.TaskData> = parentTask.getChildTasks(now)
+): List<GroupListDataWrapper.TaskData> = parentTask.getChildTasks()
     .asSequence()
-    .filterSearch(searchCriteria?.search, now)
+    .filterSearch(searchCriteria?.search)
     .map { (childTask, filterResult) ->
         val childQuery = if (filterResult == FilterResult.MATCHES) null else searchCriteria
 

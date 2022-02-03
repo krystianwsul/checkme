@@ -20,16 +20,13 @@ fun DomainFactory.getShowTaskData(requestTaskKey: TaskKey): ShowTaskViewModel.Da
     val now = ExactTimeStamp.Local.now
 
     val task = getTaskForce(taskKey)
-    val parentHierarchyExactTimeStamp = task.getHierarchyExactTimeStamp(now)
 
-    val childTaskDatas = task.getChildTasks(parentHierarchyExactTimeStamp, true)
+    val childTaskDatas = task.getChildTasks()
         .map { childTask ->
-            val childHierarchyExactTimeStamp = childTask.getHierarchyExactTimeStamp(parentHierarchyExactTimeStamp)
-
             TaskListFragment.ChildTaskData(
                 childTask.name,
                 childTask.getScheduleText(ScheduleText),
-                getTaskListChildTaskDatas(childTask, now, childHierarchyExactTimeStamp),
+                getTaskListChildTaskDatas(childTask, now),
                 childTask.note,
                 childTask.taskKey,
                 childTask.getImage(deviceDbInfo),
@@ -45,7 +42,7 @@ fun DomainFactory.getShowTaskData(requestTaskKey: TaskKey): ShowTaskViewModel.Da
 
     var collapseText = listOfNotNull(
         task.getParentTask()?.name,
-        task.getScheduleTextMultiline(ScheduleText, parentHierarchyExactTimeStamp).takeIf { it.isNotEmpty() }
+        task.getScheduleTextMultiline(ScheduleText).takeIf { it.isNotEmpty() }
     ).joinToString("\n\n")
 
     if (debugMode) {

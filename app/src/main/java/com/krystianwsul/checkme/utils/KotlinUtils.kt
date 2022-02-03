@@ -50,7 +50,6 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.plusAssign
 import java.io.*
 import java.util.*
-import kotlin.collections.ArrayList
 
 fun Set<DayOfWeek>.prettyPrint(): String {
     check(isNotEmpty())
@@ -86,7 +85,7 @@ fun View.addOneShotGlobalLayoutListener(action: () -> Unit) =
 
 fun View.onGlobalLayout() = Single.create<Unit> { emitter ->
     addOneShotGlobalLayoutListener { emitter.onSuccess(Unit) }
-}!!
+}
 
 fun getRanges(list: List<DayOfWeek>) = getRanges(list.sorted()) { x, y ->
     check(x.ordinal < y.ordinal)
@@ -154,21 +153,18 @@ fun Context.startDate(receiver: BroadcastReceiver) {
     registerReceiver(receiver, IntentFilter(Intent.ACTION_DATE_CHANGED))
 }
 
-fun <T> Observable<NullableWrapper<T>>.filterNotNull() =
-        filter { it.value != null }.map { it.value!! }!!
-
-fun <T> Single<NullableWrapper<T>>.filterNotNull() =
-        filter { it.value != null }.map { it.value!! }!!
+fun <T> Observable<NullableWrapper<T>>.filterNotNull() = filter { it.value != null }.map { it.value!! }
+fun <T> Single<NullableWrapper<T>>.filterNotNull() = filter { it.value != null }.map { it.value!! }
 
 private typealias TaskKeys = Pair<ExactTimeStamp, Set<String>>
 
 private fun DomainFactory.getTaskKeys(): TaskKeys = Pair(
-        ExactTimeStamp.Local.now,
-        getAllTasks().map { it.taskKey.taskId }.toSet()
+    ExactTimeStamp.Local.now,
+    getAllTasks().map { it.taskKey.taskId }.toSet()
 )
 
 private fun onComplete(
-        domainFactory: DomainFactory,
+    domainFactory: DomainFactory,
         caller: String,
         values: Any?,
         taskKeysBefore: TaskKeys?,
@@ -326,7 +322,7 @@ fun <T : Any> List<Single<T>>.zipSingle() = if (isEmpty()) {
             it as T
         }
     }
-}!!
+}
 
 inline fun <reified T, U> T.getPrivateField(name: String): U {
     return T::class.java.getDeclaredField(name).let {
@@ -350,28 +346,25 @@ inline fun <reified T, U> T.callPrivateFunction(name: String, vararg args: Any):
             }
 }
 
-fun <T> Single<T>.tryGetCurrentValue(): T? {
+fun <T : Any> Single<T>.tryGetCurrentValue(): T? {
     var value: T? = null
     subscribe { t -> value = t }.dispose()
     return value
 }
 
-fun <T> Single<T>.getCurrentValue() = tryGetCurrentValue()!!
+fun <T : Any> Single<T>.getCurrentValue() = tryGetCurrentValue()!!
 
-fun <T : Any, U : Any> Observable<T>.mapNotNull(mapper: (T) -> U?) =
-        map { NullableWrapper(mapper(it)) }.filterNotNull()
+fun <T : Any, U : Any> Observable<T>.mapNotNull(mapper: (T) -> U?) = map { NullableWrapper(mapper(it)) }.filterNotNull()
+fun <T : Any, U : Any> Single<T>.mapNotNull(mapper: (T) -> U?) = map { NullableWrapper(mapper(it)) }.filterNotNull()
 
-fun <T : Any, U : Any> Single<T>.mapNotNull(mapper: (T) -> U?) =
-        map { NullableWrapper(mapper(it)) }.filterNotNull()
+fun <T : Any> Observable<T>.publishImmediate(compositeDisposable: CompositeDisposable) =
+    publish().apply { compositeDisposable += connect() }
 
-fun <T> Observable<T>.publishImmediate(compositeDisposable: CompositeDisposable) =
-        publish().apply { compositeDisposable += connect() }!!
+fun <T : Any> Observable<T>.replayImmediate(compositeDisposable: CompositeDisposable) =
+    replay().apply { compositeDisposable += connect() }
 
-fun <T> Observable<T>.replayImmediate(compositeDisposable: CompositeDisposable) =
-        replay().apply { compositeDisposable += connect() }!!
-
-fun <T> Single<T>.cacheImmediate(compositeDisposable: CompositeDisposable) =
-        cache().apply { compositeDisposable += subscribe() }!!
+fun <T : Any> Single<T>.cacheImmediate(compositeDisposable: CompositeDisposable) =
+    cache().apply { compositeDisposable += subscribe() }
 
 @Suppress("unused")
 fun Any?.ignore() = Unit

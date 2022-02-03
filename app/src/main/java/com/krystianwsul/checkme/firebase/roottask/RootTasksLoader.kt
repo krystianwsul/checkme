@@ -36,7 +36,7 @@ class RootTasksLoader(
             .addTo(domainDisposable)
     }
 
-    private fun <T> Observable<T>.replayImmediate() = replay().apply { domainDisposable += connect() }!!
+    private fun <T : Any> Observable<T>.replayImmediate() = replay().apply { domainDisposable += connect() }
 
     private data class TaskData(val databaseRx: DatabaseRx<Snapshot<RootTaskJson>>, var initialRecord: RootTaskRecord?)
 

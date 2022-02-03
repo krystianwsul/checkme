@@ -10,7 +10,7 @@ import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
 
-fun Sequence<Task>.filterSearch(search: SearchCriteria.Search?, now: ExactTimeStamp.Local) = if (search?.hasSearch != true) {
+fun Sequence<Task>.filterSearch(search: SearchCriteria.Search?) = if (search?.hasSearch != true) {
     map { it to FilterResult.MATCHES }
 } else {
     fun childHierarchyMatches(task: Task): FilterResult {
@@ -18,7 +18,7 @@ fun Sequence<Task>.filterSearch(search: SearchCriteria.Search?, now: ExactTimeSt
 
         if (task.matchesSearch(search)) return FilterResult.MATCHES
 
-        if (task.getChildTasks(now).any { childHierarchyMatches(it) != FilterResult.DOESNT_MATCH })
+        if (task.getChildTasks().any { childHierarchyMatches(it) != FilterResult.DOESNT_MATCH })
             return FilterResult.CHILD_MATCHES
 
         return FilterResult.DOESNT_MATCH

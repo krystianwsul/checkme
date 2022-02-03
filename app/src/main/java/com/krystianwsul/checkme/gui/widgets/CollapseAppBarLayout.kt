@@ -66,7 +66,7 @@ class CollapseAppBarLayout : AppBarLayout {
             } else {
                 Preferences.filterParamsObservable.map { FilterCriteria.Full(filterParams = it) }
             }
-        }!!
+        }
     }
 
     private val attachedToWindowDisposable = CompositeDisposable()

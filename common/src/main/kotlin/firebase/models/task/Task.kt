@@ -159,7 +159,7 @@ sealed class Task(
         // in general, we can add a subtask to any task that is either unscheduled, or has not done instances.  Checking
         // for that will be difficult, though.
 
-        val topLevelTask = getTopLevelTask(now)
+        val topLevelTask = getTopLevelTask()
 
         // if it's in the unscheduled tasks list, we can add a subtask
         if (topLevelTask.intervalInfo.isUnscheduled()) return true
@@ -176,7 +176,7 @@ sealed class Task(
         // in general, we can add a subtask to any task that is either unscheduled, or has not done instances.  Checking
         // for that will be difficult, though.
 
-        val topLevelTask = getTopLevelTask(now)
+        val topLevelTask = getTopLevelTask()
 
         // if it's in the unscheduled tasks list, we can add a subtask
         if (topLevelTask.intervalInfo.isUnscheduled()) return true to "is unscheduled"
@@ -187,9 +187,7 @@ sealed class Task(
 
     fun canMigrateDescription(now: ExactTimeStamp.Local) = !note.isNullOrEmpty() && isVisible(now)
 
-    // todo hierarchy now
-    fun getTopLevelTask(exactTimeStamp: ExactTimeStamp): Task =
-        getParentTask()?.getTopLevelTask(exactTimeStamp) ?: this
+    fun getTopLevelTask(): Task = getParentTask()?.getTopLevelTask() ?: this
 
     fun isTopLevelTask() = getParentTask() == null
 

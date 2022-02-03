@@ -88,7 +88,8 @@ private fun getScheduleDataWrappersAndAssignedTo(
     return scheduleDataWrappers to assignedTo
 }
 
-private fun Task.topLevelTaskIsSingleSchedule(now: ExactTimeStamp.Local) = getTopLevelTask(now).intervalInfo
+// todo I think this should be getting the *current* schedule intervals
+private fun Task.topLevelTaskIsSingleSchedule() = getTopLevelTask().intervalInfo
     .scheduleIntervals
     .singleOrNull()
     ?.schedule is SingleSchedule
@@ -179,7 +180,7 @@ private fun DomainFactory.getCreateTaskDataSlow(
                 task.name,
                 EditViewModel.ParentKey.Task(task.taskKey),
                 task.hasMultipleInstances(startParameters.parentInstanceKey, now),
-                task.getTopLevelTask(now).let {
+                task.getTopLevelTask().let {
                     val parent = it.project
                         .let { it as? SharedProject }
                         ?.toParent()
@@ -189,7 +190,7 @@ private fun DomainFactory.getCreateTaskDataSlow(
 
                     Triple(parent, scheduleDataWrappers, assignedTo)
                 },
-                task.topLevelTaskIsSingleSchedule(now),
+                task.topLevelTaskIsSingleSchedule(),
             )
         }
         is EditViewModel.ParentKey.Project -> {
@@ -350,7 +351,7 @@ fun DomainUpdater.updateScheduleTask(
         over the previous instance instead of creating a new one
          */
         val parentSingleSchedule = finalTask.getParentTask()
-            ?.getTopLevelTask(now)
+            ?.getTopLevelTask()
             ?.intervalInfo
             ?.getCurrentScheduleIntervals(now)
             ?.singleOrNull()
@@ -791,7 +792,7 @@ private fun Task.toParentEntryData(
     EditViewModel.SortKey.TaskSortKey(startExactTimeStamp),
     project.projectKey,
     hasMultipleInstances(parentInstanceKey, now),
-    topLevelTaskIsSingleSchedule(now),
+    topLevelTaskIsSingleSchedule(),
 )
 
 private fun DomainFactory.getTaskListChildTaskDatas(

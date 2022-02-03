@@ -41,8 +41,8 @@ fun DomainFactory.getShowTaskData(requestTaskKey: TaskKey): ShowTaskViewModel.Da
         .sorted()
 
     var collapseText = listOfNotNull(
-        task.getParentTask()?.name,
-        task.getScheduleTextMultiline(ScheduleText).takeIf { it.isNotEmpty() }
+        task.parentTask?.name,
+        task.getScheduleTextMultiline(ScheduleText).takeIf { it.isNotEmpty() },
     ).joinToString("\n\n")
 
     if (debugMode) {

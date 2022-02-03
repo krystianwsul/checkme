@@ -187,38 +187,61 @@ sealed class Task(
 
     fun canMigrateDescription(now: ExactTimeStamp.Local) = !note.isNullOrEmpty() && isVisible(now)
 
-    fun getTopLevelTask(): Task = getParentTask()?.getTopLevelTask() ?: this
+    fun getTopLevelTask(): Task = parentTask?.getTopLevelTask() ?: this
 
-    fun isTopLevelTask() = getParentTask() == null
+    fun isTopLevelTask() = parentTask == null
 
     fun getNestedTaskHierarchy(taskHierarchyId: TaskHierarchyId) = nestedParentTaskHierarchies.getValue(taskHierarchyId)
 
-    // todo hierarchy
-    fun getParentTaskData(): Pair<Task, SingleSchedule?>? {
-        val interval = intervalInfo.intervals.last()
+    private val parentTaskDataCache =
+        invalidatableCache<Pair<Task, SingleSchedule?>?>(clearableInvalidatableManager) { invalidatableCache ->
+            val intervalRemovable = intervalInfoCache.invalidatableManager.addInvalidatable(invalidatableCache)
 
-        return when (val type = interval.type) {
-            is Type.Child -> type.getHierarchyInterval(interval)
-                .taskHierarchy
-                .parentTask to null
-            is Type.Schedule -> {
-                // hierarchy hack
-                type.getScheduleIntervals(interval)
-                    .singleOrNull()
-                    ?.schedule
-                    ?.let { it as? SingleSchedule }
-                    ?.let { singleSchedule ->
-                        singleSchedule.getInstance(this)
-                            .parentInstance
-                            ?.task
-                            ?.let { it to singleSchedule }
+            val interval = intervalInfo.intervals.last()
+
+            when (val type = interval.type) {
+                is Type.Child -> type.getHierarchyInterval(interval)
+                    .taskHierarchy
+                    .let {
+                        val parentTaskRemovable = it.parentTaskCache
+                            .invalidatableManager
+                            .addInvalidatable(invalidatableCache)
+
+                        InvalidatableCache.ValueHolder(it.parentTask to null) {
+                            intervalRemovable.remove()
+                            parentTaskRemovable.remove()
+                        }
                     }
-            }
-            is Type.NoSchedule -> null
-        }
-    }
+                is Type.Schedule -> {
+                    // hierarchy hack
+                    type.getScheduleIntervals(interval)
+                        .singleOrNull()
+                        ?.schedule
+                        ?.let { it as? SingleSchedule }
+                        ?.let { singleSchedule ->
+                            val instance = singleSchedule.getInstance(this)
 
-    fun getParentTask() = getParentTaskData()?.first
+                            val parentInstanceRemovable = instance.parentInstanceCache
+                                .invalidatableManager
+                                .addInvalidatable(invalidatableCache)
+
+                            InvalidatableCache.ValueHolder(
+                                instance.parentInstance
+                                    ?.task
+                                    ?.let { it to singleSchedule }
+                            ) {
+                                intervalRemovable.remove()
+                                parentInstanceRemovable.remove()
+                            }
+                        }
+                        ?: InvalidatableCache.ValueHolder(null) { intervalRemovable.remove() }
+                }
+                is Type.NoSchedule -> InvalidatableCache.ValueHolder(null) { intervalRemovable.remove() }
+            }
+        }
+
+    val parentTaskData by parentTaskDataCache
+    val parentTask get() = parentTaskData?.first
 
     private fun getExistingInstances(
         startExactTimeStamp: ExactTimeStamp.Offset?,
@@ -413,7 +436,7 @@ sealed class Task(
         val instanceChildTasks = parent.getAllExistingInstances()
             .filter { it.parentInstance?.task == this }
             .map { it.task }
-            .filter { it.getParentTask() == this }
+            .filter { it.parentTask == this }
 
         return taskHierarchyChildTasks + instanceChildTasks
     }
@@ -588,7 +611,7 @@ sealed class Task(
 
     fun getScheduleText(scheduleTextFactory: ScheduleTextFactory, showParent: Boolean = false): String? {
         val currentScheduleIntervals = intervalInfo.currentScheduleIntervals
-        val parentTask = getParentTask()
+        val parentTask = parentTask
 
         return if (parentTask == null) {
             ScheduleGroup.getGroups(currentScheduleIntervals.map { it.schedule }).joinToString(", ") {

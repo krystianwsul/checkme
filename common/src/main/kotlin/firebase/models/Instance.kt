@@ -204,7 +204,7 @@ class Instance private constructor(
 
     private class EndedTaskHierarchyException(message: String) : Exception(message)
 
-    private val parentInstanceCache =
+    val parentInstanceCache =
         invalidatableCache<Instance?>(task.clearableInvalidatableManager) { invalidatableCache ->
             when (val parentState = data.parentState) {
                 ParentState.NoParent -> InvalidatableCache.ValueHolder(null) { }

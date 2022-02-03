@@ -37,7 +37,7 @@ sealed class TaskHierarchy(
 
     val id by lazy { taskHierarchyRecord.id }
 
-    private val parentTaskCache = invalidatableCache<Task>(clearableInvalidatableManager) { invalidatableCache ->
+    val parentTaskCache = invalidatableCache<Task>(clearableInvalidatableManager) { invalidatableCache ->
         try {
             val parentTask = parentTaskDelegate.getParentTask()
 

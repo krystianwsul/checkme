@@ -144,7 +144,7 @@ private fun DomainFactory.getCreateTaskDataSlow(
         is EditViewModel.CurrentParentSource.Set -> currentParentSource.parentKey
         is EditViewModel.CurrentParentSource.FromTask -> {
             val task = getTaskForce(currentParentSource.taskKey)
-            val parentTask = task.getParentTask()
+            val parentTask = task.parentTask
 
             if (parentTask == null) {
                 when (val projectKey = task.project.projectKey) {
@@ -350,7 +350,7 @@ fun DomainUpdater.updateScheduleTask(
         Not the prettiest way to do this, but if we're editing a child task to make it a top-level task, we try to carry
         over the previous instance instead of creating a new one
          */
-        val parentSingleSchedule = finalTask.getParentTask()
+        val parentSingleSchedule = finalTask.parentTask
             ?.getTopLevelTask()
             ?.intervalInfo
             ?.getCurrentScheduleIntervals(now)
@@ -412,7 +412,7 @@ fun DomainUpdater.updateChildTask(
         parentTask.requireNotDeleted()
 
         tailrec fun Task.hasAncestor(taskKey: TaskKey): Boolean {
-            val currParentTask = getParentTask() ?: return false
+            val currParentTask = this.parentTask ?: return false
 
             if (currParentTask.taskKey == taskKey) return true
 

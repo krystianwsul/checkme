@@ -443,7 +443,6 @@ sealed class Task(
         }
     }
 
-    // todo hierarchy now
     fun getHierarchyExactTimeStamp(exactTimeStamp: ExactTimeStamp) =
         exactTimeStamp.coerceIn(startExactTimeStampOffset, endExactTimeStampOffset?.minusOne())
 
@@ -461,10 +460,6 @@ sealed class Task(
         return taskHierarchyChildTasks + instanceChildTasks
     }
 
-    /*
-    todo hierarchy now check usages: does this boil down to now/hierarchy? if so, attempt to use just the most recent one.
-    Or, reach into each possible child, and check if this is the parent.
-     */
     fun getChildTaskHierarchies(): List<TaskHierarchy> {
         val taskHierarchies = childHierarchyIntervals.filter {
             it.notDeletedOffset() && it.taskHierarchy.notDeleted && it.taskHierarchy.childTask.notDeleted

@@ -243,7 +243,8 @@ sealed class Task(
      * interval.
      *
      * todo hierarchy: I think all this exactTimeStamp bullshit is just to squeeze in the hierarchyTimeStamp vs "now".
-     * Check this. MAYBE I can just use the lastInterval thing instead of this whole mess?
+     * Check this. MAYBE I can just use the lastInterval thing instead of this whole mess?  Be sure to test a variety of
+     * screens in proto.
      */
     fun getParentTask(exactTimeStamp: ExactTimeStamp): Task? {
         requireNotDeletedOffset(exactTimeStamp)

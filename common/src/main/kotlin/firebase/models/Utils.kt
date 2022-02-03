@@ -18,13 +18,8 @@ fun Sequence<Task>.filterSearch(search: SearchCriteria.Search?, now: ExactTimeSt
 
         if (task.matchesSearch(search)) return FilterResult.MATCHES
 
-        if (
-            task.getChildTaskHierarchies(now).any {
-                childHierarchyMatches(it.childTask) != FilterResult.DOESNT_MATCH
-            }
-        ) {
+        if (task.getChildTasks(now).any { childHierarchyMatches(it) != FilterResult.DOESNT_MATCH })
             return FilterResult.CHILD_MATCHES
-        }
 
         return FilterResult.DOESNT_MATCH
     }

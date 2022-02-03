@@ -816,17 +816,16 @@ private fun DomainFactory.getTaskListChildTaskDatas(
 private fun DomainFactory.copyTask(now: ExactTimeStamp.Local, task: RootTask, copyTaskKey: TaskKey) {
     val copiedTask = getTaskForce(copyTaskKey)
 
-    copiedTask.getChildTaskHierarchies(now).forEach {
-        val copiedChildTask = it.childTask
-        copiedChildTask.getImage(deviceDbInfo)?.let { check(it is ImageState.Remote) }
+    copiedTask.getChildTasks(now).forEach {
+        it.getImage(deviceDbInfo)?.let { check(it is ImageState.Remote) }
 
         createChildTask(
             now,
             task,
-            copiedChildTask.name,
-            copiedChildTask.note,
-            copiedChildTask.imageJson,
-            copiedChildTask.taskKey,
+            it.name,
+            it.note,
+            it.imageJson,
+            it.taskKey,
         )
     }
 }

@@ -346,9 +346,7 @@ class DomainFactory(
     ): Pair<TaskUndoData, DomainUpdater.Params> {
         check(taskKeys.isNotEmpty())
 
-        fun Task.getAllChildren(): List<Task> = listOf(this) + getChildTaskHierarchies(now).map {
-            it.childTask.getAllChildren()
-        }.flatten()
+        fun Task.getAllChildren(): List<Task> = listOf(this) + getChildTasks(now).map { it.getAllChildren() }.flatten()
 
         val tasks = taskKeys.map { getTaskForce(it).getAllChildren() }
             .flatten()
@@ -530,7 +528,7 @@ class DomainFactory(
         parentHierarchyExactTimeStamp: ExactTimeStamp,
         includeProjectInfo: Boolean = true,
     ): List<TaskListFragment.ChildTaskData> {
-        return parentTask.getChildTasks(parentHierarchyExactTimeStamp)
+        return parentTask.getChildTasks(parentHierarchyExactTimeStamp, true)
             .map { childTask ->
                 val childHierarchyExactTimeStamp =
                     childTask.getHierarchyExactTimeStamp(parentHierarchyExactTimeStamp)

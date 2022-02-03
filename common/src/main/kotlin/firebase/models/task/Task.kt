@@ -238,6 +238,9 @@ sealed class Task(
      * For the other values, consider a map-based cache.
      *
      * If it's just stupidly re-entrant, I could also consider using a locker.
+     *
+     * Third idea: cache parent on interval itself, since the ExactTimeStamp is only used for selecting the appropriate
+     * interval.
      */
     fun getParentTask(exactTimeStamp: ExactTimeStamp): Task? {
         requireNotDeletedOffset(exactTimeStamp)
@@ -452,9 +455,9 @@ sealed class Task(
     fun getHierarchyExactTimeStamp(exactTimeStamp: ExactTimeStamp) =
         exactTimeStamp.coerceIn(startExactTimeStampOffset, endExactTimeStampOffset?.minusOne())
 
-    fun getChildTasks(exactTimeStamp: ExactTimeStamp): Set<Task> {
+    fun getChildTasks(exactTimeStamp: ExactTimeStamp, currentByHierarchy: Boolean = false): Set<Task> {
         val taskHierarchyChildTasks =
-            getChildTaskHierarchies(exactTimeStamp, true).map { it.childTask }.toSet()
+            getChildTaskHierarchies(exactTimeStamp, currentByHierarchy).map { it.childTask }.toSet()
 
         // todo hierarchy this is *not* performant.  But, check how badly it affects startup.  Use proto data
 

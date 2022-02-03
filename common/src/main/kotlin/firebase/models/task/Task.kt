@@ -193,31 +193,24 @@ sealed class Task(
 
     fun getNestedTaskHierarchy(taskHierarchyId: TaskHierarchyId) = nestedParentTaskHierarchies.getValue(taskHierarchyId)
 
-    fun getParentTaskData(exactTimeStamp: ExactTimeStamp): Pair<Task, SingleSchedule?>? {
-        requireNotDeletedOffset(exactTimeStamp)
-
-        val interval = intervalInfo.getInterval(exactTimeStamp)
+    // todo hierarchy
+    fun getParentTaskData(): Pair<Task, SingleSchedule?>? {
+        val interval = intervalInfo.intervals.last()
 
         return when (val type = interval.type) {
-            is Type.Child -> type.getHierarchyInterval(interval).run {
-                requireNotDeletedOffset(exactTimeStamp)
-                taskHierarchy.requireNotDeletedOffset(exactTimeStamp)
-
-                taskHierarchy.parentTask.apply { requireNotDeletedOffset(exactTimeStamp) } to null
-            }
+            is Type.Child -> type.getHierarchyInterval(interval)
+                .taskHierarchy
+                .parentTask to null
             is Type.Schedule -> {
                 // hierarchy hack
                 type.getScheduleIntervals(interval)
                     .singleOrNull()
-                    ?.also { it.requireNotDeletedOffset(exactTimeStamp) }
                     ?.schedule
-                    ?.also { it.requireNotDeletedOffset(exactTimeStamp) }
                     ?.let { it as? SingleSchedule }
                     ?.let { singleSchedule ->
                         singleSchedule.getInstance(this)
                             .parentInstance
                             ?.task
-                            ?.also { it.requireNotDeletedOffset(exactTimeStamp) }
                             ?.let { it to singleSchedule }
                     }
             }
@@ -225,42 +218,7 @@ sealed class Task(
         }
     }
 
-    /**
-     * todo: if performance becomes an issue for the Schedule case, I could try adding a wrapper that informs me whether or
-     * not this is being called with "now". Or, pass in now as a separate param, and compare them.  Either way, create a
-     * separate cache for that specific param value.
-     *
-     * For the other values, consider a map-based cache.
-     *
-     * If it's just stupidly re-entrant, I could also consider using a locker.
-     *
-     * Third idea: cache parent on interval itself, since the ExactTimeStamp is only used for selecting the appropriate
-     * interval.
-     *
-     * todo hierarchy now: I think all this exactTimeStamp bullshit is just to squeeze in the hierarchyTimeStamp vs "now".
-     * Check this. MAYBE I can just use the lastInterval thing instead of this whole mess?  Be sure to test a variety of
-     * screens in proto.
-     */
-    fun getParentTask(): Task? {
-        val interval = intervalInfo.intervals.last()
-
-        return when (val type = interval.type) {
-            is Type.Child -> type.getHierarchyInterval(interval)
-                .taskHierarchy
-                .parentTask
-            is Type.Schedule -> {
-                // hierarchy hack
-                type.getScheduleIntervals(interval)
-                    .singleOrNull()
-                    ?.schedule
-                    ?.let { it as? SingleSchedule }
-                    ?.getInstance(this)
-                    ?.parentInstance
-                    ?.task
-            }
-            is Type.NoSchedule -> null
-        }
-    }
+    fun getParentTask() = getParentTaskData()?.first
 
     private fun getExistingInstances(
         startExactTimeStamp: ExactTimeStamp.Offset?,

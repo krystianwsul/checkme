@@ -308,7 +308,7 @@ fun addChildToParent(
 ): UndoData? {
     childTask.requireNotDeleted()
 
-    val parentTaskData = childTask.getParentTaskData(now)
+    val parentTaskData = childTask.getParentTaskData()
 
     return if (parentTaskData?.first != parentTask) {
         fun setParentViaTaskHierarchy(): AddChildToParentUndoData {

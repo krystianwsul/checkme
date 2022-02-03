@@ -780,7 +780,7 @@ class DomainFactory(
                         oldTask.project.projectKey,
                         newProject.projectKey,
                     )
-                } else if (oldTask.isTopLevelTask(now)) {
+                } else if (oldTask.isTopLevelTask()) {
                     setNoScheduleOrParent(now, newProject.projectKey)
                 }
             }

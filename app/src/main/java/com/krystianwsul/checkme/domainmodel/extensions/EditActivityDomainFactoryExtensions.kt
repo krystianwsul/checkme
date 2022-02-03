@@ -109,7 +109,7 @@ private fun DomainFactory.getCreateTaskDataSlow(
         var scheduleDataWrappers: List<EditViewModel.ScheduleDataWrapper>? = null
         var assignedTo: Set<UserKey> = setOf()
 
-        if (task.isTopLevelTask(now)) {
+        if (task.isTopLevelTask()) {
             val schedules = task.intervalInfo.getCurrentScheduleIntervals(now)
 
             customTimes += schedules.mapNotNull { it.schedule.customTimeKey }.map { it to getCustomTime(it) }
@@ -143,7 +143,7 @@ private fun DomainFactory.getCreateTaskDataSlow(
         is EditViewModel.CurrentParentSource.Set -> currentParentSource.parentKey
         is EditViewModel.CurrentParentSource.FromTask -> {
             val task = getTaskForce(currentParentSource.taskKey)
-            val parentTask = task.getParentTask(now)
+            val parentTask = task.getParentTask()
 
             if (parentTask == null) {
                 when (val projectKey = task.project.projectKey) {
@@ -349,7 +349,7 @@ fun DomainUpdater.updateScheduleTask(
         Not the prettiest way to do this, but if we're editing a child task to make it a top-level task, we try to carry
         over the previous instance instead of creating a new one
          */
-        val parentSingleSchedule = finalTask.getParentTask(now)
+        val parentSingleSchedule = finalTask.getParentTask()
             ?.getTopLevelTask(now)
             ?.intervalInfo
             ?.getCurrentScheduleIntervals(now)
@@ -411,7 +411,7 @@ fun DomainUpdater.updateChildTask(
         parentTask.requireNotDeleted()
 
         tailrec fun Task.hasAncestor(taskKey: TaskKey): Boolean {
-            val currParentTask = getParentTask(now) ?: return false
+            val currParentTask = getParentTask() ?: return false
 
             if (currParentTask.taskKey == taskKey) return true
 
@@ -660,7 +660,7 @@ private fun DomainFactory.getParentTreeDatas(
 
     parentTreeDatas += getAllTasks().asSequence()
         .filter { it.showAsParent(now, excludedTaskKeys) }
-        .filter { it.isTopLevelTask(now) && (it.project as? SharedProject)?.notDeleted != true }
+        .filter { it.isTopLevelTask() && (it.project as? SharedProject)?.notDeleted != true }
         .map { it.toParentEntryData(this, now, excludedTaskKeys, parentInstanceKey) }
 
     val projectOrder = Preferences.projectOrder
@@ -690,7 +690,7 @@ private fun DomainFactory.getProjectTaskTreeDatas(
 ): List<EditViewModel.ParentEntryData.Task> {
     return project.getAllDependenciesLoadedTasks()
         .filter { it.showAsParent(now, excludedTaskKeys) }
-        .filter { it.isTopLevelTask(now) }
+        .filter { it.isTopLevelTask() }
         .map { it.toParentEntryData(this, now, excludedTaskKeys, parentInstanceKey) }
         .toList()
 }
@@ -901,7 +901,7 @@ private fun DomainFactory.convertAndUpdateProject(
     now: ExactTimeStamp.Local,
     projectKey: ProjectKey<*>,
 ): RootTask {
-    val isTopLevelTask = task.isTopLevelTask(now)
+    val isTopLevelTask = task.isTopLevelTask()
 
     return when (task) {
         is RootTask -> task.updateProject(projectKey)

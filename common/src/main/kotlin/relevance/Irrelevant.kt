@@ -72,7 +72,7 @@ object Irrelevant {
             val scheduleRelevances = mutableMapOf<ScheduleKey, ScheduleRelevance>()
 
             tasks.asSequence()
-                .filter { it.notDeleted && it.isTopLevelTask(now) && it.isVisible(now, true) }
+                .filter { it.notDeleted && it.isTopLevelTask() && it.isVisible(now, true) }
                 .map { taskRelevances.getValue(it.taskKey) }
                 .forEach {
                     it.setRelevant(

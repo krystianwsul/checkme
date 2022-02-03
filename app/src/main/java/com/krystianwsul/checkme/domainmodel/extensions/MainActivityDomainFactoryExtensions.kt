@@ -47,7 +47,7 @@ private fun DomainFactory.getMainData(
 ): List<TaskListFragment.ProjectData> {
     fun Collection<Task>.toChildTaskDatas() = asSequence().filter(filter)
         .map { Pair(it, it.getHierarchyExactTimeStamp(now)) }
-        .filter { (task, hierarchyExactTimeStamp) -> task.isTopLevelTask(hierarchyExactTimeStamp) }
+        .filter { (task, _) -> task.isTopLevelTask() }
         .map { (task, hierarchyExactTimeStamp) ->
             TaskListFragment.ChildTaskData(
                 task.name,

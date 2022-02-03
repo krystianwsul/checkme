@@ -91,7 +91,7 @@ fun DomainFactory.getShowTasksData(parameters: ShowTasksActivity.Parameters): Sh
             entryDatas = project.getAllDependenciesLoadedTasks()
                 .asSequence()
                 .map { Pair(it, it.getHierarchyExactTimeStamp(now)) }
-                .filter { (task, hierarchyExactTimeStamp) -> task.isTopLevelTask(hierarchyExactTimeStamp) }
+                .filter { (task, _) -> task.isTopLevelTask() }
                 .map { (task, hierarchyExactTimeStamp) -> task.toChildTaskData(hierarchyExactTimeStamp) }
                 .toList()
 

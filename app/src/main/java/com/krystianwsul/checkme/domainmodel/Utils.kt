@@ -64,7 +64,7 @@ fun <T> Sequence<T>.takeAndHasMore(n: Int): Pair<List<T>, Boolean> {
 fun Task.getProjectInfo(now: ExactTimeStamp.Local, includeProjectDetails: Boolean = true): DetailsNode.ProjectInfo? {
     val sharedProjectKey = project.projectKey as? ProjectKey.Shared
 
-    return if (isTopLevelTask(getHierarchyExactTimeStamp(now)) && sharedProjectKey != null) {
+    return if (isTopLevelTask() && sharedProjectKey != null) {
         DetailsNode.ProjectInfo(
             project.takeIf { includeProjectDetails }?.let { DetailsNode.ProjectDetails(it.name, sharedProjectKey) },
             DetailsNode.User.fromProjectUsers(getAssignedTo(now)),

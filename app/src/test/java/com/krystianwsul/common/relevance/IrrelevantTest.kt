@@ -193,7 +193,7 @@ class IrrelevantTest {
 
         fun Task.isReminderless() = notDeleted &&
                 this.isVisible(now, true) &&
-                isTopLevelTask(now) &&
+                isTopLevelTask() &&
                 intervalInfo.getCurrentScheduleIntervals(now).isEmpty()
 
         assertTrue(task.isReminderless())
@@ -406,7 +406,7 @@ class IrrelevantTest {
         val projectRecord = PrivateProjectRecord(projectKey, projectJson)
         val project = PrivateProject(projectRecord, mockk(), mockk(relaxed = true), existingInstanceChangeManager)
 
-        val parentTask = project.projectTasks.single { it.isTopLevelTask(now) }
+        val parentTask = project.projectTasks.single { it.isTopLevelTask() }
         assertEquals(2, parentTask.getChildTaskHierarchies(now).size)
 
         val child1Task = parentTask.getChildTaskHierarchies(now)
@@ -548,7 +548,7 @@ class IrrelevantTest {
         val projectRecord = PrivateProjectRecord(projectKey, projectJson)
         val project = PrivateProject(projectRecord, mockk(), mockk(relaxed = true), existingInstanceChangeManager)
 
-        val parentTask = project.projectTasks.single { it.isTopLevelTask(now) }
+        val parentTask = project.projectTasks.single { it.isTopLevelTask() }
         assertEquals(2, parentTask.getChildTaskHierarchies(now).size)
 
         val child1Task = parentTask.getChildTaskHierarchies(now)

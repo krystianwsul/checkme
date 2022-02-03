@@ -187,14 +187,11 @@ sealed class Task(
 
     fun canMigrateDescription(now: ExactTimeStamp.Local) = !note.isNullOrEmpty() && isVisible(now)
 
+    // todo hierarchy now
     fun getTopLevelTask(exactTimeStamp: ExactTimeStamp): Task =
-        getParentTask(exactTimeStamp)?.getTopLevelTask(exactTimeStamp) ?: this
+        getParentTask()?.getTopLevelTask(exactTimeStamp) ?: this
 
-    fun isTopLevelTask(exactTimeStamp: ExactTimeStamp): Boolean {
-        requireCurrentOffset(exactTimeStamp)
-
-        return getParentTask(exactTimeStamp) == null
-    }
+    fun isTopLevelTask() = getParentTask() == null
 
     fun getNestedTaskHierarchy(taskHierarchyId: TaskHierarchyId) = nestedParentTaskHierarchies.getValue(taskHierarchyId)
 
@@ -242,34 +239,26 @@ sealed class Task(
      * Third idea: cache parent on interval itself, since the ExactTimeStamp is only used for selecting the appropriate
      * interval.
      *
-     * todo hierarchy: I think all this exactTimeStamp bullshit is just to squeeze in the hierarchyTimeStamp vs "now".
+     * todo hierarchy now: I think all this exactTimeStamp bullshit is just to squeeze in the hierarchyTimeStamp vs "now".
      * Check this. MAYBE I can just use the lastInterval thing instead of this whole mess?  Be sure to test a variety of
      * screens in proto.
      */
-    fun getParentTask(exactTimeStamp: ExactTimeStamp): Task? {
-        requireNotDeletedOffset(exactTimeStamp)
-
-        val interval = intervalInfo.getInterval(exactTimeStamp)
+    fun getParentTask(): Task? {
+        val interval = intervalInfo.intervals.last()
 
         return when (val type = interval.type) {
-            is Type.Child -> type.getHierarchyInterval(interval).run {
-                requireNotDeletedOffset(exactTimeStamp)
-                taskHierarchy.requireNotDeletedOffset(exactTimeStamp)
-
-                taskHierarchy.parentTask.apply { requireNotDeletedOffset(exactTimeStamp) }
-            }
+            is Type.Child -> type.getHierarchyInterval(interval)
+                .taskHierarchy
+                .parentTask
             is Type.Schedule -> {
                 // hierarchy hack
                 type.getScheduleIntervals(interval)
                     .singleOrNull()
-                    ?.also { it.requireNotDeletedOffset(exactTimeStamp) }
                     ?.schedule
-                    ?.also { it.requireNotDeletedOffset(exactTimeStamp) }
                     ?.let { it as? SingleSchedule }
                     ?.getInstance(this)
                     ?.parentInstance
                     ?.task
-                    ?.also { it.requireNotDeletedOffset(exactTimeStamp) }
             }
             is Type.NoSchedule -> null
         }
@@ -456,6 +445,7 @@ sealed class Task(
         }
     }
 
+    // todo hierarchy now
     fun getHierarchyExactTimeStamp(exactTimeStamp: ExactTimeStamp) =
         exactTimeStamp.coerceIn(startExactTimeStampOffset, endExactTimeStampOffset?.minusOne())
 
@@ -469,11 +459,15 @@ sealed class Task(
         val instanceChildTasks = parent.getAllExistingInstances()
             .filter { it.parentInstance?.task == this }
             .map { it.task }
-            .filter { it.getParentTask(exactTimeStamp) == this }
+            .filter { it.getParentTask() == this }
 
         return taskHierarchyChildTasks + instanceChildTasks
     }
 
+    /*
+    todo hierarchy now check usages: does this boil down to now/hierarchy? if so, attempt to use just the most recent one.
+    Or, reach into each possible child, and check if this is the parent.
+     */
     fun getChildTaskHierarchies(exactTimeStamp: ExactTimeStamp, currentByHierarchy: Boolean = false): List<TaskHierarchy> {
         val taskHierarchies = childHierarchyIntervals.filter {
             val currentCheckExactTimeStamp = if (currentByHierarchy) {
@@ -660,13 +654,13 @@ sealed class Task(
 
     fun getScheduleText(
         scheduleTextFactory: ScheduleTextFactory,
-        exactTimeStamp: ExactTimeStamp,
+        exactTimeStamp: ExactTimeStamp, // todo hierarchy now
         showParent: Boolean = false,
     ): String? {
         requireCurrentOffset(exactTimeStamp)
 
         val currentScheduleIntervals = intervalInfo.getCurrentScheduleIntervals(exactTimeStamp)
-        val parentTask = getParentTask(exactTimeStamp)
+        val parentTask = getParentTask()
 
         return if (parentTask == null) {
             currentScheduleIntervals.forEach { it.requireCurrentOffset(exactTimeStamp) }

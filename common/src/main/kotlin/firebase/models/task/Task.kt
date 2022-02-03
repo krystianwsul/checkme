@@ -241,6 +241,9 @@ sealed class Task(
      *
      * Third idea: cache parent on interval itself, since the ExactTimeStamp is only used for selecting the appropriate
      * interval.
+     *
+     * todo hierarchy: I think all this exactTimeStamp bullshit is just to squeeze in the hierarchyTimeStamp vs "now".
+     * Check this. MAYBE I can just use the lastInterval thing instead of this whole mess?
      */
     fun getParentTask(exactTimeStamp: ExactTimeStamp): Task? {
         requireNotDeletedOffset(exactTimeStamp)

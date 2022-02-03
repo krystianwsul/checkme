@@ -446,6 +446,11 @@ sealed class Task(
     }
 
     fun getChildTaskHierarchies(): List<TaskHierarchy> {
+        /**
+         * todo if performance becomes an issue, then I can cache this, invalidating on childHierarchyIntervalsCache (this
+         * covers it.notDeletedOffset() && it.taskHierarchy.notDeleted), then add invalidating on childTask.endDataProperty
+         */
+
         val taskHierarchies = childHierarchyIntervals.filter {
             it.notDeletedOffset() && it.taskHierarchy.notDeleted && it.taskHierarchy.childTask.notDeleted
         }

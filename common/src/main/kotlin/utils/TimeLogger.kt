@@ -1,6 +1,7 @@
 package com.krystianwsul.common.utils
 
-import com.krystianwsul.common.time.ExactTimeStamp
+import com.krystianwsul.common.FeatureFlagManager
+import com.krystianwsul.common.time.DateTimeSoy
 
 object TimeLogger {
 
@@ -8,13 +9,23 @@ object TimeLogger {
 
     fun clear() = times.clear()
 
+    fun printToString() = times.entries
+        .sortedByDescending { it.value.first }
+        .joinToString("\n") { "called ${it.value.first} times: ${it.key}, ${it.value.second} ms" }
+
+    fun sumExcluding(key: String) = times.filterKeys { it != key }
+        .values
+        .sumOf { it.second }
+
     fun print() {
         times.entries
             .sortedByDescending { it.value.first }
-                .forEach { log("magic called ${it.value.first} times: ${it.key}, ${it.value.second} ms") }
+            .forEach { log("magic called ${it.value.first} times: ${it.key}, ${it.value.second} ms") }
     }
 
     fun start(key: String) = Tracker(key)
+
+    fun startIfLogDone(key: String) = if (FeatureFlagManager.logDone) start(key) else null
 
     data class Tracker(val key: String, val id: Int = staticId++) {
 
@@ -23,7 +34,7 @@ object TimeLogger {
             private var staticId = 0
         }
 
-        private val start = ExactTimeStamp.Local.now
+        private val start = DateTimeSoy.nowUnixLong()
 
         private var stopped = false
 
@@ -38,7 +49,7 @@ object TimeLogger {
 
             times[key] = Pair(
                     oldPair.first + 1,
-                    oldPair.second + (ExactTimeStamp.Local.now.long - start.long)
+                oldPair.second + (DateTimeSoy.nowUnixLong() - start)
             )
         }
     }

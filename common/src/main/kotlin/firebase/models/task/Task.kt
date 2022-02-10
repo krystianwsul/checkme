@@ -4,9 +4,10 @@ import com.krystianwsul.common.criteria.Assignable
 import com.krystianwsul.common.criteria.QueryMatchable
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.ScheduleGroup
-import com.krystianwsul.common.firebase.json.*
+import com.krystianwsul.common.firebase.json.InstanceJson
 import com.krystianwsul.common.firebase.json.tasks.RootTaskJson
-import com.krystianwsul.common.firebase.models.*
+import com.krystianwsul.common.firebase.models.ImageState
+import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.cache.ClearableInvalidatableManager
 import com.krystianwsul.common.firebase.models.cache.InvalidatableCache
 import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
@@ -305,7 +306,15 @@ sealed class Task(
                 .map { it.first }
                 .distinct()
                 .map(::getInstance)
-                .filter { !it.exists() && it.isRootInstance() } // I don't know if the root part is necessary, now that group tasks are removed
+                .filter {
+                    val tracker = TimeLogger.startIfLogDone("Task.getScheduleInstances filter")
+
+                    val ret = !it.exists() && it.isRootInstance()
+
+                    tracker?.stop()
+
+                    ret
+                } // I don't know if the root part is necessary, now that group tasks are removed
         }
     }
 
@@ -332,6 +341,8 @@ sealed class Task(
         }
 
         return combineSequencesGrouping(scheduleResults) {
+            val tracker = TimeLogger.startIfLogDone("Task.getScheduleDateTimes group")
+
             InterruptionChecker.throwIfInterrupted()
 
             val nextDateTime = it.filterNotNull()
@@ -341,6 +352,7 @@ sealed class Task(
             it.mapIndexed { index, dateTime -> index to dateTime }
                 .filter { it.second?.first?.compareTo(nextDateTime) == 0 }
                 .map { it.first }
+                .also { tracker?.stop() }
         }
     }
 
@@ -368,7 +380,8 @@ sealed class Task(
                 val instanceInfoSequences = mutableListOf<Sequence<InstanceInfo>>()
 
                 instanceInfoSequences +=
-                    getExistingInstances(startExactTimeStamp, endExactTimeStamp, onlyRoot).map(::InstanceInfo)
+                    getExistingInstances(startExactTimeStamp, endExactTimeStamp, onlyRoot).map(::InstanceInfo).toList()
+                        .asSequence()
 
                 if (!onlyRoot) {
                     instanceInfoSequences += getParentInstances(

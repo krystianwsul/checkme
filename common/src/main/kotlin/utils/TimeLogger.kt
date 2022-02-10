@@ -27,30 +27,28 @@ object TimeLogger {
 
     fun startIfLogDone(key: String) = if (FeatureFlagManager.logDone) start(key) else null
 
-    data class Tracker(val key: String, val id: Int = staticId++) {
-
-        companion object {
-
-            private var staticId = 0
-        }
+    class Tracker(val key: String) {
 
         private val start = DateTimeSoy.nowUnixLong()
 
         private var stopped = false
 
         fun stop(extra: String? = null) {
-            check(!stopped)
+            val diff = DateTimeSoy.nowUnixLong() - start
 
-            val key = extra?.let { "$key $it" } ?: key
+            check(!stopped)
 
             stopped = true
 
-            val oldPair = times[key] ?: Pair(0, 0L)
+            val key = extra?.let { "$key $it" } ?: key
 
-            times[key] = Pair(
-                    oldPair.first + 1,
-                oldPair.second + (DateTimeSoy.nowUnixLong() - start)
-            )
+            val oldPair = times[key]
+
+            times[key] = if (oldPair != null) {
+                Pair(oldPair.first + 1, oldPair.second + diff)
+            } else {
+                Pair(1, diff)
+            }
         }
     }
 }

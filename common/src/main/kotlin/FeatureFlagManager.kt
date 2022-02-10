@@ -7,6 +7,7 @@ object FeatureFlagManager {
     private val map = mutableMapOf<Flag, BehaviorFlow<Boolean>>()
 
     var logDone = false
+        private set
 
     fun getFlag(flag: Flag) = map[flag]?.valueOrNull ?: false
 

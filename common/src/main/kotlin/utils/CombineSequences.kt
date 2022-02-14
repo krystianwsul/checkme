@@ -36,11 +36,17 @@ fun <T : Any> combineSequences(sequences: List<Sequence<T>>, selector: (List<T?>
         if (nextValues.filterNotNull().isEmpty()) return@generateSequence null
 
         val nextIndex = selector(nextValues)
+
+        val tracker = TimeLogger.startIfLogDone("combineSequences")
+
         check(nextIndex in nextValues.indices)
 
         val selectedSequenceHolder = sequenceHolders[nextIndex]
 
         val nextValue = selectedSequenceHolder.nextValue!!
+
+        tracker?.stop()
+
         selectedSequenceHolder.getNext()
 
         nextValue
@@ -56,7 +62,8 @@ fun Sequence<InstanceInfo>.toInstances() = mapNotNull { it.instance }
 
 fun combineInstanceSequences(instanceSequences: List<Sequence<Instance>>): Sequence<Instance> = combineInstanceInfoSequences(
     instanceSequences.map {
-        it.map { InstanceInfo(it.instanceDateTime, it) }
+        val tracker = TimeLogger.startIfLogDone("combineInstanceSequences.map")
+        it.map { InstanceInfo(it.instanceDateTime, it) }.also { tracker?.stop() }
     }
 ).toInstances()
 
@@ -64,6 +71,8 @@ fun combineInstanceInfoSequences(instanceSequences: List<Sequence<InstanceInfo>>
     data class Entry(val instanceInfo: InstanceInfo?, val index: Int)
 
     return combineSequences(instanceSequences) {
+        val tracker = TimeLogger.startIfLogDone("combineInstanceInfoSequences")
+
         val finalPair = it.mapIndexed { index, instanceInfo -> Entry(instanceInfo, index) }
             .filter { it.instanceInfo != null }
             .minWithOrNull(
@@ -73,7 +82,7 @@ fun combineInstanceInfoSequences(instanceSequences: List<Sequence<InstanceInfo>>
                 )
             )!!
 
-        finalPair.index
+        finalPair.index.also { tracker?.stop() }
     }
 }
 

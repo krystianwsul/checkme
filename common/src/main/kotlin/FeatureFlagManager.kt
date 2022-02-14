@@ -6,6 +6,9 @@ object FeatureFlagManager {
 
     private val map = mutableMapOf<Flag, BehaviorFlow<Boolean>>()
 
+    var logDone = false
+        private set
+
     fun getFlag(flag: Flag) = map[flag]?.valueOrNull ?: false
 
     fun getFlags() = Flag.values().associateWith(::getFlag)
@@ -18,6 +21,8 @@ object FeatureFlagManager {
 
     fun setFlag(flag: Flag, value: Boolean) {
         getFlow(flag).value = value
+
+        if (flag == Flag.LOG_NOT_DONE_PERFORMANCE) logDone = value
     }
 
     enum class Flag {

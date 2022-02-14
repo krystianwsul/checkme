@@ -16,6 +16,7 @@ import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.ProjectKey
+import com.krystianwsul.common.utils.TimeLogger
 import com.krystianwsul.common.utils.singleOrEmpty
 import com.soywiz.klock.DateTime
 import com.soywiz.klock.Time
@@ -34,9 +35,15 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
         // duplicate of logic in Instance.shouldShowNotification
         private fun Sequence<Instance>.filterNotifications(domainFactory: DomainFactory, now: ExactTimeStamp.Local) =
             filter {
-                it.done == null &&
+                val tracker = TimeLogger.startIfLogDone("Notifier filter")
+
+                val ret = it.done == null &&
                         !it.getNotified(domainFactory.shownFactory) &&
                         it.isAssignedToMe(now, domainFactory.myUserFactory.user)
+
+                tracker?.stop()
+
+                ret
             }
 
         fun getNotificationInstances(domainFactory: DomainFactory, now: ExactTimeStamp.Local) =
@@ -109,8 +116,21 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
             DebugFragment.logDone("Notifier.updateNotifications filterNotifications end")
 
             var needsOneExtra = true
+
+            TimeLogger.clear()
+
+            val mainTracker = TimeLogger.startIfLogDone("whole thing")
+
             val allNotificationInstances =
-                notificationInstanceSequence.map { (it.instanceDateTime.toLocalExactTimeStamp() <= now) to it }
+                notificationInstanceSequence.map {
+                    val tracker = TimeLogger.startIfLogDone("Notifier mapDateTime")
+
+                    val ret = (it.instanceDateTime.toLocalExactTimeStamp() <= now) to it
+
+                    tracker?.stop()
+
+                    ret
+                }
                     .takeWhile { (beforeNow, _) ->
                         when {
                             beforeNow -> true
@@ -122,8 +142,18 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
                             else -> false
                         }
                     }
-                    .groupBy({ it.first }, { it.second })
+                    .toList()
+                    .let {
+                        val tracker = TimeLogger.startIfLogDone("Notifier group")
+
+                        it.groupBy({ it.first }, { it.second }).also { tracker?.stop() }
+                    }
+
+            mainTracker?.stop()
+
             DebugFragment.logDone("Notifier.updateNotifications finish sequence")
+            DebugFragment.logDone("TimeLogger:\n" + TimeLogger.printToString())
+            DebugFragment.logDone("TimeLogger sum:\n" + TimeLogger.sumExcluding(mainTracker?.key ?: ""))
 
             notificationInstances = allNotificationInstances[true].orEmpty().associateBy { it.instanceKey }
             nextAlarmInstance = allNotificationInstances[false].orEmpty().singleOrEmpty()

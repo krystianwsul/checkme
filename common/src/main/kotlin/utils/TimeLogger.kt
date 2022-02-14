@@ -1,6 +1,7 @@
 package com.krystianwsul.common.utils
 
-import com.krystianwsul.common.time.ExactTimeStamp
+import com.krystianwsul.common.FeatureFlagManager
+import com.krystianwsul.common.time.DateTimeSoy
 
 object TimeLogger {
 
@@ -8,38 +9,46 @@ object TimeLogger {
 
     fun clear() = times.clear()
 
+    fun printToString() = times.entries
+        .sortedByDescending { it.value.first }
+        .joinToString("\n") { "called ${it.value.first} times: ${it.key}, ${it.value.second} ms" }
+
+    fun sumExcluding(key: String) = times.filterKeys { it != key }
+        .values
+        .sumOf { it.second }
+
     fun print() {
         times.entries
             .sortedByDescending { it.value.first }
-                .forEach { log("magic called ${it.value.first} times: ${it.key}, ${it.value.second} ms") }
+            .forEach { log("magic called ${it.value.first} times: ${it.key}, ${it.value.second} ms") }
     }
 
     fun start(key: String) = Tracker(key)
 
-    data class Tracker(val key: String, val id: Int = staticId++) {
+    fun startIfLogDone(key: String) = if (FeatureFlagManager.logDone) start(key) else null
 
-        companion object {
+    class Tracker(val key: String) {
 
-            private var staticId = 0
-        }
-
-        private val start = ExactTimeStamp.Local.now
+        private val start = DateTimeSoy.nowUnixLong()
 
         private var stopped = false
 
         fun stop(extra: String? = null) {
-            check(!stopped)
+            val diff = DateTimeSoy.nowUnixLong() - start
 
-            val key = extra?.let { "$key $it" } ?: key
+            check(!stopped)
 
             stopped = true
 
-            val oldPair = times[key] ?: Pair(0, 0L)
+            val key = extra?.let { "$key $it" } ?: key
 
-            times[key] = Pair(
-                    oldPair.first + 1,
-                    oldPair.second + (ExactTimeStamp.Local.now.long - start.long)
-            )
+            val oldPair = times[key]
+
+            times[key] = if (oldPair != null) {
+                Pair(oldPair.first + 1, oldPair.second + diff)
+            } else {
+                Pair(1, diff)
+            }
         }
     }
 }

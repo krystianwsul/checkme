@@ -1,6 +1,7 @@
 package firebase.models.schedule.generators
 
 import com.krystianwsul.common.time.*
+import com.krystianwsul.common.utils.TimeLogger
 
 abstract class NextValidDateTimeSequenceGenerator : DateTimeSequenceGenerator {
 
@@ -15,8 +16,14 @@ abstract class NextValidDateTimeSequenceGenerator : DateTimeSequenceGenerator {
 
     private fun getDateSequence(startDateSoy: DateSoy, endDateSoy: DateSoy?): Sequence<DateSoy> {
         return generateSequence(
-            { getFirstDateSoy(startDateSoy).filterEnd(endDateSoy) },
-            { getNextDateSoy(it).filterEnd(endDateSoy) },
+            {
+                val tracker = TimeLogger.startIfLogDone("Generator.getFirstDateSoy")
+                getFirstDateSoy(startDateSoy).filterEnd(endDateSoy).also { tracker?.stop() }
+            },
+            {
+                val tracker = TimeLogger.startIfLogDone("Generator.getNextDateSoy")
+                getNextDateSoy(it).filterEnd(endDateSoy).also { tracker?.stop() }
+            },
         )
     }
 
@@ -33,10 +40,12 @@ abstract class NextValidDateTimeSequenceGenerator : DateTimeSequenceGenerator {
         val endSoyDate = endExactTimeStamp?.dateSoy
 
         return getDateSequence(startSoyDate, endSoyDate).mapNotNull { dateSoy ->
+            val tracker = TimeLogger.startIfLogDone("Generator.generate map")
+
             val startHourMilli = startExactTimeStamp.takeIf { dateSoy == startSoyDate }?.hourMilli
             val endHourMilli = endExactTimeStamp?.takeIf { dateSoy == endSoyDate }?.hourMilli
 
-            getDateTimeInDate(dateSoy, startHourMilli, endHourMilli, scheduleTime)
+            getDateTimeInDate(dateSoy, startHourMilli, endHourMilli, scheduleTime).also { tracker?.stop() }
         }
     }
 

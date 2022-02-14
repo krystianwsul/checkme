@@ -240,12 +240,14 @@ sealed class Project<T : ProjectType>(
 
             if (filterVisible) {
                 instances.filter { instance ->
+                    val tracker = TimeLogger.startIfLogDone("Project filter visible")
+
                     InterruptionChecker.throwIfInterrupted()
 
                     instance.isVisible(
                         now,
                         Instance.VisibilityOptions(hack24 = true, assumeRoot = true)
-                    )
+                    ).also { tracker?.stop() }
                 }
             } else {
                 instances

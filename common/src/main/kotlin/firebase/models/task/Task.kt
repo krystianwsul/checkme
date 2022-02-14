@@ -30,7 +30,7 @@ import com.krystianwsul.common.utils.*
 sealed class Task(
     val customTimeProvider: JsonTime.CustomTimeProvider,
     private val taskRecord: TaskRecord,
-    val parentTaskDelegate: ParentTaskDelegate,
+    val parentTaskDelegateFactory: ParentTaskDelegate.Factory,
     val clearableInvalidatableManager: ClearableInvalidatableManager,
     val rootModelChangeManager: RootModelChangeManager,
 ) : Endable, CurrentOffset, QueryMatchable, Assignable {
@@ -80,7 +80,7 @@ sealed class Task(
     protected abstract val projectParentTaskHierarchies: Set<ProjectTaskHierarchy>
 
     val nestedParentTaskHierarchies = taskRecord.taskHierarchyRecords
-        .mapValues { NestedTaskHierarchy(this, it.value, parentTaskDelegate) }
+        .mapValues { NestedTaskHierarchy(this, it.value, parentTaskDelegateFactory) }
         .toMutableMap()
 
     val parentTaskHierarchies get() = projectParentTaskHierarchies + nestedParentTaskHierarchies.values
@@ -159,7 +159,7 @@ sealed class Task(
         // in general, we can add a subtask to any task that is either unscheduled, or has not done instances.  Checking
         // for that will be difficult, though.
 
-        val topLevelTask = getTopLevelTask(now)
+        val topLevelTask = getTopLevelTask()
 
         // if it's in the unscheduled tasks list, we can add a subtask
         if (topLevelTask.intervalInfo.isUnscheduled()) return true
@@ -176,7 +176,7 @@ sealed class Task(
         // in general, we can add a subtask to any task that is either unscheduled, or has not done instances.  Checking
         // for that will be difficult, though.
 
-        val topLevelTask = getTopLevelTask(now)
+        val topLevelTask = getTopLevelTask()
 
         // if it's in the unscheduled tasks list, we can add a subtask
         if (topLevelTask.intervalInfo.isUnscheduled()) return true to "is unscheduled"
@@ -187,27 +187,61 @@ sealed class Task(
 
     fun canMigrateDescription(now: ExactTimeStamp.Local) = !note.isNullOrEmpty() && isVisible(now)
 
-    fun getTopLevelTask(exactTimeStamp: ExactTimeStamp): Task =
-        getParentTask(exactTimeStamp)?.getTopLevelTask(exactTimeStamp) ?: this
+    fun getTopLevelTask(): Task = parentTask?.getTopLevelTask() ?: this
 
-    fun isTopLevelTask(exactTimeStamp: ExactTimeStamp): Boolean {
-        requireCurrentOffset(exactTimeStamp)
-
-        return getParentTask(exactTimeStamp) == null
-    }
+    fun isTopLevelTask() = parentTask == null
 
     fun getNestedTaskHierarchy(taskHierarchyId: TaskHierarchyId) = nestedParentTaskHierarchies.getValue(taskHierarchyId)
 
-    fun getParentTask(exactTimeStamp: ExactTimeStamp): Task? {
-        requireNotDeletedOffset(exactTimeStamp)
+    private val parentTaskDataCache =
+        invalidatableCache<Pair<Task, SingleSchedule?>?>(clearableInvalidatableManager) { invalidatableCache ->
+            val intervalRemovable = intervalInfoCache.invalidatableManager.addInvalidatable(invalidatableCache)
 
-        return intervalInfo.getParentTaskHierarchy(exactTimeStamp)?.run {
-            requireNotDeletedOffset(exactTimeStamp)
-            taskHierarchy.requireNotDeletedOffset(exactTimeStamp)
+            val interval = intervalInfo.intervals.last()
 
-            taskHierarchy.parentTask.apply { requireNotDeletedOffset(exactTimeStamp) }
+            when (val type = interval.type) {
+                is Type.Child -> type.getHierarchyInterval(interval)
+                    .taskHierarchy
+                    .let {
+                        val parentTaskRemovable = it.parentTaskCache
+                            .invalidatableManager
+                            .addInvalidatable(invalidatableCache)
+
+                        InvalidatableCache.ValueHolder(it.parentTask to null) {
+                            intervalRemovable.remove()
+                            parentTaskRemovable.remove()
+                        }
+                    }
+                is Type.Schedule -> {
+                    // hierarchy hack
+                    type.getScheduleIntervals(interval)
+                        .singleOrNull()
+                        ?.schedule
+                        ?.let { it as? SingleSchedule }
+                        ?.let { singleSchedule ->
+                            val instance = singleSchedule.getInstance(this)
+
+                            val parentInstanceRemovable = instance.parentInstanceCache
+                                .invalidatableManager
+                                .addInvalidatable(invalidatableCache)
+
+                            InvalidatableCache.ValueHolder(
+                                instance.parentInstance
+                                    ?.task
+                                    ?.let { it to singleSchedule }
+                            ) {
+                                intervalRemovable.remove()
+                                parentInstanceRemovable.remove()
+                            }
+                        }
+                        ?: InvalidatableCache.ValueHolder(null) { intervalRemovable.remove() }
+                }
+                is Type.NoSchedule -> InvalidatableCache.ValueHolder(null) { intervalRemovable.remove() }
+            }
         }
-    }
+
+    val parentTaskData by parentTaskDataCache
+    val parentTask get() = parentTaskData?.first
 
     private fun getExistingInstances(
         startExactTimeStamp: ExactTimeStamp.Offset?,
@@ -405,22 +439,32 @@ sealed class Task(
     fun getHierarchyExactTimeStamp(exactTimeStamp: ExactTimeStamp) =
         exactTimeStamp.coerceIn(startExactTimeStampOffset, endExactTimeStampOffset?.minusOne())
 
-    fun getChildTaskHierarchies(
-        exactTimeStamp: ExactTimeStamp,
-        currentByHierarchy: Boolean = false,
-    ): List<TaskHierarchy> {
-        val taskHierarchies = childHierarchyIntervals.filter {
-            val currentCheckExactTimeStamp = if (currentByHierarchy) {
-                it.taskHierarchy
-                    .childTask
-                    .getHierarchyExactTimeStamp(exactTimeStamp)
-            } else {
-                exactTimeStamp
-            }
+    fun getChildTasks(): Set<Task> {
+        val taskHierarchyChildTasks = getChildTaskHierarchies().map { it.childTask }.toSet()
 
-            it.currentOffset(currentCheckExactTimeStamp)
-                    && it.taskHierarchy.currentOffset(currentCheckExactTimeStamp)
-                    && it.taskHierarchy.childTask.currentOffset(currentCheckExactTimeStamp)
+        /**
+         * todo if performance becomes an issue here, then I can try caching the part below.  I believe that I'd need to
+         * reset the cache not only when tasks change, but also from within the instance when its parentInstance changes,
+         * on both its old and new parentInstance.task
+         */
+
+        // hierarchy hack
+        val instanceChildTasks = parent.getAllExistingInstances()
+            .filter { it.parentInstance?.task == this }
+            .map { it.task }
+            .filter { it.parentTask == this }
+
+        return taskHierarchyChildTasks + instanceChildTasks
+    }
+
+    fun getChildTaskHierarchies(): List<TaskHierarchy> {
+        /**
+         * todo if performance becomes an issue, then I can cache this, invalidating on childHierarchyIntervalsCache (this
+         * covers it.notDeletedOffset() && it.taskHierarchy.notDeleted), then add invalidating on childTask.endDataProperty
+         */
+
+        val taskHierarchies = childHierarchyIntervals.filter {
+            it.notDeletedOffset() && it.taskHierarchy.notDeleted && it.taskHierarchy.childTask.notDeleted
         }
             .map { it.taskHierarchy }
             .toMutableSet()
@@ -559,14 +603,8 @@ sealed class Task(
         }
     }
 
-    fun getScheduleTextMultiline(
-        scheduleTextFactory: ScheduleTextFactory,
-        exactTimeStamp: ExactTimeStamp,
-    ): String {
-        requireCurrentOffset(exactTimeStamp)
-
-        val currentScheduleIntervals = intervalInfo.getCurrentScheduleIntervals(exactTimeStamp)
-        currentScheduleIntervals.forEach { it.requireCurrentOffset(exactTimeStamp) }
+    fun getScheduleTextMultiline(scheduleTextFactory: ScheduleTextFactory): String {
+        val currentScheduleIntervals = intervalInfo.currentScheduleIntervals
 
         return ScheduleGroup.getGroups(currentScheduleIntervals.map { it.schedule }).joinToString("\n") {
             scheduleTextFactory.getScheduleText(it, customTimeProvider)
@@ -592,25 +630,15 @@ sealed class Task(
             )
     }
 
-    fun getScheduleText(
-        scheduleTextFactory: ScheduleTextFactory,
-        exactTimeStamp: ExactTimeStamp,
-        showParent: Boolean = false,
-    ): String? {
-        requireCurrentOffset(exactTimeStamp)
-
-        val currentScheduleIntervals = intervalInfo.getCurrentScheduleIntervals(exactTimeStamp)
-        val parentTask = getParentTask(exactTimeStamp)
+    fun getScheduleText(scheduleTextFactory: ScheduleTextFactory, showParent: Boolean = false): String? {
+        val currentScheduleIntervals = intervalInfo.currentScheduleIntervals
+        val parentTask = parentTask
 
         return if (parentTask == null) {
-            currentScheduleIntervals.forEach { it.requireCurrentOffset(exactTimeStamp) }
-
             ScheduleGroup.getGroups(currentScheduleIntervals.map { it.schedule }).joinToString(", ") {
                 scheduleTextFactory.getScheduleText(it, customTimeProvider)
             }
         } else {
-            check(currentScheduleIntervals.isEmpty())
-
             parentTask.name.takeIf { showParent }
         }
     }
@@ -634,8 +662,8 @@ sealed class Task(
 
     final override fun toString() = super.toString() + ", name: $name, taskKey: $taskKey"
 
-    final override fun getAssignedTo(now: ExactTimeStamp.Local): List<ProjectUser> {
-        val currentScheduleIntervals = intervalInfo.getCurrentScheduleIntervals(getHierarchyExactTimeStamp(now))
+    override fun getAssignedTo(): List<ProjectUser> {
+        val currentScheduleIntervals = intervalInfo.currentScheduleIntervals
 
         return if (currentScheduleIntervals.isEmpty()) {
             listOf()

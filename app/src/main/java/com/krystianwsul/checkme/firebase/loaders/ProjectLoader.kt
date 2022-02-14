@@ -48,7 +48,7 @@ interface ProjectLoader<T : ProjectType, U : Parsable> { // U: Project JSON type
         private val rootTaskKeySource: RootTaskKeySource,
     ) : ProjectLoader<T, U> {
 
-        private fun <T> Observable<T>.replayImmediate() = replay().apply { domainDisposable += connect() }!!
+        private fun <T : Any> Observable<T>.replayImmediate() = replay().apply { domainDisposable += connect() }
 
         private data class ProjectRecordData<T : ProjectType>(
             val changeType: ChangeType,

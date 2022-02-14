@@ -15,11 +15,9 @@ class IntervalInfo(val task: Task, val intervals: List<Interval>) {
     val noScheduleOrParentIntervals
         get() = intervals.mapNotNull { (it.type as? Type.NoSchedule)?.getNoScheduleOrParentInterval(it) }
 
-    private fun getInterval(exactTimeStamp: ExactTimeStamp): Interval {
-        try {
-            return intervals.single {
-                it.containsExactTimeStamp(exactTimeStamp)
-            }
+    fun getInterval(exactTimeStamp: ExactTimeStamp): Interval {
+        return try {
+            intervals.single { it.containsExactTimeStamp(exactTimeStamp) }
         } catch (throwable: Throwable) {
             throw IntervalException(
                 "error getting interval for task ${task.name}. exactTimeStamp: $exactTimeStamp, intervals:\n"
@@ -28,6 +26,16 @@ class IntervalInfo(val task: Task, val intervals: List<Interval>) {
                 },
                 throwable
             )
+        }
+    }
+
+    val currentScheduleIntervals by lazy {
+        intervals.last().let { interval ->
+            interval.type
+                .let { it as? Type.Schedule }
+                ?.getScheduleIntervals(interval)
+                .orEmpty()
+                .filter { it.schedule.notDeleted }
         }
     }
 

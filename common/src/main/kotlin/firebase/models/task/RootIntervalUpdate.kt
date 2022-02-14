@@ -34,7 +34,8 @@ class RootIntervalUpdate(val rootTask: RootTask, intervalInfo: IntervalInfo) :
         parentSingleSchedule: SingleSchedule? = null,
     ) {
         val removeSchedules = mutableListOf<Schedule>()
-        val addScheduleDatas = scheduleDatas.map { ScheduleDiffKey(it.first, assignedTo) to it }.toMutableList()
+        val initialAddScheduleDatas = scheduleDatas.map { ScheduleDiffKey(it.first, assignedTo) to it }
+        val addScheduleDatas = initialAddScheduleDatas.toMutableList()
 
         val oldSchedules = intervalInfo.getCurrentScheduleIntervals(now).map { it.schedule }
 
@@ -59,19 +60,36 @@ class RootIntervalUpdate(val rootTask: RootTask, intervalInfo: IntervalInfo) :
 
         val singleRemoveSchedule = removeSchedules.singleOrNull() as? SingleSchedule
 
-        val singleAddSchedulePair = addScheduleDatas.singleOrNull()?.takeIf {
-            it.first.scheduleData is ScheduleData.Single
+        val singleAddSchedulePair = addScheduleDatas.singleOrNull()
+            ?.second
+            ?.let { (scheduleData, time) ->
+                scheduleData.let { it as? ScheduleData.Single }?.let { it to time }
+            }
+
+        fun SingleSchedule.setTimeOnInstance(singleScheduleData: ScheduleData.Single, time: Time) {
+            if (assignedTo.isNotEmpty()) setAssignedTo(assignedTo)
+
+            getInstance(rootTask).let {
+                it.setInstanceDateTime(
+                    shownFactory,
+                    DateTime(singleScheduleData.date, time),
+                    customTimeMigrationHelper,
+                    now,
+                )
+
+                it.setParentState(Instance.ParentState.NoParent)
+            }
         }
 
         if (singleRemoveSchedule != null && singleAddSchedulePair != null) {
-            check(parentSingleSchedule == null)
+            singleRemoveSchedule.setTimeOnInstance(singleAddSchedulePair.first, singleAddSchedulePair.second)
 
             if (assignedTo.isNotEmpty()) singleRemoveSchedule.setAssignedTo(assignedTo)
 
             singleRemoveSchedule.getInstance(rootTask).let {
                 it.setInstanceDateTime(
                     shownFactory,
-                    singleAddSchedulePair.second.run { DateTime((first as ScheduleData.Single).date, second) },
+                    singleAddSchedulePair.run { DateTime(first.date, second) },
                     customTimeMigrationHelper,
                     now,
                 )
@@ -98,7 +116,7 @@ class RootIntervalUpdate(val rootTask: RootTask, intervalInfo: IntervalInfo) :
             parentSingleSchedule.getInstance(rootTask).let {
                 it.setInstanceDateTime(
                     shownFactory,
-                    singleAddSchedulePair.second.run { DateTime((first as ScheduleData.Single).date, second) },
+                    singleAddSchedulePair.run { DateTime(first.date, second) },
                     customTimeMigrationHelper,
                     now,
                 )
@@ -106,15 +124,32 @@ class RootIntervalUpdate(val rootTask: RootTask, intervalInfo: IntervalInfo) :
                 it.setParentState(Instance.ParentState.NoParent)
             }
         } else {
-            removeSchedules.forEach { it.setEndExactTimeStamp(now.toOffset()) }
+            if (!rootTask.isTopLevelTask()) { // hierarchy hack
+                check(removeSchedules.isEmpty())
+                check(initialAddScheduleDatas.size == 1)
+                check(oldScheduleDatas.size == 1)
 
-            rootTask.createSchedules(
-                now,
-                addScheduleDatas.map { it.second },
-                assignedTo,
-                customTimeMigrationHelper,
-                projectKey,
-            )
+                val singleInitialAddSchedulePair = initialAddScheduleDatas.single().second
+
+                val singleAddSchedule = singleInitialAddSchedulePair.first.let { it as ScheduleData.Single }
+
+                val singleOldSchedule = oldScheduleDatas.single()
+                    .second
+                    .single()
+                    .let { it as SingleSchedule }
+
+                singleOldSchedule.setTimeOnInstance(singleAddSchedule, singleInitialAddSchedulePair.second)
+            } else {
+                removeSchedules.forEach { it.setEndExactTimeStamp(now.toOffset()) }
+
+                rootTask.createSchedules(
+                    now,
+                    addScheduleDatas.map { it.second },
+                    assignedTo,
+                    customTimeMigrationHelper,
+                    projectKey,
+                )
+            }
         }
     }
 
@@ -161,7 +196,7 @@ class RootIntervalUpdate(val rootTask: RootTask, intervalInfo: IntervalInfo) :
 
     private fun createParentNestedTaskHierarchy(nestedTaskHierarchyJson: NestedTaskHierarchyJson): NestedTaskHierarchy {
         val taskHierarchyRecord = rootTask.taskRecord.newTaskHierarchyRecord(nestedTaskHierarchyJson)
-        val taskHierarchy = NestedTaskHierarchy(rootTask, taskHierarchyRecord, rootTask.parentTaskDelegate)
+        val taskHierarchy = NestedTaskHierarchy(rootTask, taskHierarchyRecord, rootTask.parentTaskDelegateFactory)
 
         rootTask.nestedParentTaskHierarchies[taskHierarchy.id] = taskHierarchy
 

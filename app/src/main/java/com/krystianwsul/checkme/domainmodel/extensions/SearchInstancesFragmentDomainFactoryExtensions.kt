@@ -67,7 +67,7 @@ fun DomainFactory.getCappedInstanceAndTaskDatas(
 
     val taskDatas = getUnscheduledTasks(projectKey)
         .asSequence()
-        .filterSearch(searchCriteria.search, now)
+        .filterSearch(searchCriteria.search)
         .map { (task, filterResult) ->
             val childQuery = if (filterResult == FilterResult.MATCHES) null else searchCriteria
 
@@ -77,8 +77,8 @@ fun DomainFactory.getCappedInstanceAndTaskDatas(
                 getGroupListChildTaskDatas(task, now, childQuery),
                 task.note,
                 task.getImage(deviceDbInfo),
-                task.isAssignedToMe(now, myUserFactory.user),
-                task.getProjectInfo(now, includeProjectDetails),
+                task.isAssignedToMe(myUserFactory.user),
+                task.getProjectInfo(includeProjectDetails),
                 task.ordinal,
                 task.canMigrateDescription(now),
             )

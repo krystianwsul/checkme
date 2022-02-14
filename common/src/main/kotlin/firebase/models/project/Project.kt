@@ -218,7 +218,7 @@ sealed class Project<T : ProjectType>(
 
         val filteredTasks = getAllDependenciesLoadedTasks().asSequence()
             .filter { it.mayHaveRootInstances() }
-            .filterSearch(searchData?.searchCriteria?.search, now).map { it.first }
+            .filterSearch(searchData?.searchCriteria?.search).map { it.first }
             .toList()
 
         val instanceSequences = filteredTasks.map {

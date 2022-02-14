@@ -10,7 +10,7 @@ import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
 
-fun Sequence<Task>.filterSearch(search: SearchCriteria.Search?, now: ExactTimeStamp.Local) = if (search?.hasSearch != true) {
+fun Sequence<Task>.filterSearch(search: SearchCriteria.Search?) = if (search?.hasSearch != true) {
     map { it to FilterResult.MATCHES }
 } else {
     fun childHierarchyMatches(task: Task): FilterResult {
@@ -18,13 +18,8 @@ fun Sequence<Task>.filterSearch(search: SearchCriteria.Search?, now: ExactTimeSt
 
         if (task.matchesSearch(search)) return FilterResult.MATCHES
 
-        if (
-            task.getChildTaskHierarchies(now).any {
-                childHierarchyMatches(it.childTask) != FilterResult.DOESNT_MATCH
-            }
-        ) {
+        if (task.getChildTasks().any { childHierarchyMatches(it) != FilterResult.DOESNT_MATCH })
             return FilterResult.CHILD_MATCHES
-        }
 
         return FilterResult.DOESNT_MATCH
     }
@@ -42,7 +37,7 @@ fun Sequence<Instance>.filterSearchCriteria(
     fun childHierarchyMatches(instance: Instance): Boolean {
         InterruptionChecker.throwIfInterrupted()
 
-        if (!searchCriteria.showAssignedToOthers && !instance.isAssignedToMe(now, myUser)) return false
+        if (!searchCriteria.showAssignedToOthers && !instance.isAssignedToMe(myUser)) return false
 
         if (!searchCriteria.showDone && instance.done != null) return false
 
@@ -63,6 +58,7 @@ enum class FilterResult {
     DOESNT_MATCH, CHILD_MATCHES, MATCHES
 }
 
+// used in RelevanceChecker
 fun checkInconsistentRootTaskIds(rootTasks: Collection<RootTask>, projects: Collection<Project<*>>) {
     val rootTaskProjectKeys = rootTasks.associate { it.taskKey to it.project.projectKey }
 

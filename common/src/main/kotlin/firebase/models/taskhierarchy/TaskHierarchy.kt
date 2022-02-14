@@ -13,10 +13,11 @@ import com.krystianwsul.common.utils.TaskKey
 
 sealed class TaskHierarchy(
     clearableInvalidatableManager: ClearableInvalidatableManager,
-    private val parentTaskDelegate: ParentTaskDelegate,
+    private val taskHierarchyRecord: TaskHierarchyRecord<*>,
+    parentTaskDelegateFactory: ParentTaskDelegate.Factory,
 ) : TaskParentEntry {
 
-    protected abstract val taskHierarchyRecord: TaskHierarchyRecord<*>
+    private val parentTaskDelegate = parentTaskDelegateFactory.newDelegate(taskHierarchyRecord)
 
     val startExactTimeStamp by lazy { ExactTimeStamp.Local(taskHierarchyRecord.startTime) }
 
@@ -31,14 +32,14 @@ sealed class TaskHierarchy(
             ExactTimeStamp.Offset.fromOffset(it, taskHierarchyRecord.endTimeOffset)
         }
 
-    val parentTaskKey by lazy { parentTaskDelegate.getTaskKey(taskHierarchyRecord.parentTaskId) }
+    val parentTaskKey get() = parentTaskDelegate.parentTaskKey
     abstract val childTaskKey: TaskKey
 
     val id by lazy { taskHierarchyRecord.id }
 
-    private val parentTaskCache = invalidatableCache<Task>(clearableInvalidatableManager) { invalidatableCache ->
+    val parentTaskCache = invalidatableCache<Task>(clearableInvalidatableManager) { invalidatableCache ->
         try {
-            val parentTask = parentTaskDelegate.getTask(parentTaskId)
+            val parentTask = parentTaskDelegate.getParentTask()
 
             val removable = parentTask.clearableInvalidatableManager.addInvalidatable(invalidatableCache)
 
@@ -52,9 +53,6 @@ sealed class TaskHierarchy(
 
     val parentTask by parentTaskCache
     abstract val childTask: Task
-
-    val parentTaskId by lazy { taskHierarchyRecord.parentTaskId }
-    abstract val childTaskId: String
 
     abstract val taskHierarchyKey: TaskHierarchyKey
 

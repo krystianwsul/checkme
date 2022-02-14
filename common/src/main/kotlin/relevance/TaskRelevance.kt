@@ -102,6 +102,7 @@ class TaskRelevance(val task: Task) {
                                 true
                         }
                     }
+                    else -> throw UnsupportedOperationException()
                 }
             }
             .map { scheduleRelevances.getOrPut(it.schedule) }

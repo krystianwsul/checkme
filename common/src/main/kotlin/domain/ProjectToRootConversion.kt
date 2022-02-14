@@ -9,10 +9,10 @@ import com.krystianwsul.common.utils.TaskKey
 
 class ProjectToRootConversion {
 
-    val startTasks = mutableMapOf<String, Pair<ProjectTask, List<Instance>>>()
+    val startTasks = mutableMapOf<TaskKey.Project, Pair<ProjectTask, List<Instance>>>()
     val startTaskHierarchies = mutableMapOf<TaskHierarchyKey, TaskHierarchy>()
 
-    val endTasks = HashMap<String, RootTask>()
+    val endTasks = HashMap<TaskKey.Project, RootTask>()
 
     val copiedTaskKeys = mutableMapOf<TaskKey, TaskKey>()
 }

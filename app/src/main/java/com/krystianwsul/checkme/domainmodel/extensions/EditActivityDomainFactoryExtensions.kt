@@ -3,7 +3,10 @@ package com.krystianwsul.checkme.domainmodel.extensions
 import androidx.annotation.CheckResult
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
-import com.krystianwsul.checkme.domainmodel.*
+import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.DomainListenerManager
+import com.krystianwsul.checkme.domainmodel.ScheduleText
+import com.krystianwsul.checkme.domainmodel.UserScope
 import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
 import com.krystianwsul.checkme.domainmodel.update.SingleDomainUpdate
 import com.krystianwsul.checkme.gui.edit.EditParameters
@@ -15,7 +18,8 @@ import com.krystianwsul.common.domain.ScheduleGroup
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.MyCustomTime
 import com.krystianwsul.common.firebase.json.tasks.TaskJson
-import com.krystianwsul.common.firebase.models.*
+import com.krystianwsul.common.firebase.models.ImageState
+import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.interval.ScheduleInterval
 import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.project.SharedProject
@@ -84,7 +88,8 @@ private fun getScheduleDataWrappersAndAssignedTo(
     return scheduleDataWrappers to assignedTo
 }
 
-private fun Task.topLevelTaskIsSingleSchedule(now: ExactTimeStamp.Local) = getTopLevelTask(now).intervalInfo
+// todo I think this should be getting the *current* schedule intervals
+private fun Task.topLevelTaskIsSingleSchedule() = getTopLevelTask().intervalInfo
     .scheduleIntervals
     .singleOrNull()
     ?.schedule is SingleSchedule
@@ -102,20 +107,13 @@ private fun DomainFactory.getCreateTaskDataSlow(
     val taskData = (startParameters as? EditViewModel.StartParameters.Task)?.let {
         val task = getTaskForce(it.taskKey)
 
-        val parentKey: EditViewModel.ParentKey?
         var scheduleDataWrappers: List<EditViewModel.ScheduleDataWrapper>? = null
         var assignedTo: Set<UserKey> = setOf()
 
-        if (task.isTopLevelTask(now)) {
+        if (task.isTopLevelTask()) {
             val schedules = task.intervalInfo.getCurrentScheduleIntervals(now)
 
             customTimes += schedules.mapNotNull { it.schedule.customTimeKey }.map { it to getCustomTime(it) }
-
-            parentKey = task.project
-                .projectKey
-                .let {
-                    (it as? ProjectKey.Shared)?.let { EditViewModel.ParentKey.Project(it) }
-                }
 
             if (schedules.isNotEmpty()) {
                 getScheduleDataWrappersAndAssignedTo(schedules).let {
@@ -123,14 +121,10 @@ private fun DomainFactory.getCreateTaskDataSlow(
                     assignedTo = it.second
                 }
             }
-        } else {
-            val parentTask = task.getParentTask(now)!!
-            parentKey = EditViewModel.ParentKey.Task(parentTask.taskKey)
         }
 
         EditViewModel.TaskData(
             task.name,
-            parentKey,
             scheduleDataWrappers,
             task.note,
             task.getImage(deviceDbInfo),
@@ -150,15 +144,16 @@ private fun DomainFactory.getCreateTaskDataSlow(
         is EditViewModel.CurrentParentSource.Set -> currentParentSource.parentKey
         is EditViewModel.CurrentParentSource.FromTask -> {
             val task = getTaskForce(currentParentSource.taskKey)
+            val parentTask = task.parentTask
 
-            if (task.isTopLevelTask(now)) {
+            if (parentTask == null) {
                 when (val projectKey = task.project.projectKey) {
                     is ProjectKey.Private -> null
                     is ProjectKey.Shared -> EditViewModel.ParentKey.Project(projectKey)
                     else -> throw UnsupportedOperationException()
                 }
             } else {
-                task.getParentTask(now)?.let { EditViewModel.ParentKey.Task(it.taskKey) }
+                EditViewModel.ParentKey.Task(parentTask.taskKey)
             }
         }
         is EditViewModel.CurrentParentSource.FromTasks -> {
@@ -185,7 +180,7 @@ private fun DomainFactory.getCreateTaskDataSlow(
                 task.name,
                 EditViewModel.ParentKey.Task(task.taskKey),
                 task.hasMultipleInstances(startParameters.parentInstanceKey, now),
-                task.getTopLevelTask(now).let {
+                task.getTopLevelTask().let {
                     val parent = it.project
                         .let { it as? SharedProject }
                         ?.toParent()
@@ -195,7 +190,7 @@ private fun DomainFactory.getCreateTaskDataSlow(
 
                     Triple(parent, scheduleDataWrappers, assignedTo)
                 },
-                task.topLevelTaskIsSingleSchedule(now),
+                task.topLevelTaskIsSingleSchedule(),
             )
         }
         is EditViewModel.ParentKey.Project -> {
@@ -355,8 +350,8 @@ fun DomainUpdater.updateScheduleTask(
         Not the prettiest way to do this, but if we're editing a child task to make it a top-level task, we try to carry
         over the previous instance instead of creating a new one
          */
-        val parentSingleSchedule = finalTask.getParentTask(now)
-            ?.getTopLevelTask(now)
+        val parentSingleSchedule = finalTask.parentTask
+            ?.getTopLevelTask()
             ?.intervalInfo
             ?.getCurrentScheduleIntervals(now)
             ?.singleOrNull()
@@ -417,7 +412,7 @@ fun DomainUpdater.updateChildTask(
         parentTask.requireNotDeleted()
 
         tailrec fun Task.hasAncestor(taskKey: TaskKey): Boolean {
-            val currParentTask = getParentTask(now) ?: return false
+            val currParentTask = this.parentTask ?: return false
 
             if (currParentTask.taskKey == taskKey) return true
 
@@ -426,19 +421,7 @@ fun DomainUpdater.updateChildTask(
 
         check(!parentTask.hasAncestor(taskKey))
 
-        task.performRootIntervalUpdate {
-            if (task.getParentTask(now) != parentTask) {
-                if (allReminders) endAllCurrentTaskHierarchies(now)
-
-                parentTask.addChild(this, now)
-            }
-
-            if (allReminders) {
-                endAllCurrentSchedules(now)
-                endAllCurrentNoScheduleOrParents(now)
-            }
-        }
-
+        addChildToParent(task, parentTask, now, removeInstanceKey?.let(::getInstance), allReminders)
     }
 
     task.setName(createParameters.name, createParameters.note)
@@ -446,16 +429,6 @@ fun DomainUpdater.updateChildTask(
     val image = createParameters.getImage(this)
 
     image?.let { task.setImage(deviceDbInfo, ImageState.Local(it.uuid)) }
-
-    removeInstanceKey?.let {
-        val instance = getInstance(it)
-
-        if (instance.parentInstance?.task != parentTask
-            && instance.isVisible(now, Instance.VisibilityOptions(hack24 = true))
-        ) {
-            instance.hide()
-        }
-    }
 
     image?.upload(task.taskKey)
 
@@ -688,7 +661,7 @@ private fun DomainFactory.getParentTreeDatas(
 
     parentTreeDatas += getAllTasks().asSequence()
         .filter { it.showAsParent(now, excludedTaskKeys) }
-        .filter { it.isTopLevelTask(now) && (it.project as? SharedProject)?.notDeleted != true }
+        .filter { it.isTopLevelTask() && (it.project as? SharedProject)?.notDeleted != true }
         .map { it.toParentEntryData(this, now, excludedTaskKeys, parentInstanceKey) }
 
     val projectOrder = Preferences.projectOrder
@@ -718,7 +691,7 @@ private fun DomainFactory.getProjectTaskTreeDatas(
 ): List<EditViewModel.ParentEntryData.Task> {
     return project.getAllDependenciesLoadedTasks()
         .filter { it.showAsParent(now, excludedTaskKeys) }
-        .filter { it.isTopLevelTask(now) }
+        .filter { it.isTopLevelTask() }
         .map { it.toParentEntryData(this, now, excludedTaskKeys, parentInstanceKey) }
         .toList()
 }
@@ -762,10 +735,8 @@ private fun DomainFactory.joinJoinables(
         .instanceKey
 
     joinableMap.forEach { (joinable, task) ->
-        fun addChildToParent(instance: Instance? = null) = addChildToParent(task, newParentTask, now, instance)
-
         when (joinable) {
-            is EditParameters.Join.Joinable.Task -> addChildToParent()
+            is EditParameters.Join.Joinable.Task -> addChildToParent(task, newParentTask, now)
             is EditParameters.Join.Joinable.Instance -> {
                 val migratedInstanceScheduleKey =
                     migrateInstanceScheduleKey(task, joinable.instanceKey.instanceScheduleKey, now)
@@ -785,15 +756,22 @@ private fun DomainFactory.joinTasks(
     newParentTask.requireNotDeleted()
     check(joinTasks.size > 1)
 
-    joinTasks.forEach { addChildToParent(it, newParentTask, now) }
+    // todo this would be a lot easier if I paired them immediately
+    val unusedRemoveInstanceKeys = removeInstanceKeys.toMutableList()
 
-    removeInstanceKeys.map(::getInstance)
-        .onEach { it.setParentState(Instance.ParentState.Unset) }
-        .filter {
-            it.parentInstance?.task != newParentTask &&
-                    it.isVisible(now, Instance.VisibilityOptions(hack24 = true))
-        }
-        .forEach { it.hide() }
+    joinTasks.forEach { task ->
+        val removeInstance = removeInstanceKeys.filter { it.taskKey == task.taskKey }
+            .singleOrEmpty()
+            ?.let {
+                unusedRemoveInstanceKeys -= it
+
+                getInstance(it)
+            }
+
+        addChildToParent(task, newParentTask, now, removeInstance)
+    }
+
+    check(unusedRemoveInstanceKeys.isEmpty())
 }
 
 private fun Task.hasMultipleInstances(parentInstanceKey: InstanceKey?, now: ExactTimeStamp.Local) =
@@ -804,17 +782,16 @@ private fun Task.toParentEntryData(
     now: ExactTimeStamp.Local,
     excludedTaskKeys: Set<TaskKey>,
     parentInstanceKey: InstanceKey?,
-    scheduleTextExactTimeStamp: ExactTimeStamp = now,
 ) = EditViewModel.ParentEntryData.Task(
     name,
     domainFactory.getTaskListChildTaskDatas(now, this, excludedTaskKeys, parentInstanceKey),
     taskKey,
-    getScheduleText(ScheduleText, scheduleTextExactTimeStamp),
+    getScheduleText(ScheduleText),
     note,
     EditViewModel.SortKey.TaskSortKey(startExactTimeStamp),
     project.projectKey,
     hasMultipleInstances(parentInstanceKey, now),
-    topLevelTaskIsSingleSchedule(now),
+    topLevelTaskIsSingleSchedule(),
 )
 
 private fun DomainFactory.getTaskListChildTaskDatas(
@@ -822,9 +799,8 @@ private fun DomainFactory.getTaskListChildTaskDatas(
     parentTask: Task,
     excludedTaskKeys: Set<TaskKey>,
     parentInstanceKey: InstanceKey?,
-): List<EditViewModel.ParentEntryData.Task> = parentTask.getChildTaskHierarchies(now)
+): List<EditViewModel.ParentEntryData.Task> = parentTask.getChildTasks()
     .asSequence()
-    .map { it.childTask }
     .filter { it.showAsParent(now, excludedTaskKeys) }
     .map {
         it.toParentEntryData(
@@ -832,7 +808,6 @@ private fun DomainFactory.getTaskListChildTaskDatas(
             now,
             excludedTaskKeys,
             parentInstanceKey,
-            it.getHierarchyExactTimeStamp(now),
         )
     }
     .toList()
@@ -840,17 +815,16 @@ private fun DomainFactory.getTaskListChildTaskDatas(
 private fun DomainFactory.copyTask(now: ExactTimeStamp.Local, task: RootTask, copyTaskKey: TaskKey) {
     val copiedTask = getTaskForce(copyTaskKey)
 
-    copiedTask.getChildTaskHierarchies(now).forEach {
-        val copiedChildTask = it.childTask
-        copiedChildTask.getImage(deviceDbInfo)?.let { check(it is ImageState.Remote) }
+    copiedTask.getChildTasks().forEach {
+        it.getImage(deviceDbInfo)?.let { check(it is ImageState.Remote) }
 
         createChildTask(
             now,
             task,
-            copiedChildTask.name,
-            copiedChildTask.note,
-            copiedChildTask.imageJson,
-            copiedChildTask.taskKey,
+            it.name,
+            it.note,
+            it.imageJson,
+            it.taskKey,
         )
     }
 }
@@ -926,7 +900,7 @@ private fun DomainFactory.convertAndUpdateProject(
     now: ExactTimeStamp.Local,
     projectKey: ProjectKey<*>,
 ): RootTask {
-    val isTopLevelTask = task.isTopLevelTask(now)
+    val isTopLevelTask = task.isTopLevelTask()
 
     return when (task) {
         is RootTask -> task.updateProject(projectKey)

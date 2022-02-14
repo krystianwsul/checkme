@@ -16,7 +16,6 @@ import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.MyCustomTime
 import com.krystianwsul.common.firebase.models.Instance
-import com.krystianwsul.common.firebase.models.task.RootTask
 import com.krystianwsul.common.locker.LockerManager
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.InstanceKey
@@ -140,53 +139,25 @@ private class ListUndoData(private val undoDatas: List<UndoData>) : UndoData {
         undoDatas.flatMap { it.undo(domainFactory, now) }.toSet()
 }
 
-private class SetInstanceParentUndoData(
-    private val instanceKey: InstanceKey,
-    private val parentState: Instance.ParentState,
-) : UndoData {
-
-    override fun undo(
-        domainFactory: DomainFactory,
-        now: ExactTimeStamp.Local,
-    ) = domainFactory.getInstance(instanceKey).let {
-        val initialProject = it.task.project
-
-        domainFactory.trackRootTaskIds { it.setParentState(parentState) }
-
-        val finalProject = it.task.project
-
-        setOf(initialProject, finalProject)
-    }
-}
-
 @CheckResult
 fun DomainUpdater.setInstancesParent(
     notificationType: DomainListenerManager.NotificationType,
     instanceKeys: Set<InstanceKey>,
     parentInstanceKey: InstanceKey,
-): Single<EditInstancesResult> = SingleDomainUpdate.create("setInstancesParent") { now ->
+): Single<EditInstancesResult> = SingleDomainUpdate.create("setInstancesParent") {
     check(instanceKeys.isNotEmpty())
 
     val instances = instanceKeys.map(this::getInstance)
 
     val originalProjects = instances.map { it.task.project }
 
-    val parentTask = getTaskForce(parentInstanceKey.taskKey)
-
-    val parentTaskHasOtherInstances = parentTask.hasOtherVisibleInstances(now, parentInstanceKey)
-
     val undoDatas = trackRootTaskIds {
         instances.map {
-            if (parentTaskHasOtherInstances || it.task.hasOtherVisibleInstances(now, it.instanceKey)) {
-                val undoData = SetInstanceParentUndoData(it.instanceKey, it.parentState)
+            val undoData = SetInstanceParentUndoData(it.instanceKey, it.parentState)
 
-                it.setParentState(parentInstanceKey)
+            it.setParentState(parentInstanceKey)
 
-                undoData
-            } else {
-                // this is very rare, so I'll just hope for the best with casting
-                addChildToParent(it.task as RootTask, parentTask as RootTask, now)
-            }
+            undoData
         }
     }
 

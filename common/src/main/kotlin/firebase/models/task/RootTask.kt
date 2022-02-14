@@ -29,7 +29,7 @@ class RootTask private constructor(
 ) : Task(
     JsonTime.CustomTimeProvider.getForRootTask(userCustomTimeProvider),
     taskRecord,
-    ParentTaskDelegate.Root(parent),
+    ParentTaskDelegate.Factory.Root(parent),
     clearableInvalidatableManager,
     parent.rootModelChangeManager,
 ) {

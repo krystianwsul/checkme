@@ -22,16 +22,11 @@ fun DomainFactory.getShowTasksData(parameters: ShowTasksActivity.Parameters): Sh
 
     val now = ExactTimeStamp.Local.now
 
-    fun Task.toChildTaskData(hierarchyExactTimeStamp: ExactTimeStamp): TaskListFragment.ChildTaskData {
+    fun Task.toChildTaskData(): TaskListFragment.ChildTaskData {
         return TaskListFragment.ChildTaskData(
             name,
-            getScheduleText(ScheduleText, hierarchyExactTimeStamp),
-            getTaskListChildTaskDatas(
-                this,
-                now,
-                hierarchyExactTimeStamp,
-                false,
-            ),
+            getScheduleText(ScheduleText),
+            getTaskListChildTaskDatas(this, now, false),
             note,
             taskKey,
             getImage(deviceDbInfo),
@@ -39,8 +34,8 @@ fun DomainFactory.getShowTasksData(parameters: ShowTasksActivity.Parameters): Sh
             isVisible(now),
             canMigrateDescription(now),
             ordinal,
-            getProjectInfo(now, parameters.showProjects),
-            isAssignedToMe(now, myUserFactory.user),
+            getProjectInfo(parameters.showProjects),
+            isAssignedToMe(myUserFactory.user),
         )
     }
 
@@ -53,8 +48,7 @@ fun DomainFactory.getShowTasksData(parameters: ShowTasksActivity.Parameters): Sh
         is ShowTasksActivity.Parameters.Unscheduled -> {
             fun Project<*>.getUnscheduledTaskDatas() = getAllDependenciesLoadedTasks().filter {
                 it.notDeleted && it.intervalInfo.isUnscheduled()
-            }
-                .map { it.toChildTaskData(it.getHierarchyExactTimeStamp(now)) }
+            }.map { it.toChildTaskData() }
 
             entryDatas = projectsFactory.run {
                 if (parameters.projectKey != null) {
@@ -77,7 +71,7 @@ fun DomainFactory.getShowTasksData(parameters: ShowTasksActivity.Parameters): Sh
         is ShowTasksActivity.Parameters.Copy -> {
             entryDatas = parameters.taskKeys
                 .map(::getTaskForce)
-                .map { it.toChildTaskData(it.getHierarchyExactTimeStamp(now)) }
+                .map { it.toChildTaskData() }
                 .sorted()
 
             title = MyApplication.context.getString(R.string.copyingTasksTitle)
@@ -90,9 +84,8 @@ fun DomainFactory.getShowTasksData(parameters: ShowTasksActivity.Parameters): Sh
 
             entryDatas = project.getAllDependenciesLoadedTasks()
                 .asSequence()
-                .map { Pair(it, it.getHierarchyExactTimeStamp(now)) }
-                .filter { (task, hierarchyExactTimeStamp) -> task.isTopLevelTask(hierarchyExactTimeStamp) }
-                .map { (task, hierarchyExactTimeStamp) -> task.toChildTaskData(hierarchyExactTimeStamp) }
+                .filter { it.isTopLevelTask() }
+                .map { it.toChildTaskData() }
                 .toList()
 
             title = project.getDisplayName()

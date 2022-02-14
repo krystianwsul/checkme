@@ -204,7 +204,7 @@ class Instance private constructor(
 
     private class EndedTaskHierarchyException(message: String) : Exception(message)
 
-    private val parentInstanceCache =
+    val parentInstanceCache =
         invalidatableCache<Instance?>(task.clearableInvalidatableManager) { invalidatableCache ->
             when (val parentState = data.parentState) {
                 ParentState.NoParent -> InvalidatableCache.ValueHolder(null) { }
@@ -680,9 +680,7 @@ class Instance private constructor(
         }
     }
 
-    override fun getAssignedTo(now: ExactTimeStamp.Local) = getAssignedTo()
-
-    fun getAssignedTo(): List<ProjectUser> {
+    override fun getAssignedTo(): List<ProjectUser> {
         if (!isRootInstance()) return listOf()
 
         return getMatchingScheduleIntervals(false).map { it.schedule.assignedTo }

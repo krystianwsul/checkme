@@ -41,31 +41,24 @@ fun DomainFactory.getMainTaskData(now: ExactTimeStamp.Local = ExactTimeStamp.Loc
     return MainTaskViewModel.Data(TaskListFragment.TaskData(getMainData(now), null, true, null))
 }
 
-private fun DomainFactory.getMainData(
-    now: ExactTimeStamp.Local,
-    filter: (Task) -> Boolean = { true },
-): List<TaskListFragment.ProjectData> {
+private fun DomainFactory.getMainData(now: ExactTimeStamp.Local, filter: (Task) -> Boolean = { true }):
+        List<TaskListFragment.ProjectData> {
     fun Collection<Task>.toChildTaskDatas() = asSequence().filter(filter)
-        .map { Pair(it, it.getHierarchyExactTimeStamp(now)) }
-        .filter { (task, hierarchyExactTimeStamp) -> task.isTopLevelTask(hierarchyExactTimeStamp) }
-        .map { (task, hierarchyExactTimeStamp) ->
+        .filter { it.isTopLevelTask() }
+        .map {
             TaskListFragment.ChildTaskData(
-                task.name,
-                task.getScheduleText(ScheduleText, hierarchyExactTimeStamp),
-                getTaskListChildTaskDatas(
-                    task,
-                    now,
-                    hierarchyExactTimeStamp,
-                ),
-                task.note,
-                task.taskKey,
-                task.getImage(deviceDbInfo),
-                task.notDeleted,
-                task.isVisible(now),
-                task.canMigrateDescription(now),
-                task.ordinal,
-                task.getProjectInfo(now),
-                task.isAssignedToMe(now, myUserFactory.user),
+                it.name,
+                it.getScheduleText(ScheduleText),
+                getTaskListChildTaskDatas(it, now),
+                it.note,
+                it.taskKey,
+                it.getImage(deviceDbInfo),
+                it.notDeleted,
+                it.isVisible(now),
+                it.canMigrateDescription(now),
+                it.ordinal,
+                it.getProjectInfo(),
+                it.isAssignedToMe(myUserFactory.user),
             )
         }
         .sortedDescending()
@@ -165,7 +158,7 @@ fun DomainFactory.getGroupListData(
             doneChildInstanceDescriptors.toDoneSingleBridges(),
             instance.ordinal,
             task.getImage(deviceDbInfo),
-            instance.isAssignedToMe(now, myUserFactory.user),
+            instance.isAssignedToMe(myUserFactory.user),
             instance.getProject().projectKey as? ProjectKey.Shared,
             instance.parentInstance?.instanceKey,
         )

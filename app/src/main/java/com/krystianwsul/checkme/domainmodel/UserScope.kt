@@ -35,7 +35,7 @@ class UserScope(
 
     companion object {
 
-        val instanceRelay = BehaviorRelay.createDefault(NullableWrapper<UserScope>())!!
+        val instanceRelay = BehaviorRelay.createDefault(NullableWrapper<UserScope>())
 
         val nullableInstance get() = instanceRelay.value!!.value
 

@@ -23,7 +23,9 @@ import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.utils.checkError
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.criteria.SearchCriteria
-import com.krystianwsul.common.domain.*
+import com.krystianwsul.common.domain.DeviceDbInfo
+import com.krystianwsul.common.domain.ProjectToRootConversion
+import com.krystianwsul.common.domain.TaskUndoData
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.DomainThreadChecker
@@ -344,9 +346,7 @@ class DomainFactory(
     ): Pair<TaskUndoData, DomainUpdater.Params> {
         check(taskKeys.isNotEmpty())
 
-        fun Task.getAllChildren(): List<Task> = listOf(this) + getChildTaskHierarchies(now).map {
-            it.childTask.getAllChildren()
-        }.flatten()
+        fun Task.getAllChildren(): List<Task> = listOf(this) + getChildTasks().map { it.getAllChildren() }.flatten()
 
         val tasks = taskKeys.map { getTaskForce(it).getAllChildren() }
             .flatten()
@@ -450,7 +450,7 @@ class DomainFactory(
             doneInstanceDescriptors.toDoneSingleBridges(),
             instance.ordinal,
             instance.task.getImage(deviceDbInfo),
-            instance.isAssignedToMe(now, myUserFactory.user),
+            instance.isAssignedToMe(myUserFactory.user),
             instance.getProject().projectKey as? ProjectKey.Shared,
             instance.parentInstance?.instanceKey,
         )
@@ -525,35 +525,23 @@ class DomainFactory(
     fun getTaskListChildTaskDatas(
         parentTask: Task,
         now: ExactTimeStamp.Local,
-        parentHierarchyExactTimeStamp: ExactTimeStamp,
         includeProjectInfo: Boolean = true,
     ): List<TaskListFragment.ChildTaskData> {
-        return parentTask.getChildTaskHierarchies(parentHierarchyExactTimeStamp, true)
-            .map { taskHierarchy ->
-                val childTask = taskHierarchy.childTask
-
-                val childHierarchyExactTimeStamp =
-                    childTask.getHierarchyExactTimeStamp(parentHierarchyExactTimeStamp)
-
-                TaskListFragment.ChildTaskData(
-                    childTask.name,
-                    childTask.getScheduleText(ScheduleText, childHierarchyExactTimeStamp),
-                    getTaskListChildTaskDatas(
-                        childTask,
-                        now,
-                        childHierarchyExactTimeStamp,
-                        includeProjectInfo,
-                    ),
-                    childTask.note,
-                    childTask.taskKey,
-                    childTask.getImage(deviceDbInfo),
-                    childTask.notDeleted,
-                    childTask.isVisible(now),
-                    childTask.canMigrateDescription(now),
-                    childTask.ordinal,
-                    childTask.getProjectInfo(now, includeProjectInfo),
-                    childTask.isAssignedToMe(now, myUserFactory.user),
-                )
+        return parentTask.getChildTasks().map { childTask ->
+            TaskListFragment.ChildTaskData(
+                childTask.name,
+                childTask.getScheduleText(ScheduleText),
+                getTaskListChildTaskDatas(childTask, now, includeProjectInfo),
+                childTask.note,
+                childTask.taskKey,
+                childTask.getImage(deviceDbInfo),
+                childTask.notDeleted,
+                childTask.isVisible(now),
+                childTask.canMigrateDescription(now),
+                childTask.ordinal,
+                childTask.getProjectInfo(),
+                childTask.isAssignedToMe(myUserFactory.user),
+            )
             }
     }
 
@@ -684,14 +672,14 @@ class DomainFactory(
                     this@DomainFactory,
                 )
 
-                projectToRootConversion.endTasks[pair.first.id] = task
+                projectToRootConversion.endTasks[pair.first.taskKey] = task
                 projectToRootConversion.copiedTaskKeys[pair.first.taskKey] = task.taskKey
             }
 
             for (startTaskHierarchy in projectToRootConversion.startTaskHierarchies.values) {
-                val parentTask = projectToRootConversion.endTasks.getValue(startTaskHierarchy.parentTaskId)
-
-                val childTask = projectToRootConversion.endTasks.getValue(startTaskHierarchy.childTaskId)
+                val parentTask =
+                    projectToRootConversion.endTasks.getValue(startTaskHierarchy.parentTaskKey as TaskKey.Project)
+                val childTask = projectToRootConversion.endTasks.getValue(startTaskHierarchy.childTaskKey as TaskKey.Project)
 
                 childTask.performRootIntervalUpdate { copyParentNestedTaskHierarchy(now, startTaskHierarchy, parentTask.id) }
 
@@ -713,7 +701,7 @@ class DomainFactory(
 
             copiedTaskKeys.putAll(projectToRootConversion.copiedTaskKeys)
 
-            return projectToRootConversion.endTasks.getValue(startTask.id)
+            return projectToRootConversion.endTasks.getValue(startTask.taskKey)
         }
 
         private fun convertProjectToRootHelper(
@@ -721,9 +709,9 @@ class DomainFactory(
             projectToRootConversion: ProjectToRootConversion,
             startTask: ProjectTask,
         ) {
-            if (projectToRootConversion.startTasks.containsKey(startTask.id)) return
+            if (projectToRootConversion.startTasks.containsKey(startTask.taskKey)) return
 
-            projectToRootConversion.startTasks[startTask.id] = Pair(
+            projectToRootConversion.startTasks[startTask.taskKey] = Pair(
                 startTask,
                 startTask.existingInstances
                     .values
@@ -735,7 +723,7 @@ class DomainFactory(
                     },
             )
 
-            val childTaskHierarchies = startTask.getChildTaskHierarchies(now)
+            val childTaskHierarchies = startTask.getChildTaskHierarchies()
             val parentTaskHierarchies = startTask.parentTaskHierarchies
 
             val taskHierarchyMap = (childTaskHierarchies + parentTaskHierarchies).associateBy { it.taskHierarchyKey }
@@ -782,7 +770,7 @@ class DomainFactory(
                         oldTask.project.projectKey,
                         newProject.projectKey,
                     )
-                } else if (oldTask.isTopLevelTask(now)) {
+                } else if (oldTask.isTopLevelTask()) {
                     setNoScheduleOrParent(now, newProject.projectKey)
                 }
             }

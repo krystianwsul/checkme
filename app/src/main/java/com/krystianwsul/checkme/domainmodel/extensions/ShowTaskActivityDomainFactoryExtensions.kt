@@ -20,18 +20,13 @@ fun DomainFactory.getShowTaskData(requestTaskKey: TaskKey): ShowTaskViewModel.Da
     val now = ExactTimeStamp.Local.now
 
     val task = getTaskForce(taskKey)
-    val parentHierarchyExactTimeStamp = task.getHierarchyExactTimeStamp(now)
 
-    val childTaskDatas = task.getChildTaskHierarchies(parentHierarchyExactTimeStamp, true)
-        .map { taskHierarchy ->
-            val childTask = taskHierarchy.childTask
-
-            val childHierarchyExactTimeStamp = childTask.getHierarchyExactTimeStamp(parentHierarchyExactTimeStamp)
-
+    val childTaskDatas = task.getChildTasks()
+        .map { childTask ->
             TaskListFragment.ChildTaskData(
                 childTask.name,
-                childTask.getScheduleText(ScheduleText, childHierarchyExactTimeStamp),
-                getTaskListChildTaskDatas(childTask, now, childHierarchyExactTimeStamp),
+                childTask.getScheduleText(ScheduleText),
+                getTaskListChildTaskDatas(childTask, now),
                 childTask.note,
                 childTask.taskKey,
                 childTask.getImage(deviceDbInfo),
@@ -39,15 +34,15 @@ fun DomainFactory.getShowTaskData(requestTaskKey: TaskKey): ShowTaskViewModel.Da
                 childTask.isVisible(now),
                 childTask.canMigrateDescription(now),
                 childTask.ordinal,
-                childTask.getProjectInfo(now),
-                childTask.isAssignedToMe(now, myUserFactory.user),
+                childTask.getProjectInfo(),
+                childTask.isAssignedToMe(myUserFactory.user),
             )
         }
         .sorted()
 
     var collapseText = listOfNotNull(
-        task.getParentTask(parentHierarchyExactTimeStamp)?.name,
-        task.getScheduleTextMultiline(ScheduleText, parentHierarchyExactTimeStamp).takeIf { it.isNotEmpty() }
+        task.parentTask?.name,
+        task.getScheduleTextMultiline(ScheduleText).takeIf { it.isNotEmpty() },
     ).joinToString("\n\n")
 
     if (debugMode) {
@@ -64,7 +59,7 @@ fun DomainFactory.getShowTaskData(requestTaskKey: TaskKey): ShowTaskViewModel.Da
             childTaskDatas.toMutableList(),
             task.note,
             task.isVisible(now),
-            task.getProjectInfo(now),
+            task.getProjectInfo(),
         ),
         task.getImage(deviceDbInfo),
         task.notDeleted,

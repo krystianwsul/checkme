@@ -72,7 +72,7 @@ fun DomainFactory.getShowTaskInstancesData(
                             doneChildInstanceDescriptors.toDoneSingleBridges(),
                             it.ordinal,
                             it.task.getImage(deviceDbInfo),
-                            it.isAssignedToMe(now, myUserFactory.user),
+                            it.isAssignedToMe(myUserFactory.user),
                             it.getProject().projectKey as? ProjectKey.Shared,
                             it.parentInstance?.instanceKey,
                         )

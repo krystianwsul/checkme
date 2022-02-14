@@ -33,13 +33,13 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
         const val TEST_IRRELEVANT = false
 
         // duplicate of logic in Instance.shouldShowNotification
-        private fun Sequence<Instance>.filterNotifications(domainFactory: DomainFactory, now: ExactTimeStamp.Local) =
+        private fun Sequence<Instance>.filterNotifications(domainFactory: DomainFactory) =
             filter {
                 val tracker = TimeLogger.startIfLogDone("Notifier filter")
 
                 val ret = it.done == null &&
                         !it.getNotified(domainFactory.shownFactory) &&
-                        it.isAssignedToMe(now, domainFactory.myUserFactory.user)
+                        it.isAssignedToMe(domainFactory.myUserFactory.user)
 
                 tracker?.stop()
 
@@ -51,7 +51,7 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
                 null,
                 now.toOffset().plusOne(),
                 now,
-            ).filterNotifications(domainFactory, now)
+            ).filterNotifications(domainFactory)
 
         fun getNotificationInstances(
             domainFactory: DomainFactory,
@@ -66,7 +66,7 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
                 offset.plusOne(),
                 now,
                 projectKey = projectKey,
-            ).filterNotifications(domainFactory, now).toList()
+            ).filterNotifications(domainFactory).toList()
         }
     }
 
@@ -112,7 +112,7 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
                 now,
             ).also {
                 DebugFragment.logDone("Notifier.updateNotifications getRootInstances end")
-            }.filterNotifications(domainFactory, now)
+            }.filterNotifications(domainFactory)
             DebugFragment.logDone("Notifier.updateNotifications filterNotifications end")
 
             var needsOneExtra = true

@@ -36,7 +36,8 @@ fun DomainFactory.getShowTaskInstancesData(
 
             val parent: Endable
             val taskDatas: List<GroupListDataWrapper.TaskData>
-            val instanceDescriptors: List<GroupTypeFactory.InstanceDescriptor>
+            val notDoneInstanceDescriptors: List<GroupTypeFactory.InstanceDescriptor>
+            val doneInstanceDescriptors: List<GroupTypeFactory.InstanceDescriptor>
             val hasMore: Boolean
             when (parameters) {
                 is ShowTaskInstancesActivity.Parameters.Task -> {
@@ -54,7 +55,7 @@ fun DomainFactory.getShowTaskInstancesData(
 
                     hasMore = pair.second
 
-                    instanceDescriptors = pair.first.map {
+                    notDoneInstanceDescriptors = pair.first.map {
                         val (notDoneChildInstanceDescriptors, doneChildInstanceDescriptors) = getChildInstanceDatas(it, now)
 
                         val instanceData = GroupListDataWrapper.InstanceData(
@@ -84,6 +85,8 @@ fun DomainFactory.getShowTaskInstancesData(
                             it,
                         )
                     }
+
+                    doneInstanceDescriptors = emptyList()
                 }
                 is ShowTaskInstancesActivity.Parameters.Project -> {
                     val project = projectsFactory.getProjectForce(parameters.projectKey)
@@ -92,7 +95,10 @@ fun DomainFactory.getShowTaskInstancesData(
 
                     val triple = getCappedInstanceAndTaskDatas(now, searchCriteria, page, parameters.projectKey)
 
-                    instanceDescriptors = triple.first
+                    val splitInstanceDescriptors = triple.first.splitDone()
+
+                    notDoneInstanceDescriptors = splitInstanceDescriptors.first
+                    doneInstanceDescriptors = splitInstanceDescriptors.second
                     taskDatas = triple.second
                     hasMore = triple.third
                 }
@@ -104,11 +110,11 @@ fun DomainFactory.getShowTaskInstancesData(
                 taskDatas,
                 null,
                 newMixedInstanceDataCollection(
-                    instanceDescriptors,
+                    notDoneInstanceDescriptors,
                     parameters.groupingMode,
                     includeProjectDetails = parameters.projectKey == null,
                 ),
-                listOf(),
+                doneInstanceDescriptors.toDoneSingleBridges(),
                 null,
                 null,
                 DropParent.TopLevel(false),

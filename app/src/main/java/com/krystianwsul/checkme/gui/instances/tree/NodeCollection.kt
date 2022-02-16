@@ -20,6 +20,7 @@ class NodeCollection(
     val parentNode: DetailsNode.Parent?,
     private val projectInfo: DetailsNode.ProjectInfo?,
     private val unscheduledProjectKey: ProjectKey.Shared?,
+    val doneBeforeNotDone: Boolean,
 ) {
 
     private lateinit var notDoneGroupCollection: NotDoneGroupCollection

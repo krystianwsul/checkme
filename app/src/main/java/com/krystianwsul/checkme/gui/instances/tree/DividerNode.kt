@@ -12,7 +12,6 @@ import com.krystianwsul.checkme.gui.utils.flatten
 import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.NodeContainer
 import com.krystianwsul.treeadapter.TreeNode
-import java.util.*
 
 class DividerNode(
         override val indentation: Int,
@@ -92,6 +91,8 @@ class DividerNode(
                     || other is ImageNode
                     || other is DetailsNode
         )
+
+        if (nodeCollection.doneBeforeNotDone && other is NotDoneGroupNode) return -1
 
         return 1
     }

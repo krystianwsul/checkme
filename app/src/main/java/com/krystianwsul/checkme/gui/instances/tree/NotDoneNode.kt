@@ -181,6 +181,7 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
                     modelNode,
                     bridge.projectInfo,
                     null,
+                    false,
                 )
 
                 treeNode.setChildTreeNodes(

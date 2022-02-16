@@ -37,7 +37,7 @@ class NotDoneGroupNode(
         is ImageNode, is DetailsNode -> 1
         is NotDoneNode -> contentDelegate.bridge.compareTo(other.contentDelegate.bridge)
         is UnscheduledNode -> if (nodeCollection.unscheduledFirst) 1 else -1
-        is DividerNode -> -1
+        is DividerNode -> if (nodeCollection.doneBeforeNotDone) 1 else -1
         else -> throw IllegalArgumentException()
     }
 }

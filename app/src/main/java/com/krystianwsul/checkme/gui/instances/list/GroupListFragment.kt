@@ -23,7 +23,6 @@ import com.krystianwsul.checkme.TooltipManager.subscribeShowBalloon
 import com.krystianwsul.checkme.databinding.FragmentGroupListBinding
 import com.krystianwsul.checkme.domainmodel.GroupTypeFactory
 import com.krystianwsul.checkme.domainmodel.MixedInstanceDataCollection
-import com.krystianwsul.checkme.domainmodel.extensions.*
 import com.krystianwsul.checkme.gui.base.AbstractActivity
 import com.krystianwsul.checkme.gui.edit.EditActivity
 import com.krystianwsul.checkme.gui.edit.EditParameters
@@ -479,6 +478,7 @@ class GroupListFragment @JvmOverloads constructor(
                 data.showProgress,
                 data.groupListDataWrapper.projectInfo,
                 data.groupListDataWrapper.dropParent,
+                data.doneBeforeNotDone,
             )
         }
 
@@ -932,6 +932,7 @@ class GroupListFragment @JvmOverloads constructor(
             showProgress: Boolean,
             projectInfo: DetailsNode.ProjectInfo?,
             dropParent: DropParent,
+            doneBeforeNotDone: Boolean,
         ) {
             this.dataId = dataId
             this.customTimeDatas = customTimeDatas
@@ -947,6 +948,7 @@ class GroupListFragment @JvmOverloads constructor(
                 null,
                 projectInfo,
                 unscheduledNodeProjectKey,
+                doneBeforeNotDone,
             )
 
             treeNodeCollection.nodes = nodeCollection.initialize(

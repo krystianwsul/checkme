@@ -18,6 +18,8 @@ sealed class GroupListParameters(val draggable: Boolean = true) {
 
     open val filterCriteria: FilterCriteria.ExpandOnly? = null
 
+    open val doneBeforeNotDone: Boolean = false
+
     data class All(
         override val dataId: DataId,
         override val immediate: Boolean,
@@ -56,8 +58,9 @@ sealed class GroupListParameters(val draggable: Boolean = true) {
         override val immediate: Boolean,
         override val groupListDataWrapper: GroupListDataWrapper,
         override val showProgress: Boolean,
-        val projectKey: ProjectKey.Shared? = null,
+        val projectKey: ProjectKey.Shared?,
         override val filterCriteria: FilterCriteria.ExpandOnly,
+        override val doneBeforeNotDone: Boolean,
     ) : GroupListParameters(false) {
 
         override val unscheduledFirst = true

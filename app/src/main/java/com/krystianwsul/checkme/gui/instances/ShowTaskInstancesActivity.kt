@@ -158,6 +158,7 @@ class ShowTaskInstancesActivity : AbstractActivity(), GroupListListener {
                             it.showLoader,
                             parameters.projectKey,
                             FilterCriteria.ExpandOnly(it.searchCriteria),
+                            parameters.doneBeforeNotDone,
                         )
                     )
 
@@ -283,18 +284,24 @@ class ShowTaskInstancesActivity : AbstractActivity(), GroupListListener {
 
         abstract val groupingMode: GroupType.GroupingMode
 
+        abstract val doneBeforeNotDone: Boolean
+
         @Parcelize
         data class Task(val taskKey: TaskKey) : Parameters() {
 
             override val projectKey: ProjectKey.Shared? get() = null
 
             override val groupingMode get() = GroupType.GroupingMode.None
+
+            override val doneBeforeNotDone get() = false
         }
 
         @Parcelize
         data class Project(override val projectKey: ProjectKey.Shared) : Parameters() {
 
             override val groupingMode get() = GroupType.GroupingMode.Time(projectKey)
+
+            override val doneBeforeNotDone get() = true
         }
     }
 }

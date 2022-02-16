@@ -114,7 +114,7 @@ fun DomainFactory.getShowTaskInstancesData(
                     parameters.groupingMode,
                     includeProjectDetails = parameters.projectKey == null,
                 ),
-                doneInstanceDescriptors.toDoneSingleBridges(),
+                doneInstanceDescriptors.toDoneSingleBridges(includeProjectDetails = false),
                 null,
                 null,
                 DropParent.TopLevel(false),

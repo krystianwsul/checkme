@@ -8,7 +8,6 @@ import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.utils.*
 import kotlin.properties.Delegates.observable
-import kotlin.jvm.JvmStatic
 
 class InstanceRecord(
     create: Boolean,
@@ -141,7 +140,8 @@ class InstanceRecord(
 
     var noParent by Committer(createObject::noParent)
 
-    var ordinal by observable(createObject.ordinal?.let(Ordinal::fromJson)) { _, _, newValue ->
+    // Ordinal.fromJson isn't called by ref because of a weird JS issue
+    var ordinal by observable(createObject.ordinal?.let { Ordinal.fromJson(it) }) { _, _, newValue ->
         setProperty(createObject::ordinal, newValue?.toString())
     }
 

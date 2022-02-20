@@ -46,19 +46,23 @@ class IrrelevantDomainTest {
     @Test
     fun testRemovingScheduleWithUntil() {
         val today = Date(2022, 2, 20)
+        val tomorrow = today + 1.days
 
         var now = ExactTimeStamp.Local(today, HourMinute(1, 0))
 
         val taskKey = domainUpdater(now).createScheduleTopLevelTask(
             DomainListenerManager.NotificationType.All,
             EditDelegate.CreateParameters("task"),
-            listOf(ScheduleData.Weekly(setOf(DayOfWeek.SUNDAY), TimePair(HourMinute(2, 0)), null, today, 1)),
+            listOf(
+                ScheduleData.Weekly(setOf(DayOfWeek.SUNDAY), TimePair(HourMinute(2, 0)), null, today, 1),
+                ScheduleData.Single(tomorrow, TimePair(HourMinute(2, 0))),
+            ),
             null,
         )
             .blockingGet()
             .taskKey
 
-        assertEquals(1, domainFactory.getTaskForce(taskKey).getInstances(null, null, now).count())
+        assertEquals(2, domainFactory.getTaskForce(taskKey).getInstances(null, null, now).count())
 
         now += 1.hours
 

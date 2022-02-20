@@ -87,20 +87,16 @@ class TaskRelevance(val task: Task) {
                         schedule.getInstance(schedule.topLevelTask)
                             .isVisible(now, Instance.VisibilityOptions(hack24 = true))
                     is RepeatingSchedule -> {
-                        if (it.notDeletedOffset() && schedule.notDeleted) {
-                            true
-                        } else {
                             val oldestVisibleExactTimeStamp = schedule.oldestVisible
                                 .date
                                 ?.toMidnightExactTimeStamp()
 
-                            val scheduleEndExactTimeStamp = schedule.endExactTimeStampOffset
+                            val scheduleEndExactTimeStamp = schedule.intrinsicEndExactTimeStamp
 
                             if (oldestVisibleExactTimeStamp != null && scheduleEndExactTimeStamp != null)
                                 oldestVisibleExactTimeStamp <= scheduleEndExactTimeStamp
                             else
                                 true
-                        }
                     }
                     else -> throw UnsupportedOperationException()
                 }

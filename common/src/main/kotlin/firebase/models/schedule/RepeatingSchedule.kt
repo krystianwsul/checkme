@@ -37,7 +37,7 @@ sealed class RepeatingSchedule(topLevelTask: Task) : Schedule(topLevelTask) {
     }.apply { addTo(startExactTimeStampOffsetProperty) }
     private val intrinsicStartExactTimeStamp by intrinsicStartExactTimeStampProperty
 
-    private val intrinsicEndExactTimeStamp by invalidatableLazyCallbacks {
+    val intrinsicEndExactTimeStamp by invalidatableLazyCallbacks {
         listOfNotNull(
             endExactTimeStampOffset,
             repeatingScheduleRecord.until

@@ -1071,7 +1071,7 @@ class DomainFactoryTest {
             EditDelegate.CreateParameters("task3"),
             scheduleDatas,
             null,
-        )
+        ).blockingSubscribe()
 
         assertEquals(
             2,
@@ -1090,7 +1090,7 @@ class DomainFactoryTest {
             taskKey3,
             null,
             true,
-        )
+        ).blockingSubscribe()
 
         val instanceKey3 = domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
             .groupListDataWrapper
@@ -1595,7 +1595,7 @@ class DomainFactoryTest {
             DomainListenerManager.NotificationType.All,
             setOf(singleInstanceKey),
             repeatingInstanceKey,
-        )
+        ).blockingSubscribe()
 
         assertEquals(
             1,

@@ -612,7 +612,7 @@ class DomainFactory(
                         customTime.privateKey!!,
                     )
 
-                    getCustomTime(privateCustomTimeKey) as PrivateCustomTime
+                    projectsFactory.privateProject.tryGetProjectCustomTime(privateCustomTimeKey)
                 } else {
                     null
                 }

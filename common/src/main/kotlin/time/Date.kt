@@ -3,9 +3,7 @@ package com.krystianwsul.common.time
 import com.krystianwsul.common.utils.Parcelable
 import com.krystianwsul.common.utils.Parcelize
 import com.krystianwsul.common.utils.Serializable
-import com.soywiz.klock.DateTimeTz
-import com.soywiz.klock.ISO8601
-import com.soywiz.klock.parse
+import com.soywiz.klock.*
 
 @Parcelize
 data class Date(val year: Int, val month: Int, val day: Int) : Comparable<Date>, Parcelable, Serializable {
@@ -42,4 +40,6 @@ data class Date(val year: Int, val month: Int, val day: Int) : Comparable<Date>,
     fun toDateTimeSoy() = DateTimeSoy(year, month, day)
 
     fun toMidnightExactTimeStamp() = ExactTimeStamp.Local(this, HourMilli(0, 0, 0, 0))
+
+    operator fun plus(timeSpan: TimeSpan) = Date(toDateSoy() + timeSpan)
 }

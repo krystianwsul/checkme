@@ -257,6 +257,7 @@ class DomainFactoryRule : TestRule {
             every { save(any()) } returns Unit
             every { getUserJsons(any()) } returns mapOf()
             every { updateProjects(any(), any(), any()) } returns Unit
+            every { userMap } returns mutableMapOf()
         }
 
         domainFactory = DomainFactory(

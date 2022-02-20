@@ -68,6 +68,25 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
                 projectKey = projectKey,
             ).filterNotifications(domainFactory).toList()
         }
+
+        fun setIrrelevant(domainFactory: DomainFactory, exactTimeStamp: ExactTimeStamp.Local): Irrelevant.Result {
+            val userCustomTimeRelevances = domainFactory.run {
+                friendsFactory.userMap
+                    .map { it.value.value } +
+                        myUserFactory.user
+            }
+                .flatMap { it.customTimes.values }
+                .associate { it.key to CustomTimeRelevance(it) }
+
+            return Irrelevant.setIrrelevant(
+                { domainFactory.rootTasksFactory.rootTasks },
+                userCustomTimeRelevances,
+                { domainFactory.projectsFactory.projects },
+                domainFactory.rootTasksFactory,
+                exactTimeStamp,
+                listOf(domainFactory.myUserFactory.user),
+            )
+        }
     }
 
     fun updateNotifications(now: ExactTimeStamp.Local, params: Params) {
@@ -395,22 +414,7 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
             val dateTimeSoy = DateTime(tomorrow, Time(2.hours))
             val exactTimeStamp = ExactTimeStamp.Local(dateTimeSoy)
 
-            val userCustomTimeRelevances = domainFactory.run {
-                friendsFactory.userMap
-                    .map { it.value.value } +
-                        myUserFactory.user
-            }
-                .flatMap { it.customTimes.values }
-                .associate { it.key to CustomTimeRelevance(it) }
-
-            val results = Irrelevant.setIrrelevant(
-                { domainFactory.rootTasksFactory.rootTasks },
-                userCustomTimeRelevances,
-                { domainFactory.projectsFactory.projects },
-                domainFactory.rootTasksFactory,
-                exactTimeStamp,
-                listOf(domainFactory.myUserFactory.user),
-            )
+            val results = Companion.setIrrelevant(domainFactory, exactTimeStamp)
 
             results.irrelevantExistingInstances
                 .sortedBy { it.scheduleDateTime }

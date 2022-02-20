@@ -13,11 +13,7 @@ import com.krystianwsul.common.firebase.models.task.RootTask
 import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.firebase.models.taskhierarchy.TaskHierarchy
 import com.krystianwsul.common.time.ExactTimeStamp
-import com.krystianwsul.common.utils.Ordinal
-import com.krystianwsul.common.utils.toFields
-import com.krystianwsul.common.utils.ProjectKey
-import com.krystianwsul.common.utils.TaskKey
-import com.krystianwsul.common.utils.mapValuesNotNull
+import com.krystianwsul.common.utils.*
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
@@ -34,6 +30,11 @@ class RootTasksFactory(
     private val getProjectsFactory: () -> ProjectsFactory,
 ) : RootTask.Parent {
 
+    companion object {
+
+        var allowDeletion = Notifier.TEST_IRRELEVANT
+    }
+
     private val deletedKeys = mutableSetOf<TaskKey.Root>()
 
     private val rootTaskFactoriesRelay = BehaviorRelay.create<Map<TaskKey.Root, RootTaskFactory>>()
@@ -41,7 +42,7 @@ class RootTasksFactory(
 
     val rootTasks: Map<TaskKey.Root, RootTask>
         get() {
-            return if (Notifier.TEST_IRRELEVANT)
+            return if (allowDeletion)
                 rootTaskFactories.filterKeys { it !in deletedKeys }.mapValuesNotNull { it.value.task }
             else
                 rootTaskFactories.mapValuesNotNull { it.value.task }
@@ -93,7 +94,7 @@ class RootTasksFactory(
     }
 
     override fun deleteRootTask(task: RootTask) {
-        if (Notifier.TEST_IRRELEVANT)
+        if (allowDeletion)
             deletedKeys += task.taskKey
         else
             throw UnsupportedOperationException()

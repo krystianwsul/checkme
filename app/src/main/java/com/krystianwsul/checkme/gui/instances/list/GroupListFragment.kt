@@ -541,7 +541,7 @@ class GroupListFragment @JvmOverloads constructor(
 
         searchDataManager.treeViewAdapterSingle
             .flatMapObservable { parametersRelay }
-            .switchMap { parameters -> TooltipManager.fiveSecondDelay().map { parameters } }
+            .switchMap { TooltipManager.fiveSecondDelay().map { _ -> it } }
             .filter {
                 it.draggable &&
                         it.groupListDataWrapper.taskEditable != false &&

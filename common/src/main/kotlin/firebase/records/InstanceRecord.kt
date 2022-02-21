@@ -21,26 +21,14 @@ class InstanceRecord(
 
         private val scheduleKeyRegex = Regex("^(\\d\\d\\d\\d-\\d?\\d-\\d?\\d)-(.+)$")
 
-        private fun Int.pad(padding: Boolean) = toString().run { if (padding) padStart(2, '0') else this }
+        private fun scheduleKeyToDateString(instanceScheduleKey: InstanceScheduleKey) =
+            instanceScheduleKey.scheduleDate.run { "$year-$month-$day" }
 
-        @JvmStatic
-        fun scheduleKeyToDateString(instanceScheduleKey: InstanceScheduleKey, padding: Boolean) =
-            instanceScheduleKey.scheduleDate.run {
-                fun Int.pad() = pad(padding)
-
-                "$year-${month.pad()}-${day.pad()}"
-            }
-
-        @JvmStatic
-        fun scheduleKeyToTimeString(instanceScheduleKey: InstanceScheduleKey, padding: Boolean) =
-            instanceScheduleKey.scheduleTimePair.run {
-                fun Int.pad() = pad(padding)
-
-                customTimeKey?.toJson() ?: hourMinute!!.run { "${hour.pad()}-${minute.pad()}" }
-            }
+        private fun scheduleKeyToTimeString(instanceScheduleKey: InstanceScheduleKey) =
+            instanceScheduleKey.scheduleTimePair.run { customTimeKey?.toJson() ?: hourMinute!!.run { "$hour-$minute" } }
 
         fun scheduleKeyToString(instanceScheduleKey: InstanceScheduleKey) = instanceScheduleKey.let {
-            scheduleKeyToDateString(it, false) + "-" + scheduleKeyToTimeString(it, false)
+            scheduleKeyToDateString(it) + "-" + scheduleKeyToTimeString(it)
         }
 
         fun stringToScheduleKey(

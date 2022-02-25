@@ -46,6 +46,17 @@ class TaskRelevance(val task: Task) {
                 )
             }
 
+        task.getChildTasks().forEach {
+            taskRelevances.getValue(it.taskKey).setRelevant(
+                taskRelevances,
+                taskHierarchyRelevances,
+                instanceRelevances,
+                scheduleRelevances,
+                now,
+                source,
+            )
+        }
+
         fun Instance.filterOldestVisible(now: ExactTimeStamp.Local, ignoreHidden: Boolean = false): Boolean {
             val oldestVisibles = getOldestVisibles()
 

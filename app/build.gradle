@@ -58,7 +58,6 @@ android {
         }
     }
 
-
     buildFeatures {
         viewBinding true
         compose true
@@ -72,7 +71,7 @@ android {
 ext {
     powermockVersion = '2.0.9'
     lifecycleVersion = '2.4.1'
-    glideVersion = '4.13.0'
+    glideVersion = '4.13.1'
     composeVersion = '1.1.0'
 }
 

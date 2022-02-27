@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.domainmodel
 
+import android.util.Log
 import androidx.core.content.pm.ShortcutManagerCompat
 import com.jakewharton.rxrelay3.BehaviorRelay
 import com.jakewharton.rxrelay3.PublishRelay
@@ -99,7 +100,7 @@ class DomainFactory(
     val isWaitingForTasks = BehaviorRelay.create<Boolean>()
 
     init {
-        Preferences.tickLog.logLineHour("DomainFactory.init")
+        Preferences.tickLog.logLineHour("DomainFactory.init magic start") // todo scheduling
 
         val now = ExactTimeStamp.Local.now
 
@@ -134,6 +135,8 @@ class DomainFactory(
             .flatMapCompletable { getDomainUpdater(this).fixOffsetsAndCustomTimes(it) }
             .subscribe()
             .addTo(domainDisposable)
+
+        Log.e("asdf", "magic DomainFactory init end") // todo scheduling
     }
 
     val defaultProjectKey by lazy { projectsFactory.privateProject.projectKey }
@@ -226,7 +229,7 @@ class DomainFactory(
     override fun clearUserInfo() = getDomainUpdater(this).updateNotifications(Notifier.Params(clear = true))
 
     override fun onChangeTypeEvent(changeType: ChangeType, now: ExactTimeStamp.Local) {
-        MyCrashlytics.log("DomainFactory.onChangeTypeEvent $changeType")
+        MyCrashlytics.log("DomainFactory.onChangeTypeEvent $changeType magic") // todo scheduling
 
         check(changeType == ChangeType.REMOTE)
 

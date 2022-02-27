@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.firebase
 
+import android.util.Log
 import com.androidhuman.rxfirebase2.database.dataChanges
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.FirebaseDatabase
@@ -61,11 +62,12 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
     }
 
     private fun getUserQuery(userKey: UserKey) = rootReference.child("$USERS_KEY/${userKey.key}")
-    override fun getUserObservable(userKey: UserKey) = getUserQuery(userKey).typedSnapshotChanges<UserWrapper>()
+    override fun getUserObservable(userKey: UserKey) =
+        getUserQuery(userKey).typedSnapshotChanges<UserWrapper>("user", Priority.DB)
 
     fun getUsersObservable() = rootReference.child(USERS_KEY)
         .orderByKey()
-        .indicatorSnapshotChanges<Map<String, UserWrapper>>()
+        .indicatorSnapshotChanges<Map<String, UserWrapper>>("users", Priority.DB)
 
     private fun Path.toKey() = toString().replace('/', '-')
 
@@ -96,8 +98,13 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
         { NullableWrapper(it.value) },
     )
 
-    private inline fun <reified T : Parsable> Query.typedSnapshotChanges(): Observable<Snapshot<T>> {
+    private inline fun <reified T : Parsable> Query.typedSnapshotChanges(
+        type: String,
+        priority: Priority
+    ): Observable<Snapshot<T>> {
         return cache(
+            type,
+            priority,
             { Snapshot.fromParsable(it, T::class) },
             SnapshotConverter(path),
             { readNullable(it) },
@@ -105,8 +112,13 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
         )
     }
 
-    private inline fun <reified T : Any> Query.indicatorSnapshotChanges(): Observable<Snapshot<T>> =
+    private inline fun <reified T : Any> Query.indicatorSnapshotChanges(
+        type: String,
+        priority: Priority
+    ): Observable<Snapshot<T>> =
         cache(
+            type,
+            priority,
             { Snapshot.fromTypeIndicator(it, object : GenericTypeIndicator<T>() {}) },
             Converter(
                 { Snapshot(path.back.asString(), it.value) },
@@ -117,6 +129,8 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
         )
 
     private fun <T : Any, U : Snapshot<T>> Query.cache(
+        type: String,
+        priority: Priority,
         firebaseToSnapshot: (dataSnapshot: DataSnapshot) -> U,
         converter: Converter<NullableWrapper<T>, U>,
         readNullable: (path: Path) -> Maybe<NullableWrapper<T>>,
@@ -129,7 +143,10 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
             .map { firebaseToSnapshot(it) }
             .doOnNext { writeNullable(path, it.value).subscribe() }
 
-        return mergePaperAndRx(readNullable(path), firebaseObservable, converter).observeOnDomain(Priority.DB)
+        return mergePaperAndRx(readNullable(path), firebaseObservable, converter).observeOnDomain(priority)
+            .doOnNext {
+                Log.e("asdf", "magic db $type") // todo scheduling
+            }
     }
 
     override fun getNewId(path: String) = rootReference.child(path)
@@ -140,7 +157,7 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
         rootReference.child("$RECORDS_KEY/${projectKey.key}")
 
     override fun getSharedProjectObservable(projectKey: ProjectKey.Shared) =
-        sharedProjectQuery(projectKey).typedSnapshotChanges<JsonWrapper>()
+        sharedProjectQuery(projectKey).typedSnapshotChanges<JsonWrapper>("sharedProject", Priority.DB)
 
     override fun update(values: Map<String, Any?>, callback: DatabaseCallback) {
         rootReference.updateChildren(values)
@@ -153,13 +170,13 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
         rootReference.child("$PRIVATE_PROJECTS_KEY/${key.key}")
 
     override fun getPrivateProjectObservable(key: ProjectKey.Private) =
-        privateProjectQuery(key).typedSnapshotChanges<PrivateProjectJson>()
+        privateProjectQuery(key).typedSnapshotChanges<PrivateProjectJson>("privateProject", Priority.DB)
 
     private fun rootTaskQuery(rootTaskKey: TaskKey.Root) =
         rootReference.child("$TASKS_KEY/${rootTaskKey.taskId}")
 
     override fun getRootTaskObservable(rootTaskKey: TaskKey.Root) =
-        rootTaskQuery(rootTaskKey).typedSnapshotChanges<RootTaskJson>()
+        rootTaskQuery(rootTaskKey).typedSnapshotChanges<RootTaskJson>("rootTask", Priority.DB_TASKS)
 
     sealed class LoadState<T : Any> {
 

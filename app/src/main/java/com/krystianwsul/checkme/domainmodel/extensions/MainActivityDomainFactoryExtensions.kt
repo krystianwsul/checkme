@@ -81,7 +81,7 @@ fun DomainFactory.getGroupListData(
     position: Int,
     timeRange: Preferences.TimeRange,
 ): DayViewModel.DayData {
-    MyCrashlytics.log("DomainFactory.getGroupListData")
+    MyCrashlytics.log("DomainFactory.getGroupListData magic") // todo scheduling
 
     DomainThreadChecker.instance.requireDomainThread()
 

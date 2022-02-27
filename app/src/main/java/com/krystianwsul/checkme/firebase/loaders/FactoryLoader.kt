@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.firebase.loaders
 
+import android.util.Log
 import com.krystianwsul.checkme.domainmodel.UserScope
 import com.krystianwsul.checkme.domainmodel.observeOnDomain
 import com.krystianwsul.checkme.firebase.UserCustomTimeProviderSource
@@ -162,12 +163,23 @@ class FactoryLoader(
 
                         projectsFactorySingle = Single.zip(
                             privateProjectLoader.initialProjectEvent.map {
+                                Log.e("asdf", "magic projectFactory dependencies privateProjectLoader") // todo scheduling
                                 check(it.changeType == ChangeType.REMOTE)
 
                                 it.data
                             },
-                            sharedProjectsLoader.initialProjectsEvent,
-                            shownFactorySingle,
+                            sharedProjectsLoader.initialProjectsEvent.doOnSuccess {
+                                Log.e(
+                                    "asdf",
+                                    "magic projectFactory dependencies sharedProjectsLoader"
+                                )
+                            }, // todo scheduling
+                            shownFactorySingle.doOnSuccess {
+                                Log.e(
+                                    "asdf",
+                                    "magic projectFactory dependencies shownFactorySingle"
+                                )
+                            }, // todo scheduling
                         ) { initialPrivateProjectEvent, initialSharedProjectsEvent, shownFactory ->
                             ProjectsFactory(
                                 privateProjectLoader,

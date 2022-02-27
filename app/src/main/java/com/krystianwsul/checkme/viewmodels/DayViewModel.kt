@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.viewmodels
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.extensions.getGroupListData
@@ -23,6 +24,11 @@ class DayViewModel : ViewModel() {
     fun refresh() = entries.values.forEach { it.start(true) }
 
     class Entry(private val timeRange: Preferences.TimeRange, private val position: Int) : DomainListener<DayData>() {
+
+        override fun start(forced: Boolean) {
+            Log.e("asdf", "magic day start") // todo scheduling
+            super.start(forced)
+        }
 
         override val domainResultFetcher = DomainResultFetcher.DomainFactoryData {
             it.getGroupListData(ExactTimeStamp.Local.now, position, timeRange)

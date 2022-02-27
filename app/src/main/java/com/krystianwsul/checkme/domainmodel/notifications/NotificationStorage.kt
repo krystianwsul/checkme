@@ -5,6 +5,7 @@ import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.checkme.utils.toV3
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.TaskKey
+import com.mindorks.scheduler.Priority
 import com.pacoworks.rxpaper2.RxPaperBook
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.kotlin.Singles
@@ -38,7 +39,7 @@ class NotificationStorage(
             return Singles.zip(projectsSingle, instancesSingle)
                 .map { (projects, instances) -> NotificationStorage(rxPaperBook, projects, instances) }
                 .cast<FactoryProvider.NotificationStorage>()
-                .observeOnDomain()
+                .observeOnDomain(Priority.DB)
         }
     }
 

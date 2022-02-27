@@ -12,8 +12,10 @@ import com.krystianwsul.checkme.firebase.roottask.RootTasksFactory
 import com.krystianwsul.checkme.utils.cacheImmediate
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.domain.DeviceDbInfo
+import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.time.ExactTimeStamp
+import io.reactivex.rxjava3.core.BackpressureStrategy
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.CompositeDisposable
@@ -80,7 +82,11 @@ class UserScope(
         domainFactorySingle.flatMapObservable { domainFactory ->
             changeTypeSource.changeTypes.map { domainFactory to it }
         }
+            .toFlowable(BackpressureStrategy.DROP) // this ensures that all changeTypes get "trampolined", and debounced to just one event
+            .observeOn(getDomainScheduler(), false, 1)
             .subscribe { (domainFactory, changeType) ->
+                check(changeType == ChangeType.REMOTE)
+
                 domainFactory.onChangeTypeEvent(changeType, ExactTimeStamp.Local.now)
             }
             .addTo(domainDisposable)

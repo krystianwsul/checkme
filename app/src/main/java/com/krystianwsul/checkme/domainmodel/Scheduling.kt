@@ -8,15 +8,16 @@ import io.reactivex.rxjava3.core.Flowable
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Single
 
-private fun getScheduler(priority: Priority? = null) = RxPS.get(priority ?: Priority.MEDIUM)
+fun getDomainScheduler(priority: Priority? = null) = RxPS.get(priority ?: Priority.MEDIUM)
 
-fun <T : Any> Observable<T>.observeOnDomain(priority: Priority? = null) = observeOn(getScheduler(priority))
-fun <T : Any> Single<T>.observeOnDomain(priority: Priority? = null) = observeOn(getScheduler(priority))
-fun <T : Any> Flowable<T>.observeOnDomain(priority: Priority? = null) = observeOn(getScheduler(priority))
+fun <T : Any> Observable<T>.observeOnDomain(priority: Priority? = null) = observeOn(getDomainScheduler(priority))
 
-fun <T : Any> Observable<T>.subscribeOnDomain(priority: Priority? = null) = subscribeOn(getScheduler(priority))
-fun <T : Any> Single<T>.subscribeOnDomain(priority: Priority? = null) = subscribeOn(getScheduler(priority))
-fun Completable.subscribeOnDomain(priority: Priority? = null) = subscribeOn(getScheduler(priority))
+fun <T : Any> Single<T>.observeOnDomain(priority: Priority? = null) = observeOn(getDomainScheduler(priority))
+fun <T : Any> Flowable<T>.observeOnDomain(priority: Priority? = null) = observeOn(getDomainScheduler(priority))
+
+fun <T : Any> Observable<T>.subscribeOnDomain(priority: Priority? = null) = subscribeOn(getDomainScheduler(priority))
+fun <T : Any> Single<T>.subscribeOnDomain(priority: Priority? = null) = subscribeOn(getDomainScheduler(priority))
+fun Completable.subscribeOnDomain(priority: Priority? = null) = subscribeOn(getDomainScheduler(priority))
 
 @CheckResult
 fun completeOnDomain(action: () -> Unit) = Completable.fromAction(action).subscribeOnDomain()

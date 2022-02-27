@@ -188,6 +188,8 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
                 /*
                 Technically, this means that children of schedule tasks will get loaded along with notes.  But I think that's
                 fine-ish, actually: they're not immediately needed to display shit correctly.
+
+                todo scheduling replace with actually storing metadata on the Project.  Or maybe on the child task itself?
                  */
             }
         }

@@ -5,7 +5,7 @@ import com.mindorks.scheduler.Priority;
 public final class InternalRunnable implements Runnable, Comparable<InternalRunnable> {
 
     private final Runnable runnable;
-    private final Priority priority;
+    final Priority priority;
     private final int sequenceNumber;
 
     InternalRunnable(Runnable runnable, Priority priority, int sequenceNumber) {

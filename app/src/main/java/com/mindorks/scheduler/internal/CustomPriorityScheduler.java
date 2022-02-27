@@ -11,6 +11,8 @@ import io.reactivex.rxjava3.core.Scheduler;
 
 public final class CustomPriorityScheduler {
 
+    public static final ThreadLocal<Priority> currentPriority = new ThreadLocal<>();
+
     private static final int DEFAULT_MAX_NUM_THREADS = 1;
     private final AtomicInteger sequenceGenerator;
     private final AtomicInteger workerCount;
@@ -53,7 +55,10 @@ public final class CustomPriorityScheduler {
                             while (true) {
                                 try {
                                     InternalRunnable runnable = priorityBlockingQueue.take();
+
+                                    currentPriority.set(runnable.priority);
                                     runnable.run();
+                                    currentPriority.set(null);
                                 } catch (InterruptedException e) {
                                     Thread.currentThread().interrupt();
                                     break;

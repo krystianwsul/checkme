@@ -39,7 +39,11 @@ class NotificationStorage(
             return Singles.zip(projectsSingle, instancesSingle)
                 .map { (projects, instances) -> NotificationStorage(rxPaperBook, projects, instances) }
                 .cast<FactoryProvider.NotificationStorage>()
-                .observeOnDomain(Priority.DB)
+                .observeOnDomain(Priority.DB_NOTIFICATION_STORAGE)
+            /*
+            DB_NOTIFICATION_STORAGE is a ridiculous hack to ensure that domainFactory is initialized between schedule tasks
+            and note tasks
+             */
         }
     }
 

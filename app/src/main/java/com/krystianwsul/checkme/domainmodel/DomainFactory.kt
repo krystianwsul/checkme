@@ -56,7 +56,7 @@ class DomainFactory(
     val projectsFactory: ProjectsFactory,
     val friendsFactory: FriendsFactory,
     _deviceDbInfo: DeviceDbInfo,
-    startTime: ExactTimeStamp.Local,
+    private val startTime: ExactTimeStamp.Local,
     readTime: ExactTimeStamp.Local,
     domainDisposable: CompositeDisposable,
     private val databaseWrapper: DatabaseWrapper,
@@ -87,6 +87,9 @@ class DomainFactory(
     }
 
     var remoteReadTimes: ReadTimes
+        private set
+
+    var changeTypeDelay: Long? = null
         private set
 
     var deviceDbInfo = _deviceDbInfo
@@ -234,6 +237,8 @@ class DomainFactory(
         check(changeType == ChangeType.REMOTE)
 
         DomainThreadChecker.instance.requireDomainThread()
+
+        if (changeTypeDelay == null) changeTypeDelay = now.long - startTime.long
 
         updateShortcuts(now)
 

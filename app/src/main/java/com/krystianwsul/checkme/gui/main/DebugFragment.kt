@@ -29,6 +29,7 @@ import com.krystianwsul.checkme.domainmodel.extensions.getGroupListData
 import com.krystianwsul.checkme.domainmodel.extensions.setDebugMode
 import com.krystianwsul.checkme.domainmodel.observeOnDomain
 import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
+import com.krystianwsul.checkme.firebase.AndroidDatabaseWrapper
 import com.krystianwsul.checkme.gui.base.AbstractFragment
 import com.krystianwsul.checkme.gui.utils.ResettableProperty
 import com.krystianwsul.checkme.ticks.Ticker
@@ -106,6 +107,12 @@ class DebugFragment : AbstractFragment() {
         binding.debugLoadState.setContent {
             MdcTheme {
                 LoadStateButton { loadStateClicks.accept(Unit) }
+            }
+        }
+
+        binding.debugClearPaper.setContent {
+            MdcTheme {
+                ClearPaperButton { AndroidDatabaseWrapper.onUpgrade() }
             }
         }
 
@@ -273,6 +280,13 @@ class DebugFragment : AbstractFragment() {
     private fun LoadStateButton(onClick: () -> Unit) {
         Button(onClick = onClick) {
             Text("REFRESH LOAD STATE")
+        }
+    }
+
+    @Composable
+    private fun ClearPaperButton(onClick: () -> Unit) {
+        Button(onClick = onClick) {
+            Text("CLEAR PAPER FB CACHE")
         }
     }
 }

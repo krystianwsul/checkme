@@ -92,6 +92,9 @@ class DomainFactory(
     var changeTypeDelay: Long? = null
         private set
 
+    var finishedWaiting: Long? = null
+        private set
+
     var deviceDbInfo = _deviceDbInfo
 
     private val changeTypeRelay = PublishRelay.create<ChangeType>()
@@ -137,6 +140,11 @@ class DomainFactory(
             .firstOrError()
             .flatMapCompletable { getDomainUpdater(this).fixOffsetsAndCustomTimes(it) }
             .subscribe()
+            .addTo(domainDisposable)
+
+        isWaitingForTasks.filter { it }
+            .firstOrError()
+            .subscribe { _ -> finishedWaiting = ExactTimeStamp.Local.now.long - startTime.long }
             .addTo(domainDisposable)
 
         Log.e("asdf", "magic DomainFactory init end") // todo scheduling

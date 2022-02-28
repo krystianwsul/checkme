@@ -195,6 +195,8 @@ class DebugFragment : AbstractFragment() {
                     append(" + ")
                     append(domainFactory.remoteReadTimes.instantiateMillis)
                     append(")")
+                    append("\ndependencies done: ")
+                    append(domainFactory.finishedWaiting)
                     append("\nfirst ChangeType delay: ")
                     append(domainFactory.changeTypeDelay)
 

@@ -297,7 +297,7 @@ class DomainFactory(
         }
 
         getDomainUpdater(this).performDomainUpdate(
-            CompletableDomainUpdate.create("tryNotifyListeners") {
+            CompletableDomainUpdate("tryNotifyListeners", runType.highPriority) {
                 DomainUpdater.Params(
                     notifyParams,
                     SaveParams(NotificationType.All, runType == RunType.REMOTE),
@@ -347,9 +347,9 @@ class DomainFactory(
         .asSequence()
         .filter { !it.dependenciesLoaded }
 
-    private enum class RunType {
+    private enum class RunType(val highPriority: Boolean = true) {
 
-        APP_START, SIGN_IN, REMOTE
+        APP_START, SIGN_IN, REMOTE(false)
     }
 
     // sets

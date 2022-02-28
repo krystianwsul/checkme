@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.domainmodel.update
 
+import android.util.Log
 import com.jakewharton.rxrelay3.PublishRelay
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
@@ -9,6 +10,8 @@ import com.krystianwsul.checkme.utils.filterNotNull
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.time.ExactTimeStamp
+import com.mindorks.scheduler.Priority
+import com.mindorks.scheduler.internal.CustomPriorityScheduler
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.Disposable
@@ -21,7 +24,8 @@ object AndroidDomainUpdater : DomainUpdater() {
     private lateinit var queue: Queue
 
     fun init() {
-        val isReady = DomainFactory.instanceRelay.observeOnDomain()
+        // todo I think this is redundant with the second observeOnDomain inside queue, but whatever
+        val isReady = DomainFactory.instanceRelay.observeOnDomain(Priority.FIRST_READ)
 
         queue = Queue(isReady).apply { subscribe() }
     }
@@ -32,20 +36,21 @@ object AndroidDomainUpdater : DomainUpdater() {
 
         private val items = mutableListOf<Item>()
 
-        private val triggerRelay = PublishRelay.create<Unit>()
+        private val triggerRelay = PublishRelay.create<Boolean>()
 
         fun subscribe(): Disposable {
             return Observables.combineLatest(triggerRelay, isReady)
-                    .map { (_, domainFactoryWrapper) -> domainFactoryWrapper }
-                    .filterNotNull()
-                    .observeOnDomain()
-                    .subscribe { domainFactory ->
-                        val currItems = synchronized(items) {
-                            items.toMutableList().also { items -= it }
-                        }
-
-                        if (currItems.isNotEmpty()) dispatchItems(domainFactory, currItems)
+                .flatMapSingle { (highPriority, domainFactoryWrapper) ->
+                    Single.just(domainFactoryWrapper).observeOnDomain(Priority.FIRST_READ.takeIf { highPriority })
+                }
+                .filterNotNull()
+                .subscribe { domainFactory ->
+                    val currItems = synchronized(items) {
+                        items.toMutableList().also { items -= it }
                     }
+
+                    if (currItems.isNotEmpty()) dispatchItems(domainFactory, currItems)
+                }
         }
 
         fun <T : Any> add(domainUpdate: DomainUpdate<T>): Single<T> {
@@ -70,7 +75,7 @@ object AndroidDomainUpdater : DomainUpdater() {
 
             synchronized(items) { items += item }
 
-            triggerRelay.accept(Unit)
+            triggerRelay.accept(domainUpdate.highPriority)
 
             return subject
         }
@@ -78,6 +83,12 @@ object AndroidDomainUpdater : DomainUpdater() {
         private fun dispatchItems(domainFactory: DomainFactory, items: List<Item>) {
             MyCrashlytics.log("AndroidDomainUpdater.dispatchItems begin: " + items.joinToString(", ") { it.name })
             DebugFragment.logDone("AndroidDomainUpdater.dispatchItems start")
+
+            Log.e(
+                "asdf",
+                "AndroidDomainUpdater.dispatchItems start magic " + CustomPriorityScheduler.currentPriority.get() + " " + items.joinToString(
+                    ", "
+                ) { it.name }) // todo scheduling
 
             DomainThreadChecker.instance.requireDomainThread()
 

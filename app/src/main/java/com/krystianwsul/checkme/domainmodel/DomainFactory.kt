@@ -233,6 +233,8 @@ class DomainFactory(
             .map { ShortcutQueue.ShortcutData(deviceDbInfo, it.second) }
 
         ShortcutQueue.updateShortcuts(shortcutDatas)
+
+        HasInstancesStore.update(this, now)
     }
 
     // firebase

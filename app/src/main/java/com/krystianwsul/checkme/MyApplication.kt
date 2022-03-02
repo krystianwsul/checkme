@@ -246,6 +246,8 @@ class MyApplication : Application() {
         }
             .subscribeOn(Schedulers.io())
             .subscribe()
+
+        HasInstancesStore.init()
     }
 
     fun getRxPaparazzoDir() = File(instance.filesDir.absolutePath + "/RxPaparazzo/")

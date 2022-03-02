@@ -9,6 +9,7 @@ import com.google.firebase.database.Query
 import com.google.firebase.database.core.Path
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
+import com.krystianwsul.checkme.domainmodel.HasInstancesStore
 import com.krystianwsul.checkme.domainmodel.observeOnDomain
 import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
@@ -181,6 +182,9 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
 
     override fun getRootTaskObservable(rootTaskKey: TaskKey.Root) =
         rootTaskQuery(rootTaskKey).typedSnapshotChanges<RootTaskJson>("rootTask") {
+            it?.let { HasInstancesStore.getPriority(rootTaskKey) } ?: Priority.DB_TASKS
+
+            /*
             when {
                 it == null -> Priority.DB_TASKS
                 it.schedules.isNotEmpty() || it.instances.isNotEmpty() -> Priority.DB_TASKS
@@ -192,6 +196,7 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
                 todo scheduling replace with actually storing metadata on the Project.  Or maybe on the child task itself?
                  */
             }
+             */
         }
 
     sealed class LoadState<T : Any> {

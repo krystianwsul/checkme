@@ -103,7 +103,7 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
 
     private inline fun <reified T : Parsable> Query.typedSnapshotChanges(
         type: String,
-        noinline getPriority: (T?) -> Priority,
+        noinline getPriority: () -> Priority,
     ): Observable<Snapshot<T>> {
         return cache(
             type,
@@ -117,7 +117,7 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
 
     private inline fun <reified T : Any> Query.indicatorSnapshotChanges(
         type: String,
-        noinline getPriority: (T?) -> Priority,
+        noinline getPriority: () -> Priority,
     ): Observable<Snapshot<T>> =
         cache(
             type,
@@ -137,7 +137,7 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
         converter: Converter<NullableWrapper<T>, U>,
         readNullable: (path: Path) -> Maybe<NullableWrapper<T>>,
         writeNullable: (path: Path, T?) -> Completable,
-        getPriority: (T?) -> Priority,
+        getPriority: () -> Priority,
     ): Observable<U> {
 
         val firebaseObservable = dataChanges().toV3()
@@ -147,7 +147,7 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
             .doOnNext { writeNullable(path, it.value).subscribe() }
 
         return mergePaperAndRx(readNullable(path), firebaseObservable, converter).flatMapSingle {
-            Single.just(it).observeOnDomain(getPriority(it.value))
+            Single.just(it).observeOnDomain(getPriority())
         }
             .doOnNext {
                 Log.e("asdf", "magic db $type " + CustomPriorityScheduler.currentPriority.get()) // todo scheduling
@@ -182,21 +182,7 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
 
     override fun getRootTaskObservable(rootTaskKey: TaskKey.Root) =
         rootTaskQuery(rootTaskKey).typedSnapshotChanges<RootTaskJson>("rootTask") {
-            it?.let { HasInstancesStore.getPriority(rootTaskKey) } ?: Priority.DB_TASKS
-
-            /*
-            when {
-                it == null -> Priority.DB_TASKS
-                it.schedules.isNotEmpty() || it.instances.isNotEmpty() -> Priority.DB_TASKS
-                else -> Priority.DB_NOTES
-                /*
-                Technically, this means that children of schedule tasks will get loaded along with notes.  But I think that's
-                fine-ish, actually: they're not immediately needed to display shit correctly.
-
-                todo scheduling replace with actually storing metadata on the Project.  Or maybe on the child task itself?
-                 */
-            }
-             */
+            HasInstancesStore.getPriority(rootTaskKey)
         }
 
     sealed class LoadState<T : Any> {

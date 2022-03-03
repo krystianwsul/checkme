@@ -6,4 +6,5 @@ interface RepeatingScheduleJson : ScheduleJson {
     val until: String?
 
     var oldestVisible: String?
+    var oldestVisibleJson: String?
 }

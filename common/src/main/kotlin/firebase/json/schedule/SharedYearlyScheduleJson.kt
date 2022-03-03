@@ -1,7 +1,6 @@
 package com.krystianwsul.common.firebase.json.schedule
 
 import kotlinx.serialization.Serializable
-import kotlin.jvm.JvmOverloads
 
 @Serializable
 data class SharedYearlyScheduleJson @JvmOverloads constructor(
@@ -16,7 +15,8 @@ data class SharedYearlyScheduleJson @JvmOverloads constructor(
     override val minute: Int? = null,
     override val from: String? = null,
     override val until: String? = null,
-    override var oldestVisible: String? = null,
+    override var oldestVisible: String? = null, // todo remove once all versions > 0.75.1
+    override var oldestVisibleJson: String? = null,
     override val assignedTo: Map<String, Boolean> = mapOf(),
     override val time: String? = null,
 ) : YearlyScheduleJson, AssignedToJson, ProjectScheduleJson

@@ -18,21 +18,20 @@ sealed class RepeatingSchedule(topLevelTask: Task) : Schedule(topLevelTask) {
     val from get() = repeatingScheduleRecord.from
     val until get() = repeatingScheduleRecord.until
 
-    private val oldestVisibleDateProperty = invalidatableLazy {
-        repeatingScheduleRecord.oldestVisible?.let { Date.fromJson(it) }
+    private val repeatingOldestVisibleProperty = invalidatableLazy {
+        RepeatingOldestVisible.fromJson(repeatingScheduleRecord.oldestVisible)
     }
 
-    private val oldestVisibleDate by oldestVisibleDateProperty
+    private val repeatingOldestVisible by repeatingOldestVisibleProperty
 
-    override val oldestVisible: OldestVisible.Repeating
-        get() = oldestVisibleDate?.let { OldestVisible.Repeating.NonNull(it) } ?: OldestVisible.Repeating.Null
+    override val oldestVisible get() = OldestVisible.Repeating(repeatingOldestVisible)
 
     private val intrinsicStartExactTimeStampProperty = invalidatableLazy {
         listOfNotNull(
-                startExactTimeStampOffset,
-                repeatingScheduleRecord.from?.let {
-                    ExactTimeStamp.Local(it, HourMilli(0, 0, 0, 0))
-                },
+            startExactTimeStampOffset,
+            repeatingScheduleRecord.from?.let {
+                ExactTimeStamp.Local(it, HourMilli(0, 0, 0, 0))
+            },
         ).maxOrNull()!!
     }.apply { addTo(startExactTimeStampOffsetProperty) }
     private val intrinsicStartExactTimeStamp by intrinsicStartExactTimeStampProperty
@@ -59,13 +58,20 @@ sealed class RepeatingSchedule(topLevelTask: Task) : Schedule(topLevelTask) {
         originalDateTime: Boolean,
         checkOldestVisible: Boolean,
     ): Sequence<DateTime> {
+        val oldestVisibleExactTimeStamp = if (checkOldestVisible) {
+            when (val repeatingOldestVisible = repeatingOldestVisible) {
+                is RepeatingOldestVisible.Ongoing -> repeatingOldestVisible.date?.toMidnightExactTimeStamp()
+                is RepeatingOldestVisible.Ended -> return emptySequence()
+            }
+        } else {
+            null
+        }
+
         val startExactTimeStamp = listOfNotNull(
             intrinsicStartExactTimeStamp,
-                givenStartExactTimeStamp,
-                oldestVisibleDate?.takeIf { checkOldestVisible }?.let {
-                    ExactTimeStamp.Local(it, HourMilli(0, 0, 0, 0))
-                },
-                scheduleInterval.startExactTimeStampOffset,
+            givenStartExactTimeStamp,
+            oldestVisibleExactTimeStamp,
+            scheduleInterval.startExactTimeStampOffset,
         ).maxOrNull()!!
 
         val endExactTimeStamp = listOfNotNull(
@@ -79,26 +85,10 @@ sealed class RepeatingSchedule(topLevelTask: Task) : Schedule(topLevelTask) {
         return dateTimeSequenceGenerator.generate(startExactTimeStamp, endExactTimeStamp, time)
     }
 
-    override fun isAfterOldestVisible(exactTimeStamp: ExactTimeStamp): Boolean {
-        return oldestVisibleDate?.let {
-            ExactTimeStamp.Local(it, HourMilli(0, 0, 0, 0)) <= exactTimeStamp
-        } ?: true
-    }
+    override fun matchesScheduleDate(scheduleDate: Date) = repeatingOldestVisible.matchesScheduleDate(scheduleDate)
 
     override fun updateOldestVisible(scheduleInterval: ScheduleInterval, now: ExactTimeStamp.Local) {
-        /*
-        We grab the date of the oldest visible instance.  If there is none, then we set oldestVisible to the intrinsic
-        end date + 1 day, which is essentially a magic number that makes the algorithm in TaskRelevance work.
-
-        todo Really, this should be some sort of enum with the following states:
-
-        none -> all generated instances in the schedule's range are visible
-        present -> normal cutoff for starting range
-        ended -> don't generate anything
-
-        ... but I don't feel like serializing it right now.
-         */
-        val oldestVisible = getDateTimesInRange(
+        val oldestVisibleDate = getDateTimesInRange(
             scheduleInterval,
             null,
             null,
@@ -108,9 +98,60 @@ sealed class RepeatingSchedule(topLevelTask: Task) : Schedule(topLevelTask) {
             .filter { it.isVisible(now, Instance.VisibilityOptions(hack24 = true, assumeRoot = true)) }
             .firstOrNull()
             ?.scheduleDate
-            ?: intrinsicEndExactTimeStamp!!.date + 1.days
 
+        val oldestVisibleCompat = oldestVisibleDate ?: intrinsicEndExactTimeStamp!!.date + 1.days
+        repeatingScheduleRecord.oldestVisibleCompat = oldestVisibleCompat.toJson()
+
+        val oldestVisible = oldestVisibleDate?.let(RepeatingOldestVisible::Present) ?: RepeatingOldestVisible.Ended
         repeatingScheduleRecord.oldestVisible = oldestVisible.toJson()
-        oldestVisibleDateProperty.invalidate()
+
+        repeatingOldestVisibleProperty.invalidate()
+    }
+
+    sealed interface RepeatingOldestVisible {
+
+        companion object {
+
+            fun fromJson(json: String?) = when (json) {
+                null -> None
+                Ended.JSON_VALUE -> Ended
+                else -> Present(Date.fromJson(json))
+            }
+        }
+
+        fun matchesScheduleDate(scheduleDate: Date): Boolean
+
+        sealed interface Ongoing : RepeatingOldestVisible {
+
+            val date: Date?
+        }
+
+        sealed interface Set : RepeatingOldestVisible {
+
+            fun toJson(): String
+        }
+
+        object None : Ongoing {
+
+            override val date: Date? = null
+
+            override fun matchesScheduleDate(scheduleDate: Date) = true
+        }
+
+        data class Present(override val date: Date) : Ongoing, Set {
+
+            override fun toJson() = date.toJson()
+
+            override fun matchesScheduleDate(scheduleDate: Date) = date <= scheduleDate
+        }
+
+        object Ended : RepeatingOldestVisible, Set {
+
+            const val JSON_VALUE = "ended"
+
+            override fun toJson() = JSON_VALUE
+
+            override fun matchesScheduleDate(scheduleDate: Date) = false
+        }
     }
 }

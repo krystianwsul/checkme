@@ -73,8 +73,7 @@ class TaskRelevance(val task: Task) {
                                 assumeRoot = true,
                             )
                         )
-                        Schedule.OldestVisible.Repeating.Null -> true
-                        is Schedule.OldestVisible.Repeating.NonNull -> scheduleDate >= it.date
+                        is Schedule.OldestVisible.Repeating -> it.repeatingOldestVisible.matchesScheduleDate(scheduleDate)
                     }
                 }.any { it }
             }
@@ -97,9 +96,9 @@ class TaskRelevance(val task: Task) {
                          */
                         schedule.getInstance(schedule.topLevelTask).isVisible(now, Instance.VisibilityOptions(hack24 = true))
                     is RepeatingSchedule -> {
-                        when (val oldestVisible = schedule.oldestVisible) {
-                            Schedule.OldestVisible.Repeating.Null -> true
-                            is Schedule.OldestVisible.Repeating.NonNull -> {
+                        when (val oldestVisible = schedule.oldestVisible.repeatingOldestVisible) {
+                            RepeatingSchedule.RepeatingOldestVisible.None -> true
+                            is RepeatingSchedule.RepeatingOldestVisible.Present -> {
                                 val oldestVisibleExactTimeStamp = oldestVisible
                                     .date
                                     .toMidnightExactTimeStamp()
@@ -111,6 +110,7 @@ class TaskRelevance(val task: Task) {
                                 else
                                     true
                             }
+                            RepeatingSchedule.RepeatingOldestVisible.Ended -> false
                         }
                     }
                 }

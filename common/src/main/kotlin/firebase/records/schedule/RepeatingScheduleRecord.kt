@@ -32,5 +32,6 @@ abstract class RepeatingScheduleRecord(
         repeatingScheduleJson.until?.let { Date.fromJson(it) }
     }
 
-    var oldestVisible by Committer(repeatingScheduleJson::oldestVisible, "$key/$endTimeKey")
+    var oldestVisibleCompat by Committer(repeatingScheduleJson::oldestVisible, "$key/$endTimeKey")
+    var oldestVisible by Committer(repeatingScheduleJson::oldestVisibleJson, "$key/$endTimeKey")
 }

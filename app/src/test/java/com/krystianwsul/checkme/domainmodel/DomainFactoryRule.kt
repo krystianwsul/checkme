@@ -142,6 +142,9 @@ class DomainFactoryRule : TestRule {
 
         mockkStatic(Log::class)
         every { Log.e(any(), any()) } returns 0
+
+        mockkObject(HasInstancesStore)
+        every { HasInstancesStore.update(any(), any()) } returns Unit
     }
 
     private fun before() {

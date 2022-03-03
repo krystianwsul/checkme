@@ -14,7 +14,8 @@ object HasInstancesStore {
 
     private const val KEY = "hasInstancesKey"
 
-    private val book = RxPaperBook.with("hasInstances")
+    // lazy for tests
+    private val book by lazy { RxPaperBook.with("hasInstances") }
 
     private class Data(val fromFile: Boolean, val map: Map<TaskKey.Root, Boolean>)
 

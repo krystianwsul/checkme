@@ -86,25 +86,18 @@ sealed class RepeatingSchedule(topLevelTask: Task) : Schedule(topLevelTask) {
     }
 
     override fun updateOldestVisible(scheduleInterval: ScheduleInterval, now: ExactTimeStamp.Local) {
-        val dateTimes = getDateTimesInRange(
+        val firstRootInstanceDate = getDateTimesInRange(
             scheduleInterval,
-                null,
-                now.toOffset().plusOne(),
-        ).toList()
+            null,
+            null,
+        ).map(topLevelTask::getInstance)
+            .filter { !it.exists() }
+            .filter { it.isRootInstance() }
+            .filter { it.isVisible(now, Instance.VisibilityOptions(hack24 = true, assumeRoot = true)) }
+            .firstOrNull()
+            ?.scheduleDate
 
-        val pastRootInstances = dateTimes.map(topLevelTask::getInstance).filter { it.isRootInstance() }
-
-        val oldestVisible = listOf(
-                pastRootInstances.filter {
-                    !it.exists() && it.isVisible(
-                            now,
-                            Instance.VisibilityOptions(hack24 = true, assumeRoot = true)
-                    )
-                }
-                        .map { it.scheduleDate }
-                        .toList(),
-                listOf(now.date)
-        ).flatten().minOrNull()!!
+        val oldestVisible = listOfNotNull(firstRootInstanceDate, now.date).minOrNull()!!
 
         repeatingScheduleRecord.oldestVisible = oldestVisible.toJson()
         oldestVisibleDateProperty.invalidate()

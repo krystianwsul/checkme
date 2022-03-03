@@ -70,7 +70,7 @@ class TaskRelevance(val task: Task) {
                             Instance.VisibilityOptions(
                                 hack24 = true,
                                 ignoreHidden = ignoreHidden,
-                                assumeRoot = true
+                                assumeRoot = true,
                             )
                         )
                         Schedule.OldestVisible.RepeatingNull -> true

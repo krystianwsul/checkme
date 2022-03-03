@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.domainmodel
 
-import android.util.Log
 import com.jakewharton.rxrelay3.BehaviorRelay
 import com.krystianwsul.checkme.utils.toV3
 import com.krystianwsul.common.firebase.models.task.RootTask
@@ -26,8 +25,6 @@ object HasInstancesStore {
             .toV3()
             .subscribeBy {
                 if (!hasInstancesMapRelay.hasValue()) hasInstancesMapRelay.accept(Data(true, it))
-
-                Log.e("asdf", "magic read hasInstances") // todo cache
             }
 
         hasInstancesMapRelay.filter { !it.fromFile }
@@ -37,44 +34,34 @@ object HasInstancesStore {
                 false,
                 1,
             )
-            .subscribe {
-                Log.e("asdf", "magic wrote hasInstances") // todo cache
-            }
+            .subscribe()
     }
 
     private fun calculateHasInstances(task: RootTask, now: ExactTimeStamp.Local) =
         task.getInstances(null, null, now).any()
 
     fun update(domainFactory: DomainFactory, now: ExactTimeStamp.Local) {
-        // todo cache this can be slow, so turn it into a queue
-
-        Log.e("asdf", "magic calculating hasInstances a") // todo cache
-        domainFactory.myUserFactory
+        val projectsNullable = domainFactory.myUserFactory
             .user
             .let { it.projectIds + it.userKey.toPrivateProjectKey() }
-            .map { domainFactory.projectsFactory.getProjectForce(it) }
-            .flatMap { it.projectRecord.rootTaskParentDelegate.rootTaskKeys }
+            .map { domainFactory.projectsFactory.getProjectIfPresent(it) }
+
+        if (null in projectsNullable) return
+
+        val projects = projectsNullable.requireNoNulls()
+
+        val tasksNullable = projects.flatMap { it.projectRecord.rootTaskParentDelegate.rootTaskKeys }
             .toSet()
-            .all { domainFactory.rootTasksFactory.getRootTaskIfPresent(it)?.dependenciesLoaded == true }
-            .takeIf { !it }
-            ?.let { return }
+            .associateWith { domainFactory.rootTasksFactory.getRootTaskIfPresent(it) }
 
-        Log.e("asdf", "magic calculating hasInstances b") // todo cache
-        domainFactory.rootTasksFactory
-            .rootTasks
-            .all { it.value.dependenciesLoaded }
-            .takeIf { !it }
-            ?.let { return }
+        if (null in tasksNullable.values) return
 
-        Log.e("asdf", "magic calculating hasInstances c") // todo cache
-        val hasInstancesMap = domainFactory.rootTasksFactory
-            .rootTasks
-            .mapValues { calculateHasInstances(it.value, now) }
+        val tasks = tasksNullable.mapValues { it.value!! }
 
-        Log.e(
-            "asdf",
-            "magic calculating hasInstances d " + hasInstancesMap.size + ", " + hasInstancesMap.values.filter { it }.size
-        ) // todo cache
+        if (tasks.values.any { !it.dependenciesLoaded }) return
+
+        val hasInstancesMap = tasks.mapValues { calculateHasInstances(it.value, now) }
+
         hasInstancesMapRelay.accept(Data(false, hasInstancesMap))
     }
 

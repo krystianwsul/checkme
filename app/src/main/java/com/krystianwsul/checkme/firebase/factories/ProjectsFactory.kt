@@ -186,8 +186,10 @@ class ProjectsFactory(
         sharedProjects.values.forEach { it.updatePhotoUrl(deviceInfo, photoUrl) }
 
     @Suppress("UNCHECKED_CAST")
-    fun <T : ProjectType> getProjectForce(projectId: ProjectKey<T>) =
-        projects.getValue(projectId) as Project<T>
+    fun <T : ProjectType> getProjectIfPresent(projectKey: ProjectKey<T>) =
+        projects[projectKey] as? Project<T>
+
+    fun <T : ProjectType> getProjectForce(projectKey: ProjectKey<T>) = getProjectIfPresent(projectKey)!!
 
     fun getProjectIfPresent(projectId: String) = projects.entries
         .singleOrNull { it.key.key == projectId }

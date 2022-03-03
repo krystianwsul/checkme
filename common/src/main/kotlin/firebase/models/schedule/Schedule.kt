@@ -98,7 +98,7 @@ sealed class Schedule(val topLevelTask: Task) : TaskParentEntry, ProjectIdOwner 
 
             object Null : Repeating
 
-            data class NonNull(override val date: Date) : OldestVisible
+            data class NonNull(override val date: Date) : Repeating
         }
     }
 

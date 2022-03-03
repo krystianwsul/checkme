@@ -24,7 +24,7 @@ sealed class RepeatingSchedule(topLevelTask: Task) : Schedule(topLevelTask) {
 
     private val oldestVisibleDate by oldestVisibleDateProperty
 
-    override val oldestVisible
+    override val oldestVisible: OldestVisible.Repeating
         get() = oldestVisibleDate?.let { OldestVisible.Repeating.NonNull(it) } ?: OldestVisible.Repeating.Null
 
     private val intrinsicStartExactTimeStampProperty = invalidatableLazy {

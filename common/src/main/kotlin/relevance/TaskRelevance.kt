@@ -73,8 +73,8 @@ class TaskRelevance(val task: Task) {
                                 assumeRoot = true,
                             )
                         )
-                        Schedule.OldestVisible.RepeatingNull -> true
-                        is Schedule.OldestVisible.RepeatingNonNull -> scheduleDate >= it.date
+                        Schedule.OldestVisible.Repeating.Null -> true
+                        is Schedule.OldestVisible.Repeating.NonNull -> scheduleDate >= it.date
                     }
                 }.any { it }
             }

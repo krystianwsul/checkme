@@ -88,15 +88,18 @@ sealed class Schedule(val topLevelTask: Task) : TaskParentEntry, ProjectIdOwner 
         scheduleRecord.delete()
     }
 
-    sealed class OldestVisible {
+    sealed interface OldestVisible {
 
-        open val date: Date? = null
+        val date: Date? get() = null
 
-        object Single : OldestVisible()
+        object Single : OldestVisible
 
-        object RepeatingNull : OldestVisible()
+        sealed interface Repeating : OldestVisible {
 
-        data class RepeatingNonNull(override val date: Date) : OldestVisible()
+            object Null : Repeating
+
+            data class NonNull(override val date: Date) : OldestVisible
+        }
     }
 
     abstract val oldestVisible: OldestVisible

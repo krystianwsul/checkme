@@ -86,7 +86,19 @@ sealed class RepeatingSchedule(topLevelTask: Task) : Schedule(topLevelTask) {
     }
 
     override fun updateOldestVisible(scheduleInterval: ScheduleInterval, now: ExactTimeStamp.Local) {
-        val firstRootInstanceDate = getDateTimesInRange(
+        /*
+        We grab the date of the oldest visible instance.  If there is none, then we set oldestVisible to the intrinsic
+        end date + 1 day, which is essentially a magic number that makes the algorithm in TaskRelevance work.
+
+        todo Really, this should be some sort of enum with the following states:
+
+        none -> all generated instances in the schedule's range are visible
+        present -> normal cutoff for starting range
+        ended -> don't generate anything
+
+        ... but I don't feel like serializing it right now.
+         */
+        val oldestVisible = getDateTimesInRange(
             scheduleInterval,
             null,
             null,
@@ -96,8 +108,7 @@ sealed class RepeatingSchedule(topLevelTask: Task) : Schedule(topLevelTask) {
             .filter { it.isVisible(now, Instance.VisibilityOptions(hack24 = true, assumeRoot = true)) }
             .firstOrNull()
             ?.scheduleDate
-
-        val oldestVisible = listOfNotNull(firstRootInstanceDate, now.date).minOrNull()!!
+            ?: intrinsicEndExactTimeStamp!!.date + 1.days
 
         repeatingScheduleRecord.oldestVisible = oldestVisible.toJson()
         oldestVisibleDateProperty.invalidate()

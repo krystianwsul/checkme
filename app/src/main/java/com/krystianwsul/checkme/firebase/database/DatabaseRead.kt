@@ -6,7 +6,6 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.Query
 import com.google.firebase.database.core.Path
-import com.krystianwsul.checkme.domainmodel.observeOnDomain
 import com.krystianwsul.checkme.firebase.AndroidDatabaseWrapper
 import com.krystianwsul.checkme.firebase.Converter
 import com.krystianwsul.checkme.firebase.mergePaperAndRx
@@ -18,7 +17,6 @@ import com.mindorks.scheduler.internal.CustomPriorityScheduler
 import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Maybe
 import io.reactivex.rxjava3.core.Observable
-import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.schedulers.Schedulers
 
 abstract class DatabaseRead<DATA : Any> {
@@ -72,7 +70,7 @@ abstract class DatabaseRead<DATA : Any> {
             .doOnNext { writeNullable(path, it.value).subscribe() }
 
         return mergePaperAndRx(readNullable(path), firebaseObservable, converter).flatMapSingle {
-            Single.just(it).observeOnDomain(priority)
+            DatabaseResultQueue.enqueueSnapshot(this@DatabaseRead, it)
         }
             .doOnNext {
                 Log.e(

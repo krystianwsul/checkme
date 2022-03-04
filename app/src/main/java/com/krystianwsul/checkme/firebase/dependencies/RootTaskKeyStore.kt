@@ -9,7 +9,9 @@ class RootTaskKeyStore {
     private val projectStore = RequestKeyStore<ProjectKey<*>, TaskKey.Root>()
     private val taskStore = RequestKeyStore<TaskKey.Root, TaskKey.Root>()
 
-    val rootTaskKeysObservable: Observable<Set<TaskKey.Root>> = RequestKeyStore.merge(projectStore, taskStore)
+    private val requestMerger = RequestMerger<TaskKey.Root>()
+
+    val rootTaskKeysObservable: Observable<Set<TaskKey.Root>> = requestMerger.merge(projectStore, taskStore)
 
     fun onProjectAddedOrUpdated(projectKey: ProjectKey<*>, rootTaskKeys: Set<TaskKey.Root>) =
         projectStore.addRequest(projectKey, rootTaskKeys)
@@ -17,7 +19,7 @@ class RootTaskKeyStore {
     fun onProjectsRemoved(projectKeys: Set<ProjectKey<*>>) = projectStore.onRequestsRemoved(projectKeys)
 
     fun onRootTaskAddedOrUpdated(parentRootTaskKey: TaskKey.Root, childRootTaskKeys: Set<TaskKey.Root>) =
-            taskStore.addRequest(parentRootTaskKey, childRootTaskKeys)
+        taskStore.addRequest(parentRootTaskKey, childRootTaskKeys)
 
     fun onRootTasksRemoved(rootTaskKeys: Set<TaskKey.Root>) = taskStore.onRequestsRemoved(rootTaskKeys)
 

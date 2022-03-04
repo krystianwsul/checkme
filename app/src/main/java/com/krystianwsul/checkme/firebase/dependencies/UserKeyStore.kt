@@ -16,8 +16,8 @@ import io.reactivex.rxjava3.kotlin.merge
 import io.reactivex.rxjava3.kotlin.plusAssign
 
 class UserKeyStore(
-        friendKeysObservable: Observable<ChangeWrapper<Set<UserKey>>>,
-        domainDisposable: CompositeDisposable,
+    friendKeysObservable: Observable<ChangeWrapper<Set<UserKey>>>,
+    domainDisposable: CompositeDisposable,
 ) {
 
     private val projectRequestKeyStore = RequestKeyStore<ProjectKey.Shared, UserKey>()
@@ -25,72 +25,74 @@ class UserKeyStore(
 
     private val addFriendEvents = PublishRelay.create<FriendEvent.AddFriend>()
 
+    private val requestMerger = RequestMerger<UserKey>()
+
     val loadUserDataObservable: Observable<ChangeWrapper<Map<UserKey, LoadUserData>>>
 
     init {
         val friendKeysChangeEvents = friendKeysObservable.map { FriendEvent.FriendKeysChange(it) }
 
         val friendEvents = listOf(friendKeysChangeEvents, addFriendEvents).merge()
-                .scan(
-                        ChangeWrapper<Map<UserKey, LoadUserData>>(ChangeType.LOCAL, mapOf()) // this will be ignored by skip
-                ) { oldChangeWrapper, friendEvent ->
-                    when (friendEvent) {
-                        is FriendEvent.FriendKeysChange -> { // overwrite
-                            val changeWrapper = friendEvent.changeWrapper
+            .scan(
+                ChangeWrapper<Map<UserKey, LoadUserData>>(ChangeType.LOCAL, mapOf()) // this will be ignored by skip
+            ) { oldChangeWrapper, friendEvent ->
+                when (friendEvent) {
+                    is FriendEvent.FriendKeysChange -> { // overwrite
+                        val changeWrapper = friendEvent.changeWrapper
 
-                            changeWrapper.newData(
-                                    changeWrapper.data.associateWith { LoadUserData.Friend(null) }
+                        changeWrapper.newData(
+                            changeWrapper.data.associateWith { LoadUserData.Friend(null) }
+                        )
+                    }
+                    is FriendEvent.AddFriend -> { // add to map
+                        val newMap = oldChangeWrapper.data.toMutableMap()
+                        newMap[friendEvent.rootUserRecord.userKey] = LoadUserData.Friend(
+                            AddFriendData(
+                                friendEvent.rootUserRecord.key,
+                                friendEvent.rootUserRecord.userWrapper
                             )
-                        }
-                        is FriendEvent.AddFriend -> { // add to map
-                            val newMap = oldChangeWrapper.data.toMutableMap()
-                            newMap[friendEvent.rootUserRecord.userKey] = LoadUserData.Friend(
-                                AddFriendData(
-                                    friendEvent.rootUserRecord.key,
-                                    friendEvent.rootUserRecord.userWrapper
-                                )
-                            )
+                        )
 
-                            ChangeWrapper(ChangeType.LOCAL, newMap)
-                        }
+                        ChangeWrapper(ChangeType.LOCAL, newMap)
                     }
                 }
-                .skip(1)
-                .map { FriendOrCustomTimeEvent.Friend(it) }
+            }
+            .skip(1)
+            .map { FriendOrCustomTimeEvent.Friend(it) }
 
-        val mergedRequests = RequestKeyStore.merge(projectRequestKeyStore, rootTaskRequestKeyStore)
-                .skip(1)
-                .map { FriendOrCustomTimeEvent.CustomTimes(it) }
+        val mergedRequests = requestMerger.merge(projectRequestKeyStore, rootTaskRequestKeyStore)
+            .skip(1)
+            .map { FriendOrCustomTimeEvent.CustomTimes(it) }
 
         loadUserDataObservable = listOf(friendEvents, mergedRequests).merge()
-                .scan(OutputAggregate()) { aggregate, friendOrCustomTimeEvent ->
-                    // when summing maps, add friends to customTimes, since the former takes priority
+            .scan(OutputAggregate()) { aggregate, friendOrCustomTimeEvent ->
+                // when summing maps, add friends to customTimes, since the former takes priority
 
-                    when (friendOrCustomTimeEvent) {
-                        is FriendOrCustomTimeEvent.Friend -> {
-                            val output = aggregate.customTimesToMap() + friendOrCustomTimeEvent.changeWrapper.data
+                when (friendOrCustomTimeEvent) {
+                    is FriendOrCustomTimeEvent.Friend -> {
+                        val output = aggregate.customTimesToMap() + friendOrCustomTimeEvent.changeWrapper.data
 
-                            aggregate.copy(
-                                    friendMap = friendOrCustomTimeEvent.changeWrapper.data,
-                                    output = ChangeWrapper(friendOrCustomTimeEvent.changeWrapper.changeType, output),
-                            )
-                        }
-                        is FriendOrCustomTimeEvent.CustomTimes -> {
-                            val output = OutputAggregate.customTimesToMap(friendOrCustomTimeEvent.userKeys) +
-                                    aggregate.friendMap
+                        aggregate.copy(
+                            friendMap = friendOrCustomTimeEvent.changeWrapper.data,
+                            output = ChangeWrapper(friendOrCustomTimeEvent.changeWrapper.changeType, output),
+                        )
+                    }
+                    is FriendOrCustomTimeEvent.CustomTimes -> {
+                        val output = OutputAggregate.customTimesToMap(friendOrCustomTimeEvent.userKeys) +
+                                aggregate.friendMap
 
-                            aggregate.copy(
-                                    customTimes = friendOrCustomTimeEvent.userKeys,
-                                    output = ChangeWrapper(ChangeType.REMOTE, output),
-                            )
-                        }
+                        aggregate.copy(
+                            customTimes = friendOrCustomTimeEvent.userKeys,
+                            output = ChangeWrapper(ChangeType.REMOTE, output),
+                        )
                     }
                 }
-                .skip(1)
-                .map { it.output }
-                .distinctUntilChanged()
-                .replay()
-                .apply { domainDisposable += connect() }
+            }
+            .skip(1)
+            .map { it.output }
+            .distinctUntilChanged()
+            .replay()
+            .apply { domainDisposable += connect() }
     }
 
     fun addFriend(rootUserRecord: RootUserRecord) {

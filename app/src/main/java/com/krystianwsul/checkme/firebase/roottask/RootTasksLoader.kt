@@ -139,6 +139,6 @@ class RootTasksLoader(
 
     interface Provider {
 
-        fun getRootTaskObservable(rootTaskKey: TaskKey.Root): Observable<Snapshot<RootTaskJson>>
+        fun getRootTaskObservable(taskKey: TaskKey.Root): Observable<Snapshot<RootTaskJson>>
     }
 }

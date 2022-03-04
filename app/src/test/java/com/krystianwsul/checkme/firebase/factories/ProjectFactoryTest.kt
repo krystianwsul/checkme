@@ -64,7 +64,7 @@ class ProjectFactoryTest {
                 TODO("Not yet implemented")
             }
 
-            override fun getRootTaskObservable(rootTaskKey: TaskKey.Root): Observable<Snapshot<RootTaskJson>> {
+            override fun getRootTaskObservable(taskKey: TaskKey.Root): Observable<Snapshot<RootTaskJson>> {
                 TODO("Not yet implemented")
             }
 

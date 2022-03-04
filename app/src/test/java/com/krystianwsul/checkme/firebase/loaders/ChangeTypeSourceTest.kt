@@ -76,8 +76,8 @@ class ChangeTypeSourceTest {
 
         private val singleParamObservableSource = SingleParamObservableSource<TaskKey.Root, Snapshot<RootTaskJson>>()
 
-        override fun getRootTaskObservable(rootTaskKey: TaskKey.Root) =
-            singleParamObservableSource.getObservable(rootTaskKey)
+        override fun getRootTaskObservable(taskKey: TaskKey.Root) =
+            singleParamObservableSource.getObservable(taskKey)
 
         fun accept(taskKey: TaskKey.Root, json: RootTaskJson) =
             singleParamObservableSource.accept(taskKey, Snapshot(taskKey.taskId, json))

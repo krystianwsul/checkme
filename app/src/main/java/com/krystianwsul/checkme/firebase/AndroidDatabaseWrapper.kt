@@ -67,28 +67,6 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
 
     private fun Path.toKey() = toString().replace('/', '-')
 
-    private fun <T : Any, U : Snapshot<T>> Query.cache(
-        read: Read<T>,
-        firebaseToSnapshot: (dataSnapshot: DataSnapshot) -> U,
-        converter: Converter<NullableWrapper<T>, U>,
-        readNullable: (path: Path) -> Maybe<NullableWrapper<T>>,
-        writeNullable: (path: Path, T?) -> Completable,
-    ): Observable<U> {
-
-        val firebaseObservable = dataChanges().toV3()
-            .subscribeOn(Schedulers.io())
-            .observeOn(Schedulers.computation())
-            .map { firebaseToSnapshot(it) }
-            .doOnNext { writeNullable(path, it.value).subscribe() }
-
-        return mergePaperAndRx(readNullable(path), firebaseObservable, converter).flatMapSingle {
-            Single.just(it).observeOnDomain(read.priority)
-        }
-            .doOnNext {
-                Log.e("asdf", "magic db ${read.type} " + CustomPriorityScheduler.currentPriority.get()) // todo scheduling
-            }
-    }
-
     override fun getNewId(path: String) = rootReference.child(path)
         .push()
         .key!!
@@ -156,6 +134,30 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
             } else {
                 Maybe.empty()
             }
+        }
+
+        protected fun <U : Snapshot<DATA>> Query.cache(
+            read: Read<DATA>,
+            firebaseToSnapshot: (dataSnapshot: DataSnapshot) -> U,
+            converter: Converter<NullableWrapper<DATA>, U>,
+            readNullable: (path: Path) -> Maybe<NullableWrapper<DATA>>,
+            writeNullable: (path: Path, DATA?) -> Completable,
+        ): Observable<U> {
+            val firebaseObservable = dataChanges().toV3()
+                .subscribeOn(Schedulers.io())
+                .observeOn(Schedulers.computation())
+                .map { firebaseToSnapshot(it) }
+                .doOnNext { writeNullable(path, it.value).subscribe() }
+
+            return mergePaperAndRx(readNullable(path), firebaseObservable, converter).flatMapSingle {
+                Single.just(it).observeOnDomain(read.priority)
+            }
+                .doOnNext {
+                    Log.e(
+                        "asdf",
+                        "magic db ${read.type} " + CustomPriorityScheduler.currentPriority.get()
+                    ) // todo scheduling
+                }
         }
     }
 

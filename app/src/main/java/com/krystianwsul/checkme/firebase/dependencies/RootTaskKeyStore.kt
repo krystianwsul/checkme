@@ -1,11 +1,10 @@
-package com.krystianwsul.checkme.firebase.roottask
+package com.krystianwsul.checkme.firebase.dependencies
 
-import com.krystianwsul.checkme.firebase.dependencies.RequestKeyStore
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
 import io.reactivex.rxjava3.core.Observable
 
-class RootTaskKeySource {
+class RootTaskKeyStore {
 
     private val projectStore = RequestKeyStore<ProjectKey<*>, TaskKey.Root>()
     private val taskStore = RequestKeyStore<TaskKey.Root, TaskKey.Root>()
@@ -13,7 +12,7 @@ class RootTaskKeySource {
     val rootTaskKeysObservable: Observable<Set<TaskKey.Root>> = RequestKeyStore.merge(projectStore, taskStore)
 
     fun onProjectAddedOrUpdated(projectKey: ProjectKey<*>, rootTaskKeys: Set<TaskKey.Root>) =
-            projectStore.addRequest(projectKey, rootTaskKeys)
+        projectStore.addRequest(projectKey, rootTaskKeys)
 
     fun onProjectsRemoved(projectKeys: Set<ProjectKey<*>>) = projectStore.onRequestsRemoved(projectKeys)
 

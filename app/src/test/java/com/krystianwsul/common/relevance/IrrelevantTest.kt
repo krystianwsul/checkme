@@ -1,8 +1,8 @@
 package com.krystianwsul.common.relevance
 
+import com.krystianwsul.checkme.firebase.dependencies.RootTaskKeyStore
 import com.krystianwsul.checkme.firebase.factories.ProjectsFactory
 import com.krystianwsul.checkme.firebase.managers.AndroidRootTasksManager
-import com.krystianwsul.checkme.firebase.roottask.RootTaskKeySource
 import com.krystianwsul.checkme.firebase.roottask.RootTasksFactory
 import com.krystianwsul.checkme.firebase.roottask.RootTasksLoader
 import com.krystianwsul.common.domain.UserInfo
@@ -104,7 +104,7 @@ class IrrelevantTest {
 
         val rootTasksManager = AndroidRootTasksManager(databaseWrapper)
 
-        val rootTaskKeySource = mockk<RootTaskKeySource> {
+        val rootTaskKeySource = mockk<RootTaskKeyStore> {
             every { rootTaskKeysObservable } returns Observable.just(setOf())
             every { onProjectAddedOrUpdated(any(), any()) } returns Unit
         }

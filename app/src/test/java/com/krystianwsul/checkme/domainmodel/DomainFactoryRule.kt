@@ -8,6 +8,7 @@ import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.notifications.ImageManager
 import com.krystianwsul.checkme.domainmodel.notifications.NotificationWrapper
 import com.krystianwsul.checkme.firebase.TestUserCustomTimeProviderSource
+import com.krystianwsul.checkme.firebase.dependencies.RootTaskKeyStore
 import com.krystianwsul.checkme.firebase.factories.FriendsFactory
 import com.krystianwsul.checkme.firebase.factories.MyUserFactory
 import com.krystianwsul.checkme.firebase.factories.ProjectsFactory
@@ -17,7 +18,6 @@ import com.krystianwsul.checkme.firebase.loaders.mockBase64
 import com.krystianwsul.checkme.firebase.managers.AndroidRootTasksManager
 import com.krystianwsul.checkme.firebase.managers.AndroidSharedProjectManager
 import com.krystianwsul.checkme.firebase.roottask.RootTaskDependencyCoordinator
-import com.krystianwsul.checkme.firebase.roottask.RootTaskKeySource
 import com.krystianwsul.checkme.firebase.roottask.RootTasksFactory
 import com.krystianwsul.checkme.firebase.roottask.RootTasksLoader
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
@@ -184,7 +184,7 @@ class DomainFactoryRule : TestRule {
 
         lateinit var projectsFactory: ProjectsFactory
 
-        val rootTaskKeySource = mockk<RootTaskKeySource>(relaxed = true) {
+        val rootTaskKeySource = mockk<RootTaskKeyStore>(relaxed = true) {
             every { rootTaskKeysObservable } returns Observable.just(emptySet())
         }
 

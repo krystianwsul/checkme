@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.firebase.roottask
 
 import com.jakewharton.rxrelay3.ReplayRelay
+import com.krystianwsul.checkme.firebase.dependencies.RootTaskKeyStore
 import com.krystianwsul.checkme.firebase.loaders.DatabaseRx
 import com.krystianwsul.checkme.firebase.loaders.MapChanges
 import com.krystianwsul.checkme.firebase.loaders.processChanges
@@ -18,7 +19,7 @@ import io.reactivex.rxjava3.kotlin.ofType
 import io.reactivex.rxjava3.kotlin.plusAssign
 
 class RootTasksLoader(
-    rootTaskKeySource: RootTaskKeySource,
+    rootTaskKeyStore: RootTaskKeyStore,
     private val provider: Provider,
     private val domainDisposable: CompositeDisposable,
     val rootTasksManager: AndroidRootTasksManager,
@@ -29,7 +30,7 @@ class RootTasksLoader(
     private var ignoreKeyUpdates = false
 
     init {
-        rootTaskKeySource.rootTaskKeysObservable
+        rootTaskKeyStore.rootTaskKeysObservable
             .filter { !ignoreKeyUpdates }
             .map { it.associateWith<TaskKey.Root, RootTaskRecord?> { null } }
             .subscribe(taskKeyRelay)

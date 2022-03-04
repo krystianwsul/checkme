@@ -4,13 +4,13 @@ import com.jakewharton.rxrelay3.PublishRelay
 import com.krystianwsul.checkme.domainmodel.DomainFactoryRule
 import com.krystianwsul.checkme.firebase.UserCustomTimeProviderSource
 import com.krystianwsul.checkme.firebase.checkRemote
+import com.krystianwsul.checkme.firebase.dependencies.RootTaskKeyStore
 import com.krystianwsul.checkme.firebase.dependencies.UserKeyStore
 import com.krystianwsul.checkme.firebase.factories.ProjectsFactory
 import com.krystianwsul.checkme.firebase.managers.AndroidPrivateProjectManager
 import com.krystianwsul.checkme.firebase.managers.AndroidRootTasksManager
 import com.krystianwsul.checkme.firebase.managers.AndroidSharedProjectManager
 import com.krystianwsul.checkme.firebase.roottask.RootTaskDependencyCoordinator
-import com.krystianwsul.checkme.firebase.roottask.RootTaskKeySource
 import com.krystianwsul.checkme.firebase.roottask.RootTasksFactory
 import com.krystianwsul.checkme.firebase.roottask.RootTasksLoader
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
@@ -124,7 +124,7 @@ class ChangeTypeSourceTest {
     }
 
     private fun setup() {
-        val rootTaskKeySource = RootTaskKeySource()
+        val rootTaskKeySource = RootTaskKeyStore()
         val userCustomTimeProviderSource = immediateUserCustomTimeProviderSource()
 
         rootTasksLoaderProvider = TestRootTasksLoaderProvider()

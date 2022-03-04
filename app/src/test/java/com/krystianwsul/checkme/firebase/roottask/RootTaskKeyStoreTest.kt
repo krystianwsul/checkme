@@ -1,12 +1,13 @@
 package com.krystianwsul.checkme.firebase.roottask
 
+import com.krystianwsul.checkme.firebase.dependencies.RootTaskKeyStore
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
 import io.reactivex.rxjava3.observers.TestObserver
 import org.junit.Before
 import org.junit.Test
 
-class RootTaskKeySourceTest {
+class RootTaskKeyStoreTest {
 
     companion object {
 
@@ -20,13 +21,13 @@ class RootTaskKeySourceTest {
         private val rootTaskKey5 = TaskKey.Root("rootTaskKey5")
     }
 
-    private lateinit var rootTaskKeySource: RootTaskKeySource
+    private lateinit var rootTaskKeyStore: RootTaskKeyStore
     private lateinit var testObserver: TestObserver<Set<TaskKey.Root>>
 
     @Before
     fun before() {
-        rootTaskKeySource = RootTaskKeySource()
-        testObserver = rootTaskKeySource.rootTaskKeysObservable.test()
+        rootTaskKeyStore = RootTaskKeyStore()
+        testObserver = rootTaskKeyStore.rootTaskKeysObservable.test()
     }
 
     @Test
@@ -36,16 +37,16 @@ class RootTaskKeySourceTest {
 
     @Test
     fun testAddProject() {
-        rootTaskKeySource.onProjectAddedOrUpdated(projectKey1, setOf(rootTaskKey1, rootTaskKey2))
+        rootTaskKeyStore.onProjectAddedOrUpdated(projectKey1, setOf(rootTaskKey1, rootTaskKey2))
         testObserver.assertValueAt(1, setOf(rootTaskKey1, rootTaskKey2))
     }
 
     @Test
     fun testAddSecondProject() {
-        rootTaskKeySource.onProjectAddedOrUpdated(projectKey1, setOf(rootTaskKey1, rootTaskKey2))
+        rootTaskKeyStore.onProjectAddedOrUpdated(projectKey1, setOf(rootTaskKey1, rootTaskKey2))
         testObserver.assertValueAt(1, setOf(rootTaskKey1, rootTaskKey2))
 
-        rootTaskKeySource.onProjectAddedOrUpdated(projectKey2, setOf(rootTaskKey3, rootTaskKey4))
+        rootTaskKeyStore.onProjectAddedOrUpdated(projectKey2, setOf(rootTaskKey3, rootTaskKey4))
         testObserver.assertValueAt(2, setOf(rootTaskKey1, rootTaskKey2, rootTaskKey3, rootTaskKey4))
     }
 
@@ -53,7 +54,7 @@ class RootTaskKeySourceTest {
     fun testRemoveProject() {
         testAddSecondProject()
 
-        rootTaskKeySource.onProjectsRemoved(setOf(projectKey2))
+        rootTaskKeyStore.onProjectsRemoved(setOf(projectKey2))
         testObserver.assertValueAt(3, setOf(rootTaskKey1, rootTaskKey2))
     }
 
@@ -61,7 +62,7 @@ class RootTaskKeySourceTest {
     fun tesUpdateProject() {
         testAddSecondProject()
 
-        rootTaskKeySource.onProjectAddedOrUpdated(projectKey2, setOf(rootTaskKey4, rootTaskKey5))
+        rootTaskKeyStore.onProjectAddedOrUpdated(projectKey2, setOf(rootTaskKey4, rootTaskKey5))
         testObserver.assertValueAt(3, setOf(rootTaskKey1, rootTaskKey2, rootTaskKey4, rootTaskKey5))
     }
 }

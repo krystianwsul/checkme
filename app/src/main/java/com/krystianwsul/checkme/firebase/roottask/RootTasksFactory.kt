@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.firebase.roottask
 
 import com.jakewharton.rxrelay3.BehaviorRelay
 import com.krystianwsul.checkme.domainmodel.notifications.Notifier
+import com.krystianwsul.checkme.firebase.dependencies.RootTaskKeyStore
 import com.krystianwsul.checkme.firebase.dependencies.UserKeyStore
 import com.krystianwsul.checkme.firebase.factories.ProjectsFactory
 import com.krystianwsul.checkme.utils.publishImmediate
@@ -25,7 +26,7 @@ class RootTasksFactory(
     private val userKeyStore: UserKeyStore,
     private val rootTaskDependencyCoordinator: RootTaskDependencyCoordinator,
     domainDisposable: CompositeDisposable,
-    private val rootTaskKeySource: RootTaskKeySource,
+    private val rootTaskKeyStore: RootTaskKeyStore,
     override val rootModelChangeManager: RootModelChangeManager,
     private val getProjectsFactory: () -> ProjectsFactory,
 ) : RootTask.Parent {
@@ -74,7 +75,7 @@ class RootTasksFactory(
                 it.taskKeys.forEach { rootTaskFactories[it]?.onRemove() }
 
                 userKeyStore.onTasksRemoved(it.taskKeys)
-                rootTaskKeySource.onRootTasksRemoved(it.taskKeys)
+                rootTaskKeyStore.onRootTasksRemoved(it.taskKeys)
             }
             .addTo(domainDisposable)
 
@@ -153,13 +154,13 @@ class RootTasksFactory(
 
     override fun updateProjectRecord(projectKey: ProjectKey<*>, dependentRootTaskKeys: Set<TaskKey.Root>) {
         rootTasksLoader.ignoreKeyUpdates {
-            rootTaskKeySource.onProjectAddedOrUpdated(projectKey, dependentRootTaskKeys)
+            rootTaskKeyStore.onProjectAddedOrUpdated(projectKey, dependentRootTaskKeys)
         }
     }
 
     override fun updateTaskRecord(taskKey: TaskKey.Root, dependentRootTaskKeys: Set<TaskKey.Root>) {
         rootTasksLoader.ignoreKeyUpdates {
-            rootTaskKeySource.onRootTaskAddedOrUpdated(taskKey, dependentRootTaskKeys)
+            rootTaskKeyStore.onRootTaskAddedOrUpdated(taskKey, dependentRootTaskKeys)
         }
     }
 

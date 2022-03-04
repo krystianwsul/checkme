@@ -4,6 +4,7 @@ import android.util.Log
 import com.krystianwsul.checkme.domainmodel.UserScope
 import com.krystianwsul.checkme.domainmodel.observeOnDomain
 import com.krystianwsul.checkme.firebase.UserCustomTimeProviderSource
+import com.krystianwsul.checkme.firebase.dependencies.RootTaskKeyStore
 import com.krystianwsul.checkme.firebase.dependencies.UserKeyStore
 import com.krystianwsul.checkme.firebase.factories.FriendsFactory
 import com.krystianwsul.checkme.firebase.factories.MyUserFactory
@@ -12,7 +13,6 @@ import com.krystianwsul.checkme.firebase.managers.AndroidPrivateProjectManager
 import com.krystianwsul.checkme.firebase.managers.AndroidRootTasksManager
 import com.krystianwsul.checkme.firebase.managers.AndroidSharedProjectManager
 import com.krystianwsul.checkme.firebase.roottask.RootTaskDependencyCoordinator
-import com.krystianwsul.checkme.firebase.roottask.RootTaskKeySource
 import com.krystianwsul.checkme.firebase.roottask.RootTasksFactory
 import com.krystianwsul.checkme.firebase.roottask.RootTasksLoader
 import com.krystianwsul.checkme.utils.cacheImmediate
@@ -103,7 +103,7 @@ class FactoryLoader(
                             friendsFactorySingle,
                         )
 
-                        val rootTaskKeySource = RootTaskKeySource()
+                        val rootTaskKeySource = RootTaskKeyStore()
 
                         val rootTaskManager = AndroidRootTasksManager(factoryProvider.database)
 

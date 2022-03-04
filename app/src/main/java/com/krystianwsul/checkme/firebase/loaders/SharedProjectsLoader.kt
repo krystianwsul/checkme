@@ -2,9 +2,9 @@ package com.krystianwsul.checkme.firebase.loaders
 
 import com.jakewharton.rxrelay3.ReplayRelay
 import com.krystianwsul.checkme.firebase.UserCustomTimeProviderSource
+import com.krystianwsul.checkme.firebase.dependencies.RootTaskKeyStore
 import com.krystianwsul.checkme.firebase.dependencies.UserKeyStore
 import com.krystianwsul.checkme.firebase.managers.AndroidSharedProjectManager
-import com.krystianwsul.checkme.firebase.roottask.RootTaskKeySource
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.checkme.utils.zipSingle
 import com.krystianwsul.common.firebase.ChangeType
@@ -40,7 +40,7 @@ interface SharedProjectsLoader {
         private val sharedProjectsProvider: SharedProjectsProvider,
         private val userCustomTimeProviderSource: UserCustomTimeProviderSource,
         private val userKeyStore: UserKeyStore,
-        private val rootTaskKeySource: RootTaskKeySource,
+        private val rootTaskKeyStore: RootTaskKeyStore,
     ) : SharedProjectsLoader {
 
         private data class AddedProjectData(val initialProjectRecord: SharedProjectRecord)
@@ -113,7 +113,7 @@ interface SharedProjectsLoader {
                     projectManager,
                     projectEntry.initialProjectRecord,
                     userCustomTimeProviderSource,
-                    rootTaskKeySource,
+                    rootTaskKeyStore,
                 )
             }
         )
@@ -167,7 +167,7 @@ interface SharedProjectsLoader {
             .doOnNext {
                 it.projectKeys.forEach(projectManager::remove)
 
-                rootTaskKeySource.onProjectsRemoved(it.projectKeys)
+                rootTaskKeyStore.onProjectsRemoved(it.projectKeys)
                 userKeyStore.onProjectsRemoved(it.projectKeys)
             }
             .replayImmediate()

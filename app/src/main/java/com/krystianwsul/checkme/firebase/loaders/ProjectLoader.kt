@@ -1,7 +1,7 @@
 package com.krystianwsul.checkme.firebase.loaders
 
 import com.krystianwsul.checkme.firebase.UserCustomTimeProviderSource
-import com.krystianwsul.checkme.firebase.roottask.RootTaskKeySource
+import com.krystianwsul.checkme.firebase.dependencies.RootTaskKeyStore
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.checkme.utils.cacheImmediate
 import com.krystianwsul.checkme.utils.mapNotNull
@@ -45,7 +45,7 @@ interface ProjectLoader<T : ProjectType, U : Parsable> { // U: Project JSON type
         override val projectManager: ProjectProvider.ProjectManager<T, U>,
         initialProjectRecord: ProjectRecord<T>?,
         private val userCustomTimeProviderSource: UserCustomTimeProviderSource,
-        private val rootTaskKeySource: RootTaskKeySource,
+        private val rootTaskKeyStore: RootTaskKeyStore,
     ) : ProjectLoader<T, U> {
 
         private fun <T : Any> Observable<T>.replayImmediate() = replay().apply { domainDisposable += connect() }
@@ -66,7 +66,7 @@ interface ProjectLoader<T : ProjectType, U : Parsable> { // U: Project JSON type
                     }
                 }
                 .map { (projectChangeType, projectRecord) ->
-                    rootTaskKeySource.onProjectAddedOrUpdated(
+                    rootTaskKeyStore.onProjectAddedOrUpdated(
                         projectRecord.projectKey,
                         projectRecord.rootTaskParentDelegate.rootTaskKeys
                     )

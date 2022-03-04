@@ -34,6 +34,7 @@ import io.reactivex.rxjava3.core.Maybe
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.schedulers.Schedulers
+import kotlin.reflect.KClass
 
 
 object AndroidDatabaseWrapper : FactoryProvider.Database() {
@@ -65,52 +66,6 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
     }
 
     private fun Path.toKey() = toString().replace('/', '-')
-
-    private inline fun <reified T : Any> writeNullable(path: Path, value: T?): Completable {
-        return if (ENABLE_PAPER) {
-            rxPaperBook.write(path.toKey(), NullableWrapper(value))
-                .toV3()
-                .subscribeOn(Schedulers.io())
-        } else {
-            Completable.complete()
-        }
-    }
-
-    private inline fun <reified T : Any> readNullable(path: Path): Maybe<NullableWrapper<T>> {
-        return if (ENABLE_PAPER) {
-            rxPaperBook.read<NullableWrapper<T>>(path.toKey())
-                .toV3()
-                .subscribeOn(Schedulers.io())
-                .toMaybe()
-                .onErrorComplete()
-        } else {
-            Maybe.empty()
-        }
-    }
-
-    private class SnapshotConverter<T : Parsable>(path: Path) : Converter<NullableWrapper<T>, Snapshot<T>>(
-        { Snapshot(path.back.asString(), it.value) },
-        { NullableWrapper(it.value) },
-    )
-
-    private inline fun <reified T : Parsable> Query.typedSnapshotChanges(read: Read<T>): Observable<Snapshot<T>> = cache(
-        read,
-        { Snapshot.fromParsable(it, T::class) },
-        SnapshotConverter(path),
-        { readNullable(it) },
-        { path, value -> writeNullable(path, value) },
-    )
-
-    private inline fun <reified T : Any> Query.indicatorSnapshotChanges(read: Read<T>): Observable<Snapshot<T>> = cache(
-        read,
-        { Snapshot.fromTypeIndicator(it, object : GenericTypeIndicator<T>() {}) },
-        Converter(
-            { Snapshot(path.back.asString(), it.value) },
-            { NullableWrapper(it.value) },
-        ),
-        { readNullable(it) },
-        { path, value -> writeNullable(path, value) },
-    )
 
     private fun <T : Any, U : Snapshot<T>> Query.cache(
         read: Read<T>,
@@ -173,50 +128,108 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
         class Loaded<T : Any>(val value: T) : LoadState<T>()
     }
 
-    private interface Read<DATA : Any> {
+    private abstract class Read<DATA : Any> {
 
-        val type: String
+        abstract val type: String
 
-        val priority get() = Priority.DB
+        open val priority = Priority.DB
 
-        fun getResult(): Observable<Snapshot<DATA>>
+        abstract fun getResult(): Observable<Snapshot<DATA>>
+
+        protected fun writeNullable(path: Path, value: DATA?): Completable {
+            return if (ENABLE_PAPER) {
+                rxPaperBook.write(path.toKey(), NullableWrapper(value))
+                    .toV3()
+                    .subscribeOn(Schedulers.io())
+            } else {
+                Completable.complete()
+            }
+        }
+
+        protected fun readNullable(path: Path): Maybe<NullableWrapper<DATA>> {
+            return if (ENABLE_PAPER) {
+                rxPaperBook.read<NullableWrapper<DATA>>(path.toKey())
+                    .toV3()
+                    .subscribeOn(Schedulers.io())
+                    .toMaybe()
+                    .onErrorComplete()
+            } else {
+                Maybe.empty()
+            }
+        }
     }
 
-    private interface TypedRead<DATA : Parsable> : Read<DATA>
+    private abstract class TypedRead<DATA : Parsable> : Read<DATA>() {
 
-    private interface IndicatorRead<DATA : Any> : Read<DATA>
+        protected abstract val kClass: KClass<DATA>
 
-    private class UserRead(private val userKey: UserKey) : TypedRead<UserWrapper> {
+        private class SnapshotConverter<T : Parsable>(path: Path) : Converter<NullableWrapper<T>, Snapshot<T>>(
+            { Snapshot(path.back.asString(), it.value) },
+            { NullableWrapper(it.value) },
+        )
+
+        protected fun Query.typedSnapshotChanges(read: Read<DATA>): Observable<Snapshot<DATA>> = cache(
+            read,
+            { Snapshot.fromParsable(it, kClass) },
+            SnapshotConverter(path),
+            { readNullable(it) },
+            { path, value -> writeNullable(path, value) },
+        )
+    }
+
+    private abstract class IndicatorRead<DATA : Any> : Read<DATA>() {
+
+        protected fun Query.indicatorSnapshotChanges(read: Read<DATA>): Observable<Snapshot<DATA>> = cache(
+            read,
+            { Snapshot.fromTypeIndicator(it, object : GenericTypeIndicator<DATA>() {}) },
+            Converter(
+                { Snapshot(path.back.asString(), it.value) },
+                { NullableWrapper(it.value) },
+            ),
+            { readNullable(it) },
+            { path, value -> writeNullable(path, value) },
+        )
+    }
+
+    private class UserRead(private val userKey: UserKey) : TypedRead<UserWrapper>() {
 
         override val type = "user"
+
+        override val kClass = UserWrapper::class
 
         override fun getResult() = getUserQuery(userKey).typedSnapshotChanges(this)
     }
 
-    private class PrivateProjectRead(private val projectKey: ProjectKey.Private) : TypedRead<PrivateProjectJson> {
+    private class PrivateProjectRead(private val projectKey: ProjectKey.Private) : TypedRead<PrivateProjectJson>() {
 
         override val type = "privateProject"
+
+        override val kClass = PrivateProjectJson::class
 
         override fun getResult() = privateProjectQuery(projectKey).typedSnapshotChanges(this)
     }
 
-    private class SharedProjectRead(private val projectKey: ProjectKey.Shared) : TypedRead<JsonWrapper> {
+    private class SharedProjectRead(private val projectKey: ProjectKey.Shared) : TypedRead<JsonWrapper>() {
 
         override val type = "sharedProject"
+
+        override val kClass = JsonWrapper::class
 
         override fun getResult() = sharedProjectQuery(projectKey).typedSnapshotChanges(this)
     }
 
-    private class TaskRead(private val taskKey: TaskKey.Root) : TypedRead<RootTaskJson> {
+    private class TaskRead(private val taskKey: TaskKey.Root) : TypedRead<RootTaskJson>() {
 
         override val type = "task"
 
         override val priority get() = HasInstancesStore.getPriority(taskKey)
 
+        override val kClass = RootTaskJson::class
+
         override fun getResult() = rootTaskQuery(taskKey).typedSnapshotChanges(this)
     }
 
-    private class UsersRead : IndicatorRead<Map<String, UserWrapper>> {
+    private class UsersRead : IndicatorRead<Map<String, UserWrapper>>() {
 
         override val type = "users"
 

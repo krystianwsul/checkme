@@ -136,13 +136,11 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
             }
         }
 
-        protected fun <U : Snapshot<DATA>> Query.cache(
+        protected fun Query.cache(
             read: Read<DATA>,
-            firebaseToSnapshot: (dataSnapshot: DataSnapshot) -> U,
-            converter: Converter<NullableWrapper<DATA>, U>,
-            readNullable: (path: Path) -> Maybe<NullableWrapper<DATA>>,
-            writeNullable: (path: Path, DATA?) -> Completable,
-        ): Observable<U> {
+            firebaseToSnapshot: (dataSnapshot: DataSnapshot) -> Snapshot<DATA>,
+            converter: Converter<NullableWrapper<DATA>, Snapshot<DATA>>,
+        ): Observable<Snapshot<DATA>> {
             val firebaseObservable = dataChanges().toV3()
                 .subscribeOn(Schedulers.io())
                 .observeOn(Schedulers.computation())
@@ -155,7 +153,7 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
                 .doOnNext {
                     Log.e(
                         "asdf",
-                        "magic db ${read.type} " + CustomPriorityScheduler.currentPriority.get()
+                        "magic db ${read.type} " + CustomPriorityScheduler.currentPriority.get(),
                     ) // todo scheduling
                 }
         }
@@ -174,8 +172,6 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
             read,
             { Snapshot.fromParsable(it, kClass) },
             SnapshotConverter(path),
-            { readNullable(it) },
-            { path, value -> writeNullable(path, value) },
         )
     }
 
@@ -188,8 +184,6 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
                 { Snapshot(path.back.asString(), it.value) },
                 { NullableWrapper(it.value) },
             ),
-            { readNullable(it) },
-            { path, value -> writeNullable(path, value) },
         )
     }
 

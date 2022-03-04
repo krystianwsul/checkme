@@ -2,7 +2,7 @@ package com.krystianwsul.checkme.firebase.loaders
 
 import com.jakewharton.rxrelay3.ReplayRelay
 import com.krystianwsul.checkme.firebase.UserCustomTimeProviderSource
-import com.krystianwsul.checkme.firebase.UserKeyStore
+import com.krystianwsul.checkme.firebase.dependencies.UserKeyStore
 import com.krystianwsul.checkme.firebase.managers.AndroidSharedProjectManager
 import com.krystianwsul.checkme.firebase.roottask.RootTaskKeySource
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot

@@ -2,7 +2,7 @@ package com.krystianwsul.checkme.firebase.roottask
 
 import com.jakewharton.rxrelay3.BehaviorRelay
 import com.krystianwsul.checkme.domainmodel.notifications.Notifier
-import com.krystianwsul.checkme.firebase.UserKeyStore
+import com.krystianwsul.checkme.firebase.dependencies.UserKeyStore
 import com.krystianwsul.checkme.firebase.factories.ProjectsFactory
 import com.krystianwsul.checkme.utils.publishImmediate
 import com.krystianwsul.common.firebase.ChangeType

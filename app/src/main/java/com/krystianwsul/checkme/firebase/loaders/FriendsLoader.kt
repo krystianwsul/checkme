@@ -1,6 +1,6 @@
 package com.krystianwsul.checkme.firebase.loaders
 
-import com.krystianwsul.checkme.firebase.UserKeyStore
+import com.krystianwsul.checkme.firebase.dependencies.UserKeyStore
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.checkme.utils.cacheImmediate
 import com.krystianwsul.checkme.utils.zipSingle
@@ -16,9 +16,9 @@ import io.reactivex.rxjava3.kotlin.merge
 import io.reactivex.rxjava3.kotlin.plusAssign
 
 class FriendsLoader(
-        val userKeyStore: UserKeyStore,
-        private val domainDisposable: CompositeDisposable,
-        private val friendsProvider: FriendsProvider,
+    val userKeyStore: UserKeyStore,
+    private val domainDisposable: CompositeDisposable,
+    private val friendsProvider: FriendsProvider,
 ) {
 
     private fun <T : Any> Observable<T>.replayImmediate() = replay().apply { domainDisposable += connect() }

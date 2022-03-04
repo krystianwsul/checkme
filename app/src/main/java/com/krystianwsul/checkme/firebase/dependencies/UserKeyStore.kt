@@ -1,4 +1,4 @@
-package com.krystianwsul.checkme.firebase
+package com.krystianwsul.checkme.firebase.dependencies
 
 import com.jakewharton.rxrelay3.PublishRelay
 import com.krystianwsul.common.firebase.ChangeType
@@ -44,10 +44,12 @@ class UserKeyStore(
                         }
                         is FriendEvent.AddFriend -> { // add to map
                             val newMap = oldChangeWrapper.data.toMutableMap()
-                            newMap[friendEvent.rootUserRecord.userKey] = LoadUserData.Friend(AddFriendData(
+                            newMap[friendEvent.rootUserRecord.userKey] = LoadUserData.Friend(
+                                AddFriendData(
                                     friendEvent.rootUserRecord.key,
                                     friendEvent.rootUserRecord.userWrapper
-                            ))
+                                )
+                            )
 
                             ChangeWrapper(ChangeType.LOCAL, newMap)
                         }
@@ -156,9 +158,9 @@ class UserKeyStore(
     }
 
     private data class OutputAggregate(
-            val friendMap: Map<UserKey, LoadUserData> = mapOf(),
-            val customTimes: Set<UserKey> = setOf(),
-            val output: ChangeWrapper<Map<UserKey, LoadUserData>> = ChangeWrapper(ChangeType.LOCAL, mapOf()),
+        val friendMap: Map<UserKey, LoadUserData> = mapOf(),
+        val customTimes: Set<UserKey> = setOf(),
+        val output: ChangeWrapper<Map<UserKey, LoadUserData>> = ChangeWrapper(ChangeType.LOCAL, mapOf()),
     ) {
 
         companion object {

@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.firebase
 
 import com.jakewharton.rxrelay3.PublishRelay
+import com.krystianwsul.checkme.firebase.dependencies.UserKeyStore
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.ChangeWrapper
 import com.krystianwsul.common.firebase.DomainThreadChecker

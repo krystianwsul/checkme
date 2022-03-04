@@ -3,8 +3,8 @@ package com.krystianwsul.checkme.firebase.loaders
 import com.jakewharton.rxrelay3.PublishRelay
 import com.krystianwsul.checkme.domainmodel.DomainFactoryRule
 import com.krystianwsul.checkme.firebase.UserCustomTimeProviderSource
-import com.krystianwsul.checkme.firebase.UserKeyStore
 import com.krystianwsul.checkme.firebase.checkRemote
+import com.krystianwsul.checkme.firebase.dependencies.UserKeyStore
 import com.krystianwsul.checkme.firebase.factories.ProjectsFactory
 import com.krystianwsul.checkme.firebase.managers.AndroidPrivateProjectManager
 import com.krystianwsul.checkme.firebase.managers.AndroidRootTasksManager

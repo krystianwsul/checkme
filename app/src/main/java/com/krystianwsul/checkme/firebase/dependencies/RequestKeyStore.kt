@@ -1,4 +1,4 @@
-package com.krystianwsul.checkme.firebase
+package com.krystianwsul.checkme.firebase.dependencies
 
 import com.jakewharton.rxrelay3.PublishRelay
 import io.reactivex.rxjava3.core.Observable
@@ -9,8 +9,8 @@ class RequestKeyStore<REQUEST_KEY : Any, OUTPUT_KEY : Any> {
     companion object {
 
         fun <REQUEST1 : Any, REQUEST2 : Any, OUTPUT : Any> merge(
-                store1: RequestKeyStore<REQUEST1, OUTPUT>,
-                store2: RequestKeyStore<REQUEST2, OUTPUT>,
+            store1: RequestKeyStore<REQUEST1, OUTPUT>,
+            store2: RequestKeyStore<REQUEST2, OUTPUT>,
         ): Observable<Set<OUTPUT>> =
                 listOf(store1, store2).map { it.requestedOutputKeysObservable }.combineLatest { it.flatten().toSet() }
     }

@@ -1,7 +1,7 @@
 package com.krystianwsul.checkme.firebase.loaders
 
 import com.jakewharton.rxrelay3.PublishRelay
-import com.krystianwsul.checkme.firebase.UserKeyStore
+import com.krystianwsul.checkme.firebase.dependencies.UserKeyStore
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.ChangeWrapper

@@ -1,6 +1,6 @@
 package com.krystianwsul.checkme.firebase.roottask
 
-import com.krystianwsul.checkme.firebase.RequestKeyStore
+import com.krystianwsul.checkme.firebase.dependencies.RequestKeyStore
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
 import io.reactivex.rxjava3.core.Observable

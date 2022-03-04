@@ -136,10 +136,10 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
             }
         }
 
+        protected abstract fun firebaseToSnapshot(dataSnapshot: DataSnapshot): Snapshot<DATA>
+
         protected fun Query.cache(
-            read: Read<DATA>,
-            firebaseToSnapshot: (dataSnapshot: DataSnapshot) -> Snapshot<DATA>,
-            converter: Converter<NullableWrapper<DATA>, Snapshot<DATA>>,
+            converter: Converter<NullableWrapper<DATA>, Snapshot<DATA>>, // todo read
         ): Observable<Snapshot<DATA>> {
             val firebaseObservable = dataChanges().toV3()
                 .subscribeOn(Schedulers.io())
@@ -148,12 +148,12 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
                 .doOnNext { writeNullable(path, it.value).subscribe() }
 
             return mergePaperAndRx(readNullable(path), firebaseObservable, converter).flatMapSingle {
-                Single.just(it).observeOnDomain(read.priority)
+                Single.just(it).observeOnDomain(priority)
             }
                 .doOnNext {
                     Log.e(
                         "asdf",
-                        "magic db ${read.type} " + CustomPriorityScheduler.currentPriority.get(),
+                        "magic db $type " + CustomPriorityScheduler.currentPriority.get(),
                     ) // todo scheduling
                 }
         }
@@ -168,18 +168,19 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
             { NullableWrapper(it.value) },
         )
 
-        protected fun Query.typedSnapshotChanges(read: Read<DATA>): Observable<Snapshot<DATA>> = cache(
-            read,
-            { Snapshot.fromParsable(it, kClass) },
+        override fun firebaseToSnapshot(dataSnapshot: DataSnapshot) = Snapshot.fromParsable(dataSnapshot, kClass)
+
+        protected fun Query.typedSnapshotChanges(): Observable<Snapshot<DATA>> = cache(
             SnapshotConverter(path),
         )
     }
 
     private abstract class IndicatorRead<DATA : Any> : Read<DATA>() {
 
-        protected fun Query.indicatorSnapshotChanges(read: Read<DATA>): Observable<Snapshot<DATA>> = cache(
-            read,
-            { Snapshot.fromTypeIndicator(it, object : GenericTypeIndicator<DATA>() {}) },
+        override fun firebaseToSnapshot(dataSnapshot: DataSnapshot) =
+            Snapshot.fromTypeIndicator(dataSnapshot, object : GenericTypeIndicator<DATA>() {})
+
+        protected fun Query.indicatorSnapshotChanges(): Observable<Snapshot<DATA>> = cache(
             Converter(
                 { Snapshot(path.back.asString(), it.value) },
                 { NullableWrapper(it.value) },
@@ -193,7 +194,7 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
 
         override val kClass = UserWrapper::class
 
-        override fun getResult() = getUserQuery(userKey).typedSnapshotChanges(this)
+        override fun getResult() = getUserQuery(userKey).typedSnapshotChanges()
     }
 
     private class PrivateProjectRead(private val projectKey: ProjectKey.Private) : TypedRead<PrivateProjectJson>() {
@@ -202,7 +203,7 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
 
         override val kClass = PrivateProjectJson::class
 
-        override fun getResult() = privateProjectQuery(projectKey).typedSnapshotChanges(this)
+        override fun getResult() = privateProjectQuery(projectKey).typedSnapshotChanges()
     }
 
     private class SharedProjectRead(private val projectKey: ProjectKey.Shared) : TypedRead<JsonWrapper>() {
@@ -211,7 +212,7 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
 
         override val kClass = JsonWrapper::class
 
-        override fun getResult() = sharedProjectQuery(projectKey).typedSnapshotChanges(this)
+        override fun getResult() = sharedProjectQuery(projectKey).typedSnapshotChanges()
     }
 
     private class TaskRead(private val taskKey: TaskKey.Root) : TypedRead<RootTaskJson>() {
@@ -222,7 +223,7 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
 
         override val kClass = RootTaskJson::class
 
-        override fun getResult() = rootTaskQuery(taskKey).typedSnapshotChanges(this)
+        override fun getResult() = rootTaskQuery(taskKey).typedSnapshotChanges()
     }
 
     private class UsersRead : IndicatorRead<Map<String, UserWrapper>>() {
@@ -231,6 +232,6 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
 
         override fun getResult() = rootReference.child(USERS_KEY)
             .orderByKey()
-            .indicatorSnapshotChanges(this)
+            .indicatorSnapshotChanges()
     }
 }

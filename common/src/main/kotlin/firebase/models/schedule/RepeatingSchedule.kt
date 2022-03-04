@@ -19,7 +19,7 @@ sealed class RepeatingSchedule(topLevelTask: Task) : Schedule(topLevelTask) {
     val until get() = repeatingScheduleRecord.until
 
     private val repeatingOldestVisibleProperty = invalidatableLazy {
-        RepeatingOldestVisible.fromJson(repeatingScheduleRecord.oldestVisible)
+        RepeatingOldestVisible.fromJson(repeatingScheduleRecord.run { oldestVisible ?: oldestVisibleCompat })
     }
 
     private val repeatingOldestVisible by repeatingOldestVisibleProperty

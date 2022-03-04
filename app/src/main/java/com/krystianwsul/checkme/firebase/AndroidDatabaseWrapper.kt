@@ -65,8 +65,6 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
         rxPaperBook.destroy().subscribe()
     }
 
-    private fun Path.toKey() = toString().replace('/', '-')
-
     override fun getNewId(path: String) = rootReference.child(path)
         .push()
         .key!!
@@ -78,22 +76,11 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
             .subscribe { task -> callback(task.getMessage(), task.isSuccessful, task.exception) }
     }
 
-    private fun getUserQuery(userKey: UserKey) = rootReference.child("$USERS_KEY/${userKey.key}")
-
     override fun getUserObservable(userKey: UserKey) = UserRead(userKey).getResult()
-
-    private fun privateProjectQuery(key: ProjectKey.Private) =
-        rootReference.child("$PRIVATE_PROJECTS_KEY/${key.key}")
 
     override fun getPrivateProjectObservable(projectKey: ProjectKey.Private) = PrivateProjectRead(projectKey).getResult()
 
-    private fun sharedProjectQuery(projectKey: ProjectKey.Shared) =
-        rootReference.child("$RECORDS_KEY/${projectKey.key}")
-
     override fun getSharedProjectObservable(projectKey: ProjectKey.Shared) = SharedProjectRead(projectKey).getResult()
-
-    private fun rootTaskQuery(rootTaskKey: TaskKey.Root) =
-        rootReference.child("$TASKS_KEY/${rootTaskKey.taskId}")
 
     override fun getRootTaskObservable(taskKey: TaskKey.Root) = TaskRead(taskKey).getResult()
 
@@ -107,6 +94,11 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
     }
 
     private abstract class Read<DATA : Any> {
+
+        companion object {
+
+            private fun Path.toKey() = toString().replace('/', '-')
+        }
 
         abstract val type: String
 
@@ -138,9 +130,7 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
 
         protected abstract fun firebaseToSnapshot(dataSnapshot: DataSnapshot): Snapshot<DATA>
 
-        protected fun Query.cache(
-            converter: Converter<NullableWrapper<DATA>, Snapshot<DATA>>, // todo read
-        ): Observable<Snapshot<DATA>> {
+        protected fun Query.cache(converter: Converter<NullableWrapper<DATA>, Snapshot<DATA>>): Observable<Snapshot<DATA>> {
             val firebaseObservable = dataChanges().toV3()
                 .subscribeOn(Schedulers.io())
                 .observeOn(Schedulers.computation())
@@ -170,9 +160,7 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
 
         override fun firebaseToSnapshot(dataSnapshot: DataSnapshot) = Snapshot.fromParsable(dataSnapshot, kClass)
 
-        protected fun Query.typedSnapshotChanges(): Observable<Snapshot<DATA>> = cache(
-            SnapshotConverter(path),
-        )
+        protected fun Query.typedSnapshotChanges(): Observable<Snapshot<DATA>> = cache(SnapshotConverter(path))
     }
 
     private abstract class IndicatorRead<DATA : Any> : Read<DATA>() {
@@ -194,7 +182,7 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
 
         override val kClass = UserWrapper::class
 
-        override fun getResult() = getUserQuery(userKey).typedSnapshotChanges()
+        override fun getResult() = rootReference.child("$USERS_KEY/${userKey.key}").typedSnapshotChanges()
     }
 
     private class PrivateProjectRead(private val projectKey: ProjectKey.Private) : TypedRead<PrivateProjectJson>() {
@@ -203,7 +191,8 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
 
         override val kClass = PrivateProjectJson::class
 
-        override fun getResult() = privateProjectQuery(projectKey).typedSnapshotChanges()
+        override fun getResult() =
+            rootReference.child("$PRIVATE_PROJECTS_KEY/${projectKey.key}").typedSnapshotChanges()
     }
 
     private class SharedProjectRead(private val projectKey: ProjectKey.Shared) : TypedRead<JsonWrapper>() {
@@ -212,7 +201,7 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
 
         override val kClass = JsonWrapper::class
 
-        override fun getResult() = sharedProjectQuery(projectKey).typedSnapshotChanges()
+        override fun getResult() = rootReference.child("$RECORDS_KEY/${projectKey.key}").typedSnapshotChanges()
     }
 
     private class TaskRead(private val taskKey: TaskKey.Root) : TypedRead<RootTaskJson>() {
@@ -223,7 +212,7 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
 
         override val kClass = RootTaskJson::class
 
-        override fun getResult() = rootTaskQuery(taskKey).typedSnapshotChanges()
+        override fun getResult() = rootReference.child("$TASKS_KEY/${taskKey.taskId}").typedSnapshotChanges()
     }
 
     private class UsersRead : IndicatorRead<Map<String, UserWrapper>>() {

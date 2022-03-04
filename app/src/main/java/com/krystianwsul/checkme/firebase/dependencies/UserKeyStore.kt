@@ -23,9 +23,9 @@ class UserKeyStore(
     private val projectRequestKeyStore = RequestKeyStore<ProjectKey.Shared, UserKey>()
     private val rootTaskRequestKeyStore = RequestKeyStore<TaskKey.Root, UserKey>()
 
-    private val addFriendEvents = PublishRelay.create<FriendEvent.AddFriend>()
+    private val requestMerger = RequestMerger(projectRequestKeyStore, rootTaskRequestKeyStore)
 
-    private val requestMerger = RequestMerger<UserKey>()
+    private val addFriendEvents = PublishRelay.create<FriendEvent.AddFriend>()
 
     val loadUserDataObservable: Observable<ChangeWrapper<Map<UserKey, LoadUserData>>>
 
@@ -60,7 +60,7 @@ class UserKeyStore(
             .skip(1)
             .map { FriendOrCustomTimeEvent.Friend(it) }
 
-        val mergedRequests = requestMerger.merge(projectRequestKeyStore, rootTaskRequestKeyStore)
+        val mergedRequests = requestMerger.outputObservable
             .skip(1)
             .map { FriendOrCustomTimeEvent.CustomTimes(it) }
 

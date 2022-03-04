@@ -9,9 +9,9 @@ class RootTaskKeyStore {
     private val projectStore = RequestKeyStore<ProjectKey<*>, TaskKey.Root>()
     private val taskStore = RequestKeyStore<TaskKey.Root, TaskKey.Root>()
 
-    private val requestMerger = RequestMerger<TaskKey.Root>()
+    private val requestMerger = RequestMerger(projectStore, taskStore)
 
-    val rootTaskKeysObservable: Observable<Set<TaskKey.Root>> = requestMerger.merge(projectStore, taskStore)
+    val rootTaskKeysObservable: Observable<Set<TaskKey.Root>> = requestMerger.outputObservable
 
     fun onProjectAddedOrUpdated(projectKey: ProjectKey<*>, rootTaskKeys: Set<TaskKey.Root>) =
         projectStore.addRequest(projectKey, rootTaskKeys)

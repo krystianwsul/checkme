@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.firebase.database
 import android.util.Log
 import com.androidhuman.rxfirebase2.database.dataChanges
 import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.Query
 import com.google.firebase.database.core.Path
 import com.krystianwsul.checkme.domainmodel.observeOnDomain
@@ -31,7 +32,13 @@ abstract class DatabaseRead<DATA : Any> {
 
     open val priority = Priority.DB
 
-    abstract fun getResult(): Observable<Snapshot<DATA>>
+    protected abstract fun DatabaseReference.getQuery(): Query
+
+    protected abstract fun Query.toSnapshot(): Observable<Snapshot<DATA>>
+
+    fun getResult(): Observable<Snapshot<DATA>> = AndroidDatabaseWrapper.rootReference
+        .getQuery()
+        .toSnapshot()
 
     private fun writeNullable(path: Path, value: DATA?): Completable {
         return if (AndroidDatabaseWrapper.ENABLE_PAPER) {

@@ -7,7 +7,6 @@ import com.krystianwsul.checkme.firebase.Converter
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.firebase.json.Parsable
-import io.reactivex.rxjava3.core.Observable
 import kotlin.reflect.KClass
 
 abstract class TypedDatabaseRead<DATA : Parsable> : DatabaseRead<DATA>() {
@@ -21,5 +20,5 @@ abstract class TypedDatabaseRead<DATA : Parsable> : DatabaseRead<DATA>() {
 
     override fun firebaseToSnapshot(dataSnapshot: DataSnapshot) = Snapshot.fromParsable(dataSnapshot, kClass)
 
-    protected fun Query.typedSnapshotChanges(): Observable<Snapshot<DATA>> = cache(SnapshotConverter(path))
+    override fun Query.toSnapshot() = cache(SnapshotConverter(path))
 }

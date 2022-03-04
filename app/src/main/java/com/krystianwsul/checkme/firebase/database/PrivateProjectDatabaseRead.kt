@@ -1,6 +1,6 @@
 package com.krystianwsul.checkme.firebase.database
 
-import com.krystianwsul.checkme.firebase.AndroidDatabaseWrapper
+import com.google.firebase.database.DatabaseReference
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.json.projects.PrivateProjectJson
 import com.krystianwsul.common.utils.ProjectKey
@@ -11,7 +11,5 @@ class PrivateProjectDatabaseRead(private val projectKey: ProjectKey.Private) : T
 
     override val kClass = PrivateProjectJson::class
 
-    override fun getResult() =
-        AndroidDatabaseWrapper.rootReference.child("${DatabaseWrapper.PRIVATE_PROJECTS_KEY}/${projectKey.key}")
-            .typedSnapshotChanges()
+    override fun DatabaseReference.getQuery() = child("${DatabaseWrapper.PRIVATE_PROJECTS_KEY}/${projectKey.key}")
 }

@@ -93,8 +93,8 @@ class FactoryLoaderTest {
         val sharedProjectObservable = PublishRelay.create<Snapshot<JsonWrapper>>()
         val userObservable = PublishRelay.create<Snapshot<UserWrapper>>()
 
-        override fun getPrivateProjectObservable(key: ProjectKey.Private) =
-            privateProjectObservable.map { Snapshot(key.key, it) }
+        override fun getPrivateProjectObservable(projectKey: ProjectKey.Private) =
+            privateProjectObservable.map { Snapshot(projectKey.key, it) }
 
         override fun getSharedProjectObservable(projectKey: ProjectKey.Shared) = sharedProjectObservable
 

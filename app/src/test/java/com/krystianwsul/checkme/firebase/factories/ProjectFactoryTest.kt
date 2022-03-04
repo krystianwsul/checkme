@@ -50,7 +50,7 @@ class ProjectFactoryTest {
 
         override val database = object : FactoryProvider.Database() {
 
-            override fun getPrivateProjectObservable(key: ProjectKey.Private): Observable<Snapshot<PrivateProjectJson>> {
+            override fun getPrivateProjectObservable(projectKey: ProjectKey.Private): Observable<Snapshot<PrivateProjectJson>> {
                 TODO("Not yet implemented")
             }
 

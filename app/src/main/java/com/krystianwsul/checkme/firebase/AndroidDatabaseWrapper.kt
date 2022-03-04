@@ -93,7 +93,7 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
         { NullableWrapper(it.value) },
     )
 
-    private inline fun <reified T : Parsable> Query.typedSnapshotChanges(read: Read): Observable<Snapshot<T>> = cache(
+    private inline fun <reified T : Parsable> Query.typedSnapshotChanges(read: Read<T>): Observable<Snapshot<T>> = cache(
         read,
         { Snapshot.fromParsable(it, T::class) },
         SnapshotConverter(path),
@@ -101,7 +101,7 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
         { path, value -> writeNullable(path, value) },
     )
 
-    private inline fun <reified T : Any> Query.indicatorSnapshotChanges(read: Read): Observable<Snapshot<T>> = cache(
+    private inline fun <reified T : Any> Query.indicatorSnapshotChanges(read: Read<T>): Observable<Snapshot<T>> = cache(
         read,
         { Snapshot.fromTypeIndicator(it, object : GenericTypeIndicator<T>() {}) },
         Converter(
@@ -113,7 +113,7 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
     )
 
     private fun <T : Any, U : Snapshot<T>> Query.cache(
-        read: Read,
+        read: Read<T>,
         firebaseToSnapshot: (dataSnapshot: DataSnapshot) -> U,
         converter: Converter<NullableWrapper<T>, U>,
         readNullable: (path: Path) -> Maybe<NullableWrapper<T>>,
@@ -147,30 +147,24 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
 
     private fun getUserQuery(userKey: UserKey) = rootReference.child("$USERS_KEY/${userKey.key}")
 
-    override fun getUserObservable(userKey: UserKey) =
-        getUserQuery(userKey).typedSnapshotChanges<UserWrapper>(UserRead())
+    override fun getUserObservable(userKey: UserKey) = UserRead(userKey).getResult()
 
     private fun privateProjectQuery(key: ProjectKey.Private) =
         rootReference.child("$PRIVATE_PROJECTS_KEY/${key.key}")
 
-    override fun getPrivateProjectObservable(key: ProjectKey.Private) =
-        privateProjectQuery(key).typedSnapshotChanges<PrivateProjectJson>(PrivateProjectRead())
+    override fun getPrivateProjectObservable(projectKey: ProjectKey.Private) = PrivateProjectRead(projectKey).getResult()
 
     private fun sharedProjectQuery(projectKey: ProjectKey.Shared) =
         rootReference.child("$RECORDS_KEY/${projectKey.key}")
 
-    override fun getSharedProjectObservable(projectKey: ProjectKey.Shared) =
-        sharedProjectQuery(projectKey).typedSnapshotChanges<JsonWrapper>(SharedProjectRead())
+    override fun getSharedProjectObservable(projectKey: ProjectKey.Shared) = SharedProjectRead(projectKey).getResult()
 
     private fun rootTaskQuery(rootTaskKey: TaskKey.Root) =
         rootReference.child("$TASKS_KEY/${rootTaskKey.taskId}")
 
-    override fun getRootTaskObservable(taskKey: TaskKey.Root) =
-        rootTaskQuery(taskKey).typedSnapshotChanges<RootTaskJson>(TaskRead(taskKey))
+    override fun getRootTaskObservable(taskKey: TaskKey.Root) = TaskRead(taskKey).getResult()
 
-    fun getUsersObservable() = rootReference.child(USERS_KEY)
-        .orderByKey()
-        .indicatorSnapshotChanges<Map<String, UserWrapper>>(UsersRead)
+    fun getUsersObservable() = UsersRead().getResult()
 
     sealed class LoadState<T : Any> {
 
@@ -179,37 +173,55 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
         class Loaded<T : Any>(val value: T) : LoadState<T>()
     }
 
-    private interface Read {
+    private interface Read<DATA : Any> {
 
         val type: String
 
         val priority get() = Priority.DB
+
+        fun getResult(): Observable<Snapshot<DATA>>
     }
 
-    private class UserRead : Read {
+    private interface TypedRead<DATA : Parsable> : Read<DATA>
+
+    private interface IndicatorRead<DATA : Any> : Read<DATA>
+
+    private class UserRead(private val userKey: UserKey) : TypedRead<UserWrapper> {
 
         override val type = "user"
+
+        override fun getResult() = getUserQuery(userKey).typedSnapshotChanges(this)
     }
 
-    private class PrivateProjectRead : Read {
+    private class PrivateProjectRead(private val projectKey: ProjectKey.Private) : TypedRead<PrivateProjectJson> {
 
         override val type = "privateProject"
+
+        override fun getResult() = privateProjectQuery(projectKey).typedSnapshotChanges(this)
     }
 
-    private class SharedProjectRead : Read {
+    private class SharedProjectRead(private val projectKey: ProjectKey.Shared) : TypedRead<JsonWrapper> {
 
         override val type = "sharedProject"
+
+        override fun getResult() = sharedProjectQuery(projectKey).typedSnapshotChanges(this)
     }
 
-    private class TaskRead(private val taskKey: TaskKey.Root) : Read {
+    private class TaskRead(private val taskKey: TaskKey.Root) : TypedRead<RootTaskJson> {
 
         override val type = "task"
 
         override val priority get() = HasInstancesStore.getPriority(taskKey)
+
+        override fun getResult() = rootTaskQuery(taskKey).typedSnapshotChanges(this)
     }
 
-    private object UsersRead : Read {
+    private class UsersRead : IndicatorRead<Map<String, UserWrapper>> {
 
         override val type = "users"
+
+        override fun getResult() = rootReference.child(USERS_KEY)
+            .orderByKey()
+            .indicatorSnapshotChanges(this)
     }
 }

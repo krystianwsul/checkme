@@ -99,7 +99,7 @@ interface FactoryProvider {
 
     abstract class Database : FriendsProvider.Database(), RootTasksLoader.Provider {
 
-        abstract fun getPrivateProjectObservable(key: ProjectKey.Private): Observable<Snapshot<PrivateProjectJson>>
+        abstract fun getPrivateProjectObservable(projectKey: ProjectKey.Private): Observable<Snapshot<PrivateProjectJson>>
 
         abstract fun getSharedProjectObservable(projectKey: ProjectKey.Shared): Observable<Snapshot<JsonWrapper>>
     }

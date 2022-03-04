@@ -66,11 +66,11 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
 
     private fun getUserQuery(userKey: UserKey) = rootReference.child("$USERS_KEY/${userKey.key}")
     override fun getUserObservable(userKey: UserKey) =
-        getUserQuery(userKey).typedSnapshotChanges<UserWrapper>("user") { Priority.DB }
+        getUserQuery(userKey).typedSnapshotChanges<UserWrapper>(UserRead()) { Priority.DB }
 
     fun getUsersObservable() = rootReference.child(USERS_KEY)
         .orderByKey()
-        .indicatorSnapshotChanges<Map<String, UserWrapper>>("users") { Priority.DB }
+        .indicatorSnapshotChanges<Map<String, UserWrapper>>(UsersRead) { Priority.DB }
 
     private fun Path.toKey() = toString().replace('/', '-')
 
@@ -102,11 +102,11 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
     )
 
     private inline fun <reified T : Parsable> Query.typedSnapshotChanges(
-        type: String,
+        read: Read,
         noinline getPriority: () -> Priority,
     ): Observable<Snapshot<T>> {
         return cache(
-            type,
+            read,
             { Snapshot.fromParsable(it, T::class) },
             SnapshotConverter(path),
             { readNullable(it) },
@@ -116,11 +116,11 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
     }
 
     private inline fun <reified T : Any> Query.indicatorSnapshotChanges(
-        type: String,
+        read: Read,
         noinline getPriority: () -> Priority,
     ): Observable<Snapshot<T>> =
         cache(
-            type,
+            read,
             { Snapshot.fromTypeIndicator(it, object : GenericTypeIndicator<T>() {}) },
             Converter(
                 { Snapshot(path.back.asString(), it.value) },
@@ -132,7 +132,7 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
         )
 
     private fun <T : Any, U : Snapshot<T>> Query.cache(
-        type: String,
+        read: Read,
         firebaseToSnapshot: (dataSnapshot: DataSnapshot) -> U,
         converter: Converter<NullableWrapper<T>, U>,
         readNullable: (path: Path) -> Maybe<NullableWrapper<T>>,
@@ -150,7 +150,7 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
             Single.just(it).observeOnDomain(getPriority())
         }
             .doOnNext {
-                Log.e("asdf", "magic db $type " + CustomPriorityScheduler.currentPriority.get()) // todo scheduling
+                Log.e("asdf", "magic db ${read.type} " + CustomPriorityScheduler.currentPriority.get()) // todo scheduling
             }
     }
 
@@ -162,7 +162,7 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
         rootReference.child("$RECORDS_KEY/${projectKey.key}")
 
     override fun getSharedProjectObservable(projectKey: ProjectKey.Shared) =
-        sharedProjectQuery(projectKey).typedSnapshotChanges<JsonWrapper>("sharedProject") { Priority.DB }
+        sharedProjectQuery(projectKey).typedSnapshotChanges<JsonWrapper>(SharedProjectRead()) { Priority.DB }
 
     override fun update(values: Map<String, Any?>, callback: DatabaseCallback) {
         rootReference.updateChildren(values)
@@ -175,13 +175,13 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
         rootReference.child("$PRIVATE_PROJECTS_KEY/${key.key}")
 
     override fun getPrivateProjectObservable(key: ProjectKey.Private) =
-        privateProjectQuery(key).typedSnapshotChanges<PrivateProjectJson>("privateProject") { Priority.DB }
+        privateProjectQuery(key).typedSnapshotChanges<PrivateProjectJson>(PrivateProjectRead()) { Priority.DB }
 
     private fun rootTaskQuery(rootTaskKey: TaskKey.Root) =
         rootReference.child("$TASKS_KEY/${rootTaskKey.taskId}")
 
     override fun getRootTaskObservable(rootTaskKey: TaskKey.Root) =
-        rootTaskQuery(rootTaskKey).typedSnapshotChanges<RootTaskJson>("rootTask") {
+        rootTaskQuery(rootTaskKey).typedSnapshotChanges<RootTaskJson>(TaskRead()) {
             HasInstancesStore.getPriority(rootTaskKey)
         }
 
@@ -190,5 +190,35 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
         class Initial<T : Any> : LoadState<T>()
 
         class Loaded<T : Any>(val value: T) : LoadState<T>()
+    }
+
+    private interface Read {
+
+        val type: String
+    }
+
+    private class UserRead : Read {
+
+        override val type = "user"
+    }
+
+    private class PrivateProjectRead : Read {
+
+        override val type = "privateProject"
+    }
+
+    private class SharedProjectRead : Read {
+
+        override val type = "sharedProject"
+    }
+
+    private class TaskRead : Read {
+
+        override val type = "task"
+    }
+
+    private object UsersRead : Read {
+
+        override val type = "users"
     }
 }

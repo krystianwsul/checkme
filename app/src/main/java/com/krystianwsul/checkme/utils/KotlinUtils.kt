@@ -44,6 +44,7 @@ import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.firebase.DatabaseCallback
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.ExactTimeStamp
+import io.reactivex.rxjava3.core.Flowable
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.CompositeDisposable
@@ -155,6 +156,7 @@ fun Context.startDate(receiver: BroadcastReceiver) {
 
 fun <T> Observable<NullableWrapper<T>>.filterNotNull() = filter { it.value != null }.map { it.value!! }
 fun <T> Single<NullableWrapper<T>>.filterNotNull() = filter { it.value != null }.map { it.value!! }
+fun <T> Flowable<NullableWrapper<T>>.filterNotNull() = filter { it.value != null }.map { it.value!! }
 
 private typealias TaskKeys = Pair<ExactTimeStamp, Set<String>>
 
@@ -356,6 +358,7 @@ fun <T : Any> Single<T>.getCurrentValue() = tryGetCurrentValue()!!
 
 fun <T : Any, U : Any> Observable<T>.mapNotNull(mapper: (T) -> U?) = map { NullableWrapper(mapper(it)) }.filterNotNull()
 fun <T : Any, U : Any> Single<T>.mapNotNull(mapper: (T) -> U?) = map { NullableWrapper(mapper(it)) }.filterNotNull()
+fun <T : Any, U : Any> Flowable<T>.mapNotNull(mapper: (T) -> U?) = map { NullableWrapper(mapper(it)) }.filterNotNull()
 
 fun <T : Any> Observable<T>.publishImmediate(compositeDisposable: CompositeDisposable) =
     publish().apply { compositeDisposable += connect() }

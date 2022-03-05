@@ -4,7 +4,9 @@ import android.util.Log
 import com.jakewharton.rxrelay3.BehaviorRelay
 import com.jakewharton.rxrelay3.PublishRelay
 import com.krystianwsul.checkme.domainmodel.getDomainScheduler
+import com.krystianwsul.checkme.domainmodel.observeOnDomain
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
+import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.mindorks.scheduler.Priority
 import com.mindorks.scheduler.internal.CustomPriorityScheduler
 import io.reactivex.rxjava3.core.BackpressureStrategy
@@ -38,13 +40,15 @@ object DatabaseResultQueue {
                     }?.let { (priority, entries) ->
                         Log.e("asdf", "magic queue took ${entries.size} with priority $priority") // todo scheduling
 
-                        Maybe.just(entries).observeOn(getDomainScheduler(priority))
+                        Maybe.just(entries).observeOn(getDomainScheduler(priority)) // todo queue double observing
                     } ?: Maybe.empty()
                 },
                 false,
                 1,
             )
             .doOnNext {
+                DomainThreadChecker.instance.requireDomainThread()
+
                 Log.e(
                     "asdf",
                     "magic queue accepting ${it.size} with priority " + CustomPriorityScheduler.currentPriority.get()
@@ -67,11 +71,13 @@ object DatabaseResultQueue {
     fun <T : Any> enqueueSnapshot(databaseRead: DatabaseRead<T>, snapshot: Snapshot<T>): Single<Snapshot<T>> {
         val behaviorRelay = BehaviorRelay.create<Snapshot<T>>()
 
-        synchronized { add(QueueEntry(databaseRead.priority, snapshot, behaviorRelay)) }
+        val priority = databaseRead.priority
+
+        synchronized { add(QueueEntry(priority, snapshot, behaviorRelay)) }
 
         enqueueTrigger()
 
-        return behaviorRelay.firstOrError()
+        return behaviorRelay.firstOrError().observeOnDomain(priority) // todo queue double observing
     }
 
     /*

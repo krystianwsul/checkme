@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.firebase.loaders
 
 import com.jakewharton.rxrelay3.BehaviorRelay
+import com.krystianwsul.common.firebase.DomainThreadChecker
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.plusAssign
@@ -14,7 +15,9 @@ class DatabaseRx<T : Any>(domainDisposable: CompositeDisposable, databaseObserva
     private val cached = BehaviorRelay.create<T>()
 
     init {
-        disposable += observable.subscribe(cached::accept)
+        disposable += observable.doOnNext {
+            DomainThreadChecker.instance.requireDomainThread()
+        }.subscribe(cached::accept)
     }
 
     val first = observable.firstOrError()

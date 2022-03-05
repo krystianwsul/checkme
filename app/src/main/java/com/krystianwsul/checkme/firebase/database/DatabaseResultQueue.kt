@@ -1,10 +1,9 @@
 package com.krystianwsul.checkme.firebase.database
 
 import android.util.Log
-import com.jakewharton.rxrelay3.BehaviorRelay
 import com.jakewharton.rxrelay3.PublishRelay
+import com.jakewharton.rxrelay3.Relay
 import com.krystianwsul.checkme.domainmodel.getDomainScheduler
-import com.krystianwsul.checkme.domainmodel.observeOnDomain
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.mindorks.scheduler.Priority
@@ -69,15 +68,21 @@ object DatabaseResultQueue {
     }?.let(trigger::accept)
 
     fun <T : Any> enqueueSnapshot(databaseRead: DatabaseRead<T>, snapshot: Snapshot<T>): Single<Snapshot<T>> {
-        val behaviorRelay = BehaviorRelay.create<Snapshot<T>>()
+        val relay = PublishRelay.create<Snapshot<T>>()
 
-        val priority = databaseRead.priority
+        return relay.firstOrError()
+            .doOnSubscribe {
+                /*
+                This doOnSubscribe, plus the use of PublishRelay, is to ensure that the entry doesn't get dequeued before its
+                listeners are ready.  That, in turn, guarantees that the logic after executing an entry will get run after
+                the rest of the chain subscribing to the event.
+                 */
+                val priority = databaseRead.priority
 
-        synchronized { add(QueueEntry(priority, snapshot, behaviorRelay)) }
+                synchronized { add(QueueEntry(priority, snapshot, relay)) }
 
-        enqueueTrigger()
-
-        return behaviorRelay.firstOrError().observeOnDomain(priority) // todo queue double observing
+                enqueueTrigger()
+            }
     }
 
     /*
@@ -87,7 +92,7 @@ object DatabaseResultQueue {
     private class QueueEntry<T : Any>(
         val priority: Priority,
         val snapshot: Snapshot<T>,
-        val relay: BehaviorRelay<Snapshot<T>>,
+        val relay: Relay<Snapshot<T>>,
     ) {
 
         fun accept() = relay.accept(snapshot)

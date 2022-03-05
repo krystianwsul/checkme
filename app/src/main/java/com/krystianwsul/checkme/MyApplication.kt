@@ -41,6 +41,7 @@ import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.miguelbcr.ui.rx_paparazzo2.RxPaparazzo
+import com.mindorks.scheduler.Priority
 import com.pacoworks.rxpaper2.RxPaperBook
 import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Maybe
@@ -117,7 +118,7 @@ class MyApplication : Application() {
         RxDogTag.install()
 
         DomainThreadChecker.instance = AndroidDomainThreadChecker().also {
-            runOnDomain { it.setDomainThread() }
+            runOnDomain(Priority.IMMEDIATE) { it.setDomainThread() }
         }
 
         AndroidDomainUpdater.init()

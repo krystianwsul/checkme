@@ -20,9 +20,9 @@ fun <T : Any> Single<T>.subscribeOnDomain(priority: Priority? = null) = subscrib
 fun Completable.subscribeOnDomain(priority: Priority? = null) = subscribeOn(getDomainScheduler(priority))
 
 @CheckResult
-fun completeOnDomain(action: () -> Unit) = Completable.fromAction(action).subscribeOnDomain()
+fun completeOnDomain(priority: Priority, action: () -> Unit) = Completable.fromAction(action).subscribeOnDomain(priority)
 
-fun runOnDomain(action: () -> Unit) = completeOnDomain(action).subscribe()
+fun runOnDomain(priority: Priority, action: () -> Unit) = completeOnDomain(priority, action).subscribe()
 
 fun <T : Any> Observable<T>.observeOnDomainSplitPriorities(initialPriority: Priority, laterPriority: Priority? = null) =
     // todo scheduling

@@ -39,7 +39,7 @@ object DatabaseResultQueue {
                     }?.let { (priority, entries) ->
                         Log.e("asdf", "magic queue took ${entries.size} with priority $priority") // todo scheduling
 
-                        Maybe.just(entries).observeOn(getDomainScheduler(priority)) // todo queue double observing
+                        Maybe.just(entries).observeOn(getDomainScheduler(priority))
                     } ?: Maybe.empty()
                 },
                 false,

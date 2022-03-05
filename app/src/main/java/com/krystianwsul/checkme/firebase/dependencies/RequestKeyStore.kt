@@ -7,17 +7,18 @@ class RequestKeyStore<REQUEST_KEY : Any, OUTPUT_KEY : Any> {
 
     private val customTimeEvents = PublishRelay.create<CustomTimeEvent<REQUEST_KEY, OUTPUT_KEY>>()
 
-    val requestedOutputKeysObservable: Observable<Set<OUTPUT_KEY>> = customTimeEvents.scan(CustomTimeAggregate<REQUEST_KEY, OUTPUT_KEY>()) { aggregate, customTimeEvent ->
-        when (customTimeEvent) {
-            is CustomTimeEvent.ProjectAdded<REQUEST_KEY, OUTPUT_KEY> -> {
-                val newProjectMap = aggregate.requestMap
+    val requestedOutputKeysObservable: Observable<Collection<Set<OUTPUT_KEY>>> =
+        customTimeEvents.scan(CustomTimeAggregate<REQUEST_KEY, OUTPUT_KEY>()) { aggregate, customTimeEvent ->
+            when (customTimeEvent) {
+                is CustomTimeEvent.ProjectAdded<REQUEST_KEY, OUTPUT_KEY> -> {
+                    val newProjectMap = aggregate.requestMap
                         .toMutableMap()
                         .also { it[customTimeEvent.requestKey] = customTimeEvent.outputKeys }
 
-                CustomTimeAggregate(newProjectMap)
-            }
-            is CustomTimeEvent.ProjectsRemoved<REQUEST_KEY, OUTPUT_KEY> -> {
-                val newProjectMap = aggregate.requestMap
+                    CustomTimeAggregate(newProjectMap)
+                }
+                is CustomTimeEvent.ProjectsRemoved<REQUEST_KEY, OUTPUT_KEY> -> {
+                    val newProjectMap = aggregate.requestMap
                         .toMutableMap()
                         .also { map ->
                             customTimeEvent.requestKeys.forEach { map.remove(it) }
@@ -28,7 +29,6 @@ class RequestKeyStore<REQUEST_KEY : Any, OUTPUT_KEY : Any> {
         }
     }
             .map { it.output }
-            .distinctUntilChanged() // this initially emits an empty set.  It's necessary-ish for merging
 
     fun addRequest(requestKey: REQUEST_KEY, outputKeys: Set<OUTPUT_KEY>) =
             customTimeEvents.accept(CustomTimeEvent.ProjectAdded(requestKey, outputKeys))
@@ -53,7 +53,5 @@ class RequestKeyStore<REQUEST_KEY : Any, OUTPUT_KEY : Any> {
     ) {
 
         val output = requestMap.values
-                .flatten()
-                .toSet()
     }
 }

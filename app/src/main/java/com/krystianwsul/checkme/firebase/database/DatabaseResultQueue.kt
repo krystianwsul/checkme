@@ -20,6 +20,8 @@ object DatabaseResultQueue {
 
     private fun <U> synchronized(action: MutableList<QueueEntry<*>>.() -> U) = synchronized(entries) { entries.action() }
 
+    val onDequeued = PublishRelay.create<Unit>()
+
     init {
         trigger.toFlowable(BackpressureStrategy.LATEST)
             .flatMapMaybe(
@@ -56,6 +58,7 @@ object DatabaseResultQueue {
                 it.forEach { it.accept() }
 
                 Log.e("asdf", "magic queue accept done") // todo scheduling
+                onDequeued.accept(Unit)
             }
             .subscribe {
                 Log.e("asdf", "magic queue enqueueTrigger in subscribe") // todo scheduling

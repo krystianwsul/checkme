@@ -24,7 +24,7 @@ object DatabaseResultQueue {
             .flatMapMaybe(
                 {
                     synchronized {
-                        Log.e("asdf", "magic queue size: " + size)
+                        Log.e("asdf", "magic queue size: " + size) // todo scheduling
 
                         takeIf { isNotEmpty() }?.let {
                             val maxPriority = map { it.priority }.toSet().maxOrNull()!!
@@ -36,7 +36,7 @@ object DatabaseResultQueue {
                             maxPriority to currEntries
                         }
                     }?.let { (priority, entries) ->
-                        Log.e("asdf", "magic queue took ${entries.size} with priority $priority")
+                        Log.e("asdf", "magic queue took ${entries.size} with priority $priority") // todo scheduling
 
                         Maybe.just(entries).observeOn(getDomainScheduler(priority))
                     } ?: Maybe.empty()
@@ -48,14 +48,14 @@ object DatabaseResultQueue {
                 Log.e(
                     "asdf",
                     "magic queue accepting ${it.size} with priority " + CustomPriorityScheduler.currentPriority.get()
-                )
+                ) // todo scheduling
 
                 it.forEach { it.accept() }
 
-                Log.e("asdf", "magic queue accept done")
+                Log.e("asdf", "magic queue accept done") // todo scheduling
             }
             .subscribe {
-                Log.e("asdf", "magic queue enqueueTrigger in subscribe")
+                Log.e("asdf", "magic queue enqueueTrigger in subscribe") // todo scheduling
                 enqueueTrigger()
             }
     }
@@ -76,7 +76,7 @@ object DatabaseResultQueue {
 
     /*
     todo this should have a custom single; one that knows it's been unsubscribed from, to get pre-emptively removed
-    from the queue
+    from the queue.  ATM it's not costly to do the emission, but it would make the priority calculation more accurate.
      */
     private class QueueEntry<T : Any>(
         val priority: Priority,

@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.firebase
 
 import com.jakewharton.rxrelay3.PublishRelay
+import com.krystianwsul.checkme.firebase.database.DatabaseResultEventSource
 import com.krystianwsul.checkme.firebase.dependencies.UserKeyStore
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.ChangeWrapper
@@ -9,6 +10,7 @@ import com.krystianwsul.common.firebase.json.users.UserWrapper
 import com.krystianwsul.common.firebase.records.users.RootUserRecord
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.UserKey
+import io.mockk.every
 import io.mockk.mockk
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.observers.TestObserver
@@ -39,6 +41,7 @@ class UserKeyStoreTest {
 
     private lateinit var compositeDisposable: CompositeDisposable
     private lateinit var myUserChangeWrapperRelay: PublishRelay<ChangeWrapper<Set<UserKey>>>
+    private lateinit var onDequeuedRelay: PublishRelay<Unit>
     private lateinit var userKeyStore: UserKeyStore
     private lateinit var testObserver: TestObserver<ChangeWrapper<Map<UserKey, UserKeyStore.LoadUserData>>>
 
@@ -46,7 +49,14 @@ class UserKeyStoreTest {
     fun before() {
         compositeDisposable = CompositeDisposable()
         myUserChangeWrapperRelay = PublishRelay.create()
-        userKeyStore = UserKeyStore(myUserChangeWrapperRelay, compositeDisposable)
+        onDequeuedRelay = PublishRelay.create()
+
+        val databaseResultEventSource = mockk<DatabaseResultEventSource> {
+            every { onDequeued } returns onDequeuedRelay
+        }
+
+        userKeyStore = UserKeyStore(myUserChangeWrapperRelay, compositeDisposable, databaseResultEventSource)
+
         testObserver = userKeyStore.loadUserDataObservable.test()
     }
 
@@ -106,8 +116,14 @@ class UserKeyStoreTest {
 
         userKeyStore.addFriend(rootUserRecord4)
         currentMap[userKey4] =
-                UserKeyStore.LoadUserData.Friend(UserKeyStore.AddFriendData(userKey4.key, rootUserRecord4.userWrapper))
+            UserKeyStore.LoadUserData.Friend(UserKeyStore.AddFriendData(userKey4.key, rootUserRecord4.userWrapper))
         testObserver.assertValueAt(3, ChangeWrapper(ChangeType.LOCAL, currentMap))
+    }
+
+    private fun requestCustomTimeUsers(projectKey: ProjectKey.Shared, userKeys: Set<UserKey>) {
+        userKeyStore.requestCustomTimeUsers(projectKey, userKeys)
+
+        onDequeuedRelay.accept(Unit)
     }
 
     @Test
@@ -117,7 +133,7 @@ class UserKeyStoreTest {
         val currentMap = mutableMapOf<UserKey, UserKeyStore.LoadUserData>(userKey1 to UserKeyStore.LoadUserData.Friend(null))
         testObserver.assertValue(ChangeWrapper(ChangeType.REMOTE, currentMap))
 
-        userKeyStore.requestCustomTimeUsers(projectKey1, setOf(userKey2))
+        requestCustomTimeUsers(projectKey1, setOf(userKey2))
         currentMap[userKey2] = UserKeyStore.LoadUserData.CustomTimes
         testObserver.assertValueAt(1, ChangeWrapper(ChangeType.REMOTE, currentMap))
     }
@@ -144,7 +160,7 @@ class UserKeyStoreTest {
         val currentMap = mutableMapOf<UserKey, UserKeyStore.LoadUserData>(userKey1 to UserKeyStore.LoadUserData.Friend(null))
         testObserver.assertValue(ChangeWrapper(ChangeType.REMOTE, currentMap))
 
-        userKeyStore.requestCustomTimeUsers(projectKey1, setOf(userKey2))
+        requestCustomTimeUsers(projectKey1, setOf(userKey2))
         currentMap[userKey2] = UserKeyStore.LoadUserData.CustomTimes
         testObserver.assertValueAt(1, ChangeWrapper(ChangeType.REMOTE, currentMap))
 
@@ -160,7 +176,7 @@ class UserKeyStoreTest {
         val currentMap = mutableMapOf<UserKey, UserKeyStore.LoadUserData>(userKey1 to UserKeyStore.LoadUserData.Friend(null))
         testObserver.assertValue(ChangeWrapper(ChangeType.REMOTE, currentMap))
 
-        userKeyStore.requestCustomTimeUsers(projectKey1, setOf(userKey2))
+        requestCustomTimeUsers(projectKey1, setOf(userKey2))
         currentMap[userKey2] = UserKeyStore.LoadUserData.CustomTimes
         testObserver.assertValueAt(1, ChangeWrapper(ChangeType.REMOTE, currentMap))
 
@@ -179,7 +195,7 @@ class UserKeyStoreTest {
         val currentMap = mutableMapOf<UserKey, UserKeyStore.LoadUserData>(userKey1 to UserKeyStore.LoadUserData.Friend(null))
         testObserver.assertValue(ChangeWrapper(ChangeType.REMOTE, currentMap))
 
-        userKeyStore.requestCustomTimeUsers(projectKey1, setOf(userKey2))
+        requestCustomTimeUsers(projectKey1, setOf(userKey2))
         currentMap[userKey2] = UserKeyStore.LoadUserData.CustomTimes
         testObserver.assertValueAt(1, ChangeWrapper(ChangeType.REMOTE, currentMap))
 
@@ -192,6 +208,12 @@ class UserKeyStoreTest {
         testObserver.assertValueAt(3, ChangeWrapper(ChangeType.REMOTE, currentMap))
     }
 
+    private fun onProjectsRemoved(projectKeys: Set<ProjectKey.Shared>) {
+        userKeyStore.onProjectsRemoved(projectKeys)
+
+        onDequeuedRelay.accept(Unit)
+    }
+
     @Test
     fun testRequestCustomTimesCorrectlyDecrementAfterProjectRemoved() {
         val project1Keys = setOf(userKey1, userKey2, userKey3)
@@ -202,15 +224,15 @@ class UserKeyStoreTest {
         var currentMap = mapOf<UserKey, UserKeyStore.LoadUserData>()
         testObserver.assertValue(ChangeWrapper(ChangeType.REMOTE, currentMap))
 
-        userKeyStore.requestCustomTimeUsers(projectKey1, project1Keys)
+        requestCustomTimeUsers(projectKey1, project1Keys)
         currentMap = project1Keys.associateWith { UserKeyStore.LoadUserData.CustomTimes }
         testObserver.assertValueAt(1, ChangeWrapper(ChangeType.REMOTE, currentMap))
 
-        userKeyStore.requestCustomTimeUsers(projectKey2, project2Keys)
+        requestCustomTimeUsers(projectKey2, project2Keys)
         currentMap = (project1Keys + project2Keys).associateWith { UserKeyStore.LoadUserData.CustomTimes }
         testObserver.assertValueAt(2, ChangeWrapper(ChangeType.REMOTE, currentMap))
 
-        userKeyStore.onProjectsRemoved(setOf(projectKey2))
+        onProjectsRemoved(setOf(projectKey2))
         currentMap = project1Keys.associateWith { UserKeyStore.LoadUserData.CustomTimes }
         testObserver.assertValueAt(3, ChangeWrapper(ChangeType.REMOTE, currentMap))
     }

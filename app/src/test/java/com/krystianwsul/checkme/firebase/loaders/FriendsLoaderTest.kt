@@ -6,15 +6,27 @@ import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.ChangeWrapper
 import com.krystianwsul.common.firebase.DatabaseCallback
+import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.json.users.UserWrapper
 import com.krystianwsul.common.utils.UserKey
+import io.mockk.mockk
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import org.junit.After
 import org.junit.Before
+import org.junit.BeforeClass
 import org.junit.Test
 
 class FriendsLoaderTest {
+
+    companion object {
+
+        @JvmStatic
+        @BeforeClass
+        fun beforeClass() {
+            DomainThreadChecker.instance = mockk(relaxed = true)
+        }
+    }
 
     class TestFriendsProvider : FriendsProvider {
 
@@ -70,15 +82,19 @@ class FriendsLoaderTest {
         friendsProvider = TestFriendsProvider()
 
         userKeyStore = UserKeyStore(
-                friendsKeysRelay.map { ChangeWrapper(ChangeType.REMOTE, it) },
-                compositeDisposable,
+            friendsKeysRelay.map { ChangeWrapper(ChangeType.REMOTE, it) },
+            compositeDisposable,
+            mockk(relaxed = true),
         )
 
         friendsLoader = FriendsLoader(userKeyStore, compositeDisposable, friendsProvider)
 
-        initialFriendsEmissionChecker = EmissionChecker("initialFriends", compositeDisposable, friendsLoader.initialFriendsEvent)
-        addChangeFriendEmissionChecker = EmissionChecker("addChangeFriend", compositeDisposable, friendsLoader.addChangeFriendEvents)
-        removeFriendsEmissionChecker = EmissionChecker("removeFriends", compositeDisposable, friendsLoader.removeFriendEvents)
+        initialFriendsEmissionChecker =
+            EmissionChecker("initialFriends", compositeDisposable, friendsLoader.initialFriendsEvent)
+        addChangeFriendEmissionChecker =
+            EmissionChecker("addChangeFriend", compositeDisposable, friendsLoader.addChangeFriendEvents)
+        removeFriendsEmissionChecker =
+            EmissionChecker("removeFriends", compositeDisposable, friendsLoader.removeFriendEvents)
     }
 
     @After

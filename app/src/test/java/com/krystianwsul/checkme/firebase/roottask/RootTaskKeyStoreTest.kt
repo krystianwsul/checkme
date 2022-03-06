@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.firebase.roottask
 import com.krystianwsul.checkme.firebase.dependencies.RootTaskKeyStore
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
+import io.mockk.mockk
 import io.reactivex.rxjava3.observers.TestObserver
 import org.junit.Before
 import org.junit.Test
@@ -26,7 +27,7 @@ class RootTaskKeyStoreTest {
 
     @Before
     fun before() {
-        rootTaskKeyStore = RootTaskKeyStore()
+        rootTaskKeyStore = RootTaskKeyStore(mockk(relaxed = true))
         testObserver = rootTaskKeyStore.rootTaskKeysObservable.test()
     }
 

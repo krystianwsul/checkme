@@ -4,6 +4,7 @@ import com.jakewharton.rxrelay3.PublishRelay
 import com.krystianwsul.checkme.domainmodel.DomainFactoryRule
 import com.krystianwsul.checkme.firebase.UserCustomTimeProviderSource
 import com.krystianwsul.checkme.firebase.checkRemote
+import com.krystianwsul.checkme.firebase.database.DatabaseResultEventSource
 import com.krystianwsul.checkme.firebase.dependencies.RootTaskKeyStore
 import com.krystianwsul.checkme.firebase.dependencies.UserKeyStore
 import com.krystianwsul.checkme.firebase.factories.ProjectsFactory
@@ -72,20 +73,25 @@ class ChangeTypeSourceTest {
         }
     }
 
-    private class TestRootTasksLoaderProvider : RootTasksLoader.Provider {
+    private inner class TestRootTasksLoaderProvider : RootTasksLoader.Provider {
 
         private val singleParamObservableSource = SingleParamObservableSource<TaskKey.Root, Snapshot<RootTaskJson>>()
 
         override fun getRootTaskObservable(taskKey: TaskKey.Root) =
             singleParamObservableSource.getObservable(taskKey)
 
-        fun accept(taskKey: TaskKey.Root, json: RootTaskJson) =
+        fun accept(taskKey: TaskKey.Root, json: RootTaskJson) {
             singleParamObservableSource.accept(taskKey, Snapshot(taskKey.taskId, json))
+
+            onDequeuedRelay.accept(Unit)
+        }
     }
 
     private val domainDisposable = CompositeDisposable()
 
     private lateinit var rxErrorChecker: RxErrorChecker
+
+    private lateinit var onDequeuedRelay: PublishRelay<Unit>
 
     private lateinit var privateProjectSnapshotObservable: PublishRelay<Snapshot<PrivateProjectJson>>
     private lateinit var rootTasksLoaderProvider: TestRootTasksLoaderProvider
@@ -108,6 +114,8 @@ class ChangeTypeSourceTest {
         rxErrorChecker = RxErrorChecker()
 
         privateProjectSnapshotObservable = PublishRelay.create()
+
+        onDequeuedRelay = PublishRelay.create()
     }
 
     @After
@@ -124,7 +132,12 @@ class ChangeTypeSourceTest {
     }
 
     private fun setup() {
-        val rootTaskKeySource = RootTaskKeyStore()
+        val databaseResultEventSource = mockk<DatabaseResultEventSource> {
+            every { onDequeued } returns onDequeuedRelay
+        }
+
+        val rootTaskKeySource = RootTaskKeyStore(databaseResultEventSource)
+
         val userCustomTimeProviderSource = immediateUserCustomTimeProviderSource()
 
         rootTasksLoaderProvider = TestRootTasksLoaderProvider()
@@ -247,8 +260,11 @@ class ChangeTypeSourceTest {
         checkEmpty()
     }
 
-    private fun acceptPrivateProject(privateProjectJson: PrivateProjectJson) =
+    private fun acceptPrivateProject(privateProjectJson: PrivateProjectJson) {
         privateProjectSnapshotObservable.accept(Snapshot(privateProjectId, privateProjectJson))
+
+        onDequeuedRelay.accept(Unit)
+    }
 
     private fun checkEmpty() {
         projectEmissionChecker.checkEmpty()
@@ -697,6 +713,8 @@ class ChangeTypeSourceTest {
                     ),
                 )
             )
+
+            onDequeuedRelay.accept(Unit)
         }
 
         taskEmissionChecker.checkRemote {

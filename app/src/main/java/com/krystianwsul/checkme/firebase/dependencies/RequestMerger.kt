@@ -1,11 +1,15 @@
 package com.krystianwsul.checkme.firebase.dependencies
 
-import com.krystianwsul.checkme.firebase.database.DatabaseResultQueue
+import com.krystianwsul.checkme.firebase.database.DatabaseResultEventSource
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.kotlin.combineLatest
 import io.reactivex.rxjava3.kotlin.withLatestFrom
 
-class RequestMerger<OUTPUT : Any>(store1: RequestKeyStore<*, OUTPUT>, store2: RequestKeyStore<*, OUTPUT>) {
+class RequestMerger<OUTPUT : Any>(
+    databaseResultEventSource: DatabaseResultEventSource,
+    store1: RequestKeyStore<*, OUTPUT>,
+    store2: RequestKeyStore<*, OUTPUT>,
+) {
 
     /*
      Further optimization ideas:
@@ -15,11 +19,12 @@ class RequestMerger<OUTPUT : Any>(store1: RequestKeyStore<*, OUTPUT>, store2: Re
      and strategically slim them down with distinctUntilChanged or something.
      */
 
-    val outputObservable: Observable<Set<OUTPUT>> = DatabaseResultQueue.onDequeued
+    val outputObservable: Observable<Set<OUTPUT>> = databaseResultEventSource.onDequeued
         .withLatestFrom(listOf(store1, store2).map { it.requestedOutputKeysObservable }.combineLatest { it })
         .map { Wrapper(it.second) }
         .distinctUntilChanged()
         .map { it.value.flatten().flatten().toSet() }
+        .startWithItem(emptySet()) // because some stuff depends on an initial empty value
         .distinctUntilChanged()
 
     /*

@@ -12,7 +12,7 @@ import io.reactivex.rxjava3.core.BackpressureStrategy
 import io.reactivex.rxjava3.core.Maybe
 import io.reactivex.rxjava3.core.Single
 
-object DatabaseResultQueue {
+object DatabaseResultQueue : DatabaseResultEventSource {
 
     private val entries = mutableListOf<QueueEntry<*>>()
 
@@ -20,7 +20,7 @@ object DatabaseResultQueue {
 
     private fun <U> synchronized(action: MutableList<QueueEntry<*>>.() -> U) = synchronized(entries) { entries.action() }
 
-    val onDequeued = PublishRelay.create<Unit>()
+    override val onDequeued = PublishRelay.create<Unit>()
 
     init {
         trigger.toFlowable(BackpressureStrategy.LATEST)

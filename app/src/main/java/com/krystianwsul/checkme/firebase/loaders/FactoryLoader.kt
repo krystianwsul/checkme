@@ -4,6 +4,7 @@ import android.util.Log
 import com.krystianwsul.checkme.domainmodel.UserScope
 import com.krystianwsul.checkme.domainmodel.observeOnDomain
 import com.krystianwsul.checkme.firebase.UserCustomTimeProviderSource
+import com.krystianwsul.checkme.firebase.database.DatabaseResultQueue
 import com.krystianwsul.checkme.firebase.dependencies.RootTaskKeyStore
 import com.krystianwsul.checkme.firebase.dependencies.UserKeyStore
 import com.krystianwsul.checkme.firebase.factories.FriendsFactory
@@ -80,6 +81,7 @@ class FactoryLoader(
                         val userKeyStore = UserKeyStore(
                             userFactorySingle.flatMapObservable { it.friendKeysObservable },
                             domainDisposable,
+                            DatabaseResultQueue,
                         )
 
                         val friendsLoader = FriendsLoader(userKeyStore, domainDisposable, factoryProvider.friendsProvider)
@@ -103,7 +105,7 @@ class FactoryLoader(
                             friendsFactorySingle,
                         )
 
-                        val rootTaskKeySource = RootTaskKeyStore()
+                        val rootTaskKeySource = RootTaskKeyStore(DatabaseResultQueue)
 
                         val rootTaskManager = AndroidRootTasksManager(factoryProvider.database)
 

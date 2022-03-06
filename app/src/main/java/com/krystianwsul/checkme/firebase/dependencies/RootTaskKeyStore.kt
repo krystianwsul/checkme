@@ -1,15 +1,16 @@
 package com.krystianwsul.checkme.firebase.dependencies
 
+import com.krystianwsul.checkme.firebase.database.DatabaseResultEventSource
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
 import io.reactivex.rxjava3.core.Observable
 
-class RootTaskKeyStore {
+class RootTaskKeyStore(databaseResultEventSource: DatabaseResultEventSource) {
 
     private val projectStore = RequestKeyStore<ProjectKey<*>, TaskKey.Root>()
     private val taskStore = RequestKeyStore<TaskKey.Root, TaskKey.Root>()
 
-    private val requestMerger = RequestMerger(projectStore, taskStore)
+    private val requestMerger = RequestMerger(databaseResultEventSource, projectStore, taskStore)
 
     val rootTaskKeysObservable: Observable<Set<TaskKey.Root>> = requestMerger.outputObservable
 

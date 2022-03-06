@@ -16,6 +16,18 @@ class RequestMerger<OUTPUT : Any>(store1: RequestKeyStore<*, OUTPUT>, store2: Re
 
     // todo queue user event occasionally doesn't come through
 
+    /*
+    todo queue:
+
+     use non-data class as wrapper to optimize first debounce.  Then, benchmark to see performance on pixel 4
+
+     Further optimization ideas:
+     1. DatabaseResultQueue emits events with specific record types that were processed.  Individual stores expose which
+     event type they need.
+     2. Model this whole thing as more of a function call.  Or, go back and think hard about when the stores emit events,
+     and strategically slim them down with distinctUntilChanged or something.
+     */
+
     val outputObservable: Observable<Set<OUTPUT>> = DatabaseResultQueue.onDequeued
         .withLatestFrom(listOf(store1, store2).map { it.requestedOutputKeysObservable }.combineLatest { it })
         .map { it.second }

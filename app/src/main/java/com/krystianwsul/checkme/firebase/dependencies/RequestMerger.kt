@@ -8,19 +8,6 @@ import io.reactivex.rxjava3.kotlin.withLatestFrom
 class RequestMerger<OUTPUT : Any>(store1: RequestKeyStore<*, OUTPUT>, store2: RequestKeyStore<*, OUTPUT>) {
 
     /*
-    todo queue
-    What I would really like here is that an observable that keeps the latest value from the outputKeys observables,
-    and emits it when onDequeued has an event.  But only once.  Instead, I'm using distinctUntilChanged, which has *got* to
-    be more expensive, but baby steps.
-     */
-
-    // todo queue user event occasionally doesn't come through
-
-    /*
-    todo queue:
-
-     use non-data class as wrapper to optimize first debounce.  Then, benchmark to see performance on pixel 4
-
      Further optimization ideas:
      1. DatabaseResultQueue emits events with specific record types that were processed.  Individual stores expose which
      event type they need.
@@ -30,8 +17,15 @@ class RequestMerger<OUTPUT : Any>(store1: RequestKeyStore<*, OUTPUT>, store2: Re
 
     val outputObservable: Observable<Set<OUTPUT>> = DatabaseResultQueue.onDequeued
         .withLatestFrom(listOf(store1, store2).map { it.requestedOutputKeysObservable }.combineLatest { it })
-        .map { it.second }
+        .map { Wrapper(it.second) }
         .distinctUntilChanged()
-        .map { it.flatten().flatten().toSet() }
+        .map { it.value.flatten().flatten().toSet() }
         .distinctUntilChanged()
+
+    /*
+    This wrapper ensures that the first distinctUntilChanged just makes sure that there's a new set of data after the
+    onDequeued triggers the rx chain; not that its contents are actually different.  Essentially, it's ensuring that each
+    event set from the stores is processed only once.
+     */
+    private class Wrapper<OUTPUT : Any>(val value: List<Collection<Set<OUTPUT>>>)
 }

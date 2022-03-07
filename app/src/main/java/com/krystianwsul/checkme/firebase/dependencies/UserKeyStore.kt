@@ -104,7 +104,7 @@ class UserKeyStore(
         addFriendEvents.accept(FriendEvent.AddFriend(rootUserRecord))
     }
 
-    fun requestCustomTimeUsers(projectKey: ProjectKey.Shared, userKeys: Set<UserKey>) { // todo queue
+    fun requestCustomTimeUsers(projectKey: ProjectKey.Shared, userKeys: Set<UserKey>) {
         checkNotNull(loadUserDataObservable.tryGetCurrentValue())
 
         projectRequestKeyStore.addRequest(projectKey, userKeys)
@@ -113,10 +113,10 @@ class UserKeyStore(
     fun onProjectsRemoved(projectKeys: Set<ProjectKey.Shared>) {
         checkNotNull(loadUserDataObservable.tryGetCurrentValue())
 
-        projectRequestKeyStore.onRequestsRemoved(projectKeys) // todo queue
+        projectRequestKeyStore.onRequestsRemoved(projectKeys)
     }
 
-    fun requestCustomTimeUsers(rootTaskKey: TaskKey.Root, userKeys: Set<UserKey>) { // todo queue
+    fun requestCustomTimeUsers(rootTaskKey: TaskKey.Root, userKeys: Set<UserKey>) {
         checkNotNull(loadUserDataObservable.tryGetCurrentValue())
 
         rootTaskRequestKeyStore.addRequest(rootTaskKey, userKeys)
@@ -125,7 +125,7 @@ class UserKeyStore(
     fun onTasksRemoved(rootTaskKeys: Set<TaskKey.Root>) {
         checkNotNull(loadUserDataObservable.tryGetCurrentValue())
 
-        rootTaskRequestKeyStore.onRequestsRemoved(rootTaskKeys) // todo queue
+        rootTaskRequestKeyStore.onRequestsRemoved(rootTaskKeys)
     }
 
     sealed class LoadUserData {

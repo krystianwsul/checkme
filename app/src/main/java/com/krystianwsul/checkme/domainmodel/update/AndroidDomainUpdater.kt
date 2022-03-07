@@ -106,6 +106,8 @@ object AndroidDomainUpdater : DomainUpdater() {
                 it.dispatchResult()
             }
 
+            onUpdated.accept(Unit)
+
             DebugFragment.logDone("AndroidDomainUpdater.dispatchItems updating notifications")
             domainFactory.updateNotifications(params, now)
             DebugFragment.logDone("AndroidDomainUpdater.dispatchItems notifications updated")

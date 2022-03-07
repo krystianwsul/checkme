@@ -1,7 +1,7 @@
 package com.krystianwsul.checkme.firebase
 
 import com.jakewharton.rxrelay3.PublishRelay
-import com.krystianwsul.checkme.firebase.database.DatabaseResultEventSource
+import com.krystianwsul.checkme.firebase.dependencies.RequestMerger
 import com.krystianwsul.checkme.firebase.dependencies.UserKeyStore
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.ChangeWrapper
@@ -41,7 +41,7 @@ class UserKeyStoreTest {
 
     private lateinit var compositeDisposable: CompositeDisposable
     private lateinit var myUserChangeWrapperRelay: PublishRelay<ChangeWrapper<Set<UserKey>>>
-    private lateinit var onDequeuedRelay: PublishRelay<Unit>
+    private lateinit var triggerRelay: PublishRelay<Unit>
     private lateinit var userKeyStore: UserKeyStore
     private lateinit var testObserver: TestObserver<ChangeWrapper<Map<UserKey, UserKeyStore.LoadUserData>>>
 
@@ -49,13 +49,13 @@ class UserKeyStoreTest {
     fun before() {
         compositeDisposable = CompositeDisposable()
         myUserChangeWrapperRelay = PublishRelay.create()
-        onDequeuedRelay = PublishRelay.create()
+        triggerRelay = PublishRelay.create()
 
-        val databaseResultEventSource = mockk<DatabaseResultEventSource> {
-            every { onDequeued } returns onDequeuedRelay
+        val triggerSource = mockk<RequestMerger.TriggerSource> {
+            every { trigger } returns triggerRelay
         }
 
-        userKeyStore = UserKeyStore(myUserChangeWrapperRelay, compositeDisposable, databaseResultEventSource)
+        userKeyStore = UserKeyStore(myUserChangeWrapperRelay, compositeDisposable, triggerSource)
 
         testObserver = userKeyStore.loadUserDataObservable.test()
     }
@@ -123,7 +123,7 @@ class UserKeyStoreTest {
     private fun requestCustomTimeUsers(projectKey: ProjectKey.Shared, userKeys: Set<UserKey>) {
         userKeyStore.requestCustomTimeUsers(projectKey, userKeys)
 
-        onDequeuedRelay.accept(Unit)
+        triggerRelay.accept(Unit)
     }
 
     @Test
@@ -211,7 +211,7 @@ class UserKeyStoreTest {
     private fun onProjectsRemoved(projectKeys: Set<ProjectKey.Shared>) {
         userKeyStore.onProjectsRemoved(projectKeys)
 
-        onDequeuedRelay.accept(Unit)
+        triggerRelay.accept(Unit)
     }
 
     @Test

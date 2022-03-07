@@ -4,7 +4,7 @@ import com.jakewharton.rxrelay3.PublishRelay
 import com.krystianwsul.checkme.domainmodel.DomainFactoryRule
 import com.krystianwsul.checkme.firebase.UserCustomTimeProviderSource
 import com.krystianwsul.checkme.firebase.checkRemote
-import com.krystianwsul.checkme.firebase.database.DatabaseResultEventSource
+import com.krystianwsul.checkme.firebase.dependencies.RequestMerger
 import com.krystianwsul.checkme.firebase.dependencies.RootTaskKeyStore
 import com.krystianwsul.checkme.firebase.dependencies.UserKeyStore
 import com.krystianwsul.checkme.firebase.factories.ProjectsFactory
@@ -83,7 +83,7 @@ class ChangeTypeSourceTest {
         fun accept(taskKey: TaskKey.Root, json: RootTaskJson) {
             singleParamObservableSource.accept(taskKey, Snapshot(taskKey.taskId, json))
 
-            onDequeuedRelay.accept(Unit)
+            triggerRelay.accept(Unit)
         }
     }
 
@@ -91,7 +91,7 @@ class ChangeTypeSourceTest {
 
     private lateinit var rxErrorChecker: RxErrorChecker
 
-    private lateinit var onDequeuedRelay: PublishRelay<Unit>
+    private lateinit var triggerRelay: PublishRelay<Unit>
 
     private lateinit var privateProjectSnapshotObservable: PublishRelay<Snapshot<PrivateProjectJson>>
     private lateinit var rootTasksLoaderProvider: TestRootTasksLoaderProvider
@@ -115,7 +115,7 @@ class ChangeTypeSourceTest {
 
         privateProjectSnapshotObservable = PublishRelay.create()
 
-        onDequeuedRelay = PublishRelay.create()
+        triggerRelay = PublishRelay.create()
     }
 
     @After
@@ -132,11 +132,11 @@ class ChangeTypeSourceTest {
     }
 
     private fun setup() {
-        val databaseResultEventSource = mockk<DatabaseResultEventSource> {
-            every { onDequeued } returns onDequeuedRelay
+        val triggerSource = mockk<RequestMerger.TriggerSource> {
+            every { trigger } returns triggerRelay
         }
 
-        val rootTaskKeySource = RootTaskKeyStore(databaseResultEventSource)
+        val rootTaskKeySource = RootTaskKeyStore(triggerSource)
 
         val userCustomTimeProviderSource = immediateUserCustomTimeProviderSource()
 
@@ -263,7 +263,7 @@ class ChangeTypeSourceTest {
     private fun acceptPrivateProject(privateProjectJson: PrivateProjectJson) {
         privateProjectSnapshotObservable.accept(Snapshot(privateProjectId, privateProjectJson))
 
-        onDequeuedRelay.accept(Unit)
+        triggerRelay.accept(Unit)
     }
 
     private fun checkEmpty() {
@@ -714,7 +714,7 @@ class ChangeTypeSourceTest {
                 )
             )
 
-            onDequeuedRelay.accept(Unit)
+            triggerRelay.accept(Unit)
         }
 
         taskEmissionChecker.checkRemote {

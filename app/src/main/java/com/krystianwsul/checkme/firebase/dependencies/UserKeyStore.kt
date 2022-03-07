@@ -1,7 +1,6 @@
 package com.krystianwsul.checkme.firebase.dependencies
 
 import com.jakewharton.rxrelay3.PublishRelay
-import com.krystianwsul.checkme.firebase.database.DatabaseResultEventSource
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.ChangeWrapper
 import com.krystianwsul.common.firebase.UserLoadReason
@@ -19,13 +18,13 @@ import io.reactivex.rxjava3.kotlin.plusAssign
 class UserKeyStore(
     friendKeysObservable: Observable<ChangeWrapper<Set<UserKey>>>,
     domainDisposable: CompositeDisposable,
-    databaseResultEventSource: DatabaseResultEventSource,
+    triggerSource: RequestMerger.TriggerSource,
 ) {
 
     private val projectRequestKeyStore = RequestKeyStore<ProjectKey.Shared, UserKey>()
     private val rootTaskRequestKeyStore = RequestKeyStore<TaskKey.Root, UserKey>()
 
-    private val requestMerger = RequestMerger(databaseResultEventSource, projectRequestKeyStore, rootTaskRequestKeyStore)
+    private val requestMerger = RequestMerger(triggerSource, projectRequestKeyStore, rootTaskRequestKeyStore)
 
     private val addFriendEvents = PublishRelay.create<FriendEvent.AddFriend>()
 

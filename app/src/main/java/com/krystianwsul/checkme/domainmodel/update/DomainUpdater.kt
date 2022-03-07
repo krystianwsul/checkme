@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.domainmodel.update
 
+import com.jakewharton.rxrelay3.PublishRelay
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.notifications.Notifier
@@ -22,6 +23,8 @@ abstract class DomainUpdater {
                 cloudParams?.let(::notifyCloud)
             }
         }
+
+        val onUpdated = PublishRelay.create<Unit>()
     }
 
     abstract fun <T : Any> performDomainUpdate(domainUpdate: DomainUpdate<T>): Single<T>

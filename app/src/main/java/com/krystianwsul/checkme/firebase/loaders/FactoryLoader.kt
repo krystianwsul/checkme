@@ -3,8 +3,10 @@ package com.krystianwsul.checkme.firebase.loaders
 import android.util.Log
 import com.krystianwsul.checkme.domainmodel.UserScope
 import com.krystianwsul.checkme.domainmodel.observeOnDomain
+import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
 import com.krystianwsul.checkme.firebase.UserCustomTimeProviderSource
 import com.krystianwsul.checkme.firebase.database.DatabaseResultQueue
+import com.krystianwsul.checkme.firebase.dependencies.RequestMerger
 import com.krystianwsul.checkme.firebase.dependencies.RootTaskKeyStore
 import com.krystianwsul.checkme.firebase.dependencies.UserKeyStore
 import com.krystianwsul.checkme.firebase.factories.FriendsFactory
@@ -28,6 +30,7 @@ import com.krystianwsul.treeadapter.getCurrentValue
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.CompositeDisposable
+import io.reactivex.rxjava3.kotlin.merge
 import io.reactivex.rxjava3.kotlin.plusAssign
 
 class FactoryLoader(
@@ -78,10 +81,15 @@ class FactoryLoader(
                             .map { MyUserFactory(it, getDeviceDbInfo(), factoryProvider.database, rootModelChangeManager) }
                             .cacheImmediate()
 
+                        val triggerSource = object : RequestMerger.TriggerSource {
+
+                            override val trigger = listOf(DatabaseResultQueue.onDequeued, DomainUpdater.onUpdated).merge()
+                        }
+
                         val userKeyStore = UserKeyStore(
                             userFactorySingle.flatMapObservable { it.friendKeysObservable },
                             domainDisposable,
-                            DatabaseResultQueue,
+                            triggerSource,
                         )
 
                         val friendsLoader = FriendsLoader(userKeyStore, domainDisposable, factoryProvider.friendsProvider)
@@ -105,7 +113,7 @@ class FactoryLoader(
                             friendsFactorySingle,
                         )
 
-                        val rootTaskKeySource = RootTaskKeyStore(DatabaseResultQueue)
+                        val rootTaskKeySource = RootTaskKeyStore(triggerSource)
 
                         val rootTaskManager = AndroidRootTasksManager(factoryProvider.database)
 

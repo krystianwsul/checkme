@@ -14,6 +14,8 @@ class TestDomainUpdater(
     override fun <T : Any> performDomainUpdate(domainUpdate: DomainUpdate<T>): Single<T> {
         val (data, params) = domainUpdate.doAction(domainFactory, now)
 
+        onUpdated.accept(Unit)
+
         domainFactory.updateNotifications(params, now)
 
         /*

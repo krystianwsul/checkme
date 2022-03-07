@@ -14,15 +14,15 @@ class RootTaskKeyStore(databaseResultEventSource: DatabaseResultEventSource) {
 
     val rootTaskKeysObservable: Observable<Set<TaskKey.Root>> = requestMerger.outputObservable
 
-    fun onProjectAddedOrUpdated(projectKey: ProjectKey<*>, rootTaskKeys: Set<TaskKey.Root>) =
+    fun onProjectAddedOrUpdated(projectKey: ProjectKey<*>, rootTaskKeys: Set<TaskKey.Root>) = // todo queue
         projectStore.addRequest(projectKey, rootTaskKeys)
 
-    fun onProjectsRemoved(projectKeys: Set<ProjectKey<*>>) = projectStore.onRequestsRemoved(projectKeys)
+    fun onProjectsRemoved(projectKeys: Set<ProjectKey<*>>) = projectStore.onRequestsRemoved(projectKeys) // todo queue
 
-    fun onRootTaskAddedOrUpdated(parentRootTaskKey: TaskKey.Root, childRootTaskKeys: Set<TaskKey.Root>) =
+    fun onRootTaskAddedOrUpdated(parentRootTaskKey: TaskKey.Root, childRootTaskKeys: Set<TaskKey.Root>) = // todo queue
         taskStore.addRequest(parentRootTaskKey, childRootTaskKeys)
 
-    fun onRootTasksRemoved(rootTaskKeys: Set<TaskKey.Root>) = taskStore.onRequestsRemoved(rootTaskKeys)
+    fun onRootTasksRemoved(rootTaskKeys: Set<TaskKey.Root>) = taskStore.onRequestsRemoved(rootTaskKeys) // todo queue
 
     sealed class ParentKey {
 

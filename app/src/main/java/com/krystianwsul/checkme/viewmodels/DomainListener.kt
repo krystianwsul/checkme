@@ -43,7 +43,11 @@ abstract class DomainListener<DOMAIN_DATA : DomainData> {
 
         var listenerAdded = false
 
+        Log.e("asdf", "magic domainListener start") // todo scheduling
         disposable = UserScope.instanceRelay
+            .doOnNext {
+                Log.e("asdf", "magic domainListener 0 null? " + (it.value == null)) // todo scheduling
+            }
             /*
             todo scheduling: In the situation that the DomainListener is started before the DomainFactory is available,
             this does guarantee that it emits before RootTasks get read.  However, the subsequent events' priority comes
@@ -62,8 +66,13 @@ abstract class DomainListener<DOMAIN_DATA : DomainData> {
                 ) // todo scheduling
                 DomainThreadChecker.instance.requireDomainThread()
             }
+            .doOnNext {
+                Log.e("asdf", "magic domainListener 1a null? " + (it.value == null)) // todo scheduling
+            }
             .filterNotNull()
             .switchMap { userScope ->
+                Log.e("asdf", "magic domainListener 2a") // todo scheduling
+
                 /**
                  * What's expected here: the DomainListener may be initialized before the DomainFactory is
                  * available.  And, it can stick around after the DomainFactory is destroyed, such as on logout.
@@ -77,6 +86,12 @@ abstract class DomainListener<DOMAIN_DATA : DomainData> {
                 userScope.domainListenerManager
                     .addListener(this)
                     .map { userScope }
+                    .doOnNext {
+                        Log.e("asdf", "magic domainListener 2b") // todo scheduling
+                    }
+            }
+            .doOnNext {
+                Log.e("asdf", "magic domainListener 2c") // todo scheduling
             }
             .toFlowable(BackpressureStrategy.LATEST)
             .flatMapMaybe(

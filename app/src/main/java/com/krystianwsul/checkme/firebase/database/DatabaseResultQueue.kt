@@ -55,7 +55,19 @@ object DatabaseResultQueue {
                     "magic queue accepting ${it.size} with priority " + CustomPriorityScheduler.currentPriority.get()
                 ) // todo scheduling
 
-                it.forEach { it.accept() }
+                it.forEach {
+                    if (it.databaseRead.log) Log.e(
+                        "asdf",
+                        "magic queue accepting " + it.databaseRead.description
+                    ) // todo scheduling
+
+                    it.accept()
+
+                    if (it.databaseRead.log) Log.e(
+                        "asdf",
+                        "magic queue accepted " + it.databaseRead.description
+                    ) // todo scheduling
+                }
 
                 Log.e("asdf", "magic queue accept done") // todo scheduling
                 onDequeued.accept(Unit)
@@ -92,7 +104,7 @@ object DatabaseResultQueue {
                  */
                 val priority = databaseRead.priority
 
-                synchronized { add(QueueEntry(priority, snapshot, relay)) }
+                synchronized { add(QueueEntry(databaseRead, priority, snapshot, relay)) }
 
                 enqueueTrigger()
             }
@@ -115,6 +127,7 @@ object DatabaseResultQueue {
     from the queue.  ATM it's not costly to do the emission, but it would make the priority calculation more accurate.
      */
     private class QueueEntry<T : Any>(
+        val databaseRead: DatabaseRead<T>, // todo scheduling
         val priority: Priority,
         val snapshot: Snapshot<T>,
         val relay: Relay<Snapshot<T>>,

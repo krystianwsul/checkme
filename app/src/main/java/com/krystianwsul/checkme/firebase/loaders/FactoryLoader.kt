@@ -65,6 +65,7 @@ class FactoryLoader(
                         val userDatabaseRx = DatabaseRx(
                             domainDisposable,
                             factoryProvider.database.getUserObservable(getDeviceDbInfo().key),
+                            "user",
                         )
 
                         val privateProjectKey = getDeviceDbInfo().key.toPrivateProjectKey()
@@ -75,11 +76,17 @@ class FactoryLoader(
                             "privateProject",
                         )
 
+                        Thread.sleep(2000) // todo queue
+
                         val privateProjectManager = AndroidPrivateProjectManager(userInfo)
 
                         val rootModelChangeManager = RootModelChangeManager()
 
+                        Log.e("asdf", "magic FactoryLoader userDatabaseRx.first subscribing")
                         val userFactorySingle = userDatabaseRx.first
+                            .doOnSuccess {
+                                Log.e("asdf", "magic FactoryLoader userDatabaseRx.first onSuccess")
+                            }
                             .map { MyUserFactory(it, getDeviceDbInfo(), factoryProvider.database, rootModelChangeManager) }
                             .cacheImmediate()
 

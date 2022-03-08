@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.domainmodel
 
+import android.util.Log
 import androidx.annotation.CheckResult
 import com.mindorks.scheduler.Priority
 import com.mindorks.scheduler.RxPS
@@ -26,5 +27,11 @@ fun runOnDomain(priority: Priority, action: () -> Unit) = completeOnDomain(prior
 
 fun <T : Any> Observable<T>.observeOnDomainSplitPriorities(initialPriority: Priority, laterPriority: Priority? = null) =
     // todo scheduling
-    take(1).observeOnDomain(initialPriority)
-        .concatWith(skip(1).observeOnDomain(laterPriority))
+    take(1)
+        .doOnNext { Log.e("asdf", "magic domainListener operator take") }
+        .observeOnDomain(initialPriority)
+        .concatWith(
+            skip(1)
+                .doOnNext { Log.e("asdf", "magic domainListener operator skip") }
+                .observeOnDomain(laterPriority)
+        )

@@ -120,7 +120,7 @@ object AndroidDomainUpdater : DomainUpdater() {
 
             domainFactory.saveAndNotifyCloud(params, now)
 
-            MyCrashlytics.log("AndroidDomainUpdater.dispatchItems end")
+            MyCrashlytics.log("AndroidDomainUpdater.dispatchItems end magic") // todo scheduling
             DebugFragment.logDone("AndroidDomainUpdater.dispatchItems end")
         }
 

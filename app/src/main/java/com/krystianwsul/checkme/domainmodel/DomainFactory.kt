@@ -21,7 +21,6 @@ import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.checkme.firebase.roottask.RootTasksFactory
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
-import com.krystianwsul.checkme.utils.checkError
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.domain.DeviceDbInfo
@@ -209,6 +208,8 @@ class DomainFactory(
 
             updateShortcuts(now)
         }
+
+        checkTrackers()
     }
 
     private fun updateShortcuts(now: ExactTimeStamp.Local) {
@@ -255,6 +256,17 @@ class DomainFactory(
         tryNotifyListeners("DomainFactory.onChangeTypeEvent", RunType.REMOTE)
 
         changeTypeRelay.accept(changeType)
+
+        checkTrackers()
+    }
+
+    private fun checkTrackers() {
+        val userKeys: Set<UserKey> = friendsFactory.userMap.keys + myUserFactory.user.userKey
+        val privateProjectKeys: Set<ProjectKey.Private> = setOf(projectsFactory.privateProject.projectKey)
+        val sharedProjectKeys: Set<ProjectKey.Shared> = projectsFactory.sharedProjects.keys
+        val taskKeys = rootTasksFactory.rootTasks.keys
+
+        databaseWrapper.checkTrackers(userKeys, privateProjectKeys, sharedProjectKeys, taskKeys)
     }
 
     private fun tryNotifyListeners(source: String, runType: RunType) {

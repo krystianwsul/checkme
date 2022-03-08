@@ -50,7 +50,9 @@ class ProjectsFactory(
     private val sharedProjectFactoriesProperty = MapRelayProperty(
         sharedInitialProjectsEvent.initialProjectDatas
             .associate { (sharedProjectLoader, sharedInitialProjectEvent) ->
-                sharedInitialProjectEvent.projectRecord.projectKey to SharedProjectFactory(
+                val projectKey = sharedInitialProjectEvent.projectRecord.projectKey as ProjectKey.Shared
+
+                projectKey to SharedProjectFactory(
                     sharedProjectLoader,
                     sharedInitialProjectEvent,
                     shownFactory,
@@ -78,6 +80,7 @@ class ProjectsFactory(
             val projectKey = addProjectEvent.initialProjectEvent
                 .projectRecord
                 .projectKey
+                .let { it as ProjectKey.Shared }
 
             check(!sharedProjectFactories.containsKey(projectKey))
 
@@ -133,7 +136,7 @@ class ProjectsFactory(
         ).merge().publishImmediate(domainDisposable)
     }
 
-    val projects get() = sharedProjects + mapOf(privateProject.projectKey to privateProject)
+    val projects: Map<ProjectKey<*>, Project<*>> get() = sharedProjects + mapOf(privateProject.projectKey to privateProject)
 
     val projectTasks get() = projects.values.flatMap { it.projectTasks }
 

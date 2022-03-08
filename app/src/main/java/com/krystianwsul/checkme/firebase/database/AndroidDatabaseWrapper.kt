@@ -14,6 +14,8 @@ import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.common.utils.UserKey
 import com.mindorks.scheduler.Priority
 import com.pacoworks.rxpaper2.RxPaperBook
+import io.reactivex.rxjava3.core.Observable
+import java.util.*
 
 
 object AndroidDatabaseWrapper : FactoryProvider.Database() {
@@ -55,15 +57,20 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
             .subscribe { task -> callback(task.getMessage(), task.isSuccessful, task.exception) }
     }
 
-    override fun getUserObservable(userKey: UserKey) = UserDatabaseRead(userKey).getResult()
+    private val userTracker = Tracker<UserKey>()
+    override fun getUserObservable(userKey: UserKey) = UserDatabaseRead(userKey).getResult().track(userTracker, userKey)
 
+    private val privateProjectTracker = Tracker<ProjectKey.Private>()
     override fun getPrivateProjectObservable(projectKey: ProjectKey.Private) =
-        PrivateProjectDatabaseRead(projectKey).getResult()
+        PrivateProjectDatabaseRead(projectKey).getResult().track(privateProjectTracker, projectKey)
 
+    private val sharedProjectTracker = Tracker<ProjectKey.Shared>()
     override fun getSharedProjectObservable(projectKey: ProjectKey.Shared) =
-        SharedProjectDatabaseRead(projectKey).getResult()
+        SharedProjectDatabaseRead(projectKey).getResult().track(sharedProjectTracker, projectKey)
 
-    override fun getRootTaskObservable(taskKey: TaskKey.Root) = TaskDatabaseRead(taskKey).getResult()
+    private val taskTracker = Tracker<TaskKey.Root>()
+    override fun getRootTaskObservable(taskKey: TaskKey.Root) =
+        TaskDatabaseRead(taskKey).getResult().track(taskTracker, taskKey)
 
     fun getUsersObservable() = UsersDatabaseRead().getResult()
 
@@ -72,5 +79,36 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
         class Initial<T : Any> : LoadState<T>()
 
         class Loaded<T : Any>(val value: T) : LoadState<T>()
+    }
+
+    private class Tracker<KEY : Any> { // todo scheduling
+
+        val keys = Collections.synchronizedSet(mutableSetOf<KEY>())
+    }
+
+    private fun <KEY : Any, T : Any> Observable<T>.track(tracker: Tracker<KEY>, key: KEY) = doOnSubscribe {
+        check(key !in tracker.keys)
+
+        tracker.keys += key
+    }.doOnDispose {
+        check(key in tracker.keys)
+
+        tracker.keys -= key
+    }
+
+    override fun checkTrackers(
+        userKeys: Set<UserKey>,
+        privateProjectKeys: Set<ProjectKey.Private>,
+        sharedProjectKeys: Set<ProjectKey.Shared>,
+        taskKeys: Set<TaskKey.Root>,
+    ) {
+        fun <T : Any> check(loaded: Set<T>, tracker: Tracker<T>) = (loaded - tracker.keys).let {
+            check(it.isEmpty()) { "missing: $it" }
+        }
+
+        check(userKeys, userTracker)
+        check(privateProjectKeys, privateProjectTracker)
+        check(sharedProjectKeys, sharedProjectTracker)
+        check(taskKeys, taskTracker)
     }
 }

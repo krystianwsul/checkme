@@ -83,6 +83,7 @@ class ProjectsFactoryTest {
         privateProjectManager = AndroidPrivateProjectManager(userInfo)
 
         privateProjectLoader = ProjectLoader.Impl(
+            userInfo.key.toPrivateProjectKey(),
             privateProjectRelay,
             compositeDisposable,
             privateProjectManager,
@@ -93,14 +94,14 @@ class ProjectsFactoryTest {
 
         initialProjectEvent = null
         privateProjectLoader.initialProjectEvent
-                .subscribeBy { initialProjectEvent = it.data }
-                .addTo(compositeDisposable)
+            .subscribeBy { initialProjectEvent = it.data }
+            .addTo(compositeDisposable)
 
         projectKeysRelay = PublishRelay.create()
         sharedProjectManager = AndroidSharedProjectManager(factoryProvider.database)
 
         sharedProjectsLoader = SharedProjectsLoader.Impl(
-                projectKeysRelay,
+            projectKeysRelay,
             sharedProjectManager,
             compositeDisposable,
             factoryProvider.sharedProjectsProvider,
@@ -111,8 +112,8 @@ class ProjectsFactoryTest {
 
         initialProjectsEvent = null
         sharedProjectsLoader.initialProjectsEvent
-                .subscribeBy { initialProjectsEvent = it }
-                .addTo(compositeDisposable)
+            .subscribeBy { initialProjectsEvent = it }
+            .addTo(compositeDisposable)
 
         _projectsFactory = null
         _emissionChecker = null
@@ -157,9 +158,9 @@ class ProjectsFactoryTest {
 
         projectKeysRelay.accept(setOf(sharedProjectKey))
         factoryProvider.acceptSharedProject(sharedProjectKey, SharedProjectJson(users = mutableMapOf(
-                userInfo.key.key to mockk(relaxed = true) {
-                    every { tokens } returns mutableMapOf()
-                }
+            userInfo.key.key to mockk(relaxed = true) {
+                every { tokens } returns mutableMapOf()
+            }
         )))
 
         initProjectsFactory()
@@ -206,10 +207,12 @@ class ProjectsFactoryTest {
         initProjectsFactory()
 
         emissionChecker.checkRemote {
-            privateProjectRelay.accept(Snapshot(
+            privateProjectRelay.accept(
+                Snapshot(
                     privateProjectKey.key,
                     PrivateProjectJson(tasks = mutableMapOf(taskKey.taskId to PrivateTaskJson("task"))),
-            ))
+                )
+            )
         }
         assertEquals(projectsFactory.privateProject.projectTasks.size, 1)
     }
@@ -226,10 +229,12 @@ class ProjectsFactoryTest {
         initProjectsFactory()
 
         emissionChecker.checkRemote {
-            privateProjectRelay.accept(Snapshot(
+            privateProjectRelay.accept(
+                Snapshot(
                     privateProjectKey.key,
                     PrivateProjectJson(tasks = mutableMapOf(taskKey.taskId to PrivateTaskJson("task"))),
-            ))
+                )
+            )
         }
         assertEquals(projectsFactory.privateProject.projectTasks.size, 1)
     }
@@ -240,10 +245,10 @@ class ProjectsFactoryTest {
         val taskKey = TaskKey.Project(privateProjectKey, "taskKey")
 
         privateProjectRelay.accept(
-                Snapshot(
-                        privateProjectKey.key,
-                        PrivateProjectJson(tasks = mutableMapOf(taskKey.taskId to PrivateTaskJson("task"))),
-                )
+            Snapshot(
+                privateProjectKey.key,
+                PrivateProjectJson(tasks = mutableMapOf(taskKey.taskId to PrivateTaskJson("task"))),
+            )
         )
 
         projectKeysRelay.accept(setOf())
@@ -253,10 +258,12 @@ class ProjectsFactoryTest {
         val name = "task1"
 
         emissionChecker.checkRemote {
-            privateProjectRelay.accept(Snapshot(
+            privateProjectRelay.accept(
+                Snapshot(
                     privateProjectKey.key,
                     PrivateProjectJson(tasks = mutableMapOf(taskKey.taskId to PrivateTaskJson(name))),
-            ))
+                )
+            )
         }
         assertEquals(projectsFactory.privateProject.projectTasks.single().name, name)
     }
@@ -267,10 +274,10 @@ class ProjectsFactoryTest {
         val taskKey = TaskKey.Project(privateProjectKey, "taskKey")
 
         privateProjectRelay.accept(
-                Snapshot(
-                        privateProjectKey.key,
-                        PrivateProjectJson(tasks = mutableMapOf(taskKey.taskId to PrivateTaskJson("task"))),
-                )
+            Snapshot(
+                privateProjectKey.key,
+                PrivateProjectJson(tasks = mutableMapOf(taskKey.taskId to PrivateTaskJson("task"))),
+            )
         )
 
         projectKeysRelay.accept(setOf())
@@ -289,10 +296,12 @@ class ProjectsFactoryTest {
 
         val taskKey = TaskKey.Project(privateProjectKey, "taskKey")
 
-        privateProjectRelay.accept(Snapshot(
+        privateProjectRelay.accept(
+            Snapshot(
                 privateProjectKey.key,
                 PrivateProjectJson(tasks = mutableMapOf(taskKey.taskId to PrivateTaskJson("task"))),
-        ))
+            )
+        )
 
         projectKeysRelay.accept(setOf())
 
@@ -302,9 +311,9 @@ class ProjectsFactoryTest {
         val hourMinute = HourMinute.now
 
         val instance = projectsFactory.privateProject
-                .projectTasks
-                .single()
-                .getInstance(DateTime(date, Time.Normal(hourMinute)))
+            .projectTasks
+            .single()
+            .getInstance(DateTime(date, Time.Normal(hourMinute)))
 
         val done = ExactTimeStamp.Local.now
 
@@ -318,10 +327,12 @@ class ProjectsFactoryTest {
 
         val taskKey = TaskKey.Project(privateProjectKey, "taskKey")
 
-        privateProjectRelay.accept(Snapshot(
+        privateProjectRelay.accept(
+            Snapshot(
                 privateProjectKey.key,
                 PrivateProjectJson(tasks = mutableMapOf(taskKey.taskId to PrivateTaskJson("task"))),
-        ))
+            )
+        )
 
         projectKeysRelay.accept(setOf())
 
@@ -343,9 +354,9 @@ class ProjectsFactoryTest {
 
         emissionChecker.checkRemote {
             factoryProvider.acceptSharedProject(sharedProjectKey, SharedProjectJson(users = mutableMapOf(
-                    userInfo.key.key to mockk(relaxed = true) {
-                        every { tokens } returns mutableMapOf()
-                    }
+                userInfo.key.key to mockk(relaxed = true) {
+                    every { tokens } returns mutableMapOf()
+                }
             )))
         }
     }
@@ -364,26 +375,26 @@ class ProjectsFactoryTest {
 
         // doesn't emit ChangeType.LOCAL
         val sharedProject = projectsFactory.createProject(
-                name,
-                now,
-                setOf(),
-                mockk(relaxed = true) {
-                    every { userJson } returns UserJson()
-                },
-                userInfo,
-                mockk(relaxed = true),
+            name,
+            now,
+            setOf(),
+            mockk(relaxed = true) {
+                every { userJson } returns UserJson()
+            },
+            userInfo,
+            mockk(relaxed = true),
         )
         projectsFactory.save()
 
         // doesn't emit ChangeType.LOCAL
         factoryProvider.acceptSharedProject(
-                sharedProject.projectKey,
-                SharedProjectJson(
-                        name,
-                        now.long,
-                        now.offset,
-                        users = mutableMapOf(userInfo.key.key to newUserJson()),
-                ),
+            sharedProject.projectKey,
+            SharedProjectJson(
+                name,
+                now.long,
+                now.offset,
+                users = mutableMapOf(userInfo.key.key to newUserJson()),
+            ),
         )
     }
 
@@ -396,9 +407,9 @@ class ProjectsFactoryTest {
         projectKeysRelay.accept(setOf(sharedProjectKey))
 
         factoryProvider.acceptSharedProject(sharedProjectKey, SharedProjectJson(users = mutableMapOf(
-                userInfo.key.key to mockk(relaxed = true) {
-                    every { tokens } returns mutableMapOf()
-                }
+            userInfo.key.key to mockk(relaxed = true) {
+                every { tokens } returns mutableMapOf()
+            }
         )))
 
         initProjectsFactory()
@@ -415,9 +426,9 @@ class ProjectsFactoryTest {
         projectKeysRelay.accept(setOf(sharedProjectKey))
 
         factoryProvider.acceptSharedProject(sharedProjectKey, SharedProjectJson(users = mutableMapOf(
-                userInfo.key.key to mockk(relaxed = true) {
-                    every { tokens } returns mutableMapOf()
-                }
+            userInfo.key.key to mockk(relaxed = true) {
+                every { tokens } returns mutableMapOf()
+            }
         )))
 
         initProjectsFactory()
@@ -426,25 +437,25 @@ class ProjectsFactoryTest {
 
         emissionChecker.checkRemote {
             factoryProvider.acceptSharedProject(sharedProjectKey, SharedProjectJson(
-                    name = name,
-                    users = mutableMapOf(
-                            userInfo.key.key to mockk(relaxed = true) {
-                                every { tokens } returns mutableMapOf()
-                            }
-                    )
+                name = name,
+                users = mutableMapOf(
+                    userInfo.key.key to mockk(relaxed = true) {
+                        every { tokens } returns mutableMapOf()
+                    }
+                )
             ))
         }
         assertEquals(
-                projectsFactory.sharedProjects
-                        .values
-                        .single()
-                        .name,
-                name,
+            projectsFactory.sharedProjects
+                .values
+                .single()
+                .name,
+            name,
         )
     }
 
     private fun newUserJson() =
-            UserJson(name = userInfo.name, tokens = mutableMapOf(deviceDbInfo.uuid to deviceDbInfo.token))
+        UserJson(name = userInfo.name, tokens = mutableMapOf(deviceDbInfo.uuid to deviceDbInfo.token))
 
     @Test
     fun testChangeSharedProjectLocal() {
@@ -455,8 +466,8 @@ class ProjectsFactoryTest {
         projectKeysRelay.accept(setOf(sharedProjectKey))
 
         factoryProvider.acceptSharedProject(
-                sharedProjectKey,
-                SharedProjectJson(users = mutableMapOf(userInfo.key.key to newUserJson())),
+            sharedProjectKey,
+            SharedProjectJson(users = mutableMapOf(userInfo.key.key to newUserJson())),
         )
 
         initProjectsFactory()
@@ -464,26 +475,26 @@ class ProjectsFactoryTest {
         val name = "name"
 
         projectsFactory.sharedProjects
-                .values
-                .single()
-                .name = name
+            .values
+            .single()
+            .name = name
 
         projectsFactory.save()
 
         // doesn't emit ChangeType.LOCAL
         factoryProvider.acceptSharedProject(
-                sharedProjectKey,
-                SharedProjectJson(
-                        name = name,
-                        users = mutableMapOf(userInfo.key.key to newUserJson()),
-                ),
+            sharedProjectKey,
+            SharedProjectJson(
+                name = name,
+                users = mutableMapOf(userInfo.key.key to newUserJson()),
+            ),
         )
         assertEquals(
-                projectsFactory.sharedProjects
-                        .values
-                        .single()
-                        .name,
-                name,
+            projectsFactory.sharedProjects
+                .values
+                .single()
+                .name,
+            name,
         )
     }
 }

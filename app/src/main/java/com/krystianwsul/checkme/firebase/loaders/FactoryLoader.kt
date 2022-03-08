@@ -142,6 +142,7 @@ class FactoryLoader(
                         ) { projectsFactorySingle.getCurrentValue() }
 
                         val privateProjectLoader = ProjectLoader.Impl(
+                            userInfo.key.toPrivateProjectKey(),
                             privateProjectDatabaseRx.observable,
                             domainDisposable,
                             privateProjectManager,

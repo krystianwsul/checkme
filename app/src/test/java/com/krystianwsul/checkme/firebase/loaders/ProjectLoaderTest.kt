@@ -53,7 +53,7 @@ class ProjectLoaderTest {
     private lateinit var projectLoader: ProjectLoader<ProjectType.Private, PrivateProjectJson>
 
     private fun acceptProject(privateProjectJson: PrivateProjectJson) =
-            projectSnapshotRelay.accept(Snapshot(projectKey.key, privateProjectJson))
+        projectSnapshotRelay.accept(Snapshot(projectKey.key, privateProjectJson))
 
     private lateinit var initialProjectEmissionChecker: EmissionChecker<ChangeWrapper<ProjectLoader.InitialProjectEvent<ProjectType.Private, PrivateProjectJson>>>
     private lateinit var changeProjectEmissionChecker: EmissionChecker<ProjectLoader.ChangeProjectEvent<ProjectType.Private>>
@@ -71,6 +71,7 @@ class ProjectLoaderTest {
         projectManager = AndroidPrivateProjectManager(UserInfo("email", "name", "uid"))
 
         projectLoader = ProjectLoader.Impl(
+            projectKey,
             projectSnapshotRelay,
             compositeDisposable,
             projectManager,
@@ -80,10 +81,10 @@ class ProjectLoaderTest {
         )
 
         initialProjectEmissionChecker =
-                EmissionChecker("initialProject", compositeDisposable, projectLoader.initialProjectEvent)
+            EmissionChecker("initialProject", compositeDisposable, projectLoader.initialProjectEvent)
 
         changeProjectEmissionChecker =
-                EmissionChecker("changeProject", compositeDisposable, projectLoader.changeProjectEvents)
+            EmissionChecker("changeProject", compositeDisposable, projectLoader.changeProjectEvents)
     }
 
     @After
@@ -138,10 +139,14 @@ class ProjectLoaderTest {
         }
 
         changeProjectEmissionChecker.checkOne {
-            acceptProject(PrivateProjectJson(tasks = mutableMapOf(
-                    taskId1 to PrivateTaskJson("task1"),
-                    taskId2 to PrivateTaskJson("task2")
-            )))
+            acceptProject(
+                PrivateProjectJson(
+                    tasks = mutableMapOf(
+                        taskId1 to PrivateTaskJson("task1"),
+                        taskId2 to PrivateTaskJson("task2")
+                    )
+                )
+            )
         }
     }
 
@@ -155,10 +160,14 @@ class ProjectLoaderTest {
         }
 
         changeProjectEmissionChecker.checkOne {
-            acceptProject(PrivateProjectJson(tasks = mutableMapOf(
-                    taskId1 to PrivateTaskJson("task1"),
-                    taskId2 to PrivateTaskJson("task2"),
-            )))
+            acceptProject(
+                PrivateProjectJson(
+                    tasks = mutableMapOf(
+                        taskId1 to PrivateTaskJson("task1"),
+                        taskId2 to PrivateTaskJson("task2"),
+                    )
+                )
+            )
         }
     }
 
@@ -213,17 +222,25 @@ class ProjectLoaderTest {
         val taskId2 = "taskKey2"
 
         initialProjectEmissionChecker.checkRemote {
-            acceptProject(PrivateProjectJson(tasks = mutableMapOf(
-                    taskId1 to PrivateTaskJson("task1"),
-                    taskId2 to PrivateTaskJson("task2"),
-            )))
+            acceptProject(
+                PrivateProjectJson(
+                    tasks = mutableMapOf(
+                        taskId1 to PrivateTaskJson("task1"),
+                        taskId2 to PrivateTaskJson("task2"),
+                    )
+                )
+            )
         }
 
         changeProjectEmissionChecker.checkOne {
-            acceptProject(PrivateProjectJson(tasks = mutableMapOf(
-                    taskId1 to PrivateTaskJson("task1 change"),
-                    taskId2 to PrivateTaskJson("task2 change"),
-            )))
+            acceptProject(
+                PrivateProjectJson(
+                    tasks = mutableMapOf(
+                        taskId1 to PrivateTaskJson("task1 change"),
+                        taskId2 to PrivateTaskJson("task2 change"),
+                    )
+                )
+            )
         }
     }
 

@@ -108,6 +108,7 @@ interface SharedProjectsLoader {
                 }
 
                 ProjectLoader.Impl(
+                    projectKey,
                     projectEntry.databaseRx.observable,
                     domainDisposable,
                     projectManager,

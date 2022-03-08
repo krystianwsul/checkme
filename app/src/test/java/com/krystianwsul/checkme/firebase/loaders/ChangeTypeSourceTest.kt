@@ -184,6 +184,7 @@ class ChangeTypeSourceTest {
         val privateProjectManager = AndroidPrivateProjectManager(DomainFactoryRule.deviceDbInfo.userInfo)
 
         val privateProjectLoader = ProjectLoader.Impl(
+            privateProjectKey,
             privateProjectSnapshotObservable,
             domainDisposable,
             privateProjectManager,

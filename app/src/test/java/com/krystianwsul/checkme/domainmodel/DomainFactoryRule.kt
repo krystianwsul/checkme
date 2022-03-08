@@ -171,6 +171,8 @@ class DomainFactoryRule : TestRule {
             every { newRootTaskNestedTaskHierarchyRecordId(any()) } answers {
                 TaskHierarchyId("rootTaskNestedTaskHierarchyRecordId" + ++rootTaskNestedTaskHierarchyRecordId)
             }
+
+            every { checkTrackers(any(), any(), any(), any()) } returns Unit
         }
 
         rootModelChangeManager = RootModelChangeManager()

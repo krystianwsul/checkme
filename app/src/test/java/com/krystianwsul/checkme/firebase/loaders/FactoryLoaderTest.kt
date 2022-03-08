@@ -107,6 +107,13 @@ class FactoryLoaderTest {
         override fun getNewId(path: String) = "id"
 
         override fun update(values: Map<String, Any?>, callback: DatabaseCallback) = Unit
+
+        override fun checkTrackers(
+            userKeys: Set<UserKey>,
+            privateProjectKeys: Set<ProjectKey.Private>,
+            sharedProjectKeys: Set<ProjectKey.Shared>,
+            taskKeys: Set<TaskKey.Root>,
+        ) = Unit
     }
 
     private class TestFactoryProvider : FactoryProvider {

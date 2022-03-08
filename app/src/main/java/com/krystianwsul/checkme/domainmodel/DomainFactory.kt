@@ -21,6 +21,7 @@ import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.checkme.firebase.roottask.RootTasksFactory
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
+import com.krystianwsul.checkme.utils.checkError
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.domain.DeviceDbInfo

@@ -4,7 +4,7 @@ import android.util.Log
 import com.jakewharton.rxrelay3.BehaviorRelay
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.UserScope
-import com.krystianwsul.checkme.domainmodel.observeOnDomainSplitPriorities
+import com.krystianwsul.checkme.domainmodel.observeOnDomain
 import com.krystianwsul.checkme.utils.filterNotNull
 import com.krystianwsul.checkme.utils.mapNotNull
 import com.krystianwsul.common.firebase.DomainThreadChecker
@@ -31,7 +31,7 @@ abstract class DomainListener<DOMAIN_DATA : DomainData> {
 
     protected abstract val domainResultFetcher: DomainResultFetcher<DOMAIN_DATA>
 
-    protected open val priority: Priority? = null
+    protected open val priority: Priority? = null // todo scheduling
 
     open fun start(forced: Boolean = false) { // todo scheduling
         if (disposable != null) {
@@ -58,7 +58,7 @@ abstract class DomainListener<DOMAIN_DATA : DomainData> {
             Also, overriding priority for EditActivity may be unnecessary at that point, since that was a "first read" issue
              */
             //.observeOnDomain(priority)
-            .observeOnDomainSplitPriorities(Priority.FIRST_READ, priority)
+            .observeOnDomain(Priority.FIRST_READ)
             .doOnNext {
                 Log.e(
                     "asdf",

@@ -76,8 +76,6 @@ class FactoryLoader(
                             "privateProject",
                         )
 
-                        Thread.sleep(2000) // todo queue
-
                         val privateProjectManager = AndroidPrivateProjectManager(userInfo)
 
                         val rootModelChangeManager = RootModelChangeManager()

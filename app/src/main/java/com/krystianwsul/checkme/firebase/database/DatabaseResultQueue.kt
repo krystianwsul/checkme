@@ -5,12 +5,15 @@ import com.jakewharton.rxrelay3.PublishRelay
 import com.jakewharton.rxrelay3.Relay
 import com.krystianwsul.checkme.domainmodel.getDomainScheduler
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
+import com.krystianwsul.checkme.utils.doAfterSubscribe
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.mindorks.scheduler.Priority
 import com.mindorks.scheduler.internal.CustomPriorityScheduler
 import io.reactivex.rxjava3.core.BackpressureStrategy
+import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Maybe
 import io.reactivex.rxjava3.core.Single
+import io.reactivex.rxjava3.schedulers.Schedulers
 
 object DatabaseResultQueue {
 
@@ -58,8 +61,10 @@ object DatabaseResultQueue {
                 it.forEach {
                     if (it.databaseRead.log) Log.e(
                         "asdf",
-                        "magic queue accepting " + it.databaseRead.description
+                        "magic queue accepting " + it.databaseRead.description + ", hasObservers: " + it.relay.hasObservers()
                     ) // todo scheduling
+
+                    check(it.relay.hasObservers())
 
                     it.accept()
 
@@ -90,11 +95,17 @@ object DatabaseResultQueue {
 
         val relay = PublishRelay.create<Snapshot<T>>()
 
-        return relay.firstOrError()
-            .doOnSubscribe {
+        return relay
+            .doOnNext {
                 if (databaseRead.log) Log.e(
                     "asdf",
-                    "magic DatabaseResultQueue.enqueueSnapshot onSubscribe " + databaseRead.description
+                    "magic DatabaseResultQueue.enqueueSnapshot onNext " + databaseRead.description
+                ) // todo scheduling
+            }
+            .doAfterSubscribe {
+                if (databaseRead.log) Log.e(
+                    "asdf",
+                    "magic DatabaseResultQueue.enqueueSnapshot afterSubscribe " + databaseRead.description
                 ) // todo scheduling
 
                 /*
@@ -106,12 +117,21 @@ object DatabaseResultQueue {
 
                 synchronized { add(QueueEntry(databaseRead, priority, snapshot, relay)) }
 
-                enqueueTrigger()
+                Completable.fromCallable { enqueueTrigger() }
+                    .subscribeOn(Schedulers.trampoline())
+                    .subscribe()
             }
+            .firstOrError()
             .doOnDispose {
                 if (databaseRead.log) Log.e(
                     "asdf",
                     "magic DatabaseResultQueue.enqueueSnapshot onDispose " + databaseRead.description
+                ) // todo scheduling
+            }
+            .doOnSuccess {
+                if (databaseRead.log) Log.e(
+                    "asdf",
+                    "magic DatabaseResultQueue.enqueueSnapshot onSuccess " + databaseRead.description
                 ) // todo scheduling
             }
             .doFinally {

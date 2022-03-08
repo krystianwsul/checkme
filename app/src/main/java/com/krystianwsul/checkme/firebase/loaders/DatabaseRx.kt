@@ -16,21 +16,22 @@ class DatabaseRx<T : Any>(
 
     val disposable = CompositeDisposable().also { domainDisposable += it }
 
-    val observable = databaseObservable.publish()
+    val observable = databaseObservable
+        .doOnSubscribe {
+            logDescription?.let { Log.e("asdf", "magic DatabaseRx prePublish onSubscribe $it") }
+        }
+        .doOnNext {
+            logDescription?.let { Log.e("asdf", "magic DatabaseRx prePublish onNext $it") }
+        }
+        .doFinally {
+            logDescription?.let { Log.e("asdf", "magic DatabaseRx prePublish onFinally $it") }
+        }
+        .publish()
 
     private val cached = BehaviorRelay.create<T>()
 
     init {
         observable.doOnNext { DomainThreadChecker.instance.requireDomainThread() }
-            .doOnSubscribe {
-                logDescription?.let { Log.e("asdf", "magic DatabaseRx onSubscribe $it") }
-            }
-            .doOnNext {
-                logDescription?.let { Log.e("asdf", "magic DatabaseRx onNext $it") }
-            }
-            .doFinally {
-                logDescription?.let { Log.e("asdf", "magic DatabaseRx onFinally $it") }
-            }
             .subscribe(cached::accept)
             .addTo(disposable)
     }
@@ -44,7 +45,9 @@ class DatabaseRx<T : Any>(
         .apply { disposable += connect() }
 
     init {
+        logDescription?.let { Log.e("asdf", "magic DatabaseRx connecting $it") }
         disposable += observable.connect()
+        logDescription?.let { Log.e("asdf", "magic DatabaseRx connected $it") }
     }
 
     fun latest() = cached.firstOrError()

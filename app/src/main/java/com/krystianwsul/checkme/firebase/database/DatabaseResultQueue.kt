@@ -71,10 +71,20 @@ object DatabaseResultQueue {
     }?.let(trigger::accept)
 
     fun <T : Any> enqueueSnapshot(databaseRead: DatabaseRead<T>, snapshot: Snapshot<T>): Single<Snapshot<T>> {
+        if (databaseRead.log) Log.e(
+            "asdf",
+            "magic DatabaseResultQueue.enqueueSnapshot start " + databaseRead.description
+        ) // todo scheduling
+
         val relay = PublishRelay.create<Snapshot<T>>()
 
         return relay.firstOrError()
             .doOnSubscribe {
+                if (databaseRead.log) Log.e(
+                    "asdf",
+                    "magic DatabaseResultQueue.enqueueSnapshot onSubscribe " + databaseRead.description
+                ) // todo scheduling
+
                 /*
                 This doOnSubscribe, plus the use of PublishRelay, is to ensure that the entry doesn't get dequeued before its
                 listeners are ready.  That, in turn, guarantees that the logic after executing an entry will get run after
@@ -85,6 +95,18 @@ object DatabaseResultQueue {
                 synchronized { add(QueueEntry(priority, snapshot, relay)) }
 
                 enqueueTrigger()
+            }
+            .doOnDispose {
+                if (databaseRead.log) Log.e(
+                    "asdf",
+                    "magic DatabaseResultQueue.enqueueSnapshot onDispose " + databaseRead.description
+                ) // todo scheduling
+            }
+            .doFinally {
+                if (databaseRead.log) Log.e(
+                    "asdf",
+                    "magic DatabaseResultQueue.enqueueSnapshot finally " + databaseRead.description
+                ) // todo scheduling
             }
     }
 

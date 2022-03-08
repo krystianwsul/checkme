@@ -10,6 +10,8 @@ class TaskDatabaseRead(private val taskKey: TaskKey.Root) : TypedDatabaseRead<Ro
 
     override val type = "task"
 
+    override val key get() = taskKey.toString()
+
     override val priority get() = HasInstancesStore.getPriority(taskKey)
 
     override val kClass = RootTaskJson::class

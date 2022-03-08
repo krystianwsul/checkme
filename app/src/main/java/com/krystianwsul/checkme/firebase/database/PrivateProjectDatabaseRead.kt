@@ -9,6 +9,10 @@ class PrivateProjectDatabaseRead(private val projectKey: ProjectKey.Private) : T
 
     override val type = "privateProject"
 
+    override val key get() = projectKey.toString()
+
+    override val log = true
+
     override val kClass = PrivateProjectJson::class
 
     override fun DatabaseReference.getQuery() = child("${DatabaseWrapper.PRIVATE_PROJECTS_KEY}/${projectKey.key}")

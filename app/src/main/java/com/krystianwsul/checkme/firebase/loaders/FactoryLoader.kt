@@ -61,6 +61,7 @@ class FactoryLoader(
                     deviceDbInfoObservable.firstOrError().flatMap {
                         fun getDeviceDbInfo() = deviceDbInfoObservable.getCurrentValue()
 
+                        Log.e("asdf", "magic FactoryLoader set up userDatabaseRx") // todo scheduling
                         val userDatabaseRx = DatabaseRx(
                             domainDisposable,
                             factoryProvider.database.getUserObservable(getDeviceDbInfo().key),
@@ -71,6 +72,7 @@ class FactoryLoader(
                         val privateProjectDatabaseRx = DatabaseRx(
                             domainDisposable,
                             factoryProvider.database.getPrivateProjectObservable(privateProjectKey),
+                            "privateProject",
                         )
 
                         val privateProjectManager = AndroidPrivateProjectManager(userInfo)

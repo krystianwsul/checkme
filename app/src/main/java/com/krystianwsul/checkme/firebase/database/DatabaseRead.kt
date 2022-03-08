@@ -28,7 +28,13 @@ abstract class DatabaseRead<DATA : Any> {
 
     abstract val type: String
 
+    abstract val key: String // todo scheduling
+
+    val description by lazy { "$type: $key" }
+
     open val priority = Priority.DB
+
+    open val log: Boolean = false
 
     protected abstract fun DatabaseReference.getQuery(): Query
 

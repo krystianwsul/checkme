@@ -64,13 +64,6 @@ object DatabaseResultQueue {
                         "magic queue accepting " + it.databaseRead.description + ", hasObservers: " + it.relay.hasObservers()
                     ) // todo scheduling
 
-                    /*
-                    This isn't really correct.  It's perfectly reasonable for the result of the read to stop being needed
-                    before it actually arrives, but that would be a hell of a race condition.  I'm leaving it here for now,
-                    to make sure that the doAfterSubscribe call below is working as intended.
-                     */
-                    check(it.relay.hasObservers())
-
                     it.accept()
 
                     if (it.databaseRead.log) Log.e(

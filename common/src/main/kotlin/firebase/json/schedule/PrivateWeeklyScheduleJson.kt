@@ -1,6 +1,7 @@
 package com.krystianwsul.common.firebase.json.schedule
 
 import kotlinx.serialization.Serializable
+import kotlin.jvm.JvmOverloads
 
 @Serializable
 data class PrivateWeeklyScheduleJson @JvmOverloads constructor(

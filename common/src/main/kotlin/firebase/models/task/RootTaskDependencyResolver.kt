@@ -84,6 +84,11 @@ class RootTaskDependencyResolver(private val rootTask: RootTask) : Invalidatable
 
     val dependenciesLoaded get() = dependenciesLoadedCache.value
 
+    val directDependencyTasks
+        get() = directDependenciesStateCache.value
+            .let { it as DirectDependencyState.Present }
+            .tasks
+
     override fun invalidate() = directDependenciesStateCache.invalidate()
 
     private fun checkDirectDependenciesRecursive(task: RootTask, checkedTaskKeys: MutableSet<TaskKey.Root>): Boolean {

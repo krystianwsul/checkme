@@ -61,7 +61,8 @@ object HasInstancesStore {
 
         if (tasks.values.any { !it.dependenciesLoaded }) return
 
-        val hasInstancesMap = tasks.mapValues { calculateHasInstances(it.value, now) }
+        val hasInstancesMap = tasks.mapValues { false }.toMutableMap()
+        tasks.filterValues { calculateHasInstances(it, now) }.forEach { setTaskHighPriority(it.value, hasInstancesMap) }
 
         hasInstancesMapRelay.accept(Data(false, hasInstancesMap))
     }
@@ -74,5 +75,15 @@ object HasInstancesStore {
         val hasInstances = map[taskKey] ?: return Priority.DB_NOTES // if it's not in the cache, wait on it
 
         return if (hasInstances) Priority.DB_TASKS else Priority.DB_NOTES
+    }
+
+    private fun setTaskHighPriority(task: RootTask, map: MutableMap<TaskKey.Root, Boolean>) {
+        if (map[task.taskKey] == true) return
+
+        map[task.taskKey] = true
+
+        task.rootTaskDependencyResolver
+            .directDependencyTasks
+            .forEach { setTaskHighPriority(it, map) }
     }
 }

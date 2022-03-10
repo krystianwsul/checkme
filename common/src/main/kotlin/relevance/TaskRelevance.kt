@@ -70,11 +70,10 @@ class TaskRelevance(val task: Task) {
                             Instance.VisibilityOptions(
                                 hack24 = true,
                                 ignoreHidden = ignoreHidden,
-                                assumeRoot = true
+                                assumeRoot = true,
                             )
                         )
-                        Schedule.OldestVisible.RepeatingNull -> true
-                        is Schedule.OldestVisible.RepeatingNonNull -> scheduleDate >= it.date
+                        is Schedule.OldestVisible.Repeating -> it.repeatingOldestVisible.matchesScheduleDate(scheduleDate)
                     }
                 }.any { it }
             }
@@ -95,21 +94,25 @@ class TaskRelevance(val task: Task) {
                          * Can't assume the instance is root; it could be joined.  But (I think) the schedule is still
                          * relevant, since removing it would make the task unscheduled.
                          */
-                        schedule.getInstance(schedule.topLevelTask)
-                            .isVisible(now, Instance.VisibilityOptions(hack24 = true))
+                        schedule.getInstance(schedule.topLevelTask).isVisible(now, Instance.VisibilityOptions(hack24 = true))
                     is RepeatingSchedule -> {
-                            val oldestVisibleExactTimeStamp = schedule.oldestVisible
-                                .date
-                                ?.toMidnightExactTimeStamp()
+                        when (val oldestVisible = schedule.oldestVisible.repeatingOldestVisible) {
+                            RepeatingSchedule.RepeatingOldestVisible.None -> true
+                            is RepeatingSchedule.RepeatingOldestVisible.Present -> {
+                                val oldestVisibleExactTimeStamp = oldestVisible
+                                    .date
+                                    .toMidnightExactTimeStamp()
 
-                            val scheduleEndExactTimeStamp = schedule.intrinsicEndExactTimeStamp
+                                val scheduleEndExactTimeStamp = schedule.intrinsicEndExactTimeStamp
 
-                            if (oldestVisibleExactTimeStamp != null && scheduleEndExactTimeStamp != null)
-                                oldestVisibleExactTimeStamp <= scheduleEndExactTimeStamp
-                            else
-                                true
+                                if (scheduleEndExactTimeStamp != null)
+                                    oldestVisibleExactTimeStamp <= scheduleEndExactTimeStamp
+                                else
+                                    true
+                            }
+                            RepeatingSchedule.RepeatingOldestVisible.Ended -> false
+                        }
                     }
-                    else -> throw UnsupportedOperationException()
                 }
             }
             .map { scheduleRelevances.getOrPut(it.schedule) }

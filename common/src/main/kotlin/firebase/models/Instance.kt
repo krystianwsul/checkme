@@ -366,7 +366,7 @@ class Instance private constructor(
     private fun getMatchingScheduleIntervals(checkOldestVisible: Boolean): List<ScheduleInterval> {
         val filtered = if (checkOldestVisible) {
             matchingScheduleIntervals.map {
-                it.filter { it.second.schedule.isAfterOldestVisible(scheduleDateTime.toLocalExactTimeStamp()) }
+                it.filter { it.second.schedule.matchesScheduleDate(scheduleDate) }
             }
         } else {
             matchingScheduleIntervals
@@ -386,7 +386,7 @@ class Instance private constructor(
 
         val filtered = if (checkOldestVisible) {
             matchingScheduleIntervals.map {
-                it.filter { it.second.schedule.isAfterOldestVisible(scheduleDateTime.toLocalExactTimeStamp()) }
+                it.filter { it.second.schedule.matchesScheduleDate(scheduleDate) }
             }
         } else {
             matchingScheduleIntervals

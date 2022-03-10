@@ -81,22 +81,20 @@ sealed class Schedule(val topLevelTask: Task) : TaskParentEntry, ProjectIdOwner 
             checkOldestVisible: Boolean = true,
     ): Sequence<DateTime>
 
-    abstract fun isAfterOldestVisible(exactTimeStamp: ExactTimeStamp): Boolean
+    abstract fun matchesScheduleDate(scheduleDate: Date): Boolean
 
     fun delete() {
         topLevelTask.deleteSchedule(this)
         scheduleRecord.delete()
     }
 
-    sealed class OldestVisible {
+    sealed interface OldestVisible {
 
-        open val date: Date? = null
+        val date: Date? get() = null
 
-        object Single : OldestVisible()
+        object Single : OldestVisible
 
-        object RepeatingNull : OldestVisible()
-
-        data class RepeatingNonNull(override val date: Date) : OldestVisible()
+        data class Repeating(val repeatingOldestVisible: RepeatingSchedule.RepeatingOldestVisible) : OldestVisible
     }
 
     abstract val oldestVisible: OldestVisible

@@ -7,6 +7,7 @@ import com.krystianwsul.common.firebase.models.interval.ScheduleInterval
 import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.firebase.records.schedule.ProjectHelper
 import com.krystianwsul.common.firebase.records.schedule.SingleScheduleRecord
+import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.DateTime
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.ProjectKey
@@ -57,7 +58,7 @@ class SingleSchedule(topLevelTask: Task, val singleScheduleRecord: SingleSchedul
         return sequenceOf(originalScheduleDateTime)
     }
 
-    override fun isAfterOldestVisible(exactTimeStamp: ExactTimeStamp) = true
+    override fun matchesScheduleDate(scheduleDate: Date) = true
 
     override val oldestVisible = OldestVisible.Single
 

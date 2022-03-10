@@ -126,6 +126,7 @@ class DomainFactory(
         firstRun = false
 
         updateShortcuts(now)
+        HasInstancesStore.update(this, now)
 
         listOf(
             changeTypeRelay.filter { it == ChangeType.REMOTE } // todo changetype debounce
@@ -235,8 +236,6 @@ class DomainFactory(
             .map { ShortcutQueue.ShortcutData(deviceDbInfo, it.second) }
 
         ShortcutQueue.updateShortcuts(shortcutDatas)
-
-        HasInstancesStore.update(this, now)
     }
 
     // firebase
@@ -253,6 +252,7 @@ class DomainFactory(
         if (changeTypeDelay == null) changeTypeDelay = now.long - startTime.long
 
         updateShortcuts(now)
+        HasInstancesStore.update(this, now)
 
         tryNotifyListeners("DomainFactory.onChangeTypeEvent", RunType.REMOTE)
 

@@ -243,6 +243,8 @@ sealed class Task(
     val parentTaskData by parentTaskDataCache
     val parentTask get() = parentTaskData?.first
 
+    val isHierarchyHack get() = parentTaskData?.second != null
+
     private fun getExistingInstances(
         startExactTimeStamp: ExactTimeStamp.Offset?,
         endExactTimeStamp: ExactTimeStamp.Offset?,
@@ -284,7 +286,7 @@ sealed class Task(
                 it.parentTask
                     .getInstances(
                         givenStartExactTimeStamp,
-                        givenEndExactTimeStamp,
+                        listOfNotNull(givenEndExactTimeStamp, it.endExactTimeStampOffset).minOrNull(),
                         now,
                         excludedParentTasks = excludedParentTasks + taskKey,
                     )
@@ -311,6 +313,10 @@ sealed class Task(
                         limit the upper range with something like:
 
                         givenEndExactTimeStamp -> listOfNotNull(givenEndExactTimeStamp, hierarchyInterval.endOffset).minOrNull()
+
+                        Update: I did narrow down givenEndExactTimeStamp.  I'm going to leave that exception floating around
+                        for a while longer.  But, at this point it seems that InstanceInfo is no longer needed.  Next time
+                        this comes up, I can remove InstanceInfo and undo the changes I made to create this mechanism.
                          */
 
                         InstanceInfo(

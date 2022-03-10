@@ -202,6 +202,7 @@ class Instance private constructor(
         }
     }
 
+    // See notes in Task.getParentInstances
     private class EndedTaskHierarchyException(message: String) : Exception(message)
 
     val parentInstanceCache =

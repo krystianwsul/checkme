@@ -82,6 +82,8 @@ class RootIntervalUpdate(val rootTask: RootTask, intervalInfo: IntervalInfo) :
         }
 
         if (singleRemoveSchedule != null && singleAddSchedulePair != null) {
+            // This is for a regular single-instance reminder, and applies the schedule change to the instance.
+
             singleRemoveSchedule.setTimeOnInstance(singleAddSchedulePair.first, singleAddSchedulePair.second)
 
             if (assignedTo.isNotEmpty()) singleRemoveSchedule.setAssignedTo(assignedTo)
@@ -124,7 +126,7 @@ class RootIntervalUpdate(val rootTask: RootTask, intervalInfo: IntervalInfo) :
                 it.setParentState(Instance.ParentState.NoParent)
             }
         } else {
-            if (!rootTask.isTopLevelTask()) { // hierarchy hack
+            if (rootTask.isHierarchyHack) { // hierarchy hack
                 check(removeSchedules.isEmpty())
                 check(initialAddScheduleDatas.size == 1)
                 check(oldScheduleDatas.size == 1)

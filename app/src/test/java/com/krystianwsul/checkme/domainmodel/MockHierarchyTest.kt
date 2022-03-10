@@ -2,11 +2,9 @@ package com.krystianwsul.checkme.domainmodel
 
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.extensions.*
+import com.krystianwsul.checkme.domainmodel.updates.CreateChildTaskDomainUpdate
 import com.krystianwsul.checkme.gui.edit.delegates.EditDelegate
-import com.krystianwsul.common.time.Date
-import com.krystianwsul.common.time.ExactTimeStamp
-import com.krystianwsul.common.time.HourMinute
-import com.krystianwsul.common.time.TimePair
+import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.ScheduleData
 import com.soywiz.klock.hours
 import org.junit.Assert.*
@@ -291,5 +289,76 @@ class MockHierarchyTest {
         assertEquals(1, domainFactory.getTaskForce(childTaskKey).intervalInfo.getCurrentScheduleIntervals(now).size)
         assertEquals(parentTaskKey, domainFactory.getTaskForce(childTaskKey).parentTask?.taskKey)
         assertTrue(domainFactory.getTaskForce(parentTaskKey).getChildTasks().any { it.taskKey == childTaskKey })
+    }
+
+    @Test
+    fun convertRepeatingScheduleChildWithSubchildToSingle() {
+        val date = Date(2022, 3, 10)
+
+        var now = ExactTimeStamp.Local(date, HourMinute(1, 0))
+
+        val parentTaskKey = domainUpdater(now).createScheduleTopLevelTask(
+            DomainListenerManager.NotificationType.All,
+            EditDelegate.CreateParameters("parent task"),
+            listOf(ScheduleData.Weekly(DayOfWeek.set, TimePair(HourMinute(5, 0)), null, null, 1)),
+            null,
+        )
+            .blockingGet()
+            .taskKey
+
+        assertEquals(1, getTodayInstanceDatas(now).size)
+
+        now += 1.hours
+
+        val childTaskCreateParameters = EditDelegate.CreateParameters("child task")
+
+        val childTaskKey = CreateChildTaskDomainUpdate(
+            DomainListenerManager.NotificationType.All,
+            CreateChildTaskDomainUpdate.Parent.Task(parentTaskKey),
+            childTaskCreateParameters,
+        ).perform(domainUpdater(now))
+            .blockingGet()
+            .taskKey
+
+        getTodayInstanceDatas(now).let {
+            assertEquals(1, it.size)
+
+            assertEquals(1, it.single().allChildren.size)
+        }
+
+        now += 1.hours
+
+        val subchildTaskKey = CreateChildTaskDomainUpdate(
+            DomainListenerManager.NotificationType.All,
+            CreateChildTaskDomainUpdate.Parent.Task(childTaskKey),
+            EditDelegate.CreateParameters("subchild task"),
+        ).perform(domainUpdater(now))
+            .blockingGet()
+            .taskKey
+
+        getTodayInstanceDatas(now).let {
+            assertEquals(1, it.size)
+
+            assertEquals(1, it.single().allChildren.size)
+
+            assertEquals(1, it.single().allChildren.single().allChildren.size)
+        }
+
+        now += 1.hours
+
+        domainUpdater(now).updateScheduleTask(
+            DomainListenerManager.NotificationType.All,
+            childTaskKey,
+            childTaskCreateParameters,
+            getSingleScheduleData(date, 6, 0),
+            null,
+        ).blockingSubscribe()
+
+        getTodayInstanceDatas(now).let {
+            assertEquals(2, it.size)
+        }
+
+        // This checks that an infinite loop doesn't occur in Task.isVisible/getParentInstances
+        domainFactory.getTaskForce(subchildTaskKey).isVisible(now)
     }
 }

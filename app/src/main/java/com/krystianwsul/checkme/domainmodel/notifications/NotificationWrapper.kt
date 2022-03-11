@@ -27,6 +27,7 @@ abstract class NotificationWrapper {
         instance: Instance,
         silent: Boolean,
         now: ExactTimeStamp.Local,
+        ordinal: Ordinal,
     )
 
     abstract fun notifyProject(

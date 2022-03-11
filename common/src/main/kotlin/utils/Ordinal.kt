@@ -14,6 +14,9 @@ class Ordinal(_bigDecimal: BigDecimal) : Comparable<Ordinal> {
 
         private const val PAD_LENGTH = 50
 
+        val ZERO by lazy { Ordinal(0) }
+        val ONE by lazy { Ordinal(1) }
+
         fun fromFields(ordinalDouble: Double?, ordinalString: String?): Ordinal? {
             return ordinalString?.let(::fromJson) ?: ordinalDouble?.let(::BigDecimal)?.toOrdinal()
         }

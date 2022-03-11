@@ -138,10 +138,11 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         instance: Instance,
         silent: Boolean,
         now: ExactTimeStamp.Local,
+        ordinal: Ordinal,
     ) {
         val highPriority = getHighPriority() ?: return
 
-        val instanceData = getInstanceData(deviceDbInfo, instance, silent, now, highPriority)
+        val instanceData = getInstanceData(deviceDbInfo, instance, silent, now, highPriority, ordinal)
         notificationRelay.accept { notifyInstanceHelper(instanceData) }
     }
 
@@ -165,7 +166,8 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         silent: Boolean,
         now: ExactTimeStamp.Local,
         highPriority: Boolean,
-    ) = InstanceData(deviceDbInfo, instance, now, silent, highPriority)
+        ordinal: Ordinal,
+    ) = InstanceData(deviceDbInfo, instance, now, silent, highPriority, ordinal)
 
     private fun notifyInstanceHelper(instanceData: InstanceData) {
         val notificationId = instanceData.notificationId
@@ -741,6 +743,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         now: ExactTimeStamp.Local,
         val silent: Boolean,
         val highPriority: Boolean,
+        val ordinal: Ordinal,
     ) {
         val notificationId = instance.notificationId
 
@@ -755,8 +758,6 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         val timeStampLong = instance.instanceDateTime
             .timeStamp
             .long
-
-        val ordinal = instance.ordinal
 
         val name = instance.name
 

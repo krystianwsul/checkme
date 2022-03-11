@@ -14,10 +14,7 @@ import com.krystianwsul.common.relevance.Irrelevant
 import com.krystianwsul.common.time.DateTimeSoy
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.TimeStamp
-import com.krystianwsul.common.utils.InstanceKey
-import com.krystianwsul.common.utils.ProjectKey
-import com.krystianwsul.common.utils.TimeLogger
-import com.krystianwsul.common.utils.singleOrEmpty
+import com.krystianwsul.common.utils.*
 import com.soywiz.klock.DateTime
 import com.soywiz.klock.Time
 import com.soywiz.klock.days
@@ -374,19 +371,51 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
     ).flatMap { it.getNotifications() }
 
     private fun notifyInstances(notifications: List<GroupTypeFactory.Notification>, now: ExactTimeStamp.Local) {
-        notifications.forEach {
-            when (it) {
-                is GroupTypeFactory.Notification.Instance ->
-                    notificationWrapper.notifyInstance(domainFactory.deviceDbInfo, it.instance, it.silent, now)
+        if (notifications.isEmpty()) return
+
+        val notificationsWithOrdinals = notifications.map {
+            val ordinal = when (it) {
+                is GroupTypeFactory.Notification.Instance -> it.instance.ordinal
+                is GroupTypeFactory.Notification.Project -> domainFactory.myUserFactory
+                    .user
+                    .getProjectOrdinalManager(it.project)
+                    .getOrdinal(it.project, ProjectOrdinalManager.Key(it.instances))
+            }
+
+            it to ordinal
+        }
+
+        /*
+        because negative numbers don't get sorted properly, we need to offset everything to be non-negative.  Subtract from
+        ONE because the toString conversion behaves strangely for ZERO
+         */
+
+        val minOrdinal = notificationsWithOrdinals.map { it.second }
+            .minOrNull()!!
+            .let { if (it < Ordinal.ZERO) Ordinal.ONE - it else Ordinal.ZERO }
+
+        notificationsWithOrdinals.forEach { (notification, ordinal) ->
+            val adjustedOrdinal = minOrdinal + ordinal
+
+            when (notification) {
+                is GroupTypeFactory.Notification.Instance -> notificationWrapper.notifyInstance(
+                    domainFactory.deviceDbInfo,
+                    notification.instance,
+                    notification.silent,
+                    now,
+                    adjustedOrdinal,
+                )
                 is GroupTypeFactory.Notification.Project -> {
-                    it.instances.forEach { NotificationWrapper.instance.cancelNotification(it.notificationId) }
+                    notification.instances.forEach { NotificationWrapper.instance.cancelNotification(it.notificationId) }
 
-                    val ordinal = domainFactory.myUserFactory
-                        .user
-                        .getProjectOrdinalManager(it.project)
-                        .getOrdinal(it.project, ProjectOrdinalManager.Key(it.instances))
-
-                    notificationWrapper.notifyProject(it.project, it.instances, it.timeStamp, it.silent, now, ordinal)
+                    notificationWrapper.notifyProject(
+                        notification.project,
+                        notification.instances,
+                        notification.timeStamp,
+                        notification.silent,
+                        now,
+                        adjustedOrdinal,
+                    )
                 }
             }
         }

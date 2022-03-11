@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.firebase.loaders
 
-import android.util.Log
 import com.krystianwsul.checkme.firebase.UserCustomTimeProviderSource
 import com.krystianwsul.checkme.firebase.dependencies.RootTaskKeyStore
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
@@ -11,7 +10,6 @@ import com.krystianwsul.common.firebase.ChangeWrapper
 import com.krystianwsul.common.firebase.json.Parsable
 import com.krystianwsul.common.firebase.records.project.ProjectRecord
 import com.krystianwsul.common.time.JsonTime
-import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ProjectType
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Single
@@ -42,7 +40,6 @@ interface ProjectLoader<T : ProjectType, U : Parsable> { // U: Project JSON type
 
     // U: Project JSON type
     class Impl<T : ProjectType, U : Parsable>(
-        projectKey: ProjectKey<T>,
         snapshotObservable: Observable<Snapshot<U>>,
         private val domainDisposable: CompositeDisposable,
         override val projectManager: ProjectProvider.ProjectManager<T, U>,
@@ -59,32 +56,26 @@ interface ProjectLoader<T : ProjectType, U : Parsable> { // U: Project JSON type
             val userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
         )
 
-        private val projectRecordObservable: Observable<ProjectRecordData<T>> = snapshotObservable.doOnNext {
-            Log.e(
-                "asdf",
-                "magic ProjectLoader($projectKey) snapshotObservable hasInitial? " + (initialProjectRecord != null),
-            ) // todo scheduling
-        }
-            .mapNotNull(projectManager::set)
-            .doOnNext { Log.e("asdf", "magic ProjectLoader($projectKey) set") } // todo scheduling
-            .let {
-                if (initialProjectRecord != null) {
-                    it.startWithItem(ChangeWrapper(ChangeType.LOCAL, initialProjectRecord))
-                } else {
-                    it
+        private val projectRecordObservable: Observable<ProjectRecordData<T>> =
+            snapshotObservable.mapNotNull(projectManager::set)
+                .let {
+                    if (initialProjectRecord != null) {
+                        it.startWithItem(ChangeWrapper(ChangeType.LOCAL, initialProjectRecord))
+                    } else {
+                        it
+                    }
                 }
-            }
-            .map { (projectChangeType, projectRecord) ->
-                rootTaskKeyStore.onProjectAddedOrUpdated(
-                    projectRecord.projectKey,
-                    projectRecord.rootTaskParentDelegate.rootTaskKeys,
-                )
+                .map { (projectChangeType, projectRecord) ->
+                    rootTaskKeyStore.onProjectAddedOrUpdated(
+                        projectRecord.projectKey,
+                        projectRecord.rootTaskParentDelegate.rootTaskKeys,
+                    )
 
-                val userCustomTimeProvider = userCustomTimeProviderSource.getUserCustomTimeProvider(projectRecord)
+                    val userCustomTimeProvider = userCustomTimeProviderSource.getUserCustomTimeProvider(projectRecord)
 
-                ProjectRecordData(projectChangeType, projectRecord, userCustomTimeProvider)
-            }
-            .replayImmediate()
+                    ProjectRecordData(projectChangeType, projectRecord, userCustomTimeProvider)
+                }
+                .replayImmediate()
 
         // first snapshot of everything
         override val initialProjectEvent = projectRecordObservable.firstOrError()

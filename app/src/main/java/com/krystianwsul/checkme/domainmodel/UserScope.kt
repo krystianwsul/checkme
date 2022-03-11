@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.domainmodel
 
-import android.util.Log
 import com.jakewharton.rxrelay3.BehaviorRelay
 import com.krystianwsul.checkme.domainmodel.extensions.updateDeviceDbInfo
 import com.krystianwsul.checkme.firebase.factories.FriendsFactory
@@ -47,20 +46,11 @@ class UserScope(
 
     val domainListenerManager = DomainListenerManager()
 
-    init {
-        Log.e("asdf", "magic userScope init") // todo scheduling
-    }
-
     val domainFactorySingle = Single.zip(
-        projectsFactorySingle.doOnSuccess { Log.e("asdf", "magic userScope projectsFactorySingle") }, // todo scheduling
-        friendsFactorySingle.doOnSuccess { Log.e("asdf", "magic userScope friendsFactorySingle") }, // todo scheduling
-        notificationStorageSingle.doOnSuccess {
-            Log.e(
-                "asdf",
-                "magic userScope notificationStorageSingle"
-            )
-        }, // todo scheduling
-        shownFactorySingle.doOnSuccess { Log.e("asdf", "magic userScope shownFactorySingle") }, // todo scheduling
+        projectsFactorySingle,
+        friendsFactorySingle,
+        notificationStorageSingle,
+        shownFactorySingle,
     ) { projectsFactory, friendsFactory, notificationStorage, shownFactory ->
         factoryProvider.newDomain(
             shownFactory,
@@ -91,9 +81,7 @@ class UserScope(
             }
             .addTo(domainDisposable)
 
-        tokenObservable.flatMapCompletable {
-            factoryProvider.domainUpdater.updateDeviceDbInfo(getDeviceDbInfo())
-        }
+        tokenObservable.flatMapCompletable { factoryProvider.domainUpdater.updateDeviceDbInfo(getDeviceDbInfo()) }
             .subscribe()
             .addTo(domainDisposable)
     }

@@ -3,15 +3,11 @@ package com.krystianwsul.common.firebase.models.users
 import com.krystianwsul.common.firebase.models.project.SharedProject
 import com.krystianwsul.common.invoke
 import com.krystianwsul.common.time.*
-import com.krystianwsul.common.utils.InstanceKey
-import com.krystianwsul.common.utils.ProjectKey
-import com.krystianwsul.common.utils.TaskKey
-import com.krystianwsul.common.utils.toOrdinal
+import com.krystianwsul.common.utils.*
 import com.soywiz.klock.hours
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
-import org.junit.Assert
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
@@ -63,7 +59,7 @@ class ProjectOrdinalManagerMatcherTest {
 
         val now = ExactTimeStamp.Local(date, HourMinute(1, 0))
 
-        val ordinal = 1.toOrdinal()
+        val ordinal = Ordinal.ONE
 
         projectOrdinalManager.setOrdinal(project, key, ordinal, now)
 
@@ -87,7 +83,7 @@ class ProjectOrdinalManagerMatcherTest {
 
         val now = ExactTimeStamp.Local(date, HourMinute(1, 0))
 
-        val ordinal = 1.toOrdinal()
+        val ordinal = Ordinal.ONE
 
         projectOrdinalManager.setOrdinal(project, originalKey, ordinal, now)
 
@@ -119,7 +115,7 @@ class ProjectOrdinalManagerMatcherTest {
 
         val now = ExactTimeStamp.Local(firstDate, HourMinute(1, 0))
 
-        val ordinal = 1.toOrdinal()
+        val ordinal = Ordinal.ONE
 
         projectOrdinalManager.setOrdinal(project, firstKey, ordinal, now)
 
@@ -155,7 +151,7 @@ class ProjectOrdinalManagerMatcherTest {
             instanceKey3 to instanceDateTimePair,
         )
 
-        val firstOrdinal = 1.toOrdinal()
+        val firstOrdinal = Ordinal.ONE
 
         // first, we set an ordinal for all three instances
         var now = ExactTimeStamp.Local(date, HourMinute(1, 0))
@@ -201,7 +197,7 @@ class ProjectOrdinalManagerMatcherTest {
         // 1. set ordinal for earlier time
         var now = ExactTimeStamp.Local(date, HourMinute(1, 0))
 
-        val earlierOrdinal = 1.toOrdinal()
+        val earlierOrdinal = Ordinal.ONE
 
         projectOrdinalManager.setOrdinal(project, earlierKey, earlierOrdinal, now)
 

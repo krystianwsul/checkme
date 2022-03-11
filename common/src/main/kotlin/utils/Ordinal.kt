@@ -77,7 +77,7 @@ fun Int.toOrdinal() = Ordinal(this)
 fun Long.toOrdinal() = Ordinal(this)
 
 fun Iterable<Ordinal>.sum(): Ordinal {
-    var sum = 0.toOrdinal()
+    var sum = Ordinal.ZERO
     for (element in this) {
         sum += element
     }

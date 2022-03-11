@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.firebase.loaders
 
-import android.util.Log
 import com.krystianwsul.checkme.domainmodel.UserScope
 import com.krystianwsul.checkme.domainmodel.observeOnDomain
 import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
@@ -61,11 +60,9 @@ class FactoryLoader(
                     deviceDbInfoObservable.firstOrError().flatMap {
                         fun getDeviceDbInfo() = deviceDbInfoObservable.getCurrentValue()
 
-                        Log.e("asdf", "magic FactoryLoader set up userDatabaseRx") // todo scheduling
                         val userDatabaseRx = DatabaseRx(
                             domainDisposable,
                             factoryProvider.database.getUserObservable(getDeviceDbInfo().key),
-                            "user",
                         )
 
                         val privateProjectKey = getDeviceDbInfo().key.toPrivateProjectKey()
@@ -73,18 +70,13 @@ class FactoryLoader(
                         val privateProjectDatabaseRx = DatabaseRx(
                             domainDisposable,
                             factoryProvider.database.getPrivateProjectObservable(privateProjectKey),
-                            "privateProject",
                         )
 
                         val privateProjectManager = AndroidPrivateProjectManager(userInfo)
 
                         val rootModelChangeManager = RootModelChangeManager()
 
-                        Log.e("asdf", "magic FactoryLoader userDatabaseRx.first subscribing")
                         val userFactorySingle = userDatabaseRx.first
-                            .doOnSuccess {
-                                Log.e("asdf", "magic FactoryLoader userDatabaseRx.first onSuccess")
-                            }
                             .map { MyUserFactory(it, getDeviceDbInfo(), factoryProvider.database, rootModelChangeManager) }
                             .cacheImmediate()
 
@@ -181,23 +173,12 @@ class FactoryLoader(
 
                         projectsFactorySingle = Single.zip(
                             privateProjectLoader.initialProjectEvent.map {
-                                Log.e("asdf", "magic projectFactory dependencies privateProjectLoader") // todo scheduling
                                 check(it.changeType == ChangeType.REMOTE)
 
                                 it.data
                             },
-                            sharedProjectsLoader.initialProjectsEvent.doOnSuccess {
-                                Log.e(
-                                    "asdf",
-                                    "magic projectFactory dependencies sharedProjectsLoader"
-                                )
-                            }, // todo scheduling
-                            shownFactorySingle.doOnSuccess {
-                                Log.e(
-                                    "asdf",
-                                    "magic projectFactory dependencies shownFactorySingle"
-                                )
-                            }, // todo scheduling
+                            sharedProjectsLoader.initialProjectsEvent,
+                            shownFactorySingle,
                         ) { initialPrivateProjectEvent, initialSharedProjectsEvent, shownFactory ->
                             ProjectsFactory(
                                 privateProjectLoader,

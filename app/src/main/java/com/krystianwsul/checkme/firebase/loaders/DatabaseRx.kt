@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.firebase.loaders
 
-import android.util.Log
 import com.jakewharton.rxrelay3.BehaviorRelay
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import io.reactivex.rxjava3.core.Observable
@@ -8,25 +7,11 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.plusAssign
 
-class DatabaseRx<T : Any>(
-    domainDisposable: CompositeDisposable,
-    databaseObservable: Observable<T>,
-    logDescription: String? = null, // todo scheduling
-) {
+class DatabaseRx<T : Any>(domainDisposable: CompositeDisposable, databaseObservable: Observable<T>) {
 
     val disposable = CompositeDisposable().also { domainDisposable += it }
 
-    val observable = databaseObservable
-        .doOnSubscribe {
-            logDescription?.let { Log.e("asdf", "magic DatabaseRx prePublish onSubscribe $it") }
-        }
-        .doOnNext {
-            logDescription?.let { Log.e("asdf", "magic DatabaseRx prePublish onNext $it") }
-        }
-        .doFinally {
-            logDescription?.let { Log.e("asdf", "magic DatabaseRx prePublish onFinally $it") }
-        }
-        .publish()
+    val observable = databaseObservable.publish()
 
     private val cached = BehaviorRelay.create<T>()
 
@@ -45,9 +30,7 @@ class DatabaseRx<T : Any>(
         .apply { disposable += connect() }
 
     init {
-        logDescription?.let { Log.e("asdf", "magic DatabaseRx connecting $it") }
         disposable += observable.connect()
-        logDescription?.let { Log.e("asdf", "magic DatabaseRx connected $it") }
     }
 
     fun latest() = cached.firstOrError()

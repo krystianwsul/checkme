@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.domainmodel.update
 
-import android.util.Log
 import com.jakewharton.rxrelay3.PublishRelay
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
@@ -11,7 +10,6 @@ import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.mindorks.scheduler.Priority
-import com.mindorks.scheduler.internal.CustomPriorityScheduler
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.Disposable
@@ -84,12 +82,6 @@ object AndroidDomainUpdater : DomainUpdater() {
             MyCrashlytics.log("AndroidDomainUpdater.dispatchItems begin: " + items.joinToString(", ") { it.name })
             DebugFragment.logDone("AndroidDomainUpdater.dispatchItems start")
 
-            Log.e(
-                "asdf",
-                "AndroidDomainUpdater.dispatchItems start magic " + CustomPriorityScheduler.currentPriority.get() + " " + items.joinToString(
-                    ", "
-                ) { it.name }) // todo scheduling
-
             DomainThreadChecker.instance.requireDomainThread()
 
             check(items.isNotEmpty())
@@ -120,7 +112,7 @@ object AndroidDomainUpdater : DomainUpdater() {
 
             domainFactory.saveAndNotifyCloud(params, now)
 
-            MyCrashlytics.log("AndroidDomainUpdater.dispatchItems end magic") // todo scheduling
+            MyCrashlytics.log("AndroidDomainUpdater.dispatchItems end")
             DebugFragment.logDone("AndroidDomainUpdater.dispatchItems end")
         }
 

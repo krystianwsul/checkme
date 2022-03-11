@@ -11,8 +11,6 @@ import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.json.JsonWrapper
 import com.krystianwsul.common.firebase.json.projects.SharedProjectJson
 import com.krystianwsul.common.utils.ProjectKey
-import com.krystianwsul.common.utils.TaskKey
-import com.krystianwsul.common.utils.UserKey
 import io.mockk.mockk
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
@@ -33,13 +31,6 @@ class SharedProjectsLoaderTest {
             }
 
             override fun update(values: Map<String, Any?>, callback: DatabaseCallback) = Unit
-
-            override fun checkTrackers(
-                userKeys: Set<UserKey>,
-                privateProjectKeys: Set<ProjectKey.Private>,
-                sharedProjectKeys: Set<ProjectKey.Shared>,
-                taskKeys: Set<TaskKey.Root>,
-            ) = Unit
         }
     }
 

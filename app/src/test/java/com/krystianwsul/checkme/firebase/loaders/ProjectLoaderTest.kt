@@ -16,8 +16,6 @@ import com.krystianwsul.common.firebase.json.projects.PrivateProjectJson
 import com.krystianwsul.common.firebase.json.tasks.PrivateTaskJson
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ProjectType
-import com.krystianwsul.common.utils.TaskKey
-import com.krystianwsul.common.utils.UserKey
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
@@ -40,13 +38,6 @@ class ProjectLoaderTest {
             }
 
             override fun update(values: Map<String, Any?>, callback: DatabaseCallback) = Unit
-
-            override fun checkTrackers(
-                userKeys: Set<UserKey>,
-                privateProjectKeys: Set<ProjectKey.Private>,
-                sharedProjectKeys: Set<ProjectKey.Shared>,
-                taskKeys: Set<TaskKey.Root>,
-            ) = Unit
         }
     }
 
@@ -80,7 +71,6 @@ class ProjectLoaderTest {
         projectManager = AndroidPrivateProjectManager(UserInfo("email", "name", "uid"))
 
         projectLoader = ProjectLoader.Impl(
-            projectKey,
             projectSnapshotRelay,
             compositeDisposable,
             projectManager,

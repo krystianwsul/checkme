@@ -8,8 +8,6 @@ import com.krystianwsul.common.firebase.ChangeWrapper
 import com.krystianwsul.common.firebase.DatabaseCallback
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.json.users.UserWrapper
-import com.krystianwsul.common.utils.ProjectKey
-import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.common.utils.UserKey
 import io.mockk.mockk
 import io.reactivex.rxjava3.core.Observable
@@ -56,13 +54,6 @@ class FriendsLoaderTest {
             override fun update(values: Map<String, Any?>, callback: DatabaseCallback) {
                 TODO("Not yet implemented")
             }
-
-            override fun checkTrackers(
-                userKeys: Set<UserKey>,
-                privateProjectKeys: Set<ProjectKey.Private>,
-                sharedProjectKeys: Set<ProjectKey.Shared>,
-                taskKeys: Set<TaskKey.Root>,
-            ) = Unit
         }
     }
 

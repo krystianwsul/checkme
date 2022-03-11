@@ -21,6 +21,7 @@ class GroupTypeFactory(
     private val projectOrdinalManagerProvider: ProjectOrdinalManager.Provider,
     private val showDisplayText: Boolean,
     private val includeProjectDetails: Boolean,
+    private val compareBy: SingleBridge.CompareBy,
 ) : GroupType.Factory {
 
     private fun GroupType.fix() = this as Bridge
@@ -82,7 +83,7 @@ class GroupTypeFactory(
         SingleBridge.createTime(instanceDescriptor.fix(), includeProjectDetails)
 
     override fun createTopLevelSingle(instanceDescriptor: GroupType.InstanceDescriptor) =
-        SingleBridge.createTopLevel(instanceDescriptor.fix(), showDisplayText, includeProjectDetails)
+        SingleBridge.createTopLevel(instanceDescriptor.fix(), showDisplayText, includeProjectDetails, compareBy)
 
     class InstanceDescriptor(
         val instanceData: GroupListDataWrapper.InstanceData,
@@ -261,6 +262,7 @@ class GroupTypeFactory(
         val isGroupedInProject: Boolean?, // null means throw an error if you need it
         val displayText: String?,
         val projectInfo: DetailsNode.ProjectInfo?,
+        val compareBy: CompareBy,
     ) : GroupType.Single, TimeChild {
 
         companion object {
@@ -277,12 +279,14 @@ class GroupTypeFactory(
                     ?.getDisplayData()
                     ?.getDisplayText(),
                 instanceDescriptor.instance.getProjectInfo(includeProjectDetails),
+                CompareBy.TIMESTAMP,
             )
 
             fun createTopLevel(
                 instanceDescriptor: InstanceDescriptor,
                 showDisplayText: Boolean,
                 includeProjectDetails: Boolean,
+                compareBy: CompareBy,
             ) = SingleBridge(
                 instanceDescriptor.instanceData,
                 false, // are directly in time
@@ -291,6 +295,7 @@ class GroupTypeFactory(
                     ?.getDisplayData()
                     ?.getDisplayText(),
                 instanceDescriptor.instance.getProjectInfo(includeProjectDetails),
+                compareBy,
             )
 
             fun createTime(instanceDescriptor: InstanceDescriptor, includeProjectDetails: Boolean) = SingleBridge(
@@ -298,6 +303,7 @@ class GroupTypeFactory(
                 false,
                 null,
                 instanceDescriptor.instance.getProjectInfo(includeProjectDetails),
+                CompareBy.ORDINAL,
             )
 
             fun createTimeProject(instanceDescriptor: InstanceDescriptor) = SingleBridge(
@@ -305,6 +311,7 @@ class GroupTypeFactory(
                 null, // can't be moved into time
                 null,
                 instanceDescriptor.instance.getProjectInfo(false),
+                CompareBy.ORDINAL,
             )
 
             fun createProject(instanceDescriptor: InstanceDescriptor) = SingleBridge(
@@ -312,6 +319,7 @@ class GroupTypeFactory(
                 true, // are nested in time
                 null,
                 instanceDescriptor.instance.getProjectInfo(false),
+                CompareBy.ORDINAL,
             )
         }
 
@@ -332,13 +340,21 @@ class GroupTypeFactory(
                 is TimeBridge -> instanceData.instanceTimeStamp.compareTo(other.timeStamp)
                 is TimeProjectBridge -> instanceData.instanceTimeStamp.compareTo(other.timeStamp)
                 is ProjectBridge -> ordinal.compareTo(other.ordinal)
-                is SingleBridge -> instanceData.compareTo(other.instanceData)
+                is SingleBridge -> when (compareBy) {
+                    CompareBy.TIMESTAMP -> instanceData.compareTo(other.instanceData)
+                    CompareBy.ORDINAL -> ordinal.compareTo(other.ordinal)
+                }
             }
         }
 
         override fun canDropIntoParent(droppedTimeChild: TimeChild) = when (droppedTimeChild) {
             is ProjectBridge -> false
             is SingleBridge -> instanceData.instanceKey == droppedTimeChild.instanceData.parentInstanceKey
+        }
+
+        enum class CompareBy {
+
+            TIMESTAMP, ORDINAL
         }
     }
 }

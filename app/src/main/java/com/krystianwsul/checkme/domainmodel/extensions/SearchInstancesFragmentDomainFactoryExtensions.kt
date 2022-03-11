@@ -38,7 +38,7 @@ fun DomainFactory.getSearchInstancesData(
                 null,
                 taskDatas,
                 null,
-                newMixedInstanceDataCollection(cappedInstanceDescriptors),
+                newMixedInstanceDataCollection(cappedInstanceDescriptors, GroupTypeFactory.SingleBridge.CompareBy.TIMESTAMP),
                 listOf(),
                 null,
                 null,

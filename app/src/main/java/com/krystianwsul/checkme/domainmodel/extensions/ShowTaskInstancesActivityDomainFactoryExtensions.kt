@@ -69,7 +69,10 @@ fun DomainFactory.getShowTaskInstancesData(
                             it.canMigrateDescription(now),
                             it.getCreateTaskTimePair(projectsFactory.privateProject, myUserFactory.user),
                             it.task.note,
-                            newMixedInstanceDataCollection(notDoneChildInstanceDescriptors),
+                            newMixedInstanceDataCollection(
+                                notDoneChildInstanceDescriptors,
+                                GroupTypeFactory.SingleBridge.CompareBy.ORDINAL,
+                            ),
                             doneChildInstanceDescriptors.toDoneSingleBridges(),
                             it.ordinal,
                             it.task.getImage(deviceDbInfo),
@@ -111,6 +114,7 @@ fun DomainFactory.getShowTaskInstancesData(
                 null,
                 newMixedInstanceDataCollection(
                     notDoneInstanceDescriptors,
+                    GroupTypeFactory.SingleBridge.CompareBy.TIMESTAMP,
                     parameters.groupingMode,
                     includeProjectDetails = parameters.projectKey == null,
                 ),

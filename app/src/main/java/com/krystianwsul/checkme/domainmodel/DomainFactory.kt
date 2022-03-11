@@ -461,7 +461,7 @@ class DomainFactory(
             instance.canMigrateDescription(now),
             instance.getCreateTaskTimePair(projectsFactory.privateProject, myUserFactory.user),
             instance.task.note,
-            newMixedInstanceDataCollection(notDoneInstanceDescriptors),
+            newMixedInstanceDataCollection(notDoneInstanceDescriptors, GroupTypeFactory.SingleBridge.CompareBy.ORDINAL),
             doneInstanceDescriptors.toDoneSingleBridges(),
             instance.ordinal,
             instance.task.getImage(deviceDbInfo),
@@ -647,6 +647,7 @@ class DomainFactory(
 
     fun newMixedInstanceDataCollection(
         instanceDescriptors: Collection<GroupTypeFactory.InstanceDescriptor>,
+        compareBy: GroupTypeFactory.SingleBridge.CompareBy,
         groupingMode: GroupType.GroupingMode = GroupType.GroupingMode.None,
         showDisplayText: Boolean = true,
         includeProjectDetails: Boolean = true,
@@ -656,6 +657,7 @@ class DomainFactory(
         groupingMode,
         showDisplayText,
         includeProjectDetails,
+        compareBy,
     )
 
     // this shouldn't use DateTime, since that leaks Time.Custom which is a model object

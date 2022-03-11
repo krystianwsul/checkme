@@ -89,6 +89,7 @@ data class GroupListDataWrapper(
             check(name.isNotEmpty())
         }
 
+        // this is valid only for top-level instances
         override fun compareTo(other: InstanceData): Int {
             val timeStampComparison = instanceTimeStamp.compareTo(other.instanceTimeStamp)
             if (timeStampComparison != 0) return timeStampComparison

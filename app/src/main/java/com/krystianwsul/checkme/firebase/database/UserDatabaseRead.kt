@@ -7,12 +7,6 @@ import com.krystianwsul.common.utils.UserKey
 
 class UserDatabaseRead(private val userKey: UserKey) : TypedDatabaseRead<UserWrapper>() {
 
-    override val type = "user"
-
-    override val key get() = userKey.toString()
-
-    override val log = true
-
     override val kClass = UserWrapper::class
 
     override fun DatabaseReference.getQuery() = child("${DatabaseWrapper.USERS_KEY}/${userKey.key}")

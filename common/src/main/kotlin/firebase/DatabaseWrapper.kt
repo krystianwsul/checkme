@@ -5,7 +5,10 @@ import com.krystianwsul.common.firebase.records.noscheduleorparent.NoScheduleOrP
 import com.krystianwsul.common.firebase.records.schedule.ScheduleRecord
 import com.krystianwsul.common.firebase.records.taskhierarchy.TaskHierarchyRecord
 import com.krystianwsul.common.firebase.records.users.RootUserRecord
-import com.krystianwsul.common.utils.*
+import com.krystianwsul.common.utils.ProjectKey
+import com.krystianwsul.common.utils.ScheduleId
+import com.krystianwsul.common.utils.TaskHierarchyId
+import com.krystianwsul.common.utils.UserKey
 
 abstract class DatabaseWrapper {
 
@@ -40,11 +43,4 @@ abstract class DatabaseWrapper {
 
     fun newProjectOrdinalEntryId(userKey: UserKey, projectKey: ProjectKey.Shared) =
         getNewId("$USERS_KEY/${userKey.key}/${RootUserRecord.ORDINAL_ENTRIES}/${projectKey.key}")
-
-    abstract fun checkTrackers(
-        userKeys: Set<UserKey>,
-        privateProjectKeys: Set<ProjectKey.Private>,
-        sharedProjectKeys: Set<ProjectKey.Shared>,
-        taskKeys: Set<TaskKey.Root>,
-    )
 }

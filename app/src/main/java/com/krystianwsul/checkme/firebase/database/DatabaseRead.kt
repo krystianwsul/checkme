@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.firebase.database
 
-import android.util.Log
 import com.androidhuman.rxfirebase2.database.dataChanges
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseReference
@@ -13,7 +12,6 @@ import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.checkme.utils.toV3
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.mindorks.scheduler.Priority
-import com.mindorks.scheduler.internal.CustomPriorityScheduler
 import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Maybe
 import io.reactivex.rxjava3.core.Observable
@@ -26,15 +24,7 @@ abstract class DatabaseRead<DATA : Any> {
         private fun Path.toKey() = toString().replace('/', '-')
     }
 
-    abstract val type: String
-
-    abstract val key: String // todo scheduling
-
-    val description by lazy { "$type: $key" }
-
     open val priority = Priority.DB
-
-    open val log: Boolean = false
 
     protected abstract fun DatabaseReference.getQuery(): Query
 
@@ -78,11 +68,5 @@ abstract class DatabaseRead<DATA : Any> {
         return mergePaperAndRx(readNullable(path), firebaseObservable, converter).flatMapSingle {
             DatabaseResultQueue.enqueueSnapshot(this@DatabaseRead, it)
         }
-            .doOnNext {
-                Log.e(
-                    "asdf",
-                    "magic db $type " + CustomPriorityScheduler.currentPriority.get(),
-                ) // todo scheduling
-            }
     }
 }

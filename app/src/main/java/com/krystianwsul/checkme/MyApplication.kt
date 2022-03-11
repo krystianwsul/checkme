@@ -8,7 +8,6 @@ import android.content.SharedPreferences
 import android.content.res.Configuration
 import android.content.res.Resources
 import android.os.Build
-import android.util.Log
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.core.content.pm.ShortcutInfoCompat
@@ -150,14 +149,7 @@ class MyApplication : Application() {
 
         val factoryLoader = FactoryLoader(userInfoRelay, FactoryProvider.Impl(NoBackup.uuid), Preferences.tokenRelay)
 
-        factoryLoader.userScopeObservable
-            .doOnNext {
-                Log.e(
-                    "asdf",
-                    "magic MyApplication publishing userScopeWrapper null? " + (it.value == null)
-                )
-            } // todo scheduling
-            .subscribe(UserScope.instanceRelay)
+        factoryLoader.userScopeObservable.subscribe(UserScope.instanceRelay)
 
         factoryLoader.domainFactoryObservable.subscribe {
             @Suppress("UNCHECKED_CAST")

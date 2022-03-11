@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.viewmodels
 
-import android.util.Log
 import com.jakewharton.rxrelay3.BehaviorRelay
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.UserScope
@@ -9,7 +8,6 @@ import com.krystianwsul.checkme.utils.filterNotNull
 import com.krystianwsul.checkme.utils.mapNotNull
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.mindorks.scheduler.Priority
-import com.mindorks.scheduler.internal.CustomPriorityScheduler
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.BackpressureStrategy
 import io.reactivex.rxjava3.core.Single
@@ -31,9 +29,9 @@ abstract class DomainListener<DOMAIN_DATA : DomainData> {
 
     protected abstract val domainResultFetcher: DomainResultFetcher<DOMAIN_DATA>
 
-    protected open val priority: Priority? = null // todo scheduling
+    protected open val priority = Priority.FIRST_READ
 
-    open fun start(forced: Boolean = false) { // todo scheduling
+    fun start(forced: Boolean = false) {
         if (disposable != null) {
             if (forced)
                 stop()
@@ -43,36 +41,11 @@ abstract class DomainListener<DOMAIN_DATA : DomainData> {
 
         var listenerAdded = false
 
-        Log.e("asdf", "magic domainListener start") // todo scheduling
         disposable = UserScope.instanceRelay
-            .doOnNext {
-                Log.e("asdf", "magic domainListener 0 null? " + (it.value == null)) // todo scheduling
-            }
-            /*
-            todo scheduling: In the situation that the DomainListener is started before the DomainFactory is available,
-            this does guarantee that it emits before RootTasks get read.  However, the subsequent events' priority comes
-            from the AndroidDomainUpdater, which gets run via DomainFactory.onChangeTypeEvent.  So I think that it would
-            suffice to just use a high priority for this initial observeOnDomain, and figure out that second priority
-            as a separate issue.
-
-            Also, overriding priority for EditActivity may be unnecessary at that point, since that was a "first read" issue
-             */
-            //.observeOnDomain(priority)
-            .observeOnDomain(Priority.FIRST_READ)
-            .doOnNext {
-                Log.e(
-                    "asdf",
-                    "magic domainListener 1, priority " + CustomPriorityScheduler.currentPriority.get()
-                ) // todo scheduling
-                DomainThreadChecker.instance.requireDomainThread()
-            }
-            .doOnNext {
-                Log.e("asdf", "magic domainListener 1a null? " + (it.value == null)) // todo scheduling
-            }
+            .observeOnDomain(priority)
+            .doOnNext { DomainThreadChecker.instance.requireDomainThread() }
             .filterNotNull()
             .switchMap { userScope ->
-                Log.e("asdf", "magic domainListener 2a") // todo scheduling
-
                 /**
                  * What's expected here: the DomainListener may be initialized before the DomainFactory is
                  * available.  And, it can stick around after the DomainFactory is destroyed, such as on logout.
@@ -86,28 +59,13 @@ abstract class DomainListener<DOMAIN_DATA : DomainData> {
                 userScope.domainListenerManager
                     .addListener(this)
                     .map { userScope }
-                    .doOnNext {
-                        Log.e("asdf", "magic domainListener 2b") // todo scheduling
-                    }
-            }
-            .doOnNext {
-                Log.e("asdf", "magic domainListener 2c") // todo scheduling
             }
             .toFlowable(BackpressureStrategy.LATEST)
             .flatMapMaybe(
                 {
-                    Log.e(
-                        "asdf",
-                        "magic domainListener 2, priority " + CustomPriorityScheduler.currentPriority.get()
-                    ) // todo scheduling
                     DomainThreadChecker.instance.requireDomainThread()
 
-                    domainResultFetcher.getDomainResult(it).doOnSuccess {
-                        Log.e(
-                            "asdf",
-                            "magic domainListener 3, priority " + CustomPriorityScheduler.currentPriority.get()
-                        ) // todo scheduling
-                    }.mapNotNull { it.data }
+                    domainResultFetcher.getDomainResult(it).mapNotNull { it.data }
                 },
                 false,
                 1,

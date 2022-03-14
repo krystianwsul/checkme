@@ -36,7 +36,7 @@ class CopyExistingTaskEditDelegate(
             createParameters,
             scheduleDatas,
             sharedProjectParameters,
-            parameters.taskKey,
+            parameters.copySource,
         )
             .observeOn(AndroidSchedulers.mainThread())
             .applyCreatedTaskKey()
@@ -53,7 +53,7 @@ class CopyExistingTaskEditDelegate(
             DomainListenerManager.NotificationType.All,
             CreateChildTaskDomainUpdate.Parent.Task(parentTaskKey),
             createParameters,
-            parameters.taskKey,
+            parameters.copySource,
         )
             .perform(AndroidDomainUpdater)
             .observeOn(AndroidSchedulers.mainThread())
@@ -68,7 +68,7 @@ class CopyExistingTaskEditDelegate(
             DomainListenerManager.NotificationType.All,
             createParameters,
             sharedProjectKey,
-            parameters.taskKey,
+            parameters.copySource,
         )
             .observeOn(AndroidSchedulers.mainThread())
             .applyCreatedTaskKey()

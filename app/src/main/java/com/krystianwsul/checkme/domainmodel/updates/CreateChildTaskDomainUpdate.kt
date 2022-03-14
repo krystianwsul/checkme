@@ -5,6 +5,7 @@ import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.extensions.*
 import com.krystianwsul.checkme.domainmodel.update.AbstractSingleDomainUpdate
 import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
+import com.krystianwsul.checkme.gui.edit.EditParameters
 import com.krystianwsul.checkme.gui.edit.delegates.EditDelegate
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.InstanceKey
@@ -15,7 +16,7 @@ class CreateChildTaskDomainUpdate(
     private val notificationType: DomainListenerManager.NotificationType,
     private val parent: Parent,
     private val createParameters: EditDelegate.CreateParameters,
-    private val copyTaskKey: TaskKey? = null,
+    private val copySource: EditParameters.Copy.CopySource? = null,
     private val clearParentNote: Boolean = false,
 ) : AbstractSingleDomainUpdate<EditDelegate.CreateResult>("createChildTask") {
 
@@ -39,7 +40,7 @@ class CreateChildTaskDomainUpdate(
                         createParameters.name,
                         createParameters.note,
                         image?.json,
-                        copyTaskKey,
+                        copySource,
                     )
                 }
                 is Parent.Instance -> {

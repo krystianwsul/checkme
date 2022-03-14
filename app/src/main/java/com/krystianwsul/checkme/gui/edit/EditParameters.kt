@@ -164,11 +164,8 @@ sealed interface EditParameters : Parcelable {
                 is CopySource.Instance -> EditViewModel.CurrentParentSource.FromInstance(copySource.instanceKey)
             }
 
-        val taskKey get() = copySource.taskKey
-
         sealed class CopySource : Parcelable {
 
-            // todo copy check usages
             abstract val taskKey: TaskKey
 
             @Parcelize

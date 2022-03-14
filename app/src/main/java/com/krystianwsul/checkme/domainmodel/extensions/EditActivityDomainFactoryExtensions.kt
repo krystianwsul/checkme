@@ -273,7 +273,7 @@ fun DomainUpdater.createScheduleTopLevelTask(
     createParameters: EditDelegate.CreateParameters,
     scheduleDatas: List<ScheduleData>,
     sharedProjectParameters: EditDelegate.SharedProjectParameters?,
-    copyTaskKey: TaskKey? = null, // todo copy this doesn't always make sense with instances (like children).  Find all, rethink
+    copySource: EditParameters.Copy.CopySource? = null,
 ): Single<EditDelegate.CreateResult> = SingleDomainUpdate.create("createScheduleTopLevelTask") { now ->
     check(scheduleDatas.isNotEmpty())
 
@@ -296,7 +296,7 @@ fun DomainUpdater.createScheduleTopLevelTask(
             assignedTo = sharedProjectParameters.nonNullAssignedTo,
         )
 
-        copyTaskKey?.let { copyTask(now, task, it) }
+        copySource?.let { copyTaskOrInstance(now, task, it) }
     }
 
     image?.upload(task.taskKey)
@@ -319,7 +319,7 @@ fun DomainUpdater.createTopLevelTask(
     notificationType: DomainListenerManager.NotificationType,
     createParameters: EditDelegate.CreateParameters,
     sharedProjectKey: ProjectKey.Shared?,
-    copyTaskKey: TaskKey? = null,
+    copySource: EditParameters.Copy.CopySource? = null,
 ): Single<EditDelegate.CreateResult> = SingleDomainUpdate.create("createTopLevelTask") { now ->
     updateProjectOrder(null, sharedProjectKey)
 
@@ -337,7 +337,7 @@ fun DomainUpdater.createTopLevelTask(
             image,
         )
 
-        copyTaskKey?.let { copyTask(now, task, it) }
+        copySource?.let { copyTaskOrInstance(now, task, it) }
     }
 
     image?.upload(task.taskKey)
@@ -841,19 +841,29 @@ private fun DomainFactory.getTaskListChildTaskDatas(
     }
     .toList()
 
-private fun DomainFactory.copyTask(now: ExactTimeStamp.Local, task: RootTask, copyTaskKey: TaskKey) {
-    val copiedTask = getTaskForce(copyTaskKey)
+private fun DomainFactory.copyTaskOrInstance(
+    now: ExactTimeStamp.Local,
+    parentTask: RootTask,
+    copySource: EditParameters.Copy.CopySource,
+) {
+    val childPairs = when (copySource) {
+        is EditParameters.Copy.CopySource.Task ->
+            getTaskForce(copySource.taskKey).getChildTasks().map { it to EditParameters.Copy.CopySource.Task(it.taskKey) }
+        is EditParameters.Copy.CopySource.Instance -> getInstance(copySource.instanceKey).getChildInstances()
+            .filter { it.isVisible(now, Instance.VisibilityOptions(assumeChildOfVisibleParent = true)) }
+            .map { it.task to EditParameters.Copy.CopySource.Instance(it.instanceKey) }
+    }
 
-    copiedTask.getChildTasks().forEach {
-        it.getImage(deviceDbInfo)?.let { check(it is ImageState.Remote) }
+    childPairs.forEach { (childTask, copySource) ->
+        childTask.getImage(deviceDbInfo)?.let { check(it is ImageState.Remote) }
 
         createChildTask(
             now,
-            task,
-            it.name,
-            it.note,
-            it.imageJson,
-            it.taskKey,
+            parentTask,
+            childTask.name,
+            childTask.note,
+            childTask.imageJson,
+            copySource,
         )
     }
 }
@@ -864,7 +874,7 @@ fun DomainFactory.createChildTask(
     name: String,
     note: String?,
     imageJson: TaskJson.Image?,
-    copyTaskKey: TaskKey? = null,
+    copySource: EditParameters.Copy.CopySource? = null,
     ordinal: Ordinal? = null,
 ): RootTask {
     check(name.isNotEmpty())
@@ -872,7 +882,7 @@ fun DomainFactory.createChildTask(
 
     val childTask = parentTask.createChildTask(now, name, note, imageJson, ordinal)
 
-    copyTaskKey?.let { copyTask(now, childTask, it) }
+    copySource?.let { copyTaskOrInstance(now, childTask, it) }
 
     return childTask
 }

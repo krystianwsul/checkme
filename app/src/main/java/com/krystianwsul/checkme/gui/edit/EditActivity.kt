@@ -23,8 +23,12 @@ import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.*
 import com.krystianwsul.checkme.gui.base.NavBarActivity
 import com.krystianwsul.checkme.gui.dialogs.ConfirmDialogFragment
+import com.krystianwsul.checkme.gui.dialogs.TwoChoicesCancelDialogFragment
 import com.krystianwsul.checkme.gui.edit.delegates.EditDelegate
-import com.krystianwsul.checkme.gui.edit.dialogs.*
+import com.krystianwsul.checkme.gui.edit.dialogs.AssignToDialogFragment
+import com.krystianwsul.checkme.gui.edit.dialogs.CameraGalleryFragment
+import com.krystianwsul.checkme.gui.edit.dialogs.JoinAllRemindersDialogFragment
+import com.krystianwsul.checkme.gui.edit.dialogs.ParentPickerFragment
 import com.krystianwsul.checkme.gui.edit.dialogs.schedule.ScheduleDialogFragment
 import com.krystianwsul.checkme.gui.edit.dialogs.schedule.ScheduleDialogParameters
 import com.krystianwsul.checkme.gui.edit.dialogs.schedule.ScheduleDialogResult
@@ -135,7 +139,7 @@ class EditActivity : NavBarActivity() {
     }
 
     private val addToAllRemindersListener = { allReminders: Boolean,
-                                              payload: AddToAllRemindersDialogFragment.Parameters.BooleanPayload ->
+                                              payload: TwoChoicesCancelDialogFragment.Parameters.BooleanPayload ->
         save(payload.value, EditDelegate.DialogResult.AddToAllInstances(allReminders))
     }
 
@@ -172,8 +176,8 @@ class EditActivity : NavBarActivity() {
                         .apply { listener = joinAllRemindersListener }
                         .show(supportFragmentManager, TAG_JOIN_ALL_REMINDERS)
                 }
-                EditDelegate.ShowDialog.ADD -> AddToAllRemindersDialogFragment.newInstance(
-                    AddToAllRemindersDialogFragment.Parameters.newAddToAllReminders(andOpen)
+                EditDelegate.ShowDialog.ADD -> TwoChoicesCancelDialogFragment.newInstance(
+                    TwoChoicesCancelDialogFragment.Parameters.newAddToAllReminders(andOpen)
                 )
                     .apply { listener = addToAllRemindersListener }
                     .show(supportFragmentManager, TAG_ADD_TO_ALL_REMINDERS)
@@ -214,7 +218,7 @@ class EditActivity : NavBarActivity() {
             tryGetFragment<ConfirmDialogFragment>(DISCARD_TAG)?.listener = discardDialogListener
             tryGetFragment<JoinAllRemindersDialogFragment>(TAG_JOIN_ALL_REMINDERS)?.listener = joinAllRemindersListener
 
-            tryGetFragment<AddToAllRemindersDialogFragment<AddToAllRemindersDialogFragment.Parameters.BooleanPayload>>(
+            tryGetFragment<TwoChoicesCancelDialogFragment<TwoChoicesCancelDialogFragment.Parameters.BooleanPayload>>(
                 TAG_ADD_TO_ALL_REMINDERS
             )?.listener =
                 addToAllRemindersListener

@@ -1,4 +1,4 @@
-package com.krystianwsul.checkme.gui.edit.dialogs
+package com.krystianwsul.checkme.gui.dialogs
 
 import android.os.Bundle
 import android.os.Parcelable
@@ -8,13 +8,13 @@ import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.base.AbstractDialogFragment
 import kotlinx.parcelize.Parcelize
 
-class AddToAllRemindersDialogFragment<T : Parcelable> : AbstractDialogFragment() {
+class TwoChoicesCancelDialogFragment<T : Parcelable> : AbstractDialogFragment() {
 
     companion object {
 
         private const val KEY_PARAMETERS = "parameters"
 
-        fun <T : Parcelable> newInstance(parameters: Parameters<T>) = AddToAllRemindersDialogFragment<T>().apply {
+        fun <T : Parcelable> newInstance(parameters: Parameters<T>) = TwoChoicesCancelDialogFragment<T>().apply {
             arguments = Bundle().apply { putParcelable(KEY_PARAMETERS, parameters) }
         }
     }

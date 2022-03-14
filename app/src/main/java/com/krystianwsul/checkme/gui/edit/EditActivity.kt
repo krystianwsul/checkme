@@ -11,7 +11,6 @@ import android.view.*
 import androidx.activity.viewModels
 import androidx.core.view.isVisible
 import androidx.core.view.updatePadding
-import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.CustomItemAnimator
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -135,8 +134,9 @@ class EditActivity : NavBarActivity() {
         save(false, EditDelegate.DialogResult.JoinAllInstances(allReminders))
     }
 
-    private val addToAllRemindersListener = { allReminders: Boolean, andOpen: Boolean ->
-        save(andOpen, EditDelegate.DialogResult.AddToAllInstances(allReminders))
+    private val addToAllRemindersListener = { allReminders: Boolean,
+                                              payload: AddToAllRemindersDialogFragment.Parameters.BooleanPayload ->
+        save(payload.value, EditDelegate.DialogResult.AddToAllInstances(allReminders))
     }
 
     override val rootView get() = binding.root
@@ -172,10 +172,11 @@ class EditActivity : NavBarActivity() {
                         .apply { listener = joinAllRemindersListener }
                         .show(supportFragmentManager, TAG_JOIN_ALL_REMINDERS)
                 }
-                EditDelegate.ShowDialog.ADD ->
-                    AddToAllRemindersDialogFragment.newInstance(AddToAllRemindersDialogFragment.Parameters(andOpen))
-                        .apply { listener = addToAllRemindersListener }
-                        .show(supportFragmentManager, TAG_ADD_TO_ALL_REMINDERS)
+                EditDelegate.ShowDialog.ADD -> AddToAllRemindersDialogFragment.newInstance(
+                    AddToAllRemindersDialogFragment.Parameters.newAddToAllReminders(andOpen)
+                )
+                    .apply { listener = addToAllRemindersListener }
+                    .show(supportFragmentManager, TAG_ADD_TO_ALL_REMINDERS)
                 EditDelegate.ShowDialog.NONE -> save(andOpen, EditDelegate.DialogResult.None)
             }
         }
@@ -210,12 +211,13 @@ class EditActivity : NavBarActivity() {
         parameters = EditParameters.fromIntent(intent)
 
         supportFragmentManager.run {
-            @Suppress("UNCHECKED_CAST")
-            fun <T : Fragment> find(tag: String) = findFragmentByTag(tag) as? T
+            tryGetFragment<ConfirmDialogFragment>(DISCARD_TAG)?.listener = discardDialogListener
+            tryGetFragment<JoinAllRemindersDialogFragment>(TAG_JOIN_ALL_REMINDERS)?.listener = joinAllRemindersListener
 
-            find<ConfirmDialogFragment>(DISCARD_TAG)?.listener = discardDialogListener
-            find<JoinAllRemindersDialogFragment>(TAG_JOIN_ALL_REMINDERS)?.listener = joinAllRemindersListener
-            find<AddToAllRemindersDialogFragment>(TAG_ADD_TO_ALL_REMINDERS)?.listener = addToAllRemindersListener
+            tryGetFragment<AddToAllRemindersDialogFragment<AddToAllRemindersDialogFragment.Parameters.BooleanPayload>>(
+                TAG_ADD_TO_ALL_REMINDERS
+            )?.listener =
+                addToAllRemindersListener
         }
 
         if (!noteHasFocusRelay.value!!)// keyboard hack

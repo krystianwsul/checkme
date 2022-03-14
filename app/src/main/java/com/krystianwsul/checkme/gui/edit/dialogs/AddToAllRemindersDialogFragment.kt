@@ -6,38 +6,46 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.base.AbstractDialogFragment
 import kotlinx.parcelize.Parcelize
-import kotlin.properties.Delegates.notNull
 
-class AddToAllRemindersDialogFragment : AbstractDialogFragment() {
+class AddToAllRemindersDialogFragment<T : Parcelable> : AbstractDialogFragment() {
 
     companion object {
 
         private const val KEY_PARAMETERS = "parameters"
 
-        fun newInstance(parameters: Parameters) = AddToAllRemindersDialogFragment().apply {
+        fun <T : Parcelable> newInstance(parameters: Parameters<T>) = AddToAllRemindersDialogFragment<T>().apply {
             arguments = Bundle().apply { putParcelable(KEY_PARAMETERS, parameters) }
         }
     }
 
-    lateinit var listener: (allReminders: Boolean, andOpen: Boolean) -> Unit
+    lateinit var listener: (allReminders: Boolean, payload: T) -> Unit
 
-    private var andOpen by notNull<Boolean>()
+    private lateinit var payload: T
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val parameters = requireArguments().getParcelable<Parameters>(KEY_PARAMETERS)!!
+        val parameters = requireArguments().getParcelable<Parameters<T>>(KEY_PARAMETERS)!!
 
-        andOpen = parameters.andOpen
+        payload = parameters.payload
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?) =
         MaterialAlertDialogBuilder(requireContext()).setMessage(R.string.addToAllReminders)
-            .setPositiveButton(R.string.toAllReminders) { _, _ -> listener(true, andOpen) }
-            .setNegativeButton(R.string.justToThisReminder) { _, _ -> listener(false, andOpen) }
+            .setPositiveButton(R.string.toAllReminders) { _, _ -> listener(true, payload) }
+            .setNegativeButton(R.string.justToThisReminder) { _, _ -> listener(false, payload) }
             .setNeutralButton(R.string.removeInstancesCancel) { _, _ -> }
             .create()
 
     @Parcelize
-    data class Parameters(val andOpen: Boolean) : Parcelable
+    data class Parameters<T : Parcelable>(val payload: T) : Parcelable {
+
+        companion object {
+
+            fun newAddToAllReminders(andOpen: Boolean) = Parameters(BooleanPayload(andOpen))
+        }
+
+        @Parcelize
+        data class BooleanPayload(val value: Boolean) : Parcelable
+    }
 }

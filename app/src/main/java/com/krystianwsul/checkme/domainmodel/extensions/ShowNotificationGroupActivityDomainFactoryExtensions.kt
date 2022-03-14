@@ -55,6 +55,7 @@ fun DomainFactory.getShowNotificationGroupData(instanceKeys: Set<InstanceKey>): 
             instance.isAssignedToMe(myUserFactory.user),
             instance.getProject().projectKey as? ProjectKey.Shared,
             instance.parentInstance?.instanceKey,
+            instance.taskHasOtherVisibleInstances(now),
         )
 
         GroupTypeFactory.InstanceDescriptor(

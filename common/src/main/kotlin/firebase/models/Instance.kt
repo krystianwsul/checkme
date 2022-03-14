@@ -724,6 +724,8 @@ class Instance private constructor(
 
     fun getProject(): Project<*> = parentInstance?.getProject() ?: task.project
 
+    fun taskHasOtherVisibleInstances(now: ExactTimeStamp.Local) = task.hasOtherVisibleInstances(now, instanceKey)
+
     private sealed interface Data {
 
         val scheduleDate: Date

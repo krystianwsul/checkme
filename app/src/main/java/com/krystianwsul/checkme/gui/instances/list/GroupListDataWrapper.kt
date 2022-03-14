@@ -75,6 +75,7 @@ data class GroupListDataWrapper(
         override val isAssignedToMe: Boolean,
         val projectKey: ProjectKey.Shared?,
         val parentInstanceKey: InstanceKey?,
+        val taskHasOtherVisibleInstances: Boolean,
     ) : Comparable<InstanceData>, SelectedData, QueryMatchable, FilterParamsMatchable {
 
         companion object

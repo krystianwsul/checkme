@@ -33,6 +33,7 @@ class ShowInstanceViewModel : DomainViewModel<ShowInstanceViewModel.Data>() {
         val taskKey: TaskKey,
         val isVisible: Boolean,
         val newInstanceKey: InstanceKey,
+        val taskHasOtherVisibleInstances: Boolean,
     ) : DomainData() {
 
         init {

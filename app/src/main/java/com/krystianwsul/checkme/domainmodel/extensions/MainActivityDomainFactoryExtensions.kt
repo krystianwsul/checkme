@@ -161,6 +161,7 @@ fun DomainFactory.getGroupListData(
             instance.isAssignedToMe(myUserFactory.user),
             instance.getProject().projectKey as? ProjectKey.Shared,
             instance.parentInstance?.instanceKey,
+            instance.taskHasOtherVisibleInstances(now),
         )
 
         GroupTypeFactory.InstanceDescriptor(

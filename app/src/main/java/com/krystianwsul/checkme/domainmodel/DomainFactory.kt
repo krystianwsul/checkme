@@ -468,6 +468,7 @@ class DomainFactory(
             instance.isAssignedToMe(myUserFactory.user),
             instance.getProject().projectKey as? ProjectKey.Shared,
             instance.parentInstance?.instanceKey,
+            instance.taskHasOtherVisibleInstances(now),
         )
 
         return GroupTypeFactory.InstanceDescriptor(

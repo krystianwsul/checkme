@@ -156,6 +156,8 @@ sealed interface EditParameters : Parcelable {
 
         constructor(taskKey: TaskKey) : this(CopySource.Task(taskKey))
 
+        constructor(instanceKey: InstanceKey) : this(CopySource.Instance(instanceKey))
+
         override val startParameters get() = EditViewModel.StartParameters.TaskOrInstance(copySource)
 
         override val currentParentSource

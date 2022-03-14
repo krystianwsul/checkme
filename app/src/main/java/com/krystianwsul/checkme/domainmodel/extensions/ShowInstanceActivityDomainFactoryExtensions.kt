@@ -66,6 +66,7 @@ fun DomainFactory.getShowInstanceData(
         task.taskKey,
         debugMode || instance.isVisible(now, Instance.VisibilityOptions(hack24 = true)),
         instanceKey,
+        instance.taskHasOtherVisibleInstances(now),
     )
 }
 
@@ -155,6 +156,7 @@ private fun DomainFactory.getGroupListData(
                 childInstance.isAssignedToMe(myUserFactory.user),
                 childInstance.getProject().projectKey as? ProjectKey.Shared,
                 childInstance.parentInstance?.instanceKey,
+                childInstance.taskHasOtherVisibleInstances(now),
             )
 
             GroupTypeFactory.InstanceDescriptor(

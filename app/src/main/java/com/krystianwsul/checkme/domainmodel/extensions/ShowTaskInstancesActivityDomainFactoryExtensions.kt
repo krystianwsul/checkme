@@ -79,6 +79,7 @@ fun DomainFactory.getShowTaskInstancesData(
                             it.isAssignedToMe(myUserFactory.user),
                             it.getProject().projectKey as? ProjectKey.Shared,
                             it.parentInstance?.instanceKey,
+                            it.taskHasOtherVisibleInstances(now),
                         )
 
                         GroupTypeFactory.InstanceDescriptor(

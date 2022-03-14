@@ -33,6 +33,7 @@ import com.krystianwsul.checkme.gui.instances.tree.*
 import com.krystianwsul.checkme.gui.main.FabUser
 import com.krystianwsul.checkme.gui.main.SubtaskMenuDelegate
 import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity
+import com.krystianwsul.checkme.gui.tasks.ShowTasksActivity
 import com.krystianwsul.checkme.gui.tree.*
 import com.krystianwsul.checkme.gui.utils.*
 import com.krystianwsul.checkme.utils.*
@@ -228,7 +229,16 @@ class GroupListFragment @JvmOverloads constructor(
                     GroupMenuUtils.onUncheck(selectedDatas, parameters.dataId, listener).addTo(attachedToWindowDisposable)
                 R.id.action_group_notify ->
                     GroupMenuUtils.onNotify(selectedDatas, parameters.dataId).addTo(attachedToWindowDisposable)
-                R.id.actionGroupCopyTask -> activity.startActivity(getCopyTasksIntent(selectedDatas.map { it.taskKey }))
+                R.id.actionGroupCopyTask -> {
+                    val taskKeys = selectedDatas.map { it.taskKey }
+
+                    check(taskKeys.isNotEmpty())
+
+                    if (taskKeys.size > 1)
+                        activity.startActivity(ShowTasksActivity.newIntent(ShowTasksActivity.Parameters.Copy(taskKeys)))
+                    else
+                        listener.copyAllRemindersDelegate.showDialog(taskKeys.single())
+                }
                 R.id.actionGroupWebSearch -> activity.startActivity(webSearchIntent(selectedDatas.single().name))
                 R.id.actionGroupMigrateDescription -> activity.startActivity(
                     EditActivity.getParametersIntent(EditParameters.MigrateDescription(selectedDatas.single().taskKey))

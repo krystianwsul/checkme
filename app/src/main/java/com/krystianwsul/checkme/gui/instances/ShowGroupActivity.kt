@@ -22,6 +22,7 @@ import com.krystianwsul.checkme.gui.instances.list.GroupListParameters
 import com.krystianwsul.checkme.gui.instances.list.GroupMenuUtils
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
 import com.krystianwsul.checkme.gui.utils.BottomFabMenuDelegate
+import com.krystianwsul.checkme.gui.utils.CopyAllRemindersDelegate
 import com.krystianwsul.checkme.utils.startDate
 import com.krystianwsul.checkme.utils.tryGetFragment
 import com.krystianwsul.checkme.viewmodels.DataId
@@ -36,7 +37,6 @@ import com.krystianwsul.treeadapter.FilterCriteria
 import com.krystianwsul.treeadapter.TreeViewAdapter
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.kotlin.addTo
-import io.reactivex.rxjava3.kotlin.cast
 import io.reactivex.rxjava3.kotlin.plusAssign
 import java.io.Serializable
 
@@ -98,6 +98,9 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
     private lateinit var bottomBinding: BottomBinding
 
     private lateinit var bottomFabMenuDelegate: BottomFabMenuDelegate
+
+    override lateinit var copyAllRemindersDelegate: CopyAllRemindersDelegate
+        private set
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -175,6 +178,8 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
         editInstancesHostDelegate.onCreate()
 
         startDate(receiver)
+
+        copyAllRemindersDelegate = CopyAllRemindersDelegate(this)
     }
 
     private val editInstancesHostDelegate = object : SnackbarEditInstancesHostDelegate(createDisposable) {

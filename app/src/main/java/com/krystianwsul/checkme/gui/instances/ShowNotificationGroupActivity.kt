@@ -18,6 +18,7 @@ import com.krystianwsul.checkme.gui.instances.list.GroupListListener
 import com.krystianwsul.checkme.gui.instances.list.GroupListParameters
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
 import com.krystianwsul.checkme.gui.utils.BottomFabMenuDelegate
+import com.krystianwsul.checkme.gui.utils.CopyAllRemindersDelegate
 import com.krystianwsul.checkme.utils.startDate
 import com.krystianwsul.checkme.utils.tryGetFragment
 import com.krystianwsul.checkme.viewmodels.DataId
@@ -29,7 +30,6 @@ import com.krystianwsul.treeadapter.FilterCriteria
 import com.krystianwsul.treeadapter.TreeViewAdapter
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.kotlin.addTo
-import io.reactivex.rxjava3.kotlin.cast
 import io.reactivex.rxjava3.kotlin.plusAssign
 import java.io.Serializable
 import java.util.*
@@ -89,6 +89,9 @@ class ShowNotificationGroupActivity : AbstractActivity(), GroupListListener {
 
     private lateinit var bottomFabMenuDelegate: BottomFabMenuDelegate
 
+    override lateinit var copyAllRemindersDelegate: CopyAllRemindersDelegate
+        private set
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -140,6 +143,8 @@ class ShowNotificationGroupActivity : AbstractActivity(), GroupListListener {
         tryGetFragment<RemoveInstancesDialogFragment>(TAG_DELETE_INSTANCES)?.listener = deleteInstancesListener
 
         startDate(receiver)
+
+        copyAllRemindersDelegate = CopyAllRemindersDelegate(this)
     }
 
     private fun updateTopMenu() {

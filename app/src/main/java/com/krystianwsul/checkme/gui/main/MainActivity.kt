@@ -42,10 +42,7 @@ import com.krystianwsul.checkme.gui.instances.list.GroupListParameters
 import com.krystianwsul.checkme.gui.projects.ProjectListFragment
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
-import com.krystianwsul.checkme.gui.utils.BottomFabMenuDelegate
-import com.krystianwsul.checkme.gui.utils.CustomAppBarLayoutBehavior
-import com.krystianwsul.checkme.gui.utils.connectInstanceSearch
-import com.krystianwsul.checkme.gui.utils.measureVisibleHeight
+import com.krystianwsul.checkme.gui.utils.*
 import com.krystianwsul.checkme.gui.widgets.MyBottomBar
 import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.utils.children
@@ -183,6 +180,8 @@ class MainActivity :
 
     private val tabLayoutVisibleRelay = PublishRelay.create<TabLayoutVisibility>()
 
+    private lateinit var copyAllRemindersDelegate: CopyAllRemindersDelegate
+
     val daysGroupListListener = object : GroupListListener {
 
         override val snackbarParent get() = this@MainActivity.snackbarParent
@@ -190,6 +189,8 @@ class MainActivity :
         override val instanceSearch = Preferences.showAssignedObservable.map<FilterCriteria> {
             FilterCriteria.Full(showAssignedToOthers = it)
         }
+
+        override val copyAllRemindersDelegate get() = this@MainActivity.copyAllRemindersDelegate
 
         override fun setToolbarExpanded(expanded: Boolean) = this@MainActivity.setToolbarExpanded(expanded)
 
@@ -340,6 +341,8 @@ class MainActivity :
             override val snackbarParent get() = this@MainActivity.snackbarParent
 
             override val instanceSearch = Observable.never<FilterCriteria>()
+
+            override val copyAllRemindersDelegate get() = this@MainActivity.copyAllRemindersDelegate
 
             override fun setToolbarExpanded(expanded: Boolean) = this@MainActivity.setToolbarExpanded(expanded)
 
@@ -749,6 +752,8 @@ class MainActivity :
                 }
             }
             .addTo(createDisposable)
+
+        copyAllRemindersDelegate = CopyAllRemindersDelegate(this)
     }
 
     private fun getTabSearchStateFromIntent(intent: Intent) = when (intent.action) {

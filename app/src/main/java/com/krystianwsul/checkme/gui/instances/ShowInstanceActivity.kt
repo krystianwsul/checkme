@@ -23,6 +23,7 @@ import com.krystianwsul.checkme.gui.main.DebugFragment
 import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
 import com.krystianwsul.checkme.gui.utils.BottomFabMenuDelegate
+import com.krystianwsul.checkme.gui.utils.CopyAllRemindersDelegate
 import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.viewmodels.DataId
 import com.krystianwsul.checkme.viewmodels.ShowInstanceViewModel
@@ -34,7 +35,6 @@ import com.krystianwsul.treeadapter.FilterCriteria
 import com.krystianwsul.treeadapter.TreeViewAdapter
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.kotlin.addTo
-import io.reactivex.rxjava3.kotlin.cast
 import io.reactivex.rxjava3.kotlin.plusAssign
 import java.io.Serializable
 
@@ -136,6 +136,9 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
         override fun afterEditInstances(undoData: UndoData, count: Int, newTimeStamp: TimeStamp?) {}
     }
 
+    override lateinit var copyAllRemindersDelegate: CopyAllRemindersDelegate
+        private set
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -230,6 +233,8 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
         tryGetFragment<RemoveInstancesDialogFragment>(TAG_DELETE_INSTANCES)?.listener = deleteInstancesListener
 
         startDate(dateReceiver)
+
+        copyAllRemindersDelegate = CopyAllRemindersDelegate(this)
     }
 
     private fun showHour() = data?.run {
@@ -382,9 +387,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
                         R.id.instance_menu_select_all -> binding.groupListFragment
                             .treeViewAdapter
                             .selectAll()
-                        R.id.instanceMenuCopyTask -> startActivity(
-                            EditActivity.getParametersIntent(EditParameters.Copy(data!!.taskKey))
-                        )
+                        R.id.instanceMenuCopyTask -> copyAllRemindersDelegate.showDialog(data!!.taskKey)
                         R.id.instanceMenuWebSearch -> startActivity(webSearchIntent(data!!.name))
                         R.id.instanceMenuMigrateDescription -> startActivity(
                             EditActivity.getParametersIntent(EditParameters.MigrateDescription(data!!.taskKey))

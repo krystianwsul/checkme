@@ -22,6 +22,7 @@ import com.krystianwsul.checkme.gui.projects.ShowProjectActivity
 import com.krystianwsul.checkme.gui.tasks.ShowTasksActivity
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
 import com.krystianwsul.checkme.gui.utils.BottomFabMenuDelegate
+import com.krystianwsul.checkme.gui.utils.CopyAllRemindersDelegate
 import com.krystianwsul.checkme.gui.utils.connectInstanceSearch
 import com.krystianwsul.checkme.utils.startDate
 import com.krystianwsul.checkme.utils.tryGetFragment
@@ -93,6 +94,9 @@ class ShowTaskInstancesActivity : AbstractActivity(), GroupListListener {
     private lateinit var bottomFabMenuDelegate: BottomFabMenuDelegate
 
     private var data: ShowTaskInstancesViewModel.Data? = null
+
+    override lateinit var copyAllRemindersDelegate: CopyAllRemindersDelegate
+        private set
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -175,6 +179,8 @@ class ShowTaskInstancesActivity : AbstractActivity(), GroupListListener {
         tryGetFragment<RemoveInstancesDialogFragment>(TAG_DELETE_INSTANCES)?.listener = deleteInstancesListener
 
         startDate(receiver)
+
+        copyAllRemindersDelegate = CopyAllRemindersDelegate(this)
     }
 
     override fun onStart() {

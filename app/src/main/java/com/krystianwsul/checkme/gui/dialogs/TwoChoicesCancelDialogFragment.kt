@@ -52,9 +52,19 @@ class TwoChoicesCancelDialogFragment<T : Parcelable> : AbstractDialogFragment() 
                 R.string.justToThisReminder,
                 BooleanPayload(andOpen),
             )
+
+            fun copyAllReminders() = Parameters(
+                R.string.copyAllReminders,
+                R.string.allReminders,
+                R.string.justThisReminder,
+                UnitParcelable,
+            )
         }
 
         @Parcelize
         data class BooleanPayload(val value: Boolean) : Parcelable
+
+        @Parcelize
+        object UnitParcelable : Parcelable
     }
 }

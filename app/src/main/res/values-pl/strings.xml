@@ -163,4 +163,7 @@
     <string name="editProject">Edytuj projekt</string>
     <string name="showTasks">Pokaż zadania</string>
     <string name="migrateDescription">Zmień opis na zadanie</string>
+    <string name="copyAllReminders">Kopiować wszystkie przypomnienia?</string>
+    <string name="allReminders">Wszystkie przypomnienia</string>
+    <string name="justThisReminder">Tylko to przypomnienie</string>
 </resources>

@@ -165,4 +165,7 @@
     <string name="editProject">Edit project</string>
     <string name="showTasks">Show tasks</string>
     <string name="migrateDescription">Change description to task</string>
+    <string name="copyAllReminders">Copy all reminders?</string>
+    <string name="allReminders">All reminders</string>
+    <string name="justThisReminder">Just this reminder</string>
 </resources>

@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.gui.edit.dialogs
 
 import android.os.Bundle
 import android.os.Parcelable
+import androidx.annotation.StringRes
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.base.AbstractDialogFragment
@@ -18,31 +19,39 @@ class AddToAllRemindersDialogFragment<T : Parcelable> : AbstractDialogFragment()
         }
     }
 
-    lateinit var listener: (allReminders: Boolean, payload: T) -> Unit
+    lateinit var listener: (positive: Boolean, payload: T) -> Unit
 
-    private lateinit var payload: T
+    private lateinit var parameters: Parameters<T>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val parameters = requireArguments().getParcelable<Parameters<T>>(KEY_PARAMETERS)!!
-
-        payload = parameters.payload
+        parameters = requireArguments().getParcelable(KEY_PARAMETERS)!!
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?) =
-        MaterialAlertDialogBuilder(requireContext()).setMessage(R.string.addToAllReminders)
-            .setPositiveButton(R.string.toAllReminders) { _, _ -> listener(true, payload) }
-            .setNegativeButton(R.string.justToThisReminder) { _, _ -> listener(false, payload) }
-            .setNeutralButton(R.string.removeInstancesCancel) { _, _ -> }
+        MaterialAlertDialogBuilder(requireContext()).setMessage(parameters.message)
+            .setPositiveButton(parameters.positive) { _, _ -> listener(true, parameters.payload) } // top/right
+            .setNegativeButton(parameters.negative) { _, _ -> listener(false, parameters.payload) } // middle/middle
+            .setNeutralButton(R.string.removeInstancesCancel) { _, _ -> } // bottom/left
             .create()
 
     @Parcelize
-    data class Parameters<T : Parcelable>(val payload: T) : Parcelable {
+    data class Parameters<T : Parcelable>(
+        @StringRes val message: Int,
+        @StringRes val positive: Int, // top/right
+        @StringRes val negative: Int, // middle/middle
+        val payload: T,
+    ) : Parcelable {
 
         companion object {
 
-            fun newAddToAllReminders(andOpen: Boolean) = Parameters(BooleanPayload(andOpen))
+            fun newAddToAllReminders(andOpen: Boolean) = Parameters(
+                R.string.addToAllReminders,
+                R.string.toAllReminders,
+                R.string.justToThisReminder,
+                BooleanPayload(andOpen),
+            )
         }
 
         @Parcelize

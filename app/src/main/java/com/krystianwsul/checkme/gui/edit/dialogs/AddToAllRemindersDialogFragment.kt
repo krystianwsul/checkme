@@ -1,19 +1,21 @@
 package com.krystianwsul.checkme.gui.edit.dialogs
 
 import android.os.Bundle
+import android.os.Parcelable
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.base.AbstractDialogFragment
+import kotlinx.parcelize.Parcelize
 import kotlin.properties.Delegates.notNull
 
 class AddToAllRemindersDialogFragment : AbstractDialogFragment() {
 
     companion object {
 
-        private val KEY_AND_OPEN = "andOpen"
+        private const val KEY_PARAMETERS = "parameters"
 
-        fun newInstance(andOpen: Boolean) = AddToAllRemindersDialogFragment().apply {
-            arguments = Bundle().apply { putBoolean(KEY_AND_OPEN, andOpen) }
+        fun newInstance(parameters: Parameters) = AddToAllRemindersDialogFragment().apply {
+            arguments = Bundle().apply { putParcelable(KEY_PARAMETERS, parameters) }
         }
     }
 
@@ -24,7 +26,9 @@ class AddToAllRemindersDialogFragment : AbstractDialogFragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        andOpen = requireArguments().getBoolean(KEY_AND_OPEN)
+        val parameters = requireArguments().getParcelable<Parameters>(KEY_PARAMETERS)!!
+
+        andOpen = parameters.andOpen
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?) =
@@ -33,4 +37,7 @@ class AddToAllRemindersDialogFragment : AbstractDialogFragment() {
             .setNegativeButton(R.string.justToThisReminder) { _, _ -> listener(false, andOpen) }
             .setNeutralButton(R.string.removeInstancesCancel) { _, _ -> }
             .create()
+
+    @Parcelize
+    data class Parameters(val andOpen: Boolean) : Parcelable
 }

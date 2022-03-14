@@ -30,7 +30,10 @@ import com.krystianwsul.checkme.gui.edit.dialogs.schedule.ScheduleDialogFragment
 import com.krystianwsul.checkme.gui.edit.dialogs.schedule.ScheduleDialogParameters
 import com.krystianwsul.checkme.gui.edit.dialogs.schedule.ScheduleDialogResult
 import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity
-import com.krystianwsul.checkme.utils.*
+import com.krystianwsul.checkme.utils.addOneShotGlobalLayoutListener
+import com.krystianwsul.checkme.utils.hideKeyboardOnClickOutside
+import com.krystianwsul.checkme.utils.loadPhoto
+import com.krystianwsul.checkme.utils.tryGetFragment
 import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.common.utils.UserKey
@@ -169,9 +172,10 @@ class EditActivity : NavBarActivity() {
                         .apply { listener = joinAllRemindersListener }
                         .show(supportFragmentManager, TAG_JOIN_ALL_REMINDERS)
                 }
-                EditDelegate.ShowDialog.ADD -> AddToAllRemindersDialogFragment.newInstance(andOpen)
-                    .apply { listener = addToAllRemindersListener }
-                    .show(supportFragmentManager, TAG_ADD_TO_ALL_REMINDERS)
+                EditDelegate.ShowDialog.ADD ->
+                    AddToAllRemindersDialogFragment.newInstance(AddToAllRemindersDialogFragment.Parameters(andOpen))
+                        .apply { listener = addToAllRemindersListener }
+                        .show(supportFragmentManager, TAG_ADD_TO_ALL_REMINDERS)
                 EditDelegate.ShowDialog.NONE -> save(andOpen, EditDelegate.DialogResult.None)
             }
         }

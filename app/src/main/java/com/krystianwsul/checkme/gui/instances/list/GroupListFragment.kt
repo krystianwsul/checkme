@@ -230,14 +230,17 @@ class GroupListFragment @JvmOverloads constructor(
                 R.id.action_group_notify ->
                     GroupMenuUtils.onNotify(selectedDatas, parameters.dataId).addTo(attachedToWindowDisposable)
                 R.id.actionGroupCopyTask -> {
-                    val taskKeys = selectedDatas.map { it.taskKey }
+                    if (selectedDatas.size > 1) {
+                        activity.startActivity(ShowTasksActivity.newIntent(ShowTasksActivity.Parameters.Copy(selectedDatas.map { it.taskKey })))
+                    } else {
+                        val selectedData = selectedDatas.single()
 
-                    check(taskKeys.isNotEmpty())
-
-                    if (taskKeys.size > 1)
-                        activity.startActivity(ShowTasksActivity.newIntent(ShowTasksActivity.Parameters.Copy(taskKeys)))
-                    else
-                        listener.copyAllRemindersDelegate.showDialog(taskKeys.single())
+                        if (selectedData is GroupListDataWrapper.InstanceData) {
+                            listener.copyAllRemindersDelegate.showDialog(selectedData.instanceKey)
+                        } else {
+                            activity.startActivity(EditActivity.getParametersIntent(EditParameters.Copy(selectedData.taskKey)))
+                        }
+                    }
                 }
                 R.id.actionGroupWebSearch -> activity.startActivity(webSearchIntent(selectedDatas.single().name))
                 R.id.actionGroupMigrateDescription -> activity.startActivity(

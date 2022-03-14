@@ -21,6 +21,7 @@ import com.krystianwsul.common.firebase.json.tasks.TaskJson
 import com.krystianwsul.common.firebase.models.ImageState
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.interval.ScheduleInterval
+import com.krystianwsul.common.firebase.models.project.PrivateProject
 import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.project.SharedProject
 import com.krystianwsul.common.firebase.models.schedule.SingleSchedule
@@ -104,21 +105,50 @@ private fun DomainFactory.getCreateTaskDataSlow(
 
     val customTimes = getCurrentRemoteCustomTimes().associate { it.key to it as Time.Custom }.toMutableMap()
 
-    val taskData = (startParameters as? EditViewModel.StartParameters.Task)?.let {
-        val task = getTaskForce(it.taskKey)
+    val taskData = (startParameters as? EditViewModel.StartParameters.TaskOrInstance)?.let {
+        val task: Task
+        val project: Project<*>
 
         var scheduleDataWrappers: List<EditViewModel.ScheduleDataWrapper>? = null
         var assignedTo: Set<UserKey> = setOf()
 
-        if (task.isTopLevelTask()) {
-            val schedules = task.intervalInfo.getCurrentScheduleIntervals(now)
+        when (it.copySource) {
+            is EditParameters.Copy.CopySource.Task -> {
+                task = getTaskForce(it.copySource.taskKey)
+                project = task.project
 
-            customTimes += schedules.mapNotNull { it.schedule.customTimeKey }.map { it to getCustomTime(it) }
+                if (task.isTopLevelTask()) {
+                    val schedules = task.intervalInfo.getCurrentScheduleIntervals(now)
 
-            if (schedules.isNotEmpty()) {
-                getScheduleDataWrappersAndAssignedTo(schedules).let {
-                    scheduleDataWrappers = it.first
-                    assignedTo = it.second
+                    customTimes += schedules.mapNotNull { it.schedule.customTimeKey }.map { it to getCustomTime(it) }
+
+                    if (schedules.isNotEmpty()) {
+                        getScheduleDataWrappersAndAssignedTo(schedules).let {
+                            scheduleDataWrappers = it.first
+                            assignedTo = it.second
+                        }
+                    }
+                }
+            }
+            is EditParameters.Copy.CopySource.Instance -> {
+                val instance = getInstance(it.copySource.instanceKey)
+                task = instance.task
+                project = instance.getProject()
+
+                if (instance.isRootInstance()) {
+                    instance.instanceTime
+                        .let { it as? Time.Custom }
+                        ?.let { customTimes += it.key to it }
+
+                    scheduleDataWrappers = listOf(
+                        EditViewModel.ScheduleDataWrapper.Single(
+                            ScheduleData.Single(instance.instanceDate, instance.instanceTime.timePair)
+                        )
+                    )
+
+                    assignedTo = instance.getAssignedTo()
+                        .map { it.id }
+                        .toSet()
                 }
             }
         }
@@ -128,8 +158,7 @@ private fun DomainFactory.getCreateTaskDataSlow(
             scheduleDataWrappers,
             task.note,
             task.getImage(deviceDbInfo),
-            task.project
-                .getAssignedTo(assignedTo)
+            project.getAssignedTo(assignedTo)
                 .map { it.key }
                 .toSet(),
         )
@@ -139,22 +168,23 @@ private fun DomainFactory.getCreateTaskDataSlow(
 
     val showAllInstancesDialog = startParameters.showAllInstancesDialog(this, now)
 
+    fun Project<*>.toParentKey() = when (this) {
+        is PrivateProject -> null
+        is SharedProject -> EditViewModel.ParentKey.Project(projectKey)
+    }
+
     val currentParentKey: EditViewModel.ParentKey? = when (currentParentSource) {
         is EditViewModel.CurrentParentSource.None -> null
         is EditViewModel.CurrentParentSource.Set -> currentParentSource.parentKey
-        is EditViewModel.CurrentParentSource.FromTask -> {
-            val task = getTaskForce(currentParentSource.taskKey)
-            val parentTask = task.parentTask
-
-            if (parentTask == null) {
-                when (val projectKey = task.project.projectKey) {
-                    is ProjectKey.Private -> null
-                    is ProjectKey.Shared -> EditViewModel.ParentKey.Project(projectKey)
-                    else -> throw UnsupportedOperationException()
-                }
-            } else {
-                EditViewModel.ParentKey.Task(parentTask.taskKey)
-            }
+        is EditViewModel.CurrentParentSource.FromTask -> getTaskForce(currentParentSource.taskKey).let {
+            it.parentTask
+                ?.let { EditViewModel.ParentKey.Task(it.taskKey) }
+                ?: it.project.toParentKey()
+        }
+        is EditViewModel.CurrentParentSource.FromInstance -> getInstance(currentParentSource.instanceKey).let {
+            it.parentInstance
+                ?.let { EditViewModel.ParentKey.Task(it.taskKey) }
+                ?: it.getProject().toParentKey()
         }
         is EditViewModel.CurrentParentSource.FromTasks -> {
             currentParentSource.taskKeys
@@ -232,7 +262,6 @@ private fun DomainFactory.updateProjectOrder(task: Task?, newSharedProjectKey: P
             it,
             projectsFactory.sharedProjects
                 .keys
-                .map { it as ProjectKey.Shared }
                 .toSet(),
         )
     }
@@ -244,7 +273,7 @@ fun DomainUpdater.createScheduleTopLevelTask(
     createParameters: EditDelegate.CreateParameters,
     scheduleDatas: List<ScheduleData>,
     sharedProjectParameters: EditDelegate.SharedProjectParameters?,
-    copyTaskKey: TaskKey? = null,
+    copyTaskKey: TaskKey? = null, // todo copy this doesn't always make sense with instances (like children).  Find all, rethink
 ): Single<EditDelegate.CreateResult> = SingleDomainUpdate.create("createScheduleTopLevelTask") { now ->
     check(scheduleDatas.isNotEmpty())
 

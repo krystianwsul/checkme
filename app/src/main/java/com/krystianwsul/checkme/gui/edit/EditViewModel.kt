@@ -20,7 +20,6 @@ import com.krystianwsul.checkme.viewmodels.DomainData
 import com.krystianwsul.checkme.viewmodels.DomainListener
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.firebase.models.ImageState
-import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.utils.*
@@ -547,9 +546,9 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
             override val excludedTaskKeys = setOf<TaskKey>()
         }
 
-        class Task(val taskKey: TaskKey) : StartParameters {
+        class TaskOrInstance(val copySource: EditParameters.Copy.CopySource) : StartParameters {
 
-            override val excludedTaskKeys = setOf(taskKey)
+            override val excludedTaskKeys = setOf(copySource.taskKey)
         }
 
         class Join(private val joinables: List<EditParameters.Join.Joinable>) : StartParameters {
@@ -563,7 +562,7 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
                     task.hasOtherVisibleInstances(now, it.instanceKey)
                 } else {
                     task.getInstances(null, null, now)
-                        .filter { it.isVisible(now, Instance.VisibilityOptions()) }
+                        .filter { it.isVisible(now, com.krystianwsul.common.firebase.models.Instance.VisibilityOptions()) }
                         .takeAndHasMore(1)
                         .second
                 }
@@ -581,6 +580,9 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
 
         @Parcelize
         data class FromTask(val taskKey: TaskKey) : CurrentParentSource()
+
+        @Parcelize
+        data class FromInstance(val instanceKey: InstanceKey) : CurrentParentSource()
 
         @Parcelize
         data class FromTasks(val taskKeys: kotlin.collections.Set<TaskKey>) : CurrentParentSource()

@@ -152,11 +152,34 @@ sealed interface EditParameters : Parcelable {
     }
 
     @Parcelize
-    class Copy(val taskKey: TaskKey) : EditParameters {
+    class Copy(val copySource: CopySource) : EditParameters {
 
-        override val startParameters get() = EditViewModel.StartParameters.Task(taskKey)
+        constructor(taskKey: TaskKey) : this(CopySource.Task(taskKey))
 
-        override val currentParentSource get() = EditViewModel.CurrentParentSource.FromTask(taskKey)
+        override val startParameters get() = EditViewModel.StartParameters.TaskOrInstance(copySource)
+
+        override val currentParentSource
+            get() = when (copySource) {
+                is CopySource.Task -> EditViewModel.CurrentParentSource.FromTask(copySource.taskKey)
+                is CopySource.Instance -> EditViewModel.CurrentParentSource.FromInstance(copySource.instanceKey)
+            }
+
+        val taskKey get() = copySource.taskKey
+
+        sealed class CopySource : Parcelable {
+
+            // todo copy check usages
+            abstract val taskKey: TaskKey
+
+            @Parcelize
+            class Task(override val taskKey: TaskKey) : CopySource()
+
+            @Parcelize
+            class Instance(val instanceKey: InstanceKey) : CopySource() {
+
+                override val taskKey get() = instanceKey.taskKey
+            }
+        }
     }
 
     @Parcelize
@@ -164,7 +187,7 @@ sealed interface EditParameters : Parcelable {
 
         constructor(instanceKey: InstanceKey) : this(instanceKey.taskKey, instanceKey)
 
-        override val startParameters get() = EditViewModel.StartParameters.Task(taskKey)
+        override val startParameters get() = EditViewModel.StartParameters.TaskOrInstance(Copy.CopySource.Task(taskKey))
 
         override val currentParentSource get() = EditViewModel.CurrentParentSource.FromTask(taskKey)
 

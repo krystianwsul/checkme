@@ -35,6 +35,7 @@ import com.krystianwsul.treeadapter.FilterCriteria
 import com.krystianwsul.treeadapter.TreeViewAdapter
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.kotlin.addTo
+import io.reactivex.rxjava3.kotlin.cast
 import io.reactivex.rxjava3.kotlin.plusAssign
 import java.io.Serializable
 
@@ -387,7 +388,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
                         R.id.instance_menu_select_all -> binding.groupListFragment
                             .treeViewAdapter
                             .selectAll()
-                        R.id.instanceMenuCopyTask -> copyAllRemindersDelegate.showDialog(data!!.taskKey)
+                        R.id.instanceMenuCopyTask -> copyAllRemindersDelegate.showDialog(instanceKey)
                         R.id.instanceMenuWebSearch -> startActivity(webSearchIntent(data!!.name))
                         R.id.instanceMenuMigrateDescription -> startActivity(
                             EditActivity.getParametersIntent(EditParameters.MigrateDescription(data!!.taskKey))

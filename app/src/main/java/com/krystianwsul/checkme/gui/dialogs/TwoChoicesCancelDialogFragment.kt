@@ -6,6 +6,7 @@ import androidx.annotation.StringRes
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.base.AbstractDialogFragment
+import com.krystianwsul.common.utils.TaskKey
 import kotlinx.parcelize.Parcelize
 
 class TwoChoicesCancelDialogFragment<T : Parcelable> : AbstractDialogFragment() {
@@ -53,11 +54,11 @@ class TwoChoicesCancelDialogFragment<T : Parcelable> : AbstractDialogFragment() 
                 BooleanPayload(andOpen),
             )
 
-            fun copyAllReminders() = Parameters(
+            fun copyAllReminders(taskKey: TaskKey) = Parameters(
                 R.string.copyAllReminders,
                 R.string.allReminders,
                 R.string.justThisReminder,
-                UnitParcelable,
+                taskKey,
             )
         }
 

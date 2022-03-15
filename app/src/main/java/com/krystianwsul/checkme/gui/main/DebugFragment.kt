@@ -207,6 +207,10 @@ class DebugFragment : AbstractFragment() {
                     append("\nfirst ChangeType delay: ")
                     append(domainFactory.changeTypeDelay)
 
+                    append("\ntoday: ")
+                    append(loadTime)
+                    append(" ms")
+
                     append("\n\ntasks: ")
                     append(taskCount)
                     append("\nall existing instances: ")
@@ -230,10 +234,6 @@ class DebugFragment : AbstractFragment() {
 
                     append("\n\ntab log:\n")
                     append(Preferences.mainTabsLog.log)
-
-                    append("\n\ntoday: ")
-                    append(loadTime)
-                    append(" ms")
 
                     append("\ncrashlytics enabled: ")
                     append(MyCrashlytics.enabled)

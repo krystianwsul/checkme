@@ -400,6 +400,11 @@ sealed class Task(
 
     private var gettingInstances = false
 
+    /*
+    todo: `now` seems to be only used for filtering parent instances.  But, I think this is redundant.  Removing the
+    filtering doesn't break any tests.  If I want to remove `now` later, just make sure that production data looks the same
+    before/after.
+     */
     fun getInstances(
         startExactTimeStamp: ExactTimeStamp.Offset?,
         endExactTimeStamp: ExactTimeStamp.Offset?,

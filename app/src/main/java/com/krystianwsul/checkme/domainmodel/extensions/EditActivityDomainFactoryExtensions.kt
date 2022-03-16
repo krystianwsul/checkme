@@ -301,6 +301,8 @@ fun DomainUpdater.createScheduleTopLevelTask(
 
     image?.upload(task.taskKey)
 
+    logTaskPresent(task)
+
     DomainUpdater.Result(
         task.toCreateResult(now),
         true,
@@ -308,6 +310,10 @@ fun DomainUpdater.createScheduleTopLevelTask(
         DomainFactory.CloudParams(task.project),
     )
 }.perform(this)
+
+fun DomainFactory.logTaskPresent(task: RootTask) {
+    MyCrashlytics.log("taskKey ${task.taskKey} present? " + (getTaskIfPresent(task.taskKey) != null))
+}
 
 fun RootTask.toCreateResult(now: ExactTimeStamp.Local) =
     getInstances(null, null, now).singleOrNull()
@@ -341,6 +347,8 @@ fun DomainUpdater.createTopLevelTask(
     }
 
     image?.upload(task.taskKey)
+
+    logTaskPresent(task)
 
     DomainUpdater.Result(
         task.toCreateResult(now),

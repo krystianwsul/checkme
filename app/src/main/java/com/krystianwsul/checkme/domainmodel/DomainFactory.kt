@@ -536,7 +536,7 @@ class DomainFactory(
         }
     }
 
-    fun getTaskForce(taskKey: TaskKey) = getTaskIfPresent(taskKey)!!
+    fun getTaskForce(taskKey: TaskKey) = getTaskIfPresent(taskKey) ?: throw MissingTaskException(taskKey)
 
     fun getTaskListChildTaskDatas(
         parentTask: Task,
@@ -796,4 +796,6 @@ class DomainFactory(
             return newTask
         }
     }
+
+    private class MissingTaskException(taskKey: TaskKey) : Exception("missing task: $taskKey")
 }

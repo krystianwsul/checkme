@@ -78,6 +78,8 @@ class CreateChildTaskDomainUpdate(
 
         image?.upload(childTask.taskKey)
 
+        domainFactory.logTaskPresent(childTask)
+
         return DomainUpdater.Result(
             childTask.toCreateResult(now),
             true,

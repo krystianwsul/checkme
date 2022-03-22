@@ -5,6 +5,7 @@ import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.extensions.getGroupListData
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.common.time.ExactTimeStamp
+import kotlin.properties.Delegates.notNull
 
 class DayViewModel : ViewModel() {
 
@@ -24,17 +25,23 @@ class DayViewModel : ViewModel() {
 
     class Entry(private val timeRange: Preferences.TimeRange, private val position: Int) {
 
+        private var showAssigned by notNull<Boolean>()
+
         private val domainListener = object : DomainListener<DayData>() {
 
             override val domainResultFetcher = DomainResultFetcher.DomainFactoryData {
-                it.getGroupListData(ExactTimeStamp.Local.now, position, timeRange)
+                it.getGroupListData(ExactTimeStamp.Local.now, position, timeRange, showAssigned)
             }
         }
 
         val data get() = domainListener.data
         val dataId get() = domainListener.dataId
 
-        fun start() = domainListener.start()
+        fun start(showAssigned: Boolean) {
+            this.showAssigned = showAssigned
+
+            domainListener.start()
+        }
 
         fun refresh() = domainListener.start(true)
 

@@ -135,6 +135,7 @@ class DebugFragment : AbstractFragment() {
                             ExactTimeStamp.Local.now,
                             0,
                             Preferences.TimeRange.DAY,
+                            true,
                         )
 
                         val t2 = ExactTimeStamp.Local.now

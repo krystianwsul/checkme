@@ -21,6 +21,7 @@ import com.krystianwsul.common.time.Date
 import io.reactivex.rxjava3.core.Maybe
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
+import io.reactivex.rxjava3.kotlin.Observables
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.plusAssign
 import java.time.Month
@@ -161,7 +162,9 @@ class DayFragment @JvmOverloads constructor(
                 .addTo(compositeDisposable)
         }
 
-        compositeDisposable += startEvents.subscribe { entry!!.start() }
+        Observables.combineLatest(startEvents, Preferences.showAssignedObservable)
+            .subscribe { (_, showAssigned) -> entry!!.start(showAssigned) }
+            .addTo(compositeDisposable)
 
         compositeDisposable += stopEvents.subscribe {
             entry!!.stop()

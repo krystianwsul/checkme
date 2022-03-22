@@ -80,6 +80,7 @@ fun DomainFactory.getGroupListData(
     now: ExactTimeStamp.Local,
     position: Int,
     timeRange: Preferences.TimeRange,
+    showAssigned: Boolean,
 ): DayViewModel.DayData {
     MyCrashlytics.log("DomainFactory.getGroupListData")
 

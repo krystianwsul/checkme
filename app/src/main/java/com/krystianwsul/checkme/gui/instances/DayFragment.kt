@@ -152,8 +152,6 @@ class DayFragment @JvmOverloads constructor(
 
             setFab(event.fabDelegate)
 
-            entry!!.start()
-
             activity.selectAllRelay
                 .subscribe {
                     binding.groupListFragment
@@ -162,6 +160,8 @@ class DayFragment @JvmOverloads constructor(
                 }
                 .addTo(compositeDisposable)
         }
+
+        compositeDisposable += startEvents.subscribe { entry!!.start() }
 
         compositeDisposable += stopEvents.subscribe {
             entry!!.stop()

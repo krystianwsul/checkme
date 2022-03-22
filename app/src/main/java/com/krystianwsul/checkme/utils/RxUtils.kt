@@ -11,3 +11,9 @@ fun <T : Any> Single<T>.doOnSuccessOrDispose(action: () -> Unit) = doOnSuccess {
 fun <T : Any> Observable<T>.doAfterSubscribe(action: () -> Unit): Observable<T> {
     return mergeWith(Completable.fromAction(action))
 }
+
+fun <T : Any> Observable<T>.partition(predicate: (T) -> Boolean): Pair<Observable<T>, Observable<T>> {
+    val shared = share()
+
+    return shared.filter(predicate) to shared.filter { !predicate(it) }
+}

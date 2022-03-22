@@ -14,6 +14,7 @@ import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.FragmentDayBinding
 import com.krystianwsul.checkme.gui.main.MainActivity
 import com.krystianwsul.checkme.gui.utils.BottomFabMenuDelegate
+import com.krystianwsul.checkme.utils.partition
 import com.krystianwsul.checkme.utils.time.toDateTimeTz
 import com.krystianwsul.checkme.viewmodels.DayViewModel
 import com.krystianwsul.common.time.Date
@@ -21,6 +22,7 @@ import io.reactivex.rxjava3.core.Maybe
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
+import io.reactivex.rxjava3.kotlin.plusAssign
 import java.time.Month
 import java.time.format.TextStyle
 import java.util.*
@@ -142,32 +144,37 @@ class DayFragment @JvmOverloads constructor(
 
         val hostEvents = key.switchMap { key -> (context as Host).hostEvents.map { Pair(key, it) } }
 
-        hostEvents.subscribe { (key, event) ->
-            if (event is Event.PageVisible && event.position == key.second) {
-                setFab(event.fabDelegate)
+        val (startEvents, stopEvents) =
+            hostEvents.partition { (key, event) -> event is Event.PageVisible && event.position == key.second }
 
-                entry!!.start()
+        compositeDisposable += startEvents.subscribe { (_, event) ->
+            check(event is Event.PageVisible)
 
-                activity.selectAllRelay
-                    .subscribe {
-                        binding.groupListFragment
-                            .treeViewAdapter
-                            .selectAll()
-                    }
-                    .addTo(compositeDisposable)
-            } else {
-                entry!!.stop()
+            setFab(event.fabDelegate)
 
-                clearFab()
-                saveState()
-            }
-        }.addTo(compositeDisposable)
+            entry!!.start()
+
+            activity.selectAllRelay
+                .subscribe {
+                    binding.groupListFragment
+                        .treeViewAdapter
+                        .selectAll()
+                }
+                .addTo(compositeDisposable)
+        }
+
+        compositeDisposable += stopEvents.subscribe {
+            entry!!.stop()
+
+            clearFab()
+            saveState()
+        }
 
         key.switchMap { key -> entry!!.data.map { Triple(key, it, entry!!.dataId) } }
-                .subscribe { (key, data, dataId) ->
-                    binding.groupListFragment.setAll(
-                        key.first,
-                        key.second,
+            .subscribe { (key, data, dataId) ->
+                binding.groupListFragment.setAll(
+                    key.first,
+                    key.second,
                         dataId,
                         data.immediate,
                         data.groupListDataWrapper,

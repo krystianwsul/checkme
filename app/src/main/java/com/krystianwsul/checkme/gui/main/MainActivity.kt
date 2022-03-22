@@ -15,7 +15,9 @@ import androidx.annotation.StringRes
 import androidx.appcompat.view.ActionMode
 import androidx.appcompat.widget.Toolbar
 import androidx.coordinatorlayout.widget.CoordinatorLayout
-import androidx.core.view.*
+import androidx.core.view.MenuCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.updateLayoutParams
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
@@ -45,7 +47,6 @@ import com.krystianwsul.checkme.gui.tree.AbstractHolder
 import com.krystianwsul.checkme.gui.utils.*
 import com.krystianwsul.checkme.gui.widgets.MyBottomBar
 import com.krystianwsul.checkme.utils.*
-import com.krystianwsul.checkme.utils.children
 import com.krystianwsul.checkme.viewmodels.*
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.DateTimeSoy
@@ -68,6 +69,26 @@ import org.joda.time.DateTime
 import org.joda.time.Days
 import org.joda.time.LocalDate
 import java.io.Serializable
+import kotlin.collections.ArrayList
+import kotlin.collections.MutableMap
+import kotlin.collections.Set
+import kotlin.collections.all
+import kotlin.collections.associate
+import kotlin.collections.forEach
+import kotlin.collections.isNotEmpty
+import kotlin.collections.listOf
+import kotlin.collections.map
+import kotlin.collections.minOrNull
+import kotlin.collections.minus
+import kotlin.collections.mutableListOf
+import kotlin.collections.mutableMapOf
+import kotlin.collections.plus
+import kotlin.collections.plusAssign
+import kotlin.collections.set
+import kotlin.collections.setOf
+import kotlin.collections.single
+import kotlin.collections.singleOrNull
+import kotlin.collections.toMutableMap
 
 class MainActivity :
     AbstractActivity(),
@@ -186,9 +207,7 @@ class MainActivity :
 
         override val snackbarParent get() = this@MainActivity.snackbarParent
 
-        override val instanceSearch = Preferences.showAssignedObservable.map<FilterCriteria> {
-            FilterCriteria.Full(showAssignedToOthers = it)
-        }
+        override val instanceSearch = Observable.never<FilterCriteria>()
 
         override val copyAllRemindersDelegate get() = this@MainActivity.copyAllRemindersDelegate
 

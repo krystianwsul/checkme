@@ -11,6 +11,7 @@ import com.krystianwsul.checkme.utils.time.toDateTimeTz
 import com.krystianwsul.checkme.viewmodels.DayViewModel
 import com.krystianwsul.checkme.viewmodels.MainNoteViewModel
 import com.krystianwsul.checkme.viewmodels.MainTaskViewModel
+import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.time.Date
@@ -127,7 +128,12 @@ fun DomainFactory.getGroupListData(
 
     endExactTimeStamp = Date(endCalendar.toDateTimeTz()).toMidnightExactTimeStamp().toOffset()
 
-    val currentInstances = getRootInstances(startExactTimeStamp, endExactTimeStamp, now).toList()
+    val currentInstances = getRootInstances(
+        startExactTimeStamp,
+        endExactTimeStamp,
+        now,
+        SearchCriteria(showAssignedToOthers = showAssigned),
+    ).toList()
 
     if (position == 0 && timeRange == Preferences.TimeRange.DAY) {
         instanceInfo = currentInstances.count { it.exists() }.let { existingInstanceCount ->

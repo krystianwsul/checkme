@@ -25,6 +25,7 @@ class DayViewModel : ViewModel() {
 
     class Entry(private val timeRange: Preferences.TimeRange, private val position: Int) {
 
+        private var initialized = false
         private var showAssigned by notNull<Boolean>()
 
         private val domainListener = object : DomainListener<DayData>() {
@@ -38,9 +39,12 @@ class DayViewModel : ViewModel() {
         val dataId get() = domainListener.dataId
 
         fun start(showAssigned: Boolean) {
+            val force = initialized && (this.showAssigned != showAssigned)
+
+            initialized = true
             this.showAssigned = showAssigned
 
-            domainListener.start()
+            domainListener.start(force)
         }
 
         fun refresh() = domainListener.start(true)

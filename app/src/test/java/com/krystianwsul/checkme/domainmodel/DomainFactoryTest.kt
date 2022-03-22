@@ -47,10 +47,11 @@ class DomainFactoryTest {
         )
     }
 
-    private fun getTodayInstanceDatas(now: ExactTimeStamp.Local) =
-        domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
-            .groupListDataWrapper
-            .allInstanceDatas
+    private fun getTodayGroupListData(now: ExactTimeStamp.Local, position: Int = 0) =
+        domainFactory.getGroupListData(now, position, Preferences.TimeRange.DAY, false)
+
+    private fun getTodayInstanceDatas(now: ExactTimeStamp.Local, position: Int = 0) =
+        getTodayGroupListData(now, position).groupListDataWrapper.allInstanceDatas
 
     @Test
     fun testCircularDependencyInChildIntervals() {
@@ -224,9 +225,7 @@ class DomainFactoryTest {
             .blockingGet()
             .taskKey
 
-        val firstInstanceDatas = domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
-            .groupListDataWrapper
-            .allInstanceDatas
+        val firstInstanceDatas = getTodayInstanceDatas(now)
 
         assertEquals(2, firstInstanceDatas.size)
 
@@ -249,7 +248,7 @@ class DomainFactoryTest {
             null,
         ).perform(domainUpdater(now)).blockingGet()
 
-        val secondGroupListWrapper = domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY).groupListDataWrapper
+        val secondGroupListWrapper = getTodayGroupListData(now).groupListDataWrapper
 
         assertEquals(0, secondGroupListWrapper.doneSingleBridges.single().instanceData.allChildren.size)
         assertEquals(
@@ -273,13 +272,7 @@ class DomainFactoryTest {
             .blockingGet()
             .taskKey
 
-        assertEquals(
-            1,
-            domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
-                .groupListDataWrapper
-                .allInstanceDatas
-                .size
-        )
+        assertEquals(1, getTodayInstanceDatas(now).size)
 
         now += 1.hours
 
@@ -293,17 +286,14 @@ class DomainFactoryTest {
             .blockingGet()
             .taskKey
 
-        val instanceKey = domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
-            .groupListDataWrapper
-            .allInstanceDatas
-            .let {
-                assertEquals(1, it.size)
-                assertEquals(1, it[0].allChildren.size)
+        val instanceKey = getTodayInstanceDatas(now).let {
+            assertEquals(1, it.size)
+            assertEquals(1, it[0].allChildren.size)
 
-                it[0].allChildren
-                    .single()
-                    .instanceKey
-            }
+            it[0].allChildren
+                .single()
+                .instanceKey
+        }
 
         val instance = domainFactory.getInstance(instanceKey)
         assertNotNull(instance.parentInstance)
@@ -318,14 +308,11 @@ class DomainFactoryTest {
             null,
         ).blockingGet()
 
-        domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
-            .groupListDataWrapper
-            .allInstanceDatas
-            .let {
-                assertEquals(2, it.size)
-                assertEquals(0, it[0].allChildren.size)
-                assertEquals(0, it[1].allChildren.size)
-            }
+        getTodayInstanceDatas(now).let {
+            assertEquals(2, it.size)
+            assertEquals(0, it[0].allChildren.size)
+            assertEquals(0, it[1].allChildren.size)
+        }
 
         assertNull(instance.parentInstance)
     }
@@ -407,11 +394,7 @@ class DomainFactoryTest {
             null,
         ).blockingGet()
 
-        val instanceKey = domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
-            .groupListDataWrapper
-            .allInstanceDatas
-            .single()
-            .instanceKey
+        val instanceKey = getTodayInstanceDatas(now).single().instanceKey
 
         now += 1.hours // now 3
 
@@ -425,13 +408,7 @@ class DomainFactoryTest {
 
         domainFactory.getShowInstanceData(instanceKey)
 
-        assertEquals(
-            1,
-            domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
-                .groupListDataWrapper
-                .allInstanceDatas
-                .size,
-        )
+        assertEquals(1, getTodayInstanceDatas(now).size)
     }
 
     @Test
@@ -544,9 +521,7 @@ class DomainFactoryTest {
             null,
         ).blockingGet()
 
-        val instanceDatasBefore = domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
-            .groupListDataWrapper
-            .allInstanceDatas
+        val instanceDatasBefore = getTodayInstanceDatas(now)
 
         assertEquals(2, instanceDatasBefore.size)
 
@@ -561,9 +536,7 @@ class DomainFactoryTest {
             parentInstanceKey,
         ).blockingGet()
 
-        val instanceDatasAfter = domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
-            .groupListDataWrapper
-            .allInstanceDatas
+        val instanceDatasAfter = getTodayInstanceDatas(now)
 
         assertEquals(1, instanceDatasAfter.size)
 
@@ -602,9 +575,7 @@ class DomainFactoryTest {
             null,
         ).blockingGet()
 
-        val instanceDatasBefore = domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
-            .groupListDataWrapper
-            .allInstanceDatas
+        val instanceDatasBefore = getTodayInstanceDatas(now)
 
         assertEquals(2, instanceDatasBefore.size)
 
@@ -619,9 +590,7 @@ class DomainFactoryTest {
             parentInstanceKey,
         ).blockingGet()
 
-        val instanceDatasAfter = domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
-            .groupListDataWrapper
-            .allInstanceDatas
+        val instanceDatasAfter = getTodayInstanceDatas(now)
 
         assertEquals(1, instanceDatasAfter.size)
 
@@ -709,11 +678,7 @@ class DomainFactoryTest {
             .blockingGet()
             .taskKey
 
-        fun getGroupListData() = domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
-            .groupListDataWrapper
-            .allInstanceDatas
-
-        assertEquals(parentTaskNameBefore, getGroupListData().single().name)
+        assertEquals(parentTaskNameBefore, getTodayInstanceDatas(now).single().name)
 
         now += 1.hours
 
@@ -723,7 +688,7 @@ class DomainFactoryTest {
             EditDelegate.CreateParameters("child task"),
         ).perform(domainUpdater(now)).blockingGet()
 
-        assertEquals(parentTaskNameBefore, getGroupListData().single().name)
+        assertEquals(parentTaskNameBefore, getTodayInstanceDatas(now).single().name)
 
         fun getJson(taskKey: TaskKey.Root) = (domainFactory.getTaskForce(taskKey) as RootTask).taskRecord.createObject
 
@@ -732,7 +697,7 @@ class DomainFactoryTest {
         val parentTaskJson = getJson(parentTaskKey).copy(name = parentTaskNameAfter)
 
         domainFactoryRule.acceptRootTaskJson(parentTaskKey, parentTaskJson)
-        assertEquals(parentTaskNameAfter, getGroupListData().single().name)
+        assertEquals(parentTaskNameAfter, getTodayInstanceDatas(now).single().name)
     }
 
     @Test
@@ -772,9 +737,7 @@ class DomainFactoryTest {
             .blockingGet()
             .taskKey
 
-        val instanceDatas = domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
-            .groupListDataWrapper
-            .allInstanceDatas
+        val instanceDatas = getTodayInstanceDatas(now)
 
         assertEquals(2, instanceDatas.size)
         assertEquals(null, instanceDatas[0].projectKey)
@@ -805,10 +768,7 @@ class DomainFactoryTest {
         assertEquals(privateProjectKey, getProjectKey(privateTaskKey))
         assertEquals(privateProjectKey, getProjectKey(sharedTaskKey))
 
-        val instanceData = domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
-            .groupListDataWrapper
-            .allInstanceDatas
-            .single()
+        val instanceData = getTodayInstanceDatas(now).single()
 
         assertEquals(null, instanceData.projectKey)
         assertEquals(2, instanceData.allChildren.size)
@@ -860,9 +820,7 @@ class DomainFactoryTest {
             .blockingGet()
             .taskKey
 
-        val instanceDatas = domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
-            .groupListDataWrapper
-            .allInstanceDatas
+        val instanceDatas = getTodayInstanceDatas(now)
 
         assertEquals(2, instanceDatas.size)
         assertEquals(sharedProjectKey1, instanceDatas[0].projectKey)
@@ -871,14 +829,7 @@ class DomainFactoryTest {
         val instanceKey1 = instanceDatas[0].instanceKey
         val instanceKey2 = instanceDatas[1].instanceKey
 
-        assertEquals(
-            sharedProjectKey2,
-            domainFactory.getGroupListData(now, 7, Preferences.TimeRange.DAY)
-                .groupListDataWrapper
-                .allInstanceDatas
-                .single()
-                .projectKey,
-        )
+        assertEquals(sharedProjectKey2, getTodayInstanceDatas(now, 7).single().projectKey)
 
         now += 1.hours
 
@@ -898,23 +849,13 @@ class DomainFactoryTest {
         assertEquals(privateProjectKey, getProjectKey(joinTaskKey))
         assertEquals(sharedProjectKey2, getProjectKey(taskKey2))
 
-        val instanceData = domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
-            .groupListDataWrapper
-            .allInstanceDatas
-            .single()
+        val instanceData = getTodayInstanceDatas(now).single()
 
         assertEquals(null, instanceData.projectKey)
         assertEquals(2, instanceData.allChildren.size)
         assertTrue(instanceData.allChildren.all { it.projectKey == null })
 
-        assertEquals(
-            sharedProjectKey2,
-            domainFactory.getGroupListData(now, 7, Preferences.TimeRange.DAY)
-                .groupListDataWrapper
-                .allInstanceDatas
-                .single()
-                .projectKey
-        )
+        assertEquals(sharedProjectKey2, getTodayInstanceDatas(now, 7).single().projectKey)
     }
 
     @Test
@@ -962,9 +903,7 @@ class DomainFactoryTest {
             .blockingGet()
             .taskKey
 
-        val instanceDatas = domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
-            .groupListDataWrapper
-            .allInstanceDatas
+        val instanceDatas = getTodayInstanceDatas(now)
 
         assertEquals(2, instanceDatas.size)
         assertEquals(sharedProjectKey1, instanceDatas[0].projectKey)
@@ -973,14 +912,7 @@ class DomainFactoryTest {
         val instanceKey1 = instanceDatas[0].instanceKey
         val instanceKey2 = instanceDatas[1].instanceKey
 
-        assertEquals(
-            sharedProjectKey2,
-            domainFactory.getGroupListData(now, 7, Preferences.TimeRange.DAY)
-                .groupListDataWrapper
-                .allInstanceDatas
-                .single()
-                .projectKey,
-        )
+        assertEquals(sharedProjectKey2, getTodayInstanceDatas(now, 7).single().projectKey)
 
         now += 1.hours
 
@@ -1001,21 +933,13 @@ class DomainFactoryTest {
         assertEquals(privateProjectKey, getProjectKey(taskKey1))
         assertEquals(privateProjectKey, getProjectKey(taskKey2))
 
-        val instanceData = domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
-            .groupListDataWrapper
-            .allInstanceDatas
-            .single()
+        val instanceData = getTodayInstanceDatas(now).single()
 
         assertEquals(null, instanceData.projectKey)
         assertEquals(2, instanceData.allChildren.size)
         assertTrue(instanceData.allChildren.all { it.projectKey == null })
 
-        assertTrue(
-            domainFactory.getGroupListData(now, 7, Preferences.TimeRange.DAY)
-                .groupListDataWrapper
-                .allInstanceDatas
-                .isEmpty()
-        )
+        assertTrue(getTodayInstanceDatas(now, 7).isEmpty())
     }
 
     @Test
@@ -1055,10 +979,7 @@ class DomainFactoryTest {
 
         assertEquals(
             taskKey1,
-            domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
-                .groupListDataWrapper
-                .allInstanceDatas
-                .single()
+            getTodayInstanceDatas(now).single()
                 .instanceKey
                 .taskKey,
         )
@@ -1073,13 +994,7 @@ class DomainFactoryTest {
             null,
         ).blockingSubscribe()
 
-        assertEquals(
-            2,
-            domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
-                .groupListDataWrapper
-                .allInstanceDatas
-                .size,
-        )
+        assertEquals(2, getTodayInstanceDatas(now).size)
 
         now += 1.hours
 
@@ -1092,11 +1007,7 @@ class DomainFactoryTest {
             true,
         ).blockingSubscribe()
 
-        val instanceKey3 = domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
-            .groupListDataWrapper
-            .allInstanceDatas
-            .single()
-            .instanceKey
+        val instanceKey3 = getTodayInstanceDatas(now).single().instanceKey
 
         assertEquals(taskKey3, instanceKey3.taskKey)
 
@@ -1127,12 +1038,9 @@ class DomainFactoryTest {
 
         assertEquals(
             taskKey3,
-            domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
-                .groupListDataWrapper
-                .allInstanceDatas
-                .single()
+            getTodayInstanceDatas(now).single()
                 .instanceKey
-                .taskKey
+                .taskKey,
         )
     }
 
@@ -1166,30 +1074,14 @@ class DomainFactoryTest {
             .blockingGet()
             .taskKey
 
-        assertEquals(
-            2,
-            domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
-                .groupListDataWrapper
-                .allInstanceDatas
-                .size,
-        )
-
-        assertEquals(
-            2,
-            domainFactory.getGroupListData(now, 1, Preferences.TimeRange.DAY)
-                .groupListDataWrapper
-                .allInstanceDatas
-                .size,
-        )
+        assertEquals(2, getTodayInstanceDatas(now).size)
+        assertEquals(2, getTodayInstanceDatas(now, 1).size)
 
         now += 1.hours
 
         val singleScheduleDatas = listOf(ScheduleData.Single(date, scheduleTimePair))
 
-        val repeatingInstanceKeys = domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
-            .groupListDataWrapper
-            .allInstanceDatas
-            .map { it.instanceKey }
+        val repeatingInstanceKeys = getTodayInstanceDatas(now).map { it.instanceKey }
 
         val joinables = repeatingInstanceKeys.map { EditParameters.Join.Joinable.Instance(it) }
 
@@ -1202,31 +1094,16 @@ class DomainFactoryTest {
             false,
         ).blockingGet()
 
-        assertEquals(
-            1,
-            domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
-                .groupListDataWrapper
-                .allInstanceDatas
-                .size,
-        )
+        assertEquals(1, getTodayInstanceDatas(now).size)
 
         assertEquals(
             2,
-            domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
-                .groupListDataWrapper
-                .allInstanceDatas
-                .single()
+            getTodayInstanceDatas(now).single()
                 .allChildren
                 .size,
         )
 
-        assertEquals(
-            2,
-            domainFactory.getGroupListData(now, 1, Preferences.TimeRange.DAY)
-                .groupListDataWrapper
-                .allInstanceDatas
-                .size,
-        )
+        assertEquals(2, getTodayInstanceDatas(now, 1).size)
 
         now += 1.hours
 
@@ -1251,43 +1128,25 @@ class DomainFactoryTest {
             true,
         ).blockingGet()
 
-        assertEquals(
-            1,
-            domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
-                .groupListDataWrapper
-                .allInstanceDatas
-                .size,
-        )
+        assertEquals(1, getTodayInstanceDatas(now).size)
 
         assertEquals(
             1,
-            domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
-                .groupListDataWrapper
-                .allInstanceDatas
-                .single()
+            getTodayInstanceDatas(now).single()
                 .allChildren
                 .size,
         )
 
         assertEquals(
             2,
-            domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
-                .groupListDataWrapper
-                .allInstanceDatas
-                .single()
+            getTodayInstanceDatas(now).single()
                 .allChildren
                 .single()
                 .allChildren
                 .size,
         )
 
-        assertEquals(
-            0,
-            domainFactory.getGroupListData(now, 1, Preferences.TimeRange.DAY)
-                .groupListDataWrapper
-                .allInstanceDatas
-                .size,
-        )
+        assertEquals(0, getTodayInstanceDatas(now, 1).size)
     }
 
     @Test
@@ -1320,30 +1179,15 @@ class DomainFactoryTest {
             .blockingGet()
             .taskKey
 
-        assertEquals(
-            2,
-            domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
-                .groupListDataWrapper
-                .allInstanceDatas
-                .size,
-        )
+        assertEquals(2, getTodayInstanceDatas(now).size)
 
-        assertEquals(
-            2,
-            domainFactory.getGroupListData(now, 1, Preferences.TimeRange.DAY)
-                .groupListDataWrapper
-                .allInstanceDatas
-                .size,
-        )
+        assertEquals(2, getTodayInstanceDatas(now, 1).size)
 
         now += 1.hours
 
         val singleScheduleDatas = listOf(ScheduleData.Single(date, scheduleTimePair))
 
-        val repeatingInstanceKeys = domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
-            .groupListDataWrapper
-            .allInstanceDatas
-            .map { it.instanceKey }
+        val repeatingInstanceKeys = getTodayInstanceDatas(now).map { it.instanceKey }
 
         val joinables = repeatingInstanceKeys.map { EditParameters.Join.Joinable.Instance(it) }
 
@@ -1356,31 +1200,16 @@ class DomainFactoryTest {
             false,
         ).blockingGet()
 
-        assertEquals(
-            1,
-            domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
-                .groupListDataWrapper
-                .allInstanceDatas
-                .size,
-        )
+        assertEquals(1, getTodayInstanceDatas(now).size)
 
         assertEquals(
             2,
-            domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
-                .groupListDataWrapper
-                .allInstanceDatas
-                .single()
+            getTodayInstanceDatas(now).single()
                 .allChildren
                 .size,
         )
 
-        assertEquals(
-            2,
-            domainFactory.getGroupListData(now, 1, Preferences.TimeRange.DAY)
-                .groupListDataWrapper
-                .allInstanceDatas
-                .size,
-        )
+        assertEquals(2, getTodayInstanceDatas(now, 1).size)
 
         now += 1.hours
 
@@ -1405,43 +1234,25 @@ class DomainFactoryTest {
             false,
         ).blockingGet()
 
-        assertEquals(
-            1,
-            domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
-                .groupListDataWrapper
-                .allInstanceDatas
-                .size,
-        )
+        assertEquals(1, getTodayInstanceDatas(now).size)
 
         assertEquals(
             1,
-            domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
-                .groupListDataWrapper
-                .allInstanceDatas
-                .single()
+            getTodayInstanceDatas(now).single()
                 .allChildren
                 .size,
         )
 
         assertEquals(
             2,
-            domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
-                .groupListDataWrapper
-                .allInstanceDatas
-                .single()
+            getTodayInstanceDatas(now).single()
                 .allChildren
                 .single()
                 .allChildren
                 .size,
         )
 
-        assertEquals(
-            2,
-            domainFactory.getGroupListData(now, 1, Preferences.TimeRange.DAY)
-                .groupListDataWrapper
-                .allInstanceDatas
-                .size,
-        )
+        assertEquals(2, getTodayInstanceDatas(now, 1).size)
     }
 
     @Test
@@ -1566,9 +1377,7 @@ class DomainFactoryTest {
             .blockingGet()
             .taskKey
 
-        val instanceDatas = domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
-            .groupListDataWrapper
-            .allInstanceDatas
+        val instanceDatas = getTodayInstanceDatas(now)
 
         val singleInstanceKey = instanceDatas.single { it.taskKey == singleTaskKey }.instanceKey
         val repeatingInstanceKey = instanceDatas.single { it.taskKey == repeatingTaskKey }.instanceKey
@@ -1589,7 +1398,7 @@ class DomainFactoryTest {
 
         now += 1.hours
 
-        domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
+        getTodayInstanceDatas(now)
 
         domainUpdater(now).setInstancesParent(
             DomainListenerManager.NotificationType.All,
@@ -1599,19 +1408,11 @@ class DomainFactoryTest {
 
         assertEquals(
             1,
-            domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
-                .groupListDataWrapper
-                .allInstanceDatas
-                .single()
+            getTodayInstanceDatas(now).single()
                 .allChildren
                 .size,
         )
     }
-
-    private fun getInstanceDatasToday(now: ExactTimeStamp.Local) =
-        domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY)
-            .groupListDataWrapper
-            .allInstanceDatas
 
     @Test
     fun testMakeChildTaskTopLevelAndAssignToProject() {
@@ -1721,7 +1522,7 @@ class DomainFactoryTest {
             .taskKey
 
         assertTrue(
-            getInstanceDatasToday(now).single()
+            getTodayInstanceDatas(now).single()
                 .allChildren
                 .single()
                 .allChildren
@@ -1739,7 +1540,7 @@ class DomainFactoryTest {
             true,
         ).blockingSubscribe()
 
-        getInstanceDatasToday(now).single()
+        getTodayInstanceDatas(now).single()
             .allChildren
             .single()
             .allChildren
@@ -1758,7 +1559,7 @@ class DomainFactoryTest {
             null,
         ).blockingGet()
 
-        getInstanceDatasToday(now).single()
+        getTodayInstanceDatas(now).single()
             .allChildren
             .single()
             .allChildren
@@ -1777,7 +1578,7 @@ class DomainFactoryTest {
             null,
         ).blockingGet()
 
-        getInstanceDatasToday(now).let {
+        getTodayInstanceDatas(now).let {
             assertEquals(2, it.size)
 
             assertTrue(it[0].allChildren.isEmpty())
@@ -1839,7 +1640,7 @@ class DomainFactoryTest {
             .taskKey
 
         assertTrue(
-            getInstanceDatasToday(now).single { it.taskKey == singleMiddleTaskKey }
+            getTodayInstanceDatas(now).single { it.taskKey == singleMiddleTaskKey }
                 .allChildren
                 .all { it.done == null }
         )
@@ -1855,7 +1656,7 @@ class DomainFactoryTest {
             true,
         ).blockingSubscribe()
 
-        getInstanceDatasToday(now).single { it.taskKey == singleMiddleTaskKey }
+        getTodayInstanceDatas(now).single { it.taskKey == singleMiddleTaskKey }
             .allChildren
             .let {
                 assertEquals(1, it.filter { it.done == null }.size)
@@ -1870,14 +1671,14 @@ class DomainFactoryTest {
             DomainListenerManager.NotificationType.All,
             parentTaskCreateParameters,
             getSingleScheduleData(date, 13, 0),
-            getInstanceDatasToday(now).map { EditParameters.Join.Joinable.Instance(it.instanceKey) },
+            getTodayInstanceDatas(now).map { EditParameters.Join.Joinable.Instance(it.instanceKey) },
             null,
             false,
         ).blockingGet()
 
         assertEquals(1, getTodayInstanceDatas(now).size)
 
-        getInstanceDatasToday(now).single()
+        getTodayInstanceDatas(now).single()
             .allChildren
             .single { it.taskKey == singleMiddleTaskKey }
             .allChildren
@@ -1896,7 +1697,7 @@ class DomainFactoryTest {
             null,
         ).blockingGet()
 
-        getInstanceDatasToday(now).single()
+        getTodayInstanceDatas(now).single()
             .allChildren
             .single { it.taskKey == singleMiddleTaskKey }
             .allChildren
@@ -1915,7 +1716,7 @@ class DomainFactoryTest {
             null,
         ).blockingGet()
 
-        getInstanceDatasToday(now).let {
+        getTodayInstanceDatas(now).let {
             assertEquals(2, it.size)
 
             assertTrue(it[0].allChildren.single().taskKey == weeklyMiddleTaskKey)

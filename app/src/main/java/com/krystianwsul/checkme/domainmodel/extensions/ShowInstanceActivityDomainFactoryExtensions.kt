@@ -19,7 +19,6 @@ import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.InstanceKey
-import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
 import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Single
@@ -131,32 +130,14 @@ private fun DomainFactory.getGroupListData(
     val instanceDescriptors = parentInstance.getChildInstances()
         .filter { it.isVisible(now, Instance.VisibilityOptions(assumeChildOfVisibleParent = true)) }
         .map { childInstance ->
-            val childTask = childInstance.task
-
             val (notDoneChildInstanceDescriptors, doneChildInstanceDescriptors) = getChildInstanceDatas(childInstance, now)
 
-            val instanceData = GroupListDataWrapper.InstanceData(
-                childInstance.done,
-                childInstance.instanceKey,
-                childInstance.name,
-                childInstance.instanceDateTime.timeStamp,
-                childInstance.instanceDate,
-                childTask.notDeleted,
-                childTask.isVisible(now),
-                childInstance.canMigrateDescription(now),
-                childInstance.getCreateTaskTimePair(projectsFactory.privateProject, myUserFactory.user),
-                childTask.note,
-                newMixedInstanceDataCollection(
-                    notDoneChildInstanceDescriptors,
-                    GroupTypeFactory.SingleBridge.CompareBy.ORDINAL,
-                ),
-                doneChildInstanceDescriptors.toDoneSingleBridges(),
-                childInstance.ordinal,
-                childTask.getImage(deviceDbInfo),
-                childInstance.isAssignedToMe(myUserFactory.user),
-                childInstance.getProject().projectKey as? ProjectKey.Shared,
-                childInstance.parentInstance?.instanceKey,
-                childInstance.taskHasOtherVisibleInstances(now),
+            val instanceData = GroupListDataWrapper.InstanceData.fromInstance(
+                childInstance,
+                now,
+                this,
+                notDoneChildInstanceDescriptors,
+                doneChildInstanceDescriptors,
             )
 
             GroupTypeFactory.InstanceDescriptor(

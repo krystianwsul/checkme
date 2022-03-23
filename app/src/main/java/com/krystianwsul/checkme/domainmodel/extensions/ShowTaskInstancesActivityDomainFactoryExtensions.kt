@@ -15,7 +15,6 @@ import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.locker.LockerManager
 import com.krystianwsul.common.utils.Endable
-import com.krystianwsul.common.utils.ProjectKey
 
 fun DomainFactory.getShowTaskInstancesData(
     parameters: ShowTaskInstancesActivity.Parameters,
@@ -58,28 +57,12 @@ fun DomainFactory.getShowTaskInstancesData(
                     notDoneInstanceDescriptors = pair.first.map {
                         val (notDoneChildInstanceDescriptors, doneChildInstanceDescriptors) = getChildInstanceDatas(it, now)
 
-                        val instanceData = GroupListDataWrapper.InstanceData(
-                            it.done,
-                            it.instanceKey,
-                            it.name,
-                            it.instanceDateTime.timeStamp,
-                            it.instanceDate,
-                            it.task.notDeleted,
-                            it.canAddSubtask(now),
-                            it.canMigrateDescription(now),
-                            it.getCreateTaskTimePair(projectsFactory.privateProject, myUserFactory.user),
-                            it.task.note,
-                            newMixedInstanceDataCollection(
-                                notDoneChildInstanceDescriptors,
-                                GroupTypeFactory.SingleBridge.CompareBy.ORDINAL,
-                            ),
-                            doneChildInstanceDescriptors.toDoneSingleBridges(),
-                            it.ordinal,
-                            it.task.getImage(deviceDbInfo),
-                            it.isAssignedToMe(myUserFactory.user),
-                            it.getProject().projectKey as? ProjectKey.Shared,
-                            it.parentInstance?.instanceKey,
-                            it.taskHasOtherVisibleInstances(now),
+                        val instanceData = GroupListDataWrapper.InstanceData.fromInstance(
+                            it,
+                            now,
+                            this,
+                            notDoneChildInstanceDescriptors,
+                            doneChildInstanceDescriptors,
                         )
 
                         GroupTypeFactory.InstanceDescriptor(

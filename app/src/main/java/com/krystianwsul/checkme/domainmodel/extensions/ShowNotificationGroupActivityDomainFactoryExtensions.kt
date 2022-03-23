@@ -11,7 +11,6 @@ import com.krystianwsul.checkme.viewmodels.ShowNotificationGroupViewModel
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.InstanceKey
-import com.krystianwsul.common.utils.ProjectKey
 
 fun DomainFactory.getShowNotificationGroupData(instanceKeys: Set<InstanceKey>): ShowNotificationGroupViewModel.Data {
     MyCrashlytics.log("DomainFactory.getShowNotificationGroupData")
@@ -30,32 +29,14 @@ fun DomainFactory.getShowNotificationGroupData(instanceKeys: Set<InstanceKey>): 
     }
 
     val instanceDescriptors = instances.map { instance ->
-        val task = instance.task
-
         val (notDoneChildInstanceDescriptors, doneChildInstanceDescriptors) = getChildInstanceDatas(instance, now)
 
-        val instanceData = GroupListDataWrapper.InstanceData(
-            instance.done,
-            instance.instanceKey,
-            instance.name,
-            instance.instanceDateTime.timeStamp,
-            instance.instanceDate,
-            task.notDeleted,
-            instance.canAddSubtask(now),
-            instance.canMigrateDescription(now),
-            instance.getCreateTaskTimePair(projectsFactory.privateProject, myUserFactory.user),
-            task.note,
-            newMixedInstanceDataCollection(
-                notDoneChildInstanceDescriptors,
-                GroupTypeFactory.SingleBridge.CompareBy.ORDINAL,
-            ),
-            doneChildInstanceDescriptors.toDoneSingleBridges(),
-            instance.ordinal,
-            task.getImage(deviceDbInfo),
-            instance.isAssignedToMe(myUserFactory.user),
-            instance.getProject().projectKey as? ProjectKey.Shared,
-            instance.parentInstance?.instanceKey,
-            instance.taskHasOtherVisibleInstances(now),
+        val instanceData = GroupListDataWrapper.InstanceData.fromInstance(
+            instance,
+            now,
+            this,
+            notDoneChildInstanceDescriptors,
+            doneChildInstanceDescriptors,
         )
 
         GroupTypeFactory.InstanceDescriptor(

@@ -7,7 +7,10 @@ import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager.NotificationType
-import com.krystianwsul.checkme.domainmodel.extensions.*
+import com.krystianwsul.checkme.domainmodel.extensions.fixOffsetsAndCustomTimes
+import com.krystianwsul.checkme.domainmodel.extensions.migratePrivateCustomTime
+import com.krystianwsul.checkme.domainmodel.extensions.splitDone
+import com.krystianwsul.checkme.domainmodel.extensions.updateNotifications
 import com.krystianwsul.checkme.domainmodel.notifications.ImageManager
 import com.krystianwsul.checkme.domainmodel.notifications.NotificationWrapper
 import com.krystianwsul.checkme.domainmodel.notifications.Notifier
@@ -450,25 +453,12 @@ class DomainFactory(
     ): GroupTypeFactory.InstanceDescriptor {
         val (notDoneInstanceDescriptors, doneInstanceDescriptors) = childInstanceDescriptors.splitDone()
 
-        val instanceData = GroupListDataWrapper.InstanceData(
-            instance.done,
-            instance.instanceKey,
-            instance.name,
-            instance.instanceDateTime.timeStamp,
-            instance.instanceDate,
-            instance.task.notDeleted,
-            instance.canAddSubtask(now),
-            instance.canMigrateDescription(now),
-            instance.getCreateTaskTimePair(projectsFactory.privateProject, myUserFactory.user),
-            instance.task.note,
-            newMixedInstanceDataCollection(notDoneInstanceDescriptors, GroupTypeFactory.SingleBridge.CompareBy.ORDINAL),
-            doneInstanceDescriptors.toDoneSingleBridges(),
-            instance.ordinal,
-            instance.task.getImage(deviceDbInfo),
-            instance.isAssignedToMe(myUserFactory.user),
-            instance.getProject().projectKey as? ProjectKey.Shared,
-            instance.parentInstance?.instanceKey,
-            instance.taskHasOtherVisibleInstances(now),
+        val instanceData = GroupListDataWrapper.InstanceData.fromInstance(
+            instance,
+            now,
+            this,
+            notDoneInstanceDescriptors,
+            doneInstanceDescriptors,
         )
 
         return GroupTypeFactory.InstanceDescriptor(

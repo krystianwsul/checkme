@@ -7,6 +7,7 @@ import com.krystianwsul.checkme.utils.SingleCacheRelay
 import com.krystianwsul.checkme.utils.filterNotNull
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.InstanceKey
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
 
@@ -27,6 +28,7 @@ class GroupListViewModel : ViewModel() {
                     it.getInstance(instanceKey).taskHasOtherVisibleInstances(ExactTimeStamp.Local.now),
                 )
             }
+            .observeOn(AndroidSchedulers.mainThread())
             .subscribe(copyInstanceKeyRelay)
             .addTo(compositeDisposable)
     }

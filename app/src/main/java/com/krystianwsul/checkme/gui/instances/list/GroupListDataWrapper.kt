@@ -78,7 +78,6 @@ data class GroupListDataWrapper(
         override val isAssignedToMe: Boolean,
         val projectKey: ProjectKey.Shared?,
         val parentInstanceKey: InstanceKey?,
-        val taskHasOtherVisibleInstances: Boolean,
     ) : Comparable<InstanceData>, SelectedData, QueryMatchable, FilterParamsMatchable {
 
         companion object {
@@ -87,8 +86,8 @@ data class GroupListDataWrapper(
                 instance: Instance,
                 now: ExactTimeStamp.Local,
                 domainFactory: DomainFactory,
-                notDoneChildInstanceDescriptors: List<GroupTypeFactory.InstanceDescriptor>, // todo load this can be simplified
-                doneChildInstanceDescriptors: List<GroupTypeFactory.InstanceDescriptor>, // todo load this can be simplified
+                notDoneChildInstanceDescriptors: List<GroupTypeFactory.InstanceDescriptor>,
+                doneChildInstanceDescriptors: List<GroupTypeFactory.InstanceDescriptor>,
             ): InstanceData {
                 return InstanceData(
                     instance.done,
@@ -111,7 +110,6 @@ data class GroupListDataWrapper(
                     instance.isAssignedToMe(domainFactory.myUserFactory.user),
                     instance.getProject().projectKey as? ProjectKey.Shared,
                     instance.parentInstance?.instanceKey,
-                    instance.taskHasOtherVisibleInstances(now),
                 )
             }
         }

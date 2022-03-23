@@ -254,23 +254,20 @@ sealed class Task(
             .asSequence()
             .run { if (onlyRoot) filter { it.isRootInstance() } else this }
             .map { it.instanceDateTime to it }
-            .filterByDateTime(startExactTimeStamp, endExactTimeStamp)
+            .filter {
+                InterruptionChecker.throwIfInterrupted()
+
+                val exactTimeStamp = it.first.toLocalExactTimeStamp()
+
+                if (startExactTimeStamp?.let { exactTimeStamp < it } == true) return@filter false
+
+                if (endExactTimeStamp?.let { exactTimeStamp >= it } == true) return@filter false
+
+                true
+            }
+            .sortedBy { it.first } // this evaluates everything earlier
+            .map { it.second }
     }
-
-    private fun <T> Sequence<Pair<DateTime, T>>.filterByDateTime(
-        startExactTimeStamp: ExactTimeStamp.Offset?,
-        endExactTimeStamp: ExactTimeStamp.Offset?,
-    ) = filter {
-        InterruptionChecker.throwIfInterrupted()
-
-        val exactTimeStamp = it.first.toLocalExactTimeStamp()
-
-        if (startExactTimeStamp?.let { exactTimeStamp < it } == true) return@filter false
-
-        if (endExactTimeStamp?.let { exactTimeStamp >= it } == true) return@filter false
-
-        true
-    }.sortedBy { it.first }.map { it.second }
 
     // contains only generated instances
     private fun getParentInstances(
@@ -425,8 +422,7 @@ sealed class Task(
                 val instanceInfoSequences = mutableListOf<Sequence<InstanceInfo>>()
 
                 instanceInfoSequences +=
-                    getExistingInstances(startExactTimeStamp, endExactTimeStamp, onlyRoot).map(::InstanceInfo).toList()
-                        .asSequence()
+                    getExistingInstances(startExactTimeStamp, endExactTimeStamp, onlyRoot).map(::InstanceInfo)
 
                 if (!onlyRoot) {
                     instanceInfoSequences += getParentInstances(

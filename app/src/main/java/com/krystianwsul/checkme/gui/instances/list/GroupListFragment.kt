@@ -236,15 +236,7 @@ class GroupListFragment @JvmOverloads constructor(
                         val selectedData = selectedDatas.single()
 
                         if (selectedData is GroupListDataWrapper.InstanceData) {
-                            if (selectedData.taskHasOtherVisibleInstances) {
-                                listener.copyAllRemindersDelegate.showDialog(selectedData.instanceKey)
-                            } else {
-                                activity.startActivity(
-                                    EditActivity.getParametersIntent(
-                                        EditParameters.Copy(EditParameters.Copy.CopySource.Instance(selectedData.instanceKey))
-                                    )
-                                )
-                            }
+                            listener.groupListViewModel.copy(selectedData.instanceKey)
                         } else {
                             activity.startActivity(EditActivity.getParametersIntent(EditParameters.Copy(selectedData.taskKey)))
                         }

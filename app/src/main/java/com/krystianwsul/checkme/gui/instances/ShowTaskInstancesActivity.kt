@@ -18,6 +18,7 @@ import com.krystianwsul.checkme.gui.base.AbstractActivity
 import com.krystianwsul.checkme.gui.dialogs.RemoveInstancesDialogFragment
 import com.krystianwsul.checkme.gui.instances.list.GroupListListener
 import com.krystianwsul.checkme.gui.instances.list.GroupListParameters
+import com.krystianwsul.checkme.gui.instances.list.GroupListViewModel
 import com.krystianwsul.checkme.gui.projects.ShowProjectActivity
 import com.krystianwsul.checkme.gui.tasks.ShowTasksActivity
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
@@ -95,8 +96,7 @@ class ShowTaskInstancesActivity : AbstractActivity(), GroupListListener {
 
     private var data: ShowTaskInstancesViewModel.Data? = null
 
-    override lateinit var copyAllRemindersDelegate: CopyAllRemindersDelegate
-        private set
+    override val groupListViewModel by lazy { getViewModel<GroupListViewModel>() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -180,7 +180,7 @@ class ShowTaskInstancesActivity : AbstractActivity(), GroupListListener {
 
         startDate(receiver)
 
-        copyAllRemindersDelegate = CopyAllRemindersDelegate(this)
+        CopyAllRemindersDelegate(this, groupListViewModel, createDisposable)
     }
 
     override fun onStart() {

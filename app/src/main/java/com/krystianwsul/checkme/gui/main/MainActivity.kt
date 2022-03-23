@@ -41,6 +41,7 @@ import com.krystianwsul.checkme.gui.friends.FriendListFragment
 import com.krystianwsul.checkme.gui.instances.DayFragment
 import com.krystianwsul.checkme.gui.instances.list.GroupListListener
 import com.krystianwsul.checkme.gui.instances.list.GroupListParameters
+import com.krystianwsul.checkme.gui.instances.list.GroupListViewModel
 import com.krystianwsul.checkme.gui.projects.ProjectListFragment
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
@@ -69,26 +70,7 @@ import org.joda.time.DateTime
 import org.joda.time.Days
 import org.joda.time.LocalDate
 import java.io.Serializable
-import kotlin.collections.ArrayList
-import kotlin.collections.MutableMap
-import kotlin.collections.Set
-import kotlin.collections.all
-import kotlin.collections.associate
-import kotlin.collections.forEach
-import kotlin.collections.isNotEmpty
-import kotlin.collections.listOf
-import kotlin.collections.map
-import kotlin.collections.minOrNull
-import kotlin.collections.minus
-import kotlin.collections.mutableListOf
-import kotlin.collections.mutableMapOf
-import kotlin.collections.plus
-import kotlin.collections.plusAssign
 import kotlin.collections.set
-import kotlin.collections.setOf
-import kotlin.collections.single
-import kotlin.collections.singleOrNull
-import kotlin.collections.toMutableMap
 
 class MainActivity :
     AbstractActivity(),
@@ -203,13 +185,15 @@ class MainActivity :
 
     private lateinit var copyAllRemindersDelegate: CopyAllRemindersDelegate
 
+    private val groupListViewModel by lazy { getViewModel<GroupListViewModel>() }
+
     val daysGroupListListener = object : GroupListListener {
 
         override val snackbarParent get() = this@MainActivity.snackbarParent
 
         override val instanceSearch = Observable.never<FilterCriteria>()
 
-        override val copyAllRemindersDelegate get() = this@MainActivity.copyAllRemindersDelegate
+        override val groupListViewModel get() = this@MainActivity.groupListViewModel
 
         override fun setToolbarExpanded(expanded: Boolean) = this@MainActivity.setToolbarExpanded(expanded)
 
@@ -361,7 +345,7 @@ class MainActivity :
 
             override val instanceSearch = Observable.never<FilterCriteria>()
 
-            override val copyAllRemindersDelegate get() = this@MainActivity.copyAllRemindersDelegate
+            override val groupListViewModel get() = this@MainActivity.groupListViewModel
 
             override fun setToolbarExpanded(expanded: Boolean) = this@MainActivity.setToolbarExpanded(expanded)
 
@@ -772,7 +756,7 @@ class MainActivity :
             }
             .addTo(createDisposable)
 
-        copyAllRemindersDelegate = CopyAllRemindersDelegate(this)
+        CopyAllRemindersDelegate(this, groupListViewModel, createDisposable)
     }
 
     private fun getTabSearchStateFromIntent(intent: Intent) = when (intent.action) {

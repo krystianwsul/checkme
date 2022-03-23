@@ -19,6 +19,7 @@ import com.krystianwsul.checkme.gui.dialogs.RemoveInstancesDialogFragment
 import com.krystianwsul.checkme.gui.instances.edit.SnackbarEditInstancesHostDelegate
 import com.krystianwsul.checkme.gui.instances.list.GroupListListener
 import com.krystianwsul.checkme.gui.instances.list.GroupListParameters
+import com.krystianwsul.checkme.gui.instances.list.GroupListViewModel
 import com.krystianwsul.checkme.gui.instances.list.GroupMenuUtils
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
 import com.krystianwsul.checkme.gui.utils.BottomFabMenuDelegate
@@ -100,8 +101,7 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
 
     private lateinit var bottomFabMenuDelegate: BottomFabMenuDelegate
 
-    override lateinit var copyAllRemindersDelegate: CopyAllRemindersDelegate
-        private set
+    override val groupListViewModel by lazy { getViewModel<GroupListViewModel>() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -180,7 +180,7 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
 
         startDate(receiver)
 
-        copyAllRemindersDelegate = CopyAllRemindersDelegate(this)
+        CopyAllRemindersDelegate(this, groupListViewModel, createDisposable)
     }
 
     private val editInstancesHostDelegate = object : SnackbarEditInstancesHostDelegate(createDisposable) {

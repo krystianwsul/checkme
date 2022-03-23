@@ -5,7 +5,6 @@ import com.krystianwsul.checkme.gui.base.ListItemAddedListener
 import com.krystianwsul.checkme.gui.base.SnackbarListener
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
 import com.krystianwsul.checkme.gui.utils.BottomFabMenuDelegate
-import com.krystianwsul.checkme.gui.utils.CopyAllRemindersDelegate
 import com.krystianwsul.checkme.gui.widgets.MyBottomBar
 import com.krystianwsul.checkme.viewmodels.DataId
 import com.krystianwsul.common.utils.TaskKey
@@ -17,7 +16,7 @@ interface GroupListListener : SnackbarListener, ListItemAddedListener {
 
     val instanceSearch: Observable<FilterCriteria>
 
-    val copyAllRemindersDelegate: CopyAllRemindersDelegate
+    val groupListViewModel: GroupListViewModel
 
     fun onCreateGroupActionMode(
         actionMode: ActionMode,

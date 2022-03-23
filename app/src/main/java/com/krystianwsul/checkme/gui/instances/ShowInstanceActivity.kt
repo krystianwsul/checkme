@@ -19,6 +19,7 @@ import com.krystianwsul.checkme.gui.edit.EditActivity
 import com.krystianwsul.checkme.gui.edit.EditParameters
 import com.krystianwsul.checkme.gui.instances.edit.EditInstancesHostDelegate
 import com.krystianwsul.checkme.gui.instances.list.GroupListListener
+import com.krystianwsul.checkme.gui.instances.list.GroupListViewModel
 import com.krystianwsul.checkme.gui.main.DebugFragment
 import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
@@ -137,8 +138,8 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
         override fun afterEditInstances(undoData: UndoData, count: Int, newTimeStamp: TimeStamp?) {}
     }
 
-    override lateinit var copyAllRemindersDelegate: CopyAllRemindersDelegate
-        private set
+    override val groupListViewModel by lazy { getViewModel<GroupListViewModel>() }
+    private lateinit var copyAllRemindersDelegate: CopyAllRemindersDelegate
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -235,7 +236,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
 
         startDate(dateReceiver)
 
-        copyAllRemindersDelegate = CopyAllRemindersDelegate(this)
+        copyAllRemindersDelegate = CopyAllRemindersDelegate(this, groupListViewModel, createDisposable)
     }
 
     private fun showHour() = data?.run {

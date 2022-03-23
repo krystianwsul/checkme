@@ -27,6 +27,16 @@ object TimeLogger {
 
     fun startIfLogDone(key: String) = if (FeatureFlagManager.logDone) start(key) else null
 
+    fun <T> log(key: String, action: () -> T): T {
+        val tracker = start(key)
+
+        val ret = action()
+
+        tracker.stop()
+
+        return ret
+    }
+
     class Tracker(val key: String) {
 
         private val start = DateTimeSoy.nowUnixLong()

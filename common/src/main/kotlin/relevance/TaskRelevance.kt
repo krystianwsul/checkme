@@ -113,6 +113,7 @@ class TaskRelevance(val task: Task) {
                             RepeatingSchedule.RepeatingOldestVisible.Ended -> false
                         }
                     }
+                    else -> throw UnsupportedOperationException() // oh for fuck's sake
                 }
             }
             .map { scheduleRelevances.getOrPut(it.schedule) }

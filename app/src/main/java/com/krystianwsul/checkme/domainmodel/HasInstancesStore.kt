@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.domainmodel
 import com.jakewharton.rxrelay3.BehaviorRelay
 import com.krystianwsul.checkme.utils.toV3
 import com.krystianwsul.common.firebase.models.task.RootTask
+import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.TaskKey
 import com.mindorks.scheduler.Priority
@@ -15,15 +16,18 @@ object HasInstancesStore {
     private const val KEY = "hasInstancesKey"
 
     // lazy for tests
-    private val book by lazy { RxPaperBook.with("hasInstances") }
+    private val book by lazy { RxPaperBook.with("hasInstances2") }
 
-    private class Data(val fromFile: Boolean, val map: Map<TaskKey.Root, Boolean>)
+    private class Data(val fromFile: Boolean, val taskData: TaskData?)
+
+    private class TaskData(val date: Date, val map: Map<TaskKey.Root, InstanceState>)
 
     private val hasInstancesMapRelay = BehaviorRelay.create<Data>()
 
     fun init() {
-        book.read(KEY, mapOf<TaskKey.Root, Boolean>())
+        book.read<TaskData>(KEY)
             .toV3()
+            .onErrorComplete()
             .subscribeBy {
                 if (!hasInstancesMapRelay.hasValue()) hasInstancesMapRelay.accept(Data(true, it))
             }
@@ -31,7 +35,7 @@ object HasInstancesStore {
         hasInstancesMapRelay.filter { !it.fromFile }
             .toFlowable(BackpressureStrategy.LATEST)
             .flatMapCompletable(
-                { book.write(KEY, it.map).toV3() },
+                { book.write(KEY, it.taskData).toV3() },
                 false,
                 1,
             )
@@ -39,7 +43,13 @@ object HasInstancesStore {
     }
 
     private fun calculateHasInstances(task: RootTask, now: ExactTimeStamp.Local) =
-        task.getInstances(null, null, now).any()
+        task.getInstances(null, null, now).firstOrNull().let {
+            when {
+                it == null -> InstanceState.NONE
+                it.instanceDate <= now.date -> InstanceState.TODAY
+                else -> InstanceState.ANY
+            }
+        }
 
     fun update(domainFactory: DomainFactory, now: ExactTimeStamp.Local) {
         val projectsNullable = domainFactory.myUserFactory
@@ -61,29 +71,40 @@ object HasInstancesStore {
 
         if (tasks.values.any { !it.dependenciesLoaded }) return
 
-        val hasInstancesMap = tasks.mapValues { false }.toMutableMap()
-        tasks.filterValues { calculateHasInstances(it, now) }.forEach { setTaskHighPriority(it.value, hasInstancesMap) }
+        val hasInstancesMap = tasks.mapValues { InstanceState.NONE }.toMutableMap()
 
-        hasInstancesMapRelay.accept(Data(false, hasInstancesMap))
+        tasks.map { it.value to calculateHasInstances(it.value, now) }
+            .filter { it.second > InstanceState.NONE }
+            .forEach { setTaskPriority(it.first, it.second, hasInstancesMap) }
+
+        hasInstancesMapRelay.accept(Data(false, TaskData(now.date, hasInstancesMap)))
     }
 
     fun getPriority(taskKey: TaskKey.Root): Priority {
-        val map = hasInstancesMapRelay.value
-            ?.map
-            ?: return Priority.DB_TASKS // if the file hasn't loaded
+        val taskData = hasInstancesMapRelay.value
+            ?.taskData
+            ?: return Priority.DB_TASKS
 
-        val hasInstances = map[taskKey] ?: return Priority.DB_NOTES // if it's not in the cache, wait on it
-
-        return if (hasInstances) Priority.DB_TASKS else Priority.DB_NOTES
+        return when (taskData.map.getOrDefault(taskKey, InstanceState.NONE)) {
+            InstanceState.NONE -> Priority.DB_NOTES
+            // if we have yesterday's data, then we'd better load all instances
+            InstanceState.ANY -> if (taskData.date == Date.today()) Priority.DB_LATER_INSTANCES else Priority.DB_TASKS
+            InstanceState.TODAY -> Priority.DB_TASKS
+        }
     }
 
-    private fun setTaskHighPriority(task: RootTask, map: MutableMap<TaskKey.Root, Boolean>) {
-        if (map[task.taskKey] == true) return
+    private fun setTaskPriority(task: RootTask, instanceState: InstanceState, map: MutableMap<TaskKey.Root, InstanceState>) {
+        if (map.getOrDefault(task.taskKey, InstanceState.NONE) >= instanceState) return
 
-        map[task.taskKey] = true
+        map[task.taskKey] = instanceState
 
         task.rootTaskDependencyResolver
             .directDependencyTasks
-            .forEach { setTaskHighPriority(it, map) }
+            .forEach { setTaskPriority(it, instanceState, map) }
+    }
+
+    private enum class InstanceState {
+
+        NONE, ANY, TODAY
     }
 }

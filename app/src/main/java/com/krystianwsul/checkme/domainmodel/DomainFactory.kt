@@ -481,7 +481,7 @@ class DomainFactory(
             .filter {
                 !filterVisible || it.isVisible(now, Instance.VisibilityOptions(assumeChildOfVisibleParent = true))
             }
-            .filterSearchCriteria(searchCriteria, now, myUserFactory.user)
+            .filterSearchCriteria(searchCriteria, now, myUserFactory.user, true)
             .mapNotNull { childInstance ->
                 val childTask = childInstance.task
 

@@ -177,7 +177,7 @@ class DetailsNode(
 
         companion object {
 
-            fun fromProjectUsers(users: List<ProjectUser>) = users.map { User(it.name, it.photoUrl) }
+            fun fromProjectUsers(users: Collection<ProjectUser>) = users.map { User(it.name, it.photoUrl) }
         }
     }
 

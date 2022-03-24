@@ -31,13 +31,14 @@ fun Sequence<Instance>.filterSearchCriteria(
     searchCriteria: SearchCriteria,
     now: ExactTimeStamp.Local,
     myUser: MyUser,
+    assumeChild: Boolean,
 ) = if (searchCriteria.isEmpty) {
     this
 } else {
-    fun childHierarchyMatches(instance: Instance): Boolean {
+    fun childHierarchyMatches(instance: Instance, assumeChild: Boolean): Boolean {
         InterruptionChecker.throwIfInterrupted()
 
-        if (!searchCriteria.showAssignedToOthers && !instance.isAssignedToMe(myUser)) return false
+        if (!assumeChild && !searchCriteria.showAssignedToOthers && !instance.isAssignedToMe(myUser)) return false
 
         if (!searchCriteria.showDone && instance.done != null) return false
 
@@ -47,10 +48,10 @@ fun Sequence<Instance>.filterSearchCriteria(
 
         return instance.getChildInstances()
             .filter { it.isVisible(now, Instance.VisibilityOptions(assumeChildOfVisibleParent = true)) }
-            .any(::childHierarchyMatches)
+            .any { childHierarchyMatches(it, true) }
     }
 
-    filter(::childHierarchyMatches)
+    filter { childHierarchyMatches(it, assumeChild) }
 }
 
 enum class FilterResult {

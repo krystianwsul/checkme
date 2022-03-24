@@ -101,7 +101,7 @@ sealed class Schedule(val topLevelTask: Task) : TaskParentEntry, ProjectIdOwner 
 
     abstract fun updateOldestVisible(scheduleInterval: ScheduleInterval, now: ExactTimeStamp.Local)
 
-    val assignedTo get() = scheduleRecord.assignedTo.map { UserKey(it) }.toSet()
+    val assignedTo by lazy { scheduleRecord.assignedTo.map { UserKey(it) }.toSet() }
 
     override fun toString() = super.toString() + ", taskKey: ${topLevelTask.taskKey}, id: $id, type: ${this::class.simpleName}, startExactTimeStamp: $startExactTimeStamp, endExactTimeStamp: $endExactTimeStamp"
 

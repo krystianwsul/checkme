@@ -279,56 +279,53 @@ class Instance private constructor(
 
     private val taskHierarchyChildInstancesCache =
         invalidatableCache<List<Instance>>(task.clearableInvalidatableManager) { invalidatableCache ->
-            val scheduleDateTime = scheduleDateTime
-
-            val childInstances = task.childHierarchyIntervals
-                .asSequence()
-                .filter { it.notDeletedOffset(scheduleDateTime.toLocalExactTimeStamp()) }
-                /**
-                 * todo it seems to me that this `filter` should be redundant with the check in getParentInstance, but a
-                 * test fails if I remove it.
-                 */
-                .filter { interval -> // once an instance is done, we don't want subsequently added task hierarchies contributing to it
-                    doneOffset?.let { it > interval.taskHierarchy.startExactTimeStampOffset } != false
-                }
-                .map {
-                    it.taskHierarchy
-                        .childTask
-                        .getInstance(scheduleDateTime)
-                }
-                /*
-                todo this doesn't really make sense to me.  I feel like these instances should be filtered by !exists,
-                (because that's redundant with existingChildInstancesCache) and then the remainder of this chain
-                shouldn't be needed.  But trying that made some tests fail, and I don't feel like figuring it out now.
-                 */
-                .filter { it.parentInstance == this }
-                .distinct()
-                .toList()
-
-            val doneOffsetCallback = doneOffsetProperty.addCallback { invalidatableCache.invalidate() }
-
-            val parentInstanceRemovables = childInstances.map {
-                it.parentInstanceCache
-                    .invalidatableManager
-                    .addInvalidatable(invalidatableCache)
-            }
-
             val childHierarchyIntervalsRemovable = task.childHierarchyIntervalsCache
                 .invalidatableManager
                 .addInvalidatable(invalidatableCache)
 
-            val customTimesRemovable = task.rootModelChangeManager
-                .customTimesInvalidatableManager
-                .addInvalidatable(invalidatableCache)
+            if (task.childHierarchyIntervals.isEmpty()) { // optimization
+                InvalidatableCache.ValueHolder(emptyList()) { childHierarchyIntervalsRemovable.remove() }
+            } else {
+                val scheduleDateTime = scheduleDateTime
+                val scheduleExactTimeStamp = scheduleDateTime.toLocalExactTimeStamp()
 
-            InvalidatableCache.ValueHolder(childInstances) {
-                doneOffsetProperty.removeCallback(doneOffsetCallback)
+                val childInstances = task.childHierarchyIntervals
+                    .asSequence()
+                    .filter { it.notDeletedOffset(scheduleExactTimeStamp) }
+                    .filter { interval -> // once an instance is done, we don't want subsequently added task hierarchies contributing to it
+                        doneOffset?.let { it > interval.taskHierarchy.startExactTimeStampOffset } != false
+                    }
+                    .map {
+                        it.taskHierarchy
+                            .childTask
+                            .getInstance(scheduleDateTime)
+                    }
+                    .filter { it.parentState is ParentState.Unset }
+                    .filter { it.parentInstance == this }
+                    .distinct()
+                    .toList()
 
-                parentInstanceRemovables.forEach { it.remove() }
+                val doneOffsetCallback = doneOffsetProperty.addCallback { invalidatableCache.invalidate() }
 
-                childHierarchyIntervalsRemovable.remove()
+                val parentInstanceRemovables = childInstances.map {
+                    it.parentInstanceCache
+                        .invalidatableManager
+                        .addInvalidatable(invalidatableCache)
+                }
 
-                customTimesRemovable.remove()
+                val customTimesRemovable = task.rootModelChangeManager
+                    .customTimesInvalidatableManager
+                    .addInvalidatable(invalidatableCache)
+
+                InvalidatableCache.ValueHolder(childInstances) {
+                    doneOffsetProperty.removeCallback(doneOffsetCallback)
+
+                    parentInstanceRemovables.forEach { it.remove() }
+
+                    childHierarchyIntervalsRemovable.remove()
+
+                    customTimesRemovable.remove()
+                }
             }
         }
 
@@ -336,7 +333,11 @@ class Instance private constructor(
         invalidatableCache<List<Instance>>(task.clearableInvalidatableManager) { invalidatableCache ->
             val childInstances = task.parent
                 .getAllExistingInstances()
-                .filter { it.parentInstance == this }
+                .filter {
+                    it.parentState
+                        .let { it as? ParentState.Parent }
+                        ?.parentInstanceKey == instanceKey
+                }
                 .toList()
 
             val parentInstanceRemovables = childInstances.map {
@@ -356,7 +357,7 @@ class Instance private constructor(
             }
         }
 
-    fun getChildInstances() = (taskHierarchyChildInstancesCache.value + existingChildInstancesCache.value).distinct()
+    fun getChildInstances() = taskHierarchyChildInstancesCache.value + existingChildInstancesCache.value
 
     fun isRootInstance() = parentInstance == null
 
@@ -681,15 +682,19 @@ class Instance private constructor(
         }
     }
 
-    override fun getAssignedTo(): List<ProjectUser> {
+    override fun getAssignedTo(): Collection<ProjectUser> {
+        // optimization.  If they're all empty, then so must be the final result
+        if (task.schedules.all { it.assignedTo.isEmpty() }) return listOf()
+
         if (!isRootInstance()) return listOf()
 
-        return getMatchingScheduleIntervals(false).map { it.schedule.assignedTo }
+        return getMatchingScheduleIntervals(false)
+            .map { it.schedule.assignedTo }
             .distinct()
             .singleOrEmpty()
             .orEmpty()
             .let(task.project::getAssignedTo)
-            .map { it.value }
+            .values
     }
 
     fun setParentState(parentInstanceKey: InstanceKey) = setParentState(ParentState.Parent(parentInstanceKey))

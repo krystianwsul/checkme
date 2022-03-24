@@ -46,7 +46,7 @@ abstract class ScheduleRecord(
 
     val customTimeKey: CustomTimeKey? get() = timePair.customTimeKey
 
-    val assignedTo get() = taskRecord.assignedToHelper.getAssignedTo(scheduleJson)
+    val assignedTo by lazy { taskRecord.assignedToHelper.getAssignedTo(scheduleJson) }
 
     abstract val scheduleWrapperBridge: ScheduleWrapperBridge
 

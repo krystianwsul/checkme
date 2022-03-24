@@ -234,7 +234,7 @@ sealed class Project<T : ProjectType>(
         return combineInstanceSequences(instanceSequences).let { sequence ->
             InterruptionChecker.throwIfInterrupted()
 
-            searchData?.let { sequence.filterSearchCriteria(it.searchCriteria, now, it.myUser) } ?: sequence
+            searchData?.let { sequence.filterSearchCriteria(it.searchCriteria, now, it.myUser, false) } ?: sequence
         }.let { instances ->
             InterruptionChecker.throwIfInterrupted()
 

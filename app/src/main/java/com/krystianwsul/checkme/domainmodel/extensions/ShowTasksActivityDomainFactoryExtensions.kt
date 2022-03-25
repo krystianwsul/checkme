@@ -15,7 +15,10 @@ import com.krystianwsul.common.firebase.models.project.SharedProject
 import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.time.ExactTimeStamp
 
-fun DomainFactory.getShowTasksData(parameters: ShowTasksActivity.Parameters): ShowTasksViewModel.Data {
+fun DomainFactory.getShowTasksData(
+    parameters: ShowTasksActivity.Parameters,
+    showProjects: Boolean, // this is dynamically from FilterCriteria, not the helper in parameters
+): ShowTasksViewModel.Data {
     MyCrashlytics.log("DomainFactory.getShowTasksData")
 
     DomainThreadChecker.instance.requireDomainThread()
@@ -54,7 +57,7 @@ fun DomainFactory.getShowTasksData(parameters: ShowTasksActivity.Parameters): Sh
                 if (parameters.projectKey != null) {
                     getProjectForce(parameters.projectKey).getUnscheduledTaskDatas()
                 } else {
-                    projects.values.flatMap { it.toEntryDatas(it.getUnscheduledTaskDatas()) }
+                    projects.values.flatMap { it.toEntryDatas(it.getUnscheduledTaskDatas(), showProjects) }
                 }
             }
 

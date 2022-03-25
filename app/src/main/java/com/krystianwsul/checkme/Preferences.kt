@@ -21,7 +21,6 @@ import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.schedulers.Schedulers
 import org.joda.time.LocalDateTime
 import java.util.*
-import kotlin.collections.HashMap
 import kotlin.properties.Delegates.observable
 import kotlin.properties.ReadOnlyProperty
 import kotlin.properties.ReadWriteProperty
@@ -151,9 +150,8 @@ object Preferences {
     val filterParamsObservable = Observable.combineLatest(
         showDeletedObservable,
         showAssignedObservable,
-        showProjectsObservable,
-    ) { showDeleted, showAssignedToOthers, showProjects ->
-        FilterCriteria.Full.FilterParams(showDeleted, showAssignedToOthers, showProjects)
+    ) { showDeleted, showAssignedToOthers ->
+        FilterCriteria.Full.FilterParams(showDeleted, showAssignedToOthers)
     }.distinctUntilChanged()
 
     var instanceWarningSnooze: ExactTimeStamp.Local?

@@ -1040,7 +1040,7 @@ class MainActivity :
             binding.mainCustomTimesFrame,
             binding.mainFriendListFrame,
             binding.mainDebugFrame,
-            binding.mainAboutFrame
+            binding.mainAboutFrame,
         ) - currentTabLayout
 
         if (tab == Tab.INSTANCES) {

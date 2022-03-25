@@ -403,11 +403,11 @@ fun DomainUpdater.undo(notificationType: DomainListenerManager.NotificationType,
 
 fun Project<*>.toEntryDatas(
     childTaskDatas: List<TaskListFragment.ChildTaskData>,
-//    showProjects: Boolean, todo projects
+    showProjects: Boolean,
 ): List<TaskListFragment.EntryData> {
     if (childTaskDatas.isEmpty()) return emptyList()
 
-    return if (/* todo projects showProjects */ true) {
+    return if (showProjects) {
         listOf(
             TaskListFragment.ProjectData(
                 getDisplayName(),

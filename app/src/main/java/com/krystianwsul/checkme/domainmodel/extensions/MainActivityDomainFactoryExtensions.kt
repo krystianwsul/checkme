@@ -18,14 +18,17 @@ import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.ExactTimeStamp
 import java.util.*
 
-fun DomainFactory.getMainNoteData(now: ExactTimeStamp.Local = ExactTimeStamp.Local.now): MainNoteViewModel.Data {
+fun DomainFactory.getMainNoteData(
+    showProjects: Boolean,
+    now: ExactTimeStamp.Local = ExactTimeStamp.Local.now,
+): MainNoteViewModel.Data {
     MyCrashlytics.log("DomainFactory.getMainNoteData")
 
     DomainThreadChecker.instance.requireDomainThread()
 
     return MainNoteViewModel.Data(
         TaskListFragment.TaskData(
-            getMainData(now) { it.intervalInfo.isUnscheduled() },
+            getMainData(now, showProjects) { it.intervalInfo.isUnscheduled() },
             null,
             true,
             null,
@@ -33,16 +36,22 @@ fun DomainFactory.getMainNoteData(now: ExactTimeStamp.Local = ExactTimeStamp.Loc
     )
 }
 
-fun DomainFactory.getMainTaskData(now: ExactTimeStamp.Local = ExactTimeStamp.Local.now): MainTaskViewModel.Data {
+fun DomainFactory.getMainTaskData(
+    showProjects: Boolean,
+    now: ExactTimeStamp.Local = ExactTimeStamp.Local.now,
+): MainTaskViewModel.Data {
     MyCrashlytics.log("DomainFactory.getMainTaskData")
 
     DomainThreadChecker.instance.requireDomainThread()
 
-    return MainTaskViewModel.Data(TaskListFragment.TaskData(getMainData(now), null, true, null))
+    return MainTaskViewModel.Data(
+        TaskListFragment.TaskData(getMainData(now, showProjects), null, true, null)
+    )
 }
 
 private fun DomainFactory.getMainData(
     now: ExactTimeStamp.Local,
+    showProjects: Boolean,
     filter: (Task) -> Boolean = { true },
 ): List<TaskListFragment.EntryData> {
     fun Collection<Task>.toChildTaskDatas() = asSequence().filter(filter)
@@ -71,12 +80,12 @@ private fun DomainFactory.getMainData(
             .values
             .groupBy { it.projectId }
             .flatMap { (projectId, tasks) ->
-                projectsFactory.getProjectForce(projectId).toEntryDatas(tasks.toChildTaskDatas())
+                projectsFactory.getProjectForce(projectId).toEntryDatas(tasks.toChildTaskDatas(), showProjects)
             }
     } else {
         projectsFactory.projects
             .values
-            .flatMap { it.toEntryDatas(it.getAllDependenciesLoadedTasks().toChildTaskDatas()) }
+            .flatMap { it.toEntryDatas(it.getAllDependenciesLoadedTasks().toChildTaskDatas(), showProjects) }
     }
 }
 

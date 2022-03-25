@@ -8,11 +8,19 @@ abstract class DomainViewModel<D : DomainData> : ViewModel() {
     protected abstract val domainListener: DomainListener<D>
 
     protected val clearedDisposable = CompositeDisposable()
+    protected val startedDisposable = CompositeDisposable()
+
+    protected var started = false
+        private set
 
     val data get() = domainListener.data
     val dataId get() = domainListener.dataId
 
-    fun stop() = domainListener.stop()
+    fun stop() {
+        started = false
+        startedDisposable.clear()
+        domainListener.stop()
+    }
 
     override fun onCleared() {
         stop()
@@ -20,7 +28,13 @@ abstract class DomainViewModel<D : DomainData> : ViewModel() {
         clearedDisposable.dispose()
     }
 
-    protected fun internalStart() = domainListener.start()
+    protected fun internalStart() {
+        started = true
+        domainListener.start()
+    }
 
-    fun refresh() = domainListener.start(true)
+    fun refresh() {
+        started = true
+        domainListener.start(true)
+    }
 }

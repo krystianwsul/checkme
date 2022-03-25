@@ -452,11 +452,6 @@ class GroupListFragment @JvmOverloads constructor(
 
         override fun getFilterCriteriaFromData(data: GroupListParameters) = data.filterCriteria
 
-        override fun filterDataChangeRequiresReinitializingModelAdapter(
-            oldFilterCriteria: FilterCriteria,
-            newFilterCriteria: FilterCriteria,
-        ) = false
-
         override fun instantiateAdapters(filterCriteria: FilterCriteria) = GroupAdapter(
             this@GroupListFragment,
             filterCriteria,
@@ -472,11 +467,7 @@ class GroupListFragment @JvmOverloads constructor(
             dragHelper.attachToRecyclerView(binding.groupListRecycler)
         }
 
-        override fun initializeModelAdapter(
-            modelAdapter: GroupAdapter,
-            data: GroupListParameters,
-            filterCriteria: FilterCriteria,
-        ) {
+        override fun initializeModelAdapter(modelAdapter: GroupAdapter, data: GroupListParameters) {
             if (treeViewAdapterInitialized) state = modelAdapter.groupListState
 
             modelAdapter.initialize(

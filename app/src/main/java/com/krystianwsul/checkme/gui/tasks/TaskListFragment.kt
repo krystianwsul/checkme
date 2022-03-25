@@ -26,7 +26,6 @@ import com.krystianwsul.checkme.gui.edit.EditActivity
 import com.krystianwsul.checkme.gui.edit.EditParameters
 import com.krystianwsul.checkme.gui.edit.EditParentHint
 import com.krystianwsul.checkme.gui.instances.ShowTaskInstancesActivity
-import com.krystianwsul.checkme.gui.instances.tree.*
 import com.krystianwsul.checkme.gui.main.FabUser
 import com.krystianwsul.checkme.gui.tree.*
 import com.krystianwsul.checkme.gui.tree.delegates.expandable.ExpandableDelegate
@@ -58,7 +57,6 @@ import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.cast
 import kotlinx.parcelize.Parcelize
 import java.io.Serializable
-import java.util.*
 import com.krystianwsul.checkme.gui.instances.tree.TaskNode as InstanceTreeTaskNode
 
 class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
@@ -283,15 +281,6 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
         override fun getFilterCriteriaFromData(data: Data): FilterCriteria? = null
 
-        override fun filterDataChangeRequiresReinitializingModelAdapter(
-            oldFilterCriteria: FilterCriteria,
-            newFilterCriteria: FilterCriteria,
-        ): Boolean {
-            fun FilterCriteria.showProjects() = (this as? FilterCriteria.Full)?.filterParams?.showProjects
-
-            return topLevelTaskData == null && oldFilterCriteria.showProjects() != newFilterCriteria.showProjects()
-        }
-
         override fun instantiateAdapters(filterCriteria: FilterCriteria) =
             TaskAdapter(this@TaskListFragment, filterCriteria).let { it to it.treeViewAdapter }
 
@@ -304,12 +293,10 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             dragHelper.attachToRecyclerView(binding.taskListRecycler)
         }
 
-        override fun initializeModelAdapter(modelAdapter: TaskAdapter, data: Data, filterCriteria: FilterCriteria) {
-            val showProjects = (filterCriteria as? FilterCriteria.Full)?.filterParams?.showProjects == true
-
+        override fun initializeModelAdapter(modelAdapter: TaskAdapter, data: Data) {
             if (treeViewAdapterInitialized) adapterState = getAdapterState()
 
-            modelAdapter.initialize(data.taskData, adapterState, data.copying, showProjects)
+            modelAdapter.initialize(data.taskData, adapterState, data.copying)
         }
 
         override fun updateTreeViewAdapterAfterModelAdapterInitialization(
@@ -527,7 +514,6 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             taskData: TaskData,
             adapterState: AdapterState,
             copying: Boolean,
-            showProjects: Boolean,
         ) {
             treeNodeCollection = TreeNodeCollection(treeViewAdapter)
 
@@ -578,19 +564,14 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                     )
 
                     when (it) {
-                        is ProjectData -> {
-                            if (showProjects)
-                                listOf(ProjectNode(this, it, copying))
-                            else
-                                it.children.map { it.toRootWrapper() }
-                        }
+                        is ProjectData -> listOf(ProjectNode(this, it, copying))
                         is ChildTaskData -> listOf(it.toRootWrapper())
                         else -> throw IllegalArgumentException()
                     }
                 }
                 .toMutableList()
 
-            treeNodes += nodes.map { it.initialize(adapterState, treeNodeCollection, showProjects) }
+            treeNodes += nodes.map { it.initialize(adapterState, treeNodeCollection) }
 
             treeNodeCollection.nodes = treeNodes
         }
@@ -656,7 +637,6 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         abstract fun initialize(
             adapterState: AdapterState,
             nodeContainer: NodeContainer<AbstractHolder>,
-            showProjects: Boolean,
         ): TreeNode<AbstractHolder>
     }
 
@@ -700,7 +680,6 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         override fun initialize(
             adapterState: AdapterState,
             nodeContainer: NodeContainer<AbstractHolder>,
-            showProjects: Boolean,
         ): TreeNode<AbstractHolder> {
             treeNode = TreeNode(
                 this,
@@ -719,7 +698,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                     it,
                     copying,
                     this
-                ).also { treeNodes += it.initialize(adapterState, treeNode, showProjects) }
+                ).also { treeNodes += it.initialize(adapterState, treeNode) }
             }
 
             treeNode.setChildTreeNodes(treeNodes)
@@ -779,7 +758,6 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         override fun initialize(
             adapterState: AdapterState,
             nodeContainer: NodeContainer<AbstractHolder>,
-            showProjects: Boolean,
         ): TreeNode<AbstractHolder> {
             val detailsNode = DetailsNode(
                 childTaskData.projectInfo,
@@ -807,7 +785,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                     it,
                     copying,
                     this
-                ).also { treeNodes += it.initialize(adapterState, treeNode, showProjects) }
+                ).also { treeNodes += it.initialize(adapterState, treeNode) }
             }
 
             treeNode.setChildTreeNodes(treeNodes)

@@ -24,8 +24,7 @@ sealed interface FilterCriteria : Parcelable {
             query: String = "",
             showDeleted: Boolean = false,
             showAssignedToOthers: Boolean = true,
-            showProjects: Boolean = false,
-        ) : this(query, FilterParams(showDeleted, showAssignedToOthers, showProjects))
+        ) : this(query, FilterParams(showDeleted, showAssignedToOthers))
 
         override fun canBeShown(treeNode: TreeNode<*>): Boolean {
             if (!treeNode.modelNode.matchesFilterParams(filterParams)) return false
@@ -38,11 +37,7 @@ sealed interface FilterCriteria : Parcelable {
         }
 
         @Parcelize
-        data class FilterParams(
-            val showDeleted: Boolean = false,
-            val showAssignedToOthers: Boolean = true,
-            val showProjects: Boolean = false,
-        ) : Parcelable
+        data class FilterParams(val showDeleted: Boolean = false, val showAssignedToOthers: Boolean = true) : Parcelable
     }
 
     @Parcelize

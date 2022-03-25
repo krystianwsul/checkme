@@ -401,13 +401,26 @@ fun DomainUpdater.undo(notificationType: DomainListenerManager.NotificationType,
         DomainUpdater.Params(true, notificationType, DomainFactory.CloudParams(projects))
     }.perform(this)
 
-fun Project<*>.toProjectData(childTaskDatas: List<TaskListFragment.ChildTaskData>) = TaskListFragment.ProjectData(
-    getDisplayName(),
-    childTaskDatas,
-    projectKey,
-    endExactTimeStamp == null,
-    startExactTimeStamp.long,
-)
+fun Project<*>.toEntryDatas(
+    childTaskDatas: List<TaskListFragment.ChildTaskData>,
+//    showProjects: Boolean, todo projects
+): List<TaskListFragment.EntryData> {
+    if (childTaskDatas.isEmpty()) return emptyList()
+
+    return if (/* todo projects showProjects */ true) {
+        listOf(
+            TaskListFragment.ProjectData(
+                getDisplayName(),
+                childTaskDatas,
+                projectKey,
+                endExactTimeStamp == null,
+                startExactTimeStamp.long,
+            )
+        )
+    } else {
+        childTaskDatas
+    }
+}
 
 fun Project<*>.getDisplayName() = name.takeIf { it.isNotEmpty() } ?: MyApplication.context.getString(R.string.myTasks)
 

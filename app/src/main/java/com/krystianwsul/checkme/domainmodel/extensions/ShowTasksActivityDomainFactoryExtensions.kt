@@ -54,9 +54,7 @@ fun DomainFactory.getShowTasksData(parameters: ShowTasksActivity.Parameters): Sh
                 if (parameters.projectKey != null) {
                     getProjectForce(parameters.projectKey).getUnscheduledTaskDatas()
                 } else {
-                    projects.values
-                        .map { it.toProjectData(it.getUnscheduledTaskDatas()) }
-                        .filter { it.children.isNotEmpty() }
+                    projects.values.flatMap { it.toEntryDatas(it.getUnscheduledTaskDatas()) }
                 }
             }
 

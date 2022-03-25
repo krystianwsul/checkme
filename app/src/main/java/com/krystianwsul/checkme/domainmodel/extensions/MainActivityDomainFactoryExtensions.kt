@@ -41,8 +41,10 @@ fun DomainFactory.getMainTaskData(now: ExactTimeStamp.Local = ExactTimeStamp.Loc
     return MainTaskViewModel.Data(TaskListFragment.TaskData(getMainData(now), null, true, null))
 }
 
-private fun DomainFactory.getMainData(now: ExactTimeStamp.Local, filter: (Task) -> Boolean = { true }):
-        List<TaskListFragment.ProjectData> {
+private fun DomainFactory.getMainData(
+    now: ExactTimeStamp.Local,
+    filter: (Task) -> Boolean = { true },
+): List<TaskListFragment.EntryData> {
     fun Collection<Task>.toChildTaskDatas() = asSequence().filter(filter)
         .filter { it.isTopLevelTask() }
         .map {
@@ -68,12 +70,14 @@ private fun DomainFactory.getMainData(now: ExactTimeStamp.Local, filter: (Task) 
         rootTasksFactory.rootTasks
             .values
             .groupBy { it.projectId }
-            .map { (projectId, tasks) -> projectsFactory.getProjectForce(projectId).toProjectData(tasks.toChildTaskDatas()) }
+            .flatMap { (projectId, tasks) ->
+                projectsFactory.getProjectForce(projectId).toEntryDatas(tasks.toChildTaskDatas())
+            }
     } else {
         projectsFactory.projects
             .values
-            .map { it.toProjectData(it.getAllDependenciesLoadedTasks().toChildTaskDatas()) }
-    }.filter { it.children.isNotEmpty() }
+            .flatMap { it.toEntryDatas(it.getAllDependenciesLoadedTasks().toChildTaskDatas()) }
+    }
 }
 
 fun DomainFactory.getGroupListData(

@@ -37,11 +37,9 @@ class DomainFactoryTest {
 
         assertEquals(
             "task",
-            domainFactory.getMainTaskData()
+            domainFactory.getMainTaskData(false)
                 .taskData
                 .entryDatas
-                .single()
-                .children
                 .single()
                 .name
         )
@@ -430,11 +428,9 @@ class DomainFactoryTest {
 
         assertEquals(
             taskName,
-            domainFactory.getMainTaskData()
+            domainFactory.getMainTaskData(false)
                 .taskData
                 .entryDatas
-                .single()
-                .children
                 .single()
                 .name
         )

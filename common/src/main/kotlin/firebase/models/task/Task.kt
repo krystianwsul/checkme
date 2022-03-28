@@ -245,7 +245,7 @@ sealed class Task(
 
     val isHierarchyHack get() = parentTaskData?.second != null
 
-    private fun getExistingInstances(
+    fun getExistingInstances(
         startExactTimeStamp: ExactTimeStamp.Offset?,
         endExactTimeStamp: ExactTimeStamp.Offset?,
         onlyRoot: Boolean,
@@ -397,6 +397,11 @@ sealed class Task(
 
     private var gettingInstances = false
 
+    enum class ExistingVirtual {
+
+        EXISTING, VIRTUAL, ALL
+    }
+
     /*
     todo: `now` seems to be only used for filtering parent instances.  But, I think this is redundant.  Removing the
     filtering doesn't break any tests.  If I want to remove `now` later, just make sure that production data looks the same
@@ -409,6 +414,7 @@ sealed class Task(
         onlyRoot: Boolean = false,
         filterVisible: Boolean = true,
         excludedParentTasks: Set<TaskKey> = emptySet(),
+        existingVirtual: ExistingVirtual = ExistingVirtual.ALL,
     ): Sequence<Instance> {
         check(!gettingInstances)
         gettingInstances = true
@@ -417,23 +423,31 @@ sealed class Task(
             InterruptionChecker.throwIfInterrupted()
 
             if (filterVisible && !notDeleted && endData!!.deleteInstances) {
-                getExistingInstances(startExactTimeStamp, endExactTimeStamp, onlyRoot).filter { it.done != null }
+                if (existingVirtual == ExistingVirtual.VIRTUAL) {
+                    emptySequence()
+                } else {
+                    getExistingInstances(startExactTimeStamp, endExactTimeStamp, onlyRoot).filter { it.done != null }
+                }
             } else {
                 val instanceInfoSequences = mutableListOf<Sequence<InstanceInfo>>()
 
-                instanceInfoSequences +=
-                    getExistingInstances(startExactTimeStamp, endExactTimeStamp, onlyRoot).map(::InstanceInfo)
-
-                if (!onlyRoot) {
-                    instanceInfoSequences += getParentInstances(
-                        startExactTimeStamp,
-                        endExactTimeStamp,
-                        now,
-                        excludedParentTasks,
-                    )
+                if (existingVirtual != ExistingVirtual.VIRTUAL) {
+                    instanceInfoSequences +=
+                        getExistingInstances(startExactTimeStamp, endExactTimeStamp, onlyRoot).map(::InstanceInfo)
                 }
 
-                instanceInfoSequences += getScheduleInstances(startExactTimeStamp, endExactTimeStamp).map(::InstanceInfo)
+                if (existingVirtual != ExistingVirtual.EXISTING) {
+                    if (!onlyRoot) {
+                        instanceInfoSequences += getParentInstances(
+                            startExactTimeStamp,
+                            endExactTimeStamp,
+                            now,
+                            excludedParentTasks,
+                        )
+                    }
+
+                    instanceInfoSequences += getScheduleInstances(startExactTimeStamp, endExactTimeStamp).map(::InstanceInfo)
+                }
 
                 combineInstanceInfoSequences(instanceInfoSequences).toInstances()
             }
@@ -446,8 +460,10 @@ sealed class Task(
     fun getHierarchyExactTimeStamp(exactTimeStamp: ExactTimeStamp) =
         exactTimeStamp.coerceIn(startExactTimeStampOffset, endExactTimeStampOffset?.minusOne())
 
+    fun getHierarchyChildTasks() = getChildTaskHierarchies().map { it.childTask }.toSet()
+
     fun getChildTasks(): Set<Task> {
-        val taskHierarchyChildTasks = getChildTaskHierarchies().map { it.childTask }.toSet()
+        val taskHierarchyChildTasks = getHierarchyChildTasks()
 
         /**
          * todo if performance becomes an issue here, then I can try caching the part below.  I believe that I'd need to

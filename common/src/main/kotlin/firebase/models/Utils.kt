@@ -10,19 +10,22 @@ import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
 
-fun Sequence<Task>.filterSearch(search: SearchCriteria.Search?) = if (search?.hasSearch != true) {
-    map { it to FilterResult.MATCHES }
-} else {
-    fun childHierarchyMatches(task: Task): FilterResult {
-        InterruptionChecker.throwIfInterrupted()
+fun Sequence<Task>.filterSearch(search: SearchCriteria.Search?, onlyHierarchy: Boolean = false) =
+    if (search?.hasSearch != true) {
+        map { it to FilterResult.MATCHES }
+    } else {
+        fun childHierarchyMatches(task: Task): FilterResult {
+            InterruptionChecker.throwIfInterrupted()
 
-        if (task.matchesSearch(search)) return FilterResult.MATCHES
+            if (task.matchesSearch(search)) return FilterResult.MATCHES
 
-        if (task.getChildTasks().any { childHierarchyMatches(it) != FilterResult.DOESNT_MATCH })
-            return FilterResult.CHILD_MATCHES
+            val childTasks = if (onlyHierarchy) task.getHierarchyChildTasks() else task.getChildTasks()
 
-        return FilterResult.DOESNT_MATCH
-    }
+            if (childTasks.any { childHierarchyMatches(it) != FilterResult.DOESNT_MATCH })
+                return FilterResult.CHILD_MATCHES
+
+            return FilterResult.DOESNT_MATCH
+        }
 
     map { it to childHierarchyMatches(it) }.filter { it.second != FilterResult.DOESNT_MATCH }
 }

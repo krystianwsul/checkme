@@ -216,9 +216,18 @@ sealed class Project<T : ProjectType>(
 
         InterruptionChecker.throwIfInterrupted()
 
-        val filteredTasks = getAllDependenciesLoadedTasks().asSequence()
-            .filter { it.mayHaveRootInstances() }
-            .filterSearch(searchData?.searchCriteria?.search).map { it.first }
+        val allTasks = getAllDependenciesLoadedTasks().asSequence().filter { it.mayHaveRootInstances() }.toList()
+
+        /*
+        This is a pretty sloppy solution, but it works.  The issue was that a task can have a single instance that matches
+        a query (as a result of editing that specific instance), and an infinite amount that do not.  So, we want to return
+        virtual instances only in the situation that the current task hierarchies match the search - not child tasks in
+        general.  Then, we check all existing instances on top of that.
+         */
+
+        val filteredTasks = allTasks.asSequence()
+            .filterSearch(searchData?.searchCriteria?.search, true)
+            .map { it.first }
             .toList()
 
         val instanceSequences = filteredTasks.map {
@@ -228,6 +237,16 @@ sealed class Project<T : ProjectType>(
                 now,
                 onlyRoot = true,
                 filterVisible = filterVisible,
+                existingVirtual = Task.ExistingVirtual.VIRTUAL,
+            )
+        } + allTasks.map {
+            it.getInstances(
+                startExactTimeStamp,
+                endExactTimeStamp,
+                now,
+                onlyRoot = true,
+                filterVisible = filterVisible,
+                existingVirtual = Task.ExistingVirtual.EXISTING,
             )
         }
 

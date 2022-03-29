@@ -38,7 +38,7 @@ class DomainFactoryTest {
 
         assertEquals(
             "task",
-            domainFactory.getMainTaskData(false, SearchCriteria.empty)
+            domainFactory.getMainTaskData(false, SearchCriteria.empty, false)
                 .taskData
                 .entryDatas
                 .single()
@@ -429,11 +429,11 @@ class DomainFactoryTest {
 
         assertEquals(
             taskName,
-            domainFactory.getMainTaskData(false, SearchCriteria.empty)
+            domainFactory.getMainTaskData(false, SearchCriteria.empty, false)
                 .taskData
                 .entryDatas
                 .single()
-                .name
+                .name,
         )
 
         val taskKey = createResult.taskKey

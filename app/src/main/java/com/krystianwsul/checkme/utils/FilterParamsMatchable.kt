@@ -4,7 +4,7 @@ import com.krystianwsul.treeadapter.FilterCriteria
 
 interface FilterParamsMatchable {
 
-    val isDeleted: Boolean? get() = null
+    val isDeleted: Boolean? get() = null // todo show done
 
     fun matchesFilterParams(filterParams: FilterCriteria.Full.FilterParams): Boolean {
         isDeleted?.let {

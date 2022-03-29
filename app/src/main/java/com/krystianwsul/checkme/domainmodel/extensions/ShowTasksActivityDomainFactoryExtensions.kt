@@ -54,7 +54,7 @@ fun DomainFactory.getShowTasksData(
             fun Project<*>.getUnscheduledTaskDatas() = getAllDependenciesLoadedTasks()
                 .asSequence()
                 .filter { it.notDeleted && it.intervalInfo.isUnscheduled() }
-                .filterSearchCriteria(searchCriteria, myUserFactory.user)
+                .filterSearchCriteria(searchCriteria, myUserFactory.user, true, now) // todo show done
                 .map { it.toChildTaskData() }
                 .toList()
 

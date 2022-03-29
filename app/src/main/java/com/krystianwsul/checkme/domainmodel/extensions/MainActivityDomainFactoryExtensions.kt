@@ -22,6 +22,7 @@ import java.util.*
 fun DomainFactory.getMainNoteData(
     showProjects: Boolean,
     searchCriteria: SearchCriteria,
+    showDeleted: Boolean,
     now: ExactTimeStamp.Local = ExactTimeStamp.Local.now,
 ): MainNoteViewModel.Data {
     MyCrashlytics.log("DomainFactory.getMainNoteData")
@@ -30,7 +31,7 @@ fun DomainFactory.getMainNoteData(
 
     return MainNoteViewModel.Data(
         TaskListFragment.TaskData(
-            getMainData(now, showProjects, searchCriteria) { it.intervalInfo.isUnscheduled() },
+            getMainData(now, showProjects, searchCriteria, showDeleted) { it.intervalInfo.isUnscheduled() },
             null,
             true,
             null,
@@ -41,6 +42,7 @@ fun DomainFactory.getMainNoteData(
 fun DomainFactory.getMainTaskData(
     showProjects: Boolean,
     searchCriteria: SearchCriteria,
+    showDeleted: Boolean,
     now: ExactTimeStamp.Local = ExactTimeStamp.Local.now,
 ): MainTaskViewModel.Data {
     MyCrashlytics.log("DomainFactory.getMainTaskData")
@@ -48,7 +50,7 @@ fun DomainFactory.getMainTaskData(
     DomainThreadChecker.instance.requireDomainThread()
 
     return MainTaskViewModel.Data(
-        TaskListFragment.TaskData(getMainData(now, showProjects, searchCriteria), null, true, null)
+        TaskListFragment.TaskData(getMainData(now, showProjects, searchCriteria, showDeleted), null, true, null)
     )
 }
 
@@ -56,12 +58,13 @@ private fun DomainFactory.getMainData(
     now: ExactTimeStamp.Local,
     showProjects: Boolean,
     searchCriteria: SearchCriteria,
+    showDeleted: Boolean,
     filter: (Task) -> Boolean = { true },
 ): List<TaskListFragment.EntryData> {
     fun Collection<Task>.toChildTaskDatas() = asSequence()
         .filter(filter)
         .filter { it.isTopLevelTask() }
-        .filterSearchCriteria(searchCriteria, myUserFactory.user)
+        .filterSearchCriteria(searchCriteria, myUserFactory.user, showDeleted, now)
         .map {
             TaskListFragment.ChildTaskData(
                 it.name,
@@ -85,12 +88,18 @@ private fun DomainFactory.getMainData(
             .values
             .groupBy { it.projectId }
             .flatMap { (projectId, tasks) ->
-                projectsFactory.getProjectForce(projectId).toEntryDatas(tasks.toChildTaskDatas(), showProjects)
+                projectsFactory.getProjectForce(projectId)
+                    .takeIf { it.filterSearchCriteria(showDeleted) }
+                    ?.toEntryDatas(tasks.toChildTaskDatas(), showProjects)
+                    .orEmpty()
             }
     } else {
         projectsFactory.projects
             .values
+            .asSequence()
+            .filterSearchCriteria(showDeleted)
             .flatMap { it.toEntryDatas(it.getAllDependenciesLoadedTasks().toChildTaskDatas(), showProjects) }
+            .toList()
     }
 }
 

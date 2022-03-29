@@ -58,7 +58,7 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
         binding.showTasksToolbarCollapseInclude
             .collapseAppBarLayout
             .filterCriteria
-            .map { it.stripAssignedToOthers() }
+//            .map { it.stripAssignedToOthers() } todo show done
     }
 
     private val receiver = object : BroadcastReceiver() {

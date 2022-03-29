@@ -1,5 +1,6 @@
 package com.krystianwsul.common.firebase.models
 
+import android.util.Log
 import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.task.RootTask
@@ -30,15 +31,32 @@ fun Sequence<Task>.filterSearch(search: SearchCriteria.Search?, onlyHierarchy: B
         map { it to childHierarchyMatches(it) }.filter { it.second != FilterResult.DOESNT_MATCH }
     }
 
-fun Sequence<Task>.filterSearchCriteria(searchCriteria: SearchCriteria, myUser: MyUser) = if (searchCriteria.isEmpty) {
-    this
-} else {
-    if (searchCriteria.showAssignedToOthers) {
+fun Sequence<Task>.filterSearchCriteria(
+    searchCriteria: SearchCriteria,
+    myUser: MyUser,
+    showDeleted: Boolean,
+    now: ExactTimeStamp.Local,
+): Sequence<Task> {
+    Log.e("asdf", "magic showDeleted $showDeleted")
+    if (searchCriteria.isEmpty && showDeleted) return this
+
+    val filtered = if (searchCriteria.showAssignedToOthers) {
         this
     } else {
         filter { it.isAssignedToMe(myUser) }
     }
+
+    return if (showDeleted) {
+        filtered
+    } else {
+        Log.e("asdf", "magic filtering")
+        filtered.filter { it.isVisible(now).also { vi -> Log.e("asdf", "magic ${it.name} isVisible? " + vi) } }
+    }
 }
+
+fun Project<*>.filterSearchCriteria(showDeleted: Boolean) = showDeleted || endExactTimeStamp == null
+
+fun Sequence<Project<*>>.filterSearchCriteria(showDeleted: Boolean) = filter { it.filterSearchCriteria(showDeleted) }
 
 fun Sequence<Instance>.filterSearchCriteria(
     searchCriteria: SearchCriteria,

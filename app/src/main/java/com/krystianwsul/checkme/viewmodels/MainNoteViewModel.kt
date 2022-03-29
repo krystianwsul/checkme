@@ -12,8 +12,9 @@ class MainNoteViewModel : DomainViewModel<MainNoteViewModel.Data>() {
 
     override val domainListener = object : DomainListener<Data>() {
 
-        override val domainResultFetcher =
-            DomainResultFetcher.DomainFactoryData { it.getMainNoteData(parameters.showProjects, parameters.searchCriteria) }
+        override val domainResultFetcher = DomainResultFetcher.DomainFactoryData {
+            it.getMainNoteData(parameters.showProjects, parameters.searchCriteria, parameters.showDeleted)
+        }
     }
 
     fun start() {
@@ -22,11 +23,16 @@ class MainNoteViewModel : DomainViewModel<MainNoteViewModel.Data>() {
         Observables.combineLatest(
             Preferences.showProjectsObservable,
             Preferences.showAssignedObservable,
+            Preferences.showDeletedObservable,
         )
             .distinctUntilChanged()
-            .subscribe { (showProjects, showAssignedToOthers) ->
+            .subscribe { (showProjects, showAssignedToOthers, showDeleted) ->
                 parameters =
-                    Parameters(showProjects, SearchCriteria(showAssignedToOthers = showAssignedToOthers)) // todo show done
+                    Parameters(
+                        showProjects,
+                        SearchCriteria(showAssignedToOthers = showAssignedToOthers),
+                        showDeleted
+                    ) // todo show done
 
                 refresh()
             }
@@ -34,5 +40,5 @@ class MainNoteViewModel : DomainViewModel<MainNoteViewModel.Data>() {
 
     data class Data(val taskData: TaskListFragment.TaskData) : DomainData()
 
-    private data class Parameters(val showProjects: Boolean, val searchCriteria: SearchCriteria)
+    private data class Parameters(val showProjects: Boolean, val searchCriteria: SearchCriteria, val showDeleted: Boolean)
 }

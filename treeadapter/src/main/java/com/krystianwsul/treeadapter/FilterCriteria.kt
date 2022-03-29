@@ -36,7 +36,7 @@ sealed interface FilterCriteria : Parcelable {
             }
         }
 
-        fun stripAssignedToOthers() = copy(filterParams = filterParams.copy(showAssignedToOthers = true)) // todo assigned
+        fun stripShowDeleted() = copy(filterParams = filterParams.copy(showDeleted = true)) // todo show done
 
         @Parcelize
         data class FilterParams(val showDeleted: Boolean = false, val showAssignedToOthers: Boolean = true) : Parcelable

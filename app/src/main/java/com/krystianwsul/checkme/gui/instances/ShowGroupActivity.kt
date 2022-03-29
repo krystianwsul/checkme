@@ -91,7 +91,6 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
         binding.showGroupToolbarCollapseInclude
             .collapseAppBarLayout
             .filterCriteria
-            .map { it.stripAssignedToOthers() }
             .cast<FilterCriteria>()
     }
 

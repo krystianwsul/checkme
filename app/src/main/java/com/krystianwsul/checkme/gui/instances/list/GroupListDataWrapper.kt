@@ -35,7 +35,6 @@ data class GroupListDataWrapper(
         val children: List<TaskData>,
         override val note: String?,
         val imageState: ImageState?,
-        override val isAssignedToMe: Boolean,
         val projectInfo: DetailsNode.ProjectInfo?,
         val ordinal: Ordinal,
         override val canMigrateDescription: Boolean,
@@ -75,7 +74,6 @@ data class GroupListDataWrapper(
         val doneSingleBridges: List<GroupTypeFactory.SingleBridge>,
         val ordinal: Ordinal,
         val imageState: ImageState?,
-        override val isAssignedToMe: Boolean,
         val projectKey: ProjectKey.Shared?,
         val parentInstanceKey: InstanceKey?,
     ) : Comparable<InstanceData>, SelectedData, QueryMatchable, FilterParamsMatchable {
@@ -107,7 +105,6 @@ data class GroupListDataWrapper(
                     doneChildInstanceDescriptors.toDoneSingleBridges(),
                     instance.ordinal,
                     instance.task.getImage(domainFactory.deviceDbInfo),
-                    instance.isAssignedToMe(domainFactory.myUserFactory.user),
                     instance.getProject().projectKey as? ProjectKey.Shared,
                     instance.parentInstance?.instanceKey,
                 )

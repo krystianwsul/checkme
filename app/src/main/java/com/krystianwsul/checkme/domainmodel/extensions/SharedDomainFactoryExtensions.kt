@@ -203,7 +203,6 @@ fun DomainFactory.getGroupListChildTaskDatas(
             getGroupListChildTaskDatas(childTask, now, childQuery),
             childTask.note,
             childTask.getImage(deviceDbInfo),
-            childTask.isAssignedToMe(myUserFactory.user),
             childTask.getProjectInfo(),
             childTask.ordinal,
             childTask.canMigrateDescription(now),

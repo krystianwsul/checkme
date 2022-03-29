@@ -906,8 +906,6 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
         override val normalizedFields by lazy { listOf(name.normalized()) }
 
-        override val isAssignedToMe = true
-
         override fun compareTo(other: EntryData): Int {
             check(other is ProjectData)
 
@@ -927,7 +925,6 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         val canMigrateDescription: Boolean,
         val ordinal: Ordinal,
         val projectInfo: DetailsNode.ProjectInfo?,
-        override val isAssignedToMe: Boolean,
     ) : EntryData {
 
         override val id = taskKey

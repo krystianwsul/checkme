@@ -546,9 +546,8 @@ class DomainFactory(
                 childTask.canMigrateDescription(now),
                 childTask.ordinal,
                 childTask.getProjectInfo(),
-                childTask.isAssignedToMe(myUserFactory.user),
             )
-            }
+        }
     }
 
     data class CloudParams(val projects: Collection<Project<*>>, val userKeys: Collection<UserKey> = emptySet()) {

@@ -75,7 +75,6 @@ private fun DomainFactory.getMainData(
                 it.canMigrateDescription(now),
                 it.ordinal,
                 it.getProjectInfo(),
-                it.isAssignedToMe(myUserFactory.user),
             )
         }
         .sortedDescending()

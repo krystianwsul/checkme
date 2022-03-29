@@ -35,7 +35,6 @@ fun DomainFactory.getShowTaskData(requestTaskKey: TaskKey): ShowTaskViewModel.Da
                 childTask.canMigrateDescription(now),
                 childTask.ordinal,
                 childTask.getProjectInfo(),
-                childTask.isAssignedToMe(myUserFactory.user),
             )
         }
         .sorted()

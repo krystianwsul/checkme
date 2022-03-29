@@ -41,7 +41,6 @@ fun DomainFactory.getShowTasksData(
             canMigrateDescription(now),
             ordinal,
             getProjectInfo(parameters.showProjects),
-            isAssignedToMe(myUserFactory.user),
         )
     }
 

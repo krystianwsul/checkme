@@ -19,7 +19,7 @@ class ShowGroupViewModel : DomainViewModel<ShowGroupViewModel.Data>() {
 
     fun start(activityParameters: ShowGroupActivity.Parameters) {
 
-        Preferences.showAssignedObservable // todo show done
+        Preferences.showAssignedObservable
             .distinctUntilChanged()
             .subscribe {
                 parameters = Parameters(activityParameters, SearchCriteria(showAssignedToOthers = it))

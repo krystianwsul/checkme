@@ -76,7 +76,7 @@ class ShowNotificationGroupActivity : AbstractActivity(), GroupListListener {
         override fun onReceive(context: Context?, intent: Intent?) = showNotificationGroupViewModel.refresh()
     }
 
-    override val instanceSearch by lazy { // todo show done doesn't need subsequent filtering
+    override val instanceSearch by lazy {
         binding.showNotificationGroupToolbarCollapseInclude
             .collapseAppBarLayout
             .filterCriteria

@@ -14,7 +14,7 @@ class ShowTaskViewModel : DomainViewModel<ShowTaskViewModel.Data>() {
         override val domainResultFetcher = DomainResultFetcher.DomainFactoryData { it.getShowTaskData(taskKey) }
     }
 
-    fun start(taskKey: TaskKey) {
+    fun start(taskKey: TaskKey) { // todo show done
         this.taskKey = taskKey
 
         internalStart()

@@ -392,13 +392,6 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
             override fun normalize() = entryData.normalize()
 
-            override fun matchesFilterParams(filterParams: FilterCriteria.Full.FilterParams): Boolean {
-                check(!filterParams.showDeleted)
-                check(filterParams.showAssignedToOthers)
-
-                return true
-            }
-
             override fun getMatchResult(search: SearchCriteria.Search) =
                 ModelNode.MatchResult.fromBoolean(entryData.matchesSearch(search))
         }

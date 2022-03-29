@@ -283,9 +283,6 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
 
             override fun normalize() = instanceData.normalize()
 
-            override fun matchesFilterParams(filterParams: FilterCriteria.Full.FilterParams) =
-                instanceData.matchesFilterParams(filterParams)
-
             override fun getMatchResult(search: SearchCriteria.Search) =
                 ModelNode.MatchResult.fromBoolean(instanceData.matchesSearch(search))
 
@@ -436,9 +433,6 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
             }
 
             override fun normalize() = allInstanceDatas.forEach { it.normalize() }
-
-            override fun matchesFilterParams(filterParams: FilterCriteria.Full.FilterParams) =
-                allInstanceDatas.any { it.matchesFilterParams(filterParams) }
 
             override fun getMatchResult(search: SearchCriteria.Search) =
                 ModelNode.MatchResult.fromBoolean(allInstanceDatas.any { it.matchesSearch(search) })

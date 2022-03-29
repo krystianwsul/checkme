@@ -31,8 +31,8 @@ class MainTaskViewModel : DomainViewModel<MainTaskViewModel.Data>() {
                     Parameters(
                         showProjects,
                         SearchCriteria(showAssignedToOthers = showAssignedToOthers),
-                        showDeleted
-                    ) // todo show done
+                        showDeleted,
+                    )
 
                 refresh()
             }

@@ -6,7 +6,6 @@ import com.krystianwsul.checkme.domainmodel.MixedInstanceDataCollection
 import com.krystianwsul.checkme.domainmodel.extensions.toDoneSingleBridges
 import com.krystianwsul.checkme.gui.instances.drag.DropParent
 import com.krystianwsul.checkme.gui.tree.DetailsNode
-import com.krystianwsul.checkme.utils.FilterParamsMatchable
 import com.krystianwsul.common.criteria.QueryMatchable
 import com.krystianwsul.common.firebase.models.ImageState
 import com.krystianwsul.common.firebase.models.Instance
@@ -38,7 +37,7 @@ data class GroupListDataWrapper(
         val projectInfo: DetailsNode.ProjectInfo?,
         val ordinal: Ordinal,
         override val canMigrateDescription: Boolean,
-    ) : SelectedData, QueryMatchable, FilterParamsMatchable {
+    ) : SelectedData, QueryMatchable {
 
         init {
             check(name.isNotEmpty())
@@ -76,7 +75,7 @@ data class GroupListDataWrapper(
         val imageState: ImageState?,
         val projectKey: ProjectKey.Shared?,
         val parentInstanceKey: InstanceKey?,
-    ) : Comparable<InstanceData>, SelectedData, QueryMatchable, FilterParamsMatchable {
+    ) : Comparable<InstanceData>, SelectedData, QueryMatchable {
 
         companion object {
 

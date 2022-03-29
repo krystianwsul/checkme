@@ -31,8 +31,8 @@ class MainNoteViewModel : DomainViewModel<MainNoteViewModel.Data>() {
                     Parameters(
                         showProjects,
                         SearchCriteria(showAssignedToOthers = showAssignedToOthers),
-                        showDeleted
-                    ) // todo show done
+                        showDeleted,
+                    )
 
                 refresh()
             }

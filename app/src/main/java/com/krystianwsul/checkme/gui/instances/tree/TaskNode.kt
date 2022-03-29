@@ -25,7 +25,10 @@ import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.utils.Ordinal
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.common.utils.filterValuesNotNull
-import com.krystianwsul.treeadapter.*
+import com.krystianwsul.treeadapter.ModelNode
+import com.krystianwsul.treeadapter.NodeContainer
+import com.krystianwsul.treeadapter.Sortable
+import com.krystianwsul.treeadapter.TreeNode
 
 class TaskNode(
     override val indentation: Int,
@@ -166,9 +169,6 @@ class TaskNode(
     override val isSelectable = true
 
     override val thumbnail = taskData.imageState
-
-    override fun matchesFilterParams(filterParams: FilterCriteria.Full.FilterParams) =
-        taskData.matchesFilterParams(filterParams)
 
     override fun getMatchResult(search: SearchCriteria.Search) =
         ModelNode.MatchResult.fromBoolean(taskData.matchesSearch(search))

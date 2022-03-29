@@ -40,7 +40,6 @@ import com.krystianwsul.checkme.gui.tree.delegates.thumbnail.ThumbnailDelegate
 import com.krystianwsul.checkme.gui.tree.delegates.thumbnail.ThumbnailModelNode
 import com.krystianwsul.checkme.gui.utils.*
 import com.krystianwsul.checkme.gui.widgets.MyBottomBar
-import com.krystianwsul.checkme.utils.FilterParamsMatchable
 import com.krystianwsul.checkme.utils.Utils
 import com.krystianwsul.checkme.utils.tryGetFragment
 import com.krystianwsul.checkme.utils.webSearchIntent
@@ -628,9 +627,6 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
         override fun normalize() = entryData.normalize()
 
-        override fun matchesFilterParams(filterParams: FilterCriteria.Full.FilterParams) =
-            entryData.matchesFilterParams(filterParams)
-
         override fun getMatchResult(search: SearchCriteria.Search) =
             ModelNode.MatchResult.fromBoolean(entryData.matchesSearch(search))
 
@@ -879,7 +875,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         val projectInfo: DetailsNode.ProjectInfo?,
     )
 
-    interface EntryData : Comparable<EntryData>, QueryMatchable, FilterParamsMatchable {
+    interface EntryData : Comparable<EntryData>, QueryMatchable {
 
         val name: String
         val children: List<EntryData>
@@ -902,7 +898,6 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         override val id = projectKey
 
         override val canAddSubtask = current
-        override val isDeleted = !canAddSubtask
 
         override val normalizedFields by lazy { listOf(name.normalized()) }
 
@@ -928,8 +923,6 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
     ) : EntryData {
 
         override val id = taskKey
-
-        override val isDeleted = !canAddSubtask
 
         override fun compareTo(other: EntryData): Int {
             check(other is ChildTaskData)

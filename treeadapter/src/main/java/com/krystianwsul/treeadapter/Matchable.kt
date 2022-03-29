@@ -6,7 +6,7 @@ interface Matchable {
 
     fun normalize() = Unit
 
-    fun matchesFilterParams(filterParams: FilterCriteria.Full.FilterParams) = true
+    fun matchesFilterParams(filterParams: FilterCriteria.Full.FilterParams) = true // todo show done
 
     fun getMatchResult(search: SearchCriteria.Search) = ModelNode.MatchResult.ALWAYS_VISIBLE
 }

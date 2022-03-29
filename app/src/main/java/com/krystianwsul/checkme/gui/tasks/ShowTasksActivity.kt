@@ -25,6 +25,8 @@ import com.krystianwsul.checkme.viewmodels.ShowTasksViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
+import com.krystianwsul.treeadapter.FilterCriteria
+import io.reactivex.rxjava3.kotlin.cast
 import io.reactivex.rxjava3.kotlin.plusAssign
 import kotlinx.parcelize.Parcelize
 
@@ -58,6 +60,7 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
         binding.showTasksToolbarCollapseInclude
             .collapseAppBarLayout
             .filterCriteria
+            .cast<FilterCriteria>()
     }
 
     private val receiver = object : BroadcastReceiver() {

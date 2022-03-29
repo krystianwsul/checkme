@@ -11,6 +11,7 @@ import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.viewmodels.ShowTasksViewModel
 import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.firebase.DomainThreadChecker
+import com.krystianwsul.common.firebase.models.FilterResult
 import com.krystianwsul.common.firebase.models.filterSearchCriteria
 import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.project.SharedProject
@@ -29,11 +30,11 @@ fun DomainFactory.getShowTasksData(
 
     val now = ExactTimeStamp.Local.now
 
-    fun Task.toChildTaskData(): TaskListFragment.ChildTaskData {
+    fun Task.toChildTaskData(childSearchCriteria: SearchCriteria): TaskListFragment.ChildTaskData {
         return TaskListFragment.ChildTaskData(
             name,
             getScheduleText(ScheduleText),
-            getTaskListChildTaskDatas(this, now, false),
+            getTaskListChildTaskDatas(this, now, childSearchCriteria, showDeleted, false),
             note,
             taskKey,
             getImage(deviceDbInfo),
@@ -56,7 +57,12 @@ fun DomainFactory.getShowTasksData(
                 .asSequence()
                 .filter { it.notDeleted && it.intervalInfo.isUnscheduled() }
                 .filterSearchCriteria(searchCriteria, myUserFactory.user, showDeleted, now)
-                .map { it.toChildTaskData() }
+                .map { (task, filterResult) ->
+                    val childSearchCriteria =
+                        if (filterResult == FilterResult.MATCHES) searchCriteria.copy(search = null) else searchCriteria
+
+                    task.toChildTaskData(childSearchCriteria)
+                }
                 .toList()
 
             entryDatas = projectsFactory.run {
@@ -82,7 +88,7 @@ fun DomainFactory.getShowTasksData(
         is ShowTasksActivity.Parameters.Copy -> {
             entryDatas = parameters.taskKeys
                 .map(::getTaskForce)
-                .map { it.toChildTaskData() }
+                .map { it.toChildTaskData(searchCriteria) }
                 .sorted()
 
             title = MyApplication.context.getString(R.string.copyingTasksTitle)
@@ -97,7 +103,12 @@ fun DomainFactory.getShowTasksData(
                 .asSequence()
                 .filter { it.isTopLevelTask() }
                 .filterSearchCriteria(searchCriteria, myUserFactory.user, showDeleted, now)
-                .map { it.toChildTaskData() }
+                .map { (task, filterResult) ->
+                    val childSearchCriteria =
+                        if (filterResult == FilterResult.MATCHES) searchCriteria.copy(search = null) else searchCriteria
+
+                    task.toChildTaskData(childSearchCriteria)
+                }
                 .toList()
 
             title = project.getDisplayName()

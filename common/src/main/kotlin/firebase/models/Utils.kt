@@ -1,6 +1,5 @@
 package com.krystianwsul.common.firebase.models
 
-import android.util.Log
 import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.task.RootTask
@@ -36,21 +35,21 @@ fun Sequence<Task>.filterSearchCriteria(
     myUser: MyUser,
     showDeleted: Boolean,
     now: ExactTimeStamp.Local,
-): Sequence<Task> {
-    Log.e("asdf", "magic showDeleted $showDeleted")
-    if (searchCriteria.isEmpty && showDeleted) return this
+): Sequence<Pair<Task, FilterResult>> {
+    if (searchCriteria.isEmpty && showDeleted) return map { it to FilterResult.MATCHES }
 
-    val filtered = if (searchCriteria.showAssignedToOthers) {
+    val filtered1 = if (searchCriteria.showAssignedToOthers) {
         this
     } else {
         filter { it.isAssignedToMe(myUser) }
     }
 
+    val filtered2 = filtered1.filterSearch(searchCriteria.search)
+
     return if (showDeleted) {
-        filtered
+        filtered2
     } else {
-        Log.e("asdf", "magic filtering")
-        filtered.filter { it.isVisible(now).also { vi -> Log.e("asdf", "magic ${it.name} isVisible? " + vi) } }
+        filtered2.filter { it.first.isVisible(now) }
     }
 }
 

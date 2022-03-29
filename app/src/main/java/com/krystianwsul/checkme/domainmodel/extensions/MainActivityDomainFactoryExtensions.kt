@@ -13,6 +13,7 @@ import com.krystianwsul.checkme.viewmodels.MainNoteViewModel
 import com.krystianwsul.checkme.viewmodels.MainTaskViewModel
 import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.firebase.DomainThreadChecker
+import com.krystianwsul.common.firebase.models.FilterResult
 import com.krystianwsul.common.firebase.models.filterSearchCriteria
 import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.time.Date
@@ -65,19 +66,22 @@ private fun DomainFactory.getMainData(
         .filter(filter)
         .filter { it.isTopLevelTask() }
         .filterSearchCriteria(searchCriteria, myUserFactory.user, showDeleted, now)
-        .map {
+        .map { (task, filterResult) ->
+            val childSearchCriteria =
+                if (filterResult == FilterResult.MATCHES) searchCriteria.copy(search = null) else searchCriteria
+
             TaskListFragment.ChildTaskData(
-                it.name,
-                it.getScheduleText(ScheduleText),
-                getTaskListChildTaskDatas(it, now, showDeleted),
-                it.note,
-                it.taskKey,
-                it.getImage(deviceDbInfo),
-                it.notDeleted,
-                it.isVisible(now),
-                it.canMigrateDescription(now),
-                it.ordinal,
-                it.getProjectInfo(),
+                task.name,
+                task.getScheduleText(ScheduleText),
+                getTaskListChildTaskDatas(task, now, childSearchCriteria, showDeleted),
+                task.note,
+                task.taskKey,
+                task.getImage(deviceDbInfo),
+                task.notDeleted,
+                task.isVisible(now),
+                task.canMigrateDescription(now),
+                task.ordinal,
+                task.getProjectInfo(),
             )
         }
         .sortedDescending()

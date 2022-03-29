@@ -34,6 +34,7 @@ import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.MyCustomTime
 import com.krystianwsul.common.firebase.json.tasks.RootTaskJson
+import com.krystianwsul.common.firebase.models.FilterResult
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.customtime.PrivateCustomTime
 import com.krystianwsul.common.firebase.models.customtime.SharedCustomTime
@@ -531,14 +532,21 @@ class DomainFactory(
     fun getTaskListChildTaskDatas(
         parentTask: Task,
         now: ExactTimeStamp.Local,
+        searchCriteria: SearchCriteria,
+        showDeleted: Boolean,
         includeProjectInfo: Boolean = true,
     ): List<TaskListFragment.ChildTaskData> {
         return parentTask.getChildTasks()
-            .map { childTask ->
+            .asSequence()
+            .filterSearchCriteria(searchCriteria, myUserFactory.user, showDeleted, now)
+            .map { (childTask, filterResult) ->
+                val childSearchCriteria =
+                    if (filterResult == FilterResult.MATCHES) searchCriteria.copy(search = null) else searchCriteria
+
                 TaskListFragment.ChildTaskData(
                     childTask.name,
                     childTask.getScheduleText(ScheduleText),
-                    getTaskListChildTaskDatas(childTask, now, includeProjectInfo),
+                    getTaskListChildTaskDatas(childTask, now, childSearchCriteria, showDeleted, includeProjectInfo),
                     childTask.note,
                     childTask.taskKey,
                     childTask.getImage(deviceDbInfo),

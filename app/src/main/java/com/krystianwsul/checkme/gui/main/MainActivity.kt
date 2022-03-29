@@ -64,6 +64,7 @@ import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.kotlin.Observables
 import io.reactivex.rxjava3.kotlin.addTo
+import io.reactivex.rxjava3.kotlin.cast
 import io.reactivex.rxjava3.kotlin.plusAssign
 import kotlinx.parcelize.Parcelize
 import org.joda.time.DateTime
@@ -143,7 +144,7 @@ class MainActivity :
 
     private var actionMode: ActionMode? = null
 
-    private val filterCriteriaObservable by lazy { // todo expand
+    private val filterCriteriaObservable by lazy {
         binding.mainSearchInclude
             .toolbar
             .filterCriteriaObservable
@@ -535,15 +536,8 @@ class MainActivity :
                 .commit()
         }
 
-        noteListFragment.listener = newTaskListListener(
-            { it is TabSearchState.Notes },
-            { noteSelectAllVisible = it },
-        )
-
-        taskListFragment.listener = newTaskListListener(
-            { it is TabSearchState.Tasks },
-            { taskSelectAllVisible = it },
-        )
+        noteListFragment.listener = noteTaskListListener
+        taskListFragment.listener = allTasksTaskListListener
 
         binding.mainDaysPager
             .pageSelections()
@@ -657,7 +651,7 @@ class MainActivity :
         searchInstancesViewModel.apply {
             val instanceSearch = Observable.combineLatest(
                 tabSearchStateRelay,
-                filterCriteriaObservable
+                filterCriteriaObservable,
             ) { tabSearchState, searchData ->
                 if ((tabSearchState as? TabSearchState.Instances)?.isSearching == true) {
                     NullableWrapper(searchData)
@@ -781,14 +775,14 @@ class MainActivity :
         getTabSearchStateFromIntent(intent)?.let(::setTabSearchState)
     }
 
-    private fun newTaskListListener(
+    private inner class TaskListListener(
         checkTabSearchState: (TabSearchState) -> Boolean,
-        storeSelectAllVisibility: (Boolean) -> Unit,
-    ) = object : TaskListFragment.Listener {
+        private val storeSelectAllVisibility: (Boolean) -> Unit,
+    ) : TaskListFragment.Listener {
 
         override val snackbarParent get() = this@MainActivity.snackbarParent
 
-        override val taskSearch by lazy {
+        private val filterCriteria by lazy {
             tabSearchStateRelay.switchMap {
                 if (checkTabSearchState(it)) {
                     if (it.isSearching) {
@@ -799,7 +793,13 @@ class MainActivity :
                 } else {
                     Observable.never()
                 }
-            }
+            }.share()
+        }
+
+        val searchObservable = filterCriteria.map { it.search }
+
+        override val taskSearch by lazy {
+            filterCriteria.map { it.toExpandOnly() }.cast<FilterCriteria>()
         }
 
         override fun onCreateActionMode(actionMode: ActionMode) = this@MainActivity.onCreateActionMode(actionMode)
@@ -820,6 +820,20 @@ class MainActivity :
 
         override fun showFabMenu(menuDelegate: BottomFabMenuDelegate.MenuDelegate) =
             bottomFabMenuDelegate.showMenu(menuDelegate)
+    }
+
+    private val noteTaskListListener by lazy {
+        TaskListListener(
+            { it is TabSearchState.Notes },
+            { noteSelectAllVisible = it },
+        )
+    }
+
+    private val allTasksTaskListListener by lazy {
+        TaskListListener(
+            { it is TabSearchState.Tasks },
+            { taskSelectAllVisible = it },
+        )
     }
 
     private data class DeleteTasksData(val dataId: DataId, val taskKeys: Set<TaskKey>) : Serializable
@@ -1053,8 +1067,8 @@ class MainActivity :
 
         if (tab == Tab.ABOUT) aboutFragment.onShown()
 
-        mainNoteViewModel.apply { if (tab == Tab.NOTES) start() else stop() }
-        mainTaskViewModel.apply { if (tab == Tab.TASKS) start() else stop() }
+        mainNoteViewModel.apply { if (tab == Tab.NOTES) start(noteTaskListListener.searchObservable) else stop() }
+        mainTaskViewModel.apply { if (tab == Tab.TASKS) start(allTasksTaskListListener.searchObservable) else stop() }
 
         binding.mainActivityToolbar.title = getString(tabSearchState.title)
 

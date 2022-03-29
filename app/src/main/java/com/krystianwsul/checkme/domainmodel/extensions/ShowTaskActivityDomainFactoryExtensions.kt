@@ -6,6 +6,7 @@ import com.krystianwsul.checkme.domainmodel.ScheduleText
 import com.krystianwsul.checkme.domainmodel.getProjectInfo
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.viewmodels.ShowTaskViewModel
+import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.TaskKey
@@ -27,7 +28,7 @@ fun DomainFactory.getShowTaskData(requestTaskKey: TaskKey): ShowTaskViewModel.Da
             TaskListFragment.ChildTaskData(
                 childTask.name,
                 childTask.getScheduleText(ScheduleText),
-                getTaskListChildTaskDatas(childTask, now, false),
+                getTaskListChildTaskDatas(childTask, now, SearchCriteria.empty, false, false), // todo expand
                 childTask.note,
                 childTask.taskKey,
                 childTask.getImage(deviceDbInfo),

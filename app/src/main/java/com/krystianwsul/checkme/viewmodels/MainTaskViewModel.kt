@@ -4,7 +4,8 @@ import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.extensions.getMainTaskData
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.common.criteria.SearchCriteria
-import io.reactivex.rxjava3.kotlin.Observables
+import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.kotlin.addTo
 
 class MainTaskViewModel : DomainViewModel<MainTaskViewModel.Data>() {
 
@@ -17,25 +18,28 @@ class MainTaskViewModel : DomainViewModel<MainTaskViewModel.Data>() {
         }
     }
 
-    fun start() {
+    fun start(searchObservable: Observable<SearchCriteria.Search.Query>) {
         if (started) return
 
-        Observables.combineLatest(
+        Observable.combineLatest(
             Preferences.showProjectsObservable,
             Preferences.showAssignedObservable,
             Preferences.showDeletedObservable,
-        )
+            searchObservable,
+        ) { showProjects, showAssignedToOthers, showDeleted, search ->
+            Parameters(
+                showProjects,
+                SearchCriteria(search, showAssignedToOthers = showAssignedToOthers),
+                showDeleted,
+            )
+        }
             .distinctUntilChanged()
-            .subscribe { (showProjects, showAssignedToOthers, showDeleted) ->
-                parameters =
-                    Parameters(
-                        showProjects,
-                        SearchCriteria(showAssignedToOthers = showAssignedToOthers),
-                        showDeleted,
-                    )
+            .subscribe {
+                parameters = it
 
                 refresh()
             }
+            .addTo(startedDisposable)
     }
 
     data class Data(val taskData: TaskListFragment.TaskData) : DomainData()

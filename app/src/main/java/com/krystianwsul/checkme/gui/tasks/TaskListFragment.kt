@@ -939,7 +939,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
     interface Listener : ActionModeListener, SnackbarListener, ListItemAddedListener {
 
-        val taskSearch: Observable<FilterCriteria.Full>
+        val taskSearch: Observable<FilterCriteria>
 
         fun setTaskSelectAllVisibility(selectAllVisible: Boolean)
 

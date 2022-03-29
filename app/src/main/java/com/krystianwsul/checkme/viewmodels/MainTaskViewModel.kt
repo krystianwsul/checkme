@@ -3,28 +3,36 @@ package com.krystianwsul.checkme.viewmodels
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.extensions.getMainTaskData
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
-import io.reactivex.rxjava3.kotlin.addTo
-import kotlin.properties.Delegates
+import com.krystianwsul.common.criteria.SearchCriteria
+import io.reactivex.rxjava3.kotlin.Observables
 
 class MainTaskViewModel : DomainViewModel<MainTaskViewModel.Data>() {
 
-    private var showProjects by Delegates.notNull<Boolean>()
+    private lateinit var parameters: Parameters
 
     override val domainListener = object : DomainListener<Data>() {
 
-        override val domainResultFetcher = DomainResultFetcher.DomainFactoryData { it.getMainTaskData(showProjects) }
+        override val domainResultFetcher =
+            DomainResultFetcher.DomainFactoryData { it.getMainTaskData(parameters.showProjects, parameters.searchCriteria) }
     }
 
     fun start() {
         if (started) return
 
-        Preferences.showProjectsObservable
-            .subscribe {
-                showProjects = it
+        Observables.combineLatest(
+            Preferences.showProjectsObservable,
+            Preferences.showAssignedObservable,
+        )
+            .distinctUntilChanged()
+            .subscribe { (showProjects, showAssignedToOthers) ->
+                parameters =
+                    Parameters(showProjects, SearchCriteria(showAssignedToOthers = showAssignedToOthers)) // todo show done
+
                 refresh()
             }
-            .addTo(startedDisposable)
     }
 
     data class Data(val taskData: TaskListFragment.TaskData) : DomainData()
+
+    private data class Parameters(val showProjects: Boolean, val searchCriteria: SearchCriteria)
 }

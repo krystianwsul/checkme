@@ -5,6 +5,7 @@ import com.krystianwsul.checkme.domainmodel.extensions.*
 import com.krystianwsul.checkme.domainmodel.updates.CreateChildTaskDomainUpdate
 import com.krystianwsul.checkme.gui.edit.EditParameters
 import com.krystianwsul.checkme.gui.edit.delegates.EditDelegate
+import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.task.RootTask
 import com.krystianwsul.common.time.*
@@ -37,7 +38,7 @@ class DomainFactoryTest {
 
         assertEquals(
             "task",
-            domainFactory.getMainTaskData(false)
+            domainFactory.getMainTaskData(false, SearchCriteria.empty)
                 .taskData
                 .entryDatas
                 .single()
@@ -428,7 +429,7 @@ class DomainFactoryTest {
 
         assertEquals(
             taskName,
-            domainFactory.getMainTaskData(false)
+            domainFactory.getMainTaskData(false, SearchCriteria.empty)
                 .taskData
                 .entryDatas
                 .single()

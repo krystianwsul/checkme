@@ -31,7 +31,7 @@ class ShowTasksViewModel : DomainViewModel<ShowTasksViewModel.Data>() {
                 parameters = Parameters(
                     activityParameters,
                     showProjects,
-                    SearchCriteria(showAssignedToOthers = showAssignedToOthers),
+                    SearchCriteria(showAssignedToOthers = showAssignedToOthers), // todo show done
                 )
 
                 refresh()

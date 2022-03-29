@@ -13,6 +13,7 @@ import com.krystianwsul.checkme.viewmodels.MainNoteViewModel
 import com.krystianwsul.checkme.viewmodels.MainTaskViewModel
 import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.firebase.DomainThreadChecker
+import com.krystianwsul.common.firebase.models.filterSearchCriteria
 import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.ExactTimeStamp
@@ -20,6 +21,7 @@ import java.util.*
 
 fun DomainFactory.getMainNoteData(
     showProjects: Boolean,
+    searchCriteria: SearchCriteria,
     now: ExactTimeStamp.Local = ExactTimeStamp.Local.now,
 ): MainNoteViewModel.Data {
     MyCrashlytics.log("DomainFactory.getMainNoteData")
@@ -28,7 +30,7 @@ fun DomainFactory.getMainNoteData(
 
     return MainNoteViewModel.Data(
         TaskListFragment.TaskData(
-            getMainData(now, showProjects) { it.intervalInfo.isUnscheduled() },
+            getMainData(now, showProjects, searchCriteria) { it.intervalInfo.isUnscheduled() },
             null,
             true,
             null,
@@ -38,6 +40,7 @@ fun DomainFactory.getMainNoteData(
 
 fun DomainFactory.getMainTaskData(
     showProjects: Boolean,
+    searchCriteria: SearchCriteria,
     now: ExactTimeStamp.Local = ExactTimeStamp.Local.now,
 ): MainTaskViewModel.Data {
     MyCrashlytics.log("DomainFactory.getMainTaskData")
@@ -45,17 +48,20 @@ fun DomainFactory.getMainTaskData(
     DomainThreadChecker.instance.requireDomainThread()
 
     return MainTaskViewModel.Data(
-        TaskListFragment.TaskData(getMainData(now, showProjects), null, true, null)
+        TaskListFragment.TaskData(getMainData(now, showProjects, searchCriteria), null, true, null)
     )
 }
 
 private fun DomainFactory.getMainData(
     now: ExactTimeStamp.Local,
     showProjects: Boolean,
+    searchCriteria: SearchCriteria,
     filter: (Task) -> Boolean = { true },
 ): List<TaskListFragment.EntryData> {
-    fun Collection<Task>.toChildTaskDatas() = asSequence().filter(filter)
+    fun Collection<Task>.toChildTaskDatas() = asSequence()
+        .filter(filter)
         .filter { it.isTopLevelTask() }
+        .filterSearchCriteria(searchCriteria, myUserFactory.user)
         .map {
             TaskListFragment.ChildTaskData(
                 it.name,

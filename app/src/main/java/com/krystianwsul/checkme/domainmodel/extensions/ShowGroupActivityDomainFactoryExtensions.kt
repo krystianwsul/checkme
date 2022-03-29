@@ -11,6 +11,7 @@ import com.krystianwsul.checkme.utils.time.calendar
 import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.checkme.utils.time.toDateTimeSoy
 import com.krystianwsul.checkme.viewmodels.ShowGroupViewModel
+import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.time.DateTime
 import com.krystianwsul.common.time.ExactTimeStamp
@@ -19,7 +20,10 @@ import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.ProjectKey
 import java.util.*
 
-fun DomainFactory.getShowGroupData(parameters: ShowGroupActivity.Parameters): ShowGroupViewModel.Data {
+fun DomainFactory.getShowGroupData(
+    parameters: ShowGroupActivity.Parameters,
+    searchCriteria: SearchCriteria,
+): ShowGroupViewModel.Data {
     MyCrashlytics.log("DomainFactory.getShowGroupData")
 
     DomainThreadChecker.instance.requireDomainThread()
@@ -47,7 +51,7 @@ fun DomainFactory.getShowGroupData(parameters: ShowGroupActivity.Parameters): Sh
     return ShowGroupViewModel.Data(
         title,
         subtitle,
-        getGroupListData(timeStamp, now, parameters.projectKey, parameters.groupingMode)
+        getGroupListData(timeStamp, now, parameters.projectKey, parameters.groupingMode, searchCriteria),
     )
 }
 
@@ -56,6 +60,7 @@ private fun DomainFactory.getGroupListData(
     now: ExactTimeStamp.Local,
     projectKey: ProjectKey.Shared?,
     groupingMode: GroupType.GroupingMode,
+    searchCriteria: SearchCriteria,
 ): GroupListDataWrapper {
     val endCalendar = timeStamp.calendar.apply { add(Calendar.MINUTE, 1) }
     val endExactTimeStamp = ExactTimeStamp.Local(endCalendar.toDateTimeSoy()).toOffset()
@@ -64,16 +69,14 @@ private fun DomainFactory.getGroupListData(
         timeStamp.toLocalExactTimeStamp().toOffset(),
         endExactTimeStamp,
         now,
+        searchCriteria,
         projectKey = projectKey,
     ).toList()
 
     val currentInstances = rootInstances.filter { it.instanceDateTime.timeStamp.compareTo(timeStamp) == 0 }
 
     val customTimeDatas = getCurrentRemoteCustomTimes().map {
-        GroupListDataWrapper.CustomTimeData(
-            it.name,
-            it.hourMinutes.toSortedMap()
-        )
+        GroupListDataWrapper.CustomTimeData(it.name, it.hourMinutes.toSortedMap())
     }
 
     val includeProjectDetails = projectKey == null

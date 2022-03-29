@@ -117,7 +117,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
             .addTo(createDisposable)
     }
 
-    override val instanceSearch by lazy {
+    override val instanceSearch by lazy { // todo show done
         binding.showInstanceToolbarCollapseInclude
             .collapseAppBarLayout
             .filterCriteria

@@ -76,7 +76,7 @@ class ShowNotificationGroupActivity : AbstractActivity(), GroupListListener {
         override fun onReceive(context: Context?, intent: Intent?) = showNotificationGroupViewModel.refresh()
     }
 
-    override val instanceSearch by lazy {
+    override val instanceSearch by lazy { // todo show done doesn't need subsequent filtering
         binding.showNotificationGroupToolbarCollapseInclude
             .collapseAppBarLayout
             .filterCriteria
@@ -112,7 +112,10 @@ class ShowNotificationGroupActivity : AbstractActivity(), GroupListListener {
             .collapseAppBarLayout
             .apply {
                 setSearchMenuOptions(false, true, false)
+
                 configureMenu(R.menu.show_task_menu_top, R.id.actionShowTaskSearch)
+
+                menu.findItem(R.id.actionTaskShowDeleted).isVisible = false
             }
 
         updateTopMenu()

@@ -21,6 +21,7 @@ fun DomainFactory.getShowTasksData(
     parameters: ShowTasksActivity.Parameters,
     showProjects: Boolean, // this is dynamically from FilterCriteria, not the helper in parameters
     searchCriteria: SearchCriteria,
+    showDeleted: Boolean,
 ): ShowTasksViewModel.Data {
     MyCrashlytics.log("DomainFactory.getShowTasksData")
 
@@ -54,7 +55,7 @@ fun DomainFactory.getShowTasksData(
             fun Project<*>.getUnscheduledTaskDatas() = getAllDependenciesLoadedTasks()
                 .asSequence()
                 .filter { it.notDeleted && it.intervalInfo.isUnscheduled() }
-                .filterSearchCriteria(searchCriteria, myUserFactory.user, true, now) // todo show done
+                .filterSearchCriteria(searchCriteria, myUserFactory.user, showDeleted, now)
                 .map { it.toChildTaskData() }
                 .toList()
 
@@ -62,15 +63,19 @@ fun DomainFactory.getShowTasksData(
                 if (parameters.projectKey != null) {
                     getProjectForce(parameters.projectKey).getUnscheduledTaskDatas()
                 } else {
-                    projects.values.flatMap { it.toEntryDatas(it.getUnscheduledTaskDatas(), showProjects) }
+                    projects.values
+                        .asSequence()
+                        .filterSearchCriteria(showDeleted)
+                        .flatMap { it.toEntryDatas(it.getUnscheduledTaskDatas(), showProjects) }
+                        .toList()
                 }
             }
 
             title = MyApplication.context.getString(R.string.notes)
 
-            subtitle = parameters.projectKey?.let {
-                projectsFactory.getProjectForce(it).getDisplayName()
-            }
+            subtitle = parameters.projectKey
+                ?.let(projectsFactory::getProjectForce)
+                ?.getDisplayName()
 
             isSharedProject = null
         }
@@ -91,6 +96,7 @@ fun DomainFactory.getShowTasksData(
             entryDatas = project.getAllDependenciesLoadedTasks()
                 .asSequence()
                 .filter { it.isTopLevelTask() }
+                .filterSearchCriteria(searchCriteria, myUserFactory.user, showDeleted, now)
                 .map { it.toChildTaskData() }
                 .toList()
 

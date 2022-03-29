@@ -533,21 +533,23 @@ class DomainFactory(
         now: ExactTimeStamp.Local,
         includeProjectInfo: Boolean = true,
     ): List<TaskListFragment.ChildTaskData> {
-        return parentTask.getChildTasks().map { childTask ->
-            TaskListFragment.ChildTaskData(
-                childTask.name,
-                childTask.getScheduleText(ScheduleText),
-                getTaskListChildTaskDatas(childTask, now, includeProjectInfo),
-                childTask.note,
-                childTask.taskKey,
-                childTask.getImage(deviceDbInfo),
-                childTask.notDeleted,
-                childTask.isVisible(now),
-                childTask.canMigrateDescription(now),
-                childTask.ordinal,
-                childTask.getProjectInfo(),
-            )
-        }
+        return parentTask.getChildTasks()
+            .map { childTask ->
+                TaskListFragment.ChildTaskData(
+                    childTask.name,
+                    childTask.getScheduleText(ScheduleText),
+                    getTaskListChildTaskDatas(childTask, now, includeProjectInfo),
+                    childTask.note,
+                    childTask.taskKey,
+                    childTask.getImage(deviceDbInfo),
+                    childTask.notDeleted,
+                    childTask.isVisible(now),
+                    childTask.canMigrateDescription(now),
+                    childTask.ordinal,
+                    childTask.getProjectInfo(),
+                )
+            }
+            .toList()
     }
 
     data class CloudParams(val projects: Collection<Project<*>>, val userKeys: Collection<UserKey> = emptySet()) {

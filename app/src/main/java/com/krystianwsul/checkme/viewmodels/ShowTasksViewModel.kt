@@ -15,7 +15,12 @@ class ShowTasksViewModel : DomainViewModel<ShowTasksViewModel.Data>() {
     override val domainListener = object : DomainListener<Data>() {
 
         override val domainResultFetcher = DomainResultFetcher.DomainFactoryData {
-            it.getShowTasksData(parameters.activityParameters, parameters.showProjects, parameters.searchCriteria)
+            it.getShowTasksData(
+                parameters.activityParameters,
+                parameters.showProjects,
+                parameters.searchCriteria,
+                parameters.showDeleted,
+            )
         }
     }
 
@@ -25,13 +30,15 @@ class ShowTasksViewModel : DomainViewModel<ShowTasksViewModel.Data>() {
         Observables.combineLatest(
             Preferences.showProjectsObservable,
             Preferences.showAssignedObservable,
+            Preferences.showDeletedObservable,
         )
             .distinctUntilChanged()
-            .subscribe { (showProjects, showAssignedToOthers) ->
+            .subscribe { (showProjects, showAssignedToOthers, showDeleted) ->
                 parameters = Parameters(
                     activityParameters,
                     showProjects,
-                    SearchCriteria(showAssignedToOthers = showAssignedToOthers), // todo show done
+                    SearchCriteria(showAssignedToOthers = showAssignedToOthers),
+                    showDeleted,
                 )
 
                 refresh()
@@ -50,5 +57,6 @@ class ShowTasksViewModel : DomainViewModel<ShowTasksViewModel.Data>() {
         val activityParameters: ShowTasksActivity.Parameters,
         val showProjects: Boolean,
         val searchCriteria: SearchCriteria,
+        val showDeleted: Boolean,
     )
 }

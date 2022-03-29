@@ -22,11 +22,12 @@ fun DomainFactory.getShowTaskData(requestTaskKey: TaskKey): ShowTaskViewModel.Da
     val task = getTaskForce(taskKey)
 
     val childTaskDatas = task.getChildTasks()
+        .asSequence()
         .map { childTask ->
             TaskListFragment.ChildTaskData(
                 childTask.name,
                 childTask.getScheduleText(ScheduleText),
-                getTaskListChildTaskDatas(childTask, now),
+                getTaskListChildTaskDatas(childTask, now, false),
                 childTask.note,
                 childTask.taskKey,
                 childTask.getImage(deviceDbInfo),

@@ -69,7 +69,7 @@ private fun DomainFactory.getMainData(
             TaskListFragment.ChildTaskData(
                 it.name,
                 it.getScheduleText(ScheduleText),
-                getTaskListChildTaskDatas(it, now),
+                getTaskListChildTaskDatas(it, now, showDeleted),
                 it.note,
                 it.taskKey,
                 it.getImage(deviceDbInfo),

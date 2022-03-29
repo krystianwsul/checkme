@@ -82,6 +82,7 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.Listener {
         binding.showTaskToolbarCollapseInclude
             .collapseAppBarLayout
             .filterCriteria
+            .map { it.stripShowDeleted() }
     }
 
     private lateinit var binding: ActivityShowTaskBinding
@@ -105,7 +106,7 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.Listener {
 
         binding.showTaskToolbarCollapseInclude
             .collapseAppBarLayout
-            .configureMenu(R.menu.show_task_menu_top, R.id.actionShowTaskSearch, R.id.actionTaskShowDeleted)
+            .configureMenu(R.menu.show_task_menu_top, R.id.actionShowTaskSearch)
 
         updateTopMenu()
 
@@ -180,7 +181,7 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.Listener {
             .menu
             .apply {
                 findItem(R.id.actionShowTaskSearch).isVisible = hasChildren
-                findItem(R.id.actionTaskShowDeleted).isVisible = hasChildren
+                findItem(R.id.actionTaskShowDeleted).isVisible = false
             }
     }
 

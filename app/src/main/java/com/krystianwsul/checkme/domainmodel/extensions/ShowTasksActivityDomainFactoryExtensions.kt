@@ -9,7 +9,9 @@ import com.krystianwsul.checkme.domainmodel.getProjectInfo
 import com.krystianwsul.checkme.gui.tasks.ShowTasksActivity
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.viewmodels.ShowTasksViewModel
+import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.firebase.DomainThreadChecker
+import com.krystianwsul.common.firebase.models.filterSearchCriteria
 import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.project.SharedProject
 import com.krystianwsul.common.firebase.models.task.Task
@@ -18,6 +20,7 @@ import com.krystianwsul.common.time.ExactTimeStamp
 fun DomainFactory.getShowTasksData(
     parameters: ShowTasksActivity.Parameters,
     showProjects: Boolean, // this is dynamically from FilterCriteria, not the helper in parameters
+    searchCriteria: SearchCriteria,
 ): ShowTasksViewModel.Data {
     MyCrashlytics.log("DomainFactory.getShowTasksData")
 
@@ -49,9 +52,12 @@ fun DomainFactory.getShowTasksData(
 
     when (parameters) {
         is ShowTasksActivity.Parameters.Unscheduled -> {
-            fun Project<*>.getUnscheduledTaskDatas() = getAllDependenciesLoadedTasks().filter {
-                it.notDeleted && it.intervalInfo.isUnscheduled()
-            }.map { it.toChildTaskData() }
+            fun Project<*>.getUnscheduledTaskDatas() = getAllDependenciesLoadedTasks()
+                .asSequence()
+                .filter { it.notDeleted && it.intervalInfo.isUnscheduled() }
+                .filterSearchCriteria(searchCriteria, myUserFactory.user)
+                .map { it.toChildTaskData() }
+                .toList()
 
             entryDatas = projectsFactory.run {
                 if (parameters.projectKey != null) {

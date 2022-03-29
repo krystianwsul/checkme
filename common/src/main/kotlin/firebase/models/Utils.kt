@@ -27,7 +27,17 @@ fun Sequence<Task>.filterSearch(search: SearchCriteria.Search?, onlyHierarchy: B
             return FilterResult.DOESNT_MATCH
         }
 
-    map { it to childHierarchyMatches(it) }.filter { it.second != FilterResult.DOESNT_MATCH }
+        map { it to childHierarchyMatches(it) }.filter { it.second != FilterResult.DOESNT_MATCH }
+    }
+
+fun Sequence<Task>.filterSearchCriteria(searchCriteria: SearchCriteria, myUser: MyUser) = if (searchCriteria.isEmpty) {
+    this
+} else {
+    if (searchCriteria.showAssignedToOthers) {
+        this
+    } else {
+        filter { it.isAssignedToMe(myUser) }
+    }
 }
 
 fun Sequence<Instance>.filterSearchCriteria(

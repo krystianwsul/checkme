@@ -4,6 +4,8 @@ import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.extensions.getShowTasksData
 import com.krystianwsul.checkme.gui.tasks.ShowTasksActivity
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
+import com.krystianwsul.common.criteria.SearchCriteria
+import io.reactivex.rxjava3.kotlin.Observables
 import io.reactivex.rxjava3.kotlin.addTo
 
 class ShowTasksViewModel : DomainViewModel<ShowTasksViewModel.Data>() {
@@ -13,16 +15,25 @@ class ShowTasksViewModel : DomainViewModel<ShowTasksViewModel.Data>() {
     override val domainListener = object : DomainListener<Data>() {
 
         override val domainResultFetcher = DomainResultFetcher.DomainFactoryData {
-            it.getShowTasksData(parameters.activityParameters, parameters.showProjects)
+            it.getShowTasksData(parameters.activityParameters, parameters.showProjects, parameters.searchCriteria)
         }
     }
 
     fun start(activityParameters: ShowTasksActivity.Parameters) {
         if (started) return
 
-        Preferences.showProjectsObservable
-            .subscribe {
-                parameters = Parameters(activityParameters, it)
+        Observables.combineLatest(
+            Preferences.showProjectsObservable,
+            Preferences.showAssignedObservable,
+        )
+            .distinctUntilChanged()
+            .subscribe { (showProjects, showAssignedToOthers) ->
+                parameters = Parameters(
+                    activityParameters,
+                    showProjects,
+                    SearchCriteria(showAssignedToOthers = showAssignedToOthers),
+                )
+
                 refresh()
             }
             .addTo(startedDisposable)
@@ -35,5 +46,9 @@ class ShowTasksViewModel : DomainViewModel<ShowTasksViewModel.Data>() {
         val isSharedProject: Boolean?,
     ) : DomainData()
 
-    data class Parameters(val activityParameters: ShowTasksActivity.Parameters, val showProjects: Boolean)
+    data class Parameters(
+        val activityParameters: ShowTasksActivity.Parameters,
+        val showProjects: Boolean,
+        val searchCriteria: SearchCriteria,
+    )
 }

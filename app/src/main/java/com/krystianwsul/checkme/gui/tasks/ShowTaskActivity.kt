@@ -82,7 +82,6 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.Listener {
         binding.showTaskToolbarCollapseInclude
             .collapseAppBarLayout
             .filterCriteria
-            .map { it.stripShowDeleted() }
     }
 
     private lateinit var binding: ActivityShowTaskBinding

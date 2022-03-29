@@ -58,7 +58,6 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
         binding.showTasksToolbarCollapseInclude
             .collapseAppBarLayout
             .filterCriteria
-            .map { it.stripShowDeleted() }
     }
 
     private val receiver = object : BroadcastReceiver() {

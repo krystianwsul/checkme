@@ -33,9 +33,15 @@ import com.krystianwsul.checkme.gui.edit.dialogs.ParentPickerFragment
 import com.krystianwsul.checkme.gui.utils.ResettableProperty
 import com.krystianwsul.checkme.gui.utils.connectInstanceSearch
 import com.krystianwsul.checkme.gui.utils.measureVisibleHeight
-import com.krystianwsul.checkme.utils.*
+import com.krystianwsul.checkme.utils.addOneShotGlobalLayoutListener
+import com.krystianwsul.checkme.utils.animateVisibility
+import com.krystianwsul.checkme.utils.cancelAnimations
 import com.krystianwsul.checkme.utils.time.getDisplayText
-import com.krystianwsul.checkme.viewmodels.*
+import com.krystianwsul.checkme.utils.tryGetFragment
+import com.krystianwsul.checkme.viewmodels.DataId
+import com.krystianwsul.checkme.viewmodels.EditInstancesSearchViewModel
+import com.krystianwsul.checkme.viewmodels.EditInstancesViewModel
+import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.time.TimePairPersist
@@ -48,7 +54,6 @@ import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.subscribeBy
 import kotlinx.parcelize.Parcelize
-import java.util.*
 
 class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
 
@@ -142,7 +147,7 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
 
             init {
                 connectInstanceSearch(
-                    queryRelay.map { FilterCriteria.Full(it, showAssignedToOthers = Preferences.showAssigned) },
+                    queryRelay.map { FilterCriteria.Full(it, Preferences.showAssigned) },
                     false,
                     { state.page },
                     { state.page = it },

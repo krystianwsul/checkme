@@ -16,7 +16,6 @@ import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.treeadapter.FilterCriteria
 import com.soywiz.klock.DateTimeTz
 import com.soywiz.klock.days
-import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.schedulers.Schedulers
 import org.joda.time.LocalDateTime
@@ -147,12 +146,9 @@ object Preferences {
     var showProjects by showProjectsProperty
     val showProjectsObservable = showProjectsProperty.observable.distinctUntilChanged()
 
-    val filterParamsObservable = Observable.combineLatest(
-        showDeletedObservable,
-        showAssignedObservable,
-    ) { showDeleted, showAssignedToOthers ->
-        FilterCriteria.Full.FilterParams(showDeleted, showAssignedToOthers)
-    }.distinctUntilChanged()
+    val filterParamsObservable = showAssignedObservable.distinctUntilChanged()
+        .map(FilterCriteria.Full::FilterParams)
+        .distinctUntilChanged()
 
     var instanceWarningSnooze: ExactTimeStamp.Local?
         get() = sharedPreferences.getLong(KEY_INSTANCE_WARNING_SNOOZE, -1)

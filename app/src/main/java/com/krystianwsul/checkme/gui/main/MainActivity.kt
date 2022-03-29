@@ -799,7 +799,7 @@ class MainActivity :
                 } else {
                     Observable.never()
                 }
-            }.map { it.stripShowDeleted() }
+            }
         }
 
         override fun onCreateActionMode(actionMode: ActionMode) = this@MainActivity.onCreateActionMode(actionMode)

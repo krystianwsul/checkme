@@ -20,11 +20,7 @@ sealed interface FilterCriteria : Parcelable {
         constructor(query: String = "", filterParams: FilterParams = FilterParams()) :
                 this(SearchCriteria.Search.Query(query), filterParams)
 
-        constructor(
-            query: String = "",
-            showDeleted: Boolean = false,
-            showAssignedToOthers: Boolean = true,
-        ) : this(query, FilterParams(showDeleted, showAssignedToOthers))
+        constructor(query: String, showAssignedToOthers: Boolean) : this(query, FilterParams(showAssignedToOthers))
 
         override fun canBeShown(treeNode: TreeNode<*>): Boolean {
             return when (treeNode.modelNode.getMatchResult(search)) {
@@ -34,10 +30,8 @@ sealed interface FilterCriteria : Parcelable {
             }
         }
 
-        fun stripShowDeleted() = copy(filterParams = filterParams.copy(showDeleted = true)) // todo show done
-
         @Parcelize
-        data class FilterParams(val showDeleted: Boolean = false, val showAssignedToOthers: Boolean = true) : Parcelable
+        data class FilterParams(val showAssignedToOthers: Boolean = true) : Parcelable
     }
 
     @Parcelize

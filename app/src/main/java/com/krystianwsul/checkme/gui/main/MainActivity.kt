@@ -143,7 +143,7 @@ class MainActivity :
 
     private var actionMode: ActionMode? = null
 
-    private val filterCriteriaObservable by lazy {
+    private val filterCriteriaObservable by lazy { // todo expand
         binding.mainSearchInclude
             .toolbar
             .filterCriteriaObservable

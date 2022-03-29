@@ -30,6 +30,8 @@ sealed interface FilterCriteria : Parcelable {
             }
         }
 
+        fun toExpandOnly() = ExpandOnly(search) // todo optimization
+
         @Parcelize
         data class FilterParams(val showAssignedToOthers: Boolean = true) : Parcelable
     }

@@ -5,9 +5,10 @@ import com.krystianwsul.common.utils.Parcelable
 import com.krystianwsul.common.utils.Parcelize
 
 data class SearchCriteria(
+    // todo optimization: split up into smaller classes and use empty/isEmpty model for them, to optimize sub-searches
     val search: Search? = null,
     val showAssignedToOthers: Boolean = true,
-    val showDone: Boolean = true,
+    val showDone: Boolean = true, // this is definitely not the same as showDeleted
     val excludedInstanceKeys: Set<InstanceKey> = setOf(),
 ) {
 

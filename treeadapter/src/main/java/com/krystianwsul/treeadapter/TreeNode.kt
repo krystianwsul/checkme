@@ -4,7 +4,6 @@ import android.os.Parcelable
 import androidx.recyclerview.widget.RecyclerView
 import com.krystianwsul.common.criteria.SearchCriteria
 import kotlinx.parcelize.Parcelize
-import java.util.*
 
 class TreeNode<T : TreeHolder>(
     val modelNode: ModelNode<T>,
@@ -337,11 +336,8 @@ class TreeNode<T : TreeHolder>(
 
     fun parentHierarchyMatchesSearch(search: SearchCriteria.Search) = parentHierarchyMatchesSearch(this, search)
 
-    fun childHierarchyMatchesFilterCriteria(filterCriteria: FilterCriteria.Full): Boolean = childTreeNodes.any {
-        val matchesFilterCriteria = it.modelNode.matchesFilterParams(filterCriteria.filterParams) &&
-                it.matchesSearch(filterCriteria.search)
-
-        matchesFilterCriteria || it.childHierarchyMatchesFilterCriteria(filterCriteria)
+    fun childHierarchyMatchesSearch(search: SearchCriteria.Search.Query): Boolean = childTreeNodes.any {
+        it.matchesSearch(search) || it.childHierarchyMatchesSearch(search)
     }
 
     private fun childHierarchyMatchesSearch(search: SearchCriteria.Search): Boolean =

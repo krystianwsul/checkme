@@ -27,12 +27,10 @@ sealed interface FilterCriteria : Parcelable {
         ) : this(query, FilterParams(showDeleted, showAssignedToOthers))
 
         override fun canBeShown(treeNode: TreeNode<*>): Boolean {
-            if (!treeNode.modelNode.matchesFilterParams(filterParams)) return false
-
             return when (treeNode.modelNode.getMatchResult(search)) {
                 ModelNode.MatchResult.ALWAYS_VISIBLE, ModelNode.MatchResult.MATCHES -> true
                 ModelNode.MatchResult.DOESNT_MATCH -> treeNode.parentHierarchyMatchesSearch(search) ||
-                        treeNode.childHierarchyMatchesFilterCriteria(this)
+                        treeNode.childHierarchyMatchesSearch(search)
             }
         }
 

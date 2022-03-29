@@ -56,7 +56,7 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
 
     private val showTasksViewModel by lazy { getViewModel<ShowTasksViewModel>() }
 
-    override val taskSearch by lazy {
+    override val taskSearch by lazy { // todo expand
         binding.showTasksToolbarCollapseInclude
             .collapseAppBarLayout
             .filterCriteria

@@ -57,7 +57,7 @@ class CollapseAppBarLayout : AppBarLayout {
 
     val isSearching get() = searchingRelay.value!!
 
-    val filterCriteria: Observable<FilterCriteria.Full> by lazy { // todo expand
+    val filterCriteria: Observable<FilterCriteria.Full> by lazy {
         searchingRelay.switchMap {
             if (it) {
                 binding.searchInclude

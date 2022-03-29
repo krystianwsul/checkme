@@ -87,7 +87,7 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
         override fun onReceive(context: Context?, intent: Intent?) = showGroupViewModel.refresh()
     }
 
-    override val instanceSearch by lazy {
+    override val instanceSearch by lazy { // todo expand
         binding.showGroupToolbarCollapseInclude
             .collapseAppBarLayout
             .filterCriteria

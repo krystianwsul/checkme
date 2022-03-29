@@ -80,7 +80,7 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.Listener {
         override fun onReceive(context: Context?, intent: Intent?) = showTaskViewModel.refresh()
     }
 
-    override val taskSearch by lazy {
+    override val taskSearch by lazy { // todo expand
         binding.showTaskToolbarCollapseInclude
             .collapseAppBarLayout
             .filterCriteria

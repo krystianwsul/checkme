@@ -117,11 +117,14 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
             .addTo(createDisposable)
     }
 
-    override val instanceSearch by lazy { // todo expand
+    private val filterCriteria by lazy {
         binding.showInstanceToolbarCollapseInclude
             .collapseAppBarLayout
             .filterCriteria
-            .cast<FilterCriteria>()
+    }
+
+    override val instanceSearch by lazy {
+        filterCriteria.map { it.toExpandOnly() }.cast<FilterCriteria>()
     }
 
     private lateinit var binding: ActivityShowInstanceBinding
@@ -229,7 +232,9 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
         showInstanceViewModel.apply {
             start(instanceKey)
 
-            createDisposable += data.subscribe { onLoadFinished(it) }
+            createDisposable += filterCriteria.map { it.search }.subscribe(searchRelay)
+
+            createDisposable += data.subscribe(::onLoadFinished)
         }
 
         tryGetFragment<RemoveInstancesDialogFragment>(TAG_DELETE_INSTANCES)?.listener = deleteInstancesListener

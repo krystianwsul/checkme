@@ -13,9 +13,11 @@ import com.krystianwsul.checkme.gui.instances.drag.DropParent
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.checkme.viewmodels.ShowInstanceViewModel
+import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.domain.TaskUndoData
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.models.Instance
+import com.krystianwsul.common.firebase.models.filterSearchCriteria
 import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.InstanceKey
@@ -25,6 +27,7 @@ import io.reactivex.rxjava3.core.Single
 
 fun DomainFactory.getShowInstanceData(
     instanceKey: InstanceKey,
+    searchCriteria: SearchCriteria,
     now: ExactTimeStamp.Local = ExactTimeStamp.Local.now,
 ): ShowInstanceViewModel.Data {
     MyCrashlytics.log("DomainFactory.getShowInstanceData")
@@ -60,7 +63,7 @@ fun DomainFactory.getShowInstanceData(
         task.notDeleted,
         instance.canMigrateDescription(now),
         parentInstance == null,
-        getGroupListData(instance, task, now),
+        getGroupListData(instance, task, now, searchCriteria),
         displayText,
         task.taskKey,
         debugMode || instance.isVisible(now, Instance.VisibilityOptions(hack24 = true)),
@@ -122,15 +125,24 @@ private fun DomainFactory.getGroupListData(
     parentInstance: Instance,
     task: Task,
     now: ExactTimeStamp.Local,
+    searchCriteria: SearchCriteria,
 ): GroupListDataWrapper {
     val customTimeDatas = getCurrentRemoteCustomTimes().map {
         GroupListDataWrapper.CustomTimeData(it.name, it.hourMinutes.toSortedMap())
     }
 
     val instanceDescriptors = parentInstance.getChildInstances()
+        .asSequence()
         .filter { it.isVisible(now, Instance.VisibilityOptions(assumeChildOfVisibleParent = true)) }
+        .filterSearchCriteria(searchCriteria, now, myUserFactory.user, true)
         .map { childInstance ->
-            val (notDoneChildInstanceDescriptors, doneChildInstanceDescriptors) = getChildInstanceDatas(childInstance, now)
+            val childSearchCriteria = if (childInstance.task.matchesSearch(searchCriteria.search))
+                searchCriteria.copy(search = null)
+            else
+                searchCriteria
+
+            val (notDoneChildInstanceDescriptors, doneChildInstanceDescriptors) =
+                getChildInstanceDatas(childInstance, now, childSearchCriteria)
 
             val instanceData = GroupListDataWrapper.InstanceData.fromInstance(
                 childInstance,
@@ -147,6 +159,7 @@ private fun DomainFactory.getGroupListData(
                 childInstance,
             )
         }
+        .toList()
 
     val (mixedInstanceDescriptors, doneInstanceDescriptors) = instanceDescriptors.splitDone()
 

@@ -142,6 +142,10 @@ sealed class Task(
             taskRecord.ordinal = value
         }
 
+    /*
+    todo this shouldn't include the project unconditionally.  For instance, if I'm searching in ShowTaskActivity, I already
+    know they're all in the same project.  And the project name isn't even visible anywhere.
+     */
     protected val normalizedFieldsDelegate = invalidatableLazy {
         listOfNotNull(name, note, project.name).map { it.normalized() }
     }

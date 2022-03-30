@@ -28,7 +28,7 @@ class MainTaskViewModel : ObservableDomainViewModel<MainTaskViewModel.Data, Main
         ) { showProjects, showAssignedToOthers, showDeleted, search ->
             Parameters(
                 showProjects,
-                SearchCriteria(search, showAssignedToOthers = showAssignedToOthers),
+                SearchCriteria(search, showAssignedToOthers),
                 showDeleted,
             )
         }

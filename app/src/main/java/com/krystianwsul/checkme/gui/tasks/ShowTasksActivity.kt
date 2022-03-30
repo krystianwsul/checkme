@@ -56,11 +56,14 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
 
     private val showTasksViewModel by lazy { getViewModel<ShowTasksViewModel>() }
 
-    override val taskSearch by lazy { // todo expand
+    private val filterCriteria by lazy {
         binding.showTasksToolbarCollapseInclude
             .collapseAppBarLayout
             .filterCriteria
-            .cast<FilterCriteria>()
+    }
+
+    override val taskSearch by lazy {
+        filterCriteria.map { it.toExpandOnly() }.cast<FilterCriteria>()
     }
 
     private val receiver = object : BroadcastReceiver() {
@@ -117,7 +120,9 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
         showTasksViewModel.apply {
             start(parameters)
 
-            createDisposable += data.subscribe { onLoadFinished(it) }
+            createDisposable += filterCriteria.map { it.search }.subscribe(searchRelay)
+
+            createDisposable += data.subscribe(::onLoadFinished)
         }
 
         startDate(receiver)

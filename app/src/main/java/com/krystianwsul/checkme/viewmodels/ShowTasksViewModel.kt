@@ -25,17 +25,20 @@ class ShowTasksViewModel : ObservableDomainViewModel<ShowTasksViewModel.Data, Sh
 
     private val activityParametersRelay = PublishRelay.create<ShowTasksActivity.Parameters>()
 
+    val searchRelay = PublishRelay.create<SearchCriteria.Search.Query>()
+
     init {
         Observable.combineLatest(
             Preferences.showProjectsObservable,
             Preferences.showAssignedObservable,
             Preferences.showDeletedObservable,
             activityParametersRelay,
-        ) { showProjects, showAssignedToOthers, showDeleted, activityParameters ->
+            searchRelay,
+        ) { showProjects, showAssignedToOthers, showDeleted, activityParameters, search ->
             Parameters(
                 activityParameters,
                 showProjects,
-                SearchCriteria(showAssignedToOthers = showAssignedToOthers),
+                SearchCriteria(search, showAssignedToOthers),
                 showDeleted,
             )
         }

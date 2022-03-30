@@ -80,11 +80,14 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.Listener {
         override fun onReceive(context: Context?, intent: Intent?) = showTaskViewModel.refresh()
     }
 
-    override val taskSearch by lazy { // todo expand
+    private val filterCriteria by lazy {
         binding.showTaskToolbarCollapseInclude
             .collapseAppBarLayout
             .filterCriteria
-            .cast<FilterCriteria>()
+    }
+
+    override val taskSearch by lazy {
+        filterCriteria.map { it.toExpandOnly() }.cast<FilterCriteria>()
     }
 
     private lateinit var binding: ActivityShowTaskBinding
@@ -125,6 +128,8 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.Listener {
 
         showTaskViewModel.apply {
             start(taskKey)
+
+            createDisposable += filterCriteria.map { it.search }.subscribe(searchRelay)
 
             createDisposable += data.subscribe(::onLoadFinished)
         }

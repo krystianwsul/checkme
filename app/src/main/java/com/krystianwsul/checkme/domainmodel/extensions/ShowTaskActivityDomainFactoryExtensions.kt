@@ -8,10 +8,12 @@ import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.viewmodels.ShowTaskViewModel
 import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.firebase.DomainThreadChecker
+import com.krystianwsul.common.firebase.models.FilterResult
+import com.krystianwsul.common.firebase.models.filterSearchCriteria
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.TaskKey
 
-fun DomainFactory.getShowTaskData(requestTaskKey: TaskKey): ShowTaskViewModel.Data {
+fun DomainFactory.getShowTaskData(requestTaskKey: TaskKey, searchCriteria: SearchCriteria): ShowTaskViewModel.Data {
     MyCrashlytics.log("DomainFactory.getShowTaskData")
 
     DomainThreadChecker.instance.requireDomainThread()
@@ -24,11 +26,15 @@ fun DomainFactory.getShowTaskData(requestTaskKey: TaskKey): ShowTaskViewModel.Da
 
     val childTaskDatas = task.getChildTasks()
         .asSequence()
-        .map { childTask ->
+        .filterSearchCriteria(searchCriteria, myUserFactory.user, false, now)
+        .map { (childTask, filterResult) ->
+            val childSearchCriteria =
+                if (filterResult == FilterResult.MATCHES) searchCriteria.copy(search = null) else searchCriteria
+
             TaskListFragment.ChildTaskData(
                 childTask.name,
                 childTask.getScheduleText(ScheduleText),
-                getTaskListChildTaskDatas(childTask, now, SearchCriteria.empty, false, false), // todo expand
+                getTaskListChildTaskDatas(childTask, now, childSearchCriteria, false, false),
                 childTask.note,
                 childTask.taskKey,
                 childTask.getImage(deviceDbInfo),

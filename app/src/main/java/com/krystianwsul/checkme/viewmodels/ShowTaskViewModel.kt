@@ -1,21 +1,36 @@
 package com.krystianwsul.checkme.viewmodels
 
+import com.jakewharton.rxrelay3.PublishRelay
 import com.krystianwsul.checkme.domainmodel.extensions.getShowTaskData
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
+import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.firebase.models.ImageState
 import com.krystianwsul.common.utils.TaskKey
+import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.kotlin.addTo
 
-class ShowTaskViewModel : DomainViewModel<ShowTaskViewModel.Data>() {
-
-    private lateinit var taskKey: TaskKey
+class ShowTaskViewModel : ObservableDomainViewModel<ShowTaskViewModel.Data, ShowTaskViewModel.Parameters>() {
 
     override val domainListener = object : DomainListener<Data>() {
 
-        override val domainResultFetcher = DomainResultFetcher.DomainFactoryData { it.getShowTaskData(taskKey) }
+        override val domainResultFetcher =
+            DomainResultFetcher.DomainFactoryData { it.getShowTaskData(parameters.taskKey, parameters.searchCriteria) }
+    }
+
+    private val taskKeyRelay = PublishRelay.create<TaskKey>()
+
+    val searchRelay = PublishRelay.create<SearchCriteria.Search.Query>()
+
+    init {
+        Observable.combineLatest(taskKeyRelay, searchRelay) { taskKey, search ->
+            Parameters(taskKey, SearchCriteria(search))
+        }
+            .subscribe(parametersRelay)
+            .addTo(clearedDisposable)
     }
 
     fun start(taskKey: TaskKey) {
-        this.taskKey = taskKey
+        taskKeyRelay.accept(taskKey)
 
         internalStart()
     }
@@ -34,4 +49,6 @@ class ShowTaskViewModel : DomainViewModel<ShowTaskViewModel.Data>() {
             check(name.isNotEmpty())
         }
     }
+
+    data class Parameters(val taskKey: TaskKey, val searchCriteria: SearchCriteria) : ObservableDomainViewModel.Parameters
 }

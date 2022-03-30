@@ -1,16 +1,15 @@
 package com.krystianwsul.checkme.viewmodels
 
+import com.jakewharton.rxrelay3.PublishRelay
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.extensions.getShowTasksData
 import com.krystianwsul.checkme.gui.tasks.ShowTasksActivity
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.common.criteria.SearchCriteria
-import io.reactivex.rxjava3.kotlin.Observables
+import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.kotlin.addTo
 
-class ShowTasksViewModel : DomainViewModel<ShowTasksViewModel.Data>() {
-
-    private lateinit var parameters: Parameters
+class ShowTasksViewModel : ObservableDomainViewModel<ShowTasksViewModel.Data, ShowTasksViewModel.Parameters>() {
 
     override val domainListener = object : DomainListener<Data>() {
 
@@ -24,26 +23,30 @@ class ShowTasksViewModel : DomainViewModel<ShowTasksViewModel.Data>() {
         }
     }
 
-    fun start(activityParameters: ShowTasksActivity.Parameters) {
-        if (started) return
+    private val activityParametersRelay = PublishRelay.create<ShowTasksActivity.Parameters>()
 
-        Observables.combineLatest(
+    init {
+        Observable.combineLatest(
             Preferences.showProjectsObservable,
             Preferences.showAssignedObservable,
             Preferences.showDeletedObservable,
-        )
-            .distinctUntilChanged()
-            .subscribe { (showProjects, showAssignedToOthers, showDeleted) ->
-                parameters = Parameters(
-                    activityParameters,
-                    showProjects,
-                    SearchCriteria(showAssignedToOthers = showAssignedToOthers),
-                    showDeleted,
-                )
+            activityParametersRelay,
+        ) { showProjects, showAssignedToOthers, showDeleted, activityParameters ->
+            Parameters(
+                activityParameters,
+                showProjects,
+                SearchCriteria(showAssignedToOthers = showAssignedToOthers),
+                showDeleted,
+            )
+        }
+            .subscribe(parametersRelay)
+            .addTo(clearedDisposable)
+    }
 
-                refresh()
-            }
-            .addTo(startedDisposable)
+    fun start(activityParameters: ShowTasksActivity.Parameters) {
+        activityParametersRelay.accept(activityParameters)
+
+        internalStart()
     }
 
     data class Data(
@@ -58,5 +61,5 @@ class ShowTasksViewModel : DomainViewModel<ShowTasksViewModel.Data>() {
         val showProjects: Boolean,
         val searchCriteria: SearchCriteria,
         val showDeleted: Boolean,
-    )
+    ) : ObservableDomainViewModel.Parameters
 }

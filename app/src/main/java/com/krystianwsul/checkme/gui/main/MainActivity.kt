@@ -539,6 +539,14 @@ class MainActivity :
         noteListFragment.listener = noteTaskListListener
         taskListFragment.listener = allTasksTaskListListener
 
+        noteTaskListListener.searchObservable
+            .subscribe(mainNoteViewModel.searchRelay)
+            .addTo(createDisposable)
+
+        allTasksTaskListListener.searchObservable
+            .subscribe(mainTaskViewModel.searchRelay)
+            .addTo(createDisposable)
+
         binding.mainDaysPager
             .pageSelections()
             .subscribe {
@@ -1067,8 +1075,8 @@ class MainActivity :
 
         if (tab == Tab.ABOUT) aboutFragment.onShown()
 
-        mainNoteViewModel.apply { if (tab == Tab.NOTES) start(noteTaskListListener.searchObservable) else stop() }
-        mainTaskViewModel.apply { if (tab == Tab.TASKS) start(allTasksTaskListListener.searchObservable) else stop() }
+        mainNoteViewModel.apply { if (tab == Tab.NOTES) start() else stop() }
+        mainTaskViewModel.apply { if (tab == Tab.TASKS) start() else stop() }
 
         binding.mainActivityToolbar.title = getString(tabSearchState.title)
 

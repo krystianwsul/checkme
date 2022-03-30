@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.viewmodels
 
+import com.jakewharton.rxrelay3.PublishRelay
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.extensions.getMainTaskData
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
@@ -7,9 +8,7 @@ import com.krystianwsul.common.criteria.SearchCriteria
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.kotlin.addTo
 
-class MainTaskViewModel : DomainViewModel<MainTaskViewModel.Data>() {
-
-    private lateinit var parameters: Parameters
+class MainTaskViewModel : ObservableDomainViewModel<MainTaskViewModel.Data, MainTaskViewModel.Parameters>() {
 
     override val domainListener = object : DomainListener<Data>() {
 
@@ -18,14 +17,14 @@ class MainTaskViewModel : DomainViewModel<MainTaskViewModel.Data>() {
         }
     }
 
-    fun start(searchObservable: Observable<SearchCriteria.Search.Query>) {
-        if (started) return
+    val searchRelay = PublishRelay.create<SearchCriteria.Search.Query>()
 
+    init {
         Observable.combineLatest(
             Preferences.showProjectsObservable,
             Preferences.showAssignedObservable,
             Preferences.showDeletedObservable,
-            searchObservable,
+            searchRelay,
         ) { showProjects, showAssignedToOthers, showDeleted, search ->
             Parameters(
                 showProjects,
@@ -33,16 +32,17 @@ class MainTaskViewModel : DomainViewModel<MainTaskViewModel.Data>() {
                 showDeleted,
             )
         }
-            .distinctUntilChanged()
-            .subscribe {
-                parameters = it
-
-                refresh()
-            }
-            .addTo(startedDisposable)
+            .subscribe(parametersRelay)
+            .addTo(clearedDisposable)
     }
+
+    fun start() = internalStart()
 
     data class Data(val taskData: TaskListFragment.TaskData) : DomainData()
 
-    private data class Parameters(val showProjects: Boolean, val searchCriteria: SearchCriteria, val showDeleted: Boolean)
+    data class Parameters(
+        val showProjects: Boolean,
+        val searchCriteria: SearchCriteria,
+        val showDeleted: Boolean,
+    ) : ObservableDomainViewModel.Parameters
 }

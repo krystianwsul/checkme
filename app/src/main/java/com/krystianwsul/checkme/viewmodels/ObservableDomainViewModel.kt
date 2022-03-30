@@ -15,11 +15,7 @@ abstract class ObservableDomainViewModel<D : DomainData, P : ObservableDomainVie
 
     override fun internalStart() {
         val myStarted = disposable?.isDisposed == false
-        check(myStarted == started)
-
         if (myStarted) return
-
-        started = true
 
         disposable = Observables.combineLatest(parametersRelay, refreshRelay)
             .distinctUntilChanged()

@@ -9,33 +9,21 @@ abstract class DomainViewModel<D : DomainData> : ViewModel() {
     protected abstract val domainListener: DomainListener<D>
 
     protected val clearedDisposable = CompositeDisposable()
-    protected val startedDisposable = CompositeDisposable() // todo observable
-
-    protected var started = false // todo observable
 
     val data get() = domainListener.data
     val dataId get() = domainListener.dataId
 
     @CallSuper
-    open fun stop() {
-        started = false
-        startedDisposable.clear()
-        domainListener.stop()
-    }
+    open fun stop() = domainListener.stop()
 
+    @CallSuper
     override fun onCleared() {
         stop()
 
         clearedDisposable.dispose()
     }
 
-    protected open fun internalStart() { // todo observable
-        started = true
-        domainListener.start()
-    }
+    protected open fun internalStart() = domainListener.start()
 
-    open fun refresh() { // todo observable
-        started = true
-        domainListener.start(true)
-    }
+    open fun refresh() = domainListener.start(true)
 }

@@ -57,6 +57,7 @@ fun Project<*>.filterSearchCriteria(showDeleted: Boolean) = showDeleted || endEx
 
 fun Sequence<Project<*>>.filterSearchCriteria(showDeleted: Boolean) = filter { it.filterSearchCriteria(showDeleted) }
 
+// todo this could return the task.matchesSearch result to optimize building child searchCriteria in the calling function
 fun Sequence<Instance>.filterSearchCriteria(
     searchCriteria: SearchCriteria,
     now: ExactTimeStamp.Local,

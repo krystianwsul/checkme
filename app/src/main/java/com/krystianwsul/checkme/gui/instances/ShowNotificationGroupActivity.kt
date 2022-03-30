@@ -4,7 +4,6 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.os.Parcelable
 import androidx.appcompat.view.ActionMode
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.ActivityShowNotificationGroupBinding
@@ -25,7 +24,6 @@ import com.krystianwsul.checkme.utils.tryGetFragment
 import com.krystianwsul.checkme.viewmodels.DataId
 import com.krystianwsul.checkme.viewmodels.ShowNotificationGroupViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
-import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.treeadapter.FilterCriteria
 import com.krystianwsul.treeadapter.TreeViewAdapter
@@ -39,14 +37,11 @@ class ShowNotificationGroupActivity : AbstractActivity(), GroupListListener {
 
     companion object {
 
-        private const val KEY_PROJECT_KEY = "projectKey"
-
         private const val TAG_DELETE_INSTANCES = "deleteInstances"
 
         private const val KEY_MENU_DELEGATE_STATE = "menuDelegateState"
 
-        fun getIntent(context: Context, projectKey: ProjectKey.Shared? = null) =
-            Intent(context, ShowNotificationGroupActivity::class.java).putExtra(KEY_PROJECT_KEY, projectKey as? Parcelable)
+        fun getIntent(context: Context) = Intent(context, ShowNotificationGroupActivity::class.java)
     }
 
     private var selectAllVisible = false
@@ -76,11 +71,14 @@ class ShowNotificationGroupActivity : AbstractActivity(), GroupListListener {
         override fun onReceive(context: Context?, intent: Intent?) = showNotificationGroupViewModel.refresh()
     }
 
-    override val instanceSearch by lazy { // todo expand
+    private val filterCriteria by lazy {
         binding.showNotificationGroupToolbarCollapseInclude
             .collapseAppBarLayout
             .filterCriteria
-            .cast<FilterCriteria>()
+    }
+
+    override val instanceSearch by lazy {
+        filterCriteria.map { it.toExpandOnly() }.cast<FilterCriteria>()
     }
 
     private var data: ShowNotificationGroupViewModel.Data? = null
@@ -121,10 +119,10 @@ class ShowNotificationGroupActivity : AbstractActivity(), GroupListListener {
         updateTopMenu()
         initBottomBar()
 
-        val projectKey = intent.getParcelableExtra<ProjectKey.Shared>(KEY_PROJECT_KEY)
-
         showNotificationGroupViewModel.apply {
-            start(projectKey)
+            start()
+
+            createDisposable += filterCriteria.map { it.search }.subscribe(searchRelay)
 
             createDisposable += data.subscribe {
                 this@ShowNotificationGroupActivity.data = it

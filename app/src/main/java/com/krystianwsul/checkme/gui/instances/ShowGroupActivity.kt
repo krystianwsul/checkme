@@ -87,11 +87,14 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
         override fun onReceive(context: Context?, intent: Intent?) = showGroupViewModel.refresh()
     }
 
-    override val instanceSearch by lazy { // todo expand
+    private val filterCriteria by lazy {
         binding.showGroupToolbarCollapseInclude
             .collapseAppBarLayout
             .filterCriteria
-            .cast<FilterCriteria>()
+    }
+
+    override val instanceSearch by lazy {
+        filterCriteria.map { it.toExpandOnly() }.cast<FilterCriteria>()
     }
 
     private var data: ShowGroupViewModel.Data? = null
@@ -171,7 +174,9 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
         showGroupViewModel.apply {
             start(parameters)
 
-            createDisposable += data.subscribe { onLoadFinished(it) }
+            createDisposable += filterCriteria.map { it.search }.subscribe(searchRelay)
+
+            createDisposable += data.subscribe(::onLoadFinished)
         }
 
         tryGetFragment<RemoveInstancesDialogFragment>(TAG_DELETE_INSTANCES)?.listener = deleteInstancesListener

@@ -18,14 +18,17 @@ class ShowGroupViewModel : ObservableDomainViewModel<ShowGroupViewModel.Data, Sh
         }
     }
 
+    val searchRelay = PublishRelay.create<SearchCriteria.Search.Query>()
+
     private val activityParametersRelay = PublishRelay.create<ShowGroupActivity.Parameters>()
 
     init {
         Observable.combineLatest(
             Preferences.showAssignedObservable,
             activityParametersRelay,
-        ) { showAssigned, activityParameters ->
-            Parameters(activityParameters, SearchCriteria(showAssignedToOthers = showAssigned))
+            searchRelay,
+        ) { showAssigned, activityParameters, search ->
+            Parameters(activityParameters, SearchCriteria(search, showAssigned))
         }
             .subscribe(parametersRelay)
             .addTo(clearedDisposable)

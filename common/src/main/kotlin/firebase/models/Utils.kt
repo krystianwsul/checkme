@@ -14,21 +14,28 @@ import com.krystianwsul.common.utils.TaskKey
 private fun childHierarchyMatches(task: Task, search: SearchCriteria.Search?, onlyHierarchy: Boolean = false): FilterResult {
     InterruptionChecker.throwIfInterrupted()
 
-    if (task.matchesSearch(search)) return FilterResult.MATCHES
+    return task.getFilterResult(search).let {
+        when (it) {
+            FilterResult.DOESNT_MATCH -> it
+            FilterResult.NO_SEARCH -> it
+            FilterResult.INCLUDE -> {
+                val childTasks = if (onlyHierarchy) task.getHierarchyChildTasks() else task.getChildTasks()
 
-    val childTasks = if (onlyHierarchy) task.getHierarchyChildTasks() else task.getChildTasks()
-
-    if (childTasks.any { childHierarchyMatches(it, search, onlyHierarchy) != FilterResult.DOESNT_MATCH })
-        return FilterResult.INCLUDE
-
-    return FilterResult.DOESNT_MATCH
+                if (childTasks.any { !childHierarchyMatches(it, search, onlyHierarchy).doesntMatch })
+                    FilterResult.INCLUDE
+                else
+                    FilterResult.DOESNT_MATCH
+            }
+            FilterResult.MATCHES -> it
+        }
+    }
 }
 
 fun Sequence<Task>.filterSearch(search: SearchCriteria.Search?, onlyHierarchy: Boolean = false) =
     if (search?.hasSearch != true) {
-        map { it to FilterResult.INCLUDE }
+        map { it to FilterResult.NO_SEARCH }
     } else {
-        map { it to childHierarchyMatches(it, search, onlyHierarchy) }.filter { it.second != FilterResult.DOESNT_MATCH }
+        map { it to childHierarchyMatches(it, search, onlyHierarchy) }.filter { !it.second.doesntMatch }
     }
 
 fun Sequence<Task>.filterSearchCriteria(
@@ -37,7 +44,7 @@ fun Sequence<Task>.filterSearchCriteria(
     showDeleted: Boolean,
     now: ExactTimeStamp.Local,
 ): Sequence<Pair<Task, FilterResult>> {
-    if (searchCriteria.isEmpty && showDeleted) return map { it to FilterResult.INCLUDE }
+    if (searchCriteria.isEmpty && showDeleted) return map { it to FilterResult.NO_SEARCH }
 
     val filtered1 = if (searchCriteria.showAssignedToOthers) {
         this
@@ -59,42 +66,29 @@ fun Project<*>.filterSearchCriteria(
     showDeleted: Boolean,
     showProjects: Boolean,
 ): FilterResult {
-    /*
-    CHILD_MATCHES really means, "should I apply the searchCriteria to child tasks?".  So yes, if projects aren't visible,
-    then - given how this function is used - this is what we want to return.
-     */
-    if (!showProjects) return FilterResult.INCLUDE
-
     if (!showDeleted && endExactTimeStamp != null) return FilterResult.DOESNT_MATCH
 
-    if (searchCriteria.search == null) return FilterResult.INCLUDE
+    if (searchCriteria.search == null) return FilterResult.NO_SEARCH
+    if (!searchCriteria.search.hasSearch) return FilterResult.NO_SEARCH
 
-    // ditto as CHILD_MATCHES comment above
-    if (name.isEmpty()) return FilterResult.INCLUDE
-
-    when (searchCriteria.search) {
-        is SearchCriteria.Search.Query -> {
-            val query = searchCriteria.search
-            if (query.query.isEmpty()) return FilterResult.INCLUDE
-
-            if (normalizedName.contains(query.query)) return FilterResult.MATCHES
-
-            return if (getAllDependenciesLoadedTasks().any { childHierarchyMatches(it, query) != FilterResult.DOESNT_MATCH })
-                FilterResult.INCLUDE
-            else
-                FilterResult.DOESNT_MATCH
+    searchCriteria.search
+        .let { it as? SearchCriteria.Search.Query }
+        ?.takeIf { showProjects }
+        ?.let {
+            if (name.isNotEmpty() && normalizedName.contains(it.query)) return FilterResult.MATCHES
         }
-        is SearchCriteria.Search.TaskKey -> return FilterResult.INCLUDE
-    }
+
+    return if (getAllDependenciesLoadedTasks().any { !childHierarchyMatches(it, searchCriteria.search).doesntMatch })
+        FilterResult.INCLUDE
+    else
+        FilterResult.DOESNT_MATCH
 }
 
 fun <T : Project<*>> Sequence<T>.filterSearchCriteria(
     searchCriteria: SearchCriteria,
     showDeleted: Boolean,
     showProjects: Boolean,
-) = map { it to it.filterSearchCriteria(searchCriteria, showDeleted, showProjects) }.filter {
-    it.second != FilterResult.DOESNT_MATCH
-}
+) = map { it to it.filterSearchCriteria(searchCriteria, showDeleted, showProjects) }.filter { !it.second.doesntMatch }
 
 // todo this could return the task.matchesSearch result to optimize building child searchCriteria in the calling function
 fun Sequence<Instance>.filterSearchCriteria(
@@ -114,19 +108,29 @@ fun Sequence<Instance>.filterSearchCriteria(
 
         if (instance.instanceKey in searchCriteria.excludedInstanceKeys) return false
 
-        if (instance.task.matchesSearch(searchCriteria.search)) return true
-
-        return instance.getChildInstances()
-            .filter { it.isVisible(now, Instance.VisibilityOptions(assumeChildOfVisibleParent = true)) }
-            .any { childHierarchyMatches(it, true) }
+        return instance.task.getFilterResult(searchCriteria.search).let {
+            when (it) {
+                FilterResult.DOESNT_MATCH -> false
+                FilterResult.NO_SEARCH -> true
+                FilterResult.INCLUDE -> instance.getChildInstances()
+                    .filter { it.isVisible(now, Instance.VisibilityOptions(assumeChildOfVisibleParent = true)) }
+                    .any { childHierarchyMatches(it, true) }
+                FilterResult.MATCHES -> true
+            }
+        }
     }
 
     filter { childHierarchyMatches(it, assumeChild) }
 }
 
-enum class FilterResult(val matches: Boolean = false) {
+enum class FilterResult(val doesntMatch: Boolean = false) {
 
-    DOESNT_MATCH {
+    DOESNT_MATCH(doesntMatch = true) {
+
+        override fun getChildrenSearchCriteria(searchCriteria: SearchCriteria) = searchCriteria
+    },
+
+    NO_SEARCH {
 
         override fun getChildrenSearchCriteria(searchCriteria: SearchCriteria) = searchCriteria
     },
@@ -136,7 +140,7 @@ enum class FilterResult(val matches: Boolean = false) {
         override fun getChildrenSearchCriteria(searchCriteria: SearchCriteria) = searchCriteria
     },
 
-    MATCHES(true) {
+    MATCHES {
 
         override fun getChildrenSearchCriteria(searchCriteria: SearchCriteria): SearchCriteria {
             return if (searchCriteria.search?.hasSearch == true) {

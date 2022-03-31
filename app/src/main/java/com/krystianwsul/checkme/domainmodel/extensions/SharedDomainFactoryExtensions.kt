@@ -236,8 +236,7 @@ fun <T : Comparable<T>> DomainFactory.searchInstances(
         We know this instance matches SearchCriteria.showAssignedToOthers.  If it also matches the query, we
         can skip filtering child instances, since showAssignedToOthers is meaningless for child instances.
          */
-        val childSearchCriteria =
-            if (task.matchesSearch(searchCriteria.search)) searchCriteria.copy(search = null) else searchCriteria
+        val childSearchCriteria = task.getFilterResult(searchCriteria.search).getChildrenSearchCriteria(searchCriteria)
 
         val children = getChildInstanceDatas(it, now, mapper, childSearchCriteria, !debugMode)
 

@@ -13,7 +13,6 @@ import com.krystianwsul.checkme.viewmodels.MainNoteViewModel
 import com.krystianwsul.checkme.viewmodels.MainTaskViewModel
 import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.firebase.DomainThreadChecker
-import com.krystianwsul.common.firebase.models.FilterResult
 import com.krystianwsul.common.firebase.models.filterSearchCriteria
 import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.time.Date
@@ -93,7 +92,7 @@ private fun DomainFactory.getMainData(
             .flatMap { (projectId, tasks) ->
                 projectsFactory.getProjectForce(projectId)
                     .let { it to it.filterSearchCriteria(searchCriteria, showDeleted, showProjects) }
-                    .takeIf { it.second != FilterResult.DOESNT_MATCH }
+                    .takeIf { !it.second.doesntMatch }
                     ?.let { (project, filterResult) ->
                         val childSearchCriteria = filterResult.getChildrenSearchCriteria(searchCriteria)
 

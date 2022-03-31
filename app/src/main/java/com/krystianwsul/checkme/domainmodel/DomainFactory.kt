@@ -34,6 +34,7 @@ import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.MyCustomTime
 import com.krystianwsul.common.firebase.json.tasks.RootTaskJson
+import com.krystianwsul.common.firebase.models.FilterResult
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.customtime.PrivateCustomTime
 import com.krystianwsul.common.firebase.models.customtime.SharedCustomTime
@@ -485,20 +486,24 @@ class DomainFactory(
             .mapNotNull { childInstance ->
                 val childTask = childInstance.task
 
-                val childTaskMatches = childTask.matchesSearch(searchCriteria.search)
+                val filterResult = childTask.getFilterResult(searchCriteria.search)
 
-                /*
-                We know this instance matches SearchCriteria.showAssignedToOthers.  If it also matches the query, we
-                can skip filtering child instances, since showAssignedToOthers is meaningless for child instances.
-                 */
-                val childrenQuery = if (childTaskMatches) searchCriteria.copy(search = null) else searchCriteria
-
-                val children = getChildInstanceDatas(childInstance, now, mapper, childrenQuery, filterVisible)
-
-                if (childTaskMatches || children.isNotEmpty())
-                    mapper(childInstance, children)
-                else
+                if (filterResult.doesntMatch) {
                     null
+                } else {
+                    /*
+                    We know this instance matches SearchCriteria.showAssignedToOthers.  If it also matches the query, we
+                    can skip filtering child instances, since showAssignedToOthers is meaningless for child instances.
+                     */
+                    val childrenQuery = filterResult.getChildrenSearchCriteria(searchCriteria)
+
+                    val children = getChildInstanceDatas(childInstance, now, mapper, childrenQuery, filterVisible)
+
+                    if (filterResult == FilterResult.INCLUDE && children.isEmpty())
+                        null
+                    else
+                        mapper(childInstance, children)
+                }
             }
             .toList()
     }

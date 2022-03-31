@@ -35,7 +35,7 @@ interface ModelNode<T : TreeHolder> : Comparable<ModelNode<T>>, Matchable {
 
     fun isVisible(actionMode: Boolean, hasVisibleChildren: Boolean): Boolean = true
 
-    enum class MatchResult {
+    enum class MatchResult { // todo optimization delete
 
         ALWAYS_VISIBLE, MATCHES, DOESNT_MATCH;
 

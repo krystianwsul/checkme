@@ -18,7 +18,6 @@ import com.krystianwsul.checkme.utils.time.toDateTimeTz
 import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.domain.TaskUndoData
 import com.krystianwsul.common.firebase.DomainThreadChecker
-import com.krystianwsul.common.firebase.models.FilterResult
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.filterSearch
 import com.krystianwsul.common.firebase.models.project.Project
@@ -190,12 +189,12 @@ fun DomainFactory.getUnscheduledTasks(projectKey: ProjectKey.Shared? = null): Li
 fun DomainFactory.getGroupListChildTaskDatas(
     parentTask: Task,
     now: ExactTimeStamp.Local,
-    searchCriteria: SearchCriteria? = null,
+    searchCriteria: SearchCriteria = SearchCriteria.empty,
 ): List<GroupListDataWrapper.TaskData> = parentTask.getChildTasks()
     .asSequence()
-    .filterSearch(searchCriteria?.search)
+    .filterSearch(searchCriteria.search)
     .map { (childTask, filterResult) ->
-        val childQuery = if (filterResult == FilterResult.MATCHES) null else searchCriteria
+        val childQuery = filterResult.getChildrenSearchCriteria(searchCriteria)
 
         GroupListDataWrapper.TaskData(
             childTask.taskKey,

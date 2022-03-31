@@ -34,7 +34,6 @@ import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.MyCustomTime
 import com.krystianwsul.common.firebase.json.tasks.RootTaskJson
-import com.krystianwsul.common.firebase.models.FilterResult
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.customtime.PrivateCustomTime
 import com.krystianwsul.common.firebase.models.customtime.SharedCustomTime
@@ -540,8 +539,7 @@ class DomainFactory(
             .asSequence()
             .filterSearchCriteria(searchCriteria, myUserFactory.user, showDeleted, now)
             .map { (childTask, filterResult) ->
-                val childSearchCriteria =
-                    if (filterResult == FilterResult.MATCHES) searchCriteria.copy(search = null) else searchCriteria
+                val childSearchCriteria = filterResult.getChildrenSearchCriteria(searchCriteria)
 
                 TaskListFragment.ChildTaskData(
                     childTask.name,

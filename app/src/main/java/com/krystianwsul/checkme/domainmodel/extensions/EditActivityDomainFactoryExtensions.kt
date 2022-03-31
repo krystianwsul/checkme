@@ -19,7 +19,6 @@ import com.krystianwsul.common.domain.ScheduleGroup
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.MyCustomTime
 import com.krystianwsul.common.firebase.json.tasks.TaskJson
-import com.krystianwsul.common.firebase.models.FilterResult
 import com.krystianwsul.common.firebase.models.ImageState
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.filterSearchCriteria
@@ -707,8 +706,7 @@ private fun DomainFactory.getParentTreeDatas(
         .filter { it.isTopLevelTask() && (it.project as? SharedProject)?.notDeleted != true }
         .filterSearchCriteria(searchCriteria, myUserFactory.user, false, now)
         .map { (task, filterResult) ->
-            val childSearchCriteria =
-                if (filterResult == FilterResult.MATCHES) searchCriteria.copy(search = null) else searchCriteria
+            val childSearchCriteria = filterResult.getChildrenSearchCriteria(searchCriteria)
 
             task.toParentEntryData(this, now, excludedTaskKeys, parentInstanceKey, childSearchCriteria)
         }
@@ -721,8 +719,7 @@ private fun DomainFactory.getParentTreeDatas(
         .filter { it.notDeleted }
         .filterSearchCriteria(searchCriteria, false, true)
         .map { (project, filterResult) ->
-            val childSearchCriteria =
-                if (filterResult == FilterResult.MATCHES) searchCriteria.copy(search = null) else searchCriteria
+            val childSearchCriteria = filterResult.getChildrenSearchCriteria(searchCriteria)
 
             EditViewModel.ParentEntryData.Project(
                 project.name,
@@ -755,8 +752,7 @@ private fun DomainFactory.getProjectTaskTreeDatas(
         .filter { it.isTopLevelTask() }
         .filterSearchCriteria(searchCriteria, myUserFactory.user, false, now)
         .map { (task, filterResult) ->
-            val childSearchCriteria =
-                if (filterResult == FilterResult.MATCHES) searchCriteria.copy(search = null) else searchCriteria
+            val childSearchCriteria = filterResult.getChildrenSearchCriteria(searchCriteria)
 
             task.toParentEntryData(this, now, excludedTaskKeys, parentInstanceKey, childSearchCriteria)
         }
@@ -873,8 +869,7 @@ private fun DomainFactory.getTaskListChildTaskDatas(
     .filter { it.showAsParent(now, excludedTaskKeys) }
     .filterSearchCriteria(searchCriteria, myUserFactory.user, false, now)
     .map { (task, filterResult) ->
-        val childSearchCriteria =
-            if (filterResult == FilterResult.MATCHES) searchCriteria.copy(search = null) else searchCriteria
+        val childSearchCriteria = filterResult.getChildrenSearchCriteria(searchCriteria)
 
         task.toParentEntryData(
             this,

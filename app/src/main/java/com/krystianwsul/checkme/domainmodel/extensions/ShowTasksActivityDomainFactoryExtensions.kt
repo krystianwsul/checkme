@@ -11,7 +11,6 @@ import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.viewmodels.ShowTasksViewModel
 import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.firebase.DomainThreadChecker
-import com.krystianwsul.common.firebase.models.FilterResult
 import com.krystianwsul.common.firebase.models.filterSearchCriteria
 import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.project.SharedProject
@@ -58,8 +57,7 @@ fun DomainFactory.getShowTasksData(
                 .filter { it.notDeleted && it.intervalInfo.isUnscheduled() }
                 .filterSearchCriteria(searchCriteria, myUserFactory.user, showDeleted, now)
                 .map { (task, filterResult) ->
-                    val childSearchCriteria =
-                        if (filterResult == FilterResult.MATCHES) searchCriteria.copy(search = null) else searchCriteria
+                    val childSearchCriteria = filterResult.getChildrenSearchCriteria(searchCriteria)
 
                     task.toChildTaskData(childSearchCriteria)
                 }
@@ -73,10 +71,7 @@ fun DomainFactory.getShowTasksData(
                         .asSequence()
                         .filterSearchCriteria(searchCriteria, showDeleted, showProjects)
                         .flatMap { (project, filterResult) ->
-                            val childSearchCriteria = if (filterResult == FilterResult.MATCHES)
-                                searchCriteria.copy(search = null)
-                            else
-                                searchCriteria
+                            val childSearchCriteria = filterResult.getChildrenSearchCriteria(searchCriteria)
 
                             project.toEntryDatas(project.getUnscheduledTaskDatas(childSearchCriteria), showProjects)
                         }
@@ -111,8 +106,7 @@ fun DomainFactory.getShowTasksData(
                 .filter { it.isTopLevelTask() }
                 .filterSearchCriteria(searchCriteria, myUserFactory.user, showDeleted, now)
                 .map { (task, filterResult) ->
-                    val childSearchCriteria =
-                        if (filterResult == FilterResult.MATCHES) searchCriteria.copy(search = null) else searchCriteria
+                    val childSearchCriteria = filterResult.getChildrenSearchCriteria(searchCriteria)
 
                     task.toChildTaskData(childSearchCriteria)
                 }

@@ -9,19 +9,19 @@ interface DomainQueryMatchable {
 
     fun matchesTaskKey(taskKey: TaskKey): Boolean
 
-    fun getFilterResult(search: SearchCriteria.Search?): FilterResult {
-        fun Boolean.toFilterResult() = if (this) FilterResult.MATCHES else FilterResult.DOESNT_MATCH
+    fun getFilterResult(search: SearchCriteria.Search?): FilterResult.Task {
+        fun Boolean.toFilterResult() = if (this) FilterResult.Matches else FilterResult.Include
 
         return when (search) {
             is SearchCriteria.Search.Query -> {
                 if (search.query.isEmpty()) {
-                    FilterResult.NO_SEARCH
+                    FilterResult.NoSearch
                 } else {
                     normalizedFields.any { it.contains(search.query) }.toFilterResult()
                 }
             }
             is SearchCriteria.Search.TaskKey -> matchesTaskKey(search.taskKey).toFilterResult()
-            null -> FilterResult.NO_SEARCH
+            null -> FilterResult.NoSearch
         }
     }
 }

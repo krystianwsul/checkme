@@ -16,24 +16,23 @@ private fun childHierarchyMatches(task: Task, search: SearchCriteria.Search?, on
 
     return task.getFilterResult(search).let {
         when (it) {
-            FilterResult.DOESNT_MATCH -> it
-            FilterResult.NO_SEARCH -> it
-            FilterResult.INCLUDE -> {
+            FilterResult.NoSearch -> it
+            FilterResult.Include -> {
                 val childTasks = if (onlyHierarchy) task.getHierarchyChildTasks() else task.getChildTasks()
 
                 if (childTasks.any { !childHierarchyMatches(it, search, onlyHierarchy).doesntMatch })
-                    FilterResult.INCLUDE
+                    FilterResult.Include
                 else
-                    FilterResult.DOESNT_MATCH
+                    FilterResult.DoesntMatch
             }
-            FilterResult.MATCHES -> it
+            FilterResult.Matches -> it
         }
     }
 }
 
 fun Sequence<Task>.filterSearch(search: SearchCriteria.Search?, onlyHierarchy: Boolean = false) =
     if (search?.hasSearch != true) {
-        map { it to FilterResult.NO_SEARCH }
+        map { it to FilterResult.NoSearch }
     } else {
         map { it to childHierarchyMatches(it, search, onlyHierarchy) }.filter { !it.second.doesntMatch }
     }
@@ -44,7 +43,7 @@ fun Sequence<Task>.filterSearchCriteria(
     showDeleted: Boolean,
     now: ExactTimeStamp.Local,
 ): Sequence<Pair<Task, FilterResult>> {
-    if (searchCriteria.isEmpty && showDeleted) return map { it to FilterResult.NO_SEARCH }
+    if (searchCriteria.isEmpty && showDeleted) return map { it to FilterResult.NoSearch }
 
     val filtered1 = if (searchCriteria.showAssignedToOthers) {
         this
@@ -66,22 +65,22 @@ fun Project<*>.filterSearchCriteria(
     showDeleted: Boolean,
     showProjects: Boolean,
 ): FilterResult {
-    if (!showDeleted && endExactTimeStamp != null) return FilterResult.DOESNT_MATCH
+    if (!showDeleted && endExactTimeStamp != null) return FilterResult.DoesntMatch
 
-    if (searchCriteria.search == null) return FilterResult.NO_SEARCH
-    if (!searchCriteria.search.hasSearch) return FilterResult.NO_SEARCH
+    if (searchCriteria.search == null) return FilterResult.NoSearch
+    if (!searchCriteria.search.hasSearch) return FilterResult.NoSearch
 
     searchCriteria.search
         .let { it as? SearchCriteria.Search.Query }
         ?.takeIf { showProjects }
         ?.let {
-            if (name.isNotEmpty() && normalizedName.contains(it.query)) return FilterResult.MATCHES
+            if (name.isNotEmpty() && normalizedName.contains(it.query)) return FilterResult.Matches
         }
 
     return if (getAllDependenciesLoadedTasks().any { !childHierarchyMatches(it, searchCriteria.search).doesntMatch })
-        FilterResult.INCLUDE
+        FilterResult.Include
     else
-        FilterResult.DOESNT_MATCH
+        FilterResult.DoesntMatch
 }
 
 fun <T : Project<*>> Sequence<T>.filterSearchCriteria(
@@ -110,12 +109,11 @@ fun Sequence<Instance>.filterSearchCriteria(
 
         return instance.task.getFilterResult(searchCriteria.search).let {
             when (it) {
-                FilterResult.DOESNT_MATCH -> false
-                FilterResult.NO_SEARCH -> true
-                FilterResult.INCLUDE -> instance.getChildInstances()
+                FilterResult.NoSearch -> true
+                FilterResult.Include -> instance.getChildInstances()
                     .filter { it.isVisible(now, Instance.VisibilityOptions(assumeChildOfVisibleParent = true)) }
                     .any { childHierarchyMatches(it, true) }
-                FilterResult.MATCHES -> true
+                FilterResult.Matches -> true
             }
         }
     }
@@ -123,24 +121,27 @@ fun Sequence<Instance>.filterSearchCriteria(
     filter { childHierarchyMatches(it, assumeChild) }
 }
 
-enum class FilterResult(val doesntMatch: Boolean = false) {
+sealed interface FilterResult {
 
-    DOESNT_MATCH(doesntMatch = true) {
+    val doesntMatch: Boolean
 
-        override fun getChildrenSearchCriteria(searchCriteria: SearchCriteria) = searchCriteria
-    },
+    fun getChildrenSearchCriteria(searchCriteria: SearchCriteria) = searchCriteria
 
-    NO_SEARCH {
+    object DoesntMatch : FilterResult {
 
-        override fun getChildrenSearchCriteria(searchCriteria: SearchCriteria) = searchCriteria
-    },
+        override val doesntMatch = true
+    }
 
-    INCLUDE {
+    sealed class Task : FilterResult {
 
-        override fun getChildrenSearchCriteria(searchCriteria: SearchCriteria) = searchCriteria
-    },
+        override val doesntMatch = false
+    }
 
-    MATCHES {
+    object NoSearch : Task()
+
+    object Include : Task()
+
+    object Matches : Task() {
 
         override fun getChildrenSearchCriteria(searchCriteria: SearchCriteria): SearchCriteria {
             return if (searchCriteria.search?.hasSearch == true) {
@@ -149,9 +150,7 @@ enum class FilterResult(val doesntMatch: Boolean = false) {
                 searchCriteria
             }
         }
-    };
-
-    abstract fun getChildrenSearchCriteria(searchCriteria: SearchCriteria): SearchCriteria
+    }
 }
 
 // used in RelevanceChecker

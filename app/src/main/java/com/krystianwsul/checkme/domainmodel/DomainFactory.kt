@@ -488,22 +488,18 @@ class DomainFactory(
 
                 val filterResult = childTask.getFilterResult(searchCriteria.search)
 
-                if (filterResult.doesntMatch) {
+                /*
+                We know this instance matches SearchCriteria.showAssignedToOthers.  If it also matches the query, we
+                can skip filtering child instances, since showAssignedToOthers is meaningless for child instances.
+                 */
+                val childrenQuery = filterResult.getChildrenSearchCriteria(searchCriteria)
+
+                val children = getChildInstanceDatas(childInstance, now, mapper, childrenQuery, filterVisible)
+
+                if (filterResult == FilterResult.Include && children.isEmpty())
                     null
-                } else {
-                    /*
-                    We know this instance matches SearchCriteria.showAssignedToOthers.  If it also matches the query, we
-                    can skip filtering child instances, since showAssignedToOthers is meaningless for child instances.
-                     */
-                    val childrenQuery = filterResult.getChildrenSearchCriteria(searchCriteria)
-
-                    val children = getChildInstanceDatas(childInstance, now, mapper, childrenQuery, filterVisible)
-
-                    if (filterResult == FilterResult.INCLUDE && children.isEmpty())
-                        null
-                    else
-                        mapper(childInstance, children)
-                }
+                else
+                    mapper(childInstance, children)
             }
             .toList()
     }

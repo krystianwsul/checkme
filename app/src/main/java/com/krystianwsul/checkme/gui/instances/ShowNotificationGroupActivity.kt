@@ -25,11 +25,9 @@ import com.krystianwsul.checkme.viewmodels.DataId
 import com.krystianwsul.checkme.viewmodels.ShowNotificationGroupViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.common.utils.TaskKey
-import com.krystianwsul.treeadapter.FilterCriteria
 import com.krystianwsul.treeadapter.TreeViewAdapter
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.kotlin.addTo
-import io.reactivex.rxjava3.kotlin.cast
 import io.reactivex.rxjava3.kotlin.plusAssign
 import java.io.Serializable
 
@@ -78,7 +76,7 @@ class ShowNotificationGroupActivity : AbstractActivity(), GroupListListener {
     }
 
     override val instanceSearch by lazy {
-        filterCriteria.map { it.toExpandOnly() }.cast<FilterCriteria>()
+        filterCriteria.map { it.toExpandOnly() }
     }
 
     private var data: ShowNotificationGroupViewModel.Data? = null

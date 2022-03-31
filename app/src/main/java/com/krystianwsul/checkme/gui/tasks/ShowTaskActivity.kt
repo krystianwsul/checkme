@@ -25,10 +25,8 @@ import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.viewmodels.ShowTaskViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.common.utils.TaskKey
-import com.krystianwsul.treeadapter.FilterCriteria
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.kotlin.addTo
-import io.reactivex.rxjava3.kotlin.cast
 import io.reactivex.rxjava3.kotlin.plusAssign
 import io.reactivex.rxjava3.kotlin.subscribeBy
 import java.io.Serializable
@@ -87,7 +85,7 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.Listener {
     }
 
     override val taskSearch by lazy {
-        filterCriteria.map { it.toExpandOnly() }.cast<FilterCriteria>()
+        filterCriteria.map { it.toExpandOnly() }
     }
 
     private lateinit var binding: ActivityShowTaskBinding

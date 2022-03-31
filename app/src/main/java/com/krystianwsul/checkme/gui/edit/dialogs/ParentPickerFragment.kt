@@ -68,7 +68,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
     private var expansionStates: Map<Parcelable, TreeNode.ExpansionState>? = null
 
-    private var filterCriteria: FilterCriteria = FilterCriteria.Full()
+    private var filterCriteria: FilterCriteria.AllowedFilterCriteria = FilterCriteria.None
 
     private val bindingProperty = ResettableProperty<FragmentParentPickerBinding>()
     private var binding by bindingProperty
@@ -229,7 +229,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
         super.onDestroyView()
     }
 
-    private fun search(filterCriteria: FilterCriteria, placeholder: TreeViewAdapter.Placeholder) {
+    private fun search(filterCriteria: FilterCriteria.AllowedFilterCriteria, placeholder: TreeViewAdapter.Placeholder) {
         this.filterCriteria = filterCriteria
 
         treeViewAdapter!!.setFilterCriteria(filterCriteria, placeholder)
@@ -406,7 +406,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
         val adapterDataObservable: Observable<AdapterData>
 
-        val filterCriteriaObservable: Observable<FilterCriteria>
+        val filterCriteriaObservable: Observable<FilterCriteria.AllowedFilterCriteria>
 
         val initialScrollMatcher: ((EntryData) -> Boolean)?
 

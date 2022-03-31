@@ -452,7 +452,7 @@ class GroupListFragment @JvmOverloads constructor(
 
         override fun getFilterCriteriaFromData(data: GroupListParameters) = data.filterCriteria
 
-        override fun instantiateAdapters(filterCriteria: FilterCriteria) = GroupAdapter(
+        override fun instantiateAdapters(filterCriteria: FilterCriteria.AllowedFilterCriteria) = GroupAdapter(
             this@GroupListFragment,
             filterCriteria,
             (parameters as? GroupListParameters.Parent)?.projectKey,
@@ -880,7 +880,7 @@ class GroupListFragment @JvmOverloads constructor(
 
     class GroupAdapter(
         val groupListFragment: GroupListFragment,
-        filterCriteria: FilterCriteria,
+        filterCriteria: FilterCriteria.AllowedFilterCriteria,
         private val unscheduledNodeProjectKey: ProjectKey.Shared?,
     ) :
         BaseAdapter(),
@@ -890,7 +890,7 @@ class GroupListFragment @JvmOverloads constructor(
         val treeViewAdapter = TreeViewAdapter(
             this,
             TreeViewAdapter.PaddingData(R.layout.row_group_list_fab_padding, R.id.paddingProgress),
-            filterCriteria
+            filterCriteria,
         )
 
         public override lateinit var treeNodeCollection: TreeNodeCollection<AbstractHolder>

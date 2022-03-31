@@ -30,20 +30,22 @@ sealed interface FilterCriteria : Parcelable {
             }
         }
 
-        fun toExpandOnly() = ExpandOnly(search) // todo optimization
+        fun toExpandOnly() = ExpandOnly(search) as AllowedFilterCriteria // todo optimization
 
         @Parcelize
         data class FilterParams(val showAssignedToOthers: Boolean = true) : Parcelable
     }
 
+    sealed interface AllowedFilterCriteria : FilterCriteria
+
     @Parcelize
-    data class ExpandOnly(override val search: SearchCriteria.Search?) : FilterCriteria {
+    data class ExpandOnly(override val search: SearchCriteria.Search?) : AllowedFilterCriteria {
 
         constructor(searchCriteria: SearchCriteria) : this(searchCriteria.search)
     }
 
     @Parcelize
-    object None : FilterCriteria {
+    object None : AllowedFilterCriteria {
 
         override val search: SearchCriteria.Search? get() = null
     }

@@ -139,7 +139,7 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
 
             override val adapterDataObservable = BehaviorRelay.create<ParentPickerFragment.AdapterData>()
 
-            override val filterCriteriaObservable = Observable.never<FilterCriteria>()
+            override val filterCriteriaObservable = Observable.never<FilterCriteria.AllowedFilterCriteria>()
 
             override val initialScrollMatcher: ((ParentPickerFragment.EntryData) -> Boolean)? = null
 

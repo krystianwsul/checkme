@@ -28,9 +28,9 @@ abstract class SearchDataManager<DATA : Any, MODEL_ADAPTER : BaseAdapter>(
 
     protected abstract val compositeDisposable: CompositeDisposable
 
-    protected abstract val filterCriteriaObservable: Observable<FilterCriteria>
+    protected abstract val filterCriteriaObservable: Observable<FilterCriteria.AllowedFilterCriteria>
 
-    var filterCriteria: FilterCriteria = FilterCriteria.None
+    var filterCriteria: FilterCriteria.AllowedFilterCriteria = FilterCriteria.None
         private set
 
     private val treeViewAdapterRelay = BehaviorRelay.create<TreeViewAdapter<AbstractHolder>>()
@@ -44,9 +44,9 @@ abstract class SearchDataManager<DATA : Any, MODEL_ADAPTER : BaseAdapter>(
 
     protected abstract fun dataIsImmediate(data: DATA): Boolean
 
-    protected abstract fun getFilterCriteriaFromData(data: DATA): FilterCriteria?
+    protected abstract fun getFilterCriteriaFromData(data: DATA): FilterCriteria.AllowedFilterCriteria?
 
-    protected abstract fun instantiateAdapters(filterCriteria: FilterCriteria):
+    protected abstract fun instantiateAdapters(filterCriteria: FilterCriteria.AllowedFilterCriteria):
             Pair<MODEL_ADAPTER, TreeViewAdapter<AbstractHolder>>
 
     protected abstract fun attachTreeViewAdapter(treeViewAdapter: TreeViewAdapter<AbstractHolder>)
@@ -63,7 +63,7 @@ abstract class SearchDataManager<DATA : Any, MODEL_ADAPTER : BaseAdapter>(
     protected abstract fun onDataChanged()
     protected abstract fun onFilterCriteriaChanged()
 
-    fun setInitialFilterCriteria(filterCriteria: FilterCriteria) {
+    fun setInitialFilterCriteria(filterCriteria: FilterCriteria.AllowedFilterCriteria) {
         if (modelAdapter == null)
             this.filterCriteria = filterCriteria
         else

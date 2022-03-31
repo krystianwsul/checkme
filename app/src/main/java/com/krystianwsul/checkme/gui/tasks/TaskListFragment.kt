@@ -53,7 +53,6 @@ import com.stfalcon.imageviewer.StfalconImageViewer
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.kotlin.addTo
-import io.reactivex.rxjava3.kotlin.cast
 import kotlinx.parcelize.Parcelize
 import java.io.Serializable
 import com.krystianwsul.checkme.gui.instances.tree.TaskNode as InstanceTreeTaskNode
@@ -274,13 +273,13 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
         override val compositeDisposable = viewCreatedDisposable
 
-        override val filterCriteriaObservable get() = listener.taskSearch.cast<FilterCriteria>()
+        override val filterCriteriaObservable get() = listener.taskSearch
 
         override fun dataIsImmediate(data: Data) = data.immediate
 
-        override fun getFilterCriteriaFromData(data: Data): FilterCriteria? = null
+        override fun getFilterCriteriaFromData(data: Data): FilterCriteria.AllowedFilterCriteria? = null
 
-        override fun instantiateAdapters(filterCriteria: FilterCriteria) =
+        override fun instantiateAdapters(filterCriteria: FilterCriteria.AllowedFilterCriteria) =
             TaskAdapter(this@TaskListFragment, filterCriteria).let { it to it.treeViewAdapter }
 
         override fun attachTreeViewAdapter(treeViewAdapter: TreeViewAdapter<AbstractHolder>) {
@@ -487,7 +486,10 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         super.onDestroyView()
     }
 
-    private inner class TaskAdapter(val taskListFragment: TaskListFragment, filterCriteria: FilterCriteria) :
+    private inner class TaskAdapter(
+        val taskListFragment: TaskListFragment,
+        filterCriteria: FilterCriteria.AllowedFilterCriteria
+    ) :
         BaseAdapter(),
         NodeParent,
         ActionModeCallback by taskListFragment.selectionCallback {
@@ -498,7 +500,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         val treeViewAdapter = TreeViewAdapter(
             this,
             TreeViewAdapter.PaddingData(R.layout.row_group_list_fab_padding, R.id.paddingProgress),
-            filterCriteria
+            filterCriteria,
         )
 
         public override lateinit var treeNodeCollection: TreeNodeCollection<AbstractHolder>
@@ -939,7 +941,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
     interface Listener : ActionModeListener, SnackbarListener, ListItemAddedListener {
 
-        val taskSearch: Observable<FilterCriteria>
+        val taskSearch: Observable<FilterCriteria.AllowedFilterCriteria>
 
         fun setTaskSelectAllVisibility(selectAllVisible: Boolean)
 

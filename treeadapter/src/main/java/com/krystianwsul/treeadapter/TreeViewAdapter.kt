@@ -22,7 +22,7 @@ import io.reactivex.rxjava3.schedulers.Schedulers
 class TreeViewAdapter<T : TreeHolder>(
     val treeModelAdapter: TreeModelAdapter<T>,
     private val paddingData: PaddingData,
-    initialFilterCriteria: FilterCriteria = FilterCriteria.None,
+    initialFilterCriteria: FilterCriteria.AllowedFilterCriteria = FilterCriteria.None,
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>(), ActionModeCallback by treeModelAdapter {
 
     companion object {
@@ -361,7 +361,10 @@ class TreeViewAdapter<T : TreeHolder>(
 
     private var updatingAfterNormalizationDisposable: Disposable? = null
 
-    fun setFilterCriteria(filterCriteria: FilterCriteria, @Suppress("UNUSED_PARAMETER") placeholder: Placeholder) {
+    fun setFilterCriteria(
+        filterCriteria: FilterCriteria.AllowedFilterCriteria,
+        @Suppress("UNUSED_PARAMETER") placeholder: Placeholder
+    ) {
         updatingAfterNormalizationDisposable?.dispose()
 
         if (normalizedObservable.getCurrentValue() || !filterCriteria.needsNormalization) {

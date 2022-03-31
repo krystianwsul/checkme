@@ -87,7 +87,7 @@ class ShowTaskInstancesActivity : AbstractActivity(), GroupListListener {
 
     private var page = 0
 
-    override val instanceSearch = Observable.just<FilterCriteria>(FilterCriteria.None)
+    override val instanceSearch = Observable.just<FilterCriteria.AllowedFilterCriteria>(FilterCriteria.None)
 
     private lateinit var binding: ActivityShowNotificationGroupBinding
     private lateinit var bottomBinding: BottomBinding

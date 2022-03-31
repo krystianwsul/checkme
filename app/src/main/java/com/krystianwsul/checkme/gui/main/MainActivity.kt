@@ -64,7 +64,6 @@ import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.kotlin.Observables
 import io.reactivex.rxjava3.kotlin.addTo
-import io.reactivex.rxjava3.kotlin.cast
 import io.reactivex.rxjava3.kotlin.plusAssign
 import kotlinx.parcelize.Parcelize
 import org.joda.time.DateTime
@@ -192,7 +191,7 @@ class MainActivity :
 
         override val snackbarParent get() = this@MainActivity.snackbarParent
 
-        override val instanceSearch = Observable.never<FilterCriteria>()
+        override val instanceSearch = Observable.never<FilterCriteria.AllowedFilterCriteria>()
 
         override val groupListViewModel get() = this@MainActivity.groupListViewModel
 
@@ -344,7 +343,7 @@ class MainActivity :
 
             override val snackbarParent get() = this@MainActivity.snackbarParent
 
-            override val instanceSearch = Observable.never<FilterCriteria>()
+            override val instanceSearch = Observable.never<FilterCriteria.AllowedFilterCriteria>()
 
             override val groupListViewModel get() = this@MainActivity.groupListViewModel
 
@@ -807,7 +806,7 @@ class MainActivity :
         val searchObservable = filterCriteria.map { it.search }
 
         override val taskSearch by lazy {
-            filterCriteria.map { it.toExpandOnly() }.cast<FilterCriteria>()
+            filterCriteria.map { it.toExpandOnly() }
         }
 
         override fun onCreateActionMode(actionMode: ActionMode) = this@MainActivity.onCreateActionMode(actionMode)

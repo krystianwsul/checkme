@@ -125,6 +125,8 @@ sealed interface FilterResult {
 
     val doesntMatch: Boolean
 
+    val matches get() = false
+
     fun getChildrenSearchCriteria(searchCriteria: SearchCriteria) = searchCriteria
 
     object DoesntMatch : FilterResult {
@@ -142,6 +144,8 @@ sealed interface FilterResult {
     object Include : Task()
 
     object Matches : Task() {
+
+        override val matches = true
 
         override fun getChildrenSearchCriteria(searchCriteria: SearchCriteria): SearchCriteria {
             return if (searchCriteria.search?.hasSearch == true) {

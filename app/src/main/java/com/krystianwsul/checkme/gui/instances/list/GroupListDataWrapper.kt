@@ -37,6 +37,7 @@ data class GroupListDataWrapper(
         val projectInfo: DetailsNode.ProjectInfo?,
         val ordinal: Ordinal,
         override val canMigrateDescription: Boolean,
+        override val matchesSearch: Boolean,
     ) : SelectedData, QueryMatchable {
 
         init {
@@ -75,6 +76,7 @@ data class GroupListDataWrapper(
         val imageState: ImageState?,
         val projectKey: ProjectKey.Shared?,
         val parentInstanceKey: InstanceKey?,
+        override val matchesSearch: Boolean,
     ) : Comparable<InstanceData>, SelectedData, QueryMatchable {
 
         companion object {
@@ -85,6 +87,7 @@ data class GroupListDataWrapper(
                 domainFactory: DomainFactory,
                 notDoneChildInstanceDescriptors: List<GroupTypeFactory.InstanceDescriptor>,
                 doneChildInstanceDescriptors: List<GroupTypeFactory.InstanceDescriptor>,
+                matchesSearch: Boolean,
             ): InstanceData {
                 return InstanceData(
                     instance.done,
@@ -106,6 +109,7 @@ data class GroupListDataWrapper(
                     instance.task.getImage(domainFactory.deviceDbInfo),
                     instance.getProject().projectKey as? ProjectKey.Shared,
                     instance.parentInstance?.instanceKey,
+                    matchesSearch,
                 )
             }
         }

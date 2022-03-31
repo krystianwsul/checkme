@@ -48,6 +48,7 @@ class EditInstancesSearchViewModel : DomainViewModel<EditInstancesSearchViewMode
         val instanceTimeStamp: TimeStamp,
         var ordinal: Ordinal,
         val instanceKey: InstanceKey,
+        override val matchesSearch: Boolean,
     ) : Comparable<InstanceEntryData>, ParentPickerFragment.EntryData {
 
         override val normalizedFields by lazy { listOfNotNull(name, note).map { it.normalized() } }

@@ -894,6 +894,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         val projectKey: ProjectKey<*>,
         val current: Boolean,
         val startExactTimeStamp: Long,
+        override val matchesSearch: Boolean,
     ) : EntryData {
 
         override val id = projectKey
@@ -921,6 +922,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         val canMigrateDescription: Boolean,
         val ordinal: Ordinal,
         val projectInfo: DetailsNode.ProjectInfo?,
+        override val matchesSearch: Boolean,
     ) : EntryData {
 
         override val id = taskKey

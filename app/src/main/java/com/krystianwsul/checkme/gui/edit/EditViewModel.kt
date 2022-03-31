@@ -463,6 +463,7 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
             override val projectKey: ProjectKey.Shared,
             private val projectUsers: Map<UserKey, UserData>,
             private val projectOrder: Float,
+            override val matchesSearch: Boolean,
         ) : ParentEntryData() {
 
             override val normalizedFields by lazy { listOfNotNull(name, note).map { it.normalized() } }
@@ -494,6 +495,7 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
             override val projectKey: ProjectKey<*>,
             val hasMultipleInstances: Boolean?, // only for certain scenarios with Create
             val topLevelTaskIsSingleSchedule: Boolean, // only for join with showJoinAllRemindersDialog == true
+            override val matchesSearch: Boolean,
         ) : ParentEntryData() {
 
             override val normalizedFields by lazy { listOfNotNull(name, note).map { it.normalized() } }

@@ -9,6 +9,7 @@ interface DomainQueryMatchable {
 
     fun matchesTaskKey(taskKey: TaskKey): Boolean
 
+    // todo optimization check calls where FilterResult was already obtained earlier, like for instances
     fun getFilterResult(search: SearchCriteria.Search?): FilterResult.Task {
         fun Boolean.toFilterResult() = if (this) FilterResult.Matches else FilterResult.Include
 

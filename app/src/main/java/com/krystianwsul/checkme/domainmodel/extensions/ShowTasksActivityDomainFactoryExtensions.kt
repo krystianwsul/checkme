@@ -29,7 +29,10 @@ fun DomainFactory.getShowTasksData(
 
     val now = ExactTimeStamp.Local.now
 
-    fun Task.toChildTaskData(childSearchCriteria: SearchCriteria): TaskListFragment.ChildTaskData {
+    fun Task.toChildTaskData(
+        childSearchCriteria: SearchCriteria,
+        matchesSearch: Boolean,
+    ): TaskListFragment.ChildTaskData {
         return TaskListFragment.ChildTaskData(
             name,
             getScheduleText(ScheduleText),
@@ -42,6 +45,7 @@ fun DomainFactory.getShowTasksData(
             canMigrateDescription(now),
             ordinal,
             getProjectInfo(parameters.showProjects),
+            matchesSearch,
         )
     }
 
@@ -59,7 +63,7 @@ fun DomainFactory.getShowTasksData(
                 .map { (task, filterResult) ->
                     val childSearchCriteria = filterResult.getChildrenSearchCriteria(searchCriteria)
 
-                    task.toChildTaskData(childSearchCriteria)
+                    task.toChildTaskData(childSearchCriteria, filterResult.matches)
                 }
                 .toList()
 
@@ -73,7 +77,11 @@ fun DomainFactory.getShowTasksData(
                         .flatMap { (project, filterResult) ->
                             val childSearchCriteria = filterResult.getChildrenSearchCriteria(searchCriteria)
 
-                            project.toEntryDatas(project.getUnscheduledTaskDatas(childSearchCriteria), showProjects)
+                            project.toEntryDatas(
+                                project.getUnscheduledTaskDatas(childSearchCriteria),
+                                showProjects,
+                                filterResult,
+                            )
                         }
                         .toList()
                 }
@@ -90,7 +98,7 @@ fun DomainFactory.getShowTasksData(
         is ShowTasksActivity.Parameters.Copy -> {
             entryDatas = parameters.taskKeys
                 .map(::getTaskForce)
-                .map { it.toChildTaskData(searchCriteria) }
+                .map { it.toChildTaskData(searchCriteria, true) }
                 .sorted()
 
             title = MyApplication.context.getString(R.string.copyingTasksTitle)
@@ -108,7 +116,7 @@ fun DomainFactory.getShowTasksData(
                 .map { (task, filterResult) ->
                     val childSearchCriteria = filterResult.getChildrenSearchCriteria(searchCriteria)
 
-                    task.toChildTaskData(childSearchCriteria)
+                    task.toChildTaskData(childSearchCriteria, filterResult.matches)
                 }
                 .toList()
 

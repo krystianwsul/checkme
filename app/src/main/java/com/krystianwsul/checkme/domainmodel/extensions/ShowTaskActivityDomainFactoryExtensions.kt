@@ -41,6 +41,7 @@ fun DomainFactory.getShowTaskData(requestTaskKey: TaskKey, searchCriteria: Searc
                 childTask.canMigrateDescription(now),
                 childTask.ordinal,
                 childTask.getProjectInfo(),
+                filterResult.matches,
             )
         }
         .sorted()

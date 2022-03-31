@@ -186,7 +186,7 @@ fun DomainFactory.getEditInstancesSearchData(
                 searchCriteria,
                 page,
                 null,
-            ) { instance, children ->
+            ) { instance, children, filterResult ->
                 EditInstancesSearchViewModel.InstanceEntryData(
                     instance.name,
                     children,
@@ -197,6 +197,7 @@ fun DomainFactory.getEditInstancesSearchData(
                     instance.instanceDateTime.timeStamp,
                     instance.ordinal,
                     instance.instanceKey,
+                    filterResult.matches,
                 )
             }
 

@@ -115,7 +115,6 @@ class TreeViewAdapter<T : TreeHolder>(
         locker = AdapterLocker()
 
         if (
-            (newFilterCriteria != oldFilterCriteria) &&
             (newFilterCriteria.expandMatches || oldFilterCriteria.expandMatches)
         ) {
             treeNodeCollection!!.apply {

@@ -19,6 +19,7 @@ import com.krystianwsul.common.domain.ScheduleGroup
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.MyCustomTime
 import com.krystianwsul.common.firebase.json.tasks.TaskJson
+import com.krystianwsul.common.firebase.models.FilterResult
 import com.krystianwsul.common.firebase.models.ImageState
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.filterSearchCriteria
@@ -708,7 +709,14 @@ private fun DomainFactory.getParentTreeDatas(
         .map { (task, filterResult) ->
             val childSearchCriteria = filterResult.getChildrenSearchCriteria(searchCriteria)
 
-            task.toParentEntryData(this, now, excludedTaskKeys, parentInstanceKey, childSearchCriteria)
+            task.toParentEntryData(
+                this,
+                now,
+                excludedTaskKeys,
+                parentInstanceKey,
+                childSearchCriteria,
+                filterResult,
+            )
         }
 
     val projectOrder = Preferences.projectOrder
@@ -733,6 +741,7 @@ private fun DomainFactory.getParentTreeDatas(
                 project.projectKey,
                 project.users.toUserDatas(),
                 projectOrder.getOrDefault(project.projectKey, 0f),
+                filterResult.matches,
             )
         }
 
@@ -754,7 +763,14 @@ private fun DomainFactory.getProjectTaskTreeDatas(
         .map { (task, filterResult) ->
             val childSearchCriteria = filterResult.getChildrenSearchCriteria(searchCriteria)
 
-            task.toParentEntryData(this, now, excludedTaskKeys, parentInstanceKey, childSearchCriteria)
+            task.toParentEntryData(
+                this,
+                now,
+                excludedTaskKeys,
+                parentInstanceKey,
+                childSearchCriteria,
+                filterResult,
+            )
         }
         .toList()
 }
@@ -846,6 +862,7 @@ private fun Task.toParentEntryData(
     excludedTaskKeys: Set<TaskKey>,
     parentInstanceKey: InstanceKey?,
     searchCriteria: SearchCriteria,
+    filterResult: FilterResult,
 ) = EditViewModel.ParentEntryData.Task(
     name,
     domainFactory.getTaskListChildTaskDatas(now, this, excludedTaskKeys, parentInstanceKey, searchCriteria),
@@ -856,6 +873,7 @@ private fun Task.toParentEntryData(
     project.projectKey,
     hasMultipleInstances(parentInstanceKey, now),
     topLevelTaskIsSingleSchedule(),
+    filterResult.matches,
 )
 
 private fun DomainFactory.getTaskListChildTaskDatas(
@@ -877,6 +895,7 @@ private fun DomainFactory.getTaskListChildTaskDatas(
             excludedTaskKeys,
             parentInstanceKey,
             childSearchCriteria,
+            filterResult,
         )
     }
     .toList()

@@ -18,6 +18,7 @@ import com.krystianwsul.checkme.utils.time.toDateTimeTz
 import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.domain.TaskUndoData
 import com.krystianwsul.common.firebase.DomainThreadChecker
+import com.krystianwsul.common.firebase.models.FilterResult
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.filterSearch
 import com.krystianwsul.common.firebase.models.project.Project
@@ -205,6 +206,7 @@ fun DomainFactory.getGroupListChildTaskDatas(
             childTask.getProjectInfo(),
             childTask.ordinal,
             childTask.canMigrateDescription(now),
+            filterResult.matches,
         )
     }
     .toList()
@@ -214,7 +216,7 @@ fun <T : Comparable<T>> DomainFactory.searchInstances(
     searchCriteria: SearchCriteria,
     page: Int,
     projectKey: ProjectKey<*>?,
-    mapper: (Instance, Collection<T>) -> T,
+    mapper: (Instance, Collection<T>, FilterResult) -> T,
 ): Pair<List<T>, Boolean> {
     DomainThreadChecker.instance.requireDomainThread()
 
@@ -236,11 +238,13 @@ fun <T : Comparable<T>> DomainFactory.searchInstances(
         We know this instance matches SearchCriteria.showAssignedToOthers.  If it also matches the query, we
         can skip filtering child instances, since showAssignedToOthers is meaningless for child instances.
          */
-        val childSearchCriteria = task.getFilterResult(searchCriteria.search).getChildrenSearchCriteria(searchCriteria)
+        val filterResult = task.getFilterResult(searchCriteria.search)
+
+        val childSearchCriteria = filterResult.getChildrenSearchCriteria(searchCriteria)
 
         val children = getChildInstanceDatas(it, now, mapper, childSearchCriteria, !debugMode)
 
-        mapper(it, children)
+        mapper(it, children, filterResult)
     }
 
     return instanceDatas.sorted().take(desiredCount) to hasMore
@@ -401,6 +405,7 @@ fun DomainUpdater.undo(notificationType: DomainListenerManager.NotificationType,
 fun Project<*>.toEntryDatas(
     childTaskDatas: List<TaskListFragment.ChildTaskData>,
     showProjects: Boolean,
+    filterResult: FilterResult,
 ): List<TaskListFragment.EntryData> {
     if (childTaskDatas.isEmpty()) return emptyList()
 
@@ -412,6 +417,7 @@ fun Project<*>.toEntryDatas(
                 projectKey,
                 endExactTimeStamp == null,
                 startExactTimeStamp.long,
+                filterResult.matches,
             )
         )
     } else {

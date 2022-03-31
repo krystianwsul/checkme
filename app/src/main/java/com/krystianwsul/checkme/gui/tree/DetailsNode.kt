@@ -51,6 +51,8 @@ class DetailsNode(
 
     override val inheritParentBottomSeparator = true
 
+    override val matchesSearch = false
+
     fun initialize(nodeContainer: NodeContainer<AbstractHolder>): TreeNode<AbstractHolder> {
         this.nodeContainer = nodeContainer
 

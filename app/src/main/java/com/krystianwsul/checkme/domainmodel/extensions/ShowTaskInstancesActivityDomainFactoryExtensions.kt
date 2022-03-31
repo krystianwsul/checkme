@@ -63,6 +63,7 @@ fun DomainFactory.getShowTaskInstancesData(
                             this,
                             notDoneChildInstanceDescriptors,
                             doneChildInstanceDescriptors,
+                            false,
                         )
 
                         GroupTypeFactory.InstanceDescriptor(

@@ -62,7 +62,7 @@ fun DomainFactory.getCappedInstanceAndTaskDatas(
         searchCriteria,
         page,
         projectKey,
-    ) { instance, children -> instanceToGroupListData(instance, now, children) }
+    ) { instance, children, filterResult -> instanceToGroupListData(instance, now, children, filterResult.matches) }
 
     val taskDatas = getUnscheduledTasks(projectKey)
         .asSequence()
@@ -79,6 +79,7 @@ fun DomainFactory.getCappedInstanceAndTaskDatas(
                 task.getProjectInfo(includeProjectDetails),
                 task.ordinal,
                 task.canMigrateDescription(now),
+                filterResult.matches,
             )
         }
         .toList()

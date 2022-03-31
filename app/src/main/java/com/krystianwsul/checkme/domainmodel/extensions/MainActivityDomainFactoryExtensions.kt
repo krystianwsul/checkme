@@ -80,6 +80,7 @@ private fun DomainFactory.getMainData(
                 task.canMigrateDescription(now),
                 task.ordinal,
                 task.getProjectInfo(),
+                filterResult.matches,
             )
         }
         .sortedDescending()
@@ -96,7 +97,7 @@ private fun DomainFactory.getMainData(
                     ?.let { (project, filterResult) ->
                         val childSearchCriteria = filterResult.getChildrenSearchCriteria(searchCriteria)
 
-                        project.toEntryDatas(tasks.toChildTaskDatas(childSearchCriteria), showProjects)
+                        project.toEntryDatas(tasks.toChildTaskDatas(childSearchCriteria), showProjects, filterResult)
                     }
                     .orEmpty()
             }
@@ -111,6 +112,7 @@ private fun DomainFactory.getMainData(
                 project.toEntryDatas(
                     project.getAllDependenciesLoadedTasks().toChildTaskDatas(childSearchCriteria),
                     showProjects,
+                    filterResult,
                 )
             }
             .toList()
@@ -194,6 +196,7 @@ fun DomainFactory.getGroupListData(
             this,
             notDoneChildInstanceDescriptors,
             doneChildInstanceDescriptors,
+            false,
         )
 
         GroupTypeFactory.InstanceDescriptor(

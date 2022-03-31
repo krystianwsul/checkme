@@ -451,6 +451,7 @@ class DomainFactory(
         instance: Instance,
         now: ExactTimeStamp.Local,
         childInstanceDescriptors: Collection<GroupTypeFactory.InstanceDescriptor>,
+        matchesSearch: Boolean,
     ): GroupTypeFactory.InstanceDescriptor {
         val (notDoneInstanceDescriptors, doneInstanceDescriptors) = childInstanceDescriptors.splitDone()
 
@@ -460,6 +461,7 @@ class DomainFactory(
             this,
             notDoneInstanceDescriptors,
             doneInstanceDescriptors,
+            matchesSearch,
         )
 
         return GroupTypeFactory.InstanceDescriptor(
@@ -473,7 +475,7 @@ class DomainFactory(
     fun <T> getChildInstanceDatas(
         instance: Instance,
         now: ExactTimeStamp.Local,
-        mapper: (Instance, Collection<T>) -> T,
+        mapper: (Instance, Collection<T>, FilterResult.Task) -> T,
         searchCriteria: SearchCriteria = SearchCriteria.empty,
         filterVisible: Boolean = true,
     ): Collection<T> {
@@ -499,7 +501,7 @@ class DomainFactory(
                 if (filterResult == FilterResult.Include && children.isEmpty())
                     null
                 else
-                    mapper(childInstance, children)
+                    mapper(childInstance, children, filterResult)
             }
             .toList()
     }
@@ -512,7 +514,9 @@ class DomainFactory(
     ) = getChildInstanceDatas<GroupTypeFactory.InstanceDescriptor>(
         instance,
         now,
-        { childInstance, children -> instanceToGroupListData(childInstance, now, children) },
+        { childInstance, children, filterResult ->
+            instanceToGroupListData(childInstance, now, children, filterResult.matches)
+        },
         searchCriteria,
         filterVisible,
     ).splitDone()
@@ -554,6 +558,7 @@ class DomainFactory(
                     childTask.canMigrateDescription(now),
                     childTask.ordinal,
                     childTask.getProjectInfo(),
+                    filterResult.matches,
                 )
             }
             .toList()

@@ -1,5 +1,6 @@
 package com.krystianwsul.treeadapter
 
+import android.util.Log
 import androidx.recyclerview.widget.RecyclerView
 
 interface ModelNode<T : TreeHolder> : Comparable<ModelNode<T>>, Matchable {
@@ -41,7 +42,9 @@ interface ModelNode<T : TreeHolder> : Comparable<ModelNode<T>>, Matchable {
 
         companion object {
 
-            fun fromBoolean(matches: Boolean) = if (matches) MATCHES else DOESNT_MATCH
+            fun fromBoolean(matches: Boolean) = (if (matches) MATCHES else DOESNT_MATCH).also {
+                Log.e("asdf", "magic fromBoolean $it")
+            }
         }
     }
 }

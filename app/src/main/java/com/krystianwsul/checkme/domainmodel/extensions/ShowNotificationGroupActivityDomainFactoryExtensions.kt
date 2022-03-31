@@ -36,9 +36,9 @@ fun DomainFactory.getShowNotificationGroupData(
     val instanceDescriptors = instances.asSequence()
         .filterSearchCriteria(searchCriteria, now, myUserFactory.user, false)
         .map { instance ->
-            val childSearchCriteria = instance.task
-                .getFilterResult(searchCriteria.search)
-                .getChildrenSearchCriteria(searchCriteria)
+            val filterResult = instance.task.getFilterResult(searchCriteria.search)
+
+            val childSearchCriteria = filterResult.getChildrenSearchCriteria(searchCriteria)
 
             val (notDoneChildInstanceDescriptors, doneChildInstanceDescriptors) =
                 getChildInstanceDatas(instance, now, childSearchCriteria)
@@ -49,6 +49,7 @@ fun DomainFactory.getShowNotificationGroupData(
                 this,
                 notDoneChildInstanceDescriptors,
                 doneChildInstanceDescriptors,
+                filterResult.matches,
             )
 
             GroupTypeFactory.InstanceDescriptor(

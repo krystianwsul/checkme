@@ -12,19 +12,6 @@ class TreeNode<T : TreeHolder>(
     private val initialExpansionState: ExpansionState? = null,
 ) : Comparable<TreeNode<T>>, NodeContainer<T> {
 
-    companion object {
-
-        private tailrec fun parentHierarchyMatchesSearch(treeNode: TreeNode<*>, search: SearchCriteria.Search): Boolean {
-            treeNode.parent.let {
-                if (it !is TreeNode<*>) return false
-
-                if (it.matchesSearch(search)) return true
-
-                return parentHierarchyMatchesSearch(it, search)
-            }
-        }
-    }
-
     override val treeNodeCollection by lazy { parent.treeNodeCollection }
 
     private lateinit var expansionState: ExpansionState
@@ -326,19 +313,11 @@ class TreeNode<T : TreeHolder>(
     fun canBeShown(): Boolean {
         checkChildTreeNodesSet()
 
-        if (!modelNodeVisible) return false
-
-        return treeViewAdapter.filterCriteria.canBeShown(this)
+        return modelNodeVisible
     }
 
     private fun matchesSearch(search: SearchCriteria.Search) =
         modelNode.getMatchResult(search) == ModelNode.MatchResult.MATCHES
-
-    fun parentHierarchyMatchesSearch(search: SearchCriteria.Search) = parentHierarchyMatchesSearch(this, search)
-
-    fun childHierarchyMatchesSearch(search: SearchCriteria.Search.Query): Boolean = childTreeNodes.any {
-        it.matchesSearch(search) || it.childHierarchyMatchesSearch(search)
-    }
 
     private fun childHierarchyMatchesSearch(search: SearchCriteria.Search): Boolean =
         childTreeNodes.any { it.matchesSearch(search) || it.childHierarchyMatchesSearch(search) }
@@ -367,7 +346,7 @@ class TreeNode<T : TreeHolder>(
 
         if (!visible) return
 
-        if (isExpanded && 0 == childTreeNodes.map { it.displayedNodes.size }.sum()) expansionState = ExpansionState()
+        if (isExpanded && 0 == childTreeNodes.sumOf { it.displayedNodes.size }) expansionState = ExpansionState()
     }
 
     override fun add(treeNode: TreeNode<T>, placeholder: TreeViewAdapter.Placeholder) {

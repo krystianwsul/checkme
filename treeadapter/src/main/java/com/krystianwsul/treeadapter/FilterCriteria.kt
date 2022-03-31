@@ -12,8 +12,6 @@ sealed interface FilterCriteria : Parcelable {
     val expandMatches get() = search?.expandMatches ?: false
     val needsNormalization get() = search?.needsNormalization ?: false
 
-    fun canBeShown(treeNode: TreeNode<*>): Boolean = true
-
     @Parcelize
     data class Full(override val search: SearchCriteria.Search.Query, val filterParams: FilterParams) : FilterCriteria {
 
@@ -21,14 +19,6 @@ sealed interface FilterCriteria : Parcelable {
                 this(SearchCriteria.Search.Query(query), filterParams)
 
         constructor(query: String, showAssignedToOthers: Boolean) : this(query, FilterParams(showAssignedToOthers))
-
-        override fun canBeShown(treeNode: TreeNode<*>): Boolean {
-            return when (treeNode.modelNode.getMatchResult(search)) {
-                ModelNode.MatchResult.ALWAYS_VISIBLE, ModelNode.MatchResult.MATCHES -> true
-                ModelNode.MatchResult.DOESNT_MATCH -> treeNode.parentHierarchyMatchesSearch(search) ||
-                        treeNode.childHierarchyMatchesSearch(search)
-            }
-        }
 
         fun toExpandOnly() = ExpandOnly(search) as AllowedFilterCriteria // todo optimization
 

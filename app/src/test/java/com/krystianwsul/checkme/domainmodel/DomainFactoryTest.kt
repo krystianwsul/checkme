@@ -405,7 +405,7 @@ class DomainFactoryTest {
             EditDelegate.SharedProjectParameters(sharedProjectKey, setOf()),
         ).blockingGet()
 
-        domainFactory.getShowInstanceData(instanceKey)
+        domainFactory.getShowInstanceData(instanceKey, SearchCriteria.empty)
 
         assertEquals(1, getTodayInstanceDatas(now).size)
     }
@@ -1008,7 +1008,7 @@ class DomainFactoryTest {
 
         assertEquals(taskKey3, instanceKey3.taskKey)
 
-        val showInstanceData = domainFactory.getShowInstanceData(instanceKey3, now)
+        val showInstanceData = domainFactory.getShowInstanceData(instanceKey3, SearchCriteria.empty, now)
 
         val instanceData1 = showInstanceData.groupListDataWrapper
             .allInstanceDatas

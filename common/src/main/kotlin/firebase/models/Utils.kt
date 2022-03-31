@@ -10,24 +10,25 @@ import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
 
+
+private fun childHierarchyMatches(task: Task, search: SearchCriteria.Search?, onlyHierarchy: Boolean = false): FilterResult {
+    InterruptionChecker.throwIfInterrupted()
+
+    if (task.matchesSearch(search)) return FilterResult.MATCHES
+
+    val childTasks = if (onlyHierarchy) task.getHierarchyChildTasks() else task.getChildTasks()
+
+    if (childTasks.any { childHierarchyMatches(it, search, onlyHierarchy) != FilterResult.DOESNT_MATCH })
+        return FilterResult.CHILD_MATCHES
+
+    return FilterResult.DOESNT_MATCH
+}
+
 fun Sequence<Task>.filterSearch(search: SearchCriteria.Search?, onlyHierarchy: Boolean = false) =
     if (search?.hasSearch != true) {
         map { it to FilterResult.MATCHES }
     } else {
-        fun childHierarchyMatches(task: Task): FilterResult {
-            InterruptionChecker.throwIfInterrupted()
-
-            if (task.matchesSearch(search)) return FilterResult.MATCHES
-
-            val childTasks = if (onlyHierarchy) task.getHierarchyChildTasks() else task.getChildTasks()
-
-            if (childTasks.any { childHierarchyMatches(it) != FilterResult.DOESNT_MATCH })
-                return FilterResult.CHILD_MATCHES
-
-            return FilterResult.DOESNT_MATCH
-        }
-
-        map { it to childHierarchyMatches(it) }.filter { it.second != FilterResult.DOESNT_MATCH }
+        map { it to childHierarchyMatches(it, search, onlyHierarchy) }.filter { it.second != FilterResult.DOESNT_MATCH }
     }
 
 fun Sequence<Task>.filterSearchCriteria(
@@ -53,10 +54,42 @@ fun Sequence<Task>.filterSearchCriteria(
     }
 }
 
-fun Project<*>.filterSearchCriteria(showDeleted: Boolean) = showDeleted || endExactTimeStamp == null
+fun Project<*>.filterSearchCriteria(
+    searchCriteria: SearchCriteria,
+    showDeleted: Boolean,
+    showProjects: Boolean,
+): FilterResult {
+    /*
+    CHILD_MATCHES really means, "should I apply the searchCriteria to child tasks?".  So yes, if projects aren't visible,
+    then - given how this function is used - this is what we want to return.
+     */
+    if (!showProjects) return FilterResult.CHILD_MATCHES
 
-fun <T : Project<*>> Sequence<T>.filterSearchCriteria(showDeleted: Boolean) =
-    filter { it.filterSearchCriteria(showDeleted) }
+    if (!showDeleted && endExactTimeStamp != null) return FilterResult.DOESNT_MATCH
+
+    if (searchCriteria.search == null) return FilterResult.MATCHES
+
+    // ditto as CHILD_MATCHES comment above
+    if (name.isEmpty()) return FilterResult.CHILD_MATCHES
+
+    val query = searchCriteria.search as SearchCriteria.Search.Query
+    if (query.query.isEmpty()) return FilterResult.MATCHES
+
+    if (normalizedName.contains(query.query)) return FilterResult.MATCHES
+
+    return if (getAllDependenciesLoadedTasks().any { childHierarchyMatches(it, query) != FilterResult.DOESNT_MATCH })
+        FilterResult.CHILD_MATCHES
+    else
+        FilterResult.DOESNT_MATCH
+}
+
+fun <T : Project<*>> Sequence<T>.filterSearchCriteria(
+    searchCriteria: SearchCriteria,
+    showDeleted: Boolean,
+    showProjects: Boolean,
+) = map { it to it.filterSearchCriteria(searchCriteria, showDeleted, showProjects) }.filter {
+    it.second != FilterResult.DOESNT_MATCH
+}
 
 // todo this could return the task.matchesSearch result to optimize building child searchCriteria in the calling function
 fun Sequence<Instance>.filterSearchCriteria(

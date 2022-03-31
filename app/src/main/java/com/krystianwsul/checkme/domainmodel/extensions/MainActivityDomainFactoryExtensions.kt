@@ -62,7 +62,7 @@ private fun DomainFactory.getMainData(
     showDeleted: Boolean,
     filter: (Task) -> Boolean = { true },
 ): List<TaskListFragment.EntryData> {
-    fun Collection<Task>.toChildTaskDatas() = asSequence()
+    fun Collection<Task>.toChildTaskDatas(searchCriteria: SearchCriteria) = asSequence()
         .filter(filter)
         .filter { it.isTopLevelTask() }
         .filterSearchCriteria(searchCriteria, myUserFactory.user, showDeleted, now)
@@ -93,16 +93,30 @@ private fun DomainFactory.getMainData(
             .groupBy { it.projectId }
             .flatMap { (projectId, tasks) ->
                 projectsFactory.getProjectForce(projectId)
-                    .takeIf { it.filterSearchCriteria(showDeleted) }
-                    ?.toEntryDatas(tasks.toChildTaskDatas(), showProjects)
+                    .let { it to it.filterSearchCriteria(searchCriteria, showDeleted, showProjects) }
+                    .takeIf { it.second != FilterResult.DOESNT_MATCH }
+                    ?.let { (project, filterResult) ->
+                        val childSearchCriteria =
+                            if (filterResult == FilterResult.MATCHES) searchCriteria.copy(search = null) else searchCriteria
+
+                        project.toEntryDatas(tasks.toChildTaskDatas(childSearchCriteria), showProjects)
+                    }
                     .orEmpty()
             }
     } else {
         projectsFactory.projects
             .values
             .asSequence()
-            .filterSearchCriteria(showDeleted)
-            .flatMap { it.toEntryDatas(it.getAllDependenciesLoadedTasks().toChildTaskDatas(), showProjects) }
+            .filterSearchCriteria(searchCriteria, showDeleted, showProjects)
+            .flatMap { (project, filterResult) ->
+                val childSearchCriteria =
+                    if (filterResult == FilterResult.MATCHES) searchCriteria.copy(search = null) else searchCriteria
+
+                project.toEntryDatas(
+                    project.getAllDependenciesLoadedTasks().toChildTaskDatas(childSearchCriteria),
+                    showProjects,
+                )
+            }
             .toList()
     }
 }

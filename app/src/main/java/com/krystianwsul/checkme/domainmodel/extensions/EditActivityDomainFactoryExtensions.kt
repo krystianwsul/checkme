@@ -719,20 +719,23 @@ private fun DomainFactory.getParentTreeDatas(
         .values
         .asSequence()
         .filter { it.notDeleted }
-        .filterSearchCriteria(false) // todo edit this should also include searchCriteria
-        .map {
+        .filterSearchCriteria(searchCriteria, false, true)
+        .map { (project, filterResult) ->
+            val childSearchCriteria =
+                if (filterResult == FilterResult.MATCHES) searchCriteria.copy(search = null) else searchCriteria
+
             EditViewModel.ParentEntryData.Project(
-                it.name,
+                project.name,
                 getProjectTaskTreeDatas(
                     now,
-                    it,
+                    project,
                     excludedTaskKeys,
                     parentInstanceKey,
-                    searchCriteria
-                ), // todo edit filter these searchCriteria after fixing above
-                it.projectKey,
-                it.users.toUserDatas(),
-                projectOrder.getOrDefault(it.projectKey, 0f),
+                    childSearchCriteria,
+                ),
+                project.projectKey,
+                project.users.toUserDatas(),
+                projectOrder.getOrDefault(project.projectKey, 0f),
             )
         }
 

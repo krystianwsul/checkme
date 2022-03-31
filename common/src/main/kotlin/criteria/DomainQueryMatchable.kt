@@ -6,7 +6,7 @@ interface DomainQueryMatchable {
 
     val normalizedFields: List<String>
 
-    fun matchesTaskKey(taskKey: TaskKey): Boolean = throw UnsupportedOperationException()
+    fun matchesTaskKey(taskKey: TaskKey): Boolean
 
     fun matchesSearch(search: SearchCriteria.Search?): Boolean {
         return when (search) {

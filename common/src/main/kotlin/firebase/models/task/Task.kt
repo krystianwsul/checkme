@@ -155,6 +155,8 @@ sealed class Task(
     }
     final override val normalizedFields by normalizedFieldsDelegate
 
+    override fun matchesTaskKey(taskKey: TaskKey) = this.taskKey == taskKey
+
     abstract val projectCustomTimeIdProvider: JsonTime.ProjectCustomTimeIdProvider
 
     abstract val dependenciesLoaded: Boolean

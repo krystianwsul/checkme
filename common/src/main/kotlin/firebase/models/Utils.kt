@@ -72,15 +72,20 @@ fun Project<*>.filterSearchCriteria(
     // ditto as CHILD_MATCHES comment above
     if (name.isEmpty()) return FilterResult.CHILD_MATCHES
 
-    val query = searchCriteria.search as SearchCriteria.Search.Query
-    if (query.query.isEmpty()) return FilterResult.MATCHES
+    when (searchCriteria.search) {
+        is SearchCriteria.Search.Query -> {
+            val query = searchCriteria.search
+            if (query.query.isEmpty()) return FilterResult.MATCHES
 
-    if (normalizedName.contains(query.query)) return FilterResult.MATCHES
+            if (normalizedName.contains(query.query)) return FilterResult.MATCHES
 
-    return if (getAllDependenciesLoadedTasks().any { childHierarchyMatches(it, query) != FilterResult.DOESNT_MATCH })
-        FilterResult.CHILD_MATCHES
-    else
-        FilterResult.DOESNT_MATCH
+            return if (getAllDependenciesLoadedTasks().any { childHierarchyMatches(it, query) != FilterResult.DOESNT_MATCH })
+                FilterResult.CHILD_MATCHES
+            else
+                FilterResult.DOESNT_MATCH
+        }
+        is SearchCriteria.Search.TaskKey -> return FilterResult.CHILD_MATCHES
+    }
 }
 
 fun <T : Project<*>> Sequence<T>.filterSearchCriteria(

@@ -171,10 +171,10 @@ sealed interface EditParameters : Parcelable {
             abstract val taskKey: TaskKey
 
             @Parcelize
-            class Task(override val taskKey: TaskKey) : CopySource()
+            data class Task(override val taskKey: TaskKey) : CopySource()
 
             @Parcelize
-            class Instance(val instanceKey: InstanceKey) : CopySource() {
+            data class Instance(val instanceKey: InstanceKey) : CopySource() {
 
                 override val taskKey get() = instanceKey.taskKey
             }

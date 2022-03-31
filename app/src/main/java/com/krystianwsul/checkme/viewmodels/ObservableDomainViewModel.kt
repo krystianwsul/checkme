@@ -6,41 +6,23 @@ import io.reactivex.rxjava3.kotlin.Observables
 
 abstract class ObservableDomainViewModel<D : DomainData, P : ObservableDomainViewModel.Parameters> : DomainViewModel<D>() {
 
-    protected val parametersRelay = BehaviorRelay.create<P>()
-    protected val parameters get() = parametersRelay.value!!
+    private val delegate by lazy { Delegate<D, P>(domainListener) }
 
-    private val refreshRelay = BehaviorRelay.createDefault(Refresh())
+    val parametersRelay get() = delegate.parametersRelay
+    val parameters get() = delegate.parameters
 
-    private var disposable: Disposable? = null
+    override fun internalStart() = delegate.start()
 
-    override fun internalStart() {
-        val myStarted = disposable?.isDisposed == false
-        if (myStarted) return
-
-        disposable = Observables.combineLatest(parametersRelay, refreshRelay)
-            .distinctUntilChanged()
-            .subscribe { domainListener.start(true) }
-    }
-
-    override fun refresh() {
-        refreshRelay.accept(Refresh())
-
-        internalStart()
-    }
-
-    private fun dispose() {
-        disposable?.dispose()
-        disposable = null
-    }
+    override fun refresh() = delegate.refresh()
 
     override fun stop() {
-        dispose()
+        delegate.dispose()
 
         super.stop()
     }
 
     override fun onCleared() {
-        dispose()
+        delegate.dispose()
 
         super.onCleared()
     }
@@ -48,4 +30,35 @@ abstract class ObservableDomainViewModel<D : DomainData, P : ObservableDomainVie
     interface Parameters
 
     private class Refresh
+
+    class Delegate<D : DomainData, P : Parameters>(private val domainListener: DomainListener<D>) {
+
+        val parametersRelay = BehaviorRelay.create<P>()
+        val parameters get() = parametersRelay.value!!
+
+        private val refreshRelay = BehaviorRelay.createDefault(Refresh())
+
+        private var disposable: Disposable? = null
+
+        private val started get() = disposable?.isDisposed == false
+
+        fun start() {
+            if (started) return
+
+            disposable = Observables.combineLatest(parametersRelay, refreshRelay)
+                .distinctUntilChanged()
+                .subscribe { domainListener.start(true) }
+        }
+
+        fun refresh() {
+            refreshRelay.accept(Refresh())
+
+            start()
+        }
+
+        fun dispose() {
+            disposable?.dispose()
+            disposable = null
+        }
+    }
 }

@@ -172,7 +172,7 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
         initBottomBar()
 
         showGroupViewModel.apply {
-            start(parameters)
+            start(this@ShowGroupActivity.parameters)
 
             createDisposable += filterCriteria.map { it.search }.subscribe(searchRelay)
 

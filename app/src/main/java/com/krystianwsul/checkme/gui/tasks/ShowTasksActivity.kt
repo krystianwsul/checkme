@@ -118,7 +118,7 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
         }
 
         showTasksViewModel.apply {
-            start(parameters)
+            start(this@ShowTasksActivity.parameters)
 
             createDisposable += filterCriteria.map { it.search }.subscribe(searchRelay)
 

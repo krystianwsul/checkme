@@ -19,6 +19,7 @@ import com.krystianwsul.checkme.gui.utils.SavedStateProperty
 import com.krystianwsul.checkme.viewmodels.DomainData
 import com.krystianwsul.checkme.viewmodels.DomainListener
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
+import com.krystianwsul.checkme.viewmodels.ObservableDomainViewModel
 import com.krystianwsul.common.firebase.models.ImageState
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.time.Date
@@ -41,7 +42,13 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
 
     private val clearedDisposable = CompositeDisposable()
 
-    private lateinit var editParameters: EditParameters
+    private val editParametersRelay = BehaviorRelay.create<EditParameters>()
+
+    private var editParameters
+        get() = editParametersRelay.value!!
+        set(value) {
+            editParametersRelay.accept(value)
+        }
 
     private val mainDomainListener = object : DomainListener<MainData>() {
 
@@ -68,6 +75,9 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
             it.getCreateTaskParentPickerData(editParameters.startParameters)
         }
     }
+
+    private val parentPickerDelegate =
+        ObservableDomainViewModel.Delegate<ParentPickerData, ParentPickerParameters>(parentPickerDomainListener)
 
     val mainData get() = mainDomainListener.data
     val parentPickerData get() = parentPickerDomainListener.data
@@ -114,6 +124,10 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
         mainData.skip(1)
             .subscribe { delegate.newData(it) }
             .addTo(clearedDisposable)
+
+        editParametersRelay.map { ParentPickerParameters(it.startParameters) }
+            .subscribe(parentPickerDelegate.parametersRelay)
+            .addTo(clearedDisposable)
     }
 
     fun start(editParameters: EditParameters, editActivity: EditActivity) {
@@ -122,7 +136,7 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
         this.editParameters = editParameters
 
         mainDomainListener.start()
-        parentPickerDomainListener.start()
+        parentPickerDelegate.start()
 
         if (editImageStateRelay.value != null) return
 
@@ -147,6 +161,8 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
 
     fun stop() {
         mainDomainListener.stop()
+
+        parentPickerDelegate.dispose()
         parentPickerDomainListener.stop()
     }
 
@@ -536,22 +552,22 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
 
         fun showAllInstancesDialog(domainFactory: DomainFactory, now: ExactTimeStamp.Local): Boolean? = null
 
-        class Create(override val parentInstanceKey: InstanceKey?) : StartParameters {
+        data class Create(override val parentInstanceKey: InstanceKey?) : StartParameters {
 
             override val excludedTaskKeys = setOf<TaskKey>()
         }
 
-        class MigrateDescription(val taskKey: TaskKey) : StartParameters {
+        data class MigrateDescription(val taskKey: TaskKey) : StartParameters {
 
             override val excludedTaskKeys = setOf<TaskKey>()
         }
 
-        class TaskOrInstance(val copySource: EditParameters.Copy.CopySource) : StartParameters {
+        data class TaskOrInstance(val copySource: EditParameters.Copy.CopySource) : StartParameters {
 
             override val excludedTaskKeys = setOf(copySource.taskKey)
         }
 
-        class Join(private val joinables: List<EditParameters.Join.Joinable>) : StartParameters {
+        data class Join(private val joinables: List<EditParameters.Join.Joinable>) : StartParameters {
 
             override val excludedTaskKeys = joinables.map { it.taskKey }.toSet()
 
@@ -590,4 +606,6 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
 
     @Parcelize
     data class UserData(val key: UserKey, val name: String, val photoUrl: String?) : Parcelable
+
+    private data class ParentPickerParameters(val startParameters: StartParameters) : ObservableDomainViewModel.Parameters
 }

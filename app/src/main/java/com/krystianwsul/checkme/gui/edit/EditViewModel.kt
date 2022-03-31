@@ -6,6 +6,7 @@ import android.os.Parcelable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import com.jakewharton.rxrelay3.BehaviorRelay
+import com.jakewharton.rxrelay3.PublishRelay
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.ScheduleText
 import com.krystianwsul.checkme.domainmodel.UserScope
@@ -20,12 +21,14 @@ import com.krystianwsul.checkme.viewmodels.DomainData
 import com.krystianwsul.checkme.viewmodels.DomainListener
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.checkme.viewmodels.ObservableDomainViewModel
+import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.firebase.models.ImageState
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.utils.*
 import com.mindorks.scheduler.Priority
 import com.soywiz.klock.Month
+import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.subscribeBy
@@ -69,10 +72,10 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
      * but I don't care right now.  The objective I achieved was being able to display the main screen, without waiting
      * for this stupid list to be generated.
      */
-    private val parentPickerDomainListener = object : DomainListener<ParentPickerData>() {
+    private val parentPickerDomainListener: DomainListener<ParentPickerData> = object : DomainListener<ParentPickerData>() {
 
         override val domainResultFetcher = DomainResultFetcher.DomainFactoryData {
-            it.getCreateTaskParentPickerData(editParameters.startParameters)
+            parentPickerDelegate.parameters.run { it.getCreateTaskParentPickerData(startParameters, searchCriteria) }
         }
     }
 
@@ -92,6 +95,8 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
     val hasDelegate get() = this::delegate.isInitialized
 
     private var currentParentSource by SavedStateProperty<CurrentParentSource>(savedStateHandle, "currentParentSource")
+
+    val searchRelay = PublishRelay.create<SearchCriteria.Search.Query>()
 
     init {
         savedStateHandle.setSavedStateProvider(KEY_EDIT_IMAGE_STATE) {
@@ -125,7 +130,9 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
             .subscribe { delegate.newData(it) }
             .addTo(clearedDisposable)
 
-        editParametersRelay.map { ParentPickerParameters(it.startParameters) }
+        Observable.combineLatest(searchRelay, editParametersRelay) { search, editParameters ->
+            ParentPickerParameters(SearchCriteria(search), editParameters.startParameters)
+        }
             .subscribe(parentPickerDelegate.parametersRelay)
             .addTo(clearedDisposable)
     }
@@ -607,5 +614,8 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
     @Parcelize
     data class UserData(val key: UserKey, val name: String, val photoUrl: String?) : Parcelable
 
-    private data class ParentPickerParameters(val startParameters: StartParameters) : ObservableDomainViewModel.Parameters
+    private data class ParentPickerParameters(
+        val searchCriteria: SearchCriteria,
+        val startParameters: StartParameters,
+    ) : ObservableDomainViewModel.Parameters
 }

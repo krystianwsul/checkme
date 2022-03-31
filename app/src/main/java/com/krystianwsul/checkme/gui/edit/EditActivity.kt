@@ -227,6 +227,12 @@ class EditActivity : NavBarActivity() {
         if (!noteHasFocusRelay.value!!)// keyboard hack
             window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
 
+        parentPickerDelegateRelay.switchMap { it.queryObservable }
+            .startWithItem("")
+            .map(SearchCriteria.Search::Query)
+            .subscribe(editViewModel.searchRelay)
+            .addTo(createDisposable)
+
         editViewModel.apply {
             start(parameters, this@EditActivity)
 
@@ -496,7 +502,8 @@ class EditActivity : NavBarActivity() {
             .assignedTo = finalUserKeys
     }
 
-    private fun newParentPickerDelegate() = ParentPickerDelegate()
+    private val parentPickerDelegateRelay = PublishRelay.create<ParentPickerDelegate>()
+    private fun newParentPickerDelegate() = ParentPickerDelegate().also(parentPickerDelegateRelay::accept)
 
     enum class HolderType {
 
@@ -977,8 +984,11 @@ class EditActivity : NavBarActivity() {
 
         private val queryRelay = BehaviorRelay.create<String>()
 
+        val queryObservable = queryRelay.hide()
+
         override val filterCriteriaObservable by lazy {
-            queryRelay.distinctUntilChanged().map<FilterCriteria> { FilterCriteria.Full(it) }
+            queryRelay.distinctUntilChanged()
+                .map<FilterCriteria> { FilterCriteria.ExpandOnly(SearchCriteria.Search.Query(it)) }
         }
 
         override val initialScrollMatcher by lazy {

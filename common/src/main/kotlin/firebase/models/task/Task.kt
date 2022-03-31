@@ -1,7 +1,7 @@
 package com.krystianwsul.common.firebase.models.task
 
 import com.krystianwsul.common.criteria.Assignable
-import com.krystianwsul.common.criteria.QueryMatchable
+import com.krystianwsul.common.criteria.DomainQueryMatchable
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.ScheduleGroup
 import com.krystianwsul.common.firebase.json.InstanceJson
@@ -33,7 +33,7 @@ sealed class Task(
     val parentTaskDelegateFactory: ParentTaskDelegate.Factory,
     val clearableInvalidatableManager: ClearableInvalidatableManager,
     val rootModelChangeManager: RootModelChangeManager,
-) : Endable, CurrentOffset, QueryMatchable, Assignable {
+) : Endable, CurrentOffset, DomainQueryMatchable, Assignable {
 
     abstract val parent: Parent
     abstract val project: Project<*>

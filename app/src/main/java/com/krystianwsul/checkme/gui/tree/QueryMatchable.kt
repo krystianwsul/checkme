@@ -1,5 +1,6 @@
-package com.krystianwsul.common.criteria
+package com.krystianwsul.checkme.gui.tree
 
+import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.utils.TaskKey
 
 interface QueryMatchable {

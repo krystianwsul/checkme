@@ -25,7 +25,6 @@ import com.krystianwsul.checkme.gui.utils.ResettableProperty
 import com.krystianwsul.checkme.gui.utils.flatten
 import com.krystianwsul.checkme.utils.getMap
 import com.krystianwsul.checkme.utils.putMap
-import com.krystianwsul.common.criteria.QueryMatchable
 import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.utils.filterValuesNotNull
 import com.krystianwsul.common.utils.normalized

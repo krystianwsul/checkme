@@ -146,7 +146,7 @@ class DetailsNode(
         normalizedFields
     }
 
-    override fun getMatchResult(search: SearchCriteria.Search) = ModelNode.MatchResult.fromBoolean(matchesSearch(search))
+    override fun getMatchResult(search: SearchCriteria.Search) = ModelNode.MatchResult.fromBoolean(matchesSearch)
 
     data class State(val superState: ModelState, val projectInfo: ProjectInfo?, val note: String?) : ModelState {
 

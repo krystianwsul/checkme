@@ -629,7 +629,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         override fun normalize() = entryData.normalize()
 
         override fun getMatchResult(search: SearchCriteria.Search) =
-            ModelNode.MatchResult.fromBoolean(entryData.matchesSearch(search))
+            ModelNode.MatchResult.fromBoolean(entryData.matchesSearch)
 
         abstract fun initialize(
             adapterState: AdapterState,

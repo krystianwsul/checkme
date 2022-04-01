@@ -392,7 +392,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
             override fun normalize() = entryData.normalize()
 
             override fun getMatchResult(search: SearchCriteria.Search) =
-                ModelNode.MatchResult.fromBoolean(entryData.matchesSearch(search))
+                ModelNode.MatchResult.fromBoolean(entryData.matchesSearch)
         }
     }
 

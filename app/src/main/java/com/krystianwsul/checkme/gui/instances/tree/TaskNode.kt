@@ -171,7 +171,7 @@ class TaskNode(
     override val thumbnail = taskData.imageState
 
     override fun getMatchResult(search: SearchCriteria.Search) =
-        ModelNode.MatchResult.fromBoolean(taskData.matchesSearch(search))
+        ModelNode.MatchResult.fromBoolean(taskData.matchesSearch)
 
     override fun tryStartDrag(viewHolder: RecyclerView.ViewHolder): Boolean {
         return if (groupAdapter.treeNodeCollection.selectedChildren.isEmpty()

@@ -44,7 +44,6 @@ import com.krystianwsul.checkme.utils.Utils
 import com.krystianwsul.checkme.utils.tryGetFragment
 import com.krystianwsul.checkme.utils.webSearchIntent
 import com.krystianwsul.checkme.viewmodels.DataId
-import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.firebase.models.ImageState
 import com.krystianwsul.common.utils.Ordinal
 import com.krystianwsul.common.utils.ProjectKey
@@ -629,8 +628,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             1
         }
 
-        override fun getMatchResult(search: SearchCriteria.Search) =
-            ModelNode.MatchResult.fromBoolean(entryData.matchesSearch)
+        override val matchesSearch = entryData.matchesSearch
 
         abstract fun initialize(
             adapterState: AdapterState,

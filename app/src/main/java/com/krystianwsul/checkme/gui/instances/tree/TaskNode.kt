@@ -21,7 +21,6 @@ import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineRow
 import com.krystianwsul.checkme.gui.tree.delegates.thumbnail.ThumbnailDelegate
 import com.krystianwsul.checkme.gui.tree.delegates.thumbnail.ThumbnailModelNode
 import com.krystianwsul.checkme.gui.utils.flatten
-import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.utils.Ordinal
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.common.utils.filterValuesNotNull
@@ -170,8 +169,7 @@ class TaskNode(
 
     override val thumbnail = taskData.imageState
 
-    override fun getMatchResult(search: SearchCriteria.Search) =
-        ModelNode.MatchResult.fromBoolean(taskData.matchesSearch)
+    override val matchesSearch = taskData.matchesSearch
 
     override fun tryStartDrag(viewHolder: RecyclerView.ViewHolder): Boolean {
         return if (groupAdapter.treeNodeCollection.selectedChildren.isEmpty()

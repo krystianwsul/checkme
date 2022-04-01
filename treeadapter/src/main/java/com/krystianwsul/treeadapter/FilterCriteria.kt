@@ -10,7 +10,6 @@ sealed interface FilterCriteria : Parcelable {
 
     val hasSearch get() = search?.hasSearch ?: false
     val expandMatches get() = search?.expandMatches ?: false
-    val needsNormalization get() = search?.needsNormalization ?: false
 
     @Parcelize
     data class Full(override val search: SearchCriteria.Search.Query, val filterParams: FilterParams) : FilterCriteria {

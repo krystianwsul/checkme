@@ -1,11 +1,9 @@
 package com.krystianwsul.treeadapter
 
-import android.util.Log
 import com.jakewharton.rxrelay3.BehaviorRelay
-import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.utils.Ordinal
 import io.reactivex.rxjava3.core.Observable
-import kotlin.math.*
+import kotlin.math.min
 
 class TreeNodeCollection<T : TreeHolder>(val treeViewAdapter: TreeViewAdapter<T>) : NodeContainer<T> {
 
@@ -240,17 +238,11 @@ class TreeNodeCollection<T : TreeHolder>(val treeViewAdapter: TreeViewAdapter<T>
 
     fun selectNode(position: Int) = treeViewAdapter.updateDisplayedNodes { displayedNodes[position].select(it) }
 
-    fun normalize() = treeNodesRelay.value
-        ?.forEach { it.normalize() }
-        ?: throw SetTreeNodesNotCalledException()
-
     fun resetExpansion(onlyProgrammatic: Boolean, placeholder: TreeViewAdapter.Placeholder) {
         treeNodesRelay.value!!.forEach { it.resetExpansion(onlyProgrammatic, placeholder) }
     }
 
-    fun expandMatching(search: SearchCriteria.Search) {
-        treeNodesRelay.value!!.forEach { it.expandMatching(search) }
-    }
+    fun expandMatching() = treeNodesRelay.value!!.forEach { it.expandMatching() }
 
     class SetTreeNodesNotCalledException : InitializationException("TreeNodeCollection.setTreeNodes() has not been called.")
 

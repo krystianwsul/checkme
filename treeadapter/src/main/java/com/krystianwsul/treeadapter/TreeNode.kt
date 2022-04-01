@@ -2,7 +2,6 @@ package com.krystianwsul.treeadapter
 
 import android.os.Parcelable
 import androidx.recyclerview.widget.RecyclerView
-import com.krystianwsul.common.criteria.SearchCriteria
 import kotlinx.parcelize.Parcelize
 
 class TreeNode<T : TreeHolder>(
@@ -316,11 +315,9 @@ class TreeNode<T : TreeHolder>(
         return modelNodeVisible
     }
 
-    private fun matchesSearch(search: SearchCriteria.Search) =
-        modelNode.getMatchResult(search) == ModelNode.MatchResult.MATCHES
+    private val matchesSearch = modelNode.matchesSearch
 
-    private fun childHierarchyMatchesSearch(search: SearchCriteria.Search): Boolean =
-        childTreeNodes.any { it.matchesSearch(search) || it.childHierarchyMatchesSearch(search) }
+    private val childHierarchyMatchesSearch: Boolean get() = childTreeNodes.any { it.matchesSearch || it.childHierarchyMatchesSearch }
 
     fun visible(): Boolean {
         checkChildTreeNodesSet()
@@ -367,12 +364,6 @@ class TreeNode<T : TreeHolder>(
 
     override val indentation by lazy { parent.indentation + 1 }
 
-    fun normalize() {
-        modelNode.normalize()
-
-        childTreeNodes.forEach { it.normalize() }
-    }
-
     fun resetExpansion(onlyProgrammatic: Boolean, placeholder: TreeViewAdapter.Placeholder) {
         childTreeNodes.forEach { it.resetExpansion(onlyProgrammatic, placeholder) }
 
@@ -382,16 +373,16 @@ class TreeNode<T : TreeHolder>(
             expansionState = ExpansionState()
     }
 
-    fun expandMatching(search: SearchCriteria.Search) {
+    fun expandMatching() {
         checkChildTreeNodesSet()
 
         if (!visible()) return
         if (!expandVisible) return
         if (childTreeNodes.none { canBeShown() }) return
 
-        if (childHierarchyMatchesSearch(search)) expansionState.programmatic = true
+        if (childHierarchyMatchesSearch) expansionState.programmatic = true
 
-        childTreeNodes.forEach { it.expandMatching(search) }
+        childTreeNodes.forEach { it.expandMatching() }
     }
 
     private fun checkChildTreeNodesSet() {

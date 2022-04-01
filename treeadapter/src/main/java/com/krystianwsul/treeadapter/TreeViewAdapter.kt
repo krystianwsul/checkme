@@ -9,15 +9,10 @@ import androidx.recyclerview.widget.BatchingListUpdateCallback
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListUpdateCallback
 import androidx.recyclerview.widget.RecyclerView
-import com.jakewharton.rxrelay3.BehaviorRelay
 import com.jakewharton.rxrelay3.PublishRelay
 import com.krystianwsul.treeadapter.locker.AdapterLocker
-import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
-import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.disposables.Disposable
-import io.reactivex.rxjava3.kotlin.addTo
-import io.reactivex.rxjava3.schedulers.Schedulers
 
 class TreeViewAdapter<T : TreeHolder>(
     val treeModelAdapter: TreeModelAdapter<T>,
@@ -53,11 +48,7 @@ class TreeViewAdapter<T : TreeHolder>(
 
     private val showPadding get() = !paddingData.hideWithoutProgress || showProgress
 
-    private val normalizeRelay = BehaviorRelay.create<Unit>()
-
     private val recyclerAttachedToWindowDisposable = CompositeDisposable()
-
-    private val normalizedObservable = BehaviorRelay.createDefault(false)
 
     var locker: AdapterLocker<T>? = null
         private set
@@ -79,7 +70,7 @@ class TreeViewAdapter<T : TreeHolder>(
 
                     filterCriteria.search
                         ?.takeIf { it.expandMatches }
-                        ?.let(treeNodeCollection::expandMatching)
+                        ?.let { treeNodeCollection.expandMatching() }
                 }
         } else {
             check(updating)
@@ -87,8 +78,6 @@ class TreeViewAdapter<T : TreeHolder>(
 
             this.treeNodeCollection = treeNodeCollection
         }
-
-        normalizeRelay.accept(Unit)
     }
 
     override fun getItemCount() = displayedNodes.size + if (showPadding) 1 else 0
@@ -122,7 +111,7 @@ class TreeViewAdapter<T : TreeHolder>(
 
                 val search = filterCriteria.search
 
-                if (search?.expandMatches == true) expandMatching(search)
+                if (search?.expandMatches == true) expandMatching()
             }
         }
 
@@ -312,20 +301,6 @@ class TreeViewAdapter<T : TreeHolder>(
 
         recyclerAttached = true
 
-        normalizeRelay.switchMap {
-            treeNodeCollection!!.nodesObservable
-                .firstOrError()
-                .flatMapObservable {
-                    Observable.fromCallable { treeNodeCollection!!.normalize() }
-                        .subscribeOn(Schedulers.computation())
-                        .map { true }
-                        .startWithItem(false)
-                        .observeOn(AndroidSchedulers.mainThread())
-                }
-        }
-            .subscribe(normalizedObservable::accept)
-            .addTo(recyclerAttachedToWindowDisposable)
-
         attachedHolders.forEach { it.startRx() }
     }
 
@@ -360,23 +335,16 @@ class TreeViewAdapter<T : TreeHolder>(
 
     private var updatingAfterNormalizationDisposable: Disposable? = null
 
-    fun setFilterCriteria(
+    fun setFilterCriteria( // todo optimization remove
         filterCriteria: FilterCriteria.AllowedFilterCriteria,
         @Suppress("UNUSED_PARAMETER") placeholder: Placeholder
     ) {
         updatingAfterNormalizationDisposable?.dispose()
 
-        if (normalizedObservable.getCurrentValue() || !filterCriteria.needsNormalization) {
-            this.filterCriteria = filterCriteria
-        } else {
-            updatingAfterNormalizationDisposable = normalizedObservable.filter { it }
-                .subscribe { updateDisplayedNodes { this.filterCriteria = filterCriteria } }
-                .addTo(recyclerAttachedToWindowDisposable)
-        }
+        this.filterCriteria = filterCriteria
     }
 
-    fun getTreeNodeCollection() = treeNodeCollection
-        ?: throw SetTreeNodeCollectionNotCalledException()
+    fun getTreeNodeCollection() = treeNodeCollection ?: throw SetTreeNodeCollectionNotCalledException()
 
     fun clearExpansionStates() = updateDisplayedNodes {
         treeNodeCollection?.resetExpansion(false, it) ?: throw SetTreeNodeCollectionNotCalledException()

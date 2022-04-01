@@ -12,7 +12,6 @@ import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineDelegate
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineModelNode
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineRow
 import com.krystianwsul.checkme.utils.loadPhoto
-import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.firebase.models.users.ProjectUser
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.treeadapter.ModelNode
@@ -136,8 +135,6 @@ class DetailsNode(
     }
 
     override fun compareTo(other: ModelNode<AbstractHolder>) = -1
-
-    override fun getMatchResult(search: SearchCriteria.Search) = ModelNode.MatchResult.DOESNT_MATCH
 
     data class State(val superState: ModelState, val projectInfo: ProjectInfo?, val note: String?) : ModelState {
 

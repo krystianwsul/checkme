@@ -31,7 +31,6 @@ import com.krystianwsul.checkme.gui.tree.delegates.thumbnail.ThumbnailModelNode
 import com.krystianwsul.checkme.gui.utils.ListItemAddedScroller
 import com.krystianwsul.checkme.gui.utils.flatten
 import com.krystianwsul.checkme.utils.time.getDisplayText
-import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.firebase.models.ImageState
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.HourMinute
@@ -281,8 +280,7 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
                     .canDropIntoParent(bridge)
             }
 
-            override fun getMatchResult(search: SearchCriteria.Search) =
-                ModelNode.MatchResult.fromBoolean(instanceData.matchesSearch)
+            override val matchesSearch = instanceData.matchesSearch
 
             @Parcelize
             data class Id(val instanceKey: InstanceKey) : ContentDelegate.Id
@@ -430,8 +428,7 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
                     .canDropIntoParent(bridge as GroupTypeFactory.TimeChild)
             }
 
-            override fun getMatchResult(search: SearchCriteria.Search) =
-                ModelNode.MatchResult.fromBoolean(allInstanceDatas.any { it.matchesSearch })
+            override val matchesSearch = false
 
             sealed class GroupRowsDelegate : DetailsNode.ProjectRowsDelegate(null, R.color.textSecondary) {
 

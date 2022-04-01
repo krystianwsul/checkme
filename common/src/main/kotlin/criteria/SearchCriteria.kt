@@ -25,22 +25,16 @@ data class SearchCriteria(
 
         val expandMatches get() = hasSearch
 
-        val needsNormalization: Boolean
-
         @Parcelize
         data class Query(val query: String = "") : Search {
 
             override val hasSearch get() = query.isNotEmpty()
-
-            override val needsNormalization get() = hasSearch
         }
 
         @Parcelize
         data class TaskKey(val taskKey: com.krystianwsul.common.utils.TaskKey) : Search {
 
             override val hasSearch get() = true
-
-            override val needsNormalization get() = false
         }
     }
 }

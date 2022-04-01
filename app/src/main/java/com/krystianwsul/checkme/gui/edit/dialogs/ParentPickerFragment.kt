@@ -25,7 +25,6 @@ import com.krystianwsul.checkme.gui.utils.ResettableProperty
 import com.krystianwsul.checkme.gui.utils.flatten
 import com.krystianwsul.checkme.utils.getMap
 import com.krystianwsul.checkme.utils.putMap
-import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.utils.filterValuesNotNull
 import com.krystianwsul.common.utils.normalized
 import com.krystianwsul.treeadapter.*
@@ -389,8 +388,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
                 return -entryData.sortKey.compareTo((other as TaskWrapper).entryData.sortKey)
             }
 
-            override fun getMatchResult(search: SearchCriteria.Search) =
-                ModelNode.MatchResult.fromBoolean(entryData.matchesSearch)
+            override val matchesSearch = entryData.matchesSearch
         }
     }
 

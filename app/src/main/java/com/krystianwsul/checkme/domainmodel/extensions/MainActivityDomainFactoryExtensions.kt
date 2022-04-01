@@ -80,7 +80,7 @@ private fun DomainFactory.getMainData(
                 task.canMigrateDescription(now),
                 task.ordinal,
                 task.getProjectInfo(),
-                filterResult.matches,
+                filterResult.matchesSearch,
             )
         }
         .sortedDescending()

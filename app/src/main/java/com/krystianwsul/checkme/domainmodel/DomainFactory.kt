@@ -25,6 +25,7 @@ import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.utils.checkError
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
+import com.krystianwsul.common.criteria.DomainQueryMatchable
 import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.ProjectToRootConversion
@@ -34,7 +35,6 @@ import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.MyCustomTime
 import com.krystianwsul.common.firebase.json.tasks.RootTaskJson
-import com.krystianwsul.common.firebase.models.FilterResult
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.customtime.PrivateCustomTime
 import com.krystianwsul.common.firebase.models.customtime.SharedCustomTime
@@ -475,7 +475,7 @@ class DomainFactory(
     fun <T> getChildInstanceDatas(
         instance: Instance,
         now: ExactTimeStamp.Local,
-        mapper: (Instance, Collection<T>, FilterResult.Task) -> T,
+        mapper: (Instance, Collection<T>, DomainQueryMatchable.MatchResult) -> T,
         searchCriteria: SearchCriteria = SearchCriteria.empty,
         filterVisible: Boolean = true,
     ): Collection<T> {
@@ -488,20 +488,20 @@ class DomainFactory(
             .mapNotNull { childInstance ->
                 val childTask = childInstance.task
 
-                val filterResult = childTask.getFilterResult(searchCriteria.search)
+                val matchResult = childTask.getMatchResult(searchCriteria.search)
 
                 /*
                 We know this instance matches SearchCriteria.showAssignedToOthers.  If it also matches the query, we
                 can skip filtering child instances, since showAssignedToOthers is meaningless for child instances.
                  */
-                val childrenQuery = filterResult.getChildrenSearchCriteria(searchCriteria)
+                val childrenQuery = matchResult.getChildrenSearchCriteria(searchCriteria)
 
                 val children = getChildInstanceDatas(childInstance, now, mapper, childrenQuery, filterVisible)
 
-                if (filterResult == FilterResult.Include && children.isEmpty())
+                if (!matchResult.includeWithoutChildren && children.isEmpty())
                     null
                 else
-                    mapper(childInstance, children, filterResult)
+                    mapper(childInstance, children, matchResult)
             }
             .toList()
     }
@@ -558,7 +558,7 @@ class DomainFactory(
                     childTask.canMigrateDescription(now),
                     childTask.ordinal,
                     childTask.getProjectInfo(),
-                    filterResult.matches,
+                    filterResult.matchesSearch,
                 )
             }
             .toList()

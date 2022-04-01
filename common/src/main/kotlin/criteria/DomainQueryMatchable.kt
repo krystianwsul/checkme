@@ -10,19 +10,52 @@ interface DomainQueryMatchable {
     fun matchesTaskKey(taskKey: TaskKey): Boolean
 
     // todo optimization check calls where FilterResult was already obtained earlier, like for instances
-    fun getFilterResult(search: SearchCriteria.Search?): FilterResult.Task {
-        fun Boolean.toFilterResult() = if (this) FilterResult.Matches else FilterResult.Include
-
+    fun getMatchResult(search: SearchCriteria.Search?): MatchResult {
         return when (search) {
             is SearchCriteria.Search.Query -> {
-                if (search.query.isEmpty()) {
-                    FilterResult.NoSearch
-                } else {
-                    normalizedFields.any { it.contains(search.query) }.toFilterResult()
+                when {
+                    search.query.isEmpty() -> MatchResult.NO_SEARCH
+                    normalizedFields.any { it.contains(search.query) } -> MatchResult.QUERY_MATCH
+                    else -> MatchResult.QUERY_NOMATCH
                 }
             }
-            is SearchCriteria.Search.TaskKey -> matchesTaskKey(search.taskKey).toFilterResult()
-            null -> FilterResult.NoSearch
+            is SearchCriteria.Search.TaskKey ->
+                if (matchesTaskKey(search.taskKey)) MatchResult.TASKKEY_MATCH else MatchResult.TASKKEY_NOMATCH
+            null -> MatchResult.NO_SEARCH
         }
+    }
+
+    enum class MatchResult(val matches: Boolean = false, val includeWithoutChildren: Boolean = true) {
+
+        NO_SEARCH {
+
+            override fun getFilterResult() = FilterResult.NoSearch
+        },
+
+        QUERY_NOMATCH(includeWithoutChildren = false) {
+
+            override fun getFilterResult(): FilterResult? = null
+        },
+
+        QUERY_MATCH(matches = true) {
+
+            override fun getFilterResult() = FilterResult.Matches(true)
+        },
+
+        TASKKEY_NOMATCH {
+
+            override fun getFilterResult() = FilterResult.Matches(false)
+        },
+
+        TASKKEY_MATCH(matches = true) {
+
+            override fun getFilterResult() = FilterResult.Matches(true)
+        };
+
+        fun getChildrenSearchCriteria(searchCriteria: SearchCriteria) =
+            if (matches) searchCriteria.clear() else searchCriteria
+
+        // null means check children
+        abstract fun getFilterResult(): FilterResult?
     }
 }

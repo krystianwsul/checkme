@@ -63,7 +63,7 @@ fun DomainFactory.getShowTasksData(
                 .map { (task, filterResult) ->
                     val childSearchCriteria = filterResult.getChildrenSearchCriteria(searchCriteria)
 
-                    task.toChildTaskData(childSearchCriteria, filterResult.matches)
+                    task.toChildTaskData(childSearchCriteria, filterResult.matchesSearch)
                 }
                 .toList()
 
@@ -116,7 +116,7 @@ fun DomainFactory.getShowTasksData(
                 .map { (task, filterResult) ->
                     val childSearchCriteria = filterResult.getChildrenSearchCriteria(searchCriteria)
 
-                    task.toChildTaskData(childSearchCriteria, filterResult.matches)
+                    task.toChildTaskData(childSearchCriteria, filterResult.matchesSearch)
                 }
                 .toList()
 

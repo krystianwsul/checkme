@@ -79,7 +79,7 @@ fun DomainFactory.getCappedInstanceAndTaskDatas(
                 task.getProjectInfo(includeProjectDetails),
                 task.ordinal,
                 task.canMigrateDescription(now),
-                filterResult.matches,
+                filterResult.matchesSearch,
             )
         }
         .toList()

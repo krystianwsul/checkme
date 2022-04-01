@@ -14,18 +14,14 @@ import com.krystianwsul.common.utils.TaskKey
 private fun childHierarchyMatches(task: Task, search: SearchCriteria.Search?, onlyHierarchy: Boolean = false): FilterResult {
     InterruptionChecker.throwIfInterrupted()
 
-    return task.getFilterResult(search).let {
-        when (it) {
-            FilterResult.NoSearch -> it
-            FilterResult.Include -> {
-                val childTasks = if (onlyHierarchy) task.getHierarchyChildTasks() else task.getChildTasks()
+    return task.getMatchResult(search).let {
+        it.getFilterResult() ?: run {
+            val childTasks = if (onlyHierarchy) task.getHierarchyChildTasks() else task.getChildTasks()
 
-                if (childTasks.any { !childHierarchyMatches(it, search, onlyHierarchy).doesntMatch })
-                    FilterResult.Include
-                else
-                    FilterResult.DoesntMatch
-            }
-            FilterResult.Matches -> it
+            if (childTasks.any { !childHierarchyMatches(it, search, onlyHierarchy).doesntMatch })
+                FilterResult.Include
+            else
+                FilterResult.DoesntMatch
         }
     }
 }
@@ -74,7 +70,7 @@ fun Project<*>.filterSearchCriteria(
         .let { it as? SearchCriteria.Search.Query }
         ?.takeIf { showProjects }
         ?.let {
-            if (name.isNotEmpty() && normalizedName.contains(it.query)) return FilterResult.Matches
+            if (name.isNotEmpty() && normalizedName.contains(it.query)) return FilterResult.Matches(true)
         }
 
     return if (getAllDependenciesLoadedTasks().any { !childHierarchyMatches(it, searchCriteria.search).doesntMatch })
@@ -107,14 +103,12 @@ fun Sequence<Instance>.filterSearchCriteria(
 
         if (instance.instanceKey in searchCriteria.excludedInstanceKeys) return false
 
-        return instance.task.getFilterResult(searchCriteria.search).let {
-            when (it) {
-                FilterResult.NoSearch -> true
-                FilterResult.Include -> instance.getChildInstances()
+        return instance.task.getMatchResult(searchCriteria.search).let {
+            it.includeWithoutChildren
+                .takeIf { it }
+                ?: instance.getChildInstances()
                     .filter { it.isVisible(now, Instance.VisibilityOptions(assumeChildOfVisibleParent = true)) }
                     .any { childHierarchyMatches(it, true) }
-                FilterResult.Matches -> true
-            }
         }
     }
 
@@ -125,8 +119,9 @@ sealed interface FilterResult {
 
     val doesntMatch: Boolean
 
-    val matches get() = false
+    val matchesSearch get() = false
 
+    // todo taskKey check if used
     fun getChildrenSearchCriteria(searchCriteria: SearchCriteria) = searchCriteria
 
     object DoesntMatch : FilterResult {
@@ -143,17 +138,10 @@ sealed interface FilterResult {
 
     object Include : Task()
 
-    object Matches : Task() {
+    // todo taskKey this naming is awful
+    class Matches(override val matchesSearch: Boolean) : Task() {
 
-        override val matches = true
-
-        override fun getChildrenSearchCriteria(searchCriteria: SearchCriteria): SearchCriteria {
-            return if (searchCriteria.search?.hasSearch == true) {
-                searchCriteria.copy(search = null)
-            } else {
-                searchCriteria
-            }
-        }
+        override fun getChildrenSearchCriteria(searchCriteria: SearchCriteria) = searchCriteria.clear()
     }
 }
 

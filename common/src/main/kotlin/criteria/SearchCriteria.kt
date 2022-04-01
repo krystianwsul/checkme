@@ -19,6 +19,14 @@ data class SearchCriteria(
 
     val isEmpty by lazy { this == empty }
 
+    fun clear(): SearchCriteria {
+        return if (search?.hasSearch == true) {
+            copy(search = null)
+        } else {
+            this
+        }
+    }
+
     sealed interface Search : Parcelable {
 
         val hasSearch: Boolean

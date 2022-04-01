@@ -15,6 +15,7 @@ import com.krystianwsul.checkme.gui.main.DebugFragment
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.utils.time.calendar
 import com.krystianwsul.checkme.utils.time.toDateTimeTz
+import com.krystianwsul.common.criteria.DomainQueryMatchable
 import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.domain.TaskUndoData
 import com.krystianwsul.common.firebase.DomainThreadChecker
@@ -206,7 +207,7 @@ fun DomainFactory.getGroupListChildTaskDatas(
             childTask.getProjectInfo(),
             childTask.ordinal,
             childTask.canMigrateDescription(now),
-            filterResult.matches,
+            filterResult.matchesSearch,
         )
     }
     .toList()
@@ -216,7 +217,7 @@ fun <T : Comparable<T>> DomainFactory.searchInstances(
     searchCriteria: SearchCriteria,
     page: Int,
     projectKey: ProjectKey<*>?,
-    mapper: (Instance, Collection<T>, FilterResult) -> T,
+    mapper: (Instance, Collection<T>, DomainQueryMatchable.MatchResult) -> T,
 ): Pair<List<T>, Boolean> {
     DomainThreadChecker.instance.requireDomainThread()
 
@@ -238,13 +239,13 @@ fun <T : Comparable<T>> DomainFactory.searchInstances(
         We know this instance matches SearchCriteria.showAssignedToOthers.  If it also matches the query, we
         can skip filtering child instances, since showAssignedToOthers is meaningless for child instances.
          */
-        val filterResult = task.getFilterResult(searchCriteria.search)
+        val matchResult = task.getMatchResult(searchCriteria.search)
 
-        val childSearchCriteria = filterResult.getChildrenSearchCriteria(searchCriteria)
+        val childSearchCriteria = matchResult.getChildrenSearchCriteria(searchCriteria)
 
         val children = getChildInstanceDatas(it, now, mapper, childSearchCriteria, !debugMode)
 
-        mapper(it, children, filterResult)
+        mapper(it, children, matchResult)
     }
 
     return instanceDatas.sorted().take(desiredCount) to hasMore
@@ -417,7 +418,7 @@ fun Project<*>.toEntryDatas(
                 projectKey,
                 endExactTimeStamp == null,
                 startExactTimeStamp.long,
-                filterResult.matches,
+                filterResult.matchesSearch,
             )
         )
     } else {

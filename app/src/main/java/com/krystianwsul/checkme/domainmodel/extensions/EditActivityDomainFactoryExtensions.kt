@@ -741,7 +741,7 @@ private fun DomainFactory.getParentTreeDatas(
                 project.projectKey,
                 project.users.toUserDatas(),
                 projectOrder.getOrDefault(project.projectKey, 0f),
-                filterResult.matches,
+                filterResult.matchesSearch,
             )
         }
 
@@ -873,7 +873,7 @@ private fun Task.toParentEntryData(
     project.projectKey,
     hasMultipleInstances(parentInstanceKey, now),
     topLevelTaskIsSingleSchedule(),
-    filterResult.matches,
+    filterResult.matchesSearch,
 )
 
 private fun DomainFactory.getTaskListChildTaskDatas(

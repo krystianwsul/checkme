@@ -1,6 +1,5 @@
 package com.krystianwsul.treeadapter
 
-import android.util.Log
 import androidx.recyclerview.widget.RecyclerView
 
 interface ModelNode<T : TreeHolder> : Comparable<ModelNode<T>>, Matchable {
@@ -35,16 +34,4 @@ interface ModelNode<T : TreeHolder> : Comparable<ModelNode<T>>, Matchable {
     fun tryStartDrag(viewHolder: RecyclerView.ViewHolder): Boolean = false
 
     fun isVisible(actionMode: Boolean, hasVisibleChildren: Boolean): Boolean = true
-
-    enum class MatchResult { // todo optimization delete
-
-        ALWAYS_VISIBLE, MATCHES, DOESNT_MATCH;
-
-        companion object {
-
-            fun fromBoolean(matches: Boolean) = (if (matches) MATCHES else DOESNT_MATCH).also {
-                Log.e("asdf", "magic fromBoolean $it")
-            }
-        }
-    }
 }

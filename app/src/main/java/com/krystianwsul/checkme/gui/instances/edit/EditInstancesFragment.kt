@@ -50,6 +50,7 @@ import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.treeadapter.FilterCriteria
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.functions.Consumer
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.subscribeBy
 import kotlinx.parcelize.Parcelize
@@ -134,6 +135,8 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
     private val parentPickerDelegate by lazy {
         object : ParentPickerFragment.Delegate {
 
+            override val startedRelay = Consumer<Boolean> { }
+
             private val queryRelay = BehaviorRelay.createDefault("")
 
             override val adapterDataObservable = BehaviorRelay.create<ParentPickerFragment.AdapterData>()
@@ -151,15 +154,7 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
                     progressShownRelay,
                     viewCreatedDisposable,
                     editInstancesSearchViewModel,
-                    {
-                        adapterDataObservable.accept(
-                            ParentPickerFragment.AdapterData(
-                                it.instanceEntryDatas,
-                                FilterCriteria.ExpandOnly(it.searchCriteria.search),
-                                it.showLoader,
-                            )
-                        )
-                    },
+                    { adapterDataObservable.accept(ParentPickerFragment.AdapterData(it.instanceEntryDatas, it.showLoader)) },
                     editInstancesSearchViewModel::start,
                     instanceKeys.toSet(),
                 )

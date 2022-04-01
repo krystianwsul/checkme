@@ -20,7 +20,7 @@ fun <T : DomainData> connectInstanceSearch(
         compositeDisposable: CompositeDisposable,
         viewModel: DomainViewModel<T>,
         setAdapterData: (data: T) -> Unit,
-        startViewModel: (searchCriteria: SearchCriteria, page: Int) -> Unit,
+        startViewModel: (searchCriteria: SearchCriteria, page: Int) -> Unit, // todo filterCriteria
         excludedInstanceKeys: Set<InstanceKey>,
 ) {
     /**

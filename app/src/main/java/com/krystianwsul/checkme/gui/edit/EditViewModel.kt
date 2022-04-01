@@ -96,7 +96,7 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
 
     private var currentParentSource by SavedStateProperty<CurrentParentSource>(savedStateHandle, "currentParentSource")
 
-    val searchRelay = PublishRelay.create<SearchCriteria.Search.Query>()
+    val searchRelay = PublishRelay.create<SearchCriteria.Search>()
 
     init {
         savedStateHandle.setSavedStateProvider(KEY_EDIT_IMAGE_STATE) {

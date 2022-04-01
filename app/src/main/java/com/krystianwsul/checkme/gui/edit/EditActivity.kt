@@ -40,7 +40,6 @@ import com.krystianwsul.checkme.utils.tryGetFragment
 import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.common.utils.UserKey
-import com.krystianwsul.treeadapter.FilterCriteria
 import com.krystianwsul.treeadapter.getCurrentValue
 import com.miguelbcr.ui.rx_paparazzo2.entities.FileData
 import com.miguelbcr.ui.rx_paparazzo2.entities.Response
@@ -227,9 +226,26 @@ class EditActivity : NavBarActivity() {
         if (!noteHasFocusRelay.value!!)// keyboard hack
             window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
 
-        parentPickerDelegateRelay.switchMap { it.queryObservable }
-            .startWithItem("")
-            .map(SearchCriteria.Search::Query)
+        parentPickerDelegateRelay.switchMap { delegate ->
+            delegate.startedRelay.map { delegate to it }
+        }
+            .switchMap { (delegate, started) ->
+                if (started) {
+                    delegate.queryObservable.map(SearchCriteria.Search::Query)
+                } else {
+                    editViewModel.delegate
+                        .parentScheduleManager
+                        .parentObservable
+                        .map {
+                            val taskKey = it.value
+                                ?.parentKey
+                                ?.let { it as? EditViewModel.ParentKey.Task }
+                                ?.let { SearchCriteria.Search.TaskKey(it.taskKey) }
+
+                            taskKey ?: SearchCriteria.Search.Query()
+                        }
+                }
+            }
             .subscribe(editViewModel.searchRelay)
             .addTo(createDisposable)
 
@@ -961,25 +977,10 @@ class EditActivity : NavBarActivity() {
 
     private inner class ParentPickerDelegate : ParentPickerFragment.Delegate {
 
+        override val startedRelay = BehaviorRelay.createDefault(false)
+
         override val adapterDataObservable by lazy {
-            var first = true
-
-            editViewModel.parentPickerData.map {
-                val filterCriteria = if (first) {
-                    first = false
-
-                    editViewModel.delegate
-                        .parentScheduleManager
-                        .parent
-                        ?.parentKey
-                        ?.let { it as? EditViewModel.ParentKey.Task }
-                        ?.let { FilterCriteria.ExpandOnly(SearchCriteria.Search.TaskKey(it.taskKey)) }
-                } else {
-                    null
-                }
-
-                ParentPickerFragment.AdapterData(it.parentTreeDatas, filterCriteria)
-            }
+            editViewModel.parentPickerData.map { ParentPickerFragment.AdapterData(it.parentTreeDatas) }
         }
 
         private val queryRelay = BehaviorRelay.create<String>()

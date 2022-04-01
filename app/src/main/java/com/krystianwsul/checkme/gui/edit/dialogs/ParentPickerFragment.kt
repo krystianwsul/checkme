@@ -29,6 +29,7 @@ import com.krystianwsul.common.utils.filterValuesNotNull
 import com.krystianwsul.common.utils.normalized
 import com.krystianwsul.treeadapter.*
 import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.functions.Consumer
 import io.reactivex.rxjava3.kotlin.Observables
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.cast
@@ -74,6 +75,10 @@ class ParentPickerFragment : AbstractDialogFragment() {
         searchChanges = savedInstanceState?.getString(KEY_SEARCH)
             ?.let { BehaviorRelay.createDefault(it) }
             ?: BehaviorRelay.create()
+
+        Observables.combineLatest(startedRelay, delegateRelay)
+            .subscribe { (started, delegate) -> delegate.startedRelay.accept(started) }
+            .addTo(createDisposable)
     }
 
     @SuppressLint("InflateParams")
@@ -172,6 +177,8 @@ class ParentPickerFragment : AbstractDialogFragment() {
         }
     }
 
+    private val startedRelay = BehaviorRelay.createDefault(false)
+
     override fun onStart() {
         super.onStart()
 
@@ -191,6 +198,14 @@ class ParentPickerFragment : AbstractDialogFragment() {
                 }
             }.subscribe()
         }
+
+        startedRelay.accept(true)
+    }
+
+    override fun onStop() {
+        startedRelay.accept(false)
+
+        super.onStop()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -376,6 +391,8 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
     interface Delegate {
 
+        val startedRelay: Consumer<Boolean>
+
         val adapterDataObservable: Observable<AdapterData>
 
         val initialScrollMatcher: ((EntryData) -> Boolean)?
@@ -391,11 +408,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
         fun onPaddingShown()
     }
 
-    data class AdapterData(
-        val entryDatas: Collection<EntryData>,
-        val filterCriteria: FilterCriteria.ExpandOnly? = null, // filterCriteria
-        val showProgress: Boolean = false,
-    )
+    data class AdapterData(val entryDatas: Collection<EntryData>, val showProgress: Boolean = false)
 
     interface EntryData {
 

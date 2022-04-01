@@ -6,6 +6,7 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable
 
 abstract class AbstractDialogFragment : AppCompatDialogFragment() {
 
+    protected val createDisposable = CompositeDisposable()
     protected val viewCreatedDisposable = CompositeDisposable()
     protected val startDisposable = CompositeDisposable()
 
@@ -25,5 +26,11 @@ abstract class AbstractDialogFragment : AppCompatDialogFragment() {
         viewCreatedDisposable.clear()
 
         super.onDestroyView()
+    }
+
+    override fun onDestroy() {
+        createDisposable.dispose()
+
+        super.onDestroy()
     }
 }

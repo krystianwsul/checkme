@@ -389,8 +389,6 @@ class ParentPickerFragment : AbstractDialogFragment() {
                 return -entryData.sortKey.compareTo((other as TaskWrapper).entryData.sortKey)
             }
 
-            override fun normalize() = entryData.normalize()
-
             override fun getMatchResult(search: SearchCriteria.Search) =
                 ModelNode.MatchResult.fromBoolean(entryData.matchesSearch)
         }
@@ -426,7 +424,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
         val showProgress: Boolean = false,
     )
 
-    interface EntryData : QueryMatchable {
+    interface EntryData {
 
         val name: String
         val childEntryDatas: Collection<EntryData>
@@ -434,8 +432,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
         val details: String?
         val note: String?
         val sortKey: SortKey
-
-        fun normalize()
+        val matchesSearch: Boolean
     }
 
     interface SortKey : Comparable<SortKey>

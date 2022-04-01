@@ -466,8 +466,6 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
             override val matchesSearch: Boolean,
         ) : ParentEntryData() {
 
-            override val normalizedFields by lazy { listOfNotNull(name, note).map { it.normalized() } }
-
             override val entryKey = ParentKey.Project(projectKey)
 
             override val details = projectUsers.values.joinToString(", ") { it.name }
@@ -475,12 +473,6 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
             override val note: String? = null
 
             override val sortKey = SortKey.ProjectSortKey(projectKey, projectOrder)
-
-            override fun normalize() {
-                normalizedFields
-            }
-
-            override fun matchesTaskKey(taskKey: TaskKey) = false
 
             override fun toParent() = ParentScheduleManager.Parent.Project(name, entryKey, projectUsers)
         }
@@ -498,15 +490,7 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
             override val matchesSearch: Boolean,
         ) : ParentEntryData() {
 
-            override val normalizedFields by lazy { listOfNotNull(name, note).map { it.normalized() } }
-
             override val entryKey = ParentKey.Task(taskKey)
-
-            override fun normalize() {
-                normalizedFields
-            }
-
-            override fun matchesTaskKey(taskKey: TaskKey) = this.taskKey == taskKey
 
             override fun toParent(): ParentScheduleManager.Parent = ParentScheduleManager.Parent.Task(
                 name,

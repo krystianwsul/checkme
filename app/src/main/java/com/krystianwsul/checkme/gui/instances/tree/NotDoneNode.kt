@@ -281,8 +281,6 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
                     .canDropIntoParent(bridge)
             }
 
-            override fun normalize() = instanceData.normalize()
-
             override fun getMatchResult(search: SearchCriteria.Search) =
                 ModelNode.MatchResult.fromBoolean(instanceData.matchesSearch)
 
@@ -431,8 +429,6 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
                     .getDropParent()
                     .canDropIntoParent(bridge as GroupTypeFactory.TimeChild)
             }
-
-            override fun normalize() = allInstanceDatas.forEach { it.normalize() }
 
             override fun getMatchResult(search: SearchCriteria.Search) =
                 ModelNode.MatchResult.fromBoolean(allInstanceDatas.any { it.matchesSearch })

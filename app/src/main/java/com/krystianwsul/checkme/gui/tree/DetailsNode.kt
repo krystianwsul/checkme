@@ -15,7 +15,6 @@ import com.krystianwsul.checkme.utils.loadPhoto
 import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.firebase.models.users.ProjectUser
 import com.krystianwsul.common.utils.ProjectKey
-import com.krystianwsul.common.utils.normalized
 import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.ModelState
 import com.krystianwsul.treeadapter.NodeContainer
@@ -26,7 +25,7 @@ class DetailsNode(
     private val note: String?,
     override val parentNode: Parent?,
     indentation: Int,
-) : AbstractModelNode(), IndentationModelNode, QueryMatchable {
+) : AbstractModelNode(), IndentationModelNode {
 
     override lateinit var treeNode: TreeNode<AbstractHolder>
         private set
@@ -43,15 +42,11 @@ class DetailsNode(
 
     data class Id(val id: Any?)
 
-    override val normalizedFields by lazy { listOfNotNull(note?.normalized()) }
-
     override val disableRipple = true
 
     override val showSeparatorWhenParentExpanded = false
 
     override val inheritParentBottomSeparator = true
-
-    override val matchesSearch = false
 
     fun initialize(nodeContainer: NodeContainer<AbstractHolder>): TreeNode<AbstractHolder> {
         this.nodeContainer = nodeContainer
@@ -142,11 +137,7 @@ class DetailsNode(
 
     override fun compareTo(other: ModelNode<AbstractHolder>) = -1
 
-    override fun normalize() {
-        normalizedFields
-    }
-
-    override fun getMatchResult(search: SearchCriteria.Search) = ModelNode.MatchResult.fromBoolean(matchesSearch)
+    override fun getMatchResult(search: SearchCriteria.Search) = ModelNode.MatchResult.DOESNT_MATCH
 
     data class State(val superState: ModelState, val projectInfo: ProjectInfo?, val note: String?) : ModelState {
 

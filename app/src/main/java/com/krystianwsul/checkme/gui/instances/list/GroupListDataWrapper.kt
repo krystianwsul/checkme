@@ -6,12 +6,14 @@ import com.krystianwsul.checkme.domainmodel.MixedInstanceDataCollection
 import com.krystianwsul.checkme.domainmodel.extensions.toDoneSingleBridges
 import com.krystianwsul.checkme.gui.instances.drag.DropParent
 import com.krystianwsul.checkme.gui.tree.DetailsNode
-import com.krystianwsul.checkme.gui.tree.QueryMatchable
 import com.krystianwsul.common.firebase.models.ImageState
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.time.Date
-import com.krystianwsul.common.utils.*
+import com.krystianwsul.common.utils.InstanceKey
+import com.krystianwsul.common.utils.Ordinal
+import com.krystianwsul.common.utils.ProjectKey
+import com.krystianwsul.common.utils.TaskKey
 import java.util.*
 
 data class GroupListDataWrapper(
@@ -37,14 +39,12 @@ data class GroupListDataWrapper(
         val projectInfo: DetailsNode.ProjectInfo?,
         val ordinal: Ordinal,
         override val canMigrateDescription: Boolean,
-        override val matchesSearch: Boolean,
-    ) : SelectedData, QueryMatchable {
+        val matchesSearch: Boolean,
+    ) : SelectedData {
 
         init {
             check(name.isNotEmpty())
         }
-
-        override val normalizedFields by lazy { listOfNotNull(name, note).map { it.normalized() } }
 
         override val taskCurrent = true
         override val canAddSubtask = true
@@ -76,8 +76,8 @@ data class GroupListDataWrapper(
         val imageState: ImageState?,
         val projectKey: ProjectKey.Shared?,
         val parentInstanceKey: InstanceKey?,
-        override val matchesSearch: Boolean,
-    ) : Comparable<InstanceData>, SelectedData, QueryMatchable {
+        val matchesSearch: Boolean,
+    ) : Comparable<InstanceData>, SelectedData {
 
         companion object {
 
@@ -118,8 +118,6 @@ data class GroupListDataWrapper(
 
         val allChildren = mixedInstanceDataCollection.instanceDatas + doneSingleBridges.map { it.instanceData }
 
-        override val normalizedFields by lazy { listOfNotNull(name, note).map { it.normalized() } }
-
         init {
             check(name.isNotEmpty())
         }
@@ -135,10 +133,6 @@ data class GroupListDataWrapper(
         override val taskKey = instanceKey.taskKey
 
         override val childSelectedDatas get() = allChildren
-
-        fun normalize() {
-            normalizedFields
-        }
     }
 
     interface SelectedData {

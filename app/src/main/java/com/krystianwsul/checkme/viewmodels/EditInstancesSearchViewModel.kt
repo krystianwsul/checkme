@@ -7,7 +7,6 @@ import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.Ordinal
-import com.krystianwsul.common.utils.normalized
 
 class EditInstancesSearchViewModel : DomainViewModel<EditInstancesSearchViewModel.Data>() {
 
@@ -50,12 +49,6 @@ class EditInstancesSearchViewModel : DomainViewModel<EditInstancesSearchViewMode
         val instanceKey: InstanceKey,
         override val matchesSearch: Boolean,
     ) : Comparable<InstanceEntryData>, ParentPickerFragment.EntryData {
-
-        override val normalizedFields by lazy { listOfNotNull(name, note).map { it.normalized() } }
-
-        override fun normalize() {
-            normalizedFields
-        }
 
         override fun compareTo(other: InstanceEntryData): Int {
             val timeStampComparison = instanceTimeStamp.compareTo(other.instanceTimeStamp)

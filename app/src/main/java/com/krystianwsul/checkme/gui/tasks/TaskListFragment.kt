@@ -46,7 +46,10 @@ import com.krystianwsul.checkme.utils.webSearchIntent
 import com.krystianwsul.checkme.viewmodels.DataId
 import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.firebase.models.ImageState
-import com.krystianwsul.common.utils.*
+import com.krystianwsul.common.utils.Ordinal
+import com.krystianwsul.common.utils.ProjectKey
+import com.krystianwsul.common.utils.TaskKey
+import com.krystianwsul.common.utils.filterValuesNotNull
 import com.krystianwsul.treeadapter.*
 import com.stfalcon.imageviewer.StfalconImageViewer
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
@@ -626,8 +629,6 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             1
         }
 
-        override fun normalize() = entryData.normalize()
-
         override fun getMatchResult(search: SearchCriteria.Search) =
             ModelNode.MatchResult.fromBoolean(entryData.matchesSearch)
 
@@ -876,16 +877,13 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         val projectInfo: DetailsNode.ProjectInfo?,
     )
 
-    interface EntryData : Comparable<EntryData>, QueryMatchable {
+    interface EntryData : Comparable<EntryData> {
 
         val name: String
         val children: List<EntryData>
         val id: Any
         val canAddSubtask: Boolean
-
-        fun normalize() {
-            normalizedFields
-        }
+        val matchesSearch: Boolean
     }
 
     data class ProjectData(
@@ -900,8 +898,6 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         override val id = projectKey
 
         override val canAddSubtask = current
-
-        override val normalizedFields by lazy { listOf(name.normalized()) }
 
         override fun compareTo(other: EntryData): Int {
             check(other is ProjectData)
@@ -931,12 +927,6 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             check(other is ChildTaskData)
 
             return ordinal.compareTo(other.ordinal)
-        }
-
-        override val normalizedFields by lazy { listOfNotNull(name, note).map { it.normalized() } }
-
-        override fun normalize() {
-            normalizedFields
         }
     }
 

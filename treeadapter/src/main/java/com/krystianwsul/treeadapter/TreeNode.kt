@@ -376,10 +376,6 @@ class TreeNode<T : TreeHolder>(
     fun expandMatching() {
         checkChildTreeNodesSet()
 
-        if (!visible()) return
-        if (!expandVisible) return
-        if (childTreeNodes.none { canBeShown() }) return
-
         if (childHierarchyMatchesSearch) expansionState.programmatic = true
 
         childTreeNodes.forEach { it.expandMatching() }

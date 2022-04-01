@@ -11,6 +11,7 @@ sealed interface FilterCriteria : Parcelable {
     val hasSearch get() = search?.hasSearch ?: false
     val expandMatches get() = search?.expandMatches ?: false
 
+    // todo optimize replace with new class where actually used for something
     @Parcelize
     data class Full(override val search: SearchCriteria.Search.Query, val filterParams: FilterParams) : FilterCriteria {
 

@@ -68,9 +68,7 @@ class TreeViewAdapter<T : TreeHolder>(
 
                     locker = AdapterLocker()
 
-                    filterCriteria.search
-                        ?.takeIf { it.expandMatches }
-                        ?.let { treeNodeCollection.expandMatching() }
+                    treeNodeCollection.expandMatching()
                 }
         } else {
             check(updating)
@@ -92,7 +90,6 @@ class TreeViewAdapter<T : TreeHolder>(
 
         val oldStates = getStates()
         val oldShowProgress = showProgress
-        val oldFilterCriteria = filterCriteria
         val oldShowPadding = showPadding
 
         updating = true
@@ -100,19 +97,15 @@ class TreeViewAdapter<T : TreeHolder>(
 
         action(Placeholder.instance)
 
-        val newFilterCriteria = filterCriteria
         locker = AdapterLocker()
 
-        if (
-            (newFilterCriteria.expandMatches || oldFilterCriteria.expandMatches)
-        ) {
-            treeNodeCollection!!.apply {
-                resetExpansion(true, Placeholder.instance)
+        /*
+        This doesn't seem very performant anymore; I'm just clearing and re-setting everything.  But it's fine for now.
+         */
+        treeNodeCollection!!.apply {
+            resetExpansion(true, Placeholder.instance)
 
-                val search = filterCriteria.search
-
-                if (search?.expandMatches == true) expandMatching()
-            }
+            expandMatching()
         }
 
         updating = false

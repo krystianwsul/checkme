@@ -45,7 +45,10 @@ import com.krystianwsul.common.time.TimePair
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.NullableWrapper
 import com.krystianwsul.common.utils.ProjectKey
-import com.krystianwsul.treeadapter.*
+import com.krystianwsul.treeadapter.ActionModeCallback
+import com.krystianwsul.treeadapter.TreeNode
+import com.krystianwsul.treeadapter.TreeNodeCollection
+import com.krystianwsul.treeadapter.TreeViewAdapter
 import com.skydoves.balloon.ArrowOrientation
 import com.stfalcon.imageviewer.StfalconImageViewer
 import io.reactivex.rxjava3.core.Observable
@@ -452,9 +455,8 @@ class GroupListFragment @JvmOverloads constructor(
 
         override fun getFilterCriteriaFromData(data: GroupListParameters) = data.filterCriteria
 
-        override fun instantiateAdapters(filterCriteria: FilterCriteria.AllowedFilterCriteria) = GroupAdapter(
+        override fun instantiateAdapters() = GroupAdapter(
             this@GroupListFragment,
-            filterCriteria,
             (parameters as? GroupListParameters.Parent)?.projectKey,
         ).let { it to it.treeViewAdapter }
 
@@ -878,11 +880,7 @@ class GroupListFragment @JvmOverloads constructor(
 
     fun clearExpansionStates() = searchDataManager.treeViewAdapterNullable?.clearExpansionStates()
 
-    class GroupAdapter(
-        val groupListFragment: GroupListFragment,
-        filterCriteria: FilterCriteria.AllowedFilterCriteria,
-        private val unscheduledNodeProjectKey: ProjectKey.Shared?,
-    ) :
+    class GroupAdapter(val groupListFragment: GroupListFragment, private val unscheduledNodeProjectKey: ProjectKey.Shared?) :
         BaseAdapter(),
         NodeCollectionParent,
         ActionModeCallback by groupListFragment.selectionCallback {
@@ -890,7 +888,6 @@ class GroupListFragment @JvmOverloads constructor(
         val treeViewAdapter = TreeViewAdapter(
             this,
             TreeViewAdapter.PaddingData(R.layout.row_group_list_fab_padding, R.id.paddingProgress),
-            filterCriteria,
         )
 
         public override lateinit var treeNodeCollection: TreeNodeCollection<AbstractHolder>

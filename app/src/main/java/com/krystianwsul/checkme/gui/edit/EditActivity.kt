@@ -986,11 +986,6 @@ class EditActivity : NavBarActivity() {
 
         val queryObservable = queryRelay.hide()
 
-        override val filterCriteriaObservable by lazy {
-            queryRelay.distinctUntilChanged()
-                .map<FilterCriteria.AllowedFilterCriteria> { FilterCriteria.ExpandOnly(SearchCriteria.Search.Query(it)) }
-        }
-
         override val initialScrollMatcher by lazy {
             editViewModel.delegate
                 .parentScheduleManager

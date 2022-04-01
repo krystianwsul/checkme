@@ -50,7 +50,6 @@ import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.treeadapter.FilterCriteria
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
-import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.subscribeBy
 import kotlinx.parcelize.Parcelize
@@ -138,8 +137,6 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
             private val queryRelay = BehaviorRelay.createDefault("")
 
             override val adapterDataObservable = BehaviorRelay.create<ParentPickerFragment.AdapterData>()
-
-            override val filterCriteriaObservable = Observable.never<FilterCriteria.AllowedFilterCriteria>()
 
             override val initialScrollMatcher: ((ParentPickerFragment.EntryData) -> Boolean)? = null
 

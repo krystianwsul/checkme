@@ -12,21 +12,14 @@ import androidx.recyclerview.widget.RecyclerView
 import com.jakewharton.rxrelay3.PublishRelay
 import com.krystianwsul.treeadapter.locker.AdapterLocker
 import io.reactivex.rxjava3.disposables.CompositeDisposable
-import io.reactivex.rxjava3.disposables.Disposable
 
-class TreeViewAdapter<T : TreeHolder>(
-    val treeModelAdapter: TreeModelAdapter<T>,
-    private val paddingData: PaddingData,
-    initialFilterCriteria: FilterCriteria.AllowedFilterCriteria = FilterCriteria.None,
-) : RecyclerView.Adapter<RecyclerView.ViewHolder>(), ActionModeCallback by treeModelAdapter {
+class TreeViewAdapter<T : TreeHolder>(val treeModelAdapter: TreeModelAdapter<T>, private val paddingData: PaddingData) :
+    RecyclerView.Adapter<RecyclerView.ViewHolder>(), ActionModeCallback by treeModelAdapter {
 
     companion object {
 
         private const val TYPE_PADDING = 1000
     }
-
-    internal var filterCriteria = initialFilterCriteria
-        private set
 
     private var treeNodeCollection: TreeNodeCollection<T>? = null
 
@@ -325,17 +318,6 @@ class TreeViewAdapter<T : TreeHolder>(
 
     fun selectNode(position: Int) = treeNodeCollection?.selectNode(position)
         ?: throw SetTreeNodeCollectionNotCalledException()
-
-    private var updatingAfterNormalizationDisposable: Disposable? = null
-
-    fun setFilterCriteria( // todo optimization remove
-        filterCriteria: FilterCriteria.AllowedFilterCriteria,
-        @Suppress("UNUSED_PARAMETER") placeholder: Placeholder
-    ) {
-        updatingAfterNormalizationDisposable?.dispose()
-
-        this.filterCriteria = filterCriteria
-    }
 
     fun getTreeNodeCollection() = treeNodeCollection ?: throw SetTreeNodeCollectionNotCalledException()
 

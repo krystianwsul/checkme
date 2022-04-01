@@ -30,6 +30,7 @@ abstract class SearchDataManager<DATA : Any, MODEL_ADAPTER : BaseAdapter>(
 
     protected abstract val filterCriteriaObservable: Observable<FilterCriteria.AllowedFilterCriteria>
 
+    // todo filterCriteria
     var filterCriteria: FilterCriteria.AllowedFilterCriteria = FilterCriteria.None
         private set
 
@@ -46,8 +47,7 @@ abstract class SearchDataManager<DATA : Any, MODEL_ADAPTER : BaseAdapter>(
 
     protected abstract fun getFilterCriteriaFromData(data: DATA): FilterCriteria.AllowedFilterCriteria?
 
-    protected abstract fun instantiateAdapters(filterCriteria: FilterCriteria.AllowedFilterCriteria):
-            Pair<MODEL_ADAPTER, TreeViewAdapter<AbstractHolder>>
+    protected abstract fun instantiateAdapters(): Pair<MODEL_ADAPTER, TreeViewAdapter<AbstractHolder>>
 
     protected abstract fun attachTreeViewAdapter(treeViewAdapter: TreeViewAdapter<AbstractHolder>)
 
@@ -92,7 +92,7 @@ abstract class SearchDataManager<DATA : Any, MODEL_ADAPTER : BaseAdapter>(
                 if (first) {
                     emptyBefore = true
 
-                    val (modelAdapter, treeViewAdapter) = instantiateAdapters(filterCriteria)
+                    val (modelAdapter, treeViewAdapter) = instantiateAdapters()
 
                     initializeModelAdapter(modelAdapter, data)
 
@@ -111,8 +111,6 @@ abstract class SearchDataManager<DATA : Any, MODEL_ADAPTER : BaseAdapter>(
                         initializeModelAdapter(modelAdapter!!, data)
 
                         updateTreeViewAdapterAfterModelAdapterInitialization(treeViewAdapter, data, first, it)
-
-                        treeViewAdapter.setFilterCriteria(filterCriteria, it)
                     }
                 }
 
@@ -136,8 +134,7 @@ abstract class SearchDataManager<DATA : Any, MODEL_ADAPTER : BaseAdapter>(
             if (treeViewAdapterInitialized) {
                 val emptyBefore = isAdapterEmpty()
 
-                treeViewAdapter.updateDisplayedNodes { treeViewAdapter.setFilterCriteria(filterCriteria, it) }
-
+                // todo filterCriteria pretty sure emptyBefore/after will be identical
                 updateEmptyState(emptyBefore, false)
             }
         }

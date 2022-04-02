@@ -32,6 +32,7 @@ fun Sequence<Task>.filterSearch(searchContext: SearchContext, onlyHierarchy: Boo
     if (searchContext.searchCriteria.search?.hasSearch != true) {
         map { it to FilterResult.NoSearch("e") }
     } else {
+        // todo taskKey this could return a subtype of FilterCriteria, i.e. the subset where doesnMatch = false
         map { it to childHierarchyMatches(it, searchContext, onlyHierarchy) }.filter { !it.second.doesntMatch }
     }
 
@@ -95,48 +96,43 @@ fun Sequence<Instance>.filterSearchCriteria(
     now: ExactTimeStamp.Local,
     myUser: MyUser,
     assumeChild: Boolean,
-) = if (searchContext.searchCriteria.isEmpty) {
+): Sequence<Instance> = if (searchContext.searchCriteria.isEmpty) {
     this
 } else {
-    fun childHierarchyMatches(
-        instance: Instance,
-        assumeChild: Boolean,
-        searchContext: SearchContext,
-        firstDepth: Boolean,
-    ): Boolean {
+    fun childHierarchyMatches(instance: Instance, assumeChild: Boolean): FilterResult {
         InterruptionChecker.throwIfInterrupted()
 
-        if (!assumeChild && !searchContext.searchCriteria.showAssignedToOthers && !instance.isAssignedToMe(myUser)) return false
+        if (!assumeChild && !searchContext.searchCriteria.showAssignedToOthers && !instance.isAssignedToMe(myUser))
+            return FilterResult.DoesntMatch
 
-        if (!searchContext.searchCriteria.showDone && instance.done != null) return false
+        if (!searchContext.searchCriteria.showDone && instance.done != null)
+            return FilterResult.DoesntMatch
 
-        if (instance.instanceKey in searchContext.searchCriteria.excludedInstanceKeys) return false
-
-        /*
-        Okay so, this is a weird situation.  This function does two things:
-        1. For direct invocations, it tells us if this instance should be included in the results.
-        2. For nested invocations, it tells us whether a parent instance has matching children.
-
-        These are two different things, but whatever.  There's a lot of overlapping functionality.  This check ensures
-        that for case #1, the instance gets included in the results if it's a child of a match.  For case #2, we're trying
-        to figure out if it really *is* a match, not just if it should be included in the results.
-         */
-        if (firstDepth && searchContext.searchingChildrenOfQueryMatch) return true
+        if (instance.instanceKey in searchContext.searchCriteria.excludedInstanceKeys)
+            return FilterResult.DoesntMatch
 
         return instance.task.getMatchResult(searchContext.searchCriteria.search).let {
-            if (it.includeWithoutChildren) {
-                true
-            } else {
-                val childrenSearchContext = searchContext.getChildrenSearchContext(it)
-
-                instance.getChildInstances()
-                    .filter { it.isVisible(now, Instance.VisibilityOptions(assumeChildOfVisibleParent = true)) }
-                    .any { childHierarchyMatches(it, true, childrenSearchContext, false) }
+            it.getFilterResult() ?: run {
+                if (searchContext.searchingChildrenOfQueryMatch) {
+                    FilterResult.Include
+                } else {
+                    if (
+                        instance.getChildInstances()
+                            .filter { it.isVisible(now, Instance.VisibilityOptions(assumeChildOfVisibleParent = true)) }
+                            .any { !childHierarchyMatches(it, true).doesntMatch }
+                    ) {
+                        FilterResult.Include
+                    } else {
+                        FilterResult.DoesntMatch
+                    }
+                }
             }
         }
     }
 
-    filter { childHierarchyMatches(it, assumeChild, searchContext, true) }
+    map { it to childHierarchyMatches(it, assumeChild) }.filter { !it.second.doesntMatch }
+        // todo taskKey figure out how to fix combineInstanceSequences, then remove this mapping
+        .map { it.first }
 }
 
 // todo taskKey remove

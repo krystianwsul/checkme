@@ -1,7 +1,7 @@
 package com.krystianwsul.common.firebase.models.search
 
-import com.krystianwsul.common.criteria.DomainQueryMatchable
 import com.krystianwsul.common.criteria.SearchCriteria
+import search.MatchResult
 
 class SearchContext(val searchCriteria: SearchCriteria) {
 
@@ -12,6 +12,6 @@ class SearchContext(val searchCriteria: SearchCriteria) {
         is FilterResult.Matches -> if (filterResult.matchesSearch) SearchContext(searchCriteria.clear()) else this
     }
 
-    fun getChildrenSearchContext(matchResult: DomainQueryMatchable.MatchResult) =
+    fun getChildrenSearchContext(matchResult: MatchResult) =
         if (matchResult.matches) SearchContext(searchCriteria.clear()) else this
 }

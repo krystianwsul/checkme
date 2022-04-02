@@ -15,7 +15,6 @@ import com.krystianwsul.checkme.gui.main.DebugFragment
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.utils.time.calendar
 import com.krystianwsul.checkme.utils.time.toDateTimeTz
-import com.krystianwsul.common.criteria.DomainQueryMatchable
 import com.krystianwsul.common.domain.TaskUndoData
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.models.Instance
@@ -33,6 +32,7 @@ import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.utils.*
 import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Single
+import search.MatchResult
 import java.util.*
 
 const val SEARCH_PAGE_SIZE = 20
@@ -217,7 +217,7 @@ fun <T : Comparable<T>> DomainFactory.searchInstances(
     searchContext: SearchContext,
     page: Int,
     projectKey: ProjectKey<*>?,
-    mapper: (Instance, Collection<T>, DomainQueryMatchable.MatchResult) -> T,
+    mapper: (Instance, Collection<T>, MatchResult) -> T,
 ): Pair<List<T>, Boolean> {
     DomainThreadChecker.instance.requireDomainThread()
 

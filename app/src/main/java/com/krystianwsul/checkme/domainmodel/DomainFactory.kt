@@ -25,7 +25,6 @@ import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.utils.checkError
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
-import com.krystianwsul.common.criteria.DomainQueryMatchable
 import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.ProjectToRootConversion
@@ -51,6 +50,7 @@ import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.merge
+import search.MatchResult
 import java.util.concurrent.TimeUnit
 
 @Suppress("LeakingThis")
@@ -476,7 +476,7 @@ class DomainFactory(
     fun <T> getChildInstanceDatas(
         instance: Instance,
         now: ExactTimeStamp.Local,
-        mapper: (Instance, Collection<T>, DomainQueryMatchable.MatchResult) -> T,
+        mapper: (Instance, Collection<T>, MatchResult) -> T,
         searchContext: SearchContext,
         filterVisible: Boolean = true,
     ): Collection<T> {

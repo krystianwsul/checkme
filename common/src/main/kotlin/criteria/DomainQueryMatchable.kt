@@ -29,7 +29,7 @@ interface DomainQueryMatchable {
 
         NO_SEARCH {
 
-            override fun getFilterResult() = FilterResult.NoSearch
+            override fun getFilterResult() = FilterResult.NoSearch("a")
         },
 
         QUERY_NOMATCH(includeWithoutChildren = false) {

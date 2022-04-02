@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.domainmodel.extensions
 
+import android.util.Log
 import androidx.annotation.CheckResult
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
@@ -19,10 +20,7 @@ import com.krystianwsul.common.domain.ScheduleGroup
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.MyCustomTime
 import com.krystianwsul.common.firebase.json.tasks.TaskJson
-import com.krystianwsul.common.firebase.models.FilterResult
-import com.krystianwsul.common.firebase.models.ImageState
-import com.krystianwsul.common.firebase.models.Instance
-import com.krystianwsul.common.firebase.models.filterSearchCriteria
+import com.krystianwsul.common.firebase.models.*
 import com.krystianwsul.common.firebase.models.interval.ScheduleInterval
 import com.krystianwsul.common.firebase.models.project.PrivateProject
 import com.krystianwsul.common.firebase.models.project.Project
@@ -700,6 +698,8 @@ private fun DomainFactory.getParentTreeDatas(
     parentInstanceKey: InstanceKey?,
     searchCriteria: SearchCriteria,
 ): List<EditViewModel.ParentEntryData> {
+    Log.e("asdf", "magic searchCriteria $searchCriteria")
+
     val parentTreeDatas = mutableListOf<EditViewModel.ParentEntryData>()
 
     parentTreeDatas += getAllTasks().asSequence()
@@ -761,6 +761,8 @@ private fun DomainFactory.getProjectTaskTreeDatas(
         .filter { it.isTopLevelTask() }
         .filterSearchCriteria(searchCriteria, myUserFactory.user, false, now)
         .map { (task, filterResult) ->
+            logFilterResult(task, filterResult)
+
             val childSearchCriteria = filterResult.getChildrenSearchCriteria(searchCriteria)
 
             task.toParentEntryData(
@@ -874,7 +876,7 @@ private fun Task.toParentEntryData(
     hasMultipleInstances(parentInstanceKey, now),
     topLevelTaskIsSingleSchedule(),
     filterResult.matchesSearch,
-)
+).also { logFilterResult(this, filterResult) }
 
 private fun DomainFactory.getTaskListChildTaskDatas(
     now: ExactTimeStamp.Local,

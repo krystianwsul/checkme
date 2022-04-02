@@ -1,5 +1,6 @@
 package com.krystianwsul.common.firebase.models
 
+import android.util.Log
 import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.task.RootTask
@@ -28,7 +29,7 @@ private fun childHierarchyMatches(task: Task, search: SearchCriteria.Search?, on
 
 fun Sequence<Task>.filterSearch(search: SearchCriteria.Search?, onlyHierarchy: Boolean = false) =
     if (search?.hasSearch != true) {
-        map { it to FilterResult.NoSearch }
+        map { it to FilterResult.NoSearch("e") }
     } else {
         map { it to childHierarchyMatches(it, search, onlyHierarchy) }.filter { !it.second.doesntMatch }
     }
@@ -39,7 +40,7 @@ fun Sequence<Task>.filterSearchCriteria(
     showDeleted: Boolean,
     now: ExactTimeStamp.Local,
 ): Sequence<Pair<Task, FilterResult>> {
-    if (searchCriteria.isEmpty && showDeleted) return map { it to FilterResult.NoSearch }
+    if (searchCriteria.isEmpty && showDeleted) return map { it to FilterResult.NoSearch("b") }
 
     val filtered1 = if (searchCriteria.showAssignedToOthers) {
         this
@@ -63,8 +64,8 @@ fun Project<*>.filterSearchCriteria(
 ): FilterResult {
     if (!showDeleted && endExactTimeStamp != null) return FilterResult.DoesntMatch
 
-    if (searchCriteria.search == null) return FilterResult.NoSearch
-    if (!searchCriteria.search.hasSearch) return FilterResult.NoSearch
+    if (searchCriteria.search == null) return FilterResult.NoSearch("c")
+    if (!searchCriteria.search.hasSearch) return FilterResult.NoSearch("d")
 
     searchCriteria.search
         .let { it as? SearchCriteria.Search.Query }
@@ -127,21 +128,36 @@ sealed interface FilterResult {
     object DoesntMatch : FilterResult {
 
         override val doesntMatch = true
+
+        override fun toString() = "FilterResult.DoesntMatch" // todo taskKey
     }
 
     sealed class Task : FilterResult {
 
         override val doesntMatch = false
+
+        override fun toString() = "FilterResult.Task" // todo taskKey
     }
 
-    object NoSearch : Task()
+    class NoSearch(val source: String) : Task() { // todo taskKey remove source, revert to object
 
-    object Include : Task()
+
+        override fun toString() = "FilterResult.NoSearch source: $source" // todo taskKey
+    }
+
+    object Include : Task() {
+
+
+        override fun toString() = "FilterResult.Include" // todo taskKey
+    }
 
     // todo taskKey this naming is awful
     class Matches(override val matchesSearch: Boolean) : Task() {
 
-        override fun getChildrenSearchCriteria(searchCriteria: SearchCriteria) = searchCriteria.clear()
+        override fun getChildrenSearchCriteria(searchCriteria: SearchCriteria) =
+            if (matchesSearch) searchCriteria.clear() else searchCriteria
+
+        override fun toString() = "FilterResult.Matches matchesSearch: $matchesSearch" // todo taskKey
     }
 }
 
@@ -175,3 +191,21 @@ private class InconsistentRootTaskIdsException(pairs: List<Triple<TaskKey.Root, 
             "${it.first} says it belongs in project ${it.second}, but was found in ${it.third}"
         }
     )
+
+// todo taskKey remove
+private fun Task.getChain(chain: MutableList<String>) {
+    chain.add(0, name)
+
+    if (isTopLevelTask()) {
+        chain.add(0, project.name)
+    } else {
+        parentTask!!.getChain(chain)
+    }
+}
+
+fun logFilterResult(task: Task, filterResult: FilterResult) {
+    val chain = mutableListOf<String>()
+    task.getChain(chain)
+
+    Log.e("asdf", "magic " + chain.filter { it.isNotEmpty() }.joinToString("/") + " filterResult: " + filterResult)
+}

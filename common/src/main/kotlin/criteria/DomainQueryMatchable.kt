@@ -1,7 +1,6 @@
 package com.krystianwsul.common.criteria
 
 import com.krystianwsul.common.firebase.models.search.FilterResult
-import com.krystianwsul.common.firebase.models.search.SearchContext
 import com.krystianwsul.common.utils.TaskKey
 
 interface DomainQueryMatchable {
@@ -52,9 +51,6 @@ interface DomainQueryMatchable {
 
             override fun getFilterResult() = FilterResult.Matches(true)
         };
-
-        fun getChildrenSearchContext(searchContext: SearchContext) =
-            if (matches) SearchContext(searchContext.searchCriteria.clear()) else searchContext
 
         // null means check children
         abstract fun getFilterResult(): FilterResult?

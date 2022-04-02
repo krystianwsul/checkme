@@ -12,5 +12,6 @@ class SearchContext(val searchCriteria: SearchCriteria) {
         is FilterResult.Matches -> if (filterResult.matchesSearch) SearchContext(searchCriteria.clear()) else this
     }
 
-    fun getChildrenSearchContext(matchResult: DomainQueryMatchable.MatchResult) = matchResult.getChildrenSearchContext(this)
+    fun getChildrenSearchContext(matchResult: DomainQueryMatchable.MatchResult) =
+        if (matchResult.matches) SearchContext(searchCriteria.clear()) else this
 }

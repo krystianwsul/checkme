@@ -14,12 +14,16 @@ private fun childHierarchyMatches(task: Task, searchContext: SearchContext, only
 
     return task.getMatchResult(searchContext.searchCriteria.search).let {
         it.getFilterResult() ?: run {
-            val childTasks = if (onlyHierarchy) task.getHierarchyChildTasks() else task.getChildTasks()
-
-            if (childTasks.any { !childHierarchyMatches(it, searchContext, onlyHierarchy).doesntMatch })
+            if (searchContext.searchingChildrenOfQueryMatch) {
                 FilterResult.Include
-            else
-                FilterResult.DoesntMatch
+            } else {
+                val childTasks = if (onlyHierarchy) task.getHierarchyChildTasks() else task.getChildTasks()
+
+                if (childTasks.any { !childHierarchyMatches(it, searchContext, onlyHierarchy).doesntMatch })
+                    FilterResult.Include
+                else
+                    FilterResult.DoesntMatch
+            }
         }
     }
 }

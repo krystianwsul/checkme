@@ -6,8 +6,6 @@ sealed interface FilterResult {
 
     val matchesSearch get() = false
 
-    fun getChildrenSearchContext(searchContext: SearchContext) = searchContext
-
     object DoesntMatch : FilterResult {
 
         override val doesntMatch = true
@@ -36,9 +34,6 @@ sealed interface FilterResult {
 
     // todo taskKey this naming is awful
     class Matches(override val matchesSearch: Boolean) : Task() {
-
-        override fun getChildrenSearchContext(searchContext: SearchContext) =
-            if (matchesSearch) SearchContext(searchContext.searchCriteria.clear()) else searchContext
 
         override fun toString() = "FilterResult.Matches matchesSearch: $matchesSearch" // todo taskKey
     }

@@ -107,6 +107,8 @@ fun Sequence<Instance>.filterSearchCriteria(
 
         if (instance.instanceKey in searchContext.searchCriteria.excludedInstanceKeys) return false
 
+        if (searchContext.searchingChildrenOfQueryMatch) return true
+
         return instance.task.getMatchResult(searchContext.searchCriteria.search).let {
             it.includeWithoutChildren
                 .takeIf { it }

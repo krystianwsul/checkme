@@ -34,4 +34,8 @@ class SearchContext private constructor(val searchCriteria: SearchCriteria, val 
         } else {
             this
         }
+
+    // todo taskKey
+    override fun toString() =
+        "SearchContext searchingChildrenOfQueryMatch: $searchingChildrenOfQueryMatch, criteria: $searchCriteria"
 }

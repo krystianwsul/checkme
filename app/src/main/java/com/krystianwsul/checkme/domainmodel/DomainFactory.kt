@@ -499,7 +499,7 @@ class DomainFactory(
 
                 val children = getChildInstanceDatas(childInstance, now, mapper, childrenSearchContext, filterVisible)
 
-                if (!matchResult.includeWithoutChildren && children.isEmpty())
+                if (!searchContext.searchingChildrenOfQueryMatch && !matchResult.includeWithoutChildren && children.isEmpty())
                     null
                 else
                     mapper(childInstance, children, matchResult)

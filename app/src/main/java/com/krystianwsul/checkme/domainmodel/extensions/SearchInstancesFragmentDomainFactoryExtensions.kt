@@ -31,7 +31,7 @@ fun DomainFactory.getSearchInstancesData(
                 GroupListDataWrapper.CustomTimeData(it.name, it.hourMinutes.toSortedMap())
             }
 
-            val searchContext = SearchContext(searchCriteria)
+            val searchContext = SearchContext.startSearch(searchCriteria)
 
             val (cappedInstanceDescriptors, taskDatas, hasMore) = getCappedInstanceAndTaskDatas(now, searchContext, page)
 

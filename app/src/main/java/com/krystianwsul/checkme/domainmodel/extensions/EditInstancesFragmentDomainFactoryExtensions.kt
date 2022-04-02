@@ -182,7 +182,7 @@ fun DomainFactory.getEditInstancesSearchData(
 
     return LockerManager.setLocker { now ->
         getDomainResultInterrupting {
-            val searchContext = SearchContext(searchCriteria)
+            val searchContext = SearchContext.startSearch(searchCriteria)
 
             val (instanceEntryDatas, hasMore) = searchInstances<EditInstancesSearchViewModel.InstanceEntryData>(
                 now,

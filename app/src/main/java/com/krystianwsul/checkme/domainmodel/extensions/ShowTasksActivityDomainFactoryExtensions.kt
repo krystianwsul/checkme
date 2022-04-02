@@ -50,7 +50,7 @@ fun DomainFactory.getShowTasksData(
         )
     }
 
-    val searchContext = SearchContext(searchCriteria)
+    val searchContext = SearchContext.startSearch(searchCriteria)
 
     val entryDatas: List<TaskListFragment.EntryData>
     val title: String

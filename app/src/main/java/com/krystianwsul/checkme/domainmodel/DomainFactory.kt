@@ -510,7 +510,7 @@ class DomainFactory(
     fun getChildInstanceDatas(
         instance: Instance,
         now: ExactTimeStamp.Local,
-        searchContext: SearchContext = SearchContext(SearchCriteria.empty),
+        searchContext: SearchContext = SearchContext.startSearch(SearchCriteria.empty),
         filterVisible: Boolean = true,
     ) = getChildInstanceDatas<GroupTypeFactory.InstanceDescriptor>(
         instance,

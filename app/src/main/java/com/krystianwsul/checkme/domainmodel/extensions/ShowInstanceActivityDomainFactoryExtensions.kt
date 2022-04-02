@@ -57,7 +57,7 @@ fun DomainFactory.getShowInstanceData(
         displayText += "\nparent state: " + instance.parentState.javaClass.simpleName
     }
 
-    val searchContext = SearchContext(searchCriteria)
+    val searchContext = SearchContext.startSearch(searchCriteria)
 
     return ShowInstanceViewModel.Data(
         instance.name,
@@ -141,10 +141,10 @@ private fun DomainFactory.getGroupListData(
         .map { childInstance ->
             val matchResult = childInstance.task.getMatchResult(searchContext.searchCriteria.search)
 
-            val childSearchCriteria = searchContext.getChildrenSearchContext(matchResult)
+            val childSearchContext = searchContext.getChildrenSearchContext(matchResult)
 
             val (notDoneChildInstanceDescriptors, doneChildInstanceDescriptors) =
-                getChildInstanceDatas(childInstance, now, childSearchCriteria)
+                getChildInstanceDatas(childInstance, now, childSearchContext)
 
             val instanceData = GroupListDataWrapper.InstanceData.fromInstance(
                 childInstance,

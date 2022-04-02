@@ -62,7 +62,7 @@ private fun DomainFactory.getMainData(
     showDeleted: Boolean,
     filter: (Task) -> Boolean = { true },
 ): List<TaskListFragment.EntryData> {
-    val searchContext = SearchContext(searchCriteria)
+    val searchContext = SearchContext.startSearch(searchCriteria)
 
     fun Collection<Task>.toChildTaskDatas(searchContext: SearchContext) = asSequence()
         .filter(filter)

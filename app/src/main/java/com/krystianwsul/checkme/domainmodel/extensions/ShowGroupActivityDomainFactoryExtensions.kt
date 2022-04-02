@@ -82,7 +82,7 @@ private fun DomainFactory.getGroupListData(
 
     val includeProjectDetails = projectKey == null
 
-    val searchContext = SearchContext(searchCriteria)
+    val searchContext = SearchContext.startSearch(searchCriteria)
 
     val instanceDescriptors = currentInstances.map { instance ->
         val matchResult = instance.task.getMatchResult(searchContext.searchCriteria.search)

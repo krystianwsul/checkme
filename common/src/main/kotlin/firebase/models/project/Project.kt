@@ -221,14 +221,14 @@ sealed class Project<T : ProjectType>(
 
         val allTasks = getAllDependenciesLoadedTasks().asSequence().filter { it.mayHaveRootInstances() }.toList()
 
+        val searchContext = SearchContext.startSearch(searchData?.searchCriteria ?: SearchCriteria.empty)
+
         /*
         This is a pretty sloppy solution, but it works.  The issue was that a task can have a single instance that matches
         a query (as a result of editing that specific instance), and an infinite amount that do not.  So, we want to return
         virtual instances only in the situation that the current task hierarchies match the search - not child tasks in
         general.  Then, we check all existing instances on top of that.
          */
-
-        val searchContext = SearchContext(searchData?.searchCriteria ?: SearchCriteria.empty)
 
         val filteredTasks = allTasks.asSequence()
             .filterSearch(searchContext, true)

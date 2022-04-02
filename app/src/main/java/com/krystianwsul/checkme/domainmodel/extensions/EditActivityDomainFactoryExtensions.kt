@@ -258,7 +258,7 @@ fun DomainFactory.getCreateTaskParentPickerData(
 
     val now = ExactTimeStamp.Local.now
 
-    val searchContext = SearchContext(searchCriteria)
+    val searchContext = SearchContext.startSearch(searchCriteria)
 
     val parentTreeDatas =
         getParentTreeDatas(now, startParameters.excludedTaskKeys, startParameters.parentInstanceKey, searchContext)

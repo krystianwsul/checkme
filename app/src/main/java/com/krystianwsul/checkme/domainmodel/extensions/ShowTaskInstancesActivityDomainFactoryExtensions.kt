@@ -82,7 +82,7 @@ fun DomainFactory.getShowTaskInstancesData(
 
                     parent = project
 
-                    val searchContext = SearchContext(searchCriteria)
+                    val searchContext = SearchContext.startSearch(searchCriteria)
 
                     val triple = getCappedInstanceAndTaskDatas(now, searchContext, page, parameters.projectKey)
 

@@ -3,7 +3,12 @@ package com.krystianwsul.common.firebase.models.search
 import com.krystianwsul.common.criteria.SearchCriteria
 import search.MatchResult
 
-class SearchContext(val searchCriteria: SearchCriteria) {
+class SearchContext private constructor(val searchCriteria: SearchCriteria) {
+
+    companion object {
+
+        fun startSearch(searchCriteria: SearchCriteria) = SearchContext(searchCriteria)
+    }
 
     fun getChildrenSearchContext(filterResult: FilterResult) = when (filterResult) {
         FilterResult.DoesntMatch -> this

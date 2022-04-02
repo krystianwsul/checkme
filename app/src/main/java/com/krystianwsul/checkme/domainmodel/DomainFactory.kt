@@ -425,11 +425,11 @@ class DomainFactory(
         startExactTimeStamp: ExactTimeStamp.Offset?,
         endExactTimeStamp: ExactTimeStamp.Offset?,
         now: ExactTimeStamp.Local,
-        searchCriteria: SearchCriteria? = null,
+        searchContext: SearchContext? = null,
         filterVisible: Boolean = true,
         projectKey: ProjectKey<*>? = null,
     ): Sequence<Instance> {
-        val searchData = searchCriteria?.let { Project.SearchData(it, myUserFactory.user) }
+        val searchData = searchContext?.let { Project.SearchData(it, myUserFactory.user) }
 
         val projects =
             projectKey?.let { listOf(projectsFactory.getProjectForce(it)) } ?: projectsFactory.projects.values

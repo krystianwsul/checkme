@@ -206,7 +206,7 @@ sealed class Project<T : ProjectType>(
             .forEach { it.fixNotificationShown(shownFactory, now) }
     }
 
-    data class SearchData(val searchCriteria: SearchCriteria, val myUser: MyUser)
+    data class SearchData(val searchContext: SearchContext, val myUser: MyUser)
 
     fun getRootInstances(
         startExactTimeStamp: ExactTimeStamp.Offset?,
@@ -221,7 +221,7 @@ sealed class Project<T : ProjectType>(
 
         val allTasks = getAllDependenciesLoadedTasks().asSequence().filter { it.mayHaveRootInstances() }.toList()
 
-        val searchContext = SearchContext.startSearch(searchData?.searchCriteria ?: SearchCriteria.empty)
+        val searchContext = searchData?.searchContext ?: SearchContext.startSearch(SearchCriteria.empty)
 
         /*
         This is a pretty sloppy solution, but it works.  The issue was that a task can have a single instance that matches

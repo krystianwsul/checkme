@@ -177,7 +177,7 @@ fun DomainFactory.getGroupListData(
         startExactTimeStamp,
         endExactTimeStamp,
         now,
-        SearchCriteria(showAssignedToOthers = showAssigned),
+        SearchContext.startSearch(SearchCriteria(showAssignedToOthers = showAssigned)),
     ).toList()
 
     if (position == 0 && timeRange == Preferences.TimeRange.DAY) {

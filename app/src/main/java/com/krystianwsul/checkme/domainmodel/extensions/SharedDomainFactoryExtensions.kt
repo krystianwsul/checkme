@@ -227,7 +227,7 @@ fun <T : Comparable<T>> DomainFactory.searchInstances(
         null,
         null,
         now,
-        searchContext.searchCriteria,
+        searchContext,
         filterVisible = !debugMode,
         projectKey = projectKey,
     ).takeAndHasMore(desiredCount)

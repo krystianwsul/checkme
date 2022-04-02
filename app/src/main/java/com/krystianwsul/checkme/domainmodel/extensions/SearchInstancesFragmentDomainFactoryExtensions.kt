@@ -31,9 +31,7 @@ fun DomainFactory.getSearchInstancesData(
                 GroupListDataWrapper.CustomTimeData(it.name, it.hourMinutes.toSortedMap())
             }
 
-            val searchContext = SearchContext.startSearch(searchCriteria)
-
-            val (cappedInstanceDescriptors, taskDatas, hasMore) = getCappedInstanceAndTaskDatas(now, searchContext, page)
+            val (cappedInstanceDescriptors, taskDatas, hasMore) = getCappedInstanceAndTaskDatas(now, searchCriteria, page)
 
             val dataWrapper = GroupListDataWrapper(
                 customTimeDatas,
@@ -54,11 +52,13 @@ fun DomainFactory.getSearchInstancesData(
 
 fun DomainFactory.getCappedInstanceAndTaskDatas(
     now: ExactTimeStamp.Local,
-    searchContext: SearchContext,
+    searchCriteria: SearchCriteria,
     page: Int,
     projectKey: ProjectKey.Shared? = null,
 ): Triple<List<GroupTypeFactory.InstanceDescriptor>, List<GroupListDataWrapper.TaskData>, Boolean> {
     val includeProjectDetails = projectKey == null
+
+    val searchContext = SearchContext.startSearch(searchCriteria)
 
     val (cappedInstanceDescriptors, hasMore) = searchInstances<GroupTypeFactory.InstanceDescriptor>(
         now,

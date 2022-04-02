@@ -66,11 +66,13 @@ private fun DomainFactory.getGroupListData(
     val endCalendar = timeStamp.calendar.apply { add(Calendar.MINUTE, 1) }
     val endExactTimeStamp = ExactTimeStamp.Local(endCalendar.toDateTimeSoy()).toOffset()
 
+    val searchContext = SearchContext.startSearch(searchCriteria)
+
     val rootInstances = getRootInstances(
         timeStamp.toLocalExactTimeStamp().toOffset(),
         endExactTimeStamp,
         now,
-        searchCriteria,
+        searchContext,
         projectKey = projectKey,
     ).toList()
 
@@ -81,8 +83,6 @@ private fun DomainFactory.getGroupListData(
     }
 
     val includeProjectDetails = projectKey == null
-
-    val searchContext = SearchContext.startSearch(searchCriteria)
 
     val instanceDescriptors = currentInstances.map { instance ->
         val matchResult = instance.task.getMatchResult(searchContext.searchCriteria.search)

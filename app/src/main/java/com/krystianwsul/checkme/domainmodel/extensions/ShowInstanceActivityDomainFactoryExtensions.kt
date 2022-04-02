@@ -17,8 +17,8 @@ import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.domain.TaskUndoData
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.models.Instance
-import com.krystianwsul.common.firebase.models.SearchContext
-import com.krystianwsul.common.firebase.models.filterSearchCriteria
+import com.krystianwsul.common.firebase.models.search.SearchContext
+import com.krystianwsul.common.firebase.models.search.filterSearchCriteria
 import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.InstanceKey

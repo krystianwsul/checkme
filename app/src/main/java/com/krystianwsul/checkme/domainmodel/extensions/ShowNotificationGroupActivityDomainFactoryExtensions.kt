@@ -10,8 +10,8 @@ import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.viewmodels.ShowNotificationGroupViewModel
 import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.firebase.DomainThreadChecker
-import com.krystianwsul.common.firebase.models.SearchContext
-import com.krystianwsul.common.firebase.models.filterSearchCriteria
+import com.krystianwsul.common.firebase.models.search.SearchContext
+import com.krystianwsul.common.firebase.models.search.filterSearchCriteria
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.InstanceKey
 

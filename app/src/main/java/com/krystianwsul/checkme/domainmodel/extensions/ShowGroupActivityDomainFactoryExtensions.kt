@@ -13,7 +13,7 @@ import com.krystianwsul.checkme.utils.time.toDateTimeSoy
 import com.krystianwsul.checkme.viewmodels.ShowGroupViewModel
 import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.firebase.DomainThreadChecker
-import com.krystianwsul.common.firebase.models.SearchContext
+import com.krystianwsul.common.firebase.models.search.SearchContext
 import com.krystianwsul.common.time.DateTime
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.Time

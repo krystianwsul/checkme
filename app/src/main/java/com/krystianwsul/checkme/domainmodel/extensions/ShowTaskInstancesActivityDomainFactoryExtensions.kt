@@ -13,7 +13,7 @@ import com.krystianwsul.checkme.viewmodels.ShowTaskInstancesViewModel
 import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.models.Instance
-import com.krystianwsul.common.firebase.models.SearchContext
+import com.krystianwsul.common.firebase.models.search.SearchContext
 import com.krystianwsul.common.locker.LockerManager
 import com.krystianwsul.common.utils.Endable
 

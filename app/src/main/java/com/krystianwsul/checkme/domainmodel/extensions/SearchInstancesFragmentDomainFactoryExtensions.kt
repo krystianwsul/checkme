@@ -11,8 +11,8 @@ import com.krystianwsul.checkme.viewmodels.DomainQuery
 import com.krystianwsul.checkme.viewmodels.SearchInstancesViewModel
 import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.firebase.DomainThreadChecker
-import com.krystianwsul.common.firebase.models.SearchContext
-import com.krystianwsul.common.firebase.models.filterSearch
+import com.krystianwsul.common.firebase.models.search.SearchContext
+import com.krystianwsul.common.firebase.models.search.filterSearch
 import com.krystianwsul.common.locker.LockerManager
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.ProjectKey

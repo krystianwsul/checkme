@@ -1,7 +1,7 @@
 package com.krystianwsul.common.criteria
 
-import com.krystianwsul.common.firebase.models.FilterResult
-import com.krystianwsul.common.firebase.models.SearchContext
+import com.krystianwsul.common.firebase.models.search.FilterResult
+import com.krystianwsul.common.firebase.models.search.SearchContext
 import com.krystianwsul.common.utils.TaskKey
 
 interface DomainQueryMatchable {

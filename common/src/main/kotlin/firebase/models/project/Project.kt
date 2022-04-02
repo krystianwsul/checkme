@@ -6,13 +6,13 @@ import com.krystianwsul.common.domain.TaskHierarchyContainer
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.json.tasks.TaskJson
 import com.krystianwsul.common.firebase.models.Instance
-import com.krystianwsul.common.firebase.models.SearchContext
 import com.krystianwsul.common.firebase.models.cache.ClearableInvalidatableManager
 import com.krystianwsul.common.firebase.models.cache.InvalidatableCache
 import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
 import com.krystianwsul.common.firebase.models.cache.invalidatableCache
-import com.krystianwsul.common.firebase.models.filterSearch
-import com.krystianwsul.common.firebase.models.filterSearchCriteria
+import com.krystianwsul.common.firebase.models.search.SearchContext
+import com.krystianwsul.common.firebase.models.search.filterSearch
+import com.krystianwsul.common.firebase.models.search.filterSearchCriteria
 import com.krystianwsul.common.firebase.models.task.ProjectTask
 import com.krystianwsul.common.firebase.models.task.RootTask
 import com.krystianwsul.common.firebase.models.task.Task

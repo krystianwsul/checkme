@@ -98,7 +98,12 @@ fun Sequence<Instance>.filterSearchCriteria(
 ) = if (searchContext.searchCriteria.isEmpty) {
     this
 } else {
-    fun childHierarchyMatches(instance: Instance, assumeChild: Boolean): Boolean {
+    fun childHierarchyMatches(
+        instance: Instance,
+        assumeChild: Boolean,
+        searchContext: SearchContext,
+        firstDepth: Boolean,
+    ): Boolean {
         InterruptionChecker.throwIfInterrupted()
 
         if (!assumeChild && !searchContext.searchCriteria.showAssignedToOthers && !instance.isAssignedToMe(myUser)) return false
@@ -107,18 +112,31 @@ fun Sequence<Instance>.filterSearchCriteria(
 
         if (instance.instanceKey in searchContext.searchCriteria.excludedInstanceKeys) return false
 
-        if (searchContext.searchingChildrenOfQueryMatch) return true
+        /*
+        Okay so, this is a weird situation.  This function does two things:
+        1. For direct invocations, it tells us if this instance should be included in the results.
+        2. For nested invocations, it tells us whether a parent instance has matching children.
+
+        These are two different things, but whatever.  There's a lot of overlapping functionality.  This check ensures
+        that for case #1, the instance gets included in the results if it's a child of a match.  For case #2, we're trying
+        to figure out if it really *is* a match, not just if it should be included in the results.
+         */
+        if (firstDepth && searchContext.searchingChildrenOfQueryMatch) return true
 
         return instance.task.getMatchResult(searchContext.searchCriteria.search).let {
-            it.includeWithoutChildren
-                .takeIf { it }
-                ?: instance.getChildInstances()
+            if (it.includeWithoutChildren) {
+                true
+            } else {
+                val childrenSearchContext = searchContext.getChildrenSearchContext(it)
+
+                instance.getChildInstances()
                     .filter { it.isVisible(now, Instance.VisibilityOptions(assumeChildOfVisibleParent = true)) }
-                    .any { childHierarchyMatches(it, true) }
+                    .any { childHierarchyMatches(it, true, childrenSearchContext, false) }
+            }
         }
     }
 
-    filter { childHierarchyMatches(it, assumeChild) }
+    filter { childHierarchyMatches(it, assumeChild, searchContext, true) }
 }
 
 // todo taskKey remove

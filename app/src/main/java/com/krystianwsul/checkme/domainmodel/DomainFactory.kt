@@ -499,6 +499,7 @@ class DomainFactory(
 
                 val children = getChildInstanceDatas(childInstance, now, mapper, childrenSearchContext, filterVisible)
 
+                // todo taskKey I'm really confused about why this is getting checked twice, since we just ran filterSearchCriteria
                 if (!searchContext.searchingChildrenOfQueryMatch && !matchResult.includeWithoutChildren && children.isEmpty())
                     null
                 else

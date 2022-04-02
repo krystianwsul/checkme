@@ -13,6 +13,7 @@ import com.krystianwsul.checkme.utils.time.toDateTimeSoy
 import com.krystianwsul.checkme.viewmodels.ShowGroupViewModel
 import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.firebase.DomainThreadChecker
+import com.krystianwsul.common.firebase.models.SearchContext
 import com.krystianwsul.common.time.DateTime
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.Time
@@ -81,13 +82,15 @@ private fun DomainFactory.getGroupListData(
 
     val includeProjectDetails = projectKey == null
 
-    val instanceDescriptors = currentInstances.map { instance ->
-        val filterResult = instance.task.getMatchResult(searchCriteria.search)
+    val searchContext = SearchContext(searchCriteria)
 
-        val childSearchCriteria = filterResult.getChildrenSearchCriteria(searchCriteria)
+    val instanceDescriptors = currentInstances.map { instance ->
+        val filterResult = instance.task.getMatchResult(searchContext.searchCriteria.search)
+
+        val childSearchContext = filterResult.getChildrenSearchContext(searchContext)
 
         val (notDoneChildInstanceDescriptors, doneChildInstanceDescriptors) =
-            getChildInstanceDatas(instance, now, childSearchCriteria)
+            getChildInstanceDatas(instance, now, childSearchContext)
 
         val instanceData = GroupListDataWrapper.InstanceData.fromInstance(
             instance,

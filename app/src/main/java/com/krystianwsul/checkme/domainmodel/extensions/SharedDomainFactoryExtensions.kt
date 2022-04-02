@@ -16,11 +16,11 @@ import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.utils.time.calendar
 import com.krystianwsul.checkme.utils.time.toDateTimeTz
 import com.krystianwsul.common.criteria.DomainQueryMatchable
-import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.domain.TaskUndoData
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.models.FilterResult
 import com.krystianwsul.common.firebase.models.Instance
+import com.krystianwsul.common.firebase.models.SearchContext
 import com.krystianwsul.common.firebase.models.filterSearch
 import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.schedule.SingleSchedule
@@ -191,12 +191,12 @@ fun DomainFactory.getUnscheduledTasks(projectKey: ProjectKey.Shared? = null): Li
 fun DomainFactory.getGroupListChildTaskDatas(
     parentTask: Task,
     now: ExactTimeStamp.Local,
-    searchCriteria: SearchCriteria = SearchCriteria.empty,
+    searchContext: SearchContext,
 ): List<GroupListDataWrapper.TaskData> = parentTask.getChildTasks()
     .asSequence()
-    .filterSearch(searchCriteria.search)
+    .filterSearch(searchContext)
     .map { (childTask, filterResult) ->
-        val childQuery = filterResult.getChildrenSearchCriteria(searchCriteria)
+        val childQuery = filterResult.getChildrenSearchContext(searchContext)
 
         GroupListDataWrapper.TaskData(
             childTask.taskKey,
@@ -214,7 +214,7 @@ fun DomainFactory.getGroupListChildTaskDatas(
 
 fun <T : Comparable<T>> DomainFactory.searchInstances(
     now: ExactTimeStamp.Local,
-    searchCriteria: SearchCriteria,
+    searchContext: SearchContext,
     page: Int,
     projectKey: ProjectKey<*>?,
     mapper: (Instance, Collection<T>, DomainQueryMatchable.MatchResult) -> T,
@@ -227,7 +227,7 @@ fun <T : Comparable<T>> DomainFactory.searchInstances(
         null,
         null,
         now,
-        searchCriteria,
+        searchContext.searchCriteria,
         filterVisible = !debugMode,
         projectKey = projectKey,
     ).takeAndHasMore(desiredCount)
@@ -239,11 +239,11 @@ fun <T : Comparable<T>> DomainFactory.searchInstances(
         We know this instance matches SearchCriteria.showAssignedToOthers.  If it also matches the query, we
         can skip filtering child instances, since showAssignedToOthers is meaningless for child instances.
          */
-        val matchResult = task.getMatchResult(searchCriteria.search)
+        val matchResult = task.getMatchResult(searchContext.searchCriteria.search)
 
-        val childSearchCriteria = matchResult.getChildrenSearchCriteria(searchCriteria)
+        val childrenSearchContext = matchResult.getChildrenSearchContext(searchContext)
 
-        val children = getChildInstanceDatas(it, now, mapper, childSearchCriteria, !debugMode)
+        val children = getChildInstanceDatas(it, now, mapper, childrenSearchContext, !debugMode)
 
         mapper(it, children, matchResult)
     }

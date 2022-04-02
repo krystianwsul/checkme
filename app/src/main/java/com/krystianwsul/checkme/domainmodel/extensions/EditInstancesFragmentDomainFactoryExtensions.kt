@@ -16,6 +16,7 @@ import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.MyCustomTime
 import com.krystianwsul.common.firebase.models.Instance
+import com.krystianwsul.common.firebase.models.SearchContext
 import com.krystianwsul.common.locker.LockerManager
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.InstanceKey
@@ -181,9 +182,11 @@ fun DomainFactory.getEditInstancesSearchData(
 
     return LockerManager.setLocker { now ->
         getDomainResultInterrupting {
+            val searchContext = SearchContext(searchCriteria)
+
             val (instanceEntryDatas, hasMore) = searchInstances<EditInstancesSearchViewModel.InstanceEntryData>(
                 now,
-                searchCriteria,
+                searchContext,
                 page,
                 null,
             ) { instance, children, filterResult ->

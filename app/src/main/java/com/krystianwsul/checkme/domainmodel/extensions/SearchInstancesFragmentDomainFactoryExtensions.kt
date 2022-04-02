@@ -11,6 +11,7 @@ import com.krystianwsul.checkme.viewmodels.DomainQuery
 import com.krystianwsul.checkme.viewmodels.SearchInstancesViewModel
 import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.firebase.DomainThreadChecker
+import com.krystianwsul.common.firebase.models.SearchContext
 import com.krystianwsul.common.firebase.models.filterSearch
 import com.krystianwsul.common.locker.LockerManager
 import com.krystianwsul.common.time.ExactTimeStamp
@@ -30,7 +31,9 @@ fun DomainFactory.getSearchInstancesData(
                 GroupListDataWrapper.CustomTimeData(it.name, it.hourMinutes.toSortedMap())
             }
 
-            val (cappedInstanceDescriptors, taskDatas, hasMore) = getCappedInstanceAndTaskDatas(now, searchCriteria, page)
+            val searchContext = SearchContext(searchCriteria)
+
+            val (cappedInstanceDescriptors, taskDatas, hasMore) = getCappedInstanceAndTaskDatas(now, searchContext, page)
 
             val dataWrapper = GroupListDataWrapper(
                 customTimeDatas,
@@ -51,7 +54,7 @@ fun DomainFactory.getSearchInstancesData(
 
 fun DomainFactory.getCappedInstanceAndTaskDatas(
     now: ExactTimeStamp.Local,
-    searchCriteria: SearchCriteria,
+    searchContext: SearchContext,
     page: Int,
     projectKey: ProjectKey.Shared? = null,
 ): Triple<List<GroupTypeFactory.InstanceDescriptor>, List<GroupListDataWrapper.TaskData>, Boolean> {
@@ -59,21 +62,21 @@ fun DomainFactory.getCappedInstanceAndTaskDatas(
 
     val (cappedInstanceDescriptors, hasMore) = searchInstances<GroupTypeFactory.InstanceDescriptor>(
         now,
-        searchCriteria,
+        searchContext,
         page,
         projectKey,
     ) { instance, children, filterResult -> instanceToGroupListData(instance, now, children, filterResult.matches) }
 
     val taskDatas = getUnscheduledTasks(projectKey)
         .asSequence()
-        .filterSearch(searchCriteria.search)
+        .filterSearch(searchContext)
         .map { (task, filterResult) ->
-            val childQuery = filterResult.getChildrenSearchCriteria(searchCriteria)
+            val childrenSearchContext = filterResult.getChildrenSearchContext(searchContext)
 
             GroupListDataWrapper.TaskData(
                 task.taskKey,
                 task.name,
-                getGroupListChildTaskDatas(task, now, childQuery),
+                getGroupListChildTaskDatas(task, now, childrenSearchContext),
                 task.note,
                 task.getImage(deviceDbInfo),
                 task.getProjectInfo(includeProjectDetails),

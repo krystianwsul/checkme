@@ -36,6 +36,7 @@ import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.MyCustomTime
 import com.krystianwsul.common.firebase.json.tasks.RootTaskJson
 import com.krystianwsul.common.firebase.models.Instance
+import com.krystianwsul.common.firebase.models.SearchContext
 import com.krystianwsul.common.firebase.models.customtime.PrivateCustomTime
 import com.krystianwsul.common.firebase.models.customtime.SharedCustomTime
 import com.krystianwsul.common.firebase.models.filterSearchCriteria
@@ -476,7 +477,7 @@ class DomainFactory(
         instance: Instance,
         now: ExactTimeStamp.Local,
         mapper: (Instance, Collection<T>, DomainQueryMatchable.MatchResult) -> T,
-        searchCriteria: SearchCriteria = SearchCriteria.empty,
+        searchContext: SearchContext,
         filterVisible: Boolean = true,
     ): Collection<T> {
         return instance.getChildInstances()
@@ -484,19 +485,19 @@ class DomainFactory(
             .filter {
                 !filterVisible || it.isVisible(now, Instance.VisibilityOptions(assumeChildOfVisibleParent = true))
             }
-            .filterSearchCriteria(searchCriteria, now, myUserFactory.user, true)
+            .filterSearchCriteria(searchContext, now, myUserFactory.user, true)
             .mapNotNull { childInstance ->
                 val childTask = childInstance.task
 
-                val matchResult = childTask.getMatchResult(searchCriteria.search)
+                val matchResult = childTask.getMatchResult(searchContext.searchCriteria.search)
 
                 /*
                 We know this instance matches SearchCriteria.showAssignedToOthers.  If it also matches the query, we
                 can skip filtering child instances, since showAssignedToOthers is meaningless for child instances.
                  */
-                val childrenQuery = matchResult.getChildrenSearchCriteria(searchCriteria)
+                val childrenSearchContext = matchResult.getChildrenSearchContext(searchContext)
 
-                val children = getChildInstanceDatas(childInstance, now, mapper, childrenQuery, filterVisible)
+                val children = getChildInstanceDatas(childInstance, now, mapper, childrenSearchContext, filterVisible)
 
                 if (!matchResult.includeWithoutChildren && children.isEmpty())
                     null
@@ -509,7 +510,7 @@ class DomainFactory(
     fun getChildInstanceDatas(
         instance: Instance,
         now: ExactTimeStamp.Local,
-        searchCriteria: SearchCriteria = SearchCriteria.empty,
+        searchContext: SearchContext = SearchContext(SearchCriteria.empty),
         filterVisible: Boolean = true,
     ) = getChildInstanceDatas<GroupTypeFactory.InstanceDescriptor>(
         instance,
@@ -517,7 +518,7 @@ class DomainFactory(
         { childInstance, children, filterResult ->
             instanceToGroupListData(childInstance, now, children, filterResult.matches)
         },
-        searchCriteria,
+        searchContext,
         filterVisible,
     ).splitDone()
 
@@ -536,20 +537,20 @@ class DomainFactory(
     fun getTaskListChildTaskDatas(
         parentTask: Task,
         now: ExactTimeStamp.Local,
-        searchCriteria: SearchCriteria,
+        searchContext: SearchContext,
         showDeleted: Boolean,
         includeProjectInfo: Boolean = true,
     ): List<TaskListFragment.ChildTaskData> {
         return parentTask.getChildTasks()
             .asSequence()
-            .filterSearchCriteria(searchCriteria, myUserFactory.user, showDeleted, now)
+            .filterSearchCriteria(searchContext, myUserFactory.user, showDeleted, now)
             .map { (childTask, filterResult) ->
-                val childSearchCriteria = filterResult.getChildrenSearchCriteria(searchCriteria)
+                val childSearchContext = filterResult.getChildrenSearchContext(searchContext)
 
                 TaskListFragment.ChildTaskData(
                     childTask.name,
                     childTask.getScheduleText(ScheduleText),
-                    getTaskListChildTaskDatas(childTask, now, childSearchCriteria, showDeleted, includeProjectInfo),
+                    getTaskListChildTaskDatas(childTask, now, childSearchContext, showDeleted, includeProjectInfo),
                     childTask.note,
                     childTask.taskKey,
                     childTask.getImage(deviceDbInfo),

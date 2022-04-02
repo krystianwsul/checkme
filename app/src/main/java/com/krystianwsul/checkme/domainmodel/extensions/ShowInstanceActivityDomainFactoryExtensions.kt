@@ -17,6 +17,7 @@ import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.domain.TaskUndoData
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.models.Instance
+import com.krystianwsul.common.firebase.models.SearchContext
 import com.krystianwsul.common.firebase.models.filterSearchCriteria
 import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.time.ExactTimeStamp
@@ -56,6 +57,8 @@ fun DomainFactory.getShowInstanceData(
         displayText += "\nparent state: " + instance.parentState.javaClass.simpleName
     }
 
+    val searchContext = SearchContext(searchCriteria)
+
     return ShowInstanceViewModel.Data(
         instance.name,
         instanceDateTime,
@@ -63,7 +66,7 @@ fun DomainFactory.getShowInstanceData(
         task.notDeleted,
         instance.canMigrateDescription(now),
         parentInstance == null,
-        getGroupListData(instance, task, now, searchCriteria),
+        getGroupListData(instance, task, now, searchContext),
         displayText,
         task.taskKey,
         debugMode || instance.isVisible(now, Instance.VisibilityOptions(hack24 = true)),
@@ -125,7 +128,7 @@ private fun DomainFactory.getGroupListData(
     parentInstance: Instance,
     task: Task,
     now: ExactTimeStamp.Local,
-    searchCriteria: SearchCriteria,
+    searchContext: SearchContext,
 ): GroupListDataWrapper {
     val customTimeDatas = getCurrentRemoteCustomTimes().map {
         GroupListDataWrapper.CustomTimeData(it.name, it.hourMinutes.toSortedMap())
@@ -134,11 +137,11 @@ private fun DomainFactory.getGroupListData(
     val instanceDescriptors = parentInstance.getChildInstances()
         .asSequence()
         .filter { it.isVisible(now, Instance.VisibilityOptions(assumeChildOfVisibleParent = true)) }
-        .filterSearchCriteria(searchCriteria, now, myUserFactory.user, true)
+        .filterSearchCriteria(searchContext, now, myUserFactory.user, true)
         .map { childInstance ->
-            val filterResult = childInstance.task.getMatchResult(searchCriteria.search)
+            val filterResult = childInstance.task.getMatchResult(searchContext.searchCriteria.search)
 
-            val childSearchCriteria = filterResult.getChildrenSearchCriteria(searchCriteria)
+            val childSearchCriteria = filterResult.getChildrenSearchContext(searchContext)
 
             val (notDoneChildInstanceDescriptors, doneChildInstanceDescriptors) =
                 getChildInstanceDatas(childInstance, now, childSearchCriteria)

@@ -13,6 +13,7 @@ import com.krystianwsul.checkme.viewmodels.MainNoteViewModel
 import com.krystianwsul.checkme.viewmodels.MainTaskViewModel
 import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.firebase.DomainThreadChecker
+import com.krystianwsul.common.firebase.models.SearchContext
 import com.krystianwsul.common.firebase.models.filterSearchCriteria
 import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.time.Date
@@ -61,17 +62,19 @@ private fun DomainFactory.getMainData(
     showDeleted: Boolean,
     filter: (Task) -> Boolean = { true },
 ): List<TaskListFragment.EntryData> {
-    fun Collection<Task>.toChildTaskDatas(searchCriteria: SearchCriteria) = asSequence()
+    val searchContext = SearchContext(searchCriteria)
+
+    fun Collection<Task>.toChildTaskDatas(searchContext: SearchContext) = asSequence()
         .filter(filter)
         .filter { it.isTopLevelTask() }
-        .filterSearchCriteria(searchCriteria, myUserFactory.user, showDeleted, now)
+        .filterSearchCriteria(searchContext, myUserFactory.user, showDeleted, now)
         .map { (task, filterResult) ->
-            val childSearchCriteria = filterResult.getChildrenSearchCriteria(searchCriteria)
+            val childSearchContext = filterResult.getChildrenSearchContext(searchContext)
 
             TaskListFragment.ChildTaskData(
                 task.name,
                 task.getScheduleText(ScheduleText),
-                getTaskListChildTaskDatas(task, now, childSearchCriteria, showDeleted),
+                getTaskListChildTaskDatas(task, now, childSearchContext, showDeleted),
                 task.note,
                 task.taskKey,
                 task.getImage(deviceDbInfo),
@@ -92,12 +95,12 @@ private fun DomainFactory.getMainData(
             .groupBy { it.projectId }
             .flatMap { (projectId, tasks) ->
                 projectsFactory.getProjectForce(projectId)
-                    .let { it to it.filterSearchCriteria(searchCriteria, showDeleted, showProjects) }
+                    .let { it to it.filterSearchCriteria(searchContext, showDeleted, showProjects) }
                     .takeIf { !it.second.doesntMatch }
                     ?.let { (project, filterResult) ->
-                        val childSearchCriteria = filterResult.getChildrenSearchCriteria(searchCriteria)
+                        val childSearchContext = filterResult.getChildrenSearchContext(searchContext)
 
-                        project.toEntryDatas(tasks.toChildTaskDatas(childSearchCriteria), showProjects, filterResult)
+                        project.toEntryDatas(tasks.toChildTaskDatas(childSearchContext), showProjects, filterResult)
                     }
                     .orEmpty()
             }
@@ -105,12 +108,12 @@ private fun DomainFactory.getMainData(
         projectsFactory.projects
             .values
             .asSequence()
-            .filterSearchCriteria(searchCriteria, showDeleted, showProjects)
+            .filterSearchCriteria(searchContext, showDeleted, showProjects)
             .flatMap { (project, filterResult) ->
-                val childSearchCriteria = filterResult.getChildrenSearchCriteria(searchCriteria)
+                val childSearchContext = filterResult.getChildrenSearchContext(searchContext)
 
                 project.toEntryDatas(
-                    project.getAllDependenciesLoadedTasks().toChildTaskDatas(childSearchCriteria),
+                    project.getAllDependenciesLoadedTasks().toChildTaskDatas(childSearchContext),
                     showProjects,
                     filterResult,
                 )

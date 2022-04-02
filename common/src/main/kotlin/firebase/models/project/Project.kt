@@ -6,6 +6,7 @@ import com.krystianwsul.common.domain.TaskHierarchyContainer
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.json.tasks.TaskJson
 import com.krystianwsul.common.firebase.models.Instance
+import com.krystianwsul.common.firebase.models.SearchContext
 import com.krystianwsul.common.firebase.models.cache.ClearableInvalidatableManager
 import com.krystianwsul.common.firebase.models.cache.InvalidatableCache
 import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
@@ -227,8 +228,10 @@ sealed class Project<T : ProjectType>(
         general.  Then, we check all existing instances on top of that.
          */
 
+        val searchContext = SearchContext(searchData?.searchCriteria ?: SearchCriteria.empty)
+
         val filteredTasks = allTasks.asSequence()
-            .filterSearch(searchData?.searchCriteria?.search, true)
+            .filterSearch(searchContext, true)
             .map { it.first }
             .toList()
 
@@ -255,7 +258,7 @@ sealed class Project<T : ProjectType>(
         return combineInstanceSequences(instanceSequences).let { sequence ->
             InterruptionChecker.throwIfInterrupted()
 
-            searchData?.let { sequence.filterSearchCriteria(it.searchCriteria, now, it.myUser, false) } ?: sequence
+            searchData?.let { sequence.filterSearchCriteria(searchContext, now, it.myUser, false) } ?: sequence
         }.let { instances ->
             InterruptionChecker.throwIfInterrupted()
 

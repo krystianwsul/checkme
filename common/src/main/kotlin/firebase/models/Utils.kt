@@ -12,14 +12,14 @@ import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
 
 
-private fun childHierarchyMatches(task: Task, search: SearchCriteria.Search?, onlyHierarchy: Boolean = false): FilterResult {
+private fun childHierarchyMatches(task: Task, searchContext: SearchContext, onlyHierarchy: Boolean = false): FilterResult {
     InterruptionChecker.throwIfInterrupted()
 
-    return task.getMatchResult(search).let {
+    return task.getMatchResult(searchContext.searchCriteria.search).let {
         it.getFilterResult() ?: run {
             val childTasks = if (onlyHierarchy) task.getHierarchyChildTasks() else task.getChildTasks()
 
-            if (childTasks.any { !childHierarchyMatches(it, search, onlyHierarchy).doesntMatch })
+            if (childTasks.any { !childHierarchyMatches(it, searchContext, onlyHierarchy).doesntMatch })
                 FilterResult.Include
             else
                 FilterResult.DoesntMatch
@@ -27,28 +27,28 @@ private fun childHierarchyMatches(task: Task, search: SearchCriteria.Search?, on
     }
 }
 
-fun Sequence<Task>.filterSearch(search: SearchCriteria.Search?, onlyHierarchy: Boolean = false) =
-    if (search?.hasSearch != true) {
+fun Sequence<Task>.filterSearch(searchContext: SearchContext, onlyHierarchy: Boolean = false) =
+    if (searchContext.searchCriteria.search?.hasSearch != true) {
         map { it to FilterResult.NoSearch("e") }
     } else {
-        map { it to childHierarchyMatches(it, search, onlyHierarchy) }.filter { !it.second.doesntMatch }
+        map { it to childHierarchyMatches(it, searchContext, onlyHierarchy) }.filter { !it.second.doesntMatch }
     }
 
 fun Sequence<Task>.filterSearchCriteria(
-    searchCriteria: SearchCriteria,
+    searchContext: SearchContext,
     myUser: MyUser,
     showDeleted: Boolean,
     now: ExactTimeStamp.Local,
 ): Sequence<Pair<Task, FilterResult>> {
-    if (searchCriteria.isEmpty && showDeleted) return map { it to FilterResult.NoSearch("b") }
+    if (searchContext.searchCriteria.isEmpty && showDeleted) return map { it to FilterResult.NoSearch("b") }
 
-    val filtered1 = if (searchCriteria.showAssignedToOthers) {
+    val filtered1 = if (searchContext.searchCriteria.showAssignedToOthers) {
         this
     } else {
         filter { it.isAssignedToMe(myUser) }
     }
 
-    val filtered2 = filtered1.filterSearch(searchCriteria.search)
+    val filtered2 = filtered1.filterSearch(searchContext)
 
     return if (showDeleted) {
         filtered2
@@ -58,53 +58,54 @@ fun Sequence<Task>.filterSearchCriteria(
 }
 
 fun Project<*>.filterSearchCriteria(
-    searchCriteria: SearchCriteria,
+    searchContext: SearchContext,
     showDeleted: Boolean,
     showProjects: Boolean,
 ): FilterResult {
     if (!showDeleted && endExactTimeStamp != null) return FilterResult.DoesntMatch
 
-    if (searchCriteria.search == null) return FilterResult.NoSearch("c")
-    if (!searchCriteria.search.hasSearch) return FilterResult.NoSearch("d")
+    if (searchContext.searchCriteria.search == null) return FilterResult.NoSearch("c")
+    if (!searchContext.searchCriteria.search.hasSearch) return FilterResult.NoSearch("d")
 
-    searchCriteria.search
+    searchContext.searchCriteria
+        .search
         .let { it as? SearchCriteria.Search.Query }
         ?.takeIf { showProjects }
         ?.let {
             if (name.isNotEmpty() && normalizedName.contains(it.query)) return FilterResult.Matches(true)
         }
 
-    return if (getAllDependenciesLoadedTasks().any { !childHierarchyMatches(it, searchCriteria.search).doesntMatch })
+    return if (getAllDependenciesLoadedTasks().any { !childHierarchyMatches(it, searchContext).doesntMatch })
         FilterResult.Include
     else
         FilterResult.DoesntMatch
 }
 
 fun <T : Project<*>> Sequence<T>.filterSearchCriteria(
-    searchCriteria: SearchCriteria,
+    searchContext: SearchContext,
     showDeleted: Boolean,
     showProjects: Boolean,
-) = map { it to it.filterSearchCriteria(searchCriteria, showDeleted, showProjects) }.filter { !it.second.doesntMatch }
+) = map { it to it.filterSearchCriteria(searchContext, showDeleted, showProjects) }.filter { !it.second.doesntMatch }
 
 // todo this could return the task.matchesSearch result to optimize building child searchCriteria in the calling function
 fun Sequence<Instance>.filterSearchCriteria(
-    searchCriteria: SearchCriteria,
+    searchContext: SearchContext,
     now: ExactTimeStamp.Local,
     myUser: MyUser,
     assumeChild: Boolean,
-) = if (searchCriteria.isEmpty) {
+) = if (searchContext.searchCriteria.isEmpty) {
     this
 } else {
     fun childHierarchyMatches(instance: Instance, assumeChild: Boolean): Boolean {
         InterruptionChecker.throwIfInterrupted()
 
-        if (!assumeChild && !searchCriteria.showAssignedToOthers && !instance.isAssignedToMe(myUser)) return false
+        if (!assumeChild && !searchContext.searchCriteria.showAssignedToOthers && !instance.isAssignedToMe(myUser)) return false
 
-        if (!searchCriteria.showDone && instance.done != null) return false
+        if (!searchContext.searchCriteria.showDone && instance.done != null) return false
 
-        if (instance.instanceKey in searchCriteria.excludedInstanceKeys) return false
+        if (instance.instanceKey in searchContext.searchCriteria.excludedInstanceKeys) return false
 
-        return instance.task.getMatchResult(searchCriteria.search).let {
+        return instance.task.getMatchResult(searchContext.searchCriteria.search).let {
             it.includeWithoutChildren
                 .takeIf { it }
                 ?: instance.getChildInstances()
@@ -122,8 +123,7 @@ sealed interface FilterResult {
 
     val matchesSearch get() = false
 
-    // todo taskKey check if used
-    fun getChildrenSearchCriteria(searchCriteria: SearchCriteria) = searchCriteria
+    fun getChildrenSearchContext(searchContext: SearchContext) = searchContext
 
     object DoesntMatch : FilterResult {
 
@@ -154,8 +154,8 @@ sealed interface FilterResult {
     // todo taskKey this naming is awful
     class Matches(override val matchesSearch: Boolean) : Task() {
 
-        override fun getChildrenSearchCriteria(searchCriteria: SearchCriteria) =
-            if (matchesSearch) searchCriteria.clear() else searchCriteria
+        override fun getChildrenSearchContext(searchContext: SearchContext) =
+            if (matchesSearch) SearchContext(searchContext.searchCriteria.clear()) else searchContext
 
         override fun toString() = "FilterResult.Matches matchesSearch: $matchesSearch" // todo taskKey
     }
@@ -209,3 +209,5 @@ fun logFilterResult(task: Task, filterResult: FilterResult) {
 
     Log.e("asdf", "magic " + chain.filter { it.isNotEmpty() }.joinToString("/") + " filterResult: " + filterResult)
 }
+
+class SearchContext(val searchCriteria: SearchCriteria)

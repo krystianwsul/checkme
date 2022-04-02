@@ -10,6 +10,7 @@ import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.viewmodels.ShowNotificationGroupViewModel
 import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.firebase.DomainThreadChecker
+import com.krystianwsul.common.firebase.models.SearchContext
 import com.krystianwsul.common.firebase.models.filterSearchCriteria
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.InstanceKey
@@ -33,12 +34,14 @@ fun DomainFactory.getShowNotificationGroupData(
         GroupListDataWrapper.CustomTimeData(it.name, it.hourMinutes.toSortedMap())
     }
 
-    val instanceDescriptors = instances.asSequence()
-        .filterSearchCriteria(searchCriteria, now, myUserFactory.user, false)
-        .map { instance ->
-            val filterResult = instance.task.getMatchResult(searchCriteria.search)
+    val searchContext = SearchContext(searchCriteria)
 
-            val childSearchCriteria = filterResult.getChildrenSearchCriteria(searchCriteria)
+    val instanceDescriptors = instances.asSequence()
+        .filterSearchCriteria(searchContext, now, myUserFactory.user, false)
+        .map { instance ->
+            val filterResult = instance.task.getMatchResult(searchContext.searchCriteria.search)
+
+            val childSearchCriteria = filterResult.getChildrenSearchContext(searchContext)
 
             val (notDoneChildInstanceDescriptors, doneChildInstanceDescriptors) =
                 getChildInstanceDatas(instance, now, childSearchCriteria)

@@ -66,12 +66,12 @@ fun Project<*>.filterSearchCriteria(
 ): FilterResult {
     if (!showDeleted && endExactTimeStamp != null) return FilterResult.DoesntMatch
 
-    if (searchContext.searchCriteria.search == null) return FilterResult.NoSearch("c")
-    if (!searchContext.searchCriteria.search.hasSearch) return FilterResult.NoSearch("d")
-
-    searchContext.searchCriteria
+    val search = searchContext.searchCriteria
         .search
-        .let { it as? SearchCriteria.Search.Query }
+        ?.takeIf { it.hasSearch }
+        ?: return FilterResult.NoSearch("c")
+
+    search.let { it as? SearchCriteria.Search.Query }
         ?.takeIf { showProjects }
         ?.let {
             if (name.isNotEmpty() && normalizedName.contains(it.query)) return FilterResult.Matches(true)

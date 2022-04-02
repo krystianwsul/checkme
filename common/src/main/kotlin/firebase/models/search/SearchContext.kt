@@ -25,5 +25,13 @@ class SearchContext private constructor(val searchCriteria: SearchCriteria, val 
     }
 
     fun getChildrenSearchContext(matchResult: MatchResult) =
-        if (matchResult.matches) SearchContext(searchCriteria.clear(), false) else this
+        if (matchResult.matches) {
+            if (matchResult.continueSearchingChildren) {
+                SearchContext(searchCriteria, true)
+            } else {
+                SearchContext(searchCriteria.clear(), false)
+            }
+        } else {
+            this
+        }
 }

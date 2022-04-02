@@ -2,7 +2,11 @@ package search
 
 import com.krystianwsul.common.firebase.models.search.FilterResult
 
-enum class MatchResult(val matches: Boolean = false, val includeWithoutChildren: Boolean = true) {
+enum class MatchResult(
+    val matches: Boolean = false,
+    val includeWithoutChildren: Boolean = true,
+    val continueSearchingChildren: Boolean = false, // todo taskKey this logic is spread out across a few places.  Clean up after unifying instance filtering.
+) {
 
     NO_SEARCH {
 
@@ -14,7 +18,7 @@ enum class MatchResult(val matches: Boolean = false, val includeWithoutChildren:
         override fun getFilterResult(): FilterResult? = null
     },
 
-    QUERY_MATCH(matches = true) {
+    QUERY_MATCH(matches = true, continueSearchingChildren = true) {
 
         override fun getFilterResult() = FilterResult.Matches(true)
     },

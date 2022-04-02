@@ -709,7 +709,7 @@ private fun DomainFactory.getParentTreeDatas(
         .filter { it.isTopLevelTask() && (it.project as? SharedProject)?.notDeleted != true }
         .filterSearchCriteria(searchContext, myUserFactory.user, false, now)
         .map { (task, filterResult) ->
-            val childSearchContext = filterResult.getChildrenSearchContext(searchContext)
+            val childSearchContext = searchContext.getChildrenSearchContext(filterResult)
 
             task.toParentEntryData(
                 this,
@@ -729,7 +729,7 @@ private fun DomainFactory.getParentTreeDatas(
         .filter { it.notDeleted }
         .filterSearchCriteria(searchContext, false, true)
         .map { (project, filterResult) ->
-            val childSearchCriteria = filterResult.getChildrenSearchContext(searchContext)
+            val childSearchCriteria = searchContext.getChildrenSearchContext(filterResult)
 
             EditViewModel.ParentEntryData.Project(
                 project.name,
@@ -765,7 +765,7 @@ private fun DomainFactory.getProjectTaskTreeDatas(
         .map { (task, filterResult) ->
             logFilterResult(task, filterResult)
 
-            val childrenSearchContext = filterResult.getChildrenSearchContext(searchContext)
+            val childrenSearchContext = searchContext.getChildrenSearchContext(filterResult)
 
             task.toParentEntryData(
                 this,
@@ -891,7 +891,7 @@ private fun DomainFactory.getTaskListChildTaskDatas(
     .filter { it.showAsParent(now, excludedTaskKeys) }
     .filterSearchCriteria(searchContext, myUserFactory.user, false, now)
     .map { (task, filterResult) ->
-        val childSearchContext = filterResult.getChildrenSearchContext(searchContext)
+        val childSearchContext = searchContext.getChildrenSearchContext(filterResult)
 
         task.toParentEntryData(
             this,

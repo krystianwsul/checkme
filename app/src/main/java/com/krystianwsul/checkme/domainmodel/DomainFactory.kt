@@ -495,7 +495,7 @@ class DomainFactory(
                 We know this instance matches SearchCriteria.showAssignedToOthers.  If it also matches the query, we
                 can skip filtering child instances, since showAssignedToOthers is meaningless for child instances.
                  */
-                val childrenSearchContext = matchResult.getChildrenSearchContext(searchContext)
+                val childrenSearchContext = searchContext.getChildrenSearchContext(matchResult)
 
                 val children = getChildInstanceDatas(childInstance, now, mapper, childrenSearchContext, filterVisible)
 
@@ -545,7 +545,7 @@ class DomainFactory(
             .asSequence()
             .filterSearchCriteria(searchContext, myUserFactory.user, showDeleted, now)
             .map { (childTask, filterResult) ->
-                val childSearchContext = filterResult.getChildrenSearchContext(searchContext)
+                val childSearchContext = searchContext.getChildrenSearchContext(filterResult)
 
                 TaskListFragment.ChildTaskData(
                     childTask.name,

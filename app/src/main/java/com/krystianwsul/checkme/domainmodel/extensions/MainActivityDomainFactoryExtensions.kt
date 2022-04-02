@@ -69,7 +69,7 @@ private fun DomainFactory.getMainData(
         .filter { it.isTopLevelTask() }
         .filterSearchCriteria(searchContext, myUserFactory.user, showDeleted, now)
         .map { (task, filterResult) ->
-            val childSearchContext = filterResult.getChildrenSearchContext(searchContext)
+            val childSearchContext = searchContext.getChildrenSearchContext(filterResult)
 
             TaskListFragment.ChildTaskData(
                 task.name,
@@ -98,7 +98,7 @@ private fun DomainFactory.getMainData(
                     .let { it to it.filterSearchCriteria(searchContext, showDeleted, showProjects) }
                     .takeIf { !it.second.doesntMatch }
                     ?.let { (project, filterResult) ->
-                        val childSearchContext = filterResult.getChildrenSearchContext(searchContext)
+                        val childSearchContext = searchContext.getChildrenSearchContext(filterResult)
 
                         project.toEntryDatas(tasks.toChildTaskDatas(childSearchContext), showProjects, filterResult)
                     }
@@ -110,7 +110,7 @@ private fun DomainFactory.getMainData(
             .asSequence()
             .filterSearchCriteria(searchContext, showDeleted, showProjects)
             .flatMap { (project, filterResult) ->
-                val childSearchContext = filterResult.getChildrenSearchContext(searchContext)
+                val childSearchContext = searchContext.getChildrenSearchContext(filterResult)
 
                 project.toEntryDatas(
                     project.getAllDependenciesLoadedTasks().toChildTaskDatas(childSearchContext),

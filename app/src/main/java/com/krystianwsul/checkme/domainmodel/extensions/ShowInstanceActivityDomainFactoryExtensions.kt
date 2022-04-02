@@ -139,9 +139,9 @@ private fun DomainFactory.getGroupListData(
         .filter { it.isVisible(now, Instance.VisibilityOptions(assumeChildOfVisibleParent = true)) }
         .filterSearchCriteria(searchContext, now, myUserFactory.user, true)
         .map { childInstance ->
-            val filterResult = childInstance.task.getMatchResult(searchContext.searchCriteria.search)
+            val matchResult = childInstance.task.getMatchResult(searchContext.searchCriteria.search)
 
-            val childSearchCriteria = filterResult.getChildrenSearchContext(searchContext)
+            val childSearchCriteria = searchContext.getChildrenSearchContext(matchResult)
 
             val (notDoneChildInstanceDescriptors, doneChildInstanceDescriptors) =
                 getChildInstanceDatas(childInstance, now, childSearchCriteria)
@@ -152,7 +152,7 @@ private fun DomainFactory.getGroupListData(
                 this,
                 notDoneChildInstanceDescriptors,
                 doneChildInstanceDescriptors,
-                filterResult.matches,
+                matchResult.matches,
             )
 
             GroupTypeFactory.InstanceDescriptor(

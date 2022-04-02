@@ -1,6 +1,7 @@
 package com.krystianwsul.common.firebase.models
 
 import android.util.Log
+import com.krystianwsul.common.criteria.DomainQueryMatchable
 import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.task.RootTask
@@ -210,4 +211,9 @@ fun logFilterResult(task: Task, filterResult: FilterResult) {
     Log.e("asdf", "magic " + chain.filter { it.isNotEmpty() }.joinToString("/") + " filterResult: " + filterResult)
 }
 
-class SearchContext(val searchCriteria: SearchCriteria)
+class SearchContext(val searchCriteria: SearchCriteria) {
+
+    fun getChildrenSearchContext(filterResult: FilterResult) = filterResult.getChildrenSearchContext(this)
+
+    fun getChildrenSearchContext(matchResult: DomainQueryMatchable.MatchResult) = matchResult.getChildrenSearchContext(this)
+}

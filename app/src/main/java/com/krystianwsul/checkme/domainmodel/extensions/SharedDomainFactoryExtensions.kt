@@ -196,7 +196,7 @@ fun DomainFactory.getGroupListChildTaskDatas(
     .asSequence()
     .filterSearch(searchContext)
     .map { (childTask, filterResult) ->
-        val childQuery = filterResult.getChildrenSearchContext(searchContext)
+        val childQuery = searchContext.getChildrenSearchContext(filterResult)
 
         GroupListDataWrapper.TaskData(
             childTask.taskKey,
@@ -241,7 +241,7 @@ fun <T : Comparable<T>> DomainFactory.searchInstances(
          */
         val matchResult = task.getMatchResult(searchContext.searchCriteria.search)
 
-        val childrenSearchContext = matchResult.getChildrenSearchContext(searchContext)
+        val childrenSearchContext = searchContext.getChildrenSearchContext(matchResult)
 
         val children = getChildInstanceDatas(it, now, mapper, childrenSearchContext, !debugMode)
 

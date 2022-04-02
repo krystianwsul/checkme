@@ -64,7 +64,7 @@ fun DomainFactory.getShowTasksData(
                 .filter { it.notDeleted && it.intervalInfo.isUnscheduled() }
                 .filterSearchCriteria(searchContext, myUserFactory.user, showDeleted, now)
                 .map { (task, filterResult) ->
-                    val childSearchCriteria = filterResult.getChildrenSearchContext(searchContext)
+                    val childSearchCriteria = searchContext.getChildrenSearchContext(filterResult)
 
                     task.toChildTaskData(childSearchCriteria, filterResult.matchesSearch)
                 }
@@ -78,7 +78,7 @@ fun DomainFactory.getShowTasksData(
                         .asSequence()
                         .filterSearchCriteria(searchContext, showDeleted, showProjects)
                         .flatMap { (project, filterResult) ->
-                            val childSearchCriteria = filterResult.getChildrenSearchContext(searchContext)
+                            val childSearchCriteria = searchContext.getChildrenSearchContext(filterResult)
 
                             project.toEntryDatas(
                                 project.getUnscheduledTaskDatas(childSearchCriteria),
@@ -117,7 +117,7 @@ fun DomainFactory.getShowTasksData(
                 .filter { it.isTopLevelTask() }
                 .filterSearchCriteria(searchContext, myUserFactory.user, showDeleted, now)
                 .map { (task, filterResult) ->
-                    val childSearchCriteria = filterResult.getChildrenSearchContext(searchContext)
+                    val childSearchCriteria = searchContext.getChildrenSearchContext(filterResult)
 
                     task.toChildTaskData(childSearchCriteria, filterResult.matchesSearch)
                 }

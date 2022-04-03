@@ -36,6 +36,26 @@ class SearchContext private constructor(val searchCriteria: SearchCriteria, val 
 
     fun <T> search(action: SearchContext.() -> T) = run(action)
 
+    // todo searchContext private
+    private fun childHierarchyMatches(task: Task, onlyHierarchy: Boolean = false): FilterResult {
+        InterruptionChecker.throwIfInterrupted()
+
+        return task.getMatchResult(searchCriteria.search).let {
+            it.getFilterResult() ?: run {
+                if (searchingChildrenOfQueryMatch) {
+                    FilterResult.Include(false)
+                } else {
+                    val childTasks = if (onlyHierarchy) task.getHierarchyChildTasks() else task.getChildTasks()
+
+                    if (childTasks.any { !childHierarchyMatches(it, onlyHierarchy).doesntMatch })
+                        FilterResult.Include(false)
+                    else
+                        FilterResult.Exclude
+                }
+            }
+        }
+    }
+
     fun Project<*>.filterSearchCriteria(showDeleted: Boolean, showProjects: Boolean): FilterResult {
         if (!showDeleted && endExactTimeStamp != null) return FilterResult.Exclude
 
@@ -49,9 +69,7 @@ class SearchContext private constructor(val searchCriteria: SearchCriteria, val 
                 if (name.isNotEmpty() && normalizedName.contains(it.query)) return FilterResult.Include(true)
             }
 
-        return if (
-            getAllDependenciesLoadedTasks().any { !childHierarchyMatches(it, this@SearchContext).doesntMatch }
-        )
+        return if (getAllDependenciesLoadedTasks().any { !childHierarchyMatches(it).doesntMatch })
             FilterResult.Include(false)
         else
             FilterResult.Exclude
@@ -65,7 +83,7 @@ class SearchContext private constructor(val searchCriteria: SearchCriteria, val 
             map { it to FilterResult.NoSearch("e") }
         } else {
             // todo taskKey this could return a subtype of FilterCriteria, i.e. the subset where doesnMatch = false
-            map { it to childHierarchyMatches(it, this@SearchContext, onlyHierarchy) }.filter { !it.second.doesntMatch }
+            map { it to childHierarchyMatches(it, onlyHierarchy) }.filter { !it.second.doesntMatch }
         }
 
     fun Sequence<Task>.filterSearchCriteria(

@@ -895,6 +895,7 @@ class MainActivity :
                     fun ExactTimeStamp.old() = toDateTimeSoy() <= twoDaysAgo
 
                     it.getRootInstances(null, now.plusOne().toOffset(), now, filterVisible = false)
+                        .map { it.first } // todo sequence
                         .filter { it.done != null }
                         .map {
                             listOf(it.instanceDateTime, it.scheduleDateTime).map {

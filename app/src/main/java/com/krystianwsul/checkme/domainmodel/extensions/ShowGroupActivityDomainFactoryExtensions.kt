@@ -74,7 +74,9 @@ private fun DomainFactory.getGroupListData(
         now,
         searchContext,
         projectKey = projectKey,
-    ).toList()
+    )
+        .map { it.first } // todo sequence
+        .toList()
 
     val currentInstances = rootInstances.filter { it.instanceDateTime.timeStamp.compareTo(timeStamp) == 0 }
 

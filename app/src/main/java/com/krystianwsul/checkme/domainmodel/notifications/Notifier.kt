@@ -48,7 +48,9 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
                 null,
                 now.toOffset().plusOne(),
                 now,
-            ).filterNotifications(domainFactory)
+            )
+                .map { it.first } // todo sequence
+                .filterNotifications(domainFactory)
 
         fun getNotificationInstances(
             domainFactory: DomainFactory,
@@ -63,7 +65,9 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
                 offset.plusOne(),
                 now,
                 projectKey = projectKey,
-            ).filterNotifications(domainFactory).toList()
+            )
+                .map { it.first } // todo sequence
+                .filterNotifications(domainFactory).toList()
         }
 
         fun setIrrelevant(domainFactory: DomainFactory, exactTimeStamp: ExactTimeStamp.Local): Irrelevant.Result {
@@ -128,7 +132,9 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
                 now,
             ).also {
                 DebugFragment.logDone("Notifier.updateNotifications getRootInstances end")
-            }.filterNotifications(domainFactory)
+            }
+                .map { it.first } // todo sequence
+                .filterNotifications(domainFactory)
             DebugFragment.logDone("Notifier.updateNotifications filterNotifications end")
 
             var needsOneExtra = true
@@ -457,6 +463,7 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
         }
 
         val relevantInstanceShownKeys = domainFactory.getRootInstances(null, now.toOffset().plusOne(), now)
+            .map { it.first } // todo sequence
             .mapNotNull { it.getShown(domainFactory.shownFactory)?.instanceKey }
             .toSet()
 

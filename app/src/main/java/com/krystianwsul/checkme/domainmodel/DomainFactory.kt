@@ -39,6 +39,7 @@ import com.krystianwsul.common.firebase.models.customtime.PrivateCustomTime
 import com.krystianwsul.common.firebase.models.customtime.SharedCustomTime
 import com.krystianwsul.common.firebase.models.project.PrivateProject
 import com.krystianwsul.common.firebase.models.project.Project
+import com.krystianwsul.common.firebase.models.search.FilterResult
 import com.krystianwsul.common.firebase.models.search.SearchContext
 import com.krystianwsul.common.firebase.models.search.filterSearchCriteria
 import com.krystianwsul.common.firebase.models.task.*
@@ -428,7 +429,7 @@ class DomainFactory(
         searchContext: SearchContext? = null,
         filterVisible: Boolean = true,
         projectKey: ProjectKey<*>? = null,
-    ): Sequence<Instance> {
+    ): Sequence<Pair<Instance, FilterResult>> {
         val searchData = searchContext?.let { Project.SearchData(it, myUserFactory.user) }
 
         val projects =
@@ -436,10 +437,9 @@ class DomainFactory(
 
         val instanceSequences = projects.map {
             it.getRootInstances(startExactTimeStamp, endExactTimeStamp, now, searchData, filterVisible)
-                .map { it.first } // todo sequence
         }
 
-        return combineInstanceSequences(instanceSequences)
+        return combineInstanceSequences(instanceSequences) { it.first }
     }
 
     fun getCurrentRemoteCustomTimes(): List<MyCustomTime> {

@@ -232,16 +232,18 @@ fun <T : Comparable<T>> DomainFactory.searchInstances(
         projectKey = projectKey,
     ).takeAndHasMore(desiredCount)
 
-    val instanceDatas = instances.map {
-        val task = it.task
+    val instanceDatas = instances
+        .map { it.first } // todo sequence
+        .map {
+            val task = it.task
 
-        /*
-        We know this instance matches SearchCriteria.showAssignedToOthers.  If it also matches the query, we
-        can skip filtering child instances, since showAssignedToOthers is meaningless for child instances.
-         */
-        val matchResult = task.getMatchResult(searchContext.searchCriteria.search)
+            /*
+            We know this instance matches SearchCriteria.showAssignedToOthers.  If it also matches the query, we
+            can skip filtering child instances, since showAssignedToOthers is meaningless for child instances.
+             */
+            val matchResult = task.getMatchResult(searchContext.searchCriteria.search)
 
-        val childrenSearchContext = searchContext.getChildrenSearchContext(matchResult)
+            val childrenSearchContext = searchContext.getChildrenSearchContext(matchResult)
 
         val children = getChildInstanceDatas(it, now, mapper, childrenSearchContext, !debugMode)
 

@@ -51,7 +51,6 @@ import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.merge
-import search.MatchResult
 import java.util.concurrent.TimeUnit
 
 @Suppress("LeakingThis")
@@ -475,33 +474,24 @@ class DomainFactory(
     }
 
     fun <T> getChildInstanceDatas(
-        instance: Instance,
+        parentInstance: Instance,
         now: ExactTimeStamp.Local,
-        mapper: (Instance, Collection<T>, MatchResult) -> T,
+        mapper: (Instance, Collection<T>, FilterResult) -> T,
         searchContext: SearchContext,
         filterVisible: Boolean = true,
     ): Collection<T> {
-        return instance.getChildInstances()
+        return parentInstance.getChildInstances()
             .asSequence()
             .filter {
                 !filterVisible || it.isVisible(now, Instance.VisibilityOptions(assumeChildOfVisibleParent = true))
             }
             .filterSearchCriteria(searchContext, now, myUserFactory.user, true)
-            .map { it.first } // todo sequence
-            .mapNotNull { childInstance ->
-                val childTask = childInstance.task
-
-                val matchResult = childTask.getMatchResult(searchContext.searchCriteria.search)
-
-                /*
-                We know this instance matches SearchCriteria.showAssignedToOthers.  If it also matches the query, we
-                can skip filtering child instances, since showAssignedToOthers is meaningless for child instances.
-                 */
-                val childrenSearchContext = searchContext.getChildrenSearchContext(matchResult)
+            .mapNotNull { (childInstance, filterResult) ->
+                val childrenSearchContext = searchContext.getChildrenSearchContext(filterResult)
 
                 val children = getChildInstanceDatas(childInstance, now, mapper, childrenSearchContext, filterVisible)
 
-                mapper(childInstance, children, matchResult)
+                mapper(childInstance, children, filterResult)
             }
             .toList()
     }
@@ -515,7 +505,7 @@ class DomainFactory(
         instance,
         now,
         { childInstance, children, filterResult ->
-            instanceToGroupListData(childInstance, now, children, filterResult.matches)
+            instanceToGroupListData(childInstance, now, children, filterResult.matchesSearch)
         },
         searchContext,
         filterVisible,

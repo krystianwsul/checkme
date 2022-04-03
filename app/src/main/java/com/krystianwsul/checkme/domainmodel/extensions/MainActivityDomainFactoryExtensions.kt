@@ -178,9 +178,7 @@ fun DomainFactory.getGroupListData(
         endExactTimeStamp,
         now,
         SearchContext.startSearch(SearchCriteria(showAssignedToOthers = showAssigned)),
-    )
-        .map { it.first } // todo sequence
-        .toList()
+    ).map { it.first }.toList()
 
     if (position == 0 && timeRange == Preferences.TimeRange.DAY) {
         instanceInfo = currentInstances.count { it.exists() }.let { existingInstanceCount ->

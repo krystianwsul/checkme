@@ -32,7 +32,6 @@ import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.utils.*
 import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Single
-import search.MatchResult
 import java.util.*
 
 const val SEARCH_PAGE_SIZE = 20
@@ -217,7 +216,7 @@ fun <T : Comparable<T>> DomainFactory.searchInstances(
     searchContext: SearchContext,
     page: Int,
     projectKey: ProjectKey<*>?,
-    mapper: (Instance, Collection<T>, MatchResult) -> T,
+    mapper: (Instance, Collection<T>, FilterResult) -> T,
 ): Pair<List<T>, Boolean> {
     DomainThreadChecker.instance.requireDomainThread()
 
@@ -232,22 +231,12 @@ fun <T : Comparable<T>> DomainFactory.searchInstances(
         projectKey = projectKey,
     ).takeAndHasMore(desiredCount)
 
-    val instanceDatas = instances
-        .map { it.first } // todo sequence
-        .map {
-            val task = it.task
+    val instanceDatas = instances.map { (instance, filterResult) ->
+        val childrenSearchContext = searchContext.getChildrenSearchContext(filterResult)
 
-            /*
-            We know this instance matches SearchCriteria.showAssignedToOthers.  If it also matches the query, we
-            can skip filtering child instances, since showAssignedToOthers is meaningless for child instances.
-             */
-            val matchResult = task.getMatchResult(searchContext.searchCriteria.search)
+        val children = getChildInstanceDatas(instance, now, mapper, childrenSearchContext, !debugMode)
 
-            val childrenSearchContext = searchContext.getChildrenSearchContext(matchResult)
-
-        val children = getChildInstanceDatas(it, now, mapper, childrenSearchContext, !debugMode)
-
-        mapper(it, children, matchResult)
+        mapper(instance, children, filterResult)
     }
 
     return instanceDatas.sorted().take(desiredCount) to hasMore

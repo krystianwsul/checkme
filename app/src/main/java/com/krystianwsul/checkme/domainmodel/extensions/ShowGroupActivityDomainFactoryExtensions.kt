@@ -74,11 +74,9 @@ private fun DomainFactory.getGroupListData(
         now,
         searchContext,
         projectKey = projectKey,
-    )
-        .map { it.first } // todo sequence
-        .toList()
+    ).toList()
 
-    val currentInstances = rootInstances.filter { it.instanceDateTime.timeStamp.compareTo(timeStamp) == 0 }
+    val currentInstances = rootInstances.filter { it.first.instanceDateTime.timeStamp.compareTo(timeStamp) == 0 }
 
     val customTimeDatas = getCurrentRemoteCustomTimes().map {
         GroupListDataWrapper.CustomTimeData(it.name, it.hourMinutes.toSortedMap())
@@ -86,10 +84,8 @@ private fun DomainFactory.getGroupListData(
 
     val includeProjectDetails = projectKey == null
 
-    val instanceDescriptors = currentInstances.map { instance ->
-        val matchResult = instance.task.getMatchResult(searchContext.searchCriteria.search)
-
-        val childSearchContext = searchContext.getChildrenSearchContext(matchResult)
+    val instanceDescriptors = currentInstances.map { (instance, filterResult) ->
+        val childSearchContext = searchContext.getChildrenSearchContext(filterResult)
 
         val (notDoneChildInstanceDescriptors, doneChildInstanceDescriptors) =
             getChildInstanceDatas(instance, now, childSearchContext)
@@ -100,7 +96,7 @@ private fun DomainFactory.getGroupListData(
             this,
             notDoneChildInstanceDescriptors,
             doneChildInstanceDescriptors,
-            matchResult.matches,
+            filterResult.matchesSearch,
         )
 
         GroupTypeFactory.InstanceDescriptor(

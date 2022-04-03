@@ -7,7 +7,10 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.GroupType
 import com.krystianwsul.checkme.gui.main.DebugFragment
 import com.krystianwsul.checkme.ticks.Ticker
+import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.firebase.models.Instance
+import com.krystianwsul.common.firebase.models.search.FilterResult
+import com.krystianwsul.common.firebase.models.search.SearchContext
 import com.krystianwsul.common.firebase.models.users.ProjectOrdinalManager
 import com.krystianwsul.common.relevance.CustomTimeRelevance
 import com.krystianwsul.common.relevance.Irrelevant
@@ -30,13 +33,11 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
         const val TEST_IRRELEVANT = false
 
         // duplicate of logic in Instance.shouldShowNotification
-        private fun Sequence<Instance>.filterNotifications(domainFactory: DomainFactory) =
-            filter {
+        private fun Sequence<Pair<Instance, FilterResult>>.filterNotifications(domainFactory: DomainFactory) =
+            map { it.first }.filter {
                 val tracker = TimeLogger.startIfLogDone("Notifier filter")
 
-                val ret = it.done == null &&
-                        !it.getNotified(domainFactory.shownFactory) &&
-                        it.isAssignedToMe(domainFactory.myUserFactory.user)
+                val ret = !it.getNotified(domainFactory.shownFactory)
 
                 tracker?.stop()
 
@@ -48,9 +49,8 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
                 null,
                 now.toOffset().plusOne(),
                 now,
-            )
-                .map { it.first } // todo sequence
-                .filterNotifications(domainFactory)
+                SearchContext.startSearch(SearchCriteria(showAssignedToOthers = false, showDone = false)),
+            ).filterNotifications(domainFactory)
 
         fun getNotificationInstances(
             domainFactory: DomainFactory,
@@ -64,10 +64,9 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
                 offset,
                 offset.plusOne(),
                 now,
+                SearchContext.startSearch(SearchCriteria(showAssignedToOthers = false, showDone = false)),
                 projectKey = projectKey,
-            )
-                .map { it.first } // todo sequence
-                .filterNotifications(domainFactory).toList()
+            ).filterNotifications(domainFactory).toList()
         }
 
         fun setIrrelevant(domainFactory: DomainFactory, exactTimeStamp: ExactTimeStamp.Local): Irrelevant.Result {
@@ -126,15 +125,16 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
             nextAlarmInstance = null
         } else {
             DebugFragment.logDone("Notifier.updateNotifications getRootInstances start")
+
             val notificationInstanceSequence = domainFactory.getRootInstances(
                 null,
                 null,
                 now,
-            ).also {
-                DebugFragment.logDone("Notifier.updateNotifications getRootInstances end")
-            }
-                .map { it.first } // todo sequence
+                SearchContext.startSearch(SearchCriteria(showAssignedToOthers = false, showDone = false)),
+            )
+                .also { DebugFragment.logDone("Notifier.updateNotifications getRootInstances end") }
                 .filterNotifications(domainFactory)
+
             DebugFragment.logDone("Notifier.updateNotifications filterNotifications end")
 
             var needsOneExtra = true

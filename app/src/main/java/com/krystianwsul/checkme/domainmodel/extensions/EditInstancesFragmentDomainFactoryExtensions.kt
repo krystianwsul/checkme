@@ -200,7 +200,7 @@ fun DomainFactory.getEditInstancesSearchData(
                     instance.instanceDateTime.timeStamp,
                     instance.ordinal,
                     instance.instanceKey,
-                    filterResult.matches,
+                    filterResult.matchesSearch,
                 )
             }
 

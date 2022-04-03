@@ -96,8 +96,8 @@ fun Sequence<Instance>.filterSearchCriteria(
     now: ExactTimeStamp.Local,
     myUser: MyUser,
     assumeChild: Boolean,
-): Sequence<Instance> = if (searchContext.searchCriteria.isEmpty) {
-    this
+): Sequence<Pair<Instance, FilterResult>> = if (searchContext.searchCriteria.isEmpty) {
+    this.map { it to FilterResult.NoSearch("i") }
 } else {
     fun childHierarchyMatches(instance: Instance, assumeChild: Boolean): FilterResult {
         InterruptionChecker.throwIfInterrupted()
@@ -131,8 +131,6 @@ fun Sequence<Instance>.filterSearchCriteria(
     }
 
     map { it to childHierarchyMatches(it, assumeChild) }.filter { !it.second.doesntMatch }
-        // todo taskKey figure out how to fix combineInstanceSequences, then remove this mapping
-        .map { it.first }
 }
 
 // todo taskKey remove

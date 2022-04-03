@@ -195,12 +195,10 @@ fun DomainFactory.getGroupListChildTaskDatas(
         .asSequence()
         .filterSearch()
         .map { (childTask, filterResult) ->
-            val childQuery = searchContext.getChildrenSearchContext(filterResult)
-
             GroupListDataWrapper.TaskData(
                 childTask.taskKey,
                 childTask.name,
-                getGroupListChildTaskDatas(childTask, now, childQuery),
+                getGroupListChildTaskDatas(childTask, now, getChildrenSearchContext(filterResult)),
                 childTask.note,
                 childTask.getImage(deviceDbInfo),
                 childTask.getProjectInfo(),
@@ -232,12 +230,12 @@ fun <T : Comparable<T>> DomainFactory.searchInstances(
         projectKey = projectKey,
     ).takeAndHasMore(desiredCount)
 
-    val instanceDatas = instances.map { (instance, filterResult) ->
-        val childrenSearchContext = searchContext.getChildrenSearchContext(filterResult)
+    val instanceDatas = searchContext.search {
+        instances.map { (instance, filterResult) ->
+            val children = getChildInstanceDatas(instance, now, mapper, getChildrenSearchContext(filterResult), !debugMode)
 
-        val children = getChildInstanceDatas(instance, now, mapper, childrenSearchContext, !debugMode)
-
-        mapper(instance, children, filterResult)
+            mapper(instance, children, filterResult)
+        }
     }
 
     return instanceDatas.sorted().take(desiredCount) to hasMore

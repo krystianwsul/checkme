@@ -9,7 +9,10 @@ import com.krystianwsul.common.interrupt.InterruptionChecker
 import com.krystianwsul.common.time.ExactTimeStamp
 
 // todo searchContext add MyUser in here, then clean up SearchData
-class SearchContext private constructor(val searchCriteria: SearchCriteria, val searchingChildrenOfQueryMatch: Boolean) {
+class SearchContext private constructor(
+    private val searchCriteria: SearchCriteria,
+    private val searchingChildrenOfQueryMatch: Boolean,
+) {
 
     companion object {
 

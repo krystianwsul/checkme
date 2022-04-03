@@ -58,30 +58,28 @@ fun DomainFactory.getShowTasksData(
 
     when (parameters) {
         is ShowTasksActivity.Parameters.Unscheduled -> {
+            fun Project<*>.getUnscheduledTaskDatas(searchContext: SearchContext) = searchContext.search {
+                getAllDependenciesLoadedTasks()
+                    .asSequence()
+                    .filter { it.notDeleted && it.intervalInfo.isUnscheduled() }
+                    .filterSearchCriteria(myUserFactory.user, showDeleted, now)
+                    .map { (task, filterResult) ->
+                        task.toChildTaskData(getChildrenSearchContext(filterResult), filterResult.matchesSearch)
+                    }
+                    .toList()
+            }
+
             entryDatas = projectsFactory.run {
                 searchContext.search {
-                    fun Project<*>.getUnscheduledTaskDatas(searchContext: SearchContext) = getAllDependenciesLoadedTasks()
-                        .asSequence()
-                        .filter { it.notDeleted && it.intervalInfo.isUnscheduled() }
-                        .filterSearchCriteria(myUserFactory.user, showDeleted, now)
-                        .map { (task, filterResult) ->
-                            val childSearchCriteria = searchContext.getChildrenSearchContext(filterResult)
-
-                            task.toChildTaskData(childSearchCriteria, filterResult.matchesSearch)
-                        }
-                        .toList()
-
                     if (parameters.projectKey != null) {
-                        getProjectForce(parameters.projectKey).getUnscheduledTaskDatas(searchContext)
+                        getProjectForce(parameters.projectKey).getUnscheduledTaskDatas(this)
                     } else {
                         projects.values
                             .asSequence()
                             .filterSearchCriteria(showDeleted, showProjects)
                             .flatMap { (project, filterResult) ->
-                                val childSearchCriteria = searchContext.getChildrenSearchContext(filterResult)
-
                                 project.toEntryDatas(
-                                    project.getUnscheduledTaskDatas(childSearchCriteria),
+                                    project.getUnscheduledTaskDatas(getChildrenSearchContext(filterResult)),
                                     showProjects,
                                     filterResult,
                                 )
@@ -119,9 +117,7 @@ fun DomainFactory.getShowTasksData(
                     .filter { it.isTopLevelTask() }
                     .filterSearchCriteria(myUserFactory.user, showDeleted, now)
                     .map { (task, filterResult) ->
-                        val childSearchCriteria = searchContext.getChildrenSearchContext(filterResult)
-
-                        task.toChildTaskData(childSearchCriteria, filterResult.matchesSearch)
+                        task.toChildTaskData(getChildrenSearchContext(filterResult), filterResult.matchesSearch)
                     }
                     .toList()
             }

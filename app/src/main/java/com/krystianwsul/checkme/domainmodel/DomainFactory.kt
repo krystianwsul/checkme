@@ -420,6 +420,7 @@ class DomainFactory(
     fun getInstance(instanceKey: InstanceKey) =
         getTaskForce(instanceKey.taskKey).getInstance(instanceKey.instanceScheduleKey)
 
+    // todo searchContext consider making an extension of SearchContext, and make second overload that creates an empty one
     fun getRootInstances(
         startExactTimeStamp: ExactTimeStamp.Offset?,
         endExactTimeStamp: ExactTimeStamp.Offset?,
@@ -487,9 +488,13 @@ class DomainFactory(
                 }
                 .filterSearchCriteria(now, myUserFactory.user, true)
                 .mapNotNull { (childInstance, filterResult) ->
-                    val childrenSearchContext = searchContext.getChildrenSearchContext(filterResult)
-
-                    val children = getChildInstanceDatas(childInstance, now, mapper, childrenSearchContext, filterVisible)
+                    val children = getChildInstanceDatas(
+                        childInstance,
+                        now,
+                        mapper,
+                        getChildrenSearchContext(filterResult),
+                        filterVisible,
+                    )
 
                     mapper(childInstance, children, filterResult)
                 }
@@ -536,12 +541,16 @@ class DomainFactory(
                 .asSequence()
                 .filterSearchCriteria(myUserFactory.user, showDeleted, now)
                 .map { (childTask, filterResult) ->
-                    val childSearchContext = searchContext.getChildrenSearchContext(filterResult)
-
                     TaskListFragment.ChildTaskData(
                         childTask.name,
                         childTask.getScheduleText(ScheduleText),
-                        getTaskListChildTaskDatas(childTask, now, childSearchContext, showDeleted, includeProjectInfo),
+                        getTaskListChildTaskDatas(
+                            childTask,
+                            now,
+                            getChildrenSearchContext(filterResult),
+                            showDeleted,
+                            includeProjectInfo,
+                        ),
                         childTask.note,
                         childTask.taskKey,
                         childTask.getImage(deviceDbInfo),

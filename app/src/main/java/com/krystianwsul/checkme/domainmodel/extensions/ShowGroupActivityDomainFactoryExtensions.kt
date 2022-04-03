@@ -84,27 +84,27 @@ private fun DomainFactory.getGroupListData(
 
     val includeProjectDetails = projectKey == null
 
-    val instanceDescriptors = currentInstances.map { (instance, filterResult) ->
-        val childSearchContext = searchContext.getChildrenSearchContext(filterResult)
+    val instanceDescriptors = searchContext.search {
+        currentInstances.map { (instance, filterResult) ->
+            val (notDoneChildInstanceDescriptors, doneChildInstanceDescriptors) =
+                getChildInstanceDatas(instance, now, getChildrenSearchContext(filterResult))
 
-        val (notDoneChildInstanceDescriptors, doneChildInstanceDescriptors) =
-            getChildInstanceDatas(instance, now, childSearchContext)
+            val instanceData = GroupListDataWrapper.InstanceData.fromInstance(
+                instance,
+                now,
+                this@getGroupListData,
+                notDoneChildInstanceDescriptors,
+                doneChildInstanceDescriptors,
+                filterResult.matchesSearch,
+            )
 
-        val instanceData = GroupListDataWrapper.InstanceData.fromInstance(
-            instance,
-            now,
-            this,
-            notDoneChildInstanceDescriptors,
-            doneChildInstanceDescriptors,
-            filterResult.matchesSearch,
-        )
-
-        GroupTypeFactory.InstanceDescriptor(
-            instanceData,
-            instance.instanceDateTime.toDateTimePair(),
-            instance.groupByProject,
-            instance,
-        )
+            GroupTypeFactory.InstanceDescriptor(
+                instanceData,
+                instance.instanceDateTime.toDateTimePair(),
+                instance.groupByProject,
+                instance,
+            )
+        }
     }
 
     val (mixedInstanceDescriptors, doneInstanceDescriptors) = instanceDescriptors.splitDone()

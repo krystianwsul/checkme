@@ -71,12 +71,10 @@ fun DomainFactory.getCappedInstanceAndTaskDatas(
             .asSequence()
             .filterSearch()
             .map { (task, filterResult) ->
-                val childrenSearchContext = searchContext.getChildrenSearchContext(filterResult)
-
                 GroupListDataWrapper.TaskData(
                     task.taskKey,
                     task.name,
-                    getGroupListChildTaskDatas(task, now, childrenSearchContext),
+                    getGroupListChildTaskDatas(task, now, getChildrenSearchContext(filterResult)),
                     task.note,
                     task.getImage(deviceDbInfo),
                     task.getProjectInfo(includeProjectDetails),

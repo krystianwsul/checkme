@@ -63,32 +63,30 @@ private fun DomainFactory.getMainData(
 ): List<TaskListFragment.EntryData> {
     val searchContext = SearchContext.startSearch(searchCriteria)
 
-    fun Collection<Task>.toChildTaskDatas(searchContext: SearchContext) = asSequence()
-        .filter(filter)
-        .filter { it.isTopLevelTask() }
-        .let {
-            searchContext.search { it.filterSearchCriteria(myUserFactory.user, showDeleted, now) }
-        }
-        .map { (task, filterResult) ->
-            val childSearchContext = searchContext.getChildrenSearchContext(filterResult)
-
-            TaskListFragment.ChildTaskData(
-                task.name,
-                task.getScheduleText(ScheduleText),
-                getTaskListChildTaskDatas(task, now, childSearchContext, showDeleted),
-                task.note,
-                task.taskKey,
-                task.getImage(deviceDbInfo),
-                task.notDeleted,
-                task.isVisible(now),
-                task.canMigrateDescription(now),
-                task.ordinal,
-                task.getProjectInfo(),
-                filterResult.matchesSearch,
-            )
-        }
-        .sortedDescending()
-        .toList()
+    fun Collection<Task>.toChildTaskDatas(searchContext: SearchContext) = searchContext.search {
+        asSequence()
+            .filter(filter)
+            .filter { it.isTopLevelTask() }
+            .filterSearchCriteria(myUserFactory.user, showDeleted, now)
+            .map { (task, filterResult) ->
+                TaskListFragment.ChildTaskData(
+                    task.name,
+                    task.getScheduleText(ScheduleText),
+                    getTaskListChildTaskDatas(task, now, getChildrenSearchContext(filterResult), showDeleted),
+                    task.note,
+                    task.taskKey,
+                    task.getImage(deviceDbInfo),
+                    task.notDeleted,
+                    task.isVisible(now),
+                    task.canMigrateDescription(now),
+                    task.ordinal,
+                    task.getProjectInfo(),
+                    filterResult.matchesSearch,
+                )
+            }
+            .sortedDescending()
+            .toList()
+    }
 
     return searchContext.search {
         if (debugMode) {
@@ -100,9 +98,11 @@ private fun DomainFactory.getMainData(
                         .let { it to it.filterSearchCriteria(showDeleted, showProjects) }
                         .takeIf { !it.second.doesntMatch }
                         ?.let { (project, filterResult) ->
-                            val childSearchContext = searchContext.getChildrenSearchContext(filterResult)
-
-                            project.toEntryDatas(tasks.toChildTaskDatas(childSearchContext), showProjects, filterResult)
+                            project.toEntryDatas(
+                                tasks.toChildTaskDatas(getChildrenSearchContext(filterResult)),
+                                showProjects,
+                                filterResult,
+                            )
                         }
                         .orEmpty()
                 }
@@ -112,10 +112,8 @@ private fun DomainFactory.getMainData(
                 .asSequence()
                 .filterSearchCriteria(showDeleted, showProjects)
                 .flatMap { (project, filterResult) ->
-                    val childSearchContext = searchContext.getChildrenSearchContext(filterResult)
-
                     project.toEntryDatas(
-                        project.getAllDependenciesLoadedTasks().toChildTaskDatas(childSearchContext),
+                        project.getAllDependenciesLoadedTasks().toChildTaskDatas(getChildrenSearchContext(filterResult)),
                         showProjects,
                         filterResult,
                     )

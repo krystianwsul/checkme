@@ -62,27 +62,45 @@ fun Sequence<InstanceInfo>.toInstances() = mapNotNull { it.instance }
 
 fun combineInstanceSequences(instanceSequences: List<Sequence<Instance>>): Sequence<Instance> = combineInstanceInfoSequences(
     instanceSequences.map {
-        val tracker = TimeLogger.startIfLogDone("combineInstanceSequences.map")
+        val tracker = TimeLogger.startIfLogDone("combineInstanceSequences.map 1")
         it.map { InstanceInfo(it.instanceDateTime, it) }.also { tracker?.stop() }
     }
 ).toInstances()
 
-fun combineInstanceInfoSequences(instanceSequences: List<Sequence<InstanceInfo>>): Sequence<InstanceInfo> {
-    data class Entry(val instanceInfo: InstanceInfo?, val index: Int)
+fun <T : Any> combineInstanceSequences(instanceSequences: List<Sequence<T>>, instanceGetter: (T) -> Instance): Sequence<T> {
+    return combineInstanceInfoSequences(instanceSequences) {
+        val tracker = TimeLogger.startIfLogDone("combineInstanceSequences.map 2")
 
-    return combineSequences(instanceSequences) {
+        val instance = instanceGetter(it)
+        InstanceInfo(instance.instanceDateTime, instance).also { tracker?.stop() }
+    }
+}
+
+fun combineInstanceInfoSequences(instanceInfoSequences: List<Sequence<InstanceInfo>>): Sequence<InstanceInfo> =
+    combineInstanceInfoSequences(instanceInfoSequences) { it }
+
+fun <T : Any> combineInstanceInfoSequences(
+    instanceInfoSequences: List<Sequence<T>>,
+    instanceInfoGetter: (T) -> InstanceInfo,
+): Sequence<T> {
+    data class Entry(val element: T?, val index: Int)
+
+    return combineSequences(instanceInfoSequences) {
         val tracker = TimeLogger.startIfLogDone("combineInstanceInfoSequences")
 
-        val finalPair = it.mapIndexed { index, instanceInfo -> Entry(instanceInfo, index) }
-            .filter { it.instanceInfo != null }
+        val finalPair = it.mapIndexed { index, element -> Entry(element, index) }
+            .filter { it.element != null }
+            .map { it to instanceInfoGetter(it.element!!) }
             .minWithOrNull(
                 compareBy(
-                    { it.instanceInfo!!.dateTime },
-                    { it.instanceInfo!!.instance?.ordinal },
+                    { it.second.dateTime },
+                    { it.second.instance?.ordinal },
                 )
             )!!
 
-        finalPair.index.also { tracker?.stop() }
+        finalPair.first
+            .index
+            .also { tracker?.stop() }
     }
 }
 

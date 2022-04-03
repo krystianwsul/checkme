@@ -19,17 +19,17 @@ enum class MatchResult(
 
     QUERY_MATCH(matches = true, continueSearchingChildren = true) {
 
-        override fun getFilterResult() = FilterResult.Matches(true)
+        override fun getFilterResult() = FilterResult.Include(true)
     },
 
     TASKKEY_NOMATCH {
 
-        override fun getFilterResult() = FilterResult.Matches(false)
+        override fun getFilterResult() = FilterResult.Include(false)
     },
 
     TASKKEY_MATCH(matches = true) {
 
-        override fun getFilterResult() = FilterResult.Matches(true)
+        override fun getFilterResult() = FilterResult.Include(true)
     };
 
     // null means check children

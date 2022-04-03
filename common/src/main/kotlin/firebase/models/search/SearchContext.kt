@@ -11,10 +11,9 @@ class SearchContext private constructor(val searchCriteria: SearchCriteria, val 
     }
 
     fun getChildrenSearchContext(filterResult: FilterResult) = when (filterResult) {
-        FilterResult.DoesntMatch -> this
+        FilterResult.Exclude -> this
         is FilterResult.NoSearch -> this
-        FilterResult.Include -> this
-        is FilterResult.Matches -> if (filterResult.matchesSearch) {
+        is FilterResult.Include -> if (filterResult.matchesSearch) {
             when (searchCriteria.search!!) {
                 is SearchCriteria.Search.Query -> SearchContext(searchCriteria, true)
                 is SearchCriteria.Search.TaskKey -> SearchContext(searchCriteria.clear(), false)

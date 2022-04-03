@@ -15,14 +15,14 @@ private fun childHierarchyMatches(task: Task, searchContext: SearchContext, only
     return task.getMatchResult(searchContext.searchCriteria.search).let {
         it.getFilterResult() ?: run {
             if (searchContext.searchingChildrenOfQueryMatch) {
-                FilterResult.Include
+                FilterResult.Include(false)
             } else {
                 val childTasks = if (onlyHierarchy) task.getHierarchyChildTasks() else task.getChildTasks()
 
                 if (childTasks.any { !childHierarchyMatches(it, searchContext, onlyHierarchy).doesntMatch })
-                    FilterResult.Include
+                    FilterResult.Include(false)
                 else
-                    FilterResult.DoesntMatch
+                    FilterResult.Exclude
             }
         }
     }
@@ -65,7 +65,7 @@ fun Project<*>.filterSearchCriteria(
     showDeleted: Boolean,
     showProjects: Boolean,
 ): FilterResult {
-    if (!showDeleted && endExactTimeStamp != null) return FilterResult.DoesntMatch
+    if (!showDeleted && endExactTimeStamp != null) return FilterResult.Exclude
 
     val search = searchContext.searchCriteria
         .search
@@ -75,13 +75,13 @@ fun Project<*>.filterSearchCriteria(
     search.let { it as? SearchCriteria.Search.Query }
         ?.takeIf { showProjects }
         ?.let {
-            if (name.isNotEmpty() && normalizedName.contains(it.query)) return FilterResult.Matches(true)
+            if (name.isNotEmpty() && normalizedName.contains(it.query)) return FilterResult.Include(true)
         }
 
     return if (getAllDependenciesLoadedTasks().any { !childHierarchyMatches(it, searchContext).doesntMatch })
-        FilterResult.Include
+        FilterResult.Include(false)
     else
-        FilterResult.DoesntMatch
+        FilterResult.Exclude
 }
 
 fun <T : Project<*>> Sequence<T>.filterSearchCriteria(
@@ -103,27 +103,27 @@ fun Sequence<Instance>.filterSearchCriteria(
         InterruptionChecker.throwIfInterrupted()
 
         if (!assumeChild && !searchContext.searchCriteria.showAssignedToOthers && !instance.isAssignedToMe(myUser))
-            return FilterResult.DoesntMatch
+            return FilterResult.Exclude
 
         if (!searchContext.searchCriteria.showDone && instance.done != null)
-            return FilterResult.DoesntMatch
+            return FilterResult.Exclude
 
         if (instance.instanceKey in searchContext.searchCriteria.excludedInstanceKeys)
-            return FilterResult.DoesntMatch
+            return FilterResult.Exclude
 
         return instance.task.getMatchResult(searchContext.searchCriteria.search).let {
             it.getFilterResult() ?: run {
                 if (searchContext.searchingChildrenOfQueryMatch) {
-                    FilterResult.Include
+                    FilterResult.Include(false)
                 } else {
                     if (
                         instance.getChildInstances()
                             .filter { it.isVisible(now, Instance.VisibilityOptions(assumeChildOfVisibleParent = true)) }
                             .any { !childHierarchyMatches(it, true).doesntMatch }
                     ) {
-                        FilterResult.Include
+                        FilterResult.Include(false)
                     } else {
-                        FilterResult.DoesntMatch
+                        FilterResult.Exclude
                     }
                 }
             }

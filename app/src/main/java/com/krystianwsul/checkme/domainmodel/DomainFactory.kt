@@ -436,6 +436,7 @@ class DomainFactory(
 
         val instanceSequences = projects.map {
             it.getRootInstances(startExactTimeStamp, endExactTimeStamp, now, searchData, filterVisible)
+                .map { it.first } // todo sequence
         }
 
         return combineInstanceSequences(instanceSequences)

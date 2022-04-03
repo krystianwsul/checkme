@@ -61,6 +61,7 @@ object Irrelevant {
 
             val rootInstances = projects.values
                 .flatMap { it.getRootInstances(null, now.toOffset().plusOne(), now) }
+                .map { it.first }
                 .toList()
 
             val instanceRelevances = (existingInstances + rootInstances)

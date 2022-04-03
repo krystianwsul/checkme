@@ -10,6 +10,7 @@ import com.krystianwsul.common.firebase.models.cache.ClearableInvalidatableManag
 import com.krystianwsul.common.firebase.models.cache.InvalidatableCache
 import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
 import com.krystianwsul.common.firebase.models.cache.invalidatableCache
+import com.krystianwsul.common.firebase.models.search.FilterResult
 import com.krystianwsul.common.firebase.models.search.SearchContext
 import com.krystianwsul.common.firebase.models.search.filterSearch
 import com.krystianwsul.common.firebase.models.search.filterSearchCriteria
@@ -214,7 +215,7 @@ sealed class Project<T : ProjectType>(
         now: ExactTimeStamp.Local,
         searchData: SearchData? = null,
         filterVisible: Boolean = true,
-    ): Sequence<Instance> {
+    ): Sequence<Pair<Instance, FilterResult>> {
         check(startExactTimeStamp == null || endExactTimeStamp == null || startExactTimeStamp < endExactTimeStamp)
 
         InterruptionChecker.throwIfInterrupted()
@@ -258,14 +259,13 @@ sealed class Project<T : ProjectType>(
         return combineInstanceSequences(instanceSequences).let { sequence ->
             InterruptionChecker.throwIfInterrupted()
 
-            // todo sequence
-            searchData?.let { sequence.filterSearchCriteria(searchContext, now, it.myUser, false).map { it.first } }
-                ?: sequence
+            searchData?.let { sequence.filterSearchCriteria(searchContext, now, it.myUser, false) }
+                ?: sequence.map { it to FilterResult.NoSearch("j") }
         }.let { instances ->
             InterruptionChecker.throwIfInterrupted()
 
             if (filterVisible) {
-                instances.filter { instance ->
+                instances.filter { (instance, _) ->
                     val tracker = TimeLogger.startIfLogDone("Project filter visible")
 
                     InterruptionChecker.throwIfInterrupted()

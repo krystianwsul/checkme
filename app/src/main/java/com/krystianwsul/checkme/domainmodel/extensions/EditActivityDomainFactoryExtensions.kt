@@ -712,7 +712,7 @@ private fun DomainFactory.getParentTreeDatas(
         getAllTasks().asSequence()
             .filter { it.showAsParent(now, excludedTaskKeys) }
             .filter { it.isTopLevelTask() && (it.project as? SharedProject)?.notDeleted != true }
-            .filterSearchCriteria(myUserFactory.user, false, now)
+            .filterSearchCriteria(myUserFactory.user, now)
             .map { (task, filterResult) ->
                 task.toParentEntryData(
                     this@getParentTreeDatas,
@@ -732,7 +732,7 @@ private fun DomainFactory.getParentTreeDatas(
             .values
             .asSequence()
             .filter { it.notDeleted }
-            .filterSearchCriteria(false, true)
+            .filterSearchCriteria(true)
             .map { (project, filterResult) ->
                 EditViewModel.ParentEntryData.Project(
                     project.name,
@@ -766,7 +766,7 @@ private fun DomainFactory.getProjectTaskTreeDatas(
             .asSequence()
             .filter { it.showAsParent(now, excludedTaskKeys) }
             .filter { it.isTopLevelTask() }
-            .filterSearchCriteria(myUserFactory.user, false, now)
+            .filterSearchCriteria(myUserFactory.user, now)
             .map { (task, filterResult) ->
                 logFilterResult(task, filterResult)
 
@@ -894,7 +894,7 @@ private fun DomainFactory.getTaskListChildTaskDatas(
     parentTask.getChildTasks()
         .asSequence()
         .filter { it.showAsParent(now, excludedTaskKeys) }
-        .filterSearchCriteria(myUserFactory.user, false, now)
+        .filterSearchCriteria(myUserFactory.user, now)
         .map { (task, filterResult) ->
             task.toParentEntryData(
                 this@getTaskListChildTaskDatas,

@@ -131,7 +131,7 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
             .addTo(clearedDisposable)
 
         Observable.combineLatest(searchRelay, editParametersRelay) { search, editParameters ->
-            ParentPickerParameters(SearchCriteria(search), editParameters.startParameters)
+            ParentPickerParameters(SearchCriteria(search, showDeleted = false), editParameters.startParameters)
         }
             .subscribe(parentPickerDelegate.parametersRelay)
             .addTo(clearedDisposable)

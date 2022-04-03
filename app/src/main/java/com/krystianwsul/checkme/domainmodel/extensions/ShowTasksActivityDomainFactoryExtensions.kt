@@ -21,7 +21,6 @@ fun DomainFactory.getShowTasksData(
     parameters: ShowTasksActivity.Parameters,
     showProjects: Boolean, // this is dynamically from FilterCriteria, not the helper in parameters
     searchCriteria: SearchCriteria,
-    showDeleted: Boolean,
 ): ShowTasksViewModel.Data {
     MyCrashlytics.log("DomainFactory.getShowTasksData")
 
@@ -36,7 +35,7 @@ fun DomainFactory.getShowTasksData(
         return TaskListFragment.ChildTaskData(
             name,
             getScheduleText(ScheduleText),
-            getTaskListChildTaskDatas(this, now, childSearchContext, showDeleted, false),
+            getTaskListChildTaskDatas(this, now, childSearchContext, false),
             note,
             taskKey,
             getImage(deviceDbInfo),
@@ -62,7 +61,7 @@ fun DomainFactory.getShowTasksData(
                 getAllDependenciesLoadedTasks()
                     .asSequence()
                     .filter { it.notDeleted && it.intervalInfo.isUnscheduled() }
-                    .filterSearchCriteria(myUserFactory.user, showDeleted, now)
+                    .filterSearchCriteria(myUserFactory.user, now)
                     .map { (task, filterResult) ->
                         task.toChildTaskData(getChildrenSearchContext(filterResult), filterResult.matchesSearch)
                     }
@@ -76,7 +75,7 @@ fun DomainFactory.getShowTasksData(
                     } else {
                         projects.values
                             .asSequence()
-                            .filterSearchCriteria(showDeleted, showProjects)
+                            .filterSearchCriteria(showProjects)
                             .flatMap { (project, filterResult) ->
                                 project.toEntryDatas(
                                     project.getUnscheduledTaskDatas(getChildrenSearchContext(filterResult)),
@@ -115,7 +114,7 @@ fun DomainFactory.getShowTasksData(
                 project.getAllDependenciesLoadedTasks()
                     .asSequence()
                     .filter { it.isTopLevelTask() }
-                    .filterSearchCriteria(myUserFactory.user, showDeleted, now)
+                    .filterSearchCriteria(myUserFactory.user, now)
                     .map { (task, filterResult) ->
                         task.toChildTaskData(getChildrenSearchContext(filterResult), filterResult.matchesSearch)
                     }

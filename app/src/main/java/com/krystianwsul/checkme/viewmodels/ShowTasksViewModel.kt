@@ -18,7 +18,6 @@ class ShowTasksViewModel : ObservableDomainViewModel<ShowTasksViewModel.Data, Sh
                 parameters.activityParameters,
                 parameters.showProjects,
                 parameters.searchCriteria,
-                parameters.showDeleted,
             )
         }
     }
@@ -38,8 +37,7 @@ class ShowTasksViewModel : ObservableDomainViewModel<ShowTasksViewModel.Data, Sh
             Parameters(
                 activityParameters,
                 showProjects,
-                SearchCriteria(search, showAssignedToOthers),
-                showDeleted,
+                SearchCriteria(search, showAssignedToOthers, showDeleted = showDeleted),
             )
         }
             .subscribe(parametersRelay)
@@ -63,6 +61,5 @@ class ShowTasksViewModel : ObservableDomainViewModel<ShowTasksViewModel.Data, Sh
         val activityParameters: ShowTasksActivity.Parameters,
         val showProjects: Boolean,
         val searchCriteria: SearchCriteria,
-        val showDeleted: Boolean,
     ) : ObservableDomainViewModel.Parameters
 }

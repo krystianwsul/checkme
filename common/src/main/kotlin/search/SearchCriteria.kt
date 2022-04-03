@@ -10,6 +10,7 @@ data class SearchCriteria(
     val showAssignedToOthers: Boolean = true,
     val showDone: Boolean = true, // this is definitely not the same as showDeleted
     val excludedInstanceKeys: Set<InstanceKey> = setOf(),
+    val showDeleted: Boolean = true,
 ) {
 
     companion object {

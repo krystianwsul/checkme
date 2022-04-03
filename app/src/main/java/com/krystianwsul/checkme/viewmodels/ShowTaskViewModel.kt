@@ -23,7 +23,7 @@ class ShowTaskViewModel : ObservableDomainViewModel<ShowTaskViewModel.Data, Show
 
     init {
         Observable.combineLatest(taskKeyRelay, searchRelay) { taskKey, search ->
-            Parameters(taskKey, SearchCriteria(search))
+            Parameters(taskKey, SearchCriteria(search, showDeleted = false))
         }
             .subscribe(parametersRelay)
             .addTo(clearedDisposable)

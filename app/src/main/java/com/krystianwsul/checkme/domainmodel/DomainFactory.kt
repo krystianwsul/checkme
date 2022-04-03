@@ -533,13 +533,12 @@ class DomainFactory(
         parentTask: Task,
         now: ExactTimeStamp.Local,
         searchContext: SearchContext,
-        showDeleted: Boolean,
-        includeProjectInfo: Boolean = true,
+        includeProjectInfo: Boolean,
     ): List<TaskListFragment.ChildTaskData> {
         return searchContext.search {
             parentTask.getChildTasks()
                 .asSequence()
-                .filterSearchCriteria(myUserFactory.user, showDeleted, now)
+                .filterSearchCriteria(myUserFactory.user, now)
                 .map { (childTask, filterResult) ->
                     TaskListFragment.ChildTaskData(
                         childTask.name,
@@ -548,7 +547,6 @@ class DomainFactory(
                             childTask,
                             now,
                             getChildrenSearchContext(filterResult),
-                            showDeleted,
                             includeProjectInfo,
                         ),
                         childTask.note,

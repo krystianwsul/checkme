@@ -13,7 +13,7 @@ class MainNoteViewModel : ObservableDomainViewModel<MainNoteViewModel.Data, Main
     override val domainListener = object : DomainListener<Data>() {
 
         override val domainResultFetcher = DomainResultFetcher.DomainFactoryData {
-            it.getMainNoteData(parameters.showProjects, parameters.searchCriteria, parameters.showDeleted)
+            it.getMainNoteData(parameters.showProjects, parameters.searchCriteria)
         }
     }
 
@@ -28,8 +28,7 @@ class MainNoteViewModel : ObservableDomainViewModel<MainNoteViewModel.Data, Main
         ) { showProjects, showAssignedToOthers, showDeleted, search ->
             Parameters(
                 showProjects,
-                SearchCriteria(search, showAssignedToOthers = showAssignedToOthers),
-                showDeleted,
+                SearchCriteria(search, showAssignedToOthers = showAssignedToOthers, showDeleted = showDeleted),
             )
         }
             .subscribe(parametersRelay)
@@ -40,9 +39,6 @@ class MainNoteViewModel : ObservableDomainViewModel<MainNoteViewModel.Data, Main
 
     data class Data(val taskData: TaskListFragment.TaskData) : DomainData()
 
-    data class Parameters(
-        val showProjects: Boolean,
-        val searchCriteria: SearchCriteria,
-        val showDeleted: Boolean,
-    ) : ObservableDomainViewModel.Parameters
+    data class Parameters(val showProjects: Boolean, val searchCriteria: SearchCriteria) :
+        ObservableDomainViewModel.Parameters
 }

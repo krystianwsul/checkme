@@ -61,8 +61,8 @@ class SearchContext private constructor(
         }
     }
 
-    fun Project<*>.filterSearchCriteria(showDeleted: Boolean, showProjects: Boolean): FilterResult {
-        if (!showDeleted && endExactTimeStamp != null) return FilterResult.Exclude
+    fun Project<*>.filterSearchCriteria(showProjects: Boolean): FilterResult {
+        if (!searchCriteria.showDeleted && endExactTimeStamp != null) return FilterResult.Exclude
 
         val search = searchCriteria.search
             ?.takeIf { it.hasSearch }
@@ -80,8 +80,8 @@ class SearchContext private constructor(
             FilterResult.Exclude
     }
 
-    fun <T : Project<*>> Sequence<T>.filterSearchCriteria(showDeleted: Boolean, showProjects: Boolean) =
-        map { it to it.filterSearchCriteria(showDeleted, showProjects) }.filter { !it.second.doesntMatch }
+    fun <T : Project<*>> Sequence<T>.filterSearchCriteria(showProjects: Boolean) =
+        map { it to it.filterSearchCriteria(showProjects) }.filter { !it.second.doesntMatch }
 
     fun Sequence<Task>.filterSearch(onlyHierarchy: Boolean = false) =
         if (searchCriteria.search?.hasSearch != true) {
@@ -93,10 +93,9 @@ class SearchContext private constructor(
 
     fun Sequence<Task>.filterSearchCriteria(
         myUser: MyUser,
-        showDeleted: Boolean,
         now: ExactTimeStamp.Local,
     ): Sequence<Pair<Task, FilterResult>> {
-        if (searchCriteria.isEmpty && showDeleted) return map { it to FilterResult.NoSearch("b") }
+        if (searchCriteria.isEmpty) return map { it to FilterResult.NoSearch("b") }
 
         val filtered1 = if (searchCriteria.showAssignedToOthers) {
             this
@@ -106,14 +105,14 @@ class SearchContext private constructor(
 
         val filtered2 = filtered1.filterSearch()
 
-        return if (showDeleted) {
+        return if (searchCriteria.showDeleted) {
             filtered2
         } else {
             filtered2.filter { it.first.isVisible(now) }
         }
     }
 
-    // todo this could return the task.matchesSearch result to optimize building child searchCriteria in the calling function
+    // todo taskKey this could return the task.matchesSearch result to optimize building child searchCriteria in the calling function
     fun Sequence<Instance>.filterSearchCriteria(
         now: ExactTimeStamp.Local,
         myUser: MyUser,

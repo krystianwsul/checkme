@@ -22,7 +22,6 @@ import java.util.*
 fun DomainFactory.getMainNoteData(
     showProjects: Boolean,
     searchCriteria: SearchCriteria,
-    showDeleted: Boolean,
     now: ExactTimeStamp.Local = ExactTimeStamp.Local.now,
 ): MainNoteViewModel.Data {
     MyCrashlytics.log("DomainFactory.getMainNoteData")
@@ -31,7 +30,7 @@ fun DomainFactory.getMainNoteData(
 
     return MainNoteViewModel.Data(
         TaskListFragment.TaskData(
-            getMainData(now, showProjects, searchCriteria, showDeleted) { it.intervalInfo.isUnscheduled() },
+            getMainData(now, showProjects, searchCriteria) { it.intervalInfo.isUnscheduled() },
             null,
             true,
             null,
@@ -42,7 +41,6 @@ fun DomainFactory.getMainNoteData(
 fun DomainFactory.getMainTaskData(
     showProjects: Boolean,
     searchCriteria: SearchCriteria,
-    showDeleted: Boolean,
     now: ExactTimeStamp.Local = ExactTimeStamp.Local.now,
 ): MainTaskViewModel.Data {
     MyCrashlytics.log("DomainFactory.getMainTaskData")
@@ -50,7 +48,7 @@ fun DomainFactory.getMainTaskData(
     DomainThreadChecker.instance.requireDomainThread()
 
     return MainTaskViewModel.Data(
-        TaskListFragment.TaskData(getMainData(now, showProjects, searchCriteria, showDeleted), null, true, null)
+        TaskListFragment.TaskData(getMainData(now, showProjects, searchCriteria), null, true, null)
     )
 }
 
@@ -58,7 +56,6 @@ private fun DomainFactory.getMainData(
     now: ExactTimeStamp.Local,
     showProjects: Boolean,
     searchCriteria: SearchCriteria,
-    showDeleted: Boolean,
     filter: (Task) -> Boolean = { true },
 ): List<TaskListFragment.EntryData> {
     val searchContext = SearchContext.startSearch(searchCriteria)
@@ -67,12 +64,12 @@ private fun DomainFactory.getMainData(
         asSequence()
             .filter(filter)
             .filter { it.isTopLevelTask() }
-            .filterSearchCriteria(myUserFactory.user, showDeleted, now)
+            .filterSearchCriteria(myUserFactory.user, now)
             .map { (task, filterResult) ->
                 TaskListFragment.ChildTaskData(
                     task.name,
                     task.getScheduleText(ScheduleText),
-                    getTaskListChildTaskDatas(task, now, getChildrenSearchContext(filterResult), showDeleted),
+                    getTaskListChildTaskDatas(task, now, getChildrenSearchContext(filterResult), true),
                     task.note,
                     task.taskKey,
                     task.getImage(deviceDbInfo),
@@ -95,7 +92,7 @@ private fun DomainFactory.getMainData(
                 .groupBy { it.projectId }
                 .flatMap { (projectId, tasks) ->
                     projectsFactory.getProjectForce(projectId)
-                        .let { it to it.filterSearchCriteria(showDeleted, showProjects) }
+                        .let { it to it.filterSearchCriteria(showProjects) }
                         .takeIf { !it.second.doesntMatch }
                         ?.let { (project, filterResult) ->
                             project.toEntryDatas(
@@ -110,7 +107,7 @@ private fun DomainFactory.getMainData(
             projectsFactory.projects
                 .values
                 .asSequence()
-                .filterSearchCriteria(showDeleted, showProjects)
+                .filterSearchCriteria(showProjects)
                 .flatMap { (project, filterResult) ->
                     project.toEntryDatas(
                         project.getAllDependenciesLoadedTasks().toChildTaskDatas(getChildrenSearchContext(filterResult)),

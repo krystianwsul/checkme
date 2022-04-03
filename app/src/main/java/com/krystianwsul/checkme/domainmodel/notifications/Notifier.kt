@@ -463,7 +463,7 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
         }
 
         val relevantInstanceShownKeys = domainFactory.getRootInstances(null, now.toOffset().plusOne(), now)
-            .map { it.first } // todo sequence
+            .map { it.first }
             .mapNotNull { it.getShown(domainFactory.shownFactory)?.instanceKey }
             .toSet()
 

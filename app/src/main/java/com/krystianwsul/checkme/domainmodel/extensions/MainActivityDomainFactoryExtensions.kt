@@ -89,36 +89,38 @@ private fun DomainFactory.getMainData(
         .sortedDescending()
         .toList()
 
-    return if (debugMode) {
-        rootTasksFactory.rootTasks
-            .values
-            .groupBy { it.projectId }
-            .flatMap { (projectId, tasks) ->
-                projectsFactory.getProjectForce(projectId)
-                    .let { it to it.filterSearchCriteria(searchContext, showDeleted, showProjects) }
-                    .takeIf { !it.second.doesntMatch }
-                    ?.let { (project, filterResult) ->
-                        val childSearchContext = searchContext.getChildrenSearchContext(filterResult)
+    return searchContext.search {
+        if (debugMode) {
+            rootTasksFactory.rootTasks
+                .values
+                .groupBy { it.projectId }
+                .flatMap { (projectId, tasks) ->
+                    projectsFactory.getProjectForce(projectId)
+                        .let { it to it.filterSearchCriteria(showDeleted, showProjects) }
+                        .takeIf { !it.second.doesntMatch }
+                        ?.let { (project, filterResult) ->
+                            val childSearchContext = searchContext.getChildrenSearchContext(filterResult)
 
-                        project.toEntryDatas(tasks.toChildTaskDatas(childSearchContext), showProjects, filterResult)
-                    }
-                    .orEmpty()
-            }
-    } else {
-        projectsFactory.projects
-            .values
-            .asSequence()
-            .filterSearchCriteria(searchContext, showDeleted, showProjects)
-            .flatMap { (project, filterResult) ->
-                val childSearchContext = searchContext.getChildrenSearchContext(filterResult)
+                            project.toEntryDatas(tasks.toChildTaskDatas(childSearchContext), showProjects, filterResult)
+                        }
+                        .orEmpty()
+                }
+        } else {
+            projectsFactory.projects
+                .values
+                .asSequence()
+                .filterSearchCriteria(showDeleted, showProjects)
+                .flatMap { (project, filterResult) ->
+                    val childSearchContext = searchContext.getChildrenSearchContext(filterResult)
 
-                project.toEntryDatas(
-                    project.getAllDependenciesLoadedTasks().toChildTaskDatas(childSearchContext),
-                    showProjects,
-                    filterResult,
-                )
-            }
-            .toList()
+                    project.toEntryDatas(
+                        project.getAllDependenciesLoadedTasks().toChildTaskDatas(childSearchContext),
+                        showProjects,
+                        filterResult,
+                    )
+                }
+                .toList()
+        }
     }
 }
 

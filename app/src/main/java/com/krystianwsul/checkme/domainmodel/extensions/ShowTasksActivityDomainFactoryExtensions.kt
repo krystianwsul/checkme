@@ -74,19 +74,21 @@ fun DomainFactory.getShowTasksData(
                 if (parameters.projectKey != null) {
                     getProjectForce(parameters.projectKey).getUnscheduledTaskDatas(searchContext)
                 } else {
-                    projects.values
-                        .asSequence()
-                        .filterSearchCriteria(searchContext, showDeleted, showProjects)
-                        .flatMap { (project, filterResult) ->
-                            val childSearchCriteria = searchContext.getChildrenSearchContext(filterResult)
+                    searchContext.search {
+                        projects.values
+                            .asSequence()
+                            .filterSearchCriteria(showDeleted, showProjects)
+                            .flatMap { (project, filterResult) ->
+                                val childSearchCriteria = searchContext.getChildrenSearchContext(filterResult)
 
-                            project.toEntryDatas(
-                                project.getUnscheduledTaskDatas(childSearchCriteria),
-                                showProjects,
-                                filterResult,
-                            )
-                        }
-                        .toList()
+                                project.toEntryDatas(
+                                    project.getUnscheduledTaskDatas(childSearchCriteria),
+                                    showProjects,
+                                    filterResult,
+                                )
+                            }
+                            .toList()
+                    }
                 }
             }
 

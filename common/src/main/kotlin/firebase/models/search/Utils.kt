@@ -1,15 +1,14 @@
 package com.krystianwsul.common.firebase.models.search
 
 import android.util.Log
-import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.firebase.models.Instance
-import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.firebase.models.users.MyUser
 import com.krystianwsul.common.interrupt.InterruptionChecker
 import com.krystianwsul.common.time.ExactTimeStamp
 
-private fun childHierarchyMatches(task: Task, searchContext: SearchContext, onlyHierarchy: Boolean = false): FilterResult {
+// todo searchContext private
+fun childHierarchyMatches(task: Task, searchContext: SearchContext, onlyHierarchy: Boolean = false): FilterResult {
     InterruptionChecker.throwIfInterrupted()
 
     return task.getMatchResult(searchContext.searchCriteria.search).let {
@@ -59,36 +58,6 @@ fun Sequence<Task>.filterSearchCriteria(
         filtered2.filter { it.first.isVisible(now) }
     }
 }
-
-fun Project<*>.filterSearchCriteria(
-    searchContext: SearchContext,
-    showDeleted: Boolean,
-    showProjects: Boolean,
-): FilterResult {
-    if (!showDeleted && endExactTimeStamp != null) return FilterResult.Exclude
-
-    val search = searchContext.searchCriteria
-        .search
-        ?.takeIf { it.hasSearch }
-        ?: return FilterResult.NoSearch("c")
-
-    search.let { it as? SearchCriteria.Search.Query }
-        ?.takeIf { showProjects }
-        ?.let {
-            if (name.isNotEmpty() && normalizedName.contains(it.query)) return FilterResult.Include(true)
-        }
-
-    return if (getAllDependenciesLoadedTasks().any { !childHierarchyMatches(it, searchContext).doesntMatch })
-        FilterResult.Include(false)
-    else
-        FilterResult.Exclude
-}
-
-fun <T : Project<*>> Sequence<T>.filterSearchCriteria(
-    searchContext: SearchContext,
-    showDeleted: Boolean,
-    showProjects: Boolean,
-) = map { it to it.filterSearchCriteria(searchContext, showDeleted, showProjects) }.filter { !it.second.doesntMatch }
 
 // todo this could return the task.matchesSearch result to optimize building child searchCriteria in the calling function
 fun Sequence<Instance>.filterSearchCriteria(

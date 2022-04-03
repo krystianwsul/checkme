@@ -728,29 +728,31 @@ private fun DomainFactory.getParentTreeDatas(
 
     val projectOrder = Preferences.projectOrder
 
-    parentTreeDatas += projectsFactory.sharedProjects
-        .values
-        .asSequence()
-        .filter { it.notDeleted }
-        .filterSearchCriteria(searchContext, false, true)
-        .map { (project, filterResult) ->
-            val childSearchCriteria = searchContext.getChildrenSearchContext(filterResult)
+    parentTreeDatas += searchContext.search {
+        projectsFactory.sharedProjects
+            .values
+            .asSequence()
+            .filter { it.notDeleted }
+            .filterSearchCriteria(false, true)
+            .map { (project, filterResult) ->
+                val childSearchCriteria = searchContext.getChildrenSearchContext(filterResult)
 
-            EditViewModel.ParentEntryData.Project(
-                project.name,
-                getProjectTaskTreeDatas(
-                    now,
-                    project,
-                    excludedTaskKeys,
-                    parentInstanceKey,
-                    childSearchCriteria,
-                ),
-                project.projectKey,
-                project.users.toUserDatas(),
-                projectOrder.getOrDefault(project.projectKey, 0f),
-                filterResult.matchesSearch,
-            )
-        }
+                EditViewModel.ParentEntryData.Project(
+                    project.name,
+                    getProjectTaskTreeDatas(
+                        now,
+                        project,
+                        excludedTaskKeys,
+                        parentInstanceKey,
+                        childSearchCriteria,
+                    ),
+                    project.projectKey,
+                    project.users.toUserDatas(),
+                    projectOrder.getOrDefault(project.projectKey, 0f),
+                    filterResult.matchesSearch,
+                )
+            }
+    }
 
     return parentTreeDatas
 }

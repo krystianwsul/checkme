@@ -11,7 +11,6 @@ import com.krystianwsul.checkme.viewmodels.ShowNotificationGroupViewModel
 import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.models.search.SearchContext
-import com.krystianwsul.common.firebase.models.search.filterSearchCriteria
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.InstanceKey
 
@@ -36,31 +35,33 @@ fun DomainFactory.getShowNotificationGroupData(
 
     val searchContext = SearchContext.startSearch(searchCriteria)
 
-    val instanceDescriptors = instances.asSequence()
-        .filterSearchCriteria(searchContext, now, myUserFactory.user, false)
-        .map { (instance, filterResult) ->
-            val childSearchContext = searchContext.getChildrenSearchContext(filterResult)
+    val instanceDescriptors = searchContext.search {
+        instances.asSequence()
+            .filterSearchCriteria(now, myUserFactory.user, false)
+            .map { (instance, filterResult) ->
+                val childSearchContext = searchContext.getChildrenSearchContext(filterResult)
 
-            val (notDoneChildInstanceDescriptors, doneChildInstanceDescriptors) =
-                getChildInstanceDatas(instance, now, childSearchContext)
+                val (notDoneChildInstanceDescriptors, doneChildInstanceDescriptors) =
+                    getChildInstanceDatas(instance, now, childSearchContext)
 
-            val instanceData = GroupListDataWrapper.InstanceData.fromInstance(
-                instance,
-                now,
-                this,
-                notDoneChildInstanceDescriptors,
-                doneChildInstanceDescriptors,
-                filterResult.matchesSearch,
-            )
+                val instanceData = GroupListDataWrapper.InstanceData.fromInstance(
+                    instance,
+                    now,
+                    this@getShowNotificationGroupData,
+                    notDoneChildInstanceDescriptors,
+                    doneChildInstanceDescriptors,
+                    filterResult.matchesSearch,
+                )
 
-            GroupTypeFactory.InstanceDescriptor(
-                instanceData,
-                instance.instanceDateTime.toDateTimePair(),
-                instance.groupByProject,
-                instance,
-            )
-        }
-        .toList()
+                GroupTypeFactory.InstanceDescriptor(
+                    instanceData,
+                    instance.instanceDateTime.toDateTimePair(),
+                    instance.groupByProject,
+                    instance,
+                )
+            }
+            .toList()
+    }
 
     val (mixedInstanceDatas, doneInstanceDatas) = instanceDescriptors.splitDone()
 

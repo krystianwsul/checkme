@@ -41,7 +41,6 @@ import com.krystianwsul.common.firebase.models.project.PrivateProject
 import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.search.FilterResult
 import com.krystianwsul.common.firebase.models.search.SearchContext
-import com.krystianwsul.common.firebase.models.search.filterSearchCriteria
 import com.krystianwsul.common.firebase.models.task.*
 import com.krystianwsul.common.firebase.models.taskhierarchy.TaskHierarchy
 import com.krystianwsul.common.time.*
@@ -480,20 +479,22 @@ class DomainFactory(
         searchContext: SearchContext,
         filterVisible: Boolean = true,
     ): Collection<T> {
-        return parentInstance.getChildInstances()
-            .asSequence()
-            .filter {
-                !filterVisible || it.isVisible(now, Instance.VisibilityOptions(assumeChildOfVisibleParent = true))
-            }
-            .filterSearchCriteria(searchContext, now, myUserFactory.user, true)
-            .mapNotNull { (childInstance, filterResult) ->
-                val childrenSearchContext = searchContext.getChildrenSearchContext(filterResult)
+        return searchContext.search {
+            parentInstance.getChildInstances()
+                .asSequence()
+                .filter {
+                    !filterVisible || it.isVisible(now, Instance.VisibilityOptions(assumeChildOfVisibleParent = true))
+                }
+                .filterSearchCriteria(now, myUserFactory.user, true)
+                .mapNotNull { (childInstance, filterResult) ->
+                    val childrenSearchContext = searchContext.getChildrenSearchContext(filterResult)
 
-                val children = getChildInstanceDatas(childInstance, now, mapper, childrenSearchContext, filterVisible)
+                    val children = getChildInstanceDatas(childInstance, now, mapper, childrenSearchContext, filterVisible)
 
-                mapper(childInstance, children, filterResult)
-            }
-            .toList()
+                    mapper(childInstance, children, filterResult)
+                }
+                .toList()
+        }
     }
 
     fun getChildInstanceDatas(

@@ -1,11 +1,14 @@
 package com.krystianwsul.common.firebase.models.search
 
 import com.krystianwsul.common.criteria.SearchCriteria
+import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.firebase.models.users.MyUser
+import com.krystianwsul.common.interrupt.InterruptionChecker
 import com.krystianwsul.common.time.ExactTimeStamp
 
+// todo searchContext add MyUser in here, then clean up SearchData
 class SearchContext private constructor(val searchCriteria: SearchCriteria, val searchingChildrenOfQueryMatch: Boolean) {
 
     companion object {
@@ -85,5 +88,47 @@ class SearchContext private constructor(val searchCriteria: SearchCriteria, val 
         } else {
             filtered2.filter { it.first.isVisible(now) }
         }
+    }
+
+    // todo this could return the task.matchesSearch result to optimize building child searchCriteria in the calling function
+    fun Sequence<Instance>.filterSearchCriteria(
+        now: ExactTimeStamp.Local,
+        myUser: MyUser,
+        assumeChild: Boolean,
+    ): Sequence<Pair<Instance, FilterResult>> = if (searchCriteria.isEmpty) {
+        this.map { it to FilterResult.NoSearch("i") }
+    } else {
+        fun childHierarchyMatches(instance: Instance, assumeChild: Boolean): FilterResult {
+            InterruptionChecker.throwIfInterrupted()
+
+            if (!assumeChild && !searchCriteria.showAssignedToOthers && !instance.isAssignedToMe(myUser))
+                return FilterResult.Exclude
+
+            if (!searchCriteria.showDone && instance.done != null)
+                return FilterResult.Exclude
+
+            if (instance.instanceKey in searchCriteria.excludedInstanceKeys)
+                return FilterResult.Exclude
+
+            return instance.task.getMatchResult(searchCriteria.search).let {
+                it.getFilterResult() ?: run {
+                    if (searchingChildrenOfQueryMatch) {
+                        FilterResult.Include(false)
+                    } else {
+                        if (
+                            instance.getChildInstances()
+                                .filter { it.isVisible(now, Instance.VisibilityOptions(assumeChildOfVisibleParent = true)) }
+                                .any { !childHierarchyMatches(it, true).doesntMatch }
+                        ) {
+                            FilterResult.Include(false)
+                        } else {
+                            FilterResult.Exclude
+                        }
+                    }
+                }
+            }
+        }
+
+        map { it to childHierarchyMatches(it, assumeChild) }.filter { !it.second.doesntMatch }
     }
 }

@@ -12,7 +12,6 @@ import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
 import com.krystianwsul.common.firebase.models.cache.invalidatableCache
 import com.krystianwsul.common.firebase.models.search.FilterResult
 import com.krystianwsul.common.firebase.models.search.SearchContext
-import com.krystianwsul.common.firebase.models.search.filterSearchCriteria
 import com.krystianwsul.common.firebase.models.task.ProjectTask
 import com.krystianwsul.common.firebase.models.task.RootTask
 import com.krystianwsul.common.firebase.models.task.Task
@@ -260,8 +259,9 @@ sealed class Project<T : ProjectType>(
         return combineInstanceSequences(instanceSequences).let { sequence ->
             InterruptionChecker.throwIfInterrupted()
 
-            searchData?.let { sequence.filterSearchCriteria(searchContext, now, it.myUser, false) }
-                ?: sequence.map { it to FilterResult.NoSearch("j") }
+            searchData?.let {
+                it.searchContext.search { sequence.filterSearchCriteria(now, it.myUser, false) }
+            } ?: sequence.map { it to FilterResult.NoSearch("j") }
         }.let { instances ->
             InterruptionChecker.throwIfInterrupted()
 

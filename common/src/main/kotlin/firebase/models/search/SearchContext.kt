@@ -19,7 +19,6 @@ class SearchContext private constructor(
         fun startSearch(searchCriteria: SearchCriteria) = SearchContext(searchCriteria, false)
     }
 
-    // todo searchContext check usages, remove receiver
     fun getChildrenSearchContext(filterResult: FilterResult) = when (filterResult) {
         FilterResult.Exclude -> this
         is FilterResult.NoSearch -> this
@@ -39,7 +38,6 @@ class SearchContext private constructor(
 
     fun <T> search(action: SearchContext.() -> T) = run(action)
 
-    // todo searchContext private
     private fun childHierarchyMatches(task: Task, onlyHierarchy: Boolean = false): FilterResult {
         InterruptionChecker.throwIfInterrupted()
 

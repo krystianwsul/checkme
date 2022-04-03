@@ -14,6 +14,10 @@ class SearchContext private constructor(
     private val searchingChildrenOfQueryMatch: Boolean,
 ) {
 
+    /*
+    todo searchContext consider making delegates for projects/tasks/instances/query
+     */
+
     companion object {
 
         fun startSearch(searchCriteria: SearchCriteria) = SearchContext(searchCriteria, false)

@@ -12,7 +12,6 @@ import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
 import com.krystianwsul.common.firebase.models.cache.invalidatableCache
 import com.krystianwsul.common.firebase.models.search.FilterResult
 import com.krystianwsul.common.firebase.models.search.SearchContext
-import com.krystianwsul.common.firebase.models.search.filterSearch
 import com.krystianwsul.common.firebase.models.search.filterSearchCriteria
 import com.krystianwsul.common.firebase.models.task.ProjectTask
 import com.krystianwsul.common.firebase.models.task.RootTask
@@ -231,10 +230,12 @@ sealed class Project<T : ProjectType>(
         general.  Then, we check all existing instances on top of that.
          */
 
-        val filteredTasks = allTasks.asSequence()
-            .filterSearch(searchContext, true)
-            .map { it.first }
-            .toList()
+        val filteredTasks = searchContext.search {
+            allTasks.asSequence()
+                .filterSearch(true)
+                .map { it.first }
+                .toList()
+        }
 
         val instanceSequences = filteredTasks.map {
             it.getInstances(

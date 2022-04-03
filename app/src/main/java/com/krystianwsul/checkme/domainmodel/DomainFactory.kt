@@ -530,28 +530,30 @@ class DomainFactory(
         showDeleted: Boolean,
         includeProjectInfo: Boolean = true,
     ): List<TaskListFragment.ChildTaskData> {
-        return parentTask.getChildTasks()
-            .asSequence()
-            .filterSearchCriteria(searchContext, myUserFactory.user, showDeleted, now)
-            .map { (childTask, filterResult) ->
-                val childSearchContext = searchContext.getChildrenSearchContext(filterResult)
+        return searchContext.search {
+            parentTask.getChildTasks()
+                .asSequence()
+                .filterSearchCriteria(myUserFactory.user, showDeleted, now)
+                .map { (childTask, filterResult) ->
+                    val childSearchContext = searchContext.getChildrenSearchContext(filterResult)
 
-                TaskListFragment.ChildTaskData(
-                    childTask.name,
-                    childTask.getScheduleText(ScheduleText),
-                    getTaskListChildTaskDatas(childTask, now, childSearchContext, showDeleted, includeProjectInfo),
-                    childTask.note,
-                    childTask.taskKey,
-                    childTask.getImage(deviceDbInfo),
-                    childTask.notDeleted,
-                    childTask.isVisible(now),
-                    childTask.canMigrateDescription(now),
-                    childTask.ordinal,
-                    childTask.getProjectInfo(),
-                    filterResult.matchesSearch,
-                )
-            }
-            .toList()
+                    TaskListFragment.ChildTaskData(
+                        childTask.name,
+                        childTask.getScheduleText(ScheduleText),
+                        getTaskListChildTaskDatas(childTask, now, childSearchContext, showDeleted, includeProjectInfo),
+                        childTask.note,
+                        childTask.taskKey,
+                        childTask.getImage(deviceDbInfo),
+                        childTask.notDeleted,
+                        childTask.isVisible(now),
+                        childTask.canMigrateDescription(now),
+                        childTask.ordinal,
+                        childTask.getProjectInfo(),
+                        filterResult.matchesSearch,
+                    )
+                }
+                .toList()
+        }
     }
 
     data class CloudParams(val projects: Collection<Project<*>>, val userKeys: Collection<UserKey> = emptySet()) {

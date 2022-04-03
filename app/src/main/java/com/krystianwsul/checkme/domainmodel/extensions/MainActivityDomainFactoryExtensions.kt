@@ -14,7 +14,6 @@ import com.krystianwsul.checkme.viewmodels.MainTaskViewModel
 import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.models.search.SearchContext
-import com.krystianwsul.common.firebase.models.search.filterSearchCriteria
 import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.ExactTimeStamp
@@ -67,7 +66,9 @@ private fun DomainFactory.getMainData(
     fun Collection<Task>.toChildTaskDatas(searchContext: SearchContext) = asSequence()
         .filter(filter)
         .filter { it.isTopLevelTask() }
-        .filterSearchCriteria(searchContext, myUserFactory.user, showDeleted, now)
+        .let {
+            searchContext.search { it.filterSearchCriteria(myUserFactory.user, showDeleted, now) }
+        }
         .map { (task, filterResult) ->
             val childSearchContext = searchContext.getChildrenSearchContext(filterResult)
 

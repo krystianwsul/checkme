@@ -2,7 +2,9 @@ package com.krystianwsul.common.firebase.models.search
 
 import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.firebase.models.project.Project
-import search.MatchResult
+import com.krystianwsul.common.firebase.models.task.Task
+import com.krystianwsul.common.firebase.models.users.MyUser
+import com.krystianwsul.common.time.ExactTimeStamp
 
 class SearchContext private constructor(val searchCriteria: SearchCriteria, val searchingChildrenOfQueryMatch: Boolean) {
 
@@ -11,6 +13,7 @@ class SearchContext private constructor(val searchCriteria: SearchCriteria, val 
         fun startSearch(searchCriteria: SearchCriteria) = SearchContext(searchCriteria, false)
     }
 
+    // todo searchContext check usages, remove receiver
     fun getChildrenSearchContext(filterResult: FilterResult) = when (filterResult) {
         FilterResult.Exclude -> this
         is FilterResult.NoSearch -> this
@@ -23,17 +26,6 @@ class SearchContext private constructor(val searchCriteria: SearchCriteria, val 
             this
         }
     }
-
-    fun getChildrenSearchContext(matchResult: MatchResult) =
-        if (matchResult.matches) {
-            if (matchResult.continueSearchingChildren) {
-                SearchContext(searchCriteria, true)
-            } else {
-                SearchContext(searchCriteria.clear(), false)
-            }
-        } else {
-            this
-        }
 
     // todo taskKey
     override fun toString() =
@@ -64,4 +56,34 @@ class SearchContext private constructor(val searchCriteria: SearchCriteria, val 
 
     fun <T : Project<*>> Sequence<T>.filterSearchCriteria(showDeleted: Boolean, showProjects: Boolean) =
         map { it to it.filterSearchCriteria(showDeleted, showProjects) }.filter { !it.second.doesntMatch }
+
+    fun Sequence<Task>.filterSearch(onlyHierarchy: Boolean = false) =
+        if (searchCriteria.search?.hasSearch != true) {
+            map { it to FilterResult.NoSearch("e") }
+        } else {
+            // todo taskKey this could return a subtype of FilterCriteria, i.e. the subset where doesnMatch = false
+            map { it to childHierarchyMatches(it, this@SearchContext, onlyHierarchy) }.filter { !it.second.doesntMatch }
+        }
+
+    fun Sequence<Task>.filterSearchCriteria(
+        myUser: MyUser,
+        showDeleted: Boolean,
+        now: ExactTimeStamp.Local,
+    ): Sequence<Pair<Task, FilterResult>> {
+        if (searchCriteria.isEmpty && showDeleted) return map { it to FilterResult.NoSearch("b") }
+
+        val filtered1 = if (searchCriteria.showAssignedToOthers) {
+            this
+        } else {
+            filter { it.isAssignedToMe(myUser) }
+        }
+
+        val filtered2 = filtered1.filterSearch()
+
+        return if (showDeleted) {
+            filtered2
+        } else {
+            filtered2.filter { it.first.isVisible(now) }
+        }
+    }
 }

@@ -22,7 +22,6 @@ import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.schedule.SingleSchedule
 import com.krystianwsul.common.firebase.models.search.FilterResult
 import com.krystianwsul.common.firebase.models.search.SearchContext
-import com.krystianwsul.common.firebase.models.search.filterSearch
 import com.krystianwsul.common.firebase.models.task.ProjectRootTaskIdTracker
 import com.krystianwsul.common.firebase.models.task.RootTask
 import com.krystianwsul.common.firebase.models.task.Task
@@ -191,25 +190,27 @@ fun DomainFactory.getGroupListChildTaskDatas(
     parentTask: Task,
     now: ExactTimeStamp.Local,
     searchContext: SearchContext,
-): List<GroupListDataWrapper.TaskData> = parentTask.getChildTasks()
-    .asSequence()
-    .filterSearch(searchContext)
-    .map { (childTask, filterResult) ->
-        val childQuery = searchContext.getChildrenSearchContext(filterResult)
+): List<GroupListDataWrapper.TaskData> = searchContext.search {
+    parentTask.getChildTasks()
+        .asSequence()
+        .filterSearch()
+        .map { (childTask, filterResult) ->
+            val childQuery = searchContext.getChildrenSearchContext(filterResult)
 
-        GroupListDataWrapper.TaskData(
-            childTask.taskKey,
-            childTask.name,
-            getGroupListChildTaskDatas(childTask, now, childQuery),
-            childTask.note,
-            childTask.getImage(deviceDbInfo),
-            childTask.getProjectInfo(),
-            childTask.ordinal,
-            childTask.canMigrateDescription(now),
-            filterResult.matchesSearch,
-        )
-    }
-    .toList()
+            GroupListDataWrapper.TaskData(
+                childTask.taskKey,
+                childTask.name,
+                getGroupListChildTaskDatas(childTask, now, childQuery),
+                childTask.note,
+                childTask.getImage(deviceDbInfo),
+                childTask.getProjectInfo(),
+                childTask.ordinal,
+                childTask.canMigrateDescription(now),
+                filterResult.matchesSearch,
+            )
+        }
+        .toList()
+}
 
 fun <T : Comparable<T>> DomainFactory.searchInstances(
     now: ExactTimeStamp.Local,

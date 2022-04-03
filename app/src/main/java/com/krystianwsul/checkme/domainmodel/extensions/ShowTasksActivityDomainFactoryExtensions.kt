@@ -14,7 +14,6 @@ import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.project.SharedProject
 import com.krystianwsul.common.firebase.models.search.SearchContext
-import com.krystianwsul.common.firebase.models.search.filterSearchCriteria
 import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.time.ExactTimeStamp
 
@@ -59,22 +58,22 @@ fun DomainFactory.getShowTasksData(
 
     when (parameters) {
         is ShowTasksActivity.Parameters.Unscheduled -> {
-            fun Project<*>.getUnscheduledTaskDatas(searchContext: SearchContext) = getAllDependenciesLoadedTasks()
-                .asSequence()
-                .filter { it.notDeleted && it.intervalInfo.isUnscheduled() }
-                .filterSearchCriteria(searchContext, myUserFactory.user, showDeleted, now)
-                .map { (task, filterResult) ->
-                    val childSearchCriteria = searchContext.getChildrenSearchContext(filterResult)
-
-                    task.toChildTaskData(childSearchCriteria, filterResult.matchesSearch)
-                }
-                .toList()
-
             entryDatas = projectsFactory.run {
-                if (parameters.projectKey != null) {
-                    getProjectForce(parameters.projectKey).getUnscheduledTaskDatas(searchContext)
-                } else {
-                    searchContext.search {
+                searchContext.search {
+                    fun Project<*>.getUnscheduledTaskDatas(searchContext: SearchContext) = getAllDependenciesLoadedTasks()
+                        .asSequence()
+                        .filter { it.notDeleted && it.intervalInfo.isUnscheduled() }
+                        .filterSearchCriteria(myUserFactory.user, showDeleted, now)
+                        .map { (task, filterResult) ->
+                            val childSearchCriteria = searchContext.getChildrenSearchContext(filterResult)
+
+                            task.toChildTaskData(childSearchCriteria, filterResult.matchesSearch)
+                        }
+                        .toList()
+
+                    if (parameters.projectKey != null) {
+                        getProjectForce(parameters.projectKey).getUnscheduledTaskDatas(searchContext)
+                    } else {
                         projects.values
                             .asSequence()
                             .filterSearchCriteria(showDeleted, showProjects)
@@ -114,16 +113,18 @@ fun DomainFactory.getShowTasksData(
         is ShowTasksActivity.Parameters.Project -> {
             val project = projectsFactory.getProjectForce(parameters.projectKey)
 
-            entryDatas = project.getAllDependenciesLoadedTasks()
-                .asSequence()
-                .filter { it.isTopLevelTask() }
-                .filterSearchCriteria(searchContext, myUserFactory.user, showDeleted, now)
-                .map { (task, filterResult) ->
-                    val childSearchCriteria = searchContext.getChildrenSearchContext(filterResult)
+            entryDatas = searchContext.search {
+                project.getAllDependenciesLoadedTasks()
+                    .asSequence()
+                    .filter { it.isTopLevelTask() }
+                    .filterSearchCriteria(myUserFactory.user, showDeleted, now)
+                    .map { (task, filterResult) ->
+                        val childSearchCriteria = searchContext.getChildrenSearchContext(filterResult)
 
-                    task.toChildTaskData(childSearchCriteria, filterResult.matchesSearch)
-                }
-                .toList()
+                        task.toChildTaskData(childSearchCriteria, filterResult.matchesSearch)
+                    }
+                    .toList()
+            }
 
             title = project.getDisplayName()
             subtitle = null

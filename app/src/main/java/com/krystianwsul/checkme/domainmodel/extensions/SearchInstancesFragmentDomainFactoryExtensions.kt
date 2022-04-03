@@ -12,7 +12,6 @@ import com.krystianwsul.checkme.viewmodels.SearchInstancesViewModel
 import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.models.search.SearchContext
-import com.krystianwsul.common.firebase.models.search.filterSearch
 import com.krystianwsul.common.locker.LockerManager
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.ProjectKey
@@ -67,25 +66,27 @@ fun DomainFactory.getCappedInstanceAndTaskDatas(
         projectKey,
     ) { instance, children, filterResult -> instanceToGroupListData(instance, now, children, filterResult.matchesSearch) }
 
-    val taskDatas = getUnscheduledTasks(projectKey)
-        .asSequence()
-        .filterSearch(searchContext)
-        .map { (task, filterResult) ->
-            val childrenSearchContext = searchContext.getChildrenSearchContext(filterResult)
+    val taskDatas = searchContext.search {
+        getUnscheduledTasks(projectKey)
+            .asSequence()
+            .filterSearch()
+            .map { (task, filterResult) ->
+                val childrenSearchContext = searchContext.getChildrenSearchContext(filterResult)
 
-            GroupListDataWrapper.TaskData(
-                task.taskKey,
-                task.name,
-                getGroupListChildTaskDatas(task, now, childrenSearchContext),
-                task.note,
-                task.getImage(deviceDbInfo),
-                task.getProjectInfo(includeProjectDetails),
-                task.ordinal,
-                task.canMigrateDescription(now),
-                filterResult.matchesSearch,
-            )
-        }
-        .toList()
+                GroupListDataWrapper.TaskData(
+                    task.taskKey,
+                    task.name,
+                    getGroupListChildTaskDatas(task, now, childrenSearchContext),
+                    task.note,
+                    task.getImage(deviceDbInfo),
+                    task.getProjectInfo(includeProjectDetails),
+                    task.ordinal,
+                    task.canMigrateDescription(now),
+                    filterResult.matchesSearch,
+                )
+            }
+            .toList()
+    }
 
     return Triple(cappedInstanceDescriptors, taskDatas, hasMore)
 }

@@ -29,7 +29,6 @@ import com.krystianwsul.common.firebase.models.project.SharedProject
 import com.krystianwsul.common.firebase.models.schedule.SingleSchedule
 import com.krystianwsul.common.firebase.models.search.FilterResult
 import com.krystianwsul.common.firebase.models.search.SearchContext
-import com.krystianwsul.common.firebase.models.search.filterSearchCriteria
 import com.krystianwsul.common.firebase.models.search.logFilterResult
 import com.krystianwsul.common.firebase.models.task.*
 import com.krystianwsul.common.firebase.models.users.ProjectUser
@@ -709,22 +708,24 @@ private fun DomainFactory.getParentTreeDatas(
 
     val parentTreeDatas = mutableListOf<EditViewModel.ParentEntryData>()
 
-    parentTreeDatas += getAllTasks().asSequence()
-        .filter { it.showAsParent(now, excludedTaskKeys) }
-        .filter { it.isTopLevelTask() && (it.project as? SharedProject)?.notDeleted != true }
-        .filterSearchCriteria(searchContext, myUserFactory.user, false, now)
-        .map { (task, filterResult) ->
-            val childSearchContext = searchContext.getChildrenSearchContext(filterResult)
+    parentTreeDatas += searchContext.search {
+        getAllTasks().asSequence()
+            .filter { it.showAsParent(now, excludedTaskKeys) }
+            .filter { it.isTopLevelTask() && (it.project as? SharedProject)?.notDeleted != true }
+            .filterSearchCriteria(myUserFactory.user, false, now)
+            .map { (task, filterResult) ->
+                val childSearchContext = searchContext.getChildrenSearchContext(filterResult)
 
-            task.toParentEntryData(
-                this,
-                now,
-                excludedTaskKeys,
-                parentInstanceKey,
-                childSearchContext,
-                filterResult,
-            )
-        }
+                task.toParentEntryData(
+                    this@getParentTreeDatas,
+                    now,
+                    excludedTaskKeys,
+                    parentInstanceKey,
+                    childSearchContext,
+                    filterResult,
+                )
+            }
+    }
 
     val projectOrder = Preferences.projectOrder
 
@@ -764,26 +765,28 @@ private fun DomainFactory.getProjectTaskTreeDatas(
     parentInstanceKey: InstanceKey?,
     searchContext: SearchContext,
 ): List<EditViewModel.ParentEntryData.Task> {
-    return project.getAllDependenciesLoadedTasks()
-        .asSequence()
-        .filter { it.showAsParent(now, excludedTaskKeys) }
-        .filter { it.isTopLevelTask() }
-        .filterSearchCriteria(searchContext, myUserFactory.user, false, now)
-        .map { (task, filterResult) ->
-            logFilterResult(task, filterResult)
+    return searchContext.search {
+        project.getAllDependenciesLoadedTasks()
+            .asSequence()
+            .filter { it.showAsParent(now, excludedTaskKeys) }
+            .filter { it.isTopLevelTask() }
+            .filterSearchCriteria(myUserFactory.user, false, now)
+            .map { (task, filterResult) ->
+                logFilterResult(task, filterResult)
 
-            val childrenSearchContext = searchContext.getChildrenSearchContext(filterResult)
+                val childrenSearchContext = searchContext.getChildrenSearchContext(filterResult)
 
-            task.toParentEntryData(
-                this,
-                now,
-                excludedTaskKeys,
-                parentInstanceKey,
-                childrenSearchContext,
-                filterResult,
-            )
-        }
-        .toList()
+                task.toParentEntryData(
+                    this@getProjectTaskTreeDatas,
+                    now,
+                    excludedTaskKeys,
+                    parentInstanceKey,
+                    childrenSearchContext,
+                    filterResult,
+                )
+            }
+            .toList()
+    }
 }
 
 private fun Task.showAsParent(now: ExactTimeStamp.Local, excludedTaskKeys: Set<TaskKey>): Boolean {
@@ -893,23 +896,25 @@ private fun DomainFactory.getTaskListChildTaskDatas(
     excludedTaskKeys: Set<TaskKey>,
     parentInstanceKey: InstanceKey?,
     searchContext: SearchContext,
-): List<EditViewModel.ParentEntryData.Task> = parentTask.getChildTasks()
-    .asSequence()
-    .filter { it.showAsParent(now, excludedTaskKeys) }
-    .filterSearchCriteria(searchContext, myUserFactory.user, false, now)
-    .map { (task, filterResult) ->
-        val childSearchContext = searchContext.getChildrenSearchContext(filterResult)
+): List<EditViewModel.ParentEntryData.Task> = searchContext.search {
+    parentTask.getChildTasks()
+        .asSequence()
+        .filter { it.showAsParent(now, excludedTaskKeys) }
+        .filterSearchCriteria(myUserFactory.user, false, now)
+        .map { (task, filterResult) ->
+            val childSearchContext = searchContext.getChildrenSearchContext(filterResult)
 
-        task.toParentEntryData(
-            this,
-            now,
-            excludedTaskKeys,
-            parentInstanceKey,
-            childSearchContext,
-            filterResult,
-        )
-    }
-    .toList()
+            task.toParentEntryData(
+                this@getTaskListChildTaskDatas,
+                now,
+                excludedTaskKeys,
+                parentInstanceKey,
+                childSearchContext,
+                filterResult,
+            )
+        }
+        .toList()
+}
 
 private fun DomainFactory.copyTaskOrInstance(
     now: ExactTimeStamp.Local,

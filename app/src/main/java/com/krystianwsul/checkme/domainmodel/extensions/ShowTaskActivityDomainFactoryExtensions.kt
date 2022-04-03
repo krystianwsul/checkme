@@ -9,7 +9,6 @@ import com.krystianwsul.checkme.viewmodels.ShowTaskViewModel
 import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.models.search.SearchContext
-import com.krystianwsul.common.firebase.models.search.filterSearchCriteria
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.TaskKey
 
@@ -26,28 +25,30 @@ fun DomainFactory.getShowTaskData(requestTaskKey: TaskKey, searchCriteria: Searc
 
     val searchContext = SearchContext.startSearch(searchCriteria)
 
-    val childTaskDatas = task.getChildTasks()
-        .asSequence()
-        .filterSearchCriteria(searchContext, myUserFactory.user, false, now)
-        .map { (childTask, filterResult) ->
-            val childSearchCriteria = searchContext.getChildrenSearchContext(filterResult)
+    val childTaskDatas = searchContext.search {
+        task.getChildTasks()
+            .asSequence()
+            .filterSearchCriteria(myUserFactory.user, false, now)
+            .map { (childTask, filterResult) ->
+                val childSearchCriteria = searchContext.getChildrenSearchContext(filterResult)
 
-            TaskListFragment.ChildTaskData(
-                childTask.name,
-                childTask.getScheduleText(ScheduleText),
-                getTaskListChildTaskDatas(childTask, now, childSearchCriteria, false, false),
-                childTask.note,
-                childTask.taskKey,
-                childTask.getImage(deviceDbInfo),
-                childTask.notDeleted,
-                childTask.isVisible(now),
-                childTask.canMigrateDescription(now),
-                childTask.ordinal,
-                childTask.getProjectInfo(),
-                filterResult.matchesSearch,
-            )
-        }
-        .sorted()
+                TaskListFragment.ChildTaskData(
+                    childTask.name,
+                    childTask.getScheduleText(ScheduleText),
+                    getTaskListChildTaskDatas(childTask, now, childSearchCriteria, false, false),
+                    childTask.note,
+                    childTask.taskKey,
+                    childTask.getImage(deviceDbInfo),
+                    childTask.notDeleted,
+                    childTask.isVisible(now),
+                    childTask.canMigrateDescription(now),
+                    childTask.ordinal,
+                    childTask.getProjectInfo(),
+                    filterResult.matchesSearch,
+                )
+            }
+            .sorted()
+    }
 
     var collapseText = listOfNotNull(
         task.parentTask?.name,

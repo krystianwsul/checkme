@@ -209,6 +209,7 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
         )
     }
 
+    @Suppress("OVERRIDE_DEPRECATION")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         @Suppress("DEPRECATION")
         super.onActivityResult(requestCode, resultCode, data)
@@ -284,7 +285,7 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
             showSearch = hasTasks
             showDeleted = hasTasks && parameters.showDeleted
             showAssignedToOthers = hasTasks && parameters.getShowAssignedToOthers(data)
-            showProjects = hasTasks && parameters.showProjects
+            showProjects = hasTasks && parameters.showProjectsMenuVisible
         }
 
         binding.showTasksToolbarCollapseInclude
@@ -308,7 +309,7 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
         open val copying = false
 
         open val showDeleted = true
-        open val showProjects = false
+        open val showProjectsMenuVisible = false
 
         abstract fun getShowAssignedToOthers(data: ShowTasksViewModel.Data): Boolean
 
@@ -332,7 +333,7 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
         @Parcelize
         data class Unscheduled(val projectKey: ProjectKey<*>?) : Parameters() {
 
-            override val showProjects get() = projectKey == null
+            override val showProjectsMenuVisible get() = projectKey == null
 
             override fun getShowAssignedToOthers(data: ShowTasksViewModel.Data): Boolean {
                 check(data.isSharedProject == null)

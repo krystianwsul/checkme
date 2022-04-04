@@ -31,6 +31,7 @@ fun DomainFactory.getShowTasksData(
     fun Task.toChildTaskData(
         childSearchContext: SearchContext,
         matchesSearch: Boolean,
+        includeProjectDetails: Boolean,
     ): TaskListFragment.ChildTaskData {
         return TaskListFragment.ChildTaskData(
             name,
@@ -43,7 +44,7 @@ fun DomainFactory.getShowTasksData(
             isVisible(now),
             canMigrateDescription(now),
             ordinal,
-            getProjectInfo(parameters.showProjects), // todo showProjects this doesn't seem right.  Related to earlier bug?
+            getProjectInfo(includeProjectDetails),
             matchesSearch,
         )
     }
@@ -63,7 +64,11 @@ fun DomainFactory.getShowTasksData(
                     .filter { it.notDeleted && it.intervalInfo.isUnscheduled() }
                     .filterSearchCriteria(myUserFactory.user, now)
                     .map { (task, filterResult) ->
-                        task.toChildTaskData(getChildrenSearchContext(filterResult), filterResult.matchesSearch)
+                        task.toChildTaskData(
+                            getChildrenSearchContext(filterResult),
+                            filterResult.matchesSearch,
+                            !showProjects,
+                        )
                     }
                     .toList()
             }
@@ -80,8 +85,9 @@ fun DomainFactory.getShowTasksData(
 
             title = MyApplication.context.getString(R.string.notes)
 
+            // can't use method reference because of runtime casting error
             subtitle = parameters.projectKey
-                ?.let(projectsFactory::getProjectForce)
+                ?.let { projectsFactory.getProjectForce(it) }
                 ?.getDisplayName()
 
             isSharedProject = null
@@ -89,7 +95,7 @@ fun DomainFactory.getShowTasksData(
         is ShowTasksActivity.Parameters.Copy -> {
             entryDatas = parameters.taskKeys
                 .map(::getTaskForce)
-                .map { it.toChildTaskData(searchContext, true) }
+                .map { it.toChildTaskData(searchContext, true, true) }
                 .sorted()
 
             title = MyApplication.context.getString(R.string.copyingTasksTitle)
@@ -106,7 +112,11 @@ fun DomainFactory.getShowTasksData(
                     .filter { it.isTopLevelTask() }
                     .filterSearchCriteria(myUserFactory.user, now)
                     .map { (task, filterResult) ->
-                        task.toChildTaskData(getChildrenSearchContext(filterResult), filterResult.matchesSearch)
+                        task.toChildTaskData(
+                            getChildrenSearchContext(filterResult),
+                            filterResult.matchesSearch,
+                            false,
+                        )
                     }
                     .toList()
             }

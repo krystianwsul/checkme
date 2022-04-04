@@ -77,7 +77,7 @@ private fun DomainFactory.getMainData(
                     task.isVisible(now),
                     task.canMigrateDescription(now),
                     task.ordinal,
-                    task.getProjectInfo(),
+                    task.getProjectInfo(!showProjects),
                     filterResult.matchesSearch,
                 )
             }

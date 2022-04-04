@@ -15,7 +15,10 @@ class SearchContext private constructor(
 
     companion object {
 
-        fun startSearch(searchCriteria: SearchCriteria) = SearchContext(searchCriteria, false)
+        fun startSearch(searchCriteria: SearchCriteria) = new(searchCriteria, false)
+
+        private fun new(searchCriteria: SearchCriteria, searchingChildrenOfQueryMatch: Boolean) =
+            SearchContext(searchCriteria, searchingChildrenOfQueryMatch)
     }
 
     fun getChildrenSearchContext(filterResult: FilterResult) = when (filterResult) {
@@ -23,8 +26,8 @@ class SearchContext private constructor(
         is FilterResult.NoSearch -> this
         is FilterResult.Include -> if (filterResult.matchesSearch) {
             when (searchCriteria.search) {
-                is SearchCriteria.Search.Query -> SearchContext(searchCriteria, true)
-                is SearchCriteria.Search.TaskKey -> SearchContext(searchCriteria.clearSearch(), false)
+                is SearchCriteria.Search.Query -> new(searchCriteria, true)
+                is SearchCriteria.Search.TaskKey -> new(searchCriteria.clearSearch(), false)
             }
         } else {
             this

@@ -66,14 +66,14 @@ sealed class SearchContext {
         }
     }
 
-    sealed class Search(protected val searchCriteria: SearchCriteria, private val searchingChildrenOfQueryMatch: Boolean) :
+    sealed class Search(protected val searchCriteria: SearchCriteria) :
         SearchContext() {
 
         init {
             check(!searchCriteria.isEmpty)
         }
 
-        private fun childHierarchyMatches(task: Task, onlyHierarchy: Boolean = false): FilterResult {
+        protected fun childHierarchyMatches(task: Task, onlyHierarchy: Boolean = false): FilterResult {
             InterruptionChecker.throwIfInterrupted()
 
             return task.getMatchResult(searchCriteria.search)
@@ -81,18 +81,7 @@ sealed class SearchContext {
                 ?: getTaskChildrenResult(task, onlyHierarchy)
         }
 
-        private fun getTaskChildrenResult(task: Task, onlyHierarchy: Boolean): FilterResult {
-            return if (searchingChildrenOfQueryMatch) {
-                FilterResult.Include(false)
-            } else {
-                val childTasks = if (onlyHierarchy) task.getHierarchyChildTasks() else task.getChildTasks()
-
-                if (childTasks.any { !childHierarchyMatches(it, onlyHierarchy).doesntMatch })
-                    FilterResult.Include(false)
-                else
-                    FilterResult.Exclude
-            }
-        }
+        protected abstract fun getTaskChildrenResult(task: Task, onlyHierarchy: Boolean): FilterResult
 
         override fun Sequence<Task>.filterSearch(onlyHierarchy: Boolean): Sequence<Pair<Task, FilterResult>> =
             if (searchCriteria.search.isEmpty) {
@@ -133,7 +122,7 @@ sealed class SearchContext {
             map { it to childHierarchyMatches(now, myUser, it, assumeChild) }.filter { !it.second.doesntMatch }
         }
 
-        private fun childHierarchyMatches(
+        protected fun childHierarchyMatches(
             now: ExactTimeStamp.Local,
             myUser: MyUser,
             instance: Instance,
@@ -150,30 +139,18 @@ sealed class SearchContext {
             if (instance.instanceKey in searchCriteria.excludedInstanceKeys)
                 return FilterResult.Exclude
 
-            return instance.task.getMatchResult(searchCriteria.search).let {
-                it.getFilterResult() ?: run {
-                    if (searchingChildrenOfQueryMatch) {
-                        FilterResult.Include(false)
-                    } else {
-                        if (
-                            instance.getChildInstances()
-                                .filter {
-                                    it.isVisible(
-                                        now,
-                                        Instance.VisibilityOptions(assumeChildOfVisibleParent = true)
-                                    )
-                                }
-                                .any { !childHierarchyMatches(now, myUser, it, true).doesntMatch }
-                        ) {
-                            FilterResult.Include(false)
-                        } else {
-                            FilterResult.Exclude
-                        }
-                    }
-                }
-            }
+            return instance.task.getMatchResult(searchCriteria.search)
+                .getFilterResult()
+                ?: getInstanceChildrenResult(now, myUser, instance)
         }
 
+        protected abstract fun getInstanceChildrenResult(
+            now: ExactTimeStamp.Local,
+            myUser: MyUser,
+            instance: Instance,
+        ): FilterResult
+
+        // todo searchContext
         override fun getChildrenSearchContext(filterResult: FilterResult): SearchContext = when (filterResult) {
             FilterResult.Exclude -> this
             is FilterResult.NoSearch -> this
@@ -188,7 +165,44 @@ sealed class SearchContext {
         }
     }
 
-    class Normal(searchCriteria: SearchCriteria) : Search(searchCriteria, false)
+    class Normal(searchCriteria: SearchCriteria) : Search(searchCriteria) {
 
-    class QueryMatchChildren(searchCriteria: SearchCriteria) : Search(searchCriteria, true)
+        override fun getTaskChildrenResult(task: Task, onlyHierarchy: Boolean): FilterResult {
+            val childTasks = if (onlyHierarchy) task.getHierarchyChildTasks() else task.getChildTasks()
+
+            return if (childTasks.any { !childHierarchyMatches(it, onlyHierarchy).doesntMatch })
+                FilterResult.Include(false)
+            else
+                FilterResult.Exclude
+        }
+
+        override fun getInstanceChildrenResult(now: ExactTimeStamp.Local, myUser: MyUser, instance: Instance): FilterResult {
+            return if (
+                instance.getChildInstances()
+                    .filter {
+                        it.isVisible(
+                            now,
+                            Instance.VisibilityOptions(assumeChildOfVisibleParent = true)
+                        )
+                    }
+                    .any { !childHierarchyMatches(now, myUser, it, true).doesntMatch }
+            ) {
+                FilterResult.Include(false)
+            } else {
+                FilterResult.Exclude
+            }
+        }
+    }
+
+    class QueryMatchChildren(searchCriteria: SearchCriteria) : Search(searchCriteria) {
+
+        init {
+            check(searchCriteria.search is SearchCriteria.Search.Query)
+        }
+
+        override fun getTaskChildrenResult(task: Task, onlyHierarchy: Boolean) = FilterResult.Include(false)
+
+        override fun getInstanceChildrenResult(now: ExactTimeStamp.Local, myUser: MyUser, instance: Instance) =
+            FilterResult.Include(false)
+    }
 }

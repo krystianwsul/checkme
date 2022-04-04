@@ -17,7 +17,7 @@ data class SearchCriteria(
     }
 
     constructor(
-        search: Search? = CommonCriteria.empty.search,
+        search: Search = CommonCriteria.empty.search,
         showAssignedToOthers: Boolean = CommonCriteria.empty.showAssignedToOthers,
         showDone: Boolean = InstanceCriteria.empty.showDone,
         excludedInstanceKeys: Set<InstanceKey> = InstanceCriteria.empty.excludedInstanceKeys,
@@ -38,10 +38,10 @@ data class SearchCriteria(
     val showDone get() = instanceCriteria.showDone
 
     fun clearSearch(): SearchCriteria {
-        return if (commonCriteria.search?.isEmpty == false) {
-            copy(commonCriteria = commonCriteria.copy(search = CommonCriteria.empty.search))
-        } else {
+        return if (commonCriteria.search.isEmpty) {
             this
+        } else {
+            copy(commonCriteria = commonCriteria.copy(search = CommonCriteria.empty.search))
         }
     }
 
@@ -75,8 +75,7 @@ data class SearchCriteria(
         }
     }
 
-    // todo searchCriteria make Search.Query.empty
-    data class CommonCriteria(val search: Search? = null, val showAssignedToOthers: Boolean = true) {
+    data class CommonCriteria(val search: Search = Search.Query.empty, val showAssignedToOthers: Boolean = true) {
 
         companion object {
 

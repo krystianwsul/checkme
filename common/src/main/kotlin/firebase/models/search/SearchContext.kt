@@ -26,7 +26,7 @@ class SearchContext private constructor(
         FilterResult.Exclude -> this
         is FilterResult.NoSearch -> this
         is FilterResult.Include -> if (filterResult.matchesSearch) {
-            when (searchCriteria.search!!) {
+            when (searchCriteria.search) {
                 is SearchCriteria.Search.Query -> SearchContext(searchCriteria, true)
                 is SearchCriteria.Search.TaskKey -> SearchContext(searchCriteria.clearSearch(), false)
             }
@@ -61,7 +61,7 @@ class SearchContext private constructor(
     }
 
     fun Sequence<Task>.filterSearch(onlyHierarchy: Boolean = false) =
-        if (searchCriteria.search?.hasSearch != true) {
+        if (!searchCriteria.search.hasSearch) {
             map { it to FilterResult.NoSearch("e") }
         } else {
             // todo taskKey this could return a subtype of FilterCriteria, i.e. the subset where doesnMatch = false

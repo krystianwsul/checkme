@@ -29,7 +29,6 @@ import com.krystianwsul.common.firebase.models.project.SharedProject
 import com.krystianwsul.common.firebase.models.schedule.SingleSchedule
 import com.krystianwsul.common.firebase.models.search.FilterResult
 import com.krystianwsul.common.firebase.models.search.SearchContext
-import com.krystianwsul.common.firebase.models.search.logFilterResult
 import com.krystianwsul.common.firebase.models.task.*
 import com.krystianwsul.common.firebase.models.users.ProjectUser
 import com.krystianwsul.common.time.ExactTimeStamp
@@ -764,8 +763,6 @@ private fun DomainFactory.getProjectTaskTreeDatas(
             .filter { it.isTopLevelTask() }
             .filterSearchCriteria()
             .map { (task, filterResult) ->
-                logFilterResult(task, filterResult)
-
                 task.toParentEntryData(
                     this@getProjectTaskTreeDatas,
                     now,
@@ -878,7 +875,7 @@ private fun Task.toParentEntryData(
     hasMultipleInstances(parentInstanceKey, now),
     topLevelTaskIsSingleSchedule(),
     filterResult.matchesSearch,
-).also { logFilterResult(this, filterResult) }
+)
 
 private fun DomainFactory.getTaskListChildTaskDatas(
     now: ExactTimeStamp.Local,

@@ -12,7 +12,7 @@ import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.plusAssign
 
 fun <T : DomainData> connectInstanceSearch(
-        filterCriteriaObservable: Observable<FilterCriteria.Full>,
+        filterCriteriaObservable: Observable<FilterCriteria.Full>, // todo filterCriteria
         showDone: Boolean,
         getPage: () -> Int,
         setPage: (Int) -> Unit,
@@ -20,7 +20,7 @@ fun <T : DomainData> connectInstanceSearch(
         compositeDisposable: CompositeDisposable,
         viewModel: DomainViewModel<T>,
         setAdapterData: (data: T) -> Unit,
-        startViewModel: (searchCriteria: SearchCriteria, page: Int) -> Unit, // todo filterCriteria
+        startViewModel: (searchCriteria: SearchCriteria, page: Int) -> Unit,
         excludedInstanceKeys: Set<InstanceKey>,
 ) {
     /**

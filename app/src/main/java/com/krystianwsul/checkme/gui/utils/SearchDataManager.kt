@@ -134,7 +134,6 @@ abstract class SearchDataManager<DATA : Any, MODEL_ADAPTER : BaseAdapter>(
             if (treeViewAdapterInitialized) {
                 val emptyBefore = isAdapterEmpty()
 
-                // todo filterCriteria pretty sure emptyBefore/after will be identical
                 updateEmptyState(emptyBefore, false)
             }
         }

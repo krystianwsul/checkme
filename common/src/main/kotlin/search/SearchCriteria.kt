@@ -50,8 +50,6 @@ data class SearchCriteria(
 
         val hasSearch: Boolean // todo filterCriteria replace with isEmpty
 
-        val expandMatches get() = hasSearch // todo filterCriteria remove
-
         val isEmpty: Boolean
 
         @Parcelize

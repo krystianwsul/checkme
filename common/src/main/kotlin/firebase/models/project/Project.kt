@@ -56,7 +56,7 @@ sealed class Project<T : ProjectType>(
             projectRecord.name = name
         }
 
-    val normalizedName get() = name.normalized()
+    val normalizedName get() = name.normalized() // todo showProjects
 
     val startExactTimeStamp by lazy { ExactTimeStamp.Local(projectRecord.startTime) }
 

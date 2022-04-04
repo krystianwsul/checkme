@@ -43,7 +43,7 @@ fun DomainFactory.getShowTasksData(
             isVisible(now),
             canMigrateDescription(now),
             ordinal,
-            getProjectInfo(parameters.showProjects),
+            getProjectInfo(parameters.showProjects), // todo showProjects this doesn't seem right.  Related to earlier bug?
             matchesSearch,
         )
     }

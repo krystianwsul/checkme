@@ -57,7 +57,7 @@ class RootTask private constructor(
     }
 
     val projectIdCache: InvalidatableCache<String> =
-        invalidatableCache<String>(clearableInvalidatableManager) { invalidatableCache ->
+        invalidatableCache(clearableInvalidatableManager) { invalidatableCache ->
             val intervalInfoRemovable = intervalInfoCache.invalidatableManager.addInvalidatable(invalidatableCache)
 
             when (val taskParentEntry = getProjectIdTaskParentEntry()) {
@@ -80,8 +80,6 @@ class RootTask private constructor(
                 }
                 else -> throw IllegalStateException()
             }
-        }.apply {
-            invalidatableManager.addInvalidatable { normalizedFieldsDelegate.invalidate() }
         }
 
     private inner class NoScheduleOrParentException : Exception("task $name, $taskKey")

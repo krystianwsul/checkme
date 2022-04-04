@@ -257,7 +257,7 @@ fun DomainFactory.getCreateTaskParentPickerData(
 
     val now = ExactTimeStamp.Local.now
 
-    val searchContext = SearchContext.startSearch(searchCriteria)
+    val searchContext = SearchContext.startSearch(searchCriteria, now, myUserFactory.user)
 
     val parentTreeDatas =
         getParentTreeDatas(now, startParameters.excludedTaskKeys, startParameters.parentInstanceKey, searchContext)
@@ -712,7 +712,7 @@ private fun DomainFactory.getParentTreeDatas(
         getAllTasks().asSequence()
             .filter { it.showAsParent(now, excludedTaskKeys) }
             .filter { it.isTopLevelTask() && (it.project as? SharedProject)?.notDeleted != true }
-            .filterSearchCriteria(myUserFactory.user, now)
+            .filterSearchCriteria()
             .map { (task, filterResult) ->
                 task.toParentEntryData(
                     this@getParentTreeDatas,
@@ -762,7 +762,7 @@ private fun DomainFactory.getProjectTaskTreeDatas(
             .asSequence()
             .filter { it.showAsParent(now, excludedTaskKeys) }
             .filter { it.isTopLevelTask() }
-            .filterSearchCriteria(myUserFactory.user, now)
+            .filterSearchCriteria()
             .map { (task, filterResult) ->
                 logFilterResult(task, filterResult)
 
@@ -890,7 +890,7 @@ private fun DomainFactory.getTaskListChildTaskDatas(
     parentTask.getChildTasks()
         .asSequence()
         .filter { it.showAsParent(now, excludedTaskKeys) }
-        .filterSearchCriteria(myUserFactory.user, now)
+        .filterSearchCriteria()
         .map { (task, filterResult) ->
             task.toParentEntryData(
                 this@getTaskListChildTaskDatas,

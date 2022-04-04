@@ -57,7 +57,7 @@ fun DomainFactory.getCappedInstanceAndTaskDatas(
 ): Triple<List<GroupTypeFactory.InstanceDescriptor>, List<GroupListDataWrapper.TaskData>, Boolean> {
     val includeProjectDetails = projectKey == null
 
-    val searchContext = SearchContext.startSearch(searchCriteria)
+    val searchContext = SearchContext.startSearch(searchCriteria, now, myUserFactory.user)
 
     val (cappedInstanceDescriptors, hasMore) = searchInstances<GroupTypeFactory.InstanceDescriptor>(
         now,

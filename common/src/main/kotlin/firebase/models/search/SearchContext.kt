@@ -12,16 +12,22 @@ sealed class SearchContext {
 
     companion object {
 
-        fun startSearch(searchCriteria: SearchCriteria) = new(searchCriteria, false)
+        fun startSearch(searchCriteria: SearchCriteria, now: ExactTimeStamp.Local, myUser: MyUser) =
+            new(searchCriteria, false, now, myUser)
 
-        private fun new(searchCriteria: SearchCriteria, searchingChildrenOfQueryMatch: Boolean): SearchContext {
+        private fun new(
+            searchCriteria: SearchCriteria,
+            searchingChildrenOfQueryMatch: Boolean,
+            now: ExactTimeStamp.Local,
+            myUser: MyUser,
+        ): SearchContext {
             return if (searchCriteria.isEmpty) {
                 NoSearch
             } else {
                 if (searchingChildrenOfQueryMatch) {
-                    QueryMatchChildren(searchCriteria)
+                    QueryMatchChildren(searchCriteria, now, myUser)
                 } else {
-                    Normal(searchCriteria)
+                    Normal(searchCriteria, now, myUser)
                 }
             }
         }
@@ -31,16 +37,9 @@ sealed class SearchContext {
 
     abstract fun Sequence<Task>.filterSearch(onlyHierarchy: Boolean = false): Sequence<Pair<Task, FilterResult>>
 
-    abstract fun Sequence<Task>.filterSearchCriteria(
-        myUser: MyUser,
-        now: ExactTimeStamp.Local,
-    ): Sequence<Pair<Task, FilterResult>>
+    abstract fun Sequence<Task>.filterSearchCriteria(): Sequence<Pair<Task, FilterResult>>
 
-    abstract fun Sequence<Instance>.filterSearchCriteria(
-        now: ExactTimeStamp.Local,
-        myUser: MyUser,
-        assumeChild: Boolean,
-    ): Sequence<Pair<Instance, FilterResult>>
+    abstract fun Sequence<Instance>.filterSearchCriteria(assumeChild: Boolean): Sequence<Pair<Instance, FilterResult>>
 
     abstract fun getChildrenSearchContext(filterResult: FilterResult): SearchContext
 
@@ -48,16 +47,10 @@ sealed class SearchContext {
 
         override fun Sequence<Task>.filterSearch(onlyHierarchy: Boolean) = map { it to FilterResult.NoSearch("e") }
 
-        override fun Sequence<Task>.filterSearchCriteria(
-            myUser: MyUser,
-            now: ExactTimeStamp.Local,
-        ) = map { it to FilterResult.NoSearch("b") }
+        override fun Sequence<Task>.filterSearchCriteria() = map { it to FilterResult.NoSearch("b") }
 
-        override fun Sequence<Instance>.filterSearchCriteria(
-            now: ExactTimeStamp.Local,
-            myUser: MyUser,
-            assumeChild: Boolean,
-        ): Sequence<Pair<Instance, FilterResult>> = map { it to FilterResult.NoSearch("i") }
+        override fun Sequence<Instance>.filterSearchCriteria(assumeChild: Boolean): Sequence<Pair<Instance, FilterResult>> =
+            map { it to FilterResult.NoSearch("i") }
 
         override fun getChildrenSearchContext(filterResult: FilterResult): SearchContext {
             check(filterResult is FilterResult.NoSearch)
@@ -66,7 +59,11 @@ sealed class SearchContext {
         }
     }
 
-    sealed class Search(protected val searchCriteria: SearchCriteria) :
+    sealed class Search(
+        protected val searchCriteria: SearchCriteria,
+        protected val now: ExactTimeStamp.Local,
+        protected val myUser: MyUser,
+    ) :
         SearchContext() {
 
         init {
@@ -91,10 +88,7 @@ sealed class SearchContext {
                 map { it to childHierarchyMatches(it, onlyHierarchy) }.filter { !it.second.doesntMatch }
             }
 
-        override fun Sequence<Task>.filterSearchCriteria(
-            myUser: MyUser,
-            now: ExactTimeStamp.Local,
-        ): Sequence<Pair<Task, FilterResult>> {
+        override fun Sequence<Task>.filterSearchCriteria(): Sequence<Pair<Task, FilterResult>> {
             if (searchCriteria.isTaskEmpty) return map { it to FilterResult.NoSearch("b") }
 
             val filtered1 = if (searchCriteria.showAssignedToOthers) {
@@ -112,11 +106,7 @@ sealed class SearchContext {
             }
         }
 
-        override fun Sequence<Instance>.filterSearchCriteria(
-            now: ExactTimeStamp.Local,
-            myUser: MyUser,
-            assumeChild: Boolean,
-        ): Sequence<Pair<Instance, FilterResult>> = if (searchCriteria.isInstanceEmpty) {
+        override fun Sequence<Instance>.filterSearchCriteria(assumeChild: Boolean) = if (searchCriteria.isInstanceEmpty) {
             this.map { it to FilterResult.NoSearch("i") }
         } else {
             map { it to childHierarchyMatches(now, myUser, it, assumeChild) }.filter { !it.second.doesntMatch }
@@ -151,7 +141,8 @@ sealed class SearchContext {
         ): FilterResult
     }
 
-    class Normal(searchCriteria: SearchCriteria) : Search(searchCriteria) {
+    class Normal(searchCriteria: SearchCriteria, now: ExactTimeStamp.Local, myUser: MyUser) :
+        Search(searchCriteria, now, myUser) {
 
         override fun getTaskChildrenResult(task: Task, onlyHierarchy: Boolean): FilterResult {
             val childTasks = if (onlyHierarchy) task.getHierarchyChildTasks() else task.getChildTasks()
@@ -184,8 +175,9 @@ sealed class SearchContext {
             is FilterResult.NoSearch -> this
             is FilterResult.Include -> if (filterResult.matchesSearch) {
                 when (searchCriteria.search) {
-                    is SearchCriteria.Search.Query -> new(searchCriteria, true)
-                    is SearchCriteria.Search.TaskKey -> new(searchCriteria.clearSearch(), false)
+                    is SearchCriteria.Search.Query -> QueryMatchChildren(searchCriteria, now, myUser)
+                    is SearchCriteria.Search.TaskKey ->
+                        new(searchCriteria.clearSearch(), false, now, myUser)
                 }
             } else {
                 this
@@ -193,7 +185,8 @@ sealed class SearchContext {
         }
     }
 
-    class QueryMatchChildren(searchCriteria: SearchCriteria) : Search(searchCriteria) {
+    class QueryMatchChildren(searchCriteria: SearchCriteria, now: ExactTimeStamp.Local, myUser: MyUser) :
+        Search(searchCriteria, now, myUser) {
 
         init {
             check(searchCriteria.search is SearchCriteria.Search.Query)

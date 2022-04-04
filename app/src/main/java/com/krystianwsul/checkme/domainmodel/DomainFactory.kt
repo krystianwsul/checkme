@@ -25,7 +25,6 @@ import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.utils.checkError
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
-import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.ProjectToRootConversion
 import com.krystianwsul.common.domain.TaskUndoData
@@ -420,22 +419,19 @@ class DomainFactory(
     fun getInstance(instanceKey: InstanceKey) =
         getTaskForce(instanceKey.taskKey).getInstance(instanceKey.instanceScheduleKey)
 
-    // todo searchContext consider making an extension of SearchContext, and make second overload that creates an empty one
     fun getRootInstances(
         startExactTimeStamp: ExactTimeStamp.Offset?,
         endExactTimeStamp: ExactTimeStamp.Offset?,
         now: ExactTimeStamp.Local,
-        searchContext: SearchContext? = null,
+        searchContext: SearchContext = SearchContext.NoSearch,
         filterVisible: Boolean = true,
         projectKey: ProjectKey<*>? = null,
     ): Sequence<Pair<Instance, FilterResult>> {
-        val searchData = searchContext?.let { Project.SearchData(it, myUserFactory.user) }
-
         val projects =
             projectKey?.let { listOf(projectsFactory.getProjectForce(it)) } ?: projectsFactory.projects.values
 
         val instanceSequences = projects.map {
-            it.getRootInstances(startExactTimeStamp, endExactTimeStamp, now, searchData, filterVisible)
+            it.getRootInstances(startExactTimeStamp, endExactTimeStamp, now, searchContext, filterVisible)
         }
 
         return combineInstanceSequences(instanceSequences) { it.first }
@@ -486,7 +482,7 @@ class DomainFactory(
                 .filter {
                     !filterVisible || it.isVisible(now, Instance.VisibilityOptions(assumeChildOfVisibleParent = true))
                 }
-                .filterSearchCriteria(now, myUserFactory.user, true)
+                .filterSearchCriteria(true)
                 .mapNotNull { (childInstance, filterResult) ->
                     val children = getChildInstanceDatas(
                         childInstance,
@@ -505,7 +501,7 @@ class DomainFactory(
     fun getChildInstanceDatas(
         instance: Instance,
         now: ExactTimeStamp.Local,
-        searchContext: SearchContext = SearchContext.startSearch(SearchCriteria.empty),
+        searchContext: SearchContext = SearchContext.NoSearch,
         filterVisible: Boolean = true,
     ) = getChildInstanceDatas<GroupTypeFactory.InstanceDescriptor>(
         instance,
@@ -538,7 +534,7 @@ class DomainFactory(
         return searchContext.search {
             parentTask.getChildTasks()
                 .asSequence()
-                .filterSearchCriteria(myUserFactory.user, now)
+                .filterSearchCriteria()
                 .map { (childTask, filterResult) ->
                     TaskListFragment.ChildTaskData(
                         childTask.name,

@@ -1,6 +1,5 @@
 package com.krystianwsul.common.firebase.models.project
 
-import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.domain.ProjectUndoData
 import com.krystianwsul.common.domain.TaskHierarchyContainer
 import com.krystianwsul.common.firebase.DomainThreadChecker
@@ -18,7 +17,6 @@ import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.firebase.models.task.performIntervalUpdate
 import com.krystianwsul.common.firebase.models.taskhierarchy.ProjectTaskHierarchy
 import com.krystianwsul.common.firebase.models.taskhierarchy.TaskHierarchy
-import com.krystianwsul.common.firebase.models.users.MyUser
 import com.krystianwsul.common.firebase.models.users.ProjectUser
 import com.krystianwsul.common.firebase.records.AssignedToHelper
 import com.krystianwsul.common.firebase.records.project.ProjectRecord
@@ -203,13 +201,11 @@ sealed class Project<T : ProjectType>(
             .forEach { it.fixNotificationShown(shownFactory, now) }
     }
 
-    data class SearchData(val searchContext: SearchContext, val myUser: MyUser)
-
     fun getRootInstances(
         startExactTimeStamp: ExactTimeStamp.Offset?,
         endExactTimeStamp: ExactTimeStamp.Offset?,
         now: ExactTimeStamp.Local,
-        searchData: SearchData? = null,
+        searchContext: SearchContext = SearchContext.NoSearch,
         filterVisible: Boolean = true,
     ): Sequence<Pair<Instance, FilterResult>> {
         check(startExactTimeStamp == null || endExactTimeStamp == null || startExactTimeStamp < endExactTimeStamp)
@@ -217,8 +213,6 @@ sealed class Project<T : ProjectType>(
         InterruptionChecker.throwIfInterrupted()
 
         val allTasks = getAllDependenciesLoadedTasks().asSequence().filter { it.mayHaveRootInstances() }.toList()
-
-        val searchContext = searchData?.searchContext ?: SearchContext.startSearch(SearchCriteria.empty)
 
         /*
         This is a pretty sloppy solution, but it works.  The issue was that a task can have a single instance that matches
@@ -257,9 +251,7 @@ sealed class Project<T : ProjectType>(
         return combineInstanceSequences(instanceSequences).let { sequence ->
             InterruptionChecker.throwIfInterrupted()
 
-            searchData?.let {
-                it.searchContext.search { sequence.filterSearchCriteria(now, it.myUser, false) }
-            } ?: sequence.map { it to FilterResult.NoSearch("j") }
+            searchContext.search { sequence.filterSearchCriteria(false) }
         }.let { instances ->
             InterruptionChecker.throwIfInterrupted()
 

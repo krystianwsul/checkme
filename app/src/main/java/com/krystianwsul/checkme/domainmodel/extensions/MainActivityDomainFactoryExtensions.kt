@@ -58,13 +58,13 @@ private fun DomainFactory.getMainData(
     searchCriteria: SearchCriteria,
     filter: (Task) -> Boolean = { true },
 ): List<TaskListFragment.EntryData> {
-    val searchContext = SearchContext.startSearch(searchCriteria)
+    val searchContext = SearchContext.startSearch(searchCriteria, now, myUserFactory.user)
 
     fun Collection<Task>.toChildTaskDatas(searchContext: SearchContext) = searchContext.search {
         asSequence()
             .filter(filter)
             .filter { it.isTopLevelTask() }
-            .filterSearchCriteria(myUserFactory.user, now)
+            .filterSearchCriteria()
             .map { (task, filterResult) ->
                 TaskListFragment.ChildTaskData(
                     task.name,
@@ -154,7 +154,7 @@ fun DomainFactory.getGroupListData(
         startExactTimeStamp,
         endExactTimeStamp,
         now,
-        SearchContext.startSearch(SearchCriteria(showAssignedToOthers = showAssigned)),
+        SearchContext.startSearch(SearchCriteria(showAssignedToOthers = showAssigned), now, myUserFactory.user),
     ).map { it.first }.toList()
 
     if (position == 0 && timeRange == Preferences.TimeRange.DAY) {

@@ -23,12 +23,12 @@ fun DomainFactory.getShowTaskData(requestTaskKey: TaskKey, searchCriteria: Searc
 
     val task = getTaskForce(taskKey)
 
-    val searchContext = SearchContext.startSearch(searchCriteria)
+    val searchContext = SearchContext.startSearch(searchCriteria, now, myUserFactory.user)
 
     val childTaskDatas = searchContext.search {
         task.getChildTasks()
             .asSequence()
-            .filterSearchCriteria(myUserFactory.user, now)
+            .filterSearchCriteria()
             .map { (childTask, filterResult) ->
                 TaskListFragment.ChildTaskData(
                     childTask.name,

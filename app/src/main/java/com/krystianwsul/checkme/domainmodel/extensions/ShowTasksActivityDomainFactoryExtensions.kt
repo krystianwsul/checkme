@@ -49,7 +49,7 @@ fun DomainFactory.getShowTasksData(
         )
     }
 
-    val searchContext = SearchContext.startSearch(searchCriteria)
+    val searchContext = SearchContext.startSearch(searchCriteria, now, myUserFactory.user)
 
     val entryDatas: List<TaskListFragment.EntryData>
     val title: String
@@ -62,7 +62,7 @@ fun DomainFactory.getShowTasksData(
                 getAllDependenciesLoadedTasks()
                     .asSequence()
                     .filter { it.notDeleted && it.intervalInfo.isUnscheduled() }
-                    .filterSearchCriteria(myUserFactory.user, now)
+                    .filterSearchCriteria()
                     .map { (task, filterResult) ->
                         task.toChildTaskData(
                             getChildrenSearchContext(filterResult),
@@ -110,7 +110,7 @@ fun DomainFactory.getShowTasksData(
                 project.getAllDependenciesLoadedTasks()
                     .asSequence()
                     .filter { it.isTopLevelTask() }
-                    .filterSearchCriteria(myUserFactory.user, now)
+                    .filterSearchCriteria()
                     .map { (task, filterResult) ->
                         task.toChildTaskData(
                             getChildrenSearchContext(filterResult),

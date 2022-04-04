@@ -33,11 +33,11 @@ fun DomainFactory.getShowNotificationGroupData(
         GroupListDataWrapper.CustomTimeData(it.name, it.hourMinutes.toSortedMap())
     }
 
-    val searchContext = SearchContext.startSearch(searchCriteria)
+    val searchContext = SearchContext.startSearch(searchCriteria, now, myUserFactory.user)
 
     val instanceDescriptors = searchContext.search {
         instances.asSequence()
-            .filterSearchCriteria(now, myUserFactory.user, false)
+            .filterSearchCriteria(false)
             .map { (instance, filterResult) ->
                 val (notDoneChildInstanceDescriptors, doneChildInstanceDescriptors) =
                     getChildInstanceDatas(instance, now, getChildrenSearchContext(filterResult))

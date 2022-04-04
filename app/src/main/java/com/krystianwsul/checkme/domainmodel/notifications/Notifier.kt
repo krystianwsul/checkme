@@ -49,7 +49,11 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
                 null,
                 now.toOffset().plusOne(),
                 now,
-                SearchContext.startSearch(SearchCriteria(showAssignedToOthers = false, showDone = false)),
+                SearchContext.startSearch(
+                    SearchCriteria(showAssignedToOthers = false, showDone = false),
+                    now,
+                    domainFactory.myUserFactory.user,
+                ),
             ).filterNotifications(domainFactory)
 
         fun getNotificationInstances(
@@ -64,7 +68,11 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
                 offset,
                 offset.plusOne(),
                 now,
-                SearchContext.startSearch(SearchCriteria(showAssignedToOthers = false, showDone = false)),
+                SearchContext.startSearch(
+                    SearchCriteria(showAssignedToOthers = false, showDone = false),
+                    now,
+                    domainFactory.myUserFactory.user,
+                ),
                 projectKey = projectKey,
             ).filterNotifications(domainFactory).toList()
         }
@@ -130,7 +138,14 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
                 null,
                 null,
                 now,
-                SearchContext.startSearch(SearchCriteria(showAssignedToOthers = false, showDone = false)),
+                SearchContext.startSearch(
+                    SearchCriteria(
+                        showAssignedToOthers = false,
+                        showDone = false
+                    ), // todo searchContext unify all searchCriteria in this class
+                    now,
+                    domainFactory.myUserFactory.user,
+                ),
             )
                 .also { DebugFragment.logDone("Notifier.updateNotifications getRootInstances end") }
                 .filterNotifications(domainFactory)

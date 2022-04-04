@@ -66,7 +66,7 @@ private fun DomainFactory.getGroupListData(
     val endCalendar = timeStamp.calendar.apply { add(Calendar.MINUTE, 1) }
     val endExactTimeStamp = ExactTimeStamp.Local(endCalendar.toDateTimeSoy()).toOffset()
 
-    val searchContext = SearchContext.startSearch(searchCriteria)
+    val searchContext = SearchContext.startSearch(searchCriteria, now, myUserFactory.user)
 
     val rootInstances = getRootInstances(
         timeStamp.toLocalExactTimeStamp().toOffset(),

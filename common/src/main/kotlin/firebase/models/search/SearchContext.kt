@@ -83,8 +83,7 @@ sealed class SearchContext {
             if (searchCriteria.search.isEmpty) {
                 map { it to FilterResult.NoSearch }
             } else {
-                // todo taskKey this could return a subtype of FilterCriteria, i.e. the subset where doesnMatch = false
-                map { it to childHierarchyMatches(it, onlyHierarchy) }.filter { !it.second.doesntMatch }
+                map { it to childHierarchyMatches(it, onlyHierarchy) }.filter { it.second.include }
             }
 
         override fun Sequence<Task>.filterSearchCriteria(): Sequence<Pair<Task, FilterResult>> {
@@ -108,7 +107,7 @@ sealed class SearchContext {
         override fun Sequence<Instance>.filterSearchCriteria(assumeChild: Boolean) = if (searchCriteria.isInstanceEmpty) {
             this.map { it to FilterResult.NoSearch }
         } else {
-            map { it to childHierarchyMatches(now, myUser, it, assumeChild) }.filter { !it.second.doesntMatch }
+            map { it to childHierarchyMatches(now, myUser, it, assumeChild) }.filter { it.second.include }
         }
 
         protected fun childHierarchyMatches(
@@ -146,7 +145,7 @@ sealed class SearchContext {
         override fun getTaskChildrenResult(task: Task, onlyHierarchy: Boolean): FilterResult {
             val childTasks = if (onlyHierarchy) task.getHierarchyChildTasks() else task.getChildTasks()
 
-            return if (childTasks.any { !childHierarchyMatches(it, onlyHierarchy).doesntMatch })
+            return if (childTasks.any { childHierarchyMatches(it, onlyHierarchy).include })
                 FilterResult.Include(false)
             else
                 FilterResult.Exclude
@@ -161,7 +160,7 @@ sealed class SearchContext {
                             Instance.VisibilityOptions(assumeChildOfVisibleParent = true)
                         )
                     }
-                    .any { !childHierarchyMatches(now, myUser, it, true).doesntMatch }
+                    .any { childHierarchyMatches(now, myUser, it, true).include }
             ) {
                 FilterResult.Include(false)
             } else {

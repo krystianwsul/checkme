@@ -32,6 +32,14 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
 
         const val TEST_IRRELEVANT = false
 
+        private val searchCriteria = SearchCriteria(showAssignedToOthers = false, showDone = false)
+
+        private fun newSearchContext(now: ExactTimeStamp.Local, domainFactory: DomainFactory) = SearchContext.startSearch(
+            searchCriteria,
+            now,
+            domainFactory.myUserFactory.user,
+        )
+
         // duplicate of logic in Instance.shouldShowNotification
         private fun Sequence<Pair<Instance, FilterResult>>.filterNotifications(domainFactory: DomainFactory) =
             map { it.first }.filter {
@@ -49,11 +57,7 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
                 null,
                 now.toOffset().plusOne(),
                 now,
-                SearchContext.startSearch(
-                    SearchCriteria(showAssignedToOthers = false, showDone = false),
-                    now,
-                    domainFactory.myUserFactory.user,
-                ),
+                newSearchContext(now, domainFactory),
             ).filterNotifications(domainFactory)
 
         fun getNotificationInstances(
@@ -68,11 +72,7 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
                 offset,
                 offset.plusOne(),
                 now,
-                SearchContext.startSearch(
-                    SearchCriteria(showAssignedToOthers = false, showDone = false),
-                    now,
-                    domainFactory.myUserFactory.user,
-                ),
+                newSearchContext(now, domainFactory),
                 projectKey = projectKey,
             ).filterNotifications(domainFactory).toList()
         }
@@ -138,14 +138,7 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
                 null,
                 null,
                 now,
-                SearchContext.startSearch(
-                    SearchCriteria(
-                        showAssignedToOthers = false,
-                        showDone = false
-                    ), // todo searchContext unify all searchCriteria in this class
-                    now,
-                    domainFactory.myUserFactory.user,
-                ),
+                newSearchContext(now, domainFactory),
             )
                 .also { DebugFragment.logDone("Notifier.updateNotifications getRootInstances end") }
                 .filterNotifications(domainFactory)

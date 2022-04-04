@@ -133,43 +133,48 @@ sealed class SearchContext(
         ): Sequence<Pair<Instance, FilterResult>> = if (searchCriteria.isInstanceEmpty) {
             this.map { it to FilterResult.NoSearch("i") }
         } else {
-            fun childHierarchyMatches(instance: Instance, assumeChild: Boolean): FilterResult {
-                InterruptionChecker.throwIfInterrupted()
+            map { it to childHierarchyMatches(now, myUser, it, assumeChild) }.filter { !it.second.doesntMatch }
+        }
 
-                if (!assumeChild && !searchCriteria.showAssignedToOthers && !instance.isAssignedToMe(myUser))
-                    return FilterResult.Exclude
+        private fun childHierarchyMatches(
+            now: ExactTimeStamp.Local,
+            myUser: MyUser,
+            instance: Instance,
+            assumeChild: Boolean,
+        ): FilterResult {
+            InterruptionChecker.throwIfInterrupted()
 
-                if (!searchCriteria.showDone && instance.done != null)
-                    return FilterResult.Exclude
+            if (!assumeChild && !searchCriteria.showAssignedToOthers && !instance.isAssignedToMe(myUser))
+                return FilterResult.Exclude
 
-                if (instance.instanceKey in searchCriteria.excludedInstanceKeys)
-                    return FilterResult.Exclude
+            if (!searchCriteria.showDone && instance.done != null)
+                return FilterResult.Exclude
 
-                return instance.task.getMatchResult(searchCriteria.search).let {
-                    it.getFilterResult() ?: run {
-                        if (searchingChildrenOfQueryMatch) {
+            if (instance.instanceKey in searchCriteria.excludedInstanceKeys)
+                return FilterResult.Exclude
+
+            return instance.task.getMatchResult(searchCriteria.search).let {
+                it.getFilterResult() ?: run {
+                    if (searchingChildrenOfQueryMatch) {
+                        FilterResult.Include(false)
+                    } else {
+                        if (
+                            instance.getChildInstances()
+                                .filter {
+                                    it.isVisible(
+                                        now,
+                                        Instance.VisibilityOptions(assumeChildOfVisibleParent = true)
+                                    )
+                                }
+                                .any { !childHierarchyMatches(now, myUser, it, true).doesntMatch }
+                        ) {
                             FilterResult.Include(false)
                         } else {
-                            if (
-                                instance.getChildInstances()
-                                    .filter {
-                                        it.isVisible(
-                                            now,
-                                            Instance.VisibilityOptions(assumeChildOfVisibleParent = true)
-                                        )
-                                    }
-                                    .any { !childHierarchyMatches(it, true).doesntMatch }
-                            ) {
-                                FilterResult.Include(false)
-                            } else {
-                                FilterResult.Exclude
-                            }
+                            FilterResult.Exclude
                         }
                     }
                 }
             }
-
-            map { it to childHierarchyMatches(it, assumeChild) }.filter { !it.second.doesntMatch }
         }
 
         override fun getChildrenSearchContext(filterResult: FilterResult): SearchContext = when (filterResult) {

@@ -8,10 +8,7 @@ import com.krystianwsul.common.interrupt.InterruptionChecker
 import com.krystianwsul.common.time.ExactTimeStamp
 
 // todo searchContext add MyUser in here, then clean up SearchData
-sealed class SearchContext(
-    protected val searchCriteria: SearchCriteria,
-    protected val searchingChildrenOfQueryMatch: Boolean, // todo searchContext separate subclass
-) {
+sealed class SearchContext {
 
     companion object {
 
@@ -21,14 +18,14 @@ sealed class SearchContext(
             return if (searchCriteria.isEmpty) {
                 NoSearch
             } else {
-                Normal(searchCriteria, searchingChildrenOfQueryMatch)
+                if (searchingChildrenOfQueryMatch) {
+                    QueryMatchChildren(searchCriteria)
+                } else {
+                    Normal(searchCriteria)
+                }
             }
         }
     }
-
-    // todo taskKey
-    override fun toString() =
-        "SearchContext searchingChildrenOfQueryMatch: $searchingChildrenOfQueryMatch, criteria: $searchCriteria"
 
     fun <T> search(action: SearchContext.() -> T) = run(action)
 
@@ -47,7 +44,7 @@ sealed class SearchContext(
 
     abstract fun getChildrenSearchContext(filterResult: FilterResult): SearchContext
 
-    object NoSearch : SearchContext(SearchCriteria.empty, false) {
+    object NoSearch : SearchContext() {
 
         override fun Sequence<Task>.filterSearch(onlyHierarchy: Boolean) = map { it to FilterResult.NoSearch("e") }
 
@@ -69,8 +66,8 @@ sealed class SearchContext(
         }
     }
 
-    class Normal(searchCriteria: SearchCriteria, searchingChildrenOfQueryMatch: Boolean) :
-        SearchContext(searchCriteria, searchingChildrenOfQueryMatch) {
+    sealed class Search(protected val searchCriteria: SearchCriteria, private val searchingChildrenOfQueryMatch: Boolean) :
+        SearchContext() {
 
         init {
             check(!searchCriteria.isEmpty)
@@ -190,4 +187,8 @@ sealed class SearchContext(
             }
         }
     }
+
+    class Normal(searchCriteria: SearchCriteria) : Search(searchCriteria, false)
+
+    class QueryMatchChildren(searchCriteria: SearchCriteria) : Search(searchCriteria, true)
 }

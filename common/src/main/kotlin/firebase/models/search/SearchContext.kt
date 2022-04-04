@@ -79,19 +79,21 @@ sealed class SearchContext(
         private fun childHierarchyMatches(task: Task, onlyHierarchy: Boolean = false): FilterResult {
             InterruptionChecker.throwIfInterrupted()
 
-            return task.getMatchResult(searchCriteria.search).let {
-                it.getFilterResult() ?: run {
-                    if (searchingChildrenOfQueryMatch) {
-                        FilterResult.Include(false)
-                    } else {
-                        val childTasks = if (onlyHierarchy) task.getHierarchyChildTasks() else task.getChildTasks()
+            return task.getMatchResult(searchCriteria.search)
+                .getFilterResult()
+                ?: getTaskChildrenResult(task, onlyHierarchy)
+        }
 
-                        if (childTasks.any { !childHierarchyMatches(it, onlyHierarchy).doesntMatch })
-                            FilterResult.Include(false)
-                        else
-                            FilterResult.Exclude
-                    }
-                }
+        private fun getTaskChildrenResult(task: Task, onlyHierarchy: Boolean): FilterResult {
+            return if (searchingChildrenOfQueryMatch) {
+                FilterResult.Include(false)
+            } else {
+                val childTasks = if (onlyHierarchy) task.getHierarchyChildTasks() else task.getChildTasks()
+
+                if (childTasks.any { !childHierarchyMatches(it, onlyHierarchy).doesntMatch })
+                    FilterResult.Include(false)
+                else
+                    FilterResult.Exclude
             }
         }
 

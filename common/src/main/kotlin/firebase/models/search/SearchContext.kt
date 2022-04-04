@@ -149,20 +149,6 @@ sealed class SearchContext {
             myUser: MyUser,
             instance: Instance,
         ): FilterResult
-
-        // todo searchContext
-        override fun getChildrenSearchContext(filterResult: FilterResult): SearchContext = when (filterResult) {
-            FilterResult.Exclude -> this
-            is FilterResult.NoSearch -> this
-            is FilterResult.Include -> if (filterResult.matchesSearch) {
-                when (searchCriteria.search) {
-                    is SearchCriteria.Search.Query -> new(searchCriteria, true)
-                    is SearchCriteria.Search.TaskKey -> new(searchCriteria.clearSearch(), false)
-                }
-            } else {
-                this
-            }
-        }
     }
 
     class Normal(searchCriteria: SearchCriteria) : Search(searchCriteria) {
@@ -192,6 +178,19 @@ sealed class SearchContext {
                 FilterResult.Exclude
             }
         }
+
+        override fun getChildrenSearchContext(filterResult: FilterResult): SearchContext = when (filterResult) {
+            FilterResult.Exclude -> this
+            is FilterResult.NoSearch -> this
+            is FilterResult.Include -> if (filterResult.matchesSearch) {
+                when (searchCriteria.search) {
+                    is SearchCriteria.Search.Query -> new(searchCriteria, true)
+                    is SearchCriteria.Search.TaskKey -> new(searchCriteria.clearSearch(), false)
+                }
+            } else {
+                this
+            }
+        }
     }
 
     class QueryMatchChildren(searchCriteria: SearchCriteria) : Search(searchCriteria) {
@@ -204,5 +203,7 @@ sealed class SearchContext {
 
         override fun getInstanceChildrenResult(now: ExactTimeStamp.Local, myUser: MyUser, instance: Instance) =
             FilterResult.Include(false)
+
+        override fun getChildrenSearchContext(filterResult: FilterResult) = this
     }
 }

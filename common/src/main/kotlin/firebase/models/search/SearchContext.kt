@@ -7,7 +7,6 @@ import com.krystianwsul.common.firebase.models.users.MyUser
 import com.krystianwsul.common.interrupt.InterruptionChecker
 import com.krystianwsul.common.time.ExactTimeStamp
 
-// todo searchContext add MyUser in here, then clean up SearchData
 sealed class SearchContext {
 
     companion object {
@@ -45,12 +44,12 @@ sealed class SearchContext {
 
     object NoSearch : SearchContext() {
 
-        override fun Sequence<Task>.filterSearch(onlyHierarchy: Boolean) = map { it to FilterResult.NoSearch("e") }
+        override fun Sequence<Task>.filterSearch(onlyHierarchy: Boolean) = map { it to FilterResult.NoSearch }
 
-        override fun Sequence<Task>.filterSearchCriteria() = map { it to FilterResult.NoSearch("b") }
+        override fun Sequence<Task>.filterSearchCriteria() = map { it to FilterResult.NoSearch }
 
         override fun Sequence<Instance>.filterSearchCriteria(assumeChild: Boolean): Sequence<Pair<Instance, FilterResult>> =
-            map { it to FilterResult.NoSearch("i") }
+            map { it to FilterResult.NoSearch }
 
         override fun getChildrenSearchContext(filterResult: FilterResult): SearchContext {
             check(filterResult is FilterResult.NoSearch)
@@ -82,14 +81,14 @@ sealed class SearchContext {
 
         override fun Sequence<Task>.filterSearch(onlyHierarchy: Boolean): Sequence<Pair<Task, FilterResult>> =
             if (searchCriteria.search.isEmpty) {
-                map { it to FilterResult.NoSearch("e") }
+                map { it to FilterResult.NoSearch }
             } else {
                 // todo taskKey this could return a subtype of FilterCriteria, i.e. the subset where doesnMatch = false
                 map { it to childHierarchyMatches(it, onlyHierarchy) }.filter { !it.second.doesntMatch }
             }
 
         override fun Sequence<Task>.filterSearchCriteria(): Sequence<Pair<Task, FilterResult>> {
-            if (searchCriteria.isTaskEmpty) return map { it to FilterResult.NoSearch("b") }
+            if (searchCriteria.isTaskEmpty) return map { it to FilterResult.NoSearch }
 
             val filtered1 = if (searchCriteria.showAssignedToOthers) {
                 this
@@ -107,7 +106,7 @@ sealed class SearchContext {
         }
 
         override fun Sequence<Instance>.filterSearchCriteria(assumeChild: Boolean) = if (searchCriteria.isInstanceEmpty) {
-            this.map { it to FilterResult.NoSearch("i") }
+            this.map { it to FilterResult.NoSearch }
         } else {
             map { it to childHierarchyMatches(now, myUser, it, assumeChild) }.filter { !it.second.doesntMatch }
         }

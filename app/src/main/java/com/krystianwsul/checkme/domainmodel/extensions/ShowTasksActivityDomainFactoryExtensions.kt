@@ -69,21 +69,11 @@ fun DomainFactory.getShowTasksData(
             }
 
             entryDatas = projectsFactory.run {
-                searchContext.search {
-                    if (parameters.projectKey != null) {
-                        getProjectForce(parameters.projectKey).getUnscheduledTaskDatas(this)
-                    } else {
-                        projects.values
-                            .asSequence()
-                            .filterSearchCriteria(showProjects)
-                            .flatMap { (project, filterResult) ->
-                                project.toEntryDatas(
-                                    project.getUnscheduledTaskDatas(getChildrenSearchContext(filterResult)),
-                                    showProjects,
-                                    filterResult,
-                                )
-                            }
-                            .toList()
+                if (parameters.projectKey != null) {
+                    getProjectForce(parameters.projectKey).getUnscheduledTaskDatas(searchContext)
+                } else {
+                    projects.values.flatMap {
+                        it.toEntryDatas(it.getUnscheduledTaskDatas(searchContext), showProjects)
                     }
                 }
             }

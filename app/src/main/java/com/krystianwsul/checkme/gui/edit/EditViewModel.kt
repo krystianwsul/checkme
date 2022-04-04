@@ -463,7 +463,6 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
             override val projectKey: ProjectKey.Shared,
             private val projectUsers: Map<UserKey, UserData>,
             private val projectOrder: Float,
-            override val matchesSearch: Boolean,
         ) : ParentEntryData() {
 
             override val entryKey = ParentKey.Project(projectKey)
@@ -473,6 +472,8 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
             override val note: String? = null
 
             override val sortKey = SortKey.ProjectSortKey(projectKey, projectOrder)
+
+            override val matchesSearch = false
 
             override fun toParent() = ParentScheduleManager.Parent.Project(name, entryKey, projectUsers)
         }

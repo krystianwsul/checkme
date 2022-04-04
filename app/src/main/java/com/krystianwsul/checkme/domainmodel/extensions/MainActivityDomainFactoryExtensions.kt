@@ -85,38 +85,17 @@ private fun DomainFactory.getMainData(
             .toList()
     }
 
-    return searchContext.search {
-        if (debugMode) {
-            rootTasksFactory.rootTasks
-                .values
-                .groupBy { it.projectId }
-                .flatMap { (projectId, tasks) ->
-                    projectsFactory.getProjectForce(projectId)
-                        .let { it to it.filterSearchCriteria(showProjects) }
-                        .takeIf { !it.second.doesntMatch }
-                        ?.let { (project, filterResult) ->
-                            project.toEntryDatas(
-                                tasks.toChildTaskDatas(getChildrenSearchContext(filterResult)),
-                                showProjects,
-                                filterResult,
-                            )
-                        }
-                        .orEmpty()
-                }
-        } else {
-            projectsFactory.projects
-                .values
-                .asSequence()
-                .filterSearchCriteria(showProjects)
-                .flatMap { (project, filterResult) ->
-                    project.toEntryDatas(
-                        project.getAllDependenciesLoadedTasks().toChildTaskDatas(getChildrenSearchContext(filterResult)),
-                        showProjects,
-                        filterResult,
-                    )
-                }
-                .toList()
-        }
+    return if (debugMode) {
+        rootTasksFactory.rootTasks
+            .values
+            .groupBy { it.projectId }
+            .flatMap { (projectId, tasks) ->
+                projectsFactory.getProjectForce(projectId).toEntryDatas(tasks.toChildTaskDatas(searchContext), showProjects)
+            }
+    } else {
+        projectsFactory.projects
+            .values
+            .flatMap { it.toEntryDatas(it.getAllDependenciesLoadedTasks().toChildTaskDatas(searchContext), showProjects) }
     }
 }
 

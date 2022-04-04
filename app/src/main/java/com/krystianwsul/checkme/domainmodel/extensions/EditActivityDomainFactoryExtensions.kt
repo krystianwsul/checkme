@@ -727,29 +727,25 @@ private fun DomainFactory.getParentTreeDatas(
 
     val projectOrder = Preferences.projectOrder
 
-    parentTreeDatas += searchContext.search {
-        projectsFactory.sharedProjects
-            .values
-            .asSequence()
-            .filter { it.notDeleted }
-            .filterSearchCriteria(true)
-            .map { (project, filterResult) ->
-                EditViewModel.ParentEntryData.Project(
-                    project.name,
-                    getProjectTaskTreeDatas(
-                        now,
-                        project,
-                        excludedTaskKeys,
-                        parentInstanceKey,
-                        getChildrenSearchContext(filterResult),
-                    ),
-                    project.projectKey,
-                    project.users.toUserDatas(),
-                    projectOrder.getOrDefault(project.projectKey, 0f),
-                    filterResult.matchesSearch,
-                )
-            }
-    }
+    parentTreeDatas += projectsFactory.sharedProjects
+        .values
+        .asSequence()
+        .filter { it.notDeleted }
+        .map { project ->
+            EditViewModel.ParentEntryData.Project(
+                project.name,
+                getProjectTaskTreeDatas(
+                    now,
+                    project,
+                    excludedTaskKeys,
+                    parentInstanceKey,
+                    searchContext,
+                ),
+                project.projectKey,
+                project.users.toUserDatas(),
+                projectOrder.getOrDefault(project.projectKey, 0f),
+            )
+        }
 
     return parentTreeDatas
 }

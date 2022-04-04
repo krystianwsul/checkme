@@ -396,7 +396,6 @@ fun DomainUpdater.undo(notificationType: DomainListenerManager.NotificationType,
 fun Project<*>.toEntryDatas(
     childTaskDatas: List<TaskListFragment.ChildTaskData>,
     showProjects: Boolean,
-    filterResult: FilterResult,
 ): List<TaskListFragment.EntryData> {
     if (childTaskDatas.isEmpty()) return emptyList()
 
@@ -408,7 +407,6 @@ fun Project<*>.toEntryDatas(
                 projectKey,
                 endExactTimeStamp == null,
                 startExactTimeStamp.long,
-                filterResult.matchesSearch,
             )
         )
     } else {

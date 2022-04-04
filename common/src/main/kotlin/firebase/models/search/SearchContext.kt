@@ -2,7 +2,6 @@ package com.krystianwsul.common.firebase.models.search
 
 import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.firebase.models.Instance
-import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.firebase.models.users.MyUser
 import com.krystianwsul.common.interrupt.InterruptionChecker
@@ -60,28 +59,6 @@ class SearchContext private constructor(
             }
         }
     }
-
-    fun Project<*>.filterSearchCriteria(showProjects: Boolean): FilterResult {
-        if (!searchCriteria.showDeleted && endExactTimeStamp != null) return FilterResult.Exclude
-
-        val search = searchCriteria.search
-            ?.takeIf { it.hasSearch }
-            ?: return FilterResult.NoSearch("c")
-
-        search.let { it as? SearchCriteria.Search.Query }
-            ?.takeIf { showProjects }
-            ?.let {
-                if (name.isNotEmpty() && normalizedName.contains(it.query)) return FilterResult.Include(true)
-            }
-
-        return if (getAllDependenciesLoadedTasks().any { !childHierarchyMatches(it).doesntMatch })
-            FilterResult.Include(false)
-        else
-            FilterResult.Exclude
-    }
-
-    fun <T : Project<*>> Sequence<T>.filterSearchCriteria(showProjects: Boolean) =
-        map { it to it.filterSearchCriteria(showProjects) }.filter { !it.second.doesntMatch }
 
     fun Sequence<Task>.filterSearch(onlyHierarchy: Boolean = false) =
         if (searchCriteria.search?.hasSearch != true) {

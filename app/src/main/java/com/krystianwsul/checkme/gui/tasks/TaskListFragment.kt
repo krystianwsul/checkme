@@ -885,12 +885,13 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         val projectKey: ProjectKey<*>,
         val current: Boolean,
         val startExactTimeStamp: Long,
-        override val matchesSearch: Boolean,
     ) : EntryData {
 
         override val id = projectKey
 
         override val canAddSubtask = current
+
+        override val matchesSearch = false
 
         override fun compareTo(other: EntryData): Int {
             check(other is ProjectData)

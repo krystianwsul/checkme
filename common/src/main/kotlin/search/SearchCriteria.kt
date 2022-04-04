@@ -6,11 +6,9 @@ import com.krystianwsul.common.utils.Parcelize
 
 // todo optimization: split up into smaller classes and use empty/isEmpty model for them, to optimize sub-searches
 data class SearchCriteria(
-    val search: Search? = null,
-    val showAssignedToOthers: Boolean = true,
-    val showDone: Boolean = true, // this is definitely not the same as showDeleted
-    val excludedInstanceKeys: Set<InstanceKey> = setOf(),
-    val showDeleted: Boolean = true,
+    val commonCriteria: CommonCriteria = CommonCriteria.empty,
+    val taskCriteria: TaskCriteria = TaskCriteria.empty,
+    val instanceCriteria: InstanceCriteria = InstanceCriteria.empty,
 ) {
 
     companion object {
@@ -18,11 +16,30 @@ data class SearchCriteria(
         val empty = SearchCriteria()
     }
 
-    val isEmpty by lazy { this == empty }
+    constructor(
+        search: Search? = CommonCriteria.empty.search,
+        showAssignedToOthers: Boolean = CommonCriteria.empty.showAssignedToOthers,
+        showDone: Boolean = InstanceCriteria.empty.showDone,
+        excludedInstanceKeys: Set<InstanceKey> = InstanceCriteria.empty.excludedInstanceKeys,
+        showDeleted: Boolean = TaskCriteria.empty.showDeleted,
+    ) : this(
+        CommonCriteria(search, showAssignedToOthers),
+        TaskCriteria(showDeleted),
+        InstanceCriteria(excludedInstanceKeys, showDone),
+    )
 
-    fun clear(): SearchCriteria {
-        return if (search?.hasSearch == true) {
-            copy(search = null)
+    val isEmpty by lazy { this == empty }
+    // todo searchCriteria commonEmpty -> taskEmpty + instanceEmpty.  Also, use in SearchContext for optimized sequences
+
+    val search get() = commonCriteria.search
+    val showAssignedToOthers get() = commonCriteria.showAssignedToOthers
+    val showDeleted get() = taskCriteria.showDeleted
+    val excludedInstanceKeys get() = instanceCriteria.excludedInstanceKeys
+    val showDone get() = instanceCriteria.showDone
+
+    fun clearSearch(): SearchCriteria {
+        return if (commonCriteria.search?.isEmpty == false) {
+            copy(commonCriteria = commonCriteria.copy(search = CommonCriteria.empty.search))
         } else {
             this
         }
@@ -30,12 +47,21 @@ data class SearchCriteria(
 
     sealed interface Search : Parcelable {
 
-        val hasSearch: Boolean
+        val hasSearch: Boolean // todo searchCriteria replace with isEmpty
 
-        val expandMatches get() = hasSearch
+        val expandMatches get() = hasSearch // todo searchCriteria remove, though possibly later
+
+        val isEmpty: Boolean
 
         @Parcelize
         data class Query(val query: String = "") : Search {
+
+            companion object {
+
+                val empty = Query()
+            }
+
+            override val isEmpty get() = this == empty
 
             override val hasSearch get() = query.isNotEmpty()
         }
@@ -44,6 +70,39 @@ data class SearchCriteria(
         data class TaskKey(val taskKey: com.krystianwsul.common.utils.TaskKey) : Search {
 
             override val hasSearch get() = true
+
+            override val isEmpty get() = false
         }
+    }
+
+    // todo searchCriteria make Search.Query.empty
+    data class CommonCriteria(val search: Search? = null, val showAssignedToOthers: Boolean = true) {
+
+        companion object {
+
+            val empty = CommonCriteria()
+        }
+
+        val isEmpty by lazy { this == empty }
+    }
+
+    data class TaskCriteria(val showDeleted: Boolean = true) {
+
+        companion object {
+
+            val empty = TaskCriteria()
+        }
+
+        val isEmpty by lazy { this == empty }
+    }
+
+    data class InstanceCriteria(val excludedInstanceKeys: Set<InstanceKey> = setOf(), val showDone: Boolean = true) {
+
+        companion object {
+
+            val empty = InstanceCriteria()
+        }
+
+        val isEmpty by lazy { this == empty }
     }
 }

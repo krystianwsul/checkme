@@ -28,7 +28,7 @@ class SearchContext private constructor(
         is FilterResult.Include -> if (filterResult.matchesSearch) {
             when (searchCriteria.search!!) {
                 is SearchCriteria.Search.Query -> SearchContext(searchCriteria, true)
-                is SearchCriteria.Search.TaskKey -> SearchContext(searchCriteria.clear(), false)
+                is SearchCriteria.Search.TaskKey -> SearchContext(searchCriteria.clearSearch(), false)
             }
         } else {
             this
@@ -82,7 +82,7 @@ class SearchContext private constructor(
 
         val filtered2 = filtered1.filterSearch()
 
-        return if (searchCriteria.showDeleted) {
+        return if (searchCriteria.taskCriteria.showDeleted) {
             filtered2
         } else {
             filtered2.filter { it.first.isVisible(now) }

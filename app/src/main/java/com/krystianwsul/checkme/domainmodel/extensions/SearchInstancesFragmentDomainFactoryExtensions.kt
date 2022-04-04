@@ -69,7 +69,7 @@ fun DomainFactory.getCappedInstanceAndTaskDatas(
     val taskDatas = searchContext.search {
         getUnscheduledTasks(projectKey)
             .asSequence()
-            .filterSearch()
+            .filterSearch() // this isn't filterSearchCriteria because these are note tasks, so the other checks aren't relevant
             .map { (task, filterResult) ->
                 GroupListDataWrapper.TaskData(
                     task.taskKey,

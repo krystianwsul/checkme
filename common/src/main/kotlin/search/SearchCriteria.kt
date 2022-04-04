@@ -48,9 +48,9 @@ data class SearchCriteria(
 
     sealed interface Search : Parcelable {
 
-        val hasSearch: Boolean // todo searchCriteria replace with isEmpty
+        val hasSearch: Boolean // todo filterCriteria replace with isEmpty
 
-        val expandMatches get() = hasSearch // todo searchCriteria remove, though possibly later
+        val expandMatches get() = hasSearch // todo filterCriteria remove
 
         val isEmpty: Boolean
 

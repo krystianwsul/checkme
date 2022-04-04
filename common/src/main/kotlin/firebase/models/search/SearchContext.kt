@@ -61,7 +61,7 @@ class SearchContext private constructor(
     }
 
     fun Sequence<Task>.filterSearch(onlyHierarchy: Boolean = false) =
-        if (!searchCriteria.search.hasSearch) {
+        if (searchCriteria.search.isEmpty) {
             map { it to FilterResult.NoSearch("e") }
         } else {
             // todo taskKey this could return a subtype of FilterCriteria, i.e. the subset where doesnMatch = false
@@ -72,7 +72,7 @@ class SearchContext private constructor(
         myUser: MyUser,
         now: ExactTimeStamp.Local,
     ): Sequence<Pair<Task, FilterResult>> {
-        if (searchCriteria.isEmpty) return map { it to FilterResult.NoSearch("b") }
+        if (searchCriteria.isTaskEmpty) return map { it to FilterResult.NoSearch("b") }
 
         val filtered1 = if (searchCriteria.showAssignedToOthers) {
             this
@@ -94,7 +94,7 @@ class SearchContext private constructor(
         now: ExactTimeStamp.Local,
         myUser: MyUser,
         assumeChild: Boolean,
-    ): Sequence<Pair<Instance, FilterResult>> = if (searchCriteria.isEmpty) {
+    ): Sequence<Pair<Instance, FilterResult>> = if (searchCriteria.isInstanceEmpty) {
         this.map { it to FilterResult.NoSearch("i") }
     } else {
         fun childHierarchyMatches(instance: Instance, assumeChild: Boolean): FilterResult {

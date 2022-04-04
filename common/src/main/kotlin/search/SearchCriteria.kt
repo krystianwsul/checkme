@@ -29,7 +29,8 @@ data class SearchCriteria(
     )
 
     val isEmpty by lazy { this == empty }
-    // todo searchCriteria commonEmpty -> taskEmpty + instanceEmpty.  Also, use in SearchContext for optimized sequences
+    val isTaskEmpty by lazy { commonCriteria.isEmpty && taskCriteria.isEmpty }
+    val isInstanceEmpty by lazy { commonCriteria.isEmpty && instanceCriteria.isEmpty }
 
     val search get() = commonCriteria.search
     val showAssignedToOthers get() = commonCriteria.showAssignedToOthers

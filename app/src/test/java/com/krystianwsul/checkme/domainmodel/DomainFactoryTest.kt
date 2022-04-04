@@ -29,20 +29,23 @@ class DomainFactoryTest {
 
     @Test
     fun testCreatingTask() {
-        domainUpdater().createScheduleTopLevelTask(
+        val date = Date(2020, 12, 20)
+        val now = ExactTimeStamp.Local(date, HourMinute(0, 0))
+
+        domainUpdater(now).createScheduleTopLevelTask(
             DomainListenerManager.NotificationType.All,
             EditDelegate.CreateParameters("task"),
-            listOf(ScheduleData.Single(Date(2020, 12, 20), TimePair(HourMinute(20, 0)))),
+            listOf(ScheduleData.Single(date, TimePair(HourMinute(20, 0)))),
             null,
         ).blockingGet()
 
         assertEquals(
             "task",
-            domainFactory.getMainTaskData(false, SearchCriteria.empty, false)
+            domainFactory.getMainTaskData(false, SearchCriteria.empty, now)
                 .taskData
                 .entryDatas
                 .single()
-                .name
+                .name,
         )
     }
 
@@ -429,7 +432,7 @@ class DomainFactoryTest {
 
         assertEquals(
             taskName,
-            domainFactory.getMainTaskData(false, SearchCriteria.empty, false)
+            domainFactory.getMainTaskData(false, SearchCriteria.empty, now)
                 .taskData
                 .entryDatas
                 .single()

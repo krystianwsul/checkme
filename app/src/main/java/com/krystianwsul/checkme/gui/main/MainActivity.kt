@@ -658,7 +658,7 @@ class MainActivity :
         searchInstancesViewModel.apply {
             val instanceSearch = Observable.combineLatest(
                 tabSearchStateRelay,
-                filterCriteriaObservable,
+                filterCriteriaObservable, // todo connect
             ) { tabSearchState, searchData ->
                 if ((tabSearchState as? TabSearchState.Instances)?.isSearching == true) {
                     NullableWrapper(searchData)
@@ -667,9 +667,11 @@ class MainActivity :
                     NullableWrapper()
                 }
             }
+                .filterNotNull()
+                .toSearchCriteria(true, setOf())
 
             connectInstanceSearch(
-                instanceSearch.filterNotNull().toSearchCriteria(true, setOf()),
+                instanceSearch,
                 { searchPage },
                 { searchPage = it },
                 binding.mainSearchGroupListFragment.progressShown,

@@ -139,7 +139,7 @@ class ShowTaskInstancesActivity : AbstractActivity(), GroupListListener {
                 .filterCriteria
 
             connectInstanceSearch(
-                instanceSearch.toSearchCriteria(true, setOf()),
+                instanceSearch.toSearchCriteria(true, setOf()), // todo connect
                 { page },
                 { page = it },
                 binding.groupListFragment.progressShown,

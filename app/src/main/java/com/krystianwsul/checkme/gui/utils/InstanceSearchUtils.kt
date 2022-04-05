@@ -42,8 +42,7 @@ fun <T : DomainData> connectInstanceSearch(
                 .addTo(compositeDisposable)
 }
 
-fun FilterCriteria.Full.toSearchCriteria(showDone: Boolean, excludedInstanceKeys: Set<InstanceKey>) = SearchCriteria(
-        // todo connect
+private fun FilterCriteria.Full.toSearchCriteria(showDone: Boolean, excludedInstanceKeys: Set<InstanceKey>) = SearchCriteria(
         search,
         filterParams.showAssignedToOthers,
         showDone,

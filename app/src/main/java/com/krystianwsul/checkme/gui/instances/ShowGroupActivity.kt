@@ -85,17 +85,6 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
         override fun onReceive(context: Context?, intent: Intent?) = showGroupViewModel.refresh()
     }
 
-    private val filterCriteria by lazy {
-        binding.showGroupToolbarCollapseInclude
-            .collapseAppBarLayout
-            .searchParamsObservable
-            .map { it.toFilterCriteria() } // todo connect
-    }
-
-    override val instanceSearch by lazy {
-        filterCriteria.map { it.toExpandOnly() }
-    }
-
     private var data: ShowGroupViewModel.Data? = null
 
     private lateinit var binding: ActivityShowGroupBinding
@@ -173,7 +162,12 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
         showGroupViewModel.apply {
             start(this@ShowGroupActivity.parameters)
 
-            createDisposable += filterCriteria.map { it.search }.subscribe(searchRelay)
+            binding.showGroupToolbarCollapseInclude
+                .collapseAppBarLayout
+                .searchParamsObservable
+                .map { it.toQuery() }
+                .subscribe(searchRelay)
+                .addTo(createDisposable)
 
             createDisposable += data.subscribe(::onLoadFinished)
         }

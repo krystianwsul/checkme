@@ -69,17 +69,6 @@ class ShowNotificationGroupActivity : AbstractActivity(), GroupListListener {
         override fun onReceive(context: Context?, intent: Intent?) = showNotificationGroupViewModel.refresh()
     }
 
-    private val filterCriteria by lazy {
-        binding.showNotificationGroupToolbarCollapseInclude
-            .collapseAppBarLayout
-            .searchParamsObservable
-            .map { it.toFilterCriteria() } // todo connect
-    }
-
-    override val instanceSearch by lazy {
-        filterCriteria.map { it.toExpandOnly() }
-    }
-
     private var data: ShowNotificationGroupViewModel.Data? = null
 
     private lateinit var binding: ActivityShowNotificationGroupBinding
@@ -121,7 +110,12 @@ class ShowNotificationGroupActivity : AbstractActivity(), GroupListListener {
         showNotificationGroupViewModel.apply {
             start()
 
-            createDisposable += filterCriteria.map { it.search }.subscribe(searchRelay)
+            binding.showNotificationGroupToolbarCollapseInclude
+                .collapseAppBarLayout
+                .searchParamsObservable
+                .map { it.toQuery() }
+                .subscribe(searchRelay)
+                .addTo(createDisposable)
 
             createDisposable += data.subscribe {
                 this@ShowNotificationGroupActivity.data = it

@@ -33,10 +33,8 @@ import com.krystianwsul.checkme.viewmodels.ShowTaskInstancesViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
-import com.krystianwsul.treeadapter.FilterCriteria
 import com.krystianwsul.treeadapter.TreeViewAdapter
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
-import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.kotlin.addTo
 import kotlinx.parcelize.Parcelize
 import java.io.Serializable
@@ -87,8 +85,6 @@ class ShowTaskInstancesActivity : AbstractActivity(), GroupListListener {
     }
 
     private var page = 0
-
-    override val instanceSearch = Observable.just<FilterCriteria.AllowedFilterCriteria>(FilterCriteria.None)
 
     private lateinit var binding: ActivityShowNotificationGroupBinding
     private lateinit var bottomBinding: BottomBinding

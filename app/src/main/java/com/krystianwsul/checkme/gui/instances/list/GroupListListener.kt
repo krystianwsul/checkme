@@ -8,13 +8,9 @@ import com.krystianwsul.checkme.gui.utils.BottomFabMenuDelegate
 import com.krystianwsul.checkme.gui.widgets.MyBottomBar
 import com.krystianwsul.checkme.viewmodels.DataId
 import com.krystianwsul.common.utils.TaskKey
-import com.krystianwsul.treeadapter.FilterCriteria
 import com.krystianwsul.treeadapter.TreeViewAdapter
-import io.reactivex.rxjava3.core.Observable
 
 interface GroupListListener : SnackbarListener, ListItemAddedListener {
-
-    val instanceSearch: Observable<FilterCriteria.AllowedFilterCriteria> // todo manager
 
     val groupListViewModel: GroupListViewModel
 

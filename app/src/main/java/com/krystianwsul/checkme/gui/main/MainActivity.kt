@@ -54,7 +54,6 @@ import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.DateTimeSoy
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.TaskKey
-import com.krystianwsul.treeadapter.FilterCriteria
 import com.krystianwsul.treeadapter.TreeViewAdapter
 import com.mindorks.scheduler.Priority
 import com.skydoves.balloon.ArrowOrientation
@@ -189,8 +188,6 @@ class MainActivity :
     val daysGroupListListener = object : GroupListListener {
 
         override val snackbarParent get() = this@MainActivity.snackbarParent
-
-        override val instanceSearch = Observable.never<FilterCriteria.AllowedFilterCriteria>()
 
         override val groupListViewModel get() = this@MainActivity.groupListViewModel
 
@@ -341,8 +338,6 @@ class MainActivity :
         binding.mainSearchGroupListFragment.listener = object : GroupListListener {
 
             override val snackbarParent get() = this@MainActivity.snackbarParent
-
-            override val instanceSearch = Observable.never<FilterCriteria.AllowedFilterCriteria>()
 
             override val groupListViewModel get() = this@MainActivity.groupListViewModel
 

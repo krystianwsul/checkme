@@ -115,17 +115,6 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
             .addTo(createDisposable)
     }
 
-    private val filterCriteria by lazy {
-        binding.showInstanceToolbarCollapseInclude
-            .collapseAppBarLayout
-            .searchParamsObservable
-            .map { it.toFilterCriteria() } // todo connect
-    }
-
-    override val instanceSearch by lazy {
-        filterCriteria.map { it.toExpandOnly() }
-    }
-
     private lateinit var binding: ActivityShowInstanceBinding
     private lateinit var bottomBinding: BottomBinding
 
@@ -231,7 +220,12 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
         showInstanceViewModel.apply {
             start(instanceKey)
 
-            createDisposable += filterCriteria.map { it.search }.subscribe(searchRelay)
+            binding.showInstanceToolbarCollapseInclude
+                .collapseAppBarLayout
+                .searchParamsObservable
+                .map { it.toQuery() }
+                .subscribe(searchRelay)
+                .addTo(createDisposable)
 
             createDisposable += data.subscribe(::onLoadFinished)
         }

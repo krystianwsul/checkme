@@ -4,7 +4,6 @@ import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.Parcelable
 import com.krystianwsul.common.utils.Parcelize
 
-// todo optimization: split up into smaller classes and use empty/isEmpty model for them, to optimize sub-searches
 data class SearchCriteria(
     val commonCriteria: CommonCriteria = CommonCriteria.empty,
     val taskCriteria: TaskCriteria = TaskCriteria.empty,

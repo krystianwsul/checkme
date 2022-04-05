@@ -48,8 +48,6 @@ data class SearchCriteria(
 
     sealed interface Search : Parcelable {
 
-        val hasSearch: Boolean // todo filterCriteria replace with isEmpty
-
         val isEmpty: Boolean
 
         @Parcelize
@@ -61,14 +59,10 @@ data class SearchCriteria(
             }
 
             override val isEmpty get() = this == empty
-
-            override val hasSearch get() = query.isNotEmpty()
         }
 
         @Parcelize
         data class TaskKey(val taskKey: com.krystianwsul.common.utils.TaskKey) : Search {
-
-            override val hasSearch get() = true
 
             override val isEmpty get() = false
         }

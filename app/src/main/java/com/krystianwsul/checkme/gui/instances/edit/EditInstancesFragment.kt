@@ -42,13 +42,13 @@ import com.krystianwsul.checkme.viewmodels.DataId
 import com.krystianwsul.checkme.viewmodels.EditInstancesSearchViewModel
 import com.krystianwsul.checkme.viewmodels.EditInstancesViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
+import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.time.TimePairPersist
 import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.InstanceKey
-import com.krystianwsul.treeadapter.FilterCriteria
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.functions.Consumer
 import io.reactivex.rxjava3.kotlin.addTo
@@ -147,8 +147,7 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
 
             init {
                 connectInstanceSearch(
-                    queryRelay.map { FilterCriteria.Full(it, Preferences.showAssigned) },
-                    false,
+                    queryRelay.map { SearchCriteria(SearchCriteria.Search.Query(it), Preferences.showAssigned, false) },
                     { state.page },
                     { state.page = it },
                     progressShownRelay,
@@ -156,7 +155,6 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
                     editInstancesSearchViewModel,
                     { adapterDataObservable.accept(ParentPickerFragment.AdapterData(it.instanceEntryDatas, it.showLoader)) },
                     editInstancesSearchViewModel::start,
-                    instanceKeys.toSet(),
                 )
             }
 
@@ -248,6 +246,7 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
                 .addTo(viewCreatedDisposable)
     }
 
+    @Suppress("OVERRIDE_DEPRECATION")
     @SuppressLint("MissingSuperCall")
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         @Suppress("DEPRECATION")
@@ -417,6 +416,7 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
         first = false
     }
 
+    @Suppress("OVERRIDE_DEPRECATION")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         check(requestCode == ShowCustomTimeActivity.CREATE_CUSTOM_TIME_REQUEST_CODE)
 

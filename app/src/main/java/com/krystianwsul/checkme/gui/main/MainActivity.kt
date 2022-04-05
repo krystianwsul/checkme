@@ -669,8 +669,7 @@ class MainActivity :
             }
 
             connectInstanceSearch(
-                instanceSearch.filterNotNull(),
-                true,
+                instanceSearch.filterNotNull().toSearchCriteria(true, setOf()),
                 { searchPage },
                 { searchPage = it },
                 binding.mainSearchGroupListFragment.progressShown,
@@ -688,7 +687,6 @@ class MainActivity :
                     )
                 },
                 this::start,
-                setOf(),
             )
         }
 

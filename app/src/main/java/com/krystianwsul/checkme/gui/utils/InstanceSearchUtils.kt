@@ -12,8 +12,7 @@ import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.plusAssign
 
 fun <T : DomainData> connectInstanceSearch(
-        filterCriteriaObservable: Observable<FilterCriteria.Full>, // todo filterCriteria
-        showDone: Boolean,
+        searchCriteriaObservable: Observable<SearchCriteria>,
         getPage: () -> Int,
         setPage: (Int) -> Unit,
         onProgressShownObservable: Observable<Unit>,
@@ -21,7 +20,6 @@ fun <T : DomainData> connectInstanceSearch(
         viewModel: DomainViewModel<T>,
         setAdapterData: (data: T) -> Unit,
         startViewModel: (searchCriteria: SearchCriteria, page: Int) -> Unit,
-        excludedInstanceKeys: Set<InstanceKey>,
 ) {
     /**
      * This whole observable flow no longer serves its original purpose, but it happens to trigger searches more or less
@@ -29,19 +27,28 @@ fun <T : DomainData> connectInstanceSearch(
      */
 
     val searchParameters = Observables.combineLatest(
-            filterCriteriaObservable.distinctUntilChanged().map {
-                SearchCriteria(it.search, it.filterParams.showAssignedToOthers, showDone, excludedInstanceKeys)
-            },
-            onProgressShownObservable.doOnNext { setPage(getPage() + 1) }.startWithItem(Unit)
+            searchCriteriaObservable,
+            onProgressShownObservable.doOnNext { setPage(getPage() + 1) }.startWithItem(Unit),
     )
             .replay(1)
             .apply { compositeDisposable += connect() }
 
-    viewModel.data
-            .doOnNext(setAdapterData)
-            .map { }
-            .startWithItem(Unit)
-            .switchMap { searchParameters }
-            .subscribe { startViewModel(it.first, getPage()) }
-            .addTo(compositeDisposable)
+        viewModel.data
+                .doOnNext(setAdapterData)
+                .map { }
+                .startWithItem(Unit)
+                .switchMap { searchParameters }
+                .subscribe { startViewModel(it.first, getPage()) }
+                .addTo(compositeDisposable)
 }
+
+fun FilterCriteria.Full.toSearchCriteria(showDone: Boolean, excludedInstanceKeys: Set<InstanceKey>) = SearchCriteria(
+        // todo connect
+        search,
+        filterParams.showAssignedToOthers,
+        showDone,
+        excludedInstanceKeys,
+)
+
+fun Observable<FilterCriteria.Full>.toSearchCriteria(showDone: Boolean, excludedInstanceKeys: Set<InstanceKey>) =
+        map { it.toSearchCriteria(showDone, excludedInstanceKeys) }

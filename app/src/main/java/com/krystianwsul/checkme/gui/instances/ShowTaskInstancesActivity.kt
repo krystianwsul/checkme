@@ -25,6 +25,7 @@ import com.krystianwsul.checkme.gui.tree.AbstractHolder
 import com.krystianwsul.checkme.gui.utils.BottomFabMenuDelegate
 import com.krystianwsul.checkme.gui.utils.CopyAllRemindersDelegate
 import com.krystianwsul.checkme.gui.utils.connectInstanceSearch
+import com.krystianwsul.checkme.gui.utils.toSearchCriteria
 import com.krystianwsul.checkme.utils.startDate
 import com.krystianwsul.checkme.utils.tryGetFragment
 import com.krystianwsul.checkme.viewmodels.DataId
@@ -138,8 +139,7 @@ class ShowTaskInstancesActivity : AbstractActivity(), GroupListListener {
                 .filterCriteria
 
             connectInstanceSearch(
-                instanceSearch,
-                true,
+                instanceSearch.toSearchCriteria(true, setOf()),
                 { page },
                 { page = it },
                 binding.groupListFragment.progressShown,
@@ -169,7 +169,6 @@ class ShowTaskInstancesActivity : AbstractActivity(), GroupListListener {
                     updateTopMenu()
                 },
                 { searchCriteria, page -> start(parameters, page, searchCriteria) },
-                setOf(),
             )
         }
 

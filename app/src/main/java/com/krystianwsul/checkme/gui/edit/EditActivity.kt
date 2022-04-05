@@ -227,23 +227,29 @@ class EditActivity : NavBarActivity() {
             window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
 
         parentPickerDelegateRelay.switchMap { delegate ->
-            delegate.startedRelay.map { delegate to it }
+            delegate.startedRelay.map<Pair<ParentPickerDelegate?, Boolean>> { delegate to it }
         }
+            .startWithItem(null to false)
             .switchMap { (delegate, started) ->
                 if (started) {
-                    delegate.queryObservable.map(SearchCriteria.Search::Query)
+                    delegate!!.queryObservable.map(SearchCriteria.Search::Query)
                 } else {
-                    editViewModel.delegate
-                        .parentScheduleManager
-                        .parentObservable
-                        .map {
-                            val taskKey = it.value
-                                ?.parentKey
-                                ?.let { it as? EditViewModel.ParentKey.Task }
-                                ?.let { SearchCriteria.Search.TaskKey(it.taskKey) }
+                    /*
+                    I think this stream should be used not just if the delegate isn't started, but also if its query hasn't
+                    been modified yet.  But it works as-is for now.
+                     */
+                    editViewModel.delegateRelay.switchMap {
+                        it.parentScheduleManager
+                            .parentObservable
+                            .map {
+                                val taskKey = it.value
+                                    ?.parentKey
+                                    ?.let { it as? EditViewModel.ParentKey.Task }
+                                    ?.let { SearchCriteria.Search.TaskKey(it.taskKey) }
 
-                            taskKey ?: SearchCriteria.Search.Query()
-                        }
+                                taskKey ?: SearchCriteria.Search.Query()
+                            }
+                    }
                 }
             }
             .subscribe(editViewModel.searchRelay)
@@ -455,6 +461,7 @@ class EditActivity : NavBarActivity() {
         )
     }
 
+    @Suppress("OVERRIDE_DEPRECATION")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         @Suppress("DEPRECATION")
         super.onActivityResult(requestCode, resultCode, data)

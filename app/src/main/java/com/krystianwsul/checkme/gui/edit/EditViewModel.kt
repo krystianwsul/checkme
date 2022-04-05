@@ -89,10 +89,15 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
     val editImageStateObservable = editImageStateRelay.hide()
     val editImageState get() = editImageStateRelay.value!!
 
-    lateinit var delegate: EditDelegate
-        private set
+    val delegateRelay = BehaviorRelay.create<EditDelegate>()
 
-    val hasDelegate get() = this::delegate.isInitialized
+    var delegate
+        get() = delegateRelay.value!!
+        set(value) {
+            delegateRelay.accept(value)
+        }
+
+    val hasDelegate get() = delegateRelay.hasValue()
 
     private var currentParentSource by SavedStateProperty<CurrentParentSource>(savedStateHandle, "currentParentSource")
 
@@ -111,7 +116,7 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
 
         mainData.firstOrError()
             .subscribeBy {
-                check(!this::delegate.isInitialized)
+                check(!hasDelegate)
 
                 delegate = EditDelegate.fromParameters(
                     editParameters,

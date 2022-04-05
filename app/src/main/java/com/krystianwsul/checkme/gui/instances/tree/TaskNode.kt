@@ -24,10 +24,7 @@ import com.krystianwsul.checkme.gui.utils.flatten
 import com.krystianwsul.common.utils.Ordinal
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.common.utils.filterValuesNotNull
-import com.krystianwsul.treeadapter.ModelNode
-import com.krystianwsul.treeadapter.NodeContainer
-import com.krystianwsul.treeadapter.Sortable
-import com.krystianwsul.treeadapter.TreeNode
+import com.krystianwsul.treeadapter.*
 
 class TaskNode(
     override val indentation: Int,
@@ -42,7 +39,8 @@ class TaskNode(
     ThumbnailModelNode,
     IndentationModelNode,
     Sortable,
-    DetailsNode.Parent {
+    DetailsNode.Parent,
+    Matchable by taskData {
 
     companion object {
 
@@ -168,8 +166,6 @@ class TaskNode(
     override val isSelectable = true
 
     override val thumbnail = taskData.imageState
-
-    override val matchesSearch = taskData.matchesSearch // todo optimization
 
     override fun tryStartDrag(viewHolder: RecyclerView.ViewHolder): Boolean {
         return if (groupAdapter.treeNodeCollection.selectedChildren.isEmpty()

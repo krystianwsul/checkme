@@ -473,7 +473,7 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
 
             override val sortKey = SortKey.ProjectSortKey(projectKey, projectOrder)
 
-            override val matchesSearch = false // todo optimization
+            override val matchesSearch = false
 
             override fun toParent() = ParentScheduleManager.Parent.Project(name, entryKey, projectUsers)
         }
@@ -488,7 +488,7 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
             override val projectKey: ProjectKey<*>,
             val hasMultipleInstances: Boolean?, // only for certain scenarios with Create
             val topLevelTaskIsSingleSchedule: Boolean, // only for join with showJoinAllRemindersDialog == true
-            override val matchesSearch: Boolean, // todo optimization
+            override val matchesSearch: Boolean,
         ) : ParentEntryData() {
 
             override val entryKey = ParentKey.Task(taskKey)

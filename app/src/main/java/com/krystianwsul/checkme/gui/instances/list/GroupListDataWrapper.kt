@@ -15,6 +15,7 @@ import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.Ordinal
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
+import com.krystianwsul.treeadapter.Matchable
 import java.util.*
 
 data class GroupListDataWrapper(
@@ -41,8 +42,8 @@ data class GroupListDataWrapper(
         val projectInfo: DetailsNode.ProjectInfo?,
         val ordinal: Ordinal,
         override val canMigrateDescription: Boolean,
-        val matchesSearch: Boolean,
-    ) : SelectedData {
+        override val matchesSearch: Boolean,
+    ) : SelectedData, Matchable {
 
         init {
             check(name.isNotEmpty())
@@ -78,8 +79,8 @@ data class GroupListDataWrapper(
         val imageState: ImageState?,
         val projectKey: ProjectKey.Shared?,
         val parentInstanceKey: InstanceKey?,
-        val matchesSearch: Boolean,
-    ) : Comparable<InstanceData>, SelectedData {
+        override val matchesSearch: Boolean,
+    ) : Comparable<InstanceData>, SelectedData, Matchable {
 
         companion object {
 

@@ -562,11 +562,13 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         }
     }
 
-    private abstract class Node(
-        val entryData: EntryData,
-        private val nodeParent: NodeParent,
-        reverseSortOrder: Boolean,
-    ) : AbstractModelNode(), NodeParent, MultiLineModelNode, InvisibleCheckboxModelNode, IndentationModelNode {
+    private abstract class Node(val entryData: EntryData, private val nodeParent: NodeParent, reverseSortOrder: Boolean) :
+        AbstractModelNode(),
+        NodeParent,
+        MultiLineModelNode,
+        InvisibleCheckboxModelNode,
+        IndentationModelNode,
+        Matchable by entryData {
 
         override val holderType = HolderType.EXPANDABLE_MULTILINE
 
@@ -610,8 +612,6 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         } else {
             1
         }
-
-        override val matchesSearch = entryData.matchesSearch // todo optimization
 
         abstract fun initialize(
             adapterState: AdapterState,
@@ -859,13 +859,12 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         val searchCriteria: SearchCriteria,
     )
 
-    interface EntryData : Comparable<EntryData> {
+    interface EntryData : Comparable<EntryData>, Matchable {
 
         val name: String
         val children: List<EntryData>
         val id: Any
         val canAddSubtask: Boolean
-        val matchesSearch: Boolean
     }
 
     data class ProjectData(

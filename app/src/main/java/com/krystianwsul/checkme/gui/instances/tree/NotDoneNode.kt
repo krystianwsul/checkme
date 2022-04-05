@@ -146,7 +146,7 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
             override val groupAdapter: GroupListFragment.GroupAdapter,
             override val bridge: GroupTypeFactory.SingleBridge,
             override val indentation: Int,
-        ) : ContentDelegate() {
+        ) : ContentDelegate(), Matchable by bridge.instanceData {
 
             val instanceData get() = bridge.instanceData
 
@@ -279,8 +279,6 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
                     .getDropParent()
                     .canDropIntoParent(bridge)
             }
-
-            override val matchesSearch = instanceData.matchesSearch // todo optimization
 
             @Parcelize
             data class Id(val instanceKey: InstanceKey) : ContentDelegate.Id
@@ -428,7 +426,7 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
                     .canDropIntoParent(bridge as GroupTypeFactory.TimeChild)
             }
 
-            override val matchesSearch = false // todo optimization
+            override val matchesSearch = false
 
             sealed class GroupRowsDelegate : DetailsNode.ProjectRowsDelegate(null, R.color.textSecondary) {
 

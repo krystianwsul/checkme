@@ -280,7 +280,7 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
                     .canDropIntoParent(bridge)
             }
 
-            override val matchesSearch = instanceData.matchesSearch
+            override val matchesSearch = instanceData.matchesSearch // todo optimization
 
             @Parcelize
             data class Id(val instanceKey: InstanceKey) : ContentDelegate.Id
@@ -428,7 +428,7 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
                     .canDropIntoParent(bridge as GroupTypeFactory.TimeChild)
             }
 
-            override val matchesSearch = false
+            override val matchesSearch = false // todo optimization
 
             sealed class GroupRowsDelegate : DetailsNode.ProjectRowsDelegate(null, R.color.textSecondary) {
 

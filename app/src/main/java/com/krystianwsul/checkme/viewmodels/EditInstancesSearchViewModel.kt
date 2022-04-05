@@ -47,7 +47,7 @@ class EditInstancesSearchViewModel : DomainViewModel<EditInstancesSearchViewMode
         val instanceTimeStamp: TimeStamp,
         var ordinal: Ordinal,
         val instanceKey: InstanceKey,
-        override val matchesSearch: Boolean,
+        override val matchesSearch: Boolean, // todo optimization
     ) : Comparable<InstanceEntryData>, ParentPickerFragment.EntryData {
 
         override fun compareTo(other: InstanceEntryData): Int {

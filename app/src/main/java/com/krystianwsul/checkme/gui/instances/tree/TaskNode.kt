@@ -169,7 +169,7 @@ class TaskNode(
 
     override val thumbnail = taskData.imageState
 
-    override val matchesSearch = taskData.matchesSearch
+    override val matchesSearch = taskData.matchesSearch // todo optimization
 
     override fun tryStartDrag(viewHolder: RecyclerView.ViewHolder): Boolean {
         return if (groupAdapter.treeNodeCollection.selectedChildren.isEmpty()

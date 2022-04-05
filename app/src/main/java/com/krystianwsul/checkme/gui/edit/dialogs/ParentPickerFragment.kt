@@ -117,6 +117,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
     fun initialize(delegate: Delegate) = delegateRelay.accept(delegate)
 
+    @Suppress("OVERRIDE_DEPRECATION")
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         @Suppress("DEPRECATION")
         super.onActivityCreated(savedInstanceState)
@@ -283,7 +284,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
             private val taskParent: TaskParent,
             val entryData: EntryData,
             override val parentNode: ModelNode<AbstractHolder>?,
-        ) : AbstractModelNode(), TaskParent, MultiLineModelNode, IndentationModelNode {
+        ) : AbstractModelNode(), TaskParent, MultiLineModelNode, IndentationModelNode, Matchable by entryData {
 
             override lateinit var treeNode: TreeNode<AbstractHolder>
                 private set
@@ -379,8 +380,6 @@ class ParentPickerFragment : AbstractDialogFragment() {
             override fun compareTo(other: ModelNode<AbstractHolder>): Int {
                 return -entryData.sortKey.compareTo((other as TaskWrapper).entryData.sortKey)
             }
-
-            override val matchesSearch = entryData.matchesSearch
         }
     }
 
@@ -410,7 +409,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
     data class AdapterData(val entryDatas: Collection<EntryData>, val showProgress: Boolean = false)
 
-    interface EntryData {
+    interface EntryData : Matchable {
 
         val name: String
         val childEntryDatas: Collection<EntryData>
@@ -418,7 +417,6 @@ class ParentPickerFragment : AbstractDialogFragment() {
         val details: String?
         val note: String?
         val sortKey: SortKey
-        val matchesSearch: Boolean
     }
 
     interface SortKey : Comparable<SortKey>

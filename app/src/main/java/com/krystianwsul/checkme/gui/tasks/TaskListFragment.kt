@@ -611,7 +611,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             1
         }
 
-        override val matchesSearch = entryData.matchesSearch
+        override val matchesSearch = entryData.matchesSearch // todo optimization
 
         abstract fun initialize(
             adapterState: AdapterState,

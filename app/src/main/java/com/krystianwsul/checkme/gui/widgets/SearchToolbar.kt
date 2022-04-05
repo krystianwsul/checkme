@@ -13,6 +13,8 @@ import com.jakewharton.rxbinding4.widget.textChanges
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.ToolbarSearchInnerBinding
+import com.krystianwsul.common.criteria.SearchCriteria
+import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.normalized
 import com.krystianwsul.treeadapter.FilterCriteria
 import com.krystianwsul.treeadapter.getCurrentValue
@@ -171,5 +173,12 @@ class SearchToolbar @JvmOverloads constructor(context: Context, attrs: Attribute
     data class SearchParams(val query: String, val showAssignedToOthers: Boolean) {
 
         fun toFilterCriteria() = FilterCriteria.Full(query, showAssignedToOthers) // todo connect eliminiate
+
+        fun toSearchCriteria(showDone: Boolean, excludedInstanceKeys: Set<InstanceKey>) = SearchCriteria(
+            SearchCriteria.Search.Query(query),
+            showAssignedToOthers,
+            showDone,
+            excludedInstanceKeys,
+        )
     }
 }

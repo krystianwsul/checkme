@@ -143,11 +143,10 @@ class MainActivity :
 
     private var actionMode: ActionMode? = null
 
-    private val filterCriteriaObservable by lazy {
+    private val searchParamsObservable by lazy {
         binding.mainSearchInclude
             .toolbar
             .searchParamsObservable
-            .map { it.toFilterCriteria() }
     }
 
     private val deleteInstancesListener: (Serializable, Boolean) -> Unit = { deleteTasksData, removeInstances ->
@@ -659,7 +658,7 @@ class MainActivity :
         searchInstancesViewModel.apply {
             val instanceSearch = Observable.combineLatest(
                 tabSearchStateRelay,
-                filterCriteriaObservable, // todo connect
+                searchParamsObservable,
             ) { tabSearchState, searchData ->
                 if ((tabSearchState as? TabSearchState.Instances)?.isSearching == true) {
                     NullableWrapper(searchData)
@@ -669,7 +668,7 @@ class MainActivity :
                 }
             }
                 .filterNotNull()
-                .toSearchCriteria(true, setOf())
+                .map { it.toSearchCriteria(true, setOf()) }
 
             connectInstanceSearch(
                 instanceSearch,
@@ -794,7 +793,7 @@ class MainActivity :
             tabSearchStateRelay.switchMap {
                 if (checkTabSearchState(it)) {
                     if (it.isSearching) {
-                        filterCriteriaObservable
+                        searchParamsObservable.map { it.toFilterCriteria() }
                     } else {
                         Preferences.filterParamsObservable.map { FilterCriteria.Full(filterParams = it) }
                     }

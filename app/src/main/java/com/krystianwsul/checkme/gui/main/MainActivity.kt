@@ -48,6 +48,7 @@ import com.krystianwsul.checkme.gui.tree.AbstractHolder
 import com.krystianwsul.checkme.gui.utils.*
 import com.krystianwsul.checkme.gui.widgets.MyBottomBar
 import com.krystianwsul.checkme.gui.widgets.toQuery
+import com.krystianwsul.checkme.gui.widgets.toSearchCriteria
 import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.viewmodels.*
 import com.krystianwsul.common.criteria.SearchCriteria
@@ -663,7 +664,7 @@ class MainActivity :
                 }
             }
                 .filterNotNull()
-                .map { it.toSearchCriteria(true, setOf()) }
+                .toSearchCriteria(true, setOf())
 
             connectInstanceSearch(
                 instanceSearch,

@@ -14,9 +14,7 @@ import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.ToolbarSearchInnerBinding
 import com.krystianwsul.common.criteria.SearchCriteria
-import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.normalized
-import com.krystianwsul.treeadapter.FilterCriteria
 import com.krystianwsul.treeadapter.getCurrentValue
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.Observables
@@ -176,16 +174,5 @@ class SearchToolbar @JvmOverloads constructor(context: Context, attrs: Attribute
             .empty
             .query,
         val showAssignedToOthers: Boolean = SearchCriteria.empty.showAssignedToOthers,
-    ) {
-
-        fun toSearchCriteria(showDone: Boolean, excludedInstanceKeys: Set<InstanceKey>) = SearchCriteria(
-            // todo connect
-            SearchCriteria.Search.Query(query),
-            showAssignedToOthers,
-            showDone,
-            excludedInstanceKeys,
-        )
-
-        fun toExpandOnly() = FilterCriteria.ExpandOnly(SearchCriteria.Search.Query(query)) // todo connect
-    }
+    )
 }

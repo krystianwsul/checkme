@@ -3,8 +3,6 @@ package com.krystianwsul.checkme.gui.utils
 import com.krystianwsul.checkme.viewmodels.DomainData
 import com.krystianwsul.checkme.viewmodels.DomainViewModel
 import com.krystianwsul.common.criteria.SearchCriteria
-import com.krystianwsul.common.utils.InstanceKey
-import com.krystianwsul.treeadapter.FilterCriteria
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.Observables
@@ -41,13 +39,3 @@ fun <T : DomainData> connectInstanceSearch(
                 .subscribe { startViewModel(it.first, getPage()) }
                 .addTo(compositeDisposable)
 }
-
-private fun FilterCriteria.Full.toSearchCriteria(showDone: Boolean, excludedInstanceKeys: Set<InstanceKey>) = SearchCriteria(
-        search,
-        filterParams.showAssignedToOthers,
-        showDone,
-        excludedInstanceKeys,
-)
-
-fun Observable<FilterCriteria.Full>.toSearchCriteria(showDone: Boolean, excludedInstanceKeys: Set<InstanceKey>) =
-        map { it.toSearchCriteria(showDone, excludedInstanceKeys) }

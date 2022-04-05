@@ -25,6 +25,7 @@ import com.krystianwsul.checkme.gui.tree.AbstractHolder
 import com.krystianwsul.checkme.gui.utils.BottomFabMenuDelegate
 import com.krystianwsul.checkme.gui.utils.CopyAllRemindersDelegate
 import com.krystianwsul.checkme.gui.utils.connectInstanceSearch
+import com.krystianwsul.checkme.gui.widgets.toSearchCriteria
 import com.krystianwsul.checkme.utils.startDate
 import com.krystianwsul.checkme.utils.tryGetFragment
 import com.krystianwsul.checkme.viewmodels.DataId
@@ -132,7 +133,7 @@ class ShowTaskInstancesActivity : AbstractActivity(), GroupListListener {
             val instanceSearch = binding.showNotificationGroupToolbarCollapseInclude
                 .collapseAppBarLayout
                 .searchParamsObservable
-                .map { it.toSearchCriteria(true, setOf()) }
+                .toSearchCriteria(true, setOf())
 
             connectInstanceSearch(
                 instanceSearch,

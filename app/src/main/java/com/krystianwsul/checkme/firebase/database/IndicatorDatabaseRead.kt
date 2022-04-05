@@ -9,8 +9,10 @@ import com.krystianwsul.checkme.viewmodels.NullableWrapper
 
 abstract class IndicatorDatabaseRead<DATA : Any> : DatabaseRead<DATA>() {
 
+    protected abstract val genericTypeIndicator: GenericTypeIndicator<DATA>
+
     override fun firebaseToSnapshot(dataSnapshot: DataSnapshot) =
-        Snapshot.fromTypeIndicator(dataSnapshot, object : GenericTypeIndicator<DATA>() {})
+        Snapshot.fromTypeIndicator(dataSnapshot, genericTypeIndicator)
 
     override fun Query.toSnapshot() = cache(
         Converter(

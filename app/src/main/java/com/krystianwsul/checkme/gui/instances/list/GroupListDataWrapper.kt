@@ -6,6 +6,7 @@ import com.krystianwsul.checkme.domainmodel.MixedInstanceDataCollection
 import com.krystianwsul.checkme.domainmodel.extensions.toDoneSingleBridges
 import com.krystianwsul.checkme.gui.instances.drag.DropParent
 import com.krystianwsul.checkme.gui.tree.DetailsNode
+import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.firebase.models.ImageState
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.time.*
@@ -26,6 +27,7 @@ data class GroupListDataWrapper(
     val imageData: ImageState?,
     val projectInfo: DetailsNode.ProjectInfo?,
     val dropParent: DropParent,
+    val searchCriteria: SearchCriteria,
 ) {
 
     val allInstanceDatas get() = mixedInstanceDataCollection.instanceDatas + doneSingleBridges.map { it.instanceData }

@@ -32,6 +32,8 @@ sealed class SearchContext {
         }
     }
 
+    abstract val searchCriteria: SearchCriteria
+
     fun <T> search(action: SearchContext.() -> T) = run(action)
 
     abstract fun Sequence<Task>.filterSearch(onlyHierarchy: Boolean = false): Sequence<Pair<Task, FilterResult>>
@@ -43,6 +45,8 @@ sealed class SearchContext {
     abstract fun getChildrenSearchContext(filterResult: FilterResult): SearchContext
 
     object NoSearch : SearchContext() {
+
+        override val searchCriteria = SearchCriteria.empty
 
         override fun Sequence<Task>.filterSearch(onlyHierarchy: Boolean) = map { it to FilterResult.NoSearch }
 
@@ -59,7 +63,7 @@ sealed class SearchContext {
     }
 
     sealed class Search(
-        protected val searchCriteria: SearchCriteria,
+        final override val searchCriteria: SearchCriteria,
         protected val now: ExactTimeStamp.Local,
         protected val myUser: MyUser,
     ) :

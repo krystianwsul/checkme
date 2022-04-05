@@ -44,6 +44,7 @@ import com.krystianwsul.checkme.utils.Utils
 import com.krystianwsul.checkme.utils.tryGetFragment
 import com.krystianwsul.checkme.utils.webSearchIntent
 import com.krystianwsul.checkme.viewmodels.DataId
+import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.firebase.models.ImageState
 import com.krystianwsul.common.utils.Ordinal
 import com.krystianwsul.common.utils.ProjectKey
@@ -62,7 +63,6 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
     companion object {
 
-        private const val KEY_SEARCH_DATA = "searchData"
         private const val KEY_SHOW_IMAGE = "showImage"
         private const val KEY_ADAPTER_STATE = "adapterState"
 
@@ -274,11 +274,9 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
         override val compositeDisposable = viewCreatedDisposable
 
-        override val filterCriteriaObservable get() = listener.taskSearch
-
         override fun dataIsImmediate(data: Data) = data.immediate
 
-        override fun getFilterCriteriaFromData(data: Data): FilterCriteria.AllowedFilterCriteria? = null
+        override fun getSearchCriteriaFromData(data: Data) = data.taskData.searchCriteria
 
         override fun instantiateAdapters() = TaskAdapter(this@TaskListFragment).let { it to it.treeViewAdapter }
 
@@ -311,8 +309,6 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
             tryScroll()
         }
-
-        override fun onFilterCriteriaChanged() = updateFabVisibility("search")
     }
 
     private fun getShareData(treeNodes: List<TreeNode<AbstractHolder>>): String {
@@ -331,11 +327,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
         adapterState = savedInstanceState?.getParcelable(KEY_ADAPTER_STATE) ?: AdapterState()
 
-        savedInstanceState?.run {
-            searchDataManager.setInitialFilterCriteria(getParcelable(KEY_SEARCH_DATA)!!)
-
-            showImage = getBoolean(KEY_SHOW_IMAGE)
-        }
+        savedInstanceState?.run { showImage = getBoolean(KEY_SHOW_IMAGE) }
 
         tryGetFragment<RemoveInstancesDialogFragment>(TAG_REMOVE_INSTANCES)?.listener = deleteInstancesListener
     }
@@ -403,10 +395,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         super.onSaveInstanceState(outState)
 
         outState.run {
-            if (searchDataManager.treeViewAdapterInitialized)
-                putParcelable(KEY_ADAPTER_STATE, getAdapterState())
-
-            putParcelable(KEY_SEARCH_DATA, searchDataManager.filterCriteria)
+            if (searchDataManager.treeViewAdapterInitialized) putParcelable(KEY_ADAPTER_STATE, getAdapterState())
 
             putBoolean(KEY_SHOW_IMAGE, imageViewerData != null)
         }
@@ -868,6 +857,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         val note: String?,
         val showFab: Boolean,
         val projectInfo: DetailsNode.ProjectInfo?,
+        val searchCriteria: SearchCriteria,
     )
 
     interface EntryData : Comparable<EntryData> {
@@ -926,7 +916,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
     interface Listener : ActionModeListener, SnackbarListener, ListItemAddedListener {
 
-        val taskSearch: Observable<FilterCriteria.AllowedFilterCriteria>
+        val taskSearch: Observable<FilterCriteria.AllowedFilterCriteria> // todo manager
 
         fun setTaskSelectAllVisibility(selectAllVisible: Boolean)
 

@@ -127,5 +127,6 @@ private fun DomainFactory.getGroupListData(
         null,
         null,
         dropParent,
+        searchCriteria,
     )
 }

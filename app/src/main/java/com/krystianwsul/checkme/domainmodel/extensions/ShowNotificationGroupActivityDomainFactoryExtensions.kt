@@ -77,6 +77,7 @@ fun DomainFactory.getShowNotificationGroupData(
         null,
         null,
         DropParent.TopLevel(false),
+        searchCriteria,
     )
 
     return ShowNotificationGroupViewModel.Data(dataWrapper)

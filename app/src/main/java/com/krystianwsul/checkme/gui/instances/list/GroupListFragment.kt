@@ -51,7 +51,6 @@ import com.krystianwsul.treeadapter.TreeNodeCollection
 import com.krystianwsul.treeadapter.TreeViewAdapter
 import com.skydoves.balloon.ArrowOrientation
 import com.stfalcon.imageviewer.StfalconImageViewer
-import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.cast
@@ -73,7 +72,6 @@ class GroupListFragment @JvmOverloads constructor(
         const val EXPANSION_STATE_KEY = "expansionState"
         private const val LAYOUT_MANAGER_STATE = "layoutManagerState"
         private const val KEY_SHOW_IMAGE = "showImage"
-        private const val KEY_SEARCH_DATA = "searchData"
 
         private fun rangePositionToDate(timeRange: Preferences.TimeRange, position: Int): Date {
             check(position >= 0)
@@ -444,16 +442,9 @@ class GroupListFragment @JvmOverloads constructor(
 
         override val compositeDisposable = attachedToWindowDisposable
 
-        override val filterCriteriaObservable = parametersRelay.switchMap {
-            if (it.filterCriteria != null)
-                Observable.never()
-            else
-                listener.instanceSearch
-        }
-
         override fun dataIsImmediate(data: GroupListParameters) = data.immediate
 
-        override fun getFilterCriteriaFromData(data: GroupListParameters) = data.filterCriteria
+        override fun getSearchCriteriaFromData(data: GroupListParameters) = data.groupListDataWrapper.searchCriteria
 
         override fun instantiateAdapters() = GroupAdapter(
             this@GroupListFragment,
@@ -501,8 +492,6 @@ class GroupListFragment @JvmOverloads constructor(
 
             tryScroll()
         }
-
-        override fun onFilterCriteriaChanged() = Unit
     }
 
     private var searchDataManager = newSearchDataManager()
@@ -521,7 +510,6 @@ class GroupListFragment @JvmOverloads constructor(
                 showImage = getBoolean(KEY_SHOW_IMAGE)
 
                 searchDataManager = newSearchDataManager()
-                searchDataManager.setInitialFilterCriteria(getParcelable(KEY_SEARCH_DATA)!!)
             }
 
             super.onRestoreInstanceState(state.getParcelable(SUPER_STATE_KEY))
@@ -621,8 +609,6 @@ class GroupListFragment @JvmOverloads constructor(
         )
 
         putBoolean(KEY_SHOW_IMAGE, imageViewerData != null)
-
-        putParcelable(KEY_SEARCH_DATA, searchDataManager.filterCriteria)
     }
 
     private fun setGroupMenuItemVisibility() {

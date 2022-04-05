@@ -173,5 +173,6 @@ private fun DomainFactory.getGroupListData(
         task.getImage(deviceDbInfo),
         parentInstance.getProjectInfo(),
         DropParent.ParentInstance(parentInstance.instanceKey),
+        searchContext.searchCriteria,
     )
 }

@@ -73,6 +73,7 @@ fun DomainFactory.getShowTaskData(requestTaskKey: TaskKey, searchCriteria: Searc
             task.note,
             task.isVisible(now),
             task.getProjectInfo(),
+            searchCriteria,
         ),
         task.getImage(deviceDbInfo),
         task.notDeleted,

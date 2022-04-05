@@ -107,6 +107,7 @@ fun DomainFactory.getShowTaskInstancesData(
                 null,
                 null,
                 DropParent.TopLevel(false),
+                searchCriteria,
             )
 
             ShowTaskInstancesViewModel.Data(

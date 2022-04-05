@@ -683,7 +683,6 @@ class MainActivity :
                             it.immediate,
                             it.groupListDataWrapper,
                             it.showLoader,
-                            FilterCriteria.ExpandOnly(it.searchCriteria),
                         )
                     )
                 },

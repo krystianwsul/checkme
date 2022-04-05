@@ -14,7 +14,7 @@ import io.reactivex.rxjava3.core.Observable
 
 interface GroupListListener : SnackbarListener, ListItemAddedListener {
 
-    val instanceSearch: Observable<FilterCriteria.AllowedFilterCriteria>
+    val instanceSearch: Observable<FilterCriteria.AllowedFilterCriteria> // todo manager
 
     val groupListViewModel: GroupListViewModel
 

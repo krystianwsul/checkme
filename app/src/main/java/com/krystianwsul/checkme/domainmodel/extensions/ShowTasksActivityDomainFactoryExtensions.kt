@@ -129,7 +129,7 @@ fun DomainFactory.getShowTasksData(
     }
 
     return ShowTasksViewModel.Data(
-        TaskListFragment.TaskData(entryDatas, null, !parameters.copying, null),
+        TaskListFragment.TaskData(entryDatas, null, !parameters.copying, null, searchCriteria),
         title,
         subtitle,
         isSharedProject,

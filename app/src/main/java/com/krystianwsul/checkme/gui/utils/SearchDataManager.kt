@@ -8,12 +8,11 @@ import com.krystianwsul.checkme.databinding.EmptyTextBinding
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
 import com.krystianwsul.checkme.gui.tree.BaseAdapter
 import com.krystianwsul.checkme.utils.animateVisibility
-import com.krystianwsul.treeadapter.FilterCriteria
+import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.treeadapter.TreeViewAdapter
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
-import io.reactivex.rxjava3.kotlin.plusAssign
 
 abstract class SearchDataManager<DATA : Any, MODEL_ADAPTER : BaseAdapter>(
     private val screenReadyObservable: Observable<Boolean>,
@@ -28,10 +27,8 @@ abstract class SearchDataManager<DATA : Any, MODEL_ADAPTER : BaseAdapter>(
 
     protected abstract val compositeDisposable: CompositeDisposable
 
-    protected abstract val filterCriteriaObservable: Observable<FilterCriteria.AllowedFilterCriteria>
-
-    // todo filterCriteria
-    var filterCriteria: FilterCriteria.AllowedFilterCriteria = FilterCriteria.None
+    // todo manager private?
+    var searchCriteria: SearchCriteria = SearchCriteria.empty
         private set
 
     private val treeViewAdapterRelay = BehaviorRelay.create<TreeViewAdapter<AbstractHolder>>()
@@ -45,7 +42,7 @@ abstract class SearchDataManager<DATA : Any, MODEL_ADAPTER : BaseAdapter>(
 
     protected abstract fun dataIsImmediate(data: DATA): Boolean
 
-    protected abstract fun getFilterCriteriaFromData(data: DATA): FilterCriteria.AllowedFilterCriteria?
+    protected abstract fun getSearchCriteriaFromData(data: DATA): SearchCriteria
 
     protected abstract fun instantiateAdapters(): Pair<MODEL_ADAPTER, TreeViewAdapter<AbstractHolder>>
 
@@ -61,21 +58,10 @@ abstract class SearchDataManager<DATA : Any, MODEL_ADAPTER : BaseAdapter>(
     )
 
     protected abstract fun onDataChanged()
-    protected abstract fun onFilterCriteriaChanged()
-
-    fun setInitialFilterCriteria(filterCriteria: FilterCriteria.AllowedFilterCriteria) {
-        if (modelAdapter == null)
-            this.filterCriteria = filterCriteria
-        else
-            check(this.filterCriteria == filterCriteria)
-    }
 
     private var data: DATA? = null
 
-    fun subscribe() {
-        observeData()
-        observeFilterCriteria()
-    }
+    fun subscribe() = observeData()
 
     private fun observeData() {
         screenReadyObservable.switchMap { if (it) dataObservable else Observable.never() }
@@ -83,10 +69,10 @@ abstract class SearchDataManager<DATA : Any, MODEL_ADAPTER : BaseAdapter>(
                 val first = this.data == null
                 val immediate = dataIsImmediate(data)
 
-                val oldFilterCriteria = this.data?.let(::getFilterCriteriaFromData)
+                val oldFilterCriteria = this.data?.let(::getSearchCriteriaFromData)
 
                 this.data = data
-                getFilterCriteriaFromData(data)?.let { filterCriteria = it }
+                searchCriteria = getSearchCriteriaFromData(data)
 
                 val emptyBefore: Boolean
                 if (first) {
@@ -119,24 +105,10 @@ abstract class SearchDataManager<DATA : Any, MODEL_ADAPTER : BaseAdapter>(
                 onDataChanged()
 
                 // this scrolls to top on search changes
-                if (listOf(oldFilterCriteria, filterCriteria).any { it?.hasSearch == true })
+                if (listOf(oldFilterCriteria, searchCriteria).any { it?.isEmpty == false })
                     recyclerView.scrollToPosition(0)
             }
             .addTo(compositeDisposable)
-    }
-
-    private fun observeFilterCriteria() {
-        compositeDisposable += filterCriteriaObservable.subscribe { filterCriteria ->
-            this.filterCriteria = filterCriteria
-
-            onFilterCriteriaChanged()
-
-            if (treeViewAdapterInitialized) {
-                val emptyBefore = isAdapterEmpty()
-
-                updateEmptyState(emptyBefore, false)
-            }
-        }
     }
 
     private fun isAdapterEmpty() = treeViewAdapter.displayedNodes.isEmpty()
@@ -152,10 +124,10 @@ abstract class SearchDataManager<DATA : Any, MODEL_ADAPTER : BaseAdapter>(
         if (emptyAfter) {
             hide += recyclerView
 
-            val (textId, drawableId) = if (filterCriteria.hasSearch)
-                R.string.noResults to R.drawable.search
-            else
+            val (textId, drawableId) = if (searchCriteria.search.isEmpty)
                 emptyTextResId to R.drawable.empty
+            else
+                R.string.noResults to R.drawable.search
 
             if (textId != null) {
                 show += emptyTextBinding.emptyTextLayout

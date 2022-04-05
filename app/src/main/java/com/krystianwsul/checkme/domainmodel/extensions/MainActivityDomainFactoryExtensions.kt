@@ -34,6 +34,7 @@ fun DomainFactory.getMainNoteData(
             null,
             true,
             null,
+            searchCriteria,
         )
     )
 }
@@ -48,7 +49,13 @@ fun DomainFactory.getMainTaskData(
     DomainThreadChecker.instance.requireDomainThread()
 
     return MainTaskViewModel.Data(
-        TaskListFragment.TaskData(getMainData(now, showProjects, searchCriteria), null, true, null)
+        TaskListFragment.TaskData(
+            getMainData(now, showProjects, searchCriteria),
+            null,
+            true,
+            null,
+            searchCriteria,
+        )
     )
 }
 
@@ -150,11 +157,13 @@ fun DomainFactory.getGroupListData(
 
     endExactTimeStamp = Date(endCalendar.toDateTimeTz()).toMidnightExactTimeStamp().toOffset()
 
+    val searchCriteria = SearchCriteria(showAssignedToOthers = showAssigned)
+
     val currentInstances = getRootInstances(
         startExactTimeStamp,
         endExactTimeStamp,
         now,
-        SearchContext.startSearch(SearchCriteria(showAssignedToOthers = showAssigned), now, myUserFactory.user),
+        SearchContext.startSearch(searchCriteria, now, myUserFactory.user),
     ).map { it.first }.toList()
 
     if (position == 0 && timeRange == Preferences.TimeRange.DAY) {
@@ -203,6 +212,7 @@ fun DomainFactory.getGroupListData(
         null,
         null,
         DropParent.TopLevel(false),
+        searchCriteria,
     )
 
     return DayViewModel.DayData(dataWrapper)

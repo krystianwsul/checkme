@@ -42,6 +42,7 @@ fun DomainFactory.getSearchInstancesData(
                 null,
                 null,
                 DropParent.TopLevel(false),
+                searchCriteria,
             )
 
             SearchInstancesViewModel.Data(dataWrapper, hasMore, searchCriteria)

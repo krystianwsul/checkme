@@ -27,9 +27,7 @@ abstract class SearchDataManager<DATA : Any, MODEL_ADAPTER : BaseAdapter>(
 
     protected abstract val compositeDisposable: CompositeDisposable
 
-    // todo manager private?
-    var searchCriteria: SearchCriteria = SearchCriteria.empty
-        private set
+    private var searchCriteria: SearchCriteria = SearchCriteria.empty
 
     private val treeViewAdapterRelay = BehaviorRelay.create<TreeViewAdapter<AbstractHolder>>()
     val treeViewAdapterInitialized get() = treeViewAdapterRelay.hasValue()

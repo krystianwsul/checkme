@@ -53,7 +53,6 @@ import com.krystianwsul.common.utils.filterValuesNotNull
 import com.krystianwsul.treeadapter.*
 import com.stfalcon.imageviewer.StfalconImageViewer
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
-import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.kotlin.addTo
 import kotlinx.parcelize.Parcelize
 import java.io.Serializable
@@ -915,8 +914,6 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
     }
 
     interface Listener : ActionModeListener, SnackbarListener, ListItemAddedListener {
-
-        val taskSearch: Observable<FilterCriteria.AllowedFilterCriteria> // todo manager
 
         fun setTaskSelectAllVisibility(selectAllVisible: Boolean)
 

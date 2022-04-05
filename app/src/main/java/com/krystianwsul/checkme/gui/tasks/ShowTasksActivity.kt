@@ -57,11 +57,7 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
     private val searchParamsObservable by lazy {
         binding.showTasksToolbarCollapseInclude
             .collapseAppBarLayout
-            .searchParamsObservable
-    }
-
-    override val taskSearch by lazy {
-        searchParamsObservable.map { it.toAllowedCriteria() }
+            .searchParamsObservable // todo manager
     }
 
     private val receiver = object : BroadcastReceiver() {

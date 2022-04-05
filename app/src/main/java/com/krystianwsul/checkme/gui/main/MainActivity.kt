@@ -787,11 +787,11 @@ class MainActivity :
 
         override val snackbarParent get() = this@MainActivity.snackbarParent
 
-        private val filterCriteria by lazy {
+        private val searchParamsObservable by lazy {
             tabSearchStateRelay.switchMap {
                 if (checkTabSearchState(it)) {
                     if (it.isSearching) {
-                        searchParamsObservable
+                        this@MainActivity.searchParamsObservable
                     } else {
                         Preferences.showAssignedObservable.map { SearchToolbar.SearchParams(showAssignedToOthers = it) }
                     }
@@ -803,11 +803,7 @@ class MainActivity :
                 .share()
         }
 
-        val searchObservable = filterCriteria.map { it.search }
-
-        override val taskSearch by lazy {
-            filterCriteria.map { it.toExpandOnly() }
-        }
+        val searchObservable = searchParamsObservable.map { it.search } // todo manager
 
         override fun onCreateActionMode(actionMode: ActionMode) = this@MainActivity.onCreateActionMode(actionMode)
 

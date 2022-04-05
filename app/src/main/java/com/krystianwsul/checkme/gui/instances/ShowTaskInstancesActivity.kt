@@ -136,7 +136,8 @@ class ShowTaskInstancesActivity : AbstractActivity(), GroupListListener {
         showTaskInstancesViewModel = getViewModel<ShowTaskInstancesViewModel>().apply {
             val instanceSearch = binding.showNotificationGroupToolbarCollapseInclude
                 .collapseAppBarLayout
-                .filterCriteria
+                .searchParamsObservable
+                .map { it.toFilterCriteria() } // todo connect
 
             connectInstanceSearch(
                 instanceSearch.toSearchCriteria(true, setOf()), // todo connect

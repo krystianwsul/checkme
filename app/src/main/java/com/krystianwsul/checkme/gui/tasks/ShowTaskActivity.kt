@@ -81,7 +81,8 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.Listener {
     private val filterCriteria by lazy {
         binding.showTaskToolbarCollapseInclude
             .collapseAppBarLayout
-            .filterCriteria
+            .searchParamsObservable
+            .map { it.toFilterCriteria() } // todo connect
     }
 
     override val taskSearch by lazy {

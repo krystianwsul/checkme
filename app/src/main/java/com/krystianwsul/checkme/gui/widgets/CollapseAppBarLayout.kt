@@ -24,7 +24,6 @@ import com.krystianwsul.checkme.utils.addOneShotGlobalLayoutListener
 import com.krystianwsul.checkme.utils.animateVisibility
 import com.krystianwsul.checkme.utils.dpToPx
 import com.krystianwsul.checkme.utils.getPrivateField
-import com.krystianwsul.treeadapter.FilterCriteria
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
@@ -57,15 +56,14 @@ class CollapseAppBarLayout : AppBarLayout {
 
     val isSearching get() = searchingRelay.value!!
 
-    val filterCriteria: Observable<FilterCriteria.Full> by lazy {
+    val searchParamsObservable: Observable<SearchToolbar.SearchParams> by lazy {
         searchingRelay.switchMap {
             if (it) {
                 binding.searchInclude
                     .toolbar
                     .searchParamsObservable
-                    .map { it.toFilterCriteria() }
             } else {
-                Preferences.filterParamsObservable.map { FilterCriteria.Full(filterParams = it) }
+                Preferences.showAssignedObservable.map { SearchToolbar.SearchParams(showAssignedToOthers = it) }
             }
         }
     }

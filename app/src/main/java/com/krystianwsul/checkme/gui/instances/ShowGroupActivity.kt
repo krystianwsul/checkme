@@ -88,7 +88,8 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
     private val filterCriteria by lazy {
         binding.showGroupToolbarCollapseInclude
             .collapseAppBarLayout
-            .filterCriteria
+            .searchParamsObservable
+            .map { it.toFilterCriteria() } // todo connect
     }
 
     override val instanceSearch by lazy {

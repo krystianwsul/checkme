@@ -170,7 +170,13 @@ class SearchToolbar @JvmOverloads constructor(context: Context, attrs: Attribute
         }
     }
 
-    data class SearchParams(val query: String, val showAssignedToOthers: Boolean) {
+    data class SearchParams(
+        val query: String = SearchCriteria.Search
+            .Query
+            .empty
+            .query,
+        val showAssignedToOthers: Boolean = SearchCriteria.empty.showAssignedToOthers,
+    ) {
 
         fun toFilterCriteria() = FilterCriteria.Full(query, showAssignedToOthers) // todo connect eliminiate
 

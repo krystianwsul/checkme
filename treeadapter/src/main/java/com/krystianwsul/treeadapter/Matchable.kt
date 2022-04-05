@@ -1,6 +1,6 @@
 package com.krystianwsul.treeadapter
 
-interface Matchable { // todo optimization delete
+interface Matchable {
 
     val matchesSearch get() = false
 }

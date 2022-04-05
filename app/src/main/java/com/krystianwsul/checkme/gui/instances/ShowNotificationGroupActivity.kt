@@ -19,6 +19,7 @@ import com.krystianwsul.checkme.gui.instances.list.GroupListViewModel
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
 import com.krystianwsul.checkme.gui.utils.BottomFabMenuDelegate
 import com.krystianwsul.checkme.gui.utils.CopyAllRemindersDelegate
+import com.krystianwsul.checkme.gui.widgets.toQuery
 import com.krystianwsul.checkme.utils.startDate
 import com.krystianwsul.checkme.utils.tryGetFragment
 import com.krystianwsul.checkme.viewmodels.DataId
@@ -113,7 +114,7 @@ class ShowNotificationGroupActivity : AbstractActivity(), GroupListListener {
             binding.showNotificationGroupToolbarCollapseInclude
                 .collapseAppBarLayout
                 .searchParamsObservable
-                .map { it.toQuery() }
+                .toQuery()
                 .subscribe(searchRelay)
                 .addTo(createDisposable)
 

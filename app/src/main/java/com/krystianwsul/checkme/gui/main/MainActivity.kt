@@ -47,6 +47,7 @@ import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
 import com.krystianwsul.checkme.gui.utils.*
 import com.krystianwsul.checkme.gui.widgets.MyBottomBar
+import com.krystianwsul.checkme.gui.widgets.toQuery
 import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.viewmodels.*
 import com.krystianwsul.common.criteria.SearchCriteria
@@ -785,7 +786,7 @@ class MainActivity :
         val searchObservable = tabSearchStateRelay.switchMap {
             if (checkTabSearchState(it)) {
                 if (it.isSearching) {
-                    searchParamsObservable.map { it.toQuery() }
+                    searchParamsObservable.toQuery()
                 } else {
                     Observable.just(SearchCriteria.Search.Query.empty)
                 }

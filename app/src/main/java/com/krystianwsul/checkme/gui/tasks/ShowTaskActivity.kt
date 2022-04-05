@@ -21,6 +21,7 @@ import com.krystianwsul.checkme.gui.edit.EditActivity
 import com.krystianwsul.checkme.gui.edit.EditParameters
 import com.krystianwsul.checkme.gui.instances.ShowTaskInstancesActivity
 import com.krystianwsul.checkme.gui.utils.BottomFabMenuDelegate
+import com.krystianwsul.checkme.gui.widgets.toQuery
 import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.viewmodels.ShowTaskViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
@@ -120,7 +121,7 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.Listener {
             binding.showTaskToolbarCollapseInclude
                 .collapseAppBarLayout
                 .searchParamsObservable
-                .map { it.toQuery() }
+                .toQuery()
                 .subscribe(searchRelay)
                 .addTo(createDisposable)
 

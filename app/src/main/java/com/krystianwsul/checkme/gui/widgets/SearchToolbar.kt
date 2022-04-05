@@ -178,9 +178,8 @@ class SearchToolbar @JvmOverloads constructor(context: Context, attrs: Attribute
         val showAssignedToOthers: Boolean = SearchCriteria.empty.showAssignedToOthers,
     ) {
 
-        fun toFilterCriteria() = FilterCriteria.Full(query, showAssignedToOthers) // todo connect eliminiate
-
         fun toSearchCriteria(showDone: Boolean, excludedInstanceKeys: Set<InstanceKey>) = SearchCriteria(
+            // todo connect
             SearchCriteria.Search.Query(query),
             showAssignedToOthers,
             showDone,
@@ -188,9 +187,5 @@ class SearchToolbar @JvmOverloads constructor(context: Context, attrs: Attribute
         )
 
         fun toExpandOnly() = FilterCriteria.ExpandOnly(SearchCriteria.Search.Query(query)) // todo connect
-
-        fun toAllowedCriteria() = toExpandOnly() as FilterCriteria.AllowedFilterCriteria // todo connect
-
-        fun toQuery() = SearchCriteria.Search.Query(query) // todo connect?
     }
 }

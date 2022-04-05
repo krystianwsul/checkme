@@ -17,6 +17,7 @@ import com.krystianwsul.checkme.gui.edit.EditActivity
 import com.krystianwsul.checkme.gui.edit.EditParameters
 import com.krystianwsul.checkme.gui.edit.EditParentHint
 import com.krystianwsul.checkme.gui.utils.BottomFabMenuDelegate
+import com.krystianwsul.checkme.gui.widgets.toQuery
 import com.krystianwsul.checkme.utils.exhaustive
 import com.krystianwsul.checkme.utils.getOrInitializeFragment
 import com.krystianwsul.checkme.utils.startDate
@@ -112,7 +113,7 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
             binding.showTasksToolbarCollapseInclude
                 .collapseAppBarLayout
                 .searchParamsObservable
-                .map { it.toQuery() }
+                .toQuery()
                 .subscribe(searchRelay)
                 .addTo(createDisposable)
 

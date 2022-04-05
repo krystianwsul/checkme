@@ -24,6 +24,7 @@ import com.krystianwsul.checkme.gui.instances.list.GroupMenuUtils
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
 import com.krystianwsul.checkme.gui.utils.BottomFabMenuDelegate
 import com.krystianwsul.checkme.gui.utils.CopyAllRemindersDelegate
+import com.krystianwsul.checkme.gui.widgets.toQuery
 import com.krystianwsul.checkme.utils.startDate
 import com.krystianwsul.checkme.utils.tryGetFragment
 import com.krystianwsul.checkme.viewmodels.DataId
@@ -160,12 +161,12 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
         initBottomBar()
 
         showGroupViewModel.apply {
-            start(this@ShowGroupActivity.parameters)
+            start(parameters)
 
             binding.showGroupToolbarCollapseInclude
                 .collapseAppBarLayout
                 .searchParamsObservable
-                .map { it.toQuery() }
+                .toQuery()
                 .subscribe(searchRelay)
                 .addTo(createDisposable)
 

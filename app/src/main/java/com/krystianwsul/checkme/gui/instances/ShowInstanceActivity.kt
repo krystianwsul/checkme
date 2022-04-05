@@ -25,6 +25,7 @@ import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
 import com.krystianwsul.checkme.gui.utils.BottomFabMenuDelegate
 import com.krystianwsul.checkme.gui.utils.CopyAllRemindersDelegate
+import com.krystianwsul.checkme.gui.widgets.toQuery
 import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.viewmodels.DataId
 import com.krystianwsul.checkme.viewmodels.ShowInstanceViewModel
@@ -223,7 +224,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListListener {
             binding.showInstanceToolbarCollapseInclude
                 .collapseAppBarLayout
                 .searchParamsObservable
-                .map { it.toQuery() }
+                .toQuery()
                 .subscribe(searchRelay)
                 .addTo(createDisposable)
 

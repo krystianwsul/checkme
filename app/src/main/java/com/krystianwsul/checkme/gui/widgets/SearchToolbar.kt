@@ -186,5 +186,11 @@ class SearchToolbar @JvmOverloads constructor(context: Context, attrs: Attribute
             showDone,
             excludedInstanceKeys,
         )
+
+        fun toExpandOnly() = FilterCriteria.ExpandOnly(SearchCriteria.Search.Query(query)) // todo connect
+
+        fun toAllowedCriteria() = toExpandOnly() as FilterCriteria.AllowedFilterCriteria // todo connect
+
+        fun toQuery() = SearchCriteria.Search.Query(query) // todo connect?
     }
 }

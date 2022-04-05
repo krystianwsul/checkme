@@ -47,6 +47,7 @@ import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
 import com.krystianwsul.checkme.gui.utils.*
 import com.krystianwsul.checkme.gui.widgets.MyBottomBar
+import com.krystianwsul.checkme.gui.widgets.SearchToolbar
 import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.viewmodels.*
 import com.krystianwsul.common.time.Date
@@ -182,8 +183,6 @@ class MainActivity :
     }
 
     private val tabLayoutVisibleRelay = PublishRelay.create<TabLayoutVisibility>()
-
-    private lateinit var copyAllRemindersDelegate: CopyAllRemindersDelegate
 
     private val groupListViewModel by lazy { getViewModel<GroupListViewModel>() }
 
@@ -793,14 +792,16 @@ class MainActivity :
             tabSearchStateRelay.switchMap {
                 if (checkTabSearchState(it)) {
                     if (it.isSearching) {
-                        searchParamsObservable.map { it.toFilterCriteria() }
+                        searchParamsObservable
                     } else {
-                        Preferences.filterParamsObservable.map { FilterCriteria.Full(filterParams = it) }
+                        Preferences.showAssignedObservable.map { SearchToolbar.SearchParams(showAssignedToOthers = it) }
                     }
                 } else {
                     Observable.never()
                 }
-            }.share()
+            }
+                .map { it.toFilterCriteria() } // todo connect
+                .share()
         }
 
         val searchObservable = filterCriteria.map { it.search }

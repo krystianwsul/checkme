@@ -13,7 +13,6 @@ import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
-import com.krystianwsul.treeadapter.FilterCriteria
 import com.soywiz.klock.DateTimeTz
 import com.soywiz.klock.days
 import io.reactivex.rxjava3.core.Single
@@ -145,10 +144,6 @@ object Preferences {
     private var showProjectsProperty = NonNullRelayProperty(sharedPreferences.getBoolean(KEY_SHOW_PROJECTS, false))
     var showProjects by showProjectsProperty
     val showProjectsObservable = showProjectsProperty.observable.distinctUntilChanged()
-
-    val filterParamsObservable = showAssignedObservable.distinctUntilChanged() // todo connect eliminate
-        .map(FilterCriteria.Full::FilterParams)
-        .distinctUntilChanged()
 
     var instanceWarningSnooze: ExactTimeStamp.Local?
         get() = sharedPreferences.getLong(KEY_INSTANCE_WARNING_SNOOZE, -1)

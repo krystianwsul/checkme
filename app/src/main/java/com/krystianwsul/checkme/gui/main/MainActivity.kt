@@ -146,7 +146,8 @@ class MainActivity :
     private val filterCriteriaObservable by lazy {
         binding.mainSearchInclude
             .toolbar
-            .filterCriteriaObservable
+            .searchParamsObservable
+            .map { it.toFilterCriteria() }
     }
 
     private val deleteInstancesListener: (Serializable, Boolean) -> Unit = { deleteTasksData, removeInstances ->

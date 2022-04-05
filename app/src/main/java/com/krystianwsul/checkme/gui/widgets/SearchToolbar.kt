@@ -29,17 +29,17 @@ class SearchToolbar @JvmOverloads constructor(context: Context, attrs: Attribute
 
     private val inputMethodManager by lazy { context.getSystemService<InputMethodManager>()!! }
 
-    val filterCriteriaObservable by lazy {
+    val searchParamsObservable by lazy {
         Observables.combineLatest(
-                binding.searchText
-                    .textChanges()
-                    .map { it.toString() }
-                    .distinctUntilChanged()
-                    .map { it.normalized() }
-                    .distinctUntilChanged(),
-            Preferences.filterParamsObservable,
+            binding.searchText
+                .textChanges()
+                .map { it.toString() }
+                .distinctUntilChanged()
+                .map { it.normalized() }
+                .distinctUntilChanged(),
+            Preferences.showAssignedObservable,
         )
-            .map { (query, filterParams) -> FilterCriteria.Full(query, filterParams) }
+            .map { (query, showAssignedToOthers) -> SearchParams(query, showAssignedToOthers) }
             .distinctUntilChanged()
             .replay(1)
             .apply { attachedToWindowDisposable += connect() } // this should be hooked up in attachedToWindow
@@ -109,7 +109,7 @@ class SearchToolbar @JvmOverloads constructor(context: Context, attrs: Attribute
 
     override fun onSaveInstanceState(): Parcelable = SavedState(
         super.onSaveInstanceState(),
-        filterCriteriaObservable.getCurrentValue().search.query,
+        searchParamsObservable.getCurrentValue().query,
     )
 
     override fun onRestoreInstanceState(state: Parcelable) {
@@ -166,5 +166,10 @@ class SearchToolbar @JvmOverloads constructor(context: Context, attrs: Attribute
 
             out.writeString(query)
         }
+    }
+
+    data class SearchParams(val query: String, val showAssignedToOthers: Boolean) {
+
+        fun toFilterCriteria() = FilterCriteria.Full(query, showAssignedToOthers) // todo connect eliminiate
     }
 }

@@ -146,7 +146,7 @@ object Preferences {
     var showProjects by showProjectsProperty
     val showProjectsObservable = showProjectsProperty.observable.distinctUntilChanged()
 
-    val filterParamsObservable = showAssignedObservable.distinctUntilChanged()
+    val filterParamsObservable = showAssignedObservable.distinctUntilChanged() // todo connect eliminate
         .map(FilterCriteria.Full::FilterParams)
         .distinctUntilChanged()
 

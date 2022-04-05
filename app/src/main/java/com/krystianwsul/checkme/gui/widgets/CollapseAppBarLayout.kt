@@ -62,7 +62,8 @@ class CollapseAppBarLayout : AppBarLayout {
             if (it) {
                 binding.searchInclude
                     .toolbar
-                    .filterCriteriaObservable
+                    .searchParamsObservable
+                    .map { it.toFilterCriteria() }
             } else {
                 Preferences.filterParamsObservable.map { FilterCriteria.Full(filterParams = it) }
             }

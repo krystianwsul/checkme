@@ -25,6 +25,7 @@ import com.krystianwsul.checkme.viewmodels.ShowTasksViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
+import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.plusAssign
 import kotlinx.parcelize.Parcelize
 
@@ -53,12 +54,6 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
     private lateinit var taskListFragment: TaskListFragment
 
     private val showTasksViewModel by lazy { getViewModel<ShowTasksViewModel>() }
-
-    private val searchParamsObservable by lazy {
-        binding.showTasksToolbarCollapseInclude
-            .collapseAppBarLayout
-            .searchParamsObservable // todo manager
-    }
 
     private val receiver = object : BroadcastReceiver() {
 
@@ -112,11 +107,14 @@ class ShowTasksActivity : AbstractActivity(), TaskListFragment.Listener {
         }
 
         showTasksViewModel.apply {
-            start(this@ShowTasksActivity.parameters)
+            start(parameters)
 
-            createDisposable += searchParamsObservable
-                .map { it.toFilterCriteria() } // todo connect
-                .map { it.search }.subscribe(searchRelay)
+            binding.showTasksToolbarCollapseInclude
+                .collapseAppBarLayout
+                .searchParamsObservable
+                .map { it.toQuery() }
+                .subscribe(searchRelay)
+                .addTo(createDisposable)
 
             createDisposable += data.subscribe(::onLoadFinished)
         }

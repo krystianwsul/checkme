@@ -78,12 +78,6 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.Listener {
         override fun onReceive(context: Context?, intent: Intent?) = showTaskViewModel.refresh()
     }
 
-    private val searchParamsObservable by lazy {
-        binding.showTaskToolbarCollapseInclude
-            .collapseAppBarLayout
-            .searchParamsObservable // todo manager
-    }
-
     private lateinit var binding: ActivityShowTaskBinding
     private lateinit var bottomBinding: BottomBinding
 
@@ -123,7 +117,12 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.Listener {
         showTaskViewModel.apply {
             start(taskKey)
 
-            createDisposable += searchParamsObservable.map { it.toQuery() }.subscribe(searchRelay)
+            binding.showTaskToolbarCollapseInclude
+                .collapseAppBarLayout
+                .searchParamsObservable
+                .map { it.toQuery() }
+                .subscribe(searchRelay)
+                .addTo(createDisposable)
 
             createDisposable += data.subscribe(::onLoadFinished)
         }

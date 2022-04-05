@@ -47,9 +47,9 @@ import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.gui.tree.AbstractHolder
 import com.krystianwsul.checkme.gui.utils.*
 import com.krystianwsul.checkme.gui.widgets.MyBottomBar
-import com.krystianwsul.checkme.gui.widgets.SearchToolbar
 import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.viewmodels.*
+import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.DateTimeSoy
 import com.krystianwsul.common.time.ExactTimeStamp
@@ -787,23 +787,17 @@ class MainActivity :
 
         override val snackbarParent get() = this@MainActivity.snackbarParent
 
-        private val searchParamsObservable by lazy {
-            tabSearchStateRelay.switchMap {
-                if (checkTabSearchState(it)) {
-                    if (it.isSearching) {
-                        this@MainActivity.searchParamsObservable
-                    } else {
-                        Preferences.showAssignedObservable.map { SearchToolbar.SearchParams(showAssignedToOthers = it) }
-                    }
+        val searchObservable = tabSearchStateRelay.switchMap {
+            if (checkTabSearchState(it)) {
+                if (it.isSearching) {
+                    searchParamsObservable.map { it.toQuery() }
                 } else {
-                    Observable.never()
+                    Observable.just(SearchCriteria.Search.Query.empty)
                 }
+            } else {
+                Observable.never()
             }
-                .map { it.toFilterCriteria() } // todo connect
-                .share()
         }
-
-        val searchObservable = searchParamsObservable.map { it.search } // todo manager
 
         override fun onCreateActionMode(actionMode: ActionMode) = this@MainActivity.onCreateActionMode(actionMode)
 

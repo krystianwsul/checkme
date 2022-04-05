@@ -8,8 +8,8 @@ abstract class ObservableDomainViewModel<D : DomainData, P : ObservableDomainVie
 
     private val delegate by lazy { Delegate<D, P>(domainListener) }
 
-    val parametersRelay get() = delegate.parametersRelay
-    val parameters get() = delegate.parameters
+    protected val parametersRelay get() = delegate.parametersRelay
+    protected val parameters get() = delegate.parameters
 
     override fun internalStart() = delegate.start()
 

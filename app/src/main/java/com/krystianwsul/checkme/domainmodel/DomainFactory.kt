@@ -368,9 +368,8 @@ class DomainFactory(
 
         val tasks = taskKeys.map { getTaskForce(it).getAllChildren() }
             .flatten()
+            .filter { it.notDeleted }
             .toSet()
-
-        tasks.forEach { it.requireNotDeleted() }
 
         val projects = tasks.map { it.project }.toSet()
 

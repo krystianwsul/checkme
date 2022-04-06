@@ -467,6 +467,10 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
                 .sortedBy { it.startExactTimeStamp }
                 .forEach { Log.e("asdf", "magic irrelevant schedule, schedule: $it, task: ${it.topLevelTask}") }
 
+            results.irrelevantSchedules
+                .sortedBy { it.startExactTimeStamp }
+                .forEach { Log.e("asdf", "magic irrelevant task: $it") }
+
             throw Exception("Irrelevant.setIrrelevant write prevented")
         }
 

@@ -14,6 +14,8 @@ data class TimePair(val customTimeKey: CustomTimeKey?, val hourMinute: HourMinut
 
     constructor(hourMinute: HourMinute) : this(null, hourMinute)
 
+    constructor(hour: Int, minute: Int) : this(HourMinute(hour, minute))
+
     init {
         check((customTimeKey == null) != (hourMinute == null))
     }

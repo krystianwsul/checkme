@@ -5,6 +5,7 @@ import com.krystianwsul.checkme.domainmodel.extensions.createScheduleTopLevelTas
 import com.krystianwsul.checkme.domainmodel.extensions.getGroupListData
 import com.krystianwsul.checkme.domainmodel.extensions.setInstanceDone
 import com.krystianwsul.checkme.domainmodel.notifications.Notifier
+import com.krystianwsul.checkme.domainmodel.updates.CreateChildTaskDomainUpdate
 import com.krystianwsul.checkme.firebase.roottask.RootTasksFactory
 import com.krystianwsul.checkme.gui.edit.delegates.EditDelegate
 import com.krystianwsul.common.time.*
@@ -12,8 +13,7 @@ import com.krystianwsul.common.utils.ScheduleData
 import com.soywiz.klock.days
 import com.soywiz.klock.hours
 import org.junit.After
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
+import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -79,5 +79,130 @@ class IrrelevantDomainTest {
         val result = Notifier.setIrrelevant(domainFactory, now)
 
         assertTrue(result.irrelevantSchedules.isNotEmpty())
+    }
+
+    @Test
+    fun testSingleInstanceChildIrrelevantWhenDone() {
+        val today = Date(2022, 4, 6)
+        var now = ExactTimeStamp.Local(today, HourMinute(1, 0))
+
+        // first, create the parent-child relationship
+
+        val parentTaskKey = domainUpdater(now).createScheduleTopLevelTask(
+            DomainListenerManager.NotificationType.All,
+            EditDelegate.CreateParameters("parent task"),
+            listOf(ScheduleData.Weekly(setOf(today.dayOfWeek), TimePair(10, 0), null, null, 1)),
+            null,
+        )
+            .blockingGet()
+            .taskKey
+
+        val parentInstanceKey = getTodayInstanceDatas(now).let {
+            assertEquals(1, it.size)
+            assertTrue(it.single().allChildren.isEmpty())
+
+            it.single().instanceKey
+        }
+
+        now += 1.hours
+
+        val childTaskKey = CreateChildTaskDomainUpdate(
+            DomainListenerManager.NotificationType.All,
+            CreateChildTaskDomainUpdate.Parent.Instance(parentInstanceKey),
+            EditDelegate.CreateParameters("child task"),
+        ).perform(domainUpdater(now))
+            .blockingGet()
+            .taskKey
+
+        getTodayInstanceDatas(now).let {
+            assertEquals(1, it.size)
+            assertEquals(1, it.single().allChildren.size)
+        }
+
+        // check that it doesn't get garbage collected immediately
+
+        assertTrue(Notifier.setIrrelevant(domainFactory, now).irrelevantTasks.isEmpty())
+
+        // mark parent as done
+
+        domainUpdater(now).setInstanceDone(
+            DomainListenerManager.NotificationType.All,
+            parentInstanceKey,
+            true,
+        ).blockingSubscribe()
+
+        // sanity check
+
+        getTodayInstanceDatas(now).let {
+            assertNotNull(it.single().done)
+        }
+
+        // jump to tomorrow, do sanity check again
+
+        now += 1.days
+
+        getTodayInstanceDatas(now).let {
+            assertTrue(it.isEmpty())
+        }
+
+        Notifier.setIrrelevant(domainFactory, now).let {
+            assertEquals(childTaskKey, it.irrelevantTasks.single().taskKey)
+        }
+    }
+
+    @Test
+    fun testSingleInstanceChildRelevantWhenNotDone() {
+        val today = Date(2022, 4, 6)
+        var now = ExactTimeStamp.Local(today, HourMinute(1, 0))
+
+        // first, create the parent-child relationship
+
+        val parentTaskKey = domainUpdater(now).createScheduleTopLevelTask(
+            DomainListenerManager.NotificationType.All,
+            EditDelegate.CreateParameters("parent task"),
+            listOf(ScheduleData.Weekly(setOf(today.dayOfWeek), TimePair(10, 0), null, null, 1)),
+            null,
+        )
+            .blockingGet()
+            .taskKey
+
+        val parentInstanceKey = getTodayInstanceDatas(now).let {
+            assertEquals(1, it.size)
+            assertTrue(it.single().allChildren.isEmpty())
+
+            it.single().instanceKey
+        }
+
+        now += 1.hours
+
+        val childTaskKey = CreateChildTaskDomainUpdate(
+            DomainListenerManager.NotificationType.All,
+            CreateChildTaskDomainUpdate.Parent.Instance(parentInstanceKey),
+            EditDelegate.CreateParameters("child task"),
+        ).perform(domainUpdater(now))
+            .blockingGet()
+            .taskKey
+
+        getTodayInstanceDatas(now).let {
+            assertEquals(1, it.size)
+            assertEquals(1, it.single().allChildren.size)
+        }
+
+        // check that it doesn't get garbage collected immediately
+
+        assertTrue(Notifier.setIrrelevant(domainFactory, now).irrelevantTasks.isEmpty())
+
+        // jump to tomorrow, do sanity check again
+
+        now += 1.days
+
+        getTodayInstanceDatas(now).let {
+            assertEquals(1, it.size)
+            assertEquals(1, it.single().allChildren.size)
+        }
+
+        Notifier.setIrrelevant(domainFactory, now).let {
+            assertTrue(it.irrelevantTasks.isEmpty())
+        }
     }
 }

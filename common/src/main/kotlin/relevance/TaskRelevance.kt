@@ -46,7 +46,7 @@ class TaskRelevance(val task: Task) {
                 )
             }
 
-        task.getChildTasks().forEach {
+        task.getHierarchyChildTasks().forEach {
             taskRelevances.getValue(it.taskKey).setRelevant(
                 taskRelevances,
                 taskHierarchyRelevances,

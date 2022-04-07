@@ -12,6 +12,7 @@ import com.krystianwsul.common.firebase.models.cache.ClearableInvalidatableManag
 import com.krystianwsul.common.firebase.models.cache.InvalidatableCache
 import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
 import com.krystianwsul.common.firebase.models.cache.invalidatableCache
+import com.krystianwsul.common.firebase.models.filterAndSort
 import com.krystianwsul.common.firebase.models.interval.*
 import com.krystianwsul.common.firebase.models.noscheduleorparent.NoScheduleOrParent
 import com.krystianwsul.common.firebase.models.project.Project
@@ -255,20 +256,7 @@ sealed class Task(
         return _existingInstances.values
             .asSequence()
             .run { if (onlyRoot) filter { it.isRootInstance() } else this }
-            .map { it.instanceDateTime to it }
-            .filter {
-                InterruptionChecker.throwIfInterrupted()
-
-                val exactTimeStamp = it.first.toLocalExactTimeStamp()
-
-                if (startExactTimeStamp?.let { exactTimeStamp < it } == true) return@filter false
-
-                if (endExactTimeStamp?.let { exactTimeStamp >= it } == true) return@filter false
-
-                true
-            }
-            .sortedBy { it.first } // this evaluates everything earlier
-            .map { it.second }
+            .filterAndSort(startExactTimeStamp, endExactTimeStamp)
     }
 
     // contains only generated instances
@@ -399,11 +387,6 @@ sealed class Task(
 
     private var gettingInstances = false
 
-    enum class ExistingVirtual {
-
-        EXISTING, VIRTUAL, ALL
-    }
-
     /*
     todo: `now` seems to be only used for filtering parent instances.  But, I think this is redundant.  Removing the
     filtering doesn't break any tests.  If I want to remove `now` later, just make sure that production data looks the same
@@ -416,7 +399,6 @@ sealed class Task(
         onlyRoot: Boolean = false,
         filterVisible: Boolean = true,
         excludedParentTasks: Set<TaskKey> = emptySet(),
-        existingVirtual: ExistingVirtual = ExistingVirtual.ALL,
     ): Sequence<Instance> {
         check(!gettingInstances)
         gettingInstances = true
@@ -425,31 +407,23 @@ sealed class Task(
             InterruptionChecker.throwIfInterrupted()
 
             if (filterVisible && !notDeleted && endData!!.deleteInstances) {
-                if (existingVirtual == ExistingVirtual.VIRTUAL) {
-                    emptySequence()
-                } else {
-                    getExistingInstances(startExactTimeStamp, endExactTimeStamp, onlyRoot).filter { it.done != null }
-                }
+                getExistingInstances(startExactTimeStamp, endExactTimeStamp, onlyRoot).filter { it.done != null }
             } else {
                 val instanceInfoSequences = mutableListOf<Sequence<InstanceInfo>>()
 
-                if (existingVirtual != ExistingVirtual.VIRTUAL) {
-                    instanceInfoSequences +=
-                        getExistingInstances(startExactTimeStamp, endExactTimeStamp, onlyRoot).map(::InstanceInfo)
+                instanceInfoSequences +=
+                    getExistingInstances(startExactTimeStamp, endExactTimeStamp, onlyRoot).map(::InstanceInfo)
+
+                if (!onlyRoot) {
+                    instanceInfoSequences += getParentInstances(
+                        startExactTimeStamp,
+                        endExactTimeStamp,
+                        now,
+                        excludedParentTasks,
+                    )
                 }
 
-                if (existingVirtual != ExistingVirtual.EXISTING) {
-                    if (!onlyRoot) {
-                        instanceInfoSequences += getParentInstances(
-                            startExactTimeStamp,
-                            endExactTimeStamp,
-                            now,
-                            excludedParentTasks,
-                        )
-                    }
-
-                    instanceInfoSequences += getScheduleInstances(startExactTimeStamp, endExactTimeStamp).map(::InstanceInfo)
-                }
+                instanceInfoSequences += getScheduleInstances(startExactTimeStamp, endExactTimeStamp).map(::InstanceInfo)
 
                 combineInstanceInfoSequences(instanceInfoSequences).toInstances()
             }

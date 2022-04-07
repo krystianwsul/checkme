@@ -2,6 +2,8 @@ package com.krystianwsul.common.firebase.models
 
 import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.task.RootTask
+import com.krystianwsul.common.interrupt.InterruptionChecker
+import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
 
@@ -35,3 +37,30 @@ private class InconsistentRootTaskIdsException(pairs: List<Triple<TaskKey.Root, 
             "${it.first} says it belongs in project ${it.second}, but was found in ${it.third}"
         }
     )
+
+fun <T> Sequence<T>.requireDistinct(): Sequence<T> {
+    val previous = mutableSetOf<T>()
+
+    return onEach {
+        check(it !in previous) { "sequence already contains $it" }
+
+        previous += it
+    }
+}
+
+fun Sequence<Instance>.filterAndSort(
+    startExactTimeStamp: ExactTimeStamp.Offset?,
+    endExactTimeStamp: ExactTimeStamp.Offset?,
+) = map { it.instanceDateTime to it }.filter {
+    InterruptionChecker.throwIfInterrupted()
+
+    val exactTimeStamp = it.first.toLocalExactTimeStamp()
+
+    if (startExactTimeStamp?.let { exactTimeStamp < it } == true) return@filter false
+
+    if (endExactTimeStamp?.let { exactTimeStamp >= it } == true) return@filter false
+
+    true
+}
+    .sortedBy { it.first } // this evaluates everything earlier
+    .map { it.second }

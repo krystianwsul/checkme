@@ -9,6 +9,8 @@ import com.krystianwsul.common.firebase.models.cache.ClearableInvalidatableManag
 import com.krystianwsul.common.firebase.models.cache.InvalidatableCache
 import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
 import com.krystianwsul.common.firebase.models.cache.invalidatableCache
+import com.krystianwsul.common.firebase.models.filterAndSort
+import com.krystianwsul.common.firebase.models.requireDistinct
 import com.krystianwsul.common.firebase.models.search.FilterResult
 import com.krystianwsul.common.firebase.models.search.SearchContext
 import com.krystianwsul.common.firebase.models.task.ProjectTask
@@ -228,25 +230,24 @@ sealed class Project<T : ProjectType>(
                 .toList()
         }
 
-        val instanceSequences = filteredTasks.map {
+        val hierarchyInstanceSequences: List<Sequence<Instance>> = filteredTasks.map {
             it.getInstances(
                 startExactTimeStamp,
                 endExactTimeStamp,
                 now,
                 onlyRoot = true,
                 filterVisible = filterVisible,
-                existingVirtual = Task.ExistingVirtual.VIRTUAL,
-            )
-        } + allTasks.map {
-            it.getInstances(
-                startExactTimeStamp,
-                endExactTimeStamp,
-                now,
-                onlyRoot = true,
-                filterVisible = filterVisible,
-                existingVirtual = Task.ExistingVirtual.EXISTING,
-            )
+            ).filter { !it.hasExistingChildRecursive }
         }
+
+        val hackInstanceSequence: Sequence<Instance> = getAllExistingInstances().map { it.getTopLevelInstance() }
+            .filter { it.getProject() == this }
+            .distinct()
+            .filter { it.hasExistingChildRecursive } // filters out root existing instances
+            .onEach { check(it.hasExistingChildRecursive) } // todo exists
+            .filterAndSort(startExactTimeStamp, endExactTimeStamp)
+
+        val instanceSequences = hierarchyInstanceSequences.toMutableList().also { it += hackInstanceSequence }
 
         return combineInstanceSequences(instanceSequences).let { sequence ->
             InterruptionChecker.throwIfInterrupted()
@@ -269,7 +270,7 @@ sealed class Project<T : ProjectType>(
             } else {
                 instances
             }
-        }
+        }.requireDistinct() // todo exists
     }
 
     fun fixOffsets() {

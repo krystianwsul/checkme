@@ -375,7 +375,7 @@ class Instance private constructor(
                     .addInvalidatable(invalidatableCache)
             }
 
-            InvalidatableCache.ValueHolder(childInstances.any { hasExistingInChildHierarchyCache.value }) {
+            InvalidatableCache.ValueHolder(childInstances.any { it.hasExistingInChildHierarchyCache.value }) {
                 taskHierarchyRemovable.remove()
 
                 existingRemovable.remove()
@@ -386,7 +386,7 @@ class Instance private constructor(
 
     val hasExistingChildRecursive by hasExistingChildRecursiveCache
 
-    private val hasExistingInChildHierarchyCache: InvalidatableCache<Boolean> =
+    val hasExistingInChildHierarchyCache: InvalidatableCache<Boolean> = // todo exists set private
         invalidatableCache(task.clearableInvalidatableManager) { invalidatableCache ->
             if (exists()) {
                 InvalidatableCache.ValueHolder(true) { }
@@ -398,6 +398,8 @@ class Instance private constructor(
         }
 
     fun isRootInstance() = parentInstance == null
+
+    fun getTopLevelInstance(): Instance = parentInstance?.getTopLevelInstance() ?: this // todo exists cache this
 
     fun getDisplayData() = if (isRootInstance()) instanceDateTime else null
 
@@ -767,7 +769,8 @@ class Instance private constructor(
 
     fun canMigrateDescription(now: ExactTimeStamp.Local) = !task.note.isNullOrEmpty() && canAddSubtask(now)
 
-    fun getProject(): Project<*> = parentInstance?.getProject() ?: task.project
+    fun getProject(): Project<*> =
+        parentInstance?.getProject() ?: task.project // todo exists this benefits from getTopLevelInstance
 
     fun taskHasOtherVisibleInstances(now: ExactTimeStamp.Local) = task.hasOtherVisibleInstances(now, instanceKey)
 

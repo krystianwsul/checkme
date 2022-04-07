@@ -1,7 +1,6 @@
 package com.krystianwsul.checkme.gui.utils
 
 import android.view.View
-import androidx.recyclerview.widget.RecyclerView
 import com.jakewharton.rxrelay3.BehaviorRelay
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.EmptyTextBinding
@@ -9,6 +8,7 @@ import com.krystianwsul.checkme.gui.tree.AbstractHolder
 import com.krystianwsul.checkme.gui.tree.BaseAdapter
 import com.krystianwsul.checkme.utils.animateVisibility
 import com.krystianwsul.common.criteria.SearchCriteria
+import com.krystianwsul.treeadapter.TreeRecyclerView
 import com.krystianwsul.treeadapter.TreeViewAdapter
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
@@ -19,7 +19,7 @@ abstract class SearchDataManager<DATA : Any, MODEL_ADAPTER : BaseAdapter>(
     private val dataObservable: Observable<DATA>,
 ) {
 
-    protected abstract val recyclerView: RecyclerView
+    protected abstract val recyclerView: TreeRecyclerView
     protected abstract val progressView: View
     protected abstract val emptyTextBinding: EmptyTextBinding
 
@@ -69,6 +69,8 @@ abstract class SearchDataManager<DATA : Any, MODEL_ADAPTER : BaseAdapter>(
 
                 val oldSearchCriteria = this.data?.let(::getSearchCriteriaFromData)
 
+                val wasAtTop = recyclerView.layoutManager.findFirstCompletelyVisibleItemPosition() == 0
+
                 this.data = data
                 searchCriteria = getSearchCriteriaFromData(data)
 
@@ -103,17 +105,23 @@ abstract class SearchDataManager<DATA : Any, MODEL_ADAPTER : BaseAdapter>(
                 onDataChanged()
 
                 // this scrolls to top on search changes
-                tryScrollToTopOnSearchChange(oldSearchCriteria, searchCriteria)
+                tryScrollToTopOnSearchChange(oldSearchCriteria, searchCriteria, wasAtTop)
             }
             .addTo(compositeDisposable)
     }
 
-    private fun tryScrollToTopOnSearchChange(oldSearchCriteria: SearchCriteria?, newSearchCriteria: SearchCriteria) {
-        val oldSearch = oldSearchCriteria?.search
-        val newSearch = newSearchCriteria.search
+    private fun tryScrollToTopOnSearchChange(
+        oldSearchCriteria: SearchCriteria?,
+        newSearchCriteria: SearchCriteria,
+        wasAtTop: Boolean,
+    ) {
+        if (!wasAtTop) {
+            val oldSearch = oldSearchCriteria?.search
+            val newSearch = newSearchCriteria.search
 
-        if (listOfNotNull(oldSearch, newSearch).all { it.isEmpty }) return
-        if (oldSearch == newSearch) return
+            if (listOfNotNull(oldSearch, newSearch).all { it.isEmpty }) return
+            if (oldSearch == newSearch) return
+        }
 
         recyclerView.scrollToPosition(0)
     }

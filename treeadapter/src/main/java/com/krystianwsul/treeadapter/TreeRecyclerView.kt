@@ -43,6 +43,8 @@ class TreeRecyclerView : RecyclerView {
 
     fun fixDrag() = cleanupLayoutState(this)
 
+    override fun getLayoutManager() = treeLinearLayoutManager
+
     override fun setLayoutManager(layout: LayoutManager?) {
         if (preventSettingLayoutManager) throw UnsupportedOperationException()
 

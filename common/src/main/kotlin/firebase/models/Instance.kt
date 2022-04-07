@@ -359,6 +359,44 @@ class Instance private constructor(
 
     fun getChildInstances() = taskHierarchyChildInstancesCache.value + existingChildInstancesCache.value
 
+    private val hasExistingChildRecursiveCache: InvalidatableCache<Boolean> =
+        invalidatableCache(task.clearableInvalidatableManager) { invalidatableCache ->
+            val childInstances = getChildInstances()
+
+            val taskHierarchyRemovable =
+                taskHierarchyChildInstancesCache.invalidatableManager.addInvalidatable(invalidatableCache)
+
+            val existingRemovable =
+                existingChildInstancesCache.invalidatableManager.addInvalidatable(invalidatableCache)
+
+            val childRemovables = childInstances.map {
+                it.hasExistingInChildHierarchyCache
+                    .invalidatableManager
+                    .addInvalidatable(invalidatableCache)
+            }
+
+            InvalidatableCache.ValueHolder(childInstances.any { hasExistingInChildHierarchyCache.value }) {
+                taskHierarchyRemovable.remove()
+
+                existingRemovable.remove()
+
+                childRemovables.forEach { it.remove() }
+            }
+        }
+
+    val hasExistingChildRecursive by hasExistingChildRecursiveCache
+
+    private val hasExistingInChildHierarchyCache: InvalidatableCache<Boolean> =
+        invalidatableCache(task.clearableInvalidatableManager) { invalidatableCache ->
+            if (exists()) {
+                InvalidatableCache.ValueHolder(true) { }
+            } else {
+                val removable = hasExistingChildRecursiveCache.invalidatableManager.addInvalidatable(invalidatableCache)
+
+                InvalidatableCache.ValueHolder(hasExistingChildRecursive) { removable.remove() }
+            }
+        }
+
     fun isRootInstance() = parentInstance == null
 
     fun getDisplayData() = if (isRootInstance()) instanceDateTime else null
@@ -599,6 +637,8 @@ class Instance private constructor(
                 task,
                 task.createRemoteInstanceRecord(this),
             )
+
+            hasExistingInChildHierarchyCache.invalidate()
         }
 
         return data as Data.Real

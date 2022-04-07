@@ -105,25 +105,26 @@ abstract class SearchDataManager<DATA : Any, MODEL_ADAPTER : BaseAdapter>(
                 onDataChanged()
 
                 // this scrolls to top on search changes
-                tryScrollToTopOnSearchChange(oldSearchCriteria, searchCriteria, wasAtTop)
+                if (shouldScrollToTop(oldSearchCriteria, searchCriteria, wasAtTop))
+                    recyclerView.scrollToPosition(0)
             }
             .addTo(compositeDisposable)
     }
 
-    private fun tryScrollToTopOnSearchChange(
+    private fun shouldScrollToTop(
         oldSearchCriteria: SearchCriteria?,
         newSearchCriteria: SearchCriteria,
         wasAtTop: Boolean,
-    ) {
-        if (!wasAtTop) {
-            val oldSearch = oldSearchCriteria?.search
-            val newSearch = newSearchCriteria.search
+    ): Boolean {
+        if (wasAtTop) return true
 
-            if (listOfNotNull(oldSearch, newSearch).all { it.isEmpty }) return
-            if (oldSearch == newSearch) return
-        }
+        val oldSearch = oldSearchCriteria?.search
+        val newSearch = newSearchCriteria.search
 
-        recyclerView.scrollToPosition(0)
+        if (listOfNotNull(oldSearch, newSearch).all { it.isEmpty }) return false
+        if (oldSearch == newSearch) return false
+
+        return true
     }
 
     private fun isAdapterEmpty() = treeViewAdapter.displayedNodes.isEmpty()

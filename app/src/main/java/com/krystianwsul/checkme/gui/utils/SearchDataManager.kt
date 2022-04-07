@@ -67,7 +67,7 @@ abstract class SearchDataManager<DATA : Any, MODEL_ADAPTER : BaseAdapter>(
                 val first = this.data == null
                 val immediate = dataIsImmediate(data)
 
-                val oldFilterCriteria = this.data?.let(::getSearchCriteriaFromData)
+                val oldSearchCriteria = this.data?.let(::getSearchCriteriaFromData)
 
                 this.data = data
                 searchCriteria = getSearchCriteriaFromData(data)
@@ -103,10 +103,19 @@ abstract class SearchDataManager<DATA : Any, MODEL_ADAPTER : BaseAdapter>(
                 onDataChanged()
 
                 // this scrolls to top on search changes
-                if (listOf(oldFilterCriteria, searchCriteria).any { it?.isEmpty == false })
-                    recyclerView.scrollToPosition(0)
+                tryScrollToTopOnSearchChange(oldSearchCriteria, searchCriteria)
             }
             .addTo(compositeDisposable)
+    }
+
+    private fun tryScrollToTopOnSearchChange(oldSearchCriteria: SearchCriteria?, newSearchCriteria: SearchCriteria) {
+        val oldSearch = oldSearchCriteria?.search
+        val newSearch = newSearchCriteria.search
+
+        if (listOfNotNull(oldSearch, newSearch).all { it.isEmpty }) return
+        if (oldSearch == newSearch) return
+
+        recyclerView.scrollToPosition(0)
     }
 
     private fun isAdapterEmpty() = treeViewAdapter.displayedNodes.isEmpty()

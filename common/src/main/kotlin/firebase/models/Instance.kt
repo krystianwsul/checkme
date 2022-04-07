@@ -386,7 +386,7 @@ class Instance private constructor(
 
     val hasExistingChildRecursive by hasExistingChildRecursiveCache
 
-    val hasExistingInChildHierarchyCache: InvalidatableCache<Boolean> = // todo exists set private
+    private val hasExistingInChildHierarchyCache: InvalidatableCache<Boolean> =
         invalidatableCache(task.clearableInvalidatableManager) { invalidatableCache ->
             if (exists()) {
                 InvalidatableCache.ValueHolder(true) { }

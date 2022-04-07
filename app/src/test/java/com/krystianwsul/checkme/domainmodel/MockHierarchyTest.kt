@@ -4,6 +4,7 @@ import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.extensions.*
 import com.krystianwsul.checkme.domainmodel.updates.CreateChildTaskDomainUpdate
 import com.krystianwsul.checkme.gui.edit.delegates.EditDelegate
+import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.ScheduleData
 import com.soywiz.klock.hours
@@ -360,5 +361,51 @@ class MockHierarchyTest {
 
         // This checks that an infinite loop doesn't occur in Task.isVisible/getParentInstances
         domainFactory.getTaskForce(subchildTaskKey).isVisible(now)
+    }
+
+    @Test
+    fun testChildFoundThroughSearch() {
+        val today = Date(2022, 4, 7)
+        var now = ExactTimeStamp.Local(today, HourMinute(1, 0))
+
+        domainUpdater(now).createScheduleTopLevelTask(
+            DomainListenerManager.NotificationType.All,
+            EditDelegate.CreateParameters("parent task"),
+            listOf(ScheduleData.Weekly(DayOfWeek.set, TimePair(10, 0), null, null, 1)),
+            null,
+        ).blockingGet()
+
+        val parentInstanceKey = getTodayInstanceDatas(now).let {
+            assertEquals(1, it.size)
+
+            it.single().instanceKey
+        }
+
+        now += 1.hours
+
+        val childTaskKey = CreateChildTaskDomainUpdate(
+            DomainListenerManager.NotificationType.All,
+            CreateChildTaskDomainUpdate.Parent.Instance(parentInstanceKey),
+            EditDelegate.CreateParameters("child task"),
+        ).perform(domainUpdater(now))
+            .blockingGet()
+            .taskKey
+
+        domainFactory.getSearchInstancesData(
+            SearchCriteria(SearchCriteria.Search.Query("child task")),
+            0,
+        )
+            .getDomainResult()
+            .data!!
+            .groupListDataWrapper
+            .allInstanceDatas
+            .let {
+                assertEquals(1, it.size)
+
+                val parent = it.single()
+                val child = parent.allChildren.single()
+
+                assertEquals(childTaskKey, child.instanceKey.taskKey)
+            }
     }
 }

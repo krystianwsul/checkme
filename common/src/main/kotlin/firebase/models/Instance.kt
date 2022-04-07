@@ -399,7 +399,7 @@ class Instance private constructor(
 
     fun isRootInstance() = parentInstance == null
 
-    fun getTopLevelInstance(): Instance = parentInstance?.getTopLevelInstance() ?: this // todo exists cache this
+    fun getTopLevelInstance(): Instance = parentInstance?.getTopLevelInstance() ?: this
 
     fun getDisplayData() = if (isRootInstance()) instanceDateTime else null
 
@@ -769,8 +769,7 @@ class Instance private constructor(
 
     fun canMigrateDescription(now: ExactTimeStamp.Local) = !task.note.isNullOrEmpty() && canAddSubtask(now)
 
-    fun getProject(): Project<*> =
-        parentInstance?.getProject() ?: task.project // todo exists this benefits from getTopLevelInstance
+    fun getProject(): Project<*> = parentInstance?.getProject() ?: task.project
 
     fun taskHasOtherVisibleInstances(now: ExactTimeStamp.Local) = task.hasOtherVisibleInstances(now, instanceKey)
 

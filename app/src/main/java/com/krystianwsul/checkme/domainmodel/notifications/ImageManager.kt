@@ -11,6 +11,7 @@ import com.bumptech.glide.request.target.Target
 import com.bumptech.glide.request.transition.Transition
 import com.jakewharton.rxrelay3.BehaviorRelay
 import com.krystianwsul.checkme.MyApplication
+import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.observeOnDomain
 import com.krystianwsul.checkme.domainmodel.toImageLoader
 import com.krystianwsul.checkme.utils.circle
@@ -115,7 +116,10 @@ object ImageManager {
 
                 val statesToRemove = imagesToRemove.map { it to imageStates.getValue(it) }
 
-                imagesToRemove.forEach { imageStates.remove(it) }
+                imagesToRemove.forEach {
+                    imageStates.remove(it)
+                    MyCrashlytics.log("ImageManager: removed $it")
+                }
 
                 statesToRemove.filter { it.second is State.Downloading }.forEach { (uuid, state) ->
                     (state as State.Downloading).target
@@ -123,6 +127,12 @@ object ImageManager {
                         .clear()
 
                     imageStates.remove(uuid)
+
+                    /*
+                    todo: I think this also needs to cancel the RX inside the SimpleTarget.  Check logging to confirm.
+                     */
+
+                    MyCrashlytics.log("ImageManager: cleared $it")
                 }
 
                 Single.fromCallable {
@@ -166,6 +176,8 @@ object ImageManager {
 
                                         imageStates[uuid] = State.Downloaded
 
+                                        MyCrashlytics.log("ImageManager: downloaded $uuid")
+
                                         callback()
                                     }
                             }
@@ -174,10 +186,14 @@ object ImageManager {
                                 check(imageStates.getValue(uuid) is State.Downloading)
 
                                 imageStates.remove(uuid)
+
+                                MyCrashlytics.log("ImageManager: onLoadFailed $uuid")
                             }
                         })
 
                     uuid to State.Downloading(target)
+                }.onEach {
+                    MyCrashlytics.log("ImageManager: added " + it.first)
                 }
             }
         }

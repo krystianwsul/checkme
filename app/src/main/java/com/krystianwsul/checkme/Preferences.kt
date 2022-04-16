@@ -45,6 +45,7 @@ object Preferences {
     private const val KEY_VERSION_CODE = "versionCode"
     private const val KEY_INSTANCE_WARNING_SNOOZE = "instanceWarningSnooze"
     private const val KEY_PROJECT_ORDER = "projectOrder"
+    private const val KEY_NOTIFICATION_LOG = "notificationLog"
 
     private val sharedPreferences by lazy { MyApplication.sharedPreferences }
 
@@ -213,6 +214,8 @@ object Preferences {
 
         projectOrder = newProjectOrder
     }
+
+    val notificationLog = Logger(KEY_NOTIFICATION_LOG, 100)
 
     private open class ReadOnlyStrPref(protected val key: String) : ReadOnlyProperty<Any, String> {
 

@@ -50,6 +50,11 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
+        <androidx.compose.ui.platform.ComposeView
+            android:id="@+id/debugNotificationSection"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
         <Button
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

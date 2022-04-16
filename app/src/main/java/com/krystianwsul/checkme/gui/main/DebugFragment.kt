@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import arrow.core.Tuple5
 import com.google.android.material.composethemeadapter.MdcTheme
 import com.jakewharton.rxbinding4.view.clicks
+import com.jakewharton.rxrelay3.BehaviorRelay
 import com.jakewharton.rxrelay3.PublishRelay
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
@@ -40,6 +41,7 @@ import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.BackpressureStrategy
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.kotlin.addTo
+import io.reactivex.rxjava3.kotlin.plusAssign
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.rx3.asObservable
 
@@ -249,6 +251,21 @@ class DebugFragment : AbstractFragment() {
                 }
             }
             .addTo(viewCreatedDisposable)
+
+        val showNotificationLog = BehaviorRelay.createDefault(false)
+
+        viewCreatedDisposable += showNotificationLog.subscribe { show ->
+            binding.debugNotificationSection.setContent {
+                MdcTheme {
+                    NotificationSection(
+                        onClick = { showNotificationLog.accept(!show) },
+                        text = Preferences.notificationLog
+                            .log
+                            .takeIf { show },
+                    )
+                }
+            }
+        }
     }
 
     override fun onDestroyView() {
@@ -288,6 +305,20 @@ class DebugFragment : AbstractFragment() {
     private fun ClearPaperButton(onClick: () -> Unit) {
         Button(onClick = onClick) {
             Text("CLEAR PAPER FB CACHE")
+        }
+    }
+
+    @Composable
+    private fun NotificationSection(onClick: () -> Unit, text: String?) {
+        Column {
+            Button(
+                modifier = Modifier.fillMaxWidth(),
+                onClick = onClick,
+            ) {
+                Text((if (text == null) "SHOW" else "HIDE") + " NOTIFICATION LOG")
+            }
+
+            text?.let { Text(it) }
         }
     }
 }

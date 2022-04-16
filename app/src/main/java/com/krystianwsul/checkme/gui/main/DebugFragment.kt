@@ -17,6 +17,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.sp
 import arrow.core.Tuple5
 import com.google.android.material.composethemeadapter.MdcTheme
 import com.jakewharton.rxbinding4.view.clicks
@@ -318,7 +319,7 @@ class DebugFragment : AbstractFragment() {
                 Text((if (text == null) "SHOW" else "HIDE") + " NOTIFICATION LOG")
             }
 
-            text?.let { Text(it) }
+            text?.let { Text(it, fontSize = 14.sp) }
         }
     }
 }

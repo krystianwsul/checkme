@@ -123,6 +123,8 @@ open class NotificationWrapperImpl : NotificationWrapper() {
     override fun cancelNotification(id: Int, tag: String?) {
         notificationRelay.accept {
             Preferences.tickLog.logLineHour("NotificationManager.cancel id: $id, tag: $tag")
+            Preferences.notificationLog.logLineHour("cancel id: $id, tag: $tag", true)
+
             notificationManager.cancel(tag, id)
         }
     }
@@ -483,7 +485,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
             sortKey,
             largeIcon,
             notificationHash,
-            highPriority
+            highPriority,
         ).build()
 
         // I don't think this has any effect, with channels
@@ -494,6 +496,16 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         notification.extras.putInt(KEY_HASH_CODE, notificationHashCode)
 
         MyCrashlytics.log("NotificationManager.notify $notificationId silent? $silent")
+
+        Preferences.notificationLog.logLineHour(
+            "notify:" +
+                    "\nid: $notificationId" +
+                    "\ntag: $tag" +
+                    "\nsummary: $summary" +
+                    "\ntitle: $title",
+            true,
+        )
+
         notificationManager.notify(tag, notificationId, notification)
     }
 

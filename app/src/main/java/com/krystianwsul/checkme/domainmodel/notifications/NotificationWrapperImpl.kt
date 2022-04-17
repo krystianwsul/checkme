@@ -497,11 +497,23 @@ open class NotificationWrapperImpl : NotificationWrapper() {
 
         MyCrashlytics.log("NotificationManager.notify $notificationId silent? $silent")
 
+        val previousSortKey = notificationManager.activeNotifications
+            .singleOrNull { it.id == notificationId && it.tag == tag }
+            ?.notification
+            ?.sortKey
+
+        val sortKeyMessage = when {
+            previousSortKey == null -> "null"
+            previousSortKey == sortKey -> "same"
+            else -> "changed"
+        }
+
         Preferences.notificationLog.logLineHour(
             "notify:" +
                     "\nid: $notificationId" +
                     "\ntag: $tag" +
                     "\nsummary: $summary" +
+                    "\nsortKey: $sortKeyMessage" +
                     "\ntitle: $title",
             true,
         )

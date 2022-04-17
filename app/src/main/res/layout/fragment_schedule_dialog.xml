@@ -292,6 +292,15 @@
                     android:text="@string/save" />
 
                 <com.google.android.material.button.MaterialButton
+                    android:id="@+id/scheduleDialogCopy"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/copy"
+                    android:visibility="gone"
+                    tools:ignore="PrivateResource" />
+
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/scheduleDialogRemove"
                     style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                     android:layout_width="match_parent"

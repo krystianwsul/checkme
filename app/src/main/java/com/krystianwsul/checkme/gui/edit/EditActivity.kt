@@ -263,21 +263,29 @@ class EditActivity : NavBarActivity() {
 
         hideKeyboardOnClickOutside(binding.root)
 
+        // to handle different backpressure
+        val programmaticParametersRelay = PublishRelay.create<ScheduleDialogParameters>()
+
         listOfNotNull(
-            parametersRelay.toFlowable(BackpressureStrategy.DROP).flatMapSingle(
-                {
-                    ScheduleDialogFragment.newInstance(it).run {
-                        initialize(editViewModel.delegate.customTimeDatas)
-                        show(supportFragmentManager, SCHEDULE_DIALOG_TAG)
-                        result.firstOrError()
-                    }
-                },
-                false,
-                1,
-            ).toObservable(),
+            listOf(
+                parametersRelay.toFlowable(BackpressureStrategy.DROP),
+                programmaticParametersRelay.toFlowable(BackpressureStrategy.BUFFER),
+            ).merge()
+                .flatMapSingle(
+                    {
+                        ScheduleDialogFragment.newInstance(it).run {
+                            initialize(editViewModel.delegate.customTimeDatas)
+                            show(supportFragmentManager, SCHEDULE_DIALOG_TAG)
+                            result.firstOrError()
+                        }
+                    },
+                    false,
+                    1,
+                )
+                .toObservable(),
             (supportFragmentManager.findFragmentByTag(SCHEDULE_DIALOG_TAG) as? ScheduleDialogFragment)?.let {
                 Observable.just(it)
-            }?.flatMapSingle { it.result.firstOrError() }
+            }?.flatMapSingle { it.result.firstOrError() },
         ).merge()
             .subscribe { result ->
                 when (result) {
@@ -292,6 +300,8 @@ class EditActivity : NavBarActivity() {
                     }
                     is ScheduleDialogResult.Delete -> removeSchedule(result.position)
                     is ScheduleDialogResult.Cancel -> Unit
+                    is ScheduleDialogResult.Copy ->
+                        programmaticParametersRelay.accept(ScheduleDialogParameters(result.scheduleDialogData))
                 }
             }
             .addTo(createDisposable)
@@ -727,13 +737,12 @@ class EditActivity : NavBarActivity() {
                         setClose(
                             {
                                 val parameters = ScheduleDialogParameters(
-                                    holder.adapterPosition,
                                     scheduleEntry.scheduleDataWrapper.getScheduleDialogData(
                                         activity.editViewModel
                                             .delegate
                                             .scheduleHint
                                     ),
-                                    true,
+                                    holder.adapterPosition,
                                 )
 
                                 activity.parametersRelay.accept(parameters)
@@ -780,15 +789,12 @@ class EditActivity : NavBarActivity() {
                         isHintAnimationEnabled = false
 
                         setDropdown {
-                            val parameters = ScheduleDialogParameters(
-                                null,
-                                activity.editViewModel
-                                    .delegate
-                                    .firstScheduleEntry
-                                    .scheduleDataWrapper
-                                    .getScheduleDialogData(activity.editViewModel.delegate.scheduleHint),
-                                false
-                            )
+                            val parameters = activity.editViewModel
+                                .delegate
+                                .firstScheduleEntry
+                                .scheduleDataWrapper
+                                .getScheduleDialogData(activity.editViewModel.delegate.scheduleHint)
+                                .let(::ScheduleDialogParameters)
 
                             activity.parametersRelay.accept(parameters)
                         }
@@ -1033,9 +1039,7 @@ class EditActivity : NavBarActivity() {
                                 }
                             },
                             ParentScheduleState(
-                                schedules.map {
-                                    ScheduleEntry(it.scheduleDataWrapper)
-                                }.toMutableList(),
+                                schedules.map { ScheduleEntry(it.scheduleDataWrapper) }.toMutableList(),
                                 assignedTo,
                             ),
                             nameHint,

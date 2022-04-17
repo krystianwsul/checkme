@@ -10,4 +10,6 @@ sealed class ScheduleDialogResult {
     class Delete(val position: Int) : ScheduleDialogResult()
 
     object Cancel : ScheduleDialogResult()
+
+    class Copy(val scheduleDialogData: ScheduleDialogData) : ScheduleDialogResult()
 }

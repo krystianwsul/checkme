@@ -20,6 +20,7 @@ import androidx.core.view.isVisible
 import ca.antonious.materialdaypicker.MaterialDayPicker
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.timepicker.MaterialTimePicker
+import com.jakewharton.rxbinding4.view.clicks
 import com.jakewharton.rxrelay3.PublishRelay
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.FragmentScheduleDialogBinding
@@ -37,7 +38,7 @@ import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.getDateInMonth
-import java.util.*
+import io.reactivex.rxjava3.kotlin.addTo
 import kotlin.reflect.KMutableProperty0
 
 class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
@@ -46,7 +47,6 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
         private const val KEY_POSITION = "position"
         private const val SCHEDULE_DIALOG_DATA_KEY = "scheduleDialogData"
-        private const val SHOW_DELETE_KEY = "showDelete"
 
         private const val DATE_FRAGMENT_TAG = "dateFragment"
         private const val TAG_FROM_FRAGMENT = "fromFragment"
@@ -68,7 +68,6 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
             arguments = Bundle().apply {
                 parameters.position?.let { putInt(KEY_POSITION, it) }
                 putParcelable(SCHEDULE_DIALOG_DATA_KEY, parameters.scheduleDialogData)
-                putBoolean(SHOW_DELETE_KEY, parameters.showDelete)
             }
         }
     }
@@ -162,15 +161,14 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
                 binding.scheduleDialogFrom,
                 binding.scheduleDialogFromLayout,
                 scheduleDialogData::from,
-                TAG_FROM_FRAGMENT
+                TAG_FROM_FRAGMENT,
             ),
             DateFieldData(
                 binding.scheduleDialogUntil,
                 binding.scheduleDialogUntilLayout,
                 scheduleDialogData::until,
-                TAG_UNTIL_FRAGMENT,
-                { listOfNotNull(scheduleDialogData.from, Date.today()).maxOrNull()!! }
-            )
+                TAG_UNTIL_FRAGMENT
+            ) { listOfNotNull(scheduleDialogData.from, Date.today()).maxOrNull()!! }
         )
     }
 
@@ -189,31 +187,32 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.scheduleDialogSave.setOnClickListener {
-            check(customTimeDatas != null)
+        binding.scheduleDialogSave
+            .clicks()
+            .doOnNext { checkNotNull(customTimeDatas) }
+            .filter { checkValid() }
+            .map { ScheduleDialogResult.Change(position, scheduleDialogData) }
+            .doOnNext { dismiss() }
+            .subscribe(result)
+            .addTo(viewCreatedDisposable)
 
-            if (checkValid()) {
-                result.accept(ScheduleDialogResult.Change(position, scheduleDialogData))
+        position?.let { position ->
+            binding.scheduleDialogCopy.apply {
+                isVisible = true
 
-                dismiss()
+                clicks().map { ScheduleDialogResult.Copy(scheduleDialogData) }
+                    .doOnNext { dismiss() }
+                    .subscribe(result)
+                    .addTo(viewCreatedDisposable)
             }
-        }
-
-        if (requireArguments().getBoolean(SHOW_DELETE_KEY)) {
-            checkNotNull(position)
 
             binding.scheduleDialogRemove.apply {
-                visibility = View.VISIBLE
+                isVisible = true
 
-                setOnClickListener {
-                    result.accept(
-                        ScheduleDialogResult.Delete(
-                            position!!
-                        )
-                    )
-
-                    dismiss()
-                }
+                clicks().map { ScheduleDialogResult.Delete(position) }
+                    .doOnNext { dismiss() }
+                    .subscribe(result)
+                    .addTo(viewCreatedDisposable)
             }
         }
 
@@ -231,14 +230,14 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         }
     }
 
+    @Suppress("OVERRIDE_DEPRECATION")
     @SuppressLint("SetTextI18n", "MissingSuperCall")
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         @Suppress("DEPRECATION")
         super.onActivityCreated(savedInstanceState)
 
-        scheduleDialogData = (savedInstanceState ?: requireArguments()).run {
-            getParcelable(SCHEDULE_DIALOG_DATA_KEY)!!
-        }
+        scheduleDialogData = (savedInstanceState ?: requireArguments()).run { getParcelable(SCHEDULE_DIALOG_DATA_KEY)!! }
+
         updateDelegate()
 
         binding.scheduleType.run {
@@ -263,10 +262,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
             TimeDialogFragment.newInstance(ArrayList(customTimeDatas)).let {
                 it.timeDialogListener = timeDialogListener
-                it.show(
-                    childFragmentManager,
-                    TIME_LIST_FRAGMENT_TAG
-                )
+                it.show(childFragmentManager, TIME_LIST_FRAGMENT_TAG)
             }
         }
 
@@ -280,9 +276,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
             }
         }
 
-        childFragmentManager.getMaterialDatePicker(DATE_FRAGMENT_TAG)?.run {
-            addListener(datePickerDialogFragmentListener)
-        }
+        childFragmentManager.getMaterialDatePicker(DATE_FRAGMENT_TAG)?.addListener(datePickerDialogFragmentListener)
 
         dateFieldDatas.forEach { data ->
             childFragmentManager.getMaterialDatePicker(data.tag)?.let {
@@ -292,9 +286,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
             }
         }
 
-        val weekdaysMap = daysOfWeekMap.entries
-            .map { it.value to it.key }
-            .toMap()
+        val weekdaysMap = daysOfWeekMap.entries.associate { it.value to it.key }
 
         binding.scheduleDialogDayPicker.daySelectionChangedListener =
             object : MaterialDayPicker.DaySelectionChangedListener {
@@ -431,14 +423,11 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
     fun initialize(customTimeDatas: Map<CustomTimeKey, EditViewModel.CustomTimeData>) {
         this.customTimeDatas = customTimeDatas
 
-        if (this::scheduleDialogData.isInitialized)
-            initialize()
+        if (this::scheduleDialogData.isInitialized) initialize()
     }
 
-    private fun initialize() =
-        binding.scheduleDialogRoot.addOneShotGlobalLayoutListener { // needed so animations run correctly
-            updateScheduleTypeFields()
-        }
+    // needed so animations run correctly
+    private fun initialize() = binding.scheduleDialogRoot.addOneShotGlobalLayoutListener { updateScheduleTypeFields() }
 
     private fun updateScheduleTypeFields(animate: Boolean = false) {
         check(customTimeDatas != null)
@@ -472,6 +461,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         outState.putParcelable(SCHEDULE_DIALOG_DATA_KEY, scheduleDialogData)
     }
 
+    @Suppress("OVERRIDE_DEPRECATION")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         check(requestCode == ShowCustomTimeActivity.CREATE_CUSTOM_TIME_REQUEST_CODE)
 
@@ -533,7 +523,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
             scheduleDialogData.date.month,
             scheduleDialogData.monthWeekNumber,
             scheduleDialogData.monthWeekDay,
-            scheduleDialogData.beginningOfMonth
+            scheduleDialogData.beginningOfMonth,
         )
 
         val dayNumber = if (scheduleDialogData.beginningOfMonth)
@@ -630,7 +620,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
             return list.sortedBy { it.hourMinutes[dayOfWeek] }.map {
                 TimeDialogFragment.CustomTimeData(
                     it.customTimeKey,
-                    it.name + " (" + it.hourMinutes[dayOfWeek] + ")"
+                    it.name + " (" + it.hourMinutes[dayOfWeek] + ")",
                 )
             }
         }
@@ -675,7 +665,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
         override fun getCustomTimeDatas(list: List<EditViewModel.CustomTimeData>): List<TimeDialogFragment.CustomTimeData> {
             return list.sortedBy {
-                it.hourMinutes.values.map { it.hour * 60 + it.minute }.sum()
+                it.hourMinutes.values.sumOf { it.hour * 60 + it.minute }
             }.map {
                 TimeDialogFragment.CustomTimeData(it.customTimeKey, it.name)
             }

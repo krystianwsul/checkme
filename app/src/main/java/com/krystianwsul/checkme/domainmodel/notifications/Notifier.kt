@@ -330,16 +330,15 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
                     notificationInstances.isNotEmpty() -> {
                         notifies.forEach { Preferences.tickLog.logLineHour("showing/updating '" + it.instance.name + "'") }
 
-                        notifyInstances(notifications, now)
-                        cancelProjectNotifications(notifications)
-
                         /*
                         This summary lists individual instances instead of projects.  But, it's supposed to just be there to
                         allow grouping notifications; its content is never actually shown.
                          */
 
-                        // checking if showing summary AFTER individual notifications fixes grouping bug
                         showSummary()
+
+                        notifyInstances(notifications, now)
+                        cancelProjectNotifications(notifications)
                     }
                     else -> {
                         check(notificationInstances.isEmpty())

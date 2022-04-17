@@ -339,6 +339,9 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
 
                         notifyInstances(notifications, now)
                         cancelProjectNotifications(notifications)
+
+                        // calling this a second time seems to fix grouping if the app is doing a cold start
+                        showSummary()
                     }
                     else -> {
                         check(notificationInstances.isEmpty())

@@ -28,13 +28,17 @@ object DatabaseResultQueue {
                 {
                     synchronized {
                         takeIf { isNotEmpty() }?.let {
-                            val maxPriority = map { it.databaseReadPriority }.toSet().maxOrNull()!!
+                            val entriesAndPriorities = it.map { it to it.databaseRead.priority }
 
-                            val currEntries = filter { it.databaseReadPriority == maxPriority }.also {
-                                removeAll(it)
+                            val maxPriority = entriesAndPriorities.map { it.second }
+                                .toSet()
+                                .maxOrNull()!!
+
+                            val currEntries = entriesAndPriorities.filter { it.second == maxPriority }.also {
+                                removeAll(it.map { it.first })
                             }
 
-                            maxPriority to currEntries
+                            maxPriority to currEntries.map { it.first }
                         }
                     }?.let { (priority, entries) ->
                         Maybe.just(entries).observeOn(getDomainScheduler(priority.schedulerPriority))
@@ -54,7 +58,7 @@ object DatabaseResultQueue {
     }
 
     private fun enqueueTrigger() = synchronized {
-        maxOfOrNull { it.databaseReadPriority }
+        maxOfOrNull { it.databaseRead.priority }
     }?.let(trigger::accept)
 
     fun <T : Any> enqueueSnapshot(databaseRead: DatabaseRead<T>, snapshot: Snapshot<T>): Single<Snapshot<T>> {
@@ -66,9 +70,8 @@ object DatabaseResultQueue {
             listeners are ready.  That, in turn, guarantees that the logic after executing an entry will get run after the
             rest of the chain subscribing to the event.
              */
-            val priority = databaseRead.priority
 
-            synchronized { add(QueueEntry(priority, snapshot, relay)) }
+            synchronized { add(QueueEntry(databaseRead, snapshot, relay)) }
 
             Completable.fromCallable { enqueueTrigger() }
                 .subscribeOn(Schedulers.trampoline())
@@ -82,7 +85,7 @@ object DatabaseResultQueue {
     would make the priority calculation more accurate.
      */
     private class QueueEntry<T : Any>(
-        val databaseReadPriority: DatabaseReadPriority,
+        val databaseRead: DatabaseRead<T>,
         val snapshot: Snapshot<T>,
         val relay: Relay<Snapshot<T>>,
     ) {

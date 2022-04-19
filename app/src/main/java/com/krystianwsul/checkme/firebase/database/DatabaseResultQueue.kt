@@ -28,7 +28,7 @@ object DatabaseResultQueue {
                 {
                     synchronized {
                         takeIf { isNotEmpty() }?.let {
-                            val entriesAndPriorities = it.map { it to it.databaseRead.priority }
+                            val entriesAndPriorities = it.map { it to it.databaseRead.getPriority() }
 
                             val maxPriority = entriesAndPriorities.map { it.second }
                                 .toSet()
@@ -58,7 +58,7 @@ object DatabaseResultQueue {
     }
 
     private fun enqueueTrigger() = synchronized {
-        maxOfOrNull { it.databaseRead.priority }
+        maxOfOrNull { it.databaseRead.getPriority() }
     }?.let(trigger::accept)
 
     fun <T : Any> enqueueSnapshot(databaseRead: DatabaseRead<T>, snapshot: Snapshot<T>): Single<Snapshot<T>> {

@@ -23,7 +23,7 @@ abstract class DatabaseRead<DATA : Any> {
         private fun Path.toKey() = toString().replace('/', '-')
     }
 
-    open val priority = DatabaseReadPriority.NORMAL
+    open fun getPriority() = DatabaseReadPriority.NORMAL
 
     protected abstract fun DatabaseReference.getQuery(): Query
 

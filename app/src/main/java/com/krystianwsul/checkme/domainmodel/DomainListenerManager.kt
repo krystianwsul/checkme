@@ -1,7 +1,6 @@
 package com.krystianwsul.checkme.domainmodel
 
 import com.jakewharton.rxrelay3.BehaviorRelay
-import com.krystianwsul.checkme.firebase.database.TaskPriorityMapper
 import com.krystianwsul.checkme.viewmodels.DataId
 import com.krystianwsul.checkme.viewmodels.DomainListener
 import com.krystianwsul.common.utils.singleOrEmpty
@@ -9,36 +8,29 @@ import io.reactivex.rxjava3.core.Observable
 
 class DomainListenerManager {
 
-    private val entries = LinkedHashSet<Entry>()
+    private val domainListeners = mutableMapOf<DomainListener<*>, BehaviorRelay<Unit>>()
 
     @Synchronized
     fun addListener(domainListener: DomainListener<*>): Observable<Unit> {
-        val entry = Entry(domainListener)
+        check(!domainListeners.containsKey(domainListener))
 
-        check(entry !in entries)
-
-        entries += entry
-
-        return entry.relay
+        return BehaviorRelay.createDefault(Unit).also { domainListeners[domainListener] = it }
     }
 
     @Synchronized
     fun removeListener(domainListener: DomainListener<*>) {
-        val entry = entries.single { it.domainListener == domainListener }
+        check(domainListeners.containsKey(domainListener))
 
-        entries -= entry
+        domainListeners.remove(domainListener)
     }
 
     @Synchronized
     fun notify(notificationType: NotificationType) {
-        entries.sortedByDescending { it.domainListener.dataId in notificationType.dataIds }.forEach { it.relay.accept(Unit) }
-    }
+        fun Map.Entry<DomainListener<*>, *>.dataId() = key.dataId
 
-    @Synchronized
-    fun getTaskPriorityMapper(): TaskPriorityMapper? {
-        return entries.lastOrNull()
-            ?.domainListener
-            ?.taskPriorityMapper
+        domainListeners.entries
+            .sortedByDescending { it.dataId() in notificationType.dataIds }
+            .forEach { it.value.accept(Unit) }
     }
 
     sealed class NotificationType {
@@ -63,10 +55,5 @@ class DomainListenerManager {
 
             constructor(dataId: DataId) : this(setOf(dataId))
         }
-    }
-
-    private data class Entry(val domainListener: DomainListener<*>) {
-
-        val relay = BehaviorRelay.createDefault(Unit)
     }
 }

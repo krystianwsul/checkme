@@ -1,12 +1,11 @@
 package com.krystianwsul.checkme.firebase.database
 
-import android.util.Log
 import com.jakewharton.rxrelay3.PublishRelay
 import com.jakewharton.rxrelay3.Relay
-import com.krystianwsul.checkme.domainmodel.UserScope
 import com.krystianwsul.checkme.domainmodel.getDomainScheduler
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.checkme.utils.doAfterSubscribe
+import com.krystianwsul.checkme.viewmodels.DomainListener
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import io.reactivex.rxjava3.core.BackpressureStrategy
 import io.reactivex.rxjava3.core.Completable
@@ -29,7 +28,6 @@ object DatabaseResultQueue {
             .flatMapMaybe(
                 {
                     val taskPriorityMapper = getTaskPriorityMapper()
-                    Log.e("asdf", "magic using $taskPriorityMapper") // todo root
 
                     synchronized {
                         takeIf { isNotEmpty() }?.let {
@@ -63,9 +61,8 @@ object DatabaseResultQueue {
     }
 
     private fun getTaskPriorityMapper(): TaskPriorityMapper {
-        return UserScope.nullableInstance
-            ?.domainListenerManager
-            ?.getTaskPriorityMapper()
+        return DomainListener.currentDomainListener
+            ?.taskPriorityMapper
             ?: TaskPriorityMapper.Default
     }
 

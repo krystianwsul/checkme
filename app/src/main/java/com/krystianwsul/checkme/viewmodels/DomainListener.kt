@@ -8,7 +8,6 @@ import com.krystianwsul.checkme.firebase.database.TaskPriorityMapper
 import com.krystianwsul.checkme.utils.filterNotNull
 import com.krystianwsul.checkme.utils.mapNotNull
 import com.krystianwsul.common.firebase.DomainThreadChecker
-import com.krystianwsul.common.utils.TaskKey
 import com.mindorks.scheduler.Priority
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.BackpressureStrategy
@@ -22,6 +21,10 @@ abstract class DomainListener<DOMAIN_DATA : DomainData> {
         private var dataId = 1
 
         private val nextId get() = dataId++
+
+        private val startedDomainListeners = LinkedHashSet<DomainListener<*>>()
+
+        val currentDomainListener get() = startedDomainListeners.lastOrNull()
     }
 
     val dataId = DataId(nextId)
@@ -33,7 +36,7 @@ abstract class DomainListener<DOMAIN_DATA : DomainData> {
 
     protected open val priority = Priority.FIRST_READ
 
-    open val taskPriorityMapper: TaskPriorityMapper? = TaskPriorityMapper.PrioritizeTask(TaskKey.Root("")) // todo root null
+    open val taskPriorityMapper: TaskPriorityMapper? = null
 
     fun start(forced: Boolean = false) {
         if (disposable != null) {
@@ -42,6 +45,8 @@ abstract class DomainListener<DOMAIN_DATA : DomainData> {
             else
                 return
         }
+
+        startedDomainListeners += this
 
         var listenerAdded = false
 
@@ -87,6 +92,8 @@ abstract class DomainListener<DOMAIN_DATA : DomainData> {
     }
 
     fun stop() {
+        startedDomainListeners -= this
+
         disposable?.dispose()
         disposable = null
     }

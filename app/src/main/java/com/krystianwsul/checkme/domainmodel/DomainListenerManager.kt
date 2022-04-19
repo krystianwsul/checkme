@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.domainmodel
 
 import com.jakewharton.rxrelay3.BehaviorRelay
+import com.krystianwsul.checkme.firebase.database.TaskPriorityMapper
 import com.krystianwsul.checkme.viewmodels.DataId
 import com.krystianwsul.checkme.viewmodels.DomainListener
 import com.krystianwsul.common.utils.singleOrEmpty
@@ -29,8 +30,13 @@ class DomainListenerManager {
         fun Map.Entry<DomainListener<*>, *>.dataId() = key.dataId
 
         domainListeners.entries
-                .sortedByDescending { it.dataId() in notificationType.dataIds }
-                .forEach { it.value.accept(Unit) }
+            .sortedByDescending { it.dataId() in notificationType.dataIds }
+            .forEach { it.value.accept(Unit) }
+    }
+
+    @Synchronized
+    fun getTaskPriorityMapper(): TaskPriorityMapper {
+        return TaskPriorityMapper.Default
     }
 
     sealed class NotificationType {

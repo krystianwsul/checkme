@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.firebase.database
 
 import com.jakewharton.rxrelay3.PublishRelay
 import com.jakewharton.rxrelay3.Relay
+import com.krystianwsul.checkme.domainmodel.UserScope
 import com.krystianwsul.checkme.domainmodel.getDomainScheduler
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.checkme.utils.doAfterSubscribe
@@ -34,11 +35,11 @@ object DatabaseResultQueue {
                                 .toSet()
                                 .maxOrNull()!!
 
-                            val currEntries = entriesAndPriorities.filter { it.second == maxPriority }.also {
-                                removeAll(it.map { it.first })
-                            }
+                            val currEntries = entriesAndPriorities.filter { it.second == maxPriority }
+                                .map { it.first }
+                                .also(::removeAll)
 
-                            maxPriority to currEntries.map { it.first }
+                            maxPriority to currEntries
                         }
                     }?.let { (priority, entries) ->
                         Maybe.just(entries).observeOn(getDomainScheduler(priority.schedulerPriority))
@@ -57,7 +58,12 @@ object DatabaseResultQueue {
             .subscribe { enqueueTrigger() }
     }
 
-    private fun getTaskPriorityMapper() = TaskPriorityMapper.Default()
+    private fun getTaskPriorityMapper(): TaskPriorityMapper {
+        return UserScope.nullableInstance
+            ?.domainListenerManager
+            ?.getTaskPriorityMapper()
+            ?: TaskPriorityMapper.Default
+    }
 
     private fun enqueueTrigger() = trigger.accept(Unit)
 

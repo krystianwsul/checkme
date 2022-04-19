@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.firebase.database
 
+import android.util.Log
 import com.jakewharton.rxrelay3.PublishRelay
 import com.jakewharton.rxrelay3.Relay
 import com.krystianwsul.checkme.domainmodel.UserScope
@@ -27,9 +28,12 @@ object DatabaseResultQueue {
         trigger.toFlowable(BackpressureStrategy.LATEST)
             .flatMapMaybe(
                 {
+                    val taskPriorityMapper = getTaskPriorityMapper()
+                    Log.e("asdf", "magic using $taskPriorityMapper") // todo root
+
                     synchronized {
                         takeIf { isNotEmpty() }?.let {
-                            val entriesAndPriorities = it.map { it to it.databaseRead.getPriority(getTaskPriorityMapper()) }
+                            val entriesAndPriorities = it.map { it to it.databaseRead.getPriority(taskPriorityMapper) }
 
                             val maxPriority = entriesAndPriorities.map { it.second }
                                 .toSet()

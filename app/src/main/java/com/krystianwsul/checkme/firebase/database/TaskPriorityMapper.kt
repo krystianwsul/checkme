@@ -13,7 +13,7 @@ interface TaskPriorityMapper {
             taskPriority.databaseReadPriority
     }
 
-    class PrioritizeTask(val taskKey: TaskKey) : TaskPriorityMapper {
+    class PrioritizeTask(val taskKey: TaskKey.Root) : TaskPriorityMapper {
 
         override fun getDatabaseReadPriority(taskPriority: HasInstancesStore.TaskPriority) =
             DatabaseReadPriority.TODAY_INSTANCES

@@ -1,12 +1,12 @@
 package com.krystianwsul.checkme.domainmodel
 
 import com.jakewharton.rxrelay3.BehaviorRelay
+import com.krystianwsul.checkme.firebase.database.DatabaseReadPriority
 import com.krystianwsul.checkme.utils.toV3
 import com.krystianwsul.common.firebase.models.task.RootTask
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.TaskKey
-import com.mindorks.scheduler.Priority
 import com.pacoworks.rxpaper2.RxPaperBook
 import io.reactivex.rxjava3.core.BackpressureStrategy
 import io.reactivex.rxjava3.kotlin.subscribeBy
@@ -80,16 +80,19 @@ object HasInstancesStore {
         hasInstancesMapRelay.accept(Data(false, TaskData(now.date, hasInstancesMap)))
     }
 
-    fun getPriority(taskKey: TaskKey.Root): Priority {
+    fun getTaskPriority(taskKey: TaskKey.Root): TaskPriority {
         val taskData = hasInstancesMapRelay.value
             ?.taskData
-            ?: return Priority.DB_TASKS
+            ?: return TaskPriority.TODAY_INSTANCES
 
         return when (taskData.map.getOrDefault(taskKey, InstanceState.NONE)) {
-            InstanceState.NONE -> Priority.DB_NOTES
+            InstanceState.NONE -> TaskPriority.NOTES
             // if we have yesterday's data, then we'd better load all instances
-            InstanceState.ANY -> if (taskData.date == Date.today()) Priority.DB_LATER_INSTANCES else Priority.DB_TASKS
-            InstanceState.TODAY -> Priority.DB_TASKS
+            InstanceState.ANY -> if (taskData.date == Date.today())
+                TaskPriority.LATER_INSTANCES
+            else
+                TaskPriority.TODAY_INSTANCES
+            InstanceState.TODAY -> TaskPriority.TODAY_INSTANCES
         }
     }
 
@@ -106,5 +109,12 @@ object HasInstancesStore {
     private enum class InstanceState {
 
         NONE, ANY, TODAY
+    }
+
+    enum class TaskPriority(val databaseReadPriority: DatabaseReadPriority) {
+
+        NOTES(DatabaseReadPriority.NOTES),
+        LATER_INSTANCES(DatabaseReadPriority.LATER_INSTANCES),
+        TODAY_INSTANCES(DatabaseReadPriority.TODAY_INSTANCES)
     }
 }

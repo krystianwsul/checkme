@@ -8,7 +8,7 @@ import com.krystianwsul.common.utils.TaskKey
 
 class TaskDatabaseRead(private val taskKey: TaskKey.Root) : TypedDatabaseRead<RootTaskJson>() {
 
-    override val priority get() = HasInstancesStore.getPriority(taskKey)
+    override val priority get() = HasInstancesStore.getTaskPriority(taskKey).databaseReadPriority
 
     override val kClass = RootTaskJson::class
 

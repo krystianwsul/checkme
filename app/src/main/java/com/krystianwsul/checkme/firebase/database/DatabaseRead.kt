@@ -11,7 +11,6 @@ import com.krystianwsul.checkme.firebase.mergePaperAndRx
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.checkme.utils.toV3
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
-import com.mindorks.scheduler.Priority
 import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Maybe
 import io.reactivex.rxjava3.core.Observable
@@ -24,7 +23,7 @@ abstract class DatabaseRead<DATA : Any> {
         private fun Path.toKey() = toString().replace('/', '-')
     }
 
-    open val priority = Priority.DB
+    open val priority = DatabaseReadPriority.NORMAL
 
     protected abstract fun DatabaseReference.getQuery(): Query
 

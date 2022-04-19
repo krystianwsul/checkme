@@ -6,7 +6,6 @@ import com.krystianwsul.checkme.domainmodel.getDomainScheduler
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.checkme.utils.doAfterSubscribe
 import com.krystianwsul.common.firebase.DomainThreadChecker
-import com.mindorks.scheduler.Priority
 import io.reactivex.rxjava3.core.BackpressureStrategy
 import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Maybe
@@ -17,7 +16,7 @@ object DatabaseResultQueue {
 
     private val entries = mutableListOf<QueueEntry<*>>()
 
-    private val trigger = PublishRelay.create<Priority>()
+    private val trigger = PublishRelay.create<DatabaseReadPriority>()
 
     private fun <U> synchronized(action: MutableList<QueueEntry<*>>.() -> U) = synchronized(entries) { entries.action() }
 
@@ -29,16 +28,16 @@ object DatabaseResultQueue {
                 {
                     synchronized {
                         takeIf { isNotEmpty() }?.let {
-                            val maxPriority = map { it.priority }.toSet().maxOrNull()!!
+                            val maxPriority = map { it.databaseReadPriority }.toSet().maxOrNull()!!
 
-                            val currEntries = filter { it.priority == maxPriority }.also {
+                            val currEntries = filter { it.databaseReadPriority == maxPriority }.also {
                                 removeAll(it)
                             }
 
                             maxPriority to currEntries
                         }
                     }?.let { (priority, entries) ->
-                        Maybe.just(entries).observeOn(getDomainScheduler(priority))
+                        Maybe.just(entries).observeOn(getDomainScheduler(priority.schedulerPriority))
                     } ?: Maybe.empty()
                 },
                 false,
@@ -55,7 +54,7 @@ object DatabaseResultQueue {
     }
 
     private fun enqueueTrigger() = synchronized {
-        maxOfOrNull { it.priority }
+        maxOfOrNull { it.databaseReadPriority }
     }?.let(trigger::accept)
 
     fun <T : Any> enqueueSnapshot(databaseRead: DatabaseRead<T>, snapshot: Snapshot<T>): Single<Snapshot<T>> {
@@ -83,11 +82,12 @@ object DatabaseResultQueue {
     would make the priority calculation more accurate.
      */
     private class QueueEntry<T : Any>(
-        val priority: Priority,
+        val databaseReadPriority: DatabaseReadPriority,
         val snapshot: Snapshot<T>,
         val relay: Relay<Snapshot<T>>,
     ) {
 
         fun accept() = relay.accept(snapshot)
     }
+
 }

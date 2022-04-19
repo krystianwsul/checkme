@@ -20,7 +20,8 @@ class TaskDatabaseRead(private val taskKey: TaskKey.Root) : TypedDatabaseRead<Ro
         return taskPriority
     }
 
-    override fun getPriority() = getTaskPriority().databaseReadPriority
+    override fun getPriority(taskPriorityMapper: TaskPriorityMapper) =
+        taskPriorityMapper.getDatabaseReadPriority(getTaskPriority())
 
     override val kClass = RootTaskJson::class
 

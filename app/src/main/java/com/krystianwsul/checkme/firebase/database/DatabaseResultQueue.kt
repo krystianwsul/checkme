@@ -16,7 +16,7 @@ object DatabaseResultQueue {
 
     private val entries = mutableListOf<QueueEntry<*>>()
 
-    private val trigger = PublishRelay.create<DatabaseReadPriority>()
+    private val trigger = PublishRelay.create<Unit>()
 
     private fun <U> synchronized(action: MutableList<QueueEntry<*>>.() -> U) = synchronized(entries) { entries.action() }
 
@@ -28,7 +28,7 @@ object DatabaseResultQueue {
                 {
                     synchronized {
                         takeIf { isNotEmpty() }?.let {
-                            val entriesAndPriorities = it.map { it to it.databaseRead.getPriority() }
+                            val entriesAndPriorities = it.map { it to it.databaseRead.getPriority(getTaskPriorityMapper()) }
 
                             val maxPriority = entriesAndPriorities.map { it.second }
                                 .toSet()
@@ -57,9 +57,9 @@ object DatabaseResultQueue {
             .subscribe { enqueueTrigger() }
     }
 
-    private fun enqueueTrigger() = synchronized {
-        maxOfOrNull { it.databaseRead.getPriority() }
-    }?.let(trigger::accept)
+    private fun getTaskPriorityMapper() = TaskPriorityMapper.Default()
+
+    private fun enqueueTrigger() = trigger.accept(Unit)
 
     fun <T : Any> enqueueSnapshot(databaseRead: DatabaseRead<T>, snapshot: Snapshot<T>): Single<Snapshot<T>> {
         val relay = PublishRelay.create<Snapshot<T>>()

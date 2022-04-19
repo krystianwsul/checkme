@@ -83,16 +83,16 @@ object HasInstancesStore {
     fun getTaskPriority(taskKey: TaskKey.Root): TaskPriority {
         val taskData = hasInstancesMapRelay.value
             ?.taskData
-            ?: return TaskPriority.TODAY_INSTANCES
+            ?: return TaskPriority.Unknown
 
         return when (taskData.map.getOrDefault(taskKey, InstanceState.NONE)) {
-            InstanceState.NONE -> TaskPriority.NOTES
+            InstanceState.NONE -> TaskPriority.Notes
             // if we have yesterday's data, then we'd better load all instances
             InstanceState.ANY -> if (taskData.date == Date.today())
-                TaskPriority.LATER_INSTANCES
+                TaskPriority.LaterInstances
             else
-                TaskPriority.TODAY_INSTANCES
-            InstanceState.TODAY -> TaskPriority.TODAY_INSTANCES
+                TaskPriority.TodayInstances
+            InstanceState.TODAY -> TaskPriority.TodayInstances
         }
     }
 
@@ -111,10 +111,30 @@ object HasInstancesStore {
         NONE, ANY, TODAY
     }
 
-    enum class TaskPriority(val databaseReadPriority: DatabaseReadPriority) {
+    sealed interface TaskPriority {
 
-        NOTES(DatabaseReadPriority.NOTES),
-        LATER_INSTANCES(DatabaseReadPriority.LATER_INSTANCES),
-        TODAY_INSTANCES(DatabaseReadPriority.TODAY_INSTANCES)
+        val databaseReadPriority: DatabaseReadPriority
+
+        interface Final : TaskPriority
+
+        object Notes : Final {
+
+            override val databaseReadPriority = DatabaseReadPriority.NOTES
+        }
+
+        object LaterInstances : Final {
+
+            override val databaseReadPriority = DatabaseReadPriority.LATER_INSTANCES
+        }
+
+        object TodayInstances : Final {
+
+            override val databaseReadPriority = DatabaseReadPriority.TODAY_INSTANCES
+        }
+
+        object Unknown : TaskPriority {
+
+            override val databaseReadPriority = DatabaseReadPriority.TODAY_INSTANCES
+        }
     }
 }

@@ -24,9 +24,11 @@ class ShowTaskViewModel : ObservableDomainViewModel<ShowTaskViewModel.Data, Show
             get() = when (val taskKey = parameters.taskKey) {
                 is TaskKey.Project -> super.priority
                 is TaskKey.Root -> {
-                    val taskPriority = HasInstancesStore.getTaskPriority(taskKey)
+                    val priority = HasInstancesStore.getTaskPriority(taskKey)
+                        .databaseReadPriority
+                        .schedulerPriority
 
-                    Priority.values()[taskPriority.ordinal - 1]
+                    Priority.values()[priority.ordinal - 1]
                 }
             }
 

@@ -2,7 +2,6 @@ package com.krystianwsul.checkme.domainmodel.extensions
 
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.domainmodel.GroupType
 import com.krystianwsul.checkme.domainmodel.GroupTypeFactory
 import com.krystianwsul.checkme.gui.instances.ShowGroupActivity
 import com.krystianwsul.checkme.gui.instances.drag.DropParent
@@ -17,8 +16,6 @@ import com.krystianwsul.common.firebase.models.search.SearchContext
 import com.krystianwsul.common.time.DateTime
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.Time
-import com.krystianwsul.common.time.TimeStamp
-import com.krystianwsul.common.utils.ProjectKey
 import java.util.*
 
 fun DomainFactory.getShowGroupData(
@@ -43,49 +40,58 @@ fun DomainFactory.getShowGroupData(
     val displayText = DateTime(date, time).getDisplayText()
 
     val (title, subtitle) = when (parameters) {
-        is ShowGroupActivity.Parameters.Time -> displayText to null
-        is ShowGroupActivity.Parameters.Project -> parameters.projectKey
-            .let(projectsFactory::getProjectForce)
-            .name to displayText
+        is ShowGroupActivity.Parameters.Time -> Pair(displayText, null)
+        is ShowGroupActivity.Parameters.Project -> Pair(
+            parameters.projectKey
+                .let(projectsFactory::getProjectForce)
+                .name,
+            displayText,
+        )
     }
 
-    return ShowGroupViewModel.Data(
-        title,
-        subtitle,
-        getGroupListData(timeStamp, now, parameters.projectKey, parameters.groupingMode, searchCriteria),
-    )
+    return ShowGroupViewModel.Data(title, subtitle, getGroupListData(parameters, now, searchCriteria))
 }
 
 private fun DomainFactory.getGroupListData(
-    timeStamp: TimeStamp,
+    parameters: ShowGroupActivity.Parameters,
     now: ExactTimeStamp.Local,
-    projectKey: ProjectKey.Shared?,
-    groupingMode: GroupType.GroupingMode,
     searchCriteria: SearchCriteria,
 ): GroupListDataWrapper {
-    val endCalendar = timeStamp.calendar.apply { add(Calendar.MINUTE, 1) }
+    val endCalendar = parameters.timeStamp
+        .calendar
+        .apply { add(Calendar.MINUTE, 1) }
+
     val endExactTimeStamp = ExactTimeStamp.Local(endCalendar.toDateTimeSoy()).toOffset()
 
     val searchContext = SearchContext.startSearch(searchCriteria, now, myUserFactory.user)
 
-    val rootInstances = getRootInstances(
-        timeStamp.toLocalExactTimeStamp().toOffset(),
+    val instances = getRootInstances(
+        parameters.timeStamp
+            .toLocalExactTimeStamp()
+            .toOffset(),
         endExactTimeStamp,
         now,
         searchContext,
-        projectKey = projectKey,
-    ).toList()
-
-    val currentInstances = rootInstances.filter { it.first.instanceDateTime.timeStamp.compareTo(timeStamp) == 0 }
+        projectKey = parameters.projectKey,
+    )
+        // I'm really confused about why this filter would be necessary
+        .filter { it.first.instanceDateTime.timeStamp.compareTo(parameters.timeStamp) == 0 }
+        .let {
+            if (parameters.showUngrouped)
+                it
+            else
+                it.filter { it.first.groupByProject }
+        }
+        .toList()
 
     val customTimeDatas = getCurrentRemoteCustomTimes().map {
         GroupListDataWrapper.CustomTimeData(it.name, it.hourMinutes.toSortedMap())
     }
 
-    val includeProjectDetails = projectKey == null
+    val includeProjectDetails = parameters.projectKey == null
 
     val instanceDescriptors = searchContext.search {
-        currentInstances.map { (instance, filterResult) ->
+        instances.map { (instance, filterResult) ->
             val (notDoneChildInstanceDescriptors, doneChildInstanceDescriptors) =
                 getChildInstanceDatas(instance, now, getChildrenSearchContext(filterResult))
 
@@ -109,7 +115,9 @@ private fun DomainFactory.getGroupListData(
 
     val (mixedInstanceDescriptors, doneInstanceDescriptors) = instanceDescriptors.splitDone()
 
-    val dropParent = projectKey?.let { DropParent.Project(timeStamp, it) } ?: DropParent.TopLevel(true)
+    val dropParent = parameters.projectKey
+        ?.let { DropParent.Project(parameters.timeStamp, it) }
+        ?: DropParent.TopLevel(true)
 
     return GroupListDataWrapper(
         customTimeDatas,
@@ -119,7 +127,7 @@ private fun DomainFactory.getGroupListData(
         newMixedInstanceDataCollection(
             mixedInstanceDescriptors,
             GroupTypeFactory.SingleBridge.CompareBy.ORDINAL,
-            groupingMode,
+            parameters.groupingMode,
             false,
             includeProjectDetails,
         ),

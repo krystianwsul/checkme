@@ -376,6 +376,7 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
         abstract val timeStamp: TimeStamp
         abstract val projectKey: ProjectKey.Shared?
         abstract val groupingMode: GroupType.GroupingMode
+        abstract val showUngrouped: Boolean
 
         @Parcelize
         data class Time(override val timeStamp: TimeStamp) : Parameters() {
@@ -383,10 +384,16 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
             override val projectKey: ProjectKey.Shared? get() = null
 
             override val groupingMode get() = GroupType.GroupingMode.Project
+
+            override val showUngrouped get() = true
         }
 
         @Parcelize
-        data class Project(override val timeStamp: TimeStamp, override val projectKey: ProjectKey.Shared) : Parameters() {
+        data class Project(
+            override val timeStamp: TimeStamp,
+            override val projectKey: ProjectKey.Shared,
+            override val showUngrouped: Boolean = true,
+        ) : Parameters() {
 
             override val groupingMode get() = GroupType.GroupingMode.None
         }

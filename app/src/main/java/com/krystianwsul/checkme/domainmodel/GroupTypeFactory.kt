@@ -243,7 +243,7 @@ class GroupTypeFactory(
             singeBridges,
             NotDoneNode.ContentDelegate.Group.Id.Project(timeStamp, instanceKeys, projectKey),
             NotDoneNode.ContentDelegate.Group.GroupRowsDelegate.Project(groupAdapter, null, name),
-            ShowGroupActivity.Parameters.Project(timeStamp, projectKey),
+            ShowGroupActivity.Parameters.Project(timeStamp, projectKey, false),
             NotDoneNode.ContentDelegate.Group.CheckboxMode.CHECKBOX,
         )
 

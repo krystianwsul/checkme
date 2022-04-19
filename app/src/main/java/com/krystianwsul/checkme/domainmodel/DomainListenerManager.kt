@@ -9,34 +9,36 @@ import io.reactivex.rxjava3.core.Observable
 
 class DomainListenerManager {
 
-    private val domainListeners = mutableMapOf<DomainListener<*>, BehaviorRelay<Unit>>()
+    private val entries = LinkedHashSet<Entry>()
 
     @Synchronized
     fun addListener(domainListener: DomainListener<*>): Observable<Unit> {
-        check(!domainListeners.containsKey(domainListener))
+        val entry = Entry(domainListener)
 
-        return BehaviorRelay.createDefault(Unit).also { domainListeners[domainListener] = it }
+        check(entry !in entries)
+
+        entries += entry
+
+        return entry.relay
     }
 
     @Synchronized
     fun removeListener(domainListener: DomainListener<*>) {
-        check(domainListeners.containsKey(domainListener))
+        val entry = entries.single { it.domainListener == domainListener }
 
-        domainListeners.remove(domainListener)
+        entries -= entry
     }
 
     @Synchronized
     fun notify(notificationType: NotificationType) {
-        fun Map.Entry<DomainListener<*>, *>.dataId() = key.dataId
-
-        domainListeners.entries
-            .sortedByDescending { it.dataId() in notificationType.dataIds }
-            .forEach { it.value.accept(Unit) }
+        entries.sortedByDescending { it.domainListener.dataId in notificationType.dataIds }.forEach { it.relay.accept(Unit) }
     }
 
     @Synchronized
-    fun getTaskPriorityMapper(): TaskPriorityMapper {
-        return TaskPriorityMapper.Default
+    fun getTaskPriorityMapper(): TaskPriorityMapper? {
+        return entries.lastOrNull()
+            ?.domainListener
+            ?.taskPriorityMapper
     }
 
     sealed class NotificationType {
@@ -61,5 +63,10 @@ class DomainListenerManager {
 
             constructor(dataId: DataId) : this(setOf(dataId))
         }
+    }
+
+    private data class Entry(val domainListener: DomainListener<*>) {
+
+        val relay = BehaviorRelay.createDefault(Unit)
     }
 }

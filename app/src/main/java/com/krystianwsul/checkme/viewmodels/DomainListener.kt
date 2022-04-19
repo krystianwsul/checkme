@@ -4,6 +4,7 @@ import com.jakewharton.rxrelay3.BehaviorRelay
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.UserScope
 import com.krystianwsul.checkme.domainmodel.observeOnDomain
+import com.krystianwsul.checkme.firebase.database.TaskPriorityMapper
 import com.krystianwsul.checkme.utils.filterNotNull
 import com.krystianwsul.checkme.utils.mapNotNull
 import com.krystianwsul.common.firebase.DomainThreadChecker
@@ -30,6 +31,8 @@ abstract class DomainListener<DOMAIN_DATA : DomainData> {
     protected abstract val domainResultFetcher: DomainResultFetcher<DOMAIN_DATA>
 
     protected open val priority = Priority.FIRST_READ
+
+    open val taskPriorityMapper: TaskPriorityMapper? = null
 
     fun start(forced: Boolean = false) {
         if (disposable != null) {

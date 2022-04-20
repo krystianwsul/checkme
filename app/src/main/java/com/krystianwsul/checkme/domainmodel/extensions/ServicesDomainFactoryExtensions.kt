@@ -10,7 +10,9 @@ import com.krystianwsul.checkme.utils.time.calendar
 import com.krystianwsul.checkme.utils.time.toDateTimeTz
 import com.krystianwsul.common.firebase.models.ImageState
 import com.krystianwsul.common.firebase.models.Instance
-import com.krystianwsul.common.time.*
+import com.krystianwsul.common.time.DateTime
+import com.krystianwsul.common.time.ExactTimeStamp
+import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
@@ -86,9 +88,8 @@ private fun DomainFactory.setNotificationDone(instance: Instance, now: ExactTime
 fun DomainUpdater.setProjectNotificationDoneService(projectKey: ProjectKey.Shared, timeStamp: TimeStamp): Completable =
     CompletableDomainUpdate.create("setInstanceNotificationDone") { now ->
         val project = projectsFactory.getProjectForce(projectKey)
-        val instances = Notifier.getNotificationInstances(this, now, projectKey, timeStamp)
 
-        instances.forEach { setNotificationDone(it, now) }
+        Notifier.getNotificationInstances(this, now, projectKey, timeStamp).forEach { setNotificationDone(it, now) }
 
         DomainUpdater.Params(
             Notifier.Params("setInstanceNotificationDone ${project.name}"),

@@ -74,7 +74,9 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
                 now,
                 newSearchContext(now, domainFactory),
                 projectKey = projectKey,
-            ).filterNotifications(domainFactory).toList()
+            ).filterNotifications(domainFactory)
+                .filter { it.groupByProject }
+                .toList()
         }
 
         fun setIrrelevant(domainFactory: DomainFactory, exactTimeStamp: ExactTimeStamp.Local): Irrelevant.Result {

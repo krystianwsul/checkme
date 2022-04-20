@@ -10,4 +10,6 @@ class UserDatabaseRead(private val userKey: UserKey) : TypedDatabaseRead<UserWra
     override val kClass = UserWrapper::class
 
     override fun DatabaseReference.getQuery() = child("${DatabaseWrapper.USERS_KEY}/${userKey.key}")
+
+    override val description = "user"
 }

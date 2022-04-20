@@ -26,4 +26,6 @@ class TaskDatabaseRead(private val taskKey: TaskKey.Root) : TypedDatabaseRead<Ro
     override val kClass = RootTaskJson::class
 
     override fun DatabaseReference.getQuery() = child("${DatabaseWrapper.TASKS_KEY}/${taskKey.taskId}")
+
+    override val description = "rootTask $taskKey"
 }

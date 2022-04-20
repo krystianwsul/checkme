@@ -10,4 +10,6 @@ class SharedProjectDatabaseRead(private val projectKey: ProjectKey.Shared) : Typ
     override val kClass = JsonWrapper::class
 
     override fun DatabaseReference.getQuery() = child("${DatabaseWrapper.RECORDS_KEY}/${projectKey.key}")
+
+    override val description = "sharedProject"
 }

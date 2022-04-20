@@ -10,4 +10,6 @@ class UsersDatabaseRead : IndicatorDatabaseRead<Map<String, UserWrapper>>() {
     override fun DatabaseReference.getQuery() = child(DatabaseWrapper.USERS_KEY).orderByKey()
 
     override val genericTypeIndicator = object : GenericTypeIndicator<Map<String, UserWrapper>>() {}
+
+    override val description = "users"
 }

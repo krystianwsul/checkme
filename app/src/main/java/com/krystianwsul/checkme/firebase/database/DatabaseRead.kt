@@ -33,6 +33,8 @@ abstract class DatabaseRead<DATA : Any> {
         .getQuery()
         .toSnapshot()
 
+    abstract val description: String
+
     private fun writeNullable(path: Path, value: DATA?): Completable {
         return if (AndroidDatabaseWrapper.ENABLE_PAPER) {
             AndroidDatabaseWrapper.rxPaperBook.write(path.toKey(), NullableWrapper(value))

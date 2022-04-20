@@ -5,6 +5,7 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.UserScope
 import com.krystianwsul.checkme.domainmodel.observeOnDomain
 import com.krystianwsul.checkme.firebase.database.TaskPriorityMapper
+import com.krystianwsul.checkme.firebase.database.TaskPriorityMapperQueue
 import com.krystianwsul.checkme.utils.filterNotNull
 import com.krystianwsul.checkme.utils.mapNotNull
 import com.krystianwsul.common.firebase.DomainThreadChecker
@@ -14,17 +15,13 @@ import io.reactivex.rxjava3.core.BackpressureStrategy
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.Disposable
 
-abstract class DomainListener<DOMAIN_DATA : DomainData> {
+abstract class DomainListener<DOMAIN_DATA : DomainData> : TaskPriorityMapperQueue.Provider {
 
     companion object {
 
         private var dataId = 1
 
         private val nextId get() = dataId++
-
-        private val startedDomainListeners = LinkedHashSet<DomainListener<*>>()
-
-        val currentDomainListener get() = startedDomainListeners.lastOrNull()
     }
 
     val dataId = DataId(nextId)
@@ -36,7 +33,7 @@ abstract class DomainListener<DOMAIN_DATA : DomainData> {
 
     protected open val priority = Priority.FIRST_READ
 
-    open fun newTaskPriorityMapper(): TaskPriorityMapper? = null
+    override fun newTaskPriorityMapper(): TaskPriorityMapper? = null
 
     fun start(forced: Boolean = false) {
         if (disposable != null) {
@@ -46,7 +43,7 @@ abstract class DomainListener<DOMAIN_DATA : DomainData> {
                 return
         }
 
-        startedDomainListeners += this
+        TaskPriorityMapperQueue.addProvider(this)
 
         var listenerAdded = false
 
@@ -92,7 +89,7 @@ abstract class DomainListener<DOMAIN_DATA : DomainData> {
     }
 
     fun stop() {
-        startedDomainListeners -= this
+        TaskPriorityMapperQueue.removeProvider(this)
 
         disposable?.dispose()
         disposable = null

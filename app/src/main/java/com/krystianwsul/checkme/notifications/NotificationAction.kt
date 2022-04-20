@@ -7,15 +7,19 @@ import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.extensions.*
 import com.krystianwsul.checkme.domainmodel.notifications.NotificationWrapper
 import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
+import com.krystianwsul.checkme.firebase.database.TaskPriorityMapper
+import com.krystianwsul.checkme.firebase.database.TaskPriorityMapperQueue
 import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.ProjectKey
 import io.reactivex.rxjava3.core.Completable
 import kotlinx.parcelize.Parcelize
 
-sealed class NotificationAction : Parcelable {
+sealed class NotificationAction : Parcelable, TaskPriorityMapperQueue.Provider {
 
     val requestCode get() = javaClass.hashCode() + hashCode()
+
+    override fun newTaskPriorityMapper(): TaskPriorityMapper? = null
 
     @CheckResult
     abstract fun perform(): Completable

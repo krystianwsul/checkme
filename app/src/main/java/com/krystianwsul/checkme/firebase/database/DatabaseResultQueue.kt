@@ -5,7 +5,6 @@ import com.jakewharton.rxrelay3.Relay
 import com.krystianwsul.checkme.domainmodel.getDomainScheduler
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.checkme.utils.doAfterSubscribe
-import com.krystianwsul.checkme.viewmodels.DomainListener
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import io.reactivex.rxjava3.core.BackpressureStrategy
 import io.reactivex.rxjava3.core.Completable
@@ -61,9 +60,7 @@ object DatabaseResultQueue {
     }
 
     private fun getTaskPriorityMapper(): TaskPriorityMapper {
-        return DomainListener.currentDomainListener
-            ?.newTaskPriorityMapper()
-            ?: TaskPriorityMapper.Default
+        return TaskPriorityMapperQueue.tryGetCurrent() ?: TaskPriorityMapper.Default
     }
 
     private fun enqueueTrigger() = trigger.accept(Unit)

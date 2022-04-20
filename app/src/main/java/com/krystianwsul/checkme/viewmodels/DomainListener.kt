@@ -36,7 +36,7 @@ abstract class DomainListener<DOMAIN_DATA : DomainData> {
 
     protected open val priority = Priority.FIRST_READ
 
-    open val taskPriorityMapper: TaskPriorityMapper? = null
+    open fun newTaskPriorityMapper(): TaskPriorityMapper? = null
 
     fun start(forced: Boolean = false) {
         if (disposable != null) {

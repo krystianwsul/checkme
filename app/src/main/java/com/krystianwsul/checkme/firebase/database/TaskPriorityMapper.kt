@@ -13,14 +13,27 @@ interface TaskPriorityMapper {
             taskDatabaseRead.getTaskPriority().databaseReadPriority
     }
 
-    class PrioritizeTask(val taskKey: TaskKey.Root) : TaskPriorityMapper {
+    class PrioritizeSingleTask private constructor(val taskKey: TaskKey.Root) : TaskPriorityMapper {
 
-        override fun getDatabaseReadPriority(taskDatabaseRead: TaskDatabaseRead) = DatabaseReadPriority.TODAY_INSTANCES
+        companion object {
+
+            fun fromTaskKey(taskKey: TaskKey) = taskKey.let { it as? TaskKey.Root }?.let(::PrioritizeSingleTask)
+        }
+
+        override fun getDatabaseReadPriority(taskDatabaseRead: TaskDatabaseRead) = if (taskKey == taskDatabaseRead.taskKey)
+            DatabaseReadPriority.NORMAL
+        else
+            DatabaseReadPriority.LATER_INSTANCES
     }
 
-    class PrioritizeTaskWithDependencies(val taskKey: TaskKey.Root) : TaskPriorityMapper {
+    class PrioritizeTaskWithDependencies private constructor(val taskKey: TaskKey.Root) : TaskPriorityMapper {
 
-        val allDependentTaskKeys = mutableSetOf<TaskKey.Root>()
+        companion object {
+
+            fun fromTaskKey(taskKey: TaskKey) = taskKey.let { it as? TaskKey.Root }?.let(::PrioritizeTaskWithDependencies)
+        }
+
+        private val allDependentTaskKeys = mutableSetOf<TaskKey.Root>()
 
         init {
             allDependentTaskKeys += taskKey

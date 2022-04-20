@@ -62,7 +62,7 @@ object DatabaseResultQueue {
 
     private fun getTaskPriorityMapper(): TaskPriorityMapper {
         return DomainListener.currentDomainListener
-            ?.taskPriorityMapper
+            ?.newTaskPriorityMapper()
             ?: TaskPriorityMapper.Default
     }
 

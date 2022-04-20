@@ -6,6 +6,7 @@ import com.krystianwsul.checkme.firebase.dependencies.RootTaskKeyStore
 import com.krystianwsul.checkme.firebase.dependencies.UserKeyStore
 import com.krystianwsul.checkme.firebase.factories.ProjectsFactory
 import com.krystianwsul.checkme.utils.publishImmediate
+import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.json.tasks.RootTaskJson
 import com.krystianwsul.common.firebase.json.tasks.TaskJson
@@ -34,6 +35,10 @@ class RootTasksFactory(
     companion object {
 
         var allowDeletion = Notifier.TEST_IRRELEVANT
+
+        val instanceRelay = BehaviorRelay.createDefault(NullableWrapper<RootTasksFactory>())
+
+        val nullableInstance get() = instanceRelay.value!!.value
     }
 
     private val deletedKeys = mutableSetOf<TaskKey.Root>()

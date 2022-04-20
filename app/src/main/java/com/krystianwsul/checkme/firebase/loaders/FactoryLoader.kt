@@ -140,6 +140,8 @@ class FactoryLoader(
                             rootModelChangeManager,
                         ) { projectsFactorySingle.getCurrentValue() }
 
+                        RootTasksFactory.instanceRelay.accept(NullableWrapper(rootTasksFactory))
+
                         val privateProjectLoader = ProjectLoader.Impl(
                             privateProjectDatabaseRx.observable,
                             domainDisposable,
@@ -227,6 +229,8 @@ class FactoryLoader(
                     factoryProvider.nullableInstance
                         ?.clearUserInfo()
                         ?.subscribe()
+
+                    RootTasksFactory.instanceRelay.accept(NullableWrapper())
 
                     Single.just(NullableWrapper())
                 }

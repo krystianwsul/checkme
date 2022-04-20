@@ -225,6 +225,7 @@ class RootTaskRecord private constructor(
         return taskHierarchyRecord
     }
 
+    // I strongly suspect the second function is at least partially redundant
     fun getAllDependencyTaskKeys(): Set<TaskKey.Root> = rootTaskParentDelegate.rootTaskKeys + getDirectDependencyTaskKeys()
 
     fun getDirectDependencyTaskKeys(): Set<TaskKey.Root> {

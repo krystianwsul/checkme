@@ -6,11 +6,11 @@ import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.json.tasks.RootTaskJson
 import com.krystianwsul.common.utils.TaskKey
 
-class TaskDatabaseRead(private val taskKey: TaskKey.Root) : TypedDatabaseRead<RootTaskJson>() {
+class TaskDatabaseRead(val taskKey: TaskKey.Root) : TypedDatabaseRead<RootTaskJson>() {
 
     private var finalTaskPriority: HasInstancesStore.TaskPriority.Final? = null
 
-    private fun getTaskPriority(): HasInstancesStore.TaskPriority {
+    fun getTaskPriority(): HasInstancesStore.TaskPriority {
         finalTaskPriority?.let { return it }
 
         val taskPriority = HasInstancesStore.getTaskPriority(taskKey)
@@ -21,7 +21,7 @@ class TaskDatabaseRead(private val taskKey: TaskKey.Root) : TypedDatabaseRead<Ro
     }
 
     override fun getPriority(taskPriorityMapper: TaskPriorityMapper) =
-        taskPriorityMapper.getDatabaseReadPriority(getTaskPriority())
+        taskPriorityMapper.getDatabaseReadPriority(this)
 
     override val kClass = RootTaskJson::class
 

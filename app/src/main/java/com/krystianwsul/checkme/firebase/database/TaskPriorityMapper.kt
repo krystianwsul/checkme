@@ -1,25 +1,24 @@
 package com.krystianwsul.checkme.firebase.database
 
-import com.krystianwsul.checkme.domainmodel.HasInstancesStore
 import com.krystianwsul.checkme.firebase.roottask.RootTasksFactory
 import com.krystianwsul.common.utils.TaskKey
 
 interface TaskPriorityMapper {
 
-    fun getDatabaseReadPriority(taskPriority: HasInstancesStore.TaskPriority): DatabaseReadPriority
+    fun getDatabaseReadPriority(taskDatabaseRead: TaskDatabaseRead): DatabaseReadPriority
 
     object Default : TaskPriorityMapper {
 
-        override fun getDatabaseReadPriority(taskPriority: HasInstancesStore.TaskPriority) =
-            taskPriority.databaseReadPriority
+        override fun getDatabaseReadPriority(taskDatabaseRead: TaskDatabaseRead) =
+            taskDatabaseRead.getTaskPriority().databaseReadPriority
     }
 
     class PrioritizeTask(val taskKey: TaskKey.Root) : TaskPriorityMapper {
 
-        override fun getDatabaseReadPriority(taskPriority: HasInstancesStore.TaskPriority) =
-            DatabaseReadPriority.TODAY_INSTANCES
+        override fun getDatabaseReadPriority(taskDatabaseRead: TaskDatabaseRead) = DatabaseReadPriority.TODAY_INSTANCES
     }
 
+    // todo priority rename to something sane
     class PrioritizeTask2(val taskKey: TaskKey.Root) : TaskPriorityMapper {
 
         // todo priority I should distinguish between a mapper object, and a mapping... session?  For this test, just initialize it each time.  Or maybe a factory vs. actual mapper
@@ -37,6 +36,7 @@ interface TaskPriorityMapper {
             taskKey: TaskKey.Root,
             checkedTaskKeys: MutableSet<TaskKey.Root> = mutableSetOf(),
         ) {
+            if (taskKey in checkedTaskKeys) return
             checkedTaskKeys += taskKey
 
             val task = rootTasksFactory.getRootTaskIfPresent(taskKey) ?: return
@@ -48,8 +48,11 @@ interface TaskPriorityMapper {
             dependencyTaskKeys.forEach { addTaskDependencies(rootTasksFactory, taskKey, checkedTaskKeys) }
         }
 
-        override fun getDatabaseReadPriority(taskPriority: HasInstancesStore.TaskPriority): DatabaseReadPriority {
-            TODO("Not yet implemented")
+        override fun getDatabaseReadPriority(taskDatabaseRead: TaskDatabaseRead): DatabaseReadPriority {
+            return if (taskDatabaseRead.taskKey in allDependentTaskKeys)
+                DatabaseReadPriority.NORMAL
+            else
+                DatabaseReadPriority.LATER_INSTANCES
         }
     }
 }

@@ -18,10 +18,7 @@ interface TaskPriorityMapper {
         override fun getDatabaseReadPriority(taskDatabaseRead: TaskDatabaseRead) = DatabaseReadPriority.TODAY_INSTANCES
     }
 
-    // todo priority rename to something sane
-    class PrioritizeTask2(val taskKey: TaskKey.Root) : TaskPriorityMapper {
-
-        // todo priority I should distinguish between a mapper object, and a mapping... session?  For this test, just initialize it each time.  Or maybe a factory vs. actual mapper
+    class PrioritizeTaskWithDependencies(val taskKey: TaskKey.Root) : TaskPriorityMapper {
 
         val allDependentTaskKeys = mutableSetOf<TaskKey.Root>()
 

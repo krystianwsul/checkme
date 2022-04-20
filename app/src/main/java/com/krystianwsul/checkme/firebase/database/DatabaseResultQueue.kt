@@ -7,7 +7,6 @@ import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.checkme.utils.doAfterSubscribe
 import com.krystianwsul.checkme.viewmodels.DomainListener
 import com.krystianwsul.common.firebase.DomainThreadChecker
-import com.krystianwsul.common.utils.TaskKey
 import io.reactivex.rxjava3.core.BackpressureStrategy
 import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Maybe
@@ -62,8 +61,6 @@ object DatabaseResultQueue {
     }
 
     private fun getTaskPriorityMapper(): TaskPriorityMapper {
-        return TaskPriorityMapper.PrioritizeTask2(TaskKey.Root("-MzF7KDVIO8m8RPpWQk5")) // todo priority
-
         return DomainListener.currentDomainListener
             ?.taskPriorityMapper
             ?: TaskPriorityMapper.Default

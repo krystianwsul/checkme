@@ -17,12 +17,11 @@ class ShowTaskViewModel : ObservableDomainViewModel<ShowTaskViewModel.Data, Show
         override val domainResultFetcher =
             DomainResultFetcher.DomainFactoryData { it.getShowTaskData(parameters.taskKey, parameters.searchCriteria) }
 
-        override val taskPriorityMapper by lazy {
-            parameters.taskKey
+        override val taskPriorityMapper
+            get() = parameters.taskKey
                 .let { it as? TaskKey.Root }
-                ?.let(TaskPriorityMapper::PrioritizeTask)
+                ?.let(TaskPriorityMapper::PrioritizeTaskWithDependencies)
                 ?: super.taskPriorityMapper
-        }
     }
 
     private val taskKeyRelay = PublishRelay.create<TaskKey>()

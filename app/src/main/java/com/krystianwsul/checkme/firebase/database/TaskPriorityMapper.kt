@@ -55,7 +55,7 @@ interface TaskPriorityMapper {
 
             allDependentTaskKeys += dependencyTaskKeys
 
-            dependencyTaskKeys.forEach { addTaskDependencies(rootTasksFactory, taskKey, checkedTaskKeys) }
+            dependencyTaskKeys.forEach { addTaskDependencies(rootTasksFactory, it, checkedTaskKeys) }
         }
 
         override fun getDatabaseReadPriority(taskDatabaseRead: TaskDatabaseRead): DatabaseReadPriority {

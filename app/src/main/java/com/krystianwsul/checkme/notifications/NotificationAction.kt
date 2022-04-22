@@ -7,6 +7,7 @@ import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.extensions.*
 import com.krystianwsul.checkme.domainmodel.notifications.NotificationWrapper
 import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
+import com.krystianwsul.checkme.firebase.database.DomainFactoryInitializationDelayProvider
 import com.krystianwsul.checkme.firebase.database.TaskPriorityMapper
 import com.krystianwsul.checkme.firebase.database.TaskPriorityMapperQueue
 import com.krystianwsul.common.time.TimeStamp
@@ -27,11 +28,19 @@ sealed class NotificationAction : Parcelable, TaskPriorityMapperQueue.Provider {
     @Parcelize
     object DeleteGroupNotification : NotificationAction() {
 
+        override fun newDelayProvider(): DomainFactoryInitializationDelayProvider? = null
+
+        override fun newTaskPriorityMapper(): TaskPriorityMapper? = null
+
         override fun perform() = AndroidDomainUpdater.setInstancesNotifiedService()
     }
 
     @Parcelize
     data class InstanceDone(private val instanceKey: InstanceKey, private val notificationId: Int) : NotificationAction() {
+
+        override fun newDelayProvider() = DomainFactoryInitializationDelayProvider.Task.fromTaskKey(instanceKey.taskKey)
+
+        override fun newTaskPriorityMapper() = TaskPriorityMapper.PrioritizeSingleTask.fromTaskKey(instanceKey.taskKey)
 
         override fun perform(): Completable {
             Preferences.tickLog.logLineDate("InstanceDoneService.onHandleIntent")
@@ -45,6 +54,10 @@ sealed class NotificationAction : Parcelable, TaskPriorityMapperQueue.Provider {
     @Parcelize
     data class InstanceHour(private val instanceKey: InstanceKey, private val notificationId: Int) : NotificationAction() {
 
+        override fun newDelayProvider() = DomainFactoryInitializationDelayProvider.Task.fromTaskKey(instanceKey.taskKey)
+
+        override fun newTaskPriorityMapper() = TaskPriorityMapper.PrioritizeSingleTask.fromTaskKey(instanceKey.taskKey)
+
         override fun perform(): Completable {
             Preferences.tickLog.logLineDate("InstanceHourService.onHandleIntent")
 
@@ -57,6 +70,10 @@ sealed class NotificationAction : Parcelable, TaskPriorityMapperQueue.Provider {
     @Parcelize
     data class DeleteInstanceNotification(private val instanceKey: InstanceKey) : NotificationAction() {
 
+        override fun newDelayProvider() = DomainFactoryInitializationDelayProvider.Task.fromTaskKey(instanceKey.taskKey)
+
+        override fun newTaskPriorityMapper() = TaskPriorityMapper.PrioritizeSingleTask.fromTaskKey(instanceKey.taskKey)
+
         override fun perform() =
             AndroidDomainUpdater.setInstanceNotified(DomainListenerManager.NotificationType.All, instanceKey)
     }
@@ -66,8 +83,9 @@ sealed class NotificationAction : Parcelable, TaskPriorityMapperQueue.Provider {
         private val projectKey: ProjectKey.Shared,
         private val timeStamp: TimeStamp,
         private val notificationId: Int,
-    ) :
-        NotificationAction() {
+    ) : NotificationAction() {
+
+        override fun newTaskPriorityMapper() = TaskPriorityMapper.PrioritizeProject(projectKey)
 
         override fun perform(): Completable {
             Preferences.tickLog.logLineDate("ProjectDone")
@@ -85,6 +103,8 @@ sealed class NotificationAction : Parcelable, TaskPriorityMapperQueue.Provider {
         private val notificationId: Int,
     ) : NotificationAction() {
 
+        override fun newTaskPriorityMapper() = TaskPriorityMapper.PrioritizeProject(projectKey)
+
         override fun perform(): Completable {
             Preferences.tickLog.logLineDate("ProjectHour")
 
@@ -97,6 +117,8 @@ sealed class NotificationAction : Parcelable, TaskPriorityMapperQueue.Provider {
     @Parcelize
     data class DeleteProjectNotification(private val projectKey: ProjectKey.Shared, private val timeStamp: TimeStamp) :
         NotificationAction() {
+
+        override fun newTaskPriorityMapper() = TaskPriorityMapper.PrioritizeProject(projectKey)
 
         override fun perform() = AndroidDomainUpdater.setInstancesNotifiedService(projectKey, timeStamp)
     }

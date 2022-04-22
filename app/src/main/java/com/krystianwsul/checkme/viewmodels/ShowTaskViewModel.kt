@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.viewmodels
 
 import com.jakewharton.rxrelay3.PublishRelay
 import com.krystianwsul.checkme.domainmodel.extensions.getShowTaskData
+import com.krystianwsul.checkme.firebase.database.DomainFactoryInitializationDelayProvider
 import com.krystianwsul.checkme.firebase.database.TaskPriorityMapper
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.common.criteria.SearchCriteria
@@ -16,6 +17,8 @@ class ShowTaskViewModel : ObservableDomainViewModel<ShowTaskViewModel.Data, Show
 
         override val domainResultFetcher =
             DomainResultFetcher.DomainFactoryData { it.getShowTaskData(parameters.taskKey, parameters.searchCriteria) }
+
+        override fun newDelayProvider() = DomainFactoryInitializationDelayProvider.Task.fromTaskKey(parameters.taskKey)
 
         override fun newTaskPriorityMapper() =
             TaskPriorityMapper.PrioritizeTaskWithDependencies.fromTaskKey(parameters.taskKey)

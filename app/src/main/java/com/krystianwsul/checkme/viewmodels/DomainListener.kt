@@ -4,6 +4,7 @@ import com.jakewharton.rxrelay3.BehaviorRelay
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.UserScope
 import com.krystianwsul.checkme.domainmodel.observeOnDomain
+import com.krystianwsul.checkme.firebase.database.DomainFactoryInitializationDelayProvider
 import com.krystianwsul.checkme.firebase.database.TaskPriorityMapper
 import com.krystianwsul.checkme.firebase.database.TaskPriorityMapperQueue
 import com.krystianwsul.checkme.utils.filterNotNull
@@ -32,6 +33,8 @@ abstract class DomainListener<DOMAIN_DATA : DomainData> : TaskPriorityMapperQueu
     protected abstract val domainResultFetcher: DomainResultFetcher<DOMAIN_DATA>
 
     protected open val priority = Priority.FIRST_READ
+
+    override fun newDelayProvider(): DomainFactoryInitializationDelayProvider? = null
 
     override fun newTaskPriorityMapper(): TaskPriorityMapper? = null
 

@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.domainmodel
 
 import com.jakewharton.rxrelay3.BehaviorRelay
 import com.krystianwsul.checkme.domainmodel.extensions.updateDeviceDbInfo
+import com.krystianwsul.checkme.firebase.database.TaskPriorityMapperQueue
 import com.krystianwsul.checkme.firebase.factories.FriendsFactory
 import com.krystianwsul.checkme.firebase.factories.MyUserFactory
 import com.krystianwsul.checkme.firebase.factories.ProjectsFactory
@@ -14,6 +15,7 @@ import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.time.ExactTimeStamp
+import com.mindorks.scheduler.Priority
 import io.reactivex.rxjava3.core.BackpressureStrategy
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Single
@@ -51,7 +53,11 @@ class UserScope(
         friendsFactorySingle,
         notificationStorageSingle,
         shownFactorySingle,
-    ) { projectsFactory, friendsFactory, notificationStorage, shownFactory ->
+        TaskPriorityMapperQueue.delayObservable
+            .observeOnDomain(Priority.DB_NOTIFICATION_STORAGE)
+            .switchMapSingle { it.getDelayCompletable(rootTasksFactory).toSingleDefault(Unit) }
+            .firstOrError(),
+    ) { projectsFactory, friendsFactory, notificationStorage, shownFactory, _ ->
         factoryProvider.newDomain(
             shownFactory,
             myUserFactory,

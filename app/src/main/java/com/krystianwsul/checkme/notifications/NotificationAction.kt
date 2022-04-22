@@ -7,7 +7,6 @@ import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.extensions.*
 import com.krystianwsul.checkme.domainmodel.notifications.NotificationWrapper
 import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
-import com.krystianwsul.checkme.firebase.database.TaskPriorityMapper
 import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.ProjectKey
@@ -17,8 +16,6 @@ import kotlinx.parcelize.Parcelize
 sealed class NotificationAction : Parcelable {
 
     val requestCode get() = javaClass.hashCode() + hashCode()
-
-    open fun newTaskPriorityMapper(): TaskPriorityMapper? = null
 
     @CheckResult
     abstract fun perform(): Completable
@@ -32,8 +29,6 @@ sealed class NotificationAction : Parcelable {
     @Parcelize
     data class InstanceDone(private val instanceKey: InstanceKey, private val notificationId: Int) : NotificationAction() {
 
-        override fun newTaskPriorityMapper() = TaskPriorityMapper.PrioritizeSingleTask.fromTaskKey(instanceKey.taskKey)
-
         override fun perform(): Completable {
             Preferences.tickLog.logLineDate("InstanceDoneService.onHandleIntent")
 
@@ -46,8 +41,6 @@ sealed class NotificationAction : Parcelable {
     @Parcelize
     data class InstanceHour(private val instanceKey: InstanceKey, private val notificationId: Int) : NotificationAction() {
 
-        override fun newTaskPriorityMapper() = TaskPriorityMapper.PrioritizeSingleTask.fromTaskKey(instanceKey.taskKey)
-
         override fun perform(): Completable {
             Preferences.tickLog.logLineDate("InstanceHourService.onHandleIntent")
 
@@ -59,8 +52,6 @@ sealed class NotificationAction : Parcelable {
 
     @Parcelize
     data class DeleteInstanceNotification(private val instanceKey: InstanceKey) : NotificationAction() {
-
-        override fun newTaskPriorityMapper() = TaskPriorityMapper.PrioritizeSingleTask.fromTaskKey(instanceKey.taskKey)
 
         override fun perform() =
             AndroidDomainUpdater.setInstanceNotified(DomainListenerManager.NotificationType.All, instanceKey)

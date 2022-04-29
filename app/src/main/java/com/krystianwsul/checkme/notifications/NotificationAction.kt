@@ -20,6 +20,7 @@ sealed class NotificationAction : Parcelable, TaskPriorityMapperQueue.Provider {
 
     val requestCode get() = javaClass.hashCode() + hashCode()
 
+    override fun newDelayProvider(): DomainFactoryInitializationDelayProvider? = null
     override fun newTaskPriorityMapper(): TaskPriorityMapper? = null
 
     @CheckResult
@@ -40,8 +41,6 @@ sealed class NotificationAction : Parcelable, TaskPriorityMapperQueue.Provider {
 
         override fun newDelayProvider() = DomainFactoryInitializationDelayProvider.Task.fromTaskKey(instanceKey.taskKey)
 
-        override fun newTaskPriorityMapper() = TaskPriorityMapper.PrioritizeSingleTask.fromTaskKey(instanceKey.taskKey)
-
         override fun perform(): Completable {
             Preferences.tickLog.logLineDate("InstanceDoneService.onHandleIntent")
 
@@ -55,8 +54,6 @@ sealed class NotificationAction : Parcelable, TaskPriorityMapperQueue.Provider {
     data class InstanceHour(private val instanceKey: InstanceKey, private val notificationId: Int) : NotificationAction() {
 
         override fun newDelayProvider() = DomainFactoryInitializationDelayProvider.Task.fromTaskKey(instanceKey.taskKey)
-
-        override fun newTaskPriorityMapper() = TaskPriorityMapper.PrioritizeSingleTask.fromTaskKey(instanceKey.taskKey)
 
         override fun perform(): Completable {
             Preferences.tickLog.logLineDate("InstanceHourService.onHandleIntent")
@@ -72,8 +69,6 @@ sealed class NotificationAction : Parcelable, TaskPriorityMapperQueue.Provider {
 
         override fun newDelayProvider() = DomainFactoryInitializationDelayProvider.Task.fromTaskKey(instanceKey.taskKey)
 
-        override fun newTaskPriorityMapper() = TaskPriorityMapper.PrioritizeSingleTask.fromTaskKey(instanceKey.taskKey)
-
         override fun perform() =
             AndroidDomainUpdater.setInstanceNotified(DomainListenerManager.NotificationType.All, instanceKey)
     }
@@ -84,8 +79,6 @@ sealed class NotificationAction : Parcelable, TaskPriorityMapperQueue.Provider {
         private val timeStamp: TimeStamp,
         private val notificationId: Int,
     ) : NotificationAction() {
-
-        override fun newTaskPriorityMapper() = TaskPriorityMapper.PrioritizeProject(projectKey)
 
         override fun perform(): Completable {
             Preferences.tickLog.logLineDate("ProjectDone")
@@ -103,8 +96,6 @@ sealed class NotificationAction : Parcelable, TaskPriorityMapperQueue.Provider {
         private val notificationId: Int,
     ) : NotificationAction() {
 
-        override fun newTaskPriorityMapper() = TaskPriorityMapper.PrioritizeProject(projectKey)
-
         override fun perform(): Completable {
             Preferences.tickLog.logLineDate("ProjectHour")
 
@@ -117,8 +108,6 @@ sealed class NotificationAction : Parcelable, TaskPriorityMapperQueue.Provider {
     @Parcelize
     data class DeleteProjectNotification(private val projectKey: ProjectKey.Shared, private val timeStamp: TimeStamp) :
         NotificationAction() {
-
-        override fun newTaskPriorityMapper() = TaskPriorityMapper.PrioritizeProject(projectKey)
 
         override fun perform() = AndroidDomainUpdater.setInstancesNotifiedService(projectKey, timeStamp)
     }

@@ -15,18 +15,21 @@ object TaskPriorityMapperQueue {
                 ?: DomainFactoryInitializationDelayProvider.Default
         }
 
+    @Synchronized
     fun addProvider(provider: Provider) {
         providers += provider
 
         trigger.accept(Unit)
     }
 
+    @Synchronized
     fun removeProvider(provider: Provider) {
         providers -= provider
 
         trigger.accept(Unit)
     }
 
+    @Synchronized
     fun tryGetCurrent() = providers.lastOrNull()?.newTaskPriorityMapper()
 
     interface Provider {

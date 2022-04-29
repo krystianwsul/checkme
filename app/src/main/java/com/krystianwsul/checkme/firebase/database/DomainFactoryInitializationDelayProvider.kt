@@ -20,17 +20,6 @@ interface DomainFactoryInitializationDelayProvider {
             fun fromTaskKey(taskKey: TaskKey) = taskKey.let { it as? TaskKey.Root }?.let(::Task)
         }
 
-        override fun getDelayCompletable(rootTasksFactory: RootTasksFactory): Completable {
-            /*
-            todo notification instead of changeTypes, implement relay that triggers for loading specific taskKey.  Like,
-            getTaskLoadedSingle or something
-             */
-            return rootTasksFactory.changeTypes
-                .map { }
-                .startWithItem(Unit)
-                .filter { _ -> rootTasksFactory.tryGetRootTask(taskKey) != null }
-                .firstOrError()
-                .ignoreElement()
-        }
+        override fun getDelayCompletable(rootTasksFactory: RootTasksFactory) = rootTasksFactory.waitForTaskLoad(taskKey)
     }
 }

@@ -5,6 +5,8 @@ import com.krystianwsul.checkme.domainmodel.notifications.Notifier
 import com.krystianwsul.checkme.firebase.dependencies.RootTaskKeyStore
 import com.krystianwsul.checkme.firebase.dependencies.UserKeyStore
 import com.krystianwsul.checkme.firebase.factories.ProjectsFactory
+import com.krystianwsul.checkme.utils.filterNotNull
+import com.krystianwsul.checkme.utils.mapNotNull
 import com.krystianwsul.checkme.utils.publishImmediate
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.firebase.ChangeType
@@ -16,6 +18,7 @@ import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.firebase.models.taskhierarchy.TaskHierarchy
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.*
+import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
@@ -170,4 +173,12 @@ class RootTasksFactory(
     }
 
     fun save(values: MutableMap<String, Any?>) = rootTasksLoader.rootTasksManager.save(values)
+
+    fun waitForTaskLoad(taskKey: TaskKey.Root): Completable {
+        return rootTaskFactoriesRelay.mapNotNull { it[taskKey] }
+            .distinctUntilChanged()
+            .flatMap { it.taskRelay.filterNotNull() }
+            .firstOrError()
+            .ignoreElement()
+    }
 }

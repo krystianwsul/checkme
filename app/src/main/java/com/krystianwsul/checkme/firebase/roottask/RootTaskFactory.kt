@@ -1,6 +1,8 @@
 package com.krystianwsul.checkme.firebase.roottask
 
+import com.jakewharton.rxrelay3.BehaviorRelay
 import com.jakewharton.rxrelay3.PublishRelay
+import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
 import com.krystianwsul.common.firebase.models.task.RootTask
@@ -30,8 +32,13 @@ class RootTaskFactory(
 
     val changeTypes: ConnectableObservable<ChangeType>
 
-    var task: RootTask? = null
-        private set
+    val taskRelay = BehaviorRelay.createDefault(NullableWrapper<RootTask>())
+
+    var task: RootTask?
+        get() = taskRelay.value!!.value
+        private set(value) {
+            taskRelay.accept(NullableWrapper(value))
+        }
 
     init {
         eventResults = listOf(

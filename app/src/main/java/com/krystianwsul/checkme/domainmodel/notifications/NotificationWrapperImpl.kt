@@ -184,15 +184,15 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         )
 
         val pendingDeleteIntent = NotificationActionReceiver.newPendingIntent(
-            NotificationAction.DeleteInstanceNotification(instanceKey)
+            NotificationAction.Instance.Delete(instanceKey)
         )
 
         val pendingDoneIntent = NotificationActionReceiver.newPendingIntent(
-            NotificationAction.InstanceDone(instanceKey, notificationId)
+            NotificationAction.Instance.Done(instanceKey, notificationId)
         )
 
         val pendingHourIntent = NotificationActionReceiver.newPendingIntent(
-            NotificationAction.InstanceHour(instanceKey, notificationId)
+            NotificationAction.Instance.Hour(instanceKey, notificationId)
         )
 
         fun action(
@@ -295,15 +295,15 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         )
 
         val pendingDeleteIntent = NotificationActionReceiver.newPendingIntent(
-            NotificationAction.DeleteProjectNotification(projectData.projectKey, projectData.timeStamp)
+            NotificationAction.Project.Delete(projectData.projectKey, projectData.timeStamp)
         )
 
         val pendingDoneIntent = NotificationActionReceiver.newPendingIntent(
-            NotificationAction.ProjectDone(projectData.projectKey, projectData.timeStamp, notificationId)
+            NotificationAction.Project.Done(projectData.projectKey, projectData.timeStamp, notificationId)
         )
 
         val pendingHourIntent = NotificationActionReceiver.newPendingIntent(
-            NotificationAction.ProjectHour(projectData.projectKey, projectData.timeStamp, notificationId)
+            NotificationAction.Project.Hour(projectData.projectKey, projectData.timeStamp, notificationId)
         )
 
         fun action(

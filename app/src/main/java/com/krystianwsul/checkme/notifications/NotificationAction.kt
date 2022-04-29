@@ -20,7 +20,6 @@ sealed class NotificationAction : Parcelable, TaskPriorityMapperQueue.Provider {
 
     val requestCode get() = javaClass.hashCode() + hashCode()
 
-    override fun newDelayProvider(): DomainFactoryInitializationDelayProvider? = null
     override fun newTaskPriorityMapper(): TaskPriorityMapper? = null
 
     @CheckResult
@@ -31,84 +30,89 @@ sealed class NotificationAction : Parcelable, TaskPriorityMapperQueue.Provider {
 
         override fun newDelayProvider(): DomainFactoryInitializationDelayProvider? = null
 
-        override fun newTaskPriorityMapper(): TaskPriorityMapper? = null
-
         override fun perform() = AndroidDomainUpdater.setInstancesNotifiedService()
     }
 
-    @Parcelize
-    data class InstanceDone(private val instanceKey: InstanceKey, private val notificationId: Int) : NotificationAction() {
+    sealed class Instance : NotificationAction() {
+
+        protected abstract val instanceKey: InstanceKey
 
         override fun newDelayProvider() = DomainFactoryInitializationDelayProvider.Task.fromTaskKey(instanceKey.taskKey)
 
-        override fun perform(): Completable {
-            Preferences.tickLog.logLineDate("InstanceDoneService.onHandleIntent")
+        override fun newTaskPriorityMapper(): TaskPriorityMapper? = null
 
-            NotificationWrapper.instance.cleanGroup(notificationId)
+        @Parcelize
+        data class Done(override val instanceKey: InstanceKey, private val notificationId: Int) : Instance() {
 
-            return AndroidDomainUpdater.setInstanceNotificationDoneService(instanceKey)
+            override fun perform(): Completable {
+                Preferences.tickLog.logLineDate("InstanceDoneService.onHandleIntent")
+
+                NotificationWrapper.instance.cleanGroup(notificationId)
+
+                return AndroidDomainUpdater.setInstanceNotificationDoneService(instanceKey)
+            }
+        }
+
+        @Parcelize
+        data class Hour(override val instanceKey: InstanceKey, private val notificationId: Int) : Instance() {
+
+            override fun perform(): Completable {
+                Preferences.tickLog.logLineDate("InstanceHourService.onHandleIntent")
+
+                NotificationWrapper.instance.cleanGroup(notificationId)
+
+                return AndroidDomainUpdater.setInstanceAddHourService(instanceKey)
+            }
+        }
+
+        @Parcelize
+        data class Delete(override val instanceKey: InstanceKey) : Instance() {
+
+            override fun perform() =
+                AndroidDomainUpdater.setInstanceNotified(DomainListenerManager.NotificationType.All, instanceKey)
         }
     }
 
-    @Parcelize
-    data class InstanceHour(private val instanceKey: InstanceKey, private val notificationId: Int) : NotificationAction() {
+    sealed class Project : NotificationAction() {
 
-        override fun newDelayProvider() = DomainFactoryInitializationDelayProvider.Task.fromTaskKey(instanceKey.taskKey)
+        override fun newDelayProvider(): DomainFactoryInitializationDelayProvider? = null
 
-        override fun perform(): Completable {
-            Preferences.tickLog.logLineDate("InstanceHourService.onHandleIntent")
+        @Parcelize
+        data class Done(
+            private val projectKey: ProjectKey.Shared,
+            private val timeStamp: TimeStamp,
+            private val notificationId: Int,
+        ) : Project() {
 
-            NotificationWrapper.instance.cleanGroup(notificationId)
+            override fun perform(): Completable {
+                Preferences.tickLog.logLineDate("ProjectDone")
 
-            return AndroidDomainUpdater.setInstanceAddHourService(instanceKey)
+                NotificationWrapper.instance.cleanGroup(notificationId)
+
+                return AndroidDomainUpdater.setProjectNotificationDoneService(projectKey, timeStamp)
+            }
         }
-    }
 
-    @Parcelize
-    data class DeleteInstanceNotification(private val instanceKey: InstanceKey) : NotificationAction() {
+        @Parcelize
+        data class Hour(
+            private val projectKey: ProjectKey.Shared,
+            private val timeStamp: TimeStamp,
+            private val notificationId: Int,
+        ) : Project() {
 
-        override fun newDelayProvider() = DomainFactoryInitializationDelayProvider.Task.fromTaskKey(instanceKey.taskKey)
+            override fun perform(): Completable {
+                Preferences.tickLog.logLineDate("ProjectHour")
 
-        override fun perform() =
-            AndroidDomainUpdater.setInstanceNotified(DomainListenerManager.NotificationType.All, instanceKey)
-    }
+                NotificationWrapper.instance.cleanGroup(notificationId)
 
-    @Parcelize
-    data class ProjectDone(
-        private val projectKey: ProjectKey.Shared,
-        private val timeStamp: TimeStamp,
-        private val notificationId: Int,
-    ) : NotificationAction() {
-
-        override fun perform(): Completable {
-            Preferences.tickLog.logLineDate("ProjectDone")
-
-            NotificationWrapper.instance.cleanGroup(notificationId)
-
-            return AndroidDomainUpdater.setProjectNotificationDoneService(projectKey, timeStamp)
+                return AndroidDomainUpdater.setProjectAddHourService(projectKey, timeStamp)
+            }
         }
-    }
 
-    @Parcelize
-    data class ProjectHour(
-        private val projectKey: ProjectKey.Shared,
-        private val timeStamp: TimeStamp,
-        private val notificationId: Int,
-    ) : NotificationAction() {
+        @Parcelize
+        data class Delete(private val projectKey: ProjectKey.Shared, private val timeStamp: TimeStamp) : Project() {
 
-        override fun perform(): Completable {
-            Preferences.tickLog.logLineDate("ProjectHour")
-
-            NotificationWrapper.instance.cleanGroup(notificationId)
-
-            return AndroidDomainUpdater.setProjectAddHourService(projectKey, timeStamp)
+            override fun perform() = AndroidDomainUpdater.setInstancesNotifiedService(projectKey, timeStamp)
         }
-    }
-
-    @Parcelize
-    data class DeleteProjectNotification(private val projectKey: ProjectKey.Shared, private val timeStamp: TimeStamp) :
-        NotificationAction() {
-
-        override fun perform() = AndroidDomainUpdater.setInstancesNotifiedService(projectKey, timeStamp)
     }
 }

@@ -8,6 +8,8 @@ import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.notifications.ImageManager
 import com.krystianwsul.checkme.domainmodel.notifications.NotificationWrapper
 import com.krystianwsul.checkme.firebase.TestUserCustomTimeProviderSource
+import com.krystianwsul.checkme.firebase.database.DomainFactoryInitializationDelayProvider
+import com.krystianwsul.checkme.firebase.database.TaskPriorityMapperQueue
 import com.krystianwsul.checkme.firebase.dependencies.RootTaskKeyStore
 import com.krystianwsul.checkme.firebase.factories.FriendsFactory
 import com.krystianwsul.checkme.firebase.factories.MyUserFactory
@@ -145,6 +147,9 @@ class DomainFactoryRule : TestRule {
 
         mockkObject(HasInstancesStore)
         every { HasInstancesStore.update(any(), any()) } returns Unit
+
+        mockkObject(TaskPriorityMapperQueue)
+        every { TaskPriorityMapperQueue.delayObservable } returns Observable.just(DomainFactoryInitializationDelayProvider.Default)
     }
 
     private fun before() {

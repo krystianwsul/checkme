@@ -25,7 +25,8 @@ class MergePaperAndRxTest {
         paperSubject = PublishRelay.create()
         firebaseSubject = PublishRelay.create()
 
-        testObserver = mergePaperAndRx(paperSubject.firstElement(), firebaseSubject, Converter({ it }, { it })).test()
+        testObserver =
+            mergePaperAndRx(paperSubject.firstElement(), firebaseSubject, Converter({ it }, { it }, { it })).test()
 
         mockkObject(MyApplication)
         every { MyApplication.context } returns mockk(relaxed = true)

@@ -28,7 +28,8 @@ class MergePaperAndRxInitialTest {
         val paperSubject = PublishRelay.create<Int>()
         val firebaseSubject = BehaviorRelay.createDefault(1)
 
-        val testObserver = mergePaperAndRx(paperSubject.firstElement(), firebaseSubject, Converter({ it }, { it })).test()
+        val testObserver =
+            mergePaperAndRx(paperSubject.firstElement(), firebaseSubject, Converter({ it }, { it }, { it })).test()
 
         testObserver.assertValues(1)
 

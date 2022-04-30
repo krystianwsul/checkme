@@ -92,6 +92,15 @@ private sealed class PairState<T : Any, U : Any> {
             check(newFirebaseState is AndroidDatabaseWrapper.LoadState.Loaded)
 
             val firebase = converter.snapshotToPaper(newFirebaseState.value)
+
+            /*
+            todo notification: here's the race condition: this paper variable then holds RootTaskJson, which is mutable.
+            If the notification action is performed before firebase comes in, then this data class gets updated in-place.
+            So, the equality check fails afterwards, and it gets overwritten with the firebase value.
+
+            Find a place to COPY this data class, so that we keep the original here
+             */
+
             return if (firebase == paper) {
                 Terminal(null)
             } else {

@@ -47,7 +47,7 @@ interface TaskPriorityMapper {
 
         override fun getDatabaseReadPriority(taskDatabaseRead: TaskDatabaseRead): DatabaseReadPriority {
             return if (taskDatabaseRead.taskKey in allDependentTaskKeys)
-                DatabaseReadPriority.NORMAL
+                DatabaseReadPriority.TODAY_INSTANCES
             else
                 Default.getDatabaseReadPriority(taskDatabaseRead)
         }

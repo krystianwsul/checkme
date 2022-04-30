@@ -6,7 +6,7 @@ object TaskPriorityMapperQueue {
 
     private val providers = LinkedHashSet<Provider>()
 
-    private val trigger = BehaviorRelay.create<Unit>()
+    private val trigger = BehaviorRelay.createDefault(Unit)
 
     val delayObservable
         get() = trigger.map {

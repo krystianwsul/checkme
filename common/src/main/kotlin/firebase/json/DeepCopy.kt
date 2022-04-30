@@ -10,9 +10,8 @@ interface DeepCopy<T : DeepCopy<T>> : Parsable {
         private val deepCopyJson = Json
     }
 
-    val serializer: KSerializer<T>
-
     fun deepCopy(): T
 
-    fun deepCopy(value: T) = deepCopyJson.run { decodeFromJsonElement(serializer, encodeToJsonElement(serializer, value)) }
+    fun deepCopy(serializer: KSerializer<T>, value: T) =
+        deepCopyJson.run { decodeFromJsonElement(serializer, encodeToJsonElement(serializer, value)) }
 }

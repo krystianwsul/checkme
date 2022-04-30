@@ -8,7 +8,5 @@ data class JsonWrapper @JvmOverloads constructor(
     var projectJson: SharedProjectJson = SharedProjectJson(),
 ) : Parsable, DeepCopy<JsonWrapper> {
 
-    override val serializer get() = serializer()
-
-    override fun deepCopy() = deepCopy(this)
+    override fun deepCopy() = deepCopy(serializer(), this)
 }

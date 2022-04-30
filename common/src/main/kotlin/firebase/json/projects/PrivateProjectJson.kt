@@ -22,7 +22,5 @@ data class PrivateProjectJson @JvmOverloads constructor(
     override val rootTaskIds: MutableMap<String, Boolean> = mutableMapOf(),
 ) : ProjectJson<ProjectType.Private>, Parsable, DeepCopy<PrivateProjectJson> {
 
-    override val serializer get() = serializer()
-
-    override fun deepCopy() = deepCopy(this)
+    override fun deepCopy() = deepCopy(serializer(), this)
 }

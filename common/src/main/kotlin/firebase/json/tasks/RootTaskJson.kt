@@ -26,6 +26,8 @@ data class RootTaskJson @JvmOverloads constructor(
     override val rootTaskIds: MutableMap<String, Boolean> = mutableMapOf(),
 ) : TaskJson, Parsable, RootTaskParentJson, DeepCopy<RootTaskJson> {
 
+    override fun deepCopy() = deepCopy(serializer(), this)
+
     @Serializable
     data class EndData(
         override val time: Long = 0,
@@ -35,8 +37,4 @@ data class RootTaskJson @JvmOverloads constructor(
 
         fun toCompat() = ProjectTaskJson.EndData(time, offset, deleteInstances)
     }
-
-    override val serializer get() = serializer()
-
-    override fun deepCopy() = deepCopy(this)
 }

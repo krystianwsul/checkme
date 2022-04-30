@@ -17,7 +17,5 @@ data class UserWrapper @JvmOverloads constructor(
     val ordinalEntries: MutableMap<String, MutableMap<String, ProjectOrdinalEntryJson>> = mutableMapOf(), // first key is projectKey, second is push key
 ) : Parcelable, Parsable, DeepCopy<UserWrapper> {
 
-    override val serializer get() = serializer()
-
-    override fun deepCopy() = deepCopy(this)
+    override fun deepCopy() = deepCopy(serializer(), this)
 }

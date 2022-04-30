@@ -12,4 +12,6 @@ class UsersDatabaseRead : IndicatorDatabaseRead<Map<String, UserWrapper>>() {
     override val genericTypeIndicator = object : GenericTypeIndicator<Map<String, UserWrapper>>() {}
 
     override val description = "users"
+
+    override fun deepCopy(value: Map<String, UserWrapper>) = value.toMutableMap().mapValues { it.value.deepCopy() }
 }

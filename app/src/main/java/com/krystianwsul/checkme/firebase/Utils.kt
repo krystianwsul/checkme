@@ -25,7 +25,14 @@ fun <T : Any, U : Any> mergePaperAndRx(
         .mergeWith(firebaseObservable.skip(1))
 }
 
-open class Converter<T : Any, U : Any>(val paperToSnapshot: (T) -> U, val snapshotToPaper: (U) -> T)
+open class Converter<T : Any, U : Any>(
+    private val paperToSnapshot: (T) -> U,
+    val snapshotToPaper: (U) -> T,
+    val deepCopyPaper: (T) -> T,
+) {
+
+    fun copyPaperToSnapshot(value: T) = paperToSnapshot(deepCopyPaper(value))
+}
 
 private sealed class PairState<T : Any, U : Any> {
 
@@ -82,7 +89,7 @@ private sealed class PairState<T : Any, U : Any> {
     class PaperCameFirst<T : Any, U : Any>(private val paper: T, private val converter: Converter<T, U>) :
         PairState<T, U>() {
 
-        override val emission = converter.paperToSnapshot(paper)
+        override val emission = converter.copyPaperToSnapshot(paper)
 
         override fun processNextPair(
             newPaperState: AndroidDatabaseWrapper.LoadState<T>,

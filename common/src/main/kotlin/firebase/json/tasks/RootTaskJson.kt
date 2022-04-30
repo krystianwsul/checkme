@@ -1,5 +1,6 @@
 package com.krystianwsul.common.firebase.json.tasks
 
+import com.krystianwsul.common.firebase.json.DeepCopy
 import com.krystianwsul.common.firebase.json.InstanceJson
 import com.krystianwsul.common.firebase.json.Parsable
 import com.krystianwsul.common.firebase.json.RootTaskParentJson
@@ -7,7 +8,6 @@ import com.krystianwsul.common.firebase.json.noscheduleorparent.RootNoScheduleOr
 import com.krystianwsul.common.firebase.json.schedule.RootScheduleWrapper
 import com.krystianwsul.common.firebase.json.taskhierarchies.NestedTaskHierarchyJson
 import kotlinx.serialization.Serializable
-import kotlin.jvm.JvmOverloads
 
 @Serializable
 data class RootTaskJson @JvmOverloads constructor(
@@ -24,7 +24,7 @@ data class RootTaskJson @JvmOverloads constructor(
     override var ordinalString: String? = null,
     override var taskHierarchies: Map<String, NestedTaskHierarchyJson> = mapOf(),
     override val rootTaskIds: MutableMap<String, Boolean> = mutableMapOf(),
-) : TaskJson, Parsable, RootTaskParentJson {
+) : TaskJson, Parsable, RootTaskParentJson, DeepCopy<RootTaskJson> {
 
     @Serializable
     data class EndData(
@@ -35,4 +35,8 @@ data class RootTaskJson @JvmOverloads constructor(
 
         fun toCompat() = ProjectTaskJson.EndData(time, offset, deleteInstances)
     }
+
+    override val serializer get() = serializer()
+
+    override fun deepCopy() = deepCopy(this)
 }

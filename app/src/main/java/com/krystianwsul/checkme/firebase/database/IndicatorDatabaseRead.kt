@@ -18,6 +18,9 @@ abstract class IndicatorDatabaseRead<DATA : Any> : DatabaseRead<DATA>() {
         Converter(
             { Snapshot(path.back.asString(), it.value) },
             { NullableWrapper(it.value) },
+            { NullableWrapper(it.value?.let(::deepCopy)) },
         ),
     )
+
+    protected abstract fun deepCopy(value: DATA): DATA
 }

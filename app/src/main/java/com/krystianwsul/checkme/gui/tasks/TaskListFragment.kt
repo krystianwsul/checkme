@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.gui.tasks
 
+import android.content.Context
 import android.os.Bundle
 import android.os.Parcelable
 import android.view.LayoutInflater
@@ -39,6 +40,7 @@ import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineRow
 import com.krystianwsul.checkme.gui.tree.delegates.thumbnail.ThumbnailDelegate
 import com.krystianwsul.checkme.gui.tree.delegates.thumbnail.ThumbnailModelNode
 import com.krystianwsul.checkme.gui.utils.*
+import com.krystianwsul.checkme.gui.widgets.CollapseAppBarLayout
 import com.krystianwsul.checkme.gui.widgets.MyBottomBar
 import com.krystianwsul.checkme.utils.Utils
 import com.krystianwsul.checkme.utils.tryGetFragment
@@ -46,13 +48,11 @@ import com.krystianwsul.checkme.utils.webSearchIntent
 import com.krystianwsul.checkme.viewmodels.DataId
 import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.firebase.models.ImageState
-import com.krystianwsul.common.utils.Ordinal
-import com.krystianwsul.common.utils.ProjectKey
-import com.krystianwsul.common.utils.TaskKey
-import com.krystianwsul.common.utils.filterValuesNotNull
+import com.krystianwsul.common.utils.*
 import com.krystianwsul.treeadapter.*
 import com.stfalcon.imageviewer.StfalconImageViewer
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.kotlin.addTo
 import kotlinx.parcelize.Parcelize
 import java.io.Serializable
@@ -331,6 +331,20 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         tryGetFragment<RemoveInstancesDialogFragment>(TAG_REMOVE_INSTANCES)?.listener = deleteInstancesListener
     }
 
+    private val collapseAppBarHostRelay = BehaviorRelay.create<NullableWrapper<CollapseAppBarLayout.Host>>()
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+
+        collapseAppBarHostRelay.accept(NullableWrapper(context as? CollapseAppBarLayout.Host))
+    }
+
+    override fun onDetach() {
+        collapseAppBarHostRelay.accept(NullableWrapper())
+
+        super.onDetach()
+    }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?) =
         FragmentTaskListBinding.inflate(inflater, container, false).also { binding = it }.root
 
@@ -340,6 +354,15 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         viewCreatedObservable.accept(true)
 
         searchDataManager.subscribe()
+
+        collapseAppBarHostRelay.switchMap {
+            it.value
+                ?.collapseAppBarLayout
+                ?.paddingRelay
+                ?: Observable.never()
+        }
+            .subscribe { emptyTextLayout.setPadding(0, 0, 0, it) }
+            .addTo(viewCreatedDisposable)
     }
 
     private fun getAllChildTaskDatas(childTaskData: ChildTaskData): List<ChildTaskData> = listOf(

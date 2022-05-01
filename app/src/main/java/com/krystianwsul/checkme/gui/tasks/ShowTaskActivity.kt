@@ -4,8 +4,6 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.os.Parcelable
 import androidx.appcompat.view.ActionMode
 import com.krystianwsul.checkme.MyApplication
@@ -21,6 +19,7 @@ import com.krystianwsul.checkme.gui.edit.EditActivity
 import com.krystianwsul.checkme.gui.edit.EditParameters
 import com.krystianwsul.checkme.gui.instances.ShowTaskInstancesActivity
 import com.krystianwsul.checkme.gui.utils.BottomFabMenuDelegate
+import com.krystianwsul.checkme.gui.widgets.CollapseAppBarLayout
 import com.krystianwsul.checkme.gui.widgets.toQuery
 import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.viewmodels.ShowTaskViewModel
@@ -32,7 +31,7 @@ import io.reactivex.rxjava3.kotlin.plusAssign
 import io.reactivex.rxjava3.kotlin.subscribeBy
 import java.io.Serializable
 
-class ShowTaskActivity : AbstractActivity(), TaskListFragment.Listener {
+class ShowTaskActivity : AbstractActivity(), TaskListFragment.Listener, CollapseAppBarLayout.Host {
 
     companion object {
 
@@ -83,6 +82,8 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.Listener {
     private lateinit var bottomBinding: BottomBinding
 
     private lateinit var bottomFabMenuDelegate: BottomFabMenuDelegate
+
+    override val collapseAppBarLayout get() = binding.showTaskToolbarCollapseInclude.collapseAppBarLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -151,11 +152,9 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.Listener {
 
         val immediate = data.immediate
 
-        Handler(Looper.getMainLooper()).post { // apparently included layout isn't immediately available in onCreate
-            binding.showTaskToolbarCollapseInclude
-                .collapseAppBarLayout
-                .setText(data.name, data.collapseText, taskListFragment.emptyTextLayout, immediate)
-        }
+        binding.showTaskToolbarCollapseInclude
+            .collapseAppBarLayout
+            .setText(data.name, data.collapseText, null, immediate)
 
         updateTopMenu()
         updateBottomMenu()

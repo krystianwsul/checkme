@@ -279,11 +279,6 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
                     cancelInstance(it.notificationId)
                 }
 
-                fun showSummary() { // Android notification group thingy
-                    Preferences.tickLog.logLineHour("showing summary")
-                    NotificationWrapper.instance.notifyGroup(notificationInstances.values, true, now)
-                }
-
                 val wereMaxShown = shownInstanceKeys.size > MAX_NOTIFICATIONS_Q
 
                 fun hideGroupOrOld() {
@@ -307,6 +302,17 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
                 val notifies = notificationDatas.filterIsInstance<NotificationData.Notify>()
 
                 val notifications = getNotifications(notifies)
+
+                fun showSummary() { // Android notification group thingy
+                    Preferences.tickLog.logLineHour("showing summary")
+                    NotificationWrapper.instance.notifyGroup(
+                        notifications.filterIsInstance<GroupTypeFactory.Notification.Instance>().map { it.instance },
+                        notifications.all { it.silent },
+                        now,
+                        true,
+                        notifications.filterIsInstance<GroupTypeFactory.Notification.Project>(),
+                    )
+                }
 
                 // hide everything first, then show.  If applicable, FILO summary
                 when {
@@ -341,9 +347,6 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
 
                         notifyInstances(notifications, now)
                         cancelProjectNotifications(notifications)
-
-                        // calling this a second time seems to fix grouping if the app is doing a cold start
-                        showSummary()
                     }
                     else -> {
                         check(notificationInstances.isEmpty())

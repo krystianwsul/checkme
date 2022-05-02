@@ -417,9 +417,8 @@ open class NotificationWrapperImpl : NotificationWrapper() {
             .setCategory(NotificationCompat.CATEGORY_ALARM)
             .setPriority(priority)
             .setSortKey(sortKey)
-            .setOnlyAlertOnce(true)
             .setSilent(silent)
-            .setGroupAlertBehavior(NotificationCompat.GROUP_ALERT_CHILDREN)
+            .setGroupAlertBehavior(NotificationCompat.GROUP_ALERT_SUMMARY)
             .addExtras(Bundle().apply { putInt(KEY_HASH_CODE, notificationHash.hashCode()) })
 
         deleteIntent?.let { builder.setDeleteIntent(it) }

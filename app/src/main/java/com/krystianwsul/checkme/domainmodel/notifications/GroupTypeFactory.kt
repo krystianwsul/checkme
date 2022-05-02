@@ -103,13 +103,18 @@ object GroupTypeFactory : GroupType.Factory {
 
     sealed class Notification {
 
-        class Instance(val instance: com.krystianwsul.common.firebase.models.Instance, val silent: Boolean) : Notification()
+        abstract val silent: Boolean
+
+        class Instance(
+            val instance: com.krystianwsul.common.firebase.models.Instance,
+            override val silent: Boolean,
+        ) : Notification()
 
         class Project(
             val project: SharedProject,
             val instances: List<com.krystianwsul.common.firebase.models.Instance>,
             val timeStamp: TimeStamp,
-            val silent: Boolean,
+            override val silent: Boolean,
         ) : Notification() {
 
             constructor(project: SharedProject, instanceDescriptors: List<InstanceDescriptor>, timeStamp: TimeStamp) : this(

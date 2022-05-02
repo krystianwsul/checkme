@@ -209,6 +209,8 @@ class DomainFactory(
             domainListenerManager.notify(saveParams.notificationType)
 
             updateShortcuts(now)
+
+            HasInstancesStore.update(this, now)
         }
     }
 

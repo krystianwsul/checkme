@@ -320,6 +320,8 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
                         //hide
                         if (!wereMaxShown) shownInstanceKeys.cancelNotifications() // else group was already shown
 
+                        cancelNotificationDatas()
+
                         //show
                         showSummary()
 

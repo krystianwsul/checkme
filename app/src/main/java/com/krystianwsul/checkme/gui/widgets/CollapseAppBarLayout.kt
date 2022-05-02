@@ -76,6 +76,8 @@ class CollapseAppBarLayout : AppBarLayout {
 
     private val binding = CollapseAppBarLayoutBinding.inflate(LayoutInflater.from(context), this, true)
 
+    val paddingRelay = BehaviorRelay.create<Int>()
+
     init {
         binding.toolbarCollapseText.addOneShotGlobalLayoutListener { globalLayoutPerformed.accept(Unit) }
     }
@@ -137,19 +139,19 @@ class CollapseAppBarLayout : AppBarLayout {
 
                 if (!text.isNullOrEmpty()) {
                     initialTextHeight = StaticLayout.Builder
-                            .obtain(text, 0, text.length, it.paint, textWidth)
-                            .setAlignment(Layout.Alignment.ALIGN_NORMAL)
-                            .setLineSpacing(it.lineSpacingExtra, it.lineSpacingMultiplier)
-                            .setIncludePad(it.includeFontPadding)
-                            .build()
-                            .height
+                        .obtain(text, 0, text.length, it.paint, textWidth)
+                        .setAlignment(Layout.Alignment.ALIGN_NORMAL)
+                        .setLineSpacing(it.lineSpacingExtra, it.lineSpacingMultiplier)
+                        .setIncludePad(it.includeFontPadding)
+                        .build()
+                        .height
                 }
 
                 binding.toolbarCollapseLayout.addOneShotGlobalLayoutListener {
                     animateHeight(
-                            hideText,
-                            immediate,
-                            (collapseState as? CollapseState.Collapsed)?.titleHack ?: true
+                        hideText,
+                        immediate,
+                        (collapseState as? CollapseState.Collapsed)?.titleHack ?: true
                     )
                 }
             }
@@ -163,6 +165,7 @@ class CollapseAppBarLayout : AppBarLayout {
             }
 
             paddingLayout?.setPadding(0, 0, 0, newHeight)
+            paddingRelay.accept(newHeight)
         }
 
         val newHeight = when {
@@ -190,12 +193,12 @@ class CollapseAppBarLayout : AppBarLayout {
 
     private var first = true
     fun configureMenu(
-            @MenuRes menuId: Int,
-            @IdRes searchItemId: Int,
-            @IdRes showDeletedId: Int? = null,
-            @IdRes showAssignedToOthersId: Int? = null,
-            @IdRes showProjectsId: Int? = null,
-            listener: ((Int) -> Unit)? = null,
+        @MenuRes menuId: Int,
+        @IdRes searchItemId: Int,
+        @IdRes showDeletedId: Int? = null,
+        @IdRes showAssignedToOthersId: Int? = null,
+        @IdRes showProjectsId: Int? = null,
+        listener: ((Int) -> Unit)? = null,
     ) {
         check(first)
 
@@ -206,20 +209,20 @@ class CollapseAppBarLayout : AppBarLayout {
 
             showDeletedId?.let {
                 Preferences.showDeletedObservable
-                        .subscribe { menu.findItem(showDeletedId).isChecked = it }
-                        .addTo(attachedToWindowDisposable)
+                    .subscribe { menu.findItem(showDeletedId).isChecked = it }
+                    .addTo(attachedToWindowDisposable)
             }
 
             showAssignedToOthersId?.let {
                 Preferences.showAssignedObservable
-                        .subscribe { menu.findItem(showAssignedToOthersId).isChecked = it }
-                        .addTo(attachedToWindowDisposable)
+                    .subscribe { menu.findItem(showAssignedToOthersId).isChecked = it }
+                    .addTo(attachedToWindowDisposable)
             }
 
             showProjectsId?.let {
                 Preferences.showProjectsObservable
-                        .subscribe { menu.findItem(showProjectsId).isChecked = it }
-                        .addTo(attachedToWindowDisposable)
+                    .subscribe { menu.findItem(showProjectsId).isChecked = it }
+                    .addTo(attachedToWindowDisposable)
             }
 
             setOnMenuItemClickListener {
@@ -240,14 +243,14 @@ class CollapseAppBarLayout : AppBarLayout {
         expand(true)
 
         binding.searchInclude
-                .toolbar
-                .apply {
-                    check(isVisible)
+            .toolbar
+            .apply {
+                check(isVisible)
 
-                    animateVisibility(listOf(), listOf(this), duration = MyBottomBar.duration)
+                animateVisibility(listOf(), listOf(this), duration = MyBottomBar.duration)
 
-                    clearSearch()
-                }
+                clearSearch()
+            }
 
         searchingRelay.accept(false)
     }
@@ -296,15 +299,15 @@ class CollapseAppBarLayout : AppBarLayout {
 
             if (state.isSearching) {
                 binding.searchInclude
-                        .toolbar
-                        .isVisible = true
+                    .toolbar
+                    .isVisible = true
 
                 binding.toolbarCollapseLayout.title = null
                 binding.toolbarCollapseText.isVisible = false
 
                 binding.searchInclude
-                        .toolbar
-                        .requestSearchFocus()
+                    .toolbar
+                    .requestSearchFocus()
             }
         } else {
             super.onRestoreInstanceState(state)
@@ -347,5 +350,10 @@ class CollapseAppBarLayout : AppBarLayout {
         data class Collapsed(val titleHack: Boolean) : CollapseState()
 
         object Expanded : CollapseState()
+    }
+
+    interface Host {
+
+        val collapseAppBarLayout: CollapseAppBarLayout
     }
 }

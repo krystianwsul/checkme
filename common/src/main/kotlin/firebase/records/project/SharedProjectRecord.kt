@@ -18,7 +18,7 @@ class SharedProjectRecord(
     create,
     jsonWrapper.projectJson,
     projectKey,
-    "${projectKey.key}/$PROJECT_JSON"
+    "${projectKey.key}/$PROJECT_JSON",
 ) {
 
     override val taskRecords = projectJson.tasks

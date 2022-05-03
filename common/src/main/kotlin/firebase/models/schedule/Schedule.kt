@@ -101,9 +101,11 @@ sealed class Schedule(val topLevelTask: Task) : TaskParentEntry, ProjectIdOwner 
 
     abstract fun updateOldestVisible(scheduleInterval: ScheduleInterval, now: ExactTimeStamp.Local)
 
-    val assignedTo by lazy { scheduleRecord.assignedTo.map { UserKey(it) }.toSet() }
+    protected val assignedToProperty = invalidatableLazy { scheduleRecord.assignedTo.map { UserKey(it) }.toSet() }
+    val assignedTo by assignedToProperty
 
-    override fun toString() = super.toString() + ", taskKey: ${topLevelTask.taskKey}, id: $id, type: ${this::class.simpleName}, startExactTimeStamp: $startExactTimeStamp, endExactTimeStamp: $endExactTimeStamp"
+    override fun toString() =
+        super.toString() + ", taskKey: ${topLevelTask.taskKey}, id: $id, type: ${this::class.simpleName}, startExactTimeStamp: $startExactTimeStamp, endExactTimeStamp: $endExactTimeStamp"
 
     fun fixOffsets() {
         if (scheduleRecord.startTimeOffset == null) {

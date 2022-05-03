@@ -71,6 +71,8 @@ class SingleSchedule(topLevelTask: Task, val singleScheduleRecord: SingleSchedul
         topLevelTask.project
             .assignedToHelper
             .setAssignedTo(writeAssignedToJson, singleScheduleRecord, assignedTo.map { it.key }.toSet())
+
+        assignedToProperty.invalidate()
     }
 
     override fun toString() = super.toString() + ", dateTime: $dateTime"

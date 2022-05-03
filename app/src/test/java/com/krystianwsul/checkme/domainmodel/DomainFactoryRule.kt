@@ -80,6 +80,9 @@ class DomainFactoryRule : TestRule {
     lateinit var rootModelChangeManager: RootModelChangeManager
         private set
 
+    lateinit var friendsFactory: FriendsFactory
+        private set
+
     private val rootTaskRelays = mutableMapOf<TaskKey.Root, PublishRelay<RootTaskJson>>()
 
     fun acceptRootTaskJson(taskKey: TaskKey.Root, rootTaskJson: RootTaskJson) {
@@ -261,7 +264,7 @@ class DomainFactoryRule : TestRule {
             rootModelChangeManager,
         ) { deviceDbInfo }
 
-        val friendsFactory = mockk<FriendsFactory> {
+        friendsFactory = mockk {
             every { save(any()) } returns Unit
             every { getUserJsons(any()) } returns mapOf()
             every { updateProjects(any(), any(), any()) } returns Unit

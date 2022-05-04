@@ -15,6 +15,8 @@ import com.google.android.material.composethemeadapter.MdcTheme
 import com.krystianwsul.checkme.databinding.FragmentProjectFilterDialogBinding
 import com.krystianwsul.checkme.gui.base.NoCollapseBottomSheetDialogFragment
 import com.krystianwsul.checkme.gui.utils.ResettableProperty
+import com.krystianwsul.checkme.viewmodels.getViewModel
+import io.reactivex.rxjava3.kotlin.addTo
 
 class ProjectFilterDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
@@ -29,17 +31,29 @@ class ProjectFilterDialogFragment : NoCollapseBottomSheetDialogFragment() {
     override val backgroundView get() = binding.projectFilterDialogRoot
     override val contentView get() = binding.projectFilterDialogContentWrapper
 
+    private val viewModel by lazy { getViewModel<ProjectFilterViewModel>() }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        viewModel.start()
+    }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?) =
         FragmentProjectFilterDialogBinding.inflate(inflater, container, false).also { binding = it }.root
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val projects = (0..10).map { "project $it" }
+        viewModel.data
+            .subscribe {
+                val projects = it.projects.map { it.name }
 
-        binding.projectFilterDialogCompose.setContent {
-            MdcTheme { ProjectList(projects) { } }
-        }
+                binding.projectFilterDialogCompose.setContent {
+                    MdcTheme { ProjectList(projects) { } }
+                }
+            }
+            .addTo(viewCreatedDisposable)
     }
 
     @Composable

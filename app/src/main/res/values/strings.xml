@@ -168,4 +168,5 @@
     <string name="copyAllReminders">Copy all reminders?</string>
     <string name="allReminders">All reminders</string>
     <string name="justThisReminder">Just this reminder</string>
+    <string name="allProjects">All projects</string>
 </resources>

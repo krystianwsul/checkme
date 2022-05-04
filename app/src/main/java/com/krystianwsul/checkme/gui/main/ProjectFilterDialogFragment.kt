@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.gui.main
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -12,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.text.buildAnnotatedString
 import com.google.android.material.composethemeadapter.MdcTheme
+import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.FragmentProjectFilterDialogBinding
 import com.krystianwsul.checkme.gui.base.NoCollapseBottomSheetDialogFragment
 import com.krystianwsul.checkme.gui.utils.ResettableProperty
@@ -45,29 +47,35 @@ class ProjectFilterDialogFragment : NoCollapseBottomSheetDialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // todo filter add initial progress bar view
+
         viewModel.data
             .subscribe {
-                val projects = it.projects.map { it.name }
+                val items = listOf(Item.All, Item.Private) + it.projects.map { Item.Shared(it) }
 
                 binding.projectFilterDialogCompose.setContent {
-                    MdcTheme { ProjectList(projects) { } }
+                    MdcTheme {
+                        ProjectList(items) {
+                            // todo filter save to preferences
+                        }
+                    }
                 }
             }
             .addTo(viewCreatedDisposable)
     }
 
     @Composable
-    private fun ProjectList(projects: List<String>, onClick: (String) -> Unit) {
+    private fun ProjectList(items: List<Item>, onClick: (Item) -> Unit) {
         Column {
-            projects.forEach { project ->
+            items.forEach { item ->
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    RadioButton(selected = false, onClick = { onClick(project) })
+                    RadioButton(selected = false, onClick = { onClick(item) })
 
                     val annotatedString = buildAnnotatedString {
-                        append(project)
+                        append(item.getName(requireContext()))
                     }
 
-                    ClickableText(text = annotatedString, onClick = { onClick(project) })
+                    ClickableText(text = annotatedString, onClick = { onClick(item) })
                 }
             }
         }
@@ -77,5 +85,25 @@ class ProjectFilterDialogFragment : NoCollapseBottomSheetDialogFragment() {
         bindingProperty.reset()
 
         super.onDestroyView()
+    }
+
+    sealed class Item {
+
+        abstract fun getName(context: Context): String
+
+        object All : Item() {
+
+            override fun getName(context: Context) = context.getString(R.string.allProjects)
+        }
+
+        object Private : Item() {
+
+            override fun getName(context: Context) = context.getString(R.string.myTasks)
+        }
+
+        class Shared(private val project: ProjectFilterViewModel.Project) : Item() {
+
+            override fun getName(context: Context) = project.name
+        }
     }
 }

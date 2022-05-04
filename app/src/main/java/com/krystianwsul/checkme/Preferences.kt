@@ -45,6 +45,7 @@ object Preferences {
     private const val KEY_INSTANCE_WARNING_SNOOZE = "instanceWarningSnooze"
     private const val KEY_PROJECT_ORDER = "projectOrder"
     private const val KEY_NOTIFICATION_LOG = "notificationLog"
+    private const val KEY_PROJECT_FILTER = "projectFilter"
 
     private val sharedPreferences by lazy { MyApplication.sharedPreferences }
 
@@ -122,11 +123,11 @@ object Preferences {
         sharedPreferences.edit { putInt(KEY_NOTIFICATION_LEVEL, notificationLevel.ordinal) }
     }
 
-    private var showDeletedProperty = NonNullRelayProperty(sharedPreferences.getBoolean(KEY_SHOW_DELETED, false))
+    private val showDeletedProperty = NonNullRelayProperty(sharedPreferences.getBoolean(KEY_SHOW_DELETED, false))
     var showDeleted by showDeletedProperty
     val showDeletedObservable = showDeletedProperty.observable.distinctUntilChanged()
 
-    private var showAssignedProperty = NonNullRelayProperty(sharedPreferences.getBoolean(KEY_SHOW_ASSIGNED_TO, true))
+    private val showAssignedProperty = NonNullRelayProperty(sharedPreferences.getBoolean(KEY_SHOW_ASSIGNED_TO, true))
     var showAssigned by showAssignedProperty
     val showAssignedObservable = showAssignedProperty.observable.distinctUntilChanged()
 
@@ -182,6 +183,12 @@ object Preferences {
         deserialize<HashMap<ProjectKey.Shared, Float>>(projectOrderString) ?: mapOf()
     ) { _, _, newValue -> projectOrderString = serialize(HashMap(newValue)) }
         private set
+
+    private val projectFilterProperty =
+        NonNullRelayProperty(sharedPreferences.getString(KEY_PROJECT_FILTER, null).let(ProjectFilter::fromJson))
+
+    var projectFilter by projectFilterProperty
+    val projectFilterObservable = projectFilterProperty.observable
 
     private const val PROJECT_ORDER_INCREMENT = 1 / 20f
 
@@ -292,6 +299,39 @@ object Preferences {
             activity.setLanguage(locale)
 
             applySettingStartup()
+        }
+    }
+
+    sealed class ProjectFilter {
+
+        companion object {
+
+            fun fromJson(json: String?) = when (json) {
+                null, All.key -> All
+                Private.key -> Private
+                else -> Shared(ProjectKey.Shared(json))
+            }
+        }
+
+        abstract fun toJson(): String
+
+        object All : ProjectFilter() {
+
+            val key = "all"
+
+            override fun toJson() = key
+        }
+
+        object Private : ProjectFilter() {
+
+            val key = "private"
+
+            override fun toJson() = key
+        }
+
+        data class Shared(val projectKey: ProjectKey.Shared) : ProjectFilter() {
+
+            override fun toJson() = projectKey.key
         }
     }
 }

@@ -919,14 +919,17 @@ class MainActivity :
             is TabSearchState.Instances -> listOf(
                 R.id.actionMainCalendar to true,
                 R.id.actionMainSearch to true,
+                R.id.actionMainProjectsFilter to true,
             )
             is TabSearchState.Notes, is TabSearchState.Tasks -> listOf(
                 R.id.actionMainCalendar to false,
                 R.id.actionMainSearch to true,
+                R.id.actionMainProjectsFilter to false,
             )
             else -> listOf(
                 R.id.actionMainCalendar to false,
                 R.id.actionMainSearch to false,
+                R.id.actionMainProjectsFilter to false,
             )
         }
 

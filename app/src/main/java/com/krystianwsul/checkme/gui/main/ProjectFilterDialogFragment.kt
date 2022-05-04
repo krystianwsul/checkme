@@ -5,14 +5,20 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.RadioButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.buildAnnotatedString
 import com.google.android.material.composethemeadapter.MdcTheme
 import com.krystianwsul.checkme.R
@@ -75,21 +81,29 @@ class ProjectFilterDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
     @Composable
     private fun ProjectList(items: List<Item>?, onClick: (Item) -> Unit) {
-        if (items == null) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                CircularProgressIndicator(color = MaterialTheme.colors.secondary)
-            }
-        } else {
-            Column {
-                items.forEach { item ->
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        RadioButton(selected = false, onClick = { onClick(item) })
+        val itemState = derivedStateOf { items }
 
-                        val annotatedString = buildAnnotatedString {
-                            append(item.getName(requireContext()))
+        Box(Modifier.animateContentSize()) {
+            Crossfade(targetState = itemState, modifier = Modifier.fillMaxWidth()) {
+                val currentItems = it.value
+
+                if (currentItems == null) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
+                        CircularProgressIndicator(color = MaterialTheme.colors.secondary)
+                    }
+                } else {
+                    Column {
+                        currentItems.forEach { item ->
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                RadioButton(selected = false, onClick = { onClick(item) })
+
+                                val annotatedString = buildAnnotatedString {
+                                    append(item.getName(requireContext()))
+                                }
+
+                                ClickableText(text = annotatedString, onClick = { onClick(item) })
+                            }
                         }
-
-                        ClickableText(text = annotatedString, onClick = { onClick(item) })
                     }
                 }
             }

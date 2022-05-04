@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.domainmodel
 
+import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.extensions.*
 import com.krystianwsul.checkme.domainmodel.updates.CreateChildTaskDomainUpdate
 import com.krystianwsul.checkme.gui.edit.delegates.EditDelegate
@@ -22,7 +23,7 @@ class MockHierarchyTest {
         TestDomainUpdater(domainFactory, now)
 
     private fun getTodayInstanceDatas(now: ExactTimeStamp.Local) =
-        domainFactory.getGroupListData(now, 0, false)
+        domainFactory.getGroupListData(now, 0, false, Preferences.ProjectFilter.All)
             .groupListDataWrapper
             .allInstanceDatas
 

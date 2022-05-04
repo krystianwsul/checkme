@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.domainmodel
 
+import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.extensions.createScheduleTopLevelTask
 import com.krystianwsul.checkme.domainmodel.extensions.getGroupListData
 import com.krystianwsul.checkme.domainmodel.extensions.splitInstance
@@ -26,7 +27,7 @@ class SplitInstanceTest {
         TestDomainUpdater(domainFactory, now)
 
     private fun getDayInstanceDatas(now: ExactTimeStamp.Local, day: Int = 0) =
-        domainFactory.getGroupListData(now, day, false)
+        domainFactory.getGroupListData(now, day, false, Preferences.ProjectFilter.All)
             .groupListDataWrapper
             .allInstanceDatas
 

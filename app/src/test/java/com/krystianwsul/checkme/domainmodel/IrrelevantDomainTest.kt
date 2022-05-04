@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.domainmodel
 
+import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.extensions.createScheduleTopLevelTask
 import com.krystianwsul.checkme.domainmodel.extensions.getGroupListData
 import com.krystianwsul.checkme.domainmodel.extensions.setInstanceDone
@@ -37,9 +38,10 @@ class IrrelevantDomainTest {
         RootTasksFactory.allowDeletion = false
     }
 
-    private fun getTodayInstanceDatas(now: ExactTimeStamp.Local) = domainFactory.getGroupListData(now, 0, false)
-        .groupListDataWrapper
-        .allInstanceDatas
+    private fun getTodayInstanceDatas(now: ExactTimeStamp.Local) =
+        domainFactory.getGroupListData(now, 0, false, Preferences.ProjectFilter.All)
+            .groupListDataWrapper
+            .allInstanceDatas
 
     @Test
     fun testRemovingScheduleWithUntil() {

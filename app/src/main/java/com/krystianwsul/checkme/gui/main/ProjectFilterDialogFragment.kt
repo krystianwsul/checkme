@@ -20,7 +20,10 @@ import com.krystianwsul.checkme.databinding.FragmentProjectFilterDialogBinding
 import com.krystianwsul.checkme.gui.base.NoCollapseBottomSheetDialogFragment
 import com.krystianwsul.checkme.gui.utils.ResettableProperty
 import com.krystianwsul.checkme.viewmodels.getViewModel
+import com.krystianwsul.common.utils.NullableWrapper
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.kotlin.addTo
+import java.util.concurrent.TimeUnit
 
 class ProjectFilterDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
@@ -49,17 +52,19 @@ class ProjectFilterDialogFragment : NoCollapseBottomSheetDialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.projectFilterDialogCompose.setContent {
-            MdcTheme { LoadingState() }
-        }
-
         viewModel.data
-            .subscribe {
+            .map {
                 val items = listOf(Item.All, Item.Private) + it.projects.map { Item.Shared(it) }
 
+                NullableWrapper(items)
+            }
+            .delay(5, TimeUnit.SECONDS) // todo filter
+            .observeOn(AndroidSchedulers.mainThread()) // todo filter
+            .startWithItem(NullableWrapper())
+            .subscribe {
                 binding.projectFilterDialogCompose.setContent {
                     MdcTheme {
-                        ProjectList(items) {
+                        ProjectList(it.value) {
                             // todo filter save to preferences
                         }
                     }
@@ -69,24 +74,23 @@ class ProjectFilterDialogFragment : NoCollapseBottomSheetDialogFragment() {
     }
 
     @Composable
-    private fun LoadingState() {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            CircularProgressIndicator(color = MaterialTheme.colors.secondary)
-        }
-    }
+    private fun ProjectList(items: List<Item>?, onClick: (Item) -> Unit) {
+        if (items == null) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                CircularProgressIndicator(color = MaterialTheme.colors.secondary)
+            }
+        } else {
+            Column {
+                items.forEach { item ->
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        RadioButton(selected = false, onClick = { onClick(item) })
 
-    @Composable
-    private fun ProjectList(items: List<Item>, onClick: (Item) -> Unit) {
-        Column {
-            items.forEach { item ->
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    RadioButton(selected = false, onClick = { onClick(item) })
+                        val annotatedString = buildAnnotatedString {
+                            append(item.getName(requireContext()))
+                        }
 
-                    val annotatedString = buildAnnotatedString {
-                        append(item.getName(requireContext()))
+                        ClickableText(text = annotatedString, onClick = { onClick(item) })
                     }
-
-                    ClickableText(text = annotatedString, onClick = { onClick(item) })
                 }
             }
         }

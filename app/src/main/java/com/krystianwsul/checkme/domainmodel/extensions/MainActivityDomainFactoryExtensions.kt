@@ -1,7 +1,6 @@
 package com.krystianwsul.checkme.domainmodel.extensions
 
 import com.krystianwsul.checkme.MyCrashlytics
-import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.*
 import com.krystianwsul.checkme.gui.instances.drag.DropParent
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
@@ -109,7 +108,6 @@ private fun DomainFactory.getMainData(
 fun DomainFactory.getGroupListData(
     now: ExactTimeStamp.Local,
     position: Int,
-    timeRange: Preferences.TimeRange,
     showAssigned: Boolean,
 ): DayViewModel.DayData {
     MyCrashlytics.log("DomainFactory.getGroupListData")
@@ -118,44 +116,20 @@ fun DomainFactory.getGroupListData(
 
     check(position >= 0)
 
-    val startExactTimeStamp: ExactTimeStamp.Offset?
-    val endExactTimeStamp: ExactTimeStamp.Offset
+    fun exactTimeStampWithDayOffset(offset: Int) = now.calendar
+        .apply { add(Calendar.DATE, offset) }
+        .toDateTimeTz()
+        .let(::Date)
+        .toMidnightExactTimeStamp()
+        .toOffset()
 
-    if (position == 0) {
-        startExactTimeStamp = null
+    val startExactTimeStamp = if (position == 0) {
+        null
     } else {
-        val startCalendar = now.calendar
-
-        when (timeRange) {
-            Preferences.TimeRange.DAY -> startCalendar.add(Calendar.DATE, position)
-            Preferences.TimeRange.WEEK -> {
-                startCalendar.add(Calendar.WEEK_OF_YEAR, position)
-                startCalendar.set(Calendar.DAY_OF_WEEK, startCalendar.firstDayOfWeek)
-            }
-            Preferences.TimeRange.MONTH -> {
-                startCalendar.add(Calendar.MONTH, position)
-                startCalendar.set(Calendar.DAY_OF_MONTH, 1)
-            }
-        }
-
-        startExactTimeStamp = Date(startCalendar.toDateTimeTz()).toMidnightExactTimeStamp().toOffset()
+        exactTimeStampWithDayOffset(position)
     }
 
-    val endCalendar = now.calendar
-
-    when (timeRange) {
-        Preferences.TimeRange.DAY -> endCalendar.add(Calendar.DATE, position + 1)
-        Preferences.TimeRange.WEEK -> {
-            endCalendar.add(Calendar.WEEK_OF_YEAR, position + 1)
-            endCalendar.set(Calendar.DAY_OF_WEEK, endCalendar.firstDayOfWeek)
-        }
-        Preferences.TimeRange.MONTH -> {
-            endCalendar.add(Calendar.MONTH, position + 1)
-            endCalendar.set(Calendar.DAY_OF_MONTH, 1)
-        }
-    }
-
-    endExactTimeStamp = Date(endCalendar.toDateTimeTz()).toMidnightExactTimeStamp().toOffset()
+    val endExactTimeStamp = exactTimeStampWithDayOffset(position + 1)
 
     val searchCriteria = SearchCriteria(showAssignedToOthers = showAssigned)
 
@@ -166,7 +140,7 @@ fun DomainFactory.getGroupListData(
         SearchContext.startSearch(searchCriteria, now, myUserFactory.user),
     ).map { it.first }.toList()
 
-    if (position == 0 && timeRange == Preferences.TimeRange.DAY) {
+    if (position == 0) {
         instanceInfo = currentInstances.count { it.exists() }.let { existingInstanceCount ->
             Pair(existingInstanceCount, currentInstances.size - existingInstanceCount)
         }

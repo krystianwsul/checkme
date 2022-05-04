@@ -16,7 +16,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.jakewharton.rxrelay3.BehaviorRelay
 import com.krystianwsul.checkme.MyCrashlytics
-import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.TooltipManager
 import com.krystianwsul.checkme.TooltipManager.subscribeShowBalloon
@@ -73,26 +72,13 @@ class GroupListFragment @JvmOverloads constructor(
         private const val LAYOUT_MANAGER_STATE = "layoutManagerState"
         private const val KEY_SHOW_IMAGE = "showImage"
 
-        private fun rangePositionToDate(timeRange: Preferences.TimeRange, position: Int): Date {
+        private fun rangePositionToDate(position: Int): Date {
             check(position >= 0)
 
-            val calendar = Calendar.getInstance()
-
-            if (position > 0) {
-                when (timeRange) {
-                    Preferences.TimeRange.DAY -> calendar.add(Calendar.DATE, position)
-                    Preferences.TimeRange.WEEK -> {
-                        calendar.add(Calendar.WEEK_OF_YEAR, position)
-                        calendar.set(Calendar.DAY_OF_WEEK, calendar.firstDayOfWeek)
-                    }
-                    Preferences.TimeRange.MONTH -> {
-                        calendar.add(Calendar.MONTH, position)
-                        calendar.set(Calendar.DAY_OF_MONTH, 1)
-                    }
-                }
-            }
-
-            return Date(calendar.toDateTimeTz())
+            return Calendar.getInstance()
+                .apply { add(Calendar.DATE, position) }
+                .toDateTimeTz()
+                .let(::Date)
         }
 
         private fun nodesToSelectedDatas(treeNodes: List<TreeNode<AbstractHolder>>): Set<GroupListDataWrapper.SelectedData> {
@@ -504,7 +490,7 @@ class GroupListFragment @JvmOverloads constructor(
                     this@GroupListFragment.state = getParcelable(EXPANSION_STATE_KEY)!!
 
                 binding.groupListRecycler
-                    .layoutManager!!
+                    .layoutManager
                     .onRestoreInstanceState(state.getParcelable(LAYOUT_MANAGER_STATE))
 
                 showImage = getBoolean(KEY_SHOW_IMAGE)
@@ -571,7 +557,6 @@ class GroupListFragment @JvmOverloads constructor(
     }
 
     fun setAll(
-        timeRange: Preferences.TimeRange,
         position: Int,
         dataId: DataId,
         immediate: Boolean,
@@ -579,11 +564,9 @@ class GroupListFragment @JvmOverloads constructor(
     ) {
         check(position >= 0)
 
-        val differentPage = (parametersRelay.value as? GroupListParameters.All)?.let {
-            it.timeRange != timeRange || it.position != position
-        } ?: false
+        val differentPage = (parametersRelay.value as? GroupListParameters.All)?.let { it.position != position } ?: false
 
-        setParameters(GroupListParameters.All(dataId, immediate, groupListDataWrapper, position, timeRange, differentPage))
+        setParameters(GroupListParameters.All(dataId, immediate, groupListDataWrapper, position, differentPage))
     }
 
     fun setInstanceKey(
@@ -604,8 +587,8 @@ class GroupListFragment @JvmOverloads constructor(
         putParcelable(
             LAYOUT_MANAGER_STATE,
             binding.groupListRecycler
-                .layoutManager!!
-                .onSaveInstanceState()
+                .layoutManager
+                .onSaveInstanceState(),
         )
 
         putBoolean(KEY_SHOW_IMAGE, imageViewerData != null)
@@ -739,7 +722,7 @@ class GroupListFragment @JvmOverloads constructor(
                 is GroupListParameters.All -> FabState.Visible {
                     listener.showFabMenu(
                         ReminderOrNoteMenuDelegate(
-                            EditParentHint.Schedule(rangePositionToDate(parameters.timeRange, parameters.position)),
+                            EditParentHint.Schedule(rangePositionToDate(parameters.position)),
                         )
                     )
                 }

@@ -36,7 +36,6 @@ object Preferences {
     private const val KEY_SHOW_NOTIFICATIONS = "showNotifications"
     private const val KEY_NOTIFICATION_LEVEL = "notificationLevel"
     private const val KEY_ADD_DEFAULT_REMINDER = "addDefaultReminder"
-    private const val KEY_TIME_RANGE = "timeRange"
     private const val KEY_SHOW_DELETED = "showDeleted"
     private const val KEY_SHOW_ASSIGNED_TO = "showAssignedTo"
     private const val KEY_TOOLTIP_SHOWN = "tooltipShown"
@@ -115,17 +114,6 @@ object Preferences {
     var notificationLevel by observable(
         sharedPreferences.getInt(KEY_NOTIFICATION_LEVEL, 1).let { NotificationLevel.values()[it] }
     ) { _, _, newValue -> putNotificationLevel(newValue) }
-
-    private val timeRangeProperty =
-        NonNullRelayProperty(TimeRange.values()[sharedPreferences.getInt(KEY_TIME_RANGE, 0)])
-    var timeRange by timeRangeProperty
-    val timeRangeObservable = timeRangeProperty.observable.distinctUntilChanged()
-
-    init {
-        timeRangeObservable.skip(0)
-            .subscribe { sharedPreferences.edit { putInt(KEY_TIME_RANGE, it.ordinal) } }
-            .ignore()
-    }
 
     private var languageInt by intObservable(KEY_LANGUAGE, Language.DEFAULT.ordinal)
     var language by observable(Language.values()[languageInt]) { _, _, newValue -> languageInt = newValue.ordinal }
@@ -278,12 +266,6 @@ object Preferences {
     enum class NotificationLevel {
 
         NONE, MEDIUM, HIGH
-    }
-
-    enum class TimeRange {
-        DAY,
-        WEEK,
-        MONTH
     }
 
     enum class Language {

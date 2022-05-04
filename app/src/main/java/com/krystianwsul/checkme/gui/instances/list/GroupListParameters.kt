@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.gui.instances.list
 
-import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.viewmodels.DataId
 import com.krystianwsul.common.utils.ProjectKey
 
@@ -22,7 +21,6 @@ sealed class GroupListParameters(val draggable: Boolean = true) {
         override val immediate: Boolean,
         override val groupListDataWrapper: GroupListDataWrapper,
         val position: Int,
-        val timeRange: Preferences.TimeRange,
         val differentPage: Boolean,
     ) : GroupListParameters(false) {
 

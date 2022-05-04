@@ -17,6 +17,7 @@ import com.krystianwsul.common.firebase.models.search.SearchContext
 import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.ExactTimeStamp
+import com.krystianwsul.common.utils.ProjectKey
 import java.util.*
 
 fun DomainFactory.getMainNoteData(
@@ -181,6 +182,8 @@ fun DomainFactory.getGroupListData(
 
     val (mixedInstanceDescriptors, doneInstanceDescriptors) = instanceDescriptors.splitDone()
 
+    val includeProjectDetails = projectKey == null
+
     val dataWrapper = GroupListDataWrapper(
         customTimeDatas,
         null,
@@ -189,9 +192,10 @@ fun DomainFactory.getGroupListData(
         newMixedInstanceDataCollection(
             mixedInstanceDescriptors,
             GroupTypeFactory.SingleBridge.CompareBy.TIMESTAMP,
-            GroupType.GroupingMode.Time(),
+            GroupType.GroupingMode.Time(projectKey as? ProjectKey.Shared),
+            includeProjectDetails = includeProjectDetails,
         ),
-        doneInstanceDescriptors.toDoneSingleBridges(),
+        doneInstanceDescriptors.toDoneSingleBridges(includeProjectDetails = includeProjectDetails),
         null,
         null,
         DropParent.TopLevel(false),

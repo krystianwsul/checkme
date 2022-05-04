@@ -25,7 +25,7 @@
         android:title="@string/projects"
         android:orderInCategory="400"
         android:icon="@drawable/ic_baseline_group_work_white_24"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="always" />
 
     <group android:id="@+id/mainAssignedGroup">
 

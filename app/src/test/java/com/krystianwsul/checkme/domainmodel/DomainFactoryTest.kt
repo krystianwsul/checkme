@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.domainmodel
 
-import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.extensions.*
 import com.krystianwsul.checkme.domainmodel.updates.CreateChildTaskDomainUpdate
 import com.krystianwsul.checkme.gui.edit.EditParameters
@@ -50,7 +49,7 @@ class DomainFactoryTest {
     }
 
     private fun getTodayGroupListData(now: ExactTimeStamp.Local, position: Int = 0) =
-        domainFactory.getGroupListData(now, position, Preferences.TimeRange.DAY, false)
+        domainFactory.getGroupListData(now, position, false)
 
     private fun getTodayInstanceDatas(now: ExactTimeStamp.Local, position: Int = 0) =
         getTodayGroupListData(now, position).groupListDataWrapper.allInstanceDatas

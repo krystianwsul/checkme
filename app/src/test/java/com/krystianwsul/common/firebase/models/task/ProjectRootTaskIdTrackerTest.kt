@@ -1,6 +1,5 @@
 package com.krystianwsul.common.firebase.models.task
 
-import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.DomainFactoryRule
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.TestDomainUpdater
@@ -72,7 +71,7 @@ class ProjectRootTaskIdTrackerTest {
         assertEquals(emptySet<TaskKey.Root>(), privateTask.rootTaskKeys())
         assertEquals(emptySet<TaskKey.Root>(), sharedTask.rootTaskKeys())
 
-        val instanceKeys = domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY, false)
+        val instanceKeys = domainFactory.getGroupListData(now, 0, false)
             .groupListDataWrapper
             .allInstanceDatas
             .map { it.instanceKey }
@@ -92,7 +91,7 @@ class ProjectRootTaskIdTrackerTest {
 
         assertEquals(
             1,
-            domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY, false)
+            domainFactory.getGroupListData(now, 0, false)
                 .groupListDataWrapper
                 .allInstanceDatas
                 .size,

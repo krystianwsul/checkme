@@ -15,6 +15,7 @@ import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
 import com.soywiz.klock.DateTimeTz
 import com.soywiz.klock.days
+import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.schedulers.Schedulers
 import org.joda.time.LocalDateTime
@@ -155,18 +156,13 @@ object Preferences {
             instanceWarningSnooze = if (value) ExactTimeStamp.Local.now else null
         }
 
+    private fun <T : Any> Observable<T>.persist(writer: SharedPreferences.Editor.(T) -> Unit) =
+        skip(1).subscribe { sharedPreferences.edit { writer(it) } }
+
     init {
-        showDeletedObservable.skip(1)
-            .subscribe { sharedPreferences.edit { putBoolean(KEY_SHOW_DELETED, it) } }
-            .ignore()
-
-        showAssignedObservable.skip(1)
-            .subscribe { sharedPreferences.edit { putBoolean(KEY_SHOW_ASSIGNED_TO, it) } }
-            .ignore()
-
-        showProjectsObservable.skip(1)
-            .subscribe { sharedPreferences.edit { putBoolean(KEY_SHOW_PROJECTS, it) } }
-            .ignore()
+        showDeletedObservable.persist { putBoolean(KEY_SHOW_DELETED, it) }
+        showAssignedObservable.persist { putBoolean(KEY_SHOW_ASSIGNED_TO, it) }
+        showProjectsObservable.persist { putBoolean(KEY_SHOW_PROJECTS, it) }
     }
 
     fun getTooltipShown(type: TooltipManager.Type) =
@@ -189,6 +185,10 @@ object Preferences {
 
     var projectFilter by projectFilterProperty
     val projectFilterObservable = projectFilterProperty.observable
+
+    init {
+        projectFilterObservable.persist { putString(KEY_PROJECT_FILTER, it.toJson()) }
+    }
 
     private const val PROJECT_ORDER_INCREMENT = 1 / 20f
 

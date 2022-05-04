@@ -21,15 +21,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.buildAnnotatedString
 import com.google.android.material.composethemeadapter.MdcTheme
+import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.FragmentProjectFilterDialogBinding
 import com.krystianwsul.checkme.gui.base.NoCollapseBottomSheetDialogFragment
 import com.krystianwsul.checkme.gui.utils.ResettableProperty
 import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.common.utils.NullableWrapper
-import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.kotlin.Observables
 import io.reactivex.rxjava3.kotlin.addTo
-import java.util.concurrent.TimeUnit
 
 class ProjectFilterDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
@@ -58,20 +58,29 @@ class ProjectFilterDialogFragment : NoCollapseBottomSheetDialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        viewModel.data
-            .map {
-                val items = listOf(Item.All, Item.Private) + it.projects.map { Item.Shared(it) }
+        // the preference could actually just be fetched imperatively, but I already wrote the code so whatever
+        Observables.combineLatest(viewModel.data, Preferences.projectFilterObservable)
+            .map { (data, projectFilter) ->
+                val items = listOf(Item.All, Item.Private) + data.projects.map { Item.Shared(it) }
 
-                NullableWrapper(items)
+                val selected = if (
+                    projectFilter is Preferences.ProjectFilter.Shared &&
+                    data.projects.none { it.projectKey == projectFilter.projectKey }
+                ) {
+                    Preferences.ProjectFilter.All
+                } else {
+                    projectFilter
+                }
+
+                NullableWrapper(Pair(items, selected))
             }
-            .delay(5, TimeUnit.SECONDS) // todo filter
-            .observeOn(AndroidSchedulers.mainThread()) // todo filter
             .startWithItem(NullableWrapper())
             .subscribe {
                 binding.projectFilterDialogCompose.setContent {
                     MdcTheme {
                         ProjectList(it.value) {
-                            // todo filter save to preferences
+                            Preferences.projectFilter = it.projectFilter
+                            dismiss()
                         }
                     }
                 }
@@ -80,22 +89,25 @@ class ProjectFilterDialogFragment : NoCollapseBottomSheetDialogFragment() {
     }
 
     @Composable
-    private fun ProjectList(items: List<Item>?, onClick: (Item) -> Unit) {
-        val itemState = derivedStateOf { items }
+    private fun ProjectList(pair: Pair<List<Item>, Preferences.ProjectFilter>?, onClick: (Item) -> Unit) {
+        val itemState = derivedStateOf { pair }
 
+        // todo these animations should be disabled based on data.immediate, but IDK how to do that right now
         Box(Modifier.animateContentSize()) {
             Crossfade(targetState = itemState, modifier = Modifier.fillMaxWidth()) {
-                val currentItems = it.value
+                val currentPair = it.value
 
-                if (currentItems == null) {
+                if (currentPair == null) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
                         CircularProgressIndicator(color = MaterialTheme.colors.secondary)
                     }
                 } else {
                     Column {
-                        currentItems.forEach { item ->
+                        val (items, selected) = currentPair
+
+                        items.forEach { item ->
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                RadioButton(selected = false, onClick = { onClick(item) })
+                                RadioButton(selected = item.projectFilter == selected, onClick = { onClick(item) })
 
                                 val annotatedString = buildAnnotatedString {
                                     append(item.getName(requireContext()))
@@ -118,19 +130,27 @@ class ProjectFilterDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
     sealed class Item {
 
+        abstract val projectFilter: Preferences.ProjectFilter
+
         abstract fun getName(context: Context): String
 
         object All : Item() {
+
+            override val projectFilter = Preferences.ProjectFilter.All
 
             override fun getName(context: Context) = context.getString(R.string.allProjects)
         }
 
         object Private : Item() {
 
+            override val projectFilter = Preferences.ProjectFilter.Private
+
             override fun getName(context: Context) = context.getString(R.string.myTasks)
         }
 
         class Shared(private val project: ProjectFilterViewModel.Project) : Item() {
+
+            override val projectFilter = Preferences.ProjectFilter.Shared(project.projectKey)
 
             override fun getName(context: Context) = project.name
         }

@@ -20,32 +20,12 @@
         android:visible="false"
         android:title="@string/showCalendar" />
 
-    <group
-        android:id="@+id/actionMainFilter"
-        android:checkableBehavior="single">
-
-        <item
-            android:id="@+id/actionMainFilterDay"
-            android:title="@string/filterDay"
-            android:orderInCategory="400"
-            app:showAsAction="never"
-            android:visible="false" />
-
-        <item
-            android:id="@+id/actionMainFilterWeek"
-            android:title="@string/filterWeek"
-            android:orderInCategory="500"
-            app:showAsAction="never"
-            android:visible="false" />
-
-        <item
-            android:id="@+id/actionMainFilterMonth"
-            android:title="@string/filterMonth"
-            android:orderInCategory="600"
-            app:showAsAction="never"
-            android:visible="false" />
-
-    </group>
+    <item
+        android:id="@+id/actionMainProjectsFilter"
+        android:title="@string/projects"
+        android:orderInCategory="400"
+        android:icon="@drawable/ic_baseline_group_work_white_24"
+        app:showAsAction="ifRoom" />
 
     <group android:id="@+id/mainAssignedGroup">
 

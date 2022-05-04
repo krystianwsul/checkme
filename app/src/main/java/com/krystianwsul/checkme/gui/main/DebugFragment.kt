@@ -134,11 +134,12 @@ class DebugFragment : AbstractFragment() {
                         val domainFactory = DomainFactory.instance
 
                         val t1 = ExactTimeStamp.Local.now
+
                         DomainFactory.instance.getGroupListData(
                             ExactTimeStamp.Local.now,
                             0,
-                            Preferences.TimeRange.DAY,
                             true,
+                            Preferences.ProjectFilter.All,
                         )
 
                         val t2 = ExactTimeStamp.Local.now

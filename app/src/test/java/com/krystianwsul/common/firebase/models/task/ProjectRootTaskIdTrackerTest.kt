@@ -72,7 +72,7 @@ class ProjectRootTaskIdTrackerTest {
         assertEquals(emptySet<TaskKey.Root>(), privateTask.rootTaskKeys())
         assertEquals(emptySet<TaskKey.Root>(), sharedTask.rootTaskKeys())
 
-        val instanceKeys = domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY, false)
+        val instanceKeys = domainFactory.getGroupListData(now, 0, false, Preferences.ProjectFilter.All)
             .groupListDataWrapper
             .allInstanceDatas
             .map { it.instanceKey }
@@ -92,7 +92,7 @@ class ProjectRootTaskIdTrackerTest {
 
         assertEquals(
             1,
-            domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY, false)
+            domainFactory.getGroupListData(now, 0, false, Preferences.ProjectFilter.All)
                 .groupListDataWrapper
                 .allInstanceDatas
                 .size,

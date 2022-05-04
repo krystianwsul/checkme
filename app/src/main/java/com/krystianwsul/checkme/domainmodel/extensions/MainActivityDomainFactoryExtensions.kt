@@ -17,6 +17,7 @@ import com.krystianwsul.common.firebase.models.search.SearchContext
 import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.ExactTimeStamp
+import com.krystianwsul.common.utils.ProjectKey
 import java.util.*
 
 fun DomainFactory.getMainNoteData(
@@ -109,8 +110,8 @@ private fun DomainFactory.getMainData(
 fun DomainFactory.getGroupListData(
     now: ExactTimeStamp.Local,
     position: Int,
-    timeRange: Preferences.TimeRange,
     showAssigned: Boolean,
+    projectFilter: Preferences.ProjectFilter,
 ): DayViewModel.DayData {
     MyCrashlytics.log("DomainFactory.getGroupListData")
 
@@ -118,55 +119,38 @@ fun DomainFactory.getGroupListData(
 
     check(position >= 0)
 
-    val startExactTimeStamp: ExactTimeStamp.Offset?
-    val endExactTimeStamp: ExactTimeStamp.Offset
+    fun exactTimeStampWithDayOffset(offset: Int) = now.calendar
+        .apply { add(Calendar.DATE, offset) }
+        .toDateTimeTz()
+        .let(::Date)
+        .toMidnightExactTimeStamp()
+        .toOffset()
 
-    if (position == 0) {
-        startExactTimeStamp = null
+    val startExactTimeStamp = if (position == 0) {
+        null
     } else {
-        val startCalendar = now.calendar
-
-        when (timeRange) {
-            Preferences.TimeRange.DAY -> startCalendar.add(Calendar.DATE, position)
-            Preferences.TimeRange.WEEK -> {
-                startCalendar.add(Calendar.WEEK_OF_YEAR, position)
-                startCalendar.set(Calendar.DAY_OF_WEEK, startCalendar.firstDayOfWeek)
-            }
-            Preferences.TimeRange.MONTH -> {
-                startCalendar.add(Calendar.MONTH, position)
-                startCalendar.set(Calendar.DAY_OF_MONTH, 1)
-            }
-        }
-
-        startExactTimeStamp = Date(startCalendar.toDateTimeTz()).toMidnightExactTimeStamp().toOffset()
+        exactTimeStampWithDayOffset(position)
     }
 
-    val endCalendar = now.calendar
-
-    when (timeRange) {
-        Preferences.TimeRange.DAY -> endCalendar.add(Calendar.DATE, position + 1)
-        Preferences.TimeRange.WEEK -> {
-            endCalendar.add(Calendar.WEEK_OF_YEAR, position + 1)
-            endCalendar.set(Calendar.DAY_OF_WEEK, endCalendar.firstDayOfWeek)
-        }
-        Preferences.TimeRange.MONTH -> {
-            endCalendar.add(Calendar.MONTH, position + 1)
-            endCalendar.set(Calendar.DAY_OF_MONTH, 1)
-        }
-    }
-
-    endExactTimeStamp = Date(endCalendar.toDateTimeTz()).toMidnightExactTimeStamp().toOffset()
+    val endExactTimeStamp = exactTimeStampWithDayOffset(position + 1)
 
     val searchCriteria = SearchCriteria(showAssignedToOthers = showAssigned)
+
+    val projectKey = when (projectFilter) {
+        Preferences.ProjectFilter.All -> null
+        Preferences.ProjectFilter.Private -> projectsFactory.privateProject.projectKey
+        is Preferences.ProjectFilter.Shared -> projectFilter.projectKey
+    }
 
     val currentInstances = getRootInstances(
         startExactTimeStamp,
         endExactTimeStamp,
         now,
         SearchContext.startSearch(searchCriteria, now, myUserFactory.user),
+        projectKey = projectKey,
     ).map { it.first }.toList()
 
-    if (position == 0 && timeRange == Preferences.TimeRange.DAY) {
+    if (position == 0) {
         instanceInfo = currentInstances.count { it.exists() }.let { existingInstanceCount ->
             Pair(existingInstanceCount, currentInstances.size - existingInstanceCount)
         }
@@ -198,6 +182,8 @@ fun DomainFactory.getGroupListData(
 
     val (mixedInstanceDescriptors, doneInstanceDescriptors) = instanceDescriptors.splitDone()
 
+    val includeProjectDetails = projectKey == null
+
     val dataWrapper = GroupListDataWrapper(
         customTimeDatas,
         null,
@@ -206,9 +192,10 @@ fun DomainFactory.getGroupListData(
         newMixedInstanceDataCollection(
             mixedInstanceDescriptors,
             GroupTypeFactory.SingleBridge.CompareBy.TIMESTAMP,
-            GroupType.GroupingMode.Time(),
+            GroupType.GroupingMode.Time(projectKey as? ProjectKey.Shared),
+            includeProjectDetails = includeProjectDetails,
         ),
-        doneInstanceDescriptors.toDoneSingleBridges(),
+        doneInstanceDescriptors.toDoneSingleBridges(includeProjectDetails = includeProjectDetails),
         null,
         null,
         DropParent.TopLevel(false),

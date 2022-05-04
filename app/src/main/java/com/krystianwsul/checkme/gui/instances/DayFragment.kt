@@ -24,74 +24,36 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.Observables
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.plusAssign
-import java.time.Month
-import java.time.format.TextStyle
 import java.util.*
 
 
 class DayFragment @JvmOverloads constructor(
-        context: Context,
-        attrs: AttributeSet? = null,
-        defStyleAttr: Int = 0
+    context: Context,
+    attrs: AttributeSet? = null,
+    defStyleAttr: Int = 0
 ) : LinearLayoutCompat(context, attrs, defStyleAttr) {
     // todo consider subclass
 
     companion object {
 
-        fun getTitle(timeRange: Preferences.TimeRange, position: Int): String {
+        fun getTitle(position: Int): String {
             fun getString(@StringRes stringId: Int) = MyApplication.instance.getString(stringId)
 
-            return if (timeRange == Preferences.TimeRange.DAY) {
-                when (position) {
-                    0 -> getString(R.string.today)
-                    1 -> getString(R.string.tomorrow)
-                    else -> {
-                        Date(
-                                Calendar.getInstance()
-                                        .apply { add(Calendar.DATE, position) }
-                                        .toDateTimeTz()
-                        ).let { it.dayOfWeek.toString() + ", " + it.toString() }
-                    }
-                }
-            } else {
-                if (timeRange == Preferences.TimeRange.WEEK) {
-                    val startDate = Date(
-                            Calendar.getInstance()
-                                    .apply {
-                                        if (position > 0) {
-                                            add(Calendar.WEEK_OF_YEAR, position)
-                                            set(Calendar.DAY_OF_WEEK, firstDayOfWeek)
-                                        }
-                                    }
-                                    .toDateTimeTz()
-                    )
-
-                    val endDate = Date(
-                            Calendar.getInstance()
-                                    .apply {
-                                        add(Calendar.WEEK_OF_YEAR, position + 1)
-                                        set(Calendar.DAY_OF_WEEK, firstDayOfWeek)
-                                        add(Calendar.DATE, -1)
-                                    }
-                                    .toDateTimeTz()
-                    )
-
-                    "$startDate - $endDate"
-                } else {
-                    check(timeRange == Preferences.TimeRange.MONTH)
-
-                    val month = Calendar.getInstance().run {
-                        add(Calendar.MONTH, position)
-                        get(Calendar.MONTH) + 1
-                    }
-
-                    Month.of(month).getDisplayName(TextStyle.FULL_STANDALONE, Locale.getDefault())
+            return when (position) {
+                0 -> getString(R.string.today)
+                1 -> getString(R.string.tomorrow)
+                else -> {
+                    Date(
+                        Calendar.getInstance()
+                            .apply { add(Calendar.DATE, position) }
+                            .toDateTimeTz()
+                    ).let { it.dayOfWeek.toString() + ", " + it.toString() }
                 }
             }
         }
     }
 
-    private val key = BehaviorRelay.create<Pair<Preferences.TimeRange, Int>>()
+    private val key = BehaviorRelay.create<Int>()
 
     private var fabDelegate: BottomFabMenuDelegate.FabDelegate? = null
 
@@ -122,13 +84,13 @@ class DayFragment @JvmOverloads constructor(
 
     fun saveState() = activity.setState(key.value!!, binding.groupListFragment.onSaveInstanceState())
 
-    fun setPosition(timeRange: Preferences.TimeRange, position: Int) {
+    fun setPosition(position: Int) {
         entry?.stop()
         compositeDisposable.clear()
 
         key.value?.let { saveState() }
 
-        key.accept(Pair(timeRange, position))
+        key.accept(position)
 
         activity.getState(key.value!!)?.let {
             binding.groupListFragment.onRestoreInstanceState(it)
@@ -137,7 +99,7 @@ class DayFragment @JvmOverloads constructor(
         // this seems redundant/obsolete, but I'll leave it for now
         fabDelegate?.let(binding.groupListFragment::setVisible)
 
-        entry = dayViewModel.getEntry(timeRange, position)
+        entry = dayViewModel.getEntry(position)
     }
 
     override fun onAttachedToWindow() {
@@ -146,7 +108,7 @@ class DayFragment @JvmOverloads constructor(
         val hostEvents = key.switchMap { key -> (context as Host).hostEvents.map { Pair(key, it) } }
 
         val (startEvents, stopEvents) =
-            hostEvents.partition { (key, event) -> event is Event.PageVisible && event.position == key.second }
+            hostEvents.partition { (key, event) -> event is Event.PageVisible && event.position == key }
 
         compositeDisposable += startEvents.subscribe { (_, event) ->
             check(event is Event.PageVisible)
@@ -176,17 +138,16 @@ class DayFragment @JvmOverloads constructor(
         key.switchMap { key -> entry!!.data.map { Triple(key, it, entry!!.dataId) } }
             .subscribe { (key, data, dataId) ->
                 binding.groupListFragment.setAll(
-                    key.first,
-                    key.second,
-                        dataId,
-                        data.immediate,
-                        data.groupListDataWrapper,
-                    )
-                }
-                .addTo(compositeDisposable)
+                    key,
+                    dataId,
+                    data.immediate,
+                    data.groupListDataWrapper,
+                )
+            }
+            .addTo(compositeDisposable)
 
         hostEvents.switchMap { (key, event) ->
-            if (event is Event.PageVisible && event.position == key.second)
+            if (event is Event.PageVisible && event.position == key)
                 activity.started
             else
                 Observable.never()

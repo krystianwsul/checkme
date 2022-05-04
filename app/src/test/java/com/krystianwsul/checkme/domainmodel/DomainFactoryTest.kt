@@ -50,7 +50,7 @@ class DomainFactoryTest {
     }
 
     private fun getTodayGroupListData(now: ExactTimeStamp.Local, position: Int = 0) =
-        domainFactory.getGroupListData(now, position, Preferences.TimeRange.DAY, false)
+        domainFactory.getGroupListData(now, position, false, Preferences.ProjectFilter.All)
 
     private fun getTodayInstanceDatas(now: ExactTimeStamp.Local, position: Int = 0) =
         getTodayGroupListData(now, position).groupListDataWrapper.allInstanceDatas

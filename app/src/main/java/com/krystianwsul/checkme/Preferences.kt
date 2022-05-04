@@ -15,6 +15,7 @@ import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
 import com.soywiz.klock.DateTimeTz
 import com.soywiz.klock.days
+import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.schedulers.Schedulers
 import org.joda.time.LocalDateTime
@@ -36,7 +37,6 @@ object Preferences {
     private const val KEY_SHOW_NOTIFICATIONS = "showNotifications"
     private const val KEY_NOTIFICATION_LEVEL = "notificationLevel"
     private const val KEY_ADD_DEFAULT_REMINDER = "addDefaultReminder"
-    private const val KEY_TIME_RANGE = "timeRange"
     private const val KEY_SHOW_DELETED = "showDeleted"
     private const val KEY_SHOW_ASSIGNED_TO = "showAssignedTo"
     private const val KEY_TOOLTIP_SHOWN = "tooltipShown"
@@ -46,6 +46,7 @@ object Preferences {
     private const val KEY_INSTANCE_WARNING_SNOOZE = "instanceWarningSnooze"
     private const val KEY_PROJECT_ORDER = "projectOrder"
     private const val KEY_NOTIFICATION_LOG = "notificationLog"
+    private const val KEY_PROJECT_FILTER = "projectFilter"
 
     private val sharedPreferences by lazy { MyApplication.sharedPreferences }
 
@@ -116,17 +117,6 @@ object Preferences {
         sharedPreferences.getInt(KEY_NOTIFICATION_LEVEL, 1).let { NotificationLevel.values()[it] }
     ) { _, _, newValue -> putNotificationLevel(newValue) }
 
-    private val timeRangeProperty =
-        NonNullRelayProperty(TimeRange.values()[sharedPreferences.getInt(KEY_TIME_RANGE, 0)])
-    var timeRange by timeRangeProperty
-    val timeRangeObservable = timeRangeProperty.observable.distinctUntilChanged()
-
-    init {
-        timeRangeObservable.skip(0)
-            .subscribe { sharedPreferences.edit { putInt(KEY_TIME_RANGE, it.ordinal) } }
-            .ignore()
-    }
-
     private var languageInt by intObservable(KEY_LANGUAGE, Language.DEFAULT.ordinal)
     var language by observable(Language.values()[languageInt]) { _, _, newValue -> languageInt = newValue.ordinal }
 
@@ -134,11 +124,11 @@ object Preferences {
         sharedPreferences.edit { putInt(KEY_NOTIFICATION_LEVEL, notificationLevel.ordinal) }
     }
 
-    private var showDeletedProperty = NonNullRelayProperty(sharedPreferences.getBoolean(KEY_SHOW_DELETED, false))
+    private val showDeletedProperty = NonNullRelayProperty(sharedPreferences.getBoolean(KEY_SHOW_DELETED, false))
     var showDeleted by showDeletedProperty
     val showDeletedObservable = showDeletedProperty.observable.distinctUntilChanged()
 
-    private var showAssignedProperty = NonNullRelayProperty(sharedPreferences.getBoolean(KEY_SHOW_ASSIGNED_TO, true))
+    private val showAssignedProperty = NonNullRelayProperty(sharedPreferences.getBoolean(KEY_SHOW_ASSIGNED_TO, true))
     var showAssigned by showAssignedProperty
     val showAssignedObservable = showAssignedProperty.observable.distinctUntilChanged()
 
@@ -166,18 +156,13 @@ object Preferences {
             instanceWarningSnooze = if (value) ExactTimeStamp.Local.now else null
         }
 
+    private fun <T : Any> Observable<T>.persist(writer: SharedPreferences.Editor.(T) -> Unit) =
+        skip(1).subscribe { sharedPreferences.edit { writer(it) } }
+
     init {
-        showDeletedObservable.skip(1)
-            .subscribe { sharedPreferences.edit { putBoolean(KEY_SHOW_DELETED, it) } }
-            .ignore()
-
-        showAssignedObservable.skip(1)
-            .subscribe { sharedPreferences.edit { putBoolean(KEY_SHOW_ASSIGNED_TO, it) } }
-            .ignore()
-
-        showProjectsObservable.skip(1)
-            .subscribe { sharedPreferences.edit { putBoolean(KEY_SHOW_PROJECTS, it) } }
-            .ignore()
+        showDeletedObservable.persist { putBoolean(KEY_SHOW_DELETED, it) }
+        showAssignedObservable.persist { putBoolean(KEY_SHOW_ASSIGNED_TO, it) }
+        showProjectsObservable.persist { putBoolean(KEY_SHOW_PROJECTS, it) }
     }
 
     fun getTooltipShown(type: TooltipManager.Type) =
@@ -194,6 +179,16 @@ object Preferences {
         deserialize<HashMap<ProjectKey.Shared, Float>>(projectOrderString) ?: mapOf()
     ) { _, _, newValue -> projectOrderString = serialize(HashMap(newValue)) }
         private set
+
+    private val projectFilterProperty =
+        NonNullRelayProperty(sharedPreferences.getString(KEY_PROJECT_FILTER, null).let(ProjectFilter::fromJson))
+
+    var projectFilter by projectFilterProperty
+    val projectFilterObservable = projectFilterProperty.observable
+
+    init {
+        projectFilterObservable.persist { putString(KEY_PROJECT_FILTER, it.toJson()) }
+    }
 
     private const val PROJECT_ORDER_INCREMENT = 1 / 20f
 
@@ -280,12 +275,6 @@ object Preferences {
         NONE, MEDIUM, HIGH
     }
 
-    enum class TimeRange {
-        DAY,
-        WEEK,
-        MONTH
-    }
-
     enum class Language {
         DEFAULT {
 
@@ -310,6 +299,39 @@ object Preferences {
             activity.setLanguage(locale)
 
             applySettingStartup()
+        }
+    }
+
+    sealed class ProjectFilter {
+
+        companion object {
+
+            fun fromJson(json: String?) = when (json) {
+                null, All.key -> All
+                Private.key -> Private
+                else -> Shared(ProjectKey.Shared(json))
+            }
+        }
+
+        abstract fun toJson(): String
+
+        object All : ProjectFilter() {
+
+            val key = "all"
+
+            override fun toJson() = key
+        }
+
+        object Private : ProjectFilter() {
+
+            val key = "private"
+
+            override fun toJson() = key
+        }
+
+        data class Shared(val projectKey: ProjectKey.Shared) : ProjectFilter() {
+
+            override fun toJson() = projectKey.key
         }
     }
 }

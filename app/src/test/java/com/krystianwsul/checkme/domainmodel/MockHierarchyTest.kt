@@ -23,7 +23,7 @@ class MockHierarchyTest {
         TestDomainUpdater(domainFactory, now)
 
     private fun getTodayInstanceDatas(now: ExactTimeStamp.Local) =
-        domainFactory.getGroupListData(now, 0, Preferences.TimeRange.DAY, false)
+        domainFactory.getGroupListData(now, 0, false, Preferences.ProjectFilter.All)
             .groupListDataWrapper
             .allInstanceDatas
 

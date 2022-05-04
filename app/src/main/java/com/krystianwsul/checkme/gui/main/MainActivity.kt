@@ -5,6 +5,8 @@ import android.app.Activity
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.res.ColorStateList
+import android.graphics.Color
 import android.os.Bundle
 import android.os.Parcelable
 import android.view.View
@@ -728,6 +730,21 @@ class MainActivity :
             .addTo(createDisposable)
 
         CopyAllRemindersDelegate(this, groupListViewModel, createDisposable)
+
+        Preferences.projectFilterObservable
+            .subscribe {
+                binding.mainActivityToolbar
+                    .menu
+                    .findItem(R.id.actionMainProjectsFilter)
+                    .iconTintList = ColorStateList.valueOf(
+                    if (it == Preferences.ProjectFilter.All) {
+                        Color.WHITE
+                    } else {
+                        getColor(R.color.colorAccent)
+                    }
+                )
+            }
+            .addTo(createDisposable)
     }
 
     private fun getTabSearchStateFromIntent(intent: Intent) = when (intent.action) {

@@ -8,6 +8,8 @@ import android.view.ViewGroup
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.text.ClickableText
+import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.RadioButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -47,7 +49,9 @@ class ProjectFilterDialogFragment : NoCollapseBottomSheetDialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // todo filter add initial progress bar view
+        binding.projectFilterDialogCompose.setContent {
+            MdcTheme { LoadingState() }
+        }
 
         viewModel.data
             .subscribe {
@@ -62,6 +66,13 @@ class ProjectFilterDialogFragment : NoCollapseBottomSheetDialogFragment() {
                 }
             }
             .addTo(viewCreatedDisposable)
+    }
+
+    @Composable
+    private fun LoadingState() {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            CircularProgressIndicator(color = MaterialTheme.colors.secondary)
+        }
     }
 
     @Composable

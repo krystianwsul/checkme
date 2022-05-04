@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.domainmodel.extensions
 
 import com.krystianwsul.checkme.MyCrashlytics
+import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.*
 import com.krystianwsul.checkme.gui.instances.drag.DropParent
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
@@ -109,6 +110,7 @@ fun DomainFactory.getGroupListData(
     now: ExactTimeStamp.Local,
     position: Int,
     showAssigned: Boolean,
+    projectFilter: Preferences.ProjectFilter,
 ): DayViewModel.DayData {
     MyCrashlytics.log("DomainFactory.getGroupListData")
 
@@ -133,11 +135,18 @@ fun DomainFactory.getGroupListData(
 
     val searchCriteria = SearchCriteria(showAssignedToOthers = showAssigned)
 
+    val projectKey = when (projectFilter) {
+        Preferences.ProjectFilter.All -> null
+        Preferences.ProjectFilter.Private -> projectsFactory.privateProject.projectKey
+        is Preferences.ProjectFilter.Shared -> projectFilter.projectKey
+    }
+
     val currentInstances = getRootInstances(
         startExactTimeStamp,
         endExactTimeStamp,
         now,
         SearchContext.startSearch(searchCriteria, now, myUserFactory.user),
+        projectKey = projectKey,
     ).map { it.first }.toList()
 
     if (position == 0) {

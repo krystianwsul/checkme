@@ -30,7 +30,12 @@ class DayViewModel : ViewModel() {
         private val domainListener = object : DomainListener<DayData>() {
 
             override val domainResultFetcher = DomainResultFetcher.DomainFactoryData {
-                it.getGroupListData(ExactTimeStamp.Local.now, position, delegate.parameters.showAssigned)
+                it.getGroupListData(
+                    ExactTimeStamp.Local.now,
+                    position,
+                    delegate.parameters.showAssigned,
+                    delegate.parameters.projectFilter,
+                )
             }
         }
 

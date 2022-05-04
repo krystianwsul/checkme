@@ -99,6 +99,7 @@ class MainActivity :
         const val ACTION_SEARCH = "com.krystianwsul.checkme.SEARCH"
 
         private const val TAG_DELETE_INSTANCES = "deleteInstances"
+        private const val TAG_PROJECT_FILTER = "projectFilter"
 
         fun newIntent() = Intent(MyApplication.instance, MainActivity::class.java)
 
@@ -469,6 +470,9 @@ class MainActivity :
                     R.id.actionMainShowDeleted -> Preferences.showDeleted = !Preferences.showDeleted
                     R.id.actionMainAssigned -> Preferences.showAssigned = !Preferences.showAssigned
                     R.id.actionMainShowProjects -> Preferences.showProjects = !Preferences.showProjects
+                    R.id.actionMainProjectsFilter -> {
+                        ProjectFilterDialogFragment.newInstance().show(supportFragmentManager, TAG_PROJECT_FILTER)
+                    }
                     else -> throw IllegalArgumentException()
                 }
 

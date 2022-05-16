@@ -66,6 +66,7 @@ android {
     composeOptions {
         kotlinCompilerExtensionVersion '1.1.0-rc02'
     }
+    namespace 'com.krystianwsul.checkme'
 }
 
 ext {

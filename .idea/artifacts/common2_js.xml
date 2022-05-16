@@ -1,6 +1,6 @@
 <component name="ArtifactManager">
   <artifact type="jar" name="common2-js">
-    <output-path>C:\Users\kryst\StudioProjects\Check.me\common\build\libs</output-path>
+    <output-path>$PROJECT_DIR$/common/build/libs</output-path>
     <root id="archive" name="common2-js.jar">
       <element id="module-output" name="Check.me.common2.jsMain" />
     </root>

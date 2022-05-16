@@ -4,9 +4,13 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/Check.me.iml" filepath="$PROJECT_DIR$/.idea/modules/Check.me.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/Check.me.app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/Check.me.app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/Check.me.app.androidTest.iml" filepath="$PROJECT_DIR$/.idea/modules/app/Check.me.app.androidTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/Check.me.app.main.iml" filepath="$PROJECT_DIR$/.idea/modules/app/Check.me.app.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/Check.me.app.unitTest.iml" filepath="$PROJECT_DIR$/.idea/modules/app/Check.me.app.unitTest.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/common/Check.me.common2.iml" filepath="$PROJECT_DIR$/.idea/modules/common/Check.me.common2.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/common/Check.me.common2.androidAndroidTestProto.iml" filepath="$PROJECT_DIR$/.idea/modules/common/Check.me.common2.androidAndroidTestProto.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/common/Check.me.common2.androidAndroidTestRelease.iml" filepath="$PROJECT_DIR$/.idea/modules/common/Check.me.common2.androidAndroidTestRelease.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/common/Check.me.common2.androidTest.iml" filepath="$PROJECT_DIR$/.idea/modules/common/Check.me.common2.androidTest.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/common/Check.me.common2.androidTestFixtures.iml" filepath="$PROJECT_DIR$/.idea/modules/common/Check.me.common2.androidTestFixtures.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/common/Check.me.common2.androidTestFixturesDebug.iml" filepath="$PROJECT_DIR$/.idea/modules/common/Check.me.common2.androidTestFixturesDebug.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/common/Check.me.common2.androidTestFixturesProto.iml" filepath="$PROJECT_DIR$/.idea/modules/common/Check.me.common2.androidTestFixturesProto.iml" />
@@ -15,7 +19,12 @@
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/common/Check.me.common2.commonTest.iml" filepath="$PROJECT_DIR$/.idea/modules/common/Check.me.common2.commonTest.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/common/Check.me.common2.jsMain.iml" filepath="$PROJECT_DIR$/.idea/modules/common/Check.me.common2.jsMain.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/common/Check.me.common2.jsTest.iml" filepath="$PROJECT_DIR$/.idea/modules/common/Check.me.common2.jsTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/common/Check.me.common2.main.iml" filepath="$PROJECT_DIR$/.idea/modules/common/Check.me.common2.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/common/Check.me.common2.unitTest.iml" filepath="$PROJECT_DIR$/.idea/modules/common/Check.me.common2.unitTest.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/treeadapter/Check.me.treeadapter.iml" filepath="$PROJECT_DIR$/.idea/modules/treeadapter/Check.me.treeadapter.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/treeadapter/Check.me.treeadapter.androidTest.iml" filepath="$PROJECT_DIR$/.idea/modules/treeadapter/Check.me.treeadapter.androidTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/treeadapter/Check.me.treeadapter.main.iml" filepath="$PROJECT_DIR$/.idea/modules/treeadapter/Check.me.treeadapter.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/treeadapter/Check.me.treeadapter.unitTest.iml" filepath="$PROJECT_DIR$/.idea/modules/treeadapter/Check.me.treeadapter.unitTest.iml" />
     </modules>
   </component>
 </project>

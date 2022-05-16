@@ -7,6 +7,7 @@ import com.krystianwsul.common.firebase.json.taskhierarchies.ProjectTaskHierarch
 import com.krystianwsul.common.firebase.json.tasks.PrivateTaskJson
 import com.krystianwsul.common.utils.ProjectType
 import kotlinx.serialization.Serializable
+import kotlin.jvm.JvmOverloads
 
 @Serializable
 data class PrivateProjectJson @JvmOverloads constructor(

@@ -8,6 +8,7 @@ import com.krystianwsul.common.firebase.json.noscheduleorparent.RootNoScheduleOr
 import com.krystianwsul.common.firebase.json.schedule.RootScheduleWrapper
 import com.krystianwsul.common.firebase.json.taskhierarchies.NestedTaskHierarchyJson
 import kotlinx.serialization.Serializable
+import kotlin.jvm.JvmOverloads
 
 @Serializable
 data class RootTaskJson @JvmOverloads constructor(

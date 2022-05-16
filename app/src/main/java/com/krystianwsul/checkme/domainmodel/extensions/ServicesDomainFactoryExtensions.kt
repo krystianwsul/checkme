@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.domainmodel.extensions
 
+import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
@@ -117,15 +118,24 @@ fun DomainUpdater.setTaskImageUploadedService(
     imageUuid: String,
 ): Completable = CompletableDomainUpdate.create("clearProjectEndTimeStamps") {
     val task = rootTasksFactory.getRootTaskIfPresent(taskKey as TaskKey.Root)
-    if (task?.getImage(deviceDbInfo) != ImageState.Local(imageUuid)) {
+
+    if (task == null) {
+        MyCrashlytics.logException(ImageUploadException("task not found", taskKey))
+
+        DomainUpdater.Params()
+    } else if (task.getImage(deviceDbInfo) != ImageState.Local(imageUuid)) {
+        MyCrashlytics.logException(ImageUploadException("incorrect state", taskKey))
+
         DomainUpdater.Params()
     } else {
         task.setImage(deviceDbInfo, ImageState.Remote(imageUuid))
 
         DomainUpdater.Params(
-                false,
-                DomainListenerManager.NotificationType.All,
-                DomainFactory.CloudParams(task.project),
+            false,
+            DomainListenerManager.NotificationType.All,
+            DomainFactory.CloudParams(task.project),
         )
     }
 }.perform(this)
+
+private class ImageUploadException(message: String, taskKey: TaskKey.Root) : Exception("$message, taskKey: $taskKey")

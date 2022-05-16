@@ -34,19 +34,19 @@ object ImageManager {
 
     private val largeIconDownloader by lazy {
         Downloader(
-                LARGE_ICON_SIZE,
-                LARGE_ICON_SIZE,
-                "largeIcons",
-                true
+            LARGE_ICON_SIZE,
+            LARGE_ICON_SIZE,
+            "largeIcons",
+            true,
         )
     }
 
     private val bigPictureDownloader by lazy {
         Downloader(
-                BIG_PICTURE_WIDTH,
-                BIG_PICTURE_HEIGHT,
-                "bigPictures",
-                false
+            BIG_PICTURE_WIDTH,
+            BIG_PICTURE_HEIGHT,
+            "bigPictures",
+            false,
         )
     }
 
@@ -68,11 +68,13 @@ object ImageManager {
     }
 
     private class Downloader(
-            private val width: Int,
-            private val height: Int,
-            dirSuffix: String,
-            private val circle: Boolean,
+        private val width: Int,
+        private val height: Int,
+        dirSuffix: String,
+        private val circle: Boolean,
     ) {
+
+        private val tag = "ImageManager.$dirSuffix"
 
         private val dir = File(MyApplication.instance.cacheDir.absolutePath, dirSuffix)
 
@@ -96,8 +98,8 @@ object ImageManager {
 
                 readyRelay.accept(Unit)
             }
-                    .subscribeOn(Schedulers.io())
-                    .subscribe()
+                .subscribeOn(Schedulers.io())
+                .subscribe()
         }
 
         fun prefetch(deviceDbInfo: DeviceDbInfo, tasks: List<Task>, callback: () -> Unit) {
@@ -118,7 +120,7 @@ object ImageManager {
 
                 imagesToRemove.forEach {
                     imageStates.remove(it)
-                    MyCrashlytics.log("ImageManager: removed $it")
+                    MyCrashlytics.log("$tag: removed $it")
                 }
 
                 statesToRemove.filter { it.second is State.Downloading }.forEach { (uuid, state) ->
@@ -132,7 +134,7 @@ object ImageManager {
                     todo: I think this also needs to cancel the RX inside the SimpleTarget.  Check logging to confirm.
                      */
 
-                    MyCrashlytics.log("ImageManager: cleared $it")
+                    MyCrashlytics.log("$tag: cleared $uuid")
                 }
 
                 Single.fromCallable {
@@ -156,6 +158,8 @@ object ImageManager {
                             override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
                                 check(imageStates.getValue(uuid) is State.Downloading)
 
+                                MyCrashlytics.log("$tag: downloaded a $uuid")
+
                                 Single.fromCallable {
                                     check(imageStates.getValue(uuid) is State.Downloading)
 
@@ -172,11 +176,12 @@ object ImageManager {
                                     .subscribeOn(Schedulers.io())
                                     .observeOnDomain()
                                     .subscribeBy {
+                                        check(imageStates.containsKey(uuid)) { "$tag: can't find $uuid" }
                                         check(imageStates.getValue(uuid) is State.Downloading)
 
                                         imageStates[uuid] = State.Downloaded
 
-                                        MyCrashlytics.log("ImageManager: downloaded $uuid")
+                                        MyCrashlytics.log("$tag: downloaded b $uuid")
 
                                         callback()
                                     }
@@ -187,13 +192,13 @@ object ImageManager {
 
                                 imageStates.remove(uuid)
 
-                                MyCrashlytics.log("ImageManager: onLoadFailed $uuid")
+                                MyCrashlytics.log("$tag: onLoadFailed $uuid")
                             }
                         })
 
                     uuid to State.Downloading(target)
                 }.onEach {
-                    MyCrashlytics.log("ImageManager: added " + it.first)
+                    MyCrashlytics.log("$tag: added " + it.first)
                 }
             }
         }

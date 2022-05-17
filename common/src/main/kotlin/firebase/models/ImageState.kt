@@ -2,11 +2,16 @@ package com.krystianwsul.common.firebase.models
 
 import com.krystianwsul.common.utils.Serializable
 
-sealed class ImageState : Serializable {
+sealed interface ImageState : Serializable {
 
-    abstract val uuid: String?
+    val uuid: String?
 
-    data class Local(override val uuid: String) : ImageState() {
+    sealed interface Displayable : ImageState {
+
+        override val uuid: String
+    }
+
+    data class Local(override val uuid: String) : Displayable {
 
         override fun hashCode() = uuid.hashCode()
 
@@ -25,7 +30,7 @@ sealed class ImageState : Serializable {
         }
     }
 
-    data class Remote(override val uuid: String) : ImageState() {
+    data class Remote(override val uuid: String) : Displayable {
 
         override fun hashCode() = uuid.hashCode()
 
@@ -44,7 +49,7 @@ sealed class ImageState : Serializable {
         }
     }
 
-    object Uploading : ImageState() {
+    object Uploading : ImageState {
 
         override val uuid: String? = null
     }

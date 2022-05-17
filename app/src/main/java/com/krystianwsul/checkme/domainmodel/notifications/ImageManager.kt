@@ -18,6 +18,7 @@ import com.krystianwsul.checkme.utils.circle
 import com.krystianwsul.checkme.utils.dpToPx
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.firebase.DomainThreadChecker
+import com.krystianwsul.common.firebase.models.ImageState
 import com.krystianwsul.common.firebase.models.task.Task
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.kotlin.subscribeBy
@@ -106,9 +107,8 @@ object ImageManager {
             DomainThreadChecker.instance.requireDomainThread()
 
             readyRelay.observeOnDomain().subscribe {
-                val tasksWithImages = tasks.map { it to it.getImage(deviceDbInfo)?.uuid }
-                    .filter { it.second != null }
-                    .associate { it.second!! to it.first }
+                val tasksWithImages =
+                    tasks.mapNotNull { it.getImage(deviceDbInfo) as? ImageState.Displayable }.associateBy { it.uuid }
 
                 val taskUuids = tasksWithImages.keys
                 val presentUuids = imageStates.keys
@@ -147,9 +147,8 @@ object ImageManager {
 
                 val tasksToDownload = imagesToDownload.map { it to tasksWithImages.getValue(it) }
 
-                imageStates += tasksToDownload.map { (uuid, task) ->
-                    val target = task.getImage(deviceDbInfo)!!
-                        .toImageLoader()
+                imageStates += tasksToDownload.map { (uuid, imageState) ->
+                    val target = imageState.toImageLoader()
                         .requestBuilder!!
                         .circle(circle)
                         .into(object : SimpleTarget<Bitmap>(width, height) {

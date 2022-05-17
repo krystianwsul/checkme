@@ -7,6 +7,7 @@ import com.krystianwsul.checkme.domainmodel.extensions.getGroupListData
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.common.time.ExactTimeStamp
 import io.reactivex.rxjava3.disposables.CompositeDisposable
+import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.kotlin.Observables
 import io.reactivex.rxjava3.kotlin.addTo
 
@@ -47,17 +48,16 @@ class DayViewModel : ViewModel() {
 
         private val showAssignedRelay = BehaviorRelay.create<Boolean>()
 
-        private val compositeDisposable = CompositeDisposable()
-
-        init {
-            Observables.combineLatest(showAssignedRelay, Preferences.projectFilterObservable)
-                .map { (showAssigned, projectFilter) -> Parameters(showAssigned, projectFilter) }
-                .subscribe(delegate.parametersRelay)
-                .addTo(compositeDisposable)
-        }
+        private var disposable: Disposable? = null
 
         fun start(showAssigned: Boolean) {
             showAssignedRelay.accept(showAssigned)
+
+            if (disposable == null) {
+                disposable = Observables.combineLatest(showAssignedRelay, Preferences.projectFilterObservable)
+                    .map { (showAssigned, projectFilter) -> Parameters(showAssigned, projectFilter) }
+                    .subscribe(delegate.parametersRelay)
+            }
 
             delegate.start()
         }
@@ -66,7 +66,9 @@ class DayViewModel : ViewModel() {
 
         fun stop() {
             delegate.dispose()
-            compositeDisposable.clear()
+
+            disposable?.dispose()
+            disposable = null
         }
     }
 

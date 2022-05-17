@@ -38,7 +38,7 @@ class AssignedToTest {
         TestDomainUpdater(domainFactory, now)
 
     private fun getDayInstanceDatas(now: ExactTimeStamp.Local, day: Int = 0) =
-        domainFactory.getGroupListData(now, day, Preferences.TimeRange.DAY, false)
+        domainFactory.getGroupListData(now, day, false, Preferences.ProjectFilter.All)
             .groupListDataWrapper
             .allInstanceDatas
 

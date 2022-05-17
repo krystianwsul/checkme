@@ -20,6 +20,7 @@ import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.models.ImageState
 import com.krystianwsul.common.firebase.models.task.Task
+import com.krystianwsul.common.utils.TaskKey
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.kotlin.subscribeBy
 import io.reactivex.rxjava3.schedulers.Schedulers
@@ -107,8 +108,9 @@ object ImageManager {
             DomainThreadChecker.instance.requireDomainThread()
 
             readyRelay.observeOnDomain().subscribe {
-                val tasksWithImages =
-                    tasks.mapNotNull { it.getImage(deviceDbInfo) as? ImageState.Displayable }.associateBy { it.uuid }
+                val tasksWithImages = tasks.map { it.taskKey to it.getImage(deviceDbInfo) as? ImageState.Displayable }
+                    .filter { it.second != null }
+                    .associate { (taskKey, imageState) -> imageState!!.uuid to Pair(taskKey, imageState) }
 
                 val taskUuids = tasksWithImages.keys
                 val presentUuids = imageStates.keys
@@ -147,11 +149,17 @@ object ImageManager {
 
                 val tasksToDownload = imagesToDownload.map { it to tasksWithImages.getValue(it) }
 
-                imageStates += tasksToDownload.map { (uuid, imageState) ->
-                    val target = imageState.toImageLoader()
-                        .requestBuilder!!
-                        .circle(circle)
-                        .into(object : SimpleTarget<Bitmap>(width, height) {
+                imageStates += tasksToDownload.map { (uuid, pair) ->
+                    val (taskKey, imageState) = pair
+
+                    val requestBuilder = imageState.toImageLoader().requestBuilder
+
+                    val state = if (requestBuilder == null) {
+                        MyCrashlytics.logException(MissingImageException(taskKey, imageState))
+
+                        State.Missing
+                    } else {
+                        val target = requestBuilder.circle(circle).into(object : SimpleTarget<Bitmap>(width, height) {
 
                             @SuppressLint("CheckResult")
                             override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
@@ -195,7 +203,10 @@ object ImageManager {
                             }
                         })
 
-                    uuid to State.Downloading(target)
+                        State.Downloading(target)
+                    }
+
+                    uuid to state
                 }.onEach {
                     MyCrashlytics.log("$tag: added " + it.first)
                 }
@@ -209,7 +220,11 @@ object ImageManager {
 
     private sealed class State {
 
+        object Missing : State()
         object Downloaded : State()
         class Downloading(val target: Target<Bitmap>) : State()
     }
+
+    private class MissingImageException(taskKey: TaskKey, imageState: ImageState) :
+        Exception("missing image for $taskKey: $imageState")
 }

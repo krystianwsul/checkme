@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.domainmodel.notifications
 
+import android.annotation.SuppressLint
 import android.app.*
 import android.content.Context
 import android.graphics.Bitmap
@@ -27,9 +28,10 @@ import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.Ordinal
 import com.krystianwsul.common.utils.ProjectKey
+import com.mindorks.scheduler.Priority
+import com.mindorks.scheduler.internal.CustomPriorityScheduler
 import io.reactivex.rxjava3.core.BackpressureStrategy
 import io.reactivex.rxjava3.core.Single
-import io.reactivex.rxjava3.schedulers.Schedulers
 
 open class NotificationWrapperImpl : NotificationWrapper() {
 
@@ -114,8 +116,10 @@ open class NotificationWrapperImpl : NotificationWrapper() {
 
         notificationManager.createNotificationChannels(listOf(HIGH_CHANNEL, MEDIUM_CHANNEL))
 
+        val scheduler = CustomPriorityScheduler.create().get(Priority.MEDIUM)
+
         notificationRelay.toFlowable(BackpressureStrategy.BUFFER)
-            .observeOn(Schedulers.io())
+            .observeOn(scheduler)
             .flatMapSingle({ Single.fromCallable(it) }, false, 1)
             .subscribe()
     }
@@ -501,9 +505,9 @@ open class NotificationWrapperImpl : NotificationWrapper() {
             ?.notification
             ?.sortKey
 
-        val sortKeyMessage = when {
-            previousSortKey == null -> "null"
-            previousSortKey == sortKey -> "same"
+        val sortKeyMessage = when (previousSortKey) {
+            null -> "null"
+            sortKey -> "same"
             else -> "changed"
         }
 
@@ -541,7 +545,6 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         val highPriority: Boolean,
         val summary: Boolean,
     ) {
-
         val items = (instances.map { Item.Instance(it, now) } + projects.map(Item::Project)).sorted()
 
         sealed interface Item : Comparable<Item> {
@@ -576,7 +579,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
                 override val text = getInstanceText(project.instances.map { it.name }, null)
                 override val timeStamp = project.timeStamp
 
-                private val ordinal = project.instances.map { it.ordinal }.minOrNull()!!
+                private val ordinal = project.instances.minOf { it.ordinal }
 
                 override fun compareTo(other: Item): Int {
                     timeStamp.compareTo(other.timeStamp)
@@ -675,6 +678,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         }
     }
 
+    @SuppressLint("MissingPermission")
     override fun updateAlarm(nextAlarm: TimeStamp?) {
         notificationRelay.accept {
             val pendingIntent = PendingIntent.getBroadcast(

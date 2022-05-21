@@ -3,10 +3,7 @@ package com.krystianwsul.checkme.upload
 import android.annotation.SuppressLint
 import android.net.Uri
 import androidx.core.net.toUri
-import com.google.firebase.storage.FirebaseStorage
-import com.google.firebase.storage.StorageMetadata
-import com.google.firebase.storage.StorageTask
-import com.google.firebase.storage.UploadTask
+import com.google.firebase.storage.*
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.extensions.setTaskImageUploadedService
@@ -81,7 +78,21 @@ object Uploader {
     }
 
     private fun StorageTask<UploadTask.TaskSnapshot>.addListeners(entry: Queue.Entry) {
-        addOnFailureListener { MyCrashlytics.logException(UploadException("uri: ${entry.fileUri}", it)) }
+        addOnFailureListener {
+            if (it is StorageException) {
+                MyCrashlytics.logException(
+                    UploadException(
+                        "uri: ${entry.fileUri}, " +
+                                "isRecoverable: ${it.isRecoverableException}, " +
+                                "errorCode: ${it.errorCode}, " +
+                                "httpResultCode: ${it.httpResultCode}",
+                        it,
+                    )
+                )
+            } else {
+                MyCrashlytics.logException(UploadException("uri: ${entry.fileUri}", it))
+            }
+        }
 
         addOnSuccessListener {
             Queue.removeEntry(entry)

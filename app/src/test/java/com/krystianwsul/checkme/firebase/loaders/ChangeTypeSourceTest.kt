@@ -301,6 +301,7 @@ class ChangeTypeSourceTest {
                         "noScheduleOrParentId" to RootNoScheduleOrParentJson(
                             startTimeOffset = 0.0,
                             projectId = privateProjectId,
+                            projectKey = privateProjectKey.toJson(),
                         ),
                     ),
                 ),
@@ -333,6 +334,7 @@ class ChangeTypeSourceTest {
                         "noScheduleOrParentId" to RootNoScheduleOrParentJson(
                             startTimeOffset = 0.0,
                             projectId = privateProjectId,
+                            projectKey = privateProjectKey.toJson(),
                         ),
                     ),
                 ),
@@ -365,6 +367,7 @@ class ChangeTypeSourceTest {
                         "noScheduleOrParentId" to RootNoScheduleOrParentJson(
                             startTimeOffset = 0.0,
                             projectId = privateProjectId,
+                            projectKey = privateProjectKey.toJson(),
                         ),
                     ),
                 ),
@@ -393,6 +396,7 @@ class ChangeTypeSourceTest {
                         "noScheduleOrParentId" to RootNoScheduleOrParentJson(
                             startTimeOffset = 0.0,
                             projectId = privateProjectId,
+                            projectKey = privateProjectKey.toJson(),
                         ),
                     ),
                 ),
@@ -423,6 +427,7 @@ class ChangeTypeSourceTest {
                         "noScheduleOrParentId" to RootNoScheduleOrParentJson(
                             startTimeOffset = 0.0,
                             projectId = privateProjectId,
+                            projectKey = privateProjectKey.toJson(),
                         ),
                     ),
                     rootTaskIds = mutableMapOf(taskKey2.taskId to true),
@@ -465,6 +470,7 @@ class ChangeTypeSourceTest {
                         "noScheduleOrParentId" to RootNoScheduleOrParentJson(
                             startTimeOffset = 0.0,
                             projectId = privateProjectId,
+                            projectKey = privateProjectKey.toJson(),
                         ),
                     ),
                     rootTaskIds = mutableMapOf(taskKey2.taskId to true, taskKey3.taskId to true),
@@ -495,6 +501,7 @@ class ChangeTypeSourceTest {
                         "noScheduleOrParentId" to RootNoScheduleOrParentJson(
                             startTimeOffset = 0.0,
                             projectId = privateProjectId,
+                            projectKey = privateProjectKey.toJson(),
                         ),
                     ),
                     rootTaskIds = mutableMapOf(taskKey2.taskId to true),
@@ -517,6 +524,7 @@ class ChangeTypeSourceTest {
                         "noScheduleOrParentId" to RootNoScheduleOrParentJson(
                             startTimeOffset = 0.0,
                             projectId = privateProjectId,
+                            projectKey = privateProjectKey.toJson(),
                         ),
                     ),
                 ),
@@ -534,6 +542,7 @@ class ChangeTypeSourceTest {
                         "noScheduleOrParentId" to RootNoScheduleOrParentJson(
                             startTimeOffset = 0.0,
                             projectId = privateProjectId,
+                            projectKey = privateProjectKey.toJson(),
                         ),
                     ),
                 ),
@@ -554,6 +563,7 @@ class ChangeTypeSourceTest {
                         "noScheduleOrParentId" to RootNoScheduleOrParentJson(
                             startTimeOffset = 0.0,
                             projectId = privateProjectId,
+                            projectKey = privateProjectKey.toJson(),
                         ),
                     ),
                 ),
@@ -578,6 +588,7 @@ class ChangeTypeSourceTest {
                         "noScheduleOrParentId" to RootNoScheduleOrParentJson(
                             startTimeOffset = 0.0,
                             projectId = privateProjectId,
+                            projectKey = privateProjectKey.toJson(),
                         ),
                     ),
                     rootTaskIds = mutableMapOf(taskKey2.taskId to true)
@@ -610,6 +621,7 @@ class ChangeTypeSourceTest {
                         "noScheduleOrParentId" to RootNoScheduleOrParentJson(
                             startTimeOffset = 0.0,
                             projectId = privateProjectId,
+                            projectKey = privateProjectKey.toJson(),
                         ),
                     ),
                 ),
@@ -630,6 +642,7 @@ class ChangeTypeSourceTest {
                         "noScheduleOrParentId" to RootNoScheduleOrParentJson(
                             startTimeOffset = 0.0,
                             projectId = privateProjectId,
+                            projectKey = privateProjectKey.toJson(),
                         ),
                     ),
                     rootTaskIds = mutableMapOf(taskKey2.taskId to true)
@@ -725,6 +738,7 @@ class ChangeTypeSourceTest {
                         "noScheduleOrParentId" to RootNoScheduleOrParentJson(
                             startTimeOffset = 0.0,
                             projectId = sharedProjectKey.key,
+                            projectKey = privateProjectKey.toJson(),
                         ),
                     ),
                 ),
@@ -789,6 +803,7 @@ class ChangeTypeSourceTest {
                         "noScheduleOrParentId" to RootNoScheduleOrParentJson(
                             startTimeOffset = 0.0,
                             projectId = privateProjectId,
+                            projectKey = privateProjectKey.toJson(),
                         ),
                     ),
                 ),

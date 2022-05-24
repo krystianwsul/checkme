@@ -259,6 +259,7 @@ class RootTask private constructor(
                             assignedToKeys,
                             copiedTime.toJson(),
                             projectKey.key,
+                            projectKey.toJson(),
                         )
                     )
 
@@ -286,6 +287,7 @@ class RootTask private constructor(
                                 assignedTo = assignedToKeys,
                                 time = copiedTime.toJson(),
                                 projectId = projectKey.key,
+                                projectKey = projectKey.toJson(),
                             )
                         )
 
@@ -319,6 +321,7 @@ class RootTask private constructor(
                             assignedTo = assignedToKeys,
                             time = copiedTime.toJson(),
                             projectId = projectKey.key,
+                            projectKey = projectKey.toJson(),
                         )
                     )
 
@@ -342,6 +345,7 @@ class RootTask private constructor(
                             assignedTo = assignedToKeys,
                             time = copiedTime.toJson(),
                             projectId = projectKey.key,
+                            projectKey = projectKey.toJson(),
                         )
                     )
 
@@ -368,6 +372,7 @@ class RootTask private constructor(
                             assignedTo = assignedToKeys,
                             time = copiedTime.toJson(),
                             projectId = projectKey.key,
+                            projectKey = projectKey.toJson(),
                         )
                     )
 
@@ -393,6 +398,7 @@ class RootTask private constructor(
         for (schedule in schedules) {
             val today = Date.today()
 
+            @Suppress("REDUNDANT_ELSE_IN_WHEN")
             val dayOfWeek = when (schedule) {
                 is SingleSchedule -> schedule.date.dayOfWeek
                 is WeeklySchedule -> schedule.dayOfWeek
@@ -432,6 +438,7 @@ class RootTask private constructor(
                             assignedTo,
                             timeJson,
                             newProjectKey.key,
+                            newProjectKey.toJson(),
                         )
                     )
 
@@ -451,6 +458,7 @@ class RootTask private constructor(
                             assignedTo = assignedTo,
                             time = timeJson,
                             projectId = newProjectKey.key,
+                            projectKey = newProjectKey.toJson(),
                         )
                     )
 
@@ -470,6 +478,7 @@ class RootTask private constructor(
                             assignedTo = assignedTo,
                             time = timeJson,
                             projectId = newProjectKey.key,
+                            projectKey = newProjectKey.toJson(),
                         )
                     )
 
@@ -490,6 +499,7 @@ class RootTask private constructor(
                             assignedTo = assignedTo,
                             time = timeJson,
                             projectId = newProjectKey.key,
+                            projectKey = newProjectKey.toJson(),
                         )
                     )
 
@@ -509,6 +519,7 @@ class RootTask private constructor(
                             assignedTo = assignedTo,
                             time = timeJson,
                             projectId = newProjectKey.key,
+                            projectKey = newProjectKey.toJson(),
                         )
                     )
 

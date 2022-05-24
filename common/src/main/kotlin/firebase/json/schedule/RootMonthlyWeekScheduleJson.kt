@@ -18,5 +18,5 @@ data class RootMonthlyWeekScheduleJson @JvmOverloads constructor(
     override val assignedTo: Map<String, Boolean> = mapOf(),
     override val time: String = "",
     override var projectId: String = "",
-    override var projectKey: String? = null, // todo projectKey check constructors, setters, and getters
+    override var projectKey: String? = null, // todo projectKey check setters and getters
 ) : RootScheduleJson, MonthlyWeekScheduleJson, AssignedToJson

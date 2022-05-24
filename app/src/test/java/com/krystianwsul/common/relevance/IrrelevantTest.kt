@@ -626,6 +626,7 @@ class IrrelevantTest {
                 dayOfWeek = DayOfWeek.TUESDAY.ordinal,
                 time = JsonTime.Normal(hour2).toJson(),
                 projectId = userKey.key,
+                projectKey = userKey.toPrivateProjectKey().toJson(),
             )
         )
 

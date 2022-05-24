@@ -161,6 +161,7 @@ class RootIntervalUpdate(val rootTask: RootTask, intervalInfo: IntervalInfo) :
                 now.long,
                 now.offset,
                 projectId = projectKey.key,
+                projectKey = projectKey.toJson(),
             )
         )
 

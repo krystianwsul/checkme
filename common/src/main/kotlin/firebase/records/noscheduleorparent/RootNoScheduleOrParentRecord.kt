@@ -18,11 +18,15 @@ class RootNoScheduleOrParentRecord(
     var projectId by Committer(rootNoScheduleOrParentJson::projectId)
         private set
 
+    var projectKey by Committer(rootNoScheduleOrParentJson::projectKey)
+        private set
+
     override fun deleteFromParent() = check(rootTaskRecord.noScheduleOrParentRecords.remove(id) == this)
 
     override fun updateProject(projectKey: ProjectKey<*>) {
-        if (rootNoScheduleOrParentJson.projectId == projectKey.key) return
+        if (projectId != projectKey.key) projectId = projectKey.key
 
-        projectId = projectKey.key
+        val projectKeyJson = projectKey.toJson()
+        if (this.projectKey != projectKeyJson) this.projectKey = projectKeyJson
     }
 }

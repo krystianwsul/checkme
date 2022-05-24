@@ -9,5 +9,5 @@ data class RootNoScheduleOrParentJson @JvmOverloads constructor(
     override var endTime: Long? = null,
     override var endTimeOffset: Double? = null,
     var projectId: String = "",
-    var projectKey: String? = null, // todo projectKey check setters and getters
+    var projectKey: String? = null, // todo projectKey check getters
 ) : NoScheduleOrParentJson

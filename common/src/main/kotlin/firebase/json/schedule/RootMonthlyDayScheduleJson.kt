@@ -1,7 +1,6 @@
 package com.krystianwsul.common.firebase.json.schedule
 
 import kotlinx.serialization.Serializable
-import kotlin.jvm.JvmOverloads
 
 @Serializable
 data class RootMonthlyDayScheduleJson @JvmOverloads constructor(
@@ -18,4 +17,5 @@ data class RootMonthlyDayScheduleJson @JvmOverloads constructor(
     override val assignedTo: Map<String, Boolean> = mapOf(),
     override val time: String = "",
     override var projectId: String = "",
+    override var projectKey: String? = null, // todo projectKey check constructors, setters, and getters
 ) : RootScheduleJson, MonthlyDayScheduleJson, AssignedToJson

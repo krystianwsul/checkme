@@ -1,7 +1,6 @@
 package com.krystianwsul.common.firebase.json.noscheduleorparent
 
 import kotlinx.serialization.Serializable
-import kotlin.jvm.JvmOverloads
 
 @Serializable
 data class RootNoScheduleOrParentJson @JvmOverloads constructor(
@@ -10,4 +9,5 @@ data class RootNoScheduleOrParentJson @JvmOverloads constructor(
     override var endTime: Long? = null,
     override var endTimeOffset: Double? = null,
     var projectId: String = "",
+    var projectKey: String? = null, // todo projectKey check constructors, setters, and getters
 ) : NoScheduleOrParentJson

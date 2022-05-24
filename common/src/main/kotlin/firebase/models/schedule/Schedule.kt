@@ -44,6 +44,7 @@ sealed class Schedule(val topLevelTask: Task) : TaskParentEntry, ProjectIdOwner 
     val time get() = timePair.toTime()
 
     val projectId get() = scheduleRecord.projectId
+    val projectKey get() = scheduleRecord.projectKey
 
     protected fun TimePair.toTime() =
             customTimeKey?.let(topLevelTask.customTimeProvider::getCustomTime) ?: Time.Normal(hourMinute!!)

@@ -52,7 +52,7 @@ abstract class ScheduleRecord(
 
     abstract val projectHelper: ProjectHelper
 
-    val projectId get() = projectHelper.getProjectId(scheduleJson) // todo projectKey
+    val projectId get() = projectHelper.getProjectId(scheduleJson)
     val projectKey get() = projectHelper.getProjectKey(scheduleJson)
 
     val scheduleKey by lazy { ScheduleKey(taskRecord.taskKey, id) }

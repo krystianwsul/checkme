@@ -82,9 +82,38 @@ class RootTask private constructor(
             }
         }
 
+    // todo projectKey copy all invalidation code from projectIdCache
+    val projectKeyCache: InvalidatableCache<ProjectKey<*>?> =
+        invalidatableCache(clearableInvalidatableManager) { invalidatableCache ->
+            val intervalInfoRemovable = intervalInfoCache.invalidatableManager.addInvalidatable(invalidatableCache)
+
+            when (val taskParentEntry = getProjectIdTaskParentEntry()) {
+                is Schedule ->
+                    InvalidatableCache.ValueHolder(taskParentEntry.projectKey) { intervalInfoRemovable.remove() }
+                is RootNoScheduleOrParent ->
+                    InvalidatableCache.ValueHolder(taskParentEntry.projectKey) { intervalInfoRemovable.remove() }
+                is NestedTaskHierarchy -> {
+                    val parentTask = taskParentEntry.parentTask as RootTask
+                    val projectKey = parentTask.projectKey
+
+                    val parentTaskRemovable = parentTask.projectKeyCache
+                        .invalidatableManager
+                        .addInvalidatable(invalidatableCache)
+
+                    InvalidatableCache.ValueHolder(projectKey) {
+                        intervalInfoRemovable.remove()
+                        parentTaskRemovable.remove()
+                    }
+                }
+                else -> throw IllegalStateException()
+            }
+        }
+
     private inner class NoScheduleOrParentException : Exception("task $name, $taskKey")
 
-    override val projectId by projectIdCache
+    override val projectId by projectIdCache // todo projectKey
+
+    val projectKey by projectKeyCache
 
     private val projectCache = invalidatableCache<Project<*>>(clearableInvalidatableManager) { invalidatableCache ->
         val projectIdRemovable = projectIdCache.invalidatableManager.addInvalidatable(invalidatableCache)

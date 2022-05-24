@@ -57,7 +57,7 @@ abstract class ScheduleRecord(
     val scheduleKey by lazy { ScheduleKey(taskRecord.taskKey, id) }
 
     override fun updateProject(projectKey: ProjectKey<*>) =
-        projectHelper.setProjectId(scheduleJson, projectKey.key) { subKey, value ->
+        projectHelper.setProjectKey(scheduleJson, projectKey) { subKey, value ->
             addValue("$keyPlusSubkey/$subKey", value)
         }
 }

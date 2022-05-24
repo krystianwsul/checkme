@@ -76,7 +76,7 @@ fun Task.getProjectInfo(includeProjectDetails: Boolean = true): DetailsNode.Proj
 }
 
 fun Instance.getProjectInfo(includeProjectDetails: Boolean = true): DetailsNode.ProjectInfo? {
-    val sharedProjectKey = task.project.projectKey as? ProjectKey.Shared
+    val sharedProjectKey = getProject().projectKey as? ProjectKey.Shared
 
     return if (isRootInstance() && sharedProjectKey != null) {
         DetailsNode.ProjectInfo(

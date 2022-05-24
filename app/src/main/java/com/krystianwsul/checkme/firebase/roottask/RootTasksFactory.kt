@@ -12,6 +12,7 @@ import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.json.tasks.RootTaskJson
 import com.krystianwsul.common.firebase.json.tasks.TaskJson
+import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
 import com.krystianwsul.common.firebase.models.task.RootTask
 import com.krystianwsul.common.firebase.models.task.Task
@@ -123,11 +124,13 @@ class RootTasksFactory(
         }
     }
 
-    override fun getAllExistingInstances() = getProjectsFactory().projects
-        .values
-        .asSequence()
-        .flatMap { it.getAllDependenciesLoadedTasks() }
-        .flatMap { it.existingInstances.values }
+    override fun getAllExistingInstances(): Sequence<Instance> {
+        val allTasks = getProjectsFactory().projectTasks + rootTasks.values
+
+        return allTasks.asSequence()
+            .filter { it.dependenciesLoaded }
+            .flatMap { it.existingInstances.values }
+    }
 
     override fun getRootTasksForProject(projectKey: ProjectKey<*>) =
         rootTasks.values.filter { it.dependenciesLoaded && it.projectId == projectKey.key }

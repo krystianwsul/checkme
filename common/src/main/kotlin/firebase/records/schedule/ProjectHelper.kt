@@ -6,7 +6,9 @@ import com.krystianwsul.common.utils.ProjectKey
 
 sealed class ProjectHelper {
 
-    abstract fun getProjectId(scheduleJson: ScheduleJson): String
+    abstract fun getProjectId(scheduleJson: ScheduleJson): String // todo projectKey
+
+    abstract fun getProjectKey(scheduleJson: ScheduleJson): ProjectKey<*>?
 
     abstract fun setProjectKey(
         scheduleJson: ScheduleJson,
@@ -17,6 +19,12 @@ sealed class ProjectHelper {
     object Project : ProjectHelper() {
 
         override fun getProjectId(scheduleJson: ScheduleJson): String {
+            check(scheduleJson !is RootScheduleJson)
+
+            throw UnsupportedOperationException()
+        }
+
+        override fun getProjectKey(scheduleJson: ScheduleJson): ProjectKey<*>? {
             check(scheduleJson !is RootScheduleJson)
 
             throw UnsupportedOperationException()
@@ -36,6 +44,10 @@ sealed class ProjectHelper {
     object Root : ProjectHelper() {
 
         override fun getProjectId(scheduleJson: ScheduleJson) = (scheduleJson as RootScheduleJson).projectId
+
+        override fun getProjectKey(scheduleJson: ScheduleJson) = scheduleJson.let { it as RootScheduleJson }
+            .projectKey
+            ?.let { ProjectKey.fromJson(it) }
 
         override fun setProjectKey(
             scheduleJson: ScheduleJson,

@@ -7,5 +7,5 @@ interface RootScheduleJson : ScheduleJson {
     override val time: String
 
     var projectId: String
-    var projectKey: String? // todo projectKey check getters
+    var projectKey: String?
 }

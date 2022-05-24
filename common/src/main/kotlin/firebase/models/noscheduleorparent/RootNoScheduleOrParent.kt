@@ -8,7 +8,8 @@ class RootNoScheduleOrParent(
     private val rootNoScheduleOrParentRecord: RootNoScheduleOrParentRecord,
 ) : NoScheduleOrParent(rootTask, rootNoScheduleOrParentRecord) {
 
-    val projectId get() = rootNoScheduleOrParentRecord.projectId
+    val projectId get() = rootNoScheduleOrParentRecord.projectId // todo projectKey
+    val projectKey get() = rootNoScheduleOrParentRecord.projectKey
 
     override fun deleteFromParent() = rootTask.deleteNoScheduleOrParent(this)
 }

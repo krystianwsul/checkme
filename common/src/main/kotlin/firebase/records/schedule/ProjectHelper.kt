@@ -6,7 +6,7 @@ import com.krystianwsul.common.utils.ProjectKey
 
 sealed class ProjectHelper {
 
-    abstract fun getProjectId(scheduleJson: ScheduleJson): String // todo projectKey
+    abstract fun getProjectId(scheduleJson: ScheduleJson): String
 
     abstract fun getProjectKey(scheduleJson: ScheduleJson): ProjectKey<*>?
 

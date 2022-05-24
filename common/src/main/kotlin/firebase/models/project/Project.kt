@@ -240,7 +240,7 @@ sealed class Project<T : ProjectType>(
         }
 
         val hackInstanceSequence: Sequence<Instance> = getAllExistingInstances().map { it.getTopLevelInstance() }
-            .filter { it.getProject() == this }
+            .filter { it.getProjectId() == projectKey.key }
             .distinct()
             .filter { it.hasExistingChildRecursive } // filters out root existing instances
             .filterAndSort(startExactTimeStamp, endExactTimeStamp)

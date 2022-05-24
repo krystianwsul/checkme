@@ -24,6 +24,8 @@ class ProjectTask(override val project: Project<*>, private val taskRecord: Proj
 
     override val parent = project
 
+    override val projectId = project.projectKey.key
+
     private val noScheduleOrParentsMap = taskRecord.noScheduleOrParentRecords
         .mapValues { ProjectNoScheduleOrParent(this, it.value) }
         .toMutableMap()

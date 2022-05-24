@@ -84,7 +84,7 @@ class RootTask private constructor(
 
     private inner class NoScheduleOrParentException : Exception("task $name, $taskKey")
 
-    val projectId: String by projectIdCache
+    override val projectId by projectIdCache
 
     private val projectCache = invalidatableCache<Project<*>>(clearableInvalidatableManager) { invalidatableCache ->
         val projectIdRemovable = projectIdCache.invalidatableManager.addInvalidatable(invalidatableCache)

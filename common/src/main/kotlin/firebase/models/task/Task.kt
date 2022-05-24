@@ -37,6 +37,8 @@ sealed class Task(
 ) : Endable, CurrentOffset, DomainQueryMatchable, Assignable {
 
     abstract val parent: Parent
+
+    abstract val projectId: String
     abstract val project: Project<*>
 
     private val endDataProperty = invalidatableLazyCallbacks {

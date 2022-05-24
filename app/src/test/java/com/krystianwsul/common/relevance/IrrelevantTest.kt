@@ -123,6 +123,7 @@ class IrrelevantTest {
         val projectsFactory = mockk<ProjectsFactory> {
             every { getProjectForce(any()) } answers { project }
             every { projects } answers { mapOf(project.projectKey to project) }
+            every { projectTasks } returns listOf()
         }
 
         val rootModelChangeManager = RootModelChangeManager()

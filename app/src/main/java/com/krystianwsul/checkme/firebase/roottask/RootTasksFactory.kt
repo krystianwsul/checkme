@@ -129,8 +129,7 @@ class RootTasksFactory(
         .flatMap { it.getAllDependenciesLoadedTasks() }
         .flatMap { it.existingInstances.values }
 
-    override fun getRootTasksForProject(projectKey: ProjectKey<*>) =
-        rootTasks.values.filter { it.projectId == projectKey.key }
+    override fun getRootTasks() = rootTasks.values
 
     fun newTask(taskJson: RootTaskJson): RootTask {
         val taskKey = rootTasksLoader.addTask(taskJson)

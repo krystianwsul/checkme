@@ -130,27 +130,30 @@ sealed class Project<T : ProjectType>(
             val managerRemovable =
                 rootModelChangeManager.rootTaskProjectIdInvalidatableManager.addInvalidatable(invalidatableCache)
 
-            val allRootTasks = rootTaskProvider.getRootTasksForProject(projectKey)
+            val allRootTasks = rootTaskProvider.getRootTasks()
 
-            val rootTaskRemovables = allRootTasks.flatMap {
-                val projectIdRemovable = it.projectIdCache
-                    .invalidatableManager
-                    .addInvalidatable(invalidatableCache)
-
-                val dependenciesLoadedRemovable = it.rootTaskDependencyResolver
+            val loadedRemovables = allRootTasks.map {
+                it.rootTaskDependencyResolver
                     .dependenciesLoadedCache
                     .invalidatableManager
                     .addInvalidatable(invalidatableCache)
-
-                listOf(projectIdRemovable, dependenciesLoadedRemovable)
             }
 
             val loadedRootTasks = allRootTasks.filter { it.dependenciesLoaded }
 
-            InvalidatableCache.ValueHolder(loadedRootTasks) {
+            val projectIdRemovables = loadedRootTasks.map {
+                it.projectIdCache
+                    .invalidatableManager
+                    .addInvalidatable(invalidatableCache)
+            }
+
+            val myRootTasks = loadedRootTasks.filter { it.projectId == projectKey.key }
+
+            InvalidatableCache.ValueHolder(myRootTasks) {
                 managerRemovable.remove()
 
-                rootTaskRemovables.forEach { it.remove() }
+                loadedRemovables.forEach { it.remove() }
+                projectIdRemovables.forEach { it.remove() }
             }
         }
 
@@ -317,7 +320,7 @@ sealed class Project<T : ProjectType>(
         fun getRootTask(rootTaskKey: TaskKey.Root) =
             tryGetRootTask(rootTaskKey) ?: throw MissingRootTaskException(rootTaskKey)
 
-        fun getRootTasksForProject(projectKey: ProjectKey<*>): Collection<RootTask>
+        fun getRootTasks(): Collection<RootTask>
 
         fun updateProjectRecord(projectKey: ProjectKey<*>, dependentRootTaskKeys: Set<TaskKey.Root>)
 

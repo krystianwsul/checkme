@@ -647,7 +647,7 @@ class IrrelevantTest {
         val taskParent = mockk<RootTask.Parent> {
             every { rootModelChangeManager } returns existingInstanceChangeManager
 
-            every { getRootTasksForProject(any()) } answers {
+            every { getRootTasks() } answers {
                 if (taskDeleted)
                     emptyList()
                 else

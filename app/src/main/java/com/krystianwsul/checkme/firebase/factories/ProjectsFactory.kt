@@ -194,6 +194,8 @@ class ProjectsFactory(
 
     fun <T : ProjectType> getProjectForce(projectKey: ProjectKey<T>) = getProjectIfPresent(projectKey)!!
 
+    fun getSharedProjectForce(projectKey: ProjectKey.Shared) = getProjectIfPresent(projectKey) as SharedProject
+
     fun getProjectIfPresent(projectId: String) = projects.entries
         .singleOrNull { it.key.key == projectId }
         ?.value

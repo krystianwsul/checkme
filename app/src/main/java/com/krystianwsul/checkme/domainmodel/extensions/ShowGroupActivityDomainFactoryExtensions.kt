@@ -43,7 +43,7 @@ fun DomainFactory.getShowGroupData(
         is ShowGroupActivity.Parameters.Time -> Pair(displayText, null)
         is ShowGroupActivity.Parameters.Project -> Pair(
             parameters.projectKey
-                .let(projectsFactory::getProjectForce)
+                .let(projectsFactory::getSharedProjectForce)
                 .name,
             displayText,
         )

@@ -2,21 +2,22 @@ package com.krystianwsul.common.firebase.models.project
 
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.DeviceInfo
+import com.krystianwsul.common.domain.ProjectUndoData
 import com.krystianwsul.common.domain.TaskHierarchyContainer
 import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
 import com.krystianwsul.common.firebase.models.customtime.SharedCustomTime
 import com.krystianwsul.common.firebase.models.task.ProjectTask
+import com.krystianwsul.common.firebase.models.task.Task
+import com.krystianwsul.common.firebase.models.task.performIntervalUpdate
 import com.krystianwsul.common.firebase.models.taskhierarchy.ProjectTaskHierarchy
 import com.krystianwsul.common.firebase.models.users.ProjectUser
 import com.krystianwsul.common.firebase.models.users.RootUser
 import com.krystianwsul.common.firebase.records.AssignedToHelper
 import com.krystianwsul.common.firebase.records.project.SharedProjectRecord
+import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.time.Time
-import com.krystianwsul.common.utils.CustomTimeId
-import com.krystianwsul.common.utils.CustomTimeKey
-import com.krystianwsul.common.utils.ProjectType
-import com.krystianwsul.common.utils.UserKey
+import com.krystianwsul.common.utils.*
 
 class SharedProject(
     override val projectRecord: SharedProjectRecord,
@@ -28,9 +29,19 @@ class SharedProject(
     userCustomTimeProvider,
     rootTaskProvider,
     rootModelChangeManager,
-) {
+), Endable {
 
     override val projectKey = projectRecord.projectKey
+
+    var name
+        get() = projectRecord.name
+        set(name) {
+            check(name.isNotEmpty())
+
+            projectRecord.name = name
+        }
+
+    override val endExactTimeStamp get() = projectRecord.endTime?.let { ExactTimeStamp.Local(it) }
 
     private val remoteUsers = projectRecord.userRecords
         .mapValues { ProjectUser(this, it.value) }
@@ -111,6 +122,26 @@ class SharedProject(
         }
     }
 
+    fun setEndExactTimeStamp(now: ExactTimeStamp.Local, projectUndoData: ProjectUndoData, removeInstances: Boolean) {
+        requireNotDeleted()
+
+        getAllDependenciesLoadedTasks().filter { it.notDeleted }.forEach {
+            it.performIntervalUpdate { setEndData(Task.EndData(now, removeInstances), projectUndoData.taskUndoData) }
+        }
+
+        projectUndoData.projectKeys.add(projectKey)
+
+        projectRecord.endTime = now.long
+        projectRecord.endTimeOffset = now.offset
+    }
+
+    fun clearEndExactTimeStamp() {
+        requireDeleted()
+
+        projectRecord.endTime = null
+        projectRecord.endTimeOffset = null
+    }
+
     override fun deleteCustomTime(remoteCustomTime: Time.Custom.Project<ProjectType.Shared>) {
         check(remoteCustomTimes.containsKey(remoteCustomTime.id))
 
@@ -125,6 +156,14 @@ class SharedProject(
 
     override fun getProjectCustomTime(projectCustomTimeKey: CustomTimeKey.Project<ProjectType.Shared>): SharedCustomTime =
         getProjectCustomTime(projectCustomTimeKey.customTimeId)
+
+    override fun fixOffsets() {
+        super.fixOffsets()
+
+        endExactTimeStamp?.let {
+            if (projectRecord.endTimeOffset == null) projectRecord.endTimeOffset = it.offset
+        }
+    }
 
     override fun getAssignedTo(userKeys: Set<UserKey>) = remoteUsers.filterKeys { it in userKeys }
 }

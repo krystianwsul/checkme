@@ -58,7 +58,7 @@ class ProjectRootTaskIdTrackerTest {
             .taskKey
 
         val privateProject = domainFactory.projectsFactory.privateProject
-        val sharedProject = domainFactory.projectsFactory.getProjectForce(sharedProjectKey)
+        val sharedProject = domainFactory.projectsFactory.getSharedProjectForce(sharedProjectKey)
 
         val privateTask = domainFactory.rootTasksFactory.getRootTask(privateWeeklyTaskKey)
         val sharedTask = domainFactory.rootTasksFactory.getRootTask(sharedSingleTaskKey)

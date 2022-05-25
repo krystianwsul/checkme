@@ -21,6 +21,11 @@ class SharedProjectRecord(
     "${projectKey.key}/$PROJECT_JSON",
 ) {
 
+    var name by Committer(projectJson::name, committerKey)
+
+    var endTime by Committer(projectJson::endTime, committerKey)
+    var endTimeOffset by Committer(projectJson::endTimeOffset, committerKey)
+
     override val taskRecords = projectJson.tasks
         .mapValues { (id, taskJson) ->
             check(id.isNotEmpty())

@@ -27,6 +27,7 @@ import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.databinding.FragmentDebugBinding
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.extensions.debugName
 import com.krystianwsul.checkme.domainmodel.extensions.getGroupListData
 import com.krystianwsul.checkme.domainmodel.extensions.setDebugMode
 import com.krystianwsul.checkme.domainmodel.observeOnDomain
@@ -150,7 +151,7 @@ class DebugFragment : AbstractFragment() {
                             val projectTaskRows = waitingProjectTasks().map { it.name }.toList()
 
                             val projectRows = waitingProjectDetails().map { (project, taskKeys) ->
-                                listOf(project.name + " " + project.projectKey) + taskKeys.map { "\t" + it.toString() }
+                                listOf(project.debugName + " " + project.projectKey) + taskKeys.map { "\t" + it.toString() }
                             }.flatten()
 
                             val rootTaskRows = waitingRootTasks().map { it.name }.toList()

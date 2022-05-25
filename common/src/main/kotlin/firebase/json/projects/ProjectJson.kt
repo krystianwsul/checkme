@@ -8,13 +8,8 @@ import com.krystianwsul.common.utils.ProjectType
 
 interface ProjectJson<T : ProjectType> : RootTaskParentJson {
 
-    var name: String
-
     val startTime: Long
     var startTimeOffset: Double?
-
-    var endTime: Long?
-    var endTimeOffset: Double?
 
     val tasks: Map<String, TaskJson>
     var taskHierarchies: MutableMap<String, ProjectTaskHierarchyJson>

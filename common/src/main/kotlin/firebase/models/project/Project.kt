@@ -1,6 +1,5 @@
 package com.krystianwsul.common.firebase.models.project
 
-import com.krystianwsul.common.domain.ProjectUndoData
 import com.krystianwsul.common.domain.TaskHierarchyContainer
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.json.tasks.TaskJson
@@ -15,7 +14,6 @@ import com.krystianwsul.common.firebase.models.search.SearchContext
 import com.krystianwsul.common.firebase.models.task.ProjectTask
 import com.krystianwsul.common.firebase.models.task.RootTask
 import com.krystianwsul.common.firebase.models.task.Task
-import com.krystianwsul.common.firebase.models.task.performIntervalUpdate
 import com.krystianwsul.common.firebase.models.taskhierarchy.ProjectTaskHierarchy
 import com.krystianwsul.common.firebase.models.taskhierarchy.TaskHierarchy
 import com.krystianwsul.common.firebase.models.users.ProjectUser
@@ -30,8 +28,7 @@ sealed class Project<T : ProjectType>(
     userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
     val rootTaskProvider: RootTaskProvider,
     val rootModelChangeManager: RootModelChangeManager,
-) : Endable,
-    JsonTime.CustomTimeProvider,
+) : JsonTime.CustomTimeProvider,
     JsonTime.ProjectCustomTimeKeyProvider,
     Task.Parent,
     JsonTime.UserCustomTimeProvider by userCustomTimeProvider {
@@ -47,17 +44,7 @@ sealed class Project<T : ProjectType>(
 
     abstract val projectKey: ProjectKey<T>
 
-    var name
-        get() = projectRecord.name
-        set(name) {
-            check(name.isNotEmpty())
-
-            projectRecord.name = name
-        }
-
     val startExactTimeStamp by lazy { ExactTimeStamp.Local(projectRecord.startTime) }
-
-    override val endExactTimeStamp get() = projectRecord.endTime?.let { ExactTimeStamp.Local(it) }
 
     // don't want these to be mutable
     val projectTaskIds: Set<String> get() = _tasks.keys
@@ -161,26 +148,6 @@ sealed class Project<T : ProjectType>(
         return _tasks.values.filter { it.dependenciesLoaded } + rootTasksCache.value
     }
 
-    fun setEndExactTimeStamp(now: ExactTimeStamp.Local, projectUndoData: ProjectUndoData, removeInstances: Boolean) {
-        requireNotDeleted()
-
-        getAllDependenciesLoadedTasks().filter { it.notDeleted }.forEach {
-            it.performIntervalUpdate { setEndData(Task.EndData(now, removeInstances), projectUndoData.taskUndoData) }
-        }
-
-        projectUndoData.projectIds.add(projectKey)
-
-        projectRecord.endTime = now.long
-        projectRecord.endTimeOffset = now.offset
-    }
-
-    fun clearEndExactTimeStamp() {
-        requireDeleted()
-
-        projectRecord.endTime = null
-        projectRecord.endTimeOffset = null
-    }
-
     fun getProjectTaskHierarchy(id: TaskHierarchyId) = taskHierarchyContainer.getById(id)
 
     abstract fun deleteCustomTime(remoteCustomTime: Time.Custom.Project<T>)
@@ -281,12 +248,8 @@ sealed class Project<T : ProjectType>(
         }
     }
 
-    fun fixOffsets() {
+    open fun fixOffsets() {
         if (projectRecord.startTimeOffset == null) projectRecord.startTimeOffset = startExactTimeStamp.offset
-
-        endExactTimeStamp?.let {
-            if (projectRecord.endTimeOffset == null) projectRecord.endTimeOffset = it.offset
-        }
 
         _tasks.values.forEach { it.fixOffsets() }
     }

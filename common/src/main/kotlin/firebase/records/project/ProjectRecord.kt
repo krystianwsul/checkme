@@ -15,7 +15,7 @@ sealed class ProjectRecord<T : ProjectType>(
     create: Boolean,
     private val projectJson: ProjectJson<T>,
     private val _id: ProjectKey<T>,
-    committerKey: String,
+    protected val committerKey: String,
 ) : RemoteRecord(create), JsonTime.ProjectCustomTimeIdAndKeyProvider, TaskRecord.Parent {
 
     companion object {
@@ -49,13 +49,8 @@ sealed class ProjectRecord<T : ProjectType>(
 
     abstract val childKey: String
 
-    var name by Committer(projectJson::name, committerKey)
-
     val startTime get() = projectJson.startTime
     var startTimeOffset by Committer(projectJson::startTimeOffset, committerKey)
-
-    var endTime by Committer(projectJson::endTime, committerKey)
-    var endTimeOffset by Committer(projectJson::endTimeOffset, committerKey)
 
     override val children
         get() = taskRecords.values +

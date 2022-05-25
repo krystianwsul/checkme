@@ -9,10 +9,10 @@ import com.krystianwsul.checkme.viewmodels.DomainResult
 import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.models.ImageState
 import com.krystianwsul.common.firebase.models.Instance
+import com.krystianwsul.common.firebase.models.project.SharedProject
 import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.interrupt.DomainInterruptedException
 import com.krystianwsul.common.interrupt.InterruptionChecker
-import com.krystianwsul.common.utils.ProjectKey
 
 fun FirebaseUser.toUserInfo() = UserInfo(email!!, displayName!!, uid)
 
@@ -61,11 +61,13 @@ fun <T> Sequence<T>.takeAndHasMore(n: Int): Pair<List<T>, Boolean> {
 }
 
 fun Task.getProjectInfo(includeProjectDetails: Boolean = true): DetailsNode.ProjectInfo? {
-    val sharedProjectKey = project.projectKey as? ProjectKey.Shared
+    val sharedProject = project as? SharedProject
 
-    return if (isTopLevelTask() && sharedProjectKey != null) {
+    return if (isTopLevelTask() && sharedProject != null) {
         DetailsNode.ProjectInfo(
-            project.takeIf { includeProjectDetails }?.let { DetailsNode.ProjectDetails(it.name, sharedProjectKey) },
+            sharedProject.takeIf { includeProjectDetails }?.let {
+                DetailsNode.ProjectDetails(it.name, sharedProject.projectKey)
+            },
             DetailsNode.User.fromProjectUsers(getAssignedTo()),
         )
     } else {
@@ -76,13 +78,13 @@ fun Task.getProjectInfo(includeProjectDetails: Boolean = true): DetailsNode.Proj
 }
 
 fun Instance.getProjectInfo(includeProjectDetails: Boolean = true): DetailsNode.ProjectInfo? {
-    val sharedProjectKey = getProject().projectKey as? ProjectKey.Shared
+    val sharedProject = getProject() as? SharedProject
 
-    return if (isRootInstance() && sharedProjectKey != null) {
+    return if (isRootInstance() && sharedProject != null) {
         DetailsNode.ProjectInfo(
-            task.project
-                .takeIf { includeProjectDetails }
-                ?.let { DetailsNode.ProjectDetails(it.name, sharedProjectKey) },
+            sharedProject.takeIf { includeProjectDetails }?.let {
+                DetailsNode.ProjectDetails(it.name, sharedProject.projectKey)
+            },
             DetailsNode.User.fromProjectUsers(getAssignedTo()),
         )
     } else {

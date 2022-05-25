@@ -150,8 +150,7 @@ class ProjectsFactoryTest {
 
         projectKeysRelay.accept(setOf())
 
-        val name = "privateProject"
-        privateProjectRelay.accept(Snapshot(privateProjectKey.key, PrivateProjectJson(name)))
+        privateProjectRelay.accept(Snapshot(privateProjectKey.key, PrivateProjectJson()))
 
         val sharedProjectKey = ProjectKey.Shared("sharedProjectKey")
 
@@ -164,7 +163,6 @@ class ProjectsFactoryTest {
 
         initProjectsFactory()
 
-        assertEquals(name, projectsFactory.privateProject.name)
         assertTrue(projectsFactory.sharedProjects.isNotEmpty())
     }
 
@@ -177,21 +175,17 @@ class ProjectsFactoryTest {
 
         initProjectsFactory()
 
-        val name1 = "name1"
-
         emissionChecker.checkRemote {
-            privateProjectRelay.accept(Snapshot(privateProjectKey.key, PrivateProjectJson(name1)))
+            privateProjectRelay.accept(Snapshot(privateProjectKey.key, PrivateProjectJson(defaultTimesCreated = true)))
         }
-        assertEquals(projectsFactory.privateProject.name, name1)
+        assertEquals(projectsFactory.privateProject.defaultTimesCreated, true)
 
-        val name2 = "name2"
-
-        projectsFactory.privateProject.name = name2
+        projectsFactory.privateProject.defaultTimesCreated = false
         projectsFactory.save()
 
         // doesn't emit ChangeType.LOCAL
-        privateProjectRelay.accept(Snapshot(privateProjectKey.key, PrivateProjectJson(name2)))
-        assertEquals(projectsFactory.privateProject.name, name2)
+        privateProjectRelay.accept(Snapshot(privateProjectKey.key, PrivateProjectJson(defaultTimesCreated = false)))
+        assertEquals(projectsFactory.privateProject.defaultTimesCreated, false)
     }
 
     @Test

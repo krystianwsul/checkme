@@ -18,7 +18,9 @@ import com.krystianwsul.checkme.utils.time.toDateTimeTz
 import com.krystianwsul.common.domain.TaskUndoData
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.models.Instance
+import com.krystianwsul.common.firebase.models.project.PrivateProject
 import com.krystianwsul.common.firebase.models.project.Project
+import com.krystianwsul.common.firebase.models.project.SharedProject
 import com.krystianwsul.common.firebase.models.schedule.SingleSchedule
 import com.krystianwsul.common.firebase.models.search.FilterResult
 import com.krystianwsul.common.firebase.models.search.SearchContext
@@ -179,7 +181,7 @@ fun DomainUpdater.updatePhotoUrl(
 }.perform(this)
 
 fun DomainFactory.getUnscheduledTasks(projectKey: ProjectKey.Shared? = null): List<Task> {
-    val tasks = projectKey?.let(projectsFactory::getProjectForce)
+    val tasks = projectKey?.let(projectsFactory::getSharedProjectForce)
         ?.getAllDependenciesLoadedTasks()
         ?: getAllTasks()
 
@@ -405,7 +407,10 @@ fun Project<*>.toEntryDatas(
                 getDisplayName(),
                 childTaskDatas,
                 projectKey,
-                endExactTimeStamp == null,
+                when (this) {
+                    is PrivateProject -> true
+                    is SharedProject -> endExactTimeStamp == null
+                },
                 startExactTimeStamp.long,
             )
         )
@@ -414,7 +419,10 @@ fun Project<*>.toEntryDatas(
     }
 }
 
-fun Project<*>.getDisplayName() = name.takeIf { it.isNotEmpty() } ?: MyApplication.context.getString(R.string.myTasks)
+fun Project<*>.getDisplayName() = when (this) {
+    is PrivateProject -> MyApplication.context.getString(R.string.myTasks)
+    is SharedProject -> name
+}
 
 @CheckResult
 fun DomainUpdater.updateNotifications(notifierParams: Notifier.Params) =

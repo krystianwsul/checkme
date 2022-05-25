@@ -35,15 +35,15 @@ fun DomainFactory.getProjectListData(): ProjectListViewModel.Data {
 
 @CheckResult
 fun DomainUpdater.setProjectEndTimeStamps(
-        notificationType: DomainListenerManager.NotificationType,
-        projectIds: Set<ProjectKey<*>>,
-        removeInstances: Boolean,
+    notificationType: DomainListenerManager.NotificationType,
+    projectKeys: Set<ProjectKey.Shared>,
+    removeInstances: Boolean,
 ): Single<ProjectUndoData> = SingleDomainUpdate.create("setProjectEndTimeStamps") { now ->
-    check(projectIds.isNotEmpty())
+    check(projectKeys.isNotEmpty())
 
     val projectUndoData = ProjectUndoData()
 
-    val remoteProjects = projectIds.map { projectsFactory.getProjectForce(it) }.toSet()
+    val remoteProjects = projectKeys.map { projectsFactory.getSharedProjectForce(it) }.toSet()
 
     remoteProjects.forEach {
         it.requireNotDeleted()
@@ -58,10 +58,10 @@ fun DomainUpdater.clearProjectEndTimeStamps(
     notificationType: DomainListenerManager.NotificationType,
     projectUndoData: ProjectUndoData,
 ): Completable = CompletableDomainUpdate.create("clearProjectEndTimeStamps") {
-    check(projectUndoData.projectIds.isNotEmpty())
+    check(projectUndoData.projectKeys.isNotEmpty())
 
-    val remoteProjects = projectUndoData.projectIds
-        .map { projectsFactory.getProjectForce(it) }
+    val remoteProjects = projectUndoData.projectKeys
+        .map { projectsFactory.getSharedProjectForce(it) }
         .toSet()
 
     remoteProjects.forEach {

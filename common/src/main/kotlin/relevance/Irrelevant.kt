@@ -125,6 +125,7 @@ object Irrelevant {
              *
              * Update: no longer doing that second part
              */
+            @Suppress("REDUNDANT_ELSE_IN_WHEN")
             val irrelevantTaskHierarchies = (taskHierarchies - relevantTaskHierarchies).filter {
                 when (it) {
                     is ProjectTaskHierarchy -> true
@@ -188,7 +189,12 @@ object Irrelevant {
             remoteProjectRelevances = projects.mapValues { RemoteProjectRelevance(it.value) }
 
             projects.values
-                .filter { it.notDeleted }
+                .filter {
+                    when (it) {
+                        is PrivateProject -> true
+                        is SharedProject -> it.notDeleted
+                    }
+                }
                 .forEach { remoteProjectRelevances.getValue(it.projectKey).setRelevant() }
 
             taskRelevances.values

@@ -77,7 +77,7 @@ fun DomainFactory.getShowTaskInstancesData(
                     doneInstanceDescriptors = emptyList()
                 }
                 is ShowTaskInstancesActivity.Parameters.Project -> {
-                    val project = projectsFactory.getProjectForce(parameters.projectKey)
+                    val project = projectsFactory.getSharedProjectForce(parameters.projectKey)
 
                     parent = project
 
@@ -112,7 +112,7 @@ fun DomainFactory.getShowTaskInstancesData(
 
             ShowTaskInstancesViewModel.Data(
                 parameters.projectKey
-                    ?.let(projectsFactory::getProjectForce)
+                    ?.let(projectsFactory::getSharedProjectForce)
                     ?.name,
                 dataWrapper,
                 hasMore,

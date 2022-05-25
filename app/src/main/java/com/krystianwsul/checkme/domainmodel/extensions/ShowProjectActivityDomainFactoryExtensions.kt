@@ -9,7 +9,6 @@ import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
 import com.krystianwsul.checkme.domainmodel.update.SingleDomainUpdate
 import com.krystianwsul.checkme.viewmodels.ShowProjectViewModel
 import com.krystianwsul.common.firebase.DomainThreadChecker
-import com.krystianwsul.common.firebase.models.project.SharedProject
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.UserKey
 import io.reactivex.rxjava3.core.Completable
@@ -27,7 +26,7 @@ fun DomainFactory.getShowProjectData(projectId: ProjectKey.Shared?): ShowProject
     val name: String?
     val userListDatas: Set<ShowProjectViewModel.UserListData>
     if (projectId != null) {
-        val remoteProject = projectsFactory.getProjectForce(projectId) as SharedProject
+        val remoteProject = projectsFactory.getSharedProjectForce(projectId)
 
         name = remoteProject.name
 
@@ -87,7 +86,7 @@ fun DomainUpdater.updateProject(
 ): Completable = CompletableDomainUpdate.create("updateProject") {
     check(name.isNotEmpty())
 
-    val remoteProject = projectsFactory.getProjectForce(projectId) as SharedProject
+    val remoteProject = projectsFactory.getSharedProjectForce(projectId)
 
     remoteProject.name = name
 

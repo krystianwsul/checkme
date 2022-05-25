@@ -199,7 +199,7 @@ class ProjectLoaderTest {
     fun testChangeEmptyProject() {
         initialProjectEmissionChecker.checkRemote { acceptProject(PrivateProjectJson()) }
 
-        changeProjectEmissionChecker.checkOne { acceptProject(PrivateProjectJson(name = "asdf")) }
+        changeProjectEmissionChecker.checkOne { acceptProject(PrivateProjectJson(defaultTimesCreated = true)) }
     }
 
     @Test
@@ -249,12 +249,10 @@ class ProjectLoaderTest {
 
         initialProjectEmissionChecker.checkRemote { acceptProject(PrivateProjectJson()) }
 
-        val name = "project"
-
-        projectManager.value.single().name = name
+        projectManager.value.single().defaultTimesCreated = true
         projectManager.save(mockk(relaxed = true))
 
         // doesn't emit ChangeType.LOCAL
-        acceptProject(PrivateProjectJson(name = name))
+        acceptProject(PrivateProjectJson(defaultTimesCreated = true))
     }
 }

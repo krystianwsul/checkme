@@ -791,7 +791,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         val childNames = getInstanceNames(instance.getChildInstances(), now, true)
 
         val project = instance.getProject()
-            .takeIf { it is SharedProject }
+            .let { it as? SharedProject }
             ?.name
     }
 

@@ -279,7 +279,7 @@ class ChangeTypeSourceTest {
         acceptPrivateProject(PrivateProjectJson())
         checkEmpty()
 
-        projectEmissionChecker.checkRemote { acceptPrivateProject(PrivateProjectJson("name")) }
+        projectEmissionChecker.checkRemote { acceptPrivateProject(PrivateProjectJson(defaultTimesCreated = true)) }
     }
 
     @Test
@@ -322,7 +322,7 @@ class ChangeTypeSourceTest {
 
         projectEmissionChecker.checkRemote {
             acceptPrivateProject(
-                PrivateProjectJson(name = "nameChanged", rootTaskIds = mutableMapOf(taskKey1.taskId to true))
+                PrivateProjectJson(startTime = 1, rootTaskIds = mutableMapOf(taskKey1.taskId to true))
             )
         }
 

@@ -4,9 +4,8 @@ import com.krystianwsul.common.firebase.json.RootTaskParentJson
 import com.krystianwsul.common.firebase.json.customtimes.CustomTimeJson
 import com.krystianwsul.common.firebase.json.taskhierarchies.ProjectTaskHierarchyJson
 import com.krystianwsul.common.firebase.json.tasks.TaskJson
-import com.krystianwsul.common.utils.ProjectType
 
-interface ProjectJson<T : ProjectType> : RootTaskParentJson {
+interface ProjectJson : RootTaskParentJson {
 
     val startTime: Long
     var startTimeOffset: Double?

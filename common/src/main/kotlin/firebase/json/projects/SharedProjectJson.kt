@@ -4,7 +4,6 @@ import com.krystianwsul.common.firebase.json.customtimes.SharedCustomTimeJson
 import com.krystianwsul.common.firebase.json.taskhierarchies.ProjectTaskHierarchyJson
 import com.krystianwsul.common.firebase.json.tasks.SharedTaskJson
 import com.krystianwsul.common.firebase.json.users.UserJson
-import com.krystianwsul.common.utils.ProjectType
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -19,4 +18,4 @@ data class SharedProjectJson @JvmOverloads constructor(
     override var customTimes: MutableMap<String, SharedCustomTimeJson> = mutableMapOf(),
     var users: MutableMap<String, UserJson> = mutableMapOf(),
     override val rootTaskIds: MutableMap<String, Boolean> = mutableMapOf(),
-) : ProjectJson<ProjectType.Shared>
+) : ProjectJson

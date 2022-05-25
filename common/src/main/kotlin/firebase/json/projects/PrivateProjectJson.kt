@@ -5,7 +5,6 @@ import com.krystianwsul.common.firebase.json.Parsable
 import com.krystianwsul.common.firebase.json.customtimes.PrivateCustomTimeJson
 import com.krystianwsul.common.firebase.json.taskhierarchies.ProjectTaskHierarchyJson
 import com.krystianwsul.common.firebase.json.tasks.PrivateTaskJson
-import com.krystianwsul.common.utils.ProjectType
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -17,7 +16,7 @@ data class PrivateProjectJson @JvmOverloads constructor(
     override var customTimes: MutableMap<String, PrivateCustomTimeJson> = mutableMapOf(),
     var defaultTimesCreated: Boolean = false,
     override val rootTaskIds: MutableMap<String, Boolean> = mutableMapOf(),
-) : ProjectJson<ProjectType.Private>, Parsable, DeepCopy<PrivateProjectJson> {
+) : ProjectJson, Parsable, DeepCopy<PrivateProjectJson> {
 
     override fun deepCopy() = deepCopy(serializer(), this)
 }

@@ -190,9 +190,11 @@ object Irrelevant {
 
             projects.values
                 .filter {
+                    @Suppress("REDUNDANT_ELSE_IN_WHEN")
                     when (it) {
                         is PrivateProject -> true
                         is SharedProject -> it.notDeleted
+                        else -> throw UnsupportedOperationException()
                     }
                 }
                 .forEach { remoteProjectRelevances.getValue(it.projectKey).setRelevant() }

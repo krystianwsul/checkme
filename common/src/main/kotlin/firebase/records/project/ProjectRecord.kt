@@ -13,7 +13,7 @@ import com.krystianwsul.common.utils.*
 @Suppress("LeakingThis")
 sealed class ProjectRecord<T : ProjectType>(
     create: Boolean,
-    private val projectJson: ProjectJson<T>,
+    private val projectJson: ProjectJson,
     private val _id: ProjectKey<T>,
     protected val committerKey: String,
 ) : RemoteRecord(create), JsonTime.ProjectCustomTimeIdAndKeyProvider, TaskRecord.Parent {

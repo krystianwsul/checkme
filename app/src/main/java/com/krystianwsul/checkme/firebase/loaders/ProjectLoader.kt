@@ -8,7 +8,7 @@ import com.krystianwsul.checkme.utils.mapNotNull
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.ChangeWrapper
 import com.krystianwsul.common.firebase.json.Parsable
-import com.krystianwsul.common.firebase.records.project.ProjectRecord
+import com.krystianwsul.common.firebase.records.project.OwnedProjectRecord
 import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.utils.ProjectType
 import io.reactivex.rxjava3.core.Observable
@@ -29,12 +29,12 @@ interface ProjectLoader<T : ProjectType, U : Parsable> { // U: Project JSON type
     class InitialProjectEvent<T : ProjectType, U : Parsable>(
         // U: Project JSON type
         val projectManager: ProjectProvider.ProjectManager<T, U>,
-        val projectRecord: ProjectRecord<T>,
+        val projectRecord: OwnedProjectRecord<T>,
         val userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
     )
 
     class ChangeProjectEvent<T : ProjectType>(
-        val projectRecord: ProjectRecord<T>,
+        val projectRecord: OwnedProjectRecord<T>,
         val userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
     )
 
@@ -43,7 +43,7 @@ interface ProjectLoader<T : ProjectType, U : Parsable> { // U: Project JSON type
         snapshotObservable: Observable<Snapshot<U>>,
         private val domainDisposable: CompositeDisposable,
         override val projectManager: ProjectProvider.ProjectManager<T, U>,
-        initialProjectRecord: ProjectRecord<T>?,
+        initialProjectRecord: OwnedProjectRecord<T>?,
         private val userCustomTimeProviderSource: UserCustomTimeProviderSource,
         private val rootTaskKeyStore: RootTaskKeyStore,
     ) : ProjectLoader<T, U> {
@@ -52,7 +52,7 @@ interface ProjectLoader<T : ProjectType, U : Parsable> { // U: Project JSON type
 
         private data class ProjectRecordData<T : ProjectType>(
             val changeType: ChangeType,
-            val projectRecord: ProjectRecord<T>,
+            val projectRecord: OwnedProjectRecord<T>,
             val userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
         )
 

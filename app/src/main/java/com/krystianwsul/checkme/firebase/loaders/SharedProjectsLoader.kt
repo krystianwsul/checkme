@@ -10,7 +10,7 @@ import com.krystianwsul.checkme.utils.zipSingle
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.ChangeWrapper
 import com.krystianwsul.common.firebase.json.JsonWrapper
-import com.krystianwsul.common.firebase.records.project.SharedProjectRecord
+import com.krystianwsul.common.firebase.records.project.SharedOwnedProjectRecord
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ProjectType
 import io.reactivex.rxjava3.core.Observable
@@ -31,7 +31,7 @@ interface SharedProjectsLoader {
 
     val removeProjectEvents: Observable<RemoveProjectsEvent>
 
-    fun addProject(jsonWrapper: JsonWrapper): SharedProjectRecord
+    fun addProject(jsonWrapper: JsonWrapper): SharedOwnedProjectRecord
 
     class Impl(
         projectKeysObservable: Observable<Set<ProjectKey.Shared>>,
@@ -43,7 +43,7 @@ interface SharedProjectsLoader {
         private val rootTaskKeyStore: RootTaskKeyStore,
     ) : SharedProjectsLoader {
 
-        private data class AddedProjectData(val initialProjectRecord: SharedProjectRecord)
+        private data class AddedProjectData(val initialProjectRecord: SharedOwnedProjectRecord)
 
         private val addedProjectDatasRelay =
             ReplayRelay.create<ChangeWrapper<Map<ProjectKey.Shared, AddedProjectData?>>>()
@@ -68,7 +68,7 @@ interface SharedProjectsLoader {
         private data class ProjectEntry(
             val userChangeType: ChangeType,
             val databaseRx: DatabaseRx<Snapshot<JsonWrapper>>,
-            val initialProjectRecord: SharedProjectRecord?,
+            val initialProjectRecord: SharedOwnedProjectRecord?,
         )
 
         private val projectDatabaseRxObservable = addedProjectDatasRelay.distinctUntilChanged()
@@ -172,7 +172,7 @@ interface SharedProjectsLoader {
             }
             .replayImmediate()
 
-        override fun addProject(jsonWrapper: JsonWrapper): SharedProjectRecord {
+        override fun addProject(jsonWrapper: JsonWrapper): SharedOwnedProjectRecord {
             val sharedProjectRecord = projectManager.newProjectRecord(jsonWrapper)
 
             val addedProjectDatas = addedProjectDatasRelay.value!!

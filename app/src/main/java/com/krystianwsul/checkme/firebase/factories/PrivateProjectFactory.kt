@@ -7,8 +7,8 @@ import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
 import com.krystianwsul.common.firebase.models.project.PrivateProject
 import com.krystianwsul.common.firebase.models.project.Project
-import com.krystianwsul.common.firebase.records.project.PrivateProjectRecord
-import com.krystianwsul.common.firebase.records.project.ProjectRecord
+import com.krystianwsul.common.firebase.records.project.OwnedProjectRecord
+import com.krystianwsul.common.firebase.records.project.PrivateOwnedProjectRecord
 import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.utils.ProjectType
 import io.reactivex.rxjava3.disposables.CompositeDisposable
@@ -32,14 +32,14 @@ class PrivateProjectFactory(
 ) {
 
     override fun newProject(
-            projectRecord: ProjectRecord<ProjectType.Private>,
-            userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
-            rootTaskProvider: Project.RootTaskProvider,
-            rootModelChangeManager: RootModelChangeManager,
-        ) = PrivateProject(
-                projectRecord as PrivateProjectRecord,
-                userCustomTimeProvider,
-                rootTaskProvider,
-                rootModelChangeManager,
-        )
+        projectRecord: OwnedProjectRecord<ProjectType.Private>,
+        userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
+        rootTaskProvider: Project.RootTaskProvider,
+        rootModelChangeManager: RootModelChangeManager,
+    ) = PrivateProject(
+        projectRecord as PrivateOwnedProjectRecord,
+        userCustomTimeProvider,
+        rootTaskProvider,
+        rootModelChangeManager,
+    )
 }

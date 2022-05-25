@@ -13,14 +13,14 @@ import com.krystianwsul.common.firebase.models.taskhierarchy.ProjectTaskHierarch
 import com.krystianwsul.common.firebase.models.users.ProjectUser
 import com.krystianwsul.common.firebase.models.users.RootUser
 import com.krystianwsul.common.firebase.records.AssignedToHelper
-import com.krystianwsul.common.firebase.records.project.SharedProjectRecord
+import com.krystianwsul.common.firebase.records.project.SharedOwnedProjectRecord
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.*
 
 class SharedProject(
-    override val projectRecord: SharedProjectRecord,
+    override val projectRecord: SharedOwnedProjectRecord,
     userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
     rootTaskProvider: RootTaskProvider,
     rootModelChangeManager: RootModelChangeManager,

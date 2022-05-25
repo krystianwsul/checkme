@@ -10,11 +10,11 @@ import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ProjectType
 
-class PrivateProjectRecord(
+class PrivateOwnedProjectRecord(
     create: Boolean,
     override val projectKey: ProjectKey.Private,
     private val projectJson: PrivateOwnedProjectJson,
-) : ProjectRecord<ProjectType.Private>(
+) : OwnedProjectRecord<ProjectType.Private>(
     create,
     projectJson,
     projectKey,

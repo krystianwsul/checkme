@@ -4,12 +4,12 @@ import com.krystianwsul.common.firebase.json.schedule.PrivateScheduleWrapper
 import com.krystianwsul.common.firebase.json.tasks.PrivateTaskJson
 import com.krystianwsul.common.firebase.records.AssignedToHelper
 import com.krystianwsul.common.firebase.records.InstanceRecord
-import com.krystianwsul.common.firebase.records.project.PrivateProjectRecord
+import com.krystianwsul.common.firebase.records.project.PrivateOwnedProjectRecord
 import com.krystianwsul.common.utils.ScheduleId
 
 class PrivateTaskRecord(
     id: String,
-    privateProjectRecord: PrivateProjectRecord,
+    privateProjectRecord: PrivateOwnedProjectRecord,
     private val taskJson: PrivateTaskJson,
 ) : ProjectTaskRecord(false, id, privateProjectRecord, taskJson, AssignedToHelper.Private) {
 

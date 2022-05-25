@@ -5,7 +5,7 @@ import com.krystianwsul.common.firebase.json.tasks.ProjectTaskJson
 import com.krystianwsul.common.firebase.json.tasks.RootTaskJson
 import com.krystianwsul.common.firebase.records.AssignedToHelper
 import com.krystianwsul.common.firebase.records.noscheduleorparent.ProjectNoScheduleOrParentRecord
-import com.krystianwsul.common.firebase.records.project.ProjectRecord
+import com.krystianwsul.common.firebase.records.project.OwnedProjectRecord
 import com.krystianwsul.common.firebase.records.schedule.ProjectHelper
 import com.krystianwsul.common.firebase.records.schedule.ProjectRootDelegate
 import com.krystianwsul.common.utils.CustomTimeKey
@@ -13,7 +13,7 @@ import com.krystianwsul.common.utils.CustomTimeKey
 abstract class ProjectTaskRecord protected constructor(
     create: Boolean,
     id: String,
-    val projectRecord: ProjectRecord<*>,
+    val projectRecord: OwnedProjectRecord<*>,
     private val projectTaskJson: ProjectTaskJson,
     assignedToHelper: AssignedToHelper,
 ) : TaskRecord(

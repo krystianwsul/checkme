@@ -8,7 +8,7 @@ import com.krystianwsul.common.firebase.json.Parsable
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
 import com.krystianwsul.common.firebase.models.project.Project
-import com.krystianwsul.common.firebase.records.project.ProjectRecord
+import com.krystianwsul.common.firebase.records.project.OwnedProjectRecord
 import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.utils.ProjectType
 import io.reactivex.rxjava3.core.Observable
@@ -33,7 +33,7 @@ abstract class ProjectFactory<T : ProjectType, U : Parsable>(
         private set
 
     protected abstract fun newProject(
-        projectRecord: ProjectRecord<T>,
+        projectRecord: OwnedProjectRecord<T>,
         userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
         rootTaskProvider: Project.RootTaskProvider,
         rootModelChangeManager: RootModelChangeManager,

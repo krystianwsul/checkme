@@ -4,12 +4,12 @@ import com.krystianwsul.common.firebase.json.schedule.SharedScheduleWrapper
 import com.krystianwsul.common.firebase.json.tasks.SharedTaskJson
 import com.krystianwsul.common.firebase.records.AssignedToHelper
 import com.krystianwsul.common.firebase.records.InstanceRecord
-import com.krystianwsul.common.firebase.records.project.SharedProjectRecord
+import com.krystianwsul.common.firebase.records.project.SharedOwnedProjectRecord
 import com.krystianwsul.common.utils.ScheduleId
 
 class SharedTaskRecord(
     id: String,
-    sharedProjectRecord: SharedProjectRecord,
+    sharedProjectRecord: SharedOwnedProjectRecord,
     private val taskJson: SharedTaskJson,
 ) : ProjectTaskRecord(false, id, sharedProjectRecord, taskJson, AssignedToHelper.Shared) {
 

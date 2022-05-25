@@ -20,7 +20,7 @@ import com.krystianwsul.common.firebase.json.tasks.RootTaskJson
 import com.krystianwsul.common.firebase.json.users.UserWrapper
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
-import com.krystianwsul.common.firebase.records.project.PrivateProjectRecord
+import com.krystianwsul.common.firebase.records.project.PrivateOwnedProjectRecord
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ProjectType
@@ -122,7 +122,7 @@ class ProjectFactoryTest {
 
         override val projectManager = AndroidPrivateProjectManager(userInfo)
 
-        private val projectRecord = PrivateProjectRecord(projectKey, PrivateOwnedProjectJson())
+        private val projectRecord = PrivateOwnedProjectRecord(projectKey, PrivateOwnedProjectJson())
 
         private val event = ProjectLoader.InitialProjectEvent(projectManager, projectRecord, mockk())
 

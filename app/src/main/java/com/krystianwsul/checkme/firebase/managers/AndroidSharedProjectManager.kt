@@ -5,7 +5,7 @@ import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.json.JsonWrapper
 import com.krystianwsul.common.firebase.managers.SharedProjectManager
-import com.krystianwsul.common.firebase.records.project.SharedProjectRecord
+import com.krystianwsul.common.firebase.records.project.SharedOwnedProjectRecord
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ProjectType
 
@@ -15,7 +15,7 @@ class AndroidSharedProjectManager(databaseWrapper: DatabaseWrapper) :
 
     private fun Snapshot<*>.toKey() = ProjectKey.Shared(key)
 
-    private fun Snapshot<JsonWrapper>.toRecord() = SharedProjectRecord(
+    private fun Snapshot<JsonWrapper>.toRecord() = SharedOwnedProjectRecord(
         this@AndroidSharedProjectManager,
         toKey(),
         value!!,

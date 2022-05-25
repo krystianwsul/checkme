@@ -29,7 +29,7 @@ import com.krystianwsul.common.firebase.json.users.UserJson
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
 import com.krystianwsul.common.firebase.models.task.ProjectRootTaskIdTracker
-import com.krystianwsul.common.firebase.records.project.ProjectRecord
+import com.krystianwsul.common.firebase.records.project.OwnedProjectRecord
 import com.krystianwsul.common.firebase.records.task.RootTaskRecord
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.ProjectKey
@@ -127,7 +127,9 @@ class ChangeTypeSourceTest {
 
     private fun immediateUserCustomTimeProviderSource() = object : UserCustomTimeProviderSource {
 
-        override fun getUserCustomTimeProvider(projectRecord: ProjectRecord<*>) = mockk<JsonTime.UserCustomTimeProvider>()
+        override fun getUserCustomTimeProvider(projectRecord: OwnedProjectRecord<*>) =
+            mockk<JsonTime.UserCustomTimeProvider>()
+
         override fun getUserCustomTimeProvider(rootTaskRecord: RootTaskRecord) = mockk<JsonTime.UserCustomTimeProvider>()
     }
 

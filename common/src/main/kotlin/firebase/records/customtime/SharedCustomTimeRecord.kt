@@ -1,7 +1,7 @@
 package com.krystianwsul.common.firebase.records.customtime
 
 import com.krystianwsul.common.firebase.json.customtimes.SharedCustomTimeJson
-import com.krystianwsul.common.firebase.records.project.SharedProjectRecord
+import com.krystianwsul.common.firebase.records.project.SharedOwnedProjectRecord
 import com.krystianwsul.common.utils.CustomTimeId
 import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.ProjectType
@@ -10,7 +10,7 @@ import com.krystianwsul.common.utils.UserKey
 
 class SharedCustomTimeRecord(
     override val id: CustomTimeId.Project.Shared,
-    override val projectRecord: SharedProjectRecord,
+    override val projectRecord: SharedOwnedProjectRecord,
     override val customTimeJson: SharedCustomTimeJson,
 ) : ProjectCustomTimeRecord<ProjectType.Shared>(false) {
 

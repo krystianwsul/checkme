@@ -9,12 +9,12 @@ import com.krystianwsul.common.firebase.records.task.TaskRecord
 import com.krystianwsul.common.firebase.records.users.ProjectUserRecord
 import com.krystianwsul.common.utils.*
 
-class SharedProjectRecord(
+class SharedOwnedProjectRecord(
     private val parent: Parent,
     create: Boolean,
     override val projectKey: ProjectKey.Shared,
     private val jsonWrapper: JsonWrapper,
-) : ProjectRecord<ProjectType.Shared>(
+) : OwnedProjectRecord<ProjectType.Shared>(
     create,
     jsonWrapper.projectJson,
     projectKey,

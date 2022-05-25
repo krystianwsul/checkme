@@ -6,21 +6,21 @@ import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.ChangeWrapper
 import com.krystianwsul.common.firebase.json.projects.PrivateOwnedProjectJson
 import com.krystianwsul.common.firebase.managers.PrivateProjectManager
-import com.krystianwsul.common.firebase.records.project.PrivateProjectRecord
+import com.krystianwsul.common.firebase.records.project.PrivateOwnedProjectRecord
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.ProjectType
 
 class AndroidPrivateProjectManager(private val userInfo: UserInfo) :
     PrivateProjectManager(), ProjectProvider.ProjectManager<ProjectType.Private, PrivateOwnedProjectJson> {
 
-    private fun Snapshot<PrivateOwnedProjectJson>.toRecord() = PrivateProjectRecord(
+    private fun Snapshot<PrivateOwnedProjectJson>.toRecord() = PrivateOwnedProjectRecord(
         userInfo.key.toPrivateProjectKey(),
         value!!,
     )
 
     private var first = true
 
-    override fun set(snapshot: Snapshot<PrivateOwnedProjectJson>): ChangeWrapper<PrivateProjectRecord>? {
+    override fun set(snapshot: Snapshot<PrivateOwnedProjectJson>): ChangeWrapper<PrivateOwnedProjectRecord>? {
         val changeWrapper = set(
             { it.single().createObject != snapshot.value },
             {
@@ -31,10 +31,10 @@ class AndroidPrivateProjectManager(private val userInfo: UserInfo) :
 
                     snapshot.takeIf { it.exists }
                         ?.toRecord()
-                                ?: PrivateProjectRecord(
-                                    userInfo,
-                                    PrivateOwnedProjectJson(startTime = now.long, startTimeOffset = now.offset),
-                                )
+                        ?: PrivateOwnedProjectRecord(
+                            userInfo,
+                            PrivateOwnedProjectJson(startTime = now.long, startTimeOffset = now.offset),
+                        )
                     } else {
                         snapshot.toRecord()
                     }

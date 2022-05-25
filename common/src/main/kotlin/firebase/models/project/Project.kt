@@ -18,7 +18,7 @@ import com.krystianwsul.common.firebase.models.taskhierarchy.ProjectTaskHierarch
 import com.krystianwsul.common.firebase.models.taskhierarchy.TaskHierarchy
 import com.krystianwsul.common.firebase.models.users.ProjectUser
 import com.krystianwsul.common.firebase.records.AssignedToHelper
-import com.krystianwsul.common.firebase.records.project.ProjectRecord
+import com.krystianwsul.common.firebase.records.project.OwnedProjectRecord
 import com.krystianwsul.common.interrupt.InterruptionChecker
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.*
@@ -35,7 +35,7 @@ sealed class Project<T : ProjectType>(
 
     val clearableInvalidatableManager = ClearableInvalidatableManager()
 
-    abstract val projectRecord: ProjectRecord<T>
+    abstract val projectRecord: OwnedProjectRecord<T>
 
     @Suppress("PropertyName")
     protected abstract val _tasks: MutableMap<String, ProjectTask>

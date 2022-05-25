@@ -7,8 +7,8 @@ import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
 import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.project.SharedProject
-import com.krystianwsul.common.firebase.records.project.ProjectRecord
-import com.krystianwsul.common.firebase.records.project.SharedProjectRecord
+import com.krystianwsul.common.firebase.records.project.OwnedProjectRecord
+import com.krystianwsul.common.firebase.records.project.SharedOwnedProjectRecord
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.utils.ProjectType
@@ -33,12 +33,12 @@ class SharedProjectFactory(
 ) {
 
     override fun newProject(
-        projectRecord: ProjectRecord<ProjectType.Shared>,
+        projectRecord: OwnedProjectRecord<ProjectType.Shared>,
         userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
         rootTaskProvider: Project.RootTaskProvider,
         rootModelChangeManager: RootModelChangeManager,
     ) = SharedProject(
-        projectRecord as SharedProjectRecord,
+        projectRecord as SharedOwnedProjectRecord,
         userCustomTimeProvider,
         rootTaskProvider,
         rootModelChangeManager,

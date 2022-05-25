@@ -7,7 +7,7 @@ import com.krystianwsul.common.firebase.models.task.ProjectTask
 import com.krystianwsul.common.firebase.models.taskhierarchy.ProjectTaskHierarchy
 import com.krystianwsul.common.firebase.models.users.ProjectUser
 import com.krystianwsul.common.firebase.records.AssignedToHelper
-import com.krystianwsul.common.firebase.records.project.PrivateProjectRecord
+import com.krystianwsul.common.firebase.records.project.PrivateOwnedProjectRecord
 import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.CustomTimeId
@@ -16,7 +16,7 @@ import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.UserKey
 
 class PrivateProject(
-    override val projectRecord: PrivateProjectRecord,
+    override val projectRecord: PrivateOwnedProjectRecord,
     userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
     rootTaskProvider: RootTaskProvider,
     rootModelChangeManager: RootModelChangeManager,

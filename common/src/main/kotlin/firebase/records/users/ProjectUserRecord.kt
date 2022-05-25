@@ -4,13 +4,13 @@ import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.firebase.UserData
 import com.krystianwsul.common.firebase.json.users.UserJson
 import com.krystianwsul.common.firebase.records.RemoteRecord
-import com.krystianwsul.common.firebase.records.project.SharedProjectRecord
+import com.krystianwsul.common.firebase.records.project.SharedOwnedProjectRecord
 
 
 class ProjectUserRecord(
-        create: Boolean,
-        private val remoteProjectRecord: SharedProjectRecord,
-        override val createObject: UserJson
+    create: Boolean,
+    private val remoteProjectRecord: SharedOwnedProjectRecord,
+    override val createObject: UserJson
 ) : RemoteRecord(create) {
 
     companion object {

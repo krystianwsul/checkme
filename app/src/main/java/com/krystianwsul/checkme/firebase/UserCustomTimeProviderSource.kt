@@ -4,9 +4,9 @@ import com.krystianwsul.checkme.firebase.factories.FriendsFactory
 import com.krystianwsul.checkme.firebase.factories.MyUserFactory
 import com.krystianwsul.checkme.firebase.loaders.FriendsLoader
 import com.krystianwsul.checkme.utils.getCurrentValue
-import com.krystianwsul.common.firebase.records.project.PrivateProjectRecord
-import com.krystianwsul.common.firebase.records.project.ProjectRecord
-import com.krystianwsul.common.firebase.records.project.SharedProjectRecord
+import com.krystianwsul.common.firebase.records.project.OwnedProjectRecord
+import com.krystianwsul.common.firebase.records.project.PrivateOwnedProjectRecord
+import com.krystianwsul.common.firebase.records.project.SharedOwnedProjectRecord
 import com.krystianwsul.common.firebase.records.task.RootTaskRecord
 import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.time.Time
@@ -16,7 +16,7 @@ import io.reactivex.rxjava3.core.Single
 
 interface UserCustomTimeProviderSource {
 
-    fun getUserCustomTimeProvider(projectRecord: ProjectRecord<*>): JsonTime.UserCustomTimeProvider
+    fun getUserCustomTimeProvider(projectRecord: OwnedProjectRecord<*>): JsonTime.UserCustomTimeProvider
     fun getUserCustomTimeProvider(rootTaskRecord: RootTaskRecord): JsonTime.UserCustomTimeProvider
 
     class Impl(
@@ -34,25 +34,25 @@ interface UserCustomTimeProviderSource {
         }
 
         override fun getUserCustomTimeProvider(
-            projectRecord: ProjectRecord<*>,
+            projectRecord: OwnedProjectRecord<*>,
         ): JsonTime.UserCustomTimeProvider {
             val customTimeKeys = getUserCustomTimeKeys(projectRecord)
             val foreignUserKeys = getForeignUserKeys(customTimeKeys)
 
             return when (projectRecord) {
-                is PrivateProjectRecord -> {
+                is PrivateOwnedProjectRecord -> {
                     check(foreignUserKeys.isEmpty())
 
                     userCustomTimeProvider
                 }
-                is SharedProjectRecord -> getUserCustomTimeProvider(foreignUserKeys) {
+                is SharedOwnedProjectRecord -> getUserCustomTimeProvider(foreignUserKeys) {
                     friendsLoader.userKeyStore.requestCustomTimeUsers(projectRecord.projectKey, foreignUserKeys)
                 }
                 else -> throw IllegalArgumentException()
             }
         }
 
-        private fun getUserCustomTimeKeys(projectRecord: ProjectRecord<*>): Set<CustomTimeKey.User> {
+        private fun getUserCustomTimeKeys(projectRecord: OwnedProjectRecord<*>): Set<CustomTimeKey.User> {
             return projectRecord.taskRecords
                 .values
                 .flatMap { it.getUserCustomTimeKeys() }

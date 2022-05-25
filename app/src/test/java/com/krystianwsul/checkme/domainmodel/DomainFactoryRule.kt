@@ -33,7 +33,7 @@ import com.krystianwsul.common.firebase.json.projects.PrivateOwnedProjectJson
 import com.krystianwsul.common.firebase.json.tasks.RootTaskJson
 import com.krystianwsul.common.firebase.json.users.UserWrapper
 import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
-import com.krystianwsul.common.firebase.records.project.PrivateProjectRecord
+import com.krystianwsul.common.firebase.records.project.PrivateOwnedProjectRecord
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.HourMinute
@@ -246,7 +246,7 @@ class DomainFactoryRule : TestRule {
             mockk(relaxed = true),
             ProjectLoader.InitialProjectEvent(
                 mockk(relaxed = true),
-                PrivateProjectRecord(
+                PrivateOwnedProjectRecord(
                     deviceDbInfo.userInfo,
                     PrivateOwnedProjectJson(
                         startTime = domainFactoryStartTime.long,

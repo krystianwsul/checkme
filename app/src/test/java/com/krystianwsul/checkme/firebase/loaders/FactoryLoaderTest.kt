@@ -16,8 +16,8 @@ import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.DatabaseCallback
 import com.krystianwsul.common.firebase.json.JsonWrapper
-import com.krystianwsul.common.firebase.json.projects.PrivateProjectJson
-import com.krystianwsul.common.firebase.json.projects.SharedProjectJson
+import com.krystianwsul.common.firebase.json.projects.PrivateOwnedProjectJson
+import com.krystianwsul.common.firebase.json.projects.SharedOwnedProjectJson
 import com.krystianwsul.common.firebase.json.tasks.PrivateTaskJson
 import com.krystianwsul.common.firebase.json.tasks.RootTaskJson
 import com.krystianwsul.common.firebase.json.tasks.SharedTaskJson
@@ -89,7 +89,7 @@ class FactoryLoaderTest {
 
     private class TestDatabase : FactoryProvider.Database() {
 
-        val privateProjectObservable = PublishRelay.create<PrivateProjectJson>()
+        val privateProjectObservable = PublishRelay.create<PrivateOwnedProjectJson>()
         val sharedProjectObservable = PublishRelay.create<Snapshot<JsonWrapper>>()
         val userObservable = PublishRelay.create<Snapshot<UserWrapper>>()
 
@@ -210,7 +210,7 @@ class FactoryLoaderTest {
 
         testFactoryProvider.database
             .privateProjectObservable
-            .accept(PrivateProjectJson())
+            .accept(PrivateOwnedProjectJson())
 
         assertNotNull(domainFactoryRelay.value)
     }
@@ -235,7 +235,7 @@ class FactoryLoaderTest {
 
         testFactoryProvider.database
             .privateProjectObservable
-            .accept(PrivateProjectJson())
+            .accept(PrivateOwnedProjectJson())
 
         assertNull(domainFactoryRelay.value)
 
@@ -244,7 +244,7 @@ class FactoryLoaderTest {
             .accept(
                 Snapshot(
                     sharedProjectKey,
-                    JsonWrapper(SharedProjectJson(users = mutableMapOf(userInfo.key.key to UserJson()))),
+                    JsonWrapper(SharedOwnedProjectJson(users = mutableMapOf(userInfo.key.key to UserJson()))),
                 )
             )
 
@@ -269,7 +269,7 @@ class FactoryLoaderTest {
         testFactoryProvider.database
             .privateProjectObservable
             .accept(
-                PrivateProjectJson(
+                PrivateOwnedProjectJson(
                     tasks = mutableMapOf(privateTaskKey to PrivateTaskJson(name = privateTaskKey))
                 )
             )
@@ -282,7 +282,7 @@ class FactoryLoaderTest {
                 Snapshot(
                     sharedProjectKey,
                     JsonWrapper(
-                        SharedProjectJson(
+                        SharedOwnedProjectJson(
                             users = mutableMapOf(userInfo.key.key to UserJson()),
                             tasks = mutableMapOf(sharedTaskKey to SharedTaskJson(name = sharedTaskKey))
                         )
@@ -307,7 +307,7 @@ class FactoryLoaderTest {
         testFactoryProvider.database
             .privateProjectObservable
             .accept(
-                PrivateProjectJson(
+                PrivateOwnedProjectJson(
                     tasks = mutableMapOf(privateTaskKey to PrivateTaskJson(name = privateTaskKey))
                 )
             )
@@ -318,7 +318,7 @@ class FactoryLoaderTest {
                 Snapshot(
                     sharedProjectKey,
                     JsonWrapper(
-                        SharedProjectJson(
+                        SharedOwnedProjectJson(
                             users = mutableMapOf(userInfo.key.key to UserJson()),
                             tasks = mutableMapOf(sharedTaskKey to SharedTaskJson(name = sharedTaskKey))
                         )
@@ -337,7 +337,7 @@ class FactoryLoaderTest {
 
             domain.checkChange {
                 database.privateProjectObservable.accept(
-                    PrivateProjectJson(tasks = mutableMapOf(privateTaskKey to PrivateTaskJson("task")))
+                    PrivateOwnedProjectJson(tasks = mutableMapOf(privateTaskKey to PrivateTaskJson("task")))
                 )
             }
         }

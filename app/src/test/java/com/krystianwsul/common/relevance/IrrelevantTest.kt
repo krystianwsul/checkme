@@ -8,7 +8,7 @@ import com.krystianwsul.checkme.firebase.roottask.RootTasksLoader
 import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.DomainThreadChecker
-import com.krystianwsul.common.firebase.json.projects.PrivateProjectJson
+import com.krystianwsul.common.firebase.json.projects.PrivateOwnedProjectJson
 import com.krystianwsul.common.firebase.json.schedule.*
 import com.krystianwsul.common.firebase.json.taskhierarchies.NestedTaskHierarchyJson
 import com.krystianwsul.common.firebase.json.taskhierarchies.ProjectTaskHierarchyJson
@@ -99,7 +99,7 @@ class IrrelevantTest {
 
         var now = ExactTimeStamp.Local(day1, hour1)
 
-        val projectJson = PrivateProjectJson(startTime = now.long)
+        val projectJson = PrivateOwnedProjectJson(startTime = now.long)
         val projectRecord = PrivateProjectRecord(userInfo, projectJson)
 
         val rootTasksManager = AndroidRootTasksManager(databaseWrapper)
@@ -260,7 +260,7 @@ class IrrelevantTest {
 
         val taskId = "taskKey"
 
-        val projectJson = PrivateProjectJson(
+        val projectJson = PrivateOwnedProjectJson(
             startTime = now.long,
             tasks = mutableMapOf(taskId to taskJson),
         )
@@ -389,7 +389,7 @@ class IrrelevantTest {
         )
         val taskHierarchy2Id = "taskHierarchy2"
 
-        val projectJson = PrivateProjectJson(
+        val projectJson = PrivateOwnedProjectJson(
             startTime = now.long,
             tasks = mutableMapOf(
                 parentTaskId to parentTaskJson,
@@ -534,7 +534,7 @@ class IrrelevantTest {
         val child2TaskId = "child2TaskKey"
         val child2TaskKey = TaskKey.Project(projectKey, child2TaskId)
 
-        val projectJson = PrivateProjectJson(
+        val projectJson = PrivateOwnedProjectJson(
             startTime = now.long,
             startTimeOffset = now.offset,
             tasks = mutableMapOf(
@@ -679,7 +679,7 @@ class IrrelevantTest {
         task = RootTask(taskRecord, taskParent, mockk())
 
         val projectKey = ProjectKey.Private(userKey.key)
-        val projectJson = PrivateProjectJson(startTime = now.long)
+        val projectJson = PrivateOwnedProjectJson(startTime = now.long)
 
         val projectRecord = PrivateProjectRecord(projectKey, projectJson)
         project = PrivateProject(projectRecord, mockk(), taskParent, existingInstanceChangeManager)

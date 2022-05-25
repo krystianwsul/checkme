@@ -18,7 +18,7 @@ import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.json.JsonWrapper
-import com.krystianwsul.common.firebase.json.projects.PrivateProjectJson
+import com.krystianwsul.common.firebase.json.projects.PrivateOwnedProjectJson
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.InstanceKey
@@ -99,7 +99,7 @@ interface FactoryProvider {
 
     abstract class Database : FriendsProvider.Database(), RootTasksLoader.Provider {
 
-        abstract fun getPrivateProjectObservable(projectKey: ProjectKey.Private): Observable<Snapshot<PrivateProjectJson>>
+        abstract fun getPrivateProjectObservable(projectKey: ProjectKey.Private): Observable<Snapshot<PrivateOwnedProjectJson>>
 
         abstract fun getSharedProjectObservable(projectKey: ProjectKey.Shared): Observable<Snapshot<JsonWrapper>>
     }

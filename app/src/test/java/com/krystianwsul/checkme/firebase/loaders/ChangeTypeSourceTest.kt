@@ -21,8 +21,8 @@ import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.json.JsonWrapper
 import com.krystianwsul.common.firebase.json.noscheduleorparent.RootNoScheduleOrParentJson
-import com.krystianwsul.common.firebase.json.projects.PrivateProjectJson
-import com.krystianwsul.common.firebase.json.projects.SharedProjectJson
+import com.krystianwsul.common.firebase.json.projects.PrivateOwnedProjectJson
+import com.krystianwsul.common.firebase.json.projects.SharedOwnedProjectJson
 import com.krystianwsul.common.firebase.json.taskhierarchies.NestedTaskHierarchyJson
 import com.krystianwsul.common.firebase.json.tasks.RootTaskJson
 import com.krystianwsul.common.firebase.json.users.UserJson
@@ -93,7 +93,7 @@ class ChangeTypeSourceTest {
 
     private lateinit var triggerRelay: PublishRelay<Unit>
 
-    private lateinit var privateProjectSnapshotObservable: PublishRelay<Snapshot<PrivateProjectJson>>
+    private lateinit var privateProjectSnapshotObservable: PublishRelay<Snapshot<PrivateOwnedProjectJson>>
     private lateinit var rootTasksLoaderProvider: TestRootTasksLoaderProvider
 
     private lateinit var rootTasksLoader: RootTasksLoader
@@ -260,7 +260,7 @@ class ChangeTypeSourceTest {
         checkEmpty()
     }
 
-    private fun acceptPrivateProject(privateProjectJson: PrivateProjectJson) {
+    private fun acceptPrivateProject(privateProjectJson: PrivateOwnedProjectJson) {
         privateProjectSnapshotObservable.accept(Snapshot(privateProjectId, privateProjectJson))
 
         triggerRelay.accept(Unit)
@@ -276,21 +276,21 @@ class ChangeTypeSourceTest {
         setup()
 
         // first load event for projectsFactory doesn't emit a change... apparently.
-        acceptPrivateProject(PrivateProjectJson())
+        acceptPrivateProject(PrivateOwnedProjectJson())
         checkEmpty()
 
-        projectEmissionChecker.checkRemote { acceptPrivateProject(PrivateProjectJson(defaultTimesCreated = true)) }
+        projectEmissionChecker.checkRemote { acceptPrivateProject(PrivateOwnedProjectJson(defaultTimesCreated = true)) }
     }
 
     @Test
     fun testSingleProjectSingleTask() {
         setup()
 
-        acceptPrivateProject(PrivateProjectJson())
+        acceptPrivateProject(PrivateOwnedProjectJson())
         checkEmpty()
 
         projectEmissionChecker.checkRemote {
-            acceptPrivateProject(PrivateProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true)))
+            acceptPrivateProject(PrivateOwnedProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true)))
         }
 
         taskEmissionChecker.checkRemote {
@@ -313,16 +313,16 @@ class ChangeTypeSourceTest {
     fun testSingleProjectSingleTaskChangeProjectBeforeTask() {
         setup()
 
-        acceptPrivateProject(PrivateProjectJson())
+        acceptPrivateProject(PrivateOwnedProjectJson())
         checkEmpty()
 
         projectEmissionChecker.checkRemote {
-            acceptPrivateProject(PrivateProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true)))
+            acceptPrivateProject(PrivateOwnedProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true)))
         }
 
         projectEmissionChecker.checkRemote {
             acceptPrivateProject(
-                PrivateProjectJson(startTime = 1, rootTaskIds = mutableMapOf(taskKey1.taskId to true))
+                PrivateOwnedProjectJson(startTime = 1, rootTaskIds = mutableMapOf(taskKey1.taskId to true))
             )
         }
 
@@ -346,17 +346,17 @@ class ChangeTypeSourceTest {
     fun testSingleProjectSingleTaskChangeProjectBeforeTaskByStrippingOutSecondTask() {
         setup()
 
-        acceptPrivateProject(PrivateProjectJson())
+        acceptPrivateProject(PrivateOwnedProjectJson())
         checkEmpty()
 
         projectEmissionChecker.checkRemote {
             acceptPrivateProject(
-                PrivateProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true, taskKey2.taskId to true))
+                PrivateOwnedProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true, taskKey2.taskId to true))
             )
         }
 
         projectEmissionChecker.checkRemote {
-            acceptPrivateProject(PrivateProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true)))
+            acceptPrivateProject(PrivateOwnedProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true)))
         }
 
         taskEmissionChecker.checkRemote {
@@ -379,12 +379,12 @@ class ChangeTypeSourceTest {
     fun testSingleProjectSingleTaskChangeProjectBeforeTaskByStrippingOutSecondTaskDifferentOrder() {
         setup()
 
-        acceptPrivateProject(PrivateProjectJson())
+        acceptPrivateProject(PrivateOwnedProjectJson())
         checkEmpty()
 
         projectEmissionChecker.checkRemote {
             acceptPrivateProject(
-                PrivateProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true, taskKey2.taskId to true))
+                PrivateOwnedProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true, taskKey2.taskId to true))
             )
         }
 
@@ -404,7 +404,7 @@ class ChangeTypeSourceTest {
         }
 
         projectEmissionChecker.checkRemote {
-            acceptPrivateProject(PrivateProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true)))
+            acceptPrivateProject(PrivateOwnedProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true)))
         }
     }
 
@@ -412,11 +412,11 @@ class ChangeTypeSourceTest {
     fun testSingleProjectChildTask() {
         setup()
 
-        acceptPrivateProject(PrivateProjectJson())
+        acceptPrivateProject(PrivateOwnedProjectJson())
         checkEmpty()
 
         projectEmissionChecker.checkRemote {
-            acceptPrivateProject(PrivateProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true)))
+            acceptPrivateProject(PrivateOwnedProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true)))
         }
 
         taskEmissionChecker.checkRemote {
@@ -455,11 +455,11 @@ class ChangeTypeSourceTest {
     fun testSingleProjectTwoChildTasksButOneRemovedSwitchOrder() {
         setup()
 
-        acceptPrivateProject(PrivateProjectJson())
+        acceptPrivateProject(PrivateOwnedProjectJson())
         checkEmpty()
 
         projectEmissionChecker.checkRemote {
-            acceptPrivateProject(PrivateProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true)))
+            acceptPrivateProject(PrivateOwnedProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true)))
         }
 
         taskEmissionChecker.checkRemote {
@@ -514,7 +514,7 @@ class ChangeTypeSourceTest {
     fun testSingleProjectTaskChange() {
         setup()
 
-        acceptPrivateProject(PrivateProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true)))
+        acceptPrivateProject(PrivateOwnedProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true)))
 
         taskEmissionChecker.checkRemote {
             rootTasksLoaderProvider.accept(
@@ -553,7 +553,7 @@ class ChangeTypeSourceTest {
     @Test
     fun testSingleProjectRemoveTaskFromProject() {
         setup()
-        acceptPrivateProject(PrivateProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true)))
+        acceptPrivateProject(PrivateOwnedProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true)))
 
         taskEmissionChecker.checkRemote {
             rootTasksLoaderProvider.accept(
@@ -572,13 +572,13 @@ class ChangeTypeSourceTest {
 
         checkEmpty()
 
-        projectEmissionChecker.checkRemote { acceptPrivateProject(PrivateProjectJson()) }
+        projectEmissionChecker.checkRemote { acceptPrivateProject(PrivateOwnedProjectJson()) }
     }
 
     @Test
     fun testSingleProjectRemoveChildTask() {
         setup()
-        acceptPrivateProject(PrivateProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true)))
+        acceptPrivateProject(PrivateOwnedProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true)))
 
         taskEmissionChecker.checkRemote {
             rootTasksLoaderProvider.accept(
@@ -632,7 +632,7 @@ class ChangeTypeSourceTest {
     @Test
     fun testSingleProjectUpdateChildTask() {
         setup()
-        acceptPrivateProject(PrivateProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true)))
+        acceptPrivateProject(PrivateOwnedProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true)))
 
         taskEmissionChecker.checkRemote {
             rootTasksLoaderProvider.accept(
@@ -689,7 +689,7 @@ class ChangeTypeSourceTest {
         setup()
 
         // first load event for projectsFactory doesn't emit a change... apparently.
-        acceptPrivateProject(PrivateProjectJson())
+        acceptPrivateProject(PrivateOwnedProjectJson())
         checkEmpty()
 
         sharedProjectKeysRelay.accept(setOf(sharedProjectKey))
@@ -698,7 +698,7 @@ class ChangeTypeSourceTest {
             sharedProjectSnapshotRelay.accept(
                 Snapshot(
                     sharedProjectKey.key,
-                    JsonWrapper(SharedProjectJson(users = mutableMapOf("key" to UserJson()))),
+                    JsonWrapper(SharedOwnedProjectJson(users = mutableMapOf("key" to UserJson()))),
                 ),
             )
         }
@@ -709,7 +709,7 @@ class ChangeTypeSourceTest {
         setup()
 
         // first load event for projectsFactory doesn't emit a change... apparently.
-        acceptPrivateProject(PrivateProjectJson())
+        acceptPrivateProject(PrivateOwnedProjectJson())
         checkEmpty()
 
         sharedProjectKeysRelay.accept(setOf(sharedProjectKey))
@@ -719,7 +719,7 @@ class ChangeTypeSourceTest {
                 Snapshot(
                     sharedProjectKey.key,
                     JsonWrapper(
-                        SharedProjectJson(
+                        SharedOwnedProjectJson(
                             users = mutableMapOf("key" to UserJson()),
                             rootTaskIds = mutableMapOf(taskKey1.taskId to true),
                         )
@@ -750,7 +750,7 @@ class ChangeTypeSourceTest {
         setup()
 
         // first load event for projectsFactory doesn't emit a change... apparently.
-        acceptPrivateProject(PrivateProjectJson())
+        acceptPrivateProject(PrivateOwnedProjectJson())
 
         val task = rootTasksFactory.createTask(
             ExactTimeStamp.Local.now,
@@ -789,7 +789,7 @@ class ChangeTypeSourceTest {
 
         projectEmissionChecker.checkRemote {
             acceptPrivateProject(
-                PrivateProjectJson(
+                PrivateOwnedProjectJson(
                     rootTaskIds = mutableMapOf(taskKey1.taskId to true, taskKey.taskId to true)
                 )
             )

@@ -14,8 +14,8 @@ import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.ChangeWrapper
 import com.krystianwsul.common.firebase.DatabaseCallback
 import com.krystianwsul.common.firebase.json.JsonWrapper
-import com.krystianwsul.common.firebase.json.projects.PrivateProjectJson
-import com.krystianwsul.common.firebase.json.projects.SharedProjectJson
+import com.krystianwsul.common.firebase.json.projects.PrivateOwnedProjectJson
+import com.krystianwsul.common.firebase.json.projects.SharedOwnedProjectJson
 import com.krystianwsul.common.firebase.json.tasks.RootTaskJson
 import com.krystianwsul.common.firebase.json.users.UserWrapper
 import com.krystianwsul.common.firebase.models.Instance
@@ -50,7 +50,7 @@ class ProjectFactoryTest {
 
         override val database = object : FactoryProvider.Database() {
 
-            override fun getPrivateProjectObservable(projectKey: ProjectKey.Private): Observable<Snapshot<PrivateProjectJson>> {
+            override fun getPrivateProjectObservable(projectKey: ProjectKey.Private): Observable<Snapshot<PrivateOwnedProjectJson>> {
                 TODO("Not yet implemented")
             }
 
@@ -106,8 +106,8 @@ class ProjectFactoryTest {
         }
 
         fun acceptSharedProject(
-                projectKey: ProjectKey.Shared,
-                projectJson: SharedProjectJson
+            projectKey: ProjectKey.Shared,
+            projectJson: SharedOwnedProjectJson
         ) {
             sharedProjectObservables.getValue(projectKey).accept(Snapshot(
                     projectKey.key,
@@ -116,13 +116,13 @@ class ProjectFactoryTest {
         }
     }
 
-    class TestProjectLoader(projectKey: ProjectKey.Private) : ProjectLoader<ProjectType.Private, PrivateProjectJson> {
+    class TestProjectLoader(projectKey: ProjectKey.Private) : ProjectLoader<ProjectType.Private, PrivateOwnedProjectJson> {
 
         private val userInfo = UserInfo("email", "name", "uid")
 
         override val projectManager = AndroidPrivateProjectManager(userInfo)
 
-        private val projectRecord = PrivateProjectRecord(projectKey, PrivateProjectJson())
+        private val projectRecord = PrivateProjectRecord(projectKey, PrivateOwnedProjectJson())
 
         private val event = ProjectLoader.InitialProjectEvent(projectManager, projectRecord, mockk())
 

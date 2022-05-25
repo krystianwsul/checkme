@@ -29,7 +29,7 @@ import com.krystianwsul.common.domain.DeviceInfo
 import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.DomainThreadChecker
-import com.krystianwsul.common.firebase.json.projects.PrivateProjectJson
+import com.krystianwsul.common.firebase.json.projects.PrivateOwnedProjectJson
 import com.krystianwsul.common.firebase.json.tasks.RootTaskJson
 import com.krystianwsul.common.firebase.json.users.UserWrapper
 import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
@@ -248,7 +248,7 @@ class DomainFactoryRule : TestRule {
                 mockk(relaxed = true),
                 PrivateProjectRecord(
                     deviceDbInfo.userInfo,
-                    PrivateProjectJson(
+                    PrivateOwnedProjectJson(
                         startTime = domainFactoryStartTime.long,
                         startTimeOffset = domainFactoryStartTime.offset,
                     ),

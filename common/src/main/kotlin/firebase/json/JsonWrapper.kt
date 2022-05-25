@@ -1,12 +1,11 @@
 package com.krystianwsul.common.firebase.json
 
-import com.krystianwsul.common.firebase.json.projects.SharedProjectJson
+import com.krystianwsul.common.firebase.json.projects.SharedOwnedProjectJson
 import kotlinx.serialization.Serializable
-import kotlin.jvm.JvmOverloads
 
 @Serializable
 data class JsonWrapper @JvmOverloads constructor(
-    var projectJson: SharedProjectJson = SharedProjectJson(),
+    var projectJson: SharedOwnedProjectJson = SharedOwnedProjectJson(),
 ) : Parsable, DeepCopy<JsonWrapper> {
 
     override fun deepCopy() = deepCopy(serializer(), this)

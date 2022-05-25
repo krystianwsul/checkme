@@ -10,8 +10,8 @@ import com.krystianwsul.common.domain.DeviceInfo
 import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.json.JsonWrapper
-import com.krystianwsul.common.firebase.json.projects.PrivateProjectJson
-import com.krystianwsul.common.firebase.json.projects.SharedProjectJson
+import com.krystianwsul.common.firebase.json.projects.PrivateOwnedProjectJson
+import com.krystianwsul.common.firebase.json.projects.SharedOwnedProjectJson
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
 import com.krystianwsul.common.firebase.models.project.PrivateProject
@@ -25,8 +25,8 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.merge
 
 class ProjectsFactory(
-    private val privateProjectLoader: ProjectLoader<ProjectType.Private, PrivateProjectJson>,
-    privateInitialProjectEvent: ProjectLoader.InitialProjectEvent<ProjectType.Private, PrivateProjectJson>,
+    private val privateProjectLoader: ProjectLoader<ProjectType.Private, PrivateOwnedProjectJson>,
+    privateInitialProjectEvent: ProjectLoader.InitialProjectEvent<ProjectType.Private, PrivateOwnedProjectJson>,
     private val sharedProjectsLoader: SharedProjectsLoader,
     sharedInitialProjectsEvent: SharedProjectsLoader.InitialProjectsEvent,
     now: ExactTimeStamp.Local,
@@ -158,7 +158,7 @@ class ProjectsFactory(
         val userJsons = friendsFactory.getUserJsons(friendIds).toMutableMap()
         userJsons[userInfo.key] = rootUser.userJson
 
-        val sharedProjectJson = SharedProjectJson(
+        val sharedProjectJson = SharedOwnedProjectJson(
             name,
             now.long,
             now.offset,

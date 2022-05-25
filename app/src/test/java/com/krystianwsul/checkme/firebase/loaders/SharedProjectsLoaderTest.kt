@@ -9,7 +9,7 @@ import com.krystianwsul.common.firebase.ChangeWrapper
 import com.krystianwsul.common.firebase.DatabaseCallback
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.json.JsonWrapper
-import com.krystianwsul.common.firebase.json.projects.SharedProjectJson
+import com.krystianwsul.common.firebase.json.projects.SharedOwnedProjectJson
 import com.krystianwsul.common.utils.ProjectKey
 import io.mockk.mockk
 import io.reactivex.rxjava3.core.Observable
@@ -47,8 +47,8 @@ class SharedProjectsLoaderTest {
         }
 
         fun acceptProject(
-                projectKey: ProjectKey.Shared,
-                projectJson: SharedProjectJson,
+            projectKey: ProjectKey.Shared,
+            projectJson: SharedOwnedProjectJson,
         ) {
             sharedProjectObservables.getValue(projectKey).accept(Snapshot(
                     projectKey.key,
@@ -127,7 +127,7 @@ class SharedProjectsLoaderTest {
         projectKeysRelay.accept(setOf(projectKey1))
 
         initialProjectsEmissionChecker.checkOne {
-            sharedProjectsProvider.acceptProject(projectKey1, SharedProjectJson())
+            sharedProjectsProvider.acceptProject(projectKey1, SharedOwnedProjectJson())
         }
     }
 
@@ -138,7 +138,7 @@ class SharedProjectsLoaderTest {
         projectKeysRelay.accept(setOf(projectKey1))
 
         addProjectEmissionChecker.checkRemote {
-            sharedProjectsProvider.acceptProject(projectKey1, SharedProjectJson())
+            sharedProjectsProvider.acceptProject(projectKey1, SharedOwnedProjectJson())
         }
     }
 
@@ -147,13 +147,13 @@ class SharedProjectsLoaderTest {
         projectKeysRelay.accept(setOf(projectKey1))
 
         initialProjectsEmissionChecker.checkOne {
-            sharedProjectsProvider.acceptProject(projectKey1, SharedProjectJson())
+            sharedProjectsProvider.acceptProject(projectKey1, SharedOwnedProjectJson())
         }
 
         projectKeysRelay.accept(setOf(projectKey1, projectKey2))
 
         addProjectEmissionChecker.checkRemote {
-            sharedProjectsProvider.acceptProject(projectKey2, SharedProjectJson())
+            sharedProjectsProvider.acceptProject(projectKey2, SharedOwnedProjectJson())
         }
     }
 
@@ -162,7 +162,7 @@ class SharedProjectsLoaderTest {
         projectKeysRelay.accept(setOf(projectKey1))
 
         initialProjectsEmissionChecker.checkOne {
-            sharedProjectsProvider.acceptProject(projectKey1, SharedProjectJson())
+            sharedProjectsProvider.acceptProject(projectKey1, SharedOwnedProjectJson())
         }
 
         removeProjectsEmissionChecker.checkOne { projectKeysRelay.accept(setOf()) }
@@ -173,13 +173,13 @@ class SharedProjectsLoaderTest {
         projectKeysRelay.accept(setOf(projectKey1))
 
         initialProjectsEmissionChecker.checkOne {
-            sharedProjectsProvider.acceptProject(projectKey1, SharedProjectJson())
+            sharedProjectsProvider.acceptProject(projectKey1, SharedOwnedProjectJson())
         }
 
         removeProjectsEmissionChecker.checkOne { projectKeysRelay.accept(setOf(projectKey2)) }
 
         addProjectEmissionChecker.checkRemote {
-            sharedProjectsProvider.acceptProject(projectKey2, SharedProjectJson())
+            sharedProjectsProvider.acceptProject(projectKey2, SharedOwnedProjectJson())
         }
     }
 
@@ -188,13 +188,13 @@ class SharedProjectsLoaderTest {
         projectKeysRelay.accept(setOf(projectKey1))
 
         initialProjectsEmissionChecker.checkOne {
-            sharedProjectsProvider.acceptProject(projectKey1, SharedProjectJson())
+            sharedProjectsProvider.acceptProject(projectKey1, SharedOwnedProjectJson())
         }
 
         removeProjectsEmissionChecker.checkOne { projectKeysRelay.accept(setOf(projectKey2)) }
 
         addProjectEmissionChecker.checkRemote {
-            sharedProjectsProvider.acceptProject(projectKey2, SharedProjectJson())
+            sharedProjectsProvider.acceptProject(projectKey2, SharedOwnedProjectJson())
         }
     }
 }

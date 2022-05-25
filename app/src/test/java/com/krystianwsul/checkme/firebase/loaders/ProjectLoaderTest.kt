@@ -12,7 +12,7 @@ import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.ChangeWrapper
 import com.krystianwsul.common.firebase.DatabaseCallback
 import com.krystianwsul.common.firebase.DatabaseWrapper
-import com.krystianwsul.common.firebase.json.projects.PrivateProjectJson
+import com.krystianwsul.common.firebase.json.projects.PrivateOwnedProjectJson
 import com.krystianwsul.common.firebase.json.tasks.PrivateTaskJson
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ProjectType
@@ -48,14 +48,14 @@ class ProjectLoaderTest {
 
     private lateinit var rxErrorChecker: RxErrorChecker
 
-    private lateinit var projectSnapshotRelay: BehaviorRelay<Snapshot<PrivateProjectJson>>
+    private lateinit var projectSnapshotRelay: BehaviorRelay<Snapshot<PrivateOwnedProjectJson>>
     private lateinit var projectManager: AndroidPrivateProjectManager
-    private lateinit var projectLoader: ProjectLoader<ProjectType.Private, PrivateProjectJson>
+    private lateinit var projectLoader: ProjectLoader<ProjectType.Private, PrivateOwnedProjectJson>
 
-    private fun acceptProject(privateProjectJson: PrivateProjectJson) =
+    private fun acceptProject(privateProjectJson: PrivateOwnedProjectJson) =
         projectSnapshotRelay.accept(Snapshot(projectKey.key, privateProjectJson))
 
-    private lateinit var initialProjectEmissionChecker: EmissionChecker<ChangeWrapper<ProjectLoader.InitialProjectEvent<ProjectType.Private, PrivateProjectJson>>>
+    private lateinit var initialProjectEmissionChecker: EmissionChecker<ChangeWrapper<ProjectLoader.InitialProjectEvent<ProjectType.Private, PrivateOwnedProjectJson>>>
     private lateinit var changeProjectEmissionChecker: EmissionChecker<ProjectLoader.ChangeProjectEvent<ProjectType.Private>>
 
     private val projectKey = ProjectKey.Private("userKey")
@@ -103,7 +103,7 @@ class ProjectLoaderTest {
 
     @Test
     fun testEmptyProject() {
-        initialProjectEmissionChecker.checkRemote { acceptProject(PrivateProjectJson()) }
+        initialProjectEmissionChecker.checkRemote { acceptProject(PrivateOwnedProjectJson()) }
     }
 
     @Test
@@ -111,7 +111,7 @@ class ProjectLoaderTest {
         val taskId = "taskKey"
 
         initialProjectEmissionChecker.checkRemote {
-            acceptProject(PrivateProjectJson(tasks = mutableMapOf(taskId to PrivateTaskJson("task"))))
+            acceptProject(PrivateOwnedProjectJson(tasks = mutableMapOf(taskId to PrivateTaskJson("task"))))
         }
     }
 
@@ -120,11 +120,11 @@ class ProjectLoaderTest {
         val taskId = "taskKey"
 
         initialProjectEmissionChecker.checkRemote {
-            acceptProject(PrivateProjectJson(tasks = mutableMapOf(taskId to PrivateTaskJson("task"))))
+            acceptProject(PrivateOwnedProjectJson(tasks = mutableMapOf(taskId to PrivateTaskJson("task"))))
         }
 
         changeProjectEmissionChecker.checkOne {
-            acceptProject(PrivateProjectJson(tasks = mutableMapOf(taskId to PrivateTaskJson("task changed"))))
+            acceptProject(PrivateOwnedProjectJson(tasks = mutableMapOf(taskId to PrivateTaskJson("task changed"))))
         }
     }
 
@@ -134,12 +134,12 @@ class ProjectLoaderTest {
         val taskId2 = "taskKey2"
 
         initialProjectEmissionChecker.checkRemote {
-            acceptProject(PrivateProjectJson(tasks = mutableMapOf(taskId1 to PrivateTaskJson("task1"))))
+            acceptProject(PrivateOwnedProjectJson(tasks = mutableMapOf(taskId1 to PrivateTaskJson("task1"))))
         }
 
         changeProjectEmissionChecker.checkOne {
             acceptProject(
-                PrivateProjectJson(
+                PrivateOwnedProjectJson(
                     tasks = mutableMapOf(
                         taskId1 to PrivateTaskJson("task1"),
                         taskId2 to PrivateTaskJson("task2")
@@ -155,12 +155,12 @@ class ProjectLoaderTest {
         val taskId2 = "taskKey2"
 
         initialProjectEmissionChecker.checkRemote {
-            acceptProject(PrivateProjectJson(tasks = mutableMapOf(taskId1 to PrivateTaskJson("task1"))))
+            acceptProject(PrivateOwnedProjectJson(tasks = mutableMapOf(taskId1 to PrivateTaskJson("task1"))))
         }
 
         changeProjectEmissionChecker.checkOne {
             acceptProject(
-                PrivateProjectJson(
+                PrivateOwnedProjectJson(
                     tasks = mutableMapOf(
                         taskId1 to PrivateTaskJson("task1"),
                         taskId2 to PrivateTaskJson("task2"),
@@ -176,10 +176,10 @@ class ProjectLoaderTest {
 
 
         initialProjectEmissionChecker.checkRemote {
-            acceptProject(PrivateProjectJson(tasks = mutableMapOf(taskId to PrivateTaskJson("task"))))
+            acceptProject(PrivateOwnedProjectJson(tasks = mutableMapOf(taskId to PrivateTaskJson("task"))))
         }
 
-        changeProjectEmissionChecker.checkOne { acceptProject(PrivateProjectJson()) }
+        changeProjectEmissionChecker.checkOne { acceptProject(PrivateOwnedProjectJson()) }
     }
 
     @Test
@@ -187,19 +187,19 @@ class ProjectLoaderTest {
         val taskId = "taskKey"
 
         initialProjectEmissionChecker.checkRemote {
-            acceptProject(PrivateProjectJson(tasks = mutableMapOf(taskId to PrivateTaskJson("task"))))
+            acceptProject(PrivateOwnedProjectJson(tasks = mutableMapOf(taskId to PrivateTaskJson("task"))))
         }
 
         changeProjectEmissionChecker.checkOne {
-            acceptProject(PrivateProjectJson(tasks = mutableMapOf(taskId to PrivateTaskJson("task change"))))
+            acceptProject(PrivateOwnedProjectJson(tasks = mutableMapOf(taskId to PrivateTaskJson("task change"))))
         }
     }
 
     @Test
     fun testChangeEmptyProject() {
-        initialProjectEmissionChecker.checkRemote { acceptProject(PrivateProjectJson()) }
+        initialProjectEmissionChecker.checkRemote { acceptProject(PrivateOwnedProjectJson()) }
 
-        changeProjectEmissionChecker.checkOne { acceptProject(PrivateProjectJson(defaultTimesCreated = true)) }
+        changeProjectEmissionChecker.checkOne { acceptProject(PrivateOwnedProjectJson(defaultTimesCreated = true)) }
     }
 
     @Test
@@ -207,11 +207,11 @@ class ProjectLoaderTest {
         val taskId = "taskKey"
 
         initialProjectEmissionChecker.checkRemote {
-            acceptProject(PrivateProjectJson(tasks = mutableMapOf(taskId to PrivateTaskJson("task"))))
+            acceptProject(PrivateOwnedProjectJson(tasks = mutableMapOf(taskId to PrivateTaskJson("task"))))
         }
 
         changeProjectEmissionChecker.checkOne {
-            acceptProject(PrivateProjectJson(tasks = mutableMapOf(taskId to PrivateTaskJson("task change"))))
+            acceptProject(PrivateOwnedProjectJson(tasks = mutableMapOf(taskId to PrivateTaskJson("task change"))))
         }
     }
 
@@ -222,7 +222,7 @@ class ProjectLoaderTest {
 
         initialProjectEmissionChecker.checkRemote {
             acceptProject(
-                PrivateProjectJson(
+                PrivateOwnedProjectJson(
                     tasks = mutableMapOf(
                         taskId1 to PrivateTaskJson("task1"),
                         taskId2 to PrivateTaskJson("task2"),
@@ -233,7 +233,7 @@ class ProjectLoaderTest {
 
         changeProjectEmissionChecker.checkOne {
             acceptProject(
-                PrivateProjectJson(
+                PrivateOwnedProjectJson(
                     tasks = mutableMapOf(
                         taskId1 to PrivateTaskJson("task1 change"),
                         taskId2 to PrivateTaskJson("task2 change"),
@@ -247,12 +247,12 @@ class ProjectLoaderTest {
     fun testLocalEvent() {
         ErrorLogger.instance = mockk(relaxed = true)
 
-        initialProjectEmissionChecker.checkRemote { acceptProject(PrivateProjectJson()) }
+        initialProjectEmissionChecker.checkRemote { acceptProject(PrivateOwnedProjectJson()) }
 
         projectManager.value.single().defaultTimesCreated = true
         projectManager.save(mockk(relaxed = true))
 
         // doesn't emit ChangeType.LOCAL
-        acceptProject(PrivateProjectJson(defaultTimesCreated = true))
+        acceptProject(PrivateOwnedProjectJson(defaultTimesCreated = true))
     }
 }

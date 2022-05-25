@@ -1,6 +1,6 @@
 package com.krystianwsul.common.firebase.records.project
 
-import com.krystianwsul.common.firebase.json.projects.ProjectJson
+import com.krystianwsul.common.firebase.json.projects.OwnedProjectJson
 import com.krystianwsul.common.firebase.records.RemoteRecord
 import com.krystianwsul.common.firebase.records.RootTaskParentDelegate
 import com.krystianwsul.common.firebase.records.customtime.ProjectCustomTimeRecord
@@ -13,7 +13,7 @@ import com.krystianwsul.common.utils.*
 @Suppress("LeakingThis")
 sealed class ProjectRecord<T : ProjectType>(
     create: Boolean,
-    private val projectJson: ProjectJson,
+    private val projectJson: OwnedProjectJson,
     private val _id: ProjectKey<T>,
     protected val committerKey: String,
 ) : RemoteRecord(create), JsonTime.ProjectCustomTimeIdAndKeyProvider, TaskRecord.Parent {

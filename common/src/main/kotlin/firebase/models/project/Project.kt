@@ -133,9 +133,7 @@ sealed class Project<T : ProjectType>(
             val rootTasks = rootTaskProvider.getRootTasksForProject(projectKey)
 
             val rootTaskRemovables = rootTasks.map {
-                it.projectIdCache
-                    .invalidatableManager
-                    .addInvalidatable(invalidatableCache)
+                it.addProjectIdInvalidatable(invalidatableCache)
             }
 
             InvalidatableCache.ValueHolder(rootTasks) {

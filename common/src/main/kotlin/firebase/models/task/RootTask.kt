@@ -5,10 +5,7 @@ import com.krystianwsul.common.firebase.json.schedule.*
 import com.krystianwsul.common.firebase.json.tasks.TaskJson
 import com.krystianwsul.common.firebase.models.ImageState
 import com.krystianwsul.common.firebase.models.TaskParentEntry
-import com.krystianwsul.common.firebase.models.cache.ClearableInvalidatableManager
-import com.krystianwsul.common.firebase.models.cache.InvalidatableCache
-import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
-import com.krystianwsul.common.firebase.models.cache.invalidatableCache
+import com.krystianwsul.common.firebase.models.cache.*
 import com.krystianwsul.common.firebase.models.interval.Type
 import com.krystianwsul.common.firebase.models.noscheduleorparent.NoScheduleOrParent
 import com.krystianwsul.common.firebase.models.noscheduleorparent.RootNoScheduleOrParent
@@ -56,7 +53,7 @@ class RootTask private constructor(
         }
     }
 
-    val projectIdCache: InvalidatableCache<String> =
+    private val projectIdCache: InvalidatableCache<String> =
         invalidatableCache(clearableInvalidatableManager) { invalidatableCache ->
             val intervalInfoRemovable = intervalInfoCache.invalidatableManager.addInvalidatable(invalidatableCache)
 
@@ -69,9 +66,7 @@ class RootTask private constructor(
                     val parentTask = taskParentEntry.parentTask as RootTask
                     val projectId = parentTask.projectId
 
-                    val parentTaskRemovable = parentTask.projectIdCache
-                        .invalidatableManager
-                        .addInvalidatable(invalidatableCache)
+                    val parentTaskRemovable = parentTask.addProjectIdInvalidatable(invalidatableCache)
 
                     InvalidatableCache.ValueHolder(projectId) {
                         intervalInfoRemovable.remove()
@@ -82,8 +77,7 @@ class RootTask private constructor(
             }
         }
 
-    // todo projectKey copy all invalidation code from projectIdCache
-    val projectKeyCache: InvalidatableCache<ProjectKey<*>?> =
+    private val projectKeyCache: InvalidatableCache<ProjectKey<*>?> =
         invalidatableCache(clearableInvalidatableManager) { invalidatableCache ->
             val intervalInfoRemovable = intervalInfoCache.invalidatableManager.addInvalidatable(invalidatableCache)
 
@@ -109,6 +103,13 @@ class RootTask private constructor(
             }
         }
 
+    fun addProjectIdInvalidatable(invalidatable: Invalidatable) =
+        listOf(projectIdCache, projectKeyCache).map { it.invalidatableManager.addInvalidatable(invalidatable) }.let {
+            Removable {
+                it.forEach { it.remove() }
+            }
+        }
+
     private inner class NoScheduleOrParentException : Exception("task $name, $taskKey")
 
     override val projectId by projectIdCache // todo projectKey
@@ -116,7 +117,7 @@ class RootTask private constructor(
     val projectKey by projectKeyCache
 
     private val projectCache = invalidatableCache<Project<*>>(clearableInvalidatableManager) { invalidatableCache ->
-        val projectIdRemovable = projectIdCache.invalidatableManager.addInvalidatable(invalidatableCache)
+        val projectIdRemovable = addProjectIdInvalidatable(invalidatableCache)
 
         val project = parent.getProject(projectId)
         val projectRemovable = project.clearableInvalidatableManager.addInvalidatable(invalidatableCache)
@@ -242,6 +243,7 @@ class RootTask private constructor(
             it.updateProject(projectKey)
 
             projectIdCache.invalidate()
+            projectKeyCache.invalidate()
         }
 
         /**

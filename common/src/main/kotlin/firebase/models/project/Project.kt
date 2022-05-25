@@ -130,16 +130,28 @@ sealed class Project<T : ProjectType>(
             val managerRemovable =
                 rootModelChangeManager.rootTaskProjectIdInvalidatableManager.addInvalidatable(invalidatableCache)
 
-            val rootTasks = rootTaskProvider.getRootTasksForProject(projectKey)
+            val allRootTasks = rootTaskProvider.getRootTasks()
 
-            val rootTaskRemovables = rootTasks.map {
+            val loadedRemovables = allRootTasks.map {
+                it.rootTaskDependencyResolver
+                    .dependenciesLoadedCache
+                    .invalidatableManager
+                    .addInvalidatable(invalidatableCache)
+            }
+
+            val loadedRootTasks = allRootTasks.filter { it.dependenciesLoaded }
+
+            val projectIdRemovables = loadedRootTasks.map {
                 it.addProjectIdInvalidatable(invalidatableCache)
             }
 
-            InvalidatableCache.ValueHolder(rootTasks) {
+            val myRootTasks = loadedRootTasks.filter { it.projectId == projectKey.key }
+
+            InvalidatableCache.ValueHolder(myRootTasks) {
                 managerRemovable.remove()
 
-                rootTaskRemovables.forEach { it.remove() }
+                loadedRemovables.forEach { it.remove() }
+                projectIdRemovables.forEach { it.remove() }
             }
         }
 
@@ -306,7 +318,7 @@ sealed class Project<T : ProjectType>(
         fun getRootTask(rootTaskKey: TaskKey.Root) =
             tryGetRootTask(rootTaskKey) ?: throw MissingRootTaskException(rootTaskKey)
 
-        fun getRootTasksForProject(projectKey: ProjectKey<*>): Collection<RootTask>
+        fun getRootTasks(): Collection<RootTask>
 
         fun updateProjectRecord(projectKey: ProjectKey<*>, dependentRootTaskKeys: Set<TaskKey.Root>)
 

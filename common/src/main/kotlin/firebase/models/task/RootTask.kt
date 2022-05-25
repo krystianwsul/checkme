@@ -4,6 +4,7 @@ import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.firebase.json.schedule.*
 import com.krystianwsul.common.firebase.json.tasks.TaskJson
 import com.krystianwsul.common.firebase.models.ImageState
+import com.krystianwsul.common.firebase.models.ProjectIdOwner
 import com.krystianwsul.common.firebase.models.TaskParentEntry
 import com.krystianwsul.common.firebase.models.cache.*
 import com.krystianwsul.common.firebase.models.interval.Type
@@ -560,6 +561,13 @@ class RootTask private constructor(
         }
 
         invalidateIntervals()
+    }
+
+    fun fixProjectKeys() {
+        fun ProjectIdOwner.fixProjectKey(projectId: String) = updateProject(parent.getProject(projectId).projectKey)
+
+        schedules.forEach { it.fixProjectKey(it.projectId) }
+        noScheduleOrParents.forEach { it.fixProjectKey(it.projectId) }
     }
 
     interface Parent : Task.Parent, Project.RootTaskProvider {

@@ -53,7 +53,7 @@ class RootTaskDependencyResolver(private val rootTask: RootTask) : Invalidatable
             }
         }
 
-    private val dependenciesLoadedCache: InvalidatableCache<Boolean> =
+    val dependenciesLoadedCache: InvalidatableCache<Boolean> =
         invalidatableCache(rootTask.clearableInvalidatableManager) { invalidatableCache ->
             val directDependencyStateRemovable =
                 directDependenciesStateCache.invalidatableManager.addInvalidatable(invalidatableCache)

@@ -130,15 +130,24 @@ sealed class Project<T : ProjectType>(
             val managerRemovable =
                 rootModelChangeManager.rootTaskProjectIdInvalidatableManager.addInvalidatable(invalidatableCache)
 
-            val rootTasks = rootTaskProvider.getRootTasksForProject(projectKey)
+            val allRootTasks = rootTaskProvider.getRootTasksForProject(projectKey)
 
-            val rootTaskRemovables = rootTasks.map {
-                it.projectIdCache
+            val rootTaskRemovables = allRootTasks.flatMap {
+                val projectIdRemovable = it.projectIdCache
                     .invalidatableManager
                     .addInvalidatable(invalidatableCache)
+
+                val dependenciesLoadedRemovable = it.rootTaskDependencyResolver
+                    .dependenciesLoadedCache
+                    .invalidatableManager
+                    .addInvalidatable(invalidatableCache)
+
+                listOf(projectIdRemovable, dependenciesLoadedRemovable)
             }
 
-            InvalidatableCache.ValueHolder(rootTasks) {
+            val loadedRootTasks = allRootTasks.filter { it.dependenciesLoaded }
+
+            InvalidatableCache.ValueHolder(loadedRootTasks) {
                 managerRemovable.remove()
 
                 rootTaskRemovables.forEach { it.remove() }

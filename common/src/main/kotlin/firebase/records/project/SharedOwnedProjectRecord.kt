@@ -19,9 +19,9 @@ class SharedOwnedProjectRecord(
     jsonWrapper.projectJson,
     projectKey,
     "${projectKey.key}/$PROJECT_JSON",
-) {
+), SharedProjectRecord {
 
-    var name by Committer(projectJson::name, committerKey)
+    override var name by Committer(projectJson::name, committerKey)
 
     var endTime by Committer(projectJson::endTime, committerKey)
     var endTimeOffset by Committer(projectJson::endTimeOffset, committerKey)
@@ -36,7 +36,7 @@ class SharedOwnedProjectRecord(
 
     override val customTimeRecords: MutableMap<CustomTimeId.Project.Shared, SharedCustomTimeRecord>
 
-    var userRecords: MutableMap<UserKey, OwnedProjectUserRecord>
+    override lateinit var userRecords: MutableMap<UserKey, OwnedProjectUserRecord>
         private set
 
     private val projectJson get() = jsonWrapper.projectJson
@@ -56,15 +56,9 @@ class SharedOwnedProjectRecord(
             }
             .toMutableMap()
 
-        userRecords = jsonWrapper.projectJson
-            .users
-            .entries
-            .associate { (id, userJson) ->
-                check(id.isNotEmpty())
-
-                UserKey(id) to OwnedProjectUserRecord(create, this, userJson)
-            }
-            .toMutableMap()
+        userRecords = SharedProjectRecord.parseUserJsons(jsonWrapper.projectJson.users) {
+            OwnedProjectUserRecord(create, this, it)
+        }.toMutableMap()
     }
 
     override val children get() = super.children + userRecords.values

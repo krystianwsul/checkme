@@ -16,8 +16,8 @@ import com.krystianwsul.common.firebase.json.tasks.PrivateTaskJson
 import com.krystianwsul.common.firebase.json.tasks.RootTaskJson
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
+import com.krystianwsul.common.firebase.models.project.OwnedProject
 import com.krystianwsul.common.firebase.models.project.PrivateProject
-import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.task.*
 import com.krystianwsul.common.firebase.records.project.PrivateOwnedProjectRecord
 import com.krystianwsul.common.firebase.records.task.RootTaskRecord
@@ -604,7 +604,7 @@ class IrrelevantTest {
         )
     }
 
-    private fun newMockRootTaskProvider() = mockk<Project.RootTaskProvider>()
+    private fun newMockRootTaskProvider() = mockk<OwnedProject.RootTaskProvider>()
 
     @Test
     fun testRepeatingScheduleDelete() {

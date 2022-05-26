@@ -24,7 +24,7 @@ class SharedProject(
     userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
     rootTaskProvider: RootTaskProvider,
     rootModelChangeManager: RootModelChangeManager,
-) : Project<ProjectType.Shared>(
+) : OwnedProject<ProjectType.Shared>(
     AssignedToHelper.Shared,
     userCustomTimeProvider,
     rootTaskProvider,

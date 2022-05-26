@@ -6,7 +6,7 @@ import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.TestDomainUpdater
 import com.krystianwsul.checkme.domainmodel.extensions.*
 import com.krystianwsul.checkme.gui.edit.delegates.EditDelegate
-import com.krystianwsul.common.firebase.models.project.Project
+import com.krystianwsul.common.firebase.models.project.OwnedProject
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.ScheduleData
 import com.krystianwsul.common.utils.TaskKey
@@ -63,7 +63,7 @@ class ProjectRootTaskIdTrackerTest {
         val privateTask = domainFactory.rootTasksFactory.getRootTask(privateWeeklyTaskKey)
         val sharedTask = domainFactory.rootTasksFactory.getRootTask(sharedSingleTaskKey)
 
-        fun Project<*>.rootTaskKeys() = projectRecord.rootTaskParentDelegate.rootTaskKeys
+        fun OwnedProject<*>.rootTaskKeys() = projectRecord.rootTaskParentDelegate.rootTaskKeys
         fun RootTask.rootTaskKeys() = taskRecord.rootTaskParentDelegate.rootTaskKeys
 
         assertEquals(setOf(privateWeeklyTaskKey), privateProject.rootTaskKeys())

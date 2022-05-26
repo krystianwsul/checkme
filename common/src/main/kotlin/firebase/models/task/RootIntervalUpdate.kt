@@ -6,7 +6,7 @@ import com.krystianwsul.common.firebase.json.taskhierarchies.NestedTaskHierarchy
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.interval.IntervalInfo
 import com.krystianwsul.common.firebase.models.noscheduleorparent.RootNoScheduleOrParent
-import com.krystianwsul.common.firebase.models.project.Project
+import com.krystianwsul.common.firebase.models.project.OwnedProject
 import com.krystianwsul.common.firebase.models.schedule.Schedule
 import com.krystianwsul.common.firebase.models.schedule.SingleSchedule
 import com.krystianwsul.common.firebase.models.taskhierarchy.NestedTaskHierarchy
@@ -29,7 +29,7 @@ class RootIntervalUpdate(val rootTask: RootTask, intervalInfo: IntervalInfo) :
         scheduleDatas: List<Pair<ScheduleData, Time>>,
         now: ExactTimeStamp.Local,
         assignedTo: Set<UserKey>,
-        customTimeMigrationHelper: Project.CustomTimeMigrationHelper,
+        customTimeMigrationHelper: OwnedProject.CustomTimeMigrationHelper,
         projectKey: ProjectKey<*>,
         parentSingleSchedule: SingleSchedule? = null,
     ) {

@@ -15,7 +15,7 @@ import com.krystianwsul.common.firebase.models.cache.invalidatableCache
 import com.krystianwsul.common.firebase.models.filterAndSort
 import com.krystianwsul.common.firebase.models.interval.*
 import com.krystianwsul.common.firebase.models.noscheduleorparent.NoScheduleOrParent
-import com.krystianwsul.common.firebase.models.project.Project
+import com.krystianwsul.common.firebase.models.project.OwnedProject
 import com.krystianwsul.common.firebase.models.schedule.*
 import com.krystianwsul.common.firebase.models.taskhierarchy.NestedTaskHierarchy
 import com.krystianwsul.common.firebase.models.taskhierarchy.ParentTaskDelegate
@@ -39,7 +39,7 @@ sealed class Task(
     abstract val parent: Parent
 
     abstract val projectId: String
-    abstract val project: Project<*>
+    abstract val project: OwnedProject<*>
 
     private val endDataProperty = invalidatableLazyCallbacks {
         taskRecord.endData?.let {
@@ -586,7 +586,7 @@ sealed class Task(
     abstract fun getOrCopyTime(
         dayOfWeek: DayOfWeek,
         time: Time,
-        customTimeMigrationHelper: Project.CustomTimeMigrationHelper,
+        customTimeMigrationHelper: OwnedProject.CustomTimeMigrationHelper,
         now: ExactTimeStamp.Local,
     ): Time
 

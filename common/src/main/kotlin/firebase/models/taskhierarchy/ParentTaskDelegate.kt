@@ -14,7 +14,7 @@ sealed class ParentTaskDelegate {
     abstract fun getParentTask(): Task
 
     class Project(
-        private val project: com.krystianwsul.common.firebase.models.project.Project<*>,
+        private val project: com.krystianwsul.common.firebase.models.project.OwnedProject<*>,
         taskHierarchyRecord: TaskHierarchyRecord<*>,
     ) : ParentTaskDelegate() {
 
@@ -37,7 +37,7 @@ sealed class ParentTaskDelegate {
 
         fun newDelegate(taskHierarchyRecord: TaskHierarchyRecord<*>): ParentTaskDelegate
 
-        class Project(private val project: com.krystianwsul.common.firebase.models.project.Project<*>) : Factory {
+        class Project(private val project: com.krystianwsul.common.firebase.models.project.OwnedProject<*>) : Factory {
 
             override fun newDelegate(taskHierarchyRecord: TaskHierarchyRecord<*>) = Project(project, taskHierarchyRecord)
         }

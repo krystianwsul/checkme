@@ -10,8 +10,8 @@ import com.krystianwsul.common.firebase.models.cache.invalidatableCache
 import com.krystianwsul.common.firebase.models.customtime.SharedCustomTime
 import com.krystianwsul.common.firebase.models.interval.ScheduleInterval
 import com.krystianwsul.common.firebase.models.interval.Type
+import com.krystianwsul.common.firebase.models.project.OwnedProject
 import com.krystianwsul.common.firebase.models.project.PrivateProject
-import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.project.SharedProject
 import com.krystianwsul.common.firebase.models.task.ProjectRootTaskIdTracker
 import com.krystianwsul.common.firebase.models.task.Task
@@ -617,7 +617,7 @@ class Instance private constructor(
     fun setInstanceDateTime(
         shownFactory: ShownFactory,
         dateTime: DateTime?,
-        customTimeMigrationHelper: Project.CustomTimeMigrationHelper,
+        customTimeMigrationHelper: OwnedProject.CustomTimeMigrationHelper,
         now: ExactTimeStamp.Local,
     ) {
         if (dateTime == recordInstanceDateTime) return
@@ -770,7 +770,7 @@ class Instance private constructor(
     fun canMigrateDescription(now: ExactTimeStamp.Local) = !task.note.isNullOrEmpty() && canAddSubtask(now)
 
     fun getProjectId(): String = parentInstance?.getProjectId() ?: task.projectId
-    fun getProject(): Project<*> = parentInstance?.getProject() ?: task.project
+    fun getProject(): OwnedProject<*> = parentInstance?.getProject() ?: task.project
 
     fun taskHasOtherVisibleInstances(now: ExactTimeStamp.Local) = task.hasOtherVisibleInstances(now, instanceKey)
 

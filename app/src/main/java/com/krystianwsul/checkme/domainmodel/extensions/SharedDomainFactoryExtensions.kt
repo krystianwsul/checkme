@@ -18,8 +18,8 @@ import com.krystianwsul.checkme.utils.time.toDateTimeTz
 import com.krystianwsul.common.domain.TaskUndoData
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.models.Instance
+import com.krystianwsul.common.firebase.models.project.OwnedProject
 import com.krystianwsul.common.firebase.models.project.PrivateProject
-import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.project.SharedProject
 import com.krystianwsul.common.firebase.models.schedule.SingleSchedule
 import com.krystianwsul.common.firebase.models.search.FilterResult
@@ -395,7 +395,7 @@ fun DomainUpdater.undo(notificationType: DomainListenerManager.NotificationType,
         DomainUpdater.Params(true, notificationType, DomainFactory.CloudParams(projects))
     }.perform(this)
 
-fun Project<*>.toEntryDatas(
+fun OwnedProject<*>.toEntryDatas(
     childTaskDatas: List<TaskListFragment.ChildTaskData>,
     showProjects: Boolean,
 ): List<TaskListFragment.EntryData> {
@@ -419,7 +419,7 @@ fun Project<*>.toEntryDatas(
     }
 }
 
-fun Project<*>.getDisplayName() = when (this) {
+fun OwnedProject<*>.getDisplayName() = when (this) {
     is PrivateProject -> MyApplication.context.getString(R.string.myTasks)
     is SharedProject -> name
 }

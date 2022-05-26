@@ -10,7 +10,7 @@ import com.krystianwsul.common.firebase.models.cache.*
 import com.krystianwsul.common.firebase.models.interval.Type
 import com.krystianwsul.common.firebase.models.noscheduleorparent.NoScheduleOrParent
 import com.krystianwsul.common.firebase.models.noscheduleorparent.RootNoScheduleOrParent
-import com.krystianwsul.common.firebase.models.project.Project
+import com.krystianwsul.common.firebase.models.project.OwnedProject
 import com.krystianwsul.common.firebase.models.schedule.*
 import com.krystianwsul.common.firebase.models.taskhierarchy.NestedTaskHierarchy
 import com.krystianwsul.common.firebase.models.taskhierarchy.ParentTaskDelegate
@@ -117,7 +117,7 @@ class RootTask private constructor(
 
     val projectKey by projectKeyCache
 
-    private val projectCache = invalidatableCache<Project<*>>(clearableInvalidatableManager) { invalidatableCache ->
+    private val projectCache = invalidatableCache<OwnedProject<*>>(clearableInvalidatableManager) { invalidatableCache ->
         val projectIdRemovable = addProjectIdInvalidatable(invalidatableCache)
 
         val project = parent.getProject(projectId)
@@ -202,7 +202,7 @@ class RootTask private constructor(
     override fun getOrCopyTime(
         dayOfWeek: DayOfWeek,
         time: Time,
-        customTimeMigrationHelper: Project.CustomTimeMigrationHelper,
+        customTimeMigrationHelper: OwnedProject.CustomTimeMigrationHelper,
         now: ExactTimeStamp.Local,
     ) = when (time) {
         is Time.Custom.Project<*> -> customTimeMigrationHelper.tryMigrateProjectCustomTime(time, now)
@@ -260,7 +260,7 @@ class RootTask private constructor(
         now: ExactTimeStamp.Local,
         scheduleDatas: List<Pair<ScheduleData, Time>>,
         assignedTo: Set<UserKey>,
-        customTimeMigrationHelper: Project.CustomTimeMigrationHelper,
+        customTimeMigrationHelper: OwnedProject.CustomTimeMigrationHelper,
         projectKey: ProjectKey<*>,
     ) {
         val assignedToKeys = assignedTo.map { it.key }
@@ -423,7 +423,7 @@ class RootTask private constructor(
     fun copySchedules(
         now: ExactTimeStamp.Local,
         schedules: List<Schedule>,
-        customTimeMigrationHelper: Project.CustomTimeMigrationHelper,
+        customTimeMigrationHelper: OwnedProject.CustomTimeMigrationHelper,
         oldProjectKey: ProjectKey<*>,
         newProjectKey: ProjectKey<*>,
     ) {
@@ -570,13 +570,13 @@ class RootTask private constructor(
         noScheduleOrParents.forEach { it.fixProjectKey(it.projectId) }
     }
 
-    interface Parent : Task.Parent, Project.RootTaskProvider {
+    interface Parent : Task.Parent, OwnedProject.RootTaskProvider {
 
         val rootModelChangeManager: RootModelChangeManager
 
         fun deleteRootTask(task: RootTask)
 
-        fun getProject(projectId: String): Project<*>
+        fun getProject(projectId: String): OwnedProject<*>
 
         override fun createTask(
             now: ExactTimeStamp.Local,

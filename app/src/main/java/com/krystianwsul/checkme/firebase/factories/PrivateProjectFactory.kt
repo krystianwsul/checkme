@@ -5,8 +5,8 @@ import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.firebase.json.projects.PrivateOwnedProjectJson
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
+import com.krystianwsul.common.firebase.models.project.OwnedProject
 import com.krystianwsul.common.firebase.models.project.PrivateProject
-import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.records.project.OwnedProjectRecord
 import com.krystianwsul.common.firebase.records.project.PrivateOwnedProjectRecord
 import com.krystianwsul.common.time.JsonTime
@@ -18,7 +18,7 @@ class PrivateProjectFactory(
     initialProjectEvent: ProjectLoader.InitialProjectEvent<ProjectType.Private, PrivateOwnedProjectJson>,
     shownFactory: Instance.ShownFactory,
     domainDisposable: CompositeDisposable,
-    rootTaskProvider: Project.RootTaskProvider,
+    rootTaskProvider: OwnedProject.RootTaskProvider,
     rootModelChangeManager: RootModelChangeManager,
     deviceDbInfo: () -> DeviceDbInfo,
 ) : ProjectFactory<ProjectType.Private, PrivateOwnedProjectJson>(
@@ -34,7 +34,7 @@ class PrivateProjectFactory(
     override fun newProject(
         projectRecord: OwnedProjectRecord<ProjectType.Private>,
         userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
-        rootTaskProvider: Project.RootTaskProvider,
+        rootTaskProvider: OwnedProject.RootTaskProvider,
         rootModelChangeManager: RootModelChangeManager,
     ) = PrivateProject(
         projectRecord as PrivateOwnedProjectRecord,

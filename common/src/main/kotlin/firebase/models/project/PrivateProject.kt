@@ -20,7 +20,7 @@ class PrivateProject(
     userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
     rootTaskProvider: RootTaskProvider,
     rootModelChangeManager: RootModelChangeManager,
-) : Project<ProjectType.Private>(
+) : OwnedProject<ProjectType.Private>(
     AssignedToHelper.Private,
     userCustomTimeProvider,
     rootTaskProvider,

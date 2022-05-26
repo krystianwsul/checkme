@@ -14,8 +14,8 @@ import com.krystianwsul.common.firebase.json.projects.PrivateOwnedProjectJson
 import com.krystianwsul.common.firebase.json.projects.SharedOwnedProjectJson
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
+import com.krystianwsul.common.firebase.models.project.OwnedProject
 import com.krystianwsul.common.firebase.models.project.PrivateProject
-import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.project.SharedProject
 import com.krystianwsul.common.firebase.models.users.RootUser
 import com.krystianwsul.common.time.ExactTimeStamp
@@ -32,7 +32,7 @@ class ProjectsFactory(
     now: ExactTimeStamp.Local,
     private val shownFactory: Instance.ShownFactory,
     private val domainDisposable: CompositeDisposable,
-    rootTaskProvider: Project.RootTaskProvider,
+    rootTaskProvider: OwnedProject.RootTaskProvider,
     rootModelChangeManager: RootModelChangeManager,
     deviceDbInfo: () -> DeviceDbInfo,
 ) {
@@ -136,7 +136,7 @@ class ProjectsFactory(
         ).merge().publishImmediate(domainDisposable)
     }
 
-    val projects: Map<ProjectKey<*>, Project<*>> get() = sharedProjects + mapOf(privateProject.projectKey to privateProject)
+    val projects: Map<ProjectKey<*>, OwnedProject<*>> get() = sharedProjects + mapOf(privateProject.projectKey to privateProject)
 
     val projectTasks get() = projects.values.flatMap { it.projectTasks }
 
@@ -190,7 +190,7 @@ class ProjectsFactory(
 
     @Suppress("UNCHECKED_CAST")
     fun <T : ProjectType> getProjectIfPresent(projectKey: ProjectKey<T>) =
-        projects[projectKey] as? Project<T>
+        projects[projectKey] as? OwnedProject<T>
 
     fun <T : ProjectType> getProjectForce(projectKey: ProjectKey<T>) = getProjectIfPresent(projectKey)!!
 

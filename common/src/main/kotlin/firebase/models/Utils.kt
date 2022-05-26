@@ -1,6 +1,6 @@
 package com.krystianwsul.common.firebase.models
 
-import com.krystianwsul.common.firebase.models.project.Project
+import com.krystianwsul.common.firebase.models.project.OwnedProject
 import com.krystianwsul.common.firebase.models.task.RootTask
 import com.krystianwsul.common.interrupt.InterruptionChecker
 import com.krystianwsul.common.time.ExactTimeStamp
@@ -8,7 +8,7 @@ import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
 
 // used in RelevanceChecker
-fun checkInconsistentRootTaskIds(rootTasks: Collection<RootTask>, projects: Collection<Project<*>>) {
+fun checkInconsistentRootTaskIds(rootTasks: Collection<RootTask>, projects: Collection<OwnedProject<*>>) {
     val rootTaskProjectKeys = rootTasks.associate { it.taskKey to it.project.projectKey }
 
     val rootTasksInProjectKeys = projects.flatMap { project ->

@@ -3,8 +3,8 @@ package com.krystianwsul.common.relevance
 
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.noscheduleorparent.NoScheduleOrParent
+import com.krystianwsul.common.firebase.models.project.OwnedProject
 import com.krystianwsul.common.firebase.models.project.PrivateProject
-import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.project.SharedProject
 import com.krystianwsul.common.firebase.models.schedule.Schedule
 import com.krystianwsul.common.firebase.models.task.ProjectRootTaskIdTracker
@@ -26,8 +26,8 @@ object Irrelevant {
     fun setIrrelevant(
         getRootTasks: () -> Map<TaskKey.Root, RootTask>,
         userCustomTimeRelevances: Map<CustomTimeKey.User, CustomTimeRelevance>,
-        getProjects: () -> Map<ProjectKey<*>, Project<*>>,
-        rootTaskProvider: Project.RootTaskProvider,
+        getProjects: () -> Map<ProjectKey<*>, OwnedProject<*>>,
+        rootTaskProvider: OwnedProject.RootTaskProvider,
         now: ExactTimeStamp.Local,
         users: Collection<RootUser>,
     ): Result {

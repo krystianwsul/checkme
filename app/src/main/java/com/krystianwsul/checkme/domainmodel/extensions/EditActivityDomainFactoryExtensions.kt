@@ -23,8 +23,8 @@ import com.krystianwsul.common.firebase.json.tasks.TaskJson
 import com.krystianwsul.common.firebase.models.ImageState
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.interval.ScheduleInterval
+import com.krystianwsul.common.firebase.models.project.OwnedProject
 import com.krystianwsul.common.firebase.models.project.PrivateProject
-import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.project.SharedProject
 import com.krystianwsul.common.firebase.models.schedule.SingleSchedule
 import com.krystianwsul.common.firebase.models.search.FilterResult
@@ -111,7 +111,7 @@ private fun DomainFactory.getCreateTaskDataSlow(
 
     val taskData = (startParameters as? EditViewModel.StartParameters.TaskOrInstance)?.let {
         val task: Task
-        val project: Project<*>
+        val project: OwnedProject<*>
 
         var scheduleDataWrappers: List<EditViewModel.ScheduleDataWrapper>? = null
         var assignedTo: Set<UserKey> = setOf()
@@ -172,7 +172,7 @@ private fun DomainFactory.getCreateTaskDataSlow(
 
     val showAllInstancesDialog = startParameters.showAllInstancesDialog(this, now)
 
-    fun Project<*>.toParentKey() = when (this) {
+    fun OwnedProject<*>.toParentKey() = when (this) {
         is PrivateProject -> null
         is SharedProject -> EditViewModel.ParentKey.Project(projectKey)
     }
@@ -445,7 +445,7 @@ fun DomainUpdater.updateChildTask(
     allReminders: Boolean = true,
 ): Single<TaskKey.Root> = SingleDomainUpdate.create("updateChildTask") { now ->
     lateinit var task: RootTask
-    lateinit var originalProject: Project<*>
+    lateinit var originalProject: OwnedProject<*>
     lateinit var parentTask: RootTask
     trackRootTaskIds {
         task = convertToRoot(getTaskForce(taskKey), now)
@@ -751,7 +751,7 @@ private fun DomainFactory.getParentTreeDatas(
 
 private fun DomainFactory.getProjectTaskTreeDatas(
     now: ExactTimeStamp.Local,
-    project: Project<*>,
+    project: OwnedProject<*>,
     excludedTaskKeys: Set<TaskKey>,
     parentInstanceKey: InstanceKey?,
     searchContext: SearchContext,
@@ -960,7 +960,7 @@ fun DomainFactory.createScheduleTopLevelTask(
     note: String?,
     projectKey: ProjectKey<*>,
     image: EditDelegate.CreateParameters.Image?,
-    customTimeMigrationHelper: Project.CustomTimeMigrationHelper,
+    customTimeMigrationHelper: OwnedProject.CustomTimeMigrationHelper,
     ordinal: Ordinal? = null,
     assignedTo: Set<UserKey> = setOf(),
 ) = createRootTask(now, image, name, note, ordinal).apply {

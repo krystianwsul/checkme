@@ -36,8 +36,8 @@ import com.krystianwsul.common.firebase.json.tasks.RootTaskJson
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.customtime.PrivateCustomTime
 import com.krystianwsul.common.firebase.models.customtime.SharedCustomTime
+import com.krystianwsul.common.firebase.models.project.OwnedProject
 import com.krystianwsul.common.firebase.models.project.PrivateProject
-import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.search.FilterResult
 import com.krystianwsul.common.firebase.models.search.SearchContext
 import com.krystianwsul.common.firebase.models.task.*
@@ -69,7 +69,7 @@ class DomainFactory(
 ) :
     FactoryProvider.Domain,
     JsonTime.UserCustomTimeProvider,
-    Project.CustomTimeMigrationHelper {
+    OwnedProject.CustomTimeMigrationHelper {
 
     companion object {
 
@@ -561,11 +561,11 @@ class DomainFactory(
         }
     }
 
-    data class CloudParams(val projects: Collection<Project<*>>, val userKeys: Collection<UserKey> = emptySet()) {
+    data class CloudParams(val projects: Collection<OwnedProject<*>>, val userKeys: Collection<UserKey> = emptySet()) {
 
-        constructor(project: Project<*>, userKeys: Collection<UserKey> = emptySet()) : this(setOf(project), userKeys)
+        constructor(project: OwnedProject<*>, userKeys: Collection<UserKey> = emptySet()) : this(setOf(project), userKeys)
 
-        constructor(vararg projects: Project<*>) : this(projects.toSet())
+        constructor(vararg projects: OwnedProject<*>) : this(projects.toSet())
     }
 
     fun notifyCloud(cloudParams: CloudParams) {
@@ -761,8 +761,8 @@ class DomainFactory(
         private fun copyTask(
             oldTask: ProjectTask,
             now: ExactTimeStamp.Local,
-            newProject: Project<*>,
-            customTimeMigrationHelper: Project.CustomTimeMigrationHelper,
+            newProject: OwnedProject<*>,
+            customTimeMigrationHelper: OwnedProject.CustomTimeMigrationHelper,
         ): RootTask {
             val (ordinalDouble, ordinalString) = oldTask.ordinal.toFields()
 

@@ -7,7 +7,7 @@ import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.json.Parsable
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
-import com.krystianwsul.common.firebase.models.project.Project
+import com.krystianwsul.common.firebase.models.project.OwnedProject
 import com.krystianwsul.common.firebase.records.project.OwnedProjectRecord
 import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.utils.ProjectType
@@ -22,22 +22,22 @@ abstract class ProjectFactory<T : ProjectType, U : Parsable>(
     initialProjectEvent: ProjectLoader.InitialProjectEvent<T, U>,
     protected val shownFactory: Instance.ShownFactory,
     domainDisposable: CompositeDisposable,
-    private val rootTaskProvider: Project.RootTaskProvider,
+    private val rootTaskProvider: OwnedProject.RootTaskProvider,
     private val rootModelChangeManager: RootModelChangeManager,
     protected val deviceDbInfo: () -> DeviceDbInfo,
 ) {
 
     private val projectManager = initialProjectEvent.projectManager
 
-    var project: Project<T>
+    var project: OwnedProject<T>
         private set
 
     protected abstract fun newProject(
         projectRecord: OwnedProjectRecord<T>,
         userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
-        rootTaskProvider: Project.RootTaskProvider,
+        rootTaskProvider: OwnedProject.RootTaskProvider,
         rootModelChangeManager: RootModelChangeManager,
-    ): Project<T>
+    ): OwnedProject<T>
 
     val changeTypes: Observable<ChangeType>
 

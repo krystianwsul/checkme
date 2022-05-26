@@ -4,7 +4,7 @@ import com.krystianwsul.common.firebase.models.cache.InvalidatableCache
 import com.krystianwsul.common.firebase.models.cache.invalidatableCache
 import com.krystianwsul.common.firebase.models.noscheduleorparent.NoScheduleOrParent
 import com.krystianwsul.common.firebase.models.noscheduleorparent.ProjectNoScheduleOrParent
-import com.krystianwsul.common.firebase.models.project.Project
+import com.krystianwsul.common.firebase.models.project.OwnedProject
 import com.krystianwsul.common.firebase.models.taskhierarchy.ParentTaskDelegate
 import com.krystianwsul.common.firebase.records.task.ProjectTaskRecord
 import com.krystianwsul.common.time.DayOfWeek
@@ -14,7 +14,7 @@ import com.krystianwsul.common.utils.InstanceScheduleKey
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.common.utils.invalidatableLazy
 
-class ProjectTask(override val project: Project<*>, private val taskRecord: ProjectTaskRecord) : Task(
+class ProjectTask(override val project: OwnedProject<*>, private val taskRecord: ProjectTaskRecord) : Task(
     project,
     taskRecord,
     ParentTaskDelegate.Factory.Project(project),
@@ -76,7 +76,7 @@ class ProjectTask(override val project: Project<*>, private val taskRecord: Proj
     override fun getOrCopyTime(
         dayOfWeek: DayOfWeek,
         time: Time,
-        customTimeMigrationHelper: Project.CustomTimeMigrationHelper,
+        customTimeMigrationHelper: OwnedProject.CustomTimeMigrationHelper,
         now: ExactTimeStamp.Local,
     ) = project.getOrCopyTime(dayOfWeek, time, customTimeMigrationHelper, now)
 

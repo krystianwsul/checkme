@@ -68,7 +68,7 @@ sealed class Time {
 
         abstract class Project<T : ProjectType> : Custom() {
 
-            protected abstract val project: com.krystianwsul.common.firebase.models.project.Project<T>
+            protected abstract val project: com.krystianwsul.common.firebase.models.project.OwnedProject<T>
 
             abstract override val customTimeRecord: ProjectCustomTimeRecord<T>
 

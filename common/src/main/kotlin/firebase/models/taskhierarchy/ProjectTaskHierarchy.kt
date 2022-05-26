@@ -1,13 +1,13 @@
 package com.krystianwsul.common.firebase.models.taskhierarchy
 
-import com.krystianwsul.common.firebase.models.project.Project
+import com.krystianwsul.common.firebase.models.project.OwnedProject
 import com.krystianwsul.common.firebase.records.taskhierarchy.ProjectTaskHierarchyRecord
 import com.krystianwsul.common.utils.TaskHierarchyKey
 import com.krystianwsul.common.utils.TaskKey
 
 
 class ProjectTaskHierarchy(
-    private val project: Project<*>,
+    private val project: OwnedProject<*>,
     private val taskHierarchyRecord: ProjectTaskHierarchyRecord,
 ) : TaskHierarchy(project.clearableInvalidatableManager, taskHierarchyRecord, ParentTaskDelegate.Factory.Project(project)) {
 

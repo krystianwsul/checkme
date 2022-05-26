@@ -11,7 +11,7 @@ import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.viewmodels.ShowTasksViewModel
 import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.firebase.DomainThreadChecker
-import com.krystianwsul.common.firebase.models.project.Project
+import com.krystianwsul.common.firebase.models.project.OwnedProject
 import com.krystianwsul.common.firebase.models.project.SharedProject
 import com.krystianwsul.common.firebase.models.search.SearchContext
 import com.krystianwsul.common.firebase.models.task.Task
@@ -58,7 +58,7 @@ fun DomainFactory.getShowTasksData(
 
     when (parameters) {
         is ShowTasksActivity.Parameters.Unscheduled -> {
-            fun Project<*>.getUnscheduledTaskDatas(searchContext: SearchContext) = searchContext.search {
+            fun OwnedProject<*>.getUnscheduledTaskDatas(searchContext: SearchContext) = searchContext.search {
                 getAllDependenciesLoadedTasks()
                     .asSequence()
                     .filter { it.notDeleted && it.intervalInfo.isUnscheduled() }

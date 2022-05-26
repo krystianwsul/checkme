@@ -19,7 +19,7 @@ import com.krystianwsul.common.domain.TaskUndoData
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.project.OwnedProject
-import com.krystianwsul.common.firebase.models.project.PrivateProject
+import com.krystianwsul.common.firebase.models.project.PrivateOwnedProject
 import com.krystianwsul.common.firebase.models.project.SharedProject
 import com.krystianwsul.common.firebase.models.schedule.SingleSchedule
 import com.krystianwsul.common.firebase.models.search.FilterResult
@@ -408,7 +408,7 @@ fun OwnedProject<*>.toEntryDatas(
                 childTaskDatas,
                 projectKey,
                 when (this) {
-                    is PrivateProject -> true
+                    is PrivateOwnedProject -> true
                     is SharedProject -> endExactTimeStamp == null
                 },
                 startExactTimeStamp.long,
@@ -420,7 +420,7 @@ fun OwnedProject<*>.toEntryDatas(
 }
 
 fun OwnedProject<*>.getDisplayName() = when (this) {
-    is PrivateProject -> MyApplication.context.getString(R.string.myTasks)
+    is PrivateOwnedProject -> MyApplication.context.getString(R.string.myTasks)
     is SharedProject -> name
 }
 

@@ -15,7 +15,7 @@ import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.UserKey
 
-class PrivateProject(
+class PrivateOwnedProject(
     override val projectRecord: PrivateOwnedProjectRecord,
     userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
     rootTaskProvider: RootTaskProvider,

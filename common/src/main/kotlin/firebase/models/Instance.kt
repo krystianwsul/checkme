@@ -11,7 +11,7 @@ import com.krystianwsul.common.firebase.models.customtime.SharedCustomTime
 import com.krystianwsul.common.firebase.models.interval.ScheduleInterval
 import com.krystianwsul.common.firebase.models.interval.Type
 import com.krystianwsul.common.firebase.models.project.OwnedProject
-import com.krystianwsul.common.firebase.models.project.PrivateProject
+import com.krystianwsul.common.firebase.models.project.PrivateOwnedProject
 import com.krystianwsul.common.firebase.models.project.SharedProject
 import com.krystianwsul.common.firebase.models.task.ProjectRootTaskIdTracker
 import com.krystianwsul.common.firebase.models.task.Task
@@ -676,7 +676,7 @@ class Instance private constructor(
     }
 
     // todo use for all CreateTaskActivity schedule hints.  Either filter by current, or add non-current to create task data
-    fun getCreateTaskTimePair(privateProject: PrivateProject, myUser: MyUser): TimePair {
+    fun getCreateTaskTimePair(privateProject: PrivateOwnedProject, myUser: MyUser): TimePair {
         val instanceTimePair = instanceTime.timePair
 
         return if (instanceTimePair.customTimeKey != null) {

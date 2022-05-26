@@ -17,7 +17,7 @@ import com.krystianwsul.common.firebase.json.tasks.RootTaskJson
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
 import com.krystianwsul.common.firebase.models.project.OwnedProject
-import com.krystianwsul.common.firebase.models.project.PrivateProject
+import com.krystianwsul.common.firebase.models.project.PrivateOwnedProject
 import com.krystianwsul.common.firebase.models.task.*
 import com.krystianwsul.common.firebase.records.project.PrivateOwnedProjectRecord
 import com.krystianwsul.common.firebase.records.task.RootTaskRecord
@@ -118,7 +118,7 @@ class IrrelevantTest {
             rootTasksManager,
         )
 
-        lateinit var project: PrivateProject
+        lateinit var project: PrivateOwnedProject
 
         val projectsFactory = mockk<ProjectsFactory> {
             every { getProjectForce(any()) } answers { project }
@@ -139,7 +139,7 @@ class IrrelevantTest {
             rootModelChangeManager,
         ) { projectsFactory }
 
-        project = PrivateProject(projectRecord, mockk(), rootTasksFactory, rootModelChangeManager)
+        project = PrivateOwnedProject(projectRecord, mockk(), rootTasksFactory, rootModelChangeManager)
 
         now = ExactTimeStamp.Local(day1, hour2)
 
@@ -268,7 +268,7 @@ class IrrelevantTest {
         val existingInstanceChangeManager = RootModelChangeManager()
 
         val projectRecord = PrivateOwnedProjectRecord(projectKey, projectJson)
-        val project = PrivateProject(projectRecord, mockk(), mockk(relaxed = true), existingInstanceChangeManager)
+        val project = PrivateOwnedProject(projectRecord, mockk(), mockk(relaxed = true), existingInstanceChangeManager)
         val task = project.projectTasks.single()
 
         // 2. Mark single instance done
@@ -405,7 +405,7 @@ class IrrelevantTest {
         val existingInstanceChangeManager = RootModelChangeManager()
 
         val projectRecord = PrivateOwnedProjectRecord(projectKey, projectJson)
-        val project = PrivateProject(projectRecord, mockk(), mockk(relaxed = true), existingInstanceChangeManager)
+        val project = PrivateOwnedProject(projectRecord, mockk(), mockk(relaxed = true), existingInstanceChangeManager)
 
         val parentTask = project.projectTasks.single { it.isTopLevelTask() }
         assertEquals(2, parentTask.getChildTaskHierarchies().size)
@@ -547,7 +547,7 @@ class IrrelevantTest {
         val existingInstanceChangeManager = RootModelChangeManager()
 
         val projectRecord = PrivateOwnedProjectRecord(projectKey, projectJson)
-        val project = PrivateProject(projectRecord, mockk(), mockk(relaxed = true), existingInstanceChangeManager)
+        val project = PrivateOwnedProject(projectRecord, mockk(), mockk(relaxed = true), existingInstanceChangeManager)
 
         val parentTask = project.projectTasks.single { it.isTopLevelTask() }
         assertEquals(2, parentTask.getChildTaskHierarchies().size)
@@ -640,7 +640,7 @@ class IrrelevantTest {
         val taskRecord = RootTaskRecord(taskId, taskJson, mockk(), mockk())
 
         lateinit var task: RootTask
-        lateinit var project: PrivateProject
+        lateinit var project: PrivateOwnedProject
 
         var taskDeleted = false
 
@@ -682,7 +682,7 @@ class IrrelevantTest {
         val projectJson = PrivateOwnedProjectJson(startTime = now.long)
 
         val projectRecord = PrivateOwnedProjectRecord(projectKey, projectJson)
-        project = PrivateProject(projectRecord, mockk(), taskParent, existingInstanceChangeManager)
+        project = PrivateOwnedProject(projectRecord, mockk(), taskParent, existingInstanceChangeManager)
 
         // 2. Mark today's instance done
 

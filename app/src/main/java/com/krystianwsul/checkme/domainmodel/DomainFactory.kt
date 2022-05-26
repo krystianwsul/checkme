@@ -37,7 +37,7 @@ import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.customtime.PrivateCustomTime
 import com.krystianwsul.common.firebase.models.customtime.SharedCustomTime
 import com.krystianwsul.common.firebase.models.project.OwnedProject
-import com.krystianwsul.common.firebase.models.project.PrivateProject
+import com.krystianwsul.common.firebase.models.project.PrivateOwnedProject
 import com.krystianwsul.common.firebase.models.search.FilterResult
 import com.krystianwsul.common.firebase.models.search.SearchContext
 import com.krystianwsul.common.firebase.models.task.*
@@ -572,7 +572,7 @@ class DomainFactory(
         val projects = cloudParams.projects.toMutableSet()
         val userKeys = cloudParams.userKeys.toMutableSet()
 
-        val remotePrivateProject = projects.singleOrNull { it is PrivateProject }
+        val remotePrivateProject = projects.singleOrNull { it is PrivateOwnedProject }
 
         remotePrivateProject?.let {
             projects.remove(it)

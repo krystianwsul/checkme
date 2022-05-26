@@ -4,7 +4,7 @@ package com.krystianwsul.common.relevance
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.noscheduleorparent.NoScheduleOrParent
 import com.krystianwsul.common.firebase.models.project.OwnedProject
-import com.krystianwsul.common.firebase.models.project.PrivateProject
+import com.krystianwsul.common.firebase.models.project.PrivateOwnedProject
 import com.krystianwsul.common.firebase.models.project.SharedProject
 import com.krystianwsul.common.firebase.models.schedule.Schedule
 import com.krystianwsul.common.firebase.models.task.ProjectRootTaskIdTracker
@@ -179,7 +179,7 @@ object Irrelevant {
             )
 
             projects.values
-                .filterIsInstance<PrivateProject>()
+                .filterIsInstance<PrivateOwnedProject>()
                 .forEach {
                     it.customTimes
                         .filter { it.notDeleted }
@@ -192,7 +192,7 @@ object Irrelevant {
                 .filter {
                     @Suppress("REDUNDANT_ELSE_IN_WHEN")
                     when (it) {
-                        is PrivateProject -> true
+                        is PrivateOwnedProject -> true
                         is SharedProject -> it.notDeleted
                         else -> throw UnsupportedOperationException()
                     }

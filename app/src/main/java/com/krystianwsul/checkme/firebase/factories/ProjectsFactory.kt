@@ -15,7 +15,7 @@ import com.krystianwsul.common.firebase.json.projects.SharedOwnedProjectJson
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
 import com.krystianwsul.common.firebase.models.project.OwnedProject
-import com.krystianwsul.common.firebase.models.project.PrivateProject
+import com.krystianwsul.common.firebase.models.project.PrivateOwnedProject
 import com.krystianwsul.common.firebase.models.project.SharedProject
 import com.krystianwsul.common.firebase.models.users.RootUser
 import com.krystianwsul.common.time.ExactTimeStamp
@@ -67,7 +67,7 @@ class ProjectsFactory(
 
     private var sharedProjectFactories by sharedProjectFactoriesProperty
 
-    val privateProject get() = privateProjectFactory.project as PrivateProject
+    val privateProject get() = privateProjectFactory.project as PrivateOwnedProject
 
     val sharedProjects get() = sharedProjectFactories.mapValues { it.value.project as SharedProject }
 

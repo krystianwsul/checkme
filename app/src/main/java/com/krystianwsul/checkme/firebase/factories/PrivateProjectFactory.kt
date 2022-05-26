@@ -6,7 +6,7 @@ import com.krystianwsul.common.firebase.json.projects.PrivateOwnedProjectJson
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
 import com.krystianwsul.common.firebase.models.project.OwnedProject
-import com.krystianwsul.common.firebase.models.project.PrivateProject
+import com.krystianwsul.common.firebase.models.project.PrivateOwnedProject
 import com.krystianwsul.common.firebase.records.project.OwnedProjectRecord
 import com.krystianwsul.common.firebase.records.project.PrivateOwnedProjectRecord
 import com.krystianwsul.common.time.JsonTime
@@ -36,7 +36,7 @@ class PrivateProjectFactory(
         userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
         rootTaskProvider: OwnedProject.RootTaskProvider,
         rootModelChangeManager: RootModelChangeManager,
-    ) = PrivateProject(
+    ) = PrivateOwnedProject(
         projectRecord as PrivateOwnedProjectRecord,
         userCustomTimeProvider,
         rootTaskProvider,

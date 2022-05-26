@@ -12,7 +12,7 @@ import com.krystianwsul.checkme.utils.time.toDateTimeTz
 import com.krystianwsul.common.firebase.models.ImageState
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.project.OwnedProject
-import com.krystianwsul.common.firebase.models.project.PrivateProject
+import com.krystianwsul.common.firebase.models.project.PrivateOwnedProject
 import com.krystianwsul.common.firebase.models.project.SharedProject
 import com.krystianwsul.common.time.DateTime
 import com.krystianwsul.common.time.ExactTimeStamp
@@ -50,7 +50,7 @@ private fun DomainFactory.addInstanceHour(instance: Instance, dateTime: DateTime
 
 val OwnedProject<*>.debugName
     get() = when (this) {
-        is PrivateProject -> "private project"
+        is PrivateOwnedProject -> "private project"
         is SharedProject -> name
     }
 

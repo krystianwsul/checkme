@@ -3,12 +3,13 @@ package com.krystianwsul.common.firebase.records.users
 import com.krystianwsul.common.firebase.UserData
 import com.krystianwsul.common.firebase.json.users.UserJson
 import com.krystianwsul.common.firebase.records.RemoteRecord
-import com.krystianwsul.common.firebase.records.project.SharedOwnedProjectRecord
+import com.krystianwsul.common.firebase.records.project.ProjectRecord
+import com.krystianwsul.common.utils.ProjectType
 
 
 abstract class ProjectUserRecord(
     create: Boolean,
-    private val remoteProjectRecord: SharedOwnedProjectRecord, // todo projectKey
+    private val remoteProjectRecord: ProjectRecord<ProjectType.Shared>,
     final override val createObject: UserJson
 ) : RemoteRecord(create) {
 

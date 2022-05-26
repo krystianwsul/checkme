@@ -1,11 +1,11 @@
 package com.krystianwsul.common.firebase.records.users
 
 import com.krystianwsul.common.firebase.json.users.UserJson
-import com.krystianwsul.common.firebase.records.project.SharedOwnedProjectRecord
+import com.krystianwsul.common.firebase.records.project.SharedForeignProjectRecord
 
 
 class ForeignProjectUserRecord(
-    remoteProjectRecord: SharedOwnedProjectRecord, // todo projectKey
+    remoteProjectRecord: SharedForeignProjectRecord,
     createObject: UserJson
 ) : ProjectUserRecord(false, remoteProjectRecord, createObject) {
 

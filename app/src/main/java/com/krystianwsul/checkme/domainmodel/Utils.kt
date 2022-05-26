@@ -9,7 +9,7 @@ import com.krystianwsul.checkme.viewmodels.DomainResult
 import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.models.ImageState
 import com.krystianwsul.common.firebase.models.Instance
-import com.krystianwsul.common.firebase.models.project.SharedProject
+import com.krystianwsul.common.firebase.models.project.SharedOwnedProject
 import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.interrupt.DomainInterruptedException
 import com.krystianwsul.common.interrupt.InterruptionChecker
@@ -61,7 +61,7 @@ fun <T> Sequence<T>.takeAndHasMore(n: Int): Pair<List<T>, Boolean> {
 }
 
 fun Task.getProjectInfo(includeProjectDetails: Boolean = true): DetailsNode.ProjectInfo? {
-    val sharedProject = project as? SharedProject
+    val sharedProject = project as? SharedOwnedProject
 
     return if (isTopLevelTask() && sharedProject != null) {
         DetailsNode.ProjectInfo(
@@ -78,7 +78,7 @@ fun Task.getProjectInfo(includeProjectDetails: Boolean = true): DetailsNode.Proj
 }
 
 fun Instance.getProjectInfo(includeProjectDetails: Boolean = true): DetailsNode.ProjectInfo? {
-    val sharedProject = getProject() as? SharedProject
+    val sharedProject = getProject() as? SharedOwnedProject
 
     return if (isRootInstance() && sharedProject != null) {
         DetailsNode.ProjectInfo(

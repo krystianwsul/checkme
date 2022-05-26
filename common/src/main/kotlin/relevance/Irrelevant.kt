@@ -5,7 +5,7 @@ import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.noscheduleorparent.NoScheduleOrParent
 import com.krystianwsul.common.firebase.models.project.OwnedProject
 import com.krystianwsul.common.firebase.models.project.PrivateOwnedProject
-import com.krystianwsul.common.firebase.models.project.SharedProject
+import com.krystianwsul.common.firebase.models.project.SharedOwnedProject
 import com.krystianwsul.common.firebase.models.schedule.Schedule
 import com.krystianwsul.common.firebase.models.task.ProjectRootTaskIdTracker
 import com.krystianwsul.common.firebase.models.task.RootTask
@@ -193,7 +193,7 @@ object Irrelevant {
                     @Suppress("REDUNDANT_ELSE_IN_WHEN")
                     when (it) {
                         is PrivateOwnedProject -> true
-                        is SharedProject -> it.notDeleted
+                        is SharedOwnedProject -> it.notDeleted
                         else -> throw UnsupportedOperationException()
                     }
                 }
@@ -220,7 +220,7 @@ object Irrelevant {
                 .map { it.project }
                 .toSet()
 
-            val irrelevantProjects = (projects.values - relevantProjects).map { it as SharedProject }
+            val irrelevantProjects = (projects.values - relevantProjects).map { it as SharedOwnedProject }
 
             irrelevantExistingInstances.forEach { it.delete() }
             irrelevantSchedules.forEach { it.delete() }
@@ -231,7 +231,7 @@ object Irrelevant {
             // we want this to run after everything from the task down is deleted, but before custom times
             OrdinalProcessor(
                 users,
-                relevantProjects.filterIsInstance<SharedProject>().associateBy { it.projectKey },
+                relevantProjects.filterIsInstance<SharedOwnedProject>().associateBy { it.projectKey },
                 relevantTasks.associateBy { it.taskKey },
                 customTimeRelevanceCollection,
                 now,
@@ -249,7 +249,7 @@ object Irrelevant {
                 irrelevantProjectCustomTimes,
                 remoteProjectRelevances.values
                     .filter { !it.relevant }
-                    .map { it.project as SharedProject },
+                    .map { it.project as SharedOwnedProject },
             )
         }
 
@@ -284,7 +284,7 @@ object Irrelevant {
         val irrelevantNoScheduleOrParents: Collection<NoScheduleOrParent>,
         val irrelevantTasks: Collection<Task>,
         val irrelevantRemoteCustomTimes: Collection<Time.Custom.Project<*>>,
-        val removedSharedProjects: List<SharedProject>,
+        val removedSharedProjects: List<SharedOwnedProject>,
     )
 
     private class MissingRelevanceException(taskKey: TaskKey, projectKey: ProjectKey<*>) :

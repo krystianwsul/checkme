@@ -3,9 +3,12 @@ package com.krystianwsul.common.firebase.models.users
 import com.krystianwsul.common.firebase.json.users.ProjectOrdinalEntryJson
 import com.krystianwsul.common.firebase.json.users.ProjectOrdinalKeyEntryJson
 import com.krystianwsul.common.firebase.models.Instance
-import com.krystianwsul.common.firebase.models.project.SharedProject
+import com.krystianwsul.common.firebase.models.project.SharedOwnedProject
 import com.krystianwsul.common.time.*
-import com.krystianwsul.common.utils.*
+import com.krystianwsul.common.utils.InstanceKey
+import com.krystianwsul.common.utils.Ordinal
+import com.krystianwsul.common.utils.ProjectKey
+import com.krystianwsul.common.utils.TaskKey
 
 class ProjectOrdinalManager(
     private val callbacks: Callbacks,
@@ -15,10 +18,10 @@ class ProjectOrdinalManager(
 
     val allEntries: Collection<OrdinalEntry> = ordinalEntries
 
-    private fun Key.Entry.getHourMinute(project: SharedProject) =
+    private fun Key.Entry.getHourMinute(project: SharedOwnedProject) =
         project.getTime(instanceTimePair).getHourMinute(instanceDateOrDayOfWeek.dayOfWeek)
 
-    fun setOrdinal(project: SharedProject, key: Key, ordinal: Ordinal, now: ExactTimeStamp.Local) {
+    fun setOrdinal(project: SharedOwnedProject, key: Key, ordinal: Ordinal, now: ExactTimeStamp.Local) {
         check(project.projectKey == projectKey)
 
         check(
@@ -64,7 +67,7 @@ class ProjectOrdinalManager(
         }
     }
 
-    fun getOrdinal(project: SharedProject, key: Key): Ordinal {
+    fun getOrdinal(project: SharedOwnedProject, key: Key): Ordinal {
         check(project.projectKey == projectKey)
 
         listOf<Matcher<*>>(
@@ -209,6 +212,6 @@ class ProjectOrdinalManager(
 
     interface Provider {
 
-        fun getProjectOrdinalManager(project: SharedProject): ProjectOrdinalManager
+        fun getProjectOrdinalManager(project: SharedOwnedProject): ProjectOrdinalManager
     }
 }

@@ -1,13 +1,9 @@
 package com.krystianwsul.common.firebase.models.users
 
-import com.krystianwsul.common.firebase.models.project.SharedProject
 import com.krystianwsul.common.firebase.records.users.ProjectUserRecord
 
 
-open class ProjectUser(
-    private val sharedProject: SharedProject, // todo projectKey
-    private val projectUserRecord: ProjectUserRecord,
-) {
+open class ProjectUser(private val projectUserRecord: ProjectUserRecord) {
 
     val id = projectUserRecord.id
 

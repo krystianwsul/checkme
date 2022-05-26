@@ -12,7 +12,7 @@ import com.krystianwsul.checkme.viewmodels.ShowTasksViewModel
 import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.models.project.OwnedProject
-import com.krystianwsul.common.firebase.models.project.SharedProject
+import com.krystianwsul.common.firebase.models.project.SharedOwnedProject
 import com.krystianwsul.common.firebase.models.search.SearchContext
 import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.time.ExactTimeStamp
@@ -124,7 +124,7 @@ fun DomainFactory.getShowTasksData(
             title = project.getDisplayName()
             subtitle = null
 
-            isSharedProject = project is SharedProject
+            isSharedProject = project is SharedOwnedProject
         }
     }
 

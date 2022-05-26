@@ -4,7 +4,7 @@ import com.krystianwsul.common.firebase.MyUserProperties
 import com.krystianwsul.common.firebase.json.customtimes.UserCustomTimeJson
 import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
 import com.krystianwsul.common.firebase.models.customtime.MyUserCustomTime
-import com.krystianwsul.common.firebase.models.project.SharedProject
+import com.krystianwsul.common.firebase.models.project.SharedOwnedProject
 import com.krystianwsul.common.firebase.records.users.MyUserRecord
 import com.krystianwsul.common.utils.CustomTimeId
 import com.krystianwsul.common.utils.UserKey
@@ -46,16 +46,17 @@ class MyUser(private val remoteMyUserRecord: MyUserRecord, private val rootModel
         return userCustomTime
     }
 
-    override fun getProjectOrdinalManager(project: SharedProject) = projectOrdinalManagers.getOrPut(project.projectKey) {
-        // don't hold a reference to project
-        val projectKey = project.projectKey
+    override fun getProjectOrdinalManager(project: SharedOwnedProject) =
+        projectOrdinalManagers.getOrPut(project.projectKey) {
+            // don't hold a reference to project
+            val projectKey = project.projectKey
 
-        val ordinalEntries = getOrdinalEntriesForProject(project).values.toMutableList()
+            val ordinalEntries = getOrdinalEntriesForProject(project).values.toMutableList()
 
-        ProjectOrdinalManager(
-            { remoteMyUserRecord.addOrdinalEntry(projectKey, it.toJson()) },
-            projectKey,
-            ordinalEntries,
-        )
+            ProjectOrdinalManager(
+                { remoteMyUserRecord.addOrdinalEntry(projectKey, it.toJson()) },
+                projectKey,
+                ordinalEntries,
+            )
     }
 }

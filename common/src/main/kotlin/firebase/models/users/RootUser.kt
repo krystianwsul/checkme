@@ -2,7 +2,7 @@ package com.krystianwsul.common.firebase.models.users
 
 import com.krystianwsul.common.firebase.RootUserProperties
 import com.krystianwsul.common.firebase.models.cache.ClearableInvalidatableManager
-import com.krystianwsul.common.firebase.models.project.SharedProject
+import com.krystianwsul.common.firebase.models.project.SharedOwnedProject
 import com.krystianwsul.common.firebase.records.users.RootUserRecord
 import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.time.Time
@@ -34,7 +34,7 @@ open class RootUser(val remoteRootUserRecord: RootUserRecord) :
 
     override fun tryGetUserCustomTime(userCustomTimeKey: CustomTimeKey.User) = customTimes[userCustomTimeKey.customTimeId]
 
-    fun getOrdinalEntriesForProject(project: SharedProject) = userWrapper.ordinalEntries[project.projectKey.key]
+    fun getOrdinalEntriesForProject(project: SharedOwnedProject) = userWrapper.ordinalEntries[project.projectKey.key]
         ?.mapValues { ProjectOrdinalManager.OrdinalEntry.fromJson(project.projectRecord, it.value) }
         .orEmpty()
 }

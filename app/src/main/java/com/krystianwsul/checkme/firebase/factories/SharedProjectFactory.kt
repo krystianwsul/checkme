@@ -6,7 +6,7 @@ import com.krystianwsul.common.firebase.json.JsonWrapper
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
 import com.krystianwsul.common.firebase.models.project.OwnedProject
-import com.krystianwsul.common.firebase.models.project.SharedProject
+import com.krystianwsul.common.firebase.models.project.SharedOwnedProject
 import com.krystianwsul.common.firebase.records.project.OwnedProjectRecord
 import com.krystianwsul.common.firebase.records.project.SharedOwnedProjectRecord
 import com.krystianwsul.common.time.ExactTimeStamp
@@ -37,7 +37,7 @@ class SharedProjectFactory(
         userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
         rootTaskProvider: OwnedProject.RootTaskProvider,
         rootModelChangeManager: RootModelChangeManager,
-    ) = SharedProject(
+    ) = SharedOwnedProject(
         projectRecord as SharedOwnedProjectRecord,
         userCustomTimeProvider,
         rootTaskProvider,

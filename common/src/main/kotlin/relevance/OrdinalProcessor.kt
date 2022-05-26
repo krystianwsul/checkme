@@ -1,7 +1,7 @@
 package com.krystianwsul.common.relevance
 
 import com.krystianwsul.common.firebase.models.Instance
-import com.krystianwsul.common.firebase.models.project.SharedProject
+import com.krystianwsul.common.firebase.models.project.SharedOwnedProject
 import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.firebase.models.users.ProjectOrdinalManager
 import com.krystianwsul.common.firebase.models.users.RootUser
@@ -16,7 +16,7 @@ import com.krystianwsul.common.utils.TaskKey
 
 class OrdinalProcessor(
     private val users: Collection<RootUser>,
-    private val relevantProjects: Map<ProjectKey.Shared, SharedProject>,
+    private val relevantProjects: Map<ProjectKey.Shared, SharedOwnedProject>,
     private val relevantTasks: Map<TaskKey, Task>,
     private val customTimeRelevanceCollection: CustomTimeRelevanceCollection,
     private val now: ExactTimeStamp.Local,
@@ -56,7 +56,7 @@ class OrdinalProcessor(
     }
 
     private fun processProject(
-        project: SharedProject,
+        project: SharedOwnedProject,
         ordinalEntries: Map<String, ProjectOrdinalManager.OrdinalEntry>,
     ): Map<String, ProjectOrdinalManager.OrdinalEntry> {
         val mutableOrdinalEntries = ordinalEntries.mapValues { MutableOrdinalEntry(it.value) }

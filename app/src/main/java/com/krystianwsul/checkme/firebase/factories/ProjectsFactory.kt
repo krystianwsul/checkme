@@ -16,7 +16,7 @@ import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
 import com.krystianwsul.common.firebase.models.project.OwnedProject
 import com.krystianwsul.common.firebase.models.project.PrivateOwnedProject
-import com.krystianwsul.common.firebase.models.project.SharedProject
+import com.krystianwsul.common.firebase.models.project.SharedOwnedProject
 import com.krystianwsul.common.firebase.models.users.RootUser
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.*
@@ -69,7 +69,7 @@ class ProjectsFactory(
 
     val privateProject get() = privateProjectFactory.project as PrivateOwnedProject
 
-    val sharedProjects get() = sharedProjectFactories.mapValues { it.value.project as SharedProject }
+    val sharedProjects get() = sharedProjectFactories.mapValues { it.value.project as SharedOwnedProject }
 
     val changeTypes: Observable<ChangeType>
 
@@ -149,7 +149,7 @@ class ProjectsFactory(
         rootUser: RootUser,
         userInfo: UserInfo,
         friendsFactory: FriendsFactory,
-    ): SharedProject {
+    ): SharedOwnedProject {
         check(name.isNotEmpty())
 
         val friendIds = recordOf.toMutableSet()
@@ -194,7 +194,7 @@ class ProjectsFactory(
 
     fun <T : ProjectType> getProjectForce(projectKey: ProjectKey<T>) = getProjectIfPresent(projectKey)!!
 
-    fun getSharedProjectForce(projectKey: ProjectKey.Shared) = getProjectIfPresent(projectKey) as SharedProject
+    fun getSharedProjectForce(projectKey: ProjectKey.Shared) = getProjectIfPresent(projectKey) as SharedOwnedProject
 
     fun getProjectIfPresent(projectId: String) = projects.entries
         .singleOrNull { it.key.key == projectId }

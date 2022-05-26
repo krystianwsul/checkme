@@ -1,7 +1,6 @@
 package com.krystianwsul.common.firebase.models.users
 
-import com.krystianwsul.common.firebase.models.project.SharedProject
-import com.krystianwsul.common.invoke
+import com.krystianwsul.common.firebase.models.project.SharedOwnedProject
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.*
 import com.soywiz.klock.hours
@@ -25,7 +24,7 @@ class ProjectOrdinalManagerMatcherTest {
 
     private val projectKey = ProjectKey.Shared("projectKey")
 
-    private val project = mockk<SharedProject> {
+    private val project = mockk<SharedOwnedProject> {
         val timePairSlot = slot<TimePair>()
 
         every { this@mockk.projectKey } returns this@ProjectOrdinalManagerMatcherTest.projectKey

@@ -25,7 +25,7 @@ import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.interval.ScheduleInterval
 import com.krystianwsul.common.firebase.models.project.OwnedProject
 import com.krystianwsul.common.firebase.models.project.PrivateOwnedProject
-import com.krystianwsul.common.firebase.models.project.SharedProject
+import com.krystianwsul.common.firebase.models.project.SharedOwnedProject
 import com.krystianwsul.common.firebase.models.schedule.SingleSchedule
 import com.krystianwsul.common.firebase.models.search.FilterResult
 import com.krystianwsul.common.firebase.models.search.SearchContext
@@ -174,7 +174,7 @@ private fun DomainFactory.getCreateTaskDataSlow(
 
     fun OwnedProject<*>.toParentKey() = when (this) {
         is PrivateOwnedProject -> null
-        is SharedProject -> EditViewModel.ParentKey.Project(projectKey)
+        is SharedOwnedProject -> EditViewModel.ParentKey.Project(projectKey)
     }
 
     val currentParentKey: EditViewModel.ParentKey? = when (currentParentSource) {
@@ -195,12 +195,12 @@ private fun DomainFactory.getCreateTaskDataSlow(
                 .map { getTaskForce(it).project }
                 .distinct()
                 .singleOrNull()
-                ?.let { it as? SharedProject }
+                ?.let { it as? SharedOwnedProject }
                 ?.let { EditViewModel.ParentKey.Project(it.projectKey) }
         }
     }
 
-    fun SharedProject.toParent() = ParentScheduleManager.Parent.Project(
+    fun SharedOwnedProject.toParent() = ParentScheduleManager.Parent.Project(
         name,
         EditViewModel.ParentKey.Project(projectKey),
         users.toUserDatas(),
@@ -216,7 +216,7 @@ private fun DomainFactory.getCreateTaskDataSlow(
                 task.hasMultipleInstances(startParameters.parentInstanceKey, now),
                 task.getTopLevelTask().let {
                     val parent = it.project
-                        .let { it as? SharedProject }
+                        .let { it as? SharedOwnedProject }
                         ?.toParent()
 
                     val (scheduleDataWrappers, assignedTo) =
@@ -710,7 +710,7 @@ private fun DomainFactory.getParentTreeDatas(
     parentTreeDatas += searchContext.search {
         getAllTasks().asSequence()
             .filter { it.showAsParent(now, excludedTaskKeys) }
-            .filter { it.isTopLevelTask() && (it.project as? SharedProject)?.notDeleted != true }
+            .filter { it.isTopLevelTask() && (it.project as? SharedOwnedProject)?.notDeleted != true }
             .filterSearchCriteria()
             .map { (task, filterResult) ->
                 task.toParentEntryData(

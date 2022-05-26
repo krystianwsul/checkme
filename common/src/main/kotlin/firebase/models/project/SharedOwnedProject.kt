@@ -19,7 +19,7 @@ import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.*
 
-class SharedProject(
+class SharedOwnedProject(
     override val projectRecord: SharedOwnedProjectRecord,
     userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
     rootTaskProvider: RootTaskProvider,

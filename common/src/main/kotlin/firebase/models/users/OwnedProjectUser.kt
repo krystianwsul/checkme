@@ -1,14 +1,14 @@
 package com.krystianwsul.common.firebase.models.users
 
 import com.krystianwsul.common.domain.DeviceDbInfo
-import com.krystianwsul.common.firebase.models.project.SharedProject
+import com.krystianwsul.common.firebase.models.project.SharedOwnedProject
 import com.krystianwsul.common.firebase.records.users.OwnedProjectUserRecord
 
 
 class OwnedProjectUser(
-    private val sharedProject: SharedProject,
-    private val projectUserRecord: OwnedProjectUserRecord
-) : ProjectUser(sharedProject, projectUserRecord) {
+    private val sharedProject: SharedOwnedProject,
+    private val projectUserRecord: OwnedProjectUserRecord,
+) : ProjectUser(projectUserRecord) {
 
     override var name
         get() = super.name

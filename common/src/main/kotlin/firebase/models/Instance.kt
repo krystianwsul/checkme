@@ -12,7 +12,7 @@ import com.krystianwsul.common.firebase.models.interval.ScheduleInterval
 import com.krystianwsul.common.firebase.models.interval.Type
 import com.krystianwsul.common.firebase.models.project.OwnedProject
 import com.krystianwsul.common.firebase.models.project.PrivateOwnedProject
-import com.krystianwsul.common.firebase.models.project.SharedProject
+import com.krystianwsul.common.firebase.models.project.SharedOwnedProject
 import com.krystianwsul.common.firebase.models.task.ProjectRootTaskIdTracker
 import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.firebase.models.users.MyUser
@@ -99,7 +99,7 @@ class Instance private constructor(
             NewParentInfo.NO_OP -> {}
             NewParentInfo.TOP_LEVEL -> groupByProject = false
             NewParentInfo.PROJECT -> {
-                check(getProject() is SharedProject)
+                check(getProject() is SharedOwnedProject)
 
                 groupByProject = true
             }

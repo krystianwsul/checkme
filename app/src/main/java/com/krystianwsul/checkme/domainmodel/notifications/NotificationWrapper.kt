@@ -3,7 +3,7 @@ package com.krystianwsul.checkme.domainmodel.notifications
 import android.os.Build
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.firebase.models.Instance
-import com.krystianwsul.common.firebase.models.project.SharedProject
+import com.krystianwsul.common.firebase.models.project.SharedOwnedProject
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.Ordinal
@@ -31,7 +31,7 @@ abstract class NotificationWrapper {
     )
 
     abstract fun notifyProject(
-        project: SharedProject,
+        project: SharedOwnedProject,
         instances: List<Instance>,
         timeStamp: TimeStamp,
         silent: Boolean,

@@ -2,7 +2,7 @@ package com.krystianwsul.checkme.domainmodel.notifications
 
 import com.krystianwsul.checkme.domainmodel.GroupType
 import com.krystianwsul.common.firebase.models.Instance
-import com.krystianwsul.common.firebase.models.project.SharedProject
+import com.krystianwsul.common.firebase.models.project.SharedOwnedProject
 import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.InstanceKey
 
@@ -48,11 +48,11 @@ object GroupTypeFactory : GroupType.Factory {
 
         override val projectDescriptor = instance.takeIf { it.groupByProject }
             ?.getProject()
-            .let { it as? SharedProject }
+            .let { it as? SharedOwnedProject }
             ?.let(::ProjectDescriptor)
     }
 
-    data class ProjectDescriptor(val project: SharedProject) : GroupType.ProjectDescriptor
+    data class ProjectDescriptor(val project: SharedOwnedProject) : GroupType.ProjectDescriptor
 
     sealed interface Bridge {
 
@@ -73,7 +73,7 @@ object GroupTypeFactory : GroupType.Factory {
 
     class TimeProjectBridge(
         val timeStamp: TimeStamp,
-        val project: SharedProject,
+        val project: SharedOwnedProject,
         val instanceDescriptors: List<InstanceDescriptor>,
     ) : GroupType.TimeProject, SingleParent {
 
@@ -84,7 +84,7 @@ object GroupTypeFactory : GroupType.Factory {
 
     class ProjectBridge(
         val timeStamp: TimeStamp,
-        val project: SharedProject,
+        val project: SharedOwnedProject,
         val instanceDescriptors: List<InstanceDescriptor>,
     ) : GroupType.Project, SingleParent, TimeChild {
 
@@ -111,13 +111,17 @@ object GroupTypeFactory : GroupType.Factory {
         ) : Notification()
 
         class Project(
-            val project: SharedProject,
+            val project: SharedOwnedProject,
             val instances: List<com.krystianwsul.common.firebase.models.Instance>,
             val timeStamp: TimeStamp,
             override val silent: Boolean,
         ) : Notification() {
 
-            constructor(project: SharedProject, instanceDescriptors: List<InstanceDescriptor>, timeStamp: TimeStamp) : this(
+            constructor(
+                project: SharedOwnedProject,
+                instanceDescriptors: List<InstanceDescriptor>,
+                timeStamp: TimeStamp
+            ) : this(
                 project,
                 instanceDescriptors.map { it.instance },
                 timeStamp,

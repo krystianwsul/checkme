@@ -20,7 +20,7 @@ import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.project.OwnedProject
 import com.krystianwsul.common.firebase.models.project.PrivateOwnedProject
-import com.krystianwsul.common.firebase.models.project.SharedProject
+import com.krystianwsul.common.firebase.models.project.SharedOwnedProject
 import com.krystianwsul.common.firebase.models.schedule.SingleSchedule
 import com.krystianwsul.common.firebase.models.search.FilterResult
 import com.krystianwsul.common.firebase.models.search.SearchContext
@@ -409,7 +409,7 @@ fun OwnedProject<*>.toEntryDatas(
                 projectKey,
                 when (this) {
                     is PrivateOwnedProject -> true
-                    is SharedProject -> endExactTimeStamp == null
+                    is SharedOwnedProject -> endExactTimeStamp == null
                 },
                 startExactTimeStamp.long,
             )
@@ -421,7 +421,7 @@ fun OwnedProject<*>.toEntryDatas(
 
 fun OwnedProject<*>.getDisplayName() = when (this) {
     is PrivateOwnedProject -> MyApplication.context.getString(R.string.myTasks)
-    is SharedProject -> name
+    is SharedOwnedProject -> name
 }
 
 @CheckResult

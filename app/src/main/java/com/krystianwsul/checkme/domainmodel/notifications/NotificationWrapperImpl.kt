@@ -23,7 +23,7 @@ import com.krystianwsul.checkme.notifications.NotificationActionReceiver
 import com.krystianwsul.checkme.ticks.AlarmReceiver
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.firebase.models.Instance
-import com.krystianwsul.common.firebase.models.project.SharedProject
+import com.krystianwsul.common.firebase.models.project.SharedOwnedProject
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.Ordinal
@@ -153,7 +153,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
     }
 
     override fun notifyProject(
-        project: SharedProject,
+        project: SharedOwnedProject,
         instances: List<Instance>,
         timeStamp: TimeStamp,
         silent: Boolean,
@@ -791,12 +791,12 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         val childNames = getInstanceNames(instance.getChildInstances(), now, true)
 
         val project = instance.getProject()
-            .let { it as? SharedProject }
+            .let { it as? SharedOwnedProject }
             ?.name
     }
 
     protected inner class ProjectData(
-        project: SharedProject,
+        project: SharedOwnedProject,
         instances: List<Instance>,
         now: ExactTimeStamp.Local,
         val silent: Boolean,

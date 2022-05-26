@@ -138,7 +138,10 @@ class FactoryLoader(
                          */
                         lateinit var rootTasksFactory: RootTasksFactory
 
-                        val foreignProjectCoordinator = ForeignProjectCoordinator.Impl { rootTasksFactory.rootTasks.values }
+                        val foreignProjectCoordinator =
+                            ForeignProjectCoordinator.Impl(privateProjectKey, userFactorySingle, domainDisposable) {
+                                rootTasksFactory.rootTasks.values
+                            }
 
                         rootTasksFactory = RootTasksFactory(
                             rootTasksLoader,

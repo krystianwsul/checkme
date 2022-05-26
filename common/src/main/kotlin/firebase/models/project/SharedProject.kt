@@ -29,11 +29,11 @@ class SharedProject(
     userCustomTimeProvider,
     rootTaskProvider,
     rootModelChangeManager,
-), Endable {
+), SharedProjectProperties, Endable {
 
     override val projectKey = projectRecord.projectKey
 
-    var name
+    override var name
         get() = projectRecord.name
         set(name) {
             check(name.isNotEmpty())
@@ -47,7 +47,7 @@ class SharedProject(
         .mapValues { OwnedProjectUser(this, it.value) }
         .toMutableMap()
 
-    val users get() = remoteUsers.values
+    override val users get() = remoteUsers.values
 
     override val remoteCustomTimes = mutableMapOf<CustomTimeId.Project.Shared, SharedCustomTime>()
     override val _tasks: MutableMap<String, ProjectTask>

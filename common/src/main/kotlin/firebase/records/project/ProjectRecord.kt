@@ -21,7 +21,9 @@ abstract class ProjectRecord<T : ProjectType>(
 
     abstract val projectKey: ProjectKey<T>
 
-    override val key get() = _id.key
+    final override val key get() = _id.key
+
+    abstract val childKey: String
 
     val rootTaskParentDelegate = object : RootTaskParentDelegate(projectJson) {
 

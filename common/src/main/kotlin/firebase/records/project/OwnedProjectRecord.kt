@@ -12,7 +12,7 @@ import com.krystianwsul.common.utils.*
 sealed class OwnedProjectRecord<T : ProjectType>(
     create: Boolean,
     private val projectJson: OwnedProjectJson,
-    private val _id: ProjectKey<T>,
+    _id: ProjectKey<T>,
     committerKey: String,
 ) : ProjectRecord<T>(create, projectJson, _id, committerKey), JsonTime.ProjectCustomTimeIdAndKeyProvider, TaskRecord.Parent {
 
@@ -35,10 +35,6 @@ sealed class OwnedProjectRecord<T : ProjectType>(
             }
             .toMutableMap()
     }
-
-    override val key get() = _id.key
-
-    abstract val childKey: String
 
     val startTime get() = projectJson.startTime
     var startTimeOffset by Committer(projectJson::startTimeOffset, committerKey)

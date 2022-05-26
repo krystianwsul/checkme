@@ -18,12 +18,9 @@ import io.reactivex.rxjava3.schedulers.Schedulers
 
 abstract class DatabaseRead<DATA : Any> {
 
-    companion object {
-
-        private fun Path.toKey() = toString().replace('/', '-')
-    }
-
     open fun getPriority(taskPriorityMapper: TaskPriorityMapper) = DatabaseReadPriority.NORMAL
+
+    protected open fun Path.toPaperKey() = toString().replace('/', '-')
 
     protected abstract fun DatabaseReference.getQuery(): Query
 
@@ -37,7 +34,7 @@ abstract class DatabaseRead<DATA : Any> {
 
     private fun writeNullable(path: Path, value: DATA?): Completable {
         return if (AndroidDatabaseWrapper.ENABLE_PAPER) {
-            AndroidDatabaseWrapper.rxPaperBook.write(path.toKey(), NullableWrapper(value))
+            AndroidDatabaseWrapper.rxPaperBook.write(path.toPaperKey(), NullableWrapper(value))
                 .toV3()
                 .subscribeOn(Schedulers.io())
         } else {
@@ -47,7 +44,7 @@ abstract class DatabaseRead<DATA : Any> {
 
     private fun readNullable(path: Path): Maybe<NullableWrapper<DATA>> {
         return if (AndroidDatabaseWrapper.ENABLE_PAPER) {
-            AndroidDatabaseWrapper.rxPaperBook.read<NullableWrapper<DATA>>(path.toKey())
+            AndroidDatabaseWrapper.rxPaperBook.read<NullableWrapper<DATA>>(path.toPaperKey())
                 .toV3()
                 .subscribeOn(Schedulers.io())
                 .toMaybe()

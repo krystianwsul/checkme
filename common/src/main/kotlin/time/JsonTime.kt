@@ -176,6 +176,10 @@ sealed class JsonTime {
                 is CustomTimeKey.User -> getUserCustomTime(customTimeKey)
             }
         }
+
+        fun getTime(timePair: TimePair) = timePair.customTimeKey
+            ?.let(::getCustomTime)
+            ?: Time.Normal(timePair.hourMinute!!)
     }
 
     class RootTaskException : Exception("This should never be called for root tasks")

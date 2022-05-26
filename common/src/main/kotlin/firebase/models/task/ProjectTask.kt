@@ -7,6 +7,7 @@ import com.krystianwsul.common.firebase.models.noscheduleorparent.ProjectNoSched
 import com.krystianwsul.common.firebase.models.project.OwnedProject
 import com.krystianwsul.common.firebase.models.taskhierarchy.ParentTaskDelegate
 import com.krystianwsul.common.firebase.records.task.ProjectTaskRecord
+import com.krystianwsul.common.time.DateTime
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.Time
@@ -71,7 +72,8 @@ class ProjectTask(override val project: OwnedProject<*>, private val taskRecord:
 
     override fun deleteFromParent() = project.deleteTask(this)
 
-    override fun getDateTime(instanceScheduleKey: InstanceScheduleKey) = project.getDateTime(instanceScheduleKey)
+    override fun getDateTime(instanceScheduleKey: InstanceScheduleKey) =
+        DateTime(instanceScheduleKey.scheduleDate, project.getTime(instanceScheduleKey.scheduleTimePair))
 
     override fun getOrCopyTime(
         dayOfWeek: DayOfWeek,

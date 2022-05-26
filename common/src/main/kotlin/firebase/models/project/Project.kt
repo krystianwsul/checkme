@@ -5,32 +5,22 @@ import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
 import com.krystianwsul.common.firebase.models.users.ProjectUser
 import com.krystianwsul.common.firebase.records.AssignedToHelper
 import com.krystianwsul.common.firebase.records.project.ProjectRecord
-import com.krystianwsul.common.time.DateTime
 import com.krystianwsul.common.time.JsonTime
-import com.krystianwsul.common.time.Time
-import com.krystianwsul.common.time.TimePair
-import com.krystianwsul.common.utils.InstanceScheduleKey
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.UserKey
 
-abstract class Project<T : ProjectType>(
-    val assignedToHelper: AssignedToHelper,
-    val rootModelChangeManager: RootModelChangeManager,
-) : JsonTime.CustomTimeProvider {
+interface Project<T : ProjectType> : JsonTime.CustomTimeProvider {
 
-    val clearableInvalidatableManager = ClearableInvalidatableManager()
+    val assignedToHelper: AssignedToHelper
 
-    abstract val projectRecord: ProjectRecord<T>
+    val rootModelChangeManager: RootModelChangeManager
 
-    abstract val projectKey: ProjectKey<T>
+    val clearableInvalidatableManager: ClearableInvalidatableManager
 
-    fun getTime(timePair: TimePair) = timePair.customTimeKey
-        ?.let(::getCustomTime)
-        ?: Time.Normal(timePair.hourMinute!!)
+    val projectRecord: ProjectRecord<T>
 
-    fun getDateTime(instanceScheduleKey: InstanceScheduleKey) =
-        DateTime(instanceScheduleKey.scheduleDate, getTime(instanceScheduleKey.scheduleTimePair))
+    val projectKey: ProjectKey<T>
 
-    abstract fun getAssignedTo(userKeys: Set<UserKey>): Map<UserKey, ProjectUser>
+    fun getAssignedTo(userKeys: Set<UserKey>): Map<UserKey, ProjectUser>
 }

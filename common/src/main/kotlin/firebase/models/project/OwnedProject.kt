@@ -4,6 +4,7 @@ import com.krystianwsul.common.domain.TaskHierarchyContainer
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.json.tasks.TaskJson
 import com.krystianwsul.common.firebase.models.Instance
+import com.krystianwsul.common.firebase.models.cache.ClearableInvalidatableManager
 import com.krystianwsul.common.firebase.models.cache.InvalidatableCache
 import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
 import com.krystianwsul.common.firebase.models.cache.invalidatableCache
@@ -25,14 +26,16 @@ import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.*
 
 sealed class OwnedProject<T : ProjectType>(
-    assignedToHelper: AssignedToHelper,
+    override val assignedToHelper: AssignedToHelper,
     userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
     val rootTaskProvider: RootTaskProvider,
-    rootModelChangeManager: RootModelChangeManager,
-) : Project<T>(assignedToHelper, rootModelChangeManager),
+    override val rootModelChangeManager: RootModelChangeManager,
+) : Project<T>,
     JsonTime.ProjectCustomTimeKeyProvider,
     Task.Parent,
     JsonTime.UserCustomTimeProvider by userCustomTimeProvider {
+
+    final override val clearableInvalidatableManager = ClearableInvalidatableManager()
 
     abstract override val projectRecord: OwnedProjectRecord<T>
 

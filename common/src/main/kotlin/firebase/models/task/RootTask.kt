@@ -113,7 +113,7 @@ class RootTask private constructor(
 
     private inner class NoScheduleOrParentException : Exception("task $name, $taskKey")
 
-    override val projectId by projectIdCache // todo projectKey
+    override val projectId by projectIdCache
 
     val projectKey by projectKeyCache
 

@@ -18,18 +18,6 @@ interface ForeignProjectCoordinator {
     remove), we need to re-evaluate all the loaded tasks.
      */
 
-    /*
-    todo projectKey: in the implementation, listen for DatabaseResultQueue.onDequeued.  In the meantime, queue operations:
-    when a task is added, queue it up.  When a task is changed or removed, ignore task adds and just re-do everything
-    on the next trigger.
-
-    In the meantime, watch userFactorySingle over from FactoryLoader.  Grab the latest value from there somehow.  Every time
-    that changes (that includes local changes too, which we do need), also treat that as a trigger.
-
-    So we have our two triggers now.  Subtract the user's project keys from the total shared keys, add the private keys that
-    aren't our own, and voila - emit the change.
-     */
-
     val foreignProjectKeysObservable: Observable<Set<ProjectKey<*>>>
 
     fun onTaskAdded(task: RootTask)

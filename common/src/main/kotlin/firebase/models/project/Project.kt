@@ -2,7 +2,7 @@ package com.krystianwsul.common.firebase.models.project
 
 import com.krystianwsul.common.firebase.models.cache.ClearableInvalidatableManager
 import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
-import com.krystianwsul.common.firebase.models.users.OwnedProjectUser
+import com.krystianwsul.common.firebase.models.users.ProjectUser
 import com.krystianwsul.common.firebase.records.AssignedToHelper
 import com.krystianwsul.common.firebase.records.project.ProjectRecord
 import com.krystianwsul.common.time.JsonTime
@@ -22,5 +22,5 @@ interface Project<T : ProjectType> : JsonTime.CustomTimeProvider {
 
     val projectKey: ProjectKey<T>
 
-    fun getAssignedTo(userKeys: Set<UserKey>): Map<UserKey, OwnedProjectUser>
+    fun getAssignedTo(userKeys: Set<UserKey>): Map<UserKey, ProjectUser>
 }

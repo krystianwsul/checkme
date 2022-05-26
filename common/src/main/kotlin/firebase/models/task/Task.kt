@@ -21,7 +21,7 @@ import com.krystianwsul.common.firebase.models.taskhierarchy.NestedTaskHierarchy
 import com.krystianwsul.common.firebase.models.taskhierarchy.ParentTaskDelegate
 import com.krystianwsul.common.firebase.models.taskhierarchy.ProjectTaskHierarchy
 import com.krystianwsul.common.firebase.models.taskhierarchy.TaskHierarchy
-import com.krystianwsul.common.firebase.models.users.OwnedProjectUser
+import com.krystianwsul.common.firebase.models.users.ProjectUser
 import com.krystianwsul.common.firebase.records.InstanceRecord
 import com.krystianwsul.common.firebase.records.task.TaskRecord
 import com.krystianwsul.common.interrupt.InterruptionChecker
@@ -663,7 +663,7 @@ sealed class Task(
 
     final override fun toString() = super.toString() + ", name: $name, taskKey: $taskKey"
 
-    override fun getAssignedTo(): List<OwnedProjectUser> {
+    override fun getAssignedTo(): List<ProjectUser> {
         val currentScheduleIntervals = intervalInfo.currentScheduleIntervals
 
         return if (currentScheduleIntervals.isEmpty()) {

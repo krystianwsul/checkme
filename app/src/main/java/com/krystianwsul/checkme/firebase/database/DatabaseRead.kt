@@ -20,7 +20,7 @@ abstract class DatabaseRead<DATA : Any> {
 
     open fun getPriority(taskPriorityMapper: TaskPriorityMapper) = DatabaseReadPriority.NORMAL
 
-    protected open fun Path.toPaperKey() = toString().replace('/', '-')
+    protected open fun pathToPaperKey(path: Path) = path.toString().replace('/', '-')
 
     protected abstract fun DatabaseReference.getQuery(): Query
 
@@ -34,7 +34,7 @@ abstract class DatabaseRead<DATA : Any> {
 
     private fun writeNullable(path: Path, value: DATA?): Completable {
         return if (AndroidDatabaseWrapper.ENABLE_PAPER) {
-            AndroidDatabaseWrapper.rxPaperBook.write(path.toPaperKey(), NullableWrapper(value))
+            AndroidDatabaseWrapper.rxPaperBook.write(pathToPaperKey(path), NullableWrapper(value))
                 .toV3()
                 .subscribeOn(Schedulers.io())
         } else {
@@ -44,7 +44,7 @@ abstract class DatabaseRead<DATA : Any> {
 
     private fun readNullable(path: Path): Maybe<NullableWrapper<DATA>> {
         return if (AndroidDatabaseWrapper.ENABLE_PAPER) {
-            AndroidDatabaseWrapper.rxPaperBook.read<NullableWrapper<DATA>>(path.toPaperKey())
+            AndroidDatabaseWrapper.rxPaperBook.read<NullableWrapper<DATA>>(pathToPaperKey(path))
                 .toV3()
                 .subscribeOn(Schedulers.io())
                 .toMaybe()

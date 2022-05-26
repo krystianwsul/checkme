@@ -18,7 +18,9 @@ import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.json.JsonWrapper
+import com.krystianwsul.common.firebase.json.projects.PrivateForeignProjectJson
 import com.krystianwsul.common.firebase.json.projects.PrivateOwnedProjectJson
+import com.krystianwsul.common.firebase.json.projects.SharedForeignProjectJson
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.InstanceKey
@@ -43,7 +45,7 @@ interface FactoryProvider {
             override val projectProvider = this@FactoryProvider.projectProvider
 
             override fun getSharedProjectObservable(projectKey: ProjectKey.Shared) =
-                database.getSharedProjectObservable(projectKey)
+                database.getSharedOwnedProjectObservable(projectKey)
         }
 
     val friendsProvider
@@ -99,9 +101,11 @@ interface FactoryProvider {
 
     abstract class Database : FriendsProvider.Database(), RootTasksLoader.Provider {
 
-        abstract fun getPrivateProjectObservable(projectKey: ProjectKey.Private): Observable<Snapshot<PrivateOwnedProjectJson>>
+        abstract fun getPrivateOwnedProjectObservable(projectKey: ProjectKey.Private): Observable<Snapshot<PrivateOwnedProjectJson>>
+        abstract fun getSharedOwnedProjectObservable(projectKey: ProjectKey.Shared): Observable<Snapshot<JsonWrapper>>
 
-        abstract fun getSharedProjectObservable(projectKey: ProjectKey.Shared): Observable<Snapshot<JsonWrapper>>
+        abstract fun getPrivateForeignProjectObservable(projectKey: ProjectKey.Private): Observable<Snapshot<PrivateForeignProjectJson>>
+        abstract fun getSharedForeignProjectObservable(projectKey: ProjectKey.Shared): Observable<Snapshot<SharedForeignProjectJson>>
     }
 
     class Impl(override val uuid: String) : FactoryProvider {

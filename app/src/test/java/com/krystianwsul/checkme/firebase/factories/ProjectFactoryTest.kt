@@ -14,7 +14,9 @@ import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.ChangeWrapper
 import com.krystianwsul.common.firebase.DatabaseCallback
 import com.krystianwsul.common.firebase.json.JsonWrapper
+import com.krystianwsul.common.firebase.json.projects.PrivateForeignProjectJson
 import com.krystianwsul.common.firebase.json.projects.PrivateOwnedProjectJson
+import com.krystianwsul.common.firebase.json.projects.SharedForeignProjectJson
 import com.krystianwsul.common.firebase.json.projects.SharedOwnedProjectJson
 import com.krystianwsul.common.firebase.json.tasks.RootTaskJson
 import com.krystianwsul.common.firebase.json.users.UserWrapper
@@ -50,14 +52,22 @@ class ProjectFactoryTest {
 
         override val database = object : FactoryProvider.Database() {
 
-            override fun getPrivateProjectObservable(projectKey: ProjectKey.Private): Observable<Snapshot<PrivateOwnedProjectJson>> {
+            override fun getPrivateOwnedProjectObservable(projectKey: ProjectKey.Private): Observable<Snapshot<PrivateOwnedProjectJson>> {
                 TODO("Not yet implemented")
             }
 
-            override fun getSharedProjectObservable(projectKey: ProjectKey.Shared): Observable<Snapshot<JsonWrapper>> {
+            override fun getSharedOwnedProjectObservable(projectKey: ProjectKey.Shared): Observable<Snapshot<JsonWrapper>> {
                 if (!sharedProjectObservables.containsKey(projectKey))
                     sharedProjectObservables[projectKey] = PublishRelay.create()
                 return sharedProjectObservables.getValue(projectKey)
+            }
+
+            override fun getPrivateForeignProjectObservable(projectKey: ProjectKey.Private): Observable<Snapshot<PrivateForeignProjectJson>> {
+                TODO("Not yet implemented")
+            }
+
+            override fun getSharedForeignProjectObservable(projectKey: ProjectKey.Shared): Observable<Snapshot<SharedForeignProjectJson>> {
+                TODO("Not yet implemented")
             }
 
             override fun getUserObservable(userKey: UserKey): Observable<Snapshot<UserWrapper>> {

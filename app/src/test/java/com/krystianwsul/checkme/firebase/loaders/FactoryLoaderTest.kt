@@ -16,7 +16,9 @@ import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.DatabaseCallback
 import com.krystianwsul.common.firebase.json.JsonWrapper
+import com.krystianwsul.common.firebase.json.projects.PrivateForeignProjectJson
 import com.krystianwsul.common.firebase.json.projects.PrivateOwnedProjectJson
+import com.krystianwsul.common.firebase.json.projects.SharedForeignProjectJson
 import com.krystianwsul.common.firebase.json.projects.SharedOwnedProjectJson
 import com.krystianwsul.common.firebase.json.tasks.PrivateTaskJson
 import com.krystianwsul.common.firebase.json.tasks.RootTaskJson
@@ -93,10 +95,18 @@ class FactoryLoaderTest {
         val sharedProjectObservable = PublishRelay.create<Snapshot<JsonWrapper>>()
         val userObservable = PublishRelay.create<Snapshot<UserWrapper>>()
 
-        override fun getPrivateProjectObservable(projectKey: ProjectKey.Private) =
+        override fun getPrivateOwnedProjectObservable(projectKey: ProjectKey.Private) =
             privateProjectObservable.map { Snapshot(projectKey.key, it) }
 
-        override fun getSharedProjectObservable(projectKey: ProjectKey.Shared) = sharedProjectObservable
+        override fun getSharedOwnedProjectObservable(projectKey: ProjectKey.Shared) = sharedProjectObservable
+
+        override fun getPrivateForeignProjectObservable(projectKey: ProjectKey.Private): Observable<Snapshot<PrivateForeignProjectJson>> {
+            TODO("Not yet implemented")
+        }
+
+        override fun getSharedForeignProjectObservable(projectKey: ProjectKey.Shared): Observable<Snapshot<SharedForeignProjectJson>> {
+            TODO("Not yet implemented")
+        }
 
         override fun getUserObservable(userKey: UserKey) = userObservable
 

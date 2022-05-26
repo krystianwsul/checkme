@@ -70,7 +70,7 @@ class FactoryLoader(
 
                         val privateProjectDatabaseRx = DatabaseRx(
                             domainDisposable,
-                            factoryProvider.database.getPrivateProjectObservable(privateProjectKey),
+                            factoryProvider.database.getPrivateOwnedProjectObservable(privateProjectKey),
                         )
 
                         val privateProjectManager = AndroidPrivateProjectManager(userInfo)

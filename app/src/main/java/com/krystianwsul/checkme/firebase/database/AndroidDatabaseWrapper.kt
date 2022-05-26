@@ -57,11 +57,17 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
 
     override fun getUserObservable(userKey: UserKey) = UserDatabaseRead(userKey).getResult()
 
-    override fun getPrivateProjectObservable(projectKey: ProjectKey.Private) =
+    override fun getPrivateOwnedProjectObservable(projectKey: ProjectKey.Private) =
         PrivateOwnedProjectDatabaseRead(projectKey).getResult()
 
-    override fun getSharedProjectObservable(projectKey: ProjectKey.Shared) =
+    override fun getSharedOwnedProjectObservable(projectKey: ProjectKey.Shared) =
         SharedOwnedProjectDatabaseRead(projectKey).getResult()
+
+    override fun getPrivateForeignProjectObservable(projectKey: ProjectKey.Private) =
+        PrivateForeignProjectDatabaseRead(projectKey).getResult()
+
+    override fun getSharedForeignProjectObservable(projectKey: ProjectKey.Shared) =
+        SharedForeignProjectDatabaseRead(projectKey).getResult()
 
     override fun getRootTaskObservable(taskKey: TaskKey.Root) = TaskDatabaseRead(taskKey).getResult()
 

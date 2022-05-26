@@ -132,9 +132,15 @@ class FactoryLoader(
                         // this is hacky as fuck, but I'll take my chances
                         lateinit var projectsFactorySingle: Single<ProjectsFactory>
 
-                        val foreignProjectCoordinator = ForeignProjectCoordinator.Impl()
+                        /*
+                        todo I should really add a class like RootTasksStorage or something, that both rootTasksFactory
+                        and ForeignProjectCoordinator depend on.
+                         */
+                        lateinit var rootTasksFactory: RootTasksFactory
 
-                        val rootTasksFactory = RootTasksFactory(
+                        val foreignProjectCoordinator = ForeignProjectCoordinator.Impl { rootTasksFactory.rootTasks.values }
+
+                        rootTasksFactory = RootTasksFactory(
                             rootTasksLoader,
                             userKeyStore,
                             rootTaskToRootTaskCoordinator,

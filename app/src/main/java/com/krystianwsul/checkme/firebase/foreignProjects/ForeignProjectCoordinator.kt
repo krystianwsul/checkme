@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.firebase.foreignProjects
 
 import com.krystianwsul.common.firebase.models.task.RootTask
+import com.krystianwsul.common.utils.ProjectKey
 
 interface ForeignProjectCoordinator {
 
@@ -28,18 +29,58 @@ interface ForeignProjectCoordinator {
 
     fun onTaskRemoved()
 
-    class Impl : ForeignProjectCoordinator {
+    class Impl(private val getAllTasks: () -> Collection<RootTask>) : ForeignProjectCoordinator {
+
+        private var taskProjectKeys = setOf<ProjectKey<*>>()
+
+        private var taskQueueState: TaskQueueState = TaskQueueState.Valid
 
         override fun onTaskAdded(task: RootTask) {
-            // todo projectKey
+            taskQueueState = taskQueueState.addTask(task)
         }
 
         override fun onTaskChanged() {
-            // todo projectKey
+            taskQueueState = TaskQueueState.Invalidated
         }
 
         override fun onTaskRemoved() {
-            // todo projectKey
+            taskQueueState = TaskQueueState.Invalidated
+        }
+
+        private fun processTaskQueueState() {
+            when (val taskQueueState = taskQueueState) {
+                TaskQueueState.Valid -> {}
+                is TaskQueueState.TasksAdded -> taskProjectKeys += taskQueueState.tasks.mapNotNull { it.projectKey }
+                TaskQueueState.Invalidated -> taskProjectKeys = getAllTasks().mapNotNull { it.projectKey }.toSet()
+            }
+
+            taskQueueState = TaskQueueState.Valid
+        }
+
+        private sealed class TaskQueueState {
+
+            abstract fun addTask(task: RootTask): TaskQueueState
+
+            object Valid : TaskQueueState() {
+
+                override fun addTask(task: RootTask) = TasksAdded(task)
+            }
+
+            class TasksAdded(task: RootTask) : TaskQueueState() {
+
+                val tasks = mutableListOf(task) // todo projectKey convert to set later
+
+                override fun addTask(task: RootTask): TaskQueueState {
+                    tasks += task
+
+                    return this
+                }
+            }
+
+            object Invalidated : TaskQueueState() {
+
+                override fun addTask(task: RootTask) = this
+            }
         }
     }
 }

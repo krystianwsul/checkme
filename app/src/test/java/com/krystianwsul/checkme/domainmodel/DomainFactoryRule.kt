@@ -14,6 +14,7 @@ import com.krystianwsul.checkme.firebase.dependencies.RootTaskKeyStore
 import com.krystianwsul.checkme.firebase.factories.FriendsFactory
 import com.krystianwsul.checkme.firebase.factories.MyUserFactory
 import com.krystianwsul.checkme.firebase.factories.ProjectsFactory
+import com.krystianwsul.checkme.firebase.foreignProjects.ForeignProjectCoordinator
 import com.krystianwsul.checkme.firebase.loaders.ProjectLoader
 import com.krystianwsul.checkme.firebase.loaders.SharedProjectsLoader
 import com.krystianwsul.checkme.firebase.loaders.mockBase64
@@ -219,6 +220,8 @@ class DomainFactoryRule : TestRule {
             every { getDependencies(any()) } returns myUserFactory.user
         }
 
+        val foreignProjectCoordinator = mockk<ForeignProjectCoordinator>(relaxed = true)
+
         val rootTaskFactory = RootTasksFactory(
             rootTasksLoader,
             mockk(relaxed = true),
@@ -226,6 +229,7 @@ class DomainFactoryRule : TestRule {
             compositeDisposable,
             rootTaskKeySource,
             rootModelChangeManager,
+            foreignProjectCoordinator,
         ) { projectsFactory }
 
         val sharedProjectsLoader = SharedProjectsLoader.Impl(

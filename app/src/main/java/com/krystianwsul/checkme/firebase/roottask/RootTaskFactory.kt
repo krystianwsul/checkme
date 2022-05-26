@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.firebase.roottask
 
 import com.jakewharton.rxrelay3.BehaviorRelay
 import com.jakewharton.rxrelay3.PublishRelay
+import com.krystianwsul.checkme.firebase.foreignProjects.ForeignProjectCoordinator
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
@@ -21,6 +22,7 @@ class RootTaskFactory(
     private val domainDisposable: CompositeDisposable,
     addChangeEvents: GroupedObservable<TaskKey.Root, RootTasksLoader.AddChangeEvent>,
     private val rootModelChangeManager: RootModelChangeManager,
+    private val foreignProjectCoordinator: ForeignProjectCoordinator,
 ) {
 
     private val taskKey = addChangeEvents.key
@@ -65,7 +67,19 @@ class RootTaskFactory(
 
                 rootModelChangeManager.invalidateRootTasks()
 
+                val isAdd = task == null
+
                 task = it.task
+
+                if (it.task != null) {
+                    if (isAdd) {
+                        foreignProjectCoordinator.onTaskAdded(it.task!!)
+                    } else {
+                        foreignProjectCoordinator.onTaskChanged()
+                    }
+                } else {
+                    foreignProjectCoordinator.onTaskRemoved()
+                }
             }
             .publish()
 

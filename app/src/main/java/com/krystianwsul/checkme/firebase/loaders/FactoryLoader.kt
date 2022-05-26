@@ -11,6 +11,7 @@ import com.krystianwsul.checkme.firebase.dependencies.UserKeyStore
 import com.krystianwsul.checkme.firebase.factories.FriendsFactory
 import com.krystianwsul.checkme.firebase.factories.MyUserFactory
 import com.krystianwsul.checkme.firebase.factories.ProjectsFactory
+import com.krystianwsul.checkme.firebase.foreignProjects.ForeignProjectCoordinator
 import com.krystianwsul.checkme.firebase.managers.AndroidPrivateProjectManager
 import com.krystianwsul.checkme.firebase.managers.AndroidRootTasksManager
 import com.krystianwsul.checkme.firebase.managers.AndroidSharedProjectManager
@@ -131,6 +132,8 @@ class FactoryLoader(
                         // this is hacky as fuck, but I'll take my chances
                         lateinit var projectsFactorySingle: Single<ProjectsFactory>
 
+                        val foreignProjectCoordinator = ForeignProjectCoordinator.Impl()
+
                         val rootTasksFactory = RootTasksFactory(
                             rootTasksLoader,
                             userKeyStore,
@@ -138,6 +141,7 @@ class FactoryLoader(
                             domainDisposable,
                             rootTaskKeySource,
                             rootModelChangeManager,
+                            foreignProjectCoordinator,
                         ) { projectsFactorySingle.getCurrentValue() }
 
                         RootTasksFactory.instanceRelay.accept(NullableWrapper(rootTasksFactory))

@@ -2,6 +2,7 @@ package com.krystianwsul.common.relevance
 
 import com.krystianwsul.checkme.firebase.dependencies.RootTaskKeyStore
 import com.krystianwsul.checkme.firebase.factories.ProjectsFactory
+import com.krystianwsul.checkme.firebase.foreignProjects.ForeignProjectCoordinator
 import com.krystianwsul.checkme.firebase.managers.AndroidRootTasksManager
 import com.krystianwsul.checkme.firebase.roottask.RootTasksFactory
 import com.krystianwsul.checkme.firebase.roottask.RootTasksLoader
@@ -128,6 +129,8 @@ class IrrelevantTest {
 
         val rootModelChangeManager = RootModelChangeManager()
 
+        val foreignProjectCoordinator = mockk<ForeignProjectCoordinator>(relaxed = true)
+
         val rootTasksFactory = RootTasksFactory(
             rootTaskLoader,
             mockk(),
@@ -137,6 +140,7 @@ class IrrelevantTest {
             compositeDisposable,
             rootTaskKeySource,
             rootModelChangeManager,
+            foreignProjectCoordinator,
         ) { projectsFactory }
 
         project = PrivateOwnedProject(projectRecord, mockk(), rootTasksFactory, rootModelChangeManager)

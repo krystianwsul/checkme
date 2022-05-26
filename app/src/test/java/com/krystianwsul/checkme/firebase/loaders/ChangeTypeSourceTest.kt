@@ -8,6 +8,7 @@ import com.krystianwsul.checkme.firebase.dependencies.RequestMerger
 import com.krystianwsul.checkme.firebase.dependencies.RootTaskKeyStore
 import com.krystianwsul.checkme.firebase.dependencies.UserKeyStore
 import com.krystianwsul.checkme.firebase.factories.ProjectsFactory
+import com.krystianwsul.checkme.firebase.foreignProjects.ForeignProjectCoordinator
 import com.krystianwsul.checkme.firebase.managers.AndroidPrivateProjectManager
 import com.krystianwsul.checkme.firebase.managers.AndroidRootTasksManager
 import com.krystianwsul.checkme.firebase.managers.AndroidSharedProjectManager
@@ -174,6 +175,8 @@ class ChangeTypeSourceTest {
 
         val existingInstanceChangeManager = RootModelChangeManager()
 
+        val foreignProjectCoordinator = mockk<ForeignProjectCoordinator>(relaxed = true)
+
         rootTasksFactory = RootTasksFactory(
             rootTasksLoader,
             userKeyStore,
@@ -181,6 +184,7 @@ class ChangeTypeSourceTest {
             domainDisposable,
             rootTaskKeySource,
             existingInstanceChangeManager,
+            foreignProjectCoordinator,
         ) { projectsFactory }
 
         val privateProjectManager = AndroidPrivateProjectManager(DomainFactoryRule.deviceDbInfo.userInfo)

@@ -5,6 +5,7 @@ import com.krystianwsul.checkme.domainmodel.notifications.Notifier
 import com.krystianwsul.checkme.firebase.dependencies.RootTaskKeyStore
 import com.krystianwsul.checkme.firebase.dependencies.UserKeyStore
 import com.krystianwsul.checkme.firebase.factories.ProjectsFactory
+import com.krystianwsul.checkme.firebase.foreignProjects.ForeignProjectCoordinator
 import com.krystianwsul.checkme.utils.filterNotNull
 import com.krystianwsul.checkme.utils.mapNotNull
 import com.krystianwsul.checkme.utils.publishImmediate
@@ -33,6 +34,7 @@ class RootTasksFactory(
     domainDisposable: CompositeDisposable,
     private val rootTaskKeyStore: RootTaskKeyStore,
     override val rootModelChangeManager: RootModelChangeManager,
+    private val foreignProjectCoordinator: ForeignProjectCoordinator,
     private val getProjectsFactory: () -> ProjectsFactory,
 ) : RootTask.Parent {
 
@@ -73,6 +75,7 @@ class RootTasksFactory(
                         domainDisposable,
                         group,
                         rootModelChangeManager,
+                        foreignProjectCoordinator,
                     )
                 }
             }

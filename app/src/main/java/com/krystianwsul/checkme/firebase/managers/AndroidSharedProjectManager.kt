@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.firebase.managers
 
 import com.krystianwsul.checkme.firebase.loaders.ProjectProvider
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
+import com.krystianwsul.common.firebase.ChangeWrapper
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.json.JsonWrapper
 import com.krystianwsul.common.firebase.managers.SharedProjectManager
@@ -13,17 +14,15 @@ class AndroidSharedProjectManager(databaseWrapper: DatabaseWrapper) :
     SharedProjectManager(databaseWrapper),
     ProjectProvider.ProjectManager<ProjectType.Shared, JsonWrapper> {
 
-    private fun Snapshot<*>.toKey() = ProjectKey.Shared(key)
+    override fun set(snapshot: Snapshot<JsonWrapper>): ChangeWrapper<SharedOwnedProjectRecord>? {
+        val projectKey = ProjectKey.Shared(snapshot.key)
 
-    private fun Snapshot<JsonWrapper>.toRecord() = SharedOwnedProjectRecord(
-        this@AndroidSharedProjectManager,
-        toKey(),
-        value!!,
-    )
-
-    override fun set(snapshot: Snapshot<JsonWrapper>) = set(
-            snapshot.toKey(),
+        return set(
+            projectKey,
             { it.createObject != snapshot.value },
-            { snapshot.takeIf { it.exists }?.toRecord() },
-    )
+            {
+                snapshot.value?.let { SharedOwnedProjectRecord(this, projectKey, it) }
+            },
+        )
+    }
 }

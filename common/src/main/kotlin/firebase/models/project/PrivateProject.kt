@@ -5,7 +5,7 @@ import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
 import com.krystianwsul.common.firebase.models.customtime.PrivateCustomTime
 import com.krystianwsul.common.firebase.models.task.ProjectTask
 import com.krystianwsul.common.firebase.models.taskhierarchy.ProjectTaskHierarchy
-import com.krystianwsul.common.firebase.models.users.ProjectUser
+import com.krystianwsul.common.firebase.models.users.OwnedProjectUser
 import com.krystianwsul.common.firebase.records.AssignedToHelper
 import com.krystianwsul.common.firebase.records.project.PrivateOwnedProjectRecord
 import com.krystianwsul.common.time.JsonTime
@@ -79,5 +79,5 @@ class PrivateProject(
     fun tryGetProjectCustomTime(projectCustomTimeKey: CustomTimeKey.Project<ProjectType.Private>) =
         tryGetProjectCustomTime(projectCustomTimeKey.customTimeId)
 
-    override fun getAssignedTo(userKeys: Set<UserKey>) = mapOf<UserKey, ProjectUser>()
+    override fun getAssignedTo(userKeys: Set<UserKey>) = mapOf<UserKey, OwnedProjectUser>()
 }

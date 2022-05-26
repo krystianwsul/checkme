@@ -10,7 +10,7 @@ import com.krystianwsul.common.firebase.models.task.ProjectTask
 import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.firebase.models.task.performIntervalUpdate
 import com.krystianwsul.common.firebase.models.taskhierarchy.ProjectTaskHierarchy
-import com.krystianwsul.common.firebase.models.users.ProjectUser
+import com.krystianwsul.common.firebase.models.users.OwnedProjectUser
 import com.krystianwsul.common.firebase.models.users.RootUser
 import com.krystianwsul.common.firebase.records.AssignedToHelper
 import com.krystianwsul.common.firebase.records.project.SharedOwnedProjectRecord
@@ -44,7 +44,7 @@ class SharedProject(
     override val endExactTimeStamp get() = projectRecord.endTime?.let { ExactTimeStamp.Local(it) }
 
     private val remoteUsers = projectRecord.userRecords
-        .mapValues { ProjectUser(this, it.value) }
+        .mapValues { OwnedProjectUser(this, it.value) }
         .toMutableMap()
 
     val users get() = remoteUsers.values
@@ -81,12 +81,12 @@ class SharedProject(
         check(!remoteUsers.containsKey(id))
 
         val remoteProjectUserRecord = projectRecord.newRemoteUserRecord(rootUser.userJson)
-        val remoteProjectUser = ProjectUser(this, remoteProjectUserRecord)
+        val remoteProjectUser = OwnedProjectUser(this, remoteProjectUserRecord)
 
         remoteUsers[id] = remoteProjectUser
     }
 
-    fun deleteUser(projectUser: ProjectUser) {
+    fun deleteUser(projectUser: OwnedProjectUser) {
         val id = projectUser.id
         check(remoteUsers.containsKey(id))
 

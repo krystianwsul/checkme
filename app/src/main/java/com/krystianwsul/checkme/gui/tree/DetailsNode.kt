@@ -12,7 +12,7 @@ import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineDelegate
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineModelNode
 import com.krystianwsul.checkme.gui.tree.delegates.multiline.MultiLineRow
 import com.krystianwsul.checkme.utils.loadPhoto
-import com.krystianwsul.common.firebase.models.users.ProjectUser
+import com.krystianwsul.common.firebase.models.users.OwnedProjectUser
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.ModelState
@@ -166,7 +166,7 @@ class DetailsNode(
 
         companion object {
 
-            fun fromProjectUsers(users: Collection<ProjectUser>) = users.map { User(it.name, it.photoUrl) }
+            fun fromProjectUsers(users: Collection<OwnedProjectUser>) = users.map { User(it.name, it.photoUrl) }
         }
     }
 

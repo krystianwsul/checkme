@@ -1,40 +1,19 @@
 package com.krystianwsul.common.firebase.models.users
 
-import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.firebase.models.project.SharedProject
-import com.krystianwsul.common.firebase.records.users.OwnedProjectUserRecord
+import com.krystianwsul.common.firebase.records.users.ProjectUserRecord
 
 
-class ProjectUser(
-    private val sharedProject: SharedProject,
-    private val projectUserRecord: OwnedProjectUserRecord
+open class ProjectUser(
+    private val sharedProject: SharedProject, // todo projectKey
+    private val projectUserRecord: ProjectUserRecord,
 ) {
 
     val id = projectUserRecord.id
 
-    var name
-        get() = projectUserRecord.name
-        set(name) {
-            check(name.isNotEmpty())
+    open val name get() = projectUserRecord.name
 
-            projectUserRecord.name = name
-        }
+    val email get() = projectUserRecord.email
 
-    val email = projectUserRecord.email
-
-    var photoUrl
-        get() = projectUserRecord.photoUrl
-        set(value) {
-            check(!value.isNullOrEmpty())
-
-            projectUserRecord.photoUrl = value
-        }
-
-    fun delete() {
-        sharedProject.deleteUser(this)
-
-        projectUserRecord.delete()
-    }
-
-    fun setToken(deviceDbInfo: DeviceDbInfo) = projectUserRecord.setToken(deviceDbInfo)
+    open val photoUrl get() = projectUserRecord.photoUrl
 }

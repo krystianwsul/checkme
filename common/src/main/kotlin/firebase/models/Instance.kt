@@ -16,7 +16,7 @@ import com.krystianwsul.common.firebase.models.project.SharedProject
 import com.krystianwsul.common.firebase.models.task.ProjectRootTaskIdTracker
 import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.firebase.models.users.MyUser
-import com.krystianwsul.common.firebase.models.users.ProjectUser
+import com.krystianwsul.common.firebase.models.users.OwnedProjectUser
 import com.krystianwsul.common.firebase.records.InstanceRecord
 import com.krystianwsul.common.locker.LockerManager
 import com.krystianwsul.common.time.*
@@ -724,7 +724,7 @@ class Instance private constructor(
         }
     }
 
-    override fun getAssignedTo(): Collection<ProjectUser> {
+    override fun getAssignedTo(): Collection<OwnedProjectUser> {
         // optimization.  If they're all empty, then so must be the final result
         if (task.schedules.all { it.assignedTo.isEmpty() }) return listOf()
 

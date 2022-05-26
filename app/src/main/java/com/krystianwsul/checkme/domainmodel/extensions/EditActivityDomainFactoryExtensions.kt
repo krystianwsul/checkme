@@ -30,7 +30,7 @@ import com.krystianwsul.common.firebase.models.schedule.SingleSchedule
 import com.krystianwsul.common.firebase.models.search.FilterResult
 import com.krystianwsul.common.firebase.models.search.SearchContext
 import com.krystianwsul.common.firebase.models.task.*
-import com.krystianwsul.common.firebase.models.users.ProjectUser
+import com.krystianwsul.common.firebase.models.users.OwnedProjectUser
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.*
@@ -947,7 +947,7 @@ fun DomainFactory.createChildTask(
     return childTask
 }
 
-private fun Collection<ProjectUser>.toUserDatas() = associate {
+private fun Collection<OwnedProjectUser>.toUserDatas() = associate {
     it.id to EditViewModel.UserData(it.id, it.name, it.photoUrl)
 }
 

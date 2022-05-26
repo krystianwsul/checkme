@@ -15,5 +15,5 @@ class PrivateForeignProjectDatabaseRead(private val projectKey: ProjectKey.Priva
 
     override fun DatabaseReference.getQuery() = child("${DatabaseWrapper.PRIVATE_PROJECTS_KEY}/${projectKey.key}")
 
-    override val description = "foreignPrivateProject"
+    override val description = "privateForeignProject"
 }

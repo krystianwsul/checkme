@@ -31,9 +31,7 @@ interface ForeignProjectCoordinator {
 
     class Impl(private val getAllTasks: () -> Collection<RootTask>) : ForeignProjectCoordinator {
 
-        private var taskProjectKeys = setOf<ProjectKey<*>>()
-
-        private var taskQueueState: TaskQueueState = TaskQueueState.Valid
+        private var taskQueueState: TaskQueueState = TaskQueueState.Valid.initial()
 
         override fun onTaskAdded(task: RootTask) {
             taskQueueState = taskQueueState.addTask(task)
@@ -47,39 +45,48 @@ interface ForeignProjectCoordinator {
             taskQueueState = TaskQueueState.Invalidated
         }
 
-        private fun processTaskQueueState() {
-            when (val taskQueueState = taskQueueState) {
-                TaskQueueState.Valid -> {}
-                is TaskQueueState.TasksAdded -> taskProjectKeys += taskQueueState.tasks.mapNotNull { it.projectKey }
-                TaskQueueState.Invalidated -> taskProjectKeys = getAllTasks().mapNotNull { it.projectKey }.toSet()
-            }
-
-            taskQueueState = TaskQueueState.Valid
+        private fun resolveTaskQueueState() {
+            taskQueueState = taskQueueState.resolve(getAllTasks)
         }
 
         private sealed class TaskQueueState {
 
             abstract fun addTask(task: RootTask): TaskQueueState
 
-            object Valid : TaskQueueState() {
+            abstract fun resolve(getAllTasks: () -> Collection<RootTask>): Valid
 
-                override fun addTask(task: RootTask) = TasksAdded(task)
+            class Valid(val taskProjectKeys: Set<ProjectKey<*>>) : TaskQueueState() {
+
+                companion object {
+
+                    fun initial() = Valid(setOf())
+                }
+
+                override fun addTask(task: RootTask) = TasksAdded(taskProjectKeys, task)
+
+                override fun resolve(getAllTasks: () -> Collection<RootTask>) = this
             }
 
-            class TasksAdded(task: RootTask) : TaskQueueState() {
+            class TasksAdded(private val oldTaskProjectKeys: Set<ProjectKey<*>>, task: RootTask) : TaskQueueState() {
 
-                val tasks = mutableListOf(task) // todo projectKey convert to set later
+                val tasks = mutableListOf(task)
 
                 override fun addTask(task: RootTask): TaskQueueState {
                     tasks += task
 
                     return this
                 }
+
+                override fun resolve(getAllTasks: () -> Collection<RootTask>) =
+                    Valid(oldTaskProjectKeys + tasks.distinct().mapNotNull { it.projectKey })
             }
 
             object Invalidated : TaskQueueState() {
 
                 override fun addTask(task: RootTask) = this
+
+                override fun resolve(getAllTasks: () -> Collection<RootTask>) =
+                    Valid(getAllTasks().mapNotNull { it.projectKey }.toSet())
             }
         }
     }

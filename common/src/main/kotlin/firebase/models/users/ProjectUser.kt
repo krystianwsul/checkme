@@ -2,12 +2,12 @@ package com.krystianwsul.common.firebase.models.users
 
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.firebase.models.project.SharedProject
-import com.krystianwsul.common.firebase.records.users.ProjectUserRecord
+import com.krystianwsul.common.firebase.records.users.OwnedProjectUserRecord
 
 
 class ProjectUser(
-        private val sharedProject: SharedProject,
-        private val projectUserRecord: ProjectUserRecord
+    private val sharedProject: SharedProject,
+    private val projectUserRecord: OwnedProjectUserRecord
 ) {
 
     val id = projectUserRecord.id

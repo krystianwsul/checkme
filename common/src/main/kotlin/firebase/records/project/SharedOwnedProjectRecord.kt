@@ -6,7 +6,7 @@ import com.krystianwsul.common.firebase.json.users.UserJson
 import com.krystianwsul.common.firebase.records.customtime.SharedCustomTimeRecord
 import com.krystianwsul.common.firebase.records.task.SharedTaskRecord
 import com.krystianwsul.common.firebase.records.task.TaskRecord
-import com.krystianwsul.common.firebase.records.users.ProjectUserRecord
+import com.krystianwsul.common.firebase.records.users.OwnedProjectUserRecord
 import com.krystianwsul.common.utils.*
 
 class SharedOwnedProjectRecord(
@@ -36,7 +36,7 @@ class SharedOwnedProjectRecord(
 
     override val customTimeRecords: MutableMap<CustomTimeId.Project.Shared, SharedCustomTimeRecord>
 
-    var userRecords: MutableMap<UserKey, ProjectUserRecord>
+    var userRecords: MutableMap<UserKey, OwnedProjectUserRecord>
         private set
 
     private val projectJson get() = jsonWrapper.projectJson
@@ -62,7 +62,7 @@ class SharedOwnedProjectRecord(
             .associate { (id, userJson) ->
                 check(id.isNotEmpty())
 
-                UserKey(id) to ProjectUserRecord(create, this, userJson)
+                UserKey(id) to OwnedProjectUserRecord(create, this, userJson)
             }
             .toMutableMap()
     }
@@ -74,8 +74,8 @@ class SharedOwnedProjectRecord(
     constructor(databaseWrapper: DatabaseWrapper, parent: Parent, jsonWrapper: JsonWrapper) :
             this(parent, true, databaseWrapper.newSharedProjectRecordId(), jsonWrapper)
 
-    fun newRemoteUserRecord(userJson: UserJson): ProjectUserRecord {
-        val remoteProjectUserRecord = ProjectUserRecord(true, this, userJson)
+    fun newRemoteUserRecord(userJson: UserJson): OwnedProjectUserRecord {
+        val remoteProjectUserRecord = OwnedProjectUserRecord(true, this, userJson)
         check(!userRecords.containsKey(remoteProjectUserRecord.id))
 
         userRecords[remoteProjectUserRecord.id] = remoteProjectUserRecord

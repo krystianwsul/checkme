@@ -3,7 +3,6 @@ package com.krystianwsul.checkme.firebase.factories
 import com.krystianwsul.checkme.firebase.loaders.ProjectLoader
 import com.krystianwsul.checkme.utils.publishImmediate
 import com.krystianwsul.common.domain.DeviceDbInfo
-import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.json.Parsable
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
@@ -39,7 +38,7 @@ abstract class ProjectFactory<T : ProjectType, U : Parsable>(
         rootModelChangeManager: RootModelChangeManager,
     ): OwnedProject<T>
 
-    val changeTypes: Observable<ChangeType>
+    val remoteChanges: Observable<Unit>
 
     init {
         project = newProject(
@@ -51,17 +50,17 @@ abstract class ProjectFactory<T : ProjectType, U : Parsable>(
 
         rootModelChangeManager.invalidateProjects()
 
-        val changeProjectChangeTypes = projectLoader.changeProjectEvents.map {
-            project.clearableInvalidatableManager.clear()
+        val changeProjectChangeTypes = projectLoader.changeProjectEvents
+            .doOnNext {
+                project.clearableInvalidatableManager.clear()
 
-            rootModelChangeManager.invalidateProjects()
+                rootModelChangeManager.invalidateProjects()
 
-            project =
-                newProject(it.projectRecord, it.userCustomTimeProvider, rootTaskProvider, rootModelChangeManager)
+                project =
+                    newProject(it.projectRecord, it.userCustomTimeProvider, rootTaskProvider, rootModelChangeManager)
+            }
+            .map { }
 
-            ChangeType.REMOTE
-        }
-
-        changeTypes = listOf(changeProjectChangeTypes).merge().publishImmediate(domainDisposable)
+        remoteChanges = listOf(changeProjectChangeTypes).merge().publishImmediate(domainDisposable)
     }
 }

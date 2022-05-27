@@ -154,7 +154,7 @@ class ProjectFactoryTest {
 
     private lateinit var projectFactory: PrivateProjectFactory
 
-    private lateinit var changeTypesEmissionChecker: EmissionChecker<ChangeType>
+    private lateinit var changeTypesEmissionChecker: EmissionChecker<Unit>
 
     private val projectKey = ProjectKey.Private("projectKey")
 
@@ -181,7 +181,7 @@ class ProjectFactoryTest {
                 ) { mockk() }
 
                     changeTypesEmissionChecker =
-                            EmissionChecker("changeTypes", compositeDisposable, projectFactory.changeTypes)
+                        EmissionChecker("changeTypes", compositeDisposable, projectFactory.remoteChanges)
                 }
                 .addTo(compositeDisposable)
     }

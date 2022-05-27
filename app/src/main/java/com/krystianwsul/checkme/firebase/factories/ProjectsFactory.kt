@@ -124,17 +124,13 @@ class ProjectsFactory(
 
         val sharedProjectFactoryChangeTypes = sharedProjectFactoriesProperty.observable.switchMap {
             it.values
-                .map { it.changeTypes }
+                .map { it.remoteChanges }
                 .merge()
         }
 
         remoteChanges = listOf(
-            privateProjectFactory.changeTypes
-                .doOnNext { check(it == ChangeType.REMOTE) }
-                .map { }, // todo cleanup
-            sharedProjectFactoryChangeTypes
-                .doOnNext { check(it == ChangeType.REMOTE) }
-                .map { }, // todo cleanup
+            privateProjectFactory.remoteChanges,
+            sharedProjectFactoryChangeTypes,
             addProjectChangeTypes
                 .doOnNext { check(it == ChangeType.REMOTE) }
                 .map { }, // todo cleanup

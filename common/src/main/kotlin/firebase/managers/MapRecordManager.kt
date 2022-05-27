@@ -4,6 +4,7 @@ import com.krystianwsul.common.ErrorLogger
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.ChangeWrapper
 import com.krystianwsul.common.firebase.records.RemoteRecord
+import com.krystianwsul.common.utils.NullableWrapper
 
 abstract class MapRecordManager<T, U : Any> : RecordManager {
 
@@ -41,13 +42,13 @@ abstract class MapRecordManager<T, U : Any> : RecordManager {
         recordMap[key] = record
     }
 
-    protected fun set( // todo changeType
+    protected fun set(
         key: T,
         valueChanged: (U) -> Boolean,
         recordCallback: () -> U?
     ): ChangeWrapper<U>? { // lazy to prevent parsing if LOCAL
         return setNullable(key, valueChanged, recordCallback)?.let { changeWrapper ->
-            changeWrapper.data?.let { changeWrapper.newData(it) }
+            changeWrapper.value?.let { ChangeWrapper(ChangeType.REMOTE, it) } // todo changeType
         }
     }
 
@@ -55,13 +56,13 @@ abstract class MapRecordManager<T, U : Any> : RecordManager {
         key: T,
         valueChanged: (U) -> Boolean,
         recordCallback: () -> U?
-    ): ChangeWrapper<U?>? { // lazy to prevent parsing if LOCAL
+    ): NullableWrapper<U>? { // lazy to prevent parsing if LOCAL
         return if (recordMap[key]?.let(valueChanged) != false) {
-            val record = recordCallback() ?: return ChangeWrapper(ChangeType.REMOTE, null)
+            val record = recordCallback() ?: return NullableWrapper()
 
             recordMap[key] = record
 
-            ChangeWrapper(ChangeType.REMOTE, record) // todo changeType
+            NullableWrapper(record)
         } else {
             null
         }

@@ -5,7 +5,6 @@ import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.json.tasks.RootTaskJson
 import com.krystianwsul.common.firebase.managers.RootTasksManager
 import com.krystianwsul.common.firebase.records.task.RootTaskRecord
-import com.krystianwsul.common.utils.NullableWrapper
 import com.krystianwsul.common.utils.TaskKey
 
 class AndroidRootTasksManager(databaseWrapper: DatabaseWrapper) : RootTasksManager(databaseWrapper) {
@@ -37,5 +36,5 @@ class AndroidRootTasksManager(databaseWrapper: DatabaseWrapper) : RootTasksManag
                 )
             }
         },
-    )?.let { NullableWrapper(it.data) }
+    )
 }

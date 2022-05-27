@@ -58,6 +58,7 @@ interface ProjectLoader<T : ProjectType, U : Parsable> { // U: Project JSON type
 
         private val projectRecordObservable: Observable<ProjectRecordData<T>> =
             snapshotObservable.mapNotNull(projectManager::set)
+                .map { ChangeWrapper(ChangeType.REMOTE, it) }
                 .let {
                     if (initialProjectRecord != null) {
                         it.startWithItem(ChangeWrapper(ChangeType.LOCAL, initialProjectRecord))

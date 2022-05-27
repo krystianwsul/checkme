@@ -2,8 +2,6 @@ package com.krystianwsul.checkme.firebase.managers
 
 import com.krystianwsul.checkme.firebase.loaders.ProjectProvider
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
-import com.krystianwsul.common.firebase.ChangeType
-import com.krystianwsul.common.firebase.ChangeWrapper
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.json.JsonWrapper
 import com.krystianwsul.common.firebase.managers.SharedProjectManager
@@ -15,7 +13,7 @@ class AndroidSharedProjectManager(databaseWrapper: DatabaseWrapper) :
     SharedProjectManager(databaseWrapper),
     ProjectProvider.ProjectManager<ProjectType.Shared, JsonWrapper> {
 
-    override fun set(snapshot: Snapshot<JsonWrapper>): ChangeWrapper<SharedOwnedProjectRecord>? {
+    override fun set(snapshot: Snapshot<JsonWrapper>): SharedOwnedProjectRecord? {
         val projectKey = ProjectKey.Shared(snapshot.key)
 
         return set(
@@ -24,6 +22,6 @@ class AndroidSharedProjectManager(databaseWrapper: DatabaseWrapper) :
             {
                 snapshot.value?.let { SharedOwnedProjectRecord(this, projectKey, it) }
             },
-        )?.let { ChangeWrapper(ChangeType.REMOTE, it) } // todo changeType
+        )
     }
 }

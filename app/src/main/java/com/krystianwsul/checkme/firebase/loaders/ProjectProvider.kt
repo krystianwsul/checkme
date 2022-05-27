@@ -1,7 +1,6 @@
 package com.krystianwsul.checkme.firebase.loaders
 
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
-import com.krystianwsul.common.firebase.ChangeWrapper
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.json.Parsable
 import com.krystianwsul.common.firebase.managers.RecordManager
@@ -15,6 +14,6 @@ interface ProjectProvider {
     // U: Project JSON type
     interface ProjectManager<T : ProjectType, U : Parsable> : RecordManager {
 
-        fun set(snapshot: Snapshot<U>): ChangeWrapper<out OwnedProjectRecord<T>>?
+        fun set(snapshot: Snapshot<U>): OwnedProjectRecord<T>?
     }
 }

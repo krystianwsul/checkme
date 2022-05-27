@@ -41,7 +41,7 @@ abstract class MapRecordManager<T, U : Any> : RecordManager {
         recordMap[key] = record
     }
 
-    protected fun set(
+    protected fun set( // todo changeType
         key: T,
         valueChanged: (U) -> Boolean,
         recordCallback: () -> U?
@@ -61,7 +61,7 @@ abstract class MapRecordManager<T, U : Any> : RecordManager {
 
             recordMap[key] = record
 
-            ChangeWrapper(ChangeType.REMOTE, record)
+            ChangeWrapper(ChangeType.REMOTE, record) // todo changeType
         } else {
             null
         }

@@ -34,17 +34,17 @@ class FriendsFactory(
     private val strangerProjectManager = StrangerProjectManager()
 
     val userMap = rootUserManager.records
-            .mapValues { it.value.newValue(RootUser(it.value.value)) }
-            .toMutableMap()
+        .mapValues { it.value.newValue(RootUser(it.value.value)) }
+        .toMutableMap()
 
     private fun getFriendMap() = userMap.filter { it.value.userLoadReason == UserLoadReason.FRIEND }
 
     fun getFriends() = getFriendMap().values.map { it.value }
 
-    val changeTypes: Observable<ChangeType>
+    val remoteChanges: Observable<Unit>
 
     init {
-        val addChangeFriendChangeTypes = friendsLoader.addChangeFriendEvents
+        val addChangeFriendRemoteChanges = friendsLoader.addChangeFriendEvents
             .mapNotNull { rootUserManager.set(it.userWrapperData) }
             .map { reasonWrapper ->
                 val userKey = reasonWrapper.value.userKey
@@ -56,29 +56,29 @@ class FriendsFactory(
                 rootModelChangeManager.invalidateUsers()
 
                 userMap[userKey] = reasonWrapper.newValue(RootUser(reasonWrapper.value))
-
-                ChangeType.REMOTE // todo changeType
-                }
-
-        val removeFriendsChangeTypes = friendsLoader.removeFriendEvents.map {
-            it.userKeys.forEach {
-                rootUserManager.remove(it)
-
-                userMap[it]?.value
-                    ?.clearableInvalidatableManager
-                    ?.clear()
-
-                rootModelChangeManager.invalidateUsers()
-
-                userMap.remove(it)
             }
 
-            it.userChangeType
-        }
+        val removeFriendsRemoteChanges = friendsLoader.removeFriendEvents
+            .doOnNext {
+                it.userKeys.forEach {
+                    rootUserManager.remove(it)
 
-        changeTypes = listOf(addChangeFriendChangeTypes, removeFriendsChangeTypes).merge()
-                .filter { it == ChangeType.REMOTE } // filtering out events for internal changes
-                .publishImmediate(domainDisposable)
+                    userMap[it]?.value
+                        ?.clearableInvalidatableManager
+                        ?.clear()
+
+                    rootModelChangeManager.invalidateUsers()
+
+                    userMap.remove(it)
+                }
+            }
+            .filter { it.userChangeType == ChangeType.REMOTE } // filtering out events for internal changes
+            .map { }
+
+        remoteChanges = listOf(
+            addChangeFriendRemoteChanges,
+            removeFriendsRemoteChanges,
+        ).merge().publishImmediate(domainDisposable)
     }
 
     fun save(values: MutableMap<String, Any?>) {
@@ -92,8 +92,8 @@ class FriendsFactory(
         check(friendIds.all { friendMap.containsKey(it) })
 
         return friendMap.entries
-                .filter { friendIds.contains(it.key) }
-                .associateBy({ it.key }, { it.value.value.userJson })
+            .filter { friendIds.contains(it.key) }
+            .associateBy({ it.key }, { it.value.value.userJson })
     }
 
     fun getFriend(friendId: UserKey): RootUser {
@@ -104,9 +104,9 @@ class FriendsFactory(
     }
 
     fun updateProjects(
-            projectId: ProjectKey.Shared,
-            addedUsers: Set<UserKey>,
-            removedUsers: Set<UserKey>,
+        projectId: ProjectKey.Shared,
+        addedUsers: Set<UserKey>,
+        removedUsers: Set<UserKey>,
     ) {
         val addedFriends = addedUsers.mapNotNull(userMap::get)
         val addedStrangers = addedUsers - addedFriends.map { it.value.userKey }.toSet()

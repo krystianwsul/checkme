@@ -3,7 +3,6 @@ package com.krystianwsul.checkme.firebase.factories
 import com.krystianwsul.checkme.firebase.loaders.ProjectLoader
 import com.krystianwsul.checkme.firebase.loaders.SharedProjectsLoader
 import com.krystianwsul.checkme.utils.MapRelayProperty
-import com.krystianwsul.checkme.utils.mapNotNull
 import com.krystianwsul.checkme.utils.publishImmediate
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.DeviceInfo
@@ -76,34 +75,35 @@ class ProjectsFactory(
     init {
         privateProject.fixNotificationShown(shownFactory, now)
 
-        val addProjectChangeTypes = sharedProjectsLoader.addProjectEvents.mapNotNull { (changeType, addProjectEvent) ->
-            val projectKey = addProjectEvent.initialProjectEvent
-                .projectRecord
-                .projectKey
-                .let { it as ProjectKey.Shared }
+        val addProjectRemoteChanges = sharedProjectsLoader.addProjectEvents
+            .doOnNext { (_, addProjectEvent) ->
+                val projectKey = addProjectEvent.initialProjectEvent
+                    .projectRecord
+                    .projectKey
+                    .let { it as ProjectKey.Shared }
 
-            check(!sharedProjectFactories.containsKey(projectKey))
+                check(!sharedProjectFactories.containsKey(projectKey))
 
-            val sharedProjectFactory = SharedProjectFactory(
-                addProjectEvent.projectLoader,
-                addProjectEvent.initialProjectEvent,
-                shownFactory,
-                domainDisposable,
-                rootTaskProvider,
-                rootModelChangeManager,
-                deviceDbInfo,
-            )
+                val sharedProjectFactory = SharedProjectFactory(
+                    addProjectEvent.projectLoader,
+                    addProjectEvent.initialProjectEvent,
+                    shownFactory,
+                    domainDisposable,
+                    rootTaskProvider,
+                    rootModelChangeManager,
+                    deviceDbInfo,
+                )
 
-            sharedProjectFactories[projectKey]?.project
-                ?.clearableInvalidatableManager
-                ?.clear()
+                sharedProjectFactories[projectKey]?.project
+                    ?.clearableInvalidatableManager
+                    ?.clear()
 
-            rootModelChangeManager.invalidateProjects()
+                rootModelChangeManager.invalidateProjects()
 
-            sharedProjectFactoriesProperty[projectKey] = sharedProjectFactory
-
-            changeType.takeIf { it == ChangeType.REMOTE } // filtering out internal events for adding project
-        }
+                sharedProjectFactoriesProperty[projectKey] = sharedProjectFactory
+            }
+            .filter { it.changeType == ChangeType.REMOTE }
+            .map { }
 
         val removeProjectRemoteChanges = sharedProjectsLoader.removeProjectEvents
             .doOnNext {
@@ -122,7 +122,7 @@ class ProjectsFactory(
             }
             .map { }
 
-        val sharedProjectFactoryChangeTypes = sharedProjectFactoriesProperty.observable.switchMap {
+        val sharedProjectFactoryRemoteChanges = sharedProjectFactoriesProperty.observable.switchMap {
             it.values
                 .map { it.remoteChanges }
                 .merge()
@@ -130,15 +130,15 @@ class ProjectsFactory(
 
         remoteChanges = listOf(
             privateProjectFactory.remoteChanges,
-            sharedProjectFactoryChangeTypes,
-            addProjectChangeTypes
-                .doOnNext { check(it == ChangeType.REMOTE) }
-                .map { }, // todo cleanup
+            sharedProjectFactoryRemoteChanges,
+            addProjectRemoteChanges,
             removeProjectRemoteChanges,
         ).merge().publishImmediate(domainDisposable)
     }
 
-    val projects: Map<ProjectKey<*>, OwnedProject<*>> get() = sharedProjects + mapOf(privateProject.projectKey to privateProject)
+    val projects: Map<ProjectKey<*>, OwnedProject<*>>
+        get() =
+            sharedProjects + mapOf(privateProject.projectKey to privateProject)
 
     val projectTasks get() = projects.values.flatMap { it.projectTasks }
 

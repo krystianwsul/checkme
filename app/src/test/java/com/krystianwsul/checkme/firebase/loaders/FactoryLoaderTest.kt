@@ -55,7 +55,7 @@ class FactoryLoaderTest {
             TODO("Not yet implemented")
         }
 
-        override fun onChangeTypeEvent(changeType: ChangeType, now: ExactTimeStamp.Local) {
+        override fun onRemoteChange(now: ExactTimeStamp.Local) {
             TODO("Not yet implemented")
         }
     }
@@ -81,11 +81,11 @@ class FactoryLoaderTest {
             changeListenerWrapper = null
         }
 
-        override fun onChangeTypeEvent(changeType: ChangeType, now: ExactTimeStamp.Local) {
+        override fun onRemoteChange(now: ExactTimeStamp.Local) {
             assertNotNull(changeListenerWrapper)
             assertNull(changeListenerWrapper!!.result)
 
-            changeListenerWrapper!!.result = changeType
+            changeListenerWrapper!!.result = ChangeType.REMOTE
         }
     }
 

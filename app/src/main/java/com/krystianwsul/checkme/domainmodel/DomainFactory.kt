@@ -23,12 +23,10 @@ import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.checkme.firebase.roottask.RootTasksFactory
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
-import com.krystianwsul.checkme.utils.checkError
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.ProjectToRootConversion
 import com.krystianwsul.common.domain.TaskUndoData
-import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.MyCustomTime
@@ -99,7 +97,7 @@ class DomainFactory(
 
     var deviceDbInfo = _deviceDbInfo
 
-    private val changeTypeRelay = PublishRelay.create<ChangeType>()
+    private val remoteChangeRelay = PublishRelay.create<Unit>()
 
     val notifier = Notifier(this, NotificationWrapper.instance)
 
@@ -131,9 +129,7 @@ class DomainFactory(
         HasInstancesStore.update(this, now)
 
         listOf(
-            changeTypeRelay.filter { it == ChangeType.REMOTE } // todo changetype debounce
-                .firstOrError()
-                .map { "remote change" },
+            remoteChangeRelay.firstOrError().map { "remote change" },
             Single.just(Unit)
                 .delay(1, TimeUnit.MINUTES)
                 .observeOnDomain()
@@ -242,10 +238,8 @@ class DomainFactory(
 
     override fun clearUserInfo() = getDomainUpdater(this).updateNotifications(Notifier.Params(clear = true))
 
-    override fun onChangeTypeEvent(changeType: ChangeType, now: ExactTimeStamp.Local) {
-        MyCrashlytics.log("DomainFactory.onChangeTypeEvent $changeType")
-
-        check(changeType == ChangeType.REMOTE)
+    override fun onRemoteChange(now: ExactTimeStamp.Local) {
+        MyCrashlytics.log("DomainFactory.onRemoteChange")
 
         DomainThreadChecker.instance.requireDomainThread()
 
@@ -256,7 +250,7 @@ class DomainFactory(
 
         tryNotifyListeners("DomainFactory.onChangeTypeEvent", RunType.REMOTE)
 
-        changeTypeRelay.accept(changeType)
+        remoteChangeRelay.accept(Unit)
     }
 
     private fun tryNotifyListeners(source: String, runType: RunType) {

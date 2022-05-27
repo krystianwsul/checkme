@@ -12,7 +12,6 @@ import com.krystianwsul.checkme.firebase.roottask.RootTasksFactory
 import com.krystianwsul.checkme.utils.cacheImmediate
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.domain.DeviceDbInfo
-import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.mindorks.scheduler.Priority
@@ -75,16 +74,12 @@ class UserScope(
 
     init {
         // ignore all change events that come in before the DomainFactory is initialized
-        domainFactorySingle.flatMapObservable { domainFactory ->
-            changeTypeSource.changeTypes.map { domainFactory to it }
+        domainFactorySingle.flatMapObservable {
+            changeTypeSource.remoteChanges.map { _ -> it }
         }
             .toFlowable(BackpressureStrategy.DROP) // this ensures that all changeTypes get "trampolined", and debounced to just one event
             .observeOn(getDomainScheduler(), false, 1)
-            .subscribe { (domainFactory, changeType) ->
-                check(changeType == ChangeType.REMOTE)
-
-                domainFactory.onChangeTypeEvent(changeType, ExactTimeStamp.Local.now)
-            }
+            .subscribe { it.onRemoteChange(ExactTimeStamp.Local.now) }
             .addTo(domainDisposable)
 
         tokenObservable.flatMapCompletable { factoryProvider.domainUpdater.updateDeviceDbInfo(getDeviceDbInfo()) }

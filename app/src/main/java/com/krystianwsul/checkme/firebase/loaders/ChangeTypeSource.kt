@@ -22,18 +22,22 @@ class ChangeTypeSource(
     domainDisposable: CompositeDisposable,
 ) {
 
-    val changeTypes: Observable<ChangeType>
+    val remoteChanges: Observable<Unit>
 
     init {
-        val userFactoryChangeTypes = userDatabaseRx.changes.flatMapMaybe { snapshot ->
-            userFactorySingle.filter { it.onNewSnapshot(snapshot) }
-        }
+        val userFactoryRemoteChanges = userDatabaseRx.changes
+            .flatMapMaybe { snapshot ->
+                userFactorySingle.filter { it.onNewSnapshot(snapshot) }
+            }
+            .map { }
 
-        changeTypes = listOf(
-            projectsFactorySingle.flatMapObservable { it.remoteChanges }.map { ChangeType.REMOTE },
-            friendsFactorySingle.flatMapObservable { it.remoteChanges }.map { ChangeType.REMOTE },
-            userFactoryChangeTypes.map { ChangeType.REMOTE },
-            rootTasksFactory.changeTypes, // todo cleanup
+        remoteChanges = listOf(
+            projectsFactorySingle.flatMapObservable { it.remoteChanges },
+            friendsFactorySingle.flatMapObservable { it.remoteChanges },
+            userFactoryRemoteChanges,
+            rootTasksFactory.changeTypes // todo cleanup
+                .doOnNext { check(it == ChangeType.REMOTE) }
+                .map { },
         ).merge().publishImmediate(domainDisposable)
     }
 }

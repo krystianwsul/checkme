@@ -16,7 +16,6 @@ import com.krystianwsul.checkme.firebase.roottask.RootTasksFactory
 import com.krystianwsul.checkme.firebase.roottask.RootTasksLoader
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.common.domain.DeviceDbInfo
-import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.json.JsonWrapper
 import com.krystianwsul.common.firebase.json.projects.PrivateForeignProjectJson
 import com.krystianwsul.common.firebase.json.projects.PrivateOwnedProjectJson
@@ -78,7 +77,7 @@ interface FactoryProvider {
 
     interface Domain {
 
-        fun onChangeTypeEvent(changeType: ChangeType, now: ExactTimeStamp.Local)
+        fun onRemoteChange(now: ExactTimeStamp.Local)
 
         @CheckResult
         fun clearUserInfo(): Completable

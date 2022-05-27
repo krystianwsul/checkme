@@ -10,7 +10,6 @@ import com.krystianwsul.checkme.utils.filterNotNull
 import com.krystianwsul.checkme.utils.mapNotNull
 import com.krystianwsul.checkme.utils.publishImmediate
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
-import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.json.tasks.RootTaskJson
 import com.krystianwsul.common.firebase.json.tasks.TaskJson
 import com.krystianwsul.common.firebase.models.Instance
@@ -60,7 +59,7 @@ class RootTasksFactory(
                 rootTaskFactories.mapValuesNotNull { it.value.task }
         }
 
-    val changeTypes: Observable<ChangeType>
+    val remoteChanges: Observable<Unit>
 
     init {
         rootTasksLoader.addChangeEvents
@@ -91,8 +90,8 @@ class RootTasksFactory(
             }
             .addTo(domainDisposable)
 
-        changeTypes = rootTaskFactoriesRelay.switchMap {
-            it.map { it.value.changeTypes }.merge()
+        remoteChanges = rootTaskFactoriesRelay.switchMap {
+            it.map { it.value.remoteChanges }.merge()
         }.publishImmediate(domainDisposable)
 
         domainDisposable += rootTaskFactoriesRelay.subscribe {

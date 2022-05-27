@@ -4,7 +4,6 @@ import com.jakewharton.rxrelay3.BehaviorRelay
 import com.jakewharton.rxrelay3.PublishRelay
 import com.krystianwsul.checkme.firebase.foreignProjects.ForeignProjectCoordinator
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
-import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
 import com.krystianwsul.common.firebase.models.task.RootTask
 import com.krystianwsul.common.firebase.records.task.RootTaskRecord
@@ -32,7 +31,7 @@ class RootTaskFactory(
 
     private val eventResults: ConnectableObservable<EventResult>
 
-    val changeTypes: ConnectableObservable<ChangeType>
+    val remoteChanges: ConnectableObservable<Unit>
 
     val taskRelay = BehaviorRelay.createDefault(NullableWrapper<RootTask>())
 
@@ -50,7 +49,7 @@ class RootTaskFactory(
             .map { event ->
                 when (event) {
                     is Event.AddChange -> {
-                        val (taskRecord, skipChangeTypeEmission) = event
+                        val (taskRecord, skipChangeTypeEmission) = event // todo cleanup use ChangeType here, bizarrely
 
                         val userCustomTimeProvider = rootTaskDependencyCoordinator.getDependencies(taskRecord)
 
@@ -83,10 +82,6 @@ class RootTaskFactory(
             }
             .publish()
 
-        val unfilteredSetTaskEventResults = eventResults.ofType<EventResult.SetTask>()
-
-        val addChangeEventChangeTypes = unfilteredSetTaskEventResults.filter { !it.skipChangeTypeEmission }
-
         /**
          * order is important: the bottom one executes later, and we first need to check filtering before emitting the
          * unfiltered event
@@ -95,7 +90,10 @@ class RootTaskFactory(
          * initially requested the task.
          */
 
-        changeTypes = addChangeEventChangeTypes.map { ChangeType.REMOTE }.publish()
+        remoteChanges = eventResults.ofType<EventResult.SetTask>()
+            .filter { !it.skipChangeTypeEmission }
+            .map { }
+            .publish()
     }
 
     private var connected = false
@@ -104,7 +102,7 @@ class RootTaskFactory(
         if (connected) return
         connected = true
 
-        domainDisposable += changeTypes.connect()
+        domainDisposable += remoteChanges.connect()
 
         domainDisposable += eventResults.connect()
     }

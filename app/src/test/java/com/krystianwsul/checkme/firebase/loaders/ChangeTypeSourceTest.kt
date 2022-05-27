@@ -3,7 +3,6 @@ package com.krystianwsul.checkme.firebase.loaders
 import com.jakewharton.rxrelay3.PublishRelay
 import com.krystianwsul.checkme.domainmodel.DomainFactoryRule
 import com.krystianwsul.checkme.firebase.UserCustomTimeProviderSource
-import com.krystianwsul.checkme.firebase.checkRemote
 import com.krystianwsul.checkme.firebase.dependencies.RequestMerger
 import com.krystianwsul.checkme.firebase.dependencies.RootTaskKeyStore
 import com.krystianwsul.checkme.firebase.dependencies.UserKeyStore
@@ -108,7 +107,7 @@ class ChangeTypeSourceTest {
     private lateinit var changeTypeSource: ChangeTypeSource
 
     private lateinit var projectEmissionChecker: EmissionChecker<Unit>
-    private lateinit var taskEmissionChecker: EmissionChecker<ChangeType>
+    private lateinit var taskEmissionChecker: EmissionChecker<Unit>
 
     @Before
     fun before() {
@@ -255,7 +254,7 @@ class ChangeTypeSourceTest {
                 "projectsFactory",
                 domainDisposable,
                 projectsFactorySingle.flatMapObservable { it.remoteChanges })
-        taskEmissionChecker = EmissionChecker("rootTasksFactory", domainDisposable, rootTasksFactory.changeTypes)
+        taskEmissionChecker = EmissionChecker("rootTasksFactory", domainDisposable, rootTasksFactory.remoteChanges)
 
         acceptSharedProjectKeys(setOf())
     }
@@ -302,7 +301,7 @@ class ChangeTypeSourceTest {
             acceptPrivateProject(PrivateOwnedProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true)))
         }
 
-        taskEmissionChecker.checkRemote {
+        taskEmissionChecker.checkOne {
             rootTasksLoaderProvider.accept(
                 taskKey1,
                 RootTaskJson(
@@ -335,7 +334,7 @@ class ChangeTypeSourceTest {
             )
         }
 
-        taskEmissionChecker.checkRemote {
+        taskEmissionChecker.checkOne {
             rootTasksLoaderProvider.accept(
                 taskKey1,
                 RootTaskJson(
@@ -368,7 +367,7 @@ class ChangeTypeSourceTest {
             acceptPrivateProject(PrivateOwnedProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true)))
         }
 
-        taskEmissionChecker.checkRemote {
+        taskEmissionChecker.checkOne {
             rootTasksLoaderProvider.accept(
                 taskKey1,
                 RootTaskJson(
@@ -397,7 +396,7 @@ class ChangeTypeSourceTest {
             )
         }
 
-        taskEmissionChecker.checkRemote {
+        taskEmissionChecker.checkOne {
             rootTasksLoaderProvider.accept(
                 taskKey1,
                 RootTaskJson(
@@ -428,7 +427,7 @@ class ChangeTypeSourceTest {
             acceptPrivateProject(PrivateOwnedProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true)))
         }
 
-        taskEmissionChecker.checkRemote {
+        taskEmissionChecker.checkOne {
             rootTasksLoaderProvider.accept(
                 taskKey1,
                 RootTaskJson(
@@ -444,7 +443,7 @@ class ChangeTypeSourceTest {
             )
         }
 
-        taskEmissionChecker.checkRemote {
+        taskEmissionChecker.checkOne {
             rootTasksLoaderProvider.accept(
                 taskKey2,
                 RootTaskJson(
@@ -471,7 +470,7 @@ class ChangeTypeSourceTest {
             acceptPrivateProject(PrivateOwnedProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true)))
         }
 
-        taskEmissionChecker.checkRemote {
+        taskEmissionChecker.checkOne {
             rootTasksLoaderProvider.accept(
                 taskKey1,
                 RootTaskJson(
@@ -487,7 +486,7 @@ class ChangeTypeSourceTest {
             )
         }
 
-        taskEmissionChecker.checkRemote {
+        taskEmissionChecker.checkOne {
             rootTasksLoaderProvider.accept(
                 taskKey2,
                 RootTaskJson(
@@ -502,7 +501,7 @@ class ChangeTypeSourceTest {
             )
         }
 
-        taskEmissionChecker.checkRemote {
+        taskEmissionChecker.checkOne {
             rootTasksLoaderProvider.accept(
                 taskKey1,
                 RootTaskJson(
@@ -525,7 +524,7 @@ class ChangeTypeSourceTest {
 
         acceptPrivateProject(PrivateOwnedProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true)))
 
-        taskEmissionChecker.checkRemote {
+        taskEmissionChecker.checkOne {
             rootTasksLoaderProvider.accept(
                 taskKey1,
                 RootTaskJson(
@@ -542,7 +541,7 @@ class ChangeTypeSourceTest {
 
         checkEmpty()
 
-        taskEmissionChecker.checkRemote {
+        taskEmissionChecker.checkOne {
             rootTasksLoaderProvider.accept(
                 taskKey1,
                 RootTaskJson(
@@ -564,7 +563,7 @@ class ChangeTypeSourceTest {
         setup()
         acceptPrivateProject(PrivateOwnedProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true)))
 
-        taskEmissionChecker.checkRemote {
+        taskEmissionChecker.checkOne {
             rootTasksLoaderProvider.accept(
                 taskKey1,
                 RootTaskJson(
@@ -589,7 +588,7 @@ class ChangeTypeSourceTest {
         setup()
         acceptPrivateProject(PrivateOwnedProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true)))
 
-        taskEmissionChecker.checkRemote {
+        taskEmissionChecker.checkOne {
             rootTasksLoaderProvider.accept(
                 taskKey1,
                 RootTaskJson(
@@ -605,7 +604,7 @@ class ChangeTypeSourceTest {
             )
         }
 
-        taskEmissionChecker.checkRemote {
+        taskEmissionChecker.checkOne {
             rootTasksLoaderProvider.accept(
                 taskKey2,
                 RootTaskJson(
@@ -622,7 +621,7 @@ class ChangeTypeSourceTest {
 
         checkEmpty()
 
-        taskEmissionChecker.checkRemote {
+        taskEmissionChecker.checkOne {
             rootTasksLoaderProvider.accept(
                 taskKey1,
                 RootTaskJson(
@@ -643,7 +642,7 @@ class ChangeTypeSourceTest {
         setup()
         acceptPrivateProject(PrivateOwnedProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true)))
 
-        taskEmissionChecker.checkRemote {
+        taskEmissionChecker.checkOne {
             rootTasksLoaderProvider.accept(
                 taskKey1,
                 RootTaskJson(
@@ -659,7 +658,7 @@ class ChangeTypeSourceTest {
             )
         }
 
-        taskEmissionChecker.checkRemote {
+        taskEmissionChecker.checkOne {
             rootTasksLoaderProvider.accept(
                 taskKey2,
                 RootTaskJson(
@@ -676,7 +675,7 @@ class ChangeTypeSourceTest {
 
         checkEmpty()
 
-        taskEmissionChecker.checkRemote {
+        taskEmissionChecker.checkOne {
             rootTasksLoaderProvider.accept(
                 taskKey2,
                 RootTaskJson(
@@ -739,7 +738,7 @@ class ChangeTypeSourceTest {
             triggerRelay.accept(Unit)
         }
 
-        taskEmissionChecker.checkRemote {
+        taskEmissionChecker.checkOne {
             rootTasksLoaderProvider.accept(
                 taskKey1,
                 RootTaskJson(
@@ -804,7 +803,7 @@ class ChangeTypeSourceTest {
             )
         }
 
-        taskEmissionChecker.checkRemote {
+        taskEmissionChecker.checkOne {
             rootTasksLoaderProvider.accept(
                 taskKey1,
                 RootTaskJson(

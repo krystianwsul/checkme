@@ -6,7 +6,6 @@ import com.krystianwsul.checkme.firebase.factories.ProjectsFactory
 import com.krystianwsul.checkme.firebase.roottask.RootTasksFactory
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.checkme.utils.publishImmediate
-import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.json.users.UserWrapper
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Single
@@ -35,9 +34,7 @@ class ChangeTypeSource(
             projectsFactorySingle.flatMapObservable { it.remoteChanges },
             friendsFactorySingle.flatMapObservable { it.remoteChanges },
             userFactoryRemoteChanges,
-            rootTasksFactory.changeTypes // todo cleanup
-                .doOnNext { check(it == ChangeType.REMOTE) }
-                .map { },
+            rootTasksFactory.remoteChanges,
         ).merge().publishImmediate(domainDisposable)
     }
 }

@@ -48,15 +48,17 @@ class MyUserFactory(
         user.setToken(deviceDbInfo)
     }
 
-    fun onNewSnapshot(snapshot: Snapshot<UserWrapper>): ChangeType? {
-        return myUserManager.set(snapshot)?.let {
-            user.clearableInvalidatableManager.clear()
-            rootModelChangeManager.invalidateUsers()
+    fun onNewSnapshot(snapshot: Snapshot<UserWrapper>): Boolean {
+        return myUserManager.set(snapshot)
+            ?.let {
+                user.clearableInvalidatableManager.clear()
+                rootModelChangeManager.invalidateUsers()
 
-            user = MyUser(it, rootModelChangeManager)
+                user = MyUser(it, rootModelChangeManager)
 
-            ChangeType.REMOTE // todo cleanup
-        }
+                true
+            }
+            ?: false
     }
 
     fun save(values: MutableMap<String, Any?>) = myUserManager.save(values)

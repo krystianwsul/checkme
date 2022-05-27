@@ -27,7 +27,13 @@ class ChangeTypeSource(
 
     init {
         val userFactoryChangeTypes = userDatabaseRx.changes.flatMapMaybe { snapshot ->
-            userFactorySingle.mapNotNull { it.onNewSnapshot(snapshot) }
+            userFactorySingle.mapNotNull {
+                if (it.onNewSnapshot(snapshot)) {
+                    ChangeType.REMOTE // todo cleanup
+                } else {
+                    null
+                }
+            }
         }
 
         changeTypes = listOf(

@@ -90,7 +90,7 @@ interface ProjectLoader<T : ProjectType, U : Parsable> { // U: Project JSON type
         // Here we observe remaining changes to the project or tasks, which don't affect the instance observables
         override val changeProjectEvents = projectRecordObservable.skip(1)
             .map {
-                check(it.changeType == ChangeType.REMOTE) // todo cleanup
+                check(it.changeType == ChangeType.REMOTE)
 
                 ChangeProjectEvent(it.projectRecord, it.userCustomTimeProvider)
             }

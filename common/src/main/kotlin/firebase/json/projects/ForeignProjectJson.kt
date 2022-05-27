@@ -1,3 +1,5 @@
 package com.krystianwsul.common.firebase.json.projects
 
-interface ForeignProjectJson : ProjectJson
+import com.krystianwsul.common.firebase.json.Parsable
+
+interface ForeignProjectJson : ProjectJson, Parsable

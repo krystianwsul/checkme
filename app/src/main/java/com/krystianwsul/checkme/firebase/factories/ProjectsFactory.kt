@@ -174,7 +174,7 @@ class ProjectsFactory(
 
     fun save(values: MutableMap<String, Any?>) {
         privateProjectLoader.projectManager.save(values)
-        sharedProjectsLoader.projectManager.save(values)
+        sharedProjectsLoader.save(values)
     }
 
     fun getCustomTime(customTimeKey: CustomTimeKey.Project<*>) =

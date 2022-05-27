@@ -22,8 +22,6 @@ import io.reactivex.rxjava3.kotlin.plusAssign
 
 interface SharedProjectsLoader {
 
-    val projectManager: AndroidSharedProjectManager
-
     val initialProjectsEvent: Single<InitialProjectsEvent>
 
     // this is the event for adding new projects
@@ -33,9 +31,11 @@ interface SharedProjectsLoader {
 
     fun addProject(jsonWrapper: JsonWrapper): SharedOwnedProjectRecord
 
+    fun save(values: MutableMap<String, Any?>)
+
     class Impl(
         projectKeysObservable: Observable<Set<ProjectKey.Shared>>,
-        override val projectManager: AndroidSharedProjectManager,
+        private val projectManager: AndroidSharedProjectManager,
         private val domainDisposable: CompositeDisposable,
         private val sharedProjectsProvider: SharedProjectsProvider,
         private val userCustomTimeProviderSource: UserCustomTimeProviderSource,
@@ -187,6 +187,8 @@ interface SharedProjectsLoader {
 
             return sharedProjectRecord
         }
+
+        override fun save(values: MutableMap<String, Any?>) = projectManager.save(values)
     }
 
     class InitialProjectsEvent(val initialProjectDatas: List<InitialProjectData>)

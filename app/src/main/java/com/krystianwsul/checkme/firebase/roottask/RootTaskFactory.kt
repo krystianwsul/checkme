@@ -49,7 +49,7 @@ class RootTaskFactory(
             .map { event ->
                 when (event) {
                     is Event.AddChange -> {
-                        val (taskRecord, skipChangeTypeEmission) = event // todo cleanup use ChangeType here, bizarrely
+                        val (taskRecord, skipChangeTypeEmission) = event
 
                         val userCustomTimeProvider = rootTaskDependencyCoordinator.getDependencies(taskRecord)
 

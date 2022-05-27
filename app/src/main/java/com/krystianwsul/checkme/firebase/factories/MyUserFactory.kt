@@ -53,9 +53,9 @@ class MyUserFactory(
             user.clearableInvalidatableManager.clear()
             rootModelChangeManager.invalidateUsers()
 
-            user = MyUser(it.data, rootModelChangeManager)
+            user = MyUser(it, rootModelChangeManager)
 
-            it.changeType
+            ChangeType.REMOTE // todo cleanup
         }
     }
 

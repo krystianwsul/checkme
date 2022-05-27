@@ -1,8 +1,6 @@
 package com.krystianwsul.common.firebase.managers
 
 import com.krystianwsul.common.ErrorLogger
-import com.krystianwsul.common.firebase.ChangeType
-import com.krystianwsul.common.firebase.ChangeWrapper
 import com.krystianwsul.common.firebase.records.RemoteRecord
 
 abstract class ValueRecordManager<T : Any> : RecordManager {
@@ -22,8 +20,8 @@ abstract class ValueRecordManager<T : Any> : RecordManager {
         val myValues = mutableMapOf<String, Any?>()
 
         val newIsSaved = records.map { it.getValues(myValues) }.any { it }
-
         check(newIsSaved == myValues.isNotEmpty())
+
         if (myValues.isNotEmpty()) {
             ErrorLogger.instance.log("${this::class.simpleName}.save values: $myValues")
 
@@ -31,11 +29,11 @@ abstract class ValueRecordManager<T : Any> : RecordManager {
         }
     }
 
-    protected fun set(valueChanged: (T) -> Boolean, valueCallback: () -> T): ChangeWrapper<T>? { // lazy to prevent parsing if LOCAL
+    protected fun set(valueChanged: (T) -> Boolean, valueCallback: () -> T): T? { // lazy to prevent parsing if LOCAL
         return if (_value?.let(valueChanged) != false) {
             _value = valueCallback()
 
-            ChangeWrapper(ChangeType.REMOTE, value)
+            value
         } else {
             null
         }

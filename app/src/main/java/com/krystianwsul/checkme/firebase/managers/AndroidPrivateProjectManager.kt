@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.firebase.managers
 import com.krystianwsul.checkme.firebase.loaders.ProjectProvider
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.common.domain.UserInfo
+import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.ChangeWrapper
 import com.krystianwsul.common.firebase.json.projects.PrivateOwnedProjectJson
 import com.krystianwsul.common.firebase.managers.PrivateProjectManager
@@ -21,7 +22,7 @@ class AndroidPrivateProjectManager(private val userInfo: UserInfo) :
     private var first = true
 
     override fun set(snapshot: Snapshot<PrivateOwnedProjectJson>): ChangeWrapper<PrivateOwnedProjectRecord>? {
-        val changeWrapper = set(
+        val value = set(
             { it.single().createObject != snapshot.value },
             {
                 val record = if (first) {
@@ -35,14 +36,14 @@ class AndroidPrivateProjectManager(private val userInfo: UserInfo) :
                             userInfo,
                             PrivateOwnedProjectJson(startTime = now.long, startTimeOffset = now.offset),
                         )
-                    } else {
-                        snapshot.toRecord()
-                    }
-
-                    listOf(record)
+                } else {
+                    snapshot.toRecord()
                 }
+
+                listOf(record)
+            }
         )
 
-        return changeWrapper?.run { ChangeWrapper(changeType, data.single()) }
+        return value?.let { ChangeWrapper(ChangeType.REMOTE, it.single()) } // todo cleanup
     }
 }

@@ -107,7 +107,7 @@ class ChangeTypeSourceTest {
 
     private lateinit var changeTypeSource: ChangeTypeSource
 
-    private lateinit var projectEmissionChecker: EmissionChecker<ChangeType>
+    private lateinit var projectEmissionChecker: EmissionChecker<Unit>
     private lateinit var taskEmissionChecker: EmissionChecker<ChangeType>
 
     @Before
@@ -251,7 +251,10 @@ class ChangeTypeSourceTest {
         )
 
         projectEmissionChecker =
-            EmissionChecker("projectsFactory", domainDisposable, projectsFactorySingle.flatMapObservable { it.changeTypes })
+            EmissionChecker(
+                "projectsFactory",
+                domainDisposable,
+                projectsFactorySingle.flatMapObservable { it.remoteChanges })
         taskEmissionChecker = EmissionChecker("rootTasksFactory", domainDisposable, rootTasksFactory.changeTypes)
 
         acceptSharedProjectKeys(setOf())
@@ -285,7 +288,7 @@ class ChangeTypeSourceTest {
         acceptPrivateProject(PrivateOwnedProjectJson())
         checkEmpty()
 
-        projectEmissionChecker.checkRemote { acceptPrivateProject(PrivateOwnedProjectJson(defaultTimesCreated = true)) }
+        projectEmissionChecker.checkOne { acceptPrivateProject(PrivateOwnedProjectJson(defaultTimesCreated = true)) }
     }
 
     @Test
@@ -295,7 +298,7 @@ class ChangeTypeSourceTest {
         acceptPrivateProject(PrivateOwnedProjectJson())
         checkEmpty()
 
-        projectEmissionChecker.checkRemote {
+        projectEmissionChecker.checkOne {
             acceptPrivateProject(PrivateOwnedProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true)))
         }
 
@@ -322,11 +325,11 @@ class ChangeTypeSourceTest {
         acceptPrivateProject(PrivateOwnedProjectJson())
         checkEmpty()
 
-        projectEmissionChecker.checkRemote {
+        projectEmissionChecker.checkOne {
             acceptPrivateProject(PrivateOwnedProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true)))
         }
 
-        projectEmissionChecker.checkRemote {
+        projectEmissionChecker.checkOne {
             acceptPrivateProject(
                 PrivateOwnedProjectJson(startTime = 1, rootTaskIds = mutableMapOf(taskKey1.taskId to true))
             )
@@ -355,13 +358,13 @@ class ChangeTypeSourceTest {
         acceptPrivateProject(PrivateOwnedProjectJson())
         checkEmpty()
 
-        projectEmissionChecker.checkRemote {
+        projectEmissionChecker.checkOne {
             acceptPrivateProject(
                 PrivateOwnedProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true, taskKey2.taskId to true))
             )
         }
 
-        projectEmissionChecker.checkRemote {
+        projectEmissionChecker.checkOne {
             acceptPrivateProject(PrivateOwnedProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true)))
         }
 
@@ -388,7 +391,7 @@ class ChangeTypeSourceTest {
         acceptPrivateProject(PrivateOwnedProjectJson())
         checkEmpty()
 
-        projectEmissionChecker.checkRemote {
+        projectEmissionChecker.checkOne {
             acceptPrivateProject(
                 PrivateOwnedProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true, taskKey2.taskId to true))
             )
@@ -409,7 +412,7 @@ class ChangeTypeSourceTest {
             )
         }
 
-        projectEmissionChecker.checkRemote {
+        projectEmissionChecker.checkOne {
             acceptPrivateProject(PrivateOwnedProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true)))
         }
     }
@@ -421,7 +424,7 @@ class ChangeTypeSourceTest {
         acceptPrivateProject(PrivateOwnedProjectJson())
         checkEmpty()
 
-        projectEmissionChecker.checkRemote {
+        projectEmissionChecker.checkOne {
             acceptPrivateProject(PrivateOwnedProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true)))
         }
 
@@ -464,7 +467,7 @@ class ChangeTypeSourceTest {
         acceptPrivateProject(PrivateOwnedProjectJson())
         checkEmpty()
 
-        projectEmissionChecker.checkRemote {
+        projectEmissionChecker.checkOne {
             acceptPrivateProject(PrivateOwnedProjectJson(rootTaskIds = mutableMapOf(taskKey1.taskId to true)))
         }
 
@@ -578,7 +581,7 @@ class ChangeTypeSourceTest {
 
         checkEmpty()
 
-        projectEmissionChecker.checkRemote { acceptPrivateProject(PrivateOwnedProjectJson()) }
+        projectEmissionChecker.checkOne { acceptPrivateProject(PrivateOwnedProjectJson()) }
     }
 
     @Test
@@ -700,7 +703,7 @@ class ChangeTypeSourceTest {
 
         sharedProjectKeysRelay.accept(setOf(sharedProjectKey))
 
-        projectEmissionChecker.checkRemote {
+        projectEmissionChecker.checkOne {
             sharedProjectSnapshotRelay.accept(
                 Snapshot(
                     sharedProjectKey.key,
@@ -720,7 +723,7 @@ class ChangeTypeSourceTest {
 
         sharedProjectKeysRelay.accept(setOf(sharedProjectKey))
 
-        projectEmissionChecker.checkRemote {
+        projectEmissionChecker.checkOne {
             sharedProjectSnapshotRelay.accept(
                 Snapshot(
                     sharedProjectKey.key,
@@ -793,7 +796,7 @@ class ChangeTypeSourceTest {
     fun testTaskCreateThenRemoteUpdate() {
         val taskKey = createTask()
 
-        projectEmissionChecker.checkRemote {
+        projectEmissionChecker.checkOne {
             acceptPrivateProject(
                 PrivateOwnedProjectJson(
                     rootTaskIds = mutableMapOf(taskKey1.taskId to true, taskKey.taskId to true)

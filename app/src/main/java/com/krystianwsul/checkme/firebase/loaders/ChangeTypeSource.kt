@@ -30,7 +30,7 @@ class ChangeTypeSource(
         }
 
         changeTypes = listOf(
-            projectsFactorySingle.flatMapObservable { it.changeTypes }, // todo cleanup
+            projectsFactorySingle.flatMapObservable { it.remoteChanges }.map { ChangeType.REMOTE },
             friendsFactorySingle.flatMapObservable { it.remoteChanges }.map { ChangeType.REMOTE },
             userFactoryChangeTypes.map { ChangeType.REMOTE },
             rootTasksFactory.changeTypes, // todo cleanup

@@ -71,7 +71,7 @@ class ProjectsFactory(
 
     val sharedProjects get() = sharedProjectFactories.mapValues { it.value.project as SharedOwnedProject }
 
-    val changeTypes: Observable<ChangeType>
+    val remoteChanges: Observable<Unit>
 
     init {
         privateProject.fixNotificationShown(shownFactory, now)
@@ -105,22 +105,22 @@ class ProjectsFactory(
             changeType.takeIf { it == ChangeType.REMOTE } // filtering out internal events for adding project
         }
 
-        val removeProjectChangeTypes = sharedProjectsLoader.removeProjectEvents.map {
-            it.projectKeys.forEach {
-                check(sharedProjectFactories.containsKey(it))
+        val removeProjectRemoteChanges = sharedProjectsLoader.removeProjectEvents
+            .doOnNext {
+                it.projectKeys.forEach {
+                    check(sharedProjectFactories.containsKey(it))
 
-                sharedProjectFactories.getValue(it)
-                    .project
-                    .clearableInvalidatableManager
-                    .clear()
+                    sharedProjectFactories.getValue(it)
+                        .project
+                        .clearableInvalidatableManager
+                        .clear()
 
-                rootModelChangeManager.invalidateProjects()
+                    rootModelChangeManager.invalidateProjects()
 
-                sharedProjectFactoriesProperty.remove(it)
+                    sharedProjectFactoriesProperty.remove(it)
+                }
             }
-
-            ChangeType.REMOTE
-        }
+            .map { }
 
         val sharedProjectFactoryChangeTypes = sharedProjectFactoriesProperty.observable.switchMap {
             it.values
@@ -128,11 +128,17 @@ class ProjectsFactory(
                 .merge()
         }
 
-        changeTypes = listOf(
-            privateProjectFactory.changeTypes,
-            sharedProjectFactoryChangeTypes,
-            addProjectChangeTypes,
-            removeProjectChangeTypes,
+        remoteChanges = listOf(
+            privateProjectFactory.changeTypes
+                .doOnNext { check(it == ChangeType.REMOTE) }
+                .map { }, // todo cleanup
+            sharedProjectFactoryChangeTypes
+                .doOnNext { check(it == ChangeType.REMOTE) }
+                .map { }, // todo cleanup
+            addProjectChangeTypes
+                .doOnNext { check(it == ChangeType.REMOTE) }
+                .map { }, // todo cleanup
+            removeProjectRemoteChanges,
         ).merge().publishImmediate(domainDisposable)
     }
 

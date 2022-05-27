@@ -3,7 +3,6 @@ package com.krystianwsul.checkme.firebase.factories
 import com.jakewharton.rxrelay3.PublishRelay
 import com.krystianwsul.checkme.domainmodel.DomainFactoryRule
 import com.krystianwsul.checkme.firebase.TestUserCustomTimeProviderSource
-import com.krystianwsul.checkme.firebase.checkRemote
 import com.krystianwsul.checkme.firebase.loaders.*
 import com.krystianwsul.checkme.firebase.managers.AndroidPrivateProjectManager
 import com.krystianwsul.checkme.firebase.managers.AndroidSharedProjectManager
@@ -12,7 +11,6 @@ import com.krystianwsul.common.ErrorLogger
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.DeviceInfo
 import com.krystianwsul.common.domain.UserInfo
-import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.json.projects.PrivateOwnedProjectJson
 import com.krystianwsul.common.firebase.json.projects.SharedOwnedProjectJson
 import com.krystianwsul.common.firebase.json.tasks.PrivateTaskJson
@@ -64,7 +62,7 @@ class ProjectsFactoryTest {
     private var _projectsFactory: ProjectsFactory? = null
     private val projectsFactory get() = _projectsFactory!!
 
-    private var _emissionChecker: EmissionChecker<ChangeType>? = null
+    private var _emissionChecker: EmissionChecker<Unit>? = null
     private val emissionChecker get() = _emissionChecker!!
 
     private val userInfo = UserInfo("email", "name", "uid")
@@ -140,7 +138,7 @@ class ProjectsFactoryTest {
             existingInstanceChangeManager,
         ) { deviceDbInfo }
 
-        _emissionChecker = EmissionChecker("changeTypes", compositeDisposable, projectsFactory.changeTypes)
+        _emissionChecker = EmissionChecker("changeTypes", compositeDisposable, projectsFactory.remoteChanges)
     }
 
     @Test
@@ -175,7 +173,7 @@ class ProjectsFactoryTest {
 
         initProjectsFactory()
 
-        emissionChecker.checkRemote {
+        emissionChecker.checkOne {
             privateProjectRelay.accept(Snapshot(privateProjectKey.key, PrivateOwnedProjectJson(defaultTimesCreated = true)))
         }
         assertEquals(projectsFactory.privateProject.defaultTimesCreated, true)
@@ -199,7 +197,7 @@ class ProjectsFactoryTest {
 
         initProjectsFactory()
 
-        emissionChecker.checkRemote {
+        emissionChecker.checkOne {
             privateProjectRelay.accept(
                 Snapshot(
                     privateProjectKey.key,
@@ -221,7 +219,7 @@ class ProjectsFactoryTest {
 
         initProjectsFactory()
 
-        emissionChecker.checkRemote {
+        emissionChecker.checkOne {
             privateProjectRelay.accept(
                 Snapshot(
                     privateProjectKey.key,
@@ -250,7 +248,7 @@ class ProjectsFactoryTest {
 
         val name = "task1"
 
-        emissionChecker.checkRemote {
+        emissionChecker.checkOne {
             privateProjectRelay.accept(
                 Snapshot(
                     privateProjectKey.key,
@@ -277,7 +275,7 @@ class ProjectsFactoryTest {
 
         initProjectsFactory()
 
-        emissionChecker.checkRemote {
+        emissionChecker.checkOne {
             privateProjectRelay.accept(Snapshot(privateProjectKey.key, PrivateOwnedProjectJson()))
         }
         assertTrue(projectsFactory.privateProject.projectTasks.isEmpty())
@@ -345,7 +343,7 @@ class ProjectsFactoryTest {
 
         projectKeysRelay.accept(setOf(sharedProjectKey))
 
-        emissionChecker.checkRemote {
+        emissionChecker.checkOne {
             factoryProvider.acceptSharedProject(sharedProjectKey, SharedOwnedProjectJson(users = mutableMapOf(
                 userInfo.key.key to mockk(relaxed = true) {
                     every { tokens } returns mutableMapOf()
@@ -407,7 +405,7 @@ class ProjectsFactoryTest {
 
         initProjectsFactory()
 
-        emissionChecker.checkRemote { projectKeysRelay.accept(setOf()) }
+        emissionChecker.checkOne { projectKeysRelay.accept(setOf()) }
     }
 
     @Test
@@ -428,7 +426,7 @@ class ProjectsFactoryTest {
 
         val name = "name"
 
-        emissionChecker.checkRemote {
+        emissionChecker.checkOne {
             factoryProvider.acceptSharedProject(sharedProjectKey, SharedOwnedProjectJson(
                 name = name,
                 users = mutableMapOf(

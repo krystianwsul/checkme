@@ -30,10 +30,10 @@ class AndroidRootUserManager(
 
     override fun valueToRecord(value: ReasonWrapper<RootUserRecord>) = value.value
 
-    fun set(userWrapperData: FriendsLoader.UserWrapperData) = set(
-            userWrapperData.snapshot.toKey(),
-            { it.value.createObject != userWrapperData.snapshot.value },
-            { ReasonWrapper(userWrapperData.reason, userWrapperData.snapshot.toRecord()) },
+    fun set(userWrapperData: FriendsLoader.UserWrapperData): ReasonWrapper<RootUserRecord>? = set(
+        userWrapperData.snapshot.toKey(),
+        { it.value.createObject != userWrapperData.snapshot.value },
+        { ReasonWrapper(userWrapperData.reason, userWrapperData.snapshot.toRecord()) },
     )
 
     fun addFriend(userKey: UserKey, userWrapper: UserWrapper) = RootUserRecord(

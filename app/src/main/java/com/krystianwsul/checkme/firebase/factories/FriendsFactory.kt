@@ -37,8 +37,6 @@ class FriendsFactory(
             .mapValues { it.value.newValue(RootUser(it.value.value)) }
             .toMutableMap()
 
-    fun hasUserKeys(userKeys: Set<UserKey>) = userKeys.all { it in userMap.keys }
-
     private fun getFriendMap() = userMap.filter { it.value.userLoadReason == UserLoadReason.FRIEND }
 
     fun getFriends() = getFriendMap().values.map { it.value }
@@ -47,19 +45,19 @@ class FriendsFactory(
 
     init {
         val addChangeFriendChangeTypes = friendsLoader.addChangeFriendEvents
-                .mapNotNull { rootUserManager.set(it.userWrapperData) }
-                .map { (changeType, reasonWrapper) ->
-                    val userKey = reasonWrapper.value.userKey
+            .mapNotNull { rootUserManager.set(it.userWrapperData) }
+            .map { reasonWrapper ->
+                val userKey = reasonWrapper.value.userKey
 
-                    userMap[userKey]?.value
-                        ?.clearableInvalidatableManager
-                        ?.clear()
+                userMap[userKey]?.value
+                    ?.clearableInvalidatableManager
+                    ?.clear()
 
-                    rootModelChangeManager.invalidateUsers()
+                rootModelChangeManager.invalidateUsers()
 
-                    userMap[userKey] = reasonWrapper.newValue(RootUser(reasonWrapper.value))
+                userMap[userKey] = reasonWrapper.newValue(RootUser(reasonWrapper.value))
 
-                    changeType
+                ChangeType.REMOTE // todo changeType
                 }
 
         val removeFriendsChangeTypes = friendsLoader.removeFriendEvents.map {
@@ -111,10 +109,10 @@ class FriendsFactory(
             removedUsers: Set<UserKey>,
     ) {
         val addedFriends = addedUsers.mapNotNull(userMap::get)
-        val addedStrangers = addedUsers - addedFriends.map { it.value.userKey }
+        val addedStrangers = addedUsers - addedFriends.map { it.value.userKey }.toSet()
 
         val removedFriends = removedUsers.mapNotNull(userMap::get)
-        val removedStrangers = removedUsers - removedFriends.map { it.value.userKey }
+        val removedStrangers = removedUsers - removedFriends.map { it.value.userKey }.toSet()
 
         addedFriends.forEach { it.value.addProject(projectId) }
         removedFriends.forEach { it.value.removeProject(projectId) }

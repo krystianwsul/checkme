@@ -1,8 +1,6 @@
 package com.krystianwsul.common.firebase.managers
 
 import com.krystianwsul.common.ErrorLogger
-import com.krystianwsul.common.firebase.ChangeType
-import com.krystianwsul.common.firebase.ChangeWrapper
 import com.krystianwsul.common.firebase.records.RemoteRecord
 import com.krystianwsul.common.utils.NullableWrapper
 
@@ -42,22 +40,12 @@ abstract class MapRecordManager<T, U : Any> : RecordManager {
         recordMap[key] = record
     }
 
-    protected fun set(
-        key: T,
-        valueChanged: (U) -> Boolean,
-        recordCallback: () -> U?
-    ): ChangeWrapper<U>? { // lazy to prevent parsing if LOCAL
-        return setNullable(key, valueChanged, recordCallback)?.let { changeWrapper ->
-            changeWrapper.value?.let { ChangeWrapper(ChangeType.REMOTE, it) } // todo changeType
-        }
-    }
+    protected fun set(key: T, valueChanged: (U) -> Boolean, recordCallback: () -> U?): U? =
+        setNullable(key, valueChanged, recordCallback)?.value
 
-    protected fun setNullable(
-        key: T,
-        valueChanged: (U) -> Boolean,
-        recordCallback: () -> U?
-    ): NullableWrapper<U>? { // lazy to prevent parsing if LOCAL
+    protected fun setNullable(key: T, valueChanged: (U) -> Boolean, recordCallback: () -> U?): NullableWrapper<U>? {
         return if (recordMap[key]?.let(valueChanged) != false) {
+            // lazy to prevent parsing if LOCAL
             val record = recordCallback() ?: return NullableWrapper()
 
             recordMap[key] = record

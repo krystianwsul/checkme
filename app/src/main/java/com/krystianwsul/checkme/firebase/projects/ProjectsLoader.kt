@@ -29,9 +29,9 @@ abstract class ProjectsLoader<TYPE : ProjectType, RECORD : ProjectRecord<TYPE>, 
     private val userCustomTimeProviderSource: UserCustomTimeProviderSource,
 ) {
 
-    private data class AddedProjectData<RECORD : ProjectRecord<*>>(val initialProjectRecord: RECORD)
+    protected data class AddedProjectData<RECORD : ProjectRecord<*>>(val initialProjectRecord: RECORD)
 
-    private val addedProjectDatasRelay =
+    protected val addedProjectDatasRelay =
         ReplayRelay.create<ChangeWrapper<Map<ProjectKey<TYPE>, AddedProjectData<RECORD>?>>>()
 
     init {
@@ -97,6 +97,7 @@ abstract class ProjectsLoader<TYPE : ProjectType, RECORD : ProjectRecord<TYPE>, 
             }
 
             ProjectLoader.Impl<TYPE, PARSABLE, RECORD>(
+                projectKey,
                 projectEntry.databaseRx.observable,
                 domainDisposable,
                 projectsManager,
@@ -168,22 +169,6 @@ abstract class ProjectsLoader<TYPE : ProjectType, RECORD : ProjectRecord<TYPE>, 
             onProjectsRemoved(it.projectKeys)
         }
         .replayImmediate()
-
-    fun addProject(parsable: PARSABLE): RECORD {
-        val sharedProjectRecord = projectsManager.newProjectRecord(parsable)
-
-        val addedProjectDatas = addedProjectDatasRelay.value!!
-            .data
-            .toMutableMap()
-
-        check(!addedProjectDatas.containsKey(sharedProjectRecord.projectKey))
-
-        addedProjectDatas[sharedProjectRecord.projectKey] = AddedProjectData(sharedProjectRecord)
-
-        addedProjectDatasRelay.accept(ChangeWrapper(ChangeType.LOCAL, addedProjectDatas))
-
-        return sharedProjectRecord
-    }
 
     fun save(values: MutableMap<String, Any?>) = projectsManager.save(values)
 

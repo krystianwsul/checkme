@@ -7,6 +7,7 @@ import com.krystianwsul.common.firebase.json.projects.PrivateOwnedProjectJson
 import com.krystianwsul.common.firebase.managers.PrivateProjectManager
 import com.krystianwsul.common.firebase.records.project.PrivateOwnedProjectRecord
 import com.krystianwsul.common.time.ExactTimeStamp
+import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ProjectType
 
 class AndroidPrivateProjectManager(private val userInfo: UserInfo) :
@@ -20,7 +21,10 @@ class AndroidPrivateProjectManager(private val userInfo: UserInfo) :
 
     private var first = true
 
-    override fun set(snapshot: Snapshot<out PrivateOwnedProjectJson>): PrivateOwnedProjectRecord? {
+    override fun set(
+        projectKey: ProjectKey<out ProjectType.Private>,
+        snapshot: Snapshot<out PrivateOwnedProjectJson>
+    ): PrivateOwnedProjectRecord? {
         val value = set(
             { it.single().createObject != snapshot.value },
             {

@@ -87,6 +87,7 @@ class ProjectsFactoryTest {
         privateProjectManager = AndroidPrivateProjectManager(userInfo)
 
         privateProjectLoader = ProjectLoader.Impl(
+            userInfo.key.toPrivateProjectKey(),
             privateProjectRelay,
             compositeDisposable,
             privateProjectManager,

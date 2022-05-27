@@ -18,7 +18,7 @@ class ForeignProjectsLoader(
     projectsProvider: ProjectsProvider<ProjectType, ForeignProjectJson>,
     userCustomTimeProviderSource: UserCustomTimeProviderSource,
 ) : ProjectsLoader<ProjectType, ForeignProjectRecord<ProjectType>, ForeignProjectJson>(
-    projectKeysObservable, projectsManager, domainDisposable, projectsProvider, userCustomTimeProviderSource
+    projectKeysObservable, projectsManager, domainDisposable, projectsProvider, userCustomTimeProviderSource,
 ) {
 
     override fun onProjectAddedOrUpdated(record: ForeignProjectRecord<ProjectType>) {}

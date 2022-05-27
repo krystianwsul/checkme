@@ -69,9 +69,13 @@ class ProjectLoaderTest {
         rxErrorChecker = RxErrorChecker()
 
         projectSnapshotRelay = BehaviorRelay.create()
-        projectManager = AndroidPrivateProjectManager(UserInfo("email", "name", "uid"))
+
+        val userInfo = UserInfo("email", "name", "uid")
+
+        projectManager = AndroidPrivateProjectManager(userInfo)
 
         projectLoader = ProjectLoader.Impl(
+            userInfo.key.toPrivateProjectKey(),
             projectSnapshotRelay,
             compositeDisposable,
             projectManager,

@@ -156,6 +156,7 @@ class FactoryLoader(
                         RootTasksFactory.instanceRelay.accept(NullableWrapper(rootTasksFactory))
 
                         val privateProjectLoader = ProjectLoader.Impl(
+                            privateProjectKey,
                             privateProjectDatabaseRx.observable,
                             domainDisposable,
                             privateProjectManager,

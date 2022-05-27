@@ -17,7 +17,7 @@ class AndroidSharedProjectManager(databaseWrapper: DatabaseWrapper) :
         super.remove(projectKey as ProjectKey.Shared)
     }
 
-    override fun set(snapshot: Snapshot<JsonWrapper>): SharedOwnedProjectRecord? {
+    override fun set(snapshot: Snapshot<out JsonWrapper>): SharedOwnedProjectRecord? {
         val projectKey = ProjectKey.Shared(snapshot.key)
 
         return set(

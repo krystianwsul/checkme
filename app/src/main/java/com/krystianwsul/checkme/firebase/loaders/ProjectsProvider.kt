@@ -8,5 +8,5 @@ import io.reactivex.rxjava3.core.Observable
 
 interface ProjectsProvider<TYPE : ProjectType, PARSABLE : Parsable> {
 
-    fun getProjectObservable(projectKey: ProjectKey<TYPE>): Observable<Snapshot<PARSABLE>>
+    fun getProjectObservable(projectKey: ProjectKey<out TYPE>): Observable<out Snapshot<out PARSABLE>>
 }

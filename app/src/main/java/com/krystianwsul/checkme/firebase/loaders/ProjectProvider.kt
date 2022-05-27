@@ -14,6 +14,6 @@ interface ProjectProvider {
     // U: Project JSON type
     interface ProjectManager<T : ProjectType, U : Parsable, RECORD : ProjectRecord<T>> : RecordManager {
 
-        fun set(snapshot: Snapshot<U>): RECORD?
+        fun set(snapshot: Snapshot<out U>): RECORD?
     }
 }

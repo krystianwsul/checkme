@@ -13,14 +13,14 @@ class AndroidPrivateProjectManager(private val userInfo: UserInfo) :
     PrivateProjectManager(),
     ProjectProvider.ProjectManager<ProjectType.Private, PrivateOwnedProjectJson, PrivateOwnedProjectRecord> {
 
-    private fun Snapshot<PrivateOwnedProjectJson>.toRecord() = PrivateOwnedProjectRecord(
+    private fun Snapshot<out PrivateOwnedProjectJson>.toRecord() = PrivateOwnedProjectRecord(
         userInfo.key.toPrivateProjectKey(),
         value!!,
     )
 
     private var first = true
 
-    override fun set(snapshot: Snapshot<PrivateOwnedProjectJson>): PrivateOwnedProjectRecord? {
+    override fun set(snapshot: Snapshot<out PrivateOwnedProjectJson>): PrivateOwnedProjectRecord? {
         val value = set(
             { it.single().createObject != snapshot.value },
             {

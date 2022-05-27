@@ -44,7 +44,7 @@ interface FactoryProvider {
 
             override val projectProvider = this@FactoryProvider.projectProvider
 
-            override fun getProjectObservable(projectKey: ProjectKey<ProjectType.Shared>) =
+            override fun getProjectObservable(projectKey: ProjectKey<out ProjectType.Shared>) =
                 database.getSharedOwnedProjectObservable(projectKey as ProjectKey.Shared)
         }
 

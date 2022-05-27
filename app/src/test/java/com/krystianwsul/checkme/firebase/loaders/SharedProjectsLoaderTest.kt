@@ -43,7 +43,7 @@ class SharedProjectsLoaderTest {
 
         override val projectProvider = TestProjectProvider()
 
-        override fun getProjectObservable(projectKey: ProjectKey<ProjectType.Shared>): Observable<Snapshot<JsonWrapper>> {
+        override fun getProjectObservable(projectKey: ProjectKey<out ProjectType.Shared>): Observable<Snapshot<JsonWrapper>> {
             if (!sharedProjectObservables.containsKey(projectKey as ProjectKey.Shared))
                 sharedProjectObservables[projectKey] = PublishRelay.create()
             return sharedProjectObservables.getValue(projectKey)

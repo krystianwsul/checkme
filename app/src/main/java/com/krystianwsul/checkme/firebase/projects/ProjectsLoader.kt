@@ -56,7 +56,7 @@ abstract class ProjectsLoader<TYPE : ProjectType, RECORD : ProjectRecord<TYPE>, 
 
     private data class ProjectEntry<RECORD : ProjectRecord<*>, PARSABLE : Parsable>(
         val userChangeType: ChangeType,
-        val databaseRx: DatabaseRx<Snapshot<PARSABLE>>,
+        val databaseRx: DatabaseRx<out Snapshot<out PARSABLE>>,
         val initialProjectRecord: RECORD?,
     )
 

@@ -18,7 +18,7 @@ sealed class OwnedProjectRecord<T : ProjectType>(
 
     abstract val customTimeRecords: Map<out CustomTimeId.Project, ProjectCustomTimeRecord<T>>
 
-    abstract val taskRecords: Map<String, ProjectTaskRecord>
+    override abstract val taskRecords: Map<String, ProjectTaskRecord>
 
     lateinit var taskHierarchyRecords: MutableMap<TaskHierarchyId, ProjectTaskHierarchyRecord>
         private set

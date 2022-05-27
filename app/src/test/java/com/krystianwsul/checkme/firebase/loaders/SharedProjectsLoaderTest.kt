@@ -4,13 +4,16 @@ import com.jakewharton.rxrelay3.PublishRelay
 import com.krystianwsul.checkme.domainmodel.DomainFactoryRule
 import com.krystianwsul.checkme.firebase.TestUserCustomTimeProviderSource
 import com.krystianwsul.checkme.firebase.managers.AndroidSharedProjectManager
+import com.krystianwsul.checkme.firebase.projects.ProjectsLoader
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.common.firebase.ChangeWrapper
 import com.krystianwsul.common.firebase.DatabaseCallback
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.json.JsonWrapper
 import com.krystianwsul.common.firebase.json.projects.SharedOwnedProjectJson
+import com.krystianwsul.common.firebase.records.project.SharedOwnedProjectRecord
 import com.krystianwsul.common.utils.ProjectKey
+import com.krystianwsul.common.utils.ProjectType
 import io.mockk.mockk
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
@@ -40,8 +43,8 @@ class SharedProjectsLoaderTest {
 
         override val projectProvider = TestProjectProvider()
 
-        override fun getSharedProjectObservable(projectKey: ProjectKey.Shared): Observable<Snapshot<JsonWrapper>> {
-            if (!sharedProjectObservables.containsKey(projectKey))
+        override fun getProjectObservable(projectKey: ProjectKey<ProjectType.Shared>): Observable<Snapshot<JsonWrapper>> {
+            if (!sharedProjectObservables.containsKey(projectKey as ProjectKey.Shared))
                 sharedProjectObservables[projectKey] = PublishRelay.create()
             return sharedProjectObservables.getValue(projectKey)
         }
@@ -50,7 +53,8 @@ class SharedProjectsLoaderTest {
             projectKey: ProjectKey.Shared,
             projectJson: SharedOwnedProjectJson,
         ) {
-            sharedProjectObservables.getValue(projectKey).accept(Snapshot(
+            sharedProjectObservables.getValue(projectKey).accept(
+                Snapshot(
                     projectKey.key,
                     JsonWrapper(projectJson),
             ))
@@ -70,9 +74,9 @@ class SharedProjectsLoaderTest {
 
     private lateinit var sharedProjectsLoader: SharedProjectsLoader
 
-    private lateinit var initialProjectsEmissionChecker: EmissionChecker<SharedProjectsLoader.InitialProjectsEvent>
-    private lateinit var addProjectEmissionChecker: EmissionChecker<ChangeWrapper<SharedProjectsLoader.AddProjectEvent>>
-    private lateinit var removeProjectsEmissionChecker: EmissionChecker<SharedProjectsLoader.RemoveProjectsEvent>
+    private lateinit var initialProjectsEmissionChecker: EmissionChecker<ProjectsLoader.InitialProjectsEvent<ProjectType.Shared, JsonWrapper, SharedOwnedProjectRecord>>
+    private lateinit var addProjectEmissionChecker: EmissionChecker<ChangeWrapper<ProjectsLoader.AddProjectEvent<ProjectType.Shared, JsonWrapper, SharedOwnedProjectRecord>>>
+    private lateinit var removeProjectsEmissionChecker: EmissionChecker<ProjectsLoader.RemoveProjectsEvent<ProjectType.Shared>>
 
     @Before
     fun before() {

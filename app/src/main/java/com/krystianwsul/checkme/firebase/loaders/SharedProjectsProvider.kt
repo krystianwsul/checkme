@@ -1,13 +1,9 @@
 package com.krystianwsul.checkme.firebase.loaders
 
-import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.common.firebase.json.JsonWrapper
-import com.krystianwsul.common.utils.ProjectKey
-import io.reactivex.rxjava3.core.Observable
+import com.krystianwsul.common.utils.ProjectType
 
-interface SharedProjectsProvider {
+interface SharedProjectsProvider : ProjectsProvider<ProjectType.Shared, JsonWrapper> {
 
     val projectProvider: ProjectProvider
-
-    fun getSharedProjectObservable(projectKey: ProjectKey.Shared): Observable<Snapshot<JsonWrapper>>
 }

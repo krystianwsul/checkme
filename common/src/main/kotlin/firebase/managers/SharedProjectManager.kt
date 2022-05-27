@@ -13,9 +13,9 @@ abstract class SharedProjectManager(private val databaseWrapper: DatabaseWrapper
 
     override fun valueToRecord(value: SharedOwnedProjectRecord) = value
 
-    fun newProjectRecord(jsonWrapper: JsonWrapper) = SharedOwnedProjectRecord(
+    fun newProjectRecord(parsable: JsonWrapper) = SharedOwnedProjectRecord(
         databaseWrapper,
         this,
-        jsonWrapper
+        parsable
     ).also { add(it.projectKey, it) }
 }

@@ -14,6 +14,7 @@ import com.krystianwsul.common.firebase.DatabaseCallback
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.json.projects.PrivateOwnedProjectJson
 import com.krystianwsul.common.firebase.json.tasks.PrivateTaskJson
+import com.krystianwsul.common.firebase.records.project.PrivateOwnedProjectRecord
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ProjectType
 import io.mockk.every
@@ -50,13 +51,13 @@ class ProjectLoaderTest {
 
     private lateinit var projectSnapshotRelay: BehaviorRelay<Snapshot<PrivateOwnedProjectJson>>
     private lateinit var projectManager: AndroidPrivateProjectManager
-    private lateinit var projectLoader: ProjectLoader<ProjectType.Private, PrivateOwnedProjectJson>
+    private lateinit var projectLoader: ProjectLoader<ProjectType.Private, PrivateOwnedProjectJson, PrivateOwnedProjectRecord>
 
     private fun acceptProject(privateProjectJson: PrivateOwnedProjectJson) =
         projectSnapshotRelay.accept(Snapshot(projectKey.key, privateProjectJson))
 
-    private lateinit var initialProjectEmissionChecker: EmissionChecker<ChangeWrapper<ProjectLoader.InitialProjectEvent<ProjectType.Private, PrivateOwnedProjectJson>>>
-    private lateinit var changeProjectEmissionChecker: EmissionChecker<ProjectLoader.ChangeProjectEvent<ProjectType.Private>>
+    private lateinit var initialProjectEmissionChecker: EmissionChecker<ChangeWrapper<ProjectLoader.InitialProjectEvent<ProjectType.Private, PrivateOwnedProjectJson, PrivateOwnedProjectRecord>>>
+    private lateinit var changeProjectEmissionChecker: EmissionChecker<ProjectLoader.ChangeProjectEvent<PrivateOwnedProjectRecord>>
 
     private val projectKey = ProjectKey.Private("userKey")
 

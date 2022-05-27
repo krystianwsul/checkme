@@ -29,7 +29,7 @@ import com.krystianwsul.common.firebase.json.users.UserJson
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
 import com.krystianwsul.common.firebase.models.task.ProjectRootTaskIdTracker
-import com.krystianwsul.common.firebase.records.project.OwnedProjectRecord
+import com.krystianwsul.common.firebase.records.project.ProjectRecord
 import com.krystianwsul.common.firebase.records.task.RootTaskRecord
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.ProjectKey
@@ -127,7 +127,7 @@ class ChangeTypeSourceTest {
 
     private fun immediateUserCustomTimeProviderSource() = object : UserCustomTimeProviderSource {
 
-        override fun getUserCustomTimeProvider(projectRecord: OwnedProjectRecord<*>) =
+        override fun getUserCustomTimeProvider(projectRecord: ProjectRecord<*>) =
             mockk<JsonTime.UserCustomTimeProvider>()
 
         override fun getUserCustomTimeProvider(rootTaskRecord: RootTaskRecord) = mockk<JsonTime.UserCustomTimeProvider>()
@@ -194,15 +194,16 @@ class ChangeTypeSourceTest {
             privateProjectManager,
             null,
             userCustomTimeProviderSource,
-            rootTaskKeySource,
-        )
+        ) {
+            rootTaskKeySource.onProjectAddedOrUpdated(it.projectKey, it.rootTaskParentDelegate.rootTaskKeys)
+        }
 
         val sharedProjectManager = AndroidSharedProjectManager(databaseWrapper)
 
         sharedProjectSnapshotRelay = PublishRelay.create()
 
         val sharedProjectsProvider = mockk<SharedProjectsProvider> {
-            every { getSharedProjectObservable(any()) } returns sharedProjectSnapshotRelay
+            every { getProjectObservable(any()) } returns sharedProjectSnapshotRelay
         }
 
         sharedProjectKeysRelay = PublishRelay.create()

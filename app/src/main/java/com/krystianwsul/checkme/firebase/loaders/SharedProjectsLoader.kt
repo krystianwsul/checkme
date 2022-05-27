@@ -1,13 +1,10 @@
 package com.krystianwsul.checkme.firebase.loaders
 
-import com.jakewharton.rxrelay3.ReplayRelay
 import com.krystianwsul.checkme.firebase.UserCustomTimeProviderSource
 import com.krystianwsul.checkme.firebase.dependencies.RootTaskKeyStore
 import com.krystianwsul.checkme.firebase.dependencies.UserKeyStore
 import com.krystianwsul.checkme.firebase.managers.AndroidSharedProjectManager
-import com.krystianwsul.checkme.firebase.snapshot.Snapshot
-import com.krystianwsul.checkme.utils.zipSingle
-import com.krystianwsul.common.firebase.ChangeType
+import com.krystianwsul.checkme.firebase.projects.ProjectsLoader
 import com.krystianwsul.common.firebase.ChangeWrapper
 import com.krystianwsul.common.firebase.json.JsonWrapper
 import com.krystianwsul.common.firebase.records.project.SharedOwnedProjectRecord
@@ -16,192 +13,45 @@ import com.krystianwsul.common.utils.ProjectType
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.CompositeDisposable
-import io.reactivex.rxjava3.kotlin.addTo
-import io.reactivex.rxjava3.kotlin.merge
-import io.reactivex.rxjava3.kotlin.plusAssign
 
 interface SharedProjectsLoader {
 
-    val initialProjectsEvent: Single<InitialProjectsEvent>
+    val initialProjectsEvent:
+            Single<ProjectsLoader.InitialProjectsEvent<ProjectType.Shared, JsonWrapper, SharedOwnedProjectRecord>>
 
     // this is the event for adding new projects
-    val addProjectEvents: Observable<ChangeWrapper<AddProjectEvent>>
+    val addProjectEvents:
+            Observable<ChangeWrapper<ProjectsLoader.AddProjectEvent<ProjectType.Shared, JsonWrapper, SharedOwnedProjectRecord>>>
 
-    val removeProjectEvents: Observable<RemoveProjectsEvent>
+    val removeProjectEvents: Observable<ProjectsLoader.RemoveProjectsEvent<ProjectType.Shared>>
 
-    fun addProject(jsonWrapper: JsonWrapper): SharedOwnedProjectRecord
+    fun addProject(parsable: JsonWrapper): SharedOwnedProjectRecord
 
     fun save(values: MutableMap<String, Any?>)
 
     class Impl(
         projectKeysObservable: Observable<Set<ProjectKey.Shared>>,
-        private val projectManager: AndroidSharedProjectManager,
-        private val domainDisposable: CompositeDisposable,
-        private val sharedProjectsProvider: SharedProjectsProvider,
-        private val userCustomTimeProviderSource: UserCustomTimeProviderSource,
+        projectManager: AndroidSharedProjectManager,
+        domainDisposable: CompositeDisposable,
+        sharedProjectsProvider: SharedProjectsProvider,
+        userCustomTimeProviderSource: UserCustomTimeProviderSource,
         private val userKeyStore: UserKeyStore,
         private val rootTaskKeyStore: RootTaskKeyStore,
-    ) : SharedProjectsLoader {
+    ) : ProjectsLoader<ProjectType.Shared, SharedOwnedProjectRecord, JsonWrapper>(
+        projectKeysObservable,
+        projectManager,
+        domainDisposable,
+        sharedProjectsProvider,
+        userCustomTimeProviderSource,
+    ), SharedProjectsLoader {
 
-        private data class AddedProjectData(val initialProjectRecord: SharedOwnedProjectRecord)
-
-        private val addedProjectDatasRelay =
-            ReplayRelay.create<ChangeWrapper<Map<ProjectKey.Shared, AddedProjectData?>>>()
-
-        init {
-            projectKeysObservable.map {
-                ChangeWrapper<Map<ProjectKey.Shared, AddedProjectData?>>(ChangeType.REMOTE, it.associateWith { null })
-            }
-                .subscribe(addedProjectDatasRelay)
-                .addTo(domainDisposable)
+        override fun onProjectAddedOrUpdated(record: SharedOwnedProjectRecord) {
+            rootTaskKeyStore.onProjectAddedOrUpdated(record.projectKey, record.rootTaskParentDelegate.rootTaskKeys)
         }
 
-        private fun <T : Any> Observable<T>.replayImmediate() = replay().apply { domainDisposable += connect() }
-        private fun <T : Any> Single<T>.cacheImmediate() = cache().apply { domainDisposable += subscribe() }
-
-        private data class ProjectData(
-            val userChangeType: ChangeType,
-            val projectKeys: Set<ProjectKey.Shared>,
-            val newMap: Map<ProjectKey.Shared, ProjectEntry>,
-        )
-
-        private data class ProjectEntry(
-            val userChangeType: ChangeType,
-            val databaseRx: DatabaseRx<Snapshot<JsonWrapper>>,
-            val initialProjectRecord: SharedOwnedProjectRecord?,
-        )
-
-        private val projectDatabaseRxObservable = addedProjectDatasRelay.distinctUntilChanged()
-            .processChanges(
-                { it.data.keys },
-                { (changeType, addedProjectDatas), projectKey ->
-                    val addedProjectData = addedProjectDatas.getValue(projectKey)
-
-                    ProjectEntry(
-                        changeType,
-                        DatabaseRx(
-                            domainDisposable,
-                            sharedProjectsProvider.getSharedProjectObservable(projectKey),
-                        ),
-                        addedProjectData?.initialProjectRecord,
-                    )
-                },
-                { it.databaseRx.disposable.dispose() },
-            )
-            .map { ProjectData(it.original.changeType, it.original.data.keys, it.newMap) }
-            .replayImmediate()
-
-        private data class LoaderData(
-            val userChangeType: ChangeType,
-            val newLoaderMap: Map<ProjectKey.Shared, ProjectLoader<ProjectType.Shared, JsonWrapper>>,
-            val addedLoaderEntries: Map<ProjectKey.Shared, ProjectLoader<ProjectType.Shared, JsonWrapper>>,
-            val removedProjectKeys: Set<ProjectKey.Shared>,
-        )
-
-        private val projectLoadersObservable = projectDatabaseRxObservable.processChanges(
-            { it.projectKeys },
-            { mapChanges, projectKey ->
-                val projectEntry = mapChanges.newMap.getValue(projectKey)
-
-                if (projectEntry.initialProjectRecord != null) {
-                    check(mapChanges.userChangeType == ChangeType.LOCAL)
-                }
-
-                ProjectLoader.Impl(
-                    projectEntry.databaseRx.observable,
-                    domainDisposable,
-                    projectManager,
-                    projectEntry.initialProjectRecord,
-                    userCustomTimeProviderSource,
-                    rootTaskKeyStore,
-                )
-            }
-        )
-            .map {
-                LoaderData(
-                    it.original.userChangeType,
-                    it.newMap,
-                    it.addedEntries,
-                    it.removedEntries.keys,
-                )
-            }
-            .replayImmediate()
-
-        override val initialProjectsEvent = projectLoadersObservable.firstOrError()
-            .flatMap {
-                it.newLoaderMap
-                    .values
-                    .map { projectLoader ->
-                        projectLoader.initialProjectEvent
-                            .doOnSuccess { check(it.changeType == ChangeType.REMOTE) }
-                            .map { projectLoader to it }
-                    }
-                    .zipSingle()
-            }
-            .map {
-                check(it.all { it.second.changeType == ChangeType.REMOTE })
-
-                InitialProjectsEvent(it.map { InitialProjectData(it.first, it.second.data) })
-            }
-            .cacheImmediate()
-
-        override val addProjectEvents = projectLoadersObservable.skip(1)
-            .switchMap {
-                it.addedLoaderEntries
-                    .values
-                    .map { projectLoader ->
-                        projectLoader.initialProjectEvent
-                            .map { it.newData(AddProjectEvent(projectLoader, it.data)) }
-                            .toObservable()
-                    }
-                    .merge()
-            }
-            .replayImmediate()
-
-        override val removeProjectEvents = projectLoadersObservable.filter { it.removedProjectKeys.isNotEmpty() }
-            .map {
-                check(it.userChangeType == ChangeType.REMOTE)
-
-                RemoveProjectsEvent(it.removedProjectKeys)
-            }
-            .doOnNext {
-                it.projectKeys.forEach(projectManager::remove)
-
-                rootTaskKeyStore.onProjectsRemoved(it.projectKeys)
-                userKeyStore.onProjectsRemoved(it.projectKeys)
-            }
-            .replayImmediate()
-
-        override fun addProject(jsonWrapper: JsonWrapper): SharedOwnedProjectRecord {
-            val sharedProjectRecord = projectManager.newProjectRecord(jsonWrapper)
-
-            val addedProjectDatas = addedProjectDatasRelay.value!!
-                .data
-                .toMutableMap()
-
-            check(!addedProjectDatas.containsKey(sharedProjectRecord.projectKey))
-
-            addedProjectDatas[sharedProjectRecord.projectKey] = AddedProjectData(sharedProjectRecord)
-
-            addedProjectDatasRelay.accept(ChangeWrapper(ChangeType.LOCAL, addedProjectDatas))
-
-            return sharedProjectRecord
+        override fun onProjectsRemoved(projectKeys: Set<ProjectKey<ProjectType.Shared>>) {
+            rootTaskKeyStore.onProjectsRemoved(projectKeys)
+            userKeyStore.onProjectsRemoved(projectKeys.map { it as ProjectKey.Shared }.toSet())
         }
-
-        override fun save(values: MutableMap<String, Any?>) = projectManager.save(values)
     }
-
-    class InitialProjectsEvent(val initialProjectDatas: List<InitialProjectData>)
-
-    data class InitialProjectData(
-        val projectLoader: ProjectLoader<ProjectType.Shared, JsonWrapper>,
-        val initialProjectEvent: ProjectLoader.InitialProjectEvent<ProjectType.Shared, JsonWrapper>,
-    )
-
-    class AddProjectEvent(
-        val projectLoader: ProjectLoader<ProjectType.Shared, JsonWrapper>,
-        val initialProjectEvent: ProjectLoader.InitialProjectEvent<ProjectType.Shared, JsonWrapper>,
-    )
-
-    class RemoveProjectsEvent(val projectKeys: Set<ProjectKey.Shared>)
 }

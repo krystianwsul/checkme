@@ -20,6 +20,7 @@ import com.krystianwsul.checkme.firebase.loaders.SharedProjectsLoader
 import com.krystianwsul.checkme.firebase.loaders.mockBase64
 import com.krystianwsul.checkme.firebase.managers.AndroidRootTasksManager
 import com.krystianwsul.checkme.firebase.managers.AndroidSharedProjectManager
+import com.krystianwsul.checkme.firebase.projects.ProjectsLoader
 import com.krystianwsul.checkme.firebase.roottask.RootTaskDependencyCoordinator
 import com.krystianwsul.checkme.firebase.roottask.RootTasksFactory
 import com.krystianwsul.checkme.firebase.roottask.RootTasksLoader
@@ -239,7 +240,7 @@ class DomainFactoryRule : TestRule {
             },
             compositeDisposable,
             mockk(relaxed = true) {
-                every { getSharedProjectObservable(any()) } returns Observable.never()
+                every { getProjectObservable(any()) } returns Observable.never()
             },
             TestUserCustomTimeProviderSource(),
             mockk(relaxed = true),
@@ -260,7 +261,7 @@ class DomainFactoryRule : TestRule {
                 myUserFactory.user,
             ),
             sharedProjectsLoader,
-            SharedProjectsLoader.InitialProjectsEvent(listOf()),
+            ProjectsLoader.InitialProjectsEvent(listOf()),
             domainFactoryStartTime,
             mockk(relaxed = true),
             compositeDisposable,

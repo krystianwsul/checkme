@@ -1,6 +1,6 @@
 package com.krystianwsul.checkme.firebase.managers
 
-import com.krystianwsul.checkme.firebase.loaders.ProjectProvider
+import com.krystianwsul.checkme.firebase.projects.ProjectsManager
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.json.JsonWrapper
@@ -11,7 +11,11 @@ import com.krystianwsul.common.utils.ProjectType
 
 class AndroidSharedProjectManager(databaseWrapper: DatabaseWrapper) :
     SharedProjectManager(databaseWrapper),
-    ProjectProvider.ProjectManager<ProjectType.Shared, JsonWrapper> {
+    ProjectsManager<ProjectType.Shared, JsonWrapper, SharedOwnedProjectRecord> {
+
+    override fun remove(projectKey: ProjectKey<ProjectType.Shared>) {
+        super.remove(projectKey as ProjectKey.Shared)
+    }
 
     override fun set(snapshot: Snapshot<JsonWrapper>): SharedOwnedProjectRecord? {
         val projectKey = ProjectKey.Shared(snapshot.key)

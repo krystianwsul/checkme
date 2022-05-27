@@ -4,8 +4,8 @@ import com.krystianwsul.checkme.firebase.factories.FriendsFactory
 import com.krystianwsul.checkme.firebase.factories.MyUserFactory
 import com.krystianwsul.checkme.firebase.loaders.FriendsLoader
 import com.krystianwsul.checkme.utils.getCurrentValue
-import com.krystianwsul.common.firebase.records.project.OwnedProjectRecord
 import com.krystianwsul.common.firebase.records.project.PrivateOwnedProjectRecord
+import com.krystianwsul.common.firebase.records.project.ProjectRecord
 import com.krystianwsul.common.firebase.records.project.SharedOwnedProjectRecord
 import com.krystianwsul.common.firebase.records.task.RootTaskRecord
 import com.krystianwsul.common.time.JsonTime
@@ -16,7 +16,7 @@ import io.reactivex.rxjava3.core.Single
 
 interface UserCustomTimeProviderSource {
 
-    fun getUserCustomTimeProvider(projectRecord: OwnedProjectRecord<*>): JsonTime.UserCustomTimeProvider
+    fun getUserCustomTimeProvider(projectRecord: ProjectRecord<*>): JsonTime.UserCustomTimeProvider
     fun getUserCustomTimeProvider(rootTaskRecord: RootTaskRecord): JsonTime.UserCustomTimeProvider
 
     class Impl(
@@ -33,9 +33,7 @@ interface UserCustomTimeProviderSource {
             return userKeys - myUserKey
         }
 
-        override fun getUserCustomTimeProvider(
-            projectRecord: OwnedProjectRecord<*>,
-        ): JsonTime.UserCustomTimeProvider {
+        override fun getUserCustomTimeProvider(projectRecord: ProjectRecord<*>): JsonTime.UserCustomTimeProvider {
             val customTimeKeys = getUserCustomTimeKeys(projectRecord)
             val foreignUserKeys = getForeignUserKeys(customTimeKeys)
 
@@ -52,7 +50,7 @@ interface UserCustomTimeProviderSource {
             }
         }
 
-        private fun getUserCustomTimeKeys(projectRecord: OwnedProjectRecord<*>): Set<CustomTimeKey.User> {
+        private fun getUserCustomTimeKeys(projectRecord: ProjectRecord<*>): Set<CustomTimeKey.User> {
             return projectRecord.taskRecords
                 .values
                 .flatMap { it.getUserCustomTimeKeys() }

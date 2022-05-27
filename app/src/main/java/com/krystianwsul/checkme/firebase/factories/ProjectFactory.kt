@@ -7,7 +7,7 @@ import com.krystianwsul.common.firebase.json.Parsable
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
 import com.krystianwsul.common.firebase.models.project.OwnedProject
-import com.krystianwsul.common.firebase.records.project.OwnedProjectRecord
+import com.krystianwsul.common.firebase.records.project.ProjectRecord
 import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.utils.ProjectType
 import io.reactivex.rxjava3.core.Observable
@@ -15,10 +15,10 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.merge
 
 @Suppress("LeakingThis")
-abstract class ProjectFactory<T : ProjectType, U : Parsable>(
+abstract class ProjectFactory<T : ProjectType, U : Parsable, RECORD : ProjectRecord<T>>(
 // U: Project JSON type
-    projectLoader: ProjectLoader<T, U>,
-    initialProjectEvent: ProjectLoader.InitialProjectEvent<T, U>,
+    projectLoader: ProjectLoader<T, U, RECORD>,
+    initialProjectEvent: ProjectLoader.InitialProjectEvent<T, U, RECORD>,
     protected val shownFactory: Instance.ShownFactory,
     domainDisposable: CompositeDisposable,
     private val rootTaskProvider: OwnedProject.RootTaskProvider,
@@ -32,7 +32,7 @@ abstract class ProjectFactory<T : ProjectType, U : Parsable>(
         private set
 
     protected abstract fun newProject(
-        projectRecord: OwnedProjectRecord<T>,
+        projectRecord: ProjectRecord<T>,
         userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
         rootTaskProvider: OwnedProject.RootTaskProvider,
         rootModelChangeManager: RootModelChangeManager,

@@ -161,8 +161,9 @@ class FactoryLoader(
                             privateProjectManager,
                             null,
                             userCustomTimeProviderSource,
-                            rootTaskKeySource,
-                        )
+                        ) {
+                            rootTaskKeySource.onProjectAddedOrUpdated(it.projectKey, it.rootTaskParentDelegate.rootTaskKeys)
+                        }
 
                         val startTime = ExactTimeStamp.Local.now
 

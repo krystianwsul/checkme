@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.firebase.factories
 
 import com.krystianwsul.checkme.firebase.loaders.ProjectLoader
 import com.krystianwsul.checkme.firebase.loaders.SharedProjectsLoader
+import com.krystianwsul.checkme.firebase.projects.ProjectsLoader
 import com.krystianwsul.checkme.utils.MapRelayProperty
 import com.krystianwsul.checkme.utils.publishImmediate
 import com.krystianwsul.common.domain.DeviceDbInfo
@@ -17,6 +18,8 @@ import com.krystianwsul.common.firebase.models.project.OwnedProject
 import com.krystianwsul.common.firebase.models.project.PrivateOwnedProject
 import com.krystianwsul.common.firebase.models.project.SharedOwnedProject
 import com.krystianwsul.common.firebase.models.users.RootUser
+import com.krystianwsul.common.firebase.records.project.PrivateOwnedProjectRecord
+import com.krystianwsul.common.firebase.records.project.SharedOwnedProjectRecord
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.*
 import io.reactivex.rxjava3.core.Observable
@@ -24,10 +27,10 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.merge
 
 class ProjectsFactory(
-    private val privateProjectLoader: ProjectLoader<ProjectType.Private, PrivateOwnedProjectJson>,
-    privateInitialProjectEvent: ProjectLoader.InitialProjectEvent<ProjectType.Private, PrivateOwnedProjectJson>,
+    private val privateProjectLoader: ProjectLoader<ProjectType.Private, PrivateOwnedProjectJson, PrivateOwnedProjectRecord>,
+    privateInitialProjectEvent: ProjectLoader.InitialProjectEvent<ProjectType.Private, PrivateOwnedProjectJson, PrivateOwnedProjectRecord>,
     private val sharedProjectsLoader: SharedProjectsLoader,
-    sharedInitialProjectsEvent: SharedProjectsLoader.InitialProjectsEvent,
+    sharedInitialProjectsEvent: ProjectsLoader.InitialProjectsEvent<ProjectType.Shared, JsonWrapper, SharedOwnedProjectRecord>,
     now: ExactTimeStamp.Local,
     private val shownFactory: Instance.ShownFactory,
     private val domainDisposable: CompositeDisposable,
@@ -108,6 +111,8 @@ class ProjectsFactory(
         val removeProjectRemoteChanges = sharedProjectsLoader.removeProjectEvents
             .doOnNext {
                 it.projectKeys.forEach {
+                    check(it is ProjectKey.Shared)
+
                     check(sharedProjectFactories.containsKey(it))
 
                     sharedProjectFactories.getValue(it)

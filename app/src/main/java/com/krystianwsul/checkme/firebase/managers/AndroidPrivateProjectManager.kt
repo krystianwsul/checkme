@@ -10,7 +10,8 @@ import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.ProjectType
 
 class AndroidPrivateProjectManager(private val userInfo: UserInfo) :
-    PrivateProjectManager(), ProjectProvider.ProjectManager<ProjectType.Private, PrivateOwnedProjectJson> {
+    PrivateProjectManager(),
+    ProjectProvider.ProjectManager<ProjectType.Private, PrivateOwnedProjectJson, PrivateOwnedProjectRecord> {
 
     private fun Snapshot<PrivateOwnedProjectJson>.toRecord() = PrivateOwnedProjectRecord(
         userInfo.key.toPrivateProjectKey(),

@@ -3,6 +3,7 @@ package com.krystianwsul.common.firebase.records.project
 import com.krystianwsul.common.firebase.json.projects.ProjectJson
 import com.krystianwsul.common.firebase.records.RemoteRecord
 import com.krystianwsul.common.firebase.records.RootTaskParentDelegate
+import com.krystianwsul.common.firebase.records.task.ProjectTaskRecord
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ProjectType
 
@@ -31,4 +32,6 @@ abstract class ProjectRecord<T : ProjectType>(
             this@ProjectRecord.addValue("$committerKey/$subKey", value)
         }
     }
+
+    abstract val taskRecords: Map<String, ProjectTaskRecord>
 }

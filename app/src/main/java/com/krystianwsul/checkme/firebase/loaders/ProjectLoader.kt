@@ -1,14 +1,13 @@
 package com.krystianwsul.checkme.firebase.loaders
 
 import com.krystianwsul.checkme.firebase.UserCustomTimeProviderSource
-import com.krystianwsul.checkme.firebase.dependencies.RootTaskKeyStore
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.checkme.utils.cacheImmediate
 import com.krystianwsul.checkme.utils.mapNotNull
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.ChangeWrapper
 import com.krystianwsul.common.firebase.json.Parsable
-import com.krystianwsul.common.firebase.records.project.OwnedProjectRecord
+import com.krystianwsul.common.firebase.records.project.ProjectRecord
 import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.utils.ProjectType
 import io.reactivex.rxjava3.core.Observable
@@ -16,47 +15,47 @@ import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.plusAssign
 
-interface ProjectLoader<T : ProjectType, U : Parsable> { // U: Project JSON type
+interface ProjectLoader<T : ProjectType, U : Parsable, RECORD : ProjectRecord<T>> { // U: Project JSON type
 
-    val projectManager: ProjectProvider.ProjectManager<T, U>
+    val projectManager: ProjectProvider.ProjectManager<T, U, RECORD>
 
     // first snapshot of everything
-    val initialProjectEvent: Single<ChangeWrapper<InitialProjectEvent<T, U>>>
+    val initialProjectEvent: Single<ChangeWrapper<InitialProjectEvent<T, U, RECORD>>>
 
     // Here we observe remaining changes to the project or tasks, which don't affect the instance observables
-    val changeProjectEvents: Observable<ChangeProjectEvent<T>>
+    val changeProjectEvents: Observable<ChangeProjectEvent<RECORD>>
 
-    class InitialProjectEvent<T : ProjectType, U : Parsable>(
+    class InitialProjectEvent<T : ProjectType, U : Parsable, RECORD : ProjectRecord<T>>(
         // U: Project JSON type
-        val projectManager: ProjectProvider.ProjectManager<T, U>,
-        val projectRecord: OwnedProjectRecord<T>,
+        val projectManager: ProjectProvider.ProjectManager<T, U, RECORD>,
+        val projectRecord: ProjectRecord<T>,
         val userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
     )
 
-    class ChangeProjectEvent<T : ProjectType>(
-        val projectRecord: OwnedProjectRecord<T>,
+    class ChangeProjectEvent<RECORD : ProjectRecord<*>>(
+        val projectRecord: RECORD,
         val userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
     )
 
     // U: Project JSON type
-    class Impl<T : ProjectType, U : Parsable>(
+    class Impl<T : ProjectType, U : Parsable, RECORD : ProjectRecord<T>>(
         snapshotObservable: Observable<Snapshot<U>>,
         private val domainDisposable: CompositeDisposable,
-        override val projectManager: ProjectProvider.ProjectManager<T, U>,
-        initialProjectRecord: OwnedProjectRecord<T>?,
+        override val projectManager: ProjectProvider.ProjectManager<T, U, RECORD>,
+        initialProjectRecord: RECORD?,
         private val userCustomTimeProviderSource: UserCustomTimeProviderSource,
-        private val rootTaskKeyStore: RootTaskKeyStore,
-    ) : ProjectLoader<T, U> {
+        private val onProjectAddedOrUpdated: (record: RECORD) -> Unit,
+    ) : ProjectLoader<T, U, RECORD> {
 
         private fun <T : Any> Observable<T>.replayImmediate() = replay().apply { domainDisposable += connect() }
 
-        private data class ProjectRecordData<T : ProjectType>(
+        private data class ProjectRecordData<RECORD : ProjectRecord<*>>(
             val changeType: ChangeType,
-            val projectRecord: OwnedProjectRecord<T>,
+            val projectRecord: RECORD,
             val userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
         )
 
-        private val projectRecordObservable: Observable<ProjectRecordData<T>> =
+        private val projectRecordObservable: Observable<ProjectRecordData<RECORD>> =
             snapshotObservable.mapNotNull(projectManager::set)
                 .map { ChangeWrapper(ChangeType.REMOTE, it) }
                 .let {
@@ -67,10 +66,7 @@ interface ProjectLoader<T : ProjectType, U : Parsable> { // U: Project JSON type
                     }
                 }
                 .map { (projectChangeType, projectRecord) ->
-                    rootTaskKeyStore.onProjectAddedOrUpdated(
-                        projectRecord.projectKey,
-                        projectRecord.rootTaskParentDelegate.rootTaskKeys,
-                    )
+                    onProjectAddedOrUpdated(projectRecord)
 
                     val userCustomTimeProvider = userCustomTimeProviderSource.getUserCustomTimeProvider(projectRecord)
 

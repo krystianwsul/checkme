@@ -4,7 +4,7 @@ import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.json.Parsable
 import com.krystianwsul.common.firebase.managers.RecordManager
-import com.krystianwsul.common.firebase.records.project.OwnedProjectRecord
+import com.krystianwsul.common.firebase.records.project.ProjectRecord
 import com.krystianwsul.common.utils.ProjectType
 
 interface ProjectProvider {
@@ -12,8 +12,8 @@ interface ProjectProvider {
     val database: DatabaseWrapper
 
     // U: Project JSON type
-    interface ProjectManager<T : ProjectType, U : Parsable> : RecordManager {
+    interface ProjectManager<T : ProjectType, U : Parsable, RECORD : ProjectRecord<T>> : RecordManager {
 
-        fun set(snapshot: Snapshot<U>): OwnedProjectRecord<T>?
+        fun set(snapshot: Snapshot<U>): RECORD?
     }
 }

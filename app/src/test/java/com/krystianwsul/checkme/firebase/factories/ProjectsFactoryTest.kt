@@ -6,16 +6,20 @@ import com.krystianwsul.checkme.firebase.TestUserCustomTimeProviderSource
 import com.krystianwsul.checkme.firebase.loaders.*
 import com.krystianwsul.checkme.firebase.managers.AndroidPrivateProjectManager
 import com.krystianwsul.checkme.firebase.managers.AndroidSharedProjectManager
+import com.krystianwsul.checkme.firebase.projects.ProjectsLoader
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.common.ErrorLogger
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.DeviceInfo
 import com.krystianwsul.common.domain.UserInfo
+import com.krystianwsul.common.firebase.json.JsonWrapper
 import com.krystianwsul.common.firebase.json.projects.PrivateOwnedProjectJson
 import com.krystianwsul.common.firebase.json.projects.SharedOwnedProjectJson
 import com.krystianwsul.common.firebase.json.tasks.PrivateTaskJson
 import com.krystianwsul.common.firebase.json.users.UserJson
 import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
+import com.krystianwsul.common.firebase.records.project.PrivateOwnedProjectRecord
+import com.krystianwsul.common.firebase.records.project.SharedOwnedProjectRecord
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ProjectType
@@ -51,13 +55,15 @@ class ProjectsFactoryTest {
     private lateinit var privateProjectRelay: PublishRelay<Snapshot<PrivateOwnedProjectJson>>
     private lateinit var factoryProvider: ProjectFactoryTest.TestFactoryProvider
     private lateinit var privateProjectManager: AndroidPrivateProjectManager
-    private lateinit var privateProjectLoader: ProjectLoader.Impl<ProjectType.Private, PrivateOwnedProjectJson>
+    private lateinit var privateProjectLoader: ProjectLoader.Impl<ProjectType.Private, PrivateOwnedProjectJson, PrivateOwnedProjectRecord>
     private lateinit var projectKeysRelay: PublishRelay<Set<ProjectKey.Shared>>
     private lateinit var sharedProjectManager: AndroidSharedProjectManager
     private lateinit var sharedProjectsLoader: SharedProjectsLoader.Impl
 
-    private var initialProjectEvent: ProjectLoader.InitialProjectEvent<ProjectType.Private, PrivateOwnedProjectJson>? = null
-    private var initialProjectsEvent: SharedProjectsLoader.InitialProjectsEvent? = null
+    private var initialProjectEvent: ProjectLoader.InitialProjectEvent<ProjectType.Private, PrivateOwnedProjectJson, PrivateOwnedProjectRecord>? =
+        null
+    private var initialProjectsEvent: ProjectsLoader.InitialProjectsEvent<ProjectType.Shared, JsonWrapper, SharedOwnedProjectRecord>? =
+        null
 
     private var _projectsFactory: ProjectsFactory? = null
     private val projectsFactory get() = _projectsFactory!!

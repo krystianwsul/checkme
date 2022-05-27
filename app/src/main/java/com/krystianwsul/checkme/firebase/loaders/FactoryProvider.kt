@@ -24,6 +24,7 @@ import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.ProjectKey
+import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.TaskKey
 import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Observable
@@ -43,8 +44,8 @@ interface FactoryProvider {
 
             override val projectProvider = this@FactoryProvider.projectProvider
 
-            override fun getSharedProjectObservable(projectKey: ProjectKey.Shared) =
-                database.getSharedOwnedProjectObservable(projectKey)
+            override fun getProjectObservable(projectKey: ProjectKey<ProjectType.Shared>) =
+                database.getSharedOwnedProjectObservable(projectKey as ProjectKey.Shared)
         }
 
     val friendsProvider

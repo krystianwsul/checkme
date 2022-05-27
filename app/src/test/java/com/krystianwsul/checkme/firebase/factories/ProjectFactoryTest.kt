@@ -126,7 +126,8 @@ class ProjectFactoryTest {
         }
     }
 
-    class TestProjectLoader(projectKey: ProjectKey.Private) : ProjectLoader<ProjectType.Private, PrivateOwnedProjectJson> {
+    class TestProjectLoader(projectKey: ProjectKey.Private) :
+        ProjectLoader<ProjectType.Private, PrivateOwnedProjectJson, PrivateOwnedProjectRecord> {
 
         private val userInfo = UserInfo("email", "name", "uid")
 
@@ -139,7 +140,7 @@ class ProjectFactoryTest {
         override val initialProjectEvent = Single.just(ChangeWrapper(ChangeType.REMOTE, event))
 
         override val changeProjectEvents =
-            PublishRelay.create<ProjectLoader.ChangeProjectEvent<ProjectType.Private>>()
+            PublishRelay.create<ProjectLoader.ChangeProjectEvent<PrivateOwnedProjectRecord>>()
     }
 
     @get:Rule

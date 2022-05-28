@@ -2,7 +2,6 @@ package com.krystianwsul.checkme.firebase.factories
 
 import com.krystianwsul.checkme.firebase.loaders.ProjectLoader
 import com.krystianwsul.common.domain.DeviceDbInfo
-import com.krystianwsul.common.firebase.json.JsonWrapper
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
 import com.krystianwsul.common.firebase.models.project.OwnedProject
@@ -14,14 +13,14 @@ import com.krystianwsul.common.utils.ProjectType
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 
 class SharedOwnedProjectFactory(
-    projectLoader: ProjectLoader<ProjectType.Shared, JsonWrapper, SharedOwnedProjectRecord>,
+    projectLoader: ProjectLoader<*, *, SharedOwnedProjectRecord>,
     initialProjectEvent: ProjectLoader.InitialProjectEvent<SharedOwnedProjectRecord>,
     private val shownFactory: Instance.ShownFactory,
     domainDisposable: CompositeDisposable,
     private val rootTaskProvider: OwnedProject.RootTaskProvider,
     rootModelChangeManager: RootModelChangeManager,
     private val deviceDbInfo: () -> DeviceDbInfo,
-) : OwnedProjectFactory<ProjectType.Shared, JsonWrapper, SharedOwnedProjectRecord>(
+) : OwnedProjectFactory<ProjectType.Shared, SharedOwnedProjectRecord>(
     projectLoader,
     initialProjectEvent,
     domainDisposable,

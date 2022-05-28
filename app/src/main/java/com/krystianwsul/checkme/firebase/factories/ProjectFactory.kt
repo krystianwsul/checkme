@@ -2,7 +2,6 @@ package com.krystianwsul.checkme.firebase.factories
 
 import com.krystianwsul.checkme.firebase.loaders.ProjectLoader
 import com.krystianwsul.checkme.utils.publishImmediate
-import com.krystianwsul.common.firebase.json.Parsable
 import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.records.project.ProjectRecord
 import com.krystianwsul.common.time.JsonTime
@@ -10,8 +9,8 @@ import com.krystianwsul.common.utils.ProjectType
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 
-abstract class ProjectFactory<TYPE : ProjectType, PARSABLE : Parsable, RECORD : ProjectRecord<TYPE>>(
-    private val projectLoader: ProjectLoader<TYPE, PARSABLE, RECORD>,
+abstract class ProjectFactory<TYPE : ProjectType, RECORD : ProjectRecord<TYPE>>(
+    private val projectLoader: ProjectLoader<*, *, RECORD>,
     private val initialProjectEvent: ProjectLoader.InitialProjectEvent<RECORD>,
     private val domainDisposable: CompositeDisposable,
 ) {

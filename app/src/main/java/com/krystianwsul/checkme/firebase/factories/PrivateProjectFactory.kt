@@ -15,7 +15,7 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable
 
 class PrivateProjectFactory(
     projectLoader: ProjectLoader<ProjectType.Private, PrivateOwnedProjectJson, PrivateOwnedProjectRecord>,
-    initialProjectEvent: ProjectLoader.InitialProjectEvent<ProjectType.Private, PrivateOwnedProjectJson, PrivateOwnedProjectRecord>,
+    initialProjectEvent: ProjectLoader.InitialProjectEvent<PrivateOwnedProjectRecord>,
     shownFactory: Instance.ShownFactory,
     domainDisposable: CompositeDisposable,
     rootTaskProvider: OwnedProject.RootTaskProvider,

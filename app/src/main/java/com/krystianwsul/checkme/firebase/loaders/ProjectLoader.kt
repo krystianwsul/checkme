@@ -21,14 +21,12 @@ interface ProjectLoader<T : ProjectType, U : Parsable, RECORD : ProjectRecord<ou
     val projectManager: ProjectProvider.ProjectManager<T, U, RECORD>
 
     // first snapshot of everything
-    val initialProjectEvent: Single<ChangeWrapper<InitialProjectEvent<T, U, RECORD>>>
+    val initialProjectEvent: Single<ChangeWrapper<InitialProjectEvent<RECORD>>>
 
     // Here we observe remaining changes to the project or tasks, which don't affect the instance observables
     val changeProjectEvents: Observable<ChangeProjectEvent<RECORD>>
 
-    class InitialProjectEvent<T : ProjectType, U : Parsable, RECORD : ProjectRecord<out T>>(
-        // U: Project JSON type
-        val projectManager: ProjectProvider.ProjectManager<T, U, RECORD>,
+    class InitialProjectEvent<RECORD : ProjectRecord<*>>(
         val projectRecord: RECORD,
         val userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
     )
@@ -81,7 +79,7 @@ interface ProjectLoader<T : ProjectType, U : Parsable, RECORD : ProjectRecord<ou
             .map {
                 ChangeWrapper(
                     it.changeType,
-                    InitialProjectEvent(projectManager, it.projectRecord, it.userCustomTimeProvider),
+                    InitialProjectEvent(it.projectRecord, it.userCustomTimeProvider),
                 )
             }
             .cacheImmediate(domainDisposable)

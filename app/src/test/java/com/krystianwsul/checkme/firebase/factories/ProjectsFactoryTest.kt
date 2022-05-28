@@ -60,8 +60,7 @@ class ProjectsFactoryTest {
     private lateinit var sharedProjectManager: AndroidSharedProjectManager
     private lateinit var sharedProjectsLoader: SharedProjectsLoader.Impl
 
-    private var initialProjectEvent: ProjectLoader.InitialProjectEvent<ProjectType.Private, PrivateOwnedProjectJson, PrivateOwnedProjectRecord>? =
-        null
+    private var initialProjectEvent: ProjectLoader.InitialProjectEvent<PrivateOwnedProjectRecord>? = null
     private var initialProjectsEvent: ProjectsLoader.InitialProjectsEvent<ProjectType.Shared, JsonWrapper, SharedOwnedProjectRecord>? =
         null
 

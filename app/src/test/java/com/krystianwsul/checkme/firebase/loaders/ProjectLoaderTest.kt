@@ -56,7 +56,7 @@ class ProjectLoaderTest {
     private fun acceptProject(privateProjectJson: PrivateOwnedProjectJson) =
         projectSnapshotRelay.accept(Snapshot(projectKey.key, privateProjectJson))
 
-    private lateinit var initialProjectEmissionChecker: EmissionChecker<ChangeWrapper<ProjectLoader.InitialProjectEvent<ProjectType.Private, PrivateOwnedProjectJson, PrivateOwnedProjectRecord>>>
+    private lateinit var initialProjectEmissionChecker: EmissionChecker<ChangeWrapper<ProjectLoader.InitialProjectEvent<PrivateOwnedProjectRecord>>>
     private lateinit var changeProjectEmissionChecker: EmissionChecker<ProjectLoader.ChangeProjectEvent<PrivateOwnedProjectRecord>>
 
     private val projectKey = ProjectKey.Private("userKey")

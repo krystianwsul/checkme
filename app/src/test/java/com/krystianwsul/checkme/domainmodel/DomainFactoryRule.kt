@@ -250,7 +250,6 @@ class DomainFactoryRule : TestRule {
         projectsFactory = ProjectsFactory(
             mockk(relaxed = true),
             ProjectLoader.InitialProjectEvent(
-                mockk(relaxed = true),
                 PrivateOwnedProjectRecord(
                     deviceDbInfo.userInfo,
                     PrivateOwnedProjectJson(

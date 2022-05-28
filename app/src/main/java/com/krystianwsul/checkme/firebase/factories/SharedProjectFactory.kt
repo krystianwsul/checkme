@@ -16,7 +16,7 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable
 
 class SharedProjectFactory(
     projectLoader: ProjectLoader<ProjectType.Shared, JsonWrapper, SharedOwnedProjectRecord>,
-    initialProjectEvent: ProjectLoader.InitialProjectEvent<ProjectType.Shared, JsonWrapper, SharedOwnedProjectRecord>,
+    initialProjectEvent: ProjectLoader.InitialProjectEvent<SharedOwnedProjectRecord>,
     shownFactory: Instance.ShownFactory,
     domainDisposable: CompositeDisposable,
     rootTaskProvider: OwnedProject.RootTaskProvider,

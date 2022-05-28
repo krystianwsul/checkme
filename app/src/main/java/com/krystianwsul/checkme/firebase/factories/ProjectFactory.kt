@@ -18,15 +18,13 @@ import io.reactivex.rxjava3.kotlin.merge
 abstract class ProjectFactory<T : ProjectType, U : Parsable, RECORD : ProjectRecord<T>>(
 // U: Project JSON type
     projectLoader: ProjectLoader<T, U, RECORD>,
-    initialProjectEvent: ProjectLoader.InitialProjectEvent<T, U, RECORD>,
+    initialProjectEvent: ProjectLoader.InitialProjectEvent<RECORD>,
     protected val shownFactory: Instance.ShownFactory,
     domainDisposable: CompositeDisposable,
     private val rootTaskProvider: OwnedProject.RootTaskProvider,
     private val rootModelChangeManager: RootModelChangeManager,
     protected val deviceDbInfo: () -> DeviceDbInfo,
 ) {
-
-    private val projectManager = initialProjectEvent.projectManager
 
     var project: OwnedProject<T>
         private set

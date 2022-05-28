@@ -28,7 +28,7 @@ import io.reactivex.rxjava3.kotlin.merge
 
 class ProjectsFactory(
     private val privateProjectLoader: ProjectLoader<ProjectType.Private, PrivateOwnedProjectJson, PrivateOwnedProjectRecord>,
-    privateInitialProjectEvent: ProjectLoader.InitialProjectEvent<ProjectType.Private, PrivateOwnedProjectJson, PrivateOwnedProjectRecord>,
+    privateInitialProjectEvent: ProjectLoader.InitialProjectEvent<PrivateOwnedProjectRecord>,
     private val sharedProjectsLoader: SharedProjectsLoader,
     sharedInitialProjectsEvent: ProjectsLoader.InitialProjectsEvent<ProjectType.Shared, JsonWrapper, SharedOwnedProjectRecord>,
     now: ExactTimeStamp.Local,
@@ -52,7 +52,7 @@ class ProjectsFactory(
     private val sharedProjectFactoriesProperty = MapRelayProperty(
         sharedInitialProjectsEvent.initialProjectDatas
             .associate { (sharedProjectLoader, sharedInitialProjectEvent) ->
-                val projectKey = sharedInitialProjectEvent.projectRecord.projectKey as ProjectKey.Shared
+                val projectKey = sharedInitialProjectEvent.projectRecord.projectKey
 
                 projectKey to SharedProjectFactory(
                     sharedProjectLoader,
@@ -83,7 +83,6 @@ class ProjectsFactory(
                 val projectKey = addProjectEvent.initialProjectEvent
                     .projectRecord
                     .projectKey
-                    .let { it as ProjectKey.Shared }
 
                 check(!sharedProjectFactories.containsKey(projectKey))
 

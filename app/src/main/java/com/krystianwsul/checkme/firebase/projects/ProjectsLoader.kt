@@ -178,12 +178,12 @@ abstract class ProjectsLoader<TYPE : ProjectType, RECORD : ProjectRecord<out TYP
 
     data class InitialProjectData<TYPE : ProjectType, PARSABLE : Parsable, RECORD : ProjectRecord<out TYPE>>(
         val projectLoader: ProjectLoader<TYPE, PARSABLE, RECORD>,
-        val initialProjectEvent: ProjectLoader.InitialProjectEvent<TYPE, PARSABLE, RECORD>,
+        val initialProjectEvent: ProjectLoader.InitialProjectEvent<RECORD>,
     )
 
     class AddProjectEvent<TYPE : ProjectType, PARSABLE : Parsable, RECORD : ProjectRecord<out TYPE>>(
         val projectLoader: ProjectLoader<TYPE, PARSABLE, RECORD>,
-        val initialProjectEvent: ProjectLoader.InitialProjectEvent<TYPE, PARSABLE, RECORD>,
+        val initialProjectEvent: ProjectLoader.InitialProjectEvent<RECORD>,
     )
 
     class RemoveProjectsEvent<TYPE : ProjectType>(val projectKeys: Set<ProjectKey<out TYPE>>)

@@ -3,6 +3,7 @@ package com.krystianwsul.common.relevance
 import com.krystianwsul.checkme.firebase.dependencies.RootTaskKeyStore
 import com.krystianwsul.checkme.firebase.factories.OwnedProjectsFactory
 import com.krystianwsul.checkme.firebase.foreignProjects.ForeignProjectCoordinator
+import com.krystianwsul.checkme.firebase.foreignProjects.ForeignProjectsFactory
 import com.krystianwsul.checkme.firebase.managers.AndroidRootTasksManager
 import com.krystianwsul.checkme.firebase.roottask.RootTasksFactory
 import com.krystianwsul.checkme.firebase.roottask.RootTasksLoader
@@ -123,6 +124,8 @@ class IrrelevantTest {
 
         val projectsFactory = mockk<OwnedProjectsFactory> {
             every { getProjectForce(any()) } answers { project }
+            every { getProjectIfPresent(any<ProjectKey<*>>()) } answers { project }
+
             every { projects } answers { mapOf(project.projectKey to project) }
             every { projectTasks } returns listOf()
         }
@@ -130,6 +133,7 @@ class IrrelevantTest {
         val rootModelChangeManager = RootModelChangeManager()
 
         val foreignProjectCoordinator = mockk<ForeignProjectCoordinator>(relaxed = true)
+        val foreignProjectsFactory = mockk<ForeignProjectsFactory>(relaxed = true)
 
         val rootTasksFactory = RootTasksFactory(
             rootTaskLoader,
@@ -141,6 +145,7 @@ class IrrelevantTest {
             rootTaskKeySource,
             rootModelChangeManager,
             foreignProjectCoordinator,
+            foreignProjectsFactory,
         ) { projectsFactory }
 
         project = PrivateOwnedProject(projectRecord, mockk(), rootTasksFactory, rootModelChangeManager)
@@ -661,6 +666,7 @@ class IrrelevantTest {
             }
 
             every { getProject(any()) } answers { project }
+            every { getProjectIfPresent(any()) } answers { project }
 
             every { getTaskHierarchiesByParentTaskKey(any()) } returns setOf()
 

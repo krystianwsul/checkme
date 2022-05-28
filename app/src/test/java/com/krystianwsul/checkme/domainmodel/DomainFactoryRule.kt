@@ -15,6 +15,7 @@ import com.krystianwsul.checkme.firebase.factories.FriendsFactory
 import com.krystianwsul.checkme.firebase.factories.MyUserFactory
 import com.krystianwsul.checkme.firebase.factories.OwnedProjectsFactory
 import com.krystianwsul.checkme.firebase.foreignProjects.ForeignProjectCoordinator
+import com.krystianwsul.checkme.firebase.foreignProjects.ForeignProjectsFactory
 import com.krystianwsul.checkme.firebase.loaders.ProjectLoader
 import com.krystianwsul.checkme.firebase.loaders.SharedProjectsLoader
 import com.krystianwsul.checkme.firebase.loaders.mockBase64
@@ -222,6 +223,7 @@ class DomainFactoryRule : TestRule {
         }
 
         val foreignProjectCoordinator = mockk<ForeignProjectCoordinator>(relaxed = true)
+        val foreignProjectsFactory = mockk<ForeignProjectsFactory>(relaxed = true)
 
         val rootTaskFactory = RootTasksFactory(
             rootTasksLoader,
@@ -231,6 +233,7 @@ class DomainFactoryRule : TestRule {
             rootTaskKeySource,
             rootModelChangeManager,
             foreignProjectCoordinator,
+            foreignProjectsFactory,
         ) { projectsFactory }
 
         val sharedProjectsLoader = SharedProjectsLoader.Impl(
@@ -288,6 +291,7 @@ class DomainFactoryRule : TestRule {
             rootTaskFactory,
             mockk(relaxed = true),
             mockk(relaxed = true),
+            foreignProjectsFactory,
         ) { TestDomainUpdater(it, ExactTimeStamp.Local.now) }
     }
 

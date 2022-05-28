@@ -4,6 +4,7 @@ import com.jakewharton.rxrelay3.PublishRelay
 import com.krystianwsul.checkme.domainmodel.DomainFactoryRule
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
+import com.krystianwsul.checkme.firebase.foreignProjects.ForeignProjectsFactory
 import com.krystianwsul.checkme.firebase.loaders.*
 import com.krystianwsul.checkme.firebase.managers.AndroidPrivateProjectManager
 import com.krystianwsul.checkme.firebase.roottask.RootTasksFactory
@@ -111,6 +112,7 @@ class ProjectFactoryTest {
             rootTasksFactory: RootTasksFactory,
             notificationStorage: FactoryProvider.NotificationStorage,
             domainListenerManager: DomainListenerManager,
+            foreignProjectsFactory: ForeignProjectsFactory,
         ): FactoryProvider.Domain {
             TODO("Not yet implemented")
         }

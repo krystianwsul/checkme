@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.firebase.roottask
 
 import com.krystianwsul.checkme.firebase.foreignProjects.ForeignProjectCoordinator
+import com.krystianwsul.checkme.firebase.foreignProjects.ForeignProjectsFactory
 import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
 import io.mockk.every
 import io.mockk.mockk
@@ -29,6 +30,7 @@ class RootTasksFactoryInitialTest {
         val rootModelChangeManager = RootModelChangeManager()
 
         val foreignProjectCoordinator = mockk<ForeignProjectCoordinator>(relaxed = true)
+        val foreignProjectsFactory = mockk<ForeignProjectsFactory>(relaxed = true)
 
         val rootTasksFactory = RootTasksFactory(
             rootTasksLoader,
@@ -38,6 +40,7 @@ class RootTasksFactoryInitialTest {
             mockk(),
             rootModelChangeManager,
             foreignProjectCoordinator,
+            foreignProjectsFactory,
             mockk(),
         )
 

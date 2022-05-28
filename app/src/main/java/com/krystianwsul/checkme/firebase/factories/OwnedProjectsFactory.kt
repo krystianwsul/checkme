@@ -200,9 +200,9 @@ class OwnedProjectsFactory(
 
     fun getSharedProjectForce(projectKey: ProjectKey.Shared) = getProjectIfPresent(projectKey) as SharedOwnedProject
 
-    fun getProjectIfPresent(projectId: String) = projects.entries
+    fun getProjectByIdIfPresent(projectId: String) = projects.entries
         .singleOrNull { it.key.key == projectId }
         ?.value
 
-    fun getProjectForce(projectId: String) = getProjectIfPresent(projectId)!!
+    fun getProjectForce(projectId: String) = getProjectByIdIfPresent(projectId)!!
 }

@@ -8,6 +8,7 @@ import com.krystianwsul.checkme.firebase.dependencies.RootTaskKeyStore
 import com.krystianwsul.checkme.firebase.dependencies.UserKeyStore
 import com.krystianwsul.checkme.firebase.factories.OwnedProjectsFactory
 import com.krystianwsul.checkme.firebase.foreignProjects.ForeignProjectCoordinator
+import com.krystianwsul.checkme.firebase.foreignProjects.ForeignProjectsFactory
 import com.krystianwsul.checkme.firebase.managers.AndroidPrivateProjectManager
 import com.krystianwsul.checkme.firebase.managers.AndroidRootTasksManager
 import com.krystianwsul.checkme.firebase.managers.AndroidSharedProjectManager
@@ -175,6 +176,7 @@ class ChangeTypeSourceTest {
         val existingInstanceChangeManager = RootModelChangeManager()
 
         val foreignProjectCoordinator = mockk<ForeignProjectCoordinator>(relaxed = true)
+        val foreignProjectsFactory = mockk<ForeignProjectsFactory>(relaxed = true)
 
         rootTasksFactory = RootTasksFactory(
             rootTasksLoader,
@@ -184,6 +186,7 @@ class ChangeTypeSourceTest {
             rootTaskKeySource,
             existingInstanceChangeManager,
             foreignProjectCoordinator,
+            foreignProjectsFactory,
         ) { projectsFactory }
 
         val privateProjectManager = AndroidPrivateProjectManager(DomainFactoryRule.deviceDbInfo.userInfo)
@@ -249,6 +252,7 @@ class ChangeTypeSourceTest {
             Single.never(),
             rootTasksFactory,
             domainDisposable,
+            foreignProjectsFactory,
         )
 
         projectEmissionChecker =

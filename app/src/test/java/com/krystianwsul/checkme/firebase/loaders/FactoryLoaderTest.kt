@@ -8,6 +8,7 @@ import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
 import com.krystianwsul.checkme.firebase.factories.FriendsFactory
 import com.krystianwsul.checkme.firebase.factories.MyUserFactory
 import com.krystianwsul.checkme.firebase.factories.OwnedProjectsFactory
+import com.krystianwsul.checkme.firebase.foreignProjects.ForeignProjectsFactory
 import com.krystianwsul.checkme.firebase.roottask.RootTasksFactory
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
@@ -156,6 +157,7 @@ class FactoryLoaderTest {
             rootTasksFactory: RootTasksFactory,
             notificationStorage: FactoryProvider.NotificationStorage,
             domainListenerManager: DomainListenerManager,
+            foreignProjectsFactory: ForeignProjectsFactory,
         ) = domain
     }
 

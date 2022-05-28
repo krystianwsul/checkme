@@ -1,7 +1,7 @@
 package com.krystianwsul.common.relevance
 
 import com.krystianwsul.checkme.firebase.dependencies.RootTaskKeyStore
-import com.krystianwsul.checkme.firebase.factories.ProjectsFactory
+import com.krystianwsul.checkme.firebase.factories.OwnedProjectsFactory
 import com.krystianwsul.checkme.firebase.foreignProjects.ForeignProjectCoordinator
 import com.krystianwsul.checkme.firebase.managers.AndroidRootTasksManager
 import com.krystianwsul.checkme.firebase.roottask.RootTasksFactory
@@ -121,7 +121,7 @@ class IrrelevantTest {
 
         lateinit var project: PrivateOwnedProject
 
-        val projectsFactory = mockk<ProjectsFactory> {
+        val projectsFactory = mockk<OwnedProjectsFactory> {
             every { getProjectForce(any()) } answers { project }
             every { projects } answers { mapOf(project.projectKey to project) }
             every { projectTasks } returns listOf()

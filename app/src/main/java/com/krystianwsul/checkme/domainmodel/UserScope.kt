@@ -5,7 +5,7 @@ import com.krystianwsul.checkme.domainmodel.extensions.updateDeviceDbInfo
 import com.krystianwsul.checkme.firebase.database.TaskPriorityMapperQueue
 import com.krystianwsul.checkme.firebase.factories.FriendsFactory
 import com.krystianwsul.checkme.firebase.factories.MyUserFactory
-import com.krystianwsul.checkme.firebase.factories.ProjectsFactory
+import com.krystianwsul.checkme.firebase.factories.OwnedProjectsFactory
 import com.krystianwsul.checkme.firebase.loaders.ChangeTypeSource
 import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.checkme.firebase.roottask.RootTasksFactory
@@ -26,7 +26,7 @@ class UserScope(
     rootTasksFactory: RootTasksFactory,
     changeTypeSource: ChangeTypeSource,
     val myUserFactory: MyUserFactory,
-    projectsFactorySingle: Single<ProjectsFactory>,
+    projectsFactorySingle: Single<OwnedProjectsFactory>,
     friendsFactorySingle: Single<FriendsFactory>,
     notificationStorageSingle: Single<FactoryProvider.NotificationStorage>,
     shownFactorySingle: Single<Instance.ShownFactory>,

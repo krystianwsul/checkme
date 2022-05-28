@@ -10,7 +10,7 @@ import com.krystianwsul.checkme.firebase.dependencies.RootTaskKeyStore
 import com.krystianwsul.checkme.firebase.dependencies.UserKeyStore
 import com.krystianwsul.checkme.firebase.factories.FriendsFactory
 import com.krystianwsul.checkme.firebase.factories.MyUserFactory
-import com.krystianwsul.checkme.firebase.factories.ProjectsFactory
+import com.krystianwsul.checkme.firebase.factories.OwnedProjectsFactory
 import com.krystianwsul.checkme.firebase.foreignProjects.ForeignProjectCoordinator
 import com.krystianwsul.checkme.firebase.foreignProjects.ForeignProjectsLoader
 import com.krystianwsul.checkme.firebase.foreignProjects.ForeignProjectsManager
@@ -133,7 +133,7 @@ class FactoryLoader(
                         )
 
                         // this is hacky as fuck, but I'll take my chances
-                        lateinit var projectsFactorySingle: Single<ProjectsFactory>
+                        lateinit var projectsFactorySingle: Single<OwnedProjectsFactory>
 
                         /*
                         todo I should really add a class like RootTasksStorage or something, that both rootTasksFactory
@@ -199,7 +199,7 @@ class FactoryLoader(
                             sharedProjectsLoader.initialProjectsEvent,
                             shownFactorySingle,
                         ) { initialPrivateProjectEvent, initialSharedProjectsEvent, shownFactory ->
-                            ProjectsFactory(
+                            OwnedProjectsFactory(
                                 privateProjectLoader,
                                 initialPrivateProjectEvent,
                                 sharedProjectsLoader,

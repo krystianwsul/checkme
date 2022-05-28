@@ -26,7 +26,7 @@ import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.merge
 
-class ProjectsFactory(
+class OwnedProjectsFactory(
     private val privateProjectLoader: ProjectLoader<ProjectType.Private, PrivateOwnedProjectJson, PrivateOwnedProjectRecord>,
     privateInitialProjectEvent: ProjectLoader.InitialProjectEvent<PrivateOwnedProjectRecord>,
     private val sharedProjectsLoader: SharedProjectsLoader,

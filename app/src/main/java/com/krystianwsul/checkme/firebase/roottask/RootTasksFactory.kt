@@ -4,7 +4,7 @@ import com.jakewharton.rxrelay3.BehaviorRelay
 import com.krystianwsul.checkme.domainmodel.notifications.Notifier
 import com.krystianwsul.checkme.firebase.dependencies.RootTaskKeyStore
 import com.krystianwsul.checkme.firebase.dependencies.UserKeyStore
-import com.krystianwsul.checkme.firebase.factories.ProjectsFactory
+import com.krystianwsul.checkme.firebase.factories.OwnedProjectsFactory
 import com.krystianwsul.checkme.firebase.foreignProjects.ForeignProjectCoordinator
 import com.krystianwsul.checkme.utils.filterNotNull
 import com.krystianwsul.checkme.utils.mapNotNull
@@ -34,7 +34,7 @@ class RootTasksFactory(
     private val rootTaskKeyStore: RootTaskKeyStore,
     override val rootModelChangeManager: RootModelChangeManager,
     private val foreignProjectCoordinator: ForeignProjectCoordinator,
-    private val getProjectsFactory: () -> ProjectsFactory,
+    private val getProjectsFactory: () -> OwnedProjectsFactory,
 ) : RootTask.Parent {
 
     companion object {

@@ -102,7 +102,7 @@ class ProjectFactoryTest {
         override fun newDomain(
             shownFactory: Instance.ShownFactory,
             myUserFactory: MyUserFactory,
-            projectsFactory: ProjectsFactory,
+            projectsFactory: OwnedProjectsFactory,
             friendsFactory: FriendsFactory,
             deviceDbInfo: DeviceDbInfo,
             startTime: ExactTimeStamp.Local,

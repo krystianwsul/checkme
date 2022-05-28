@@ -2,7 +2,7 @@ package com.krystianwsul.checkme.firebase.loaders
 
 import com.krystianwsul.checkme.firebase.factories.FriendsFactory
 import com.krystianwsul.checkme.firebase.factories.MyUserFactory
-import com.krystianwsul.checkme.firebase.factories.ProjectsFactory
+import com.krystianwsul.checkme.firebase.factories.OwnedProjectsFactory
 import com.krystianwsul.checkme.firebase.roottask.RootTasksFactory
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.checkme.utils.publishImmediate
@@ -13,7 +13,7 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.merge
 
 class ChangeTypeSource(
-    projectsFactorySingle: Single<ProjectsFactory>,
+    projectsFactorySingle: Single<OwnedProjectsFactory>,
     friendsFactorySingle: Single<FriendsFactory>,
     userDatabaseRx: DatabaseRx<Snapshot<UserWrapper>>,
     userFactorySingle: Single<MyUserFactory>,

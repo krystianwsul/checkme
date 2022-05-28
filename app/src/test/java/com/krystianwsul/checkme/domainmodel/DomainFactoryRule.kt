@@ -13,7 +13,7 @@ import com.krystianwsul.checkme.firebase.database.TaskPriorityMapperQueue
 import com.krystianwsul.checkme.firebase.dependencies.RootTaskKeyStore
 import com.krystianwsul.checkme.firebase.factories.FriendsFactory
 import com.krystianwsul.checkme.firebase.factories.MyUserFactory
-import com.krystianwsul.checkme.firebase.factories.ProjectsFactory
+import com.krystianwsul.checkme.firebase.factories.OwnedProjectsFactory
 import com.krystianwsul.checkme.firebase.foreignProjects.ForeignProjectCoordinator
 import com.krystianwsul.checkme.firebase.loaders.ProjectLoader
 import com.krystianwsul.checkme.firebase.loaders.SharedProjectsLoader
@@ -192,7 +192,7 @@ class DomainFactoryRule : TestRule {
             rootModelChangeManager,
         )
 
-        lateinit var projectsFactory: ProjectsFactory
+        lateinit var projectsFactory: OwnedProjectsFactory
 
         val rootTaskKeySource = mockk<RootTaskKeyStore>(relaxed = true) {
             every { rootTaskKeysObservable } returns Observable.just(emptySet())
@@ -247,7 +247,7 @@ class DomainFactoryRule : TestRule {
             rootTaskKeySource,
         )
 
-        projectsFactory = ProjectsFactory(
+        projectsFactory = OwnedProjectsFactory(
             mockk(relaxed = true),
             ProjectLoader.InitialProjectEvent(
                 PrivateOwnedProjectRecord(

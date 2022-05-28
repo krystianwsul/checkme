@@ -64,7 +64,7 @@ class ProjectsFactoryTest {
     private var initialProjectsEvent: ProjectsLoader.InitialProjectsEvent<ProjectType.Shared, JsonWrapper, SharedOwnedProjectRecord>? =
         null
 
-    private var _projectsFactory: ProjectsFactory? = null
+    private var _projectsFactory: OwnedProjectsFactory? = null
     private val projectsFactory get() = _projectsFactory!!
 
     private var _emissionChecker: EmissionChecker<Unit>? = null
@@ -72,7 +72,7 @@ class ProjectsFactoryTest {
 
     private val userInfo = UserInfo("email", "name", "uid")
 
-    private fun ProjectsFactory.save() = save(mockk(relaxed = true))
+    private fun OwnedProjectsFactory.save() = save(mockk(relaxed = true))
 
     @Before
     fun before() {
@@ -132,7 +132,7 @@ class ProjectsFactoryTest {
     private fun initProjectsFactory() {
         val existingInstanceChangeManager = RootModelChangeManager()
 
-        _projectsFactory = ProjectsFactory(
+        _projectsFactory = OwnedProjectsFactory(
             privateProjectLoader,
             initialProjectEvent!!,
             sharedProjectsLoader,

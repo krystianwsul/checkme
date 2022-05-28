@@ -11,7 +11,7 @@ import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
 import com.krystianwsul.checkme.firebase.AndroidDatabaseWrapper
 import com.krystianwsul.checkme.firebase.factories.FriendsFactory
 import com.krystianwsul.checkme.firebase.factories.MyUserFactory
-import com.krystianwsul.checkme.firebase.factories.ProjectsFactory
+import com.krystianwsul.checkme.firebase.factories.OwnedProjectsFactory
 import com.krystianwsul.checkme.firebase.roottask.RootTasksFactory
 import com.krystianwsul.checkme.firebase.roottask.RootTasksLoader
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
@@ -65,7 +65,7 @@ interface FactoryProvider {
     fun newDomain(
         shownFactory: Instance.ShownFactory,
         myUserFactory: MyUserFactory,
-        projectsFactory: ProjectsFactory,
+        projectsFactory: OwnedProjectsFactory,
         friendsFactory: FriendsFactory,
         deviceDbInfo: DeviceDbInfo,
         startTime: ExactTimeStamp.Local,
@@ -129,7 +129,7 @@ interface FactoryProvider {
         override fun newDomain(
             shownFactory: Instance.ShownFactory,
             myUserFactory: MyUserFactory,
-            projectsFactory: ProjectsFactory,
+            projectsFactory: OwnedProjectsFactory,
             friendsFactory: FriendsFactory,
             deviceDbInfo: DeviceDbInfo,
             startTime: ExactTimeStamp.Local,

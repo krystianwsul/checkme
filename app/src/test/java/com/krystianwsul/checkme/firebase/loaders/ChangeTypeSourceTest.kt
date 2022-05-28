@@ -6,7 +6,7 @@ import com.krystianwsul.checkme.firebase.UserCustomTimeProviderSource
 import com.krystianwsul.checkme.firebase.dependencies.RequestMerger
 import com.krystianwsul.checkme.firebase.dependencies.RootTaskKeyStore
 import com.krystianwsul.checkme.firebase.dependencies.UserKeyStore
-import com.krystianwsul.checkme.firebase.factories.ProjectsFactory
+import com.krystianwsul.checkme.firebase.factories.OwnedProjectsFactory
 import com.krystianwsul.checkme.firebase.foreignProjects.ForeignProjectCoordinator
 import com.krystianwsul.checkme.firebase.managers.AndroidPrivateProjectManager
 import com.krystianwsul.checkme.firebase.managers.AndroidRootTasksManager
@@ -97,7 +97,7 @@ class ChangeTypeSourceTest {
     private lateinit var rootTasksLoaderProvider: TestRootTasksLoaderProvider
 
     private lateinit var rootTasksLoader: RootTasksLoader
-    private lateinit var projectsFactory: ProjectsFactory
+    private lateinit var projectsFactory: OwnedProjectsFactory
 
     private lateinit var sharedProjectKeysRelay: PublishRelay<Set<ProjectKey.Shared>>
     private lateinit var sharedProjectSnapshotRelay: PublishRelay<Snapshot<JsonWrapper>>
@@ -229,7 +229,7 @@ class ChangeTypeSourceTest {
             },
             sharedProjectsLoader.initialProjectsEvent,
         ) { initialPrivateProjectEvent, initialSharedProjectsEvent ->
-            ProjectsFactory(
+            OwnedProjectsFactory(
                 privateProjectLoader,
                 initialPrivateProjectEvent,
                 sharedProjectsLoader,

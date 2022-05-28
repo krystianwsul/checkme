@@ -18,7 +18,7 @@ import com.krystianwsul.checkme.domainmodel.update.CompletableDomainUpdate
 import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
 import com.krystianwsul.checkme.firebase.factories.FriendsFactory
 import com.krystianwsul.checkme.firebase.factories.MyUserFactory
-import com.krystianwsul.checkme.firebase.factories.ProjectsFactory
+import com.krystianwsul.checkme.firebase.factories.OwnedProjectsFactory
 import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.checkme.firebase.roottask.RootTasksFactory
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
@@ -54,7 +54,7 @@ import java.util.concurrent.TimeUnit
 class DomainFactory(
     val shownFactory: Instance.ShownFactory,
     val myUserFactory: MyUserFactory,
-    val projectsFactory: ProjectsFactory,
+    val projectsFactory: OwnedProjectsFactory,
     val friendsFactory: FriendsFactory,
     _deviceDbInfo: DeviceDbInfo,
     private val startTime: ExactTimeStamp.Local,

@@ -6,6 +6,7 @@ import com.krystianwsul.checkme.firebase.dependencies.RootTaskKeyStore
 import com.krystianwsul.checkme.firebase.dependencies.UserKeyStore
 import com.krystianwsul.checkme.firebase.factories.OwnedProjectsFactory
 import com.krystianwsul.checkme.firebase.foreignProjects.ForeignProjectCoordinator
+import com.krystianwsul.checkme.firebase.foreignProjects.ForeignProjectsFactory
 import com.krystianwsul.checkme.utils.filterNotNull
 import com.krystianwsul.checkme.utils.mapNotNull
 import com.krystianwsul.checkme.utils.publishImmediate
@@ -14,6 +15,7 @@ import com.krystianwsul.common.firebase.json.tasks.RootTaskJson
 import com.krystianwsul.common.firebase.json.tasks.TaskJson
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
+import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.task.RootTask
 import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.firebase.models.taskhierarchy.TaskHierarchy
@@ -34,6 +36,7 @@ class RootTasksFactory(
     private val rootTaskKeyStore: RootTaskKeyStore,
     override val rootModelChangeManager: RootModelChangeManager,
     private val foreignProjectCoordinator: ForeignProjectCoordinator,
+    private val foreignProjectsFactory: ForeignProjectsFactory,
     private val getProjectsFactory: () -> OwnedProjectsFactory,
 ) : RootTask.Parent {
 
@@ -117,6 +120,10 @@ class RootTasksFactory(
     override fun tryGetRootTask(rootTaskKey: TaskKey.Root) = rootTasks[rootTaskKey]
 
     override fun getProject(projectId: String) = getProjectsFactory().getProjectForce(projectId)
+
+    override fun getProjectIfPresent(projectKey: ProjectKey<*>): Project<*>? {
+        return getProjectsFactory().getProjectIfPresent(projectKey) ?: foreignProjectsFactory.getProjectIfPresent(projectKey)
+    }
 
     override fun getTask(taskKey: TaskKey): Task {
         return when (taskKey) {

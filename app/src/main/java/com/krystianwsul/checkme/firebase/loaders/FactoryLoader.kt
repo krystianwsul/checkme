@@ -143,6 +143,16 @@ class FactoryLoader(
                                 rootTasksFactory.rootTasks.values
                             }
 
+                        val foreignProjectsLoader = ForeignProjectsLoader(
+                            foreignProjectCoordinator.foreignProjectKeysObservable,
+                            ForeignProjectsManager(),
+                            domainDisposable,
+                            ForeignProjectsProvider(factoryProvider),
+                            userCustomTimeProviderSource,
+                        )
+
+                        val foreignProjectsFactory = ForeignProjectsFactory(foreignProjectsLoader, domainDisposable)
+
                         rootTasksFactory = RootTasksFactory(
                             rootTasksLoader,
                             userKeyStore,
@@ -151,6 +161,7 @@ class FactoryLoader(
                             rootTaskKeySource,
                             rootModelChangeManager,
                             foreignProjectCoordinator,
+                            foreignProjectsFactory,
                         ) { projectsFactorySingle.getCurrentValue() }
 
                         RootTasksFactory.instanceRelay.accept(NullableWrapper(rootTasksFactory))
@@ -210,17 +221,6 @@ class FactoryLoader(
                             )
                         }.cacheImmediate()
 
-                        val foreignProjectsLoader = ForeignProjectsLoader(
-                            foreignProjectCoordinator.foreignProjectKeysObservable,
-                            ForeignProjectsManager(),
-                            domainDisposable,
-                            ForeignProjectsProvider(factoryProvider),
-                            userCustomTimeProviderSource,
-                        )
-
-                        // todo projectKey
-                        val foreignProjectsFactory = ForeignProjectsFactory(foreignProjectsLoader, domainDisposable)
-
                         val changeTypeSource = ChangeTypeSource(
                             projectsFactorySingle,
                             friendsFactorySingle,
@@ -244,6 +244,7 @@ class FactoryLoader(
                                     tokenObservable,
                                     startTime,
                                     domainDisposable,
+                                    foreignProjectsFactory,
                                     ::getDeviceDbInfo,
                                 )
                             }

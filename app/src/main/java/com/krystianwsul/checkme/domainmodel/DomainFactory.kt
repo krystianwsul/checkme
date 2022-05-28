@@ -19,6 +19,7 @@ import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
 import com.krystianwsul.checkme.firebase.factories.FriendsFactory
 import com.krystianwsul.checkme.firebase.factories.MyUserFactory
 import com.krystianwsul.checkme.firebase.factories.OwnedProjectsFactory
+import com.krystianwsul.checkme.firebase.foreignProjects.ForeignProjectsFactory
 import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.checkme.firebase.roottask.RootTasksFactory
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
@@ -64,6 +65,7 @@ class DomainFactory(
     val rootTasksFactory: RootTasksFactory,
     val notificationStorage: FactoryProvider.NotificationStorage,
     val domainListenerManager: DomainListenerManager,
+    val foreignProjectsFactory: ForeignProjectsFactory,
     private val getDomainUpdater: (DomainFactory) -> DomainUpdater,
 ) :
     FactoryProvider.Domain,

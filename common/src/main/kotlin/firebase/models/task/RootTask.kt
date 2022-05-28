@@ -11,6 +11,7 @@ import com.krystianwsul.common.firebase.models.interval.Type
 import com.krystianwsul.common.firebase.models.noscheduleorparent.NoScheduleOrParent
 import com.krystianwsul.common.firebase.models.noscheduleorparent.RootNoScheduleOrParent
 import com.krystianwsul.common.firebase.models.project.OwnedProject
+import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.schedule.*
 import com.krystianwsul.common.firebase.models.taskhierarchy.NestedTaskHierarchy
 import com.krystianwsul.common.firebase.models.taskhierarchy.ParentTaskDelegate
@@ -577,6 +578,8 @@ class RootTask private constructor(
         fun deleteRootTask(task: RootTask)
 
         fun getProject(projectId: String): OwnedProject<*>
+
+        fun getProjectIfPresent(projectKey: ProjectKey<*>): Project<*>?
 
         override fun createTask(
             now: ExactTimeStamp.Local,

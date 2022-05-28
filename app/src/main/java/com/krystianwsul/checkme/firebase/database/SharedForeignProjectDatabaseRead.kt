@@ -12,7 +12,7 @@ class SharedForeignProjectDatabaseRead(private val projectKey: ProjectKey.Shared
 
     override val kClass = SharedForeignProjectJson::class
 
-    override fun pathToPaperKey(path: Path) = "foreign/" + super.pathToPaperKey(path)
+    override fun pathToPaperKey(path: Path) = "foreign-" + super.pathToPaperKey(path)
 
     override fun DatabaseReference.getQuery() =
         child("${DatabaseWrapper.RECORDS_KEY}/${projectKey.key}/${JsonWrapper.PROJECT_JSON}")

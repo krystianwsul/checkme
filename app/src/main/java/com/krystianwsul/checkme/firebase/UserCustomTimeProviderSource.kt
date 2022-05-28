@@ -4,7 +4,6 @@ import com.krystianwsul.checkme.firebase.factories.FriendsFactory
 import com.krystianwsul.checkme.firebase.factories.MyUserFactory
 import com.krystianwsul.checkme.firebase.loaders.FriendsLoader
 import com.krystianwsul.checkme.utils.getCurrentValue
-import com.krystianwsul.common.firebase.records.project.PrivateOwnedProjectRecord
 import com.krystianwsul.common.firebase.records.project.ProjectRecord
 import com.krystianwsul.common.firebase.records.project.SharedOwnedProjectRecord
 import com.krystianwsul.common.firebase.records.task.RootTaskRecord
@@ -38,15 +37,14 @@ interface UserCustomTimeProviderSource {
             val foreignUserKeys = getForeignUserKeys(customTimeKeys)
 
             return when (projectRecord) {
-                is PrivateOwnedProjectRecord -> {
+                is SharedOwnedProjectRecord -> getUserCustomTimeProvider(foreignUserKeys) {
+                    friendsLoader.userKeyStore.requestCustomTimeUsers(projectRecord.projectKey, foreignUserKeys)
+                }
+                else -> {
                     check(foreignUserKeys.isEmpty())
 
                     userCustomTimeProvider
                 }
-                is SharedOwnedProjectRecord -> getUserCustomTimeProvider(foreignUserKeys) {
-                    friendsLoader.userKeyStore.requestCustomTimeUsers(projectRecord.projectKey, foreignUserKeys)
-                }
-                else -> throw IllegalArgumentException()
             }
         }
 

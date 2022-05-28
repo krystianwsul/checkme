@@ -12,6 +12,7 @@ import com.krystianwsul.checkme.firebase.AndroidDatabaseWrapper
 import com.krystianwsul.checkme.firebase.factories.FriendsFactory
 import com.krystianwsul.checkme.firebase.factories.MyUserFactory
 import com.krystianwsul.checkme.firebase.factories.OwnedProjectsFactory
+import com.krystianwsul.checkme.firebase.foreignProjects.ForeignProjectsFactory
 import com.krystianwsul.checkme.firebase.roottask.RootTasksFactory
 import com.krystianwsul.checkme.firebase.roottask.RootTasksLoader
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
@@ -74,6 +75,7 @@ interface FactoryProvider {
         rootTasksFactory: RootTasksFactory,
         notificationStorage: NotificationStorage,
         domainListenerManager: DomainListenerManager,
+        foreignProjectsFactory: ForeignProjectsFactory,
     ): Domain
 
     interface Domain {
@@ -138,6 +140,7 @@ interface FactoryProvider {
             rootTasksFactory: RootTasksFactory,
             notificationStorage: NotificationStorage,
             domainListenerManager: DomainListenerManager,
+            foreignProjectsFactory: ForeignProjectsFactory,
         ) = DomainFactory(
             shownFactory,
             myUserFactory,
@@ -151,6 +154,7 @@ interface FactoryProvider {
             rootTasksFactory,
             notificationStorage,
             domainListenerManager,
+            foreignProjectsFactory,
         ) { AndroidDomainUpdater }
     }
 }

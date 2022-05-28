@@ -21,6 +21,18 @@ class RootTaskDependencyResolver(private val rootTask: RootTask) : Invalidatable
             val rootModelChangeManager = rootTask.rootModelChangeManager
             val parent = rootTask.parent
 
+            rootTask.projectKey?.let {
+                val project = rootTask.parent.getProjectIfPresent(it)
+
+                if (project != null) {
+                    val projectRemovable = project.clearableInvalidatableManager.addInvalidatable(invalidatableCache)
+                } else {
+                    return@invalidatableCache InvalidatableCache.ValueHolder(DirectDependencyState.Absent) {
+                        // todo projectKey add invalidatable for new foreign project loaded
+                    }
+                }
+            }
+
             val customTimeKeys = taskRecord.getUserCustomTimeKeys()
             val customTimes = customTimeKeys.mapNotNull(userCustomTimeProvider::tryGetUserCustomTime)
 

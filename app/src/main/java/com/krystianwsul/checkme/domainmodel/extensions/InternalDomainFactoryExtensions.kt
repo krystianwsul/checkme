@@ -16,10 +16,12 @@ fun DomainUpdater.fixStuff(source: String): Completable =
             .filter { it.notDeleted }
             .forEach { migratePrivateCustomTime(it, now) }
 
+        /* todo projectKey
         rootTasksFactory.rootTasks
             .values
             .filter { it.dependenciesLoaded }
             .forEach { it.fixProjectKeys() }
+         */
 
         DomainUpdater.Params(false, DomainListenerManager.NotificationType.All)
         }.perform(this)

@@ -6,6 +6,7 @@ import com.krystianwsul.checkme.firebase.database.TaskPriorityMapperQueue
 import com.krystianwsul.checkme.firebase.factories.FriendsFactory
 import com.krystianwsul.checkme.firebase.factories.MyUserFactory
 import com.krystianwsul.checkme.firebase.factories.OwnedProjectsFactory
+import com.krystianwsul.checkme.firebase.foreignProjects.ForeignProjectsFactory
 import com.krystianwsul.checkme.firebase.loaders.ChangeTypeSource
 import com.krystianwsul.checkme.firebase.loaders.FactoryProvider
 import com.krystianwsul.checkme.firebase.roottask.RootTasksFactory
@@ -33,6 +34,7 @@ class UserScope(
     tokenObservable: Observable<NullableWrapper<String>>,
     startTime: ExactTimeStamp.Local,
     domainDisposable: CompositeDisposable,
+    foreignProjectsFactory: ForeignProjectsFactory,
     getDeviceDbInfo: () -> DeviceDbInfo,
 ) {
 
@@ -69,6 +71,7 @@ class UserScope(
             rootTasksFactory,
             notificationStorage,
             domainListenerManager,
+            foreignProjectsFactory,
         )
     }.cacheImmediate(domainDisposable)
 

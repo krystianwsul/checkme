@@ -13,7 +13,7 @@ import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.utils.ProjectType
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 
-class SharedProjectFactory(
+class SharedOwnedProjectFactory(
     projectLoader: ProjectLoader<ProjectType.Shared, JsonWrapper, SharedOwnedProjectRecord>,
     initialProjectEvent: ProjectLoader.InitialProjectEvent<SharedOwnedProjectRecord>,
     private val shownFactory: Instance.ShownFactory,

@@ -52,7 +52,7 @@ class ProjectsFactory(
             .associate { (sharedProjectLoader, sharedInitialProjectEvent) ->
                 val projectKey = sharedInitialProjectEvent.projectRecord.projectKey
 
-                projectKey to SharedProjectFactory(
+                projectKey to SharedOwnedProjectFactory(
                     sharedProjectLoader,
                     sharedInitialProjectEvent,
                     shownFactory,
@@ -84,7 +84,7 @@ class ProjectsFactory(
 
                 check(!sharedProjectFactories.containsKey(projectKey))
 
-                val sharedProjectFactory = SharedProjectFactory(
+                val sharedProjectFactory = SharedOwnedProjectFactory(
                     addProjectEvent.projectLoader,
                     addProjectEvent.initialProjectEvent,
                     shownFactory,

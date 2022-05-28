@@ -22,6 +22,7 @@ abstract class ProjectFactory<TYPE : ProjectType, PARSABLE : Parsable, RECORD : 
     lateinit var remoteChanges: Observable<Unit>
         private set
 
+    // this is a separate function, because it must be called after the subclass initializers finish
     protected fun init() {
         project = newProject(initialProjectEvent.projectRecord, initialProjectEvent.userCustomTimeProvider)
         afterProjectChanged()

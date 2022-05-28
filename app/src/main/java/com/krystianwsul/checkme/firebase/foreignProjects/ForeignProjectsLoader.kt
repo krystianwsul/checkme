@@ -12,7 +12,7 @@ import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 
 class ForeignProjectsLoader(
-    projectKeysObservable: Observable<out Set<ProjectKey<ProjectType>>>,
+    projectKeysObservable: Observable<Set<ProjectKey<*>>>,
     projectsManager: ProjectsManager<ProjectType, ForeignProjectJson, ForeignProjectRecord<ProjectType>>,
     domainDisposable: CompositeDisposable,
     projectsProvider: ProjectsProvider<ProjectType, ForeignProjectJson>,
@@ -23,5 +23,5 @@ class ForeignProjectsLoader(
 
     override fun onProjectAddedOrUpdated(record: ForeignProjectRecord<ProjectType>) {}
 
-    override fun onProjectsRemoved(projectKeys: Set<ProjectKey<ProjectType>>) {}
+    override fun onProjectsRemoved(projectKeys: Set<ProjectKey<out ProjectType>>) {}
 }

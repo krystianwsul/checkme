@@ -50,7 +50,7 @@ interface SharedProjectsLoader {
             rootTaskKeyStore.onProjectAddedOrUpdated(record.projectKey, record.rootTaskParentDelegate.rootTaskKeys)
         }
 
-        override fun onProjectsRemoved(projectKeys: Set<ProjectKey<ProjectType.Shared>>) {
+        override fun onProjectsRemoved(projectKeys: Set<ProjectKey<out ProjectType.Shared>>) {
             rootTaskKeyStore.onProjectsRemoved(projectKeys)
             userKeyStore.onProjectsRemoved(projectKeys.map { it as ProjectKey.Shared }.toSet())
         }

@@ -40,7 +40,7 @@ interface ProjectLoader<T : ProjectType, U : Parsable, RECORD : ProjectRecord<T>
 
     // U: Project JSON type
     class Impl<T : ProjectType, U : Parsable, RECORD : ProjectRecord<T>>(
-        projectKey: ProjectKey<T>,
+        projectKey: ProjectKey<out T>,
         snapshotObservable: Observable<out Snapshot<out U>>,
         private val domainDisposable: CompositeDisposable,
         override val projectManager: ProjectProvider.ProjectManager<T, U, RECORD>,

@@ -22,7 +22,7 @@ import io.reactivex.rxjava3.kotlin.merge
 import io.reactivex.rxjava3.kotlin.plusAssign
 
 abstract class ProjectsLoader<TYPE : ProjectType, RECORD : ProjectRecord<TYPE>, PARSABLE : Parsable>(
-    projectKeysObservable: Observable<out Set<ProjectKey<TYPE>>>,
+    projectKeysObservable: Observable<out Set<ProjectKey<out TYPE>>>,
     private val projectsManager: ProjectsManager<TYPE, PARSABLE, RECORD>,
     private val domainDisposable: CompositeDisposable,
     private val projectsProvider: ProjectsProvider<TYPE, PARSABLE>,
@@ -32,11 +32,11 @@ abstract class ProjectsLoader<TYPE : ProjectType, RECORD : ProjectRecord<TYPE>, 
     protected data class AddedProjectData<RECORD : ProjectRecord<*>>(val initialProjectRecord: RECORD)
 
     protected val addedProjectDatasRelay =
-        ReplayRelay.create<ChangeWrapper<Map<ProjectKey<TYPE>, AddedProjectData<RECORD>?>>>()
+        ReplayRelay.create<ChangeWrapper<Map<ProjectKey<out TYPE>, AddedProjectData<RECORD>?>>>()
 
     init {
         projectKeysObservable.map {
-            ChangeWrapper<Map<ProjectKey<TYPE>, AddedProjectData<RECORD>?>>(
+            ChangeWrapper<Map<ProjectKey<out TYPE>, AddedProjectData<RECORD>?>>(
                 ChangeType.REMOTE,
                 it.associateWith { null },
             )
@@ -50,8 +50,8 @@ abstract class ProjectsLoader<TYPE : ProjectType, RECORD : ProjectRecord<TYPE>, 
 
     private data class ProjectData<TYPE : ProjectType, RECORD : ProjectRecord<TYPE>, PARSABLE : Parsable>(
         val userChangeType: ChangeType,
-        val projectKeys: Set<ProjectKey<TYPE>>,
-        val newMap: Map<ProjectKey<TYPE>, ProjectEntry<RECORD, PARSABLE>>,
+        val projectKeys: Set<ProjectKey<out TYPE>>,
+        val newMap: Map<ProjectKey<out TYPE>, ProjectEntry<RECORD, PARSABLE>>,
     )
 
     private data class ProjectEntry<RECORD : ProjectRecord<*>, PARSABLE : Parsable>(
@@ -82,9 +82,9 @@ abstract class ProjectsLoader<TYPE : ProjectType, RECORD : ProjectRecord<TYPE>, 
 
     private data class LoaderData<TYPE : ProjectType, PARSABLE : Parsable, RECORD : ProjectRecord<TYPE>>(
         val userChangeType: ChangeType,
-        val newLoaderMap: Map<ProjectKey<TYPE>, ProjectLoader<TYPE, PARSABLE, RECORD>>,
-        val addedLoaderEntries: Map<ProjectKey<TYPE>, ProjectLoader<TYPE, PARSABLE, RECORD>>,
-        val removedProjectKeys: Set<ProjectKey<TYPE>>,
+        val newLoaderMap: Map<ProjectKey<out TYPE>, ProjectLoader<TYPE, PARSABLE, RECORD>>,
+        val addedLoaderEntries: Map<ProjectKey<out TYPE>, ProjectLoader<TYPE, PARSABLE, RECORD>>,
+        val removedProjectKeys: Set<ProjectKey<out TYPE>>,
     )
 
     private val projectLoadersObservable = projectDatabaseRxObservable.processChanges(
@@ -155,7 +155,7 @@ abstract class ProjectsLoader<TYPE : ProjectType, RECORD : ProjectRecord<TYPE>, 
 
     protected abstract fun onProjectAddedOrUpdated(record: RECORD)
 
-    protected abstract fun onProjectsRemoved(projectKeys: Set<ProjectKey<TYPE>>)
+    protected abstract fun onProjectsRemoved(projectKeys: Set<ProjectKey<out TYPE>>)
 
     val removeProjectEvents = projectLoadersObservable.filter { it.removedProjectKeys.isNotEmpty() }
         .map {
@@ -186,5 +186,5 @@ abstract class ProjectsLoader<TYPE : ProjectType, RECORD : ProjectRecord<TYPE>, 
         val initialProjectEvent: ProjectLoader.InitialProjectEvent<TYPE, PARSABLE, RECORD>,
     )
 
-    class RemoveProjectsEvent<TYPE : ProjectType>(val projectKeys: Set<ProjectKey<TYPE>>)
+    class RemoveProjectsEvent<TYPE : ProjectType>(val projectKeys: Set<ProjectKey<out TYPE>>)
 }

@@ -3,22 +3,20 @@ package com.krystianwsul.checkme.firebase.factories
 import com.krystianwsul.checkme.firebase.loaders.ProjectLoader
 import com.krystianwsul.checkme.utils.publishImmediate
 import com.krystianwsul.common.firebase.json.Parsable
-import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
-import com.krystianwsul.common.firebase.models.project.OwnedProject
+import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.records.project.ProjectRecord
 import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.utils.ProjectType
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 
-abstract class ProjectFactory<TYPE : ProjectType, PARCELABLE : Parsable, RECORD : ProjectRecord<TYPE>>(
-    private val projectLoader: ProjectLoader<TYPE, PARCELABLE, RECORD>,
+abstract class ProjectFactory<TYPE : ProjectType, PARSABLE : Parsable, RECORD : ProjectRecord<TYPE>>(
+    private val projectLoader: ProjectLoader<TYPE, PARSABLE, RECORD>,
     private val initialProjectEvent: ProjectLoader.InitialProjectEvent<RECORD>,
     private val domainDisposable: CompositeDisposable,
-    protected val rootModelChangeManager: RootModelChangeManager,
 ) {
 
-    lateinit var project: OwnedProject<TYPE>
+    lateinit var project: Project<TYPE>
         private set
 
     lateinit var remoteChanges: Observable<Unit>
@@ -26,16 +24,14 @@ abstract class ProjectFactory<TYPE : ProjectType, PARCELABLE : Parsable, RECORD 
 
     protected fun init() {
         project = newProject(initialProjectEvent.projectRecord, initialProjectEvent.userCustomTimeProvider)
-
-        rootModelChangeManager.invalidateProjects()
+        afterProjectChanged()
 
         remoteChanges = projectLoader.changeProjectEvents
             .doOnNext {
                 project.clearableInvalidatableManager.clear()
 
-                rootModelChangeManager.invalidateProjects()
-
                 project = newProject(it.projectRecord, it.userCustomTimeProvider)
+                afterProjectChanged()
             }
             .map { }
             .publishImmediate(domainDisposable)
@@ -44,5 +40,7 @@ abstract class ProjectFactory<TYPE : ProjectType, PARCELABLE : Parsable, RECORD 
     protected abstract fun newProject(
         projectRecord: RECORD,
         userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
-    ): OwnedProject<TYPE>
+    ): Project<TYPE>
+
+    protected abstract fun afterProjectChanged()
 }

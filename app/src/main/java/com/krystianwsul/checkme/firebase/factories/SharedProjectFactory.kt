@@ -21,7 +21,7 @@ class SharedProjectFactory(
     private val rootTaskProvider: OwnedProject.RootTaskProvider,
     rootModelChangeManager: RootModelChangeManager,
     private val deviceDbInfo: () -> DeviceDbInfo,
-) : ProjectFactory<ProjectType.Shared, JsonWrapper, SharedOwnedProjectRecord>(
+) : OwnedProjectFactory<ProjectType.Shared, JsonWrapper, SharedOwnedProjectRecord>(
     projectLoader,
     initialProjectEvent,
     domainDisposable,

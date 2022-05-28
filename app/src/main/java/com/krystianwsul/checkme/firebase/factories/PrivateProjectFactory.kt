@@ -16,7 +16,7 @@ class PrivateProjectFactory(
     domainDisposable: CompositeDisposable,
     private val rootTaskProvider: OwnedProject.RootTaskProvider,
     rootModelChangeManager: RootModelChangeManager,
-) : ProjectFactory<ProjectType.Private, PrivateOwnedProjectJson, PrivateOwnedProjectRecord>(
+) : OwnedProjectFactory<ProjectType.Private, PrivateOwnedProjectJson, PrivateOwnedProjectRecord>(
     projectLoader,
     initialProjectEvent,
     domainDisposable,

@@ -42,11 +42,9 @@ class ProjectsFactory(
     private val privateProjectFactory = PrivateProjectFactory(
         privateProjectLoader,
         privateInitialProjectEvent,
-        shownFactory,
         domainDisposable,
         rootTaskProvider,
         rootModelChangeManager,
-        deviceDbInfo,
     )
 
     private val sharedProjectFactoriesProperty = MapRelayProperty(

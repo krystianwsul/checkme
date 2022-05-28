@@ -2,9 +2,7 @@ package com.krystianwsul.checkme.firebase.factories
 
 import com.krystianwsul.checkme.firebase.loaders.ProjectLoader
 import com.krystianwsul.checkme.utils.publishImmediate
-import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.firebase.json.Parsable
-import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
 import com.krystianwsul.common.firebase.models.project.OwnedProject
 import com.krystianwsul.common.firebase.records.project.ProjectRecord
@@ -12,53 +10,39 @@ import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.utils.ProjectType
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
-import io.reactivex.rxjava3.kotlin.merge
 
-@Suppress("LeakingThis")
-abstract class ProjectFactory<T : ProjectType, U : Parsable, RECORD : ProjectRecord<T>>(
-// U: Project JSON type
-    projectLoader: ProjectLoader<T, U, RECORD>,
-    initialProjectEvent: ProjectLoader.InitialProjectEvent<RECORD>,
-    protected val shownFactory: Instance.ShownFactory,
-    domainDisposable: CompositeDisposable,
-    private val rootTaskProvider: OwnedProject.RootTaskProvider,
-    private val rootModelChangeManager: RootModelChangeManager,
-    protected val deviceDbInfo: () -> DeviceDbInfo,
+abstract class ProjectFactory<TYPE : ProjectType, PARCELABLE : Parsable, RECORD : ProjectRecord<TYPE>>(
+    private val projectLoader: ProjectLoader<TYPE, PARCELABLE, RECORD>,
+    private val initialProjectEvent: ProjectLoader.InitialProjectEvent<RECORD>,
+    private val domainDisposable: CompositeDisposable,
+    protected val rootModelChangeManager: RootModelChangeManager,
 ) {
 
-    var project: OwnedProject<T>
+    lateinit var project: OwnedProject<TYPE>
         private set
 
-    protected abstract fun newProject(
-        projectRecord: ProjectRecord<T>,
-        userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
-        rootTaskProvider: OwnedProject.RootTaskProvider,
-        rootModelChangeManager: RootModelChangeManager,
-    ): OwnedProject<T>
+    lateinit var remoteChanges: Observable<Unit>
+        private set
 
-    val remoteChanges: Observable<Unit>
-
-    init {
-        project = newProject(
-            initialProjectEvent.projectRecord,
-            initialProjectEvent.userCustomTimeProvider,
-            rootTaskProvider,
-            rootModelChangeManager,
-        )
+    protected fun init() {
+        project = newProject(initialProjectEvent.projectRecord, initialProjectEvent.userCustomTimeProvider)
 
         rootModelChangeManager.invalidateProjects()
 
-        val changeProjectChangeTypes = projectLoader.changeProjectEvents
+        remoteChanges = projectLoader.changeProjectEvents
             .doOnNext {
                 project.clearableInvalidatableManager.clear()
 
                 rootModelChangeManager.invalidateProjects()
 
-                project =
-                    newProject(it.projectRecord, it.userCustomTimeProvider, rootTaskProvider, rootModelChangeManager)
+                project = newProject(it.projectRecord, it.userCustomTimeProvider)
             }
             .map { }
-
-        remoteChanges = listOf(changeProjectChangeTypes).merge().publishImmediate(domainDisposable)
+            .publishImmediate(domainDisposable)
     }
+
+    protected abstract fun newProject(
+        projectRecord: RECORD,
+        userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
+    ): OwnedProject<TYPE>
 }

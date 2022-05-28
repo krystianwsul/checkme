@@ -7,7 +7,6 @@ import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
 import com.krystianwsul.common.firebase.models.project.OwnedProject
 import com.krystianwsul.common.firebase.models.project.SharedOwnedProject
-import com.krystianwsul.common.firebase.records.project.ProjectRecord
 import com.krystianwsul.common.firebase.records.project.SharedOwnedProjectRecord
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.JsonTime
@@ -17,28 +16,27 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable
 class SharedProjectFactory(
     projectLoader: ProjectLoader<ProjectType.Shared, JsonWrapper, SharedOwnedProjectRecord>,
     initialProjectEvent: ProjectLoader.InitialProjectEvent<SharedOwnedProjectRecord>,
-    shownFactory: Instance.ShownFactory,
+    private val shownFactory: Instance.ShownFactory,
     domainDisposable: CompositeDisposable,
-    rootTaskProvider: OwnedProject.RootTaskProvider,
+    private val rootTaskProvider: OwnedProject.RootTaskProvider,
     rootModelChangeManager: RootModelChangeManager,
-    deviceDbInfo: () -> DeviceDbInfo,
+    private val deviceDbInfo: () -> DeviceDbInfo,
 ) : ProjectFactory<ProjectType.Shared, JsonWrapper, SharedOwnedProjectRecord>(
     projectLoader,
     initialProjectEvent,
-    shownFactory,
     domainDisposable,
-    rootTaskProvider,
     rootModelChangeManager,
-    deviceDbInfo,
 ) {
 
+    init {
+        init()
+    }
+
     override fun newProject(
-        projectRecord: ProjectRecord<ProjectType.Shared>,
+        projectRecord: SharedOwnedProjectRecord,
         userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
-        rootTaskProvider: OwnedProject.RootTaskProvider,
-        rootModelChangeManager: RootModelChangeManager,
     ) = SharedOwnedProject(
-        projectRecord as SharedOwnedProjectRecord,
+        projectRecord,
         userCustomTimeProvider,
         rootTaskProvider,
         rootModelChangeManager,

@@ -119,10 +119,12 @@ class ProjectFactoryTest {
             projectKey: ProjectKey.Shared,
             projectJson: SharedOwnedProjectJson
         ) {
-            sharedProjectObservables.getValue(projectKey).accept(Snapshot(
+            sharedProjectObservables.getValue(projectKey).accept(
+                Snapshot(
                     projectKey.key,
                     JsonWrapper(projectJson),
-            ))
+                )
+            )
         }
     }
 
@@ -175,16 +177,15 @@ class ProjectFactoryTest {
                 projectFactory = PrivateProjectFactory(
                     projectLoader,
                     it.data,
-                    factoryProvider.shownFactory,
                     compositeDisposable,
                     mockk(relaxed = true),
                     existingInstanceChangeManager,
-                ) { mockk() }
+                )
 
-                    changeTypesEmissionChecker =
-                        EmissionChecker("changeTypes", compositeDisposable, projectFactory.remoteChanges)
-                }
-                .addTo(compositeDisposable)
+                changeTypesEmissionChecker =
+                    EmissionChecker("remoteChanges", compositeDisposable, projectFactory.remoteChanges)
+            }
+            .addTo(compositeDisposable)
     }
 
     @After

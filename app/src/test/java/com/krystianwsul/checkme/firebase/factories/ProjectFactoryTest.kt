@@ -155,7 +155,7 @@ class ProjectFactoryTest {
     private lateinit var factoryProvider: TestFactoryProvider
     private lateinit var projectLoader: TestProjectLoader
 
-    private lateinit var projectFactory: PrivateProjectFactory
+    private lateinit var projectFactory: PrivateOwnedProjectFactory
 
     private lateinit var changeTypesEmissionChecker: EmissionChecker<Unit>
 
@@ -174,7 +174,7 @@ class ProjectFactoryTest {
 
         projectLoader.initialProjectEvent
             .subscribeBy {
-                projectFactory = PrivateProjectFactory(
+                projectFactory = PrivateOwnedProjectFactory(
                     projectLoader,
                     it.data,
                     compositeDisposable,

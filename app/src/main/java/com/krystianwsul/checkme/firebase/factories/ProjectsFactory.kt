@@ -39,7 +39,7 @@ class ProjectsFactory(
     deviceDbInfo: () -> DeviceDbInfo,
 ) {
 
-    private val privateProjectFactory = PrivateProjectFactory(
+    private val privateProjectFactory = PrivateOwnedProjectFactory(
         privateProjectLoader,
         privateInitialProjectEvent,
         domainDisposable,

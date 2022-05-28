@@ -10,7 +10,7 @@ import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.utils.ProjectType
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 
-class PrivateProjectFactory(
+class PrivateOwnedProjectFactory(
     projectLoader: ProjectLoader<ProjectType.Private, PrivateOwnedProjectJson, PrivateOwnedProjectRecord>,
     initialProjectEvent: ProjectLoader.InitialProjectEvent<PrivateOwnedProjectRecord>,
     domainDisposable: CompositeDisposable,

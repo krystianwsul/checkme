@@ -12,6 +12,8 @@ class RootModelChangeManager {
 
     val userInvalidatableManager = InvalidatableManager()
 
+    val foreignProjectLoadedInvalidatableManager = InvalidatableManager()
+
     /*
     This handles an atypical subset of changes:
     1. Local edits to the HourMinutes for existing CustomTimes

@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.firebase.foreignProjects
 
+import android.util.Log
 import com.krystianwsul.checkme.firebase.factories.ForeignProjectFactory
 import com.krystianwsul.checkme.firebase.factories.PrivateForeignProjectFactory
 import com.krystianwsul.checkme.firebase.factories.SharedForeignProjectFactory
@@ -7,7 +8,10 @@ import com.krystianwsul.checkme.firebase.loaders.ProjectLoader
 import com.krystianwsul.checkme.utils.MapRelayProperty
 import com.krystianwsul.checkme.utils.publishImmediate
 import com.krystianwsul.common.firebase.ChangeType
+import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
 import com.krystianwsul.common.firebase.models.project.ForeignProject
+import com.krystianwsul.common.firebase.models.project.PrivateForeignProject
+import com.krystianwsul.common.firebase.models.project.SharedForeignProject
 import com.krystianwsul.common.firebase.records.project.ForeignProjectRecord
 import com.krystianwsul.common.firebase.records.project.PrivateForeignProjectRecord
 import com.krystianwsul.common.firebase.records.project.SharedForeignProjectRecord
@@ -20,6 +24,7 @@ import io.reactivex.rxjava3.kotlin.merge
 class ForeignProjectsFactory(
     private val projectsLoader: ForeignProjectsLoader,
     private val domainDisposable: CompositeDisposable,
+    private val rootModelChangeManager: RootModelChangeManager,
 ) {
 
     private fun newProjectFactory(
@@ -30,6 +35,7 @@ class ForeignProjectsFactory(
 
         check(!projectFactories.containsKey(projectKey))
 
+        @Suppress("UNCHECKED_CAST")
         projectFactoriesProperty[projectKey] = when (projectKey) {
             is ProjectKey.Private -> PrivateForeignProjectFactory(
                 projectLoader as ProjectLoader<*, *, PrivateForeignProjectRecord>,
@@ -40,6 +46,16 @@ class ForeignProjectsFactory(
                 projectLoader as ProjectLoader<*, *, SharedForeignProjectRecord>,
                 initialProjectEvent as ProjectLoader.InitialProjectEvent<SharedForeignProjectRecord>,
                 domainDisposable,
+            )
+        }.also {
+            Log.e( // todo projectKey
+                "asdf",
+                "magic loaded foreign project " + it.foreignProject.let {
+                    when (it) {
+                        is PrivateForeignProject -> "private project " + it.projectKey
+                        is SharedForeignProject -> "shared project ${it.name} ${it.projectKey}"
+                    }
+                }
             )
         }
     }
@@ -53,11 +69,15 @@ class ForeignProjectsFactory(
     val remoteChanges: Observable<Unit>
 
     init {
+        fun invalidate() = rootModelChangeManager.foreignProjectLoadedInvalidatableManager.invalidate()
+
         val initialRemoteChange = projectsLoader.initialProjectsEvent
             .doOnSuccess {
                 it.initialProjectDatas.forEach { (projectLoader, initialProjectEvent) ->
                     newProjectFactory(projectLoader, initialProjectEvent)
                 }
+
+                if (it.initialProjectDatas.isNotEmpty()) invalidate()
             }
             .map { }
 
@@ -66,6 +86,8 @@ class ForeignProjectsFactory(
                 check(changeType == ChangeType.REMOTE)
 
                 newProjectFactory(addProjectEvent.projectLoader, addProjectEvent.initialProjectEvent)
+
+                invalidate()
             }
             .map { }
 
@@ -100,7 +122,7 @@ class ForeignProjectsFactory(
         ).merge().publishImmediate(domainDisposable)
     }
 
-    fun save(values: MutableMap<String, Any?>) { // todo projectKey
+    fun save(values: MutableMap<String, Any?>) { // todo projectKey add to save in DomainFactory
         projectsLoader.save(values)
     }
 

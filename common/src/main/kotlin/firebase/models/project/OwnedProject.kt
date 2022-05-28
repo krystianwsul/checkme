@@ -166,10 +166,14 @@ sealed class OwnedProject<T : ProjectType>(
     fun fixNotificationShown(
         shownFactory: Instance.ShownFactory,
         now: ExactTimeStamp.Local,
-    ) = getAllDependenciesLoadedTasks().forEach {
-        it.existingInstances
-            .values
-            .forEach { it.fixNotificationShown(shownFactory, now) }
+    ) {
+        if (true) return // todo projectKey this should get triggered once the individual models load. so here projectTasks, rootTasks separately
+
+        getAllDependenciesLoadedTasks().forEach {
+            it.existingInstances
+                .values
+                .forEach { it.fixNotificationShown(shownFactory, now) }
+        }
     }
 
     fun getRootInstances(

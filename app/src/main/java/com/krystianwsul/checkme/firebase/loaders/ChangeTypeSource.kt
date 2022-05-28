@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.firebase.loaders
 import com.krystianwsul.checkme.firebase.factories.FriendsFactory
 import com.krystianwsul.checkme.firebase.factories.MyUserFactory
 import com.krystianwsul.checkme.firebase.factories.OwnedProjectsFactory
+import com.krystianwsul.checkme.firebase.foreignProjects.ForeignProjectsFactory
 import com.krystianwsul.checkme.firebase.roottask.RootTasksFactory
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.checkme.utils.publishImmediate
@@ -19,6 +20,7 @@ class ChangeTypeSource(
     userFactorySingle: Single<MyUserFactory>,
     rootTasksFactory: RootTasksFactory,
     domainDisposable: CompositeDisposable,
+    foreignProjectsFactory: ForeignProjectsFactory,
 ) {
 
     val remoteChanges: Observable<Unit>
@@ -35,6 +37,7 @@ class ChangeTypeSource(
             friendsFactorySingle.flatMapObservable { it.remoteChanges },
             userFactoryRemoteChanges,
             rootTasksFactory.remoteChanges,
+            foreignProjectsFactory.remoteChanges,
         ).merge().publishImmediate(domainDisposable)
     }
 }

@@ -151,7 +151,8 @@ class FactoryLoader(
                             userCustomTimeProviderSource,
                         )
 
-                        val foreignProjectsFactory = ForeignProjectsFactory(foreignProjectsLoader, domainDisposable)
+                        val foreignProjectsFactory =
+                            ForeignProjectsFactory(foreignProjectsLoader, domainDisposable, rootModelChangeManager)
 
                         rootTasksFactory = RootTasksFactory(
                             rootTasksLoader,
@@ -228,6 +229,7 @@ class FactoryLoader(
                             userFactorySingle,
                             rootTasksFactory,
                             domainDisposable,
+                            foreignProjectsFactory,
                         )
 
                         val userScopeSingle = userFactorySingle

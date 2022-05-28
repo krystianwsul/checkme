@@ -3,6 +3,7 @@ package com.krystianwsul.common.firebase.models.task
 import com.krystianwsul.common.firebase.models.cache.Invalidatable
 import com.krystianwsul.common.firebase.models.cache.InvalidatableCache
 import com.krystianwsul.common.firebase.models.cache.invalidatableCache
+import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.utils.TaskKey
 
 class RootTaskDependencyResolver(private val rootTask: RootTask) : Invalidatable {
@@ -21,14 +22,16 @@ class RootTaskDependencyResolver(private val rootTask: RootTask) : Invalidatable
             val rootModelChangeManager = rootTask.rootModelChangeManager
             val parent = rootTask.parent
 
+            var project: Project<*>? = null
             rootTask.projectKey?.let {
-                val project = rootTask.parent.getProjectIfPresent(it)
+                project = rootTask.parent.getProjectIfPresent(it)
 
-                if (project != null) {
-                    val projectRemovable = project.clearableInvalidatableManager.addInvalidatable(invalidatableCache)
-                } else {
+                if (project == null) {
+                    val projectsRemovable =
+                        rootModelChangeManager.foreignProjectLoadedInvalidatableManager.addInvalidatable(invalidatableCache)
+
                     return@invalidatableCache InvalidatableCache.ValueHolder(DirectDependencyState.Absent) {
-                        // todo projectKey add invalidatable for new foreign project loaded
+                        projectsRemovable.remove()
                     }
                 }
             }
@@ -51,6 +54,8 @@ class RootTaskDependencyResolver(private val rootTask: RootTask) : Invalidatable
                 return@invalidatableCache InvalidatableCache.ValueHolder(DirectDependencyState.Absent) { removable.remove() }
             }
 
+            val projectRemovable = project?.clearableInvalidatableManager?.addInvalidatable(invalidatableCache)
+
             val customTimeRemovables = customTimes.map {
                 it.user
                     .clearableInvalidatableManager
@@ -60,6 +65,7 @@ class RootTaskDependencyResolver(private val rootTask: RootTask) : Invalidatable
             val taskRemovables = tasks.map { it.clearableInvalidatableManager.addInvalidatable(invalidatableCache) }
 
             InvalidatableCache.ValueHolder(DirectDependencyState.Present(tasks)) {
+                projectRemovable?.remove()
                 customTimeRemovables.forEach { it.remove() }
                 taskRemovables.forEach { it.remove() }
             }

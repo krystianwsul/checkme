@@ -1,7 +1,6 @@
 package com.krystianwsul.common.firebase.models.project
 
 import com.krystianwsul.common.firebase.models.cache.ClearableInvalidatableManager
-import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
 import com.krystianwsul.common.firebase.models.users.ProjectUser
 import com.krystianwsul.common.firebase.records.AssignedToHelper
 import com.krystianwsul.common.firebase.records.project.SharedForeignProjectRecord
@@ -12,7 +11,6 @@ import com.krystianwsul.common.utils.UserKey
 class SharedForeignProject(
     override val projectRecord: SharedForeignProjectRecord,
     userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
-    override val rootModelChangeManager: RootModelChangeManager,
 ) : ForeignProject<ProjectType.Shared>,
     SharedProjectProperties,
     JsonTime.CustomTimeProvider by JsonTime.CustomTimeProvider.getForRootTask(userCustomTimeProvider) {

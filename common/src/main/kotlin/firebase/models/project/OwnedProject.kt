@@ -29,7 +29,7 @@ sealed class OwnedProject<T : ProjectType>(
     override val assignedToHelper: AssignedToHelper,
     userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
     val rootTaskProvider: RootTaskProvider,
-    override val rootModelChangeManager: RootModelChangeManager,
+    val rootModelChangeManager: RootModelChangeManager,
 ) : Project<T>,
     JsonTime.ProjectCustomTimeKeyProvider,
     Task.Parent,

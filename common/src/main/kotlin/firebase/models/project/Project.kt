@@ -1,7 +1,6 @@
 package com.krystianwsul.common.firebase.models.project
 
 import com.krystianwsul.common.firebase.models.cache.ClearableInvalidatableManager
-import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
 import com.krystianwsul.common.firebase.models.users.ProjectUser
 import com.krystianwsul.common.firebase.records.AssignedToHelper
 import com.krystianwsul.common.firebase.records.project.ProjectRecord
@@ -13,8 +12,6 @@ import com.krystianwsul.common.utils.UserKey
 interface Project<T : ProjectType> : JsonTime.CustomTimeProvider {
 
     val assignedToHelper: AssignedToHelper
-
-    val rootModelChangeManager: RootModelChangeManager
 
     val clearableInvalidatableManager: ClearableInvalidatableManager
 

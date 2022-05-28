@@ -10,8 +10,6 @@ class RootModelChangeManager {
 
     val rootTaskInvalidatableManager = InvalidatableManager()
 
-    val projectInvalidatableManager = InvalidatableManager()
-
     val userInvalidatableManager = InvalidatableManager()
 
     /*
@@ -35,7 +33,6 @@ class RootModelChangeManager {
 
     fun invalidateProjects() {
         invalidateExistingInstances()
-        projectInvalidatableManager.invalidate()
         rootModelInvalidatableManager.invalidate()
     }
 

@@ -11,10 +11,7 @@ import com.krystianwsul.checkme.firebase.dependencies.UserKeyStore
 import com.krystianwsul.checkme.firebase.factories.FriendsFactory
 import com.krystianwsul.checkme.firebase.factories.MyUserFactory
 import com.krystianwsul.checkme.firebase.factories.OwnedProjectsFactory
-import com.krystianwsul.checkme.firebase.foreignProjects.ForeignProjectCoordinator
-import com.krystianwsul.checkme.firebase.foreignProjects.ForeignProjectsLoader
-import com.krystianwsul.checkme.firebase.foreignProjects.ForeignProjectsManager
-import com.krystianwsul.checkme.firebase.foreignProjects.ForeignProjectsProvider
+import com.krystianwsul.checkme.firebase.foreignProjects.*
 import com.krystianwsul.checkme.firebase.managers.AndroidPrivateProjectManager
 import com.krystianwsul.checkme.firebase.managers.AndroidRootTasksManager
 import com.krystianwsul.checkme.firebase.managers.AndroidSharedProjectManager
@@ -214,13 +211,15 @@ class FactoryLoader(
                         }.cacheImmediate()
 
                         val foreignProjectsLoader = ForeignProjectsLoader(
-                            // todo projectKey
                             foreignProjectCoordinator.foreignProjectKeysObservable,
                             ForeignProjectsManager(),
                             domainDisposable,
                             ForeignProjectsProvider(factoryProvider),
                             userCustomTimeProviderSource,
                         )
+
+                        // todo projectKey
+                        val foreignProjectsFactory = ForeignProjectsFactory(foreignProjectsLoader, domainDisposable)
 
                         val changeTypeSource = ChangeTypeSource(
                             projectsFactorySingle,

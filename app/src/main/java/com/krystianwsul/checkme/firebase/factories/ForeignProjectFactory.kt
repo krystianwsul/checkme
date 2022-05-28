@@ -13,6 +13,8 @@ abstract class ForeignProjectFactory<TYPE : ProjectType, RECORD : ForeignProject
     domainDisposable: CompositeDisposable,
 ) : ProjectFactory<TYPE, RECORD>(projectLoader, initialProjectEvent, domainDisposable) {
 
+    val foreignProject get() = project as ForeignProject<TYPE>
+
     abstract override fun newProject(
         projectRecord: RECORD,
         userCustomTimeProvider: JsonTime.UserCustomTimeProvider

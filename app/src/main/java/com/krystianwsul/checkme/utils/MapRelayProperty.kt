@@ -1,7 +1,7 @@
 package com.krystianwsul.checkme.utils
 
-class MapRelayProperty<KEY : Any, VALUE : Any>(initialValue: Map<KEY, VALUE>) :
-        NonNullRelayProperty<Map<KEY, VALUE>>(initialValue) {
+class MapRelayProperty<KEY : Any, VALUE : Any>(initialValue: Map<KEY, VALUE> = mapOf()) :
+    NonNullRelayProperty<Map<KEY, VALUE>>(initialValue) {
 
     operator fun set(key: KEY, value: VALUE) = mutate {
         it.toMutableMap().also { it[key] = value }

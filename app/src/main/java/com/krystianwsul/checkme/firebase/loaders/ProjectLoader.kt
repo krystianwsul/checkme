@@ -16,7 +16,7 @@ import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.plusAssign
 
-interface ProjectLoader<T : ProjectType, U : Parsable, RECORD : ProjectRecord<T>> { // U: Project JSON type
+interface ProjectLoader<T : ProjectType, U : Parsable, RECORD : ProjectRecord<out T>> { // U: Project JSON type
 
     val projectManager: ProjectProvider.ProjectManager<T, U, RECORD>
 
@@ -26,10 +26,10 @@ interface ProjectLoader<T : ProjectType, U : Parsable, RECORD : ProjectRecord<T>
     // Here we observe remaining changes to the project or tasks, which don't affect the instance observables
     val changeProjectEvents: Observable<ChangeProjectEvent<RECORD>>
 
-    class InitialProjectEvent<T : ProjectType, U : Parsable, RECORD : ProjectRecord<T>>(
+    class InitialProjectEvent<T : ProjectType, U : Parsable, RECORD : ProjectRecord<out T>>(
         // U: Project JSON type
         val projectManager: ProjectProvider.ProjectManager<T, U, RECORD>,
-        val projectRecord: ProjectRecord<T>,
+        val projectRecord: RECORD,
         val userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
     )
 
@@ -39,7 +39,7 @@ interface ProjectLoader<T : ProjectType, U : Parsable, RECORD : ProjectRecord<T>
     )
 
     // U: Project JSON type
-    class Impl<T : ProjectType, U : Parsable, RECORD : ProjectRecord<T>>(
+    class Impl<T : ProjectType, U : Parsable, RECORD : ProjectRecord<out T>>(
         projectKey: ProjectKey<out T>,
         snapshotObservable: Observable<out Snapshot<out U>>,
         private val domainDisposable: CompositeDisposable,

@@ -13,7 +13,7 @@ import com.krystianwsul.common.firebase.records.project.SharedForeignProjectReco
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ProjectType
 
-class ForeignProjectsManager : ProjectsManager<ProjectType, ForeignProjectJson, ForeignProjectRecord<out ProjectType>> {
+class ForeignProjectsManager : ProjectsManager<ProjectType, ForeignProjectJson, ForeignProjectRecord<*>> {
 
     private val privateManager = object : MapRecordManager<ProjectKey.Private, PrivateForeignProjectRecord>() {
 

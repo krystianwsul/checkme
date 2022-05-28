@@ -21,7 +21,7 @@ import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.merge
 import io.reactivex.rxjava3.kotlin.plusAssign
 
-abstract class ProjectsLoader<TYPE : ProjectType, RECORD : ProjectRecord<TYPE>, PARSABLE : Parsable>(
+abstract class ProjectsLoader<TYPE : ProjectType, RECORD : ProjectRecord<out TYPE>, PARSABLE : Parsable>(
     projectKeysObservable: Observable<out Set<ProjectKey<out TYPE>>>,
     private val projectsManager: ProjectsManager<TYPE, PARSABLE, RECORD>,
     private val domainDisposable: CompositeDisposable,
@@ -48,7 +48,7 @@ abstract class ProjectsLoader<TYPE : ProjectType, RECORD : ProjectRecord<TYPE>, 
     private fun <T : Any> Observable<T>.replayImmediate() = replay().apply { domainDisposable += connect() }
     private fun <T : Any> Single<T>.cacheImmediate() = cache().apply { domainDisposable += subscribe() }
 
-    private data class ProjectData<TYPE : ProjectType, RECORD : ProjectRecord<TYPE>, PARSABLE : Parsable>(
+    private data class ProjectData<TYPE : ProjectType, RECORD : ProjectRecord<out TYPE>, PARSABLE : Parsable>(
         val userChangeType: ChangeType,
         val projectKeys: Set<ProjectKey<out TYPE>>,
         val newMap: Map<ProjectKey<out TYPE>, ProjectEntry<RECORD, PARSABLE>>,
@@ -80,7 +80,7 @@ abstract class ProjectsLoader<TYPE : ProjectType, RECORD : ProjectRecord<TYPE>, 
         .map { ProjectData(it.original.changeType, it.original.data.keys, it.newMap) }
         .replayImmediate()
 
-    private data class LoaderData<TYPE : ProjectType, PARSABLE : Parsable, RECORD : ProjectRecord<TYPE>>(
+    private data class LoaderData<TYPE : ProjectType, PARSABLE : Parsable, RECORD : ProjectRecord<out TYPE>>(
         val userChangeType: ChangeType,
         val newLoaderMap: Map<ProjectKey<out TYPE>, ProjectLoader<TYPE, PARSABLE, RECORD>>,
         val addedLoaderEntries: Map<ProjectKey<out TYPE>, ProjectLoader<TYPE, PARSABLE, RECORD>>,
@@ -172,16 +172,16 @@ abstract class ProjectsLoader<TYPE : ProjectType, RECORD : ProjectRecord<TYPE>, 
 
     fun save(values: MutableMap<String, Any?>) = projectsManager.save(values)
 
-    class InitialProjectsEvent<TYPE : ProjectType, PARSABLE : Parsable, RECORD : ProjectRecord<TYPE>>(
+    class InitialProjectsEvent<TYPE : ProjectType, PARSABLE : Parsable, RECORD : ProjectRecord<out TYPE>>(
         val initialProjectDatas: List<InitialProjectData<TYPE, PARSABLE, RECORD>>,
     )
 
-    data class InitialProjectData<TYPE : ProjectType, PARSABLE : Parsable, RECORD : ProjectRecord<TYPE>>(
+    data class InitialProjectData<TYPE : ProjectType, PARSABLE : Parsable, RECORD : ProjectRecord<out TYPE>>(
         val projectLoader: ProjectLoader<TYPE, PARSABLE, RECORD>,
         val initialProjectEvent: ProjectLoader.InitialProjectEvent<TYPE, PARSABLE, RECORD>,
     )
 
-    class AddProjectEvent<TYPE : ProjectType, PARSABLE : Parsable, RECORD : ProjectRecord<TYPE>>(
+    class AddProjectEvent<TYPE : ProjectType, PARSABLE : Parsable, RECORD : ProjectRecord<out TYPE>>(
         val projectLoader: ProjectLoader<TYPE, PARSABLE, RECORD>,
         val initialProjectEvent: ProjectLoader.InitialProjectEvent<TYPE, PARSABLE, RECORD>,
     )

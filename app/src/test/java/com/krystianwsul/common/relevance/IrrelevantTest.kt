@@ -665,7 +665,8 @@ class IrrelevantTest {
                     listOf(task)
             }
 
-            every { getProject(any()) } answers { project }
+            every { getOwnedProjectForce(any()) } answers { project }
+            every { getProjectForce(any()) } answers { project }
             every { getProjectIfPresent(any()) } answers { project }
 
             every { getTaskHierarchiesByParentTaskKey(any()) } returns setOf()

@@ -16,6 +16,7 @@ import com.krystianwsul.common.firebase.models.filterAndSort
 import com.krystianwsul.common.firebase.models.interval.*
 import com.krystianwsul.common.firebase.models.noscheduleorparent.NoScheduleOrParent
 import com.krystianwsul.common.firebase.models.project.OwnedProject
+import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.schedule.*
 import com.krystianwsul.common.firebase.models.taskhierarchy.NestedTaskHierarchy
 import com.krystianwsul.common.firebase.models.taskhierarchy.ParentTaskDelegate
@@ -39,7 +40,7 @@ sealed class Task(
     abstract val parent: Parent
 
     abstract val projectId: String
-    abstract val project: OwnedProject<*>
+    abstract val project: Project<*>
 
     private val endDataProperty = invalidatableLazyCallbacks {
         taskRecord.endData?.let {

@@ -118,10 +118,10 @@ class RootTask private constructor(
 
     val projectKey by projectKeyCache
 
-    private val projectCache = invalidatableCache<OwnedProject<*>>(clearableInvalidatableManager) { invalidatableCache ->
+    private val projectCache = invalidatableCache<Project<*>>(clearableInvalidatableManager) { invalidatableCache ->
         val projectIdRemovable = addProjectIdInvalidatable(invalidatableCache)
 
-        val project = parent.getProject(projectId)
+        val project = projectKey?.let { parent.getProjectForce(it) } ?: parent.getOwnedProjectForce(projectId)
         val projectRemovable = project.clearableInvalidatableManager.addInvalidatable(invalidatableCache)
 
         InvalidatableCache.ValueHolder(project) {
@@ -565,7 +565,8 @@ class RootTask private constructor(
     }
 
     fun fixProjectKeys() {
-        fun ProjectIdOwner.fixProjectKey(projectId: String) = updateProject(parent.getProject(projectId).projectKey)
+        fun ProjectIdOwner.fixProjectKey(projectId: String) =
+            updateProject(parent.getOwnedProjectForce(projectId).projectKey)
 
         schedules.forEach { it.fixProjectKey(it.projectId) }
         noScheduleOrParents.forEach { it.fixProjectKey(it.projectId) }
@@ -577,9 +578,11 @@ class RootTask private constructor(
 
         fun deleteRootTask(task: RootTask)
 
-        fun getProject(projectId: String): OwnedProject<*>
+        fun getOwnedProjectForce(projectId: String): OwnedProject<*>
 
         fun getProjectIfPresent(projectKey: ProjectKey<*>): Project<*>?
+
+        fun getProjectForce(projectKey: ProjectKey<*>): Project<*> = getProjectIfPresent(projectKey)!!
 
         override fun createTask(
             now: ExactTimeStamp.Local,

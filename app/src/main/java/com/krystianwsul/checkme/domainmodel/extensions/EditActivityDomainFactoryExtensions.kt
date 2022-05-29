@@ -119,7 +119,7 @@ private fun DomainFactory.getCreateTaskDataSlow(
         when (it.copySource) {
             is EditParameters.Copy.CopySource.Task -> {
                 task = getTaskForce(it.copySource.taskKey)
-                project = task.project
+                project = task.project as OwnedProject<*> // todo projectKey typing
 
                 if (task.isTopLevelTask()) {
                     val schedules = task.intervalInfo.getCurrentScheduleIntervals(now)
@@ -137,7 +137,7 @@ private fun DomainFactory.getCreateTaskDataSlow(
             is EditParameters.Copy.CopySource.Instance -> {
                 val instance = getInstance(it.copySource.instanceKey)
                 task = instance.task
-                project = instance.getProject()
+                project = instance.getProject() as OwnedProject<*> // todo projectKey typing
 
                 if (instance.isRootInstance()) {
                     instance.instanceTime
@@ -183,12 +183,19 @@ private fun DomainFactory.getCreateTaskDataSlow(
         is EditViewModel.CurrentParentSource.FromTask -> getTaskForce(currentParentSource.taskKey).let {
             it.parentTask
                 ?.let { EditViewModel.ParentKey.Task(it.taskKey) }
-                ?: it.project.toParentKey()
+                ?: it.project.let {
+                    it as OwnedProject<*> // todo projectKey typing
+                }
+                    .toParentKey()
         }
         is EditViewModel.CurrentParentSource.FromInstance -> getInstance(currentParentSource.instanceKey).let {
             it.parentInstance
                 ?.let { EditViewModel.ParentKey.Task(it.taskKey) }
-                ?: it.getProject().toParentKey()
+                ?: it.getProject()
+                    .let {
+                        it as OwnedProject<*> // todo projectKey typing
+                    }
+                    .toParentKey()
         }
         is EditViewModel.CurrentParentSource.FromTasks -> {
             currentParentSource.taskKeys
@@ -451,7 +458,7 @@ fun DomainUpdater.updateChildTask(
         task = convertToRoot(getTaskForce(taskKey), now)
         task.requireNotDeleted()
 
-        originalProject = task.project
+        originalProject = task.project as OwnedProject<*> // todo projectKey typing
 
         parentTask = convertToRoot(getTaskForce(parentTaskKey), now)
         parentTask.requireNotDeleted()

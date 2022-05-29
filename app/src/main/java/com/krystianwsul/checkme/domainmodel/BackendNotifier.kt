@@ -11,7 +11,7 @@ import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.firebase.AndroidDatabaseWrapper
 import com.krystianwsul.common.domain.DeviceInfo
-import com.krystianwsul.common.firebase.models.project.OwnedProject
+import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.UserKey
 
@@ -34,7 +34,7 @@ object BackendNotifier {
         return PREFIX + parameters.joinToString("&")
     }
 
-    fun notify(projects: Set<OwnedProject<*>>, deviceInfo: DeviceInfo, userKeys: Collection<UserKey>) {
+    fun notify(projects: Set<Project<*>>, deviceInfo: DeviceInfo, userKeys: Collection<UserKey>) {
         val production = when (AndroidDatabaseWrapper.root) {
             "development" -> false
             "production" -> true

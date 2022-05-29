@@ -38,6 +38,7 @@ import com.krystianwsul.common.firebase.models.customtime.PrivateCustomTime
 import com.krystianwsul.common.firebase.models.customtime.SharedCustomTime
 import com.krystianwsul.common.firebase.models.project.OwnedProject
 import com.krystianwsul.common.firebase.models.project.PrivateOwnedProject
+import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.search.FilterResult
 import com.krystianwsul.common.firebase.models.search.SearchContext
 import com.krystianwsul.common.firebase.models.task.*
@@ -559,11 +560,11 @@ class DomainFactory(
         }
     }
 
-    data class CloudParams(val projects: Collection<OwnedProject<*>>, val userKeys: Collection<UserKey> = emptySet()) {
+    data class CloudParams(val projects: Collection<Project<*>>, val userKeys: Collection<UserKey> = emptySet()) {
 
-        constructor(project: OwnedProject<*>, userKeys: Collection<UserKey> = emptySet()) : this(setOf(project), userKeys)
+        constructor(project: Project<*>, userKeys: Collection<UserKey> = emptySet()) : this(setOf(project), userKeys)
 
-        constructor(vararg projects: OwnedProject<*>) : this(projects.toSet())
+        constructor(vararg projects: Project<*>) : this(projects.toSet())
     }
 
     fun notifyCloud(cloudParams: CloudParams) {
@@ -658,6 +659,12 @@ class DomainFactory(
         includeProjectDetails,
         compareBy,
     )
+
+    fun <T : ProjectType> getProjectIfPresent(projectKey: ProjectKey<T>): Project<T>? {
+        return projectsFactory.getProjectIfPresent(projectKey) ?: foreignProjectsFactory.getProjectIfPresent(projectKey)
+    }
+
+    fun <T : ProjectType> getProjectForce(projectKey: ProjectKey<T>) = getProjectIfPresent(projectKey)!!
 
     // this shouldn't use DateTime, since that leaks Time.Custom which is a model object
     class HourUndoData(val instanceDateTimes: Map<InstanceKey, DateTime>, val newTimeStamp: TimeStamp)

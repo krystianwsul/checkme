@@ -12,6 +12,7 @@ import com.krystianwsul.common.firebase.models.interval.ScheduleInterval
 import com.krystianwsul.common.firebase.models.interval.Type
 import com.krystianwsul.common.firebase.models.project.OwnedProject
 import com.krystianwsul.common.firebase.models.project.PrivateOwnedProject
+import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.project.SharedOwnedProject
 import com.krystianwsul.common.firebase.models.task.ProjectRootTaskIdTracker
 import com.krystianwsul.common.firebase.models.task.Task
@@ -770,7 +771,7 @@ class Instance private constructor(
     fun canMigrateDescription(now: ExactTimeStamp.Local) = !task.note.isNullOrEmpty() && canAddSubtask(now)
 
     fun getProjectId(): String = parentInstance?.getProjectId() ?: task.projectId
-    fun getProject(): OwnedProject<*> = parentInstance?.getProject() ?: task.project
+    fun getProject(): Project<*> = parentInstance?.getProject() ?: task.project
 
     fun taskHasOtherVisibleInstances(now: ExactTimeStamp.Local) = task.hasOtherVisibleInstances(now, instanceKey)
 

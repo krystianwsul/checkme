@@ -109,7 +109,7 @@ class ForeignProjectsFactory(
         ).merge().publishImmediate(domainDisposable)
     }
 
-    fun save(values: MutableMap<String, Any?>) { // todo projectKey add to save in DomainFactory
+    fun save(values: MutableMap<String, Any?>) {
         projectsLoader.save(values)
     }
 

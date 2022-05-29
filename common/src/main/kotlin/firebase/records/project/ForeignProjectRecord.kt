@@ -12,7 +12,7 @@ abstract class ForeignProjectRecord<T : ProjectType>(
     committerKey: String,
 ) : ProjectRecord<T>(false, projectJson, _id, committerKey) {
 
-    final override val createObject: Any get() = throw UnsupportedOperationException()
+    final override val createObject = projectJson
 
     override val taskRecords = mapOf<String, ProjectTaskRecord>()
 

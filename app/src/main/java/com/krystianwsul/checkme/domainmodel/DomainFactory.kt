@@ -198,6 +198,7 @@ class DomainFactory(
         myUserFactory.save(values)
         friendsFactory.save(values)
         rootTasksFactory.save(values)
+        foreignProjectsFactory.save(values)
 
         if (values.isNotEmpty())
             databaseWrapper.update(values, checkError(this, "DomainFactory.save", values))

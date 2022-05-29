@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.firebase.foreignProjects
 
-import android.util.Log
 import com.krystianwsul.checkme.firebase.factories.ForeignProjectFactory
 import com.krystianwsul.checkme.firebase.factories.PrivateForeignProjectFactory
 import com.krystianwsul.checkme.firebase.factories.SharedForeignProjectFactory
@@ -10,8 +9,6 @@ import com.krystianwsul.checkme.utils.publishImmediate
 import com.krystianwsul.common.firebase.ChangeType
 import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
 import com.krystianwsul.common.firebase.models.project.ForeignProject
-import com.krystianwsul.common.firebase.models.project.PrivateForeignProject
-import com.krystianwsul.common.firebase.models.project.SharedForeignProject
 import com.krystianwsul.common.firebase.records.project.ForeignProjectRecord
 import com.krystianwsul.common.firebase.records.project.PrivateForeignProjectRecord
 import com.krystianwsul.common.firebase.records.project.SharedForeignProjectRecord
@@ -46,16 +43,6 @@ class ForeignProjectsFactory(
                 projectLoader as ProjectLoader<*, *, SharedForeignProjectRecord>,
                 initialProjectEvent as ProjectLoader.InitialProjectEvent<SharedForeignProjectRecord>,
                 domainDisposable,
-            )
-        }.also {
-            Log.e( // todo projectKey
-                "asdf",
-                "magic loaded foreign project " + it.foreignProject.let {
-                    when (it) {
-                        is PrivateForeignProject -> "private project " + it.projectKey
-                        is SharedForeignProject -> "shared project ${it.name} ${it.projectKey}"
-                    }
-                }
             )
         }
     }

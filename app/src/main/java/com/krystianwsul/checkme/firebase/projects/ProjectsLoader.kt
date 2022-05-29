@@ -132,16 +132,13 @@ abstract class ProjectsLoader<TYPE : ProjectType, RECORD : ProjectRecord<out TYP
             check(it.all { it.second.changeType == ChangeType.REMOTE })
 
             InitialProjectsEvent(it.map {
-                InitialProjectData(
-                    it.first,
-                    it.second.data
-                )
+                InitialProjectData(it.first, it.second.data)
             })
         }
         .cacheImmediate()
 
     val addProjectEvents = projectLoadersObservable.skip(1)
-        .switchMap {
+        .flatMap {
             it.addedLoaderEntries
                 .values
                 .map { projectLoader ->

@@ -47,6 +47,7 @@ interface ForeignProjectCoordinator {
             .map {
                 taskQueueState.let { it as TaskQueueState.Valid }.taskProjectKeys - userProjectKeys
             }
+                // todo projectKey make sure there's a distinctUntilChanged somewhere after this, or add one here
             .replay(1)
             .also { domainDisposable += it.connect() }
 

@@ -37,7 +37,6 @@ class ForeignProjectsManager : ProjectsManager<ProjectType, ForeignProjectJson, 
 
     private val sharedManager = object : MapRecordManager<ProjectKey.Shared, SharedForeignProjectRecord>() {
 
-        // todo projectKey there's gotta be another prefix somewhere to add for jsonWrapper
         override val databasePrefix = DatabaseWrapper.RECORDS_KEY
 
         override fun valueToRecord(value: SharedForeignProjectRecord) = value

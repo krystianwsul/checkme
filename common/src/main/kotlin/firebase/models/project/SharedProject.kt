@@ -1,13 +1,11 @@
 package com.krystianwsul.common.firebase.models.project
 
-import com.krystianwsul.common.firebase.models.users.ProjectUser
 import com.krystianwsul.common.utils.ProjectKey
+import com.krystianwsul.common.utils.ProjectType
 
-sealed interface SharedProject {
+sealed interface SharedProject : Project<ProjectType.Shared> {
 
-    val projectKey: ProjectKey.Shared
+    override val projectKey: ProjectKey.Shared
 
     val name: String
-
-    val users: Collection<ProjectUser>
 }

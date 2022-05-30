@@ -19,5 +19,7 @@ sealed interface Project<T : ProjectType> : JsonTime.CustomTimeProvider {
 
     val projectKey: ProjectKey<T>
 
+    val users: Collection<ProjectUser>
+
     fun getAssignedTo(userKeys: Set<UserKey>): Map<UserKey, ProjectUser>
 }

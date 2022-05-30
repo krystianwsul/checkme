@@ -226,11 +226,11 @@ private fun DomainFactory.getCreateTaskDataSlow(
             )
         }
         is EditViewModel.ParentKey.Project -> {
-            val project = projectsFactory.sharedProjects.getValue(currentParentKey.projectId)
+            val project = getProjectForce(currentParentKey.projectId)
 
             ParentScheduleManager.Parent.Project(
-                project.name,
-                EditViewModel.ParentKey.Project(project.projectKey),
+                project.displayName,
+                EditViewModel.ParentKey.Project(project.projectKey as ProjectKey.Shared), // todo projectKey type
                 project.users.toUserDatas(),
             )
         }
@@ -256,8 +256,20 @@ fun DomainFactory.getCreateTaskParentPickerData(
 
     val searchContext = SearchContext.startSearch(searchCriteria, now, myUserFactory.user)
 
-    val parentTreeDatas =
-        getParentTreeDatas(now, startParameters.excludedTaskKeys, startParameters.parentInstanceKey, searchContext)
+    val forcedProject = startParameters.let { it as? EditViewModel.StartParameters.TaskOrInstance }
+        ?.copySource
+        ?.taskKey
+        ?.let { getTaskForce(it) }
+        ?.takeIf { it.isTopLevelTask() }
+        ?.project
+
+    val parentTreeDatas = getParentTreeDatas(
+        now,
+        startParameters.excludedTaskKeys,
+        startParameters.parentInstanceKey,
+        searchContext,
+        forcedProject,
+    )
 
     return EditViewModel.ParentPickerData(parentTreeDatas)
 }
@@ -700,6 +712,7 @@ private fun DomainFactory.getParentTreeDatas(
     excludedTaskKeys: Set<TaskKey>,
     parentInstanceKey: InstanceKey?,
     searchContext: SearchContext,
+    forcedProject: Project<*>?,
 ): List<EditViewModel.ParentEntryData> {
     Log.e("asdf", "magic searchCriteria $searchContext")
 
@@ -728,9 +741,16 @@ private fun DomainFactory.getParentTreeDatas(
         .values
         .asSequence()
         .filter { it.notDeleted }
+        .let {
+            if (forcedProject != null) {
+                it + forcedProject
+            } else {
+                it
+            }
+        }
         .map { project ->
             EditViewModel.ParentEntryData.Project(
-                project.name,
+                project.displayName,
                 getProjectTaskTreeDatas(
                     now,
                     project,
@@ -738,7 +758,7 @@ private fun DomainFactory.getParentTreeDatas(
                     parentInstanceKey,
                     searchContext,
                 ),
-                project.projectKey,
+                project.projectKey as ProjectKey.Shared, // todo projectKey private
                 project.users.toUserDatas(),
                 projectOrder.getOrDefault(project.projectKey, 0f),
             )
@@ -749,28 +769,35 @@ private fun DomainFactory.getParentTreeDatas(
 
 private fun DomainFactory.getProjectTaskTreeDatas(
     now: ExactTimeStamp.Local,
-    project: OwnedProject<*>,
+    project: Project<*>,
     excludedTaskKeys: Set<TaskKey>,
     parentInstanceKey: InstanceKey?,
     searchContext: SearchContext,
 ): List<EditViewModel.ParentEntryData.Task> {
-    return searchContext.search {
-        project.getAllDependenciesLoadedTasks()
-            .asSequence()
-            .filter { it.showAsParent(now, excludedTaskKeys) }
-            .filter { it.isTopLevelTask() }
-            .filterSearchCriteria()
-            .map { (task, filterResult) ->
-                task.toParentEntryData(
-                    this@getProjectTaskTreeDatas,
-                    now,
-                    excludedTaskKeys,
-                    parentInstanceKey,
-                    getChildrenSearchContext(filterResult),
-                    filterResult,
-                )
+    return when (project) {
+        is OwnedProject<*> -> {
+            check(project is SharedOwnedProject)
+
+            searchContext.search {
+                project.getAllDependenciesLoadedTasks()
+                    .asSequence()
+                    .filter { it.showAsParent(now, excludedTaskKeys) }
+                    .filter { it.isTopLevelTask() }
+                    .filterSearchCriteria()
+                    .map { (task, filterResult) ->
+                        task.toParentEntryData(
+                            this@getProjectTaskTreeDatas,
+                            now,
+                            excludedTaskKeys,
+                            parentInstanceKey,
+                            getChildrenSearchContext(filterResult),
+                            filterResult,
+                        )
+                    }
+                    .toList()
             }
-            .toList()
+        }
+        is ForeignProject<*> -> emptyList()
     }
 }
 

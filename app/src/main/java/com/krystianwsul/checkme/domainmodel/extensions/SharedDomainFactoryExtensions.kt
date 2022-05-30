@@ -18,9 +18,7 @@ import com.krystianwsul.checkme.utils.time.toDateTimeTz
 import com.krystianwsul.common.domain.TaskUndoData
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.models.Instance
-import com.krystianwsul.common.firebase.models.project.OwnedProject
-import com.krystianwsul.common.firebase.models.project.PrivateOwnedProject
-import com.krystianwsul.common.firebase.models.project.SharedOwnedProject
+import com.krystianwsul.common.firebase.models.project.*
 import com.krystianwsul.common.firebase.models.schedule.SingleSchedule
 import com.krystianwsul.common.firebase.models.search.FilterResult
 import com.krystianwsul.common.firebase.models.search.SearchContext
@@ -473,6 +471,13 @@ fun List<GroupTypeFactory.InstanceDescriptor>.toDoneSingleBridges(
     showDisplayText: Boolean = true,
     includeProjectDetails: Boolean = true,
 ) = map { GroupTypeFactory.SingleBridge.createDone(it, showDisplayText, includeProjectDetails) }
+
+val Project<*>.displayName
+    get() = when (this) {
+        is PrivateOwnedProject -> ""
+        is PrivateForeignProject -> "" // todo projectKey show actual name.  But we'll need to load the user first
+        is SharedProject -> name
+    }
 
 class SetInstanceParentUndoData(
     private val instanceKey: InstanceKey,

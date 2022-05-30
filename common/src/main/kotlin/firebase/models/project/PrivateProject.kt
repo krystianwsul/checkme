@@ -1,3 +1,12 @@
 package com.krystianwsul.common.firebase.models.project
 
-sealed interface PrivateProject
+import com.krystianwsul.common.firebase.models.users.ProjectUser
+import com.krystianwsul.common.utils.ProjectKey
+import com.krystianwsul.common.utils.ProjectType
+
+sealed interface PrivateProject : Project<ProjectType.Private> {
+
+    override val projectKey: ProjectKey.Private
+
+    override val users get() = emptyList<ProjectUser>()
+}

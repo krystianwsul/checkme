@@ -566,7 +566,7 @@ class RootTask private constructor(
 
     fun fixProjectKeys() {
         fun ProjectIdOwner.fixProjectKey(projectId: String) =
-            updateProject(parent.getOwnedProjectForce(projectId).projectKey)
+            parent.getOwnedProjectIfPresent(projectId)?.projectKey?.let(::updateProject)
 
         schedules.forEach { it.fixProjectKey(it.projectId) }
         noScheduleOrParents.forEach { it.fixProjectKey(it.projectId) }
@@ -578,10 +578,10 @@ class RootTask private constructor(
 
         fun deleteRootTask(task: RootTask)
 
-        fun getOwnedProjectForce(projectId: String): OwnedProject<*>
+        fun getOwnedProjectIfPresent(projectId: String): OwnedProject<*>?
+        fun getOwnedProjectForce(projectId: String): OwnedProject<*> = getOwnedProjectIfPresent(projectId)!!
 
         fun getProjectIfPresent(projectKey: ProjectKey<*>): Project<*>?
-
         fun getProjectForce(projectKey: ProjectKey<*>): Project<*> = getProjectIfPresent(projectKey)!!
 
         override fun createTask(

@@ -119,7 +119,7 @@ class RootTasksFactory(
 
     override fun tryGetRootTask(rootTaskKey: TaskKey.Root) = rootTasks[rootTaskKey]
 
-    override fun getOwnedProjectForce(projectId: String) = getProjectsFactory().getProjectForce(projectId)
+    override fun getOwnedProjectIfPresent(projectId: String) = getProjectsFactory().getProjectByIdIfPresent(projectId)
 
     override fun getProjectIfPresent(projectKey: ProjectKey<*>): Project<*>? {
         return getProjectsFactory().getProjectIfPresent(projectKey) ?: foreignProjectsFactory.getProjectIfPresent(projectKey)

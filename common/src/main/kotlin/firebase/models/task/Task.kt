@@ -304,6 +304,9 @@ sealed class Task(
                         Update: I did narrow down givenEndExactTimeStamp.  I'm going to leave that exception floating around
                         for a while longer.  But, at this point it seems that InstanceInfo is no longer needed.  Next time
                         this comes up, I can remove InstanceInfo and undo the changes I made to create this mechanism.
+
+                        Update: I removed EndedTaskHierarchyException.  If the instance doesn't exist and its most recent
+                        hierarchy interval is ended, it's a weird, invalidly displayed orphan.
                          */
 
                         InstanceInfo(

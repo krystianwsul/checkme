@@ -1,7 +1,6 @@
 package com.krystianwsul.common.firebase.models
 
 
-import com.krystianwsul.common.ErrorLogger
 import com.krystianwsul.common.criteria.Assignable
 import com.krystianwsul.common.firebase.MyCustomTime
 import com.krystianwsul.common.firebase.models.cache.InvalidatableCache
@@ -178,32 +177,24 @@ class Instance private constructor(
         return when (val type = finalInterval.type) {
             is Type.Child -> {
                 type.getHierarchyInterval(finalInterval)
-                    .also {
-                        if (!exists() &&
-                            it.endExactTimeStampOffset != null &&
-                            scheduleDateTime.toLocalExactTimeStamp() >= it.endExactTimeStampOffset
-                        ) {
-                            ErrorLogger.instance.logException(
-                                EndedTaskHierarchyException(
-                                    "instance.scheduleDateTime: $scheduleDateTime >= " +
-                                            "hierarchyInterval.endExactTimeStampOffset: ${it.endExactTimeStampOffset}, " +
-                                            "instanceKey: $instanceKey, " +
-                                            "taskHierarchyKey: ${it.taskHierarchy.taskHierarchyKey}"
-                                )
-                            )
-                        }
+                    .takeUnless {
+                        /*
+                        If the instance doesn't exist, then it shouldn't show up for an ended interval.  But, this *is* the
+                        interval that generated it; so we don't want to go looking elsewhere.
+                         */
+
+                        !exists() &&
+                                it.endExactTimeStampOffset != null &&
+                                scheduleDateTime.toLocalExactTimeStamp() >= it.endExactTimeStampOffset
                     }
-                    .taskHierarchy
-                    .parentTask
-                    .getInstance(scheduleDateTime)
+                    ?.taskHierarchy
+                    ?.parentTask
+                    ?.getInstance(scheduleDateTime)
             }
             is Type.Schedule -> null
             is Type.NoSchedule -> null
         }
     }
-
-    // See notes in Task.getParentInstances
-    private class EndedTaskHierarchyException(message: String) : Exception(message)
 
     val parentInstanceCache =
         invalidatableCache<Instance?>(task.clearableInvalidatableManager) { invalidatableCache ->

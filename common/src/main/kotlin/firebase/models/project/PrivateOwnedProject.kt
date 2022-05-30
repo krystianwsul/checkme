@@ -35,6 +35,12 @@ class PrivateOwnedProject(
 
     override val customTimes get() = remoteCustomTimes.values
 
+    override var ownerName: String
+        get() = projectRecord.ownerName
+        set(value) {
+            projectRecord.ownerName = value
+        }
+
     var defaultTimesCreated
         get() = projectRecord.defaultTimesCreated
         set(value) {

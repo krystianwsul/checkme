@@ -11,12 +11,11 @@ fun DomainUpdater.fixStuff(source: String): Completable =
             .values
             .forEach { it.fixOffsets() }
 
-        projectsFactory.privateProject
-            .customTimes
-            .filter { it.notDeleted }
-            .forEach { migratePrivateCustomTime(it, now) }
+        projectsFactory.privateProject.apply {
+            ownerName = deviceDbInfo.name
 
-        // todo owner
+            customTimes.filter { it.notDeleted }.forEach { migratePrivateCustomTime(it, now) }
+        }
 
         /* todo projectKey re-enable once projects load correctly
         rootTasksFactory.rootTasks

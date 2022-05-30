@@ -186,8 +186,11 @@ class OwnedProjectsFactory(
 
     fun getTaskIfPresent(taskKey: TaskKey.Project) = projects[taskKey.projectKey]?.getTaskIfPresent(taskKey)
 
-    fun updateDeviceInfo(deviceDbInfo: DeviceDbInfo) =
+    fun updateDeviceInfo(deviceDbInfo: DeviceDbInfo) {
+        privateProject.ownerName = deviceDbInfo.name
+
         sharedProjects.values.forEach { it.updateDeviceDbInfo(deviceDbInfo) }
+    }
 
     fun updatePhotoUrl(deviceInfo: DeviceInfo, photoUrl: String) =
         sharedProjects.values.forEach { it.updatePhotoUrl(deviceInfo, photoUrl) }

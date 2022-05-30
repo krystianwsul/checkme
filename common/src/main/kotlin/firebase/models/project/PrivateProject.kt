@@ -8,5 +8,7 @@ sealed interface PrivateProject : Project<ProjectType.Private> {
 
     override val projectKey: ProjectKey.Private
 
+    val ownerName: String
+
     override val users get() = emptyList<ProjectUser>()
 }

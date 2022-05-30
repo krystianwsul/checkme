@@ -6,8 +6,10 @@ import com.krystianwsul.common.utils.ProjectType
 
 class PrivateForeignProjectRecord(
     override val projectKey: ProjectKey.Private,
-    projectJson: PrivateForeignProjectJson,
-) : ForeignProjectRecord<ProjectType.Private>(projectJson, projectKey, projectKey.key) {
+    private val projectJson: PrivateForeignProjectJson,
+) : ForeignProjectRecord<ProjectType.Private>(projectJson, projectKey, projectKey.key), PrivateProjectRecord {
 
     override val childKey get() = key
+
+    override val ownerName get() = projectJson.ownerName
 }

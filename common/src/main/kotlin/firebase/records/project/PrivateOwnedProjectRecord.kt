@@ -19,7 +19,7 @@ class PrivateOwnedProjectRecord(
     projectJson,
     projectKey,
     projectKey.key,
-) {
+), PrivateProjectRecord {
 
     override val taskRecords = projectJson.tasks
         .mapValues { (id, taskJson) ->
@@ -71,6 +71,8 @@ class PrivateOwnedProjectRecord(
     override val childKey get() = key
 
     var defaultTimesCreated by Committer(projectJson::defaultTimesCreated)
+
+    override var ownerName by Committer(projectJson::ownerName)
 
     override fun deleteFromParent() = throw UnsupportedOperationException()
 

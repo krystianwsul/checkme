@@ -44,7 +44,7 @@ class MyUserFactory(
     }
 
     init {
-        user.name = deviceDbInfo.name // todo owner
+        user.name = deviceDbInfo.name
         user.setToken(deviceDbInfo)
     }
 

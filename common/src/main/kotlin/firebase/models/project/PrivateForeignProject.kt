@@ -21,5 +21,7 @@ class PrivateForeignProject(
 
     override val projectKey = projectRecord.projectKey
 
+    override val ownerName get() = projectRecord.ownerName
+
     override fun getAssignedTo(userKeys: Set<UserKey>) = mapOf<UserKey, ProjectUser>()
 }

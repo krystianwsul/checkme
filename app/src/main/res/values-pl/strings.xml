@@ -167,4 +167,5 @@
     <string name="allReminders">Wszystkie przypomnienia</string>
     <string name="justThisReminder">Tylko to przypomnienie</string>
     <string name="allProjects">Wszystkie projekty</string>
+    <string name="foreignPrivateProjectSuffix">: zadania</string>
 </resources>

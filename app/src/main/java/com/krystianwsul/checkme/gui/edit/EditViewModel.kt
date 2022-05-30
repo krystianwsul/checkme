@@ -465,7 +465,7 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
         data class Project(
             override val name: String,
             override val childEntryDatas: List<Task>,
-            override val projectKey: ProjectKey.Shared,
+            override val projectKey: ProjectKey<*>,
             private val projectUsers: Map<UserKey, UserData>,
             private val projectOrder: Float,
         ) : ParentEntryData() {
@@ -511,7 +511,7 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
     sealed class ParentKey : Parcelable {
 
         @Parcelize
-        data class Project(val projectId: ProjectKey.Shared) : ParentKey()
+        data class Project(val projectId: ProjectKey<*>) : ParentKey()
 
         @Parcelize
         data class Task(val taskKey: TaskKey) : ParentKey()
@@ -519,7 +519,7 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
 
     sealed class SortKey : ParentPickerFragment.SortKey {
 
-        data class ProjectSortKey(private val projectId: ProjectKey.Shared, private val projectOrder: Float) : SortKey() {
+        data class ProjectSortKey(private val projectId: ProjectKey<*>, private val projectOrder: Float) : SortKey() {
 
             override fun compareTo(other: ParentPickerFragment.SortKey): Int {
                 if (other is TaskSortKey) return 1

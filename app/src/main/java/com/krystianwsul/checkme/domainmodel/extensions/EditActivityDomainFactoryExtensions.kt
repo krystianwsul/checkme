@@ -170,10 +170,7 @@ private fun DomainFactory.getCreateTaskDataSlow(
 
     val showAllInstancesDialog = startParameters.showAllInstancesDialog(this, now)
 
-    fun Project<*>.toParentKey() = when (this) {
-        is PrivateProject -> null // todo projectKey DO show foreign private project
-        is SharedProject -> EditViewModel.ParentKey.Project(projectKey)
-    }
+    fun Project<*>.toParentKey() = EditViewModel.ParentKey.Project(projectKey)
 
     val currentParentKey: EditViewModel.ParentKey? = when (currentParentSource) {
         is EditViewModel.CurrentParentSource.None -> null
@@ -230,7 +227,7 @@ private fun DomainFactory.getCreateTaskDataSlow(
 
             ParentScheduleManager.Parent.Project(
                 project.displayName,
-                EditViewModel.ParentKey.Project(project.projectKey as ProjectKey.Shared), // todo projectKey type
+                EditViewModel.ParentKey.Project(project.projectKey),
                 project.users.toUserDatas(),
             )
         }
@@ -758,7 +755,7 @@ private fun DomainFactory.getParentTreeDatas(
                     parentInstanceKey,
                     searchContext,
                 ),
-                project.projectKey as ProjectKey.Shared, // todo projectKey private
+                project.projectKey,
                 project.users.toUserDatas(),
                 projectOrder.getOrDefault(project.projectKey, 0f),
             )

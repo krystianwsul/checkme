@@ -1,6 +1,6 @@
 package com.krystianwsul.common.utils
 
-sealed class ProjectKey<T : ProjectType> : Parcelable, Serializable {
+sealed class ProjectKey<T : ProjectType> : Parcelable, Serializable, Comparable<ProjectKey<*>> {
 
     companion object {
 
@@ -43,22 +43,20 @@ sealed class ProjectKey<T : ProjectType> : Parcelable, Serializable {
 
     fun toJson() = "$type:$key"
 
+    override fun compareTo(other: ProjectKey<*>) = key.compareTo(other.key)
+
     @Parcelize
-    data class Private(override val key: String) : ProjectKey<ProjectType.Private>(), Comparable<Private> {
+    data class Private(override val key: String) : ProjectKey<ProjectType.Private>() {
 
         override val type get() = Type.PRIVATE
-
-        override fun compareTo(other: Private) = key.compareTo(other.key)
 
         fun toUserKey() = UserKey(key)
     }
 
     @Parcelize
-    data class Shared(override val key: String) : ProjectKey<ProjectType.Shared>(), Comparable<Shared> {
+    data class Shared(override val key: String) : ProjectKey<ProjectType.Shared>() {
 
         override val type get() = Type.SHARED
-
-        override fun compareTo(other: Shared) = key.compareTo(other.key)
     }
 
     // don't change names, they're used in to/from/Json

@@ -7,7 +7,6 @@ import arrow.core.curried
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.edit.*
-import com.krystianwsul.checkme.gui.edit.EditViewModel
 import com.krystianwsul.checkme.gui.edit.dialogs.schedule.ScheduleDialogData
 import com.krystianwsul.checkme.gui.instances.ShowInstanceActivity
 import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity
@@ -164,7 +163,7 @@ abstract class EditDelegate(
 
                     null
                 } else {
-                    SharedProjectParameters(projectId, assignedTo)
+                    SharedProjectParameters(projectId as ProjectKey.Shared, assignedTo) // todo projectKey type
                 }
 
                 createTaskWithSchedule(
@@ -188,7 +187,7 @@ abstract class EditDelegate(
                 check(assignedTo.isEmpty())
                 check(dialogResult == DialogResult.None)
 
-                createTaskWithoutReminder(createParameters, projectId)
+                createTaskWithoutReminder(createParameters, projectId as ProjectKey.Shared) // todo projectKey type
             }
         }
     }

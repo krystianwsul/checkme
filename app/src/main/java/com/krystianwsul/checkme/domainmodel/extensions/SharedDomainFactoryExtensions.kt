@@ -475,7 +475,7 @@ fun List<GroupTypeFactory.InstanceDescriptor>.toDoneSingleBridges(
 val Project<*>.displayName
     get() = when (this) {
         is PrivateOwnedProject -> ""
-        is PrivateForeignProject -> "" // todo projectKey show actual name.  But we'll need to load the user first
+        is PrivateForeignProject -> ownerName + MyApplication.context.getString(R.string.foreignPrivateProjectSuffix)
         is SharedProject -> name
     }
 

@@ -25,7 +25,7 @@ class PrivateOwnedProject(
     userCustomTimeProvider,
     rootTaskProvider,
     rootModelChangeManager,
-) {
+), PrivateProject {
 
     override val projectKey = projectRecord.projectKey
 

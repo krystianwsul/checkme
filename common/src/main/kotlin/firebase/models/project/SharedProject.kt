@@ -1,8 +1,11 @@
 package com.krystianwsul.common.firebase.models.project
 
 import com.krystianwsul.common.firebase.models.users.ProjectUser
+import com.krystianwsul.common.utils.ProjectKey
 
-interface SharedProjectProperties {
+sealed interface SharedProject {
+
+    val projectKey: ProjectKey.Shared
 
     val name: String
 

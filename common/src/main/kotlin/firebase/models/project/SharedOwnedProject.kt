@@ -29,7 +29,7 @@ class SharedOwnedProject(
     userCustomTimeProvider,
     rootTaskProvider,
     rootModelChangeManager,
-), SharedProjectProperties, Endable {
+), SharedProject, Endable {
 
     override val projectKey = projectRecord.projectKey
 

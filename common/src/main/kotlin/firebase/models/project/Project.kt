@@ -9,7 +9,7 @@ import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ProjectType
 import com.krystianwsul.common.utils.UserKey
 
-interface Project<T : ProjectType> : JsonTime.CustomTimeProvider {
+sealed interface Project<T : ProjectType> : JsonTime.CustomTimeProvider {
 
     val assignedToHelper: AssignedToHelper
 

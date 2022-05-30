@@ -12,7 +12,7 @@ class SharedForeignProject(
     override val projectRecord: SharedForeignProjectRecord,
     userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
 ) : ForeignProject<ProjectType.Shared>,
-    SharedProjectProperties,
+    SharedProject,
     JsonTime.CustomTimeProvider by JsonTime.CustomTimeProvider.getForRootTask(userCustomTimeProvider) {
 
     override val assignedToHelper = AssignedToHelper.Shared

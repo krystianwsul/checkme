@@ -23,14 +23,12 @@ import com.krystianwsul.common.firebase.json.tasks.TaskJson
 import com.krystianwsul.common.firebase.models.ImageState
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.interval.ScheduleInterval
-import com.krystianwsul.common.firebase.models.project.OwnedProject
-import com.krystianwsul.common.firebase.models.project.PrivateOwnedProject
-import com.krystianwsul.common.firebase.models.project.SharedOwnedProject
+import com.krystianwsul.common.firebase.models.project.*
 import com.krystianwsul.common.firebase.models.schedule.SingleSchedule
 import com.krystianwsul.common.firebase.models.search.FilterResult
 import com.krystianwsul.common.firebase.models.search.SearchContext
 import com.krystianwsul.common.firebase.models.task.*
-import com.krystianwsul.common.firebase.models.users.OwnedProjectUser
+import com.krystianwsul.common.firebase.models.users.ProjectUser
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.*
@@ -111,7 +109,7 @@ private fun DomainFactory.getCreateTaskDataSlow(
 
     val taskData = (startParameters as? EditViewModel.StartParameters.TaskOrInstance)?.let {
         val task: Task
-        val project: OwnedProject<*>
+        val project: Project<*>
 
         var scheduleDataWrappers: List<EditViewModel.ScheduleDataWrapper>? = null
         var assignedTo: Set<UserKey> = setOf()
@@ -119,7 +117,7 @@ private fun DomainFactory.getCreateTaskDataSlow(
         when (it.copySource) {
             is EditParameters.Copy.CopySource.Task -> {
                 task = getTaskForce(it.copySource.taskKey)
-                project = task.project as OwnedProject<*> // todo projectKey typing
+                project = task.project
 
                 if (task.isTopLevelTask()) {
                     val schedules = task.intervalInfo.getCurrentScheduleIntervals(now)
@@ -137,7 +135,7 @@ private fun DomainFactory.getCreateTaskDataSlow(
             is EditParameters.Copy.CopySource.Instance -> {
                 val instance = getInstance(it.copySource.instanceKey)
                 task = instance.task
-                project = instance.getProject() as OwnedProject<*> // todo projectKey typing
+                project = instance.getProject()
 
                 if (instance.isRootInstance()) {
                     instance.instanceTime
@@ -172,9 +170,9 @@ private fun DomainFactory.getCreateTaskDataSlow(
 
     val showAllInstancesDialog = startParameters.showAllInstancesDialog(this, now)
 
-    fun OwnedProject<*>.toParentKey() = when (this) {
-        is PrivateOwnedProject -> null
-        is SharedOwnedProject -> EditViewModel.ParentKey.Project(projectKey)
+    fun Project<*>.toParentKey() = when (this) {
+        is PrivateProject -> null // todo projectKey DO show foreign private project
+        is SharedProject -> EditViewModel.ParentKey.Project(projectKey)
     }
 
     val currentParentKey: EditViewModel.ParentKey? = when (currentParentSource) {
@@ -183,19 +181,12 @@ private fun DomainFactory.getCreateTaskDataSlow(
         is EditViewModel.CurrentParentSource.FromTask -> getTaskForce(currentParentSource.taskKey).let {
             it.parentTask
                 ?.let { EditViewModel.ParentKey.Task(it.taskKey) }
-                ?: it.project.let {
-                    it as OwnedProject<*> // todo projectKey typing
-                }
-                    .toParentKey()
+                ?: it.project.toParentKey()
         }
         is EditViewModel.CurrentParentSource.FromInstance -> getInstance(currentParentSource.instanceKey).let {
             it.parentInstance
                 ?.let { EditViewModel.ParentKey.Task(it.taskKey) }
-                ?: it.getProject()
-                    .let {
-                        it as OwnedProject<*> // todo projectKey typing
-                    }
-                    .toParentKey()
+                ?: it.getProject().toParentKey()
         }
         is EditViewModel.CurrentParentSource.FromTasks -> {
             currentParentSource.taskKeys
@@ -207,7 +198,7 @@ private fun DomainFactory.getCreateTaskDataSlow(
         }
     }
 
-    fun SharedOwnedProject.toParent() = ParentScheduleManager.Parent.Project(
+    fun SharedProject.toParent() = ParentScheduleManager.Parent.Project(
         name,
         EditViewModel.ParentKey.Project(projectKey),
         users.toUserDatas(),
@@ -223,7 +214,7 @@ private fun DomainFactory.getCreateTaskDataSlow(
                 task.hasMultipleInstances(startParameters.parentInstanceKey, now),
                 task.getTopLevelTask().let {
                     val parent = it.project
-                        .let { it as? SharedOwnedProject }
+                        .let { it as? SharedProject }
                         ?.toParent()
 
                     val (scheduleDataWrappers, assignedTo) =
@@ -452,13 +443,13 @@ fun DomainUpdater.updateChildTask(
     allReminders: Boolean = true,
 ): Single<TaskKey.Root> = SingleDomainUpdate.create("updateChildTask") { now ->
     lateinit var task: RootTask
-    lateinit var originalProject: OwnedProject<*>
+    lateinit var originalProject: Project<*>
     lateinit var parentTask: RootTask
     trackRootTaskIds {
         task = convertToRoot(getTaskForce(taskKey), now)
         task.requireNotDeleted()
 
-        originalProject = task.project as OwnedProject<*> // todo projectKey typing
+        originalProject = task.project
 
         parentTask = convertToRoot(getTaskForce(parentTaskKey), now)
         parentTask.requireNotDeleted()
@@ -954,7 +945,7 @@ fun DomainFactory.createChildTask(
     return childTask
 }
 
-private fun Collection<OwnedProjectUser>.toUserDatas() = associate {
+private fun Collection<ProjectUser>.toUserDatas() = associate {
     it.id to EditViewModel.UserData(it.id, it.name, it.photoUrl)
 }
 

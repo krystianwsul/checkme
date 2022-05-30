@@ -12,6 +12,7 @@ class PrivateForeignProject(
     override val projectRecord: PrivateForeignProjectRecord,
     userCustomTimeProvider: JsonTime.UserCustomTimeProvider,
 ) : ForeignProject<ProjectType.Private>,
+    PrivateProject,
     JsonTime.CustomTimeProvider by JsonTime.CustomTimeProvider.getForRootTask(userCustomTimeProvider) {
 
     override val assignedToHelper = AssignedToHelper.Private

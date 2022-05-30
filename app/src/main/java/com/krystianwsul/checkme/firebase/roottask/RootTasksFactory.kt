@@ -136,9 +136,7 @@ class RootTasksFactory(
     override fun getAllExistingInstances(): Sequence<Instance> {
         val allTasks = getProjectsFactory().projectTasks + rootTasks.values
 
-        return allTasks.asSequence()
-            .filter { it.dependenciesLoaded }
-            .flatMap { it.existingInstances.values }
+        return allTasks.asSequence().flatMap { it.existingInstances.values }
     }
 
     override fun getRootTasks() = rootTasks.values

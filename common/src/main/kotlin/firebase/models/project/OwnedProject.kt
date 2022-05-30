@@ -214,6 +214,7 @@ sealed class OwnedProject<T : ProjectType>(
         }
 
         val hackInstanceSequence: Sequence<Instance> = getAllExistingInstances().map { it.getTopLevelInstance() }
+            .filter { it.task.dependenciesLoaded }
             .filter { it.getProjectId() == projectKey.key }
             .distinct()
             .filter { it.hasExistingChildRecursive } // filters out root existing instances
@@ -256,7 +257,7 @@ sealed class OwnedProject<T : ProjectType>(
         is TaskKey.Root -> rootTaskProvider.getRootTask(taskKey)
     }
 
-    override fun getAllExistingInstances() = rootTaskProvider.getAllExistingInstances()
+    override fun getAllExistingInstances() = rootTaskProvider.getAllExistingInstances().filter { it.task.dependenciesLoaded }
 
     private class MissingTaskException(projectId: ProjectKey<*>, taskId: String) :
         Exception("projectId: $projectId, taskId: $taskId")

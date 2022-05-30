@@ -15,6 +15,7 @@ import com.krystianwsul.common.firebase.models.project.PrivateOwnedProject
 import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.project.SharedOwnedProject
 import com.krystianwsul.common.firebase.models.task.ProjectRootTaskIdTracker
+import com.krystianwsul.common.firebase.models.task.RootTask
 import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.firebase.models.users.MyUser
 import com.krystianwsul.common.firebase.models.users.ProjectUser
@@ -341,7 +342,18 @@ class Instance private constructor(
                 }
                 .toList()
 
-            val parentInstanceRemovables = childInstances.map {
+            val (loaded, unloaded) = childInstances.partition { it.task.dependenciesLoaded }
+
+            val dependenciesRemovables = unloaded.map {
+                it.task
+                    .let { it as RootTask }
+                    .rootTaskDependencyResolver
+                    .dependenciesLoadedCache
+                    .invalidatableManager
+                    .addInvalidatable(invalidatableCache)
+            }
+
+            val parentInstanceRemovables = loaded.map {
                 it.parentInstanceCache
                     .invalidatableManager
                     .addInvalidatable(invalidatableCache)
@@ -351,7 +363,9 @@ class Instance private constructor(
                 .existingInstancesInvalidatableManager
                 .addInvalidatable(invalidatableCache)
 
-            InvalidatableCache.ValueHolder(childInstances) {
+            InvalidatableCache.ValueHolder(loaded) {
+                dependenciesRemovables.forEach { it.remove() }
+
                 parentInstanceRemovables.forEach { it.remove() }
 
                 existingInstanceRemovable.remove()

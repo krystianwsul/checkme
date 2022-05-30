@@ -452,6 +452,7 @@ sealed class Task(
 
         // hierarchy hack
         val instanceChildTasks = parent.getAllExistingInstances()
+            .filter { it.task.dependenciesLoaded }
             .filter { it.parentInstance?.task == this }
             .map { it.task }
             .filter { it.parentTask == this }

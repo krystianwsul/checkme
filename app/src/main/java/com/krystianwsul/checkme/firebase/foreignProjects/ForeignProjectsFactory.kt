@@ -81,8 +81,6 @@ class ForeignProjectsFactory(
         val removeProjectRemoteChanges = projectsLoader.removeProjectEvents
             .doOnNext {
                 it.projectKeys.forEach {
-                    check(it is ProjectKey.Shared)
-
                     check(projectFactories.containsKey(it))
 
                     projectFactories.getValue(it)

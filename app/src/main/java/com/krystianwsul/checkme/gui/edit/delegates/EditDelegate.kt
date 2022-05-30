@@ -158,18 +158,18 @@ abstract class EditDelegate(
 
         return when {
             parentScheduleManager.schedules.isNotEmpty() -> {
-                val sharedProjectParameters = if (projectId == null) {
+                val projectParameters = if (projectId == null) {
                     check(assignedTo.isEmpty())
 
                     null
                 } else {
-                    SharedProjectParameters(projectId as ProjectKey.Shared, assignedTo) // todo projectKey type
+                    ProjectParameters(projectId, assignedTo)
                 }
 
                 createTaskWithSchedule(
                     createParameters,
                     parentScheduleManager.schedules.map { it.scheduleDataWrapper.scheduleData },
-                    sharedProjectParameters,
+                    projectParameters,
                     dialogResult.joinAllInstances,
                 )
             }
@@ -187,7 +187,7 @@ abstract class EditDelegate(
                 check(assignedTo.isEmpty())
                 check(dialogResult == DialogResult.None)
 
-                createTaskWithoutReminder(createParameters, projectId as ProjectKey.Shared) // todo projectKey type
+                createTaskWithoutReminder(createParameters, projectId)
             }
         }
     }
@@ -195,7 +195,7 @@ abstract class EditDelegate(
     abstract fun createTaskWithSchedule(
         createParameters: CreateParameters,
         scheduleDatas: List<ScheduleData>,
-        sharedProjectParameters: SharedProjectParameters?,
+        projectParameters: ProjectParameters?,
         joinAllInstances: Boolean?,
     ): Single<CreateResult>
 
@@ -207,7 +207,7 @@ abstract class EditDelegate(
 
     abstract fun createTaskWithoutReminder(
         createParameters: CreateParameters,
-        sharedProjectKey: ProjectKey.Shared?,
+        projectKey: ProjectKey<*>?,
     ): Single<CreateResult>
 
     fun saveState() = parentScheduleManager.saveState()
@@ -242,7 +242,7 @@ abstract class EditDelegate(
         }
     }
 
-    class SharedProjectParameters(val key: ProjectKey.Shared, val assignedTo: Set<UserKey>)
+    class ProjectParameters(val key: ProjectKey<*>, val assignedTo: Set<UserKey>)
 
     sealed class CreateResult {
 

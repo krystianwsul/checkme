@@ -26,7 +26,7 @@ class CopyExistingTaskEditDelegate(
     override fun createTaskWithSchedule(
         createParameters: CreateParameters,
         scheduleDatas: List<ScheduleData>,
-        sharedProjectParameters: SharedProjectParameters?,
+        projectParameters: ProjectParameters?,
         joinAllInstances: Boolean?,
     ): Single<CreateResult> {
         check(joinAllInstances == null)
@@ -35,7 +35,7 @@ class CopyExistingTaskEditDelegate(
             DomainListenerManager.NotificationType.All,
             createParameters,
             scheduleDatas,
-            sharedProjectParameters,
+            projectParameters,
             parameters.copySource,
         )
             .observeOn(AndroidSchedulers.mainThread())
@@ -62,12 +62,12 @@ class CopyExistingTaskEditDelegate(
 
     override fun createTaskWithoutReminder(
         createParameters: CreateParameters,
-        sharedProjectKey: ProjectKey.Shared?,
+        projectKey: ProjectKey<*>?,
     ): Single<CreateResult> {
         return AndroidDomainUpdater.createTopLevelTask(
             DomainListenerManager.NotificationType.All,
             createParameters,
-            sharedProjectKey,
+            projectKey,
             parameters.copySource,
         )
             .observeOn(AndroidSchedulers.mainThread())

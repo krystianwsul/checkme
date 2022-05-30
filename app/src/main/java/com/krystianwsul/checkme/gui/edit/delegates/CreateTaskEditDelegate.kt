@@ -120,7 +120,7 @@ class CreateTaskEditDelegate(
     override fun createTaskWithSchedule(
         createParameters: CreateParameters,
         scheduleDatas: List<ScheduleData>,
-        sharedProjectParameters: SharedProjectParameters?,
+        projectParameters: ProjectParameters?,
         joinAllInstances: Boolean?,
     ): Single<CreateResult> {
         check(joinAllInstances == null)
@@ -129,7 +129,7 @@ class CreateTaskEditDelegate(
             DomainListenerManager.NotificationType.All,
             createParameters,
             scheduleDatas,
-            sharedProjectParameters,
+            projectParameters,
         )
             .observeOn(AndroidSchedulers.mainThread())
             .applyCreatedTaskKey()
@@ -164,12 +164,12 @@ class CreateTaskEditDelegate(
 
     override fun createTaskWithoutReminder(
         createParameters: CreateParameters,
-        sharedProjectKey: ProjectKey.Shared?,
+        projectKey: ProjectKey<*>?,
     ): Single<CreateResult> {
         return AndroidDomainUpdater.createTopLevelTask(
             DomainListenerManager.NotificationType.All,
             createParameters,
-            sharedProjectKey,
+            projectKey,
         )
             .observeOn(AndroidSchedulers.mainThread())
             .applyCreatedTaskKey()

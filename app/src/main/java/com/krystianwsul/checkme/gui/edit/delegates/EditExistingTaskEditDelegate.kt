@@ -26,7 +26,7 @@ class EditExistingTaskEditDelegate(
     override fun createTaskWithSchedule(
         createParameters: CreateParameters,
         scheduleDatas: List<ScheduleData>,
-        sharedProjectParameters: SharedProjectParameters?,
+        projectParameters: ProjectParameters?,
         joinAllInstances: Boolean?,
     ): Single<CreateResult> {
         check(joinAllInstances == null)
@@ -36,7 +36,7 @@ class EditExistingTaskEditDelegate(
             parameters.taskKey,
             createParameters,
             scheduleDatas,
-            sharedProjectParameters,
+            projectParameters,
         )
             .observeOn(AndroidSchedulers.mainThread())
             .toCreateResult()
@@ -62,13 +62,13 @@ class EditExistingTaskEditDelegate(
 
     override fun createTaskWithoutReminder(
         createParameters: CreateParameters,
-        sharedProjectKey: ProjectKey.Shared?,
+        projectKey: ProjectKey<*>?,
     ): Single<CreateResult> {
         return AndroidDomainUpdater.updateTopLevelTask(
             DomainListenerManager.NotificationType.All,
             parameters.taskKey,
             createParameters,
-            sharedProjectKey,
+            projectKey,
         )
             .observeOn(AndroidSchedulers.mainThread())
             .toCreateResult()

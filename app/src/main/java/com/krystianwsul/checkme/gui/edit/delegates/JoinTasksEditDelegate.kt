@@ -65,7 +65,7 @@ class JoinTasksEditDelegate(
     override fun createTaskWithSchedule(
         createParameters: CreateParameters,
         scheduleDatas: List<ScheduleData>,
-        sharedProjectParameters: SharedProjectParameters?,
+        projectParameters: ProjectParameters?,
         joinAllInstances: Boolean?,
     ): Single<CreateResult> {
         return AndroidDomainUpdater.createScheduleJoinTopLevelTask(
@@ -73,7 +73,7 @@ class JoinTasksEditDelegate(
             createParameters,
             scheduleDatas,
             parameters.joinables,
-            sharedProjectParameters,
+            projectParameters,
             joinAllInstances != false,
         )
             .observeOn(AndroidSchedulers.mainThread())
@@ -100,13 +100,13 @@ class JoinTasksEditDelegate(
 
     override fun createTaskWithoutReminder(
         createParameters: CreateParameters,
-        sharedProjectKey: ProjectKey.Shared?,
+        projectKey: ProjectKey<*>?,
     ): Single<CreateResult> {
         return AndroidDomainUpdater.createJoinTopLevelTask(
             DomainListenerManager.NotificationType.All,
             createParameters,
             taskKeys,
-            sharedProjectKey,
+            projectKey,
             instanceKeys,
         )
             .observeOn(AndroidSchedulers.mainThread())

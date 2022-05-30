@@ -81,7 +81,7 @@ class AssignedToTest {
             DomainListenerManager.NotificationType.All,
             createParameters,
             getSingleScheduleData(date, 5, 0),
-            EditDelegate.SharedProjectParameters(sharedProjectKey, setOf()),
+            EditDelegate.ProjectParameters(sharedProjectKey, setOf()),
         )
             .blockingGet()
             .taskKey
@@ -97,7 +97,7 @@ class AssignedToTest {
             taskKey,
             createParameters,
             newScheduleDatas,
-            EditDelegate.SharedProjectParameters(sharedProjectKey, setOf()),
+            EditDelegate.ProjectParameters(sharedProjectKey, setOf()),
         ).blockingSubscribe()
 
         assertEquals(1, getDayInstanceDatas(now).size)
@@ -109,7 +109,7 @@ class AssignedToTest {
             taskKey,
             createParameters,
             newScheduleDatas,
-            EditDelegate.SharedProjectParameters(sharedProjectKey, setOf(friendKey)),
+            EditDelegate.ProjectParameters(sharedProjectKey, setOf(friendKey)),
         ).blockingSubscribe()
 
         assertTrue(getDayInstanceDatas(now).isEmpty())

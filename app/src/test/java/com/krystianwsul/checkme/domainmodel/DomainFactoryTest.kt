@@ -405,7 +405,7 @@ class DomainFactoryTest {
             privateTaskKey,
             EditDelegate.CreateParameters("task"),
             listOf(ScheduleData.Single(date, TimePair(HourMinute(3, 0)))),
-            EditDelegate.SharedProjectParameters(sharedProjectKey, setOf()),
+            EditDelegate.ProjectParameters(sharedProjectKey, setOf()),
         ).blockingGet()
 
         domainFactory.getShowInstanceData(instanceKey, SearchCriteria.empty)
@@ -492,7 +492,7 @@ class DomainFactoryTest {
             taskKey,
             EditDelegate.CreateParameters(taskName),
             scheduleDatas,
-            EditDelegate.SharedProjectParameters(projectKey, emptySet()),
+            EditDelegate.ProjectParameters(projectKey, emptySet()),
         ).blockingGet()
 
         val task = domainFactory.rootTasksFactory.getTask(taskKey)
@@ -652,7 +652,7 @@ class DomainFactoryTest {
             parentTaskKey,
             EditDelegate.CreateParameters(parentTaskName),
             scheduleDatas,
-            EditDelegate.SharedProjectParameters(sharedProjectKey, emptySet()),
+            EditDelegate.ProjectParameters(sharedProjectKey, emptySet()),
         ).blockingGet()
 
         assertEquals(sharedProjectKey, parentTask.project.projectKey)
@@ -732,7 +732,7 @@ class DomainFactoryTest {
             DomainListenerManager.NotificationType.All,
             EditDelegate.CreateParameters("shared task"),
             scheduleDatas,
-            EditDelegate.SharedProjectParameters(sharedProjectKey, setOf()),
+            EditDelegate.ProjectParameters(sharedProjectKey, setOf()),
         )
             .blockingGet()
             .taskKey
@@ -804,7 +804,7 @@ class DomainFactoryTest {
             DomainListenerManager.NotificationType.All,
             EditDelegate.CreateParameters("task 1 single"),
             singleScheduleDatas,
-            EditDelegate.SharedProjectParameters(sharedProjectKey1, setOf()),
+            EditDelegate.ProjectParameters(sharedProjectKey1, setOf()),
         )
             .blockingGet()
             .taskKey
@@ -815,7 +815,7 @@ class DomainFactoryTest {
             DomainListenerManager.NotificationType.All,
             EditDelegate.CreateParameters("task 2 weekly"),
             listOf(ScheduleData.Weekly(setOf(DayOfWeek.TUESDAY), scheduleTimePair, null, null, 1)),
-            EditDelegate.SharedProjectParameters(sharedProjectKey2, setOf()),
+            EditDelegate.ProjectParameters(sharedProjectKey2, setOf()),
         )
             .blockingGet()
             .taskKey
@@ -887,7 +887,7 @@ class DomainFactoryTest {
             DomainListenerManager.NotificationType.All,
             EditDelegate.CreateParameters("task 1 single"),
             singleScheduleDatas,
-            EditDelegate.SharedProjectParameters(sharedProjectKey1, setOf()),
+            EditDelegate.ProjectParameters(sharedProjectKey1, setOf()),
         )
             .blockingGet()
             .taskKey
@@ -898,7 +898,7 @@ class DomainFactoryTest {
             DomainListenerManager.NotificationType.All,
             EditDelegate.CreateParameters("task 2 weekly"),
             listOf(ScheduleData.Weekly(setOf(DayOfWeek.TUESDAY), scheduleTimePair, null, null, 1)),
-            EditDelegate.SharedProjectParameters(sharedProjectKey2, setOf()),
+            EditDelegate.ProjectParameters(sharedProjectKey2, setOf()),
         )
             .blockingGet()
             .taskKey
@@ -1296,7 +1296,7 @@ class DomainFactoryTest {
             taskKey,
             createParameters,
             scheduleDatas,
-            EditDelegate.SharedProjectParameters(projectKey, setOf()),
+            EditDelegate.ProjectParameters(projectKey, setOf()),
         ).blockingGet()
 
         assertEquals(projectKey, domainFactory.getTaskForce(taskKey).project.projectKey)
@@ -1344,7 +1344,7 @@ class DomainFactoryTest {
             taskKey,
             createParameters,
             listOf(ScheduleData.Single(date, TimePair(HourMinute(6, 0)))),
-            EditDelegate.SharedProjectParameters(projectKey, setOf()),
+            EditDelegate.ProjectParameters(projectKey, setOf()),
         ).blockingGet()
 
         assertEquals(projectKey, domainFactory.getTaskForce(taskKey).project.projectKey)
@@ -1464,7 +1464,7 @@ class DomainFactoryTest {
             childTaskKey,
             childTaskCreateParameters,
             scheduleDatas,
-            EditDelegate.SharedProjectParameters(projectKey, setOf()),
+            EditDelegate.ProjectParameters(projectKey, setOf()),
         ).blockingGet()
 
         assertEquals(projectKey, childTask.project.projectKey)

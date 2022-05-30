@@ -52,7 +52,7 @@ class ProjectRootTaskIdTrackerTest {
             DomainListenerManager.NotificationType.All,
             EditDelegate.CreateParameters("shared single"),
             listOf(ScheduleData.Single(date, scheduleTimePair)),
-            EditDelegate.SharedProjectParameters(sharedProjectKey, emptySet()),
+            EditDelegate.ProjectParameters(sharedProjectKey, emptySet()),
         )
             .blockingGet()
             .taskKey

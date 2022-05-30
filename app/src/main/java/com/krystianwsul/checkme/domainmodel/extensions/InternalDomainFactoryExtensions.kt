@@ -16,6 +16,8 @@ fun DomainUpdater.fixStuff(source: String): Completable =
             .filter { it.notDeleted }
             .forEach { migratePrivateCustomTime(it, now) }
 
+        // todo owner
+
         /* todo projectKey re-enable once projects load correctly
         rootTasksFactory.rootTasks
             .values

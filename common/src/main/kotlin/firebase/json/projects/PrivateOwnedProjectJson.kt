@@ -9,6 +9,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class PrivateOwnedProjectJson @JvmOverloads constructor(
+    override val ownerName: String = "", // todo owner
     override val startTime: Long = 0,
     override var startTimeOffset: Double? = null,
     override var tasks: MutableMap<String, PrivateTaskJson> = mutableMapOf(),

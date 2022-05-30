@@ -16,7 +16,7 @@ fun DomainUpdater.updateDeviceDbInfo(deviceDbInfo: DeviceDbInfo): Completable =
             this.deviceDbInfo = deviceDbInfo
 
             myUserFactory.user.apply {
-                name = deviceDbInfo.name
+                name = deviceDbInfo.name // todo owner
                 setToken(deviceDbInfo)
             }
 

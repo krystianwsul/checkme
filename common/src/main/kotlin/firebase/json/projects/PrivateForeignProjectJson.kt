@@ -5,6 +5,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class PrivateForeignProjectJson @JvmOverloads constructor(
+    override val ownerName: String = "", // todo owner
     override val rootTaskIds: MutableMap<String, Boolean> = mutableMapOf(),
 ) : ForeignProjectJson, PrivateProjectJson, DeepCopy<PrivateForeignProjectJson> {
 

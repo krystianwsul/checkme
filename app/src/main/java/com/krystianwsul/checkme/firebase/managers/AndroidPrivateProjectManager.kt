@@ -37,7 +37,7 @@ class AndroidPrivateProjectManager(private val userInfo: UserInfo) :
                         ?.toRecord()
                         ?: PrivateOwnedProjectRecord(
                             userInfo,
-                            PrivateOwnedProjectJson(startTime = now.long, startTimeOffset = now.offset),
+                            PrivateOwnedProjectJson(userInfo.name, now.long, now.offset),
                         )
                 } else {
                     snapshot.toRecord()

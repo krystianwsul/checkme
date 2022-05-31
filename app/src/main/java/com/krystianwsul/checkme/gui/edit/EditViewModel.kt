@@ -12,7 +12,6 @@ import com.krystianwsul.checkme.domainmodel.ScheduleText
 import com.krystianwsul.checkme.domainmodel.UserScope
 import com.krystianwsul.checkme.domainmodel.extensions.getCreateTaskData
 import com.krystianwsul.checkme.domainmodel.extensions.getCreateTaskParentPickerData
-import com.krystianwsul.checkme.domainmodel.takeAndHasMore
 import com.krystianwsul.checkme.gui.edit.delegates.EditDelegate
 import com.krystianwsul.checkme.gui.edit.dialogs.ParentPickerFragment
 import com.krystianwsul.checkme.gui.edit.dialogs.schedule.ScheduleDialogData
@@ -570,18 +569,8 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
 
             override val excludedTaskKeys = joinables.map { it.taskKey }.toSet()
 
-            override fun showAllInstancesDialog(domainFactory: DomainFactory, now: ExactTimeStamp.Local) = joinables.any {
-                val task = domainFactory.getTaskForce(it.taskKey)
-
-                if (it.instanceKey != null) {
-                    task.hasOtherVisibleInstances(now, it.instanceKey)
-                } else {
-                    task.getInstances(null, null, now)
-                        .filter { it.isVisible(now, com.krystianwsul.common.firebase.models.Instance.VisibilityOptions()) }
-                        .takeAndHasMore(1)
-                        .second
-                }
-            }
+            // todo join parameters no longer needed
+            override fun showAllInstancesDialog(domainFactory: DomainFactory, now: ExactTimeStamp.Local) = true
         }
     }
 

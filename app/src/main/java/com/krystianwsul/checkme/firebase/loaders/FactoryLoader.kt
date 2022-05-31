@@ -154,6 +154,13 @@ class FactoryLoader(
                         val foreignProjectsFactory =
                             ForeignProjectsFactory(foreignProjectsLoader, domainDisposable, rootModelChangeManager)
 
+                        val notificationStorageSingle = factoryProvider.notificationStorageFactory
+                            .getNotificationStorage()
+                            .cacheImmediate(domainDisposable)
+
+                        val shownFactorySingle =
+                            notificationStorageSingle.map(factoryProvider::newShownFactory).cacheImmediate(domainDisposable)
+
                         rootTasksFactory = RootTasksFactory(
                             rootTasksLoader,
                             userKeyStore,
@@ -163,6 +170,7 @@ class FactoryLoader(
                             rootModelChangeManager,
                             foreignProjectCoordinator,
                             foreignProjectsFactory,
+                            shownFactorySingle,
                         ) { projectsFactorySingle.getCurrentValue() }
 
                         RootTasksFactory.instanceRelay.accept(NullableWrapper(rootTasksFactory))
@@ -191,13 +199,6 @@ class FactoryLoader(
                             userKeyStore,
                             rootTaskKeySource,
                         )
-
-                        val notificationStorageSingle = factoryProvider.notificationStorageFactory
-                            .getNotificationStorage()
-                            .cacheImmediate(domainDisposable)
-
-                        val shownFactorySingle =
-                            notificationStorageSingle.map(factoryProvider::newShownFactory).cacheImmediate(domainDisposable)
 
                         projectsFactorySingle = Single.zip(
                             privateProjectLoader.initialProjectEvent.map {

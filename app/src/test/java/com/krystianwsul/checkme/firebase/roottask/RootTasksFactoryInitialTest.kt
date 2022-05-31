@@ -2,10 +2,12 @@ package com.krystianwsul.checkme.firebase.roottask
 
 import com.krystianwsul.checkme.firebase.foreignProjects.ForeignProjectCoordinator
 import com.krystianwsul.checkme.firebase.foreignProjects.ForeignProjectsFactory
+import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
 import io.mockk.every
 import io.mockk.mockk
 import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import org.junit.After
 import org.junit.Assert.assertTrue
@@ -32,6 +34,8 @@ class RootTasksFactoryInitialTest {
         val foreignProjectCoordinator = mockk<ForeignProjectCoordinator>(relaxed = true)
         val foreignProjectsFactory = mockk<ForeignProjectsFactory>(relaxed = true)
 
+        val shownFactory = mockk<Instance.ShownFactory>(relaxed = true)
+
         val rootTasksFactory = RootTasksFactory(
             rootTasksLoader,
             mockk(),
@@ -41,6 +45,7 @@ class RootTasksFactoryInitialTest {
             rootModelChangeManager,
             foreignProjectCoordinator,
             foreignProjectsFactory,
+            Single.just(shownFactory),
             mockk(),
         )
 

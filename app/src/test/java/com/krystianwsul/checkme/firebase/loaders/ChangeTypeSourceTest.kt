@@ -178,6 +178,8 @@ class ChangeTypeSourceTest {
         val foreignProjectCoordinator = mockk<ForeignProjectCoordinator>(relaxed = true)
         val foreignProjectsFactory = mockk<ForeignProjectsFactory>(relaxed = true)
 
+        val shownFactory = mockk<Instance.ShownFactory>()
+
         rootTasksFactory = RootTasksFactory(
             rootTasksLoader,
             userKeyStore,
@@ -187,6 +189,7 @@ class ChangeTypeSourceTest {
             existingInstanceChangeManager,
             foreignProjectCoordinator,
             foreignProjectsFactory,
+            Single.just(shownFactory),
         ) { projectsFactory }
 
         val privateProjectManager = AndroidPrivateProjectManager(DomainFactoryRule.deviceDbInfo.userInfo)
@@ -221,8 +224,6 @@ class ChangeTypeSourceTest {
             userKeyStore,
             rootTaskKeySource,
         )
-
-        val shownFactory = mockk<Instance.ShownFactory>()
 
         val projectsFactorySingle = Single.zip(
             privateProjectLoader.initialProjectEvent.map {

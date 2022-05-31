@@ -687,6 +687,15 @@ sealed class Task(
         nestedTaskHierarchy.invalidateTasks()
     }
 
+    fun fixNotificationShown(
+        shownFactory: Instance.ShownFactory,
+        now: ExactTimeStamp.Local,
+    ) {
+        existingInstances
+            .values
+            .forEach { it.fixNotificationShown(shownFactory, now) }
+    }
+
     interface ScheduleTextFactory {
 
         fun getScheduleText(scheduleGroup: ScheduleGroup, customTimeProvider: JsonTime.CustomTimeProvider): String

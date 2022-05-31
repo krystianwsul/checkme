@@ -4,14 +4,15 @@ import com.jakewharton.rxrelay3.BehaviorRelay
 import com.jakewharton.rxrelay3.PublishRelay
 import com.krystianwsul.checkme.firebase.foreignProjects.ForeignProjectCoordinator
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
+import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
 import com.krystianwsul.common.firebase.models.task.RootTask
 import com.krystianwsul.common.firebase.records.task.RootTaskRecord
+import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.TaskKey
+import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.CompositeDisposable
-import io.reactivex.rxjava3.kotlin.merge
-import io.reactivex.rxjava3.kotlin.ofType
-import io.reactivex.rxjava3.kotlin.plusAssign
+import io.reactivex.rxjava3.kotlin.*
 import io.reactivex.rxjava3.observables.ConnectableObservable
 import io.reactivex.rxjava3.observables.GroupedObservable
 
@@ -22,6 +23,7 @@ class RootTaskFactory(
     addChangeEvents: GroupedObservable<TaskKey.Root, RootTasksLoader.AddChangeEvent>,
     private val rootModelChangeManager: RootModelChangeManager,
     private val foreignProjectCoordinator: ForeignProjectCoordinator,
+    private val shownFactorySingle: Single<Instance.ShownFactory>,
 ) {
 
     private val taskKey = addChangeEvents.key
@@ -71,8 +73,14 @@ class RootTaskFactory(
                 task = it.task
 
                 if (it.task != null) {
+                    val task = it.task!!
+
                     if (isAdd) {
-                        foreignProjectCoordinator.onTaskAdded(it.task!!)
+                        shownFactorySingle.subscribeBy {
+                            task.fixNotificationShown(it, ExactTimeStamp.Local.now)
+                        }.addTo(domainDisposable)
+
+                        foreignProjectCoordinator.onTaskAdded(task)
                     } else {
                         foreignProjectCoordinator.onTaskChanged()
                     }

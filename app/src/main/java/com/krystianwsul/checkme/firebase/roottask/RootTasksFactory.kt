@@ -23,6 +23,7 @@ import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.*
 import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.merge
@@ -37,6 +38,7 @@ class RootTasksFactory(
     override val rootModelChangeManager: RootModelChangeManager,
     private val foreignProjectCoordinator: ForeignProjectCoordinator,
     private val foreignProjectsFactory: ForeignProjectsFactory,
+    private val shownFactorySingle: Single<Instance.ShownFactory>,
     private val getProjectsFactory: () -> OwnedProjectsFactory,
 ) : RootTask.Parent {
 
@@ -78,6 +80,7 @@ class RootTasksFactory(
                         group,
                         rootModelChangeManager,
                         foreignProjectCoordinator,
+                        shownFactorySingle,
                     )
                 }
             }

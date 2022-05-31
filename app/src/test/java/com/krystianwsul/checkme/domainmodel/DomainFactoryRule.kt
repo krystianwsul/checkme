@@ -35,6 +35,7 @@ import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.json.projects.PrivateOwnedProjectJson
 import com.krystianwsul.common.firebase.json.tasks.RootTaskJson
 import com.krystianwsul.common.firebase.json.users.UserWrapper
+import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
 import com.krystianwsul.common.firebase.records.project.PrivateOwnedProjectRecord
 import com.krystianwsul.common.time.Date
@@ -45,6 +46,7 @@ import com.mindorks.scheduler.RxPS
 import io.mockk.*
 import io.reactivex.rxjava3.android.plugins.RxAndroidPlugins
 import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.plugins.RxJavaPlugins
 import io.reactivex.rxjava3.schedulers.Schedulers
@@ -225,6 +227,8 @@ class DomainFactoryRule : TestRule {
         val foreignProjectCoordinator = mockk<ForeignProjectCoordinator>(relaxed = true)
         val foreignProjectsFactory = mockk<ForeignProjectsFactory>(relaxed = true)
 
+        val shownFactory = mockk<Instance.ShownFactory>(relaxed = true)
+
         val rootTaskFactory = RootTasksFactory(
             rootTasksLoader,
             mockk(relaxed = true),
@@ -234,6 +238,7 @@ class DomainFactoryRule : TestRule {
             rootModelChangeManager,
             foreignProjectCoordinator,
             foreignProjectsFactory,
+            Single.just(shownFactory),
         ) { projectsFactory }
 
         val sharedProjectsLoader = SharedProjectsLoader.Impl(
@@ -265,7 +270,7 @@ class DomainFactoryRule : TestRule {
             sharedProjectsLoader,
             ProjectsLoader.InitialProjectsEvent(listOf()),
             domainFactoryStartTime,
-            mockk(relaxed = true),
+            shownFactory,
             compositeDisposable,
             rootTaskFactory,
             rootModelChangeManager,

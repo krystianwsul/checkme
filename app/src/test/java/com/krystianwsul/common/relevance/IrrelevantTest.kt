@@ -31,6 +31,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.spyk
 import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import org.junit.After
 import org.junit.Assert.*
@@ -135,6 +136,8 @@ class IrrelevantTest {
         val foreignProjectCoordinator = mockk<ForeignProjectCoordinator>(relaxed = true)
         val foreignProjectsFactory = mockk<ForeignProjectsFactory>(relaxed = true)
 
+        val shownFactory = mockk<Instance.ShownFactory>(relaxed = true)
+
         val rootTasksFactory = RootTasksFactory(
             rootTaskLoader,
             mockk(),
@@ -146,6 +149,7 @@ class IrrelevantTest {
             rootModelChangeManager,
             foreignProjectCoordinator,
             foreignProjectsFactory,
+            Single.just(shownFactory),
         ) { projectsFactory }
 
         project = PrivateOwnedProject(projectRecord, mockk(), rootTasksFactory, rootModelChangeManager)

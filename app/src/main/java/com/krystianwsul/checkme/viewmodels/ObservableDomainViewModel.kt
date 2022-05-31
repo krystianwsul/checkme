@@ -57,6 +57,8 @@ abstract class ObservableDomainViewModel<D : DomainData, P : ObservableDomainVie
         }
 
         fun dispose() {
+            domainListener.stop()
+
             disposable?.dispose()
             disposable = null
         }

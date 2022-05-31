@@ -9,7 +9,7 @@ import com.krystianwsul.common.utils.TaskKey
 
 // used in RelevanceChecker
 fun checkInconsistentRootTaskIds(rootTasks: Collection<RootTask>, projects: Collection<OwnedProject<*>>) {
-    val rootTaskProjectKeys = rootTasks.associate { it.taskKey to it.project.projectKey }
+    val rootTaskProjectKeys = rootTasks.associate { it.taskKey to it.getTopLevelTask().project.projectKey }
 
     val rootTasksInProjectKeys = projects.flatMap { project ->
         project.projectRecord

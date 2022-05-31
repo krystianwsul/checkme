@@ -3,10 +3,10 @@ package com.krystianwsul.checkme.domainmodel
 import com.krystianwsul.checkme.domainmodel.extensions.createProject
 import com.krystianwsul.checkme.domainmodel.extensions.createScheduleJoinTopLevelTask
 import com.krystianwsul.checkme.domainmodel.extensions.createScheduleTopLevelTask
-import com.krystianwsul.checkme.domainmodel.notifications.Notifier
 import com.krystianwsul.checkme.firebase.roottask.RootTasksFactory
 import com.krystianwsul.checkme.gui.edit.EditParameters
 import com.krystianwsul.checkme.gui.edit.delegates.EditDelegate
+import com.krystianwsul.common.firebase.models.checkInconsistentRootTaskIds
 import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.ScheduleData
@@ -113,7 +113,10 @@ class ForeignProjectRootTaskIdTest {
 
         assertTrue(privateProject.projectRecord.rootTaskParentDelegate.rootTaskKeys.isEmpty())
 
-        Notifier.setIrrelevant(domainFactory, now)
+        checkInconsistentRootTaskIds(
+            domainFactory.rootTasksFactory.getRootTasks(),
+            domainFactory.projectsFactory.projects.values
+        )
     }
 
     @Test
@@ -180,6 +183,9 @@ class ForeignProjectRootTaskIdTest {
         assertTrue(privateProject.containsRootTaskId(childTaskKey1))
         assertTrue(privateProject.containsRootTaskId(childTaskKey2))
 
-        Notifier.setIrrelevant(domainFactory, now)
+        checkInconsistentRootTaskIds(
+            domainFactory.rootTasksFactory.getRootTasks(),
+            domainFactory.projectsFactory.projects.values
+        )
     }
 }

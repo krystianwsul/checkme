@@ -460,7 +460,7 @@ fun DomainUpdater.setFirebaseTickListener(newTickData: TickData): Completable {
 fun <T> DomainFactory.trackRootTaskIds(action: () -> T): T =
     ProjectRootTaskIdTracker.trackRootTaskIds(
         { rootTasksFactory.rootTasks },
-        { projectsFactory.projects },
+        { projectsFactory.projects + foreignProjectsFactory.projects },
         rootTasksFactory,
         action,
     )

@@ -2,6 +2,7 @@ package com.krystianwsul.common.firebase.models.task
 
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.project.OwnedProject
+import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.common.utils.singleOrEmpty
@@ -18,7 +19,7 @@ class ProjectRootTaskIdTracker {
 
         fun <T> trackRootTaskIds(
             getRootTasks: () -> Map<TaskKey.Root, RootTask>,
-            getProjects: () -> Map<ProjectKey<*>, OwnedProject<*>>,
+            getProjects: () -> Map<ProjectKey<*>, Project<*>>,
             rootTaskProvider: OwnedProject.RootTaskProvider,
             action: () -> T,
         ): T {

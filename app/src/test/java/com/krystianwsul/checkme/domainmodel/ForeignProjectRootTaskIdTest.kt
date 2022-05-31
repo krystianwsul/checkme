@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.domainmodel
 import com.krystianwsul.checkme.domainmodel.extensions.createProject
 import com.krystianwsul.checkme.domainmodel.extensions.createScheduleJoinTopLevelTask
 import com.krystianwsul.checkme.domainmodel.extensions.createScheduleTopLevelTask
+import com.krystianwsul.checkme.domainmodel.notifications.Notifier
 import com.krystianwsul.checkme.firebase.roottask.RootTasksFactory
 import com.krystianwsul.checkme.gui.edit.EditParameters
 import com.krystianwsul.checkme.gui.edit.delegates.EditDelegate
@@ -108,5 +109,7 @@ class ForeignProjectRootTaskIdTest {
         assertTrue(sharedProject.containsRootTaskId(childTaskKey2))
 
         assertTrue(privateProject.projectRecord.rootTaskParentDelegate.rootTaskKeys.isEmpty())
+
+        Notifier.setIrrelevant(domainFactory, now)
     }
 }

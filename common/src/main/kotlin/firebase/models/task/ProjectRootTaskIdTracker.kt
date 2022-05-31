@@ -101,7 +101,7 @@ class ProjectRootTaskIdTracker {
         }
 
         private fun getProjectTaskMap(rootTasks: Map<TaskKey.Root, RootTask>) =
-            rootTasks.values.groupBy { it.projectId } // don't use project key, since project may not be loaded
+            rootTasks.values.groupBy { it.getTopLevelTask().projectId } // don't use project key, since project may not be loaded
 
         private fun createRootTaskIdGraphs(rootTasks: Map<TaskKey.Root, RootTask>): List<Set<TaskKey.Root>> {
             val graphs = mutableListOf<MutableSet<TaskKey.Root>>()

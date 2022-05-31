@@ -259,6 +259,7 @@ fun DomainFactory.getCreateTaskParentPickerData(
         ?.let { getTaskForce(it) }
         ?.takeIf { it.isTopLevelTask() }
         ?.project
+        ?.takeUnless { it is PrivateOwnedProject }
 
     val parentTreeDatas = getParentTreeDatas(
         now,

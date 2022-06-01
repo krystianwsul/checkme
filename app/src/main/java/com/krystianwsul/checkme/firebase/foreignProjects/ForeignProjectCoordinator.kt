@@ -99,7 +99,7 @@ interface ForeignProjectCoordinator {
                 override fun addTask(task: RootTask) = this
 
                 override fun resolve(getAllTasks: () -> Collection<RootTask>) =
-                    Valid(getAllTasks().mapNotNull { it.projectKey }.toSet())
+                    Valid(getAllTasks().mapNotNull { it.directDependencyProjectKey }.toSet())
             }
         }
     }

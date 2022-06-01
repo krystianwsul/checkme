@@ -1,15 +1,15 @@
 package com.krystianwsul.common.firebase.models.schedule
 
 
+import com.krystianwsul.common.firebase.models.DirectTaskParentEntry
 import com.krystianwsul.common.firebase.models.ProjectIdOwner
-import com.krystianwsul.common.firebase.models.TaskParentEntry
 import com.krystianwsul.common.firebase.models.interval.ScheduleInterval
 import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.firebase.records.schedule.ScheduleRecord
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.*
 
-sealed class Schedule(val topLevelTask: Task) : TaskParentEntry, ProjectIdOwner {
+sealed class Schedule(val topLevelTask: Task) : DirectTaskParentEntry, ProjectIdOwner {
 
     protected abstract val scheduleRecord: ScheduleRecord
 
@@ -43,11 +43,11 @@ sealed class Schedule(val topLevelTask: Task) : TaskParentEntry, ProjectIdOwner 
 
     val time get() = timePair.toTime()
 
-    val projectId get() = scheduleRecord.projectId
-    val projectKey get() = scheduleRecord.projectKey
+    override val projectId get() = scheduleRecord.projectId
+    override val projectKey get() = scheduleRecord.projectKey
 
     protected fun TimePair.toTime() =
-            customTimeKey?.let(topLevelTask.customTimeProvider::getCustomTime) ?: Time.Normal(hourMinute!!)
+        customTimeKey?.let(topLevelTask.customTimeProvider::getCustomTime) ?: Time.Normal(hourMinute!!)
 
     private fun invalidateEnd() {
         endExactTimeStampProperty.invalidate()

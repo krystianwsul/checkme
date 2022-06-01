@@ -23,12 +23,15 @@ class RootTaskDependencyResolver(private val rootTask: RootTask) : Invalidatable
             val parent = rootTask.parent
 
             var project: Project<*>? = null
-            rootTask.projectKey?.let {
+
+            rootTask.directDependencyProjectKey?.let {
                 project = rootTask.parent.getProjectIfPresent(it)
 
                 if (project == null) {
                     val projectsRemovable =
-                        rootModelChangeManager.foreignProjectLoadedInvalidatableManager.addInvalidatable(invalidatableCache)
+                        rootModelChangeManager.foreignProjectLoadedInvalidatableManager.addInvalidatable(
+                            invalidatableCache
+                        )
 
                     return@invalidatableCache InvalidatableCache.ValueHolder(DirectDependencyState.Absent) {
                         projectsRemovable.remove()

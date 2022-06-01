@@ -153,7 +153,7 @@ object Irrelevant {
                 irrelevantNoScheduleOrParents += it.noScheduleOrParents - relevantNoScheduleOrParents
 
                 (it as? RootTask)?.let {
-                    when (val taskParentEntry = it.getProjectIdTaskParentEntry()) {
+                    when (val taskParentEntry = it.intervalInfo.projectIdTaskParentEntry) {
                         // schedules handled elsewhere
                         is NoScheduleOrParent -> check(taskParentEntry in relevantNoScheduleOrParents)
                         is NestedTaskHierarchy ->

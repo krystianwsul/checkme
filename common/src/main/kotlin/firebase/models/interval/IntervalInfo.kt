@@ -1,5 +1,6 @@
 package com.krystianwsul.common.firebase.models.interval
 
+import com.krystianwsul.common.firebase.models.noscheduleorparent.RootNoScheduleOrParent
 import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.time.ExactTimeStamp
 
@@ -38,6 +39,20 @@ class IntervalInfo(val task: Task, val intervals: List<Interval>) {
                 .filter { it.schedule.notDeleted }
         }
     }
+
+    val projectIdTaskParentEntry by lazy {
+        val interval = intervals.last()
+
+        when (val type = interval.type) {
+            is Type.Schedule -> type.getParentProjectSchedule()
+            is Type.NoSchedule -> type.noScheduleOrParent
+                ?.let { it as? RootNoScheduleOrParent }
+                ?: throw NoScheduleOrParentException()
+            is Type.Child -> type.parentTaskHierarchy
+        }
+    }
+
+    private inner class NoScheduleOrParentException : Exception("task ${task.name}, ${task.taskKey}")
 
     fun getCurrentScheduleIntervals(exactTimeStamp: ExactTimeStamp): List<ScheduleInterval> {
         task.requireCurrentOffset(exactTimeStamp)

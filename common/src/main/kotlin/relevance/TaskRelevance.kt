@@ -119,7 +119,7 @@ class TaskRelevance(val task: Task) {
             .map { scheduleRelevances.getOrPut(it.schedule) }
             .forEach { it.setRelevant() }
 
-        (task as? RootTask)?.let { it.getProjectIdTaskParentEntry() as? Schedule }
+        (task as? RootTask)?.let { it.intervalInfo.projectIdTaskParentEntry as? Schedule }
             ?.also { scheduleRelevances.getOrPut(it).setRelevant() }
             ?.let { it as? SingleSchedule }
             ?.let { it.getInstance(it.topLevelTask) }

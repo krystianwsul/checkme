@@ -43,6 +43,10 @@ sealed class Type {
         fun getScheduleIntervals(interval: Interval) = schedules.map {
             ScheduleInterval(interval.startExactTimeStampOffset, interval.endExactTimeStampOffset, it)
         }
+
+        fun getParentProjectSchedule() = taskParentEntries.sortedWith(
+            compareByDescending<com.krystianwsul.common.firebase.models.schedule.Schedule> { it.startExactTimeStamp }.thenByDescending { it.id }
+        ).first()
     }
 
     data class NoSchedule(val noScheduleOrParent: NoScheduleOrParent? = null) : Type() {

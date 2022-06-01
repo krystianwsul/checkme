@@ -91,7 +91,7 @@ interface ForeignProjectCoordinator {
                 }
 
                 override fun resolve(getAllTasks: () -> Collection<RootTask>) =
-                    Valid(oldTaskProjectKeys + tasks.distinct().mapNotNull { it.projectKey })
+                    Valid(oldTaskProjectKeys + tasks.distinct().mapNotNull { it.directDependencyProjectKey })
             }
 
             object Invalidated : TaskQueueState() {

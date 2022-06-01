@@ -111,5 +111,4 @@
     <orderEntry type="library" scope="TEST" name="Gradle: com.soywiz.korlibs.klock:klock-android:2.2.2@aar" level="project" />
     <orderEntry type="library" scope="TEST" name="Gradle: net.danlew:android.joda:2.10.12@aar" level="project" />
   </component>
-  <component name="TestModuleProperties" production-module="Check.me.common2.main" />
 </module>

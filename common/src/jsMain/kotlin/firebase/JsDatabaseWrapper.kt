@@ -2,7 +2,7 @@ package com.krystianwsul.common.firebase
 
 import com.krystianwsul.common.ErrorLogger
 import com.krystianwsul.common.firebase.json.JsonWrapper
-import com.krystianwsul.common.firebase.json.projects.PrivateProjectJson
+import com.krystianwsul.common.firebase.json.projects.PrivateOwnedProjectJson
 import com.krystianwsul.common.firebase.json.tasks.RootTaskJson
 import com.krystianwsul.common.firebase.json.users.ProjectOrdinalEntryJson
 import com.krystianwsul.common.firebase.json.users.UserWrapper
@@ -46,7 +46,7 @@ class JsDatabaseWrapper(admin: dynamic, root: String) : DatabaseWrapper() {
         }
     }
 
-    fun getPrivateProjects(callback: (Map<String, PrivateProjectJson>) -> Unit) {
+    fun getPrivateProjects(callback: (Map<String, PrivateOwnedProjectJson>) -> Unit) {
         rootReference.child(PRIVATE_PROJECTS_KEY).once("value") { snapshot ->
             callback(parse(PrivateProjects.serializer(), object {
 
@@ -57,7 +57,7 @@ class JsDatabaseWrapper(admin: dynamic, root: String) : DatabaseWrapper() {
     }
 
     @Serializable
-    private class PrivateProjects(val privateProjectJsons: Map<String, PrivateProjectJson>? = null)
+    private class PrivateProjects(val privateProjectJsons: Map<String, PrivateOwnedProjectJson>? = null)
 
     fun getSharedProjects(callback: (Map<String, JsonWrapper>) -> Unit) {
         rootReference.child(RECORDS_KEY).once("value") { snapshot ->

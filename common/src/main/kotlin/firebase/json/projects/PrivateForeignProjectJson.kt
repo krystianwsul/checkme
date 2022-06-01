@@ -2,6 +2,7 @@ package com.krystianwsul.common.firebase.json.projects
 
 import com.krystianwsul.common.firebase.json.DeepCopy
 import kotlinx.serialization.Serializable
+import kotlin.jvm.JvmOverloads
 
 @Serializable
 data class PrivateForeignProjectJson @JvmOverloads constructor(

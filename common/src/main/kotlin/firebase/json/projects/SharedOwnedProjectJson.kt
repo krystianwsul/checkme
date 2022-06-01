@@ -5,6 +5,7 @@ import com.krystianwsul.common.firebase.json.taskhierarchies.ProjectTaskHierarch
 import com.krystianwsul.common.firebase.json.tasks.SharedTaskJson
 import com.krystianwsul.common.firebase.json.users.UserJson
 import kotlinx.serialization.Serializable
+import kotlin.jvm.JvmOverloads
 
 @Serializable
 data class SharedOwnedProjectJson @JvmOverloads constructor(

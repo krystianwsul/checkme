@@ -1,7 +1,7 @@
 import com.krystianwsul.common.ErrorLogger
 import com.krystianwsul.common.firebase.JsDatabaseWrapper
 import com.krystianwsul.common.firebase.json.JsonWrapper
-import com.krystianwsul.common.firebase.json.projects.PrivateProjectJson
+import com.krystianwsul.common.firebase.json.projects.PrivateOwnedProjectJson
 import com.krystianwsul.common.firebase.json.tasks.RootTaskJson
 import com.krystianwsul.common.firebase.json.tasks.TaskJson
 import com.krystianwsul.common.firebase.json.users.UserWrapper
@@ -11,9 +11,11 @@ import com.krystianwsul.common.firebase.managers.JsRootUserManager
 import com.krystianwsul.common.firebase.managers.JsSharedProjectManager
 import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
 import com.krystianwsul.common.firebase.models.checkInconsistentRootTaskIds
-import com.krystianwsul.common.firebase.models.project.PrivateProject
+import com.krystianwsul.common.firebase.models.project.OwnedProject
+import com.krystianwsul.common.firebase.models.project.PrivateOwnedProject
 import com.krystianwsul.common.firebase.models.project.Project
 import com.krystianwsul.common.firebase.models.project.SharedProject
+import com.krystianwsul.common.firebase.models.project.SharedOwnedProject
 import com.krystianwsul.common.firebase.models.task.RootTask
 import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.firebase.models.taskhierarchy.TaskHierarchy
@@ -60,7 +62,7 @@ object RelevanceChecker {
 
             var userWrapperMapTmp: Map<String, UserWrapper>? = null
             var rootTaskMapTmp: Map<String, RootTaskJson>? = null
-            var privateProjectMapTmp: Map<String, PrivateProjectJson>? = null
+            var privateProjectMapTmp: Map<String, PrivateOwnedProjectJson>? = null
             var sharedProjectMapTmp: Map<String, JsonWrapper>? = null
 
             fun proceed() {
@@ -93,7 +95,7 @@ object RelevanceChecker {
 
                     val rootTaskManager = JsRootTasksManager(databaseWrapper, rootTaskMap)
 
-                    lateinit var projectMap: Map<ProjectKey<*>, Project<*>>
+                    lateinit var projectMap: Map<ProjectKey<*>, OwnedProject<*>>
                     lateinit var rootTasksByTaskKey: MutableMap<TaskKey.Root, RootTask>
                     lateinit var rootTasksByProjectId: MutableMap<String, MutableSet<RootTask>>
 
@@ -122,7 +124,11 @@ object RelevanceChecker {
                             // this is just for loading
                         }
 
-                        override fun getProject(projectId: String): Project<*> {
+                        override fun getProjectIfPresent(projectKey: ProjectKey<*>): Project<*> {
+                            return projectMap.getValue(projectKey)
+                        }
+
+                        override fun getOwnedProjectIfPresent(projectId: String): OwnedProject<*> {
                             return projectMap.entries
                                 .single { it.key.key == projectId }
                                 .value
@@ -140,9 +146,9 @@ object RelevanceChecker {
                             }
                         }
 
-                        override fun getRootTasksForProject(projectKey: ProjectKey<*>): Collection<RootTask> {
-                            return rootTasksByProjectId[projectKey.key].orEmpty()
-                        }
+                        //override fun getRootTasksForProject(projectKey: ProjectKey<*>): Collection<RootTask> {
+                        //    return rootTasksByProjectId[projectKey.key].orEmpty()
+                        //}
 
                         override fun getTaskHierarchiesByParentTaskKey(parentTaskKey: TaskKey): Set<TaskHierarchy> {
                             return rootTasksByTaskKey.flatMap { it.value.nestedParentTaskHierarchies.values }
@@ -160,6 +166,8 @@ object RelevanceChecker {
                             .asSequence()
                             .flatMap { it.getAllDependenciesLoadedTasks() }
                             .flatMap { it.existingInstances.values }
+
+                        override fun getRootTasks() = rootTasksByTaskKey.values
                     }
 
                     rootTasksByTaskKey = rootTaskManager.records
@@ -178,7 +186,7 @@ object RelevanceChecker {
 
                     val privateProjects = privateProjectManager.value
                         .map {
-                            PrivateProject(
+                            PrivateOwnedProject(
                                 it,
                                 userCustomTimeProvider,
                                 rootTaskParent,
@@ -190,7 +198,7 @@ object RelevanceChecker {
                     val sharedProjects = sharedProjectManager.records
                         .values
                         .map {
-                            SharedProject(
+                            SharedOwnedProject(
                                 it,
                                 userCustomTimeProvider,
                                 rootTaskParent,

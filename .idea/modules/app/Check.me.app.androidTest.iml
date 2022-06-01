@@ -284,5 +284,4 @@
     <orderEntry type="library" scope="TEST" name="Gradle: com.tomash:androidcontacts:1.14.0@aar" level="project" />
     <orderEntry type="library" scope="TEST" name="Gradle: com.akexorcist:localization:1.2.11@aar" level="project" />
   </component>
-  <component name="TestModuleProperties" production-module="Check.me.app.main" />
 </module>

@@ -475,6 +475,8 @@ open class NotificationWrapperImpl : NotificationWrapper() {
             return
         }
 
+        if (tag == null) Preferences.fcmLog.logLineHour("showing/updating notification $title")
+
         val notification = getNotificationBuilder(
             title,
             text,

@@ -10,6 +10,11 @@ class TokenDelegate(
     private val addValue: (String, Any?) -> Unit,
 ) {
 
+    companion object {
+
+        lateinit var serverTimestamp: Map<String, String>
+    }
+
     fun setToken(deviceDbInfo: DeviceDbInfo, versionInfo: VersionInfo) {
         if (userJson.tokens[deviceDbInfo.uuid] != deviceDbInfo.token) {
             userJson.tokens[deviceDbInfo.uuid] = deviceDbInfo.token
@@ -45,5 +50,7 @@ class TokenDelegate(
 
             addValue("$deviceDataPrefix/osVersion", versionInfo.osVersion)
         }
+
+        addValue("$deviceDataPrefix/lastSeen", serverTimestamp)
     }
 }

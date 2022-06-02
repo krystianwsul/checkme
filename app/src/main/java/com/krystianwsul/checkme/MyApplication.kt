@@ -21,6 +21,7 @@ import com.github.tamir7.contacts.Contacts
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.Logger
+import com.google.firebase.database.ServerValue
 import com.google.firebase.messaging.FirebaseMessaging
 import com.jakewharton.rxrelay3.BehaviorRelay
 import com.krystianwsul.checkme.domainmodel.*
@@ -41,6 +42,7 @@ import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.VersionInfo
 import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.DomainThreadChecker
+import com.krystianwsul.common.firebase.records.users.TokenDelegate
 import com.miguelbcr.ui.rx_paparazzo2.RxPaparazzo
 import com.mindorks.scheduler.Priority
 import com.pacoworks.rxpaper2.RxPaperBook
@@ -123,6 +125,8 @@ class MyApplication : Application() {
 
         Preferences.language.applySettingStartup()
         Preferences.tickLog.logLineDate("MyApplication.onCreate")
+
+        TokenDelegate.serverTimestamp = ServerValue.TIMESTAMP
 
         FirebaseDatabase.getInstance().apply {
             setLogLevel(Logger.Level.DEBUG)

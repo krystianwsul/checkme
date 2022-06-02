@@ -38,6 +38,7 @@ import com.krystianwsul.common.firebase.json.users.UserWrapper
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.cache.RootModelChangeManager
 import com.krystianwsul.common.firebase.records.project.PrivateOwnedProjectRecord
+import com.krystianwsul.common.firebase.records.users.TokenDelegate
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.HourMinute
@@ -158,6 +159,8 @@ class DomainFactoryRule : TestRule {
 
         mockkObject(TaskPriorityMapperQueue)
         every { TaskPriorityMapperQueue.delayObservable } returns Observable.just(DomainFactoryInitializationDelayProvider.Default)
+
+        TokenDelegate.serverTimestamp = mapOf()
     }
 
     private fun before() {

@@ -16,14 +16,9 @@ class MyUserRecord(
     userKey: UserKey,
 ) : RootUserRecord(databaseWrapper, create, createObject, userKey), MyUserProperties {
 
-    override fun setToken(deviceDbInfo: DeviceDbInfo) {
-        if (deviceDbInfo.token == userJson.tokens[deviceDbInfo.uuid]) return
+    private val tokenDelegate = TokenDelegate("$key/$USER_DATA", userJson, ::addValue)
 
-        userJson.tokens[deviceDbInfo.uuid] = deviceDbInfo.token
-
-        addValue("$key/$USER_DATA/tokens/${deviceDbInfo.uuid}", deviceDbInfo.token)
-        addValue("$key/$USER_DATA/uid", deviceDbInfo.userInfo.uid)
-    }
+    override fun setToken(deviceDbInfo: DeviceDbInfo) = tokenDelegate.setToken(deviceDbInfo)
 
     override var photoUrl by Committer(userJson::photoUrl, "$key/$USER_DATA")
 

@@ -15,15 +15,9 @@ class OwnedProjectUserRecord(
 
     override var photoUrl by Committer(createObject::photoUrl)
 
-    fun setToken(deviceDbInfo: DeviceDbInfo) {
-        check(deviceDbInfo.uuid.isNotEmpty())
+    private val tokenDelegate = TokenDelegate(key, createObject, ::addValue)
 
-        if (deviceDbInfo.deviceInfo.token == createObject.tokens[deviceDbInfo.uuid])
-            return
-
-        createObject.tokens[deviceDbInfo.uuid] = deviceDbInfo.deviceInfo.token
-        addValue("$key/tokens/${deviceDbInfo.uuid}", deviceDbInfo.deviceInfo.token)
-    }
+    fun setToken(deviceDbInfo: DeviceDbInfo) = tokenDelegate.setToken(deviceDbInfo)
 
     override fun deleteFromParent() = check(remoteProjectRecord.userRecords.remove(id) == this)
 }

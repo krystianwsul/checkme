@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.domainmodel.extensions
 
-import android.util.Log
 import androidx.annotation.CheckResult
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
@@ -716,8 +715,6 @@ private fun DomainFactory.getParentTreeDatas(
     searchContext: SearchContext,
     forcedProject: Project<*>?,
 ): List<EditViewModel.ParentEntryData> {
-    Log.e("asdf", "magic searchCriteria $searchContext")
-
     val parentTreeDatas = mutableListOf<EditViewModel.ParentEntryData>()
 
     parentTreeDatas += searchContext.search {
@@ -750,6 +747,7 @@ private fun DomainFactory.getParentTreeDatas(
                 it
             }
         }
+        .distinct()
         .map { project ->
             EditViewModel.ParentEntryData.Project(
                 project.displayName,

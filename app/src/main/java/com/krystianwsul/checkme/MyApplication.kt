@@ -266,7 +266,6 @@ class MyApplication : Application() {
                     )
                 }
         }
-
     }
 
     fun getRxPaparazzoDir() = File(instance.filesDir.absolutePath + "/RxPaparazzo/")

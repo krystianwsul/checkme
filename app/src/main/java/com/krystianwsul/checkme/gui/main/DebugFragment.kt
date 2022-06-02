@@ -17,6 +17,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.unit.sp
 import arrow.core.Tuple5
 import com.google.android.material.composethemeadapter.MdcTheme
@@ -255,17 +256,17 @@ class DebugFragment : AbstractFragment() {
             }
             .addTo(viewCreatedDisposable)
 
-        val showNotificationLog = BehaviorRelay.createDefault(false)
+        showLogSection(binding.debugNotificationSection, Preferences.notificationLog, "NOTIFICATION LOG")
+        showLogSection(binding.debugFcmLog, Preferences.fcmLog, "FCM LOG")
+    }
 
-        viewCreatedDisposable += showNotificationLog.subscribe { show ->
-            binding.debugNotificationSection.setContent {
+    private fun showLogSection(composeView: ComposeView, logger: Preferences.Logger, description: String) {
+        val showSection = BehaviorRelay.createDefault(false)
+
+        viewCreatedDisposable += showSection.subscribe { show ->
+            composeView.setContent {
                 MdcTheme {
-                    NotificationSection(
-                        onClick = { showNotificationLog.accept(!show) },
-                        text = Preferences.notificationLog
-                            .log
-                            .takeIf { show },
-                    )
+                    LogSection(description, logger.takeIf { show }?.log) { showSection.accept(!show) }
                 }
             }
         }
@@ -312,16 +313,13 @@ class DebugFragment : AbstractFragment() {
     }
 
     @Composable
-    private fun NotificationSection(onClick: () -> Unit, text: String?) {
+    private fun LogSection(description: String, logText: String?, onClick: () -> Unit) {
         Column {
-            Button(
-                modifier = Modifier.fillMaxWidth(),
-                onClick = onClick,
-            ) {
-                Text((if (text == null) "SHOW" else "HIDE") + " NOTIFICATION LOG")
+            Button(onClick, Modifier.fillMaxWidth()) {
+                Text((if (logText == null) "SHOW" else "HIDE") + " " + description)
             }
 
-            text?.let { Text(it, fontSize = 14.sp) }
+            logText?.let { Text(it, fontSize = 14.sp) }
         }
     }
 }

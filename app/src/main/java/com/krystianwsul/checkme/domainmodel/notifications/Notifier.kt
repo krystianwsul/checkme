@@ -110,6 +110,7 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
 
         fun cancelNotificationDatas() {
             notificationDatas.filterIsInstance<NotificationData.Cancel>().forEach {
+                Preferences.fcmLog.logLineHour("canceling notification for " + it.instanceName)
                 notificationWrapper.cancelNotification(it.instanceId)
             }
         }
@@ -124,8 +125,8 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
             notificationDatas += NotificationData.Notify(instance)
         }
 
-        fun cancelInstance(instanceId: Int) {
-            notificationDatas += NotificationData.Cancel(instanceId)
+        fun cancelInstance(instanceId: Int, instanceName: String) {
+            notificationDatas += NotificationData.Cancel(instanceId, instanceName)
         }
 
         val notificationInstances: Map<InstanceKey, Instance>
@@ -204,7 +205,7 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
             .map { it to domainFactory.tryGetTask(it.key.taskKey) }
 
         instanceShownPairs.filter { it.second == null }.forEach { (instanceShownEntry, _) ->
-            cancelInstance(Instance.getNotificationId(instanceShownEntry.key))
+            cancelInstance(Instance.getNotificationId(instanceShownEntry.key), "unknown")
 
             instanceShownEntry.value.notificationShown = false
         }
@@ -246,7 +247,7 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
                 for (hideInstanceKey in hideInstanceKeys) {
                     val instance = domainFactory.getInstance(hideInstanceKey)
                     Preferences.tickLog.logLineHour("hiding '" + instance.name + "'")
-                    cancelInstance(instance.notificationId)
+                    cancelInstance(instance.notificationId, instance.name)
                 }
 
                 for (showInstanceKey in showInstanceKeys) {
@@ -276,7 +277,7 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
 
                 fun Collection<InstanceKey>.cancelNotifications() = map(domainFactory::getInstance).forEach {
                     Preferences.tickLog.logLineHour("hiding '" + it.name + "'")
-                    cancelInstance(it.notificationId)
+                    cancelInstance(it.notificationId, it.name)
                 }
 
                 val wereMaxShown = shownInstanceKeys.size > MAX_NOTIFICATIONS_Q
@@ -389,7 +390,7 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
 
     private sealed class NotificationData {
 
-        data class Cancel(val instanceId: Int) : NotificationData()
+        data class Cancel(val instanceId: Int, val instanceName: String) : NotificationData()
 
         data class Notify(val instance: Instance, val silent: Boolean = true) : NotificationData()
     }

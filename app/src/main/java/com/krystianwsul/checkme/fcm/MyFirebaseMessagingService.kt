@@ -20,14 +20,20 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         val data = remoteMessage.data
 
+        Preferences.fcmLog.logLineHour("onMessageReceived: start")
+
         if (data.containsKey(REFRESH_KEY)) {
             check(data.getValue(REFRESH_KEY) == "true")
 
             if (MyApplication.instance.hasUserInfo) {
-                TickHolder.addTickData(TickData.Lock(
+                Preferences.fcmLog.logLineHour("onMessageReceived: adding tick data")
+
+                TickHolder.addTickData(
+                    TickData.Lock(
                         Notifier.Params("MyFirebaseMessagingService", false, true),
                         true,
-                ))
+                    )
+                )
             }
         } else {
             MyCrashlytics.logException(UnknownMessageException(data))

@@ -11,16 +11,16 @@ object TickHolder {
         newTickData.release()
 
         val notifierParams = Notifier.Params.merge(
-                listOf(oldTickData, newTickData).map { it.notifierParams },
+            listOf(oldTickData, newTickData).map { it.notifierParams },
         )!!
 
         val tickDatas = listOf(oldTickData, newTickData)
 
-        return if (tickDatas.any { it is TickData.Lock }) {
-            val lockTickDatas = tickDatas.filterIsInstance<TickData.Lock>()
+        val lockTickDatas = tickDatas.filterIsInstance<TickData.Lock>()
 
-            val expires = lockTickDatas.map { it.expires }.maxOrNull()!!
-            val domainChanged = lockTickDatas.map { it.domainChanged }.maxOrNull()!!
+        return if (lockTickDatas.isNotEmpty()) {
+            val expires = lockTickDatas.maxOf { it.expires }
+            val domainChanged = lockTickDatas.maxOf { it.domainChanged }
 
             TickData.Lock(notifierParams, domainChanged, expires)
         } else {

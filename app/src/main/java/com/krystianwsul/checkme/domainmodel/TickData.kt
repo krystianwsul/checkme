@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.domainmodel
 import android.content.Context
 import android.os.PowerManager
 import com.krystianwsul.checkme.MyApplication
+import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.notifications.Notifier
 import com.krystianwsul.checkme.utils.time.toExactTimeStamp
 import com.krystianwsul.common.time.ExactTimeStamp
@@ -44,6 +45,10 @@ sealed class TickData {
             .toExactTimeStamp(),
     ) : TickData() {
 
+        init {
+            Preferences.fcmLog.logLineHour("acquiring lock until $expires")
+        }
+
         companion object {
 
             private const val WAKELOCK_TAG = "Check.me:myWakelockTag"
@@ -51,7 +56,10 @@ sealed class TickData {
             private const val DURATION = 30 * 1000
         }
 
-        private val wakelock = (MyApplication.instance.getSystemService(Context.POWER_SERVICE) as PowerManager).newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, WAKELOCK_TAG)!!.apply {
+        private val wakelock = (MyApplication.instance.getSystemService(Context.POWER_SERVICE) as PowerManager).newWakeLock(
+            PowerManager.PARTIAL_WAKE_LOCK,
+            WAKELOCK_TAG
+        )!!.apply {
             acquire(expires.long - ExactTimeStamp.Local.now.long)
         }
 
@@ -60,6 +68,8 @@ sealed class TickData {
         override val waiting = true
 
         override fun release() {
+            Preferences.fcmLog.logLineHour("releasing wakeLock, isHeld? " + wakelock.isHeld)
+
             if (wakelock.isHeld)
                 wakelock.release()
         }

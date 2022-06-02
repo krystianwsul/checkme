@@ -111,6 +111,7 @@ class DomainFactory(
 
     init {
         Preferences.tickLog.logLineHour("DomainFactory.init start")
+        Preferences.fcmLog.logLineHour("DomainFactory.init")
 
         val now = ExactTimeStamp.Local.now
 
@@ -245,6 +246,7 @@ class DomainFactory(
 
     override fun onRemoteChange(now: ExactTimeStamp.Local) {
         MyCrashlytics.log("DomainFactory.onRemoteChange")
+        Preferences.fcmLog.logLineHour("DomainFactory.onRemoteChange")
 
         DomainThreadChecker.instance.requireDomainThread()
 

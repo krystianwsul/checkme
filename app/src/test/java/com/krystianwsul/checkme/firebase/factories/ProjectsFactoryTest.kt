@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.firebase.factories
 
 import com.jakewharton.rxrelay3.PublishRelay
+import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.domainmodel.DomainFactoryRule
 import com.krystianwsul.checkme.firebase.TestUserCustomTimeProviderSource
 import com.krystianwsul.checkme.firebase.loaders.*
@@ -452,7 +453,16 @@ class ProjectsFactoryTest {
     }
 
     private fun newUserJson() =
-        UserJson(name = userInfo.name, tokens = mutableMapOf(deviceDbInfo.uuid to deviceDbInfo.token))
+        UserJson(
+            name = userInfo.name,
+            tokens = mutableMapOf(deviceDbInfo.uuid to deviceDbInfo.token),
+            uid = deviceDbInfo.userInfo.uid,
+            deviceDatas = mutableMapOf(
+                deviceDbInfo.run {
+                    uuid to MyApplication.versionInfo.run { UserJson.DeviceData(token, appVersion, osVersion) }
+                }
+            )
+        )
 
     @Test
     fun testChangeSharedProjectLocal() {

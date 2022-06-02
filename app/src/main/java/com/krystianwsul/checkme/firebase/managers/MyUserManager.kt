@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.firebase.managers
 
+import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.firebase.DatabaseWrapper
@@ -26,22 +27,32 @@ class MyUserManager(
 
     init {
         setInitialValue(
-                if (!snapshot.exists) {
-                    val userWrapper = UserWrapper(
-                            deviceDbInfo.run { UserJson(email, name, mutableMapOf(uuid to token), userInfo.uid) }
-                    )
+            if (!snapshot.exists) {
+                val userWrapper = UserWrapper(
+                    deviceDbInfo.run {
+                        UserJson(
+                            email,
+                            name,
+                            mutableMapOf(uuid to token),
+                            uid = userInfo.uid,
+                            deviceDatas = mutableMapOf(
+                                uuid to MyApplication.versionInfo.run { UserJson.DeviceData(token, appVersion, osVersion) }
+                            ),
+                        )
+                    }
+                )
 
-                    MyUserRecord(databaseWrapper, true, userWrapper, snapshot.toKey())
-                } else {
-                    snapshot.toRecord()
-                }
+                MyUserRecord(databaseWrapper, true, userWrapper, snapshot.toKey())
+            } else {
+                snapshot.toRecord()
+            }
         )
     }
 
     override val records get() = listOf(value)
 
     fun set(snapshot: Snapshot<UserWrapper>) = set(
-            { it.createObject != snapshot.value },
-            { snapshot.toRecord() },
+        { it.createObject != snapshot.value },
+        { snapshot.toRecord() },
     )
 }

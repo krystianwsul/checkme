@@ -1,5 +1,6 @@
 package com.krystianwsul.common.firebase.models.project
 
+import com.krystianwsul.common.VersionInfo
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.DeviceInfo
 import com.krystianwsul.common.domain.ProjectUndoData
@@ -93,12 +94,12 @@ class SharedOwnedProject(
         remoteUsers.remove(id)
     }
 
-    fun updateDeviceDbInfo(deviceDbInfo: DeviceDbInfo) {
+    fun updateDeviceDbInfo(deviceDbInfo: DeviceDbInfo, versionInfo: VersionInfo) {
         check(remoteUsers.containsKey(deviceDbInfo.key))
 
         remoteUsers.getValue(deviceDbInfo.key).apply {
             name = deviceDbInfo.name
-            setToken(deviceDbInfo)
+            setToken(deviceDbInfo, versionInfo)
         }
     }
 

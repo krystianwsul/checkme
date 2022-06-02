@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.firebase.factories
 
+import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.firebase.loaders.ProjectLoader
 import com.krystianwsul.checkme.firebase.loaders.SharedProjectsLoader
 import com.krystianwsul.checkme.firebase.projects.ProjectsLoader
@@ -189,7 +190,7 @@ class OwnedProjectsFactory(
     fun updateDeviceInfo(deviceDbInfo: DeviceDbInfo) {
         privateProject.ownerName = deviceDbInfo.name
 
-        sharedProjects.values.forEach { it.updateDeviceDbInfo(deviceDbInfo) }
+        sharedProjects.values.forEach { it.updateDeviceDbInfo(deviceDbInfo, MyApplication.versionInfo) }
     }
 
     fun updatePhotoUrl(deviceInfo: DeviceInfo, photoUrl: String) =

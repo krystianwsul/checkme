@@ -1,5 +1,6 @@
 package com.krystianwsul.common.firebase.records.users
 
+import com.krystianwsul.common.VersionInfo
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.MyUserProperties
@@ -18,7 +19,8 @@ class MyUserRecord(
 
     private val tokenDelegate = TokenDelegate("$key/$USER_DATA", userJson, ::addValue)
 
-    override fun setToken(deviceDbInfo: DeviceDbInfo) = tokenDelegate.setToken(deviceDbInfo)
+    override fun setToken(deviceDbInfo: DeviceDbInfo, versionInfo: VersionInfo) =
+        tokenDelegate.setToken(deviceDbInfo, versionInfo)
 
     override var photoUrl by Committer(userJson::photoUrl, "$key/$USER_DATA")
 

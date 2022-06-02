@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.firebase.factories
 
 import com.jakewharton.rxrelay3.BehaviorRelay
+import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.firebase.managers.MyUserManager
 import com.krystianwsul.checkme.firebase.snapshot.Snapshot
 import com.krystianwsul.common.domain.DeviceDbInfo
@@ -45,7 +46,7 @@ class MyUserFactory(
 
     init {
         user.name = deviceDbInfo.name
-        user.setToken(deviceDbInfo)
+        user.setToken(deviceDbInfo, MyApplication.versionInfo)
     }
 
     fun onNewSnapshot(snapshot: Snapshot<UserWrapper>): Boolean {

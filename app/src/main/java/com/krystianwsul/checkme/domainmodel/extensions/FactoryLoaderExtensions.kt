@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.domainmodel.extensions
 
 import androidx.annotation.CheckResult
+import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.update.CompletableDomainUpdate
 import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
@@ -18,7 +19,7 @@ fun DomainUpdater.updateDeviceDbInfo(deviceDbInfo: DeviceDbInfo): Completable =
             myUserFactory.user.apply {
                 name = deviceDbInfo.name
 
-                setToken(deviceDbInfo)
+                setToken(deviceDbInfo, MyApplication.versionInfo)
             }
 
             projectsFactory.updateDeviceInfo(deviceDbInfo)

@@ -1,5 +1,6 @@
 package com.krystianwsul.common.firebase.records.users
 
+import com.krystianwsul.common.VersionInfo
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.firebase.json.users.UserJson
 import com.krystianwsul.common.firebase.records.project.SharedOwnedProjectRecord
@@ -17,7 +18,8 @@ class OwnedProjectUserRecord(
 
     private val tokenDelegate = TokenDelegate(key, createObject, ::addValue)
 
-    fun setToken(deviceDbInfo: DeviceDbInfo) = tokenDelegate.setToken(deviceDbInfo)
+    fun setToken(deviceDbInfo: DeviceDbInfo, versionInfo: VersionInfo) =
+        tokenDelegate.setToken(deviceDbInfo, versionInfo)
 
     override fun deleteFromParent() = check(remoteProjectRecord.userRecords.remove(id) == this)
 }

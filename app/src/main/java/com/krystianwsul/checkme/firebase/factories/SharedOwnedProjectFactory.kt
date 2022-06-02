@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.firebase.factories
 
+import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.firebase.loaders.ProjectLoader
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.firebase.models.Instance
@@ -41,6 +42,6 @@ class SharedOwnedProjectFactory(
         rootModelChangeManager,
     ).apply {
         fixNotificationShown(shownFactory, ExactTimeStamp.Local.now)
-        updateDeviceDbInfo(deviceDbInfo())
+        updateDeviceDbInfo(deviceDbInfo(), MyApplication.versionInfo)
     }
 }

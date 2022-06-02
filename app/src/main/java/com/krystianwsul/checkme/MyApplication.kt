@@ -38,6 +38,7 @@ import com.krystianwsul.checkme.utils.mapNotNull
 import com.krystianwsul.checkme.utils.toSingle
 import com.krystianwsul.checkme.utils.toV3
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
+import com.krystianwsul.common.VersionInfo
 import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.miguelbcr.ui.rx_paparazzo2.RxPaparazzo
@@ -65,6 +66,8 @@ class MyApplication : Application() {
 
         var _sharedPreferences: SharedPreferences? = null
         val sharedPreferences get() = _sharedPreferences!!
+
+        val versionInfo = VersionInfo(BuildConfig.VERSION_CODE, Build.VERSION.SDK_INT)
     }
 
     val googleSignInClient by lazy { getClient() }

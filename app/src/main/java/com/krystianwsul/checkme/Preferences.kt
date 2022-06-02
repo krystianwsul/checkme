@@ -229,7 +229,7 @@ object Preferences {
             sharedPreferences.edit { putString(key, value) }
     }
 
-    class Logger(key: String, private val length: Int = 100) {
+    class Logger(private val key: String, private val length: Int = 100) {
 
         private var logString by ReadWriteStrPref(key)
 
@@ -261,7 +261,7 @@ object Preferences {
         }
 
         private fun logLine(line: String) {
-            MyCrashlytics.log("Preferences.logLine: $line")
+            MyCrashlytics.log("Preferences.logLine ($key): $line")
 
             if (!this::lineList.isInitialized) lineList = logString.split('\n')
 

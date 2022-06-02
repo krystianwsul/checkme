@@ -47,6 +47,7 @@ object Preferences {
     private const val KEY_PROJECT_ORDER = "projectOrder"
     private const val KEY_NOTIFICATION_LOG = "notificationLog"
     private const val KEY_PROJECT_FILTER = "projectFilter"
+    private const val KEY_FCM_LOG = "fcmLog"
 
     private val sharedPreferences by lazy { MyApplication.sharedPreferences }
 
@@ -211,6 +212,8 @@ object Preferences {
     }
 
     val notificationLog = Logger(KEY_NOTIFICATION_LOG, 100)
+
+    val fcmLog = Logger(KEY_FCM_LOG, 100)
 
     private open class ReadOnlyStrPref(protected val key: String) : ReadOnlyProperty<Any, String> {
 

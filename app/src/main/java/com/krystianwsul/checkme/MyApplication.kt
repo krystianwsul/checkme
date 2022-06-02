@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme
 
 import android.annotation.SuppressLint
+import android.app.ActivityManager
 import android.app.Application
 import android.content.Context
 import android.content.Intent
@@ -43,6 +44,7 @@ import com.krystianwsul.common.VersionInfo
 import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.DomainThreadChecker
 import com.krystianwsul.common.firebase.records.users.TokenDelegate
+import com.krystianwsul.common.time.ExactTimeStamp
 import com.miguelbcr.ui.rx_paparazzo2.RxPaparazzo
 import com.mindorks.scheduler.Priority
 import com.pacoworks.rxpaper2.RxPaperBook
@@ -251,6 +253,20 @@ class MyApplication : Application() {
             .subscribe()
 
         HasInstancesStore.init()
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            getSystemService(Context.ACTIVITY_SERVICE).let { it as ActivityManager }
+                .getHistoricalProcessExitReasons(packageName, 0, 1)
+                .firstOrNull()
+                ?.let {
+                    val exactTimeStamp = ExactTimeStamp.Local(it.timestamp)
+
+                    Preferences.fcmLog.logLineDate(
+                        "exit timestamp: $exactTimeStamp, reason: ${it.reason}, description: ${it.description}"
+                    )
+                }
+        }
+
     }
 
     fun getRxPaparazzoDir() = File(instance.filesDir.absolutePath + "/RxPaparazzo/")

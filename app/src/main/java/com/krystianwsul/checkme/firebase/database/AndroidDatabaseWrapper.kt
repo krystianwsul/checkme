@@ -38,7 +38,7 @@ object AndroidDatabaseWrapper : FactoryProvider.Database() {
             .child(root)
     }
 
-    val rxPaperBook = RxPaperBook.with("firebaseCache")
+    val rxPaperBook = RxPaperBook.with("firebaseCache2")
 
     fun onUpgrade() {
         rxPaperBook.destroy().subscribe()

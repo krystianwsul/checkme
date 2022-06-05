@@ -78,9 +78,7 @@ private fun getScheduleDataWrappersAndAssignedTo(
 ): Pair<List<EditViewModel.ScheduleDataWrapper>, Set<UserKey>> {
     val schedules = scheduleIntervals.map { it.schedule }
 
-    val scheduleDataWrappers = ScheduleGroup.getGroups(schedules).map {
-        EditViewModel.ScheduleDataWrapper.fromScheduleData(it.scheduleData)
-    }
+    val scheduleDataWrappers = ScheduleGroup.getGroups(schedules).map(EditViewModel.ScheduleDataWrapper::fromScheduleGroup)
 
     val assignedTo = schedules.map { it.assignedTo }
         .distinct()

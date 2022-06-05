@@ -21,6 +21,7 @@ import com.krystianwsul.checkme.viewmodels.DomainListener
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.checkme.viewmodels.ObservableDomainViewModel
 import com.krystianwsul.common.criteria.SearchCriteria
+import com.krystianwsul.common.domain.ScheduleGroup
 import com.krystianwsul.common.firebase.models.ImageState
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.time.Date
@@ -187,13 +188,13 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
 
         companion object {
 
-            fun fromScheduleData(scheduleData: ScheduleData) = when (scheduleData) {
-                is ScheduleData.Single -> Single(scheduleData)
-                is ScheduleData.Weekly -> Weekly(scheduleData)
-                is ScheduleData.MonthlyDay -> MonthlyDay(scheduleData)
-                is ScheduleData.MonthlyWeek -> MonthlyWeek(scheduleData)
-                is ScheduleData.Yearly -> Yearly(scheduleData)
-                is ScheduleData.Child -> Child(scheduleData)
+            fun fromScheduleGroup(scheduleGroup: ScheduleGroup) = when (scheduleGroup) {
+                is ScheduleGroup.Single -> Single.fromScheduleGroup(scheduleGroup)
+                is ScheduleGroup.Weekly -> Weekly.fromScheduleGroup(scheduleGroup)
+                is ScheduleGroup.MonthlyDay -> MonthlyDay.fromScheduleGroup(scheduleGroup)
+                is ScheduleGroup.MonthlyWeek -> MonthlyWeek.fromScheduleGroup(scheduleGroup)
+                is ScheduleGroup.Yearly -> Yearly.fromScheduleGroup(scheduleGroup)
+                is ScheduleGroup.Child -> Child.fromScheduleGroup(scheduleGroup)
             }
 
             private fun timePairCallback(
@@ -237,6 +238,11 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
         @Parcelize
         data class Single(override val scheduleData: ScheduleData.Single) : ScheduleDataWrapper() {
 
+            companion object {
+
+                fun fromScheduleGroup(scheduleGroup: ScheduleGroup.Single) = Single(scheduleGroup.scheduleData)
+            }
+
             override fun getText(
                 customTimeDatas: Map<CustomTimeKey, CustomTimeData>,
                 context: Context,
@@ -269,6 +275,11 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
 
         @Parcelize
         data class Weekly(override val scheduleData: ScheduleData.Weekly) : ScheduleDataWrapper() {
+
+            companion object {
+
+                fun fromScheduleGroup(scheduleGroup: ScheduleGroup.Weekly) = Weekly(scheduleGroup.scheduleData)
+            }
 
             override fun getText(
                 customTimeDatas: Map<CustomTimeKey, CustomTimeData>,
@@ -307,6 +318,11 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
         @Parcelize
         data class MonthlyDay(override val scheduleData: ScheduleData.MonthlyDay) : ScheduleDataWrapper() {
 
+            companion object {
+
+                fun fromScheduleGroup(scheduleGroup: ScheduleGroup.MonthlyDay) = MonthlyDay(scheduleGroup.scheduleData)
+            }
+
             override fun getText(
                 customTimeDatas: Map<CustomTimeKey, CustomTimeData>,
                 context: Context,
@@ -344,6 +360,11 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
 
         @Parcelize
         data class MonthlyWeek(override val scheduleData: ScheduleData.MonthlyWeek) : ScheduleDataWrapper() {
+
+            companion object {
+
+                fun fromScheduleGroup(scheduleGroup: ScheduleGroup.MonthlyWeek) = MonthlyWeek(scheduleGroup.scheduleData)
+            }
 
             override fun getText(
                 customTimeDatas: Map<CustomTimeKey, CustomTimeData>,
@@ -389,6 +410,11 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
         @Parcelize
         data class Yearly(override val scheduleData: ScheduleData.Yearly) : ScheduleDataWrapper() {
 
+            companion object {
+
+                fun fromScheduleGroup(scheduleGroup: ScheduleGroup.Yearly) = Yearly(scheduleGroup.scheduleData)
+            }
+
             override fun getText(
                 customTimeDatas: Map<CustomTimeKey, CustomTimeData>,
                 context: Context,
@@ -427,10 +453,24 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
         }
 
         @Parcelize
-        data class Child(override val scheduleData: ScheduleData) : ScheduleDataWrapper() {
+        data class Child(
+            override val scheduleData: ScheduleData,
+            val parentInstanceName: String,
+            val parentInstanceDateTimePair: DateTimePair,
+        ) : ScheduleDataWrapper() {
 
-            override fun getText(customTimeDatas: Map<CustomTimeKey, CustomTimeData>, context: Context): String {
-                TODO("todo join child")
+            companion object {
+
+                fun fromScheduleGroup(scheduleGroup: ScheduleGroup.Child) = scheduleGroup.run {
+                    Child(scheduleData, parentInstance.name, parentInstance.instanceDateTime.toDateTimePair())
+                }
+            }
+
+            override fun getText(
+                customTimeDatas: Map<CustomTimeKey, CustomTimeData>,
+                context: Context,
+            ) = ScheduleText.Child.getScheduleText(parentInstanceName, parentInstanceDateTimePair) {
+                timePairCallback(it, customTimeDatas)
             }
 
             override fun getScheduleDialogDataHelper(suggestedDate: Date): ScheduleDialogData {

@@ -8,10 +8,8 @@ import com.krystianwsul.checkme.utils.prettyPrint
 import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.common.domain.ScheduleGroup
 import com.krystianwsul.common.firebase.models.task.Task
+import com.krystianwsul.common.time.*
 import com.krystianwsul.common.time.Date
-import com.krystianwsul.common.time.JsonTime
-import com.krystianwsul.common.time.Time
-import com.krystianwsul.common.time.TimePair
 import com.krystianwsul.common.utils.ScheduleData
 import org.joda.time.LocalDate
 import java.util.*
@@ -68,9 +66,14 @@ sealed class ScheduleText {
         companion object {
 
             fun getScheduleText(
-                    scheduleData: ScheduleData.Single,
-                    timePairCallback: (TimePair) -> String,
-            ) = scheduleData.date.getDisplayText() + ", " + timePairCallback(scheduleData.timePair)
+                dateTimePair: DateTimePair,
+                timePairCallback: (TimePair) -> String,
+            ) = dateTimePair.run { date.getDisplayText() + ", " + timePairCallback(timePair) }
+
+            fun getScheduleText(
+                scheduleData: ScheduleData.Single,
+                timePairCallback: (TimePair) -> String,
+            ) = getScheduleText(scheduleData.run { DateTimePair(date, timePair) }, timePairCallback)
         }
 
         override fun getScheduleText(customTimeProvider: JsonTime.CustomTimeProvider) =
@@ -145,8 +148,8 @@ sealed class ScheduleText {
             fun getDateText(month: Int, day: Int) = LocalDate(0, month, day).toString("MMMM d")!!
 
             fun getScheduleText(
-                    scheduleData: ScheduleData.Yearly,
-                    timePairCallback: (TimePair) -> String,
+                scheduleData: ScheduleData.Yearly,
+                timePairCallback: (TimePair) -> String,
             ) = getDateText(scheduleData.month, scheduleData.day) +
                     ": " +
                     timePairCallback(scheduleData.timePair) +
@@ -154,6 +157,26 @@ sealed class ScheduleText {
         }
 
         override fun getScheduleText(customTimeProvider: JsonTime.CustomTimeProvider) =
-                Companion.getScheduleText(scheduleGroup.scheduleData) { timePairCallback(it, customTimeProvider) }
+            Companion.getScheduleText(scheduleGroup.scheduleData) { timePairCallback(it, customTimeProvider) }
+    }
+
+    class Child() : ScheduleText() {
+
+        companion object {
+
+            fun getScheduleText(
+                parentInstanceName: String,
+                parentInstanceDateTimePair: DateTimePair,
+                timePairCallback: (TimePair) -> String,
+            ): String {
+                val dateTimeText = Single.getScheduleText(parentInstanceDateTimePair, timePairCallback)
+
+                return "Shown in $parentInstanceName ($dateTimeText)" // todo join resources
+            }
+        }
+
+        override fun getScheduleText(customTimeProvider: JsonTime.CustomTimeProvider): String {
+            TODO("todo join child")
+        }
     }
 }

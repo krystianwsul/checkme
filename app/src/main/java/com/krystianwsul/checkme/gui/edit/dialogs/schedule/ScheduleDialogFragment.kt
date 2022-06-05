@@ -229,6 +229,8 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         binding.scheduleDialogSelectAllDays.setOnClickListener {
             binding.scheduleDialogDayPicker.selectAllDays()
         }
+
+        binding.scheduleDialogParentLayout.setDropdown { delegate.onParentClicked() }
     }
 
     @Suppress("OVERRIDE_DEPRECATION")
@@ -560,7 +562,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         }
     }
 
-    private abstract inner class Delegate : DateListener {
+    private abstract inner class Delegate : DateListener, ParentListener {
 
         abstract val type: ScheduleDialogData.Type
 
@@ -837,6 +839,10 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         override fun updateFields(customTimeData: EditViewModel.CustomTimeData?, hourMinuteString: String) {
             binding.scheduleDialogParentText.setText(scheduleDialogData.parentInstanceData!!.name)
         }
+
+        override fun onParentClicked() {
+
+        }
     }
 
     private data class WarningErrorData(
@@ -887,5 +893,10 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
                 }
             )
         }
+    }
+
+    private interface ParentListener {
+
+        fun onParentClicked(): Unit = throw UnsupportedOperationException()
     }
 }

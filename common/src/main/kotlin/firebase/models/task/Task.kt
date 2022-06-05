@@ -219,6 +219,7 @@ sealed class Task(
                         }
                     }
                 is Type.Schedule -> {
+                    /* todo join
                     // hierarchy hack
                     type.getScheduleIntervals(interval)
                         .singleOrNull()
@@ -240,7 +241,9 @@ sealed class Task(
                                 parentInstanceRemovable.remove()
                             }
                         }
-                        ?: InvalidatableCache.ValueHolder(null) { intervalRemovable.remove() }
+                        ?:
+                     */
+                    InvalidatableCache.ValueHolder(null) { intervalRemovable.remove() }
                 }
                 is Type.NoSchedule -> InvalidatableCache.ValueHolder(null) { intervalRemovable.remove() }
             }

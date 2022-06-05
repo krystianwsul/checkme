@@ -97,6 +97,7 @@ sealed class ScheduleDataWrapper : Parcelable {
                 null,
                 null,
                 1,
+                null,
             )
         }
     }
@@ -139,6 +140,7 @@ sealed class ScheduleDataWrapper : Parcelable {
                 scheduleData.from,
                 scheduleData.until,
                 scheduleData.interval,
+                null,
             )
         }
     }
@@ -182,6 +184,7 @@ sealed class ScheduleDataWrapper : Parcelable {
                 scheduleData.from,
                 scheduleData.until,
                 1,
+                null,
             )
         }
     }
@@ -231,6 +234,7 @@ sealed class ScheduleDataWrapper : Parcelable {
                 scheduleData.from,
                 scheduleData.until,
                 1,
+                null,
             )
         }
     }
@@ -276,6 +280,7 @@ sealed class ScheduleDataWrapper : Parcelable {
                 scheduleData.from,
                 scheduleData.until,
                 1,
+                null,
             )
         }
     }
@@ -320,6 +325,7 @@ sealed class ScheduleDataWrapper : Parcelable {
                 null,
                 null,
                 1,
+                ScheduleDialogData.ParentInstanceData(parentInstanceName),
             )
         }
     }

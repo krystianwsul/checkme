@@ -24,6 +24,7 @@ data class ScheduleDialogData(
     var from: Date?,
     var until: Date?,
     var interval: Int,
+    var parentInstanceData: ParentInstanceData?,
 ) : Parcelable {
 
     companion object {
@@ -82,4 +83,7 @@ data class ScheduleDialogData(
 
         SINGLE, DAILY, WEEKLY, MONTHLY, YEARLY, CHILD
     }
+
+    @Parcelize
+    data class ParentInstanceData(val name: String) : Parcelable
 }

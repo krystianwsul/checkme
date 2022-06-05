@@ -835,7 +835,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         }
 
         override fun updateFields(customTimeData: EditViewModel.CustomTimeData?, hourMinuteString: String) {
-            // todo join child
+            binding.scheduleDialogParentText.setText(scheduleDialogData.parentInstanceData!!.name)
         }
     }
 

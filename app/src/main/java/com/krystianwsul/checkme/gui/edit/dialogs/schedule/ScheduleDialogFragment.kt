@@ -824,22 +824,18 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
     private inner class ChildDelegate : Delegate() {
 
-        override val type: ScheduleDialogData.Type
-            get() = TODO("todo join child")
+        override val type = ScheduleDialogData.Type.CHILD
 
-        override val visibilities: Visibilities
-            get() = TODO("todo join child")
+        override val visibilities = Visibilities()
 
-        override fun isValid(): WarningErrorData {
-            TODO("todo join child")
-        }
+        override fun isValid() = WarningErrorData()
 
         override fun getCustomTimeDatas(list: List<EditViewModel.CustomTimeData>): List<TimeDialogFragment.CustomTimeData> {
             TODO("todo join child")
         }
 
         override fun updateFields(customTimeData: EditViewModel.CustomTimeData?, hourMinuteString: String) {
-            TODO("todo join child")
+            // todo join child
         }
     }
 

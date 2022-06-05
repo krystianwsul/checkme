@@ -6,5 +6,6 @@
         <item>Powtarzaj tygodniowo</item>
         <item>Powtarzaj miesięcznie</item>
         <item>Powtarzaj rocznie</item>
+        <item>Pokaż w przypomnieniu</item>
     </string-array>
 </resources>

@@ -6,5 +6,6 @@
         <item>Repeat weekly</item>
         <item>Repeat monthly</item>
         <item>Repeat yearly</item>
+        <item>Show in reminder</item>
     </string-array>
 </resources>

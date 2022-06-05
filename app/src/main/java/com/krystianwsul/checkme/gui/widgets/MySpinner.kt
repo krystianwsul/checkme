@@ -36,9 +36,9 @@ class MySpinner @JvmOverloads constructor(
         this.items = items
 
         binding.mySpinnerText.setAdapter(object : ArrayAdapter<Any>(
-                context,
-                R.layout.cat_exposed_dropdown_popup_item,
-                items
+            context,
+            R.layout.cat_exposed_dropdown_popup_item,
+            items,
         ) {
 
             override fun getFilter() = object : Filter() {
@@ -82,8 +82,8 @@ class MySpinner @JvmOverloads constructor(
         binding.mySpinnerLayout.isEnabled = enabled
         binding.mySpinnerText.setTextColor(
                 ContextCompat.getColor(
-                        context,
-                        if (enabled) R.color.textPrimary else R.color.textDisabled
+                    context,
+                    if (enabled) R.color.textPrimary else R.color.textDisabled,
                 )
         )
     }

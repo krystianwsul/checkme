@@ -29,6 +29,7 @@ import com.krystianwsul.checkme.gui.base.NoCollapseBottomSheetDialogFragment
 import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimeActivity
 import com.krystianwsul.checkme.gui.dialogs.*
 import com.krystianwsul.checkme.gui.edit.EditViewModel
+import com.krystianwsul.checkme.gui.edit.ScheduleDataWrapper
 import com.krystianwsul.checkme.gui.utils.ResettableProperty
 import com.krystianwsul.checkme.gui.widgets.MyTextInputLayout
 import com.krystianwsul.checkme.utils.*
@@ -529,7 +530,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         val dayNumber = if (scheduleDialogData.beginningOfMonth)
             date.day
         else
-            EditViewModel.ScheduleDataWrapper.dayFromEndOfMonth(date)
+            ScheduleDataWrapper.dayFromEndOfMonth(date)
 
         scheduleDialogData.date = date
         scheduleDialogData.daysOfWeek = setOf(date.dayOfWeek)
@@ -785,7 +786,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
             scheduleDialogData.date = date
             scheduleDialogData.daysOfWeek = setOf(date.dayOfWeek)
             scheduleDialogData.monthWeekNumber =
-                EditViewModel.ScheduleDataWrapper.dayOfMonthToWeekOfMonth(scheduleDialogData.monthDayNumber)
+                ScheduleDataWrapper.dayOfMonthToWeekOfMonth(scheduleDialogData.monthDayNumber)
             scheduleDialogData.monthWeekDay = date.dayOfWeek
         }
     }
@@ -854,9 +855,9 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
                 { scheduleDialogData.date = fixedDate },
                 {
                     val (monthDayNumber, beginningOfMonth)
-                            = EditViewModel.ScheduleDataWrapper.dateToDayFromBeginningOrEnd(fixedDate)
+                            = ScheduleDataWrapper.dateToDayFromBeginningOrEnd(fixedDate)
 
-                    val monthWeekNumber = EditViewModel.ScheduleDataWrapper.dayOfMonthToWeekOfMonth(monthDayNumber)
+                    val monthWeekNumber = ScheduleDataWrapper.dayOfMonthToWeekOfMonth(monthDayNumber)
 
                     scheduleDialogData.daysOfWeek = setOf(fixedDate.dayOfWeek)
                     scheduleDialogData.monthDayNumber = monthDayNumber

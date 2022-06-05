@@ -6,6 +6,6 @@ import kotlin.random.Random
 
 @Parcelize
 data class ScheduleEntry(
-        val scheduleDataWrapper: EditViewModel.ScheduleDataWrapper,
-        var id: Int = Random.nextInt()
+    val scheduleDataWrapper: ScheduleDataWrapper,
+    var id: Int = Random.nextInt()
 ) : Parcelable

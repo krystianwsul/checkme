@@ -79,7 +79,7 @@ abstract class EditDelegate(
         val (date, timePair) = scheduleHint?.let { Pair(it.date, it.timePair) }
             ?: HourMinute.nextHour.let { Pair(it.first, TimePair(it.second)) }
 
-        ScheduleEntry(EditViewModel.ScheduleDataWrapper.Single(ScheduleData.Single(date, timePair)))
+        ScheduleEntry(ScheduleDataWrapper.Single(ScheduleData.Single(date, timePair)))
     }
 
     abstract val parentScheduleManager: ParentScheduleManager

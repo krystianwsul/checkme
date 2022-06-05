@@ -1,7 +1,7 @@
 package com.krystianwsul.checkme.gui.edit.dialogs.schedule
 
 import android.os.Parcelable
-import com.krystianwsul.checkme.gui.edit.EditViewModel
+import com.krystianwsul.checkme.gui.edit.ScheduleDataWrapper
 import com.krystianwsul.checkme.gui.edit.ScheduleEntry
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.DayOfWeek
@@ -41,15 +41,15 @@ data class ScheduleDialogData(
     fun toScheduleEntry(id: Int? = null) =
         ScheduleEntry(
             when (scheduleType) {
-                Type.SINGLE -> EditViewModel.ScheduleDataWrapper.Single(ScheduleData.Single(date, timePairPersist.timePair))
-                Type.DAILY -> EditViewModel.ScheduleDataWrapper.Weekly(
+                Type.SINGLE -> ScheduleDataWrapper.Single(ScheduleData.Single(date, timePairPersist.timePair))
+                Type.DAILY -> ScheduleDataWrapper.Weekly(
                     ScheduleData.Weekly(DayOfWeek.set, timePairPersist.timePair, from, until, 1)
                 )
-                Type.WEEKLY -> EditViewModel.ScheduleDataWrapper.Weekly(
+                Type.WEEKLY -> ScheduleDataWrapper.Weekly(
                     ScheduleData.Weekly(daysOfWeek, timePairPersist.timePair, from, until, interval)
                 )
                 Type.MONTHLY -> if (monthlyDay) {
-                    EditViewModel.ScheduleDataWrapper.MonthlyDay(
+                    ScheduleDataWrapper.MonthlyDay(
                         ScheduleData.MonthlyDay(
                             monthDayNumber,
                             beginningOfMonth,
@@ -59,7 +59,7 @@ data class ScheduleDialogData(
                         )
                     )
                 } else {
-                    EditViewModel.ScheduleDataWrapper.MonthlyWeek(
+                    ScheduleDataWrapper.MonthlyWeek(
                         ScheduleData.MonthlyWeek(
                             monthWeekNumber,
                             monthWeekDay,
@@ -70,7 +70,7 @@ data class ScheduleDialogData(
                         )
                     )
                 }
-                Type.YEARLY -> EditViewModel.ScheduleDataWrapper.Yearly(
+                Type.YEARLY -> ScheduleDataWrapper.Yearly(
                     ScheduleData.Yearly(date.month, date.day, timePairPersist.timePair, from, until)
                 )
             },

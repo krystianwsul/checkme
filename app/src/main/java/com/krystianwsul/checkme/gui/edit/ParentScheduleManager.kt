@@ -45,7 +45,7 @@ interface ParentScheduleManager {
         val parentKey: EditViewModel.ParentKey
         val projectUsers: Map<UserKey, EditViewModel.UserData>
         val hasMultipleInstances: Boolean?
-        val clearParentTaskData: Triple<Project?, List<EditViewModel.ScheduleDataWrapper>, Set<UserKey>>?
+        val clearParentTaskData: Triple<Project?, List<ScheduleDataWrapper>, Set<UserKey>>?
         val compatibleWithSchedule: Boolean
 
         data class Project(
@@ -56,7 +56,7 @@ interface ParentScheduleManager {
 
             override val hasMultipleInstances: Boolean? = null
 
-            override val clearParentTaskData: Triple<Project?, List<EditViewModel.ScheduleDataWrapper>, Set<UserKey>>? = null
+            override val clearParentTaskData: Triple<Project?, List<ScheduleDataWrapper>, Set<UserKey>>? = null
 
             override val compatibleWithSchedule = true
         }
@@ -65,7 +65,7 @@ interface ParentScheduleManager {
             override val name: String,
             override val parentKey: EditViewModel.ParentKey.Task,
             override val hasMultipleInstances: Boolean?,
-            override val clearParentTaskData: Triple<Project?, List<EditViewModel.ScheduleDataWrapper>, Set<UserKey>>?,
+            override val clearParentTaskData: Triple<Project?, List<ScheduleDataWrapper>, Set<UserKey>>?,
             val topLevelTaskIsSingleSchedule: Boolean,
         ) : Parent {
 

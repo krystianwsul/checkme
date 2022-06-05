@@ -12,6 +12,7 @@ import com.krystianwsul.checkme.domainmodel.update.SingleDomainUpdate
 import com.krystianwsul.checkme.gui.edit.EditParameters
 import com.krystianwsul.checkme.gui.edit.EditViewModel
 import com.krystianwsul.checkme.gui.edit.ParentScheduleManager
+import com.krystianwsul.checkme.gui.edit.ScheduleDataWrapper
 import com.krystianwsul.checkme.gui.edit.delegates.EditDelegate
 import com.krystianwsul.checkme.viewmodels.DomainResult
 import com.krystianwsul.common.criteria.SearchCriteria
@@ -75,10 +76,10 @@ private fun UserScope.getCreateTaskDataFast(): EditViewModel.MainData {
 
 private fun getScheduleDataWrappersAndAssignedTo(
     scheduleIntervals: List<ScheduleInterval>,
-): Pair<List<EditViewModel.ScheduleDataWrapper>, Set<UserKey>> {
+): Pair<List<ScheduleDataWrapper>, Set<UserKey>> {
     val schedules = scheduleIntervals.map { it.schedule }
 
-    val scheduleDataWrappers = ScheduleGroup.getGroups(schedules).map(EditViewModel.ScheduleDataWrapper::fromScheduleGroup)
+    val scheduleDataWrappers = ScheduleGroup.getGroups(schedules).map(ScheduleDataWrapper::fromScheduleGroup)
 
     val assignedTo = schedules.map { it.assignedTo }
         .distinct()
@@ -108,7 +109,7 @@ private fun DomainFactory.getCreateTaskDataSlow(
         val task: Task
         val project: Project<*>
 
-        var scheduleDataWrappers: List<EditViewModel.ScheduleDataWrapper>? = null
+        var scheduleDataWrappers: List<ScheduleDataWrapper>? = null
         var assignedTo: Set<UserKey> = setOf()
 
         when (it.copySource) {
@@ -140,7 +141,7 @@ private fun DomainFactory.getCreateTaskDataSlow(
                         ?.let { customTimes += it.key to it }
 
                     scheduleDataWrappers = listOf(
-                        EditViewModel.ScheduleDataWrapper.Single(
+                        ScheduleDataWrapper.Single(
                             ScheduleData.Single(instance.instanceDate, instance.instanceTime.timePair)
                         )
                     )

@@ -439,6 +439,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
         run {
             delegate.visibilities.run {
+                binding.scheduleDialogTimeLayout.isVisible = time
                 binding.scheduleDialogDateLayout.isVisible = date
                 binding.scheduleDialogDayLayout.isVisible = day
                 binding.scheduleDialogMonthLayout.isVisible = month
@@ -826,7 +827,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
         override val type = ScheduleDialogData.Type.CHILD
 
-        override val visibilities = Visibilities()
+        override val visibilities = Visibilities(time = false)
 
         override fun isValid() = WarningErrorData()
 
@@ -851,6 +852,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
     }
 
     private data class Visibilities(
+        val time: Boolean = true,
         val date: Boolean = false,
         val day: Boolean = false,
         val month: Boolean = false,

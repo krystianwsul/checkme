@@ -13,79 +13,92 @@ sealed class ScheduleGroup {
     companion object {
 
         fun getGroups(schedules: List<Schedule>): List<ScheduleGroup> {
-            fun Time.getTimeFloat(daysOfWeek: Collection<DayOfWeek> = DayOfWeek.set) = daysOfWeek.map { day ->
+            fun Time.getTimeFloat(daysOfWeek: Collection<DayOfWeek> = DayOfWeek.set) = daysOfWeek.sumOf { day ->
                 getHourMinute(day).let { it.hour * 60 + it.minute }
             }
-                    .sum()
-                    .toFloat() / daysOfWeek.count()
+                .toFloat()
+                .let { it / daysOfWeek.count() }
 
             val singleSchedules = schedules.filterIsInstance<SingleSchedule>()
-                    .sortedWith(compareBy(
-                            { it.date },
-                            { it.time.getHourMinute(it.date.dayOfWeek) }
-                    ))
-                    .map { Single(it) }
+                .sortedWith(
+                    compareBy(
+                        { it.date },
+                        { it.time.getHourMinute(it.date.dayOfWeek) },
+                    )
+                )
+                .map {
+                    it.getInstance(it.topLevelTask)
+                        .parentInstance
+                        ?.let { Child() }
+                        ?: Single(it)
+                }
 
             data class WeeklyKey(
-                    val timePair: TimePair,
-                    val from: Date?,
-                    val until: Date?,
-                    val interval: Weekly.Interval,
-                    val assignedTo: Set<UserKey>,
+                val timePair: TimePair,
+                val from: Date?,
+                val until: Date?,
+                val interval: Weekly.Interval,
+                val assignedTo: Set<UserKey>,
             )
 
             val weeklySchedules = schedules.asSequence()
-                    .filterIsInstance<WeeklySchedule>()
-                    .groupBy {
-                        val interval = if (it.interval == 1) {
-                            Weekly.Interval.One
-                        } else {
-                            Weekly.Interval.More(it.from!!, it.interval)
-                        }
-
-                        WeeklyKey(it.timePair, it.from, it.until, interval, it.assignedTo)
+                .filterIsInstance<WeeklySchedule>()
+                .groupBy {
+                    val interval = if (it.interval == 1) {
+                        Weekly.Interval.One
+                    } else {
+                        Weekly.Interval.More(it.from!!, it.interval)
                     }
-                    .map {
-                        val first = it.value.first()
 
-                        Pair(
-                                first.time,
-                                Weekly(
-                                        it.key.timePair,
-                                        it.value,
-                                        it.key.from,
-                                        it.key.until,
-                                        it.key.interval,
-                                        it.key.assignedTo,
-                                )
+                    WeeklyKey(it.timePair, it.from, it.until, interval, it.assignedTo)
+                }
+                .map {
+                    val first = it.value.first()
+
+                    Pair(
+                        first.time,
+                        Weekly(
+                            it.key.timePair,
+                            it.value,
+                            it.key.from,
+                            it.key.until,
+                            it.key.interval,
+                            it.key.assignedTo,
                         )
-                    }
-                    .sortedBy { it.first.getTimeFloat(it.second.daysOfWeek) }
-                    .map { it.second }
-                    .toList()
+                    )
+                }
+                .sortedBy { it.first.getTimeFloat(it.second.daysOfWeek) }
+                .map { it.second }
+                .toList()
 
             val monthlyDaySchedules = schedules.filterIsInstance<MonthlyDaySchedule>()
-                    .sortedWith(compareBy(
-                            { !it.beginningOfMonth },
-                            { it.dayOfMonth },
-                            { it.time.getTimeFloat() }))
-                    .map { MonthlyDay(it) }
+                .sortedWith(
+                    compareBy(
+                        { !it.beginningOfMonth },
+                        { it.dayOfMonth },
+                        { it.time.getTimeFloat() }),
+                )
+                .map { MonthlyDay(it) }
 
             val monthlyWeekSchedules = schedules.filterIsInstance<MonthlyWeekSchedule>()
-                    .sortedWith(compareBy(
-                            { !it.beginningOfMonth },
-                            { it.weekOfMonth },
-                            { it.dayOfWeek },
-                            { it.time.getTimeFloat() }))
-                    .map { MonthlyWeek(it) }
+                .sortedWith(
+                    compareBy(
+                        { !it.beginningOfMonth },
+                        { it.weekOfMonth },
+                        { it.dayOfWeek },
+                        { it.time.getTimeFloat() }),
+                )
+                .map { MonthlyWeek(it) }
 
             val yearlySchedules = schedules.filterIsInstance<YearlySchedule>()
-                    .sortedWith(compareBy(
-                            { it.month },
-                            { it.day },
-                            { it.time.getTimeFloat() }
-                    ))
-                    .map { Yearly(it) }
+                .sortedWith(
+                    compareBy(
+                        { it.month },
+                        { it.day },
+                        { it.time.getTimeFloat() },
+                    )
+                )
+                .map { Yearly(it) }
 
             return singleSchedules + weeklySchedules + monthlyDaySchedules + monthlyWeekSchedules + yearlySchedules
         }
@@ -107,23 +120,23 @@ sealed class ScheduleGroup {
     }
 
     class Weekly(
-            private val timePair: TimePair,
-            private val weeklySchedules: List<WeeklySchedule>,
-            val from: Date?,
-            val until: Date?,
-            private val interval: Interval,
-            override val assignedTo: Set<UserKey>,
+        private val timePair: TimePair,
+        private val weeklySchedules: List<WeeklySchedule>,
+        val from: Date?,
+        val until: Date?,
+        private val interval: Interval,
+        override val assignedTo: Set<UserKey>,
     ) : ScheduleGroup() {
 
         val daysOfWeek get() = weeklySchedules.map { it.dayOfWeek }.toSet()
 
         override val scheduleData
             get() = ScheduleData.Weekly(
-                    daysOfWeek,
-                    timePair,
-                    from,
-                    until,
-                    interval.interval
+                daysOfWeek,
+                timePair,
+                from,
+                until,
+                interval.interval,
             )
 
         override val schedules get() = weeklySchedules
@@ -145,11 +158,11 @@ sealed class ScheduleGroup {
 
         override val scheduleData
             get() = ScheduleData.MonthlyDay(
-                    monthlyDaySchedule.dayOfMonth,
-                    monthlyDaySchedule.beginningOfMonth,
-                    monthlyDaySchedule.timePair,
-                    monthlyDaySchedule.from,
-                    monthlyDaySchedule.until,
+                monthlyDaySchedule.dayOfMonth,
+                monthlyDaySchedule.beginningOfMonth,
+                monthlyDaySchedule.timePair,
+                monthlyDaySchedule.from,
+                monthlyDaySchedule.until,
             )
 
         override val schedules get() = listOf(monthlyDaySchedule)
@@ -161,12 +174,12 @@ sealed class ScheduleGroup {
 
         override val scheduleData
             get() = ScheduleData.MonthlyWeek(
-                    monthlyWeekSchedule.weekOfMonth,
-                    monthlyWeekSchedule.dayOfWeek,
-                    monthlyWeekSchedule.beginningOfMonth,
-                    monthlyWeekSchedule.timePair,
-                    monthlyWeekSchedule.from,
-                    monthlyWeekSchedule.until,
+                monthlyWeekSchedule.weekOfMonth,
+                monthlyWeekSchedule.dayOfWeek,
+                monthlyWeekSchedule.beginningOfMonth,
+                monthlyWeekSchedule.timePair,
+                monthlyWeekSchedule.from,
+                monthlyWeekSchedule.until,
             )
 
         override val schedules get() = listOf(monthlyWeekSchedule)
@@ -178,15 +191,27 @@ sealed class ScheduleGroup {
 
         override val scheduleData
             get() = ScheduleData.Yearly(
-                    yearlySchedule.month,
-                    yearlySchedule.day,
-                    yearlySchedule.timePair,
-                    yearlySchedule.from,
-                    yearlySchedule.until,
+                yearlySchedule.month,
+                yearlySchedule.day,
+                yearlySchedule.timePair,
+                yearlySchedule.from,
+                yearlySchedule.until,
             )
 
         override val schedules get() = listOf(yearlySchedule)
 
         override val assignedTo get() = yearlySchedule.assignedTo
+    }
+
+    class Child() : ScheduleGroup() {
+
+        override val assignedTo: Set<UserKey>
+            get() = TODO("todo join child")
+
+        override val scheduleData: ScheduleData
+            get() = TODO("todo join child")
+
+        override val schedules: List<Schedule>
+            get() = TODO("todo join child")
     }
 }

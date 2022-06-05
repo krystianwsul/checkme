@@ -27,7 +27,7 @@ sealed class ScheduleText {
             is ScheduleGroup.MonthlyDay -> MonthlyDay(scheduleGroup)
             is ScheduleGroup.MonthlyWeek -> MonthlyWeek(scheduleGroup)
             is ScheduleGroup.Yearly -> Yearly(scheduleGroup)
-            else -> throw UnsupportedOperationException() // compilation
+            is ScheduleGroup.Child -> Child(scheduleGroup)
         }.getScheduleText(customTimeProvider)
 
         fun fromUntil(from: Date?, until: Date?, intervalText: String? = null): String {
@@ -160,7 +160,7 @@ sealed class ScheduleText {
             Companion.getScheduleText(scheduleGroup.scheduleData) { timePairCallback(it, customTimeProvider) }
     }
 
-    class Child() : ScheduleText() {
+    class Child(private val scheduleGroup: ScheduleGroup.Child) : ScheduleText() {
 
         companion object {
 
@@ -171,12 +171,12 @@ sealed class ScheduleText {
             ): String {
                 val dateTimeText = Single.getScheduleText(parentInstanceDateTimePair, timePairCallback)
 
-                return "Shown in $parentInstanceName ($dateTimeText)" // todo join resources
+                return "Shown in: $parentInstanceName ($dateTimeText)" // todo join resources
             }
         }
 
-        override fun getScheduleText(customTimeProvider: JsonTime.CustomTimeProvider): String {
-            TODO("todo join child")
+        override fun getScheduleText(customTimeProvider: JsonTime.CustomTimeProvider) = scheduleGroup.parentInstance.run {
+            Companion.getScheduleText(name, instanceDateTime.toDateTimePair()) { timePairCallback(it, customTimeProvider) }
         }
     }
 }

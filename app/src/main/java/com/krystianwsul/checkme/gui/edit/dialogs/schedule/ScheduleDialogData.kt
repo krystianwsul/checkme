@@ -73,12 +73,13 @@ data class ScheduleDialogData(
                 Type.YEARLY -> ScheduleDataWrapper.Yearly(
                     ScheduleData.Yearly(date.month, date.day, timePairPersist.timePair, from, until)
                 )
+                Type.CHILD -> TODO("todo join child")
             },
             id ?: Random.nextInt(),
         )
 
     enum class Type {
 
-        SINGLE, DAILY, WEEKLY, MONTHLY, YEARLY
+        SINGLE, DAILY, WEEKLY, MONTHLY, YEARLY, CHILD
     }
 }

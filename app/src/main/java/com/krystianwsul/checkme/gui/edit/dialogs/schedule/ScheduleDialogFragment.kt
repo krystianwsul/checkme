@@ -410,6 +410,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
             ScheduleDialogData.Type.MONTHLY ->
                 if (scheduleDialogData.monthlyDay) MonthlyDayDelegate() else MonthlyWeekDelegate()
             ScheduleDialogData.Type.YEARLY -> YearlyDelegate()
+            ScheduleDialogData.Type.CHILD -> TODO("todo join child")
         }
     }
 

@@ -316,7 +316,7 @@ sealed class ScheduleDataWrapper : Parcelable {
                 dayOfWeek,
                 beginningOfMonth,
                 TimePairPersist(parentInstanceDateTimePair.timePair),
-                ScheduleDialogData.Type.SINGLE, // todo join child NEW TYPE
+                ScheduleDialogData.Type.CHILD,
                 null,
                 null,
                 1,

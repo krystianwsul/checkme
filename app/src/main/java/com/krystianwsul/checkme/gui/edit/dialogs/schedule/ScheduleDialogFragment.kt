@@ -437,16 +437,15 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
         if (animate) TransitionManager.beginDelayedTransition(binding.scheduleDialogContentLayout)
 
-        run {
-            delegate.visibilities.run {
-                binding.scheduleDialogTimeLayout.isVisible = time
-                binding.scheduleDialogDateLayout.isVisible = date
-                binding.scheduleDialogDayLayout.isVisible = day
-                binding.scheduleDialogMonthLayout.isVisible = month
-                binding.scheduleDialogFromLayout.isVisible = from
-                binding.scheduleDialogUntilLayout.isVisible = until
-                binding.scheduleDialogTimePadding.isVisible = timePadding
-            }
+        delegate.visibilities.run {
+            binding.scheduleDialogTimeLayout.isVisible = time
+            binding.scheduleDialogDateLayout.isVisible = date
+            binding.scheduleDialogDayLayout.isVisible = day
+            binding.scheduleDialogMonthLayout.isVisible = month
+            binding.scheduleDialogFromLayout.isVisible = from
+            binding.scheduleDialogUntilLayout.isVisible = until
+            binding.scheduleDialogTimePadding.isVisible = timePadding
+            binding.scheduleDialogParentLayout.isVisible = parent
         }
 
         updateFields()
@@ -827,7 +826,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
         override val type = ScheduleDialogData.Type.CHILD
 
-        override val visibilities = Visibilities(time = false)
+        override val visibilities = Visibilities(time = false, timePadding = true, parent = true)
 
         override fun isValid() = WarningErrorData()
 
@@ -859,6 +858,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         val from: Boolean = false,
         val until: Boolean = false,
         val timePadding: Boolean = false,
+        val parent: Boolean = false,
     )
 
     private interface DateListener {

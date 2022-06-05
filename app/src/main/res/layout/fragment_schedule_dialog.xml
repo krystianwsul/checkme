@@ -93,8 +93,7 @@
                                 android:inputType="number"
                                 android:text="1"
                                 android:textSize="@dimen/textPrimary"
-                                tools:ignore="HardcodedText,LabelFor"
-                                tools:targetApi="o" />
+                                tools:ignore="HardcodedText,LabelFor" />
 
                         </com.google.android.material.textfield.TextInputLayout>
 
@@ -282,6 +281,24 @@
                         android:layout_height="wrap_content"
                         android:hint="@string/until"
                         tools:ignore="LabelFor" />
+
+                </com.krystianwsul.checkme.gui.widgets.MyTextInputLayout>
+
+                <com.krystianwsul.checkme.gui.widgets.MyTextInputLayout
+                    android:id="@+id/scheduleDialogParentLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:errorEnabled="true"
+                    app:hintAnimationEnabled="false"
+                    style="@style/MySpinner">
+
+                    <AutoCompleteTextView
+                        android:id="@+id/scheduleDialogParentText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        style="@style/MySpinnerText"
+                        tools:ignore="LabelFor"
+                        android:singleLine="false" />
 
                 </com.krystianwsul.checkme.gui.widgets.MyTextInputLayout>
 

@@ -290,7 +290,8 @@
                     android:layout_height="wrap_content"
                     app:errorEnabled="true"
                     app:hintAnimationEnabled="false"
-                    style="@style/MySpinner">
+                    style="@style/MySpinner"
+                    android:layout_marginTop="20dp">
 
                     <AutoCompleteTextView
                         android:id="@+id/scheduleDialogParentText"

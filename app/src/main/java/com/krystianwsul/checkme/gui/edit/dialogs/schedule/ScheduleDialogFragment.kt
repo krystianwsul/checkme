@@ -826,7 +826,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
         override val type = ScheduleDialogData.Type.CHILD
 
-        override val visibilities = Visibilities(time = false, timePadding = true, parent = true)
+        override val visibilities = Visibilities(time = false, parent = true)
 
         override fun isValid() = WarningErrorData()
 

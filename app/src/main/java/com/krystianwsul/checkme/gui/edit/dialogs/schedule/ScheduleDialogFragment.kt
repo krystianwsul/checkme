@@ -410,7 +410,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
             ScheduleDialogData.Type.MONTHLY ->
                 if (scheduleDialogData.monthlyDay) MonthlyDayDelegate() else MonthlyWeekDelegate()
             ScheduleDialogData.Type.YEARLY -> YearlyDelegate()
-            ScheduleDialogData.Type.CHILD -> TODO("todo join child")
+            ScheduleDialogData.Type.CHILD -> ChildDelegate()
         }
     }
 
@@ -820,6 +820,27 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         override val visibilities = repeatingVisibilities.copy(date = true)
 
         override fun getDatePicker() = newYearMaterialDatePicker(scheduleDialogData.date)
+    }
+
+    private inner class ChildDelegate : Delegate() {
+
+        override val type: ScheduleDialogData.Type
+            get() = TODO("todo join child")
+
+        override val visibilities: Visibilities
+            get() = TODO("todo join child")
+
+        override fun isValid(): WarningErrorData {
+            TODO("todo join child")
+        }
+
+        override fun getCustomTimeDatas(list: List<EditViewModel.CustomTimeData>): List<TimeDialogFragment.CustomTimeData> {
+            TODO("todo join child")
+        }
+
+        override fun updateFields(customTimeData: EditViewModel.CustomTimeData?, hourMinuteString: String) {
+            TODO("todo join child")
+        }
     }
 
     private data class WarningErrorData(

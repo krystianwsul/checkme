@@ -193,7 +193,7 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
                 is ScheduleData.MonthlyDay -> MonthlyDay(scheduleData)
                 is ScheduleData.MonthlyWeek -> MonthlyWeek(scheduleData)
                 is ScheduleData.Yearly -> Yearly(scheduleData)
-                else -> throw UnsupportedOperationException()
+                is ScheduleData.Child -> Child(scheduleData)
             }
 
             private fun timePairCallback(
@@ -423,6 +423,18 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
                     scheduleData.until,
                     1,
                 )
+            }
+        }
+
+        @Parcelize
+        data class Child(override val scheduleData: ScheduleData) : ScheduleDataWrapper() {
+
+            override fun getText(customTimeDatas: Map<CustomTimeKey, CustomTimeData>, context: Context): String {
+                TODO("todo join child")
+            }
+
+            override fun getScheduleDialogDataHelper(suggestedDate: Date): ScheduleDialogData {
+                TODO("todo join child")
             }
         }
     }

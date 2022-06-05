@@ -5,6 +5,7 @@ import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.time.TimePair
+import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.ScheduleData
 import com.krystianwsul.common.utils.UserKey
 
@@ -29,7 +30,7 @@ sealed class ScheduleGroup {
                 .map {
                     it.getInstance(it.topLevelTask)
                         .parentInstance
-                        ?.let { Child() }
+                        ?.let { Child(it.instanceKey) }
                         ?: Single(it)
                 }
 
@@ -203,13 +204,12 @@ sealed class ScheduleGroup {
         override val assignedTo get() = yearlySchedule.assignedTo
     }
 
-    class Child() : ScheduleGroup() {
+    class Child(private val parentInstanceKey: InstanceKey) : ScheduleGroup() {
 
         override val assignedTo: Set<UserKey>
             get() = TODO("todo join child")
 
-        override val scheduleData: ScheduleData
-            get() = TODO("todo join child")
+        override val scheduleData get() = ScheduleData.Child(parentInstanceKey)
 
         override val schedules: List<Schedule>
             get() = TODO("todo join child")

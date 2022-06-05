@@ -9,10 +9,7 @@ sealed class ScheduleData : Parcelable {
     abstract val timePair: TimePair
 
     @Parcelize
-    data class Single(
-        val date: Date,
-        override val timePair: TimePair
-    ) : ScheduleData()
+    data class Single(val date: Date, override val timePair: TimePair) : ScheduleData()
 
     @Parcelize
     data class Weekly(
@@ -34,7 +31,7 @@ sealed class ScheduleData : Parcelable {
         val beginningOfMonth: Boolean,
         override val timePair: TimePair,
         val from: Date?,
-        val until: Date?
+        val until: Date?,
     ) : ScheduleData()
 
     @Parcelize
@@ -53,6 +50,13 @@ sealed class ScheduleData : Parcelable {
         val day: Int,
         override val timePair: TimePair,
         val from: Date?,
-        val until: Date?
+        val until: Date?,
     ) : ScheduleData()
+
+    @Parcelize
+    data class Child(val parentInstanceKey: InstanceKey) : ScheduleData() {
+
+        override val timePair: TimePair
+            get() = TODO("todo join child")
+    }
 }

@@ -302,7 +302,25 @@ sealed class ScheduleDataWrapper : Parcelable {
         }
 
         override fun getScheduleDialogDataHelper(suggestedDate: Date): ScheduleDialogData {
-            TODO("todo join child")
+            val date = parentInstanceDateTimePair.date
+            val dayOfWeek = date.dayOfWeek
+
+            val (monthDayNumber, beginningOfMonth) = dateToDayFromBeginningOrEnd(date)
+
+            return ScheduleDialogData(
+                date,
+                setOf(dayOfWeek),
+                true,
+                monthDayNumber,
+                dayOfMonthToWeekOfMonth(monthDayNumber),
+                dayOfWeek,
+                beginningOfMonth,
+                TimePairPersist(parentInstanceDateTimePair.timePair),
+                ScheduleDialogData.Type.SINGLE, // todo join child NEW TYPE
+                null,
+                null,
+                1,
+            )
         }
     }
 }

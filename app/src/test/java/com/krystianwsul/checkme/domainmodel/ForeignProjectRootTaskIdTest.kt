@@ -12,11 +12,8 @@ import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.ScheduleData
 import com.krystianwsul.common.utils.TaskKey
 import com.soywiz.klock.hours
-import org.junit.After
+import org.junit.*
 import org.junit.Assert.assertTrue
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
 
 class ForeignProjectRootTaskIdTest {
 
@@ -51,6 +48,7 @@ class ForeignProjectRootTaskIdTest {
 
     private val privateProject get() = domainFactory.projectsFactory.privateProject
 
+    @Ignore("todo join child")
     @Test
     fun testSingleInstanceJoin() {
         val date = Date(2022, 5, 30)

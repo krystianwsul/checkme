@@ -255,8 +255,6 @@ class RootTask private constructor(
             .toSet()
             .toAssociateMap()
 
-        val childDateTimes = mutableListOf<DateTime>() // todo join child: actually, check in _schedules
-
         fun createSingleSchedule(date: Date, time: Time): SingleSchedule {
             val copiedTime = getOrCopyTime(
                 date.dayOfWeek,
@@ -405,10 +403,16 @@ class RootTask private constructor(
                 is ScheduleData.Child -> scheduleData.parentInstanceKey.let {
                     parent.getInstance(it)
                         .run {
-                            val childDateTime = scheduleDateTime
-                            check(childDateTime !in childDateTimes)
-
-                            childDateTimes += childDateTime
+                            /*
+                            This falls apart if a task is nested inside two instances that have the same scheduleDateTime.
+                            If I want to do something like that, I'd need a better idea than hidden SingleSchedules that line
+                            up with said ParentInstance.scheduleDateTime.
+                             */
+                            check(
+                                _schedules.filterIsInstance<SingleSchedule>().none {
+                                    it.originalScheduleDateTime == scheduleDateTime
+                                }
+                            )
 
                             createSingleSchedule(scheduleDate, scheduleTime)
                         }

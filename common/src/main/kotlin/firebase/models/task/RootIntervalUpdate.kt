@@ -23,7 +23,7 @@ import com.krystianwsul.common.utils.UserKey
 class RootIntervalUpdate(val rootTask: RootTask, intervalInfo: IntervalInfo) :
     IntervalUpdate(rootTask, intervalInfo) {
 
-    private data class ScheduleDiffKey(val scheduleData: ScheduleData, val assignedTo: Set<UserKey>)
+    private data class ScheduleDiffKey(val scheduleData: ScheduleData, val assignedTo: Set<UserKey>?)
 
     private fun getTime(timePair: TimePair) = rootTask.customTimeProvider.getTime(timePair)
 

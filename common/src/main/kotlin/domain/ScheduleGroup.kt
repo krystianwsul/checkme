@@ -30,7 +30,7 @@ sealed class ScheduleGroup {
                 .map {
                     it.getInstance(it.topLevelTask)
                         .parentInstance
-                        ?.let(::Child)
+                        ?.let { instance -> Child(it, instance) }
                         ?: Single(it)
                 }
 
@@ -109,7 +109,8 @@ sealed class ScheduleGroup {
 
     abstract val schedules: List<Schedule>
 
-    abstract val assignedTo: Set<UserKey>
+    // used to diff new/old schedules
+    abstract val assignedTo: Set<UserKey>?
 
     class Single(private val singleSchedule: SingleSchedule) : ScheduleGroup() {
 
@@ -204,14 +205,12 @@ sealed class ScheduleGroup {
         override val assignedTo get() = yearlySchedule.assignedTo
     }
 
-    class Child(val parentInstance: Instance) : ScheduleGroup() {
+    class Child(private val schedule: SingleSchedule, val parentInstance: Instance) : ScheduleGroup() {
 
-        override val assignedTo: Set<UserKey>
-            get() = TODO("todo join child")
+        override val assignedTo: Set<UserKey>? get() = null
 
         override val scheduleData get() = ScheduleData.Child(parentInstance.instanceKey)
 
-        override val schedules: List<Schedule>
-            get() = TODO("todo join child")
+        override val schedules get() = listOf(schedule)
     }
 }

@@ -289,9 +289,10 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     app:errorEnabled="true"
+                    android:hint="Choose a reminder"
                     app:hintAnimationEnabled="false"
                     style="@style/MySpinner"
-                    android:layout_marginTop="20dp">
+                    android:layout_marginTop="20dp"><!-- todo join resource -->
 
                     <AutoCompleteTextView
                         android:id="@+id/scheduleDialogParentText"

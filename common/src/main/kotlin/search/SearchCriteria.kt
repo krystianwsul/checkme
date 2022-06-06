@@ -22,10 +22,10 @@ data class SearchCriteria(
         showDone: Boolean = InstanceCriteria.empty.showDone,
         excludedInstanceKeys: Set<InstanceKey> = InstanceCriteria.empty.excludedInstanceKeys,
         showDeleted: Boolean = TaskCriteria.empty.showDeleted,
-        excludedTaskKeys: Set<TaskKey> = TaskCriteria.empty.excludedTaskKeys,
+        excludedTaskKeys: Set<TaskKey> = CommonCriteria.empty.excludedTaskKeys,
     ) : this(
-        CommonCriteria(search, showAssignedToOthers),
-        TaskCriteria(showDeleted, excludedTaskKeys),
+        CommonCriteria(search, showAssignedToOthers, excludedTaskKeys),
+        TaskCriteria(showDeleted),
         InstanceCriteria(excludedInstanceKeys, showDone),
     )
 
@@ -69,7 +69,11 @@ data class SearchCriteria(
         }
     }
 
-    data class CommonCriteria(val search: Search = Search.Query.empty, val showAssignedToOthers: Boolean = true) {
+    data class CommonCriteria(
+        val search: Search = Search.Query.empty,
+        val showAssignedToOthers: Boolean = true,
+        val excludedTaskKeys: Set<TaskKey> = emptySet(),
+    ) {
 
         companion object {
 
@@ -79,7 +83,7 @@ data class SearchCriteria(
         val isEmpty by lazy { this == empty }
     }
 
-    data class TaskCriteria(val showDeleted: Boolean = true, val excludedTaskKeys: Set<TaskKey> = emptySet()) {
+    data class TaskCriteria(val showDeleted: Boolean = true) {
 
         companion object {
 

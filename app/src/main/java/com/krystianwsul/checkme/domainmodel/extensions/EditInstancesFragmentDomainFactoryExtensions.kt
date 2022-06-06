@@ -173,7 +173,7 @@ fun DomainUpdater.setInstancesParent(
 }.perform(this)
 
 fun DomainFactory.getEditInstancesSearchData(
-    searchCriteria: SearchCriteria, // todo exclude account for excludedTaskKeys
+    searchCriteria: SearchCriteria,
     page: Int,
 ): DomainQuery<ParentInstanceViewModel.Data> {
     MyCrashlytics.log("DomainFactory.getEditInstancesSearchData")

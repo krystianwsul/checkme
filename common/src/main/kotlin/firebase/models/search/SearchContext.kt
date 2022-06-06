@@ -76,15 +76,19 @@ sealed class SearchContext {
         protected fun childHierarchyMatches(task: Task, onlyHierarchy: Boolean = false): FilterResult {
             InterruptionChecker.throwIfInterrupted()
 
-            return task.getMatchResult(searchCriteria.search)
-                .getFilterResult()
-                ?: getTaskChildrenResult(task, onlyHierarchy)
+            return task.getFilterResult() ?: getTaskChildrenResult(task, onlyHierarchy)
+        }
+
+        private fun Task.getFilterResult(): FilterResult? {
+            if (taskKey in searchCriteria.commonCriteria.excludedTaskKeys) return FilterResult.Exclude
+
+            return getMatchResult(searchCriteria.search).getFilterResult()
         }
 
         protected abstract fun getTaskChildrenResult(task: Task, onlyHierarchy: Boolean): FilterResult
 
         override fun Sequence<Task>.filterSearch(onlyHierarchy: Boolean): Sequence<Pair<Task, FilterResult>> =
-            if (searchCriteria.search.isEmpty) {
+            if (searchCriteria.search.isEmpty && searchCriteria.commonCriteria.excludedTaskKeys.isEmpty()) {
                 map { it to FilterResult.NoSearch }
             } else {
                 map { it to childHierarchyMatches(it, onlyHierarchy) }.filter { it.second.include }
@@ -131,7 +135,7 @@ sealed class SearchContext {
             if (instance.instanceKey in searchCriteria.excludedInstanceKeys)
                 return FilterResult.Exclude
 
-            return instance.task.getMatchResult(searchCriteria.search)
+            return instance.task
                 .getFilterResult()
                 ?: getInstanceChildrenResult(now, myUser, instance)
         }

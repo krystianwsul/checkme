@@ -5,12 +5,14 @@ import com.jakewharton.rxrelay3.PublishRelay
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.gui.utils.connectInstanceSearch
 import com.krystianwsul.common.criteria.SearchCriteria
+import com.krystianwsul.common.utils.TaskKey
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.functions.Consumer
 
 abstract class ParentInstancePickerDelegate(
     compositeDisposable: CompositeDisposable,
     private val editInstancesSearchViewModel: ParentInstanceViewModel,
+    excludedTaskKeys: Set<TaskKey>,
 ) : ParentPickerFragment.Delegate {
 
     final override val startedRelay = Consumer<Boolean> { }
@@ -25,7 +27,14 @@ abstract class ParentInstancePickerDelegate(
 
     init {
         connectInstanceSearch(
-            queryRelay.map { SearchCriteria(SearchCriteria.Search.Query(it), Preferences.showAssigned, false) },
+            queryRelay.map {
+                SearchCriteria(
+                    SearchCriteria.Search.Query(it),
+                    Preferences.showAssigned,
+                    false,
+                    excludedTaskKeys = excludedTaskKeys,
+                )
+            },
             ::getPage,
             ::setPage,
             progressShownRelay,

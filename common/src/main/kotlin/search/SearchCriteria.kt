@@ -3,6 +3,7 @@ package com.krystianwsul.common.criteria
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.Parcelable
 import com.krystianwsul.common.utils.Parcelize
+import com.krystianwsul.common.utils.TaskKey
 
 data class SearchCriteria(
     val commonCriteria: CommonCriteria = CommonCriteria.empty,
@@ -21,9 +22,10 @@ data class SearchCriteria(
         showDone: Boolean = InstanceCriteria.empty.showDone,
         excludedInstanceKeys: Set<InstanceKey> = InstanceCriteria.empty.excludedInstanceKeys,
         showDeleted: Boolean = TaskCriteria.empty.showDeleted,
+        excludedTaskKeys: Set<TaskKey> = TaskCriteria.empty.excludedTaskKeys,
     ) : this(
         CommonCriteria(search, showAssignedToOthers),
-        TaskCriteria(showDeleted),
+        TaskCriteria(showDeleted, excludedTaskKeys),
         InstanceCriteria(excludedInstanceKeys, showDone),
     )
 
@@ -77,7 +79,7 @@ data class SearchCriteria(
         val isEmpty by lazy { this == empty }
     }
 
-    data class TaskCriteria(val showDeleted: Boolean = true) {
+    data class TaskCriteria(val showDeleted: Boolean = true, val excludedTaskKeys: Set<TaskKey> = emptySet()) {
 
         companion object {
 

@@ -300,8 +300,12 @@ class EditActivity : NavBarActivity() {
                     }
                     is ScheduleDialogResult.Delete -> removeSchedule(result.position)
                     is ScheduleDialogResult.Cancel -> Unit
-                    is ScheduleDialogResult.Copy ->
-                        programmaticParametersRelay.accept(ScheduleDialogParameters(result.scheduleDialogData))
+                    is ScheduleDialogResult.Copy -> programmaticParametersRelay.accept(
+                        ScheduleDialogParameters(
+                            result.scheduleDialogData,
+                            parameters.excludedTaskKeys,
+                        )
+                    )
                 }
             }
             .addTo(createDisposable)
@@ -742,6 +746,7 @@ class EditActivity : NavBarActivity() {
                                             .delegate
                                             .scheduleHint
                                     ),
+                                    activity.parameters.excludedTaskKeys,
                                     holder.adapterPosition,
                                 )
 
@@ -794,7 +799,7 @@ class EditActivity : NavBarActivity() {
                                 .firstScheduleEntry
                                 .scheduleDataWrapper
                                 .getScheduleDialogData(activity.editViewModel.delegate.scheduleHint)
-                                .let(::ScheduleDialogParameters)
+                                .let { ScheduleDialogParameters(it, activity.parameters.excludedTaskKeys) }
 
                             activity.parametersRelay.accept(parameters)
                         }

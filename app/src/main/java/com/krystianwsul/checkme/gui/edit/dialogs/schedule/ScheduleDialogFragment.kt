@@ -42,6 +42,7 @@ import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.utils.CustomTimeKey
+import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.common.utils.getDateInMonth
 import io.reactivex.rxjava3.kotlin.addTo
 import kotlin.reflect.KMutableProperty0
@@ -52,6 +53,8 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
         private const val KEY_POSITION = "position"
         private const val SCHEDULE_DIALOG_DATA_KEY = "scheduleDialogData"
+        private const val KEY_EXCLUDED_TASK_KEYS = "excludedTaskKeys"
+
         private const val KEY_PARENT_PICKER_PAGE = "parentPickerPage"
 
         private const val DATE_FRAGMENT_TAG = "dateFragment"
@@ -75,6 +78,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
             arguments = Bundle().apply {
                 parameters.position?.let { putInt(KEY_POSITION, it) }
                 putParcelable(SCHEDULE_DIALOG_DATA_KEY, parameters.scheduleDialogData)
+                putSerializable(KEY_EXCLUDED_TASK_KEYS, HashSet(parameters.excludedTaskKeys))
             }
         }
     }
@@ -135,6 +139,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
     private lateinit var delegate: Delegate
 
+    private lateinit var excludedTaskKeys: Set<TaskKey>
     private var parentPickerPage = 0
 
     //cached data doesn't contain new custom time
@@ -187,7 +192,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
     private val parentInstanceViewModel by lazy { getViewModel<ParentInstanceViewModel>() }
 
     private val parentPickerDelegate by lazy {
-        object : ParentInstancePickerDelegate(viewCreatedDisposable, parentInstanceViewModel) {
+        object : ParentInstancePickerDelegate(viewCreatedDisposable, parentInstanceViewModel, excludedTaskKeys) {
 
             override fun onNewEntry(nameHint: String?) {
                 TODO("todo join child")
@@ -218,7 +223,12 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        position = requireArguments().getInt(KEY_POSITION, -1).takeUnless { it == -1 }
+        requireArguments().run {
+            position = getInt(KEY_POSITION, -1).takeUnless { it == -1 }
+
+            @Suppress("UNCHECKED_CAST")
+            excludedTaskKeys = getSerializable(KEY_EXCLUDED_TASK_KEYS) as Set<TaskKey>
+        }
 
         savedInstanceState?.let { parentPickerPage = it.getInt(KEY_PARENT_PICKER_PAGE) }
 

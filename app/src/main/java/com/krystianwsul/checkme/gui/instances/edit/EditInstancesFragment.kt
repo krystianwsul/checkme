@@ -94,10 +94,10 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
         }
 
         override fun onOtherSelected() = newMaterialTimePicker(
-                requireContext(),
-                childFragmentManager,
-                TAG_TIME_FRAGMENT,
-                state.timePairPersist.hourMinute,
+            requireContext(),
+            childFragmentManager,
+            TAG_TIME_FRAGMENT,
+            state.timePairPersist.hourMinute,
         ).setListener(timePickerDialogFragmentListener)
 
         @Suppress("DEPRECATION")
@@ -128,7 +128,11 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
     private val instanceKeys by lazy { requireArguments().getParcelableArrayList<InstanceKey>(INSTANCE_KEYS)!!.toSet() }
 
     private val parentPickerDelegate by lazy {
-        object : ParentInstancePickerDelegate(viewCreatedDisposable, editInstancesSearchViewModel) {
+        object : ParentInstancePickerDelegate(
+            viewCreatedDisposable,
+            editInstancesSearchViewModel,
+            instanceKeys.map { it.taskKey }.toSet(),
+        ) {
 
             override fun onNewEntry(nameHint: String?) = throw UnsupportedOperationException()
 
@@ -167,7 +171,7 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?) =
-            FragmentEditInstancesBinding.inflate(inflater, container, false).also { binding = it }.root
+        FragmentEditInstancesBinding.inflate(inflater, container, false).also { binding = it }.root
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -196,28 +200,28 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
                     )
                 }
             }
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribeBy {
-                        dismiss()
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeBy {
+                    dismiss()
 
-                        listener.afterEditInstances(it.undoData, instanceKeys.size, it.newTimeStamp)
-                    }
-                    .addTo(viewCreatedDisposable)
+                    listener.afterEditInstances(it.undoData, instanceKeys.size, it.newTimeStamp)
+                }
+                .addTo(viewCreatedDisposable)
         }
 
         binding.editInstanceCancel.setOnClickListener { requireDialog().cancel() }
 
         editInstancesViewModel.data
-                .subscribe(this::onLoadFinished)
-                .addTo(viewCreatedDisposable)
+            .subscribe(this::onLoadFinished)
+            .addTo(viewCreatedDisposable)
 
         binding.editInstanceSetScheduleText
-                .clicks()
-                .subscribe {
-                    state.parentInstanceData = null
-                    updateFields()
-                }
-                .addTo(viewCreatedDisposable)
+            .clicks()
+            .subscribe {
+                state.parentInstanceData = null
+                updateFields()
+            }
+            .addTo(viewCreatedDisposable)
     }
 
     @Suppress("OVERRIDE_DEPRECATION")
@@ -257,9 +261,9 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
         if (!this::state.isInitialized) {
             state = data.run {
                 State(
-                        parentInstanceData,
-                        dateTime.date,
-                        TimePairPersist(dateTime.time.timePair),
+                    parentInstanceData,
+                    dateTime.date,
+                    TimePairPersist(dateTime.time.timePair),
                 )
             }
         }
@@ -274,16 +278,16 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
 
         binding.editInstanceTimeLayout.setDropdown {
             val customTimeDatas = ArrayList(
-                    data.customTimeDatas
-                            .values
-                            .filter { it.isMine }
-                            .sortedBy { it.hourMinutes[state.date.dayOfWeek] }
-                            .map {
-                                TimeDialogFragment.CustomTimeData(
-                                        it.customTimeKey,
-                                        it.name + " (" + it.hourMinutes[state.date.dayOfWeek] + ")",
-                                )
-                            }
+                data.customTimeDatas
+                    .values
+                    .filter { it.isMine }
+                    .sortedBy { it.hourMinutes[state.date.dayOfWeek] }
+                    .map {
+                        TimeDialogFragment.CustomTimeData(
+                            it.customTimeKey,
+                            it.name + " (" + it.hourMinutes[state.date.dayOfWeek] + ")",
+                        )
+                    }
             )
 
             TimeDialogFragment.newInstance(customTimeDatas).also {
@@ -305,9 +309,9 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
                     if (!data.customTimeDatas.containsKey(state.timePairPersist.customTimeKey)) return false
 
                     data.customTimeDatas
-                            .getValue(state.timePairPersist.customTimeKey!!)
-                            .hourMinutes
-                            .getValue(state.date.dayOfWeek)
+                        .getValue(state.timePairPersist.customTimeKey!!)
+                        .hourMinutes
+                        .getValue(state.date.dayOfWeek)
                 } else {
                     state.timePairPersist.hourMinute
                 }
@@ -345,9 +349,9 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
 
         if (state.timePairPersist.customTimeKey != null) {
             binding.editInstanceTime.setText(
-                    data.customTimeDatas
-                            .getValue(state.timePairPersist.customTimeKey!!)
-                            .run { name + " (" + hourMinutes.getValue(state.date.dayOfWeek) + ")" }
+                data.customTimeDatas
+                    .getValue(state.timePairPersist.customTimeKey!!)
+                    .run { name + " (" + hourMinutes.getValue(state.date.dayOfWeek) + ")" }
             )
         } else {
             binding.editInstanceTime.setText(state.timePairPersist.hourMinute.toString())

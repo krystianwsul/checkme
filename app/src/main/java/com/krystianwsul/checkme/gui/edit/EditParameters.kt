@@ -82,6 +82,9 @@ sealed interface EditParameters : Parcelable {
 
     val currentParentSource: EditViewModel.CurrentParentSource
 
+    // for parent instance picker
+    val excludedTaskKeys: Set<TaskKey> get() = emptySet()
+
     fun getInitialEditImageState(savedEditImageState: EditImageState?) = savedEditImageState ?: EditImageState.None
 
     fun getInitialEditImageStateSingle(
@@ -126,6 +129,8 @@ sealed interface EditParameters : Parcelable {
             get() = hint?.toCurrentParent()
                 .takeIf { it !is EditViewModel.CurrentParentSource.None }
                 ?: EditViewModel.CurrentParentSource.FromTasks(joinables.map { it.taskKey }.toSet())
+
+        override val excludedTaskKeys get() = joinables.map { it.taskKey }.toSet()
 
         init {
             check(joinables.size > 1)
@@ -189,6 +194,8 @@ sealed interface EditParameters : Parcelable {
         override val startParameters get() = EditViewModel.StartParameters.TaskOrInstance(Copy.CopySource.Task(taskKey))
 
         override val currentParentSource get() = EditViewModel.CurrentParentSource.FromTask(taskKey)
+
+        override val excludedTaskKeys get() = setOf(taskKey)
 
         override fun getInitialEditImageStateSingle(
             savedEditImageState: EditImageState?,

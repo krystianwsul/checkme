@@ -198,7 +198,9 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
             }
 
             override fun onEntrySelected(entryData: ParentPickerFragment.EntryData) {
-                TODO("todo join child")
+                scheduleDialogData.parentInstanceData = ScheduleDialogData.ParentInstanceData(entryData.name)
+
+                updateFields()
             }
 
 

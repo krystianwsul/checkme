@@ -1,14 +1,16 @@
-package com.krystianwsul.checkme.viewmodels
+package com.krystianwsul.checkme.gui.edit.dialogs.parentpicker
 
 import android.os.Parcelable
 import com.krystianwsul.checkme.domainmodel.extensions.getEditInstancesSearchData
-import com.krystianwsul.checkme.gui.edit.dialogs.parentpicker.ParentPickerFragment
+import com.krystianwsul.checkme.viewmodels.DomainData
+import com.krystianwsul.checkme.viewmodels.DomainListener
+import com.krystianwsul.checkme.viewmodels.DomainViewModel
 import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.Ordinal
 
-class EditInstancesSearchViewModel : DomainViewModel<EditInstancesSearchViewModel.Data>() {
+class ParentInstanceViewModel : DomainViewModel<ParentInstanceViewModel.Data>() {
 
     private lateinit var parameters: Parameters
 

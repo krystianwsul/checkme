@@ -4,14 +4,13 @@ import com.jakewharton.rxrelay3.BehaviorRelay
 import com.jakewharton.rxrelay3.PublishRelay
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.gui.utils.connectInstanceSearch
-import com.krystianwsul.checkme.viewmodels.EditInstancesSearchViewModel
 import com.krystianwsul.common.criteria.SearchCriteria
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.functions.Consumer
 
 abstract class ParentInstancePickerDelegate(
     compositeDisposable: CompositeDisposable,
-    private val editInstancesSearchViewModel: EditInstancesSearchViewModel,
+    private val editInstancesSearchViewModel: ParentInstanceViewModel,
 ) : ParentPickerFragment.Delegate {
 
     final override val startedRelay = Consumer<Boolean> { }

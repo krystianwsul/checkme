@@ -27,6 +27,7 @@ import com.krystianwsul.checkme.gui.base.NoCollapseBottomSheetDialogFragment
 import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimeActivity
 import com.krystianwsul.checkme.gui.dialogs.*
 import com.krystianwsul.checkme.gui.edit.dialogs.parentpicker.ParentInstancePickerDelegate
+import com.krystianwsul.checkme.gui.edit.dialogs.parentpicker.ParentInstanceViewModel
 import com.krystianwsul.checkme.gui.edit.dialogs.parentpicker.ParentPickerFragment
 import com.krystianwsul.checkme.gui.utils.ResettableProperty
 import com.krystianwsul.checkme.gui.utils.measureVisibleHeight
@@ -36,7 +37,6 @@ import com.krystianwsul.checkme.utils.cancelAnimations
 import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.checkme.utils.tryGetFragment
 import com.krystianwsul.checkme.viewmodels.DataId
-import com.krystianwsul.checkme.viewmodels.EditInstancesSearchViewModel
 import com.krystianwsul.checkme.viewmodels.EditInstancesViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.common.time.Date
@@ -118,7 +118,7 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
     }
 
     private val editInstancesViewModel by lazy { getViewModel<EditInstancesViewModel>() }
-    private val editInstancesSearchViewModel by lazy { getViewModel<EditInstancesSearchViewModel>() }
+    private val editInstancesSearchViewModel by lazy { getViewModel<ParentInstanceViewModel>() }
 
     private lateinit var listener: Listener
 
@@ -138,7 +138,7 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
             }
 
             override fun onEntrySelected(entryData: ParentPickerFragment.EntryData) {
-                state.parentInstanceData = (entryData as EditInstancesSearchViewModel.InstanceEntryData).run {
+                state.parentInstanceData = (entryData as ParentInstanceViewModel.InstanceEntryData).run {
                     EditInstancesViewModel.ParentInstanceData(instanceKey, name)
                 }
 

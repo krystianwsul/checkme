@@ -30,18 +30,19 @@ import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimeActivity
 import com.krystianwsul.checkme.gui.dialogs.*
 import com.krystianwsul.checkme.gui.edit.EditViewModel
 import com.krystianwsul.checkme.gui.edit.ScheduleDataWrapper
+import com.krystianwsul.checkme.gui.edit.dialogs.parentpicker.ParentInstancePickerDelegate
+import com.krystianwsul.checkme.gui.edit.dialogs.parentpicker.ParentInstanceViewModel
 import com.krystianwsul.checkme.gui.edit.dialogs.parentpicker.ParentPickerFragment
 import com.krystianwsul.checkme.gui.utils.ResettableProperty
 import com.krystianwsul.checkme.gui.widgets.MyTextInputLayout
 import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.utils.time.getDisplayText
+import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.getDateInMonth
-import io.reactivex.rxjava3.core.Observable
-import io.reactivex.rxjava3.functions.Consumer
 import io.reactivex.rxjava3.kotlin.addTo
 import kotlin.reflect.KMutableProperty0
 
@@ -180,17 +181,10 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
     private val bindingProperty = ResettableProperty<FragmentScheduleDialogBinding>()
     private var binding by bindingProperty
 
+    private val parentInstanceViewModel by lazy { getViewModel<ParentInstanceViewModel>() }
+
     private val parentPickerDelegate by lazy {
-        object : ParentPickerFragment.Delegate {
-
-            override val startedRelay: Consumer<Boolean>
-                get() = TODO("todo join child")
-
-            override val adapterDataObservable: Observable<ParentPickerFragment.AdapterData>
-                get() = TODO("todo join child")
-
-            override val initialScrollMatcher: ((ParentPickerFragment.EntryData) -> Boolean)?
-                get() = TODO("todo join child")
+        object : ParentInstancePickerDelegate(viewCreatedDisposable, parentInstanceViewModel) {
 
             override fun onNewEntry(nameHint: String?) {
                 TODO("todo join child")
@@ -204,11 +198,12 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
                 TODO("todo join child")
             }
 
-            override fun onSearch(query: String) {
+
+            override fun getPage(): Int {
                 TODO("todo join child")
             }
 
-            override fun onPaddingShown() {
+            override fun setPage(page: Int) {
                 TODO("todo join child")
             }
         }

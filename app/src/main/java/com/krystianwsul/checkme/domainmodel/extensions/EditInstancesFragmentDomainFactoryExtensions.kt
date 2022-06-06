@@ -8,9 +8,9 @@ import com.krystianwsul.checkme.domainmodel.getDomainResultInterrupting
 import com.krystianwsul.checkme.domainmodel.undo.UndoData
 import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
 import com.krystianwsul.checkme.domainmodel.update.SingleDomainUpdate
+import com.krystianwsul.checkme.gui.edit.dialogs.parentpicker.ParentInstanceViewModel
 import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.checkme.viewmodels.DomainQuery
-import com.krystianwsul.checkme.viewmodels.EditInstancesSearchViewModel
 import com.krystianwsul.checkme.viewmodels.EditInstancesViewModel
 import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.firebase.DomainThreadChecker
@@ -175,7 +175,7 @@ fun DomainUpdater.setInstancesParent(
 fun DomainFactory.getEditInstancesSearchData(
     searchCriteria: SearchCriteria,
     page: Int,
-): DomainQuery<EditInstancesSearchViewModel.Data> {
+): DomainQuery<ParentInstanceViewModel.Data> {
     MyCrashlytics.log("DomainFactory.getEditInstancesSearchData")
 
     DomainThreadChecker.instance.requireDomainThread()
@@ -184,19 +184,19 @@ fun DomainFactory.getEditInstancesSearchData(
         getDomainResultInterrupting {
             val searchContext = SearchContext.startSearch(searchCriteria, now, myUserFactory.user)
 
-            val (instanceEntryDatas, hasMore) = searchInstances<EditInstancesSearchViewModel.InstanceEntryData>(
+            val (instanceEntryDatas, hasMore) = searchInstances<ParentInstanceViewModel.InstanceEntryData>(
                 now,
                 searchContext,
                 page,
                 null,
             ) { instance, children, filterResult ->
-                EditInstancesSearchViewModel.InstanceEntryData(
+                ParentInstanceViewModel.InstanceEntryData(
                     instance.name,
                     children,
                     instance.instanceKey,
                     if (instance.isRootInstance()) instance.instanceDateTime.getDisplayText() else null,
                     instance.task.note,
-                    instance.run { EditInstancesSearchViewModel.SortKey(instanceDateTime.timeStamp, ordinal) },
+                    instance.run { ParentInstanceViewModel.SortKey(instanceDateTime.timeStamp, ordinal) },
                     instance.instanceDateTime.timeStamp,
                     instance.ordinal,
                     instance.instanceKey,
@@ -204,7 +204,7 @@ fun DomainFactory.getEditInstancesSearchData(
                 )
             }
 
-            EditInstancesSearchViewModel.Data(instanceEntryDatas, hasMore, searchCriteria)
+            ParentInstanceViewModel.Data(instanceEntryDatas, hasMore, searchCriteria)
         }
     }
 }

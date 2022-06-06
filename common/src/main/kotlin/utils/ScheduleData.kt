@@ -8,10 +8,10 @@ sealed interface ScheduleData : Parcelable {
 
     val timePair: TimePair
 
-    interface Recyclable : ScheduleData
+    sealed interface Reusable : ScheduleData
 
     @Parcelize
-    data class Single(val date: Date, override val timePair: TimePair) : Recyclable
+    data class Single(val date: Date, override val timePair: TimePair) : Reusable
 
     @Parcelize
     data class Weekly(
@@ -56,7 +56,7 @@ sealed interface ScheduleData : Parcelable {
     ) : ScheduleData
 
     @Parcelize
-    data class Child(val parentInstanceKey: InstanceKey) : Recyclable {
+    data class Child(val parentInstanceKey: InstanceKey) : Reusable {
 
         override val timePair: TimePair
             get() = TODO("todo join child")

@@ -9,7 +9,7 @@ import com.krystianwsul.common.time.TimePair
 import com.krystianwsul.common.utils.ScheduleData
 import com.krystianwsul.common.utils.UserKey
 
-sealed class ScheduleGroup {
+sealed interface ScheduleGroup {
 
     companion object {
 
@@ -105,20 +105,27 @@ sealed class ScheduleGroup {
         }
     }
 
-    abstract val scheduleData: ScheduleData
+    val scheduleData: ScheduleData
 
-    abstract val schedules: List<Schedule>
+    val schedules: List<Schedule>
 
     // used to diff new/old schedules
-    abstract val assignedTo: Set<UserKey>
+    val assignedTo: Set<UserKey>
 
-    class Single(val singleSchedule: SingleSchedule) : ScheduleGroup() {
+    sealed interface Reusable : ScheduleGroup {
 
-        override val scheduleData get() = ScheduleData.Single(singleSchedule.date, singleSchedule.timePair)
+        val singleSchedule: SingleSchedule
+
+        override val scheduleData: ScheduleData.Reusable
 
         override val schedules get() = listOf(singleSchedule)
 
         override val assignedTo get() = singleSchedule.assignedTo
+    }
+
+    class Single(override val singleSchedule: SingleSchedule) : Reusable {
+
+        override val scheduleData get() = ScheduleData.Single(singleSchedule.date, singleSchedule.timePair)
     }
 
     class Weekly(
@@ -128,7 +135,7 @@ sealed class ScheduleGroup {
         val until: Date?,
         private val interval: Interval,
         override val assignedTo: Set<UserKey>,
-    ) : ScheduleGroup() {
+    ) : ScheduleGroup {
 
         val daysOfWeek get() = weeklySchedules.map { it.dayOfWeek }.toSet()
 
@@ -156,7 +163,7 @@ sealed class ScheduleGroup {
         }
     }
 
-    class MonthlyDay(private val monthlyDaySchedule: MonthlyDaySchedule) : ScheduleGroup() {
+    class MonthlyDay(private val monthlyDaySchedule: MonthlyDaySchedule) : ScheduleGroup {
 
         override val scheduleData
             get() = ScheduleData.MonthlyDay(
@@ -172,7 +179,7 @@ sealed class ScheduleGroup {
         override val assignedTo get() = monthlyDaySchedule.assignedTo
     }
 
-    class MonthlyWeek(private val monthlyWeekSchedule: MonthlyWeekSchedule) : ScheduleGroup() {
+    class MonthlyWeek(private val monthlyWeekSchedule: MonthlyWeekSchedule) : ScheduleGroup {
 
         override val scheduleData
             get() = ScheduleData.MonthlyWeek(
@@ -189,7 +196,7 @@ sealed class ScheduleGroup {
         override val assignedTo get() = monthlyWeekSchedule.assignedTo
     }
 
-    class Yearly(private val yearlySchedule: YearlySchedule) : ScheduleGroup() {
+    class Yearly(private val yearlySchedule: YearlySchedule) : ScheduleGroup {
 
         override val scheduleData
             get() = ScheduleData.Yearly(
@@ -205,12 +212,8 @@ sealed class ScheduleGroup {
         override val assignedTo get() = yearlySchedule.assignedTo
     }
 
-    class Child(private val schedule: SingleSchedule, val parentInstance: Instance) : ScheduleGroup() {
-
-        override val assignedTo get() = schedule.assignedTo
+    class Child(override val singleSchedule: SingleSchedule, val parentInstance: Instance) : Reusable {
 
         override val scheduleData get() = ScheduleData.Child(parentInstance.instanceKey)
-
-        override val schedules get() = listOf(schedule)
     }
 }

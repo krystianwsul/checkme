@@ -59,33 +59,50 @@ class RootIntervalUpdate(val rootTask: RootTask, intervalInfo: IntervalInfo) :
                 by another single schedule
          */
 
-        val singleRemoveScheduleGroup = removeScheduleGroups.singleOrNull() as? ScheduleGroup.Single
+        val singleRemoveReusableScheduleGroup = removeScheduleGroups.singleOrNull() as? ScheduleGroup.Reusable
 
-        val singleAddScheduleData = addScheduleDatas.singleOrNull()
+        val singleAddReusableScheduleData = addScheduleDatas.singleOrNull()
             ?.second
-            ?.let { it as? ScheduleData.Single }
+            ?.let { it as? ScheduleData.Reusable }
 
-        fun SingleSchedule.setTimeOnInstance(singleScheduleData: ScheduleData.Single) {
-            getInstance(rootTask).let {
+        fun applyReusableScheduleData(singleSchedule: SingleSchedule, reusableScheduleData: ScheduleData.Reusable) {
+            val (dateTime, parentState) = when (reusableScheduleData) {
+                is ScheduleData.Single -> reusableScheduleData.run {
+                    DateTime(
+                        date,
+                        getTime(timePair)
+                    )
+                } to Instance.ParentState.NoParent
+                is ScheduleData.Child -> reusableScheduleData.parentInstanceKey.let {
+                    Pair(
+                        rootTask.parent
+                            .getInstance(it)
+                            .instanceDateTime,
+                        Instance.ParentState.Parent(it),
+                    )
+                }
+            }
+
+            singleSchedule.getInstance(rootTask).let {
                 it.setInstanceDateTime(
                     shownFactory,
-                    singleScheduleData.run { DateTime(date, getTime(timePair)) },
+                    dateTime,
                     customTimeMigrationHelper,
                     now,
                 )
 
-                it.setParentState(Instance.ParentState.NoParent)
+                it.setParentState(parentState)
             }
         }
 
-        if (singleRemoveScheduleGroup != null && singleAddScheduleData != null) {
-            val singleSchedule = singleRemoveScheduleGroup.singleSchedule
+        if (singleRemoveReusableScheduleGroup != null && singleAddReusableScheduleData != null) {
+            val singleSchedule = singleRemoveReusableScheduleGroup.singleSchedule
             // This is for a regular single-instance reminder, and applies the schedule change to the instance.
 
             singleSchedule.setAssignedTo(assignedTo)
 
-            singleSchedule.setTimeOnInstance(singleAddScheduleData)
-        } else if (parentSingleSchedule != null && singleAddScheduleData != null) {
+            applyReusableScheduleData(singleSchedule, singleAddReusableScheduleData)
+        } else if (parentSingleSchedule != null && singleAddReusableScheduleData != null) {
             check(removeScheduleGroups.isEmpty())
 
             /*
@@ -102,7 +119,7 @@ class RootIntervalUpdate(val rootTask: RootTask, intervalInfo: IntervalInfo) :
                 projectKey,
             )
 
-            parentSingleSchedule.setTimeOnInstance(singleAddScheduleData)
+            applyReusableScheduleData(parentSingleSchedule, singleAddReusableScheduleData)
         } else {
             if (rootTask.isHierarchyHack) { // hierarchy hack
                 check(removeScheduleGroups.isEmpty())
@@ -119,7 +136,7 @@ class RootIntervalUpdate(val rootTask: RootTask, intervalInfo: IntervalInfo) :
 
                 singleOldSchedule.setAssignedTo(assignedTo)
 
-                singleOldSchedule.setTimeOnInstance(singleScheduleData)
+                applyReusableScheduleData(singleOldSchedule, singleScheduleData)
             } else {
                 removeScheduleGroups.asSequence()
                     .flatMap { it.schedules }

@@ -110,7 +110,7 @@ sealed class ScheduleGroup {
     abstract val schedules: List<Schedule>
 
     // used to diff new/old schedules
-    abstract val assignedTo: Set<UserKey>?
+    abstract val assignedTo: Set<UserKey>
 
     class Single(private val singleSchedule: SingleSchedule) : ScheduleGroup() {
 
@@ -207,7 +207,7 @@ sealed class ScheduleGroup {
 
     class Child(private val schedule: SingleSchedule, val parentInstance: Instance) : ScheduleGroup() {
 
-        override val assignedTo: Set<UserKey>? get() = null
+        override val assignedTo get() = schedule.assignedTo
 
         override val scheduleData get() = ScheduleData.Child(parentInstance.instanceKey)
 

@@ -289,7 +289,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     app:errorEnabled="true"
-                    android:hint="Choose a reminder"
+                    android:hint="Reminder"
                     app:hintAnimationEnabled="false"
                     style="@style/MySpinner"
                     android:layout_marginTop="20dp"><!-- todo join resource -->

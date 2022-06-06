@@ -158,6 +158,8 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
             binding.scheduleDialogTimeLayout.error = time
             binding.scheduleDialogFromLayout.error = from
             binding.scheduleDialogUntilLayout.error = until
+            binding.scheduleDialogParentLayout.error =
+                if (parentNotChosen) "Reminder cannot be empty" else null // todo join child resources
         }
 
         return errorData.isValid()
@@ -884,7 +886,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
         override val visibilities = Visibilities(time = false, parent = true)
 
-        override fun isValid() = WarningErrorData()
+        override fun isValid() = WarningErrorData(parentNotChosen = scheduleDialogData.parentInstanceData == null)
 
         override fun getCustomTimeDatas(list: List<EditViewModel.CustomTimeData>): List<TimeDialogFragment.CustomTimeData> {
             TODO("todo join child")
@@ -908,9 +910,10 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         val from: String? = null,
         val until: String? = null,
         val noDaysChosen: Boolean = false,
+        val parentNotChosen: Boolean = false,
     ) {
 
-        fun isValid() = listOf(from, until).all { it.isNullOrEmpty() } && !noDaysChosen
+        fun isValid() = listOf(from, until).all { it.isNullOrEmpty() } && !noDaysChosen && !parentNotChosen
     }
 
     private data class Visibilities(

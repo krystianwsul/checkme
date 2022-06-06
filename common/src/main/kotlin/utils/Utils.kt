@@ -57,4 +57,10 @@ fun <T> Collection<T>.singleOrEmpty(): T? {
 fun <T, U : Any> Map<T, U?>.filterValuesNotNull(): Map<T, U> = filterValues { it != null }.mapValues { it.value!! }
 
 fun <T, U, V> Map<T, U>.mapValuesNotNull(mapper: (Map.Entry<T, U>) -> V?): Map<T, V> =
-        mapValues(mapper).filterValuesNotNull()
+    mapValues(mapper).filterValuesNotNull()
+
+@Suppress("unused")
+fun Any?.ignore() = Unit
+
+@Suppress("unused")
+fun Any?.exhaustive() = Unit

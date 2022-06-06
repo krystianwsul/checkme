@@ -255,38 +255,40 @@ class RootTask private constructor(
             .toSet()
             .toAssociateMap()
 
+        val childDateTimes = mutableListOf<DateTime>() // todo join child: actually, check in _schedules
+
+        fun createSingleSchedule(date: Date, time: Time): SingleSchedule {
+            val copiedTime = getOrCopyTime(
+                date.dayOfWeek,
+                time,
+                customTimeMigrationHelper,
+                now,
+            )
+
+            val singleScheduleRecord = taskRecord.newSingleScheduleRecord(
+                RootSingleScheduleJson(
+                    now.long,
+                    now.offset,
+                    null,
+                    null,
+                    date.year,
+                    date.month,
+                    date.day,
+                    assignedToKeys,
+                    copiedTime.toJson(),
+                    projectKey.key,
+                    projectKey.toJson(),
+                )
+            )
+
+            return SingleSchedule(this, singleScheduleRecord).also { _schedules += it }
+        }
+
         for (scheduleData in scheduleDatas) {
             val time by lazy { customTimeProvider.getTime(scheduleData.timePair) }
 
             when (scheduleData) {
-                is ScheduleData.Single -> {
-                    val date = scheduleData.date
-
-                    val copiedTime = getOrCopyTime(
-                        date.dayOfWeek,
-                        time,
-                        customTimeMigrationHelper,
-                        now,
-                    )
-
-                    val singleScheduleRecord = taskRecord.newSingleScheduleRecord(
-                        RootSingleScheduleJson(
-                            now.long,
-                            now.offset,
-                            null,
-                            null,
-                            date.year,
-                            date.month,
-                            date.day,
-                            assignedToKeys,
-                            copiedTime.toJson(),
-                            projectKey.key,
-                            projectKey.toJson(),
-                        )
-                    )
-
-                    _schedules += SingleSchedule(this, singleScheduleRecord)
-                }
+                is ScheduleData.Single -> createSingleSchedule(scheduleData.date, time).ignore()
                 is ScheduleData.Weekly -> {
                     for (dayOfWeek in scheduleData.daysOfWeek) {
                         val copiedTime = getOrCopyTime(
@@ -400,8 +402,20 @@ class RootTask private constructor(
 
                     _schedules += YearlySchedule(this, yearlyScheduleRecord)
                 }
-                else -> throw UnsupportedOperationException("todo join child")
-            }
+                is ScheduleData.Child -> scheduleData.parentInstanceKey.let {
+                    parent.getInstance(it)
+                        .run {
+                            val childDateTime = scheduleDateTime
+                            check(childDateTime !in childDateTimes)
+
+                            childDateTimes += childDateTime
+
+                            createSingleSchedule(scheduleDate, scheduleTime)
+                        }
+                        .getInstance(this)
+                        .setParentState(it)
+                }
+            }.exhaustive()
         }
 
         invalidateIntervals()

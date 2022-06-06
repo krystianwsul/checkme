@@ -61,6 +61,7 @@ class CreateChildTaskDomainUpdate(
 
                     val parentInstance = parentTask.getInstance(migratedInstanceScheduleKey)
 
+                    // todo join child use ScheduleData.Child
                     domainFactory.createScheduleTopLevelTask(
                         now,
                         createParameters.name,

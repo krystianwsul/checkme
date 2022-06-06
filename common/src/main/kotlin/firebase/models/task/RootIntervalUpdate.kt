@@ -14,6 +14,7 @@ import com.krystianwsul.common.firebase.models.taskhierarchy.TaskHierarchy
 import com.krystianwsul.common.time.DateTime
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.Time
+import com.krystianwsul.common.time.TimePair
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ScheduleData
 import com.krystianwsul.common.utils.TaskHierarchyKey
@@ -24,9 +25,11 @@ class RootIntervalUpdate(val rootTask: RootTask, intervalInfo: IntervalInfo) :
 
     private data class ScheduleDiffKey(val scheduleData: ScheduleData, val assignedTo: Set<UserKey>)
 
+    private fun getTime(timePair: TimePair) = rootTask.customTimeProvider.getTime(timePair)
+
     fun updateSchedules(
         shownFactory: Instance.ShownFactory,
-        scheduleDatas: List<Pair<ScheduleData, Time>>,
+        scheduleDatas: List<ScheduleData>,
         now: ExactTimeStamp.Local,
         assignedTo: Set<UserKey>,
         customTimeMigrationHelper: OwnedProject.CustomTimeMigrationHelper,
@@ -34,7 +37,7 @@ class RootIntervalUpdate(val rootTask: RootTask, intervalInfo: IntervalInfo) :
         parentSingleSchedule: SingleSchedule? = null,
     ) {
         val removeSchedules = mutableListOf<Schedule>()
-        val initialAddScheduleDatas = scheduleDatas.map { ScheduleDiffKey(it.first, assignedTo) to it }
+        val initialAddScheduleDatas = scheduleDatas.map { ScheduleDiffKey(it, assignedTo) to it }
         val addScheduleDatas = initialAddScheduleDatas.toMutableList()
 
         val oldSchedules = intervalInfo.getCurrentScheduleIntervals(now).map { it.schedule }
@@ -62,8 +65,8 @@ class RootIntervalUpdate(val rootTask: RootTask, intervalInfo: IntervalInfo) :
 
         val singleAddSchedulePair = addScheduleDatas.singleOrNull()
             ?.second
-            ?.let { (scheduleData, time) ->
-                scheduleData.let { it as? ScheduleData.Single }?.let { it to time }
+            ?.let { scheduleData ->
+                scheduleData.let { it as? ScheduleData.Single }?.let { it to getTime(scheduleData.timePair) }
             }
 
         fun SingleSchedule.setTimeOnInstance(singleScheduleData: ScheduleData.Single, time: Time) {
@@ -131,22 +134,22 @@ class RootIntervalUpdate(val rootTask: RootTask, intervalInfo: IntervalInfo) :
                 check(initialAddScheduleDatas.size == 1)
                 check(oldScheduleDatas.size == 1)
 
-                val singleInitialAddSchedulePair = initialAddScheduleDatas.single().second
+                val singleInitialAddScheduleData = initialAddScheduleDatas.single().second
 
-                val singleAddSchedule = singleInitialAddSchedulePair.first.let { it as ScheduleData.Single }
+                val singleAddSchedule = singleInitialAddScheduleData.let { it as ScheduleData.Single }
 
                 val singleOldSchedule = oldScheduleDatas.single()
                     .second
                     .single()
                     .let { it as SingleSchedule }
 
-                singleOldSchedule.setTimeOnInstance(singleAddSchedule, singleInitialAddSchedulePair.second)
+                singleOldSchedule.setTimeOnInstance(singleAddSchedule, getTime(singleInitialAddScheduleData.timePair))
             } else {
                 removeSchedules.forEach { it.setEndExactTimeStamp(now.toOffset()) }
 
                 rootTask.createSchedules(
                     now,
-                    addScheduleDatas.map { it.second },
+                    addScheduleDatas.map { it.second to getTime(it.second.timePair) }, // todo join child
                     assignedTo,
                     customTimeMigrationHelper,
                     projectKey,

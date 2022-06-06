@@ -419,7 +419,7 @@ fun DomainUpdater.updateScheduleTask(
 
             updateSchedules(
                 shownFactory,
-                scheduleDatas.map { it to getTime(it.timePair) },
+                scheduleDatas,
                 now,
                 projectParameters.nonNullAssignedTo,
                 this@create,

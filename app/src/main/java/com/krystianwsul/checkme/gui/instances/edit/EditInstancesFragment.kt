@@ -16,9 +16,6 @@ import android.widget.LinearLayout
 import androidx.core.view.updateLayoutParams
 import com.google.android.material.timepicker.MaterialTimePicker
 import com.jakewharton.rxbinding4.view.clicks
-import com.jakewharton.rxrelay3.BehaviorRelay
-import com.jakewharton.rxrelay3.PublishRelay
-import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.FragmentEditInstancesBinding
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
@@ -29,9 +26,9 @@ import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
 import com.krystianwsul.checkme.gui.base.NoCollapseBottomSheetDialogFragment
 import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimeActivity
 import com.krystianwsul.checkme.gui.dialogs.*
-import com.krystianwsul.checkme.gui.edit.dialogs.ParentPickerFragment
+import com.krystianwsul.checkme.gui.edit.dialogs.parentpicker.ParentInstancePickerDelegate
+import com.krystianwsul.checkme.gui.edit.dialogs.parentpicker.ParentPickerFragment
 import com.krystianwsul.checkme.gui.utils.ResettableProperty
-import com.krystianwsul.checkme.gui.utils.connectInstanceSearch
 import com.krystianwsul.checkme.gui.utils.measureVisibleHeight
 import com.krystianwsul.checkme.utils.addOneShotGlobalLayoutListener
 import com.krystianwsul.checkme.utils.animateVisibility
@@ -42,7 +39,6 @@ import com.krystianwsul.checkme.viewmodels.DataId
 import com.krystianwsul.checkme.viewmodels.EditInstancesSearchViewModel
 import com.krystianwsul.checkme.viewmodels.EditInstancesViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
-import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.time.TimePairPersist
@@ -50,8 +46,6 @@ import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.InstanceKey
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
-import io.reactivex.rxjava3.disposables.CompositeDisposable
-import io.reactivex.rxjava3.functions.Consumer
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.subscribeBy
 import kotlinx.parcelize.Parcelize
@@ -132,43 +126,6 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
     private var binding by bindingProperty
 
     private val instanceKeys by lazy { requireArguments().getParcelableArrayList<InstanceKey>(INSTANCE_KEYS)!!.toSet() }
-
-    abstract class ParentInstancePickerDelegate(
-        compositeDisposable: CompositeDisposable,
-        private val editInstancesSearchViewModel: EditInstancesSearchViewModel,
-    ) : ParentPickerFragment.Delegate {
-
-        override val startedRelay = Consumer<Boolean> { }
-
-        private val queryRelay = BehaviorRelay.createDefault("")
-
-        override val adapterDataObservable = BehaviorRelay.create<ParentPickerFragment.AdapterData>()
-
-        override val initialScrollMatcher: ((ParentPickerFragment.EntryData) -> Boolean)? = null
-
-        private val progressShownRelay = PublishRelay.create<Unit>()
-
-        init {
-            connectInstanceSearch(
-                queryRelay.map { SearchCriteria(SearchCriteria.Search.Query(it), Preferences.showAssigned, false) },
-                ::getPage,
-                ::setPage,
-                progressShownRelay,
-                compositeDisposable,
-                editInstancesSearchViewModel,
-                { adapterDataObservable.accept(ParentPickerFragment.AdapterData(it.instanceEntryDatas, it.showLoader)) },
-                editInstancesSearchViewModel::start,
-            )
-        }
-
-        protected abstract fun getPage(): Int
-
-        protected abstract fun setPage(page: Int)
-
-        override fun onSearch(query: String) = queryRelay.accept(query)
-
-        override fun onPaddingShown() = progressShownRelay.accept(Unit)
-    }
 
     private val parentPickerDelegate by lazy {
         object : ParentInstancePickerDelegate(viewCreatedDisposable, editInstancesSearchViewModel) {

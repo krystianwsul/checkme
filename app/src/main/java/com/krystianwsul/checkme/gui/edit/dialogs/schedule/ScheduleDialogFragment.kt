@@ -30,7 +30,7 @@ import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimeActivity
 import com.krystianwsul.checkme.gui.dialogs.*
 import com.krystianwsul.checkme.gui.edit.EditViewModel
 import com.krystianwsul.checkme.gui.edit.ScheduleDataWrapper
-import com.krystianwsul.checkme.gui.edit.dialogs.ParentPickerFragment
+import com.krystianwsul.checkme.gui.edit.dialogs.parentpicker.ParentPickerFragment
 import com.krystianwsul.checkme.gui.utils.ResettableProperty
 import com.krystianwsul.checkme.gui.widgets.MyTextInputLayout
 import com.krystianwsul.checkme.utils.*
@@ -57,7 +57,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         private const val TAG_UNTIL_FRAGMENT = "untilFragment"
         private const val TIME_LIST_FRAGMENT_TAG = "timeListFragment"
         private const val TAG_TIME_PICKER = "timePicker"
-        private const val TAG_PARENT_PICKER = "parentPicker"
+        private const val TAG_PARENT_PICKER = "parentInstancePicker"
 
         private val daysOfWeekMap = mapOf(
             DayOfWeek.SUNDAY to MaterialDayPicker.Weekday.SUNDAY,

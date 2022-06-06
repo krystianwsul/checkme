@@ -28,7 +28,7 @@ import com.krystianwsul.checkme.gui.edit.delegates.EditDelegate
 import com.krystianwsul.checkme.gui.edit.dialogs.AssignToDialogFragment
 import com.krystianwsul.checkme.gui.edit.dialogs.CameraGalleryFragment
 import com.krystianwsul.checkme.gui.edit.dialogs.JoinAllRemindersDialogFragment
-import com.krystianwsul.checkme.gui.edit.dialogs.ParentPickerFragment
+import com.krystianwsul.checkme.gui.edit.dialogs.parentpicker.ParentPickerFragment
 import com.krystianwsul.checkme.gui.edit.dialogs.schedule.ScheduleDialogFragment
 import com.krystianwsul.checkme.gui.edit.dialogs.schedule.ScheduleDialogParameters
 import com.krystianwsul.checkme.gui.edit.dialogs.schedule.ScheduleDialogResult
@@ -66,7 +66,7 @@ class EditActivity : NavBarActivity() {
         const val KEY_PARENT_PROJECT_KEY = "parentProjectKey"
         const val KEY_PARENT_TASK = "parentTask"
 
-        private const val PARENT_PICKER_FRAGMENT_TAG = "parentPickerFragment"
+        private const val PARENT_PICKER_FRAGMENT_TAG = "parentTaskPickerFragment"
 
         private const val NOTE_KEY = "note"
         private const val NOTE_HAS_FOCUS_KEY = "noteHasFocus"

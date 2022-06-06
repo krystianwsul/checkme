@@ -11,7 +11,7 @@ import com.krystianwsul.checkme.domainmodel.UserScope
 import com.krystianwsul.checkme.domainmodel.extensions.getCreateTaskData
 import com.krystianwsul.checkme.domainmodel.extensions.getCreateTaskParentPickerData
 import com.krystianwsul.checkme.gui.edit.delegates.EditDelegate
-import com.krystianwsul.checkme.gui.edit.dialogs.ParentPickerFragment
+import com.krystianwsul.checkme.gui.edit.dialogs.parentpicker.ParentPickerFragment
 import com.krystianwsul.checkme.gui.utils.SavedStateProperty
 import com.krystianwsul.checkme.viewmodels.DomainData
 import com.krystianwsul.checkme.viewmodels.DomainListener

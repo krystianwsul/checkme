@@ -1,4 +1,4 @@
-package com.krystianwsul.checkme.gui.edit.dialogs
+package com.krystianwsul.checkme.gui.edit.dialogs.parentpicker
 
 
 import android.annotation.SuppressLint

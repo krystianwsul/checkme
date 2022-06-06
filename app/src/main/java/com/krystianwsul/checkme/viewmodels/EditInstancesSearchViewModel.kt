@@ -2,7 +2,7 @@ package com.krystianwsul.checkme.viewmodels
 
 import android.os.Parcelable
 import com.krystianwsul.checkme.domainmodel.extensions.getEditInstancesSearchData
-import com.krystianwsul.checkme.gui.edit.dialogs.ParentPickerFragment
+import com.krystianwsul.checkme.gui.edit.dialogs.parentpicker.ParentPickerFragment
 import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.InstanceKey

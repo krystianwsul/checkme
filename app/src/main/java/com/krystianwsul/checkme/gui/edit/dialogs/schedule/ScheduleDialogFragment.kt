@@ -52,6 +52,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
         private const val KEY_POSITION = "position"
         private const val SCHEDULE_DIALOG_DATA_KEY = "scheduleDialogData"
+        private const val KEY_PARENT_PICKER_PAGE = "parentPickerPage"
 
         private const val DATE_FRAGMENT_TAG = "dateFragment"
         private const val TAG_FROM_FRAGMENT = "fromFragment"
@@ -134,6 +135,8 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
     private lateinit var delegate: Delegate
 
+    private var parentPickerPage = 0
+
     //cached data doesn't contain new custom time
     private fun isValid(): Boolean {
         scheduleDialogData.timePairPersist
@@ -199,12 +202,10 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
             }
 
 
-            override fun getPage(): Int {
-                TODO("todo join child")
-            }
+            override fun getPage() = parentPickerPage
 
             override fun setPage(page: Int) {
-                TODO("todo join child")
+                parentPickerPage = page
             }
         }
     }
@@ -213,6 +214,8 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         super.onCreate(savedInstanceState)
 
         position = requireArguments().getInt(KEY_POSITION, -1).takeUnless { it == -1 }
+
+        savedInstanceState?.let { parentPickerPage = it.getInt(KEY_PARENT_PICKER_PAGE) }
 
         tryGetFragment<ParentPickerFragment>(TAG_PARENT_PICKER)?.initialize(parentPickerDelegate) // todo join child probably not the right place for this
     }
@@ -498,6 +501,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         super.onSaveInstanceState(outState)
 
         outState.putParcelable(SCHEDULE_DIALOG_DATA_KEY, scheduleDialogData)
+        outState.putInt(KEY_PARENT_PICKER_PAGE, parentPickerPage)
     }
 
     @Suppress("OVERRIDE_DEPRECATION")

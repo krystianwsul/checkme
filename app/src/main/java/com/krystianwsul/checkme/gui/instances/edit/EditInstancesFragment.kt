@@ -50,6 +50,7 @@ import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.InstanceKey
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.functions.Consumer
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.subscribeBy
@@ -132,31 +133,45 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
 
     private val instanceKeys by lazy { requireArguments().getParcelableArrayList<InstanceKey>(INSTANCE_KEYS)!!.toSet() }
 
+    abstract class ParentInstancePickerDelegate(
+        compositeDisposable: CompositeDisposable,
+        private val editInstancesSearchViewModel: EditInstancesSearchViewModel,
+    ) : ParentPickerFragment.Delegate {
+
+        override val startedRelay = Consumer<Boolean> { }
+
+        private val queryRelay = BehaviorRelay.createDefault("")
+
+        override val adapterDataObservable = BehaviorRelay.create<ParentPickerFragment.AdapterData>()
+
+        override val initialScrollMatcher: ((ParentPickerFragment.EntryData) -> Boolean)? = null
+
+        private val progressShownRelay = PublishRelay.create<Unit>()
+
+        init {
+            connectInstanceSearch(
+                queryRelay.map { SearchCriteria(SearchCriteria.Search.Query(it), Preferences.showAssigned, false) },
+                ::getPage,
+                ::setPage,
+                progressShownRelay,
+                compositeDisposable,
+                editInstancesSearchViewModel,
+                { adapterDataObservable.accept(ParentPickerFragment.AdapterData(it.instanceEntryDatas, it.showLoader)) },
+                editInstancesSearchViewModel::start,
+            )
+        }
+
+        protected abstract fun getPage(): Int
+
+        protected abstract fun setPage(page: Int)
+
+        override fun onSearch(query: String) = queryRelay.accept(query)
+
+        override fun onPaddingShown() = progressShownRelay.accept(Unit)
+    }
+
     private val parentPickerDelegate by lazy {
-        object : ParentPickerFragment.Delegate {
-
-            override val startedRelay = Consumer<Boolean> { }
-
-            private val queryRelay = BehaviorRelay.createDefault("")
-
-            override val adapterDataObservable = BehaviorRelay.create<ParentPickerFragment.AdapterData>()
-
-            override val initialScrollMatcher: ((ParentPickerFragment.EntryData) -> Boolean)? = null
-
-            private val progressShownRelay = PublishRelay.create<Unit>()
-
-            init {
-                connectInstanceSearch(
-                    queryRelay.map { SearchCriteria(SearchCriteria.Search.Query(it), Preferences.showAssigned, false) },
-                    { state.page },
-                    { state.page = it },
-                    progressShownRelay,
-                    viewCreatedDisposable,
-                    editInstancesSearchViewModel,
-                    { adapterDataObservable.accept(ParentPickerFragment.AdapterData(it.instanceEntryDatas, it.showLoader)) },
-                    editInstancesSearchViewModel::start,
-                )
-            }
+        object : ParentInstancePickerDelegate(viewCreatedDisposable, editInstancesSearchViewModel) {
 
             override fun onNewEntry(nameHint: String?) = throw UnsupportedOperationException()
 
@@ -173,9 +188,11 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
                 updateFields()
             }
 
-            override fun onSearch(query: String) = queryRelay.accept(query)
+            override fun getPage() = state.page
 
-            override fun onPaddingShown() = progressShownRelay.accept(Unit)
+            override fun setPage(page: Int) {
+                state.page = page
+            }
         }
     }
 

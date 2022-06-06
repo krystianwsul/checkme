@@ -112,7 +112,7 @@ sealed class ScheduleGroup {
     // used to diff new/old schedules
     abstract val assignedTo: Set<UserKey>
 
-    class Single(private val singleSchedule: SingleSchedule) : ScheduleGroup() {
+    class Single(val singleSchedule: SingleSchedule) : ScheduleGroup() {
 
         override val scheduleData get() = ScheduleData.Single(singleSchedule.date, singleSchedule.timePair)
 

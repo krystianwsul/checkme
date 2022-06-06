@@ -4,12 +4,14 @@ import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.TimePair
 
-sealed class ScheduleData : Parcelable {
+sealed interface ScheduleData : Parcelable {
 
-    abstract val timePair: TimePair
+    val timePair: TimePair
+
+    interface Recyclable : ScheduleData
 
     @Parcelize
-    data class Single(val date: Date, override val timePair: TimePair) : ScheduleData()
+    data class Single(val date: Date, override val timePair: TimePair) : Recyclable
 
     @Parcelize
     data class Weekly(
@@ -18,7 +20,7 @@ sealed class ScheduleData : Parcelable {
         val from: Date?,
         val until: Date?,
         val interval: Int,
-    ) : ScheduleData() {
+    ) : ScheduleData {
 
         init {
             check(interval > 0)
@@ -32,7 +34,7 @@ sealed class ScheduleData : Parcelable {
         override val timePair: TimePair,
         val from: Date?,
         val until: Date?,
-    ) : ScheduleData()
+    ) : ScheduleData
 
     @Parcelize
     data class MonthlyWeek(
@@ -42,7 +44,7 @@ sealed class ScheduleData : Parcelable {
         override val timePair: TimePair,
         val from: Date?,
         val until: Date?,
-    ) : ScheduleData()
+    ) : ScheduleData
 
     @Parcelize
     data class Yearly(
@@ -51,10 +53,10 @@ sealed class ScheduleData : Parcelable {
         override val timePair: TimePair,
         val from: Date?,
         val until: Date?,
-    ) : ScheduleData()
+    ) : ScheduleData
 
     @Parcelize
-    data class Child(val parentInstanceKey: InstanceKey) : ScheduleData() {
+    data class Child(val parentInstanceKey: InstanceKey) : Recyclable {
 
         override val timePair: TimePair
             get() = TODO("todo join child")

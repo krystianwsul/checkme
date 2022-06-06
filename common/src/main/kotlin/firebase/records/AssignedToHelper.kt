@@ -20,10 +20,10 @@ sealed class AssignedToHelper {
         override fun getAssignedTo(scheduleJson: ScheduleJson) = setOf<String>()
 
         override fun setAssignedTo(
-                assignedToJson: WriteAssignedToJson,
-                singleScheduleRecord: SingleScheduleRecord,
-                assignedTo: Set<String>,
-        ) = throw UnsupportedOperationException()
+            assignedToJson: WriteAssignedToJson,
+            singleScheduleRecord: SingleScheduleRecord,
+            assignedTo: Set<String>,
+        ) = check(assignedTo.isEmpty())
     }
 
     object Shared : AssignedToHelper() {

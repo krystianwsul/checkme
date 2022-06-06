@@ -306,7 +306,7 @@ fun DomainUpdater.createScheduleTopLevelTask(
         task = createScheduleTopLevelTask(
             now,
             createParameters.name,
-            scheduleDatas.map { it to getTime(it.timePair) },
+            scheduleDatas,
             createParameters.note,
             finalProjectId,
             image,
@@ -577,7 +577,7 @@ fun DomainUpdater.createScheduleJoinTopLevelTask(
         newParentTask = createScheduleTopLevelTask(
             now,
             createParameters.name,
-            scheduleDatas.map { it to getTime(it.timePair) },
+            scheduleDatas,
             createParameters.note,
             finalProjectKey,
             image,
@@ -980,7 +980,7 @@ private val EditDelegate.ProjectParameters?.nonNullAssignedTo get() = this?.assi
 fun DomainFactory.createScheduleTopLevelTask(
     now: ExactTimeStamp.Local,
     name: String,
-    scheduleDatas: List<Pair<ScheduleData, Time>>,
+    scheduleDatas: List<ScheduleData>,
     note: String?,
     projectKey: ProjectKey<*>,
     image: EditDelegate.CreateParameters.Image?,

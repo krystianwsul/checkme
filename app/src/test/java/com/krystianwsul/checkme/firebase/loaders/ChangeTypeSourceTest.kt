@@ -776,7 +776,7 @@ class ChangeTypeSourceTest {
         ).apply {
             createSchedules(
                 ExactTimeStamp.Local.now,
-                listOf(Pair(ScheduleData.Single(Date.today(), TimePair(HourMinute.now)), Time.Normal(HourMinute.now))),
+                listOf(ScheduleData.Single(Date.today(), TimePair(HourMinute.now))),
                 setOf(),
                 mockk(),
                 privateProjectKey,

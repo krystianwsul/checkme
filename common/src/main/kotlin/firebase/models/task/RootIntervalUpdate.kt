@@ -111,8 +111,8 @@ class RootIntervalUpdate(val rootTask: RootTask, intervalInfo: IntervalInfo) :
              */
             rootTask.createSchedules(
                 now,
-                parentSingleSchedule.originalScheduleDateTime.let {
-                    listOf(ScheduleData.Single(it.date, it.time.timePair) to it.time)
+                parentSingleSchedule.originalScheduleDateTime.run {
+                    listOf(ScheduleData.Single(date, time.timePair))
                 },
                 assignedTo,
                 customTimeMigrationHelper,
@@ -144,7 +144,7 @@ class RootIntervalUpdate(val rootTask: RootTask, intervalInfo: IntervalInfo) :
 
                 rootTask.createSchedules(
                     now,
-                    addScheduleDatas.map { it.second to getTime(it.second.timePair) }, // todo join child
+                    addScheduleDatas.map { it.second },
                     assignedTo,
                     customTimeMigrationHelper,
                     projectKey,

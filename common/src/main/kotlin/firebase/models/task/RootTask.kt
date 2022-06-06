@@ -246,7 +246,7 @@ class RootTask private constructor(
 
     fun createSchedules(
         now: ExactTimeStamp.Local,
-        scheduleDatas: List<Pair<ScheduleData, Time>>,
+        scheduleDatas: List<ScheduleData>,
         assignedTo: Set<UserKey>,
         customTimeMigrationHelper: OwnedProject.CustomTimeMigrationHelper,
         projectKey: ProjectKey<*>,
@@ -255,7 +255,9 @@ class RootTask private constructor(
             .toSet()
             .toAssociateMap()
 
-        for ((scheduleData, time) in scheduleDatas) {
+        for (scheduleData in scheduleDatas) {
+            val time by lazy { customTimeProvider.getTime(scheduleData.timePair) }
+
             when (scheduleData) {
                 is ScheduleData.Single -> {
                     val date = scheduleData.date
@@ -398,6 +400,7 @@ class RootTask private constructor(
 
                     _schedules += YearlySchedule(this, yearlyScheduleRecord)
                 }
+                else -> throw UnsupportedOperationException("todo join child")
             }
         }
 

@@ -61,12 +61,10 @@ class CreateChildTaskDomainUpdate(
 
                     val parentInstance = parentTask.getInstance(migratedInstanceScheduleKey)
 
-                    val scheduleTime = parentInstance.scheduleTime
-
                     domainFactory.createScheduleTopLevelTask(
                         now,
                         createParameters.name,
-                        listOf(Pair(ScheduleData.Single(parentInstance.scheduleDate, scheduleTime.timePair), scheduleTime)),
+                        listOf(ScheduleData.Single(parentInstance.scheduleDate, parentInstance.scheduleTime.timePair)),
                         createParameters.note,
                         parentTask.project.projectKey,
                         image,

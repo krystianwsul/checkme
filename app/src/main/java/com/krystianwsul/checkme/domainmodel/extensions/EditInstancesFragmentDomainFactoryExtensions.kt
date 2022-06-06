@@ -190,17 +190,21 @@ fun DomainFactory.getEditInstancesSearchData(
                 page,
                 null,
             ) { instance, children, filterResult ->
+                val instanceDateTime = instance.instanceDateTime
+                val instanceTimeStamp = instanceDateTime.timeStamp
+
                 ParentInstanceViewModel.InstanceEntryData(
                     instance.name,
                     children,
                     instance.instanceKey,
-                    if (instance.isRootInstance()) instance.instanceDateTime.getDisplayText() else null,
+                    if (instance.isRootInstance()) instanceDateTime.getDisplayText() else null,
                     instance.task.note,
-                    instance.run { ParentInstanceViewModel.SortKey(instanceDateTime.timeStamp, ordinal) },
-                    instance.instanceDateTime.timeStamp,
+                    ParentInstanceViewModel.SortKey(instanceTimeStamp, instance.ordinal),
+                    instanceTimeStamp,
                     instance.ordinal,
                     instance.instanceKey,
                     filterResult.matchesSearch,
+                    instanceDateTime.toDateTimePair(),
                 )
             }
 

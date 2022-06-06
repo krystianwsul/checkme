@@ -6,6 +6,7 @@ import com.krystianwsul.checkme.viewmodels.DomainData
 import com.krystianwsul.checkme.viewmodels.DomainListener
 import com.krystianwsul.checkme.viewmodels.DomainViewModel
 import com.krystianwsul.common.criteria.SearchCriteria
+import com.krystianwsul.common.time.DateTimePair
 import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.Ordinal
@@ -50,6 +51,7 @@ class ParentInstanceViewModel : DomainViewModel<ParentInstanceViewModel.Data>() 
         var ordinal: Ordinal,
         val instanceKey: InstanceKey,
         override val matchesSearch: Boolean,
+        val instanceDateTimePair: DateTimePair,
     ) : Comparable<InstanceEntryData>, ParentPickerFragment.EntryData {
 
         override fun compareTo(other: InstanceEntryData): Int {

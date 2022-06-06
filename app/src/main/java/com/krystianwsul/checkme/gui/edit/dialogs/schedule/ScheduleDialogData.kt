@@ -4,8 +4,10 @@ import android.os.Parcelable
 import com.krystianwsul.checkme.gui.edit.ScheduleDataWrapper
 import com.krystianwsul.checkme.gui.edit.ScheduleEntry
 import com.krystianwsul.common.time.Date
+import com.krystianwsul.common.time.DateTimePair
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.TimePairPersist
+import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.ScheduleData
 import kotlinx.parcelize.Parcelize
 import kotlin.random.Random
@@ -74,7 +76,13 @@ data class ScheduleDialogData(
                 Type.YEARLY -> ScheduleDataWrapper.Yearly(
                     ScheduleData.Yearly(date.month, date.day, timePairPersist.timePair, from, until)
                 )
-                Type.CHILD -> TODO("todo join child")
+                Type.CHILD -> parentInstanceData!!.run {
+                    ScheduleDataWrapper.Child(
+                        ScheduleData.Child(instanceKey),
+                        name,
+                        instanceDateTimePair,
+                    )
+                }
             },
             id ?: Random.nextInt(),
         )
@@ -85,5 +93,9 @@ data class ScheduleDialogData(
     }
 
     @Parcelize
-    data class ParentInstanceData(val name: String) : Parcelable
+    data class ParentInstanceData(
+        val name: String,
+        val instanceKey: InstanceKey,
+        val instanceDateTimePair: DateTimePair,
+    ) : Parcelable
 }

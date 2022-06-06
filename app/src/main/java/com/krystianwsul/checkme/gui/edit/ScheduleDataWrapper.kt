@@ -287,7 +287,7 @@ sealed class ScheduleDataWrapper : Parcelable {
 
     @Parcelize
     data class Child(
-        override val scheduleData: ScheduleData,
+        override val scheduleData: ScheduleData.Child,
         val parentInstanceName: String,
         val parentInstanceDateTimePair: DateTimePair,
     ) : ScheduleDataWrapper() {
@@ -325,7 +325,11 @@ sealed class ScheduleDataWrapper : Parcelable {
                 null,
                 null,
                 1,
-                ScheduleDialogData.ParentInstanceData(parentInstanceName),
+                ScheduleDialogData.ParentInstanceData(
+                    parentInstanceName,
+                    scheduleData.parentInstanceKey,
+                    parentInstanceDateTimePair,
+                ),
             )
         }
     }

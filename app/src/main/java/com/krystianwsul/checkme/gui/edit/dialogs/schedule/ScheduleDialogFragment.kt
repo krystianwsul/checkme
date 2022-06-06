@@ -198,7 +198,10 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
             }
 
             override fun onEntrySelected(entryData: ParentPickerFragment.EntryData) {
-                scheduleDialogData.parentInstanceData = ScheduleDialogData.ParentInstanceData(entryData.name)
+                scheduleDialogData.parentInstanceData =
+                    entryData.let { it as ParentInstanceViewModel.InstanceEntryData }.run {
+                        ScheduleDialogData.ParentInstanceData(name, instanceKey, instanceDateTimePair)
+                    }
 
                 updateFields()
             }

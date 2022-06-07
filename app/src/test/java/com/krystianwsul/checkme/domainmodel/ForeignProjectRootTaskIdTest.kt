@@ -48,7 +48,7 @@ class ForeignProjectRootTaskIdTest {
 
     private val privateProject get() = domainFactory.projectsFactory.privateProject
 
-    @Ignore("todo join child")
+    @Ignore("todo join test")
     @Test
     fun testSingleInstanceJoin() {
         val date = Date(2022, 5, 30)

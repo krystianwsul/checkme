@@ -31,7 +31,7 @@ class MockHierarchyTest {
     private fun getSingleScheduleData(date: Date, hour: Int, minute: Int) =
         listOf(ScheduleData.Single(date, TimePair(HourMinute(hour, minute))))
 
-    @Ignore("todo join child")
+    @Ignore("todo join test")
     @Test
     fun testSetSingleScheduleForMockChildTask() {
         val date = Date(2022, 2, 2)
@@ -100,7 +100,7 @@ class MockHierarchyTest {
         assertTrue(domainFactory.getTaskForce(parentTaskKey).getChildTasks().none { it.taskKey == childTaskKey })
     }
 
-    @Ignore("todo join child")
+    @Ignore("todo join test")
     @Test
     fun testUpdateNameForMockChildTask() {
         val date = Date(2022, 2, 2)
@@ -175,7 +175,7 @@ class MockHierarchyTest {
         assertTrue(domainFactory.getTaskForce(parentTaskKey).getChildTasks().any { it.taskKey == childTaskKey })
     }
 
-    @Ignore("todo join child")
+    @Ignore("todo join test")
     @Test
     fun testSetSingleScheduleForMockChildTaskDifferentTime() {
         val date = Date(2022, 2, 2)
@@ -242,7 +242,7 @@ class MockHierarchyTest {
         assertTrue(domainFactory.getTaskForce(parentTaskKey).getChildTasks().none { it.taskKey == childTaskKey })
     }
 
-    @Ignore("todo join child")
+    @Ignore("todo join test")
     @Test
     fun testCreateMockChildTaskViaEditActivity() {
         val date = Date(2022, 2, 2)

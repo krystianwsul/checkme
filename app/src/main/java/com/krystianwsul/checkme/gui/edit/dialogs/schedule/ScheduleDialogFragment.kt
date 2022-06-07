@@ -159,7 +159,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
             binding.scheduleDialogFromLayout.error = from
             binding.scheduleDialogUntilLayout.error = until
             binding.scheduleDialogParentLayout.error =
-                if (parentNotChosen) "Reminder cannot be empty" else null // todo join child resources
+                if (parentNotChosen) "Reminder cannot be empty" else null // todo join resources
         }
 
         return errorData.isValid()
@@ -196,13 +196,9 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
     private val parentPickerDelegate by lazy {
         object : ParentInstancePickerDelegate(viewCreatedDisposable, parentInstanceViewModel, excludedTaskKeys) {
 
-            override fun onNewEntry(nameHint: String?) {
-                TODO("todo join child")
-            }
+            override fun onNewEntry(nameHint: String?) = throw UnsupportedOperationException()
 
-            override fun onEntryDeleted() {
-                TODO("todo join child")
-            }
+            override fun onEntryDeleted() = throw UnsupportedOperationException()
 
             override fun onEntrySelected(entryData: ParentPickerFragment.EntryData) {
                 scheduleDialogData.parentInstanceData =
@@ -234,7 +230,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
         savedInstanceState?.let { parentPickerPage = it.getInt(KEY_PARENT_PICKER_PAGE) }
 
-        tryGetFragment<ParentPickerFragment>(TAG_PARENT_PICKER)?.initialize(parentPickerDelegate) // todo join child probably not the right place for this
+        tryGetFragment<ParentPickerFragment>(TAG_PARENT_PICKER)?.initialize(parentPickerDelegate)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?) =

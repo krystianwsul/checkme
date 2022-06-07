@@ -12,8 +12,11 @@ import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.ScheduleData
 import com.krystianwsul.common.utils.TaskKey
 import com.soywiz.klock.hours
-import org.junit.*
+import org.junit.After
 import org.junit.Assert.assertTrue
+import org.junit.Before
+import org.junit.Rule
+import org.junit.Test
 
 class ForeignProjectRootTaskIdTest {
 
@@ -38,6 +41,9 @@ class ForeignProjectRootTaskIdTest {
     private fun Project<*>.containsRootTaskId(taskKey: TaskKey.Root) =
         taskKey in projectRecord.rootTaskParentDelegate.rootTaskKeys
 
+    private fun Project<*>.rootTaskIdsAre(vararg taskKeys: TaskKey.Root) =
+        taskKeys.toSet() == projectRecord.rootTaskParentDelegate.rootTaskKeys
+
     private fun createSharedProject(now: ExactTimeStamp.Local) = domainUpdater(now).createProject(
         DomainListenerManager.NotificationType.All,
         "shared project",
@@ -48,7 +54,6 @@ class ForeignProjectRootTaskIdTest {
 
     private val privateProject get() = domainFactory.projectsFactory.privateProject
 
-    @Ignore("todo join test")
     @Test
     fun testSingleInstanceJoin() {
         val date = Date(2022, 5, 30)
@@ -105,15 +110,12 @@ class ForeignProjectRootTaskIdTest {
 
         val sharedProject = domainFactory.getProjectForce(sharedProjectKey)
 
-        assertTrue(sharedProject.containsRootTaskId(joinTaskKey))
-        assertTrue(sharedProject.containsRootTaskId(childTaskKey1))
-        assertTrue(sharedProject.containsRootTaskId(childTaskKey2))
-
-        assertTrue(privateProject.projectRecord.rootTaskParentDelegate.rootTaskKeys.isEmpty())
+        assertTrue(sharedProject.rootTaskIdsAre(joinTaskKey, childTaskKey1, childTaskKey2))
+        assertTrue(privateProject.rootTaskIdsAre(joinTaskKey, childTaskKey1, childTaskKey2))
 
         checkInconsistentRootTaskIds(
             domainFactory.rootTasksFactory.getRootTasks(),
-            domainFactory.projectsFactory.projects.values
+            domainFactory.projectsFactory.projects.values,
         )
     }
 

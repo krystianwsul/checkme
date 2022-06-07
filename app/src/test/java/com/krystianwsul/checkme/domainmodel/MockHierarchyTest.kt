@@ -5,11 +5,12 @@ import com.krystianwsul.checkme.domainmodel.extensions.*
 import com.krystianwsul.checkme.domainmodel.updates.CreateChildTaskDomainUpdate
 import com.krystianwsul.checkme.gui.edit.delegates.EditDelegate
 import com.krystianwsul.common.criteria.SearchCriteria
+import com.krystianwsul.common.firebase.models.schedule.SingleSchedule
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.ScheduleData
+import com.krystianwsul.common.utils.TaskKey
 import com.soywiz.klock.hours
 import org.junit.Assert.*
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 
@@ -31,7 +32,6 @@ class MockHierarchyTest {
     private fun getSingleScheduleData(date: Date, hour: Int, minute: Int) =
         listOf(ScheduleData.Single(date, TimePair(HourMinute(hour, minute))))
 
-    @Ignore("todo join test")
     @Test
     fun testSetSingleScheduleForMockChildTask() {
         val date = Date(2022, 2, 2)
@@ -82,8 +82,7 @@ class MockHierarchyTest {
         }
 
         assertEquals(1, domainFactory.getTaskForce(childTaskKey).intervalInfo.getCurrentScheduleIntervals(now).size)
-        assertEquals(parentTaskKey, domainFactory.getTaskForce(childTaskKey).parentTask?.taskKey)
-        assertTrue(domainFactory.getTaskForce(parentTaskKey).getChildTasks().any { it.taskKey == childTaskKey })
+        assertEquals(parentTaskKey, getSingleInstance(childTaskKey, now).parentInstance!!.taskKey)
 
         now += 1.hours
 
@@ -97,10 +96,20 @@ class MockHierarchyTest {
 
         assertEquals(2, getTodayInstanceDatas(now).size)
         assertNull(domainFactory.getTaskForce(childTaskKey).parentTask)
+        assertNull(getSingleInstance(childTaskKey, now).parentInstance)
         assertTrue(domainFactory.getTaskForce(parentTaskKey).getChildTasks().none { it.taskKey == childTaskKey })
     }
 
-    @Ignore("todo join test")
+    private fun getSingleInstance(taskKey: TaskKey, now: ExactTimeStamp.Local) =
+        domainFactory.getTaskForce(taskKey).let { task ->
+            task.intervalInfo
+                .getCurrentScheduleIntervals(now)
+                .single()
+                .schedule
+                .let { it as SingleSchedule }
+                .getInstance(task)
+        }
+
     @Test
     fun testUpdateNameForMockChildTask() {
         val date = Date(2022, 2, 2)
@@ -175,7 +184,6 @@ class MockHierarchyTest {
         assertTrue(domainFactory.getTaskForce(parentTaskKey).getChildTasks().any { it.taskKey == childTaskKey })
     }
 
-    @Ignore("todo join test")
     @Test
     fun testSetSingleScheduleForMockChildTaskDifferentTime() {
         val date = Date(2022, 2, 2)
@@ -242,7 +250,6 @@ class MockHierarchyTest {
         assertTrue(domainFactory.getTaskForce(parentTaskKey).getChildTasks().none { it.taskKey == childTaskKey })
     }
 
-    @Ignore("todo join test")
     @Test
     fun testCreateMockChildTaskViaEditActivity() {
         val date = Date(2022, 2, 2)

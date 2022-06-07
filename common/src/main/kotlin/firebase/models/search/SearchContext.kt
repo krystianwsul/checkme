@@ -36,7 +36,7 @@ sealed class SearchContext {
 
     fun <T> search(action: SearchContext.() -> T) = run(action)
 
-    abstract fun Sequence<Task>.filterSearch(onlyHierarchy: Boolean = false): Sequence<Pair<Task, FilterResult>>
+    abstract fun Sequence<Task>.filterSearch(): Sequence<Pair<Task, FilterResult>>
 
     abstract fun Sequence<Task>.filterSearchCriteria(): Sequence<Pair<Task, FilterResult>>
 
@@ -48,7 +48,7 @@ sealed class SearchContext {
 
         override val searchCriteria = SearchCriteria.empty
 
-        override fun Sequence<Task>.filterSearch(onlyHierarchy: Boolean) = map { it to FilterResult.NoSearch }
+        override fun Sequence<Task>.filterSearch() = map { it to FilterResult.NoSearch }
 
         override fun Sequence<Task>.filterSearchCriteria() = map { it to FilterResult.NoSearch }
 
@@ -73,10 +73,10 @@ sealed class SearchContext {
             check(!searchCriteria.isEmpty)
         }
 
-        protected fun childHierarchyMatches(task: Task, onlyHierarchy: Boolean = false): FilterResult {
+        protected fun childHierarchyMatches(task: Task): FilterResult {
             InterruptionChecker.throwIfInterrupted()
 
-            return task.getFilterResult() ?: getTaskChildrenResult(task, onlyHierarchy)
+            return task.getFilterResult() ?: getTaskChildrenResult(task)
         }
 
         private fun Task.getFilterResult(): FilterResult? {
@@ -85,13 +85,13 @@ sealed class SearchContext {
             return getMatchResult(searchCriteria.search).getFilterResult()
         }
 
-        protected abstract fun getTaskChildrenResult(task: Task, onlyHierarchy: Boolean): FilterResult
+        protected abstract fun getTaskChildrenResult(task: Task): FilterResult
 
-        override fun Sequence<Task>.filterSearch(onlyHierarchy: Boolean): Sequence<Pair<Task, FilterResult>> =
+        override fun Sequence<Task>.filterSearch(): Sequence<Pair<Task, FilterResult>> =
             if (searchCriteria.search.isEmpty && searchCriteria.commonCriteria.excludedTaskKeys.isEmpty()) {
                 map { it to FilterResult.NoSearch }
             } else {
-                map { it to childHierarchyMatches(it, onlyHierarchy) }.filter { it.second.include }
+                map { it to childHierarchyMatches(it) }.filter { it.second.include }
             }
 
         override fun Sequence<Task>.filterSearchCriteria(): Sequence<Pair<Task, FilterResult>> {
@@ -150,10 +150,10 @@ sealed class SearchContext {
     class Normal(searchCriteria: SearchCriteria, now: ExactTimeStamp.Local, myUser: MyUser) :
         Search(searchCriteria, now, myUser) {
 
-        override fun getTaskChildrenResult(task: Task, onlyHierarchy: Boolean): FilterResult {
-            val childTasks = if (onlyHierarchy) task.getHierarchyChildTasks() else task.getChildTasks()
+        override fun getTaskChildrenResult(task: Task): FilterResult {
+            val childTasks = task.getChildTasks()
 
-            return if (childTasks.any { childHierarchyMatches(it, onlyHierarchy).include })
+            return if (childTasks.any { childHierarchyMatches(it).include })
                 FilterResult.Include(false)
             else
                 FilterResult.Exclude
@@ -198,7 +198,7 @@ sealed class SearchContext {
             check(searchCriteria.search is SearchCriteria.Search.Query)
         }
 
-        override fun getTaskChildrenResult(task: Task, onlyHierarchy: Boolean) = FilterResult.Include(false)
+        override fun getTaskChildrenResult(task: Task) = FilterResult.Include(false)
 
         override fun getInstanceChildrenResult(now: ExactTimeStamp.Local, myUser: MyUser, instance: Instance) =
             FilterResult.Include(false)

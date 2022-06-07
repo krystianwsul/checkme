@@ -445,25 +445,8 @@ sealed class Task(
     fun getHierarchyExactTimeStamp(exactTimeStamp: ExactTimeStamp) =
         exactTimeStamp.coerceIn(startExactTimeStampOffset, endExactTimeStampOffset?.minusOne())
 
-    fun getHierarchyChildTasks() = getChildTaskHierarchies().map { it.childTask }.toSet()
-
     fun getChildTasks(): Set<Task> {
-        val taskHierarchyChildTasks = getHierarchyChildTasks()
-
-        /**
-         * todo if performance becomes an issue here, then I can try caching the part below.  I believe that I'd need to
-         * reset the cache not only when tasks change, but also from within the instance when its parentInstance changes,
-         * on both its old and new parentInstance.task
-         */
-
-        // hierarchy hack
-        val instanceChildTasks = parent.getAllExistingInstances()
-            .filter { it.task.dependenciesLoaded }
-            .filter { it.parentInstance?.task == this }
-            .map { it.task }
-            .filter { it.parentTask == this }
-
-        return taskHierarchyChildTasks + instanceChildTasks
+        return getChildTaskHierarchies().map { it.childTask }.toSet()
     }
 
     fun getChildTaskHierarchies(): List<TaskHierarchy> {

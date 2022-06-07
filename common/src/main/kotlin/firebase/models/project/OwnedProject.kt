@@ -192,7 +192,7 @@ sealed class OwnedProject<T : ProjectType>(
 
         val filteredTasks = searchContext.search {
             allTasks.asSequence()
-                .filterSearch(true)
+                .filterSearch()
                 .map { it.first }
                 .toList()
         }

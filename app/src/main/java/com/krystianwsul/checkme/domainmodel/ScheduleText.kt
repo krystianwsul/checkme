@@ -19,8 +19,8 @@ sealed class ScheduleText {
     companion object : Task.ScheduleTextFactory {
 
         override fun getScheduleText(
-                scheduleGroup: ScheduleGroup,
-                customTimeProvider: JsonTime.CustomTimeProvider,
+            scheduleGroup: ScheduleGroup,
+            customTimeProvider: JsonTime.CustomTimeProvider,
         ) = when (scheduleGroup) {
             is ScheduleGroup.Single -> Single(scheduleGroup)
             is ScheduleGroup.Weekly -> Weekly(scheduleGroup)
@@ -30,10 +30,11 @@ sealed class ScheduleText {
             is ScheduleGroup.Child -> Child(scheduleGroup)
         }.getScheduleText(customTimeProvider)
 
+        private fun getString(@StringRes id: Int) = MyApplication.context
+            .getString(id)
+            .lowercase(Locale.getDefault())
+
         fun fromUntil(from: Date?, until: Date?, intervalText: String? = null): String {
-            fun getString(@StringRes id: Int) = MyApplication.instance
-                .getString(id)
-                .lowercase(Locale.getDefault())
 
             val fromStr by lazy { from!!.getDisplayText() }
             val untilStr by lazy { until!!.getDisplayText() }
@@ -169,9 +170,10 @@ sealed class ScheduleText {
                 parentInstanceDateTimePair: DateTimePair,
                 timePairCallback: (TimePair) -> String,
             ): String {
+                val prefix = getString(R.string.shownInPrefix)
                 val dateTimeText = Single.getScheduleText(parentInstanceDateTimePair, timePairCallback)
 
-                return "Shown in: $parentInstanceName ($dateTimeText)" // todo join resources
+                return "$prefix: $parentInstanceName ($dateTimeText)"
             }
         }
 

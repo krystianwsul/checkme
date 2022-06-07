@@ -7,6 +7,7 @@
     <string name="tasks">Tasks</string>
     <string name="allTasks">All tasks</string>
     <string name="instances">Reminders</string>
+    <string name="reminder">Reminder</string>
     <string name="times">Times</string>
     <string name="other">Pick a time manually</string>
     <string name="save">Save</string>
@@ -170,4 +171,5 @@
     <string name="justThisReminder">Just this reminder</string>
     <string name="allProjects">All projects</string>
     <string name="foreignPrivateProjectSuffix">\'s tasks</string>
+    <string name="reminderCannotBeEmpty">Reminder cannot be empty</string>
 </resources>

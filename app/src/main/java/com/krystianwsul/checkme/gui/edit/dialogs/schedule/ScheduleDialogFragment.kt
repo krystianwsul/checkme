@@ -159,7 +159,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
             binding.scheduleDialogFromLayout.error = from
             binding.scheduleDialogUntilLayout.error = until
             binding.scheduleDialogParentLayout.error =
-                if (parentNotChosen) "Reminder cannot be empty" else null // todo join resources
+                if (parentNotChosen) getString(R.string.reminderCannotBeEmpty) else null
         }
 
         return errorData.isValid()

@@ -59,18 +59,17 @@ class CreateChildTaskDomainUpdate(
                         now,
                     )
 
-                    val parentInstance = parentTask.getInstance(migratedInstanceScheduleKey)
+                    val parentInstanceKey = InstanceKey(parentTask.taskKey, migratedInstanceScheduleKey)
 
-                    // todo join child use ScheduleData.Child
                     domainFactory.createScheduleTopLevelTask(
                         now,
                         createParameters.name,
-                        listOf(ScheduleData.Single(parentInstance.scheduleDate, parentInstance.scheduleTime.timePair)),
+                        listOf(ScheduleData.Child(parentInstanceKey)),
                         createParameters.note,
                         parentTask.project.projectKey,
                         image,
                         domainFactory,
-                    ).also { it.getInstance(migratedInstanceScheduleKey).setParentState(parentInstance.instanceKey) }
+                    )
                 }
             }
         }

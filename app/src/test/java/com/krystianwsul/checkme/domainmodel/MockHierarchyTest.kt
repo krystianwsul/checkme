@@ -10,7 +10,8 @@ import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.ScheduleData
 import com.krystianwsul.common.utils.TaskKey
 import com.soywiz.klock.hours
-import org.junit.Assert.*
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Rule
 import org.junit.Test
 
@@ -97,7 +98,6 @@ class MockHierarchyTest {
         assertEquals(2, getTodayInstanceDatas(now).size)
         assertNull(domainFactory.getTaskForce(childTaskKey).parentTask)
         assertNull(getSingleInstance(childTaskKey, now).parentInstance)
-        assertTrue(domainFactory.getTaskForce(parentTaskKey).getChildTasks().none { it.taskKey == childTaskKey })
     }
 
     private fun getSingleInstance(taskKey: TaskKey, now: ExactTimeStamp.Local) =
@@ -160,8 +160,7 @@ class MockHierarchyTest {
         }
 
         assertEquals(1, domainFactory.getTaskForce(childTaskKey).intervalInfo.getCurrentScheduleIntervals(now).size)
-        assertEquals(parentTaskKey, domainFactory.getTaskForce(childTaskKey).parentTask?.taskKey)
-        assertTrue(domainFactory.getTaskForce(parentTaskKey).getChildTasks().any { it.taskKey == childTaskKey })
+        assertEquals(parentTaskKey, getSingleInstance(childTaskKey, now).parentInstance?.taskKey)
 
         now += 1.hours
 
@@ -180,8 +179,7 @@ class MockHierarchyTest {
             assertEquals(childInstanceKey, it.single().allChildren.single().instanceKey)
         }
 
-        assertEquals(parentTaskKey, domainFactory.getTaskForce(childTaskKey).parentTask?.taskKey)
-        assertTrue(domainFactory.getTaskForce(parentTaskKey).getChildTasks().any { it.taskKey == childTaskKey })
+        assertEquals(parentTaskKey, getSingleInstance(childTaskKey, now).parentInstance?.taskKey)
     }
 
     @Test
@@ -232,8 +230,7 @@ class MockHierarchyTest {
         }
 
         assertEquals(1, domainFactory.getTaskForce(childTaskKey).intervalInfo.getCurrentScheduleIntervals(now).size)
-        assertEquals(parentTaskKey, domainFactory.getTaskForce(childTaskKey).parentTask?.taskKey)
-        assertTrue(domainFactory.getTaskForce(parentTaskKey).getChildTasks().any { it.taskKey == childTaskKey })
+        assertEquals(parentTaskKey, getSingleInstance(childTaskKey, now).parentInstance?.taskKey)
 
         now += 1.hours
 
@@ -246,8 +243,7 @@ class MockHierarchyTest {
         ).blockingSubscribe()
 
         assertEquals(setOf(parentInstanceKey, childInstanceKey), getTodayInstanceDatas(now).map { it.instanceKey }.toSet())
-        assertNull(domainFactory.getTaskForce(childTaskKey).parentTask)
-        assertTrue(domainFactory.getTaskForce(parentTaskKey).getChildTasks().none { it.taskKey == childTaskKey })
+        assertNull(getSingleInstance(childTaskKey, now).parentInstance)
     }
 
     @Test
@@ -300,8 +296,7 @@ class MockHierarchyTest {
         }
 
         assertEquals(1, domainFactory.getTaskForce(childTaskKey).intervalInfo.getCurrentScheduleIntervals(now).size)
-        assertEquals(parentTaskKey, domainFactory.getTaskForce(childTaskKey).parentTask?.taskKey)
-        assertTrue(domainFactory.getTaskForce(parentTaskKey).getChildTasks().any { it.taskKey == childTaskKey })
+        assertEquals(parentTaskKey, getSingleInstance(childTaskKey, now).parentInstance?.taskKey)
     }
 
     @Test

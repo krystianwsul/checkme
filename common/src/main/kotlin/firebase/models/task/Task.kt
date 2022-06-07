@@ -218,41 +218,12 @@ sealed class Task(
                             parentTaskRemovable.remove()
                         }
                     }
-                is Type.Schedule -> {
-                    /* todo join
-                    // hierarchy hack
-                    type.getScheduleIntervals(interval)
-                        .singleOrNull()
-                        ?.schedule
-                        ?.let { it as? SingleSchedule }
-                        ?.let { singleSchedule ->
-                            val instance = singleSchedule.getInstance(this)
-
-                            val parentInstanceRemovable = instance.parentInstanceCache
-                                .invalidatableManager
-                                .addInvalidatable(invalidatableCache)
-
-                            InvalidatableCache.ValueHolder(
-                                instance.parentInstance
-                                    ?.task
-                                    ?.let { it to singleSchedule }
-                            ) {
-                                intervalRemovable.remove()
-                                parentInstanceRemovable.remove()
-                            }
-                        }
-                        ?:
-                     */
-                    InvalidatableCache.ValueHolder(null) { intervalRemovable.remove() }
-                }
-                is Type.NoSchedule -> InvalidatableCache.ValueHolder(null) { intervalRemovable.remove() }
+                else -> InvalidatableCache.ValueHolder(null) { intervalRemovable.remove() }
             }
         }
 
     val parentTaskData by parentTaskDataCache
     val parentTask get() = parentTaskData?.first
-
-    val isHierarchyHack get() = parentTaskData?.second != null
 
     fun getExistingInstances(
         startExactTimeStamp: ExactTimeStamp.Offset?,

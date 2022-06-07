@@ -111,7 +111,7 @@ class RootIntervalUpdate(val rootTask: RootTask, intervalInfo: IntervalInfo) :
              */
             rootTask.createSchedules(
                 now,
-                parentSingleSchedule.originalScheduleDateTime.run {
+                parentSingleSchedule.originalScheduleDateTime.run { // todo join child use ScheduleData.Child
                     listOf(ScheduleData.Single(date, time.timePair))
                 },
                 assignedTo,
@@ -121,35 +121,17 @@ class RootIntervalUpdate(val rootTask: RootTask, intervalInfo: IntervalInfo) :
 
             applyReusableScheduleData(parentSingleSchedule, singleAddReusableScheduleData)
         } else {
-            if (rootTask.isHierarchyHack) { // hierarchy hack
-                check(removeScheduleGroups.isEmpty())
-                check(initialAddScheduleDatas.size == 1)
-                check(oldScheduleDatas.size == 1)
+            removeScheduleGroups.asSequence()
+                .flatMap { it.schedules }
+                .forEach { it.setEndExactTimeStamp(now.toOffset()) }
 
-                val singleScheduleData = initialAddScheduleDatas.single().second.let { it as ScheduleData.Single }
-
-                val singleOldSchedule = oldScheduleDatas.single()
-                    .second
-                    .schedules
-                    .single()
-                    .let { it as SingleSchedule }
-
-                singleOldSchedule.setAssignedTo(assignedTo)
-
-                applyReusableScheduleData(singleOldSchedule, singleScheduleData)
-            } else {
-                removeScheduleGroups.asSequence()
-                    .flatMap { it.schedules }
-                    .forEach { it.setEndExactTimeStamp(now.toOffset()) }
-
-                rootTask.createSchedules(
-                    now,
-                    addScheduleDatas.map { it.second },
-                    assignedTo,
-                    customTimeMigrationHelper,
-                    projectKey,
-                )
-            }
+            rootTask.createSchedules(
+                now,
+                addScheduleDatas.map { it.second },
+                assignedTo,
+                customTimeMigrationHelper,
+                projectKey,
+            )
         }
     }
 

@@ -293,16 +293,16 @@ private class AddChildToParentUndoData(
 
 fun addChildToParent(
     childTask: RootTask,
-    parentTask: RootTask,
+    newParentTask: RootTask,
     now: ExactTimeStamp.Local,
     hideInstance: Instance? = null,
     allReminders: Boolean = true,
 ): UndoData? {
     childTask.requireNotDeleted()
 
-    val parentTaskData = childTask.parentTaskData
+    val oldParentTask = childTask.parentTask
 
-    return if (parentTaskData?.first != parentTask) {
+    return if (oldParentTask != newParentTask) {
         fun setParentViaTaskHierarchy(): AddChildToParentUndoData {
             lateinit var taskHierarchyKeys: List<TaskHierarchyKey>
             lateinit var scheduleIds: List<ScheduleId>
@@ -320,7 +320,7 @@ fun addChildToParent(
                     noScheduleOrParentsIds = listOf()
                 }
 
-                deleteTaskHierarchyKey = parentTask.addChild(this, now)
+                deleteTaskHierarchyKey = newParentTask.addChild(this, now)
             }
 
             val instanceUndoData = hideInstance?.let {
@@ -328,7 +328,7 @@ fun addChildToParent(
                     .takeIf { it != Instance.ParentState.Unset }
                     .also { hideInstance.setParentState(Instance.ParentState.Unset) }
 
-                val unhide = if (it.parentInstance?.task != parentTask &&
+                val unhide = if (it.parentInstance?.task != newParentTask &&
                     it.isVisible(now, Instance.VisibilityOptions(hack24 = true))
                 ) {
                     it.hide()
@@ -351,15 +351,14 @@ fun addChildToParent(
             )
         }
 
-        val singleSchedule = parentTaskData?.second
-            ?: childTask.intervalInfo
-                .getCurrentScheduleIntervals(now)
-                .singleOrNull()
-                ?.let { it.schedule as? SingleSchedule }
+        val singleSchedule = childTask.intervalInfo
+            .getCurrentScheduleIntervals(now)
+            .singleOrNull()
+            ?.let { it.schedule as? SingleSchedule }
 
         if (singleSchedule != null) {
             // hierarchy hack
-            val singleParentInstance = parentTask.getInstances(null, null, now)
+            val singleParentInstance = newParentTask.getInstances(null, null, now)
                 .filter { it.isVisible(now, Instance.VisibilityOptions()) }
                 .singleOrNull()
 

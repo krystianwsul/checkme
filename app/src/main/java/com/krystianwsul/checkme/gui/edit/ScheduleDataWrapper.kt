@@ -54,8 +54,6 @@ sealed class ScheduleDataWrapper : Parcelable {
 
     abstract val scheduleData: ScheduleData
 
-    val timePair get() = scheduleData.timePair
-
     abstract fun getText(customTimeDatas: Map<CustomTimeKey, EditViewModel.CustomTimeData>, context: Context): String
 
     fun getScheduleDialogData(scheduleHint: EditParentHint.Schedule?) =
@@ -92,7 +90,7 @@ sealed class ScheduleDataWrapper : Parcelable {
                 dayOfMonthToWeekOfMonth(monthDayNumber),
                 scheduleData.date.dayOfWeek,
                 beginningOfMonth,
-                TimePairPersist(timePair),
+                TimePairPersist(scheduleData.timePair),
                 ScheduleDialogData.Type.SINGLE,
                 null,
                 null,
@@ -135,7 +133,7 @@ sealed class ScheduleDataWrapper : Parcelable {
                 dayOfMonthToWeekOfMonth(monthDayNumber),
                 suggestedDate.dayOfWeek,
                 beginningOfMonth,
-                TimePairPersist(timePair),
+                TimePairPersist(scheduleData.timePair),
                 type,
                 scheduleData.from,
                 scheduleData.until,
@@ -179,7 +177,7 @@ sealed class ScheduleDataWrapper : Parcelable {
                 dayOfMonthToWeekOfMonth(scheduleData.dayOfMonth),
                 date.dayOfWeek,
                 scheduleData.beginningOfMonth,
-                TimePairPersist(timePair),
+                TimePairPersist(scheduleData.timePair),
                 ScheduleDialogData.Type.MONTHLY,
                 scheduleData.from,
                 scheduleData.until,
@@ -229,7 +227,7 @@ sealed class ScheduleDataWrapper : Parcelable {
                 scheduleData.weekOfMonth,
                 scheduleData.dayOfWeek,
                 scheduleData.beginningOfMonth,
-                TimePairPersist(timePair),
+                TimePairPersist(scheduleData.timePair),
                 ScheduleDialogData.Type.MONTHLY,
                 scheduleData.from,
                 scheduleData.until,
@@ -275,7 +273,7 @@ sealed class ScheduleDataWrapper : Parcelable {
                 dayOfMonthToWeekOfMonth(monthDayNumber),
                 date.dayOfWeek,
                 beginningOfMonth,
-                TimePairPersist(timePair),
+                TimePairPersist(scheduleData.timePair),
                 ScheduleDialogData.Type.YEARLY,
                 scheduleData.from,
                 scheduleData.until,

@@ -283,11 +283,15 @@ class RootTask private constructor(
         }
 
         for (scheduleData in scheduleDatas) {
-            val time by lazy { customTimeProvider.getTime(scheduleData.timePair) }
-
             when (scheduleData) {
-                is ScheduleData.Single -> createSingleSchedule(scheduleData.date, time).ignore()
+                is ScheduleData.Single -> {
+                    val time = customTimeProvider.getTime(scheduleData.timePair)
+
+                    createSingleSchedule(scheduleData.date, time).ignore()
+                }
                 is ScheduleData.Weekly -> {
+                    val time = customTimeProvider.getTime(scheduleData.timePair)
+
                     for (dayOfWeek in scheduleData.daysOfWeek) {
                         val copiedTime = getOrCopyTime(
                             dayOfWeek,
@@ -317,6 +321,8 @@ class RootTask private constructor(
                     }
                 }
                 is ScheduleData.MonthlyDay -> {
+                    val time = customTimeProvider.getTime(scheduleData.timePair)
+
                     val (dayOfMonth, beginningOfMonth, _) = scheduleData
 
                     val today = Date.today()
@@ -350,6 +356,8 @@ class RootTask private constructor(
                     _schedules += MonthlyDaySchedule(this, monthlyDayScheduleRecord)
                 }
                 is ScheduleData.MonthlyWeek -> {
+                    val time = customTimeProvider.getTime(scheduleData.timePair)
+
                     val (weekOfMonth, dayOfWeek, beginningOfMonth) = scheduleData
                     val copiedTime = getOrCopyTime(dayOfWeek, time, customTimeMigrationHelper, now)
 
@@ -374,6 +382,8 @@ class RootTask private constructor(
                     _schedules += MonthlyWeekSchedule(this, monthlyWeekScheduleRecord)
                 }
                 is ScheduleData.Yearly -> {
+                    val time = customTimeProvider.getTime(scheduleData.timePair)
+
                     val copiedTime = getOrCopyTime(
                         Date(Date.today().year, scheduleData.month, scheduleData.day).dayOfWeek,
                         time,

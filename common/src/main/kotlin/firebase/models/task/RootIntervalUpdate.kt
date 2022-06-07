@@ -32,7 +32,7 @@ class RootIntervalUpdate(val rootTask: RootTask, intervalInfo: IntervalInfo) :
         assignedTo: Set<UserKey>,
         customTimeMigrationHelper: OwnedProject.CustomTimeMigrationHelper,
         projectKey: ProjectKey<*>,
-        parentSingleSchedule: SingleSchedule? = null,
+        parentSingleSchedule: SingleSchedule?,
     ) {
         val removeScheduleGroups = mutableListOf<ScheduleGroup>()
         val initialAddScheduleDatas = scheduleDatas.map { ScheduleDiffKey(it, assignedTo) to it }
@@ -109,11 +109,10 @@ class RootIntervalUpdate(val rootTask: RootTask, intervalInfo: IntervalInfo) :
             In this scenario, we create a schedule that matches the parent's original one, and then manipulate the instance
             time.  That way, we get to keep the previous instance, along with its children's done states.
              */
+
             rootTask.createSchedules(
                 now,
-                parentSingleSchedule.originalScheduleDateTime.run { // todo join child use ScheduleData.Child
-                    listOf(ScheduleData.Single(date, time.timePair))
-                },
+                parentSingleSchedule.originalScheduleDateTime.run { listOf(ScheduleData.Single(date, time.timePair)) },
                 assignedTo,
                 customTimeMigrationHelper,
                 projectKey,

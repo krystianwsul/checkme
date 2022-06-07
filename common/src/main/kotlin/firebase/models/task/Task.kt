@@ -199,8 +199,8 @@ sealed class Task(
 
     fun getNestedTaskHierarchy(taskHierarchyId: TaskHierarchyId) = nestedParentTaskHierarchies.getValue(taskHierarchyId)
 
-    private val parentTaskDataCache =
-        invalidatableCache<Pair<Task, SingleSchedule?>?>(clearableInvalidatableManager) { invalidatableCache ->
+    private val parentTaskCache =
+        invalidatableCache<Task?>(clearableInvalidatableManager) { invalidatableCache ->
             val intervalRemovable = intervalInfoCache.invalidatableManager.addInvalidatable(invalidatableCache)
 
             val interval = intervalInfo.intervals.last()
@@ -213,7 +213,7 @@ sealed class Task(
                             .invalidatableManager
                             .addInvalidatable(invalidatableCache)
 
-                        InvalidatableCache.ValueHolder(it.parentTask to null) {
+                        InvalidatableCache.ValueHolder(it.parentTask) {
                             intervalRemovable.remove()
                             parentTaskRemovable.remove()
                         }
@@ -222,8 +222,7 @@ sealed class Task(
             }
         }
 
-    val parentTaskData by parentTaskDataCache
-    val parentTask get() = parentTaskData?.first
+    val parentTask by parentTaskCache
 
     fun getExistingInstances(
         startExactTimeStamp: ExactTimeStamp.Offset?,

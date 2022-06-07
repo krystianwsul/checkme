@@ -168,7 +168,10 @@ private fun DomainFactory.getCreateTaskDataSlow(
 
     val showAllInstancesDialog = startParameters.showAllInstancesDialog(this, now)
 
-    fun Project<*>.toParentKey() = EditViewModel.ParentKey.Project(projectKey)
+    fun Project<*>.toParentKey() = if (this is PrivateOwnedProject)
+        null
+    else
+        EditViewModel.ParentKey.Project(projectKey)
 
     val currentParentKey: EditViewModel.ParentKey? = when (currentParentSource) {
         is EditViewModel.CurrentParentSource.None -> null

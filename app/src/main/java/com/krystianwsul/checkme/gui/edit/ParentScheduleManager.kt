@@ -54,6 +54,10 @@ interface ParentScheduleManager {
             override val projectUsers: Map<UserKey, EditViewModel.UserData>,
         ) : Parent {
 
+            init {
+                check(name.isNotEmpty())
+            }
+
             override val hasMultipleInstances: Boolean? = null
 
             override val clearParentTaskData: Triple<Project?, List<ScheduleDataWrapper>, Set<UserKey>>? = null

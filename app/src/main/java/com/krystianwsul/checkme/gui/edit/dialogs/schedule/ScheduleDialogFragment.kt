@@ -813,7 +813,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
         override fun onBeginningOfMonthChanged(beginningOfMonth: Boolean) = diffScheduleDialogData(
             { scheduleDialogData.beginningOfMonth = beginningOfMonth },
-            ::recalculateFields
+            ::recalculateFields,
         )
 
         protected abstract fun recalculateFields()
@@ -827,7 +827,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
                 scheduleDialogData.monthDayNumber = monthDayNumber
             },
-            ::recalculateFields
+            ::recalculateFields,
         )
 
         override fun recalculateFields() {
@@ -835,7 +835,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
                 scheduleDialogData.date.year,
                 scheduleDialogData.date.month,
                 scheduleDialogData.monthDayNumber,
-                scheduleDialogData.beginningOfMonth
+                scheduleDialogData.beginningOfMonth,
             )
 
             scheduleDialogData.date = date
@@ -854,12 +854,12 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
                 scheduleDialogData.monthWeekNumber = monthWeekNumber
             },
-            ::recalculateFields
+            ::recalculateFields,
         )
 
         override fun onMonthWeekDayChanged(dayOfWeek: DayOfWeek) = diffScheduleDialogData(
             { scheduleDialogData.monthWeekDay = dayOfWeek },
-            ::recalculateFields
+            ::recalculateFields,
         )
 
         override fun recalculateFields() = recalculateMonthlyWeekFields()
@@ -884,9 +884,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
         override fun isValid() = WarningErrorData(parentNotChosen = scheduleDialogData.parentInstanceData == null)
 
-        override fun getCustomTimeDatas(list: List<EditViewModel.CustomTimeData>): List<TimeDialogFragment.CustomTimeData> {
-            TODO("todo join child")
-        }
+        override fun getCustomTimeDatas(list: List<EditViewModel.CustomTimeData>) = throw UnsupportedOperationException()
 
         override fun updateFields(customTimeData: EditViewModel.CustomTimeData?, hourMinuteString: String) {
             binding.scheduleDialogParentText.setText(scheduleDialogData.parentInstanceData?.name)

@@ -42,8 +42,6 @@ class JoinTasksEditDelegate(
 
     override fun showDialog(): ShowDialog {
         fun showJoinAllRemindersDialog(): Boolean {
-            if (!data.showJoinAllRemindersDialog!!) return false
-
             return when (val parent = parentScheduleManager.parent) {
                 is ParentScheduleManager.Parent.Task -> {
                     check(parentScheduleManager.schedules.isEmpty())

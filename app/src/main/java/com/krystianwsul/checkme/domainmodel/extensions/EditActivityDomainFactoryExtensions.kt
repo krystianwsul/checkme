@@ -71,7 +71,7 @@ private fun UserScope.getCreateTaskDataFast(): EditViewModel.MainData {
         .toMutableMap<CustomTimeKey, Time.Custom>()
         .toCustomTimeDatas()
 
-    return EditViewModel.MainData(null, customTimeDatas, null, null, null)
+    return EditViewModel.MainData(null, customTimeDatas, null, null)
 }
 
 private fun getScheduleDataWrappersAndAssignedTo(
@@ -166,8 +166,6 @@ private fun DomainFactory.getCreateTaskDataSlow(
 
     val customTimeDatas = customTimes.toCustomTimeDatas()
 
-    val showAllInstancesDialog = startParameters.showAllInstancesDialog(this, now)
-
     fun Project<*>.toParentKey() = if (this is PrivateOwnedProject)
         null
     else
@@ -239,7 +237,7 @@ private fun DomainFactory.getCreateTaskDataSlow(
         ?.let(::getTaskForce)
         ?.note
 
-    return EditViewModel.MainData(taskData, customTimeDatas, showAllInstancesDialog, currentParent, parentTaskDescription)
+    return EditViewModel.MainData(taskData, customTimeDatas, currentParent, parentTaskDescription)
 }
 
 fun DomainFactory.getCreateTaskParentPickerData(

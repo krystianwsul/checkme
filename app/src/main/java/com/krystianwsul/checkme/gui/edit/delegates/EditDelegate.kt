@@ -142,11 +142,7 @@ abstract class EditDelegate(
     fun removeSchedule(adapterPosition: Int) =
         parentScheduleManager.removeSchedule(adapterPosition - scheduleOffset)
 
-    open fun showDialog(): ShowDialog {
-        check(data.showJoinAllRemindersDialog == null)
-
-        return ShowDialog.NONE
-    }
+    open fun showDialog() = ShowDialog.NONE
 
     fun setParentTask(taskKey: TaskKey) = storeParentKey(EditViewModel.ParentKey.Task(taskKey), true)
 

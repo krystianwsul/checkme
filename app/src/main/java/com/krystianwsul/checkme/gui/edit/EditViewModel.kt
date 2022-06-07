@@ -6,7 +6,6 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import com.jakewharton.rxrelay3.BehaviorRelay
 import com.jakewharton.rxrelay3.PublishRelay
-import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.UserScope
 import com.krystianwsul.checkme.domainmodel.extensions.getCreateTaskData
 import com.krystianwsul.checkme.domainmodel.extensions.getCreateTaskParentPickerData
@@ -183,7 +182,6 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
     data class MainData(
         val taskData: TaskData?,
         val customTimeDatas: Map<CustomTimeKey, CustomTimeData>,
-        val showJoinAllRemindersDialog: Boolean?,
         val currentParent: ParentScheduleManager.Parent?,
         val parentTaskDescription: String?,
     ) : DomainData()
@@ -301,8 +299,6 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
         val excludedTaskKeys: Set<TaskKey>
         val parentInstanceKey: InstanceKey? get() = null
 
-        fun showAllInstancesDialog(domainFactory: DomainFactory, now: ExactTimeStamp.Local): Boolean? = null
-
         data class Create(override val parentInstanceKey: InstanceKey?) : StartParameters {
 
             override val excludedTaskKeys = setOf<TaskKey>()
@@ -321,9 +317,6 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
         data class Join(private val joinables: List<EditParameters.Join.Joinable>) : StartParameters {
 
             override val excludedTaskKeys = joinables.map { it.taskKey }.toSet()
-
-            // todo join parameters no longer needed
-            override fun showAllInstancesDialog(domainFactory: DomainFactory, now: ExactTimeStamp.Local) = true
         }
     }
 

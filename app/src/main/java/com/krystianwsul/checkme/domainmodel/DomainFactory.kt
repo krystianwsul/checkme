@@ -661,6 +661,7 @@ class DomainFactory(
         groupingMode: GroupType.GroupingMode = GroupType.GroupingMode.None,
         showDisplayText: Boolean = true,
         projectInfoMode: ProjectInfoMode = ProjectInfoMode.Show,
+        parentInstanceKey: InstanceKey? = null,
     ) = MixedInstanceDataCollection(
         instanceDescriptors,
         myUserFactory.user,
@@ -668,6 +669,7 @@ class DomainFactory(
         showDisplayText,
         projectInfoMode,
         compareBy,
+        parentInstanceKey,
     )
 
     fun <T : ProjectType> getProjectIfPresent(projectKey: ProjectKey<T>): Project<T>? {

@@ -17,6 +17,7 @@ import com.krystianwsul.common.firebase.models.search.SearchContext
 import com.krystianwsul.common.time.DateTime
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.Time
+import com.krystianwsul.common.utils.ProjectKey
 import java.util.*
 
 fun DomainFactory.getShowGroupData(
@@ -40,13 +41,17 @@ fun DomainFactory.getShowGroupData(
 
     val displayText = DateTime(date, time).getDisplayText()
 
+    fun ProjectKey.Shared.getName() = projectsFactory.getSharedProjectForce(this).name
+
     val (title, subtitle) = when (parameters) {
         is ShowGroupActivity.Parameters.Time -> Pair(displayText, null)
         is ShowGroupActivity.Parameters.Project -> Pair(
-            parameters.projectKey
-                .let(projectsFactory::getSharedProjectForce)
-                .name,
+            parameters.projectKey.getName(),
             displayText,
+        )
+        is ShowGroupActivity.Parameters.InstanceProject -> Pair(
+            parameters.projectKey.getName(),
+            getInstance(parameters.parentInstanceKey).name,
         )
     }
 
@@ -66,24 +71,31 @@ private fun DomainFactory.getGroupListData(
 
     val searchContext = SearchContext.startSearch(searchCriteria, now, myUserFactory.user)
 
-    val instances = getRootInstances(
-        parameters.timeStamp
-            .toLocalExactTimeStamp()
-            .toOffset(),
-        endExactTimeStamp,
-        now,
-        searchContext,
-        projectKey = parameters.projectKey,
-    )
-        // I'm really confused about why this filter would be necessary
-        .filter { it.first.instanceDateTime.timeStamp.compareTo(parameters.timeStamp) == 0 }
-        .let {
-            if (parameters.showUngrouped)
-                it
-            else
-                it.filter { it.first.groupByProject }
+    val instances = when (parameters) {
+        is ShowGroupActivity.Parameters.TimeBased -> getRootInstances(
+            parameters.timeStamp
+                .toLocalExactTimeStamp()
+                .toOffset(),
+            endExactTimeStamp,
+            now,
+            searchContext,
+            projectKey = parameters.projectKey,
+        )
+            // I'm really confused about why this filter would be necessary
+            .filter { it.first.instanceDateTime.timeStamp.compareTo(parameters.timeStamp) == 0 }
+            .let {
+                if (parameters.showUngrouped)
+                    it
+                else
+                    it.filter { it.first.groupByProject }
+            }
+        is ShowGroupActivity.Parameters.InstanceProject -> searchContext.search {
+            getInstance(parameters.parentInstanceKey).getChildInstances()
+                .asSequence()
+                .filter { it.getProject().projectKey == parameters.projectKey }
+                .filterSearchCriteria(true)
         }
-        .toList()
+    }
 
     val customTimeDatas = getCurrentRemoteCustomTimes().map {
         GroupListDataWrapper.CustomTimeData(it.name, it.hourMinutes.toSortedMap())
@@ -116,7 +128,7 @@ private fun DomainFactory.getGroupListData(
                 instance,
                 null, // todo group
             )
-        }
+        }.toList()
     }
 
     val (mixedInstanceDescriptors, doneInstanceDescriptors) = instanceDescriptors.splitDone()

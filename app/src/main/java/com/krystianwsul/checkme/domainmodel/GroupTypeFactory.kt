@@ -22,6 +22,7 @@ class GroupTypeFactory(
     private val showDisplayText: Boolean,
     private val projectInfoMode: ProjectInfoMode,
     private val compareBy: SingleBridge.CompareBy,
+    private val parentInstanceKey: InstanceKey?,
 ) : GroupType.Factory {
 
     private fun GroupType.fix() = this as Bridge
@@ -76,6 +77,7 @@ class GroupTypeFactory(
             project.projectKey,
             singleBridges,
             projectOrdinalManagerProvider.getProjectOrdinalManager(project).getOrdinal(project, key),
+            parentInstanceKey,
         )
     }
 
@@ -224,6 +226,7 @@ class GroupTypeFactory(
         private val projectKey: ProjectKey.Shared,
         private val singeBridges: List<SingleBridge>,
         override val ordinal: Ordinal,
+        private val parentInstanceKey: InstanceKey?,
     ) : GroupType.Project, SingleParent, TimeChild, DropParent by DropParent.Project(timeStamp, projectKey) {
 
         private val instanceDatas = singeBridges.map { it.instanceData }
@@ -245,7 +248,9 @@ class GroupTypeFactory(
             singeBridges,
             NotDoneNode.ContentDelegate.Group.Id.Project(timeStamp, instanceKeys, projectKey),
             NotDoneNode.ContentDelegate.Group.GroupRowsDelegate.Project(groupAdapter, null, name),
-            ShowGroupActivity.Parameters.Project(timeStamp, projectKey, false),
+            parentInstanceKey?.let {
+                ShowGroupActivity.Parameters.InstanceProject(timeStamp, projectKey, it)
+            } ?: ShowGroupActivity.Parameters.Project(timeStamp, projectKey, false),
             NotDoneNode.ContentDelegate.Group.CheckboxMode.CHECKBOX,
         )
 

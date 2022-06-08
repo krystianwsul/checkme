@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.domainmodel
 
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
 import com.krystianwsul.common.firebase.models.users.ProjectOrdinalManager
+import com.krystianwsul.common.utils.InstanceKey
 
 data class MixedInstanceDataCollection(
     val instanceDatas: Collection<GroupListDataWrapper.InstanceData>,
@@ -15,6 +16,7 @@ data class MixedInstanceDataCollection(
         showDisplayText: Boolean,
         projectInfoMode: ProjectInfoMode,
         compareBy: GroupTypeFactory.SingleBridge.CompareBy,
+        parentInstanceKey: InstanceKey?,
     ) : this(
         instanceDescriptors.map { it.instanceData },
         GroupTypeFactory(
@@ -22,6 +24,7 @@ data class MixedInstanceDataCollection(
             showDisplayText,
             projectInfoMode,
             compareBy,
+            parentInstanceKey,
         ).getGroupTypeTree(instanceDescriptors, groupingMode),
     )
 }

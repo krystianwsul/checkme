@@ -107,6 +107,7 @@ data class GroupListDataWrapper(
                         GroupType.GroupingMode.Instance(instance.getProject().projectKey),
                         projectInfoMode =
                         ProjectInfoMode.ShowInsideInstance.fromProjectKey(instance.getProject().projectKey),
+                        parentInstanceKey = instance.instanceKey,
                     ),
                     doneChildInstanceDescriptors.toDoneSingleBridges(),
                     instance.ordinal,

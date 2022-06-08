@@ -74,9 +74,7 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
         )
             .observeOn(AndroidSchedulers.mainThread())
             .flatMapMaybe { showSnackbarRemovedMaybe(it.taskKeys.size).map { _ -> it } }
-            .flatMapCompletable {
-                AndroidDomainUpdater.clearTaskEndTimeStamps(showGroupViewModel.dataId.toFirst(), it)
-            }
+            .flatMapCompletable { AndroidDomainUpdater.clearTaskEndTimeStamps(showGroupViewModel.dataId.toFirst(), it) }
             .subscribe()
             .addTo(createDisposable)
     }
@@ -119,6 +117,7 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
             .collapseAppBarLayout
             .apply {
                 setSearchMenuOptions(false, true, false)
+
                 configureMenu(
                     R.menu.show_group_menu_top,
                     R.id.actionShowGroupSearch,
@@ -266,7 +265,7 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
                 findItem(R.id.actionShowGroupCheck).isVisible = check
                 findItem(R.id.actionShowGroupUncheck).isVisible = uncheck
 
-                findItem(R.id.actionShowGroupAssigned).isVisible = hasItems
+                findItem(R.id.actionShowGroupAssigned).isVisible = hasItems && parameters.showAssignedToOthers
             }
     }
 
@@ -371,15 +370,22 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
         outState.putParcelable(KEY_BOTTOM_FAB_MENU_DELEGATE_STATE, bottomFabMenuDelegate.state)
     }
 
-    sealed class Parameters : Parcelable {
+    sealed interface Parameters : Parcelable {
 
-        abstract val timeStamp: TimeStamp
-        abstract val projectKey: ProjectKey.Shared?
-        abstract val groupingMode: GroupType.GroupingMode
-        abstract val showUngrouped: Boolean
+        val timeStamp: TimeStamp
+        val projectKey: ProjectKey.Shared?
+        val groupingMode: GroupType.GroupingMode
+        val showAssignedToOthers: Boolean
+
+        sealed interface TimeBased : Parameters {
+
+            val showUngrouped: Boolean
+
+            override val showAssignedToOthers get() = true
+        }
 
         @Parcelize
-        data class Time(override val timeStamp: TimeStamp) : Parameters() {
+        data class Time(override val timeStamp: TimeStamp) : TimeBased {
 
             override val projectKey: ProjectKey.Shared? get() = null
 
@@ -393,9 +399,22 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
             override val timeStamp: TimeStamp,
             override val projectKey: ProjectKey.Shared,
             override val showUngrouped: Boolean = true,
-        ) : Parameters() {
+        ) : TimeBased {
 
             override val groupingMode get() = GroupType.GroupingMode.None
+        }
+
+        // for project node inside instance
+        @Parcelize
+        data class InstanceProject(
+            override val timeStamp: TimeStamp, // todo group this doesn't actually make sense; we'll really be fetching based on parentInstanceKey
+            override val projectKey: ProjectKey.Shared, // group hack
+            val parentInstanceKey: InstanceKey,
+        ) : Parameters {
+
+            override val groupingMode get() = GroupType.GroupingMode.None
+
+            override val showAssignedToOthers get() = false
         }
     }
 }

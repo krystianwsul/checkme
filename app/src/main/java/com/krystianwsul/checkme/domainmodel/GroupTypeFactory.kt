@@ -20,7 +20,7 @@ import com.krystianwsul.common.utils.ProjectKey
 class GroupTypeFactory(
     private val projectOrdinalManagerProvider: ProjectOrdinalManager.Provider,
     private val showDisplayText: Boolean,
-    private val includeProjectDetails: Boolean,
+    private val projectInfoMode: ProjectInfoMode,
     private val compareBy: SingleBridge.CompareBy,
 ) : GroupType.Factory {
 
@@ -80,10 +80,10 @@ class GroupTypeFactory(
     }
 
     override fun createTimeSingle(instanceDescriptor: GroupType.InstanceDescriptor) =
-        SingleBridge.createTime(instanceDescriptor.fix(), includeProjectDetails)
+        SingleBridge.createTime(instanceDescriptor.fix(), projectInfoMode)
 
     override fun createTopLevelSingle(instanceDescriptor: GroupType.InstanceDescriptor) =
-        SingleBridge.createTopLevel(instanceDescriptor.fix(), showDisplayText, includeProjectDetails, compareBy)
+        SingleBridge.createTopLevel(instanceDescriptor.fix(), showDisplayText, projectInfoMode, compareBy)
 
     class InstanceDescriptor(
         val instanceData: GroupListDataWrapper.InstanceData,
@@ -272,7 +272,7 @@ class GroupTypeFactory(
             fun createDone(
                 instanceDescriptor: InstanceDescriptor,
                 showDisplayText: Boolean,
-                includeProjectDetails: Boolean,
+                projectInfoMode: ProjectInfoMode,
             ) = SingleBridge(
                 instanceDescriptor.instanceData,
                 null,
@@ -280,14 +280,14 @@ class GroupTypeFactory(
                     ?.instance
                     ?.getDisplayData()
                     ?.getDisplayText(),
-                instanceDescriptor.instance.getProjectInfo(includeProjectDetails),
+                instanceDescriptor.instance.getProjectInfo(projectInfoMode),
                 CompareBy.TIMESTAMP,
             )
 
             fun createTopLevel(
                 instanceDescriptor: InstanceDescriptor,
                 showDisplayText: Boolean,
-                includeProjectDetails: Boolean,
+                projectInfoMode: ProjectInfoMode,
                 compareBy: CompareBy,
             ) = SingleBridge(
                 instanceDescriptor.instanceData,
@@ -296,15 +296,15 @@ class GroupTypeFactory(
                     ?.instance
                     ?.getDisplayData()
                     ?.getDisplayText(),
-                instanceDescriptor.instance.getProjectInfo(includeProjectDetails),
+                instanceDescriptor.instance.getProjectInfo(projectInfoMode),
                 compareBy,
             )
 
-            fun createTime(instanceDescriptor: InstanceDescriptor, includeProjectDetails: Boolean) = SingleBridge(
+            fun createTime(instanceDescriptor: InstanceDescriptor, projectInfoMode: ProjectInfoMode) = SingleBridge(
                 instanceDescriptor.instanceData,
                 false,
                 null,
-                instanceDescriptor.instance.getProjectInfo(includeProjectDetails),
+                instanceDescriptor.instance.getProjectInfo(projectInfoMode),
                 CompareBy.ORDINAL,
             )
 
@@ -312,7 +312,7 @@ class GroupTypeFactory(
                 instanceDescriptor.instanceData,
                 null, // can't be moved into time
                 null,
-                instanceDescriptor.instance.getProjectInfo(false),
+                instanceDescriptor.instance.getProjectInfo(ProjectInfoMode.Hide),
                 CompareBy.ORDINAL,
             )
 
@@ -320,7 +320,7 @@ class GroupTypeFactory(
                 instanceDescriptor.instanceData,
                 true, // are nested in time
                 null,
-                instanceDescriptor.instance.getProjectInfo(false),
+                instanceDescriptor.instance.getProjectInfo(ProjectInfoMode.Hide),
                 CompareBy.ORDINAL,
             )
         }

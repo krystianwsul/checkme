@@ -1,10 +1,7 @@
 package com.krystianwsul.checkme.domainmodel.extensions
 
 import com.krystianwsul.checkme.MyCrashlytics
-import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.domainmodel.GroupTypeFactory
-import com.krystianwsul.checkme.domainmodel.getDomainResultInterrupting
-import com.krystianwsul.checkme.domainmodel.takeAndHasMore
+import com.krystianwsul.checkme.domainmodel.*
 import com.krystianwsul.checkme.gui.instances.ShowTaskInstancesActivity
 import com.krystianwsul.checkme.gui.instances.drag.DropParent
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
@@ -102,9 +99,9 @@ fun DomainFactory.getShowTaskInstancesData(
                     notDoneInstanceDescriptors,
                     GroupTypeFactory.SingleBridge.CompareBy.TIMESTAMP,
                     parameters.groupingMode,
-                    includeProjectDetails = parameters.projectKey == null,
+                    projectInfoMode = if (parameters.projectKey == null) ProjectInfoMode.Show else ProjectInfoMode.Hide,
                 ),
-                doneInstanceDescriptors.toDoneSingleBridges(includeProjectDetails = false),
+                doneInstanceDescriptors.toDoneSingleBridges(projectInfoMode = ProjectInfoMode.Hide),
                 null,
                 null,
                 DropParent.TopLevel(false),

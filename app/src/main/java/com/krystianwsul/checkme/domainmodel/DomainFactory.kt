@@ -660,13 +660,13 @@ class DomainFactory(
         compareBy: GroupTypeFactory.SingleBridge.CompareBy,
         groupingMode: GroupType.GroupingMode = GroupType.GroupingMode.None,
         showDisplayText: Boolean = true,
-        includeProjectDetails: Boolean = true,
+        projectInfoMode: ProjectInfoMode = ProjectInfoMode.Show,
     ) = MixedInstanceDataCollection(
         instanceDescriptors,
         myUserFactory.user,
         groupingMode,
         showDisplayText,
-        includeProjectDetails,
+        projectInfoMode,
         compareBy,
     )
 

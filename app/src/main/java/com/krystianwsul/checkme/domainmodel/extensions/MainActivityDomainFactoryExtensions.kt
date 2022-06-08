@@ -183,7 +183,11 @@ fun DomainFactory.getGroupListData(
 
     val (mixedInstanceDescriptors, doneInstanceDescriptors) = instanceDescriptors.splitDone()
 
-    val includeProjectDetails = projectKey == null
+    val projectInfoMode = if (projectKey == null) {
+        ProjectInfoMode.Show
+    } else {
+        ProjectInfoMode.Hide
+    }
 
     val dataWrapper = GroupListDataWrapper(
         customTimeDatas,
@@ -194,9 +198,9 @@ fun DomainFactory.getGroupListData(
             mixedInstanceDescriptors,
             GroupTypeFactory.SingleBridge.CompareBy.TIMESTAMP,
             GroupType.GroupingMode.Time(projectKey as? ProjectKey.Shared),
-            includeProjectDetails = includeProjectDetails,
+            projectInfoMode = projectInfoMode,
         ),
-        doneInstanceDescriptors.toDoneSingleBridges(includeProjectDetails = includeProjectDetails),
+        doneInstanceDescriptors.toDoneSingleBridges(projectInfoMode = projectInfoMode),
         null,
         null,
         DropParent.TopLevel(false),

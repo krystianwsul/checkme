@@ -171,6 +171,7 @@ private fun DomainFactory.getGroupListData(
             mixedInstanceDescriptors,
             GroupTypeFactory.SingleBridge.CompareBy.ORDINAL,
             GroupType.GroupingMode.Instance(parentInstance.getProject().projectKey),
+            projectInfoMode = ProjectInfoMode.ShowInsideInstance.fromProjectKey(parentInstance.getProject().projectKey),
         ),
         doneInstanceDescriptors.toDoneSingleBridges(),
         task.getImage(deviceDbInfo),

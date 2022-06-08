@@ -1,9 +1,6 @@
 package com.krystianwsul.checkme.gui.instances.list
 
-import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.domainmodel.GroupType
-import com.krystianwsul.checkme.domainmodel.GroupTypeFactory
-import com.krystianwsul.checkme.domainmodel.MixedInstanceDataCollection
+import com.krystianwsul.checkme.domainmodel.*
 import com.krystianwsul.checkme.domainmodel.extensions.toDoneSingleBridges
 import com.krystianwsul.checkme.gui.instances.drag.DropParent
 import com.krystianwsul.checkme.gui.tree.DetailsNode
@@ -108,6 +105,8 @@ data class GroupListDataWrapper(
                         notDoneChildInstanceDescriptors,
                         GroupTypeFactory.SingleBridge.CompareBy.ORDINAL,
                         GroupType.GroupingMode.Instance(instance.getProject().projectKey),
+                        projectInfoMode =
+                        ProjectInfoMode.ShowInsideInstance.fromProjectKey(instance.getProject().projectKey),
                     ),
                     doneChildInstanceDescriptors.toDoneSingleBridges(),
                     instance.ordinal,

@@ -468,8 +468,8 @@ fun Collection<GroupTypeFactory.InstanceDescriptor>.splitDone() = partition { it
 
 fun List<GroupTypeFactory.InstanceDescriptor>.toDoneSingleBridges(
     showDisplayText: Boolean = true,
-    includeProjectDetails: Boolean = true,
-) = map { GroupTypeFactory.SingleBridge.createDone(it, showDisplayText, includeProjectDetails) }
+    projectInfoMode: ProjectInfoMode = ProjectInfoMode.Show,
+) = map { GroupTypeFactory.SingleBridge.createDone(it, showDisplayText, projectInfoMode) }
 
 val Project<*>.displayName
     get() = when (this) {

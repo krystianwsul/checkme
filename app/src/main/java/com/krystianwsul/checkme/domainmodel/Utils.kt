@@ -13,6 +13,7 @@ import com.krystianwsul.common.firebase.models.project.SharedOwnedProject
 import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.interrupt.DomainInterruptedException
 import com.krystianwsul.common.interrupt.InterruptionChecker
+import com.krystianwsul.common.utils.ProjectKey
 
 fun FirebaseUser.toUserInfo() = UserInfo(email!!, displayName!!, uid)
 
@@ -77,12 +78,42 @@ fun Task.getProjectInfo(includeProjectDetails: Boolean = true): DetailsNode.Proj
     }
 }
 
-fun Instance.getProjectInfo(includeProjectDetails: Boolean = true): DetailsNode.ProjectInfo? {
+sealed class ProjectInfoMode {
+
+    open val showForChildren = false
+
+    abstract fun showProject(sharedOwnedProject: SharedOwnedProject): Boolean
+
+    object Hide : ProjectInfoMode() {
+
+        override fun showProject(sharedOwnedProject: SharedOwnedProject) = false
+    }
+
+    object Show : ProjectInfoMode() { // group hack
+
+        override fun showProject(sharedOwnedProject: SharedOwnedProject) = true
+    }
+
+    class ShowInsideInstance(private val parentInstanceKey: ProjectKey.Shared? = null) : ProjectInfoMode() { // group hack
+
+        companion object {
+
+            fun fromProjectKey(projectKey: ProjectKey<*>) =
+                ShowInsideInstance(projectKey as? ProjectKey.Shared) // group hack
+        }
+
+        override val showForChildren = true
+
+        override fun showProject(sharedOwnedProject: SharedOwnedProject) = sharedOwnedProject.projectKey != parentInstanceKey
+    }
+}
+
+fun Instance.getProjectInfo(projectInfoMode: ProjectInfoMode = ProjectInfoMode.Show): DetailsNode.ProjectInfo? {
     val sharedProject = getProject() as? SharedOwnedProject
 
-    return if (isRootInstance() && sharedProject != null) {
+    return if (sharedProject != null && (isRootInstance() || projectInfoMode.showForChildren)) {
         DetailsNode.ProjectInfo(
-            sharedProject.takeIf { includeProjectDetails }?.let {
+            sharedProject.takeIf { projectInfoMode.showProject(it) }?.let {
                 DetailsNode.ProjectDetails(it.name, sharedProject.projectKey)
             },
             DetailsNode.User.fromProjectUsers(getAssignedTo()),

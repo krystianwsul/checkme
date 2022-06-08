@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.domainmodel.extensions
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.GroupTypeFactory
+import com.krystianwsul.checkme.domainmodel.ProjectInfoMode
 import com.krystianwsul.checkme.gui.instances.ShowGroupActivity
 import com.krystianwsul.checkme.gui.instances.drag.DropParent
 import com.krystianwsul.checkme.gui.instances.list.GroupListDataWrapper
@@ -88,7 +89,11 @@ private fun DomainFactory.getGroupListData(
         GroupListDataWrapper.CustomTimeData(it.name, it.hourMinutes.toSortedMap())
     }
 
-    val includeProjectDetails = parameters.projectKey == null
+    val projectInfoMode = if (parameters.projectKey == null) {
+        ProjectInfoMode.Show
+    } else {
+        ProjectInfoMode.Hide
+    }
 
     val instanceDescriptors = searchContext.search {
         instances.map { (instance, filterResult) ->
@@ -130,9 +135,9 @@ private fun DomainFactory.getGroupListData(
             GroupTypeFactory.SingleBridge.CompareBy.ORDINAL,
             parameters.groupingMode,
             false,
-            includeProjectDetails,
+            projectInfoMode,
         ),
-        doneInstanceDescriptors.toDoneSingleBridges(false, includeProjectDetails),
+        doneInstanceDescriptors.toDoneSingleBridges(false, projectInfoMode),
         null,
         null,
         dropParent,

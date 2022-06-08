@@ -13,14 +13,14 @@ data class MixedInstanceDataCollection(
         projectOrdinalManagerProvider: ProjectOrdinalManager.Provider,
         groupingMode: GroupType.GroupingMode,
         showDisplayText: Boolean,
-        includeProjectDetails: Boolean,
+        projectInfoMode: ProjectInfoMode,
         compareBy: GroupTypeFactory.SingleBridge.CompareBy,
     ) : this(
         instanceDescriptors.map { it.instanceData },
         GroupTypeFactory(
             projectOrdinalManagerProvider,
             showDisplayText,
-            includeProjectDetails,
+            projectInfoMode,
             compareBy,
         ).getGroupTypeTree(instanceDescriptors, groupingMode),
     )

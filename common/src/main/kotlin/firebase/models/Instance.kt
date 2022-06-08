@@ -775,8 +775,8 @@ class Instance private constructor(
 
     fun canMigrateDescription(now: ExactTimeStamp.Local) = !task.note.isNullOrEmpty() && canAddSubtask(now)
 
-    fun getProjectId(): String = parentInstance?.getProjectId() ?: task.projectId
-    fun getProject(): Project<*> = parentInstance?.getProject() ?: task.project
+    fun getProjectId(): String = task.projectId
+    fun getProject(): Project<*> = task.project
 
     fun taskHasOtherVisibleInstances(now: ExactTimeStamp.Local) = task.hasOtherVisibleInstances(now, instanceKey)
 

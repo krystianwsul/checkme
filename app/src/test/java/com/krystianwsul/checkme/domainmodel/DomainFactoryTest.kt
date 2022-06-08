@@ -853,7 +853,6 @@ class DomainFactoryTest {
 
         assertEquals(null, instanceData.projectKey)
         assertEquals(2, instanceData.allChildren.size)
-        assertTrue(instanceData.allChildren.all { it.projectKey == null })
 
         assertEquals(sharedProjectKey2, getTodayInstanceDatas(now, 7).single().projectKey)
     }

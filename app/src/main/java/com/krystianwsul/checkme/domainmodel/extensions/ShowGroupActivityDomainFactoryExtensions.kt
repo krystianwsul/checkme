@@ -109,6 +109,7 @@ private fun DomainFactory.getGroupListData(
                 instance.instanceDateTime.toDateTimePair(),
                 instance.groupByProject,
                 instance,
+                null, // todo group
             )
         }
     }

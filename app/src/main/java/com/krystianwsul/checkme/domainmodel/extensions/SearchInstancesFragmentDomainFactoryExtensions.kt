@@ -65,7 +65,15 @@ fun DomainFactory.getCappedInstanceAndTaskDatas(
         searchContext,
         page,
         projectKey,
-    ) { instance, children, filterResult -> instanceToGroupListData(instance, now, children, filterResult.matchesSearch) }
+    ) { instance, children, filterResult ->
+        instanceToGroupListData(
+            instance,
+            now,
+            children,
+            filterResult.matchesSearch,
+            null,
+        )
+    }
 
     val taskDatas = searchContext.search {
         getUnscheduledTasks(projectKey)

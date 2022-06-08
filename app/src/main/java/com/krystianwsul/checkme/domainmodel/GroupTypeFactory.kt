@@ -90,6 +90,7 @@ class GroupTypeFactory(
         val instanceDateTimePair: DateTimePair,
         groupIntoProject: Boolean,
         val instance: Instance,
+        excludeProjectKey: ProjectKey.Shared?,
     ) : GroupType.InstanceDescriptor, Comparable<InstanceDescriptor> {
 
         override val timeStamp get() = instanceData.instanceTimeStamp
@@ -97,6 +98,7 @@ class GroupTypeFactory(
         override val projectDescriptor = instance.takeIf { groupIntoProject }
             ?.getProject()
             ?.let { it as? SharedOwnedProject }
+            ?.takeIf { it.projectKey != excludeProjectKey }
             ?.let(GroupTypeFactory::ProjectDescriptor)
 
         override fun compareTo(other: InstanceDescriptor) = instanceData.compareTo(other.instanceData)

@@ -182,8 +182,10 @@ interface GroupType {
 
         object None : GroupingMode
 
+        // group by project, assume single time
         object Project : GroupingMode
 
+        // group by time and project
         class Time(private val projectKey: ProjectKey.Shared? = null) : GroupingMode {
 
             val groupByProject = projectKey == null
@@ -193,6 +195,7 @@ interface GroupType {
                     ?: ShowGroupActivity.Parameters.Time(timeStamp)
         }
 
+        // group by time, assume single project
         object Projects : GroupingMode
     }
 }

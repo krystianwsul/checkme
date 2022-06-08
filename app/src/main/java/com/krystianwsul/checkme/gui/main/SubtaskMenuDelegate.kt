@@ -47,7 +47,8 @@ private class AddTaskList(val instanceKey: InstanceKey) : BottomFabMenuDelegate.
 
     override fun getText(context: Context) = context.getString(R.string.addTaskList)
 
-    override fun onClick(activity: Activity) = activity.launchEditActivity(EditParentHint.Instance(instanceKey))
+    override fun onClick(activity: Activity) =
+        activity.launchEditActivity(EditParentHint.Instance(instanceKey, null))
 }
 
 private class AddToProject(

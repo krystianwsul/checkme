@@ -57,7 +57,7 @@ sealed class GroupListParameters(val draggable: Boolean = true) {
                 val projectKey: ProjectKey.Shared,
             ) : FabData() {
 
-                override fun toEditParentHint() = EditParentHint.Instance(parentInstanceKey)
+                override fun toEditParentHint() = EditParentHint.Instance(parentInstanceKey, projectKey)
             }
         }
     }

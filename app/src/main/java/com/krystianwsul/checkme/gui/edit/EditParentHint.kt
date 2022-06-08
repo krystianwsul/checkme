@@ -54,14 +54,14 @@ sealed class EditParentHint : Parcelable {
     }
 
     @Parcelize
-    class Instance(override val instanceKey: InstanceKey) : EditParentHint() {
+    class Instance(override val instanceKey: InstanceKey, val projectKey: ProjectKey.Shared?) : EditParentHint() {
 
         override val showInitialSchedule get() = false
 
-        override fun toCurrentParent() =
-            EditViewModel.CurrentParentSource.Set(EditViewModel.ParentKey.Task(instanceKey.taskKey))
+        override fun toCurrentParent() = EditViewModel.CurrentParentSource.Set(toParentKey())
 
-        override fun toParentKey() = EditViewModel.ParentKey.Task(instanceKey.taskKey)
+        override fun toParentKey() =
+            projectKey?.let { projectKey.toParentKey() } ?: EditViewModel.ParentKey.Task(instanceKey.taskKey)
 
         override fun getReplacementHintForNewTask(taskKey: TaskKey) = this.takeIf { taskKey == instanceKey.taskKey }
     }

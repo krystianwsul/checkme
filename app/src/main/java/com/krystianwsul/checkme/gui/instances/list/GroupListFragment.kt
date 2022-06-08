@@ -106,7 +106,7 @@ class GroupListFragment @JvmOverloads constructor(
                 .singleOrNull()
 
             return if (parentInstanceKey != null) {
-                EditParentHint.Instance(parentInstanceKey) // todo group
+                EditParentHint.Instance(parentInstanceKey, projectKey)
             } else {
                 val (date, timePair) = triples.firstOrNull { it.second.customTimeKey != null } ?: triples.first()
 
@@ -205,7 +205,7 @@ class GroupListFragment @JvmOverloads constructor(
                     }
 
                     val hint = if (parameters is GroupListParameters.InstanceKey) {
-                        EditParentHint.Instance((parameters as GroupListParameters.InstanceKey).instanceKey)
+                        EditParentHint.Instance((parameters as GroupListParameters.InstanceKey).instanceKey, null)
                     } else {
                         selectedDatas.filterIsInstance<GroupListDataWrapper.InstanceData>()
                             .minByOrNull { it.instanceTimeStamp }
@@ -685,7 +685,7 @@ class GroupListFragment @JvmOverloads constructor(
                             })
                         }
                         canAddSubtask -> getStartEditActivityFabState(
-                            instanceData?.let { EditParentHint.Instance(it.instanceKey) }
+                            instanceData?.let { EditParentHint.Instance(it.instanceKey, null) }
                                 ?: EditParentHint.Task(singleSelectedData.taskKey),
                             true,
                         )
@@ -749,7 +749,7 @@ class GroupListFragment @JvmOverloads constructor(
                     getStartEditActivityFabState(hint)
                 }
                 is GroupListParameters.InstanceKey -> if (parameters.groupListDataWrapper.taskEditable!!)
-                    getStartEditActivityFabState(EditParentHint.Instance(parameters.instanceKey))
+                    getStartEditActivityFabState(EditParentHint.Instance(parameters.instanceKey, null))
                 else
                     FabState.Hidden
                 is GroupListParameters.Parent -> parameters.projectKey

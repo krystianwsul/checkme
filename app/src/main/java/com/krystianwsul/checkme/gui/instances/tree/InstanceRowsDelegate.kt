@@ -29,7 +29,7 @@ class InstanceRowsDelegate(singleBridge: GroupTypeFactory.SingleBridge) :
             ?.map { it.modelNode as NotDoneGroupNode }
             ?.takeIf { it.isNotEmpty() }
             ?.sorted()
-            ?.joinToString(", ") { (it.contentDelegate as NotDoneNode.ContentDelegate.Instance).instanceData.name }
+            ?.joinToString(", ") { it.contentDelegate.name }
             .toSecondaryRow()
 
         return listOfNotNull(

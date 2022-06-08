@@ -14,6 +14,7 @@ import androidx.appcompat.view.ActionMode
 import androidx.recyclerview.widget.CustomItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import arrow.core.Tuple4
 import com.jakewharton.rxrelay3.BehaviorRelay
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.R
@@ -95,14 +96,22 @@ class GroupListFragment @JvmOverloads constructor(
             return instanceDatas.toSet()
         }
 
-        fun getHint(triples: List<Triple<Date, TimePair, ProjectKey.Shared?>>): EditParentHint.Schedule {
+        fun getHint(triples: List<Tuple4<Date, TimePair, ProjectKey.Shared?, InstanceKey?>>): EditParentHint {
+            val parentInstanceKey = triples.map { it.fourth }
+                .distinct()
+                .singleOrNull()
+
             val projectKey = triples.map { it.third }
                 .distinct()
                 .singleOrNull()
 
-            val (date, timePair) = triples.firstOrNull { it.second.customTimeKey != null } ?: triples.first()
+            return if (parentInstanceKey != null) {
+                EditParentHint.Instance(parentInstanceKey) // todo group
+            } else {
+                val (date, timePair) = triples.firstOrNull { it.second.customTimeKey != null } ?: triples.first()
 
-            return EditParentHint.Schedule(date, timePair, projectKey)
+                EditParentHint.Schedule(date, timePair, projectKey)
+            }
         }
     }
 
@@ -639,7 +648,7 @@ class GroupListFragment @JvmOverloads constructor(
         if (!parametersRelay.hasValue()) return FabState.Hidden
 
         fun List<GroupListDataWrapper.InstanceData>.getHint() =
-            getHint(map { Triple(it.instanceDate, it.createTaskTimePair, it.projectKey) })
+            getHint(map { Tuple4(it.instanceDate, it.createTaskTimePair, it.projectKey, it.parentInstanceKey) })
 
         return if (selectionCallback.hasActionMode) {
             if (parameters.fabActionMode != GroupListParameters.FabActionMode.NONE) {
@@ -733,11 +742,7 @@ class GroupListFragment @JvmOverloads constructor(
                             if (it.isNotEmpty()) {
                                 it.getHint()
                             } else {
-                                EditParentHint.Schedule(
-                                    parameters.timeStamp.date,
-                                    TimePair(parameters.timeStamp.hourMinute),
-                                    parameters.projectKey,
-                                )
+                                parameters.fabData.toEditParentHint()
                             }
                         }
 

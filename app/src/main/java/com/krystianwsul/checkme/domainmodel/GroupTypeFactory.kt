@@ -249,7 +249,7 @@ class GroupTypeFactory(
             NotDoneNode.ContentDelegate.Group.Id.Project(timeStamp, instanceKeys, projectKey),
             NotDoneNode.ContentDelegate.Group.GroupRowsDelegate.Project(groupAdapter, null, name),
             parentInstanceKey?.let {
-                ShowGroupActivity.Parameters.InstanceProject(timeStamp, projectKey, it)
+                ShowGroupActivity.Parameters.InstanceProject(projectKey, it)
             } ?: ShowGroupActivity.Parameters.Project(timeStamp, projectKey, false),
             NotDoneNode.ContentDelegate.Group.CheckboxMode.CHECKBOX,
         )

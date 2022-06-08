@@ -1,6 +1,8 @@
 package com.krystianwsul.checkme.gui.instances.list
 
+import com.krystianwsul.checkme.gui.edit.EditParentHint
 import com.krystianwsul.checkme.viewmodels.DataId
+import com.krystianwsul.common.time.TimePair
 import com.krystianwsul.common.utils.ProjectKey
 
 sealed class GroupListParameters(val draggable: Boolean = true) {
@@ -31,9 +33,34 @@ sealed class GroupListParameters(val draggable: Boolean = true) {
         override val dataId: DataId,
         override val immediate: Boolean,
         override val groupListDataWrapper: GroupListDataWrapper,
-        val timeStamp: com.krystianwsul.common.time.TimeStamp,
-        val projectKey: ProjectKey.Shared?,
-    ) : GroupListParameters()
+        val fabData: FabData,
+    ) : GroupListParameters() {
+
+        sealed class FabData {
+
+            abstract fun toEditParentHint(): EditParentHint
+
+            data class TimeBased(
+                val timeStamp: com.krystianwsul.common.time.TimeStamp,
+                val projectKey: ProjectKey.Shared?,
+            ) : FabData() {
+
+                override fun toEditParentHint() = EditParentHint.Schedule(
+                    timeStamp.date,
+                    TimePair(timeStamp.hourMinute),
+                    projectKey,
+                )
+            }
+
+            data class InstanceProject(
+                val parentInstanceKey: com.krystianwsul.common.utils.InstanceKey,
+                val projectKey: ProjectKey.Shared,
+            ) : FabData() {
+
+                override fun toEditParentHint() = EditParentHint.Instance(parentInstanceKey)
+            }
+        }
+    }
 
     data class InstanceKey(
         override val dataId: DataId,

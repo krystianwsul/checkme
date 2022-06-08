@@ -295,8 +295,7 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
                 showGroupViewModel.dataId,
                 immediate,
                 data.groupListDataWrapper,
-                parameters.timeStamp,
-                parameters.projectKey,
+                parameters.getFabData(),
             )
         )
 
@@ -372,16 +371,20 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
 
     sealed interface Parameters : Parcelable {
 
-        val timeStamp: TimeStamp
         val projectKey: ProjectKey.Shared?
         val groupingMode: GroupType.GroupingMode
         val showAssignedToOthers: Boolean
 
+        fun getFabData(): GroupListParameters.TimeStamp.FabData
+
         sealed interface TimeBased : Parameters {
 
+            val timeStamp: TimeStamp
             val showUngrouped: Boolean
 
             override val showAssignedToOthers get() = true
+
+            override fun getFabData() = GroupListParameters.TimeStamp.FabData.TimeBased(timeStamp, projectKey)
         }
 
         @Parcelize
@@ -407,7 +410,6 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
         // for project node inside instance
         @Parcelize
         data class InstanceProject(
-            override val timeStamp: TimeStamp, // todo group this doesn't actually make sense; we'll really be fetching based on parentInstanceKey
             override val projectKey: ProjectKey.Shared, // group hack
             val parentInstanceKey: InstanceKey,
         ) : Parameters {
@@ -415,6 +417,8 @@ class ShowGroupActivity : AbstractActivity(), GroupListListener {
             override val groupingMode get() = GroupType.GroupingMode.None
 
             override val showAssignedToOthers get() = false
+
+            override fun getFabData() = GroupListParameters.TimeStamp.FabData.InstanceProject(parentInstanceKey, projectKey)
         }
     }
 }

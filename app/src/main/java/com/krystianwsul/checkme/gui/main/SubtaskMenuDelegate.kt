@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.gui.main
 
 import android.app.Activity
 import android.content.Context
+import arrow.core.Tuple4
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.edit.EditActivity
 import com.krystianwsul.checkme.gui.edit.EditParameters
@@ -38,7 +39,7 @@ private class AddTaskThisTime(
     override fun getText(context: Context) = context.getString(R.string.add_task_this_time)
 
     override fun onClick(activity: Activity) {
-        activity.launchEditActivity(GroupListFragment.getHint(listOf(Triple(instanceDate, createTaskTimePair, null))))
+        activity.launchEditActivity(GroupListFragment.getHint(listOf(Tuple4(instanceDate, createTaskTimePair, null, null))))
     }
 }
 
@@ -58,7 +59,18 @@ private class AddToProject(
     override fun getText(context: Context) = context.getString(R.string.addToProject)
 
     override fun onClick(activity: Activity) {
-        activity.launchEditActivity(GroupListFragment.getHint(listOf(Triple(instanceDate, createTaskTimePair, projectKey))))
+        activity.launchEditActivity(
+            GroupListFragment.getHint(
+                listOf(
+                    Tuple4(
+                        instanceDate,
+                        createTaskTimePair,
+                        projectKey,
+                        null
+                    )
+                )
+            )
+        )
     }
 }
 

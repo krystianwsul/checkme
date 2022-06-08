@@ -30,25 +30,29 @@ fun DomainFactory.getShowGroupData(
 
     val now = ExactTimeStamp.Local.now
 
-    val timeStamp = parameters.timeStamp
-    val date = timeStamp.date
-    val dayOfWeek = date.dayOfWeek
-    val hourMinute = timeStamp.hourMinute
-
-    val time = getCurrentRemoteCustomTimes().map { it as Time.Custom }
-        .firstOrNull { it.getHourMinute(dayOfWeek) == hourMinute }
-        ?: Time.Normal(hourMinute)
-
-    val displayText = DateTime(date, time).getDisplayText()
-
     fun ProjectKey.Shared.getName() = projectsFactory.getSharedProjectForce(this).name
 
     val (title, subtitle) = when (parameters) {
-        is ShowGroupActivity.Parameters.Time -> Pair(displayText, null)
-        is ShowGroupActivity.Parameters.Project -> Pair(
-            parameters.projectKey.getName(),
-            displayText,
-        )
+        is ShowGroupActivity.Parameters.TimeBased -> {
+            val timeStamp = parameters.timeStamp
+            val date = timeStamp.date
+            val dayOfWeek = date.dayOfWeek
+            val hourMinute = timeStamp.hourMinute
+
+            val time = getCurrentRemoteCustomTimes().map { it as Time.Custom }
+                .firstOrNull { it.getHourMinute(dayOfWeek) == hourMinute }
+                ?: Time.Normal(hourMinute)
+
+            val displayText = DateTime(date, time).getDisplayText()
+
+            when (parameters) {
+                is ShowGroupActivity.Parameters.Time -> Pair(displayText, null)
+                is ShowGroupActivity.Parameters.Project -> Pair(
+                    parameters.projectKey.getName(),
+                    displayText,
+                )
+            }
+        }
         is ShowGroupActivity.Parameters.InstanceProject -> Pair(
             parameters.projectKey.getName(),
             getInstance(parameters.parentInstanceKey).name,
@@ -63,32 +67,34 @@ private fun DomainFactory.getGroupListData(
     now: ExactTimeStamp.Local,
     searchCriteria: SearchCriteria,
 ): GroupListDataWrapper {
-    val endCalendar = parameters.timeStamp
-        .calendar
-        .apply { add(Calendar.MINUTE, 1) }
-
-    val endExactTimeStamp = ExactTimeStamp.Local(endCalendar.toDateTimeSoy()).toOffset()
-
     val searchContext = SearchContext.startSearch(searchCriteria, now, myUserFactory.user)
 
     val instances = when (parameters) {
-        is ShowGroupActivity.Parameters.TimeBased -> getRootInstances(
-            parameters.timeStamp
-                .toLocalExactTimeStamp()
-                .toOffset(),
-            endExactTimeStamp,
-            now,
-            searchContext,
-            projectKey = parameters.projectKey,
-        )
-            // I'm really confused about why this filter would be necessary
-            .filter { it.first.instanceDateTime.timeStamp.compareTo(parameters.timeStamp) == 0 }
-            .let {
-                if (parameters.showUngrouped)
-                    it
-                else
-                    it.filter { it.first.groupByProject }
-            }
+        is ShowGroupActivity.Parameters.TimeBased -> {
+            val endCalendar = parameters.timeStamp
+                .calendar
+                .apply { add(Calendar.MINUTE, 1) }
+
+            val endExactTimeStamp = ExactTimeStamp.Local(endCalendar.toDateTimeSoy()).toOffset()
+
+            getRootInstances(
+                parameters.timeStamp
+                    .toLocalExactTimeStamp()
+                    .toOffset(),
+                endExactTimeStamp,
+                now,
+                searchContext,
+                projectKey = parameters.projectKey,
+            )
+                // I'm really confused about why this filter would be necessary
+                .filter { it.first.instanceDateTime.timeStamp.compareTo(parameters.timeStamp) == 0 }
+                .let {
+                    if (parameters.showUngrouped)
+                        it
+                    else
+                        it.filter { it.first.groupByProject }
+                }
+        }
         is ShowGroupActivity.Parameters.InstanceProject -> searchContext.search {
             getInstance(parameters.parentInstanceKey).getChildInstances()
                 .asSequence()
@@ -133,8 +139,13 @@ private fun DomainFactory.getGroupListData(
 
     val (mixedInstanceDescriptors, doneInstanceDescriptors) = instanceDescriptors.splitDone()
 
+    val stupidTimeStamp = when (parameters) {
+        is ShowGroupActivity.Parameters.TimeBased -> parameters.timeStamp
+        is ShowGroupActivity.Parameters.InstanceProject -> getInstance(parameters.parentInstanceKey).instanceDateTime.timeStamp // todo group ordinal
+    }
+
     val dropParent = parameters.projectKey
-        ?.let { DropParent.Project(parameters.timeStamp, it) }
+        ?.let { DropParent.Project(stupidTimeStamp, it) }
         ?: DropParent.TopLevel(true)
 
     return GroupListDataWrapper(

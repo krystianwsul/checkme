@@ -13,10 +13,13 @@ sealed class EditParentHint : Parcelable {
 
     companion object {
 
-        protected fun ProjectKey<*>.toCurrentParent() =
-            EditViewModel.CurrentParentSource.Set(EditViewModel.ParentKey.Project(this))
-
+        protected fun TaskKey.toParentKey() = EditViewModel.ParentKey.Task(this)
         protected fun ProjectKey<*>.toParentKey() = EditViewModel.ParentKey.Project(this)
+
+        protected fun EditViewModel.ParentKey.toCurrentParent() = EditViewModel.CurrentParentSource.Set(this)
+
+        protected fun TaskKey.toCurrentParent() = toParentKey().toCurrentParent()
+        protected fun ProjectKey<*>.toCurrentParent() = toParentKey().toCurrentParent()
     }
 
     open val showInitialSchedule = true
@@ -24,7 +27,6 @@ sealed class EditParentHint : Parcelable {
     open val instanceKey: InstanceKey? = null
 
     abstract fun toCurrentParent(): EditViewModel.CurrentParentSource
-    abstract fun toParentKey(): EditViewModel.ParentKey?
 
     open fun getReplacementHintForNewTask(taskKey: TaskKey): Instance? = null
 
@@ -38,8 +40,6 @@ sealed class EditParentHint : Parcelable {
         ) : this(pair.first, TimePair(pair.second), null)
 
         override fun toCurrentParent() = projectKey?.toCurrentParent() ?: EditViewModel.CurrentParentSource.None
-
-        override fun toParentKey() = projectKey?.toParentKey()
     }
 
     @Parcelize
@@ -47,10 +47,7 @@ sealed class EditParentHint : Parcelable {
 
         override val showInitialSchedule get() = false
 
-        override fun toCurrentParent() =
-            EditViewModel.CurrentParentSource.Set(EditViewModel.ParentKey.Task(taskKey))
-
-        override fun toParentKey() = EditViewModel.ParentKey.Task(taskKey)
+        override fun toCurrentParent() = taskKey.toCurrentParent()
     }
 
     @Parcelize
@@ -58,10 +55,7 @@ sealed class EditParentHint : Parcelable {
 
         override val showInitialSchedule get() = false
 
-        override fun toCurrentParent() = EditViewModel.CurrentParentSource.Set(toParentKey())
-
-        override fun toParentKey() =
-            projectKey?.let { projectKey.toParentKey() } ?: EditViewModel.ParentKey.Task(instanceKey.taskKey)
+        override fun toCurrentParent() = projectKey?.toCurrentParent() ?: instanceKey.taskKey.toCurrentParent()
 
         override fun getReplacementHintForNewTask(taskKey: TaskKey) = this.takeIf { taskKey == instanceKey.taskKey }
     }
@@ -70,7 +64,5 @@ sealed class EditParentHint : Parcelable {
     class Project(val projectKey: ProjectKey<*>, override val showInitialSchedule: Boolean = true) : EditParentHint() {
 
         override fun toCurrentParent() = projectKey.toCurrentParent()
-
-        override fun toParentKey() = projectKey.toParentKey()
     }
 }

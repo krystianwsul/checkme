@@ -30,17 +30,20 @@ class JoinTasksEditDelegate(
     private val taskKeys = parameters.joinables.map { it.taskKey }
     private val instanceKeys = parameters.joinables.mapNotNull { it.instanceKey }
 
-    private fun initialStateGetter(): ParentScheduleState {
+    private val defaultInitialParentScheduleState: ParentScheduleState
+
+    init {
         val schedule = if (parameters.hint?.showInitialSchedule == false) {
             null
         } else {
             firstScheduleEntry.takeIf { Preferences.addDefaultReminder }
         }
 
-        return ParentScheduleState(listOfNotNull(schedule), setOf())
+        defaultInitialParentScheduleState = ParentScheduleState(listOfNotNull(schedule))
     }
 
-    override val parentScheduleManager = ParentMultiScheduleManager(savedInstanceState, this::initialStateGetter, callbacks)
+    override val parentScheduleManager =
+        ParentMultiScheduleManager(savedInstanceState, defaultInitialParentScheduleState, callbacks)
 
     override fun showDialog(): ShowDialog {
         fun showJoinAllRemindersDialog(): Boolean {

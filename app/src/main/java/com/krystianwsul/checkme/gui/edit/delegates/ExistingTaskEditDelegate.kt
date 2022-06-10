@@ -18,14 +18,7 @@ abstract class ExistingTaskEditDelegate(
 
     override val parentScheduleManager = ParentMultiScheduleManager(
         savedInstanceState,
-        {
-            ParentScheduleState.create(
-                taskData.assignedTo,
-                taskData.scheduleDataWrappers
-                    ?.map(::ScheduleEntry)
-                    ?.toList(),
-            )
-        },
+        taskData.run { ParentScheduleState.create(assignedTo, scheduleDataWrappers?.map(::ScheduleEntry)?.toList()) },
         callbacks,
     )
 

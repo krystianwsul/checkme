@@ -33,7 +33,7 @@ class CreateTaskEditDelegate(
     override val parentScheduleManager: ParentScheduleManager
 
     init {
-        val initialStateGetter: () -> ParentScheduleState
+        val defaultInitialParentScheduleState: ParentScheduleState
 
         when (parameters) {
             is EditParameters.Create -> {
@@ -43,63 +43,53 @@ class CreateTaskEditDelegate(
                     ?.toScheduleHint()
                     ?.dateTimePair
 
-                initialStateGetter = {
-                    parameters.parentScheduleState ?: ParentScheduleState(
-                        listOfNotNull(
-                            firstScheduleEntry.takeIf {
-                                parameters.hint?.showInitialSchedule != false &&
-                                        Preferences.addDefaultReminder &&
-                                        parameters.showFirstSchedule
-                            }
-                        ),
-                        setOf()
-                    )
-                }
+                defaultInitialParentScheduleState = parameters.parentScheduleState ?: ParentScheduleState(
+                    listOfNotNull(
+                        firstScheduleEntry.takeIf {
+                            parameters.hint?.showInitialSchedule != false &&
+                                    Preferences.addDefaultReminder &&
+                                    parameters.showFirstSchedule
+                        }
+                    ),
+                )
             }
             is EditParameters.MigrateDescription -> {
                 initialName = data.parentTaskDescription!!
                 scheduleHint = null
 
-                initialStateGetter = { ParentScheduleState.create(setOf()) }
+                defaultInitialParentScheduleState = ParentScheduleState.create(setOf())
             }
             is EditParameters.Share -> {
                 initialName = parameters.nameHint
                 scheduleHint = null
 
                 val initialParentKey = parameters.parentTaskKeyHint?.toParentKey()
-                initialStateGetter = {
-                    ParentScheduleState(
-                        listOfNotNull(
-                            firstScheduleEntry.takeIf {
-                                initialParentKey == null && Preferences.addDefaultReminder
-                            }
-                        ),
-                        setOf()
-                    )
-                }
+
+                defaultInitialParentScheduleState = ParentScheduleState(
+                    listOfNotNull(
+                        firstScheduleEntry.takeIf { initialParentKey == null && Preferences.addDefaultReminder }
+                    ),
+                )
             }
             is EditParameters.Shortcut -> {
                 initialName = null
                 scheduleHint = null
 
-                initialStateGetter = { ParentScheduleState.create(setOf()) }
+                defaultInitialParentScheduleState = ParentScheduleState.empty
             }
             EditParameters.None -> {
                 initialName = null
                 scheduleHint = null
 
-                initialStateGetter = {
-                    ParentScheduleState(
-                        listOfNotNull(firstScheduleEntry.takeIf { Preferences.addDefaultReminder }),
-                        setOf(),
-                    )
-                }
+                defaultInitialParentScheduleState = ParentScheduleState(
+                    listOfNotNull(firstScheduleEntry.takeIf { Preferences.addDefaultReminder }),
+                )
             }
         }.exhaustive()
 
         parentScheduleManager = ParentMultiScheduleManager(
             savedInstanceState,
-            initialStateGetter,
+            defaultInitialParentScheduleState,
             callbacks,
         )
     }

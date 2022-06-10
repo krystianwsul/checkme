@@ -5,13 +5,15 @@ import com.krystianwsul.common.utils.UserKey
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-data class ParentScheduleState(val schedules: List<ScheduleEntry>, val assignedTo: Set<UserKey>) : Parcelable {
+data class ParentScheduleState(val schedules: List<ScheduleEntry>, val assignedTo: Set<UserKey> = emptySet()) : Parcelable {
 
     companion object {
 
+        val empty by lazy { create(setOf()) }
+
         fun create(
-                assignedTo: Set<UserKey>,
-                schedules: List<ScheduleEntry>? = null,
+            assignedTo: Set<UserKey>,
+            schedules: List<ScheduleEntry>? = null,
         ) = ParentScheduleState(schedules.orEmpty().toMutableList(), assignedTo)
     }
 

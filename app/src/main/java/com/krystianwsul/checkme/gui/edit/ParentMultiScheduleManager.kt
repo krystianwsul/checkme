@@ -6,9 +6,9 @@ import com.krystianwsul.checkme.utils.NullableRelayProperty
 import com.krystianwsul.common.utils.UserKey
 
 class ParentMultiScheduleManager(
-        savedInstanceState: Bundle?,
-        initialStateGetter: () -> ParentScheduleState,
-        private val callbacks: ParentScheduleManager.Callbacks,
+    savedInstanceState: Bundle?,
+    defaultInitialParentScheduleState: ParentScheduleState,
+    private val callbacks: ParentScheduleManager.Callbacks,
 ) : ParentScheduleManager {
 
     companion object {
@@ -17,7 +17,7 @@ class ParentMultiScheduleManager(
         private const val KEY_STATE = "state"
     }
 
-    private val initialState = savedInstanceState?.getParcelable(KEY_INITIAL_STATE) ?: initialStateGetter()
+    private val initialState = savedInstanceState?.getParcelable(KEY_INITIAL_STATE) ?: defaultInitialParentScheduleState
     private val state = savedInstanceState?.getParcelable(KEY_STATE) ?: initialState.copy()
 
     private val parentProperty = NullableRelayProperty(callbacks.getInitialParent()) {

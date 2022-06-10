@@ -19,6 +19,8 @@ data class DateTimePair(val date: Date, val timePair: TimePair) : Parcelable, Se
         )
     }
 
+    constructor(date: Date, hourMinute: HourMinute) : this(date, TimePair(hourMinute))
+
     fun toJson() = ProjectOrdinalKeyEntryJson.TaskInfoJson.DateTimePairJson(
         date.toJson(),
         timePair

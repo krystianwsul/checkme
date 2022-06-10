@@ -56,8 +56,8 @@ sealed class ScheduleDataWrapper : Parcelable {
 
     abstract fun getText(customTimeDatas: Map<CustomTimeKey, EditViewModel.CustomTimeData>, context: Context): String
 
-    fun getScheduleDialogData(scheduleHint: EditParentHint.Schedule?) =
-        getScheduleDialogDataHelper(scheduleHint?.date ?: Date.today())
+    fun getScheduleDialogData(suggestedDate: Date?) =
+        getScheduleDialogDataHelper(suggestedDate ?: Date.today())
 
     protected abstract fun getScheduleDialogDataHelper(suggestedDate: Date): ScheduleDialogData
 

@@ -35,17 +35,14 @@ sealed class EditParentHint : Parcelable {
     class Schedule(val dateTimePair: DateTimePair, private val projectKey: ProjectKey.Shared? = null) :
         EditParentHint() {
 
+        companion object {
+
+            operator fun invoke(date: Date) =
+                HourMinute.getNextHour(date).let { Schedule(DateTimePair(it.first, it.second)) }
+        }
+
         constructor(date: Date, timePair: TimePair, projectKey: ProjectKey.Shared? = null) :
                 this(DateTimePair(date, timePair), projectKey)
-
-        constructor(
-            date: Date,
-            pair: Pair<Date, HourMinute> = HourMinute.getNextHour(date),
-        ) : this(pair.first, TimePair(pair.second))
-
-        // todo pair
-        val date get() = dateTimePair.date
-        val timePair get() = dateTimePair.timePair
 
         override fun toCurrentParent() = projectKey?.toCurrentParent() ?: EditViewModel.CurrentParentSource.None
     }

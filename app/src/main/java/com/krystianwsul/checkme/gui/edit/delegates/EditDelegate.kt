@@ -13,8 +13,8 @@ import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity
 import com.krystianwsul.checkme.upload.Uploader
 import com.krystianwsul.checkme.utils.newUuid
 import com.krystianwsul.common.firebase.json.tasks.TaskJson
+import com.krystianwsul.common.time.DateTimePair
 import com.krystianwsul.common.time.HourMinute
-import com.krystianwsul.common.time.TimePair
 import com.krystianwsul.common.utils.*
 import com.krystianwsul.treeadapter.getCurrentValue
 import io.reactivex.rxjava3.core.Single
@@ -76,10 +76,9 @@ abstract class EditDelegate(
     protected fun EditParentHint.toScheduleHint() = this as? EditParentHint.Schedule
 
     val firstScheduleEntry by lazy {
-        val (date, timePair) = scheduleHint?.let { Pair(it.date, it.timePair) }
-            ?: HourMinute.nextHour.let { Pair(it.first, TimePair(it.second)) }
+        val dateTimePair = scheduleHint?.dateTimePair ?: HourMinute.nextHour.let { DateTimePair(it.first, it.second) }
 
-        ScheduleEntry(ScheduleDataWrapper.Single(ScheduleData.Single(date, timePair)))
+        ScheduleEntry(ScheduleDataWrapper.Single(ScheduleData.Single(dateTimePair)))
     }
 
     abstract val parentScheduleManager: ParentScheduleManager

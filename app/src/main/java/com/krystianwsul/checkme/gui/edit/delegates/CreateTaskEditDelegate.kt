@@ -43,21 +43,23 @@ class CreateTaskEditDelegate(
                     ?.toScheduleHint()
                     ?.dateTimePair
 
-                defaultInitialParentScheduleState = parameters.parentScheduleState ?: ParentScheduleState(
-                    listOfNotNull(
-                        firstScheduleEntry.takeIf {
-                            parameters.hint?.showInitialSchedule != false &&
-                                    Preferences.addDefaultReminder &&
-                                    parameters.showFirstSchedule
-                        }
-                    ),
-                )
+                defaultInitialParentScheduleState = if (parameters.parentScheduleState != null) {
+                    parameters.parentScheduleState
+                } else if (
+                    parameters.hint?.showInitialSchedule != false &&
+                    Preferences.addDefaultReminder &&
+                    parameters.showFirstSchedule
+                ) {
+                    ParentScheduleState(defaultSingleScheduleData)
+                } else {
+                    ParentScheduleState.empty
+                }
             }
             is EditParameters.MigrateDescription -> {
                 initialName = data.parentTaskDescription!!
                 scheduleHint = null
 
-                defaultInitialParentScheduleState = ParentScheduleState.create(setOf())
+                defaultInitialParentScheduleState = ParentScheduleState.empty
             }
             is EditParameters.Share -> {
                 initialName = parameters.nameHint
@@ -65,11 +67,11 @@ class CreateTaskEditDelegate(
 
                 val initialParentKey = parameters.parentTaskKeyHint?.toParentKey()
 
-                defaultInitialParentScheduleState = ParentScheduleState(
-                    listOfNotNull(
-                        firstScheduleEntry.takeIf { initialParentKey == null && Preferences.addDefaultReminder }
-                    ),
-                )
+                defaultInitialParentScheduleState = if (initialParentKey == null && Preferences.addDefaultReminder) {
+                    ParentScheduleState(defaultSingleScheduleData)
+                } else {
+                    ParentScheduleState.empty
+                }
             }
             is EditParameters.Shortcut -> {
                 initialName = null
@@ -81,9 +83,11 @@ class CreateTaskEditDelegate(
                 initialName = null
                 scheduleHint = null
 
-                defaultInitialParentScheduleState = ParentScheduleState(
-                    listOfNotNull(firstScheduleEntry.takeIf { Preferences.addDefaultReminder }),
-                )
+                defaultInitialParentScheduleState = if (Preferences.addDefaultReminder) {
+                    ParentScheduleState(defaultSingleScheduleData)
+                } else {
+                    ParentScheduleState.empty
+                }
             }
         }.exhaustive()
     }

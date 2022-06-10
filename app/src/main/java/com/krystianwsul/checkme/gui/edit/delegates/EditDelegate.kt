@@ -76,14 +76,10 @@ abstract class EditDelegate(
 
     protected fun EditParentHint.toScheduleHint() = this as? EditParentHint.Schedule
 
-    private val defaultSingleScheduleData: ScheduleData.Single by lazy { // todo encapsulate
+    protected val defaultSingleScheduleData: ScheduleData.Single by lazy { // todo encapsulate
         val dateTimePair = scheduleHint ?: HourMinute.nextHour.let { DateTimePair(it.first, it.second) }
 
         ScheduleData.Single(dateTimePair)
-    }
-
-    protected val firstScheduleEntry by lazy { // todo encapsulate
-        ScheduleEntry(ScheduleDataWrapper.Single(defaultSingleScheduleData))
     }
 
     protected abstract val defaultInitialParentScheduleState: ParentScheduleState // todo encapsulate

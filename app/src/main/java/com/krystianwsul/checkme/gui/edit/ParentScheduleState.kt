@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.gui.edit
 
 import android.os.Parcelable
+import com.krystianwsul.common.utils.ScheduleData
 import com.krystianwsul.common.utils.UserKey
 import kotlinx.parcelize.Parcelize
 
@@ -16,6 +17,8 @@ data class ParentScheduleState(val schedules: List<ScheduleEntry>, val assignedT
             schedules: List<ScheduleEntry>? = null,
         ) = ParentScheduleState(schedules.orEmpty().toMutableList(), assignedTo)
     }
+
+    constructor(scheduleData: ScheduleData.Single) : this(listOf(ScheduleEntry(ScheduleDataWrapper.Single(scheduleData))))
 
     override fun hashCode() = getScheduleDatas().hashCode()
 

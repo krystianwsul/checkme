@@ -74,7 +74,7 @@
       <excludeFolder url="file://$MODULE_DIR$/../../../app/.gradle" />
       <excludeFolder url="file://$MODULE_DIR$/../../../app/build" />
     </content>
-    <orderEntry type="jdk" jdkName="Android API 31 Platform" jdkType="Android SDK" />
+    <orderEntry type="jdk" jdkName="Android API 32 Platform" jdkType="Android SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module-library">
       <library name="Gradle: kaptGeneratedClasses">
@@ -95,13 +95,5 @@
         <SOURCES />
       </library>
     </orderEntry>
-    <orderEntry type="module" module-name="Check.me.common2.androidAndroidTestProto" />
-    <orderEntry type="module" module-name="Check.me.common2.androidAndroidTestRelease" />
-    <orderEntry type="module" module-name="Check.me.common2.androidTestFixtures" />
-    <orderEntry type="module" module-name="Check.me.common2.androidTestFixturesDebug" />
-    <orderEntry type="module" module-name="Check.me.common2.androidTestFixturesProto" />
-    <orderEntry type="module" module-name="Check.me.common2.androidTestFixturesRelease" />
-    <orderEntry type="module" module-name="Check.me.common2.commonMain" />
-    <orderEntry type="module" module-name="Check.me.common2.main" />
   </component>
 </module>

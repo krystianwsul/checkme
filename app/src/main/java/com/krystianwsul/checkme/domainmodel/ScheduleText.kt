@@ -74,7 +74,7 @@ sealed class ScheduleText {
             fun getScheduleText(
                 scheduleData: ScheduleData.Single,
                 timePairCallback: (TimePair) -> String,
-            ) = getScheduleText(scheduleData.run { DateTimePair(date, timePair) }, timePairCallback)
+            ) = getScheduleText(scheduleData.dateTimePair, timePairCallback)
         }
 
         override fun getScheduleText(customTimeProvider: JsonTime.CustomTimeProvider) =

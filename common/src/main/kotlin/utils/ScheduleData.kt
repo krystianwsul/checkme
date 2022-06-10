@@ -14,7 +14,6 @@ sealed interface ScheduleData : Parcelable {
 
         constructor(date: Date, timePair: TimePair) : this(DateTimePair(date, timePair))
 
-        // todo pair
         val date get() = dateTimePair.date
         val timePair get() = dateTimePair.timePair
     }

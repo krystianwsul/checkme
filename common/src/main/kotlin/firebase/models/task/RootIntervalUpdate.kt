@@ -67,12 +67,10 @@ class RootIntervalUpdate(val rootTask: RootTask, intervalInfo: IntervalInfo) :
 
         fun applyReusableScheduleData(singleSchedule: SingleSchedule, reusableScheduleData: ScheduleData.Reusable) {
             val (dateTime, parentState) = when (reusableScheduleData) {
-                is ScheduleData.Single -> reusableScheduleData.run {
-                    DateTime(
-                        date,
-                        getTime(timePair)
-                    )
-                } to Instance.ParentState.NoParent
+                is ScheduleData.Single -> Pair(
+                    reusableScheduleData.run { DateTime(date, getTime(timePair)) },
+                    Instance.ParentState.NoParent,
+                )
                 is ScheduleData.Child -> reusableScheduleData.parentInstanceKey.let {
                     Pair(
                         rootTask.parent

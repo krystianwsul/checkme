@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.domainmodel.update
 
+import androidx.annotation.CheckResult
 import com.jakewharton.rxrelay3.PublishRelay
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
@@ -27,6 +28,7 @@ abstract class DomainUpdater {
         val onUpdated = PublishRelay.create<Unit>()
     }
 
+    @CheckResult
     abstract fun <T : Any> performDomainUpdate(domainUpdate: DomainUpdate<T>): Single<T>
 
     data class Result<T : Any>(val data: T, val params: Params) {

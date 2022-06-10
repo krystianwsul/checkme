@@ -1,6 +1,7 @@
 package com.krystianwsul.common.utils
 
 import com.krystianwsul.common.time.Date
+import com.krystianwsul.common.time.DateTimePair
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.TimePair
 
@@ -9,7 +10,14 @@ sealed interface ScheduleData : Parcelable {
     sealed interface Reusable : ScheduleData
 
     @Parcelize
-    data class Single(val date: Date, val timePair: TimePair) : Reusable
+    data class Single(val dateTimePair: DateTimePair) : Reusable {
+
+        constructor(date: Date, timePair: TimePair) : this(DateTimePair(date, timePair))
+
+        // todo pair
+        val date get() = dateTimePair.date
+        val timePair get() = dateTimePair.timePair
+    }
 
     @Parcelize
     data class Weekly(

@@ -95,13 +95,5 @@
         <SOURCES />
       </library>
     </orderEntry>
-    <orderEntry type="module" module-name="Check.me.common2.androidAndroidTestProto" />
-    <orderEntry type="module" module-name="Check.me.common2.androidAndroidTestRelease" />
-    <orderEntry type="module" module-name="Check.me.common2.androidTestFixtures" />
-    <orderEntry type="module" module-name="Check.me.common2.androidTestFixturesDebug" />
-    <orderEntry type="module" module-name="Check.me.common2.androidTestFixturesProto" />
-    <orderEntry type="module" module-name="Check.me.common2.androidTestFixturesRelease" />
-    <orderEntry type="module" module-name="Check.me.common2.commonMain" />
-    <orderEntry type="module" module-name="Check.me.common2.main" />
   </component>
 </module>

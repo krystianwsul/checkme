@@ -7,7 +7,10 @@ import com.krystianwsul.checkme.domainmodel.extensions.createJoinChildTask
 import com.krystianwsul.checkme.domainmodel.extensions.createJoinTopLevelTask
 import com.krystianwsul.checkme.domainmodel.extensions.createScheduleJoinTopLevelTask
 import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
-import com.krystianwsul.checkme.gui.edit.*
+import com.krystianwsul.checkme.gui.edit.EditParameters
+import com.krystianwsul.checkme.gui.edit.EditViewModel
+import com.krystianwsul.checkme.gui.edit.ParentScheduleManager
+import com.krystianwsul.checkme.gui.edit.ParentScheduleState
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ScheduleData
 import com.krystianwsul.common.utils.TaskKey
@@ -21,7 +24,7 @@ class JoinTasksEditDelegate(
     savedInstanceState: Bundle?,
     compositeDisposable: CompositeDisposable,
     storeParentKey: (EditViewModel.ParentKey?, Boolean) -> Unit,
-) : EditDelegate(compositeDisposable, storeParentKey) {
+) : EditDelegate(savedInstanceState, compositeDisposable, storeParentKey) {
 
     override val scheduleHint = parameters.hint
         ?.toScheduleHint()
@@ -30,7 +33,7 @@ class JoinTasksEditDelegate(
     private val taskKeys = parameters.joinables.map { it.taskKey }
     private val instanceKeys = parameters.joinables.mapNotNull { it.instanceKey }
 
-    private val defaultInitialParentScheduleState: ParentScheduleState
+    override val defaultInitialParentScheduleState: ParentScheduleState
 
     init {
         val schedule = if (parameters.hint?.showInitialSchedule == false) {
@@ -41,9 +44,6 @@ class JoinTasksEditDelegate(
 
         defaultInitialParentScheduleState = ParentScheduleState(listOfNotNull(schedule))
     }
-
-    override val parentScheduleManager =
-        ParentMultiScheduleManager(savedInstanceState, defaultInitialParentScheduleState, callbacks)
 
     override fun showDialog(): ShowDialog {
         fun showJoinAllRemindersDialog(): Boolean {

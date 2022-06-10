@@ -8,7 +8,9 @@ import com.krystianwsul.checkme.domainmodel.extensions.createScheduleTopLevelTas
 import com.krystianwsul.checkme.domainmodel.extensions.createTopLevelTask
 import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
 import com.krystianwsul.checkme.domainmodel.updates.CreateChildTaskDomainUpdate
-import com.krystianwsul.checkme.gui.edit.*
+import com.krystianwsul.checkme.gui.edit.EditParameters
+import com.krystianwsul.checkme.gui.edit.EditViewModel
+import com.krystianwsul.checkme.gui.edit.ParentScheduleState
 import com.krystianwsul.checkme.utils.exhaustive
 import com.krystianwsul.common.time.DateTimePair
 import com.krystianwsul.common.utils.ProjectKey
@@ -24,17 +26,15 @@ class CreateTaskEditDelegate(
     savedInstanceState: Bundle?,
     compositeDisposable: CompositeDisposable,
     storeParentKey: (EditViewModel.ParentKey?, Boolean) -> Unit,
-) : EditDelegate(compositeDisposable, storeParentKey) {
+) : EditDelegate(savedInstanceState, compositeDisposable, storeParentKey) {
 
     override val initialName: String?
     override val scheduleHint: DateTimePair?
     override val showSaveAndOpen = true
 
-    override val parentScheduleManager: ParentScheduleManager
+    override val defaultInitialParentScheduleState: ParentScheduleState
 
     init {
-        val defaultInitialParentScheduleState: ParentScheduleState
-
         when (parameters) {
             is EditParameters.Create -> {
                 initialName = parameters.nameHint
@@ -86,12 +86,6 @@ class CreateTaskEditDelegate(
                 )
             }
         }.exhaustive()
-
-        parentScheduleManager = ParentMultiScheduleManager(
-            savedInstanceState,
-            defaultInitialParentScheduleState,
-            callbacks,
-        )
     }
 
     override fun showDialog(): ShowDialog {

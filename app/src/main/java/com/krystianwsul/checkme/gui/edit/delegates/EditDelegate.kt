@@ -23,6 +23,7 @@ import io.reactivex.rxjava3.kotlin.Observables
 import io.reactivex.rxjava3.kotlin.plusAssign
 
 abstract class EditDelegate(
+    savedInstanceState: Bundle?,
     compositeDisposable: CompositeDisposable,
     private val storeParentKey: (EditViewModel.ParentKey?, Boolean) -> Unit,
 ) {
@@ -81,7 +82,11 @@ abstract class EditDelegate(
         ScheduleEntry(ScheduleDataWrapper.Single(ScheduleData.Single(dateTimePair)))
     }
 
-    abstract val parentScheduleManager: ParentScheduleManager
+    protected abstract val defaultInitialParentScheduleState: ParentScheduleState
+
+    val parentScheduleManager by lazy {
+        ParentMultiScheduleManager(savedInstanceState, defaultInitialParentScheduleState, callbacks)
+    }
 
     val adapterItemObservable by lazy {
         parentScheduleManager.let {

@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.gui.edit
 
 import android.os.Parcelable
 import com.krystianwsul.common.time.Date
+import com.krystianwsul.common.time.DateTimePair
 import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.time.TimePair
 import com.krystianwsul.common.utils.InstanceKey
@@ -31,13 +32,20 @@ sealed class EditParentHint : Parcelable {
     open fun getReplacementHintForNewTask(taskKey: TaskKey): Instance? = null
 
     @Parcelize
-    class Schedule(val date: Date, val timePair: TimePair, private val projectKey: ProjectKey.Shared? = null) :
+    class Schedule(val dateTimePair: DateTimePair, private val projectKey: ProjectKey.Shared? = null) :
         EditParentHint() {
+
+        constructor(date: Date, timePair: TimePair, projectKey: ProjectKey.Shared? = null) :
+                this(DateTimePair(date, timePair), projectKey)
 
         constructor(
             date: Date,
             pair: Pair<Date, HourMinute> = HourMinute.getNextHour(date),
-        ) : this(pair.first, TimePair(pair.second), null)
+        ) : this(pair.first, TimePair(pair.second))
+
+        // todo pair
+        val date get() = dateTimePair.date
+        val timePair get() = dateTimePair.timePair
 
         override fun toCurrentParent() = projectKey?.toCurrentParent() ?: EditViewModel.CurrentParentSource.None
     }

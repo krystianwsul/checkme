@@ -126,11 +126,11 @@ class DomainFactory(
         tryNotifyListeners(
             "DomainFactory.init",
             if (firstRun) RunType.APP_START else RunType.SIGN_IN,
+            now,
         )
 
         firstRun = false
 
-        updateShortcuts(now)
         HasInstancesStore.update(this, now)
 
         listOf(
@@ -221,6 +221,8 @@ class DomainFactory(
             getDomainUpdater(this).updateNotifications(Notifier.Params()).subscribe()
         }
 
+        if (!isWaitingForTasks.value!!) return
+
         val shortcutTasks = ShortcutManager.getShortcuts()
             .map { Pair(it.value, getTaskIfPresent(it.key)) }
             .filter { it.second?.isVisible(now) == true }
@@ -252,15 +254,16 @@ class DomainFactory(
 
         if (changeTypeDelay == null) changeTypeDelay = now.long - startTime.long
 
-        updateShortcuts(now)
         HasInstancesStore.update(this, now)
 
-        tryNotifyListeners("DomainFactory.onChangeTypeEvent", RunType.REMOTE)
+        tryNotifyListeners("DomainFactory.onChangeTypeEvent", RunType.REMOTE, now)
+
+        updateShortcuts(now)
 
         remoteChangeRelay.accept(Unit)
     }
 
-    private fun tryNotifyListeners(source: String, runType: RunType) {
+    private fun tryNotifyListeners(source: String, runType: RunType, now: ExactTimeStamp.Local) {
         MyCrashlytics.log("DomainFactory.tryNotifyListeners $source $runType")
 
         Preferences.tickLog.logLineHour("DomainFactory: notifying listeners")
@@ -311,11 +314,23 @@ class DomainFactory(
         )
 
         updateIsWaitingForTasks()
+
+        updateShortcuts(now)
     }
 
     fun updateIsWaitingForTasks() {
-        isWaitingForTasks.accept(waitingProjectTasks().any() || waitingProjects().any() || waitingRootTasks().any())
+        isWaitingForTasks.accept(
+            waitingOnProjects().any() ||
+                    waitingProjectTasks().any() ||
+                    waitingProjects().any() ||
+                    waitingRootTasks().any(),
+        )
     }
+
+    private fun waitingOnProjects() = myUserFactory.user
+        .projectIds
+        .asSequence()
+        .filter { projectsFactory.getProjectIfPresent(it) == null }
 
     fun waitingProjectTasks() = projectsFactory.projects
         .values

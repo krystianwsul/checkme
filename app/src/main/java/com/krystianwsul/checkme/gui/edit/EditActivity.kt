@@ -745,7 +745,6 @@ class EditActivity : NavBarActivity() {
                                         activity.editViewModel
                                             .delegate
                                             .scheduleHint
-                                            ?.dateTimePair
                                             ?.date
                                     ),
                                     activity.parameters.excludedTaskKeys,
@@ -800,7 +799,7 @@ class EditActivity : NavBarActivity() {
                                 .delegate
                                 .firstScheduleEntry
                                 .scheduleDataWrapper
-                                .getScheduleDialogData(activity.editViewModel.delegate.scheduleHint?.dateTimePair?.date)
+                                .getScheduleDialogData(activity.editViewModel.delegate.scheduleHint?.date)
                                 .let { ScheduleDialogParameters(it, activity.parameters.excludedTaskKeys) }
 
                             activity.parametersRelay.accept(parameters)

@@ -66,7 +66,7 @@ abstract class EditDelegate(
 
     open val initialName: String? = null
     open val initialNote: String? = null
-    open val scheduleHint: EditParentHint.Schedule? = null
+    open val scheduleHint: DateTimePair? = null
     open val showSaveAndOpen = false
 
     val customTimeDatas get() = data.customTimeDatas
@@ -76,7 +76,7 @@ abstract class EditDelegate(
     protected fun EditParentHint.toScheduleHint() = this as? EditParentHint.Schedule
 
     val firstScheduleEntry by lazy {
-        val dateTimePair = scheduleHint?.dateTimePair ?: HourMinute.nextHour.let { DateTimePair(it.first, it.second) }
+        val dateTimePair = scheduleHint ?: HourMinute.nextHour.let { DateTimePair(it.first, it.second) }
 
         ScheduleEntry(ScheduleDataWrapper.Single(ScheduleData.Single(dateTimePair)))
     }

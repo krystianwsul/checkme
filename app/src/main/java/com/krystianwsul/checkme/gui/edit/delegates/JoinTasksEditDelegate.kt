@@ -23,7 +23,9 @@ class JoinTasksEditDelegate(
     storeParentKey: (EditViewModel.ParentKey?, Boolean) -> Unit,
 ) : EditDelegate(compositeDisposable, storeParentKey) {
 
-    override val scheduleHint = parameters.hint?.toScheduleHint()
+    override val scheduleHint = parameters.hint
+        ?.toScheduleHint()
+        ?.dateTimePair
 
     private val taskKeys = parameters.joinables.map { it.taskKey }
     private val instanceKeys = parameters.joinables.mapNotNull { it.instanceKey }

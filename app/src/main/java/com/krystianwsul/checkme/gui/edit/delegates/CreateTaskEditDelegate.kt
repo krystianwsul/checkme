@@ -10,6 +10,7 @@ import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
 import com.krystianwsul.checkme.domainmodel.updates.CreateChildTaskDomainUpdate
 import com.krystianwsul.checkme.gui.edit.*
 import com.krystianwsul.checkme.utils.exhaustive
+import com.krystianwsul.common.time.DateTimePair
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ScheduleData
 import com.krystianwsul.common.utils.TaskKey
@@ -26,7 +27,7 @@ class CreateTaskEditDelegate(
 ) : EditDelegate(compositeDisposable, storeParentKey) {
 
     override val initialName: String?
-    override val scheduleHint: EditParentHint.Schedule?
+    override val scheduleHint: DateTimePair?
     override val showSaveAndOpen = true
 
     override val parentScheduleManager: ParentScheduleManager
@@ -37,7 +38,10 @@ class CreateTaskEditDelegate(
         when (parameters) {
             is EditParameters.Create -> {
                 initialName = parameters.nameHint
-                scheduleHint = parameters.hint?.toScheduleHint()
+
+                scheduleHint = parameters.hint
+                    ?.toScheduleHint()
+                    ?.dateTimePair
 
                 initialStateGetter = {
                     parameters.parentScheduleState ?: ParentScheduleState(

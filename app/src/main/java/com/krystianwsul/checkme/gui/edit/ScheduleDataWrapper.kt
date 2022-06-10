@@ -67,6 +67,27 @@ sealed class ScheduleDataWrapper : Parcelable {
         companion object {
 
             fun fromScheduleGroup(scheduleGroup: ScheduleGroup.Single) = Single(scheduleGroup.scheduleData)
+
+            fun getScheduleDialogData(scheduleData: ScheduleData.Single): ScheduleDialogData {
+                val (monthDayNumber, beginningOfMonth) = dateToDayFromBeginningOrEnd(scheduleData.date)
+
+                @Suppress("BooleanLiteralArgument")
+                return ScheduleDialogData(
+                    scheduleData.date,
+                    setOf(scheduleData.date.dayOfWeek),
+                    true,
+                    monthDayNumber,
+                    dayOfMonthToWeekOfMonth(monthDayNumber),
+                    scheduleData.date.dayOfWeek,
+                    beginningOfMonth,
+                    TimePairPersist(scheduleData.timePair),
+                    ScheduleDialogData.Type.SINGLE,
+                    null,
+                    null,
+                    1,
+                    null,
+                )
+            }
         }
 
         override fun getText(
@@ -78,26 +99,7 @@ sealed class ScheduleDataWrapper : Parcelable {
             }
         }
 
-        override fun getScheduleDialogDataHelper(suggestedDate: Date): ScheduleDialogData {
-            val (monthDayNumber, beginningOfMonth) = dateToDayFromBeginningOrEnd(scheduleData.date)
-
-            @Suppress("BooleanLiteralArgument")
-            return ScheduleDialogData(
-                scheduleData.date,
-                setOf(scheduleData.date.dayOfWeek),
-                true,
-                monthDayNumber,
-                dayOfMonthToWeekOfMonth(monthDayNumber),
-                scheduleData.date.dayOfWeek,
-                beginningOfMonth,
-                TimePairPersist(scheduleData.timePair),
-                ScheduleDialogData.Type.SINGLE,
-                null,
-                null,
-                1,
-                null,
-            )
-        }
+        override fun getScheduleDialogDataHelper(suggestedDate: Date) = Companion.getScheduleDialogData(scheduleData)
     }
 
     @Parcelize

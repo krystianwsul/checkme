@@ -67,7 +67,7 @@ abstract class EditDelegate(
 
     open val initialName: String? = null
     open val initialNote: String? = null
-    open val scheduleHint: DateTimePair? = null
+    protected open val scheduleHint: DateTimePair? = null // todo encapsulate
     open val showSaveAndOpen = false
 
     val customTimeDatas get() = data.customTimeDatas
@@ -76,13 +76,17 @@ abstract class EditDelegate(
 
     protected fun EditParentHint.toScheduleHint() = this as? EditParentHint.Schedule
 
-    val firstScheduleEntry by lazy {
+    protected val firstScheduleEntry by lazy { // todo encapsulate
         val dateTimePair = scheduleHint ?: HourMinute.nextHour.let { DateTimePair(it.first, it.second) }
 
         ScheduleEntry(ScheduleDataWrapper.Single(ScheduleData.Single(dateTimePair)))
     }
 
-    protected abstract val defaultInitialParentScheduleState: ParentScheduleState
+    val defaultScheduleDate get() = scheduleHint?.date // todo encapsulate
+    fun getDefaultScheduleDialogData() =
+        firstScheduleEntry.scheduleDataWrapper.getScheduleDialogData(scheduleHint?.date) // todo encapsulate
+
+    protected abstract val defaultInitialParentScheduleState: ParentScheduleState // todo encapsulate
 
     val parentScheduleManager by lazy {
         ParentMultiScheduleManager(savedInstanceState, defaultInitialParentScheduleState, callbacks)

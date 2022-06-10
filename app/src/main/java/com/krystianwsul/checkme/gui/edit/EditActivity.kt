@@ -744,8 +744,7 @@ class EditActivity : NavBarActivity() {
                                     scheduleEntry.scheduleDataWrapper.getScheduleDialogData(
                                         activity.editViewModel
                                             .delegate
-                                            .scheduleHint
-                                            ?.date
+                                            .defaultScheduleDate
                                     ),
                                     activity.parameters.excludedTaskKeys,
                                     holder.adapterPosition,
@@ -797,9 +796,7 @@ class EditActivity : NavBarActivity() {
                         setDropdown {
                             val parameters = activity.editViewModel
                                 .delegate
-                                .firstScheduleEntry
-                                .scheduleDataWrapper
-                                .getScheduleDialogData(activity.editViewModel.delegate.scheduleHint?.date)
+                                .getDefaultScheduleDialogData()
                                 .let { ScheduleDialogParameters(it, activity.parameters.excludedTaskKeys) }
 
                             activity.parametersRelay.accept(parameters)

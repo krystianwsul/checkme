@@ -1,13 +1,13 @@
 package com.krystianwsul.checkme.gui.main
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.MenuItem
 import androidx.annotation.CheckResult
 import androidx.preference.ListPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
-import androidx.preference.SwitchPreferenceCompat
 import com.google.android.gms.auth.api.Auth
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.material.snackbar.Snackbar
@@ -68,7 +68,7 @@ class SettingsActivity : NavBarActivity() {
     private fun updateFromAccount(googleSignInAccount: GoogleSignInAccount): Completable {
         Snackbar.make(binding.settingsRoot, R.string.profileUpdated, Snackbar.LENGTH_SHORT).show()
 
-        return Maybe.fromCallable { googleSignInAccount.photoUrl }.flatMapCompletable {
+        return Maybe.fromCallable<Uri> { googleSignInAccount.photoUrl }.flatMapCompletable {
             AndroidDomainUpdater.updatePhotoUrl(DomainListenerManager.NotificationType.All, it.toString())
         }
     }
@@ -125,18 +125,6 @@ class SettingsActivity : NavBarActivity() {
                     }.ordinal
 
                     Preferences.tab = newTab
-
-                    true
-                }
-            }
-
-            val defaultReminderPreference = findPreference<SwitchPreferenceCompat>(getString(R.string.defaultReminder))!!
-
-            defaultReminderPreference.apply {
-                isChecked = Preferences.addDefaultReminder
-
-                setOnPreferenceChangeListener { _, newValue ->
-                    Preferences.addDefaultReminder = newValue as Boolean
 
                     true
                 }
@@ -201,6 +189,7 @@ class SettingsActivity : NavBarActivity() {
             }
         }
 
+        @Suppress("OVERRIDE_DEPRECATION")
         override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
             @Suppress("Deprecation")
             super.onActivityResult(requestCode, resultCode, data)
@@ -212,8 +201,8 @@ class SettingsActivity : NavBarActivity() {
 
             if (account != null) {
                 settingsActivity.updateFromAccount(account)
-                        .subscribe()
-                        .addTo(createDisposable)
+                    .subscribe()
+                    .addTo(createDisposable)
             } else {
                 MyCrashlytics.logException(SettingsSignInException(result.status.toString()))
             }

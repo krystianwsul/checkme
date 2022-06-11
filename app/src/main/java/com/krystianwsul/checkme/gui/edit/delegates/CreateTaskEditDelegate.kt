@@ -1,7 +1,6 @@
 package com.krystianwsul.checkme.gui.edit.delegates
 
 import android.os.Bundle
-import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.ShortcutManager
 import com.krystianwsul.checkme.domainmodel.extensions.createScheduleTopLevelTask
@@ -45,11 +44,7 @@ class CreateTaskEditDelegate(
 
                 defaultInitialParentScheduleState = if (parameters.parentScheduleState != null) {
                     parameters.parentScheduleState
-                } else if (
-                    parameters.hint?.showInitialSchedule != false &&
-                    Preferences.addDefaultReminder &&
-                    parameters.showFirstSchedule
-                ) {
+                } else if (parameters.run { hint?.showInitialSchedule != false && showFirstSchedule }) { // todo cleanup WTF?
                     ParentScheduleState(defaultSingleScheduleData)
                 } else {
                     ParentScheduleState.empty
@@ -67,7 +62,7 @@ class CreateTaskEditDelegate(
 
                 val initialParentKey = parameters.parentTaskKeyHint?.toParentKey()
 
-                defaultInitialParentScheduleState = if (initialParentKey == null && Preferences.addDefaultReminder) {
+                defaultInitialParentScheduleState = if (initialParentKey == null) {
                     ParentScheduleState(defaultSingleScheduleData)
                 } else {
                     ParentScheduleState.empty
@@ -77,17 +72,14 @@ class CreateTaskEditDelegate(
                 initialName = null
                 scheduleHint = null
 
-                defaultInitialParentScheduleState = ParentScheduleState.empty
+                defaultInitialParentScheduleState =
+                    ParentScheduleState.empty // todo cleanup where does the parent come from then?
             }
             EditParameters.None -> {
                 initialName = null
                 scheduleHint = null
 
-                defaultInitialParentScheduleState = if (Preferences.addDefaultReminder) {
-                    ParentScheduleState(defaultSingleScheduleData)
-                } else {
-                    ParentScheduleState.empty
-                }
+                defaultInitialParentScheduleState = ParentScheduleState(defaultSingleScheduleData)
             }
         }.exhaustive()
     }

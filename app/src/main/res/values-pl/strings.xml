@@ -95,9 +95,6 @@
     <string name="profileUpdated">Zaktualizowano profil</string>
     <string name="startPage">Strona startowa</string>
     <string name="general">Ogólne</string>
-    <string name="defaultReminder">Domyślne przypomnienie</string>
-    <string name="defaultReminderSummaryOn">Automatycznie dodawaj przypomnienie do nowych zadań</string>
-    <string name="defaultReminderSummaryOff">Nie dodawaj przypomnienia do nowych zadań</string>
     <string name="showRemoved">Pokaż usunięte i ukończone</string>
     <string name="noResults">Brak wyników</string>
     <string name="removeInstancesMessage">Usunąć nieukończone przypomnienia?</string>

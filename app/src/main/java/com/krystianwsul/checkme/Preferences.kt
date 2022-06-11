@@ -36,7 +36,6 @@ object Preferences {
     private const val TOKEN_KEY = "token"
     private const val KEY_SHOW_NOTIFICATIONS = "showNotifications"
     private const val KEY_NOTIFICATION_LEVEL = "notificationLevel"
-    private const val KEY_ADD_DEFAULT_REMINDER = "addDefaultReminder"
     private const val KEY_SHOW_DELETED = "showDeleted"
     private const val KEY_SHOW_ASSIGNED_TO = "showAssignedTo"
     private const val KEY_TOOLTIP_SHOWN = "tooltipShown"
@@ -73,8 +72,6 @@ object Preferences {
         { getInt(key, defValue) },
         { putInt(key, it) }
     )
-
-    var addDefaultReminder by booleanObservable(KEY_ADD_DEFAULT_REMINDER, true)
 
     private var shortcutString: String by observable(sharedPreferences.getString(KEY_SHORTCUTS, "")!!) { _, _, newValue ->
         sharedPreferences.edit { putString(KEY_SHORTCUTS, newValue) }

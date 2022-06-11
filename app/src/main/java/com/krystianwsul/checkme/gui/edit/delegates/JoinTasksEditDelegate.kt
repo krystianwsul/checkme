@@ -1,7 +1,6 @@
 package com.krystianwsul.checkme.gui.edit.delegates
 
 import android.os.Bundle
-import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.extensions.createJoinChildTask
 import com.krystianwsul.checkme.domainmodel.extensions.createJoinTopLevelTask
@@ -33,10 +32,7 @@ class JoinTasksEditDelegate(
     private val taskKeys = parameters.joinables.map { it.taskKey }
     private val instanceKeys = parameters.joinables.mapNotNull { it.instanceKey }
 
-    override val defaultInitialParentScheduleState = if (
-        parameters.hint?.showInitialSchedule != false &&
-        Preferences.addDefaultReminder
-    ) {
+    override val defaultInitialParentScheduleState = if (parameters.hint?.showInitialSchedule != false) {
         ParentScheduleState(defaultSingleScheduleData)
     } else {
         ParentScheduleState.empty

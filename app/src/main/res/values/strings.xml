@@ -96,9 +96,6 @@
     <string name="profileUpdated">Profile updated</string>
     <string name="startPage">Start page</string>
     <string name="general">General</string>
-    <string name="defaultReminder">Default reminder</string>
-    <string name="defaultReminderSummaryOn">Automatically add a reminder to new tasks</string>
-    <string name="defaultReminderSummaryOff">Don\'t add a reminder to new tasks</string>
     <string name="showRemoved">Show removed and done</string>
     <string name="noResults">No results</string>
     <string name="removeInstancesMessage">Remove incomplete reminders?</string>

@@ -18,12 +18,6 @@
             app:title="@string/startPage"
             app:useSimpleSummaryProvider="true" />
 
-        <SwitchPreferenceCompat
-            app:key="@string/defaultReminder"
-            app:title="@string/defaultReminder"
-            app:summaryOn="@string/defaultReminderSummaryOn"
-            app:summaryOff="@string/defaultReminderSummaryOff" />
-
         <ListPreference
             app:entries="@array/notification_entries"
             app:entryValues="@array/notification_values"

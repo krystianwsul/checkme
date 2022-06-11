@@ -744,7 +744,8 @@ class EditActivity : NavBarActivity() {
                                     scheduleEntry.scheduleDataWrapper.getScheduleDialogData(
                                         activity.editViewModel
                                             .delegate
-                                            .defaultScheduleDate
+                                            .getDefaultScheduleDateTimePair()
+                                            .date
                                     ),
                                     activity.parameters.excludedTaskKeys,
                                     holder.adapterPosition,

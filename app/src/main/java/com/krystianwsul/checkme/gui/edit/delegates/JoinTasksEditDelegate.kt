@@ -29,14 +29,14 @@ class JoinTasksEditDelegate(
         ?.toScheduleHint()
         ?.dateTimePair
 
-    private val taskKeys = parameters.joinables.map { it.taskKey }
-    private val instanceKeys = parameters.joinables.mapNotNull { it.instanceKey }
-
     override val defaultInitialParentScheduleState = if (parameters.hint?.showInitialSchedule != false) {
-        ParentScheduleState(defaultSingleScheduleData)
+        ParentScheduleState(getDefaultSingleScheduleData())
     } else {
         ParentScheduleState.empty
     }
+
+    private val taskKeys = parameters.joinables.map { it.taskKey }
+    private val instanceKeys = parameters.joinables.mapNotNull { it.instanceKey }
 
     override fun showDialog(): ShowDialog {
         fun showJoinAllRemindersDialog(): Boolean {

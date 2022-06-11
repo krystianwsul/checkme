@@ -28,9 +28,9 @@ class CreateTaskEditDelegate(
 ) : EditDelegate(savedInstanceState, compositeDisposable, storeParentKey) {
 
     override val initialName: String?
-    override val scheduleHint: DateTimePair?
     override val showSaveAndOpen = true
 
+    override val scheduleHint: DateTimePair?
     override val defaultInitialParentScheduleState: ParentScheduleState
 
     init {
@@ -45,40 +45,41 @@ class CreateTaskEditDelegate(
                 defaultInitialParentScheduleState = if (parameters.parentScheduleState != null) {
                     parameters.parentScheduleState
                 } else if (parameters.run { hint?.showInitialSchedule != false && showFirstSchedule }) {
-                    ParentScheduleState(defaultSingleScheduleData)
+                    ParentScheduleState(getDefaultSingleScheduleData())
                 } else {
                     ParentScheduleState.empty
                 }
             }
             is EditParameters.MigrateDescription -> {
                 initialName = data.parentTaskDescription!!
-                scheduleHint = null
 
+                scheduleHint = null
                 defaultInitialParentScheduleState = ParentScheduleState.empty
             }
             is EditParameters.Share -> {
                 initialName = parameters.nameHint
+
                 scheduleHint = null
 
                 val initialParentKey = parameters.parentTaskKeyHint?.toParentKey()
 
                 defaultInitialParentScheduleState = if (initialParentKey == null) {
-                    ParentScheduleState(defaultSingleScheduleData)
+                    ParentScheduleState(getDefaultSingleScheduleData())
                 } else {
                     ParentScheduleState.empty
                 }
             }
             is EditParameters.Shortcut -> {
                 initialName = null
-                scheduleHint = null
 
+                scheduleHint = null
                 defaultInitialParentScheduleState = ParentScheduleState.empty
             }
             EditParameters.None -> {
                 initialName = null
-                scheduleHint = null
 
-                defaultInitialParentScheduleState = ParentScheduleState(defaultSingleScheduleData)
+                scheduleHint = null
+                defaultInitialParentScheduleState = ParentScheduleState(getDefaultSingleScheduleData())
             }
         }.exhaustive()
     }

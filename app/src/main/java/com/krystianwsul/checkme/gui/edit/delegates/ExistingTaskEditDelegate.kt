@@ -5,6 +5,7 @@ import com.krystianwsul.checkme.gui.edit.EditImageState
 import com.krystianwsul.checkme.gui.edit.EditViewModel
 import com.krystianwsul.checkme.gui.edit.ParentScheduleState
 import com.krystianwsul.checkme.gui.edit.ScheduleEntry
+import com.krystianwsul.common.time.DateTimePair
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 
 abstract class ExistingTaskEditDelegate(
@@ -18,6 +19,8 @@ abstract class ExistingTaskEditDelegate(
 
     override val initialName get() = taskData.name
     override val initialNote get() = taskData.note
+
+    override val scheduleHint: DateTimePair? = null
 
     override val defaultInitialParentScheduleState = taskData.run {
         ParentScheduleState.create(assignedTo, scheduleDataWrappers?.map(::ScheduleEntry)?.toList())

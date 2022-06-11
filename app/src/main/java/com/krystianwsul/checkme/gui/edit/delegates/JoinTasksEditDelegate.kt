@@ -9,7 +9,6 @@ import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
 import com.krystianwsul.checkme.gui.edit.EditParameters
 import com.krystianwsul.checkme.gui.edit.EditViewModel
 import com.krystianwsul.checkme.gui.edit.ParentScheduleManager
-import com.krystianwsul.checkme.gui.edit.ParentScheduleState
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ScheduleData
 import com.krystianwsul.common.utils.TaskKey
@@ -28,14 +27,9 @@ class JoinTasksEditDelegate(
     override val defaultScheduleStateProvider = DefaultScheduleStateProvider(
         parameters.hint
             ?.toScheduleHint()
-            ?.dateTimePair
+            ?.dateTimePair,
+        DefaultScheduleStateProvider.InitializationType.Normal(parameters.hint?.showInitialSchedule != false),
     )
-
-    override val defaultInitialParentScheduleState = if (parameters.hint?.showInitialSchedule != false) {
-        ParentScheduleState(defaultScheduleStateProvider.getDefaultSingleScheduleData())
-    } else {
-        ParentScheduleState.empty
-    }
 
     private val taskKeys = parameters.joinables.map { it.taskKey }
     private val instanceKeys = parameters.joinables.mapNotNull { it.instanceKey }

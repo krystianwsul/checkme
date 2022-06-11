@@ -19,11 +19,12 @@ abstract class ExistingTaskEditDelegate(
     override val initialName get() = taskData.name
     override val initialNote get() = taskData.note
 
-    override val defaultScheduleStateProvider = DefaultScheduleStateProvider(null)
-
-    override val defaultInitialParentScheduleState = taskData.run {
-        ParentScheduleState.create(assignedTo, scheduleDataWrappers?.map(::ScheduleEntry)?.toList())
-    }
+    override val defaultScheduleStateProvider = DefaultScheduleStateProvider(
+        null,
+        DefaultScheduleStateProvider.InitializationType.Override(
+            taskData.run { ParentScheduleState.create(assignedTo, scheduleDataWrappers?.map(::ScheduleEntry)) }
+        ),
+    )
 
     override fun checkImageChanged(editImageState: EditImageState): Boolean {
         val defaultEditImageState = taskData.imageState

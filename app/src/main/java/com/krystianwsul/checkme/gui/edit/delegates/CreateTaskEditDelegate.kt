@@ -9,7 +9,6 @@ import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
 import com.krystianwsul.checkme.domainmodel.updates.CreateChildTaskDomainUpdate
 import com.krystianwsul.checkme.gui.edit.EditParameters
 import com.krystianwsul.checkme.gui.edit.EditViewModel
-import com.krystianwsul.checkme.gui.edit.ParentScheduleState
 import com.krystianwsul.checkme.utils.exhaustive
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ScheduleData
@@ -31,61 +30,59 @@ class CreateTaskEditDelegate(
 
     override val defaultScheduleStateProvider: DefaultScheduleStateProvider
 
-    override val defaultInitialParentScheduleState: ParentScheduleState
-
     init {
         when (parameters) {
             is EditParameters.Create -> {
                 initialName = parameters.nameHint
 
+                val initializationType = if (parameters.parentScheduleState != null) {
+                    DefaultScheduleStateProvider.InitializationType.Override(parameters.parentScheduleState)
+                } else {
+                    DefaultScheduleStateProvider.InitializationType.Normal(
+                        parameters.run { hint?.showInitialSchedule != false && showFirstSchedule }
+                    )
+                }
+
                 defaultScheduleStateProvider = DefaultScheduleStateProvider(
                     parameters.hint
                         ?.toScheduleHint()
-                        ?.dateTimePair
+                        ?.dateTimePair,
+                    initializationType,
                 )
-
-                defaultInitialParentScheduleState = if (parameters.parentScheduleState != null) {
-                    parameters.parentScheduleState
-                } else if (parameters.run { hint?.showInitialSchedule != false && showFirstSchedule }) {
-                    ParentScheduleState(defaultScheduleStateProvider.getDefaultSingleScheduleData())
-                } else {
-                    ParentScheduleState.empty
-                }
             }
             is EditParameters.MigrateDescription -> {
                 initialName = data.parentTaskDescription!!
 
-                defaultScheduleStateProvider = DefaultScheduleStateProvider(null)
-
-                defaultInitialParentScheduleState = ParentScheduleState.empty
+                defaultScheduleStateProvider = DefaultScheduleStateProvider(
+                    null,
+                    DefaultScheduleStateProvider.InitializationType.Normal(false),
+                )
             }
             is EditParameters.Share -> {
                 initialName = parameters.nameHint
 
-                defaultScheduleStateProvider = DefaultScheduleStateProvider(null)
-
                 val initialParentKey = parameters.parentTaskKeyHint?.toParentKey()
 
-                defaultInitialParentScheduleState = if (initialParentKey == null) {
-                    ParentScheduleState(defaultScheduleStateProvider.getDefaultSingleScheduleData())
-                } else {
-                    ParentScheduleState.empty
-                }
+                defaultScheduleStateProvider = DefaultScheduleStateProvider(
+                    null,
+                    DefaultScheduleStateProvider.InitializationType.Normal(initialParentKey == null),
+                )
             }
             is EditParameters.Shortcut -> {
                 initialName = null
 
-                defaultScheduleStateProvider = DefaultScheduleStateProvider(null)
-
-                defaultInitialParentScheduleState = ParentScheduleState.empty
+                defaultScheduleStateProvider = DefaultScheduleStateProvider(
+                    null,
+                    DefaultScheduleStateProvider.InitializationType.Normal(false),
+                )
             }
             EditParameters.None -> {
                 initialName = null
 
-                defaultScheduleStateProvider = DefaultScheduleStateProvider(null)
-
-                defaultInitialParentScheduleState =
-                    ParentScheduleState(defaultScheduleStateProvider.getDefaultSingleScheduleData())
+                defaultScheduleStateProvider = DefaultScheduleStateProvider(
+                    null,
+                    DefaultScheduleStateProvider.InitializationType.Normal(true),
+                )
             }
         }.exhaustive()
     }

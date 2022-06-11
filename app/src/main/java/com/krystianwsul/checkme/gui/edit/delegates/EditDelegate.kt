@@ -77,7 +77,10 @@ abstract class EditDelegate(
 
     protected abstract val defaultScheduleStateProvider: DefaultScheduleStateProvider
 
-    protected class DefaultScheduleStateProvider(private val defaultScheduleDateTimePairOverride: DateTimePair?) {
+    protected class DefaultScheduleStateProvider(
+        private val defaultScheduleDateTimePairOverride: DateTimePair?,
+        initializationType: InitializationType,
+    ) {
 
         fun getDefaultScheduleDateTimePair(): DateTimePair {
             return defaultScheduleDateTimePairOverride
@@ -85,17 +88,35 @@ abstract class EditDelegate(
         }
 
         fun getDefaultSingleScheduleData() = ScheduleData.Single(getDefaultScheduleDateTimePair())
+
+        val defaultInitialParentScheduleState = when (initializationType) {
+            is InitializationType.Override -> initializationType.parentScheduleState
+            is InitializationType.Normal -> if (initializationType.showDefaultSchedule) {
+                ParentScheduleState(getDefaultSingleScheduleData())
+            } else {
+                ParentScheduleState.empty
+            }
+        }
+
+        sealed class InitializationType {
+
+            class Override(val parentScheduleState: ParentScheduleState) : InitializationType()
+
+            class Normal(val showDefaultSchedule: Boolean) : InitializationType()
+        }
     }
 
     fun getDefaultScheduleDateTimePair() = defaultScheduleStateProvider.getDefaultScheduleDateTimePair()
-
-    protected abstract val defaultInitialParentScheduleState: ParentScheduleState // todo encapsulate
 
     fun getDefaultScheduleDialogData() =
         ScheduleDataWrapper.Single.getScheduleDialogData(defaultScheduleStateProvider.getDefaultSingleScheduleData())
 
     val parentScheduleManager by lazy {
-        ParentMultiScheduleManager(savedInstanceState, defaultInitialParentScheduleState, callbacks)
+        ParentMultiScheduleManager(
+            savedInstanceState,
+            defaultScheduleStateProvider.defaultInitialParentScheduleState,
+            callbacks,
+        )
     }
 
     val adapterItemObservable by lazy {

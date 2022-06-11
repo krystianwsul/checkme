@@ -44,7 +44,7 @@ class CreateTaskEditDelegate(
 
                 defaultInitialParentScheduleState = if (parameters.parentScheduleState != null) {
                     parameters.parentScheduleState
-                } else if (parameters.run { hint?.showInitialSchedule != false && showFirstSchedule }) { // todo cleanup WTF?
+                } else if (parameters.run { hint?.showInitialSchedule != false && showFirstSchedule }) {
                     ParentScheduleState(defaultSingleScheduleData)
                 } else {
                     ParentScheduleState.empty
@@ -72,8 +72,7 @@ class CreateTaskEditDelegate(
                 initialName = null
                 scheduleHint = null
 
-                defaultInitialParentScheduleState =
-                    ParentScheduleState.empty // todo cleanup where does the parent come from then?
+                defaultInitialParentScheduleState = ParentScheduleState.empty
             }
             EditParameters.None -> {
                 initialName = null

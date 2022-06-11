@@ -19,6 +19,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import ca.antonious.materialdaypicker.MaterialDayPicker
 import com.google.android.material.datepicker.MaterialDatePicker
+import com.google.android.material.textfield.MyTextInputLayout
 import com.google.android.material.timepicker.MaterialTimePicker
 import com.jakewharton.rxbinding4.view.clicks
 import com.jakewharton.rxrelay3.PublishRelay
@@ -34,7 +35,6 @@ import com.krystianwsul.checkme.gui.edit.dialogs.parentpicker.ParentInstancePick
 import com.krystianwsul.checkme.gui.edit.dialogs.parentpicker.ParentInstanceViewModel
 import com.krystianwsul.checkme.gui.edit.dialogs.parentpicker.ParentPickerFragment
 import com.krystianwsul.checkme.gui.utils.ResettableProperty
-import com.krystianwsul.checkme.gui.widgets.MyTextInputLayout
 import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.checkme.viewmodels.getViewModel

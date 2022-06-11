@@ -12,6 +12,7 @@ import android.view.MenuItem
 import android.view.View
 import androidx.core.view.isVisible
 import androidx.transition.TransitionManager
+import com.google.android.material.textfield.MyTextInputLayout
 import com.google.android.material.timepicker.MaterialTimePicker
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.databinding.ActivityShowCustomTimeBinding
@@ -23,7 +24,6 @@ import com.krystianwsul.checkme.gui.base.NavBarActivity
 import com.krystianwsul.checkme.gui.dialogs.ConfirmDialogFragment
 import com.krystianwsul.checkme.gui.dialogs.newMaterialTimePicker
 import com.krystianwsul.checkme.gui.dialogs.setListener
-import com.krystianwsul.checkme.gui.widgets.MyTextInputLayout
 import com.krystianwsul.checkme.utils.tryGetFragment
 import com.krystianwsul.checkme.viewmodels.ShowCustomTimeViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
@@ -34,7 +34,6 @@ import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.plusAssign
 import io.reactivex.rxjava3.kotlin.subscribeBy
-import java.util.*
 
 class ShowCustomTimeActivity : NavBarActivity() {
 

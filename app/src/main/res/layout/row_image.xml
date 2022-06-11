@@ -26,7 +26,7 @@
         android:adjustViewBounds="true"
         android:visibility="gone" />
 
-    <com.krystianwsul.checkme.gui.widgets.MyTextInputLayout
+    <com.google.android.material.textfield.MyTextInputLayout
         android:id="@+id/imageLayout"
         style="@style/MySpinner"
         android:layout_width="match_parent"
@@ -41,7 +41,7 @@
             style="@style/MySpinnerText"
             tools:ignore="LabelFor" />
 
-    </com.krystianwsul.checkme.gui.widgets.MyTextInputLayout>
+    </com.google.android.material.textfield.MyTextInputLayout>
 
     <ImageView
         android:id="@+id/imageEdit"

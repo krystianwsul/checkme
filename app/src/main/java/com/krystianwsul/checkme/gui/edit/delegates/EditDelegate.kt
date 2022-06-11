@@ -55,9 +55,7 @@ abstract class EditDelegate(
         parentScheduleManager.setNewParent(data.currentParent)
     }
 
-    protected val callbacks = object : ParentScheduleManager.Callbacks {
-
-        override fun getInitialParent() = data.currentParent
+    private val callbacks = object : ParentScheduleManager.Callbacks {
 
         override fun storeParent(parentKey: EditViewModel.ParentKey?) =
             this@EditDelegate.storeParentKey(parentKey, false)
@@ -115,6 +113,7 @@ abstract class EditDelegate(
         ParentMultiScheduleManager(
             savedInstanceState,
             defaultScheduleStateProvider.defaultInitialParentScheduleState,
+            data.currentParent,
             callbacks,
         )
     }

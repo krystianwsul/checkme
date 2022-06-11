@@ -8,6 +8,7 @@ import com.krystianwsul.common.utils.UserKey
 class ParentMultiScheduleManager(
     savedInstanceState: Bundle?,
     defaultInitialParentScheduleState: ParentScheduleState,
+    initialParent: ParentScheduleManager.Parent?,
     private val callbacks: ParentScheduleManager.Callbacks,
 ) : ParentScheduleManager {
 
@@ -20,7 +21,7 @@ class ParentMultiScheduleManager(
     private val initialState = savedInstanceState?.getParcelable(KEY_INITIAL_STATE) ?: defaultInitialParentScheduleState
     private val state = savedInstanceState?.getParcelable(KEY_STATE) ?: initialState.copy()
 
-    private val parentProperty = NullableRelayProperty(callbacks.getInitialParent()) {
+    private val parentProperty = NullableRelayProperty(initialParent) {
         callbacks.storeParent(it?.parentKey)
 
         if (it?.compatibleWithSchedule == false) {

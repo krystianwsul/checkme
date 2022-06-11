@@ -34,8 +34,6 @@ interface ParentScheduleManager {
 
     interface Callbacks {
 
-        fun getInitialParent(): Parent?
-
         fun storeParent(parentKey: EditViewModel.ParentKey?)
     }
 

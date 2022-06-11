@@ -311,7 +311,7 @@ class DomainFactory(
                     SaveParams(NotificationType.All, runType == RunType.REMOTE),
                 )
             }
-        )
+        ).subscribe()
 
         updateIsWaitingForTasks()
 

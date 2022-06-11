@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.domainmodel
 import com.krystianwsul.checkme.domainmodel.update.DomainUpdate
 import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
 import com.krystianwsul.common.time.ExactTimeStamp
+import com.mindorks.scheduler.Priority
 import io.reactivex.rxjava3.core.Single
 
 
@@ -12,20 +13,26 @@ class TestDomainUpdater(
 ) : DomainUpdater() {
 
     override fun <T : Any> performDomainUpdate(domainUpdate: DomainUpdate<T>): Single<T> {
-        val (data, params) = domainUpdate.doAction(domainFactory, now)
+        // DomainFactory.tryNotifyListeners operates on the assumption that DomainUpdates are performed asynchronously
 
-        onUpdated.accept(Unit)
+        return Single.just(Unit)
+            .observeOnDomain(Priority.FIRST_READ)
+            .map {
+                val (data, params) = domainUpdate.doAction(domainFactory, now)
 
-        domainFactory.updateNotifications(params, now)
+                onUpdated.accept(Unit)
 
-        /*
-        domainFactory.projectsFactory.apply {
-            checkInconsistentRootTaskIds(allDependenciesLoadedTasks.filterIsInstance<RootTask>(), projects.values)
-        }
-         */
+                domainFactory.updateNotifications(params, now)
 
-        domainFactory.saveAndNotifyCloud(params, now)
+                /*
+                domainFactory.projectsFactory.apply {
+                    checkInconsistentRootTaskIds(allDependenciesLoadedTasks.filterIsInstance<RootTask>(), projects.values)
+                }
+                 */
 
-        return Single.just(data)
+                domainFactory.saveAndNotifyCloud(params, now)
+
+                data
+            }
     }
 }

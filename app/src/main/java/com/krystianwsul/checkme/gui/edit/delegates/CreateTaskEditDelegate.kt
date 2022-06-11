@@ -11,7 +11,6 @@ import com.krystianwsul.checkme.gui.edit.EditParameters
 import com.krystianwsul.checkme.gui.edit.EditViewModel
 import com.krystianwsul.checkme.gui.edit.ParentScheduleState
 import com.krystianwsul.checkme.utils.exhaustive
-import com.krystianwsul.common.time.DateTimePair
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ScheduleData
 import com.krystianwsul.common.utils.TaskKey
@@ -30,7 +29,8 @@ class CreateTaskEditDelegate(
     override val initialName: String?
     override val showSaveAndOpen = true
 
-    override val scheduleHint: DateTimePair?
+    override val defaultScheduleStateProvider: DefaultScheduleStateProvider
+
     override val defaultInitialParentScheduleState: ParentScheduleState
 
     init {
@@ -38,9 +38,11 @@ class CreateTaskEditDelegate(
             is EditParameters.Create -> {
                 initialName = parameters.nameHint
 
-                scheduleHint = parameters.hint
-                    ?.toScheduleHint()
-                    ?.dateTimePair
+                defaultScheduleStateProvider = DefaultScheduleStateProvider(
+                    parameters.hint
+                        ?.toScheduleHint()
+                        ?.dateTimePair
+                )
 
                 defaultInitialParentScheduleState = if (parameters.parentScheduleState != null) {
                     parameters.parentScheduleState
@@ -53,13 +55,14 @@ class CreateTaskEditDelegate(
             is EditParameters.MigrateDescription -> {
                 initialName = data.parentTaskDescription!!
 
-                scheduleHint = null
+                defaultScheduleStateProvider = DefaultScheduleStateProvider(null)
+
                 defaultInitialParentScheduleState = ParentScheduleState.empty
             }
             is EditParameters.Share -> {
                 initialName = parameters.nameHint
 
-                scheduleHint = null
+                defaultScheduleStateProvider = DefaultScheduleStateProvider(null)
 
                 val initialParentKey = parameters.parentTaskKeyHint?.toParentKey()
 
@@ -72,13 +75,15 @@ class CreateTaskEditDelegate(
             is EditParameters.Shortcut -> {
                 initialName = null
 
-                scheduleHint = null
+                defaultScheduleStateProvider = DefaultScheduleStateProvider(null)
+
                 defaultInitialParentScheduleState = ParentScheduleState.empty
             }
             EditParameters.None -> {
                 initialName = null
 
-                scheduleHint = null
+                defaultScheduleStateProvider = DefaultScheduleStateProvider(null)
+
                 defaultInitialParentScheduleState = ParentScheduleState(getDefaultSingleScheduleData())
             }
         }.exhaustive()

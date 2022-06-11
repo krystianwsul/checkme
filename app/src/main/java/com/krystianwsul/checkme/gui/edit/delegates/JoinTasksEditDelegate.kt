@@ -25,9 +25,11 @@ class JoinTasksEditDelegate(
     storeParentKey: (EditViewModel.ParentKey?, Boolean) -> Unit,
 ) : EditDelegate(savedInstanceState, compositeDisposable, storeParentKey) {
 
-    override val scheduleHint = parameters.hint
-        ?.toScheduleHint()
-        ?.dateTimePair
+    override val defaultScheduleStateProvider = DefaultScheduleStateProvider(
+        parameters.hint
+            ?.toScheduleHint()
+            ?.dateTimePair
+    )
 
     override val defaultInitialParentScheduleState = if (parameters.hint?.showInitialSchedule != false) {
         ParentScheduleState(getDefaultSingleScheduleData())

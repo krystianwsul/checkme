@@ -75,10 +75,13 @@ abstract class EditDelegate(
 
     protected fun EditParentHint.toScheduleHint() = this as? EditParentHint.Schedule
 
-    protected abstract val scheduleHint: DateTimePair? // todo encapsulate
+    protected abstract val defaultScheduleStateProvider: DefaultScheduleStateProvider
+
+    protected class DefaultScheduleStateProvider(val defaultScheduleDateTimePairOverride: DateTimePair?)
 
     fun getDefaultScheduleDateTimePair(): DateTimePair { // todo encapsulate
-        return scheduleHint ?: HourMinute.nextHour.let { DateTimePair(it.first, it.second) }
+        return defaultScheduleStateProvider.defaultScheduleDateTimePairOverride
+            ?: HourMinute.nextHour.let { DateTimePair(it.first, it.second) }
     }
 
     protected fun getDefaultSingleScheduleData(): ScheduleData.Single { // todo encapsulate

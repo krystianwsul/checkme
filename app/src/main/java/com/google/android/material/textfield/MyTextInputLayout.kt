@@ -1,4 +1,4 @@
-package com.krystianwsul.checkme.gui.widgets
+package com.google.android.material.textfield
 
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
@@ -8,11 +8,7 @@ import android.util.AttributeSet
 import androidx.annotation.DrawableRes
 import androidx.core.content.ContextCompat
 import com.google.android.material.animation.AnimationUtils
-import com.google.android.material.internal.CheckableImageButton
-import com.google.android.material.textfield.TextInputLayout
 import com.krystianwsul.checkme.R
-import com.krystianwsul.checkme.utils.callPrivateFunction
-import com.krystianwsul.checkme.utils.getPrivateField
 
 
 class MyTextInputLayout : TextInputLayout {
@@ -41,15 +37,13 @@ class MyTextInputLayout : TextInputLayout {
 
     private fun getDrawable(@DrawableRes drawableId: Int) = ContextCompat.getDrawable(context, drawableId)!!
 
-    private fun TextInputLayout.getEndIconView(): CheckableImageButton = getPrivateField("endIconView")
-
     private fun getAlphaAnimator(duration: Int, vararg values: Float): ValueAnimator {
         val animator = ValueAnimator.ofFloat(*values)
         animator.interpolator = AnimationUtils.LINEAR_INTERPOLATOR
         animator.duration = duration.toLong()
         animator.addUpdateListener { animation ->
             val alpha = animation.animatedValue as Float
-            getEndIconView().alpha = alpha
+            endIconView.alpha = alpha
         }
         return animator
     }
@@ -84,9 +78,6 @@ class MyTextInputLayout : TextInputLayout {
 
             outAnimator.start()
         }
-
-        errorIconDrawable = ContextCompat.getDrawable(context, drawableRes)
-        callPrivateFunction<TextInputLayout, Unit>("setErrorIconVisible", false)
     }
 
     fun setClose(listener: () -> Unit, iconListener: () -> Unit) {

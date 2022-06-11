@@ -9,7 +9,7 @@
     android:orientation="vertical"
     android:animateLayoutChanges="true">
 
-    <com.krystianwsul.checkme.gui.widgets.MyTextInputLayout
+    <com.google.android.material.textfield.MyTextInputLayout
         android:id="@+id/assignedLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -25,7 +25,7 @@
             tools:ignore="LabelFor"
             android:singleLine="false" />
 
-    </com.krystianwsul.checkme.gui.widgets.MyTextInputLayout>
+    </com.google.android.material.textfield.MyTextInputLayout>
 
     <com.google.android.material.chip.ChipGroup
         android:id="@+id/assignedChipGroup"

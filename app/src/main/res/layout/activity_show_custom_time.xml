@@ -34,7 +34,7 @@
                 android:layout_marginTop="@dimen/activity_vertical_margin"
                 android:baselineAligned="false">
 
-                <com.krystianwsul.checkme.gui.widgets.MyTextInputLayout
+                <com.google.android.material.textfield.MyTextInputLayout
                     android:id="@+id/timeAllDaysTextLayout"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -50,9 +50,9 @@
                         tools:ignore="LabelFor"
                         android:text="@string/allDays" />
 
-                </com.krystianwsul.checkme.gui.widgets.MyTextInputLayout>
+                </com.google.android.material.textfield.MyTextInputLayout>
 
-                <com.krystianwsul.checkme.gui.widgets.MyTextInputLayout
+                <com.google.android.material.textfield.MyTextInputLayout
                     android:id="@+id/timeAllDaysTimeLayout"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -69,7 +69,7 @@
                         tools:ignore="LabelFor"
                         android:text="@string/allDays" />
 
-                </com.krystianwsul.checkme.gui.widgets.MyTextInputLayout>
+                </com.google.android.material.textfield.MyTextInputLayout>
 
             </LinearLayout>
 
@@ -96,7 +96,7 @@
                         android:textColor="@color/textPrimary"
                         tools:ignore="Deprecated" />
 
-                    <com.krystianwsul.checkme.gui.widgets.MyTextInputLayout
+                    <com.google.android.material.textfield.MyTextInputLayout
                         android:id="@+id/timeSundayTime"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -111,7 +111,7 @@
                             style="@style/MySpinnerText"
                             tools:ignore="LabelFor" />
 
-                    </com.krystianwsul.checkme.gui.widgets.MyTextInputLayout>
+                    </com.google.android.material.textfield.MyTextInputLayout>
 
                 </RelativeLayout>
 
@@ -132,7 +132,7 @@
                         android:textColor="@color/textPrimary"
                         tools:ignore="Deprecated" />
 
-                    <com.krystianwsul.checkme.gui.widgets.MyTextInputLayout
+                    <com.google.android.material.textfield.MyTextInputLayout
                         android:id="@+id/timeMondayTime"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -147,7 +147,7 @@
                             style="@style/MySpinnerText"
                             tools:ignore="LabelFor" />
 
-                    </com.krystianwsul.checkme.gui.widgets.MyTextInputLayout>
+                    </com.google.android.material.textfield.MyTextInputLayout>
 
                 </RelativeLayout>
 
@@ -168,7 +168,7 @@
                         android:textColor="@color/textPrimary"
                         tools:ignore="Deprecated" />
 
-                    <com.krystianwsul.checkme.gui.widgets.MyTextInputLayout
+                    <com.google.android.material.textfield.MyTextInputLayout
                         android:id="@+id/timeTuesdayTime"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -183,7 +183,7 @@
                             style="@style/MySpinnerText"
                             tools:ignore="LabelFor" />
 
-                    </com.krystianwsul.checkme.gui.widgets.MyTextInputLayout>
+                    </com.google.android.material.textfield.MyTextInputLayout>
 
                 </RelativeLayout>
 
@@ -204,7 +204,7 @@
                         android:textColor="@color/textPrimary"
                         tools:ignore="Deprecated" />
 
-                    <com.krystianwsul.checkme.gui.widgets.MyTextInputLayout
+                    <com.google.android.material.textfield.MyTextInputLayout
                         android:id="@+id/timeWednesdayTime"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -219,7 +219,7 @@
                             style="@style/MySpinnerText"
                             tools:ignore="LabelFor" />
 
-                    </com.krystianwsul.checkme.gui.widgets.MyTextInputLayout>
+                    </com.google.android.material.textfield.MyTextInputLayout>
 
                 </RelativeLayout>
 
@@ -240,7 +240,7 @@
                         android:textColor="@color/textPrimary"
                         tools:ignore="Deprecated" />
 
-                    <com.krystianwsul.checkme.gui.widgets.MyTextInputLayout
+                    <com.google.android.material.textfield.MyTextInputLayout
                         android:id="@+id/timeThursdayTime"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -255,7 +255,7 @@
                             style="@style/MySpinnerText"
                             tools:ignore="LabelFor" />
 
-                    </com.krystianwsul.checkme.gui.widgets.MyTextInputLayout>
+                    </com.google.android.material.textfield.MyTextInputLayout>
 
                 </RelativeLayout>
 
@@ -276,7 +276,7 @@
                         android:textColor="@color/textPrimary"
                         tools:ignore="Deprecated" />
 
-                    <com.krystianwsul.checkme.gui.widgets.MyTextInputLayout
+                    <com.google.android.material.textfield.MyTextInputLayout
                         android:id="@+id/timeFridayTime"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -291,7 +291,7 @@
                             style="@style/MySpinnerText"
                             tools:ignore="LabelFor" />
 
-                    </com.krystianwsul.checkme.gui.widgets.MyTextInputLayout>
+                    </com.google.android.material.textfield.MyTextInputLayout>
 
                 </RelativeLayout>
 
@@ -313,7 +313,7 @@
                         android:textColor="@color/textPrimary"
                         tools:ignore="Deprecated" />
 
-                    <com.krystianwsul.checkme.gui.widgets.MyTextInputLayout
+                    <com.google.android.material.textfield.MyTextInputLayout
                         android:id="@+id/timeSaturdayTime"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -328,7 +328,7 @@
                             style="@style/MySpinnerText"
                             tools:ignore="LabelFor" />
 
-                    </com.krystianwsul.checkme.gui.widgets.MyTextInputLayout>
+                    </com.google.android.material.textfield.MyTextInputLayout>
 
                 </RelativeLayout>
 

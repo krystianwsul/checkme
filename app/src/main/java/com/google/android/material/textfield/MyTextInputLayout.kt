@@ -7,8 +7,11 @@ import android.content.Context
 import android.util.AttributeSet
 import androidx.annotation.DrawableRes
 import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import com.google.android.material.animation.AnimationUtils
+import com.google.android.material.internal.CheckableImageButton
 import com.krystianwsul.checkme.R
+import com.krystianwsul.checkme.utils.getPrivateField
 
 
 class MyTextInputLayout : TextInputLayout {
@@ -78,6 +81,12 @@ class MyTextInputLayout : TextInputLayout {
 
             outAnimator.start()
         }
+
+        errorIconDrawable = ContextCompat.getDrawable(context, drawableRes)
+
+        getPrivateField<TextInputLayout, EndCompoundLayout>("endLayout")
+            .getPrivateField<EndCompoundLayout, CheckableImageButton>("errorIconView")
+            .isVisible = false
     }
 
     fun setClose(listener: () -> Unit, iconListener: () -> Unit) {

@@ -221,7 +221,7 @@ class DomainFactory(
             getDomainUpdater(this).updateNotifications(Notifier.Params()).subscribe()
         }
 
-        if (!isWaitingForTasks.value!!) return
+        if (isWaitingForTasks.value!!) return
 
         val shortcutTasks = ShortcutManager.getShortcuts()
             .map { Pair(it.value, getTaskIfPresent(it.key)) }

@@ -47,7 +47,7 @@ class CreateTaskEditDelegate(
                 defaultInitialParentScheduleState = if (parameters.parentScheduleState != null) {
                     parameters.parentScheduleState
                 } else if (parameters.run { hint?.showInitialSchedule != false && showFirstSchedule }) {
-                    ParentScheduleState(getDefaultSingleScheduleData())
+                    ParentScheduleState(defaultScheduleStateProvider.getDefaultSingleScheduleData())
                 } else {
                     ParentScheduleState.empty
                 }
@@ -67,7 +67,7 @@ class CreateTaskEditDelegate(
                 val initialParentKey = parameters.parentTaskKeyHint?.toParentKey()
 
                 defaultInitialParentScheduleState = if (initialParentKey == null) {
-                    ParentScheduleState(getDefaultSingleScheduleData())
+                    ParentScheduleState(defaultScheduleStateProvider.getDefaultSingleScheduleData())
                 } else {
                     ParentScheduleState.empty
                 }
@@ -84,7 +84,8 @@ class CreateTaskEditDelegate(
 
                 defaultScheduleStateProvider = DefaultScheduleStateProvider(null)
 
-                defaultInitialParentScheduleState = ParentScheduleState(getDefaultSingleScheduleData())
+                defaultInitialParentScheduleState =
+                    ParentScheduleState(defaultScheduleStateProvider.getDefaultSingleScheduleData())
             }
         }.exhaustive()
     }

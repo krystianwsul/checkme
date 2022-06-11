@@ -32,7 +32,7 @@ class JoinTasksEditDelegate(
     )
 
     override val defaultInitialParentScheduleState = if (parameters.hint?.showInitialSchedule != false) {
-        ParentScheduleState(getDefaultSingleScheduleData())
+        ParentScheduleState(defaultScheduleStateProvider.getDefaultSingleScheduleData())
     } else {
         ParentScheduleState.empty
     }

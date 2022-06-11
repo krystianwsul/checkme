@@ -77,20 +77,22 @@ abstract class EditDelegate(
 
     protected abstract val defaultScheduleStateProvider: DefaultScheduleStateProvider
 
-    protected class DefaultScheduleStateProvider(val defaultScheduleDateTimePairOverride: DateTimePair?)
+    protected class DefaultScheduleStateProvider(private val defaultScheduleDateTimePairOverride: DateTimePair?) {
 
-    fun getDefaultScheduleDateTimePair(): DateTimePair { // todo encapsulate
-        return defaultScheduleStateProvider.defaultScheduleDateTimePairOverride
-            ?: HourMinute.nextHour.let { DateTimePair(it.first, it.second) }
+        fun getDefaultScheduleDateTimePair(): DateTimePair {
+            return defaultScheduleDateTimePairOverride
+                ?: HourMinute.nextHour.let { DateTimePair(it.first, it.second) }
+        }
+
+        fun getDefaultSingleScheduleData() = ScheduleData.Single(getDefaultScheduleDateTimePair())
     }
 
-    protected fun getDefaultSingleScheduleData(): ScheduleData.Single { // todo encapsulate
-        return ScheduleData.Single(getDefaultScheduleDateTimePair())
-    }
+    fun getDefaultScheduleDateTimePair() = defaultScheduleStateProvider.getDefaultScheduleDateTimePair()
 
     protected abstract val defaultInitialParentScheduleState: ParentScheduleState // todo encapsulate
 
-    fun getDefaultScheduleDialogData() = ScheduleDataWrapper.Single.getScheduleDialogData(getDefaultSingleScheduleData())
+    fun getDefaultScheduleDialogData() =
+        ScheduleDataWrapper.Single.getScheduleDialogData(defaultScheduleStateProvider.getDefaultSingleScheduleData())
 
     val parentScheduleManager by lazy {
         ParentMultiScheduleManager(savedInstanceState, defaultInitialParentScheduleState, callbacks)

@@ -78,7 +78,7 @@ sealed interface EditParameters : Parcelable {
         }
     }
 
-    val startParameters: EditViewModel.StartParameters get() = EditViewModel.StartParameters.Create(null)
+    val startParameters: EditViewModel.StartParameters
 
     val currentParentSource: EditViewModel.CurrentParentSource
 
@@ -95,7 +95,10 @@ sealed interface EditParameters : Parcelable {
 
     fun getReplacementHintForNewTask(taskKey: TaskKey): EditParentHint.Instance? = null
 
-    sealed interface CreateDelegateParameters : EditParameters
+    sealed interface CreateDelegateParameters : EditParameters {
+
+        override val startParameters: EditViewModel.StartParameters get() = EditViewModel.StartParameters.Create(null)
+    }
 
     @Parcelize
     class Create(
@@ -118,6 +121,85 @@ sealed interface EditParameters : Parcelable {
         override val startParameters get() = EditViewModel.StartParameters.MigrateDescription(taskKey)
 
         override val currentParentSource get() = EditViewModel.CurrentParentSource.Set(EditViewModel.ParentKey.Task(taskKey))
+    }
+
+    @Parcelize
+    class Share private constructor(
+        val nameHint: String? = null,
+        val parentTaskKeyHint: TaskKey? = null,
+        val uri: Uri? = null,
+    ) : CreateDelegateParameters {
+
+        companion object {
+
+            fun fromText(nameHint: String, parentTaskKeyHint: TaskKey?) = Share(nameHint, parentTaskKeyHint)
+
+            fun fromUri(uri: Uri) = Share(uri = uri)
+        }
+
+        override val currentParentSource
+            get() = parentTaskKeyHint?.let {
+                EditViewModel.CurrentParentSource.Set(EditViewModel.ParentKey.Task(it))
+            } ?: EditViewModel.CurrentParentSource.None
+
+        override fun getInitialEditImageStateSingle(
+            savedEditImageState: EditImageState?,
+            taskDataSingle: Single<NullableWrapper<EditViewModel.TaskData>>,
+            editActivity: EditActivity,
+        ): Single<EditImageState> {
+            return when {
+                savedEditImageState?.dontOverwrite == true -> Single.just(savedEditImageState)
+                uri != null -> {
+                    if (uri.scheme == "file") {
+                        uri.toString().let { Single.just(EditImageState.Selected(it, it)) }
+                    } else {
+                        check(uri.scheme == "content")
+
+                        copyFile(editActivity)
+                    }
+                }
+                else -> super.getInitialEditImageStateSingle(savedEditImageState, taskDataSingle, editActivity)
+            }
+        }
+
+        private fun copyFile(editActivity: EditActivity): Single<EditImageState> {
+            return Single.fromCallable<EditImageState> {
+                MyApplication.instance
+                    .getRxPaparazzoDir()
+                    .mkdirs()
+
+                val outputFile = File.createTempFile(
+                    "copiedImage",
+                    null,
+                    MyApplication.instance.getRxPaparazzoDir(),
+                )
+
+                editActivity.contentResolver
+                    .openInputStream(uri!!)
+                    .use { inputStream ->
+                        FileOutputStream(outputFile).use { outputStream ->
+                            IOUtils.copy(inputStream, outputStream)
+                        }
+                    }
+
+                EditImageState.Selected(outputFile)
+            }
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+        }
+    }
+
+    @Parcelize
+    class Shortcut(private val parentTaskKeyHint: TaskKey) : CreateDelegateParameters {
+
+        override val currentParentSource
+            get() = EditViewModel.CurrentParentSource.Set(EditViewModel.ParentKey.Task(parentTaskKeyHint))
+    }
+
+    @Parcelize
+    object None : CreateDelegateParameters {
+
+        override val currentParentSource get() = EditViewModel.CurrentParentSource.None
     }
 
     @Parcelize
@@ -213,84 +295,5 @@ sealed interface EditParameters : Parcelable {
                 }
             }
         }
-    }
-
-    @Parcelize
-    class Shortcut(private val parentTaskKeyHint: TaskKey) : CreateDelegateParameters {
-
-        override val currentParentSource
-            get() = EditViewModel.CurrentParentSource.Set(EditViewModel.ParentKey.Task(parentTaskKeyHint))
-    }
-
-    @Parcelize
-    class Share private constructor(
-        val nameHint: String? = null,
-        val parentTaskKeyHint: TaskKey? = null,
-        val uri: Uri? = null,
-    ) : CreateDelegateParameters {
-
-        companion object {
-
-            fun fromText(nameHint: String, parentTaskKeyHint: TaskKey?) = Share(nameHint, parentTaskKeyHint)
-
-            fun fromUri(uri: Uri) = Share(uri = uri)
-        }
-
-        override val currentParentSource
-            get() = parentTaskKeyHint?.let {
-                EditViewModel.CurrentParentSource.Set(EditViewModel.ParentKey.Task(it))
-            } ?: EditViewModel.CurrentParentSource.None
-
-        override fun getInitialEditImageStateSingle(
-            savedEditImageState: EditImageState?,
-            taskDataSingle: Single<NullableWrapper<EditViewModel.TaskData>>,
-            editActivity: EditActivity,
-        ): Single<EditImageState> {
-            return when {
-                savedEditImageState?.dontOverwrite == true -> Single.just(savedEditImageState)
-                uri != null -> {
-                    if (uri.scheme == "file") {
-                        uri.toString().let { Single.just(EditImageState.Selected(it, it)) }
-                    } else {
-                        check(uri.scheme == "content")
-
-                        copyFile(editActivity)
-                    }
-                }
-                else -> super.getInitialEditImageStateSingle(savedEditImageState, taskDataSingle, editActivity)
-            }
-        }
-
-        private fun copyFile(editActivity: EditActivity): Single<EditImageState> {
-            return Single.fromCallable<EditImageState> {
-                MyApplication.instance
-                    .getRxPaparazzoDir()
-                    .mkdirs()
-
-                val outputFile = File.createTempFile(
-                    "copiedImage",
-                    null,
-                    MyApplication.instance.getRxPaparazzoDir(),
-                )
-
-                editActivity.contentResolver
-                    .openInputStream(uri!!)
-                    .use { inputStream ->
-                        FileOutputStream(outputFile).use { outputStream ->
-                            IOUtils.copy(inputStream, outputStream)
-                        }
-                    }
-
-                EditImageState.Selected(outputFile)
-            }
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-        }
-    }
-
-    @Parcelize
-    object None : CreateDelegateParameters {
-
-        override val currentParentSource get() = EditViewModel.CurrentParentSource.None
     }
 }

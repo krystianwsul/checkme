@@ -48,6 +48,7 @@ class CreateTaskEditDelegate(
                         ?.toScheduleHint()
                         ?.dateTimePair,
                     initializationType,
+                    data,
                 )
             }
             is EditParameters.MigrateDescription -> {
@@ -56,6 +57,7 @@ class CreateTaskEditDelegate(
                 defaultScheduleStateProvider = DefaultScheduleStateProvider(
                     null,
                     DefaultScheduleStateProvider.InitializationType.Normal(false),
+                    data,
                 )
             }
             is EditParameters.Share -> {
@@ -66,6 +68,7 @@ class CreateTaskEditDelegate(
                 defaultScheduleStateProvider = DefaultScheduleStateProvider(
                     null,
                     DefaultScheduleStateProvider.InitializationType.Normal(initialParentKey == null),
+                    data,
                 )
             }
             is EditParameters.Shortcut -> {
@@ -74,6 +77,7 @@ class CreateTaskEditDelegate(
                 defaultScheduleStateProvider = DefaultScheduleStateProvider(
                     null,
                     DefaultScheduleStateProvider.InitializationType.Normal(false),
+                    data,
                 )
             }
             EditParameters.None -> {
@@ -82,6 +86,7 @@ class CreateTaskEditDelegate(
                 defaultScheduleStateProvider = DefaultScheduleStateProvider(
                     null,
                     DefaultScheduleStateProvider.InitializationType.Normal(true),
+                    data,
                 )
             }
         }.exhaustive()

@@ -29,6 +29,7 @@ class JoinTasksEditDelegate(
             ?.toScheduleHint()
             ?.dateTimePair,
         DefaultScheduleStateProvider.InitializationType.Normal(parameters.hint?.showInitialSchedule != false),
+        data,
     )
 
     private val taskKeys = parameters.joinables.map { it.taskKey }

@@ -3,8 +3,6 @@ package com.krystianwsul.checkme.gui.edit.delegates
 import android.os.Bundle
 import com.krystianwsul.checkme.gui.edit.EditImageState
 import com.krystianwsul.checkme.gui.edit.EditViewModel
-import com.krystianwsul.checkme.gui.edit.ParentScheduleState
-import com.krystianwsul.checkme.gui.edit.ScheduleEntry
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 
 abstract class ExistingTaskEditDelegate(
@@ -21,9 +19,8 @@ abstract class ExistingTaskEditDelegate(
 
     override val defaultScheduleStateProvider = DefaultScheduleStateProvider(
         null,
-        DefaultScheduleStateProvider.InitializationType.Override(
-            taskData.run { ParentScheduleState.create(assignedTo, scheduleDataWrappers?.map(::ScheduleEntry)) }
-        ),
+        DefaultScheduleStateProvider.InitializationType.FromTaskData,
+        data,
     )
 
     override fun checkImageChanged(editImageState: EditImageState): Boolean {

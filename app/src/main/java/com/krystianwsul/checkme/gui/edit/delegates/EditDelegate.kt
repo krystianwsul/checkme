@@ -23,6 +23,7 @@ import io.reactivex.rxjava3.kotlin.Observables
 import io.reactivex.rxjava3.kotlin.plusAssign
 
 abstract class EditDelegate(
+    editParameters: EditParameters,
     savedInstanceState: Bundle?,
     compositeDisposable: CompositeDisposable,
     private val storeParentKey: (EditViewModel.ParentKey?, Boolean) -> Unit,
@@ -69,26 +70,18 @@ abstract class EditDelegate(
 
     val customTimeDatas get() = data.customTimeDatas
 
-    protected fun TaskKey.toParentKey() = EditViewModel.ParentKey.Task(this)
-
-    protected fun EditParentHint.toScheduleHint() = this as? EditParentHint.Schedule
-
-    protected abstract val defaultScheduleStateProvider: DefaultScheduleStateProvider
-
     protected class DefaultScheduleStateProvider(
-        private val defaultScheduleDateTimePairOverride: DateTimePair?,
-        source: EditViewModel.ScheduleParameters.Source,
+        private val scheduleParameters: EditViewModel.ScheduleParameters,
         data: EditViewModel.MainData,
     ) {
 
         fun getDefaultScheduleDateTimePair(): DateTimePair {
-            return defaultScheduleDateTimePairOverride
-                ?: HourMinute.nextHour.let { DateTimePair(it.first, it.second) }
+            return scheduleParameters.dateTimePairOverride ?: HourMinute.nextHour.let { DateTimePair(it.first, it.second) }
         }
 
         fun getDefaultSingleScheduleData() = ScheduleData.Single(getDefaultScheduleDateTimePair())
 
-        val defaultInitialParentScheduleState = when (source) {
+        val defaultInitialParentScheduleState = when (val source = scheduleParameters.source) {
             is EditViewModel.ScheduleParameters.Source.Override -> source.parentScheduleState
             EditViewModel.ScheduleParameters.Source.FromTaskData ->
                 data.taskData!!.run { ParentScheduleState.create(assignedTo, scheduleDataWrappers?.map(::ScheduleEntry)) }
@@ -98,6 +91,10 @@ abstract class EditDelegate(
                 ParentScheduleState.empty
             }
         }
+    }
+
+    private val defaultScheduleStateProvider by lazy {
+        DefaultScheduleStateProvider(editParameters.scheduleParameters, data)
     }
 
     fun getDefaultScheduleDateTimePair() = defaultScheduleStateProvider.getDefaultScheduleDateTimePair()

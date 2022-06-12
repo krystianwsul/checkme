@@ -18,6 +18,7 @@ import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.checkme.viewmodels.ObservableDomainViewModel
 import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.firebase.models.ImageState
+import com.krystianwsul.common.time.DateTimePair
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.HourMinute
@@ -346,7 +347,7 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
         val startParameters: StartParameters,
     ) : ObservableDomainViewModel.Parameters
 
-    class ScheduleParameters {
+    class ScheduleParameters(val dateTimePairOverride: DateTimePair?, val source: Source) {
 
         sealed class Source {
 

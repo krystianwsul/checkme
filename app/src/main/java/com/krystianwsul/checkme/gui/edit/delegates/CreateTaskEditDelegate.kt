@@ -23,71 +23,27 @@ class CreateTaskEditDelegate(
     savedInstanceState: Bundle?,
     compositeDisposable: CompositeDisposable,
     storeParentKey: (EditViewModel.ParentKey?, Boolean) -> Unit,
-) : EditDelegate(savedInstanceState, compositeDisposable, storeParentKey) {
+) : EditDelegate(parameters, savedInstanceState, compositeDisposable, storeParentKey) {
 
-    override val initialName: String?
+    override val initialName: String? // todo cleanup
     override val showSaveAndOpen = true
-
-    override val defaultScheduleStateProvider: DefaultScheduleStateProvider
 
     init {
         when (parameters) {
             is EditParameters.Create -> {
                 initialName = parameters.nameHint
-
-                val source = if (parameters.parentScheduleState != null) {
-                    EditViewModel.ScheduleParameters.Source.Override(parameters.parentScheduleState)
-                } else {
-                    EditViewModel.ScheduleParameters.Source.Normal(
-                        parameters.run { hint?.showInitialSchedule != false && showFirstSchedule }
-                    )
-                }
-
-                defaultScheduleStateProvider = DefaultScheduleStateProvider(
-                    parameters.hint
-                        ?.toScheduleHint()
-                        ?.dateTimePair,
-                    source,
-                    data,
-                )
             }
             is EditParameters.MigrateDescription -> {
                 initialName = data.parentTaskDescription!!
-
-                defaultScheduleStateProvider = DefaultScheduleStateProvider(
-                    null,
-                    EditViewModel.ScheduleParameters.Source.Normal(false),
-                    data,
-                )
             }
             is EditParameters.Share -> {
                 initialName = parameters.nameHint
-
-                val initialParentKey = parameters.parentTaskKeyHint?.toParentKey()
-
-                defaultScheduleStateProvider = DefaultScheduleStateProvider(
-                    null,
-                    EditViewModel.ScheduleParameters.Source.Normal(initialParentKey == null),
-                    data,
-                )
             }
             is EditParameters.Shortcut -> {
                 initialName = null
-
-                defaultScheduleStateProvider = DefaultScheduleStateProvider(
-                    null,
-                    EditViewModel.ScheduleParameters.Source.Normal(false),
-                    data,
-                )
             }
             EditParameters.None -> {
                 initialName = null
-
-                defaultScheduleStateProvider = DefaultScheduleStateProvider(
-                    null,
-                    EditViewModel.ScheduleParameters.Source.Normal(true),
-                    data,
-                )
             }
         }.exhaustive()
     }

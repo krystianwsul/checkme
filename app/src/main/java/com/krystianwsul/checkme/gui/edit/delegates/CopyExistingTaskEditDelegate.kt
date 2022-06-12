@@ -21,7 +21,7 @@ class CopyExistingTaskEditDelegate(
     savedInstanceState: Bundle?,
     compositeDisposable: CompositeDisposable,
     storeParentKey: (EditViewModel.ParentKey?, Boolean) -> Unit,
-) : ExistingTaskEditDelegate(data, savedInstanceState, compositeDisposable, storeParentKey) {
+) : ExistingTaskEditDelegate(parameters, data, savedInstanceState, compositeDisposable, storeParentKey) {
 
     override fun createTaskWithSchedule(
         createParameters: CreateParameters,

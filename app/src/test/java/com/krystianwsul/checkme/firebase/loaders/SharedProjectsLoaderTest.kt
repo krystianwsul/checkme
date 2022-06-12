@@ -66,8 +66,6 @@ class SharedProjectsLoaderTest {
 
     private val compositeDisposable = CompositeDisposable()
 
-    private lateinit var rxErrorChecker: RxErrorChecker
-
     private lateinit var projectKeysRelay: PublishRelay<Set<ProjectKey.Shared>>
     private lateinit var sharedProjectsProvider: TestSharedProjectsProvider
     private lateinit var projectManager: AndroidSharedProjectManager
@@ -80,8 +78,6 @@ class SharedProjectsLoaderTest {
 
     @Before
     fun before() {
-        rxErrorChecker = RxErrorChecker()
-
         projectKeysRelay = PublishRelay.create()
         sharedProjectsProvider = TestSharedProjectsProvider()
 
@@ -114,8 +110,6 @@ class SharedProjectsLoaderTest {
         initialProjectsEmissionChecker.checkEmpty()
         addProjectEmissionChecker.checkEmpty()
         removeProjectsEmissionChecker.checkEmpty()
-
-        rxErrorChecker.check()
     }
 
     private val projectKey1 = ProjectKey.Shared("projectKey1")

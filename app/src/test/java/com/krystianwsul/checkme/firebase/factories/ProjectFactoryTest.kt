@@ -152,8 +152,6 @@ class ProjectFactoryTest {
 
     private val compositeDisposable = CompositeDisposable()
 
-    private lateinit var rxErrorChecker: RxErrorChecker
-
     private lateinit var factoryProvider: TestFactoryProvider
     private lateinit var projectLoader: TestProjectLoader
 
@@ -166,8 +164,6 @@ class ProjectFactoryTest {
     @Before
     fun before() {
         mockBase64()
-
-        rxErrorChecker = RxErrorChecker()
 
         factoryProvider = TestFactoryProvider()
         projectLoader = TestProjectLoader(projectKey)
@@ -195,8 +191,6 @@ class ProjectFactoryTest {
         compositeDisposable.clear()
 
         changeTypesEmissionChecker.checkEmpty()
-
-        rxErrorChecker.check()
     }
 
     @Test

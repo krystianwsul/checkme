@@ -17,6 +17,7 @@ import com.krystianwsul.checkme.firebase.factories.OwnedProjectsFactory
 import com.krystianwsul.checkme.firebase.foreignProjects.ForeignProjectCoordinator
 import com.krystianwsul.checkme.firebase.foreignProjects.ForeignProjectsFactory
 import com.krystianwsul.checkme.firebase.loaders.ProjectLoader
+import com.krystianwsul.checkme.firebase.loaders.RxErrorChecker
 import com.krystianwsul.checkme.firebase.loaders.SharedProjectsLoader
 import com.krystianwsul.checkme.firebase.loaders.mockBase64
 import com.krystianwsul.checkme.firebase.managers.AndroidRootTasksManager
@@ -112,6 +113,8 @@ class DomainFactoryRule : TestRule {
         }
     }
 
+    private lateinit var rxErrorChecker: RxErrorChecker
+
     private fun beforeClass() {
         MyApplication._sharedPreferences = mockk(relaxed = true)
         MyApplication._context = mockk(relaxed = true)
@@ -141,10 +144,7 @@ class DomainFactoryRule : TestRule {
         DomainThreadChecker.instance = mockk(relaxed = true)
 
         RxJavaPlugins.setSingleSchedulerHandler { Schedulers.trampoline() }
-        RxJavaPlugins.setErrorHandler { it.printStackTrace() }
-
         RxAndroidPlugins.setInitMainThreadSchedulerHandler { Schedulers.trampoline() }
-
         RxPS.setScheduler(Schedulers.trampoline())
 
         mockBase64()
@@ -164,6 +164,8 @@ class DomainFactoryRule : TestRule {
     }
 
     private fun before() {
+        rxErrorChecker = RxErrorChecker()
+
         val databaseWrapper = mockk<DatabaseWrapper> {
             var sharedProjectId = 0
             every { newSharedProjectRecordId() } answers {
@@ -307,6 +309,8 @@ class DomainFactoryRule : TestRule {
         rootTaskRelays.clear()
 
         compositeDisposable.clear()
+
+        rxErrorChecker.check()
     }
 
     private fun afterClass() {

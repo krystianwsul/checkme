@@ -47,8 +47,6 @@ class ProjectLoaderTest {
 
     private val compositeDisposable = CompositeDisposable()
 
-    private lateinit var rxErrorChecker: RxErrorChecker
-
     private lateinit var projectSnapshotRelay: BehaviorRelay<Snapshot<PrivateOwnedProjectJson>>
     private lateinit var projectManager: AndroidPrivateProjectManager
     private lateinit var projectLoader: ProjectLoader<ProjectType.Private, PrivateOwnedProjectJson, PrivateOwnedProjectRecord>
@@ -65,8 +63,6 @@ class ProjectLoaderTest {
     fun before() {
         mockkStatic(Base64::class)
         every { Base64.encodeToString(any(), any()) } returns projectKey.key
-
-        rxErrorChecker = RxErrorChecker()
 
         projectSnapshotRelay = BehaviorRelay.create()
 
@@ -97,8 +93,6 @@ class ProjectLoaderTest {
 
         initialProjectEmissionChecker.checkEmpty()
         changeProjectEmissionChecker.checkEmpty()
-
-        rxErrorChecker.check()
     }
 
     @Test

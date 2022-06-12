@@ -51,8 +51,6 @@ class ProjectsFactoryTest {
 
     private val compositeDisposable = CompositeDisposable()
 
-    private lateinit var rxErrorChecker: RxErrorChecker
-
     private lateinit var privateProjectRelay: PublishRelay<Snapshot<PrivateOwnedProjectJson>>
     private lateinit var factoryProvider: ProjectFactoryTest.TestFactoryProvider
     private lateinit var privateProjectManager: AndroidPrivateProjectManager
@@ -79,8 +77,6 @@ class ProjectsFactoryTest {
     fun before() {
         mockBase64()
         ErrorLogger.instance = mockk(relaxed = true)
-
-        rxErrorChecker = RxErrorChecker()
 
         privateProjectRelay = PublishRelay.create()
         factoryProvider = ProjectFactoryTest.TestFactoryProvider()
@@ -126,8 +122,6 @@ class ProjectsFactoryTest {
     @After
     fun after() {
         compositeDisposable.clear()
-
-        rxErrorChecker.check()
     }
 
     private fun initProjectsFactory() {

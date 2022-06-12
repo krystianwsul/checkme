@@ -74,7 +74,14 @@ private fun UserScope.getCreateTaskDataFast(scheduleParameters: EditViewModel.Sc
         .toMutableMap<CustomTimeKey, Time.Custom>()
         .toCustomTimeDatas()
 
-    return EditViewModel.MainData(null, customTimeDatas, null, null, scheduleParameters)
+    return EditViewModel.MainData(
+        null,
+        customTimeDatas,
+        null,
+        null,
+        scheduleParameters,
+        scheduleParameters.dateTimePairOverride,
+    )
 }
 
 private fun getScheduleDataWrappersAndAssignedTo(
@@ -241,7 +248,14 @@ private fun DomainFactory.getCreateTaskDataSlow(
         ?.let(::getTaskForce)
         ?.note
 
-    return EditViewModel.MainData(taskData, customTimeDatas, currentParent, parentTaskDescription, scheduleParameters)
+    return EditViewModel.MainData(
+        taskData,
+        customTimeDatas,
+        currentParent,
+        parentTaskDescription,
+        scheduleParameters,
+        scheduleParameters.dateTimePairOverride,
+    )
 }
 
 fun DomainFactory.getCreateTaskParentPickerData(

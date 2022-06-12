@@ -71,10 +71,10 @@ abstract class EditDelegate(
 
     protected class DefaultScheduleStateProvider(data: EditViewModel.MainData) {
 
-        private val dateTimePairOverride = data.scheduleParameters.dateTimePairOverride
+        private val defaultScheduleOverride = data.defaultScheduleOverride
 
         fun getDefaultScheduleDateTimePair(): DateTimePair {
-            return dateTimePairOverride ?: HourMinute.nextHour.let { DateTimePair(it.first, it.second) }
+            return defaultScheduleOverride ?: HourMinute.nextHour.let { DateTimePair(it.first, it.second) }
         }
 
         fun getDefaultSingleScheduleData() = ScheduleData.Single(getDefaultScheduleDateTimePair())

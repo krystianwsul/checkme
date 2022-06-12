@@ -189,6 +189,7 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
         val currentParent: ParentScheduleManager.Parent?,
         val parentTaskDescription: String?,
         val scheduleParameters: ScheduleParameters,
+        val defaultScheduleOverride: DateTimePair?,
     ) : DomainData()
 
     data class ParentPickerData(val parentTreeDatas: List<ParentEntryData>) : DomainData()

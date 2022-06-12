@@ -202,12 +202,11 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
     )
 
     data class TaskData(
-        // todo cleanup
         val name: String,
-        val scheduleDataWrappers: List<ScheduleDataWrapper>?,
+        val scheduleDataWrappers: List<ScheduleDataWrapper>?, // todo cleanup
         val note: String?,
         val imageState: ImageState?,
-        val assignedTo: Set<UserKey>,
+        val assignedTo: Set<UserKey>, // todo cleanup
     )
 
     sealed class ParentEntryData : ParentPickerFragment.EntryData {

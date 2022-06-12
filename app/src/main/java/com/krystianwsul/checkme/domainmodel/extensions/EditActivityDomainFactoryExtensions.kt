@@ -9,10 +9,7 @@ import com.krystianwsul.checkme.domainmodel.ScheduleText
 import com.krystianwsul.checkme.domainmodel.UserScope
 import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
 import com.krystianwsul.checkme.domainmodel.update.SingleDomainUpdate
-import com.krystianwsul.checkme.gui.edit.EditParameters
-import com.krystianwsul.checkme.gui.edit.EditViewModel
-import com.krystianwsul.checkme.gui.edit.ParentScheduleManager
-import com.krystianwsul.checkme.gui.edit.ScheduleDataWrapper
+import com.krystianwsul.checkme.gui.edit.*
 import com.krystianwsul.checkme.gui.edit.delegates.EditDelegate
 import com.krystianwsul.checkme.viewmodels.DomainResult
 import com.krystianwsul.common.criteria.SearchCriteria
@@ -31,6 +28,7 @@ import com.krystianwsul.common.firebase.models.task.*
 import com.krystianwsul.common.firebase.models.users.ProjectUser
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.Time
+import com.krystianwsul.common.time.orNextHour
 import com.krystianwsul.common.utils.*
 import io.reactivex.rxjava3.core.Single
 
@@ -79,8 +77,8 @@ private fun UserScope.getCreateTaskDataFast(scheduleParameters: EditViewModel.Sc
         customTimeDatas,
         null,
         null,
-        scheduleParameters,
         scheduleParameters.dateTimePairOverride,
+        scheduleParametersSourceToDefaultParentScheduleState(scheduleParameters, null), // todo cleanup
     )
 }
 
@@ -253,8 +251,8 @@ private fun DomainFactory.getCreateTaskDataSlow(
         customTimeDatas,
         currentParent,
         parentTaskDescription,
-        scheduleParameters,
         scheduleParameters.dateTimePairOverride,
+        scheduleParametersSourceToDefaultParentScheduleState(scheduleParameters, taskData), // todo cleanup
     )
 }
 
@@ -1057,4 +1055,20 @@ fun DomainFactory.convertToRoot(task: Task, now: ExactTimeStamp.Local): RootTask
     if (task is RootTask) return task
 
     return converter.convertToRoot(now, task as ProjectTask, task.project.projectKey)
+}
+
+private fun scheduleParametersSourceToDefaultParentScheduleState(
+    scheduleParameters: EditViewModel.ScheduleParameters,
+    taskData: EditViewModel.TaskData?,
+): ParentScheduleState {
+    return when (val source = scheduleParameters.source) {
+        is EditViewModel.ScheduleParameters.Source.Override -> source.parentScheduleState
+        EditViewModel.ScheduleParameters.Source.FromTaskData ->
+            taskData!!.run { ParentScheduleState.create(assignedTo, scheduleDataWrappers?.map(::ScheduleEntry)) }
+        is EditViewModel.ScheduleParameters.Source.Normal -> if (source.showDefaultSchedule) {
+            ParentScheduleState(ScheduleData.Single(scheduleParameters.dateTimePairOverride.orNextHour()))
+        } else {
+            ParentScheduleState.empty
+        }
+    }
 }

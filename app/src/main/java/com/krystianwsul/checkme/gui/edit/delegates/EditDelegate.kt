@@ -13,8 +13,7 @@ import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity
 import com.krystianwsul.checkme.upload.Uploader
 import com.krystianwsul.checkme.utils.newUuid
 import com.krystianwsul.common.firebase.json.tasks.TaskJson
-import com.krystianwsul.common.time.DateTimePair
-import com.krystianwsul.common.time.HourMinute
+import com.krystianwsul.common.time.orNextHour
 import com.krystianwsul.common.utils.*
 import com.krystianwsul.treeadapter.getCurrentValue
 import io.reactivex.rxjava3.core.Single
@@ -73,22 +72,11 @@ abstract class EditDelegate(
 
         private val defaultScheduleOverride = data.defaultScheduleOverride
 
-        fun getDefaultScheduleDateTimePair(): DateTimePair {
-            return defaultScheduleOverride ?: HourMinute.nextHour.let { DateTimePair(it.first, it.second) }
-        }
+        fun getDefaultScheduleDateTimePair() = defaultScheduleOverride.orNextHour()
 
         fun getDefaultSingleScheduleData() = ScheduleData.Single(getDefaultScheduleDateTimePair())
 
-        val defaultInitialParentScheduleState = when (val source = data.scheduleParameters.source) {
-            is EditViewModel.ScheduleParameters.Source.Override -> source.parentScheduleState
-            EditViewModel.ScheduleParameters.Source.FromTaskData ->
-                data.taskData!!.run { ParentScheduleState.create(assignedTo, scheduleDataWrappers?.map(::ScheduleEntry)) }
-            is EditViewModel.ScheduleParameters.Source.Normal -> if (source.showDefaultSchedule) {
-                ParentScheduleState(getDefaultSingleScheduleData())
-            } else {
-                ParentScheduleState.empty
-            }
-        }
+        val defaultInitialParentScheduleState = data.defaultParentScheduleState
     }
 
     private val defaultScheduleStateProvider by lazy { DefaultScheduleStateProvider(data) }

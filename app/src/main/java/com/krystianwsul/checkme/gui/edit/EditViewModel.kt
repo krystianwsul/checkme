@@ -300,10 +300,15 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
         val parentInstanceKey: InstanceKey? get() = null
         val scheduleParameters: ScheduleParameters
 
+        sealed interface Other : StartParameters {
+
+            override val scheduleParameters: ScheduleParameters.Fast
+        }
+
         data class Create(
-            override val parentInstanceKey: InstanceKey?,
+            override val parentInstanceKey: InstanceKey?, // todo instance make new parameters for this
             override val scheduleParameters: ScheduleParameters.Fast,
-        ) : StartParameters {
+        ) : Other {
 
             override val excludedTaskKeys = setOf<TaskKey>()
         }
@@ -311,7 +316,7 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
         data class MigrateDescription(
             val taskKey: TaskKey,
             override val scheduleParameters: ScheduleParameters.Normal,
-        ) : StartParameters {
+        ) : Other {
 
             override val excludedTaskKeys = setOf<TaskKey>()
         }
@@ -327,7 +332,7 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
         data class Join(
             private val joinables: List<EditParameters.Join.Joinable>,
             override val scheduleParameters: ScheduleParameters.Normal,
-        ) : StartParameters {
+        ) : Other {
 
             override val excludedTaskKeys = joinables.map { it.taskKey }.toSet()
         }
@@ -363,11 +368,7 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
 
         val defaultScheduleOverride: DateTimePair?
 
-        fun getParentScheduleState(taskData: TaskData?): ParentScheduleState
-
         sealed interface Fast : ScheduleParameters {
-
-            override fun getParentScheduleState(taskData: TaskData?) = getParentScheduleState()
 
             fun getParentScheduleState(): ParentScheduleState
         }
@@ -384,8 +385,8 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
 
             override val defaultScheduleOverride: DateTimePair? = null
 
-            override fun getParentScheduleState(taskData: TaskData?) =
-                taskData!!.run { ParentScheduleState.create(assignedTo, scheduleDataWrappers?.map(::ScheduleEntry)) }
+            fun getParentScheduleState(taskData: TaskData) =
+                taskData.run { ParentScheduleState.create(assignedTo, scheduleDataWrappers?.map(::ScheduleEntry)) }
         }
 
         class Normal(

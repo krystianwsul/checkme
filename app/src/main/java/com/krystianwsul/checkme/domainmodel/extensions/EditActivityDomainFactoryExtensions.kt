@@ -9,10 +9,7 @@ import com.krystianwsul.checkme.domainmodel.ScheduleText
 import com.krystianwsul.checkme.domainmodel.UserScope
 import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
 import com.krystianwsul.checkme.domainmodel.update.SingleDomainUpdate
-import com.krystianwsul.checkme.gui.edit.EditParameters
-import com.krystianwsul.checkme.gui.edit.EditViewModel
-import com.krystianwsul.checkme.gui.edit.ParentScheduleManager
-import com.krystianwsul.checkme.gui.edit.ScheduleDataWrapper
+import com.krystianwsul.checkme.gui.edit.*
 import com.krystianwsul.checkme.gui.edit.delegates.EditDelegate
 import com.krystianwsul.checkme.viewmodels.DomainResult
 import com.krystianwsul.common.criteria.SearchCriteria
@@ -117,63 +114,75 @@ private fun DomainFactory.getCreateTaskDataSlow(
 
     val customTimes = getCurrentRemoteCustomTimes().associate { it.key to it as Time.Custom }.toMutableMap()
 
-    val taskData = (startParameters as? EditViewModel.StartParameters.TaskOrInstance)?.let {
-        val task: Task
-        val project: Project<*>
+    val taskData: EditViewModel.TaskData?
+    val defaultParentScheduleState: ParentScheduleState
 
-        var scheduleDataWrappers: List<ScheduleDataWrapper>? = null
-        var assignedTo: Set<UserKey> = setOf()
+    when (startParameters) {
+        is EditViewModel.StartParameters.TaskOrInstance -> {
+            val task: Task
+            val project: Project<*>
 
-        when (it.copySource) {
-            is EditParameters.Copy.CopySource.Task -> {
-                task = getTaskForce(it.copySource.taskKey)
-                project = task.project
+            var scheduleDataWrappers: List<ScheduleDataWrapper>? = null
+            var assignedTo: Set<UserKey> = setOf()
 
-                if (task.isTopLevelTask()) {
-                    val schedules = task.intervalInfo.getCurrentScheduleIntervals(now)
+            when (startParameters.copySource) {
+                is EditParameters.Copy.CopySource.Task -> {
+                    task = getTaskForce(startParameters.copySource.taskKey)
+                    project = task.project
 
-                    customTimes += schedules.mapNotNull { it.schedule.customTimeKey }.map { it to getCustomTime(it) }
+                    if (task.isTopLevelTask()) {
+                        val schedules = task.intervalInfo.getCurrentScheduleIntervals(now)
 
-                    if (schedules.isNotEmpty()) {
-                        getScheduleDataWrappersAndAssignedTo(schedules).let {
-                            scheduleDataWrappers = it.first
-                            assignedTo = it.second
+                        customTimes += schedules.mapNotNull { it.schedule.customTimeKey }.map { it to getCustomTime(it) }
+
+                        if (schedules.isNotEmpty()) {
+                            getScheduleDataWrappersAndAssignedTo(schedules).let {
+                                scheduleDataWrappers = it.first
+                                assignedTo = it.second
+                            }
                         }
                     }
                 }
-            }
-            is EditParameters.Copy.CopySource.Instance -> {
-                val instance = getInstance(it.copySource.instanceKey)
-                task = instance.task
-                project = instance.getProject()
+                is EditParameters.Copy.CopySource.Instance -> {
+                    val instance = getInstance(startParameters.copySource.instanceKey)
+                    task = instance.task
+                    project = instance.getProject()
 
-                if (instance.isRootInstance()) {
-                    instance.instanceTime
-                        .let { it as? Time.Custom }
-                        ?.let { customTimes += it.key to it }
+                    if (instance.isRootInstance()) {
+                        instance.instanceTime
+                            .let { it as? Time.Custom }
+                            ?.let { customTimes += it.key to it }
 
-                    scheduleDataWrappers = listOf(
-                        ScheduleDataWrapper.Single(
-                            ScheduleData.Single(instance.instanceDate, instance.instanceTime.timePair)
+                        scheduleDataWrappers = listOf(
+                            ScheduleDataWrapper.Single(
+                                ScheduleData.Single(instance.instanceDate, instance.instanceTime.timePair)
+                            )
                         )
-                    )
 
-                    assignedTo = instance.getAssignedTo()
-                        .map { it.id }
-                        .toSet()
+                        assignedTo = instance.getAssignedTo()
+                            .map { it.id }
+                            .toSet()
+                    }
                 }
             }
-        }
 
-        EditViewModel.TaskData(
-            task.name,
-            scheduleDataWrappers,
-            task.note,
-            task.getImage(deviceDbInfo),
-            project.getAssignedTo(assignedTo)
-                .map { it.key }
-                .toSet(),
-        )
+            taskData = EditViewModel.TaskData(
+                task.name,
+                scheduleDataWrappers,
+                task.note,
+                task.getImage(deviceDbInfo),
+                project.getAssignedTo(assignedTo)
+                    .map { it.key }
+                    .toSet(),
+            )
+
+            defaultParentScheduleState = startParameters.scheduleParameters.getParentScheduleState(taskData)
+        }
+        is EditViewModel.StartParameters.Other -> {
+            taskData = null
+
+            defaultParentScheduleState = startParameters.scheduleParameters.getParentScheduleState()
+        }
     }
 
     val customTimeDatas = customTimes.toCustomTimeDatas()
@@ -255,7 +264,7 @@ private fun DomainFactory.getCreateTaskDataSlow(
         currentParent,
         parentTaskDescription,
         startParameters.scheduleParameters.defaultScheduleOverride,
-        startParameters.scheduleParameters.getParentScheduleState(taskData), // todo cleanup
+        defaultParentScheduleState,
     )
 }
 

@@ -304,6 +304,8 @@ class DomainFactory(
             RunType.REMOTE -> tickData?.let { tick(it, true) } ?: notify()
         }
 
+        updateIsWaitingForTasks()
+
         getDomainUpdater(this).performDomainUpdate(
             CompletableDomainUpdate("tryNotifyListeners", runType.highPriority) {
                 DomainUpdater.Params(
@@ -312,8 +314,6 @@ class DomainFactory(
                 )
             }
         ).subscribe()
-
-        updateIsWaitingForTasks()
 
         updateShortcuts(now)
     }

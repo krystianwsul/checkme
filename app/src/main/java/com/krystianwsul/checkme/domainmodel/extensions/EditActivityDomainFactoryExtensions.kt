@@ -1063,7 +1063,7 @@ private fun scheduleParametersSourceToDefaultParentScheduleState(
 ): ParentScheduleState {
     return when (scheduleParameters) {
         is EditViewModel.ScheduleParameters.Override -> scheduleParameters.parentScheduleState
-        is EditViewModel.ScheduleParameters.FromTaskData ->
+        EditViewModel.ScheduleParameters.FromTaskData ->
             taskData!!.run { ParentScheduleState.create(assignedTo, scheduleDataWrappers?.map(::ScheduleEntry)) }
         is EditViewModel.ScheduleParameters.Normal -> if (scheduleParameters.showDefaultSchedule) {
             ParentScheduleState(ScheduleData.Single(scheduleParameters.defaultScheduleOverride.orNextHour()))

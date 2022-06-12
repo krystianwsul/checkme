@@ -272,7 +272,7 @@ sealed interface EditParameters : Parcelable {
 
     sealed interface Existing : EditParameters {
 
-        override val scheduleParameters get() = EditViewModel.ScheduleParameters.FromTaskData(null)
+        override val scheduleParameters get() = EditViewModel.ScheduleParameters.FromTaskData
     }
 
     @Parcelize

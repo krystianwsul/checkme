@@ -361,7 +361,10 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
             val parentScheduleState: ParentScheduleState,
         ) : ScheduleParameters
 
-        class FromTaskData(override val defaultScheduleOverride: DateTimePair?) : ScheduleParameters
+        object FromTaskData : ScheduleParameters {
+
+            override val defaultScheduleOverride: DateTimePair? = null
+        }
 
         class Normal(
             override val defaultScheduleOverride: DateTimePair?,

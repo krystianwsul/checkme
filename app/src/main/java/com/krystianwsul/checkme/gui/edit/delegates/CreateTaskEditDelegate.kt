@@ -22,7 +22,7 @@ class CreateTaskEditDelegate(
     savedInstanceState: Bundle?,
     compositeDisposable: CompositeDisposable,
     storeParentKey: (EditViewModel.ParentKey?, Boolean) -> Unit,
-) : EditDelegate(parameters, savedInstanceState, compositeDisposable, storeParentKey) {
+) : EditDelegate(savedInstanceState, compositeDisposable, storeParentKey) {
 
     override val initialName: String? = when (parameters) {
         is EditParameters.Create -> parameters.nameHint

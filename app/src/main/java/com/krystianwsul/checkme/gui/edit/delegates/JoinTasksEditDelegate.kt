@@ -22,7 +22,7 @@ class JoinTasksEditDelegate(
     savedInstanceState: Bundle?,
     compositeDisposable: CompositeDisposable,
     storeParentKey: (EditViewModel.ParentKey?, Boolean) -> Unit,
-) : EditDelegate(parameters, savedInstanceState, compositeDisposable, storeParentKey) {
+) : EditDelegate(savedInstanceState, compositeDisposable, storeParentKey) {
 
     private val taskKeys = parameters.joinables.map { it.taskKey }
     private val instanceKeys = parameters.joinables.mapNotNull { it.instanceKey }

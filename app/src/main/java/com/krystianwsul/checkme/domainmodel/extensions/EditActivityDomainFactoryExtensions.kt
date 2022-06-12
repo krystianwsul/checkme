@@ -37,15 +37,18 @@ import io.reactivex.rxjava3.core.Single
 fun UserScope.getCreateTaskData(
     startParameters: EditViewModel.StartParameters,
     currentParentSource: EditViewModel.CurrentParentSource,
+    scheduleParameters: EditViewModel.ScheduleParameters,
 ): Single<DomainResult<EditViewModel.MainData>> {
     MyCrashlytics.logMethod(this)
 
     val mainDataSingle = if (startParameters is EditViewModel.StartParameters.Create &&
         currentParentSource is EditViewModel.CurrentParentSource.None
     ) {
-        Single.just(getCreateTaskDataFast())
+        Single.just(getCreateTaskDataFast(scheduleParameters))
     } else {
-        domainFactorySingle.map { (it as DomainFactory).getCreateTaskDataSlow(startParameters, currentParentSource) }
+        domainFactorySingle.map {
+            it.let { it as DomainFactory }.getCreateTaskDataSlow(startParameters, currentParentSource, scheduleParameters)
+        }
     }
 
     return mainDataSingle.map { DomainResult.Completed(it) }
@@ -60,7 +63,7 @@ private fun Map<CustomTimeKey, Time.Custom>.toCustomTimeDatas() = mapValues { (c
     )
 }
 
-private fun UserScope.getCreateTaskDataFast(): EditViewModel.MainData {
+private fun UserScope.getCreateTaskDataFast(scheduleParameters: EditViewModel.ScheduleParameters): EditViewModel.MainData {
     DomainThreadChecker.instance.requireDomainThread()
 
     val customTimeDatas = myUserFactory.user
@@ -71,7 +74,7 @@ private fun UserScope.getCreateTaskDataFast(): EditViewModel.MainData {
         .toMutableMap<CustomTimeKey, Time.Custom>()
         .toCustomTimeDatas()
 
-    return EditViewModel.MainData(null, customTimeDatas, null, null)
+    return EditViewModel.MainData(null, customTimeDatas, null, null, scheduleParameters)
 }
 
 private fun getScheduleDataWrappersAndAssignedTo(
@@ -98,6 +101,7 @@ private fun Task.topLevelTaskIsSingleSchedule() = getTopLevelTask().intervalInfo
 private fun DomainFactory.getCreateTaskDataSlow(
     startParameters: EditViewModel.StartParameters,
     currentParentSource: EditViewModel.CurrentParentSource,
+    scheduleParameters: EditViewModel.ScheduleParameters,
 ): EditViewModel.MainData {
     DomainThreadChecker.instance.requireDomainThread()
 
@@ -237,7 +241,7 @@ private fun DomainFactory.getCreateTaskDataSlow(
         ?.let(::getTaskForce)
         ?.note
 
-    return EditViewModel.MainData(taskData, customTimeDatas, currentParent, parentTaskDescription)
+    return EditViewModel.MainData(taskData, customTimeDatas, currentParent, parentTaskDescription, scheduleParameters)
 }
 
 fun DomainFactory.getCreateTaskParentPickerData(

@@ -55,8 +55,11 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
 
         override val domainResultFetcher = object : DomainResultFetcher<MainData> {
 
-            override fun getDomainResult(userScope: UserScope) =
-                userScope.getCreateTaskData(editParameters.startParameters, currentParentSource!!)
+            override fun getDomainResult(userScope: UserScope) = userScope.getCreateTaskData(
+                editParameters.startParameters,
+                currentParentSource!!,
+                editParameters.scheduleParameters,
+            )
         }
     }
 
@@ -185,6 +188,7 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
         val customTimeDatas: Map<CustomTimeKey, CustomTimeData>,
         val currentParent: ParentScheduleManager.Parent?,
         val parentTaskDescription: String?,
+        val scheduleParameters: ScheduleParameters,
     ) : DomainData()
 
     data class ParentPickerData(val parentTreeDatas: List<ParentEntryData>) : DomainData()

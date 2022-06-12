@@ -23,7 +23,6 @@ import io.reactivex.rxjava3.kotlin.Observables
 import io.reactivex.rxjava3.kotlin.plusAssign
 
 abstract class EditDelegate(
-    editParameters: EditParameters,
     savedInstanceState: Bundle?,
     compositeDisposable: CompositeDisposable,
     private val storeParentKey: (EditViewModel.ParentKey?, Boolean) -> Unit,
@@ -70,18 +69,17 @@ abstract class EditDelegate(
 
     val customTimeDatas get() = data.customTimeDatas
 
-    protected class DefaultScheduleStateProvider(
-        private val scheduleParameters: EditViewModel.ScheduleParameters,
-        data: EditViewModel.MainData,
-    ) {
+    protected class DefaultScheduleStateProvider(data: EditViewModel.MainData) {
+
+        private val dateTimePairOverride = data.scheduleParameters.dateTimePairOverride
 
         fun getDefaultScheduleDateTimePair(): DateTimePair {
-            return scheduleParameters.dateTimePairOverride ?: HourMinute.nextHour.let { DateTimePair(it.first, it.second) }
+            return dateTimePairOverride ?: HourMinute.nextHour.let { DateTimePair(it.first, it.second) }
         }
 
         fun getDefaultSingleScheduleData() = ScheduleData.Single(getDefaultScheduleDateTimePair())
 
-        val defaultInitialParentScheduleState = when (val source = scheduleParameters.source) {
+        val defaultInitialParentScheduleState = when (val source = data.scheduleParameters.source) {
             is EditViewModel.ScheduleParameters.Source.Override -> source.parentScheduleState
             EditViewModel.ScheduleParameters.Source.FromTaskData ->
                 data.taskData!!.run { ParentScheduleState.create(assignedTo, scheduleDataWrappers?.map(::ScheduleEntry)) }
@@ -93,9 +91,7 @@ abstract class EditDelegate(
         }
     }
 
-    private val defaultScheduleStateProvider by lazy {
-        DefaultScheduleStateProvider(editParameters.scheduleParameters, data)
-    }
+    private val defaultScheduleStateProvider by lazy { DefaultScheduleStateProvider(data) }
 
     fun getDefaultScheduleDateTimePair() = defaultScheduleStateProvider.getDefaultScheduleDateTimePair()
 

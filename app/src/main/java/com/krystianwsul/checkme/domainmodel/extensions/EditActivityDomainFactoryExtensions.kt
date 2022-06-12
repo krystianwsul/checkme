@@ -166,17 +166,14 @@ private fun DomainFactory.getCreateTaskDataSlow(
                 }
             }
 
-            taskData = EditViewModel.TaskData(
-                task.name,
-                scheduleDataWrappers,
-                task.note,
-                task.getImage(deviceDbInfo),
+            taskData = task.run { EditViewModel.TaskData(name, note, getImage(deviceDbInfo)) }
+
+            defaultParentScheduleState = startParameters.scheduleParameters.getParentScheduleState(
                 project.getAssignedTo(assignedTo)
                     .map { it.key }
                     .toSet(),
+                scheduleDataWrappers,
             )
-
-            defaultParentScheduleState = startParameters.scheduleParameters.getParentScheduleState(taskData)
         }
         is EditViewModel.StartParameters.Other -> {
             taskData = null

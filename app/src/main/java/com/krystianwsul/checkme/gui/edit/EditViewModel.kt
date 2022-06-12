@@ -195,13 +195,7 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
         val isMine: Boolean,
     )
 
-    data class TaskData(
-        val name: String,
-        val scheduleDataWrappers: List<ScheduleDataWrapper>?, // todo cleanup
-        val note: String?,
-        val imageState: ImageState?,
-        val assignedTo: Set<UserKey>, // todo cleanup
-    )
+    data class TaskData(val name: String, val note: String?, val imageState: ImageState?)
 
     sealed class ParentEntryData : ParentPickerFragment.EntryData {
 
@@ -385,8 +379,8 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
 
             override val defaultScheduleOverride: DateTimePair? = null
 
-            fun getParentScheduleState(taskData: TaskData) =
-                taskData.run { ParentScheduleState.create(assignedTo, scheduleDataWrappers?.map(::ScheduleEntry)) }
+            fun getParentScheduleState(assignedTo: Set<UserKey>, scheduleDataWrappers: List<ScheduleDataWrapper>?) =
+                ParentScheduleState.create(assignedTo, scheduleDataWrappers?.map(::ScheduleEntry))
         }
 
         class Normal(

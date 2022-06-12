@@ -18,10 +18,7 @@ import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.checkme.viewmodels.ObservableDomainViewModel
 import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.firebase.models.ImageState
-import com.krystianwsul.common.time.DateTimePair
-import com.krystianwsul.common.time.DayOfWeek
-import com.krystianwsul.common.time.ExactTimeStamp
-import com.krystianwsul.common.time.HourMinute
+import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.*
 import com.mindorks.scheduler.Priority
 import io.reactivex.rxjava3.core.Observable
@@ -354,21 +351,43 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
 
     sealed interface ScheduleParameters {
 
-        val defaultScheduleOverride: DateTimePair? // todo cleanup check where value always null
+        val defaultScheduleOverride: DateTimePair?
+
+        fun getParentScheduleState(taskData: TaskData?): ParentScheduleState
+
+        sealed interface Fast : ScheduleParameters {
+
+            override fun getParentScheduleState(taskData: TaskData?) = getParentScheduleState()
+
+            fun getParentScheduleState(): ParentScheduleState
+        }
 
         class Override(
             override val defaultScheduleOverride: DateTimePair?,
-            val parentScheduleState: ParentScheduleState,
-        ) : ScheduleParameters
+            private val parentScheduleState: ParentScheduleState,
+        ) : Fast {
+
+            override fun getParentScheduleState() = parentScheduleState
+        }
 
         object FromTaskData : ScheduleParameters {
 
             override val defaultScheduleOverride: DateTimePair? = null
+
+            override fun getParentScheduleState(taskData: TaskData?) =
+                taskData!!.run { ParentScheduleState.create(assignedTo, scheduleDataWrappers?.map(::ScheduleEntry)) }
         }
 
         class Normal(
             override val defaultScheduleOverride: DateTimePair?,
-            val showDefaultSchedule: Boolean,
-        ) : ScheduleParameters
+            private val showDefaultSchedule: Boolean,
+        ) : Fast {
+
+            override fun getParentScheduleState() = if (showDefaultSchedule) {
+                ParentScheduleState(ScheduleData.Single(defaultScheduleOverride.orNextHour()))
+            } else {
+                ParentScheduleState.empty
+            }
+        }
     }
 }

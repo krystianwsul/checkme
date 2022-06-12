@@ -9,7 +9,10 @@ import com.krystianwsul.checkme.domainmodel.ScheduleText
 import com.krystianwsul.checkme.domainmodel.UserScope
 import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
 import com.krystianwsul.checkme.domainmodel.update.SingleDomainUpdate
-import com.krystianwsul.checkme.gui.edit.*
+import com.krystianwsul.checkme.gui.edit.EditParameters
+import com.krystianwsul.checkme.gui.edit.EditViewModel
+import com.krystianwsul.checkme.gui.edit.ParentScheduleManager
+import com.krystianwsul.checkme.gui.edit.ScheduleDataWrapper
 import com.krystianwsul.checkme.gui.edit.delegates.EditDelegate
 import com.krystianwsul.checkme.viewmodels.DomainResult
 import com.krystianwsul.common.criteria.SearchCriteria
@@ -28,7 +31,6 @@ import com.krystianwsul.common.firebase.models.task.*
 import com.krystianwsul.common.firebase.models.users.ProjectUser
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.Time
-import com.krystianwsul.common.time.orNextHour
 import com.krystianwsul.common.utils.*
 import io.reactivex.rxjava3.core.Single
 
@@ -40,7 +42,8 @@ fun UserScope.getCreateTaskData(
     MyCrashlytics.logMethod(this)
 
     val mainDataSingle = if (startParameters is EditViewModel.StartParameters.Create &&
-        currentParentSource is EditViewModel.CurrentParentSource.None
+        currentParentSource is EditViewModel.CurrentParentSource.None &&
+        scheduleParameters is EditViewModel.ScheduleParameters.Fast
     ) {
         Single.just(getCreateTaskDataFast(scheduleParameters))
     } else {
@@ -61,7 +64,9 @@ private fun Map<CustomTimeKey, Time.Custom>.toCustomTimeDatas() = mapValues { (c
     )
 }
 
-private fun UserScope.getCreateTaskDataFast(scheduleParameters: EditViewModel.ScheduleParameters): EditViewModel.MainData {
+private fun UserScope.getCreateTaskDataFast(
+    scheduleParameters: EditViewModel.ScheduleParameters.Fast,
+): EditViewModel.MainData {
     DomainThreadChecker.instance.requireDomainThread()
 
     val customTimeDatas = myUserFactory.user
@@ -78,7 +83,7 @@ private fun UserScope.getCreateTaskDataFast(scheduleParameters: EditViewModel.Sc
         null,
         null,
         scheduleParameters.defaultScheduleOverride,
-        scheduleParametersSourceToDefaultParentScheduleState(scheduleParameters, null), // todo cleanup
+        scheduleParameters.getParentScheduleState(),
     )
 }
 
@@ -252,7 +257,7 @@ private fun DomainFactory.getCreateTaskDataSlow(
         currentParent,
         parentTaskDescription,
         scheduleParameters.defaultScheduleOverride,
-        scheduleParametersSourceToDefaultParentScheduleState(scheduleParameters, taskData), // todo cleanup
+        scheduleParameters.getParentScheduleState(taskData), // todo cleanup
     )
 }
 
@@ -1055,20 +1060,4 @@ fun DomainFactory.convertToRoot(task: Task, now: ExactTimeStamp.Local): RootTask
     if (task is RootTask) return task
 
     return converter.convertToRoot(now, task as ProjectTask, task.project.projectKey)
-}
-
-private fun scheduleParametersSourceToDefaultParentScheduleState(
-    scheduleParameters: EditViewModel.ScheduleParameters,
-    taskData: EditViewModel.TaskData?,
-): ParentScheduleState {
-    return when (scheduleParameters) {
-        is EditViewModel.ScheduleParameters.Override -> scheduleParameters.parentScheduleState
-        EditViewModel.ScheduleParameters.FromTaskData ->
-            taskData!!.run { ParentScheduleState.create(assignedTo, scheduleDataWrappers?.map(::ScheduleEntry)) }
-        is EditViewModel.ScheduleParameters.Normal -> if (scheduleParameters.showDefaultSchedule) {
-            ParentScheduleState(ScheduleData.Single(scheduleParameters.defaultScheduleOverride.orNextHour()))
-        } else {
-            ParentScheduleState.empty
-        }
-    }
 }

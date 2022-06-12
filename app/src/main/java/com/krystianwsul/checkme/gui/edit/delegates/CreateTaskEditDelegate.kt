@@ -9,7 +9,6 @@ import com.krystianwsul.checkme.domainmodel.update.AndroidDomainUpdater
 import com.krystianwsul.checkme.domainmodel.updates.CreateChildTaskDomainUpdate
 import com.krystianwsul.checkme.gui.edit.EditParameters
 import com.krystianwsul.checkme.gui.edit.EditViewModel
-import com.krystianwsul.checkme.utils.exhaustive
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.ScheduleData
 import com.krystianwsul.common.utils.TaskKey
@@ -25,28 +24,14 @@ class CreateTaskEditDelegate(
     storeParentKey: (EditViewModel.ParentKey?, Boolean) -> Unit,
 ) : EditDelegate(parameters, savedInstanceState, compositeDisposable, storeParentKey) {
 
-    override val initialName: String? // todo cleanup
-    override val showSaveAndOpen = true
-
-    init {
-        when (parameters) {
-            is EditParameters.Create -> {
-                initialName = parameters.nameHint
-            }
-            is EditParameters.MigrateDescription -> {
-                initialName = data.parentTaskDescription!!
-            }
-            is EditParameters.Share -> {
-                initialName = parameters.nameHint
-            }
-            is EditParameters.Shortcut -> {
-                initialName = null
-            }
-            EditParameters.None -> {
-                initialName = null
-            }
-        }.exhaustive()
+    override val initialName: String? = when (parameters) {
+        is EditParameters.Create -> parameters.nameHint
+        is EditParameters.MigrateDescription -> data.parentTaskDescription!!
+        is EditParameters.Share -> parameters.nameHint
+        is EditParameters.Shortcut, EditParameters.None -> null
     }
+
+    override val showSaveAndOpen = true
 
     override fun showDialog(): ShowDialog {
         val parent = parentScheduleManager.parent ?: return ShowDialog.NONE

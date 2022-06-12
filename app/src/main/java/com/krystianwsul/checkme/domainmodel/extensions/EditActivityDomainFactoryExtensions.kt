@@ -37,18 +37,17 @@ import io.reactivex.rxjava3.core.Single
 fun UserScope.getCreateTaskData(
     startParameters: EditViewModel.StartParameters,
     currentParentSource: EditViewModel.CurrentParentSource,
-    scheduleParameters: EditViewModel.ScheduleParameters,
 ): Single<DomainResult<EditViewModel.MainData>> {
     MyCrashlytics.logMethod(this)
 
-    val mainDataSingle = if (startParameters is EditViewModel.StartParameters.Create &&
-        currentParentSource is EditViewModel.CurrentParentSource.None &&
-        scheduleParameters is EditViewModel.ScheduleParameters.Fast
+    val mainDataSingle = if (
+        startParameters is EditViewModel.StartParameters.Create &&
+        currentParentSource is EditViewModel.CurrentParentSource.None
     ) {
-        Single.just(getCreateTaskDataFast(scheduleParameters))
+        Single.just(getCreateTaskDataFast(startParameters.scheduleParameters))
     } else {
         domainFactorySingle.map {
-            it.let { it as DomainFactory }.getCreateTaskDataSlow(startParameters, currentParentSource, scheduleParameters)
+            it.let { it as DomainFactory }.getCreateTaskDataSlow(startParameters, currentParentSource)
         }
     }
 
@@ -111,7 +110,6 @@ private fun Task.topLevelTaskIsSingleSchedule() = getTopLevelTask().intervalInfo
 private fun DomainFactory.getCreateTaskDataSlow(
     startParameters: EditViewModel.StartParameters,
     currentParentSource: EditViewModel.CurrentParentSource,
-    scheduleParameters: EditViewModel.ScheduleParameters,
 ): EditViewModel.MainData {
     DomainThreadChecker.instance.requireDomainThread()
 
@@ -256,8 +254,8 @@ private fun DomainFactory.getCreateTaskDataSlow(
         customTimeDatas,
         currentParent,
         parentTaskDescription,
-        scheduleParameters.defaultScheduleOverride,
-        scheduleParameters.getParentScheduleState(taskData), // todo cleanup
+        startParameters.scheduleParameters.defaultScheduleOverride,
+        startParameters.scheduleParameters.getParentScheduleState(taskData), // todo cleanup
     )
 }
 

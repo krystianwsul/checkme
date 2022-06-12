@@ -52,11 +52,8 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
 
         override val domainResultFetcher = object : DomainResultFetcher<MainData> {
 
-            override fun getDomainResult(userScope: UserScope) = userScope.getCreateTaskData(
-                editParameters.startParameters,
-                currentParentSource!!,
-                editParameters.scheduleParameters,
-            )
+            override fun getDomainResult(userScope: UserScope) =
+                userScope.getCreateTaskData(editParameters.startParameters, currentParentSource!!)
         }
     }
 
@@ -301,23 +298,36 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
 
         val excludedTaskKeys: Set<TaskKey>
         val parentInstanceKey: InstanceKey? get() = null
+        val scheduleParameters: ScheduleParameters
 
-        data class Create(override val parentInstanceKey: InstanceKey?) : StartParameters {
+        data class Create(
+            override val parentInstanceKey: InstanceKey?,
+            override val scheduleParameters: ScheduleParameters.Fast,
+        ) : StartParameters {
 
             override val excludedTaskKeys = setOf<TaskKey>()
         }
 
-        data class MigrateDescription(val taskKey: TaskKey) : StartParameters {
+        data class MigrateDescription(
+            val taskKey: TaskKey,
+            override val scheduleParameters: ScheduleParameters.Normal,
+        ) : StartParameters {
 
             override val excludedTaskKeys = setOf<TaskKey>()
         }
 
-        data class TaskOrInstance(val copySource: EditParameters.Copy.CopySource) : StartParameters {
+        data class TaskOrInstance(
+            val copySource: EditParameters.Copy.CopySource,
+            override val scheduleParameters: ScheduleParameters.FromTaskData,
+        ) : StartParameters {
 
             override val excludedTaskKeys = setOf(copySource.taskKey)
         }
 
-        data class Join(private val joinables: List<EditParameters.Join.Joinable>) : StartParameters {
+        data class Join(
+            private val joinables: List<EditParameters.Join.Joinable>,
+            override val scheduleParameters: ScheduleParameters.Normal,
+        ) : StartParameters {
 
             override val excludedTaskKeys = joinables.map { it.taskKey }.toSet()
         }

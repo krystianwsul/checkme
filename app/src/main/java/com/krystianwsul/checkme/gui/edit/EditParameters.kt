@@ -82,8 +82,6 @@ sealed interface EditParameters : Parcelable {
 
     val startParameters: EditViewModel.StartParameters
 
-    val scheduleParameters: EditViewModel.ScheduleParameters
-
     val currentParentSource: EditViewModel.CurrentParentSource
 
     // for parent instance picker
@@ -99,10 +97,7 @@ sealed interface EditParameters : Parcelable {
 
     fun getReplacementHintForNewTask(taskKey: TaskKey): EditParentHint.Instance? = null
 
-    sealed interface CreateDelegateParameters : EditParameters {
-
-        override val startParameters: EditViewModel.StartParameters get() = EditViewModel.StartParameters.Create(null)
-    }
+    sealed interface CreateDelegateParameters : EditParameters
 
     @Parcelize
     class Create(
@@ -112,13 +107,11 @@ sealed interface EditParameters : Parcelable {
         private val showFirstSchedule: Boolean = true,
     ) : CreateDelegateParameters {
 
-        override val startParameters get() = EditViewModel.StartParameters.Create(hint?.instanceKey)
-
-        override val scheduleParameters: EditViewModel.ScheduleParameters
+        override val startParameters: EditViewModel.StartParameters.Create
             get() {
                 val defaultScheduleOverride = hint?.toScheduleHint()?.dateTimePair
 
-                return if (parentScheduleState != null) {
+                val scheduleParameters = if (parentScheduleState != null) {
                     EditViewModel.ScheduleParameters.Override(defaultScheduleOverride, parentScheduleState)
                 } else {
                     EditViewModel.ScheduleParameters.Normal(
@@ -126,6 +119,8 @@ sealed interface EditParameters : Parcelable {
                         hint?.showInitialSchedule != false && showFirstSchedule,
                     )
                 }
+
+                return EditViewModel.StartParameters.Create(hint?.instanceKey, scheduleParameters)
             }
 
         override val currentParentSource get() = hint?.toCurrentParent() ?: EditViewModel.CurrentParentSource.None
@@ -136,9 +131,11 @@ sealed interface EditParameters : Parcelable {
     @Parcelize
     class MigrateDescription(val taskKey: TaskKey) : CreateDelegateParameters {
 
-        override val startParameters get() = EditViewModel.StartParameters.MigrateDescription(taskKey)
-
-        override val scheduleParameters get() = EditViewModel.ScheduleParameters.Normal(null, false)
+        override val startParameters
+            get() = EditViewModel.StartParameters.MigrateDescription(
+                taskKey,
+                EditViewModel.ScheduleParameters.Normal(null, false),
+            )
 
         override val currentParentSource get() = EditViewModel.CurrentParentSource.Set(EditViewModel.ParentKey.Task(taskKey))
     }
@@ -157,12 +154,16 @@ sealed interface EditParameters : Parcelable {
             fun fromUri(uri: Uri) = Share(uri = uri)
         }
 
+        override val startParameters
+            get() = EditViewModel.StartParameters.Create(
+                null,
+                EditViewModel.ScheduleParameters.Normal(null, parentTaskKeyHint == null),
+            )
+
         override val currentParentSource
             get() = parentTaskKeyHint?.let {
                 EditViewModel.CurrentParentSource.Set(EditViewModel.ParentKey.Task(it))
             } ?: EditViewModel.CurrentParentSource.None
-
-        override val scheduleParameters get() = EditViewModel.ScheduleParameters.Normal(null, parentTaskKeyHint == null)
 
         override fun getInitialEditImageStateSingle(
             savedEditImageState: EditImageState?,
@@ -214,7 +215,11 @@ sealed interface EditParameters : Parcelable {
     @Parcelize
     class Shortcut(private val parentTaskKeyHint: TaskKey) : CreateDelegateParameters {
 
-        override val scheduleParameters get() = EditViewModel.ScheduleParameters.Normal(null, false)
+        override val startParameters
+            get() = EditViewModel.StartParameters.Create(
+                null,
+                EditViewModel.ScheduleParameters.Normal(null, false),
+            )
 
         override val currentParentSource
             get() = EditViewModel.CurrentParentSource.Set(EditViewModel.ParentKey.Task(parentTaskKeyHint))
@@ -223,7 +228,11 @@ sealed interface EditParameters : Parcelable {
     @Parcelize
     object None : CreateDelegateParameters {
 
-        override val scheduleParameters get() = EditViewModel.ScheduleParameters.Normal(null, true)
+        override val startParameters
+            get() = EditViewModel.StartParameters.Create(
+                null,
+                EditViewModel.ScheduleParameters.Normal(null, true),
+            )
 
         override val currentParentSource get() = EditViewModel.CurrentParentSource.None
     }
@@ -231,12 +240,13 @@ sealed interface EditParameters : Parcelable {
     @Parcelize
     class Join(val joinables: List<Joinable>, private val hint: EditParentHint? = null) : EditParameters {
 
-        override val startParameters get() = EditViewModel.StartParameters.Join(joinables)
-
-        override val scheduleParameters
-            get() = EditViewModel.ScheduleParameters.Normal(
-                hint?.toScheduleHint()?.dateTimePair,
-                hint?.showInitialSchedule != false,
+        override val startParameters
+            get() = EditViewModel.StartParameters.Join(
+                joinables,
+                EditViewModel.ScheduleParameters.Normal(
+                    hint?.toScheduleHint()?.dateTimePair,
+                    hint?.showInitialSchedule != false,
+                )
             )
 
         override val currentParentSource
@@ -270,10 +280,7 @@ sealed interface EditParameters : Parcelable {
         }
     }
 
-    sealed interface Existing : EditParameters {
-
-        override val scheduleParameters get() = EditViewModel.ScheduleParameters.FromTaskData
-    }
+    sealed interface Existing : EditParameters
 
     @Parcelize
     class Copy(val copySource: CopySource) : Existing {
@@ -282,7 +289,11 @@ sealed interface EditParameters : Parcelable {
 
         constructor(instanceKey: InstanceKey) : this(CopySource.Instance(instanceKey))
 
-        override val startParameters get() = EditViewModel.StartParameters.TaskOrInstance(copySource)
+        override val startParameters
+            get() = EditViewModel.StartParameters.TaskOrInstance(
+                copySource,
+                EditViewModel.ScheduleParameters.FromTaskData,
+            )
 
         override val currentParentSource
             get() = when (copySource) {
@@ -310,7 +321,11 @@ sealed interface EditParameters : Parcelable {
 
         constructor(instanceKey: InstanceKey) : this(instanceKey.taskKey, instanceKey)
 
-        override val startParameters get() = EditViewModel.StartParameters.TaskOrInstance(Copy.CopySource.Task(taskKey))
+        override val startParameters
+            get() = EditViewModel.StartParameters.TaskOrInstance(
+                Copy.CopySource.Task(taskKey),
+                EditViewModel.ScheduleParameters.FromTaskData,
+            )
 
         override val currentParentSource get() = EditViewModel.CurrentParentSource.FromTask(taskKey)
 

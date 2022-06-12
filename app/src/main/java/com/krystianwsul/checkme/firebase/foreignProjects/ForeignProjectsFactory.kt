@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.firebase.foreignProjects
 
+import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.firebase.factories.ForeignProjectFactory
 import com.krystianwsul.checkme.firebase.factories.PrivateForeignProjectFactory
 import com.krystianwsul.checkme.firebase.factories.SharedForeignProjectFactory
@@ -60,6 +61,8 @@ class ForeignProjectsFactory(
 
         val initialRemoteChange = projectsLoader.initialProjectsEvent
             .doOnSuccess {
+                MyCrashlytics.log("ForeignProjectsFactory.initialProjectsEvent, keys: " + it.initialProjectDatas.map { it.initialProjectEvent.projectRecord.projectKey }) // debug log key: foreign projects logging
+
                 it.initialProjectDatas.forEach { (projectLoader, initialProjectEvent) ->
                     newProjectFactory(projectLoader, initialProjectEvent)
                 }
@@ -70,6 +73,8 @@ class ForeignProjectsFactory(
 
         val addProjectRemoteChanges = projectsLoader.addProjectEvents
             .doOnNext { (changeType, addProjectEvent) ->
+                MyCrashlytics.log("ForeignProjectsFactory.addProjectEvents, key: " + addProjectEvent.initialProjectEvent.projectRecord.projectKey) // debug log key: foreign projects logging
+
                 check(changeType == ChangeType.REMOTE)
 
                 newProjectFactory(addProjectEvent.projectLoader, addProjectEvent.initialProjectEvent)
@@ -80,8 +85,10 @@ class ForeignProjectsFactory(
 
         val removeProjectRemoteChanges = projectsLoader.removeProjectEvents
             .doOnNext {
+                MyCrashlytics.log("ForeignProjectsFactory.removeProjectEvents, keys: " + it.projectKeys) // debug log key: foreign projects logging
+
                 it.projectKeys.forEach {
-                    check(projectFactories.containsKey(it))
+                    check(projectFactories.containsKey(it)) // debug log key: foreign projects logging
 
                     projectFactories.getValue(it)
                         .project

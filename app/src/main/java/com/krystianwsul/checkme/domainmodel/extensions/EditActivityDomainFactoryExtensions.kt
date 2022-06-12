@@ -77,7 +77,7 @@ private fun UserScope.getCreateTaskDataFast(scheduleParameters: EditViewModel.Sc
         customTimeDatas,
         null,
         null,
-        scheduleParameters.dateTimePairOverride,
+        scheduleParameters.defaultScheduleOverride,
         scheduleParametersSourceToDefaultParentScheduleState(scheduleParameters, null), // todo cleanup
     )
 }
@@ -251,7 +251,7 @@ private fun DomainFactory.getCreateTaskDataSlow(
         customTimeDatas,
         currentParent,
         parentTaskDescription,
-        scheduleParameters.dateTimePairOverride,
+        scheduleParameters.defaultScheduleOverride,
         scheduleParametersSourceToDefaultParentScheduleState(scheduleParameters, taskData), // todo cleanup
     )
 }
@@ -1061,12 +1061,12 @@ private fun scheduleParametersSourceToDefaultParentScheduleState(
     scheduleParameters: EditViewModel.ScheduleParameters,
     taskData: EditViewModel.TaskData?,
 ): ParentScheduleState {
-    return when (val source = scheduleParameters.source) {
-        is EditViewModel.ScheduleParameters.Source.Override -> source.parentScheduleState
-        EditViewModel.ScheduleParameters.Source.FromTaskData ->
+    return when (scheduleParameters) {
+        is EditViewModel.ScheduleParameters.Override -> scheduleParameters.parentScheduleState
+        is EditViewModel.ScheduleParameters.FromTaskData ->
             taskData!!.run { ParentScheduleState.create(assignedTo, scheduleDataWrappers?.map(::ScheduleEntry)) }
-        is EditViewModel.ScheduleParameters.Source.Normal -> if (source.showDefaultSchedule) {
-            ParentScheduleState(ScheduleData.Single(scheduleParameters.dateTimePairOverride.orNextHour()))
+        is EditViewModel.ScheduleParameters.Normal -> if (scheduleParameters.showDefaultSchedule) {
+            ParentScheduleState(ScheduleData.Single(scheduleParameters.defaultScheduleOverride.orNextHour()))
         } else {
             ParentScheduleState.empty
         }

@@ -352,16 +352,20 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
         val startParameters: StartParameters,
     ) : ObservableDomainViewModel.Parameters
 
-    class ScheduleParameters(val dateTimePairOverride: DateTimePair?, val source: Source) {
+    sealed interface ScheduleParameters {
 
-        sealed class Source {
+        val defaultScheduleOverride: DateTimePair? // todo cleanup check where value always null
 
-            class Override(val parentScheduleState: ParentScheduleState) : Source()
+        class Override(
+            override val defaultScheduleOverride: DateTimePair?,
+            val parentScheduleState: ParentScheduleState,
+        ) : ScheduleParameters
 
-            object FromTaskData : Source()
+        class FromTaskData(override val defaultScheduleOverride: DateTimePair?) : ScheduleParameters
 
-            class Normal(val showDefaultSchedule: Boolean) : Source()
-        }
-
+        class Normal(
+            override val defaultScheduleOverride: DateTimePair?,
+            val showDefaultSchedule: Boolean,
+        ) : ScheduleParameters
     }
 }

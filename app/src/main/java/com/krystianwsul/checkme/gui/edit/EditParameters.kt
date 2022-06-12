@@ -109,7 +109,7 @@ sealed interface EditParameters : Parcelable {
         val hint: EditParentHint? = null,
         private val parentScheduleState: ParentScheduleState? = null,
         val nameHint: String? = null,
-        val showFirstSchedule: Boolean = true,
+        private val showFirstSchedule: Boolean = true,
     ) : CreateDelegateParameters {
 
         override val startParameters get() = EditViewModel.StartParameters.Create(hint?.instanceKey)
@@ -150,7 +150,7 @@ sealed interface EditParameters : Parcelable {
     class Share private constructor(
         val nameHint: String? = null,
         private val parentTaskKeyHint: TaskKey? = null,
-        val uri: Uri? = null,
+        private val uri: Uri? = null,
     ) : CreateDelegateParameters {
 
         companion object {
@@ -244,7 +244,7 @@ sealed interface EditParameters : Parcelable {
     }
 
     @Parcelize
-    class Join(val joinables: List<Joinable>, val hint: EditParentHint? = null) : EditParameters {
+    class Join(val joinables: List<Joinable>, private val hint: EditParentHint? = null) : EditParameters {
 
         override val startParameters get() = EditViewModel.StartParameters.Join(joinables)
 

@@ -345,4 +345,17 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
         val searchCriteria: SearchCriteria,
         val startParameters: StartParameters,
     ) : ObservableDomainViewModel.Parameters
+
+    class ScheduleParameters {
+
+        sealed class Source {
+
+            class Override(val parentScheduleState: ParentScheduleState) : Source()
+
+            object FromTaskData : Source()
+
+            class Normal(val showDefaultSchedule: Boolean) : Source()
+        }
+
+    }
 }

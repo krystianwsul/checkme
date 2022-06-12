@@ -28,7 +28,7 @@ class JoinTasksEditDelegate(
         parameters.hint
             ?.toScheduleHint()
             ?.dateTimePair,
-        DefaultScheduleStateProvider.InitializationType.Normal(parameters.hint?.showInitialSchedule != false),
+        EditViewModel.ScheduleParameters.Source.Normal(parameters.hint?.showInitialSchedule != false),
         data,
     )
 

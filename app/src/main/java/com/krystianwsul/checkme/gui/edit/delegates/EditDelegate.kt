@@ -77,7 +77,7 @@ abstract class EditDelegate(
 
     protected class DefaultScheduleStateProvider(
         private val defaultScheduleDateTimePairOverride: DateTimePair?,
-        initializationType: InitializationType,
+        source: EditViewModel.ScheduleParameters.Source,
         data: EditViewModel.MainData,
     ) {
 
@@ -88,24 +88,15 @@ abstract class EditDelegate(
 
         fun getDefaultSingleScheduleData() = ScheduleData.Single(getDefaultScheduleDateTimePair())
 
-        val defaultInitialParentScheduleState = when (initializationType) {
-            is InitializationType.Override -> initializationType.parentScheduleState
-            InitializationType.FromTaskData ->
+        val defaultInitialParentScheduleState = when (source) {
+            is EditViewModel.ScheduleParameters.Source.Override -> source.parentScheduleState
+            EditViewModel.ScheduleParameters.Source.FromTaskData ->
                 data.taskData!!.run { ParentScheduleState.create(assignedTo, scheduleDataWrappers?.map(::ScheduleEntry)) }
-            is InitializationType.Normal -> if (initializationType.showDefaultSchedule) {
+            is EditViewModel.ScheduleParameters.Source.Normal -> if (source.showDefaultSchedule) {
                 ParentScheduleState(getDefaultSingleScheduleData())
             } else {
                 ParentScheduleState.empty
             }
-        }
-
-        sealed class InitializationType {
-
-            class Override(val parentScheduleState: ParentScheduleState) : InitializationType()
-
-            object FromTaskData : InitializationType()
-
-            class Normal(val showDefaultSchedule: Boolean) : InitializationType()
         }
     }
 

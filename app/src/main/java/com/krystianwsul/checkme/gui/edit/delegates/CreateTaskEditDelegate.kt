@@ -35,10 +35,10 @@ class CreateTaskEditDelegate(
             is EditParameters.Create -> {
                 initialName = parameters.nameHint
 
-                val initializationType = if (parameters.parentScheduleState != null) {
-                    DefaultScheduleStateProvider.InitializationType.Override(parameters.parentScheduleState)
+                val source = if (parameters.parentScheduleState != null) {
+                    EditViewModel.ScheduleParameters.Source.Override(parameters.parentScheduleState)
                 } else {
-                    DefaultScheduleStateProvider.InitializationType.Normal(
+                    EditViewModel.ScheduleParameters.Source.Normal(
                         parameters.run { hint?.showInitialSchedule != false && showFirstSchedule }
                     )
                 }
@@ -47,7 +47,7 @@ class CreateTaskEditDelegate(
                     parameters.hint
                         ?.toScheduleHint()
                         ?.dateTimePair,
-                    initializationType,
+                    source,
                     data,
                 )
             }
@@ -56,7 +56,7 @@ class CreateTaskEditDelegate(
 
                 defaultScheduleStateProvider = DefaultScheduleStateProvider(
                     null,
-                    DefaultScheduleStateProvider.InitializationType.Normal(false),
+                    EditViewModel.ScheduleParameters.Source.Normal(false),
                     data,
                 )
             }
@@ -67,7 +67,7 @@ class CreateTaskEditDelegate(
 
                 defaultScheduleStateProvider = DefaultScheduleStateProvider(
                     null,
-                    DefaultScheduleStateProvider.InitializationType.Normal(initialParentKey == null),
+                    EditViewModel.ScheduleParameters.Source.Normal(initialParentKey == null),
                     data,
                 )
             }
@@ -76,7 +76,7 @@ class CreateTaskEditDelegate(
 
                 defaultScheduleStateProvider = DefaultScheduleStateProvider(
                     null,
-                    DefaultScheduleStateProvider.InitializationType.Normal(false),
+                    EditViewModel.ScheduleParameters.Source.Normal(false),
                     data,
                 )
             }
@@ -85,7 +85,7 @@ class CreateTaskEditDelegate(
 
                 defaultScheduleStateProvider = DefaultScheduleStateProvider(
                     null,
-                    DefaultScheduleStateProvider.InitializationType.Normal(true),
+                    EditViewModel.ScheduleParameters.Source.Normal(true),
                     data,
                 )
             }

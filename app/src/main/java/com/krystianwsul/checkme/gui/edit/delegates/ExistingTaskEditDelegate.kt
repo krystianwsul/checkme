@@ -19,7 +19,7 @@ abstract class ExistingTaskEditDelegate(
 
     override val defaultScheduleStateProvider = DefaultScheduleStateProvider(
         null,
-        DefaultScheduleStateProvider.InitializationType.FromTaskData,
+        EditViewModel.ScheduleParameters.Source.FromTaskData,
         data,
     )
 

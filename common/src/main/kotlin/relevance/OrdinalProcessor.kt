@@ -64,6 +64,20 @@ class OrdinalProcessor(
         mutableOrdinalEntries.values.forEach { mutableOrdinalEntry ->
             // pruning
 
+            mutableOrdinalEntry.parentState
+                .let { it as? ProjectOrdinalManager.Key.ParentState.Set }
+                ?.parentInstanceKey
+                ?.let {
+                    if (
+                        relevantTasks[it.taskKey]?.getInstance(it.instanceScheduleKey)?.isVisible(
+                            now,
+                            Instance.VisibilityOptions(hack24 = true),
+                        ) != true
+                    ) {
+                        mutableOrdinalEntry.parentState = ProjectOrdinalManager.Key.ParentState.Unset
+                    }
+                }
+
             mutableOrdinalEntry.mutableKeyEntries.forEach { mutableKeyEntry ->
                 mutableKeyEntry.mutableTaskInfo?.let {
                     val task = relevantTasks[it.taskKey]
@@ -71,8 +85,7 @@ class OrdinalProcessor(
                     if (task == null) {
                         mutableKeyEntry.mutableTaskInfo = null
                     } else if (it.scheduleDateTimePair != null) {
-                        val instanceScheduleKey =
-                            InstanceScheduleKey(it.scheduleDateTimePair!!.date, it.scheduleDateTimePair!!.timePair)
+                        val instanceScheduleKey = it.scheduleDateTimePair!!.run { InstanceScheduleKey(date, timePair) }
 
                         val isVisible = task.getInstance(instanceScheduleKey).isVisible(
                             now,
@@ -128,7 +141,7 @@ class OrdinalProcessor(
         val mutableKeyEntries: MutableList<MutableKeyEntry>,
         val ordinal: Ordinal,
         val updated: ExactTimeStamp.Local,
-        val parentState: ProjectOrdinalManager.Key.ParentState,
+        var parentState: ProjectOrdinalManager.Key.ParentState,
     ) {
 
         constructor(ordinalEntry: ProjectOrdinalManager.OrdinalEntry) : this(

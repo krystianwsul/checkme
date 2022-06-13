@@ -115,7 +115,8 @@ open class NotificationWrapperImpl : NotificationWrapper() {
                                     it.instance.run {
                                         ProjectOrdinalManager.Key.Entry(instanceKey, instanceDateTime.toDateTimePair())
                                     }
-                                }.toSet()
+                                }.toSet(),
+                                instance.instanceKey,
                             )
 
                             DomainFactory.instance

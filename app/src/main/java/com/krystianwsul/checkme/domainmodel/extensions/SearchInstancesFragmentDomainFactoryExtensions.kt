@@ -71,7 +71,6 @@ fun DomainFactory.getCappedInstanceAndTaskDatas(
             now,
             children,
             filterResult.matchesSearch,
-            null,
         )
     }
 

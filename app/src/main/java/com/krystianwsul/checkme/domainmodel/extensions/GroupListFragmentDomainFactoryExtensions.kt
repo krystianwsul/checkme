@@ -33,15 +33,18 @@ fun DomainUpdater.setOrdinalProject(
     notificationType: DomainListenerManager.NotificationType,
     instanceKeys: Set<InstanceKey>,
     ordinal: Ordinal,
+    parentInstanceKey: InstanceKey?,
 ): Completable = CompletableDomainUpdate.create("setOrdinalProject") { now ->
     val instances = instanceKeys.map(::getInstance)
 
     val project = instances.map { it.getProject() }
         .distinct()
         .single()
-        .let { it as SharedOwnedProject }
+        .let { it as SharedOwnedProject } // todo group ordinal
 
-    val key = ProjectOrdinalManager.Key(instances)
+    val parentInstance = parentInstanceKey?.let(::getInstance)
+
+    val key = ProjectOrdinalManager.Key(instances, parentInstance)
 
     myUserFactory.user.getProjectOrdinalManager(project).setOrdinal(project, key, ordinal, now)
 

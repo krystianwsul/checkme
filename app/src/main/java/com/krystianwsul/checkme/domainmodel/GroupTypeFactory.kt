@@ -59,7 +59,8 @@ class GroupTypeFactory(
         projectDescriptor: GroupType.ProjectDescriptor,
         instanceDescriptors: List<GroupType.InstanceDescriptor>,
     ): GroupType.Project {
-        val project = projectDescriptor.fix().project
+        val fixedProjectDescriptor = projectDescriptor.fix()
+        val project = fixedProjectDescriptor.project
 
         val fixedInstanceDescriptors = instanceDescriptors.map { it.fix() }
 
@@ -68,7 +69,8 @@ class GroupTypeFactory(
         val key = ProjectOrdinalManager.Key(
             fixedInstanceDescriptors.map {
                 ProjectOrdinalManager.Key.Entry(it.instanceData.instanceKey, it.instanceDateTimePair)
-            }.toSet()
+            }.toSet(),
+            fixedProjectDescriptor.parentInstance?.instanceKey,
         )
 
         return ProjectBridge(
@@ -92,7 +94,6 @@ class GroupTypeFactory(
         val instanceDateTimePair: DateTimePair,
         groupIntoProject: Boolean,
         val instance: Instance,
-        excludeProjectKey: ProjectKey.Shared?,
     ) : GroupType.InstanceDescriptor, Comparable<InstanceDescriptor> {
 
         override val timeStamp get() = instanceData.instanceTimeStamp
@@ -100,13 +101,14 @@ class GroupTypeFactory(
         override val projectDescriptor = instance.takeIf { groupIntoProject }
             ?.getProject()
             ?.let { it as? SharedOwnedProject } // todo group ordinal
-            ?.takeIf { it.projectKey != excludeProjectKey }
-            ?.let(GroupTypeFactory::ProjectDescriptor)
+            ?.takeIf { it != instance.parentInstance?.getProject() }
+            ?.let { ProjectDescriptor(it, instance.parentInstance) }
 
         override fun compareTo(other: InstanceDescriptor) = instanceData.compareTo(other.instanceData)
     }
 
-    data class ProjectDescriptor(val project: SharedOwnedProject) : GroupType.ProjectDescriptor
+    data class ProjectDescriptor(val project: SharedOwnedProject, val parentInstance: Instance?) :
+        GroupType.ProjectDescriptor
 
     sealed interface Bridge : Comparable<Bridge>, DropParent {
 
@@ -226,7 +228,7 @@ class GroupTypeFactory(
         private val projectKey: ProjectKey.Shared,
         private val singeBridges: List<SingleBridge>,
         override val ordinal: Ordinal,
-        private val parentInstanceKey: InstanceKey?,
+        val parentInstanceKey: InstanceKey?,
     ) : GroupType.Project, SingleParent, TimeChild, DropParent by DropParent.Project(timeStamp, projectKey) {
 
         private val instanceDatas = singeBridges.map { it.instanceData }

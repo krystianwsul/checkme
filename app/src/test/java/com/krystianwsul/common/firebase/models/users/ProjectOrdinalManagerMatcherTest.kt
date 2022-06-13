@@ -16,7 +16,8 @@ class ProjectOrdinalManagerMatcherTest {
     companion object {
 
         private fun newKey(vararg entries: Pair<InstanceKey, DateTimePair>) = ProjectOrdinalManager.Key(
-            entries.map { ProjectOrdinalManager.Key.Entry(it.first, it.second) }.toSet()
+            entries.map { ProjectOrdinalManager.Key.Entry(it.first, it.second) }.toSet(),
+            null,
         )
     }
 

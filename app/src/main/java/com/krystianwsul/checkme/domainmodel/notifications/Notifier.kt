@@ -409,7 +409,7 @@ class Notifier(private val domainFactory: DomainFactory, private val notificatio
                 is GroupTypeFactory.Notification.Project -> domainFactory.myUserFactory
                     .user
                     .getProjectOrdinalManager(it.project)
-                    .getOrdinal(it.project, ProjectOrdinalManager.Key(it.instances))
+                    .getOrdinal(it.project, ProjectOrdinalManager.Key(it.instances, null))
             }
 
             it to ordinal

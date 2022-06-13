@@ -466,7 +466,6 @@ class DomainFactory(
         now: ExactTimeStamp.Local,
         childInstanceDescriptors: Collection<GroupTypeFactory.InstanceDescriptor>,
         matchesSearch: Boolean,
-        excludeProjectKey: ProjectKey.Shared?,
     ): GroupTypeFactory.InstanceDescriptor {
         val (notDoneInstanceDescriptors, doneInstanceDescriptors) = childInstanceDescriptors.splitDone()
 
@@ -484,7 +483,6 @@ class DomainFactory(
             instance.instanceDateTime.toDateTimePair(),
             instance.groupByProject,
             instance,
-            excludeProjectKey,
         )
     }
 
@@ -531,7 +529,6 @@ class DomainFactory(
                 now,
                 children,
                 filterResult.matchesSearch,
-                instance.getProject().projectKey as? ProjectKey.Shared, // group hack
             )
         },
         searchContext,

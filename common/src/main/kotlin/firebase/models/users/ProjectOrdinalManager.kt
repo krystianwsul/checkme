@@ -108,11 +108,16 @@ class ProjectOrdinalManager(
                 projectCustomTimeIdAndKeyProvider: JsonTime.ProjectCustomTimeIdAndKeyProvider,
                 json: ProjectOrdinalEntryJson,
             ): OrdinalEntry {
+                val parentInstanceKey = json.parentInstanceKey?.let {
+                    InstanceKey.fromJson(projectCustomTimeIdAndKeyProvider, it)
+                }
+
                 return OrdinalEntry(
                     Key(
                         json.keyEntries
                             .map { Key.Entry.fromJson(projectCustomTimeIdAndKeyProvider, it.value) }
-                            .toSet()
+                            .toSet(),
+                        parentInstanceKey,
                     ),
                     Value(Ordinal.fromFields(json.ordinal, json.ordinalString)!!, ExactTimeStamp.Local(json.updated))
                 )
@@ -129,13 +134,17 @@ class ProjectOrdinalManager(
                 ordinalDouble,
                 ordinalString,
                 value.updated.long,
+                key.parentInstanceKey?.toJson(),
             )
         }
     }
 
-    data class Key(val entries: Set<Entry>) {
+    data class Key(val entries: Set<Entry>, val parentInstanceKey: InstanceKey?) {
 
-        constructor(instances: Collection<Instance>) : this(instances.map(::Entry).toSet())
+        constructor(instances: Collection<Instance>, parentInstance: Instance?) : this(
+            instances.map(::Entry).toSet(),
+            parentInstance?.instanceKey
+        )
 
         data class Entry(
             val taskInfo: TaskInfo?,

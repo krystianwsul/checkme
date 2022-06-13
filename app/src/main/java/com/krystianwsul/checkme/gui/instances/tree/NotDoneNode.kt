@@ -411,10 +411,13 @@ sealed class NotDoneNode(val contentDelegate: ContentDelegate) :
             override fun getOrdinal() = bridge.ordinal
 
             override fun setOrdinal(ordinal: Ordinal) {
+                check(bridge is GroupTypeFactory.ProjectBridge)
+
                 AndroidDomainUpdater.setOrdinalProject(
                     groupListFragment.parameters.dataId.toFirst(),
-                    bridge.let { it as GroupTypeFactory.ProjectBridge }.instanceKeys,
+                    bridge.instanceKeys,
                     ordinal,
+                    bridge.parentInstanceKey,
                 ).subscribe()
             }
 

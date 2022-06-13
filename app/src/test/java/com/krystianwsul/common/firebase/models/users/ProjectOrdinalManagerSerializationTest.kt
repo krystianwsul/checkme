@@ -1,8 +1,7 @@
 package com.krystianwsul.common.firebase.models.users
 
 import com.krystianwsul.common.time.*
-import com.krystianwsul.common.utils.ProjectKey
-import com.krystianwsul.common.utils.TaskKey
+import com.krystianwsul.common.utils.*
 import io.mockk.mockk
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -65,6 +64,24 @@ class ProjectOrdinalManagerSerializationTest {
         assertEquals(
             dayOfWeek,
             outputDateOrDayOfWeek.let { it as DateOrDayOfWeek.DayOfWeek }.dayOfWeek,
+        )
+    }
+
+    @Test
+    fun testParentInstanceKeySerialization() {
+        val instanceKey = InstanceKey(
+            TaskKey.Root("taskKey"),
+            InstanceScheduleKey(Date(2022, 6, 13), TimePair(1, 0)),
+        )
+
+        val key = ProjectOrdinalManager.Key(emptySet(), instanceKey)
+
+        val entry =
+            ProjectOrdinalManager.OrdinalEntry(key, ProjectOrdinalManager.Value(Ordinal.ZERO, ExactTimeStamp.Local.now))
+
+        assertEquals(
+            key,
+            ProjectOrdinalManager.OrdinalEntry.fromJson(mockk(), entry.toJson()).key,
         )
     }
 }

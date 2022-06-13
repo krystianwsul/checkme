@@ -72,6 +72,13 @@ class ProjectOrdinalManager(
 
         listOf<Matcher<*>>(
             Matcher(false) { entry ->
+                if (entry.taskInfo?.scheduleDateTimePair == null && entry.instanceDateOrDayOfWeek.date != null) {
+                    null
+                } else {
+                    entry
+                }
+            }, // instanceKey and instance dateTimePair
+            Matcher(false) { entry ->
                 entry.instanceDateOrDayOfWeek
                     .date
                     ?.let { DateTimePair(it, entry.instanceTimePair) }
@@ -82,9 +89,7 @@ class ProjectOrdinalManager(
                     ?.let { TimeStamp(it, entry.getHourMinute(project)) }
             }, // instance Timestamp
             Matcher(true) {
-                it.taskInfo?.let { taskInfo ->
-                    taskInfo.scheduleDateTimePair?.let { taskInfo to it }
-                }
+                it.taskInfo?.takeIf { it.scheduleDateTimePair != null }
             }, // instanceKey
             Matcher(true) { it.instanceTimePair }, // instance timePair
             Matcher(true) { it.getHourMinute(project) }, // instance hourMinute

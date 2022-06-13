@@ -14,6 +14,8 @@ import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
+import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.GroupType
 import com.krystianwsul.checkme.gui.instances.ShowGroupActivity
 import com.krystianwsul.checkme.gui.instances.ShowInstanceActivity
 import com.krystianwsul.checkme.gui.instances.ShowNotificationGroupActivity
@@ -24,6 +26,7 @@ import com.krystianwsul.checkme.ticks.AlarmReceiver
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.project.SharedOwnedProject
+import com.krystianwsul.common.firebase.models.users.ProjectOrdinalManager
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.Ordinal
@@ -75,7 +78,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
             (projectKey.hashCode() + timeStamp.long).toInt()
 
         private fun getInstanceText(instance: Instance, now: ExactTimeStamp.Local): String {
-            val childNames = getInstanceNames(instance.getChildInstances(), now, true)
+            val childNames = getChildInstanceNames(instance, now)
 
             return getInstanceText(childNames, instance.task.note)
         }
@@ -90,13 +93,47 @@ open class NotificationWrapperImpl : NotificationWrapper() {
             }
         }
 
-        private fun getInstanceNames(
-            instances: List<Instance>,
-            now: ExactTimeStamp.Local,
-            assumeChild: Boolean,
-        ) = instances.asSequence()
+        private fun getChildInstanceNames(instance: Instance, now: ExactTimeStamp.Local): List<String> {
+            return GroupTypeFactory.getGroupTypeTree(
+                instance.getChildInstances()
+                    .filter { it.done == null }
+                    .filter { it.isVisible(now, Instance.VisibilityOptions(assumeChildOfVisibleParent = true)) }
+                    .map { GroupTypeFactory.InstanceDescriptor(it, true) },
+                GroupType.GroupingMode.Instance(instance.getProject().projectKey),
+            )
+                .sortedBy {
+                    when (it) {
+                        is GroupTypeFactory.ProjectBridge -> {
+                            val key = ProjectOrdinalManager.Key(
+                                it.instanceDescriptors.map {
+                                    it.instance.run {
+                                        ProjectOrdinalManager.Key.Entry(instanceKey, instanceDateTime.toDateTimePair())
+                                    }
+                                }.toSet()
+                            )
+
+                            DomainFactory.instance
+                                .myUserFactory
+                                .user
+                                .getProjectOrdinalManager(it.project)
+                                .getOrdinal(it.project, key)
+                        }
+                        is GroupTypeFactory.SingleBridge -> it.instanceDescriptor.instance.ordinal
+                        else -> throw UnsupportedOperationException()
+                    }
+                }
+                .map {
+                    when (it) {
+                        is GroupTypeFactory.ProjectBridge -> it.project.name
+                        is GroupTypeFactory.SingleBridge -> it.instanceDescriptor.instance.name
+                        else -> throw UnsupportedOperationException()
+                    }
+                }
+        }
+
+        private fun getInstanceNames(instances: List<Instance>, now: ExactTimeStamp.Local) = instances.asSequence()
             .filter { it.done == null }
-            .filter { it.isVisible(now, Instance.VisibilityOptions(assumeChildOfVisibleParent = assumeChild)) }
+            .filter { it.isVisible(now, Instance.VisibilityOptions()) }
             .sortedBy { it.ordinal }
             .map { it.name }
             .toList()
@@ -790,7 +827,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
 
         val name = instance.name
 
-        val childNames = getInstanceNames(instance.getChildInstances(), now, true)
+        val childNames = getChildInstanceNames(instance, now)
 
         val project = instance.getProject()
             .let { it as? SharedOwnedProject }
@@ -813,7 +850,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
 
         val name = project.name
 
-        val childNames = getInstanceNames(instances, now, false)
+        val childNames = getInstanceNames(instances, now)
     }
 
     class NotificationException(

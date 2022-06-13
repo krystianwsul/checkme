@@ -276,21 +276,24 @@ class ProjectOrdinalManagerMatcherTest {
 
         val parentInstanceKey = InstanceKey(TaskKey.Root("parentTaskKey"), date, timePair)
 
-        val joinedPairOrdinal = Ordinal(1)
+        val originalJoinedPairsOrdinal = Ordinal(1)
 
         fun List<InstanceKey>.toPairs() = map { it to dateTimePair }.toTypedArray()
 
-        val joinedPairs = listOf(instanceKey1, instanceKey2).toPairs()
+        val originalJoinedPairs = listOf(instanceKey1, instanceKey2).toPairs()
 
         // drop two top-level instances, give them an ordinal
 
-        projectOrdinalManager.setOrdinal(project, newKey(*joinedPairs), joinedPairOrdinal, now)
+        projectOrdinalManager.setOrdinal(project, newKey(*originalJoinedPairs), originalJoinedPairsOrdinal, now)
 
-        assertEquals(joinedPairOrdinal, projectOrdinalManager.getOrdinal(project, newKey(*joinedPairs)))
+        assertEquals(originalJoinedPairsOrdinal, projectOrdinalManager.getOrdinal(project, newKey(*originalJoinedPairs)))
 
         // make sure ordinal carried over when they get joined
 
-        assertEquals(joinedPairOrdinal, projectOrdinalManager.getOrdinal(project, newKey(parentInstanceKey, *joinedPairs)))
+        assertEquals(
+            originalJoinedPairsOrdinal,
+            projectOrdinalManager.getOrdinal(project, newKey(parentInstanceKey, *originalJoinedPairs))
+        )
 
         now += 1.hours
 
@@ -303,7 +306,41 @@ class ProjectOrdinalManagerMatcherTest {
 
         projectOrdinalManager.setOrdinal(project, newKey(*topLevelPairs), topLevelOrdinal, now)
 
-        assertEquals(joinedPairOrdinal, projectOrdinalManager.getOrdinal(project, newKey(parentInstanceKey, *joinedPairs)))
+        assertEquals(
+            originalJoinedPairsOrdinal,
+            projectOrdinalManager.getOrdinal(project, newKey(parentInstanceKey, *originalJoinedPairs)),
+        )
+
+        assertEquals(topLevelOrdinal, projectOrdinalManager.getOrdinal(project, newKey(*topLevelPairs)))
+
+        // let's give the joined ones a new ordinal
+
+        now += 1.hours
+
+        val newJoinedPairsOrdinal = Ordinal(3)
+
+        projectOrdinalManager.setOrdinal(project, newKey(*originalJoinedPairs), newJoinedPairsOrdinal, now)
+
+        assertEquals(
+            newJoinedPairsOrdinal,
+            projectOrdinalManager.getOrdinal(project, newKey(parentInstanceKey, *originalJoinedPairs)),
+        )
+
+        assertEquals(topLevelOrdinal, projectOrdinalManager.getOrdinal(project, newKey(*topLevelPairs)))
+
+        // now, let's add another joined instance, and check if the ordinals "hold"
+
+        now += 1.hours
+
+        val instanceKey5 = InstanceKey(TaskKey.Root("taskKey4"), date, timePair)
+
+        val augmentedJoinedPairs = listOf(instanceKey1, instanceKey2, instanceKey5).toPairs()
+
+        assertEquals(
+            newJoinedPairsOrdinal,
+            projectOrdinalManager.getOrdinal(project, newKey(parentInstanceKey, *augmentedJoinedPairs)),
+        )
+
         assertEquals(topLevelOrdinal, projectOrdinalManager.getOrdinal(project, newKey(*topLevelPairs)))
     }
 }

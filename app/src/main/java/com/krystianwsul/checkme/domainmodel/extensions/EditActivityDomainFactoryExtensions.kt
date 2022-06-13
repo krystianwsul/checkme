@@ -26,6 +26,7 @@ import com.krystianwsul.common.firebase.models.search.FilterResult
 import com.krystianwsul.common.firebase.models.search.SearchContext
 import com.krystianwsul.common.firebase.models.task.*
 import com.krystianwsul.common.firebase.models.users.ProjectUser
+import com.krystianwsul.common.time.DateTimePair
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.*
@@ -39,6 +40,7 @@ fun UserScope.getCreateTaskData(
 
     val mainDataSingle = if (
         startParameters is EditViewModel.StartParameters.Create &&
+        startParameters.scheduleParameters is EditViewModel.ScheduleParameters.Fast &&
         currentParentSource is EditViewModel.CurrentParentSource.None
     ) {
         Single.just(getCreateTaskDataFast(startParameters.scheduleParameters))
@@ -116,6 +118,7 @@ private fun DomainFactory.getCreateTaskDataSlow(
 
     val taskData: EditViewModel.TaskData?
     val defaultParentScheduleState: ParentScheduleState
+    val defaultScheduleOverride: DateTimePair?
 
     when (startParameters) {
         is EditViewModel.StartParameters.TaskOrInstance -> {
@@ -174,11 +177,37 @@ private fun DomainFactory.getCreateTaskDataSlow(
                     .toSet(),
                 scheduleDataWrappers,
             )
+
+            defaultScheduleOverride = null
         }
         is EditViewModel.StartParameters.Other -> {
             taskData = null
 
-            defaultParentScheduleState = startParameters.scheduleParameters.getParentScheduleState()
+            when (val scheduleParameters = startParameters.scheduleParameters) {
+                is EditViewModel.ScheduleParameters.Fast -> {
+                    defaultParentScheduleState = scheduleParameters.getParentScheduleState()
+                    defaultScheduleOverride = scheduleParameters.defaultScheduleOverride
+                }
+                is EditViewModel.ScheduleParameters.InstanceProject -> {
+                    val parentInstance = getInstance(scheduleParameters.parentInstanceKey)
+
+                    val dateTimePair = parentInstance.instanceDateTime.toDateTimePair()
+
+                    defaultParentScheduleState = ParentScheduleState(
+                        listOf(
+                            ScheduleEntry(
+                                ScheduleDataWrapper.Child(
+                                    ScheduleData.Child(scheduleParameters.parentInstanceKey),
+                                    parentInstance.name,
+                                    dateTimePair,
+                                )
+                            )
+                        )
+                    )
+
+                    defaultScheduleOverride = dateTimePair
+                }
+            }
         }
     }
 
@@ -260,7 +289,7 @@ private fun DomainFactory.getCreateTaskDataSlow(
         customTimeDatas,
         currentParent,
         parentTaskDescription,
-        startParameters.scheduleParameters.defaultScheduleOverride,
+        defaultScheduleOverride,
         defaultParentScheduleState,
     )
 }

@@ -296,12 +296,12 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
 
         sealed interface Other : StartParameters {
 
-            override val scheduleParameters: ScheduleParameters.Fast
+            override val scheduleParameters: ScheduleParameters.NotFromTaskData
         }
 
         data class Create(
             override val parentInstanceKey: InstanceKey?, // todo instance make new parameters for this
-            override val scheduleParameters: ScheduleParameters.Fast,
+            override val scheduleParameters: ScheduleParameters.NotFromTaskData,
         ) : Other {
 
             override val excludedTaskKeys = setOf<TaskKey>()
@@ -360,9 +360,11 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
 
     sealed interface ScheduleParameters {
 
-        val defaultScheduleOverride: DateTimePair?
+        sealed interface NotFromTaskData : ScheduleParameters
 
-        sealed interface Fast : ScheduleParameters {
+        sealed interface Fast : NotFromTaskData {
+
+            val defaultScheduleOverride: DateTimePair?
 
             fun getParentScheduleState(): ParentScheduleState
         }
@@ -376,8 +378,6 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
         }
 
         object FromTaskData : ScheduleParameters {
-
-            override val defaultScheduleOverride: DateTimePair? = null
 
             fun getParentScheduleState(assignedTo: Set<UserKey>, scheduleDataWrappers: List<ScheduleDataWrapper>?) =
                 ParentScheduleState.create(assignedTo, scheduleDataWrappers?.map(::ScheduleEntry))
@@ -394,5 +394,7 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
                 ParentScheduleState.empty
             }
         }
+
+        class InstanceProject(val parentInstanceKey: InstanceKey, val projectKey: ProjectKey.Shared) : NotFromTaskData
     }
 }

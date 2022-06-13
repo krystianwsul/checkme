@@ -112,12 +112,18 @@ sealed interface EditParameters : Parcelable {
                 val defaultScheduleOverride = hint?.toScheduleHint()?.dateTimePair
 
                 val scheduleParameters = if (parentScheduleState != null) {
+                    check(hint == null)
+
                     EditViewModel.ScheduleParameters.Override(defaultScheduleOverride, parentScheduleState)
                 } else {
-                    EditViewModel.ScheduleParameters.Normal(
-                        defaultScheduleOverride,
-                        hint?.showInitialSchedule != false && showFirstSchedule,
-                    )
+                    if (hint is EditParentHint.Instance && hint.projectKey != null) {
+                        EditViewModel.ScheduleParameters.InstanceProject(hint.instanceKey, hint.projectKey)
+                    } else {
+                        EditViewModel.ScheduleParameters.Normal(
+                            defaultScheduleOverride,
+                            hint?.showInitialSchedule != false && showFirstSchedule,
+                        )
+                    }
                 }
 
                 return EditViewModel.StartParameters.Create(hint?.instanceKey, scheduleParameters)

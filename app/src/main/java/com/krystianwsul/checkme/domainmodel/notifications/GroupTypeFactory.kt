@@ -5,6 +5,7 @@ import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.project.SharedOwnedProject
 import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.InstanceKey
+import com.krystianwsul.common.utils.ProjectKey
 
 object GroupTypeFactory : GroupType.Factory {
 
@@ -42,13 +43,18 @@ object GroupTypeFactory : GroupType.Factory {
     override fun createTimeSingle(instanceDescriptor: GroupType.InstanceDescriptor) =
         SingleBridge(instanceDescriptor.fix())
 
-    class InstanceDescriptor(val instance: Instance, val silent: Boolean) : GroupType.InstanceDescriptor {
+    class InstanceDescriptor(
+        val instance: Instance,
+        val silent: Boolean,
+        excludeProjectKey: ProjectKey.Shared?,
+    ) : GroupType.InstanceDescriptor {
 
         override val timeStamp get() = instance.instanceDateTime.timeStamp
 
         override val projectDescriptor = instance.takeIf { it.groupByProject }
             ?.getProject()
             .let { it as? SharedOwnedProject }
+            ?.takeIf { it.projectKey != excludeProjectKey }
             ?.let(::ProjectDescriptor)
     }
 

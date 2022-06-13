@@ -98,7 +98,13 @@ open class NotificationWrapperImpl : NotificationWrapper() {
                 instance.getChildInstances()
                     .filter { it.done == null }
                     .filter { it.isVisible(now, Instance.VisibilityOptions(assumeChildOfVisibleParent = true)) }
-                    .map { GroupTypeFactory.InstanceDescriptor(it, true) },
+                    .map {
+                        GroupTypeFactory.InstanceDescriptor(
+                            it,
+                            true,
+                            instance.getProject().projectKey as? ProjectKey.Shared, // group hack
+                        )
+                    },
                 GroupType.GroupingMode.Instance(instance.getProject().projectKey),
             )
                 .sortedBy {

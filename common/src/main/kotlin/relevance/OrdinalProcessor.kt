@@ -9,7 +9,10 @@ import com.krystianwsul.common.time.DateOrDayOfWeek
 import com.krystianwsul.common.time.DateTimePair
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.TimePair
-import com.krystianwsul.common.utils.*
+import com.krystianwsul.common.utils.InstanceScheduleKey
+import com.krystianwsul.common.utils.Ordinal
+import com.krystianwsul.common.utils.ProjectKey
+import com.krystianwsul.common.utils.TaskKey
 
 class OrdinalProcessor(
     private val users: Collection<RootUser>,
@@ -125,7 +128,7 @@ class OrdinalProcessor(
         val mutableKeyEntries: MutableList<MutableKeyEntry>,
         val ordinal: Ordinal,
         val updated: ExactTimeStamp.Local,
-        val parentInstanceKey: InstanceKey?,
+        val parentState: ProjectOrdinalManager.Key.ParentState,
     ) {
 
         constructor(ordinalEntry: ProjectOrdinalManager.OrdinalEntry) : this(
@@ -135,11 +138,11 @@ class OrdinalProcessor(
                 .toMutableList(),
             ordinalEntry.value.ordinal,
             ordinalEntry.value.updated,
-            ordinalEntry.key.parentInstanceKey,
+            ordinalEntry.key.parentState,
         )
 
         fun getImmutableKeys() =
-            ProjectOrdinalManager.Key(mutableKeyEntries.map { it.toImmutableKeyEntry() }.toSet(), parentInstanceKey)
+            ProjectOrdinalManager.Key(mutableKeyEntries.map { it.toImmutableKeyEntry() }.toSet(), parentState)
 
         fun getImmutableValue() = ProjectOrdinalManager.Value(ordinal, updated)
     }

@@ -62,7 +62,13 @@ class ProjectOrdinalManager(
                     }
                 }
                 ?.map { it.ordinalEntry }
-                ?.sortedWith(compareBy({ it.key.parentInstanceKey == searchKey.parentInstanceKey }, { it.value.updated }))
+                ?.sortedWith(
+                    compareBy(
+                        { it.key.parentState is Key.ParentState.Set },
+                        { it.key.parentState == searchKey.parentState },
+                        { it.value.updated },
+                    )
+                )
                 ?.lastOrNull()
                 ?.value
                 ?.ordinal
@@ -115,16 +121,12 @@ class ProjectOrdinalManager(
                 projectCustomTimeIdAndKeyProvider: JsonTime.ProjectCustomTimeIdAndKeyProvider,
                 json: ProjectOrdinalEntryJson,
             ): OrdinalEntry {
-                val parentInstanceKey = json.parentInstanceKey?.let {
-                    InstanceKey.fromJson(projectCustomTimeIdAndKeyProvider, it)
-                }
-
                 return OrdinalEntry(
                     Key(
                         json.keyEntries
                             .map { Key.Entry.fromJson(projectCustomTimeIdAndKeyProvider, it.value) }
                             .toSet(),
-                        parentInstanceKey,
+                        Key.ParentState.fromJson(projectCustomTimeIdAndKeyProvider, json.parentInstanceKey),
                     ),
                     Value(Ordinal.fromFields(json.ordinal, json.ordinalString)!!, ExactTimeStamp.Local(json.updated))
                 )
@@ -141,17 +143,19 @@ class ProjectOrdinalManager(
                 ordinalDouble,
                 ordinalString,
                 value.updated.long,
-                key.parentInstanceKey?.toJson(),
+                key.parentState.toJson(),
             )
         }
     }
 
-    data class Key(val entries: Set<Entry>, val parentInstanceKey: InstanceKey?) {
+    data class Key(val entries: Set<Entry>, val parentState: ParentState) {
 
         constructor(instances: Collection<Instance>, parentInstance: Instance?) : this(
             instances.map(::Entry).toSet(),
-            parentInstance?.instanceKey
+            ParentState.Set(parentInstance?.instanceKey),
         )
+
+        constructor(entries: Set<Entry>, parentInstanceKey: InstanceKey?) : this(entries, ParentState.Set(parentInstanceKey))
 
         data class Entry(
             val taskInfo: TaskInfo?,
@@ -216,6 +220,42 @@ class ProjectOrdinalManager(
                 taskKey.toShortcut(),
                 scheduleDateTimePair?.toJson(),
             )
+        }
+
+        sealed class ParentState {
+
+            companion object {
+
+                fun fromJson(
+                    projectCustomTimeIdAndKeyProvider: JsonTime.ProjectCustomTimeIdAndKeyProvider,
+                    json: String?,
+                ) = when (json) {
+                    Unset.key -> Unset
+                    else -> Set.fromJson(projectCustomTimeIdAndKeyProvider, json)
+                }
+            }
+
+            abstract fun toJson(): String?
+
+            object Unset : ParentState() {
+
+                val key = "unset"
+
+                override fun toJson(): String = "unset"
+            }
+
+            data class Set(val parentInstanceKey: InstanceKey?) : ParentState() {
+
+                companion object {
+
+                    fun fromJson(
+                        projectCustomTimeIdAndKeyProvider: JsonTime.ProjectCustomTimeIdAndKeyProvider,
+                        json: String?,
+                    ) = Set(json?.let { InstanceKey.fromJson(projectCustomTimeIdAndKeyProvider, it) })
+                }
+
+                override fun toJson() = parentInstanceKey?.toJson()
+            }
         }
     }
 

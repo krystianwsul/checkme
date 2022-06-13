@@ -25,7 +25,7 @@ class ProjectOrdinalManagerMatcherTest {
             parentInstanceKey: InstanceKey?,
         ) = ProjectOrdinalManager.Key(
             entries.map { ProjectOrdinalManager.Key.Entry(it.first, it.second) }.toSet(),
-            parentInstanceKey,
+            ProjectOrdinalManager.Key.ParentState.Set(parentInstanceKey),
         )
     }
 

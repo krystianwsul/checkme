@@ -325,7 +325,7 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
 
         data class Join(
             private val joinables: List<EditParameters.Join.Joinable>,
-            override val scheduleParameters: ScheduleParameters.Normal,
+            override val scheduleParameters: ScheduleParameters.NotFromTaskData,
         ) : Other {
 
             override val excludedTaskKeys = joinables.map { it.taskKey }.toSet()

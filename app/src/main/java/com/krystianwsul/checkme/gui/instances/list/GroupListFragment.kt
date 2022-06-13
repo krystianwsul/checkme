@@ -207,14 +207,26 @@ class GroupListFragment @JvmOverloads constructor(
                     val hint = if (parameters is GroupListParameters.InstanceKey) {
                         EditParentHint.Instance((parameters as GroupListParameters.InstanceKey).instanceKey, null)
                     } else {
-                        selectedDatas.filterIsInstance<GroupListDataWrapper.InstanceData>()
-                            .minByOrNull { it.instanceTimeStamp }
-                            ?.let {
+                        val instanceDatas = selectedDatas.filterIsInstance<GroupListDataWrapper.InstanceData>()
+
+                        val projectKey = instanceDatas.map { it.projectKey }
+                            .distinct()
+                            .singleOrNull()
+
+                        val parentInstanceKey = instanceDatas.map { it.parentInstanceKey }
+                            .distinct()
+                            .singleOrNull()
+
+                        if (parentInstanceKey != null) {
+                            EditParentHint.Instance(parentInstanceKey, projectKey)
+                        } else {
+                            instanceDatas.minByOrNull { it.instanceTimeStamp }?.let {
                                 val date = it.instanceTimeStamp.date
                                 val timePair = it.createTaskTimePair
 
-                                EditParentHint.Schedule(date, timePair)
+                                EditParentHint.Schedule(date, timePair, projectKey)
                             }
+                        }
                     }
 
                     activity.startActivity(EditActivity.getParametersIntent(EditParameters.Join(joinables, hint)))

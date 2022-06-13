@@ -246,14 +246,19 @@ sealed interface EditParameters : Parcelable {
     @Parcelize
     class Join(val joinables: List<Joinable>, private val hint: EditParentHint? = null) : EditParameters {
 
-        override val startParameters
-            get() = EditViewModel.StartParameters.Join(
-                joinables,
-                EditViewModel.ScheduleParameters.Normal(
-                    hint?.toScheduleHint()?.dateTimePair,
-                    hint?.showInitialSchedule != false,
-                )
-            )
+        override val startParameters: EditViewModel.StartParameters.Join
+            get() {
+                val scheduleParameters = if (hint is EditParentHint.Instance && hint.projectKey != null) {
+                    EditViewModel.ScheduleParameters.InstanceProject(hint.instanceKey, hint.projectKey)
+                } else {
+                    EditViewModel.ScheduleParameters.Normal(
+                        hint?.toScheduleHint()?.dateTimePair,
+                        hint?.showInitialSchedule != false,
+                    )
+                }
+
+                return EditViewModel.StartParameters.Join(joinables, scheduleParameters)
+            }
 
         override val currentParentSource
             get() = hint?.toCurrentParent()

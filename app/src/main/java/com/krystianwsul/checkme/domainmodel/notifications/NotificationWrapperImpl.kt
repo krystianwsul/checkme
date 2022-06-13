@@ -26,6 +26,7 @@ import com.krystianwsul.checkme.ticks.AlarmReceiver
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.project.SharedOwnedProject
+import com.krystianwsul.common.firebase.models.project.SharedProject
 import com.krystianwsul.common.firebase.models.users.ProjectOrdinalManager
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.TimeStamp
@@ -837,7 +838,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         val childNames = getChildInstanceNames(instance, now)
 
         val project = instance.getProject()
-            .let { it as? SharedOwnedProject }
+            .let { it as? SharedProject }
             ?.name
     }
 

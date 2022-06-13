@@ -62,7 +62,7 @@ fun <T> Sequence<T>.takeAndHasMore(n: Int): Pair<List<T>, Boolean> {
 }
 
 fun Task.getProjectInfo(includeProjectDetails: Boolean = true): DetailsNode.ProjectInfo? {
-    val sharedProject = project as? SharedOwnedProject
+    val sharedProject = project as? SharedOwnedProject // todo group
 
     return if (isTopLevelTask() && sharedProject != null) {
         DetailsNode.ProjectInfo(
@@ -109,7 +109,7 @@ sealed class ProjectInfoMode {
 }
 
 fun Instance.getProjectInfo(projectInfoMode: ProjectInfoMode = ProjectInfoMode.Show): DetailsNode.ProjectInfo? {
-    val sharedProject = getProject() as? SharedOwnedProject
+    val sharedProject = getProject() as? SharedOwnedProject // todo group
 
     return if (sharedProject != null && (isRootInstance() || projectInfoMode.showForChildren)) {
         DetailsNode.ProjectInfo(

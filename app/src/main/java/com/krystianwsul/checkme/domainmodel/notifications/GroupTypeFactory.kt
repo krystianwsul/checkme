@@ -53,7 +53,7 @@ object GroupTypeFactory : GroupType.Factory {
 
         override val projectDescriptor = instance.takeIf { it.groupByProject }
             ?.getProject()
-            .let { it as? SharedOwnedProject }
+            .let { it as? SharedOwnedProject } // todo ordinal
             ?.takeIf { it.projectKey != excludeProjectKey }
             ?.let(::ProjectDescriptor)
     }

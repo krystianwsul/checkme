@@ -56,7 +56,7 @@ fun DomainFactory.getShowNotificationGroupData(
                     instance.instanceDateTime.toDateTimePair(),
                     instance.groupByProject,
                     instance,
-                    null, // todo group later
+                    null,
                 )
             }
             .toList()

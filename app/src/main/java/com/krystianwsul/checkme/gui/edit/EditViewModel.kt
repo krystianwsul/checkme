@@ -300,7 +300,7 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
         }
 
         data class Create(
-            override val parentInstanceKey: InstanceKey?, // todo instance make new parameters for this
+            override val parentInstanceKey: InstanceKey?,
             override val scheduleParameters: ScheduleParameters.NotFromTaskData,
         ) : Other {
 

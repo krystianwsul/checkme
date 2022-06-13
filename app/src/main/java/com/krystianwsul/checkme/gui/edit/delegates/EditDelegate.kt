@@ -68,28 +68,15 @@ abstract class EditDelegate(
 
     val customTimeDatas get() = data.customTimeDatas
 
-    protected class DefaultScheduleStateProvider(data: EditViewModel.MainData) {
-
-        private val defaultScheduleOverride = data.defaultScheduleOverride
-
-        fun getDefaultScheduleDateTimePair() = defaultScheduleOverride.orNextHour()
-
-        fun getDefaultSingleScheduleData() = ScheduleData.Single(getDefaultScheduleDateTimePair())
-
-        val defaultInitialParentScheduleState = data.defaultParentScheduleState
-    }
-
-    private val defaultScheduleStateProvider by lazy { DefaultScheduleStateProvider(data) }
-
-    fun getDefaultScheduleDateTimePair() = defaultScheduleStateProvider.getDefaultScheduleDateTimePair()
+    fun getDefaultScheduleDateTimePair() = data.defaultScheduleOverride.orNextHour()
 
     fun getDefaultScheduleDialogData() =
-        ScheduleDataWrapper.Single.getScheduleDialogData(defaultScheduleStateProvider.getDefaultSingleScheduleData())
+        ScheduleDataWrapper.Single.getScheduleDialogData(ScheduleData.Single(getDefaultScheduleDateTimePair()))
 
     val parentScheduleManager by lazy {
         ParentMultiScheduleManager(
             savedInstanceState,
-            defaultScheduleStateProvider.defaultInitialParentScheduleState,
+            data.defaultParentScheduleState,
             data.currentParent,
             callbacks,
         )

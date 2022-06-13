@@ -61,8 +61,10 @@ class ProjectOrdinalManager(
                         it.flatMap { it.value } // find any match elements in common
                     }
                 }
-                ?.map { it.ordinalEntry.value }
-                ?.maxByOrNull { it.updated }
+                ?.map { it.ordinalEntry }
+                ?.sortedWith(compareBy({ it.key.parentInstanceKey == searchKey.parentInstanceKey }, { it.value.updated }))
+                ?.lastOrNull()
+                ?.value
                 ?.ordinal
         }
     }

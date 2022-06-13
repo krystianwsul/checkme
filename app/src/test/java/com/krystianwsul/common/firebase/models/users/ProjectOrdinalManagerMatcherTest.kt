@@ -319,7 +319,12 @@ class ProjectOrdinalManagerMatcherTest {
 
         val newJoinedPairsOrdinal = Ordinal(3)
 
-        projectOrdinalManager.setOrdinal(project, newKey(*originalJoinedPairs), newJoinedPairsOrdinal, now)
+        projectOrdinalManager.setOrdinal(
+            project,
+            newKey(parentInstanceKey, *originalJoinedPairs),
+            newJoinedPairsOrdinal,
+            now
+        )
 
         assertEquals(
             newJoinedPairsOrdinal,
@@ -332,7 +337,7 @@ class ProjectOrdinalManagerMatcherTest {
 
         now += 1.hours
 
-        val instanceKey5 = InstanceKey(TaskKey.Root("taskKey4"), date, timePair)
+        val instanceKey5 = InstanceKey(TaskKey.Root("taskKey5"), date, timePair)
 
         val augmentedJoinedPairs = listOf(instanceKey1, instanceKey2, instanceKey5).toPairs()
 
@@ -342,5 +347,26 @@ class ProjectOrdinalManagerMatcherTest {
         )
 
         assertEquals(topLevelOrdinal, projectOrdinalManager.getOrdinal(project, newKey(*topLevelPairs)))
+
+        now += 1.hours
+
+        // now, let's test for fresh instances both top-level and joined
+
+        val instanceKey6 = InstanceKey(TaskKey.Root("taskKey6"), date, timePair)
+        val instanceKey7 = InstanceKey(TaskKey.Root("taskKey7"), date, timePair)
+
+        val freshJoinedPairs = listOf(instanceKey6, instanceKey7).toPairs()
+
+        val instanceKey8 = InstanceKey(TaskKey.Root("taskKey8"), date, timePair)
+        val instanceKey9 = InstanceKey(TaskKey.Root("taskKey9"), date, timePair)
+
+        val freshTopLevelPairs = listOf(instanceKey8, instanceKey9).toPairs()
+
+        assertEquals(
+            newJoinedPairsOrdinal,
+            projectOrdinalManager.getOrdinal(project, newKey(parentInstanceKey, *freshJoinedPairs)),
+        )
+
+        assertEquals(topLevelOrdinal, projectOrdinalManager.getOrdinal(project, newKey(*freshTopLevelPairs)))
     }
 }

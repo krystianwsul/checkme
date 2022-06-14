@@ -228,7 +228,27 @@ class GroupTypeFactory(
         private val singeBridges: List<SingleBridge>,
         override val ordinal: Ordinal,
         val parentInstanceKey: InstanceKey?,
-    ) : GroupType.Project, SingleParent, TimeChild, DropParent by DropParent.Project(timeStamp, projectKey) {
+        private val dropParent: DropParent, // this could get set up to be inconsistent with parentInstanceKey; be careful
+    ) : GroupType.Project, SingleParent, TimeChild, DropParent by dropParent {
+
+        constructor(
+            timeStamp: TimeStamp,
+            name: String,
+            projectKey: ProjectKey.Shared,
+            singeBridges: List<SingleBridge>,
+            ordinal: Ordinal,
+            parentInstanceKey: InstanceKey?
+        ) : this(
+            timeStamp,
+            name,
+            projectKey,
+            singeBridges,
+            ordinal,
+            parentInstanceKey,
+            parentInstanceKey?.let {
+                DropParent.InstanceProject(parentInstanceKey, projectKey)
+            } ?: DropParent.Project(timeStamp, projectKey),
+        )
 
         private val instanceDatas = singeBridges.map { it.instanceData }
 

@@ -1,7 +1,6 @@
 package com.krystianwsul.checkme.gui.instances.drag
 
 import com.krystianwsul.checkme.domainmodel.GroupTypeFactory
-import com.krystianwsul.checkme.domainmodel.updates.SetInstanceOrdinalDomainUpdate
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.InstanceKey
@@ -52,6 +51,18 @@ interface DropParent {
             is GroupTypeFactory.ProjectBridge -> false
             is GroupTypeFactory.SingleBridge -> droppedTimeChild.instanceData.let {
                 timeStamp == it.instanceTimeStamp && projectKey == it.projectKey && it.isRootInstance
+            }
+        }
+    }
+
+    data class InstanceProject(val parentInstanceKey: InstanceKey, val projectKey: ProjectKey.Shared) : DropParent {
+
+        override fun getNewParentInfo(isGroupedInProject: Boolean?) = Instance.NewParentInfo.PROJECT
+
+        override fun canDropIntoParent(droppedTimeChild: GroupTypeFactory.TimeChild) = when (droppedTimeChild) {
+            is GroupTypeFactory.ProjectBridge -> false
+            is GroupTypeFactory.SingleBridge -> droppedTimeChild.instanceData.let {
+                projectKey == it.projectKey && parentInstanceKey == it.parentInstanceKey
             }
         }
     }

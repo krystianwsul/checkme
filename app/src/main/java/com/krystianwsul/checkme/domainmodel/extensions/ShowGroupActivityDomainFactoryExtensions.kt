@@ -138,13 +138,12 @@ private fun DomainFactory.getGroupListData(
 
     val (mixedInstanceDescriptors, doneInstanceDescriptors) = instanceDescriptors.splitDone()
 
-    val dropParent = when (parameters) {
-        is ShowGroupActivity.Parameters.Time -> DropParent.TopLevel(true)
-        is ShowGroupActivity.Parameters.Project -> DropParent.Project(parameters.timeStamp, parameters.projectKey)
-        is ShowGroupActivity.Parameters.InstanceProject -> DropParent.Project(
-            getInstance(parameters.parentInstanceKey).instanceDateTime.timeStamp,
-            parameters.projectKey,
-        ) // todo group drag
+    val dropParent = parameters.run {
+        when (this) {
+            is ShowGroupActivity.Parameters.Time -> DropParent.TopLevel(true)
+            is ShowGroupActivity.Parameters.Project -> DropParent.Project(timeStamp, projectKey)
+            is ShowGroupActivity.Parameters.InstanceProject -> DropParent.InstanceProject(parentInstanceKey, projectKey)
+        }
     }
 
     return GroupListDataWrapper(

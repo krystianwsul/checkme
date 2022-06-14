@@ -376,7 +376,7 @@ class GroupTypeFactory(
         }
 
         override fun canDropIntoParent(droppedTimeChild: TimeChild) = when (droppedTimeChild) {
-            is ProjectBridge -> false
+            is ProjectBridge -> instanceData.instanceKey == droppedTimeChild.parentInstanceKey
             is SingleBridge -> instanceData.instanceKey == droppedTimeChild.instanceData.parentInstanceKey
         }
 

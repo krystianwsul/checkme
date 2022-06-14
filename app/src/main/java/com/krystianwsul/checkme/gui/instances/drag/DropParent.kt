@@ -38,7 +38,7 @@ interface DropParent {
         override fun getNewParentInfo(isGroupedInProject: Boolean?) = Instance.NewParentInfo.NO_OP
 
         override fun canDropIntoParent(droppedTimeChild: GroupTypeFactory.TimeChild) = when (droppedTimeChild) {
-            is GroupTypeFactory.ProjectBridge -> throw UnsupportedOperationException()
+            is GroupTypeFactory.ProjectBridge -> parentInstanceKey == droppedTimeChild.parentInstanceKey
             is GroupTypeFactory.SingleBridge -> parentInstanceKey == droppedTimeChild.instanceData.parentInstanceKey!!
         }
     }

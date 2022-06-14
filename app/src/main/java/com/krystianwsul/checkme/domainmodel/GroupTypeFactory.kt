@@ -291,7 +291,9 @@ class GroupTypeFactory(
         val displayText: String?,
         val projectInfo: DetailsNode.ProjectInfo?,
         val compareBy: CompareBy,
-    ) : GroupType.Single, TimeChild {
+    ) : GroupType.Single,
+        TimeChild,
+        DropParent by DropParent.ParentInstance(instanceData.instanceKey, instanceData.projectKey) {
 
         companion object {
 
@@ -355,8 +357,6 @@ class GroupTypeFactory(
 
         override val ordinal = instanceData.ordinal
 
-        override fun getNewParentInfo(isGroupedInProject: Boolean?) = Instance.NewParentInfo.NO_OP
-
         override fun toContentDelegate(
             groupAdapter: GroupListFragment.GroupAdapter,
             indentation: Int,
@@ -373,11 +373,6 @@ class GroupTypeFactory(
                     CompareBy.ORDINAL -> ordinal.compareTo(other.ordinal)
                 }
             }
-        }
-
-        override fun canDropIntoParent(droppedTimeChild: TimeChild) = when (droppedTimeChild) {
-            is ProjectBridge -> instanceData.instanceKey == droppedTimeChild.parentInstanceKey
-            is SingleBridge -> instanceData.instanceKey == droppedTimeChild.instanceData.parentInstanceKey
         }
 
         enum class CompareBy {

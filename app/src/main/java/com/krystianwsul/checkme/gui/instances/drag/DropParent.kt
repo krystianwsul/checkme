@@ -33,13 +33,21 @@ interface DropParent {
         }
     }
 
-    data class ParentInstance(val parentInstanceKey: InstanceKey) : DropParent {
+    data class ParentInstance(
+        private val parentInstanceKey: InstanceKey,
+        private val parentInstanceProjectKey: ProjectKey.Shared?
+    ) : DropParent {
 
         override fun getNewParentInfo(isGroupedInProject: Boolean?) = Instance.NewParentInfo.NO_OP
 
         override fun canDropIntoParent(droppedTimeChild: GroupTypeFactory.TimeChild) = when (droppedTimeChild) {
             is GroupTypeFactory.ProjectBridge -> parentInstanceKey == droppedTimeChild.parentInstanceKey
-            is GroupTypeFactory.SingleBridge -> parentInstanceKey == droppedTimeChild.instanceData.parentInstanceKey!!
+            is GroupTypeFactory.SingleBridge -> droppedTimeChild.instanceData.let {
+                parentInstanceKey == it.parentInstanceKey && it.projectKey in listOf(
+                    parentInstanceProjectKey,
+                    null
+                ) // group hack
+            }
         }
     }
 

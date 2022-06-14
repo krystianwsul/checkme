@@ -9,7 +9,7 @@ import com.krystianwsul.checkme.gui.instances.tree.NotDoneNode
 import com.krystianwsul.checkme.gui.tree.DetailsNode
 import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.common.firebase.models.Instance
-import com.krystianwsul.common.firebase.models.project.SharedOwnedProject
+import com.krystianwsul.common.firebase.models.project.SharedProject
 import com.krystianwsul.common.firebase.models.users.ProjectOrdinalManager
 import com.krystianwsul.common.time.DateTimePair
 import com.krystianwsul.common.time.TimeStamp
@@ -100,15 +100,14 @@ class GroupTypeFactory(
 
         override val projectDescriptor = instance.takeIf { groupIntoProject }
             ?.getProject()
-            ?.let { it as? SharedOwnedProject } // todo group ordinal
+            ?.let { it as? SharedProject } // group hack
             ?.takeIf { it != instance.parentInstance?.getProject() }
             ?.let { ProjectDescriptor(it, instance.parentInstance) }
 
         override fun compareTo(other: InstanceDescriptor) = instanceData.compareTo(other.instanceData)
     }
 
-    data class ProjectDescriptor(val project: SharedOwnedProject, val parentInstance: Instance?) :
-        GroupType.ProjectDescriptor
+    data class ProjectDescriptor(val project: SharedProject, val parentInstance: Instance?) : GroupType.ProjectDescriptor
 
     sealed interface Bridge : Comparable<Bridge>, DropParent {
 

@@ -5,7 +5,7 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.DomainListenerManager
 import com.krystianwsul.checkme.domainmodel.update.CompletableDomainUpdate
 import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
-import com.krystianwsul.common.firebase.models.project.SharedOwnedProject
+import com.krystianwsul.common.firebase.models.project.SharedProject
 import com.krystianwsul.common.firebase.models.users.ProjectOrdinalManager
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.Ordinal
@@ -40,7 +40,7 @@ fun DomainUpdater.setOrdinalProject(
     val project = instances.map { it.getProject() }
         .distinct()
         .single()
-        .let { it as SharedOwnedProject } // todo group ordinal
+        .let { it as SharedProject } // group hack
 
     val parentInstance = parentInstanceKey?.let(::getInstance)
 

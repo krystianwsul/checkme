@@ -178,8 +178,8 @@ private fun DomainFactory.getGroupListData(
         parentInstance.getProjectInfo(),
         DropParent.ParentInstance(
             parentInstance.instanceKey,
-            parentInstance.getProject().projectKey as? ProjectKey.Shared
-        ), // group hack
+            parentInstance.getProject().projectKey as? ProjectKey.Shared // group hack
+        ),
         searchContext.searchCriteria,
     )
 }

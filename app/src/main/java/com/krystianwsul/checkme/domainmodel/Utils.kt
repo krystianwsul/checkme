@@ -9,7 +9,7 @@ import com.krystianwsul.checkme.viewmodels.DomainResult
 import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.models.ImageState
 import com.krystianwsul.common.firebase.models.Instance
-import com.krystianwsul.common.firebase.models.project.SharedOwnedProject
+import com.krystianwsul.common.firebase.models.project.SharedProject
 import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.interrupt.DomainInterruptedException
 import com.krystianwsul.common.interrupt.InterruptionChecker
@@ -62,7 +62,7 @@ fun <T> Sequence<T>.takeAndHasMore(n: Int): Pair<List<T>, Boolean> {
 }
 
 fun Task.getProjectInfo(includeProjectDetails: Boolean = true): DetailsNode.ProjectInfo? {
-    val sharedProject = project as? SharedOwnedProject // todo group
+    val sharedProject = project as? SharedProject // group hack
 
     return if (isTopLevelTask() && sharedProject != null) {
         DetailsNode.ProjectInfo(
@@ -82,16 +82,16 @@ sealed class ProjectInfoMode {
 
     open val showForChildren = false
 
-    abstract fun showProject(sharedOwnedProject: SharedOwnedProject): Boolean
+    abstract fun showProject(sharedProject: SharedProject): Boolean
 
     object Hide : ProjectInfoMode() {
 
-        override fun showProject(sharedOwnedProject: SharedOwnedProject) = false
+        override fun showProject(sharedProject: SharedProject) = false
     }
 
     object Show : ProjectInfoMode() { // group hack
 
-        override fun showProject(sharedOwnedProject: SharedOwnedProject) = true
+        override fun showProject(sharedProject: SharedProject) = true
     }
 
     class ShowInsideInstance(private val parentInstanceKey: ProjectKey.Shared? = null) : ProjectInfoMode() { // group hack
@@ -104,16 +104,16 @@ sealed class ProjectInfoMode {
 
         override val showForChildren = true
 
-        override fun showProject(sharedOwnedProject: SharedOwnedProject) = sharedOwnedProject.projectKey != parentInstanceKey
+        override fun showProject(sharedProject: SharedProject) = sharedProject.projectKey != parentInstanceKey
     }
 }
 
 fun Instance.getProjectInfo(projectInfoMode: ProjectInfoMode = ProjectInfoMode.Show): DetailsNode.ProjectInfo? {
-    val sharedProject = getProject() as? SharedOwnedProject // todo group
+    val sharedProject = getProject() as? SharedProject // group hack
 
     return if (sharedProject != null && (isRootInstance() || projectInfoMode.showForChildren)) {
         DetailsNode.ProjectInfo(
-            sharedProject.takeIf { projectInfoMode.showProject(it) }?.let {
+            sharedProject.takeIf(projectInfoMode::showProject)?.let {
                 DetailsNode.ProjectDetails(it.name, sharedProject.projectKey)
             },
             DetailsNode.User.fromProjectUsers(getAssignedTo()),

@@ -36,6 +36,7 @@ import com.krystianwsul.checkme.gui.edit.EditActivity
 import com.krystianwsul.checkme.gui.main.MainActivity
 import com.krystianwsul.checkme.upload.Queue
 import com.krystianwsul.checkme.upload.Uploader
+import com.krystianwsul.checkme.utils.filterNotNull
 import com.krystianwsul.checkme.utils.mapNotNull
 import com.krystianwsul.checkme.utils.toSingle
 import com.krystianwsul.checkme.utils.toV3
@@ -147,6 +148,8 @@ class MyApplication : Application() {
         userInfoRelay.firstOrError()
             .filter { it.value != null }
             .subscribe { DomainFactory.firstRun = true }
+
+        userInfoRelay.filterNotNull().subscribe { MyCrashlytics.setUserKey(it.key) }
 
         RxPaperBook.init(this)
         VersionCodeManager.check(AndroidDatabaseWrapper::onUpgrade)

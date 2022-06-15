@@ -88,7 +88,7 @@ class ForeignProjectsFactory(
                 MyCrashlytics.log("ForeignProjectsFactory.removeProjectEvents, keys: " + it.projectKeys) // debug log key: foreign projects logging
 
                 it.projectKeys.forEach {
-                    check(projectFactories.containsKey(it)) // debug log key: foreign projects logging
+                    check(projectFactories.containsKey(it)) { "missing project key: $it" }// debug log key: foreign projects logging
 
                     projectFactories.getValue(it)
                         .project

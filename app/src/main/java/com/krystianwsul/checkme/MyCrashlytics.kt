@@ -5,6 +5,7 @@ import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.google.firebase.perf.FirebasePerformance
 import com.krystianwsul.common.ErrorLogger
+import com.krystianwsul.common.utils.UserKey
 
 object MyCrashlytics : ErrorLogger() {
 
@@ -50,5 +51,9 @@ object MyCrashlytics : ErrorLogger() {
         val method = caller.methodName
 
         log(obj.javaClass.simpleName + "." + method + " " + obj.hashCode() + ": $message")
+    }
+
+    fun setUserKey(userKey: UserKey) {
+        FirebaseCrashlytics.getInstance().setCustomKey("UserKey", userKey.key)
     }
 }

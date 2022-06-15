@@ -12,13 +12,18 @@ import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 
 class ForeignProjectsLoader(
+    privateProjectKey: ProjectKey.Private,
     projectKeysObservable: Observable<Set<ProjectKey<*>>>,
     projectsManager: ProjectsManager<ProjectType, ForeignProjectJson, ForeignProjectRecord<*>>,
     domainDisposable: CompositeDisposable,
     projectsProvider: ProjectsProvider<ProjectType, ForeignProjectJson>,
     userCustomTimeProviderSource: UserCustomTimeProviderSource,
 ) : ProjectsLoader<ProjectType, ForeignProjectRecord<*>, ForeignProjectJson>(
-    projectKeysObservable, projectsManager, domainDisposable, projectsProvider, userCustomTimeProviderSource,
+    projectKeysObservable.doOnNext { check(privateProjectKey !in it) }, // debug log key
+    projectsManager,
+    domainDisposable,
+    projectsProvider,
+    userCustomTimeProviderSource,
 ) {
 
     override fun onProjectAddedOrUpdated(record: ForeignProjectRecord<*>) {}

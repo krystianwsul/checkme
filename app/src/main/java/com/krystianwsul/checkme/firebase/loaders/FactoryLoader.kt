@@ -144,6 +144,7 @@ class FactoryLoader(
                             }
 
                         val foreignProjectsLoader = ForeignProjectsLoader(
+                            privateProjectKey,
                             foreignProjectCoordinator.foreignProjectKeysObservable,
                             ForeignProjectsManager(),
                             domainDisposable,

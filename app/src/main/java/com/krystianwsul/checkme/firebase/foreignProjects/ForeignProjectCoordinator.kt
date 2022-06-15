@@ -47,6 +47,7 @@ interface ForeignProjectCoordinator {
             .map {
                 taskQueueState.let { it as TaskQueueState.Valid }.taskProjectKeys - userProjectKeys
             }
+            .doOnNext { check(privateProjectKey !in it) } // debug log key
             .replay(1)
             .also { domainDisposable += it.connect() }
 

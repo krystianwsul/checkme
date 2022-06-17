@@ -19,9 +19,9 @@ abstract class DragHelper(callback: MyCallback = MyCallback()) : ItemTouchHelper
 
         private val animationTime by lazy {
             MyApplication.instance
-                    .resources
-                    .getInteger(android.R.integer.config_shortAnimTime)
-                    .toLong()
+                .resources
+                .getInteger(android.R.integer.config_shortAnimTime)
+                .toLong()
         }
     }
 
@@ -85,7 +85,7 @@ abstract class DragHelper(callback: MyCallback = MyCallback()) : ItemTouchHelper
             if (startPosition != endPosition) getTreeViewAdapter().setNewItemPosition(endPosition!!)
 
             getTreeViewAdapter().getTreeNodeCollection()
-                .getNode(viewHolder.adapterPosition, PositionMode.DISPLAYED)
+                .getNode(viewHolder.adapterPosition, PositionMode.Displayed)
                 .onBindViewHolder(viewHolder)
         } else {
             startPosition?.let { getTreeViewAdapter().selectNode(it) }
@@ -102,10 +102,10 @@ abstract class DragHelper(callback: MyCallback = MyCallback()) : ItemTouchHelper
 
         val position = target.adapterPosition.let { if (it == treeNodeCollection.displayedNodes.size) it - 1 else it }
 
-        val thisTreeNode = treeNodeCollection.getNode(current.adapterPosition, PositionMode.DISPLAYED)
+        val thisTreeNode = treeNodeCollection.getNode(current.adapterPosition, PositionMode.Displayed)
         val thisSortable = thisTreeNode.modelNode as Sortable
 
-        val otherTreeNode = treeNodeCollection.getNode(position, PositionMode.DISPLAYED)
+        val otherTreeNode = treeNodeCollection.getNode(position, PositionMode.Displayed)
         val otherSortable = otherTreeNode.modelNode as? Sortable ?: return false
 
         if (!otherSortable.sortable) return false
@@ -114,10 +114,10 @@ abstract class DragHelper(callback: MyCallback = MyCallback()) : ItemTouchHelper
     }
 
     private fun onChildDrawHelper(
-            viewHolder: RecyclerView.ViewHolder,
-            dX: Float,
-            dY: Float,
-            isCurrentlyActive: Boolean,
+        viewHolder: RecyclerView.ViewHolder,
+        dX: Float,
+        dY: Float,
+        isCurrentlyActive: Boolean,
     ) {
         viewHolder.itemView.apply {
             translationX = dX
@@ -144,9 +144,9 @@ abstract class DragHelper(callback: MyCallback = MyCallback()) : ItemTouchHelper
         override fun isLongPressDragEnabled() = false
 
         override fun onMove(
-                recyclerView: RecyclerView,
-                viewHolder: RecyclerView.ViewHolder,
-                target: RecyclerView.ViewHolder,
+            recyclerView: RecyclerView,
+            viewHolder: RecyclerView.ViewHolder,
+            target: RecyclerView.ViewHolder,
         ) = dragHelper.onMoveHelper(viewHolder, target)
 
         override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) = Unit
@@ -166,13 +166,13 @@ abstract class DragHelper(callback: MyCallback = MyCallback()) : ItemTouchHelper
         ) = dragHelper.canDropOverHelper(current, target)
 
         override fun onChildDraw(
-                canvas: Canvas,
-                recyclerView: RecyclerView,
-                viewHolder: RecyclerView.ViewHolder,
-                dX: Float,
-                dY: Float,
-                actionState: Int,
-                isCurrentlyActive: Boolean,
+            canvas: Canvas,
+            recyclerView: RecyclerView,
+            viewHolder: RecyclerView.ViewHolder,
+            dX: Float,
+            dY: Float,
+            actionState: Int,
+            isCurrentlyActive: Boolean,
         ) = dragHelper.onChildDrawHelper(viewHolder, dX, dY, isCurrentlyActive)
     }
 }

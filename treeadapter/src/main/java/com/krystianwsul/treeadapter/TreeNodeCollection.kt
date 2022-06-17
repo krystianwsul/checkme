@@ -28,7 +28,7 @@ class TreeNodeCollection<T : TreeHolder>(val treeViewAdapter: TreeViewAdapter<T>
 
     override val wantsSeparators = false
 
-    override fun getNode(position: Int, positionMode: PositionMode): TreeNode<T> {
+    override fun getNode(position: Int, positionMode: PositionMode.Sane): TreeNode<T> {
         check(position >= 0)
 
         return positionMode.getRecursiveNodes(this)[position]
@@ -109,8 +109,8 @@ class TreeNodeCollection<T : TreeHolder>(val treeViewAdapter: TreeViewAdapter<T>
     override val showInheritableBottomSeparator = false
 
     fun moveItem(fromPosition: Int, toPosition: Int, placeholder: TreeViewAdapter.Placeholder) {
-        val fromTreeNode = getNode(fromPosition, PositionMode.DISPLAYED)
-        val toTreeNode = getNode(toPosition, PositionMode.DISPLAYED)
+        val fromTreeNode = getNode(fromPosition, PositionMode.Displayed)
+        val toTreeNode = getNode(toPosition, PositionMode.Displayed)
 
         val fromParent = fromTreeNode.parent
         val toParent = toTreeNode.parent

@@ -15,10 +15,10 @@ object TooltipManager {
     private var tooltipVisible = false
 
     private fun tryCreateBalloon(
-            context: Context,
-            type: Type,
-            block: Balloon.Builder.() -> Unit,
-            show: Balloon.() -> Unit,
+        context: Context,
+        type: Type,
+        block: Balloon.Builder.() -> Unit,
+        show: Balloon.() -> Unit,
     ): Balloon? {
         if (tooltipVisible) return null
         if (!type.canBeShown()) return null
@@ -49,10 +49,10 @@ object TooltipManager {
 
     @CheckResult
     fun <T : Any> Observable<T>.subscribeShowBalloon(
-            context: Context,
-            type: Type,
-            block: Balloon.Builder.(T) -> Unit,
-            show: Balloon.(T) -> Unit,
+        context: Context,
+        type: Type,
+        block: Balloon.Builder.(T) -> Unit,
+        show: Balloon.(T) -> Unit,
     ): Disposable {
         var balloon: Balloon? = null
 
@@ -64,14 +64,13 @@ object TooltipManager {
     @CheckResult
     fun fiveSecondDelay(): Observable<Unit> {
         return Observable.just(Unit)
-                .mergeWith(Observable.never())
-                .delay(5, TimeUnit.SECONDS)
-                .observeOn(AndroidSchedulers.mainThread())
+            .mergeWith(Observable.never())
+            .delay(5, TimeUnit.SECONDS)
+            .observeOn(AndroidSchedulers.mainThread())
     }
 
     enum class Type {
 
-        PRESS_TO_SELECT,
         PRESS_MENU_TOOLTIP,
         PRESS_DRAG,
         TASKS_TAB,

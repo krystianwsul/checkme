@@ -233,7 +233,7 @@ class TreeViewAdapter<T : TreeHolder>(val treeModelAdapter: TreeModelAdapter<T>,
 
             super.onBindViewHolder(holder, position, payloads)
         } else {
-            treeNodeCollection!!.getNode(position, PositionMode.DISPLAYED).apply {
+            treeNodeCollection!!.getNode(position, PositionMode.Displayed).apply {
                 if (payloads.isNotEmpty()) {
                     check(payloads.all { it is TreeNode.PayloadSeparator })
 

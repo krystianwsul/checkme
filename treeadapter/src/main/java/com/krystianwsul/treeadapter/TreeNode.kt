@@ -112,18 +112,18 @@ class TreeNode<T : TreeHolder>(
         get() {
             if (!parent.isExpanded) throw InvisibleNodeException()
 
-            val positionInCollection = treeNodeCollection.getPosition(this, PositionMode.DISPLAYED)
+            val positionInCollection = treeNodeCollection.getPosition(this, PositionMode.Displayed)
             check(positionInCollection >= 0)
 
             if (positionInCollection == treeNodeCollection.displayedNodes.size - 1) return false
 
-            if (parent.getPosition(this, PositionMode.DISPLAYED) == parent.displayedNodes.size - 1) {
+            if (parent.getPosition(this, PositionMode.Displayed) == parent.displayedNodes.size - 1) {
                 if (modelNode.inheritParentBottomSeparator && parent.showInheritableBottomSeparator) return true
 
                 if (parent.wantsSeparators) return true
             }
 
-            val nextTreeNode = treeNodeCollection.getNode(positionInCollection + 1, PositionMode.DISPLAYED)
+            val nextTreeNode = treeNodeCollection.getNode(positionInCollection + 1, PositionMode.Displayed)
             return modelNode.isSeparatorVisibleWhenNotExpanded || nextTreeNode.wantsSeparators
         }
 
@@ -195,7 +195,7 @@ class TreeNode<T : TreeHolder>(
 
     private fun decrementSelected(placeholder: TreeViewAdapter.Placeholder) = treeViewAdapter.decrementSelected(placeholder)
 
-    override fun getNode(position: Int, positionMode: PositionMode): TreeNode<T> {
+    override fun getNode(position: Int, positionMode: PositionMode.Sane): TreeNode<T> {
         checkChildTreeNodesSet()
 
         check(position in positionMode.getRecursiveNodes(this).indices)

@@ -165,7 +165,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
             delegateRelay.value!!
                 .initialScrollMatcher
                 ?.let { matcher ->
-                    val position = treeViewAdapter!!.getTreeNodeCollection().getPosition(PositionMode.DISPLAYED) {
+                    val position = treeViewAdapter!!.getTreeNodeCollection().getPosition(PositionMode.Displayed) {
                         it.modelNode
                             .let { it as? TaskAdapter.TaskWrapper }
                             ?.entryData

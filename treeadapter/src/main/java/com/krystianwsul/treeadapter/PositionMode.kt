@@ -1,47 +1,51 @@
 package com.krystianwsul.treeadapter
 
-enum class PositionMode {
+sealed interface PositionMode {
 
-    COMPAT {
+    fun <T : TreeHolder> getDirectChildNodes(treeNodeCollection: TreeNodeCollection<T>): List<TreeNode<T>>
+    fun <T : TreeHolder> getRecursiveNodes(treeNodeCollection: TreeNodeCollection<T>): List<TreeNode<T>>
+
+    fun <T : TreeHolder> getDirectChildNodes(treeNode: TreeNode<T>): List<TreeNode<T>>
+    fun <T : TreeHolder> getRecursiveNodes(treeNode: TreeNode<T>): List<TreeNode<T>>
+
+    object Compat : PositionMode {
 
         override fun <T : TreeHolder> getDirectChildNodes(treeNodeCollection: TreeNodeCollection<T>) =
-                treeNodeCollection.nodes
+            treeNodeCollection.nodes
 
         override fun <T : TreeHolder> getRecursiveNodes(treeNodeCollection: TreeNodeCollection<T>) =
-                treeNodeCollection.displayedNodes
+            treeNodeCollection.displayedNodes
 
         override fun <T : TreeHolder> getDirectChildNodes(treeNode: TreeNode<T>) = treeNode.allChildren
 
         override fun <T : TreeHolder> getRecursiveNodes(treeNode: TreeNode<T>) = treeNode.displayedNodes
-    },
-    DISPLAYED {
+    }
+
+    sealed interface Sane : PositionMode
+
+    object Displayed : Sane {
 
         override fun <T : TreeHolder> getDirectChildNodes(treeNodeCollection: TreeNodeCollection<T>) =
-                treeNodeCollection.nodes.filter { it.canBeShown() }
+            treeNodeCollection.nodes.filter { it.canBeShown() }
 
         override fun <T : TreeHolder> getRecursiveNodes(treeNodeCollection: TreeNodeCollection<T>) =
-                treeNodeCollection.displayedNodes
+            treeNodeCollection.displayedNodes
 
         override fun <T : TreeHolder> getDirectChildNodes(treeNode: TreeNode<T>) =
-                treeNode.allChildren.filter { it.canBeShown() }
+            treeNode.allChildren.filter { it.canBeShown() }
 
         override fun <T : TreeHolder> getRecursiveNodes(treeNode: TreeNode<T>) = treeNode.displayedNodes
-    },
-    ALL {
+    }
+
+    object All : Sane {
 
         override fun <T : TreeHolder> getDirectChildNodes(treeNodeCollection: TreeNodeCollection<T>) =
-                throw NotImplementedError()
+            throw NotImplementedError()
 
         override fun <T : TreeHolder> getRecursiveNodes(treeNodeCollection: TreeNodeCollection<T>) =
-                throw NotImplementedError()
+            throw NotImplementedError()
 
         override fun <T : TreeHolder> getDirectChildNodes(treeNode: TreeNode<T>) = throw NotImplementedError()
         override fun <T : TreeHolder> getRecursiveNodes(treeNode: TreeNode<T>) = throw NotImplementedError()
-    };
-
-    abstract fun <T : TreeHolder> getDirectChildNodes(treeNodeCollection: TreeNodeCollection<T>): List<TreeNode<T>>
-    abstract fun <T : TreeHolder> getRecursiveNodes(treeNodeCollection: TreeNodeCollection<T>): List<TreeNode<T>>
-
-    abstract fun <T : TreeHolder> getDirectChildNodes(treeNode: TreeNode<T>): List<TreeNode<T>>
-    abstract fun <T : TreeHolder> getRecursiveNodes(treeNode: TreeNode<T>): List<TreeNode<T>>
+    }
 }

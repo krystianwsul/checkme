@@ -22,12 +22,12 @@ sealed interface NodeContainer<T : TreeHolder> {
 
     val showInheritableBottomSeparator: Boolean
 
-    fun getPosition(treeNode: TreeNode<T>, positionMode: PositionMode = PositionMode.COMPAT) =
+    fun getPosition(treeNode: TreeNode<T>, positionMode: PositionMode = PositionMode.Compat) =
         getPosition(positionMode) { it == treeNode }
 
     fun getPosition(positionMode: PositionMode, matcher: (TreeNode<T>) -> Boolean): Int
 
-    fun getNode(position: Int, positionMode: PositionMode = PositionMode.COMPAT): TreeNode<T>
+    fun getNode(position: Int, positionMode: PositionMode.Sane = PositionMode.Displayed): TreeNode<T>
 
     fun remove(treeNode: TreeNode<T>, placeholder: TreeViewAdapter.Placeholder)
 

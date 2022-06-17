@@ -22,6 +22,7 @@ import com.krystianwsul.common.firebase.models.ImageState
 import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.utils.TaskKey
 import io.reactivex.rxjava3.core.Single
+import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.kotlin.subscribeBy
 import io.reactivex.rxjava3.schedulers.Schedulers
 import java.io.File
@@ -125,16 +126,10 @@ object ImageManager {
                     MyCrashlytics.log("$tag: removed $it")
                 }
 
-                statesToRemove.filter { it.second is State.Downloading }.forEach { (uuid, state) ->
-                    (state as State.Downloading).target
-                        .request!!
-                        .clear()
+                statesToRemove.filter { it.second is State.Stoppable }.forEach { (uuid, state) ->
+                    (state as State.Stoppable).stop()
 
                     imageStates.remove(uuid)
-
-                    /*
-                    todo: I think this also needs to cancel the RX inside the SimpleTarget.  Check logging to confirm.
-                     */
 
                     MyCrashlytics.log("$tag: cleared $uuid")
                 }
@@ -167,8 +162,8 @@ object ImageManager {
 
                                 MyCrashlytics.log("$tag: downloaded a $uuid")
 
-                                Single.fromCallable {
-                                    check(imageStates.getValue(uuid) is State.Downloading)
+                                val disposable = Single.fromCallable {
+                                    check(imageStates.getValue(uuid) is State.Reading)
 
                                     getFile(uuid).apply {
                                         createNewFile()
@@ -184,7 +179,7 @@ object ImageManager {
                                     .observeOnDomain()
                                     .subscribeBy {
                                         check(imageStates.containsKey(uuid)) { "$tag: can't find $uuid" }
-                                        check(imageStates.getValue(uuid) is State.Downloading)
+                                        check(imageStates.getValue(uuid) is State.Reading)
 
                                         imageStates[uuid] = State.Downloaded
 
@@ -192,6 +187,8 @@ object ImageManager {
 
                                         callback()
                                     }
+
+                                imageStates[uuid] = State.Reading(disposable)
                             }
 
                             override fun onLoadFailed(errorDrawable: Drawable?) {
@@ -218,11 +215,26 @@ object ImageManager {
         }
     }
 
-    private sealed class State {
+    private sealed interface State {
 
-        object Missing : State()
-        object Downloaded : State()
-        class Downloading(val target: Target<Bitmap>) : State()
+        object Missing : State
+
+        sealed interface Stoppable : State {
+
+            fun stop()
+        }
+
+        class Downloading(private val target: Target<Bitmap>) : Stoppable {
+
+            override fun stop() = target.request!!.clear()
+        }
+
+        class Reading(private val disposable: Disposable) : Stoppable {
+
+            override fun stop() = disposable.dispose()
+        }
+
+        object Downloaded : State
     }
 
     private class MissingImageException(taskKey: TaskKey, imageState: ImageState) :

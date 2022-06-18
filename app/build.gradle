@@ -40,6 +40,8 @@ android {
             versionNameSuffix "-proto"
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+
+            matchingFallbacks = ['debug', 'release']
         }
     }
 

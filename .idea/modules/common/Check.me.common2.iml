@@ -76,8 +76,6 @@
     </facet>
   </component>
   <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_11">
-    <output url="file://$MODULE_DIR$/../../../common/build/intermediates/javac/debug/classes" />
-    <output-test url="file://$MODULE_DIR$/../../../common/build/intermediates/javac/debugUnitTest/classes" />
     <exclude-output />
     <content url="file://$MODULE_DIR$/../../../common">
       <excludeFolder url="file://$MODULE_DIR$/../../../common/.gradle" />
@@ -85,5 +83,13 @@
     </content>
     <orderEntry type="jdk" jdkName="Android API 30 Platform" jdkType="Android SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="module" module-name="Check.me.common2.androidAndroidTestProto" scope="TEST" />
+    <orderEntry type="module" module-name="Check.me.common2.androidAndroidTestRelease" scope="TEST" />
+    <orderEntry type="module" module-name="Check.me.common2.androidTestFixtures" scope="TEST" />
+    <orderEntry type="module" module-name="Check.me.common2.androidTestFixturesDebug" scope="TEST" />
+    <orderEntry type="module" module-name="Check.me.common2.androidTestFixturesProto" scope="TEST" />
+    <orderEntry type="module" module-name="Check.me.common2.androidTestFixturesRelease" scope="TEST" />
+    <orderEntry type="module" module-name="Check.me.common2.commonMain" scope="TEST" />
+    <orderEntry type="module" module-name="Check.me.common2.main" scope="TEST" />
   </component>
 </module>

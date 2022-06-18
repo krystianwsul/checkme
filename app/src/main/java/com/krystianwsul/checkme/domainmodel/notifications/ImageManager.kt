@@ -109,7 +109,13 @@ object ImageManager {
             DomainThreadChecker.instance.requireDomainThread()
 
             readyRelay.observeOnDomain().subscribe {
-                val tasksWithImages = tasks.map { it.taskKey to it.getImage(deviceDbInfo) as? ImageState.Displayable }
+                val tasksWithImages = tasks.map {
+                    val imageState = it.getImage(deviceDbInfo)
+
+                    MyCrashlytics.log("$tag taskKey: ${it.taskKey}, imageState: $imageState, json: " + it.imageJson)
+
+                    it.taskKey to imageState as? ImageState.Displayable
+                }
                     .filter { it.second != null }
                     .associate { (taskKey, imageState) -> imageState!!.uuid to Pair(taskKey, imageState) }
 
@@ -205,7 +211,7 @@ object ImageManager {
 
                     uuid to state
                 }.onEach {
-                    MyCrashlytics.log("$tag: added " + it.first)
+                    MyCrashlytics.log("$tag: added " + it.first + ", " + it.second)
                 }
             }
         }

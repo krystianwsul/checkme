@@ -125,7 +125,7 @@ fun DomainUpdater.setInstancesNotifiedService(projectKey: ProjectKey.Shared, tim
 fun DomainUpdater.setTaskImageUploadedService(
     taskKey: TaskKey,
     imageUuid: String,
-): Completable = CompletableDomainUpdate.create("clearProjectEndTimeStamps") {
+): Completable = CompletableDomainUpdate.create("setTaskImageUploadedService") {
     val task = rootTasksFactory.getRootTaskIfPresent(taskKey as TaskKey.Root)
 
     if (task == null) {

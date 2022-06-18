@@ -169,7 +169,7 @@ private fun DomainFactory.getGroupListData(
         newMixedInstanceDataCollection(
             mixedInstanceDescriptors,
             GroupTypeFactory.SingleBridge.CompareBy.ORDINAL,
-            GroupType.GroupingMode.Instance(parentInstance.getProject().projectKey),
+            GroupType.GroupingMode.Instance(parentInstance.instanceDateTime.timeStamp),
             projectInfoMode = ProjectInfoMode.ShowInsideInstance.fromProjectKey(parentInstance.getProject().projectKey),
             parentInstanceKey = parentInstance.instanceKey,
         ),

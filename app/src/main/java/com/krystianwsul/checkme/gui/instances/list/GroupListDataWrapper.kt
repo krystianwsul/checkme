@@ -104,7 +104,7 @@ data class GroupListDataWrapper(
                     domainFactory.newMixedInstanceDataCollection(
                         notDoneChildInstanceDescriptors,
                         GroupTypeFactory.SingleBridge.CompareBy.ORDINAL,
-                        GroupType.GroupingMode.Instance(instance.getProject().projectKey),
+                        GroupType.GroupingMode.Instance(instance.instanceDateTime.timeStamp),
                         projectInfoMode =
                         ProjectInfoMode.ShowInsideInstance.fromProjectKey(instance.getProject().projectKey),
                         parentInstanceKey = instance.instanceKey,

@@ -18,7 +18,6 @@ import com.krystianwsul.common.firebase.models.search.SearchContext
 import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.InstanceKey
-import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.TaskKey
 import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Single
@@ -176,10 +175,7 @@ private fun DomainFactory.getGroupListData(
         doneInstanceDescriptors.toDoneSingleBridges(),
         task.getImage(deviceDbInfo),
         parentInstance.getProjectInfo(),
-        DropParent.ParentInstance(
-            parentInstance.instanceKey,
-            parentInstance.getProject().projectKey as? ProjectKey.Shared // group hack
-        ),
+        DropParent.ParentInstance(parentInstance.instanceKey),
         searchContext.searchCriteria,
     )
 }

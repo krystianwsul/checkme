@@ -293,7 +293,7 @@ class GroupTypeFactory(
         val compareBy: CompareBy,
     ) : GroupType.Single,
         TimeChild,
-        DropParent by DropParent.ParentInstance(instanceData.instanceKey, instanceData.projectKey) {
+        DropParent by DropParent.ParentInstance(instanceData.instanceKey) {
 
         companion object {
 

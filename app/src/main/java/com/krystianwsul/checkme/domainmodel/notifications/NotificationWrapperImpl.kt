@@ -106,7 +106,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
                             instance.getProject().projectKey as? ProjectKey.Shared, // group hack
                         )
                     },
-                GroupType.GroupingMode.Instance(instance.getProject().projectKey),
+                GroupType.GroupingMode.Instance(instance.instanceDateTime.timeStamp),
             )
                 .sortedBy {
                     when (it) {

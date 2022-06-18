@@ -70,13 +70,15 @@ interface GroupType {
 
                     noProjectGroupTypes + projectGroupTypes
                 }
-                GroupingMode.Project, is GroupingMode.Instance -> {
+                GroupingMode.Project -> {
                     val timeStamp = instanceDescriptors.map { it.timeStamp }
                         .distinct()
                         .single()
 
                     groupByProject(factory, timeStamp, instanceDescriptors, false)
                 }
+                is GroupingMode.Instance ->
+                    groupByProject(factory, groupingMode.instanceTimeStamp, instanceDescriptors, false)
                 GroupingMode.None -> instanceDescriptors.map { factory.createTopLevelSingle(it) }
             }
         }
@@ -199,6 +201,6 @@ interface GroupType {
         object Projects : GroupingMode
 
         // group by project (for those that don't match parent instance project), assume single time
-        class Instance(val projectKey: ProjectKey<*>) : GroupingMode
+        class Instance(val instanceTimeStamp: TimeStamp) : GroupingMode
     }
 }

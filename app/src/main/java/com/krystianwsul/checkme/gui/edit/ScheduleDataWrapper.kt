@@ -56,9 +56,10 @@ sealed class ScheduleDataWrapper : Parcelable {
 
     abstract fun getText(customTimeDatas: Map<CustomTimeKey, EditViewModel.CustomTimeData>, context: Context): String
 
-    fun getScheduleDialogData(suggestedDate: Date) = getScheduleDialogDataHelper(suggestedDate)
-
-    protected abstract fun getScheduleDialogDataHelper(suggestedDate: Date): ScheduleDialogData
+    abstract fun getScheduleDialogData(
+        suggestedDate: Date,
+        suggestedParentInstanceData: ScheduleDialogData.ParentInstanceData?,
+    ): ScheduleDialogData
 
     @Parcelize
     data class Single(override val scheduleData: ScheduleData.Single) : ScheduleDataWrapper() {
@@ -67,7 +68,10 @@ sealed class ScheduleDataWrapper : Parcelable {
 
             fun fromScheduleGroup(scheduleGroup: ScheduleGroup.Single) = Single(scheduleGroup.scheduleData)
 
-            fun getScheduleDialogData(scheduleData: ScheduleData.Single): ScheduleDialogData {
+            fun getScheduleDialogData(
+                scheduleData: ScheduleData.Single,
+                suggestedParentInstanceData: ScheduleDialogData.ParentInstanceData?,
+            ): ScheduleDialogData {
                 val (monthDayNumber, beginningOfMonth) = dateToDayFromBeginningOrEnd(scheduleData.date)
 
                 @Suppress("BooleanLiteralArgument")
@@ -84,7 +88,7 @@ sealed class ScheduleDataWrapper : Parcelable {
                     null,
                     null,
                     1,
-                    null,
+                    suggestedParentInstanceData,
                 )
             }
         }
@@ -98,7 +102,10 @@ sealed class ScheduleDataWrapper : Parcelable {
             }
         }
 
-        override fun getScheduleDialogDataHelper(suggestedDate: Date) = Companion.getScheduleDialogData(scheduleData)
+        override fun getScheduleDialogData(
+            suggestedDate: Date,
+            suggestedParentInstanceData: ScheduleDialogData.ParentInstanceData?,
+        ) = Companion.getScheduleDialogData(scheduleData, suggestedParentInstanceData)
     }
 
     @Parcelize
@@ -118,7 +125,10 @@ sealed class ScheduleDataWrapper : Parcelable {
             }
         }
 
-        override fun getScheduleDialogDataHelper(suggestedDate: Date): ScheduleDialogData {
+        override fun getScheduleDialogData(
+            suggestedDate: Date,
+            suggestedParentInstanceData: ScheduleDialogData.ParentInstanceData?,
+        ): ScheduleDialogData {
             val (monthDayNumber, beginningOfMonth) = dateToDayFromBeginningOrEnd(suggestedDate)
 
             val type = if (scheduleData.daysOfWeek == DayOfWeek.set && scheduleData.interval == 1)
@@ -139,7 +149,7 @@ sealed class ScheduleDataWrapper : Parcelable {
                 scheduleData.from,
                 scheduleData.until,
                 scheduleData.interval,
-                null,
+                suggestedParentInstanceData,
             )
         }
     }
@@ -161,7 +171,10 @@ sealed class ScheduleDataWrapper : Parcelable {
             }
         }
 
-        override fun getScheduleDialogDataHelper(suggestedDate: Date): ScheduleDialogData {
+        override fun getScheduleDialogData(
+            suggestedDate: Date,
+            suggestedParentInstanceData: ScheduleDialogData.ParentInstanceData?,
+        ): ScheduleDialogData {
             val date = getDateInMonth(
                 suggestedDate.year,
                 suggestedDate.month,
@@ -183,7 +196,7 @@ sealed class ScheduleDataWrapper : Parcelable {
                 scheduleData.from,
                 scheduleData.until,
                 1,
-                null,
+                suggestedParentInstanceData,
             )
         }
     }
@@ -205,7 +218,10 @@ sealed class ScheduleDataWrapper : Parcelable {
             }
         }
 
-        override fun getScheduleDialogDataHelper(suggestedDate: Date): ScheduleDialogData {
+        override fun getScheduleDialogData(
+            suggestedDate: Date,
+            suggestedParentInstanceData: ScheduleDialogData.ParentInstanceData?,
+        ): ScheduleDialogData {
             val date = getDateInMonth(
                 suggestedDate.year,
                 suggestedDate.month,
@@ -233,7 +249,7 @@ sealed class ScheduleDataWrapper : Parcelable {
                 scheduleData.from,
                 scheduleData.until,
                 1,
-                null,
+                suggestedParentInstanceData,
             )
         }
     }
@@ -255,7 +271,10 @@ sealed class ScheduleDataWrapper : Parcelable {
             }
         }
 
-        override fun getScheduleDialogDataHelper(suggestedDate: Date): ScheduleDialogData {
+        override fun getScheduleDialogData(
+            suggestedDate: Date,
+            suggestedParentInstanceData: ScheduleDialogData.ParentInstanceData?,
+        ): ScheduleDialogData {
             val date = getDateInMonth(
                 suggestedDate.year,
                 scheduleData.month,
@@ -279,7 +298,7 @@ sealed class ScheduleDataWrapper : Parcelable {
                 scheduleData.from,
                 scheduleData.until,
                 1,
-                null,
+                suggestedParentInstanceData,
             )
         }
     }
@@ -305,7 +324,10 @@ sealed class ScheduleDataWrapper : Parcelable {
             timePairCallback(it, customTimeDatas)
         }
 
-        override fun getScheduleDialogDataHelper(suggestedDate: Date): ScheduleDialogData {
+        override fun getScheduleDialogData(
+            suggestedDate: Date,
+            suggestedParentInstanceData: ScheduleDialogData.ParentInstanceData?,
+        ): ScheduleDialogData {
             val date = parentInstanceDateTimePair.date
             val dayOfWeek = date.dayOfWeek
 

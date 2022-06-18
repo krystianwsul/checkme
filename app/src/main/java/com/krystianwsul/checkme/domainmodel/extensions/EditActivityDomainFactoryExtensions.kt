@@ -11,6 +11,7 @@ import com.krystianwsul.checkme.domainmodel.update.DomainUpdater
 import com.krystianwsul.checkme.domainmodel.update.SingleDomainUpdate
 import com.krystianwsul.checkme.gui.edit.*
 import com.krystianwsul.checkme.gui.edit.delegates.EditDelegate
+import com.krystianwsul.checkme.gui.edit.dialogs.schedule.ScheduleDialogData
 import com.krystianwsul.checkme.viewmodels.DomainResult
 import com.krystianwsul.common.criteria.SearchCriteria
 import com.krystianwsul.common.domain.ScheduleGroup
@@ -40,6 +41,7 @@ fun UserScope.getCreateTaskData(
 
     val mainDataSingle = if (
         startParameters is EditViewModel.StartParameters.Create &&
+        startParameters.parentInstanceKey == null &&
         startParameters.scheduleParameters is EditViewModel.ScheduleParameters.Fast &&
         currentParentSource is EditViewModel.CurrentParentSource.None
     ) {
@@ -82,6 +84,7 @@ private fun UserScope.getCreateTaskDataFast(
         null,
         scheduleParameters.defaultScheduleOverride,
         scheduleParameters.getParentScheduleState(),
+        null,
     )
 }
 
@@ -284,6 +287,10 @@ private fun DomainFactory.getCreateTaskDataSlow(
         ?.let(::getTaskForce)
         ?.note
 
+    val defaultParentInstanceData = startParameters.parentInstanceKey
+        ?.let(::getInstance)
+        ?.run { ScheduleDialogData.ParentInstanceData(name, instanceKey, instanceDateTime.toDateTimePair()) }
+
     return EditViewModel.MainData(
         taskData,
         customTimeDatas,
@@ -291,6 +298,7 @@ private fun DomainFactory.getCreateTaskDataSlow(
         parentTaskDescription,
         defaultScheduleOverride,
         defaultParentScheduleState,
+        defaultParentInstanceData,
     )
 }
 

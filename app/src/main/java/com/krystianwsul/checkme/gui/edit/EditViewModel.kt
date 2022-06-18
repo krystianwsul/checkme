@@ -11,6 +11,7 @@ import com.krystianwsul.checkme.domainmodel.extensions.getCreateTaskData
 import com.krystianwsul.checkme.domainmodel.extensions.getCreateTaskParentPickerData
 import com.krystianwsul.checkme.gui.edit.delegates.EditDelegate
 import com.krystianwsul.checkme.gui.edit.dialogs.parentpicker.ParentPickerFragment
+import com.krystianwsul.checkme.gui.edit.dialogs.schedule.ScheduleDialogData
 import com.krystianwsul.checkme.gui.utils.SavedStateProperty
 import com.krystianwsul.checkme.viewmodels.DomainData
 import com.krystianwsul.checkme.viewmodels.DomainListener
@@ -184,6 +185,7 @@ class EditViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
         val parentTaskDescription: String?,
         val defaultScheduleOverride: DateTimePair?,
         val defaultParentScheduleState: ParentScheduleState,
+        val defaultParentInstanceData: ScheduleDialogData.ParentInstanceData?,
     ) : DomainData()
 
     data class ParentPickerData(val parentTreeDatas: List<ParentEntryData>) : DomainData()

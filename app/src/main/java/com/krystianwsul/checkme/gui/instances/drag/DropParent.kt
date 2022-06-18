@@ -35,7 +35,8 @@ interface DropParent {
 
     data class ParentInstance(private val parentInstanceKey: InstanceKey) : DropParent {
 
-        override fun getNewParentInfo(isGroupedInProject: Boolean?) = Instance.NewParentInfo.TOP_LEVEL
+        override fun getNewParentInfo(isGroupedInProject: Boolean?) =
+            if (isGroupedInProject!!) Instance.NewParentInfo.TOP_LEVEL else Instance.NewParentInfo.NO_OP
 
         override fun canDropIntoParent(droppedTimeChild: GroupTypeFactory.TimeChild) = when (droppedTimeChild) {
             is GroupTypeFactory.ProjectBridge -> parentInstanceKey == droppedTimeChild.parentInstanceKey

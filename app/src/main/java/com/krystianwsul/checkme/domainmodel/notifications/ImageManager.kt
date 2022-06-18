@@ -156,6 +156,16 @@ object ImageManager {
                     val requestBuilder = imageState.toImageLoader().requestBuilder
 
                     val state = if (requestBuilder == null) {
+                        /*
+                        At the moment, it looks like there's a chance this is caused by a race condition in Uploader. First
+                        the file is removed, then updating the Task is enqueued on the domain thread.  If that's the case,
+                        then I see a few options:
+
+                        1. Find a way to eliminate the inconsistency in ImageState
+                        2. Try to cancel this operation during the inconsistency
+                        3. Accept it, and ensure that this State.Missing gets overwritten on the next try
+                            - Also, double-check that updating the Task from the Uploader does make this re-run
+                         */
                         MyCrashlytics.logException(MissingImageException(taskKey, imageState))
 
                         State.Missing

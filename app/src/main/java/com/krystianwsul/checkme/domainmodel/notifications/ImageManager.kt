@@ -23,9 +23,9 @@ import com.krystianwsul.common.firebase.models.task.Task
 import com.krystianwsul.common.utils.TaskKey
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.Disposable
-import io.reactivex.rxjava3.kotlin.subscribeBy
 import io.reactivex.rxjava3.schedulers.Schedulers
 import java.io.File
+import java.util.*
 import kotlin.math.roundToInt
 
 object ImageManager {
@@ -97,7 +97,8 @@ object ImageManager {
 
                 imageStates = (dir.listFiles()?.toList() ?: listOf()).map { it.name }
                     .associateWith { State.Downloaded }
-                    .toMutableMap()
+                    .toMutableMap<String, State>()
+                    .let { Collections.synchronizedMap(it) }
 
                 readyRelay.accept(Unit)
             }
@@ -110,11 +111,13 @@ object ImageManager {
 
             readyRelay.observeOnDomain().subscribe {
                 val tasksWithImages = tasks.map {
-                    val imageState = it.getImage(deviceDbInfo)
+                    val imageState = it.getImage(deviceDbInfo) as? ImageState.Displayable
 
-                    MyCrashlytics.log("$tag taskKey: ${it.taskKey}, imageState: $imageState, json: " + it.imageJson)
+                    imageState?.let { _ ->
+                        MyCrashlytics.log("$tag taskKey: ${it.taskKey}, imageState: $imageState, json: " + it.imageJson)
+                    }
 
-                    it.taskKey to imageState as? ImageState.Displayable
+                    it.taskKey to imageState
                 }
                     .filter { it.second != null }
                     .associate { (taskKey, imageState) -> imageState!!.uuid to Pair(taskKey, imageState) }
@@ -166,10 +169,12 @@ object ImageManager {
                             override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
                                 check(imageStates.getValue(uuid) is State.Downloading)
 
-                                MyCrashlytics.log("$tag: downloaded a $uuid")
+                                MyCrashlytics.log("$tag: downloaded a $uuid, starting read")
 
-                                val disposable = Single.fromCallable {
-                                    check(imageStates.getValue(uuid) is State.Reading)
+                                val observable = Single.fromCallable {
+                                    imageStates.getValue(uuid).let {
+                                        check(it is State.Reading) { "$tag wrong state for $uuid: $it" }
+                                    }
 
                                     getFile(uuid).apply {
                                         createNewFile()
@@ -183,7 +188,7 @@ object ImageManager {
                                 }
                                     .subscribeOn(Schedulers.io())
                                     .observeOnDomain()
-                                    .subscribeBy {
+                                    .doOnSuccess {
                                         check(imageStates.containsKey(uuid)) { "$tag: can't find $uuid" }
                                         check(imageStates.getValue(uuid) is State.Reading)
 
@@ -193,8 +198,16 @@ object ImageManager {
 
                                         callback()
                                     }
+                                    .toObservable()
+                                    .publish()
+
+                                val disposable = observable.subscribe()
 
                                 imageStates[uuid] = State.Reading(disposable)
+
+                                MyCrashlytics.log("$tag: downloaded a $uuid, set state " + imageStates[uuid])
+
+                                observable.connect()
                             }
 
                             override fun onLoadFailed(errorDrawable: Drawable?) {

@@ -16,10 +16,14 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+        debug {
+        }
         proto {
             initWith debug
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+
+            matchingFallbacks = ['debug', 'release']
         }
     }
     namespace 'com.krystianwsul.treeadapter'

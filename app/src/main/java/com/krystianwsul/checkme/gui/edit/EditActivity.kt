@@ -741,12 +741,14 @@ class EditActivity : NavBarActivity() {
                         setClose(
                             {
                                 val parameters = ScheduleDialogParameters(
-                                    scheduleEntry.scheduleDataWrapper.getScheduleDialogData(
-                                        activity.editViewModel
-                                            .delegate
-                                            .getDefaultScheduleDateTimePair()
-                                            .date
-                                    ),
+                                    activity.editViewModel
+                                        .delegate
+                                        .run {
+                                            scheduleEntry.scheduleDataWrapper.getScheduleDialogData(
+                                                getDefaultScheduleDateTimePair().date,
+                                                getDefaultParentInstanceData(),
+                                            )
+                                        },
                                     activity.parameters.excludedTaskKeys,
                                     holder.adapterPosition,
                                 )

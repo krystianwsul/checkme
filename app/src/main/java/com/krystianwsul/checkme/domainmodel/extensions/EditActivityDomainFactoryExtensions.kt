@@ -41,7 +41,7 @@ fun UserScope.getCreateTaskData(
     val mainDataSingle = if (
         startParameters is EditViewModel.StartParameters.Create &&
         startParameters.scheduleParameters is EditViewModel.ScheduleParameters.Fast &&
-        currentParentSource is EditViewModel.CurrentParentSource.None
+        currentParentSource is EditViewModel.CurrentParentSource.None // todo parent
     ) {
         Single.just(getCreateTaskDataFast(startParameters.scheduleParameters))
     } else {
@@ -82,6 +82,7 @@ private fun UserScope.getCreateTaskDataFast(
         null,
         scheduleParameters.defaultScheduleOverride,
         scheduleParameters.getParentScheduleState(),
+        null,
     )
 }
 
@@ -291,6 +292,7 @@ private fun DomainFactory.getCreateTaskDataSlow(
         parentTaskDescription,
         defaultScheduleOverride,
         defaultParentScheduleState,
+        null, // todo parent
     )
 }
 

@@ -70,8 +70,12 @@ abstract class EditDelegate(
 
     fun getDefaultScheduleDateTimePair() = data.defaultScheduleOverride.orNextHour()
 
-    fun getDefaultScheduleDialogData() =
-        ScheduleDataWrapper.Single.getScheduleDialogData(ScheduleData.Single(getDefaultScheduleDateTimePair()))
+    fun getDefaultParentInstanceData() = data.defaultParentInstanceData
+
+    fun getDefaultScheduleDialogData() = ScheduleDataWrapper.Single.getScheduleDialogData(
+        ScheduleData.Single(getDefaultScheduleDateTimePair()),
+        getDefaultParentInstanceData(),
+    )
 
     val parentScheduleManager by lazy {
         ParentMultiScheduleManager(
